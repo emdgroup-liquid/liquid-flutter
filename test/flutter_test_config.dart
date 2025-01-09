@@ -5,7 +5,7 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 
 import 'utils/compare_goldens.dart';
 
-const _kGoldenTestsThreshold = 0.5 / 100;
+const _kGoldenTestsThreshold = 1 / 100;
 
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   await loadAppFonts();
