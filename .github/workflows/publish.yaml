@@ -21,6 +21,11 @@ jobs:
         uses: subosito/flutter-action@v2
       - name: Install dependencies
         run: flutter pub get
+      - name: Configure git
+        run: |
+          git fetch --prune --unshallow
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "gh-actions@emdgroup.com"
       - name: 🔂 Run standard-version
         run: |
           npx standard-version --skip.tag
@@ -52,11 +57,7 @@ jobs:
         run: flutter test
       - name: Run linter
         run: flutter analyze
-      - name: Configure git
-        run: |
-          git fetch --prune --unshallow
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "gh-actions@emdgroup.com"
+
       - name: Add changed source files
         run: |
           git add pubspec.yaml lib/ package.json
