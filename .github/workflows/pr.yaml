@@ -1,0 +1,54 @@
+name: "PR to Main"
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate_pr:
+    permissions:
+      pull-requests: write
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/semantic_pull_request.yml@v1
+  validate_dart:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Run build runner  
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+      - name: Generate l10n
+        run: flutter gen-l10n
+      - name: Run tests
+        run: flutter test
+      - name: Run linter
+        run: flutter analyze
+      - name: Run formatter
+        run: flutter format --set-exit-if-changed --dry-run
+      - name: Configure git
+        run: |
+          git fetch --prune --unshallow
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "gh-actions@emdgroup.com"
+      
+      - name: 🔂 Run standard-version
+        run: | 
+          npx standard-version --skip.tag --skip.commit
+      - name: ⏎ Get new version 
+        uses: actions/github-script@v7
+        id: get_new_version
+        with:
+          result-encoding: string
+          script: |
+            const fs = require('fs');
+            const package = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            return package.version;
+      - name:  💬 Comment on PR with new version
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: "New version ${{ steps.get_new_version.outputs.result }} 🚀 "
+  
+    

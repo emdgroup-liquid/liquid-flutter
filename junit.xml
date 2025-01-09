@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<testsuites>
+  <testsuite name="orb_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="16">
+    <testcase name="loading /home/vsts/work/1/s/test/orb_test.dart" classname="loading /home/vsts/work/1/s/test/orb_test.dart" time="13.533"/>
+    <testcase name="LdOrb" classname="LdOrb" time="0.301"/>
+  </testsuite>
+  <testsuite name="tag_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="5">
+    <testcase name="loading /home/vsts/work/1/s/test/tag_test.dart" classname="loading /home/vsts/work/1/s/test/tag_test.dart" time="0.93"/>
+    <testcase name="LdTag" classname="LdTag" time="0.269"/>
+  </testsuite>
+  <testsuite name="breadcrumb_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="6">
+    <testcase name="loading /home/vsts/work/1/s/test/breadcrumb_test.dart" classname="loading /home/vsts/work/1/s/test/breadcrumb_test.dart" time="1.04"/>
+    <testcase name="LdBreadcrumb" classname="LdBreadcrumb" time="0.283"/>
+    <testcase name="LdBreadcrumb fromStrings" classname="LdBreadcrumb fromStrings" time="0.012"/>
+  </testsuite>
+  <testsuite name="form_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="5">
+    <testcase name="loading /home/vsts/work/1/s/test/form_test.dart" classname="loading /home/vsts/work/1/s/test/form_test.dart" time="0.79"/>
+    <testcase name="LdForm" classname="LdForm" time="0.99"/>
+  </testsuite>
+  <testsuite name="tabs_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="4">
+    <testcase name="loading /home/vsts/work/1/s/test/tabs_test.dart" classname="loading /home/vsts/work/1/s/test/tabs_test.dart" time="0.805"/>
+    <testcase name="LdTabs" classname="LdTabs" time="0.419"/>
+  </testsuite>
+  <testsuite name="container_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="4">
+    <testcase name="loading /home/vsts/work/1/s/test/container_test.dart" classname="loading /home/vsts/work/1/s/test/container_test.dart" time="0.897"/>
+    <testcase name="LdContainer" classname="LdContainer" time="0.558"/>
+  </testsuite>
+  <testsuite name="card_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="5">
+    <testcase name="loading /home/vsts/work/1/s/test/card_test.dart" classname="loading /home/vsts/work/1/s/test/card_test.dart" time="0.79"/>
+    <testcase name="LdCard" classname="LdCard" time="0.291"/>
+  </testsuite>
+  <testsuite name="switch_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="4">
+    <testcase name="loading /home/vsts/work/1/s/test/switch_test.dart" classname="loading /home/vsts/work/1/s/test/switch_test.dart" time="0.743"/>
+    <testcase name="LdSwitch" classname="LdSwitch" time="0.403"/>
+  </testsuite>
+  <testsuite name="animations_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="4">
+    <testcase name="loading /home/vsts/work/1/s/test/animations_test.dart" classname="loading /home/vsts/work/1/s/test/animations_test.dart" time="0.865"/>
+    <testcase name="LdAnimation" classname="LdAnimation" time="0.356"/>
+  </testsuite>
+  <testsuite name="select_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="5">
+    <testcase name="loading /home/vsts/work/1/s/test/select_test.dart" classname="loading /home/vsts/work/1/s/test/select_test.dart" time="0.724"/>
+    <testcase name="LdSelect" classname="LdSelect" time="0.874"/>
+  </testsuite>
+  <testsuite name="hint_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="4">
+    <testcase name="loading /home/vsts/work/1/s/test/hint_test.dart" classname="loading /home/vsts/work/1/s/test/hint_test.dart" time="0.787"/>
+    <testcase name="LdHint" classname="LdHint" time="0.286"/>
+  </testsuite>
+  <testsuite name="drawer_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="4">
+    <testcase name="loading /home/vsts/work/1/s/test/drawer_test.dart" classname="loading /home/vsts/work/1/s/test/drawer_test.dart" time="0.914"/>
+    <testcase name="LdDrawer" classname="LdDrawer" time="0.369"/>
+  </testsuite>
+  <testsuite name="button_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="10">
+    <testcase name="loading /home/vsts/work/1/s/test/button_test.dart" classname="loading /home/vsts/work/1/s/test/button_test.dart" time="0.806"/>
+    <testcase name="LdButton interactivity" classname="LdButton interactivity" time="0.396"/>
+    <testcase name="LdButton with icon" classname="LdButton with icon" time="0.03"/>
+    <testcase name="LdButton sizes" classname="LdButton sizes" time="0.03"/>
+    <testcase name="LdButton loading" classname="LdButton loading" time="0.074"/>
+  </testsuite>
+  <testsuite name="accordion_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="9">
+    <testcase name="loading /home/vsts/work/1/s/test/accordion_test.dart" classname="loading /home/vsts/work/1/s/test/accordion_test.dart" time="0.728"/>
+    <testcase name="LdAccordion interactivity" classname="LdAccordion interactivity" time="0.554"/>
+    <testcase name="LdAccordion fromList" classname="LdAccordion fromList" time="0.031"/>
+    <testcase name="LdAccordion multiple open" classname="LdAccordion multiple open" time="0.123"/>
+  </testsuite>
+  <testsuite name="table_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="4">
+    <testcase name="loading /home/vsts/work/1/s/test/table_test.dart" classname="loading /home/vsts/work/1/s/test/table_test.dart" time="0.864"/>
+    <testcase name="LdTable" classname="LdTable" time="0.605"/>
+  </testsuite>
+  <testsuite name="liquid_flutter_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="6">
+    <testcase name="loading /home/vsts/work/1/s/test/liquid_flutter_test.dart" classname="loading /home/vsts/work/1/s/test/liquid_flutter_test.dart" time="0.658"/>
+    <testcase name="theme.dart" classname="theme.dart" time="0.031"/>
+    <testcase name="getMaterialTheme()" classname="getMaterialTheme()" time="0.046"/>
+  </testsuite>
+  <testsuite name="dialog_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="4">
+    <testcase name="loading /home/vsts/work/1/s/test/dialog_test.dart" classname="loading /home/vsts/work/1/s/test/dialog_test.dart" time="0.726"/>
+    <testcase name="LdDialog" classname="LdDialog" time="0.375"/>
+  </testsuite>
+  <testsuite name="toggle_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="4">
+    <testcase name="loading /home/vsts/work/1/s/test/toggle_test.dart" classname="loading /home/vsts/work/1/s/test/toggle_test.dart" time="0.865"/>
+    <testcase name="LdToggle" classname="LdToggle" time="0.386"/>
+  </testsuite>
+  <testsuite name="badge_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="4">
+    <testcase name="loading /home/vsts/work/1/s/test/badge_test.dart" classname="loading /home/vsts/work/1/s/test/badge_test.dart" time="0.727"/>
+    <testcase name="LdBadge" classname="LdBadge" time="0.261"/>
+  </testsuite>
+  <testsuite name="checkbox_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="6">
+    <testcase name="loading /home/vsts/work/1/s/test/checkbox_test.dart" classname="loading /home/vsts/work/1/s/test/checkbox_test.dart" time="0.716"/>
+    <testcase name="LdCheckbox" classname="LdCheckbox" time="0.384"/>
+    <testcase name="LdCheckbox with color" classname="LdCheckbox with color" time="0.014"/>
+  </testsuite>
+  <testsuite name="radio_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="7">
+    <testcase name="loading /home/vsts/work/1/s/test/radio_test.dart" classname="loading /home/vsts/work/1/s/test/radio_test.dart" time="0.869"/>
+    <testcase name="LdRadio" classname="LdRadio" time="0.391"/>
+    <testcase name="LdRadio with color" classname="LdRadio with color" time="0.014"/>
+  </testsuite>
+  <testsuite name="input_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="3">
+    <testcase name="loading /home/vsts/work/1/s/test/input_test.dart" classname="loading /home/vsts/work/1/s/test/input_test.dart" time="1.648"/>
+    <testcase name="LdInput" classname="LdInput" time="0"/>
+  </testsuite>
+  <testsuite name="loader_test.dart" timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="4">
+    <testcase name="loading /home/vsts/work/1/s/test/loader_test.dart" classname="loading /home/vsts/work/1/s/test/loader_test.dart" time="0.733"/>
+    <testcase name="LdLoader" classname="LdLoader" time="0.285"/>
+  </testsuite>
+  <testsuite timestamp="2024-03-22T13:39:45.995Z" errors="0" skipped="0" failures="0" tests="1">
+    <testcase name="All tests passed!" classname="All tests passed!" time="0"/>
+  </testsuite>
+</testsuites>

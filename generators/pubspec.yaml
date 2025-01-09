@@ -1,0 +1,15 @@
+name: liquid_generators
+description: Generators for liquid_flutter
+version: 0.0.01
+environment:
+  sdk: ">=2.17.0 <3.0.0"
+  flutter: ">=1.17.0"
+dependencies:
+  analyzer: ^6.2.0 # Pin the analyzer version to work around generatiuon failure
+  build: ^2.4.1
+  code_builder: ^4.8.0
+  glob: ^2.0.2
+  build_config: ^1.1.1
+  source_gen: ^1.4.0
+  dart_style: ^2.3.4
+  flutter_lints: ^1.0.0

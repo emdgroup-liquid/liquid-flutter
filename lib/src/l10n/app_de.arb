@@ -1,0 +1,23 @@
+{
+  "cancel": "Abbrechen",
+  "choose": "Auswählen",
+  "close": "Schließen",
+  "confirm": "Bestätigen",
+  "done": "Fertig",
+  "enterText": "Text eingeben",
+  "errorOccurred": "Ein Fehler ist aufgetreten",
+  "failed": "Fehlgeschlagen",
+  "formatError": "Ein Fehler beim Verarbeiten der Anfrage ist aufgetreten. Bitte versuchen Sie es erneut.",
+  "loading": "Laden...",
+  "moreInfo": "Weitere Informationen",
+  "networkError": "Netzwerkfehler. Bitte stellen Sie sicher, dass Sie mit dem Internet verbunden sind und versuchen Sie es erneut.",
+  "noItemsFound": "Keine Elemente gefunden",
+  "ok": "OK", 
+  "refresh": "Aktualisieren",
+  "retry": "Erneut versuchen",
+  "searchAgain": "Erneut suchen",
+  "selectDate": "Datum auswählen",
+  "submit": "Absenden",
+  "timeoutError": "Zeitüberschreitung der Anfrage. Bitte versuchen Sie es erneut.",
+  "unknownError": "Unbekannter Fehler"
+}

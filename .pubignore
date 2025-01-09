@@ -1,0 +1,12 @@
+.github/
+.husky/
+.vscode/
+node_modules/
+test/
+.dockerignore
+logo.png
+
+example/
+generators/
+build/
+mobile_screens.webp

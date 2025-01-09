@@ -1,0 +1,11 @@
+icons_launcher:
+  image_path: "liquid_flutter_icon.jpg"
+  platforms:
+    android:
+      enable: true
+    ios:
+      enable: true
+    web:
+      enable: true
+    macos:
+      enable: true
