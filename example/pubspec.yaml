@@ -11,9 +11,8 @@ publish_to: "none"
 dependencies:
   flutter:
     sdk: flutter
-  liquid_flutter:
-    path: "./.."
-  #liquid_flutter_emd_theme:
+  liquid_flutter: ^18.0.0-0
+  liquid_flutter_emd_theme: ^0.0.1-0
   #  path: "./../liquid_flutter_emd_theme"
   bitsdojo_window: ^0.1.2
   flutter_markdown: ^0.6.12
@@ -65,10 +64,10 @@ flutter:
           weight: 800
     - family: EMD
       fonts:
-        - asset: packages/emd_theme/fonts/EMD.ttf
+        - asset: packages/liquid_flutter_emd_theme/fonts/EMD.ttf
     - family: LiquidIcons
       fonts:
-        - asset: packages/emd_theme/fonts/LiquidIcons.ttf
+        - asset: packages/liquid_flutter_emd_theme/fonts/LiquidIcons.ttf
 
     - family: NotoSansMono
       fonts:
@@ -88,3 +87,7 @@ icons_launcher:
       enable: true
     windows:
       enable: true
+
+dependency_overrides:
+  liquid_flutter:
+    path: ./../

@@ -34,7 +34,6 @@ const components = [
       Icons.settings_backup_restore),
   _Component("Autospace", "/components/autospace", LdIcons.arrow_up_n_down),
   _Component("Accordion", "/components/accordion", LdIcons.arrow_up_n_down),
-  _Component("Animations", "/components/animation", LdIcons.play),
   _Component("Badge", "/components/badge", Icons.tag),
   _Component("Breadcrumb", "/components/breadcrumb", LdIcons.arrow_right),
   _Component("Button", "/components/button", LdIcons.add),

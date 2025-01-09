@@ -28,9 +28,6 @@ TextStyle ldBuildTextStyle(LdTheme theme, LdTextType type, LdSize size,
       case LdTextType.caption:
         fontWeight = FontWeight.w700;
         break;
-      default:
-        fontWeight = FontWeight.w400;
-        break;
     }
   }
 

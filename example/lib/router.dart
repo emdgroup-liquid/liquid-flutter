@@ -39,7 +39,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 import 'window/app_scaffold.dart';
 import 'components/accordion.dart';
-import 'components/animations.dart';
+
 import 'components/badge.dart';
 import 'components/breadcrumb.dart';
 import 'components/checkbox.dart';
@@ -196,11 +196,6 @@ class AppRouter {
             path: "/components/loader",
             pageBuilder: (context, state) => NoTransitionPage<void>(
                 key: state.pageKey, child: const LoaderDemo()),
-          ),
-          GoRoute(
-            path: "/components/animation",
-            pageBuilder: (context, state) => NoTransitionPage<void>(
-                key: state.pageKey, child: const AnimationDemo()),
           ),
           GoRoute(
             path: "/components/reveal",
