@@ -18,7 +18,7 @@ LdColorBundle neutralGhostColor(
 
   if (disabled) {
     return LdColorBundle(
-      surface: theme.neutralShade(1).withOpacity(0.1),
+      surface: theme.neutralShade(1).withAlpha(23),
       text: theme.neutralShade(5),
       border: Colors.transparent,
       icon: palette.background.withAlpha(disabledAlpha),
@@ -52,7 +52,7 @@ LdColorBundle neutralGhostColor(
   }
 
   return LdColorBundle(
-    surface: theme.neutralShade(1).withOpacity(0.0),
+    surface: theme.neutralShade(1).withAlpha(0),
     text: theme.isDark ? theme.text : palette.primary.center(theme.isDark),
     border: Colors.transparent,
     icon: palette.primary.center(theme.isDark),
@@ -88,10 +88,10 @@ LdColorBundle touchableColor(
         final foreground = disabledColor.idle(theme.isDark);
         if (mode == LdTouchableSurfaceMode.vague) {
           return LdColorBundle(
-            surface: foreground.withOpacity(0.1),
+            surface: foreground.withAlpha(26),
             text: disabledColor.contrastingText(foreground),
             border: foreground,
-            icon: foreground.withOpacity(0.6),
+            icon: foreground.withAlpha(153),
           );
         }
 
@@ -105,7 +105,7 @@ LdColorBundle touchableColor(
 
     if (active) {
       return LdColorBundle(
-        surface: color.idle(theme.isDark).withOpacity(0.2),
+        surface: color.idle(theme.isDark).withAlpha(51),
         text: color.moveRelative(
           color.active(theme.isDark),
           theme.isDark ? -2 : 2,
@@ -116,7 +116,7 @@ LdColorBundle touchableColor(
 
     if (hovering) {
       return LdColorBundle(
-        surface: color.hover(theme.isDark).withOpacity(0.2),
+        surface: color.hover(theme.isDark).withAlpha(51),
         text: color.moveRelative(
           color.hover(theme.isDark),
           theme.isDark ? -2 : 2,
@@ -127,7 +127,7 @@ LdColorBundle touchableColor(
 
     if (focus) {
       return LdColorBundle(
-        surface: color.focus(theme.isDark).withOpacity(0.2),
+        surface: color.focus(theme.isDark).withAlpha(51),
         text: color.focus(theme.isDark),
         border: color.focus(theme.isDark),
       );
@@ -135,13 +135,13 @@ LdColorBundle touchableColor(
 
     if (mode == LdTouchableSurfaceMode.vague) {
       return LdColorBundle(
-        surface: color.idle(theme.isDark).withOpacity(0.1),
+        surface: color.idle(theme.isDark).withAlpha(26),
         text: color.idle(theme.isDark),
         border: color.idle(theme.isDark),
       );
     }
     return LdColorBundle(
-      surface: color.idle(theme.isDark).withOpacity(0.0),
+      surface: color.idle(theme.isDark).withAlpha(0),
       text: color.idle(theme.isDark),
       border: color.idle(theme.isDark),
     );

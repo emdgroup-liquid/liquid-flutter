@@ -109,12 +109,12 @@ ThemeData getMaterialTheme(LdTheme theme) {
     textTheme: text,
     extensions: [
       WoltModalSheetThemeData(
-        topBarShadowColor: theme.background.withOpacity(0),
+        topBarShadowColor: theme.background.withAlpha(0),
         backgroundColor: theme.surface,
         navBarHeight: 48,
         topBarElevation: 0,
         isTopBarLayerAlwaysVisible: true,
-        modalBarrierColor: theme.palette.neutral.shades.last.withOpacity(0.8),
+        modalBarrierColor: theme.palette.neutral.shades.last.withAlpha(204),
       )
     ],
   );

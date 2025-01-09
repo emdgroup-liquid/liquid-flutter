@@ -180,7 +180,7 @@ class _LdContextMenuState extends State<LdContextMenu> {
                 borderRadius: theme.radius(LdSize.s),
                 boxShadow: [
                   BoxShadow(
-                    color: theme.palette.neutral.shades.last.withOpacity(0.2),
+                    color: theme.palette.neutral.shades.last.withAlpha(51),
                     blurRadius: 10,
                     offset: const Offset(0, 0),
                   )

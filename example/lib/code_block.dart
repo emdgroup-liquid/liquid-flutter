@@ -161,8 +161,8 @@ class _CodeBlockState extends State<CodeBlock> {
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
                                   colors: [
-                                    colors.surface.withOpacity(0),
-                                    colors.surface.withOpacity(0.9),
+                                    colors.surface.withAlpha(0),
+                                    colors.surface.withAlpha(233),
                                   ],
                                 ),
                               ),

@@ -92,7 +92,7 @@ class LdSubmitDialogBuilder<T> extends LdSubmitBuilder<T> {
             children: [
               Positioned.fill(
                 child: ColoredBox(
-                  color: LdTheme.of(context).surface.withOpacity(0.8),
+                  color: LdTheme.of(context).surface.withAlpha(204),
                 ),
               ),
               ModalBarrier(onDismiss: () {
