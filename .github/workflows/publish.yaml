@@ -4,9 +4,9 @@ on:
     branches:
       - main
 jobs:
-  release_liquid_flutter: 
+  release_liquid_flutter:
     runs-on: ubuntu-latest
-    steps: 
+    steps:
       - name: 🔑 Get token for bumper app
         uses: actions/create-github-app-token@v1
         id: app-token
@@ -21,7 +21,30 @@ jobs:
         uses: subosito/flutter-action@v2
       - name: Install dependencies
         run: flutter pub get
-      - name: Run build runner  
+      - name: 🔂 Run standard-version
+        run: |
+          npx standard-version --skip.tag
+      - name: ⏎ Get new version
+        uses: actions/github-script@v7
+        id: get_new_version
+        with:
+          result-encoding: string
+          script: |
+            const fs = require('fs');
+            const package = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            return package.version;
+      - run: npm install yaml
+      - name: Update version in pubspec
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const yaml = require("yaml");
+            const version = '${{ steps.get_new_version.outputs.result }}';
+            const pubspec = yaml.parse(fs.readFileSync('pubspec.yaml', 'utf8'));
+            pubspec.version = version;
+            fs.writeFileSync('pubspec.yaml', yaml.stringify(pubspec));
+      - name: Run build runner
         run: flutter pub run build_runner build --delete-conflicting-outputs
       - name: Generate l10n
         run: flutter gen-l10n
@@ -34,39 +57,16 @@ jobs:
           git fetch --prune --unshallow
           git config --global user.name "GitHub Actions"
           git config --global user.email "gh-actions@emdgroup.com"
-      - name: 🔂 Run standard-version
-        run: | 
-          npx standard-version --skip.tag 
-      - name: ⏎ Get new version 
-        uses: actions/github-script@v7
-        id: get_new_version
-        with:
-          result-encoding: string
-          script: |
-            const fs = require('fs');
-            const package = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-            return package.version;
-      - run: npm install yaml
-      - name: Update version in pubspec
-        uses: actions/github-script@v7
-        with: 
-          script: |
-            const fs = require('fs');
-            const yaml = require("yaml");
-            const version = '${{ steps.get_new_version.outputs.result }}';
-            const pubspec = yaml.parse(fs.readFileSync('pubspec.yaml', 'utf8'));
-            pubspec.version = version;
-            fs.writeFileSync('pubspec.yaml', yaml.stringify(pubspec));    
-      - name: 📦 Publish package
-        run: flutter pub publish --dry-run 
-      - run: |
-          git add pubspec.yaml
+      - name: Add changed source files
+        run: |
+          git add pubspec.yaml lib/ package.json
           git commit -m "chore(release): ${{ steps.get_new_version.outputs.result }} [skip ci]"
+      - name: 📦 Publish package
+        run: flutter pub publish --dry-run
+      - run: |
           git push origin main
-      
-  
 
-  deploy_example: 
+  deploy_example:
     runs-on: ubuntu-latest
     needs: release_liquid_flutter
     steps:
@@ -75,10 +75,10 @@ jobs:
         uses: merckgroup/mtrust-workflows/.github/actions/prepare-flutter@v2
         with:
           directory: .
-          artifactory_key: ${{ secrets.artifactory_key }} 
+          artifactory_key: ${{ secrets.artifactory_key }}
           flutter_version: "3.24.0"
       - name: Build example
-        run: | 
+        run: |
           cd example 
           flutter build web --release
       - name: Deploy example
