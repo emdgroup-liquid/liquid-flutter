@@ -57,7 +57,6 @@ jobs:
         run: flutter test
       - name: Run linter
         run: flutter analyze
-
       - name: Add changed source files
         run: |
           git add pubspec.yaml lib/ package.json
@@ -67,17 +66,41 @@ jobs:
       - run: |
           git push origin main
 
-  deploy_example:
-    runs-on: ubuntu-latest
-    needs: release_liquid_flutter
-    steps:
-      - uses: actions/checkout@v2
-      - name: 🛠️ Prepare flutter
-        uses: merckgroup/mtrust-workflows/.github/actions/prepare-flutter@v2
+      - name: 🪵 Extract changelog for current version
+        uses: actions/github-script@v7
         with:
-          directory: .
-          artifactory_key: ${{ secrets.artifactory_key }}
-          flutter_version: "3.24.0"
+          script: |
+            const fs = require("fs");
+            const changelog = fs.readFileSync("CHANGELOG.md", "utf8");
+            const lines = changelog.split("\n");
+            let lastVersion = [];
+            for (let line of lines) {
+                // Match the version header, by looking for a markdown header followed by semver  (optionally wrapped in [])
+                // Semver regex from https://semver.org/
+                if (line.match(/^#{2,} \[?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?\]?/)) {
+                    if (lastVersion.length != 0) {
+                        break;
+                    } else {
+                        console.log("Extracting changelog for: " + line)
+                        lastVersion.push(line);
+                        continue;
+                    }
+                }
+                if (lastVersion.length > 0) {
+                    lastVersion.push(line);
+                }
+            }
+
+            fs.writeFileSync("last_version.md", lastVersion.slice(1).join("\n").trim(), "utf8");
+
+      # Create a release
+      - name: 🚀 Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.get_new_version.outputs.result }}
+          name: Release ${{ steps.get_new_version.outputs.result }}
+          body_path: last_version.md
+          prerelease: false
       - name: Build example
         run: |
           cd example 
