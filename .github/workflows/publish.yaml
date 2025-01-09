@@ -101,6 +101,8 @@ jobs:
           name: Release ${{ steps.get_new_version.outputs.result }}
           body_path: last_version.md
           prerelease: false
+      - name: 📦 Publish package
+        run: flutter pub publish --force
       - name: Build example
         run: |
           cd example 
