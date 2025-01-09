@@ -26,8 +26,6 @@ jobs:
         run: flutter test
       - name: Run linter
         run: flutter analyze
-      - name: Run formatter
-        run: flutter format --set-exit-if-changed --dry-run
       - name: Configure git
         run: |
           git fetch --prune --unshallow
