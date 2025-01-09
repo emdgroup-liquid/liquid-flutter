@@ -6,6 +6,8 @@ on:
 jobs:
   release_liquid_flutter:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # This is required for requesting the JWT
     steps:
       - name: 🔑 Get token for bumper app
         uses: actions/create-github-app-token@v1
@@ -62,7 +64,7 @@ jobs:
           git add pubspec.yaml lib/ package.json
           git commit -m "chore(release): ${{ steps.get_new_version.outputs.result }} [skip ci]"
       - name: 📦 Publish package
-        run: flutter pub publish --dry-run
+        run: flutter pub publish
       - run: |
           git push origin main
 
@@ -111,24 +113,3 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./example/build/web
-
-  publish_to_pub_dev:
-    needs: release_liquid_flutter
-    name: "Publish to pub.dev"
-    permissions:
-      id-token: write # This is required for requesting the JWT
-    runs-on: ubuntu-latest
-    steps:
-      # Checkout repository
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-      - uses: dart-lang/setup-dart@e630b99d28a3b71860378cafdc2a067c71107f94
-      - uses: flutter-actions/setup-flutter@d030cb603380106494f72d65a7e52462f380781f
-      - name: Install dependencies
-        run: dart pub get
-        working-directory: ${{ inputs.working-directory }}
-
-      # Publishing...
-      - name: Publish to pub.dev
-        run: dart pub publish -f
