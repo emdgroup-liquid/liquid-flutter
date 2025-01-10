@@ -6,8 +6,6 @@ on:
 jobs:
   release_liquid_flutter:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write # This is required for requesting the JWT
     steps:
       - name: 🔑 Get token for bumper app
         uses: actions/create-github-app-token@v1
