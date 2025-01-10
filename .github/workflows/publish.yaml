@@ -63,8 +63,10 @@ jobs:
         run: |
           git add pubspec.yaml lib/ package.json
           git commit -m "chore(release): ${{ steps.get_new_version.outputs.result }} [skip ci]"
+      - name: Dry run publish
+        run: flutter pub publish --dry-run
       - name: 📦 Publish package
-        run: flutter pub publish
+        run: flutter pub publish -f
       - run: |
           git push origin main
 
