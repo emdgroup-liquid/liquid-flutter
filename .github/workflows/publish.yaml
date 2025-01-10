@@ -9,6 +9,15 @@ jobs:
     permissions:
       id-token: write # This is required for requesting the JWT
     steps:
+      - name: 🪪 Get Id Token
+        uses: actions/github-script@v6
+        with:
+          script: |
+            let pub_token = await core.getIDToken('https://pub.dev')
+            core.exportVariable('PUB_TOKEN', pub_token)
+      - name: Authenticate with pub.dev
+        run: flutter pub pub token add https://pub.dev --env-var PUB_TOKEN
+
       - name: 🔑 Get token for bumper app
         uses: actions/create-github-app-token@v1
         id: app-token
