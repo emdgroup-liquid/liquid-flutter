@@ -107,7 +107,7 @@ jobs:
       - name: Build example
         run: |
           cd example 
-          flutter build web --release
+          flutter build web --release --base-href /liquid-flutter/
       - name: Deploy example
         uses: peaceiris/actions-gh-pages@v3
         with:
