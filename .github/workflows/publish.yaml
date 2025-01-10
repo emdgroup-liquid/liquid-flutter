@@ -9,13 +9,6 @@ jobs:
     permissions:
       id-token: write # This is required for requesting the JWT
     steps:
-      - name: 🪪 Get Id Token
-        uses: actions/github-script@v6
-        with:
-          script: |
-            let pub_token = await core.getIDToken('https://pub.dev')
-            core.exportVariable('PUB_TOKEN', pub_token)
-
       - name: 🔑 Get token for bumper app
         uses: actions/create-github-app-token@v1
         id: app-token
@@ -28,8 +21,7 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
       - name: Install Flutter
         uses: subosito/flutter-action@v2
-      - name: Authenticate with pub.dev
-        run: flutter pub pub token add https://pub.dev --env-var PUB_TOKEN
+
       - name: Install dependencies
         run: flutter pub get
       - name: Configure git
@@ -74,8 +66,7 @@ jobs:
           git commit -m "chore(release): ${{ steps.get_new_version.outputs.result }} [skip ci]"
       - name: Dry run publish
         run: flutter pub publish --dry-run
-      - name: 📦 Publish package
-        run: flutter pub publish -f
+
       - run: |
           git push origin main
 
