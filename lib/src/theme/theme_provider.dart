@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -67,6 +68,8 @@ class _LdThemeProviderState extends State<LdThemeProvider>
     _theme.addListener(themeChanged);
     WidgetsBinding.instance.addObserver(this);
 
+    unawaited(_getScreenRadius());
+
     if (widget.autoSize) {
       if (kIsWeb ||
           Platform.isMacOS ||
@@ -79,6 +82,10 @@ class _LdThemeProviderState extends State<LdThemeProvider>
     }
 
     super.initState();
+  }
+
+  Future<void> _getScreenRadius() async {
+    _theme.screenRadius = await getScreenRadius();
   }
 
   @override

@@ -7,15 +7,23 @@ import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 class LdSheetType extends WoltBottomSheetType {
   final int index;
+  final double? inset;
   LdSheetType({
     required LdTheme theme,
+    this.inset,
+    double? topRadius,
+    double? bottomRadius,
     this.index = 0,
   }) : super(
           shapeBorder: RoundedRectangleBorder(
-            borderRadius: theme.radius(LdSize.m).copyWith(
-                  bottomLeft: Radius.zero,
-                  bottomRight: Radius.zero,
-                ),
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(bottomRadius ?? 0),
+              bottomRight: Radius.circular(bottomRadius ?? 0),
+              topLeft: Radius.circular(
+                  topRadius ?? theme.radius(LdSize.m).bottomLeft.x),
+              topRight: Radius.circular(
+                  bottomRadius ?? theme.radius(LdSize.m).bottomRight.x),
+            ),
             side: BorderSide(
               color: theme.border,
               width: 1,
@@ -24,17 +32,28 @@ class LdSheetType extends WoltBottomSheetType {
         );
 
   @override
+  BoxConstraints layoutModal(Size availableSize) {
+    if (inset != null) {
+      return super.layoutModal(
+        Size(availableSize.width - 2 * inset!,
+            availableSize.height - 2 * inset!),
+      );
+    }
+    return super.layoutModal(availableSize);
+  }
+
+  @override
   Offset positionModal(
       Size availableSize, Size modalContentSize, TextDirection _) {
     final xOffset = max(
-      0.0,
+      inset ?? 0.0,
       (availableSize.width - modalContentSize.width) / 2,
     );
     final yOffset = max(
       0.0,
       (availableSize.height - modalContentSize.height + index * 48),
     );
-    return Offset(xOffset, yOffset);
+    return Offset(xOffset, yOffset - (inset ?? 0.0));
   }
 }
 

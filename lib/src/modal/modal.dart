@@ -49,6 +49,18 @@ class LdModal {
   /// The size of the modal.
   final LdSize? size;
 
+  /// The radius for the top of the modal.
+  final double? topRadius;
+
+  /// The radius for the bottom of the modal.
+  final double? bottomRadius;
+
+  /// The inset for the modal from the edges of the screen.
+  final double? inset;
+
+  /// Whether the modal should use safe area. Defaults to true.
+  final bool useSafeArea;
+
   LdModal({
     this.enableScaling,
     this.modalContent,
@@ -64,6 +76,10 @@ class LdModal {
     this.injectables,
     this.onDismiss,
     this.size,
+    this.topRadius,
+    this.bottomRadius,
+    this.inset,
+    this.useSafeArea = true,
   });
 
   bool get shouldScale {
@@ -74,7 +90,10 @@ class LdModal {
     return switch (mode) {
       LdModalTypeMode.sheet => LdSheetType(
           theme: LdTheme.of(context),
+          topRadius: topRadius ?? 0,
+          bottomRadius: bottomRadius,
           index: index,
+          inset: inset,
         ),
       LdModalTypeMode.dialog => LdDialogType(
           theme: LdTheme.of(context),
@@ -82,9 +101,12 @@ class LdModal {
           index: index,
         ),
       _ => ldAutoModalType(
-          context,
-          size ?? LdSize.m,
-          index,
+          context: context,
+          dialogSize: size ?? LdSize.m,
+          index: index,
+          topRadius: topRadius,
+          bottomRadius: bottomRadius,
+          inset: inset,
         ),
     };
   }
@@ -237,6 +259,7 @@ class LdModal {
 
   WoltModalSheetRoute asRoute(RouteSettings settings) {
     return WoltModalSheetRoute(
+      useSafeArea: useSafeArea,
       barrierDismissible: userCanDismiss,
       enableDrag: enableDrag,
       settings: settings,
@@ -267,6 +290,7 @@ class LdModal {
       ),
       barrierDismissible: userCanDismiss,
       context: context,
+      useSafeArea: useSafeArea,
       enableDrag: userCanDismiss && !noHeader,
       modalTypeBuilder: (_) => _getSheetType(
         context,

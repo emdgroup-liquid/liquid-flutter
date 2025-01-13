@@ -10,19 +10,27 @@ import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 /// If the device is a watch or mobile, it returns a [LdSheetType].
 /// Otherwise, it returns a [LdDialogType].
 WoltModalType ldAutoModalType(
-    BuildContext context, LdSize dialogSize, int index) {
+    {required BuildContext context,
+    required LdSize dialogSize,
+    required int index,
+    double? topRadius,
+    double? bottomRadius,
+    double? inset}) {
   final theme = LdTheme.of(context);
   final deviceType = getDeviceType(MediaQuery.sizeOf(context));
 
   return switch (deviceType) {
-    DeviceScreenType.watch => LdSheetType(
+    DeviceScreenType.watch || DeviceScreenType.mobile => LdSheetType(
         theme: theme,
         index: index,
+        topRadius: topRadius,
+        inset: inset,
+        bottomRadius: bottomRadius,
       ),
-    DeviceScreenType.mobile => LdSheetType(
+    _ => LdDialogType(
         theme: theme,
+        size: dialogSize,
         index: index,
       ),
-    _ => LdDialogType(theme: theme, size: dialogSize, index: index),
   };
 }

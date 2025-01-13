@@ -98,6 +98,7 @@ export 'src/typography.dart';
 export 'src/version.dart';
 export 'src/blurring_header.dart';
 export 'src/window_frame.dart';
+export 'src/theme/screen_radius.dart';
 export 'variants.g.dart';
 
 /// This variable defines whether TextStyle
