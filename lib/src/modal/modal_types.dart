@@ -49,7 +49,7 @@ class LdSheetType extends WoltBottomSheetType {
       insets.left,
       (availableSize.width - modalContentSize.width - insets.horizontal) / 2,
     );
-    print(insets.bottom);
+
     final yOffset = max(
       0.0,
       (availableSize.height -
