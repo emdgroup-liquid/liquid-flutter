@@ -23,9 +23,6 @@ class LdSubmitController<T> {
 
   Future<void> init() async {
     if (config.autoTrigger) {
-      if (ldPrintDebugMessages) {
-        debugPrint("Auto triggering submit controller");
-      }
       Future.delayed(Duration.zero, _trigger);
     }
     _stateController.add(state);
