@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [18.0.2](https://github.com/emdgroup-liquid/liquid-flutter/compare/v18.0.1...v18.0.2) (2025-01-13)
+
+
+### Bug Fixes
+
+* add padding to done button in choose modal ([c578583](https://github.com/emdgroup-liquid/liquid-flutter/commit/c578583ffcffb37b4bd90009b1e1a0e0da140c6a))
+* adjust contrast for bettter legibility ([80e28ae](https://github.com/emdgroup-liquid/liquid-flutter/commit/80e28aeb71430be3d559d90b95ccff638262794f))
+* color for show more text ([86f5eb0](https://github.com/emdgroup-liquid/liquid-flutter/commit/86f5eb05522fca998dc524234ebc51b3f128eebc))
+* coloring and action padding in modals ([afbab72](https://github.com/emdgroup-liquid/liquid-flutter/commit/afbab7259698aebf969fab1bcd09f139d98ecd8e))
+* consider dark theme for fromCenter calls ([103b8b9](https://github.com/emdgroup-liquid/liquid-flutter/commit/103b8b9125cc6859d9136e28e6a9d6d37d85100b))
+* fix background color of modals to be theme.surface ([f84c90a](https://github.com/emdgroup-liquid/liquid-flutter/commit/f84c90ab22798a5be1dacc82a0b2104c85d88238))
+
 ### [18.0.1](https://github.com/emdgroup-liquid/liquid-flutter/compare/v18.0.0...v18.0.1) (2025-01-10)
 
 ## 18.0.0 (2025-01-10)
