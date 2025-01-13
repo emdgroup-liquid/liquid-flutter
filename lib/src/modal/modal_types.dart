@@ -19,10 +19,9 @@ class LdSheetType extends WoltBottomSheetType {
             borderRadius: BorderRadius.only(
               bottomLeft: Radius.circular(bottomRadius ?? 0),
               bottomRight: Radius.circular(bottomRadius ?? 0),
-              topLeft: Radius.circular(
-                  topRadius ?? theme.radius(LdSize.m).bottomLeft.x),
-              topRight: Radius.circular(
-                  bottomRadius ?? theme.radius(LdSize.m).bottomRight.x),
+              topLeft: Radius.circular(topRadius ?? theme.sizingConfig.radiusM),
+              topRight:
+                  Radius.circular(topRadius ?? theme.sizingConfig.radiusM),
             ),
             side: BorderSide(
               color: theme.border,
