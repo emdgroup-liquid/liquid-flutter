@@ -153,6 +153,7 @@ class LdModal {
       if (contentSlivers != null)
         SliverWoltModalSheetPage(
           backgroundColor: LdTheme.of(context).surface,
+          surfaceTintColor: LdTheme.of(context).surface,
           mainContentSliversBuilder: (context) => contentSlivers!(context)
               .map(
                 (e) => SliverPadding(
@@ -171,6 +172,7 @@ class LdModal {
       if (modalContent != null)
         WoltModalSheetPage(
           backgroundColor: LdTheme.of(context).surface,
+          surfaceTintColor: LdTheme.of(context).surface,
           child: _getInjectables(
             context,
             (context) => Portal(
