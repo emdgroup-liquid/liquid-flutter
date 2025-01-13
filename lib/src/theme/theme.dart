@@ -29,6 +29,15 @@ class LdTheme extends ChangeNotifier {
     });
   }
 
+  double _screenRadius = 0;
+
+  double get screenRadius => _screenRadius;
+
+  set screenRadius(double radius) {
+    _screenRadius = radius;
+    notifyListeners();
+  }
+
   String _fontFamily = 'Lato';
 
   /// Get the font family for the theme, defaults to 'Lato'

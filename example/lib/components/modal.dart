@@ -15,10 +15,12 @@ class ModalDemo extends StatefulWidget {
 class _DemoSheet extends StatelessWidget {
   final bool enableScaling;
   final LdModalTypeMode mode;
+  final bool useScreenRadius;
 
   const _DemoSheet({
     required this.mode,
     required this.enableScaling,
+    required this.useScreenRadius,
   });
 
   @override
@@ -36,8 +38,14 @@ class _DemoSheet extends StatelessWidget {
       },
       modal: LdModal(
           mode: mode,
+          noHeader: useScreenRadius,
           enableScaling: enableScaling,
-          title: const Text("Foo"),
+          title: useScreenRadius ? null : const Text("Title"),
+          inset: useScreenRadius ? 5 : null,
+          topRadius:
+              useScreenRadius ? LdTheme.of(context).screenRadius - 2.5 : null,
+          bottomRadius:
+              useScreenRadius ? LdTheme.of(context).screenRadius - 2.5 : null,
           modalContent: (
             context,
           ) =>
@@ -46,6 +54,7 @@ class _DemoSheet extends StatelessWidget {
                   _DemoSheet(
                     enableScaling: enableScaling,
                     mode: mode,
+                    useScreenRadius: useScreenRadius,
                   ),
                   const LdTextP(
                       "It's about managing expectations tiger team it is all exactly as i said, but i don't like it. Let's unpack that later we should leverage existing asserts that ladder up to the message. We need to socialize the comms with the wider stakeholder community we're building the plane while we're flying it, but if you want to motivate these clowns, try less carrot and more stick, race without a finish line performance review, so what do you feel you would bring to the table if you were hired for this position."),
@@ -63,13 +72,16 @@ class _DemoSheet extends StatelessWidget {
                     height: 200,
                   ),
                 ],
-              ).padM()),
+              )),
     );
   }
 }
 
 class _ModalDemoState extends State<ModalDemo> {
   bool _enableScaling = true;
+
+  bool _useScreenRadius = false;
+
   LdModalTypeMode mode = LdModalTypeMode.auto;
 
   @override
@@ -109,8 +121,18 @@ class _ModalDemoState extends State<ModalDemo> {
                 child: _DemoSheet(
                   mode: mode,
                   enableScaling: _enableScaling,
+                  useScreenRadius: _useScreenRadius,
                 ),
               ),
+            ),
+            LdToggle(
+              label: "Use screen radius",
+              checked: _useScreenRadius,
+              onChanged: (value) {
+                setState(() {
+                  _useScreenRadius = value;
+                });
+              },
             ),
             LdToggle(
               label: "Enable scaling (by default enabled on iOS)",
