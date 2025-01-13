@@ -18,8 +18,10 @@ class LdColor {
   Color center(bool isDark) => isDark ? shades[_darkCenter] : shades[_center];
 
   // Get the center color of the palette
-  Color fromCenter(int offset) =>
-      shades[(_center + offset).clamp(0, shades.length - 1)];
+  Color fromCenter(int offset, bool isDark) {
+    final center = isDark ? _darkCenter : _center;
+    return shades[(center + offset).clamp(0, shades.length - 1)];
+  }
 
   /// Get the dark center color of the palette
   Color fromDarkCenter(int offset) =>
@@ -42,10 +44,10 @@ class LdColor {
     UI States
   */
 
-  Color idle(bool dark) => fromCenter(0);
-  Color hover(bool dark) => fromCenter(1);
-  Color active(bool dark) => fromCenter(2);
-  Color focus(bool dark) => fromCenter(-1);
+  Color idle(bool dark) => fromCenter(0, dark);
+  Color hover(bool dark) => fromCenter(1, dark);
+  Color active(bool dark) => fromCenter(2, dark);
+  Color focus(bool dark) => fromCenter(-1, dark);
 
   /*
     DEBUG FUNCTIONS
