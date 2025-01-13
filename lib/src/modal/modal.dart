@@ -1,6 +1,7 @@
 import 'dart:io' if (dart.library.io) 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
@@ -263,18 +264,24 @@ class LdModal {
       barrierDismissible: userCanDismiss,
       enableDrag: enableDrag,
       settings: settings,
-      pageContentDecorator: (p0) {
-        if (!userCanDismiss) {
-          return PopScope(
-            canPop: false,
-            child: p0,
-          );
-        }
-        return p0;
-      },
+      pageContentDecorator: _getContentDecorator,
       modalTypeBuilder: (context) => _getSheetType(context),
       pageListBuilderNotifier: ValueNotifier(
         (context) => _getPageList(context),
+      ),
+    );
+  }
+
+  Widget _getContentDecorator(Widget child) {
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      // add this
+      sized: false, // important
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent, // set color to transparent
+      ),
+      child: PopScope(
+        canPop: userCanDismiss,
+        child: child,
       ),
     );
   }
@@ -300,16 +307,10 @@ class LdModal {
       barrierDismissible: userCanDismiss,
       context: context,
       useSafeArea: useSafeArea,
+      modalBarrierColor:
+          LdTheme.of(context).palette.neutral.shades.last.withAlpha(150),
       enableDrag: userCanDismiss && !noHeader,
-      pageContentDecorator: (p0) {
-        if (!userCanDismiss) {
-          return PopScope(
-            canPop: false,
-            child: p0,
-          );
-        }
-        return p0;
-      },
+      pageContentDecorator: _getContentDecorator,
       modalTypeBuilder: (_) => _getSheetType(
         context,
         index: index,
