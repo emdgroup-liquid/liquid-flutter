@@ -141,7 +141,8 @@ class _LdChooseState<T> extends State<LdChoose<T>> {
                     LiquidLocalizations.of(context).done,
                   ),
                   onPressed: Navigator.of(context).pop,
-                )
+                ),
+                ldSpacerM,
               ],
               padding: EdgeInsets.zero,
               contentSlivers: (context) {
