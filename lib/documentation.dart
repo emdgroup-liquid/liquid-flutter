@@ -7924,6 +7924,32 @@ const ldDocComponents = [
         features: ['final'],
       ),
       LdDocProperty(
+        name: 'topRadius',
+        type: 'double?',
+        description: '/// The radius for the top of the modal.',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'bottomRadius',
+        type: 'double?',
+        description: '/// The radius for the bottom of the modal.',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'insets',
+        type: 'EdgeInsets?',
+        description:
+            '/// The inset for the modal from the edges of the screen.',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'useSafeArea',
+        type: 'bool',
+        description:
+            '/// Whether the modal should use safe area. Defaults to true.',
+        features: ['final'],
+      ),
+      LdDocProperty(
         name: 'shouldScale',
         type: 'bool',
         description: '',
@@ -8057,6 +8083,34 @@ const ldDocComponents = [
             named: true,
             required: false,
           ),
+          LdDocParameter(
+            name: 'topRadius',
+            type: 'double?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'bottomRadius',
+            type: 'double?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'insets',
+            type: 'EdgeInsets?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'useSafeArea',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
         ],
         features: [],
       )
@@ -8124,7 +8178,13 @@ const ldDocComponents = [
         type: 'int',
         description: '',
         features: ['final'],
-      )
+      ),
+      LdDocProperty(
+        name: 'insets',
+        type: 'EdgeInsets',
+        description: '',
+        features: ['final'],
+      ),
     ],
     constructors: [
       LdDocConstructor(
@@ -8138,6 +8198,27 @@ const ldDocComponents = [
             required: true,
           ),
           LdDocParameter(
+            name: 'insets',
+            type: 'EdgeInsets',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'topRadius',
+            type: 'double?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'bottomRadius',
+            type: 'double?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
             name: 'index',
             type: 'int',
             description: '',
@@ -8148,7 +8229,10 @@ const ldDocComponents = [
         features: [],
       )
     ],
-    methods: ['positionModal'],
+    methods: [
+      'layoutModal',
+      'positionModal',
+    ],
   ),
   LdDocComponent(
     name: 'LdDialogType',
@@ -12083,6 +12167,12 @@ const ldDocComponents = [
         features: [],
       ),
       LdDocProperty(
+        name: '_screenRadius',
+        type: 'double',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
         name: '_fontFamily',
         type: 'String',
         description: '',
@@ -12115,6 +12205,12 @@ const ldDocComponents = [
       LdDocProperty(
         name: 'sizingConfig',
         type: 'LdSizingConfig',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'screenRadius',
+        type: 'double',
         description: '',
         features: [],
       ),
@@ -12682,6 +12778,7 @@ const ldDocComponents = [
     ],
     methods: [
       'initState',
+      '_getScreenRadius',
       'didChangePlatformBrightness',
       '_applyBrightness',
       'didUpdateWidget',

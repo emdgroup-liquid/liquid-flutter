@@ -1,2 +1,2 @@
 /// Version of the library 
-const ldVersion = "18.0.2";
+const ldVersion = "18.1.0";
