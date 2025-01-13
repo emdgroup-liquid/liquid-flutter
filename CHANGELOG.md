@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [18.1.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v18.0.2...v18.1.0) (2025-01-13)
+
+
+### Features
+
+* adaptive modal radius ([21c1ca1](https://github.com/emdgroup-liquid/liquid-flutter/commit/21c1ca1d49547dfd86f5b32c5b8d6ebe290a303c))
+
+
+### Bug Fixes
+
+* use EdgeInsets for modal insets ([de88b4a](https://github.com/emdgroup-liquid/liquid-flutter/commit/de88b4ad779c547e6fed28fc035e08eaaf601926))
+
 ### [18.0.2](https://github.com/emdgroup-liquid/liquid-flutter/compare/v18.0.1...v18.0.2) (2025-01-13)
 
 
