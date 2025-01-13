@@ -14,4 +14,4 @@ const shadSky = LdColor([
   Color.fromRGBO(7, 89, 133, 1),
   Color.fromRGBO(12, 74, 110, 1),
   Color.fromRGBO(8, 47, 73, 1),
-], 8, 4);
+], 7, 5);

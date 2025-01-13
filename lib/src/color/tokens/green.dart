@@ -14,4 +14,4 @@ const shadGreen = LdColor([
   Color.fromRGBO(22, 101, 52, 1),
   Color.fromRGBO(20, 83, 45, 1),
   Color.fromRGBO(5, 46, 22, 1),
-], 5, 6);
+], 7, 6);
