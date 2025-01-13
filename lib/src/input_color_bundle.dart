@@ -69,13 +69,13 @@ class LdInputColorBundle {
       backgroundHover: surface,
       backgroundFocus: surface,
       backgroundDisabled: onSurface ? surface : background,
-      borderIdle: isValid ? border : borderInvalid.fromCenter(1),
+      borderIdle: isValid ? border : borderInvalid.fromCenter(1, theme.isDark),
       borderHover: isValid
           ? theme.palette.neutral.relative(theme.isDark, 3)
-          : borderInvalid.fromCenter(2),
+          : borderInvalid.fromCenter(2, theme.isDark),
       borderFocus: isValid
-          ? theme.palette.neutral.relative(theme.isDark, 4)
-          : borderInvalid.fromCenter(-1),
+          ? theme.palette.primary.relative(theme.isDark, 4)
+          : borderInvalid.fromCenter(-1, theme.isDark),
       borderDisabled: theme.palette.border,
       textIdle: theme.palette.text,
       textHover: theme.palette.text,
@@ -85,10 +85,10 @@ class LdInputColorBundle {
       placeholderHover: theme.palette.textMuted,
       placeholderFocus: theme.palette.textMuted,
       placeholderDisabled: theme.palette.textMuted,
-      iconIdle: theme.palette.primary.fromCenter(1),
-      iconHover: theme.palette.primary.fromCenter(2),
-      iconFocus: theme.palette.primary.fromCenter(-1),
-      iconDisabled: theme.palette.primary.fromCenter(1),
+      iconIdle: theme.palette.primary.fromCenter(1, theme.isDark),
+      iconHover: theme.palette.primary.fromCenter(2, theme.isDark),
+      iconFocus: theme.palette.primary.fromCenter(-1, theme.isDark),
+      iconDisabled: theme.palette.primary.fromCenter(1, theme.isDark),
     );
   }
 
