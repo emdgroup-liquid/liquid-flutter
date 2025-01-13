@@ -152,7 +152,11 @@ class _CodeBlockState extends State<CodeBlock> {
                                   Text(expanded ? "Show less" : "Show more",
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
-                                          color: colors.text,
+                                          color: LdTheme.of(context)
+                                              .palette
+                                              .neutral
+                                              .shades
+                                              .first,
                                           fontWeight: FontWeight.bold)),
                                 ],
                               ),
