@@ -10,7 +10,7 @@ jobs:
       pull-requests: write
     uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/semantic_pull_request.yml@v1
   validate_dart:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,6 +24,13 @@ jobs:
         run: flutter gen-l10n
       - name: Run tests
         run: flutter test
+      - name: Upload test failures
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: test-failures
+          path: test/failures/
+          if-no-files-found: ignore
       - name: Run linter
         run: flutter analyze
       - name: Configure git
