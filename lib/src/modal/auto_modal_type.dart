@@ -15,7 +15,7 @@ WoltModalType ldAutoModalType(
     required int index,
     double? topRadius,
     double? bottomRadius,
-    double? inset}) {
+    EdgeInsets? insets}) {
   final theme = LdTheme.of(context);
   final deviceType = getDeviceType(MediaQuery.sizeOf(context));
 
@@ -24,7 +24,7 @@ WoltModalType ldAutoModalType(
         theme: theme,
         index: index,
         topRadius: topRadius,
-        inset: inset,
+        insets: insets ?? EdgeInsets.zero,
         bottomRadius: bottomRadius,
       ),
     _ => LdDialogType(

@@ -56,7 +56,7 @@ class LdModal {
   final double? bottomRadius;
 
   /// The inset for the modal from the edges of the screen.
-  final double? inset;
+  final EdgeInsets? insets;
 
   /// Whether the modal should use safe area. Defaults to true.
   final bool useSafeArea;
@@ -78,7 +78,7 @@ class LdModal {
     this.size,
     this.topRadius,
     this.bottomRadius,
-    this.inset,
+    this.insets,
     this.useSafeArea = true,
   });
 
@@ -93,7 +93,7 @@ class LdModal {
           topRadius: topRadius ?? 0,
           bottomRadius: bottomRadius,
           index: index,
-          inset: inset,
+          insets: insets ?? EdgeInsets.zero,
         ),
       LdModalTypeMode.dialog => LdDialogType(
           theme: LdTheme.of(context),
@@ -106,7 +106,7 @@ class LdModal {
           index: index,
           topRadius: topRadius,
           bottomRadius: bottomRadius,
-          inset: inset,
+          insets: insets ?? EdgeInsets.zero,
         ),
     };
   }
