@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [18.1.1](https://github.com/emdgroup-liquid/liquid-flutter/compare/v18.1.0...v18.1.1) (2025-01-13)
+
+
+### Bug Fixes
+
+* update modal  corner radius to use the correct paramter ([0dc7edf](https://github.com/emdgroup-liquid/liquid-flutter/commit/0dc7edf2a7dd3b816697ba07976ea3b70375e84b))
+* userDismissable with back button ([4a8e90d](https://github.com/emdgroup-liquid/liquid-flutter/commit/4a8e90d879ec2570748abb4d440bb5e7aaeeb9ee))
+
 ## [18.1.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v18.0.2...v18.1.0) (2025-01-13)
 
 
