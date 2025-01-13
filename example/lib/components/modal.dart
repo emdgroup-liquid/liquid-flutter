@@ -40,8 +40,18 @@ class _DemoSheet extends StatelessWidget {
           mode: mode,
           noHeader: useScreenRadius,
           enableScaling: enableScaling,
+          useSafeArea: !useScreenRadius,
           title: useScreenRadius ? null : const Text("Title"),
-          inset: useScreenRadius ? 5 : null,
+          insets: useScreenRadius
+              ? EdgeInsets.only(
+                  left: 0,
+                  right: 5,
+                  bottom: MediaQuery.paddingOf(
+                              Scaffold.maybeOf(context)?.context ?? context)
+                          .bottom /
+                      2,
+                )
+              : null,
           topRadius:
               useScreenRadius ? LdTheme.of(context).screenRadius - 2.5 : null,
           bottomRadius:

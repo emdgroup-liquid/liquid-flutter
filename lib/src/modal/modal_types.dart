@@ -7,10 +7,10 @@ import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 class LdSheetType extends WoltBottomSheetType {
   final int index;
-  final double? inset;
+  final EdgeInsets insets;
   LdSheetType({
     required LdTheme theme,
-    this.inset,
+    this.insets = EdgeInsets.zero,
     double? topRadius,
     double? bottomRadius,
     this.index = 0,
@@ -33,10 +33,10 @@ class LdSheetType extends WoltBottomSheetType {
 
   @override
   BoxConstraints layoutModal(Size availableSize) {
-    if (inset != null) {
+    if (insets != EdgeInsets.zero) {
       return super.layoutModal(
-        Size(availableSize.width - 2 * inset!,
-            availableSize.height - 2 * inset!),
+        Size(availableSize.width - 2 * insets.horizontal,
+            availableSize.height - 2 * insets.vertical),
       );
     }
     return super.layoutModal(availableSize);
@@ -46,14 +46,18 @@ class LdSheetType extends WoltBottomSheetType {
   Offset positionModal(
       Size availableSize, Size modalContentSize, TextDirection _) {
     final xOffset = max(
-      inset ?? 0.0,
-      (availableSize.width - modalContentSize.width) / 2,
+      insets.left,
+      (availableSize.width - modalContentSize.width - insets.horizontal) / 2,
     );
+    print(insets.bottom);
     final yOffset = max(
       0.0,
-      (availableSize.height - modalContentSize.height + index * 48),
+      (availableSize.height -
+          modalContentSize.height +
+          index * 48 -
+          insets.bottom),
     );
-    return Offset(xOffset, yOffset - (inset ?? 0.0));
+    return Offset(xOffset, yOffset - insets.top);
   }
 }
 
