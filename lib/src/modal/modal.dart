@@ -263,6 +263,15 @@ class LdModal {
       barrierDismissible: userCanDismiss,
       enableDrag: enableDrag,
       settings: settings,
+      pageContentDecorator: (p0) {
+        if (!userCanDismiss) {
+          return PopScope(
+            canPop: false,
+            child: p0,
+          );
+        }
+        return p0;
+      },
       modalTypeBuilder: (context) => _getSheetType(context),
       pageListBuilderNotifier: ValueNotifier(
         (context) => _getPageList(context),
@@ -292,6 +301,15 @@ class LdModal {
       context: context,
       useSafeArea: useSafeArea,
       enableDrag: userCanDismiss && !noHeader,
+      pageContentDecorator: (p0) {
+        if (!userCanDismiss) {
+          return PopScope(
+            canPop: false,
+            child: p0,
+          );
+        }
+        return p0;
+      },
       modalTypeBuilder: (_) => _getSheetType(
         context,
         index: index,
