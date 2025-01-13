@@ -128,18 +128,23 @@ class LdModal {
     }
 
     if (actions != null) {
+      final theme = LdTheme.of(context);
       return _getInjectables(
         context,
         (context) => Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ...actions!(context),
-              ],
-            ),
+            Padding(
+                padding: EdgeInsets.only(
+                  right: padding?.right ?? theme.paddingSize(size: LdSize.m),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ...actions!(context),
+                  ],
+                )),
           ],
         ),
       );
@@ -152,8 +157,8 @@ class LdModal {
     return [
       if (contentSlivers != null)
         SliverWoltModalSheetPage(
-          backgroundColor: LdTheme.of(context).surface,
-          surfaceTintColor: LdTheme.of(context).surface,
+          backgroundColor: LdTheme.of(context).background,
+          surfaceTintColor: LdTheme.of(context).background,
           mainContentSliversBuilder: (context) => contentSlivers!(context)
               .map(
                 (e) => SliverPadding(
@@ -171,8 +176,8 @@ class LdModal {
         ),
       if (modalContent != null)
         WoltModalSheetPage(
-          backgroundColor: LdTheme.of(context).surface,
-          surfaceTintColor: LdTheme.of(context).surface,
+          backgroundColor: LdTheme.of(context).background,
+          surfaceTintColor: LdTheme.of(context).background,
           child: _getInjectables(
             context,
             (context) => Portal(
@@ -202,21 +207,23 @@ class LdModal {
 
     return _getInjectables(
       context,
-      (context) => Column(children: [
-        Expanded(
-          child: Row(children: [
-            DefaultTextStyle(
-              style: ldBuildTextStyle(
-                LdTheme.of(context),
-                LdTextType.label,
-                LdSize.m,
-              ),
-              child: title!,
-            )
-          ]).padM(),
-        ),
-        const LdDivider(height: 1)
-      ]),
+      (context) => LdAutoBackground(
+        child: Column(children: [
+          Expanded(
+            child: Row(children: [
+              DefaultTextStyle(
+                style: ldBuildTextStyle(
+                  LdTheme.of(context),
+                  LdTextType.label,
+                  LdSize.m,
+                ),
+                child: title!,
+              )
+            ]).padM(),
+          ),
+          const LdDivider(height: 1)
+        ]),
+      ),
     );
   }
 
