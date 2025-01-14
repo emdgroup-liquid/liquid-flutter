@@ -13,6 +13,7 @@ WoltModalType ldAutoModalType(
     {required BuildContext context,
     required LdSize dialogSize,
     required int index,
+    Size? fixedDialogSize,
     double? topRadius,
     double? bottomRadius,
     EdgeInsets? insets}) {
@@ -29,6 +30,7 @@ WoltModalType ldAutoModalType(
       ),
     _ => LdDialogType(
         theme: theme,
+        fixedSize: fixedDialogSize,
         size: dialogSize,
         index: index,
       ),

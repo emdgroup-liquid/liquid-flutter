@@ -50,6 +50,9 @@ class LdModal {
   /// The size of the modal.
   final LdSize? size;
 
+  /// Fixed dialog size
+  final Size? fixedDialogSize;
+
   /// The radius for the top of the modal.
   final double? topRadius;
 
@@ -81,6 +84,7 @@ class LdModal {
     this.bottomRadius,
     this.insets,
     this.useSafeArea = true,
+    this.fixedDialogSize,
   });
 
   bool get shouldScale {
@@ -99,11 +103,13 @@ class LdModal {
       LdModalTypeMode.dialog => LdDialogType(
           theme: LdTheme.of(context),
           size: size ?? LdSize.m,
+          fixedSize: fixedDialogSize,
           index: index,
         ),
       _ => ldAutoModalType(
           context: context,
           dialogSize: size ?? LdSize.m,
+          fixedDialogSize: fixedDialogSize,
           index: index,
           topRadius: topRadius,
           bottomRadius: bottomRadius,

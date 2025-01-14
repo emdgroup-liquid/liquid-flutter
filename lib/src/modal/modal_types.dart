@@ -62,10 +62,15 @@ class LdSheetType extends WoltBottomSheetType {
 
 class LdDialogType extends WoltDialogType {
   final LdSize size;
+  final Size? fixedSize;
   final LdTheme theme;
   final int index;
-  LdDialogType({required this.theme, this.size = LdSize.m, this.index = 0})
-      : super(
+  LdDialogType({
+    required this.theme,
+    this.size = LdSize.m,
+    this.index = 0,
+    this.fixedSize,
+  }) : super(
           shapeBorder: RoundedRectangleBorder(
             borderRadius: theme.radius(LdSize.m),
             side: BorderSide(
@@ -102,6 +107,10 @@ class LdDialogType extends WoltDialogType {
       case LdSize.l:
         configuredSize = const Size(900, 700);
         break;
+    }
+
+    if (fixedSize != null) {
+      configuredSize = fixedSize!;
     }
 
     final minPadding = theme.pad(size: LdSize.l);
