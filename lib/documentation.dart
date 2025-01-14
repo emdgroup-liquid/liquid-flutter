@@ -7924,6 +7924,12 @@ const ldDocComponents = [
         features: ['final'],
       ),
       LdDocProperty(
+        name: 'fixedDialogSize',
+        type: 'Size?',
+        description: '/// Fixed dialog size',
+        features: ['final'],
+      ),
+      LdDocProperty(
         name: 'topRadius',
         type: 'double?',
         description: '/// The radius for the top of the modal.',
@@ -8111,6 +8117,13 @@ const ldDocComponents = [
             named: true,
             required: false,
           ),
+          LdDocParameter(
+            name: 'fixedDialogSize',
+            type: 'Size?',
+            description: '',
+            named: true,
+            required: false,
+          ),
         ],
         features: [],
       )
@@ -8247,6 +8260,12 @@ const ldDocComponents = [
         features: ['final'],
       ),
       LdDocProperty(
+        name: 'fixedSize',
+        type: 'Size?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
         name: 'theme',
         type: 'LdTheme',
         description: '',
@@ -8280,6 +8299,13 @@ const ldDocComponents = [
           LdDocParameter(
             name: 'index',
             type: 'int',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'fixedSize',
+            type: 'Size?',
             description: '',
             named: true,
             required: false,
