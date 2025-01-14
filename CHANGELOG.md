@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [18.1.2](https://github.com/emdgroup-liquid/liquid-flutter/compare/v18.1.1...v18.1.2) (2025-01-14)
+
+
+### Bug Fixes
+
+* modal does not affect navigation bar color when LdAppBar is present ([56439a6](https://github.com/emdgroup-liquid/liquid-flutter/commit/56439a69d95a12cfdf1c1ad9c6e34e02b7cf0d21))
+
 ### [18.1.1](https://github.com/emdgroup-liquid/liquid-flutter/compare/v18.1.0...v18.1.1) (2025-01-13)
 
 
