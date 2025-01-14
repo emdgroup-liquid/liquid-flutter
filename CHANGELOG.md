@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [18.2.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v18.1.2...v18.2.0) (2025-01-14)
+
+
+### Features
+
+* adds an option to have a fixed size for dialogs ([211ea7c](https://github.com/emdgroup-liquid/liquid-flutter/commit/211ea7c7860e805a5c5e7e14d5cd303e0d178d10))
+
 ### [18.1.2](https://github.com/emdgroup-liquid/liquid-flutter/compare/v18.1.1...v18.1.2) (2025-01-14)
 
 
