@@ -8122,6 +8122,7 @@ const ldDocComponents = [
       '_getPageList',
       '_getTopBar',
       'asRoute',
+      '_getContentDecorator',
       'show',
     ],
   ),
