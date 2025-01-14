@@ -14,6 +14,7 @@ class ModalDemo extends StatefulWidget {
 
 class _DemoSheet extends StatelessWidget {
   final bool enableScaling;
+  final bool fixedDialogSize;
   final LdModalTypeMode mode;
   final bool useScreenRadius;
   final bool userDismissable;
@@ -21,6 +22,7 @@ class _DemoSheet extends StatelessWidget {
   const _DemoSheet({
     required this.mode,
     required this.enableScaling,
+    required this.fixedDialogSize,
     required this.useScreenRadius,
     required this.userDismissable,
   });
@@ -43,6 +45,7 @@ class _DemoSheet extends StatelessWidget {
           noHeader: useScreenRadius,
           enableScaling: enableScaling,
           userCanDismiss: userDismissable,
+          fixedDialogSize: fixedDialogSize ? const Size(400, 400) : null,
           useSafeArea: !useScreenRadius,
           title: useScreenRadius ? null : const Text("Title"),
           insets: useScreenRadius
@@ -66,6 +69,7 @@ class _DemoSheet extends StatelessWidget {
                 children: [
                   _DemoSheet(
                     enableScaling: enableScaling,
+                    fixedDialogSize: fixedDialogSize,
                     mode: mode,
                     useScreenRadius: useScreenRadius,
                     userDismissable: userDismissable,
@@ -97,6 +101,8 @@ class _ModalDemoState extends State<ModalDemo> {
   bool _useScreenRadius = false;
 
   bool _userDismissable = true;
+
+  bool _fixedDialogSize = false;
 
   LdModalTypeMode mode = LdModalTypeMode.auto;
 
@@ -135,6 +141,7 @@ class _ModalDemoState extends State<ModalDemo> {
             ComponentWell(
               child: Center(
                 child: _DemoSheet(
+                  fixedDialogSize: _fixedDialogSize,
                   mode: mode,
                   enableScaling: _enableScaling,
                   useScreenRadius: _useScreenRadius,
@@ -148,6 +155,15 @@ class _ModalDemoState extends State<ModalDemo> {
               onChanged: (value) {
                 setState(() {
                   _useScreenRadius = value;
+                });
+              },
+            ),
+            LdToggle(
+              label: "Fixed size (dialog only)",
+              checked: _fixedDialogSize,
+              onChanged: (value) {
+                setState(() {
+                  _fixedDialogSize = value;
                 });
               },
             ),
