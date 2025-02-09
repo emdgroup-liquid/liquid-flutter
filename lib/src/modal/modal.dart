@@ -34,6 +34,9 @@ class LdModal {
 
   final Key? key;
 
+  @Deprecated(
+    "No longer used. Widget will build header if [title] is provided.",
+  )
   final bool noHeader;
 
   final EdgeInsets? padding;
@@ -65,6 +68,8 @@ class LdModal {
   /// Whether the modal should use safe area. Defaults to true.
   final bool useSafeArea;
 
+  final bool? showDragHandle;
+
   LdModal({
     this.enableScaling,
     this.modalContent,
@@ -72,6 +77,7 @@ class LdModal {
     this.userCanDismiss = true,
     this.disableScrolling = false,
     this.noHeader = false,
+    this.showDragHandle,
     this.padding,
     this.title,
     this.actions,
@@ -95,7 +101,7 @@ class LdModal {
     return switch (mode) {
       LdModalTypeMode.sheet => LdSheetType(
           theme: LdTheme.of(context),
-          topRadius: topRadius ?? 0,
+          topRadius: topRadius,
           bottomRadius: bottomRadius,
           index: index,
           insets: insets ?? EdgeInsets.zero,
@@ -137,25 +143,7 @@ class LdModal {
     );
   }
 
-  Widget _getTrailingNavBarWidget(BuildContext context) {
-    if (userCanDismiss && actions == null) {
-      final theme = LdTheme.of(context);
-      return _getInjectables(
-        context,
-        (context) => Padding(
-          padding: EdgeInsets.only(
-            right: padding?.right ?? theme.paddingSize(size: LdSize.m),
-          ),
-          child: LdButtonGhost(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Icon(Icons.clear),
-          ),
-        ),
-      );
-    }
-
+  Widget? _getTrailingNavBarWidget(BuildContext context) {
     if (actions != null) {
       final theme = LdTheme.of(context);
       return _getInjectables(
@@ -179,7 +167,25 @@ class LdModal {
       );
     }
 
-    return const SizedBox.shrink();
+    if (userCanDismiss) {
+      final theme = LdTheme.of(context);
+      return _getInjectables(
+        context,
+        (context) => Padding(
+          padding: EdgeInsets.only(
+            right: padding?.right ?? theme.paddingSize(size: LdSize.m),
+          ),
+          child: LdButtonGhost(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Icon(Icons.clear),
+          ),
+        ),
+      );
+    }
+
+    return null;
   }
 
   List<SliverWoltModalSheetPage> _getPageList(BuildContext context) {
@@ -199,9 +205,9 @@ class LdModal {
           trailingNavBarWidget: _getTrailingNavBarWidget(
             context,
           ),
-          isTopBarLayerAlwaysVisible: title != null && !noHeader,
-          topBar: title != null ? _getTopBar(context) : null,
-          navBarHeight: noHeader ? 0 : 48,
+          isTopBarLayerAlwaysVisible: title != null,
+          topBar: _getTopBar(context),
+          navBarHeight: navbarHeight,
         ),
       if (modalContent != null)
         WoltModalSheetPage(
@@ -216,15 +222,13 @@ class LdModal {
               ),
             ),
           ),
-          trailingNavBarWidget: noHeader == false
-              ? _getTrailingNavBarWidget(
-                  context,
-                )
-              : null,
-          isTopBarLayerAlwaysVisible: title != null && !noHeader,
-          topBar: title != null ? _getTopBar(context) : null,
-          navBarHeight: noHeader ? 0 : 48,
-          hasTopBarLayer: !noHeader,
+          trailingNavBarWidget: _getTrailingNavBarWidget(
+            context,
+          ),
+          isTopBarLayerAlwaysVisible: isTopBarLayerAlwaysVisible,
+          topBar: _getTopBar(context),
+          navBarHeight: navbarHeight,
+          hasTopBarLayer: hasTopBarLayer,
         ),
     ];
   }
@@ -256,19 +260,22 @@ class LdModal {
     );
   }
 
+  bool get _isMobile => kIsWeb || Platform.isIOS || Platform.isAndroid;
+
   bool get barrierDismissible => userCanDismiss;
+  bool get enableDrag => userCanDismiss;
+  bool get isTopBarLayerAlwaysVisible => title != null;
+  bool get _showDragHandle => showDragHandle ?? (userCanDismiss && _isMobile);
 
-  bool get enableDrag => userCanDismiss && !noHeader;
-
-  bool get isTopBarLayerAlwaysVisible => title != null && !noHeader;
-
-  bool get showDragHandle => userCanDismiss && !noHeader;
+  bool get hasTopBarLayer => title != null;
+  double get navbarHeight => title != null ? 48 : 0;
 
   WoltModalSheetRoute asRoute(RouteSettings settings) {
     return WoltModalSheetRoute(
       useSafeArea: useSafeArea,
       barrierDismissible: userCanDismiss,
       enableDrag: enableDrag,
+      showDragHandle: _showDragHandle,
       settings: settings,
       pageContentDecorator: _getContentDecorator,
       modalTypeBuilder: (context) => _getSheetType(context),
@@ -313,9 +320,12 @@ class LdModal {
       barrierDismissible: userCanDismiss,
       context: context,
       useSafeArea: useSafeArea,
+      showDragHandle: _showDragHandle,
       modalBarrierColor:
-          LdTheme.of(context).palette.neutral.shades.last.withAlpha(150),
-      enableDrag: userCanDismiss && !noHeader,
+          LdTheme.of(context).palette.neutral.shades.last.withAlpha(
+                150,
+              ),
+      enableDrag: userCanDismiss,
       pageContentDecorator: _getContentDecorator,
       modalTypeBuilder: (_) => _getSheetType(
         context,

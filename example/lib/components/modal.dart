@@ -17,14 +17,18 @@ class _DemoSheet extends StatelessWidget {
   final bool fixedDialogSize;
   final LdModalTypeMode mode;
   final bool useScreenRadius;
+  final bool enableHeader;
   final bool userDismissable;
+  final bool enableInsets;
 
   const _DemoSheet({
     required this.mode,
     required this.enableScaling,
     required this.fixedDialogSize,
     required this.useScreenRadius,
+    required this.enableHeader,
     required this.userDismissable,
+    required this.enableInsets,
   });
 
   @override
@@ -42,12 +46,13 @@ class _DemoSheet extends StatelessWidget {
       },
       modal: LdModal(
           mode: mode,
-          noHeader: useScreenRadius,
           enableScaling: enableScaling,
+
+          //showDragHandle: true,
           userCanDismiss: userDismissable,
           fixedDialogSize: fixedDialogSize ? const Size(400, 400) : null,
           useSafeArea: !useScreenRadius,
-          title: useScreenRadius ? null : const Text("Title"),
+          title: !enableHeader ? null : const Text("Title"),
           insets: useScreenRadius
               ? EdgeInsets.only(
                   left: 0,
@@ -57,7 +62,9 @@ class _DemoSheet extends StatelessWidget {
                           .bottom /
                       2,
                 )
-              : null,
+              : (enableInsets
+                  ? const EdgeInsets.symmetric(horizontal: 32)
+                  : EdgeInsets.zero),
           topRadius:
               useScreenRadius ? LdTheme.of(context).screenRadius - 2.5 : null,
           bottomRadius:
@@ -68,6 +75,8 @@ class _DemoSheet extends StatelessWidget {
               LdAutoSpace(
                 children: [
                   _DemoSheet(
+                    enableHeader: enableHeader,
+                    enableInsets: enableInsets,
                     enableScaling: enableScaling,
                     fixedDialogSize: fixedDialogSize,
                     mode: mode,
@@ -103,6 +112,10 @@ class _ModalDemoState extends State<ModalDemo> {
   bool _userDismissable = true;
 
   bool _fixedDialogSize = false;
+
+  bool _enableHeader = true;
+
+  bool _enableInset = false;
 
   LdModalTypeMode mode = LdModalTypeMode.auto;
 
@@ -141,13 +154,33 @@ class _ModalDemoState extends State<ModalDemo> {
             ComponentWell(
               child: Center(
                 child: _DemoSheet(
+                  enableInsets: _enableInset,
                   fixedDialogSize: _fixedDialogSize,
+                  enableHeader: _enableHeader,
                   mode: mode,
                   enableScaling: _enableScaling,
                   useScreenRadius: _useScreenRadius,
                   userDismissable: _userDismissable,
                 ),
               ),
+            ),
+            LdToggle(
+              label: "Header enabled",
+              checked: _enableHeader,
+              onChanged: (value) {
+                setState(() {
+                  _enableHeader = value;
+                });
+              },
+            ),
+            LdToggle(
+              label: "Insets enabled",
+              checked: _enableInset,
+              onChanged: (value) {
+                setState(() {
+                  _enableInset = value;
+                });
+              },
             ),
             LdToggle(
               label: "Use screen radius",

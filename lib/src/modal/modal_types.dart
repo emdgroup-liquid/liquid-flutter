@@ -19,9 +19,12 @@ class LdSheetType extends WoltBottomSheetType {
             borderRadius: BorderRadius.only(
               bottomLeft: Radius.circular(bottomRadius ?? 0),
               bottomRight: Radius.circular(bottomRadius ?? 0),
-              topLeft: Radius.circular(topRadius ?? theme.sizingConfig.radiusM),
-              topRight:
-                  Radius.circular(topRadius ?? theme.sizingConfig.radiusM),
+              topLeft: Radius.circular(
+                topRadius ?? theme.sizingConfig.radiusM,
+              ),
+              topRight: Radius.circular(
+                topRadius ?? theme.sizingConfig.radiusM,
+              ),
             ),
             side: BorderSide(
               color: theme.border,
@@ -34,8 +37,8 @@ class LdSheetType extends WoltBottomSheetType {
   BoxConstraints layoutModal(Size availableSize) {
     if (insets != EdgeInsets.zero) {
       return super.layoutModal(
-        Size(availableSize.width - 2 * insets.horizontal,
-            availableSize.height - 2 * insets.vertical),
+        Size(availableSize.width - insets.horizontal,
+            availableSize.height - insets.vertical),
       );
     }
     return super.layoutModal(availableSize);
@@ -45,8 +48,8 @@ class LdSheetType extends WoltBottomSheetType {
   Offset positionModal(
       Size availableSize, Size modalContentSize, TextDirection _) {
     final xOffset = max(
-      insets.left,
-      (availableSize.width - modalContentSize.width - insets.horizontal) / 2,
+      0.0,
+      (availableSize.width - modalContentSize.width) / 2,
     );
 
     final yOffset = max(
