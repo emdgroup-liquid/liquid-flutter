@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [19.0.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v18.2.0...v19.0.0) (2025-02-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* Modal changes and screen radius for notifications (#8)
+
+### Features
+
+* Modal changes and screen radius for notifications ([#8](https://github.com/emdgroup-liquid/liquid-flutter/issues/8)) ([53412d1](https://github.com/emdgroup-liquid/liquid-flutter/commit/53412d12ddf72c015cac92253eff9c951927b51a))
+
 ## [18.2.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v18.1.2...v18.2.0) (2025-01-14)
 
 
