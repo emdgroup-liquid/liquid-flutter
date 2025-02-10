@@ -83,7 +83,7 @@ class LdNotificationPortal extends StatelessWidget {
                   child: SafeArea(
                     child: Padding(
                       padding: const EdgeInsets.only(
-                        bottom: 32.0,
+                        bottom: 16.0,
                         left: 8,
                         right: 8,
                       ),
@@ -244,6 +244,7 @@ class LdNotificationWidget extends StatelessWidget {
         notification.acknowledgeText ?? LiquidLocalizations.of(context).ok;
     return LdButton(
       key: notification.dismissKey,
+      autoFocus: true,
       child: Text(ackText),
       onPressed: onDismiss,
       width: double.infinity,
@@ -251,6 +252,10 @@ class LdNotificationWidget extends StatelessWidget {
   }
 
   Widget _buildNotificationBody(BuildContext context) {
+    final isTextOnly = notification is! LdConfirmNotification &&
+        notification is! LdAcknowledgeNotification &&
+        notification is! LdInputNotification;
+
     final theme = _theme(context);
     return Container(
       decoration: BoxDecoration(
@@ -264,8 +269,10 @@ class LdNotificationWidget extends StatelessWidget {
         clipBehavior: Clip.hardEdge,
         padding: _theme(context).pad(size: LdSize.m),
         decoration: BoxDecoration(
-            color: _theme(context).surface,
-            borderRadius: theme.radius(LdSize.s),
+            color: _theme(context).background,
+            borderRadius: theme.screenRadius == 0 || !isTextOnly
+                ? theme.radius(LdSize.l)
+                : BorderRadius.circular(theme.screenRadius),
             border: Border.all(
               color: LdTheme.of(context).border,
               width: LdTheme.of(context).borderWidth,
@@ -335,15 +342,15 @@ class LdNotificationWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double yOffset = index * 0.5;
+    double yOffset = index * 10;
 
     if (removing) {
-      yOffset = 5;
+      yOffset = 100;
     }
 
     return LdSpring(
         initialPosition: 0,
-        position: removing ? 0 : 1 - index * 0.1,
+        position: 1 - index * 0.1,
         builder: (context, state) {
           return LdSpring(
               initialPosition: 0,
