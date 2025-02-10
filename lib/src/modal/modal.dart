@@ -307,11 +307,9 @@ class LdModal {
           stickyActionBar: _getStickyActionBar(context),
           child: _getInjectables(
             context,
-            (context) => Portal(
-              child: Padding(
-                padding: contentPadding + actionBarPadding,
-                child: modalContent!(context),
-              ),
+            (context) => Padding(
+              padding: contentPadding + actionBarPadding,
+              child: modalContent!(context),
             ),
           ),
           trailingNavBarWidget: _getTrailingNavBarWidget(
@@ -448,7 +446,7 @@ class LdModal {
       ),
       child: PopScope(
         canPop: userCanDismiss,
-        child: child,
+        child: LdPortal(child: child),
       ),
     );
   }
