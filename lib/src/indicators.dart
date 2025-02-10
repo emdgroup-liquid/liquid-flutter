@@ -16,12 +16,18 @@ enum LdIndicatorType {
 class LdIndicator extends StatelessWidget {
   final LdIndicatorType type;
   final LdSize size;
+  final double? customSize;
 
-  const LdIndicator({super.key, required this.type, this.size = LdSize.m});
+  const LdIndicator({
+    super.key,
+    required this.type,
+    this.size = LdSize.m,
+    this.customSize,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final size = LdTheme.of(context).labelSize(this.size);
+    final size = customSize ?? LdTheme.of(context).labelSize(this.size);
 
     if (type == LdIndicatorType.loading) {
       return Container(
