@@ -1,7 +1,6 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_portal/flutter_portal.dart';
 import 'package:liquid/window/drawer.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -42,7 +41,7 @@ class _AppScaffoldState extends State<AppScaffold> {
             onDoubleTap: () => appWindow.maximizeOrRestore(),
             child: child,
           ),
-          child: Portal(
+          child: LdPortal(
             child: Scaffold(
               drawer: !split ? const MainNavigationDrawer() : null,
               backgroundColor: themeService.background,

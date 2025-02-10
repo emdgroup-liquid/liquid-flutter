@@ -22,34 +22,32 @@ class ComponentPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LdPortal(
-      child: SingleChildScrollView(
-        child: SafeArea(
-          child: LdContainer(
-            child: LdAutoSpace(
-              children: [
-                // Breadcrumbs
-                LdBreadcrumb.fromStrings([
-                  "Components",
-                  title,
-                ]),
+    return SingleChildScrollView(
+      child: SafeArea(
+        child: LdContainer(
+          child: LdAutoSpace(
+            children: [
+              // Breadcrumbs
+              LdBreadcrumb.fromStrings([
+                "Components",
+                title,
+              ]),
 
-                LdTextHl(
-                  title,
-                ),
-                MarkdownBody(data: text ?? ""),
-                // Demo
+              LdTextHl(
+                title,
+              ),
+              MarkdownBody(data: text ?? ""),
+              // Demo
 
-                demo ?? Container(),
+              demo ?? Container(),
 
-                const LdTextH(
-                  "API Reference",
-                ),
+              const LdTextH(
+                "API Reference",
+              ),
 
-                ComponentsAccordion(
-                    components: apiComponents?.toSet() ?? {title}),
-              ],
-            ),
+              ComponentsAccordion(
+                  components: apiComponents?.toSet() ?? {title}),
+            ],
           ),
         ),
       ),
