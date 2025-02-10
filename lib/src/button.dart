@@ -24,6 +24,7 @@ class LdButton extends StatefulWidget {
   final double? width;
   final bool autoLoading;
   final double? progress;
+  final bool autoFocus;
 
   final LdButtonMode mode;
   final MainAxisAlignment? alignment;
@@ -45,6 +46,7 @@ class LdButton extends StatefulWidget {
     this.width,
     this.disabled = false,
     this.focusNode,
+    this.autoFocus = false,
     this.alignment,
     this.leading,
     this.circular,
@@ -230,6 +232,7 @@ class _LdButtonState extends State<LdButton> {
 
     return LdTouchableSurface(
       focusNode: widget.focusNode,
+      autoFocus: widget.autoFocus,
       mode: switch (widget.mode) {
         (LdButtonMode.filled) => LdTouchableSurfaceMode.solid,
         (LdButtonMode.ghost) => LdTouchableSurfaceMode.ghost,

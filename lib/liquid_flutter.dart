@@ -15,7 +15,6 @@ export 'src/choose.dart';
 
 export 'src/modal/modal.dart';
 export 'src/modal/modal_builder.dart';
-export 'src/modal/auto_modal_type.dart';
 export 'src/modal/modal_page.dart';
 export 'src/modal/modal_types.dart';
 export 'src/modal/modal_type_mode.dart';
@@ -32,6 +31,7 @@ export 'src/color/color.dart';
 
 export 'src/container.dart';
 export 'src/date_picker.dart';
+export 'src/time_picker.dart';
 
 export 'src/divider.dart';
 export 'src/drawer/header.dart';
@@ -99,6 +99,7 @@ export 'src/version.dart';
 export 'src/blurring_header.dart';
 export 'src/window_frame.dart';
 export 'src/theme/screen_radius.dart';
+export 'src/modal/utils.dart';
 export 'variants.g.dart';
 
 /// This variable defines whether TextStyle

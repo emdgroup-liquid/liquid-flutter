@@ -52,6 +52,9 @@ class LiquidLocalizationsEn extends LiquidLocalizations {
   String get selectDate => 'Select date';
 
   @override
+  String get selectTime => 'Select time';
+
+  @override
   String get unknownError => 'An unknown error occurred';
 
   @override

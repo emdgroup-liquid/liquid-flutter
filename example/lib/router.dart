@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid/chemical_screen.dart';
 import 'package:liquid/components/context_menu.dart';
-import 'package:liquid/components/date_picker.dart';
+import 'package:liquid/components/date_time_pickers.dart';
 import 'package:liquid/components/indicator.dart';
 import 'package:liquid/components/reveal.dart';
 import 'package:liquid/components/runner.dart';
@@ -173,9 +173,9 @@ class AppRouter {
                 key: state.pageKey, child: const ContextMenuDemo()),
           ),
           GoRoute(
-            path: "/components/date-picker",
+            path: "/components/date-time-picker",
             pageBuilder: (context, state) => NoTransitionPage<void>(
-                key: state.pageKey, child: const DatePickerDemo()),
+                key: state.pageKey, child: const DateTimePickerDemo()),
           ),
           GoRoute(
             path: "/components/divider",

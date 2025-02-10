@@ -41,8 +41,11 @@ const components = [
   _Component("Checkbox", "/components/checkbox", LdIcons.checkmark),
   _Component("Context Menu", "/components/context-menu", Icons.mouse),
   _Component("Choose", "/components/choose", Icons.select_all),
-  _Component("Date Picker", "/components/date-picker", Icons.calendar_month),
-
+  _Component(
+    "Date/Time Picker",
+    "/components/date-time-picker",
+    Icons.calendar_month,
+  ),
   _Component("Divider", "/components/divider", Icons.horizontal_rule),
   _Component("Drawer", "/components/drawer", Icons.menu),
   _Component("Form", "/components/form", LdIcons.pen),
@@ -388,9 +391,9 @@ class _RadiusSelectorState extends State<RadiusSelector> {
           });
         },
         children: const {
-          RadiusMode.sharp: Text("Sharp"),
-          RadiusMode.standard: Text("Standard"),
-          RadiusMode.rounded: Text("Rounded"),
+          RadiusMode.sharp: Text("Sharp", maxLines: 1),
+          RadiusMode.standard: Text("Standard", maxLines: 1),
+          RadiusMode.rounded: Text("Rounded", maxLines: 1),
         },
         value: _mode);
   }

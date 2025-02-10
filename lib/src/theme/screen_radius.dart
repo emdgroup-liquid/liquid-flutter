@@ -8,6 +8,10 @@ Future<double> getScreenRadius() async {
     return 0.0;
   }
 
+  if (Platform.isMacOS) {
+    return 12;
+  }
+
   if (Platform.isIOS) {
     // Switch device type
     DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();

@@ -200,6 +200,8 @@ class LdTouchableSurface extends StatefulWidget {
 
   final bool active;
 
+  final bool autoFocus;
+
   final LdTouchableSurfaceMode mode;
 
   final FocusNode? focusNode;
@@ -215,6 +217,7 @@ class LdTouchableSurface extends StatefulWidget {
     this.active = false,
     this.mode = LdTouchableSurfaceMode.neutralGhost,
     this.disabled = false,
+    this.autoFocus = false,
   });
 
   @override
@@ -263,6 +266,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
     var colors = _colorBundle;
     return Focus(
       focusNode: widget.focusNode,
+      autofocus: widget.autoFocus,
       canRequestFocus: !widget.disabled,
       onFocusChange: (value) {
         setState(() {

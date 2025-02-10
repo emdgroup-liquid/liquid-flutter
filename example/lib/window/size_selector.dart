@@ -24,9 +24,9 @@ class _SizeSelectorState extends State<SizeSelector> {
         },
         label: "Theme Size",
         children: const {
-          LdThemeSize.s: Text("Small"),
-          LdThemeSize.m: Text("Medium"),
-          LdThemeSize.l: Text("Large"),
+          LdThemeSize.s: Text("Small", maxLines: 1),
+          LdThemeSize.m: Text("Medium", maxLines: 1),
+          LdThemeSize.l: Text("Large", maxLines: 1),
         });
   }
 }

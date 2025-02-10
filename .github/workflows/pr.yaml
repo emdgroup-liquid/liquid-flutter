@@ -25,7 +25,7 @@ jobs:
       - name: Run tests
         run: flutter test
       - name: Upload test failures
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: test-failures
