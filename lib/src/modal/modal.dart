@@ -22,6 +22,9 @@ class LdModal {
   /// Whether the sheet can be dismissed
   final bool userCanDismiss;
 
+  /// Whether to show the dismiss button
+  final bool showDismissButton;
+
   /// Callback for when the sheet is dismissed.
   final VoidCallback? onDismiss;
 
@@ -90,6 +93,7 @@ class LdModal {
     this.actions,
     this.contentSlivers,
     this.mode = LdModalTypeMode.auto,
+    this.showDismissButton = true,
     this.injectables,
     this.onDismiss,
     this.size,
@@ -100,7 +104,10 @@ class LdModal {
     this.useSafeArea = false,
     this.fixedDialogSize,
     this.index,
-  });
+  }) {
+    assert(!(userCanDismiss == false && showDismissButton),
+        "showDismissButton is true but userCanDismiss is false");
+  }
 
   final Map<LdThemeSize, double> _actionBarHeight = {
     LdThemeSize.l: 150,
@@ -215,7 +222,7 @@ class LdModal {
       );
     }
 
-    if (userCanDismiss) {
+    if (userCanDismiss && showDismissButton) {
       final dismissButton = Builder(builder: (context) {
         return LdButton(
           size: LdSize.s,
