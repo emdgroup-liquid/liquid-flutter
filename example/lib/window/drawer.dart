@@ -388,9 +388,9 @@ class _RadiusSelectorState extends State<RadiusSelector> {
           });
         },
         children: const {
-          RadiusMode.sharp: Text("Sharp"),
-          RadiusMode.standard: Text("Standard"),
-          RadiusMode.rounded: Text("Rounded"),
+          RadiusMode.sharp: Text("Sharp", maxLines: 1),
+          RadiusMode.standard: Text("Standard", maxLines: 1),
+          RadiusMode.rounded: Text("Rounded", maxLines: 1),
         },
         value: _mode);
   }
