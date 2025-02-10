@@ -296,7 +296,7 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
               );
             }),
           ),
-          PortalTarget(
+          /*PortalTarget(
             child: Container(),
             visible: isOpen,
             portalFollower: GestureDetector(
@@ -310,7 +310,7 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
                 });
               },
             ),
-          ),
+          ),*/
         ],
       ),
     );

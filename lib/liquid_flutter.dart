@@ -31,6 +31,7 @@ export 'src/color/color.dart';
 
 export 'src/container.dart';
 export 'src/date_picker.dart';
+export 'src/time_picker.dart';
 
 export 'src/divider.dart';
 export 'src/drawer/header.dart';

@@ -14,6 +14,7 @@
   "choose": "Choose",
   "submit": "Submit",
   "selectDate": "Select date",
+  "selectTime": "Select time",
   "unknownError": "An unknown error occurred",
   "moreInfo": "More info",
   "close": "Close",
