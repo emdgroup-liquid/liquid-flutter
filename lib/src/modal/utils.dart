@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
-Future<bool> confirmModal(
+Future<bool> ldConfirmModal(
     {String? description,
     Widget? title,
     Widget? positive,

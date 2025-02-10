@@ -320,7 +320,7 @@ class _ModalDemoState extends State<ModalDemo> {
             LdButton(
               child: const Text("Open confirm modal"),
               onPressed: () async {
-                final result = await confirmModal(
+                final result = await ldConfirmModal(
                   context: context,
                   description: "Are you sure you want to delete this item?",
                   confirmColor: LdTheme.of(context).error,
