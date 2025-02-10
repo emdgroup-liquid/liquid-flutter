@@ -16,19 +16,19 @@ class LdSheetType extends WoltBottomSheetType {
     this.index = 0,
   }) : super(
           shapeBorder: RoundedRectangleBorder(
+            side: BorderSide(
+              color: theme.stroke,
+              width: 1,
+            ),
             borderRadius: BorderRadius.only(
               bottomLeft: Radius.circular(bottomRadius ?? 0),
               bottomRight: Radius.circular(bottomRadius ?? 0),
               topLeft: Radius.circular(
-                topRadius ?? theme.sizingConfig.radiusM,
+                topRadius ?? theme.sizingConfig.radiusL,
               ),
               topRight: Radius.circular(
-                topRadius ?? theme.sizingConfig.radiusM,
+                topRadius ?? theme.sizingConfig.radiusL,
               ),
-            ),
-            side: BorderSide(
-              color: theme.border,
-              width: 1,
             ),
           ),
         );
@@ -38,9 +38,10 @@ class LdSheetType extends WoltBottomSheetType {
     if (insets != EdgeInsets.zero) {
       return super.layoutModal(
         Size(availableSize.width - insets.horizontal,
-            availableSize.height - insets.vertical),
+            availableSize.height - insets.vertical - index * 48),
       );
     }
+
     return super.layoutModal(availableSize);
   }
 
@@ -54,10 +55,7 @@ class LdSheetType extends WoltBottomSheetType {
 
     final yOffset = max(
       0.0,
-      (availableSize.height -
-          modalContentSize.height +
-          index * 48 -
-          insets.bottom),
+      (availableSize.height - modalContentSize.height + insets.bottom),
     );
     return Offset(xOffset, yOffset - insets.top);
   }
@@ -77,8 +75,8 @@ class LdDialogType extends WoltDialogType {
           shapeBorder: RoundedRectangleBorder(
             borderRadius: theme.radius(LdSize.m),
             side: BorderSide(
-              color: theme.border,
-              width: theme.borderWidth,
+              color: theme.stroke,
+              width: 1,
             ),
           ),
         );
@@ -89,7 +87,7 @@ class LdDialogType extends WoltDialogType {
     final xOffset =
         max(0.0, (availableSize.width - modalContentSize.width) / 2);
     final yOffset = max(
-        0.0, (availableSize.height - modalContentSize.height) / 2 + index * 32);
+        0.0, (availableSize.height - modalContentSize.height + index * 64) / 2);
     return Offset(xOffset, yOffset);
   }
 
@@ -125,7 +123,7 @@ class LdDialogType extends WoltDialogType {
 
     double maxHeight = min(
       configuredSize.height,
-      availableSize.height - minPadding.vertical,
+      availableSize.height - minPadding.vertical - index * 64,
     );
 
     return BoxConstraints(
