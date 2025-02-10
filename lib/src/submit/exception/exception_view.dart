@@ -57,7 +57,7 @@ class LdExceptionView extends StatelessWidget {
     );
   }
 
-  _buildDialogBUtton(BuildContext context, VoidCallback moreInfo) {
+  _buildDialogButton(BuildContext context, VoidCallback moreInfo) {
     return LdButton(
       child: LdAutoSpace(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,7 +83,7 @@ class LdExceptionView extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildDialogBUtton(context, moreInfo),
+            _buildDialogButton(context, moreInfo),
             if (retry != null) ...[ldSpacerM, _buildRetryButton(context)],
           ],
         )
@@ -103,7 +103,7 @@ class LdExceptionView extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Flexible(child: _buildDialogBUtton(context, moreInfo)),
+            Flexible(child: _buildDialogButton(context, moreInfo)),
             if (retry != null) ...[
               ldSpacerM,
               Flexible(
@@ -120,7 +120,6 @@ class LdExceptionView extends StatelessWidget {
   Widget build(BuildContext context) {
     return LdModalBuilder(
       modal: LdModal(
-        noHeader: true,
         size: LdSize.xs,
         modalContent: (context) => LdExceptionDialog(
           error: exception,
