@@ -16,6 +16,7 @@ class LdDatePicker extends StatelessWidget {
   final String displayFormat;
   final LdButtonMode buttonMode;
   final bool disabled;
+  final bool useRootNavigator;
   final void Function(DateTime?) onChanged;
 
   const LdDatePicker({
@@ -28,6 +29,7 @@ class LdDatePicker extends StatelessWidget {
     this.buttonMode = LdButtonMode.filled,
     required this.onChanged,
     this.disabled = false,
+    this.useRootNavigator = false,
   });
 
   DateTime get _initialDate => value ?? DateTime.now();
@@ -41,6 +43,7 @@ class LdDatePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdModalBuilder(
+      useRootNavigator: useRootNavigator,
       builder: (context, open) => LdBundle(
         children: [
           if (label != null) LdTextL(label!),
@@ -56,6 +59,8 @@ class LdDatePicker extends StatelessWidget {
       modal: LdModal(
         key: const Key('date_picker_sheet'),
         noHeader: true,
+        size: LdSize.m,
+        padding: LdTheme.of(context).pad(size: LdSize.s),
         modalContent: (
           context,
         ) =>
@@ -329,7 +334,6 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
 
     return LdAutoSpace(
       children: [
-        ldSpacerL,
         ResponsiveBuilder(
           builder: (context, size) {
             if (size.isDesktop) {
@@ -442,9 +446,9 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
               widget.onChanged(_selectedDate);
               widget.dismiss();
             }),
-        ldSpacerM,
+        ldSpacerL,
       ],
-    ).padM();
+    );
   }
 }
 
