@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
@@ -81,30 +80,6 @@ class LdPortal extends StatelessWidget {
     this.controller,
   }) : super(key: key);
 
-  SystemUiOverlayStyle defaultStyle(LdTheme theme) {
-    return SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness:
-          theme.isDark ? Brightness.light : Brightness.dark,
-      systemNavigationBarColor: theme.surface,
-      systemNavigationBarDividerColor: theme.border,
-      systemNavigationBarIconBrightness:
-          theme.isDark ? Brightness.light : Brightness.dark,
-      statusBarBrightness: theme.isDark ? Brightness.dark : Brightness.light,
-    );
-  }
-
-  SystemUiOverlayStyle scaledStyle(LdTheme theme) {
-    return SystemUiOverlayStyle(
-      statusBarColor: Colors.black,
-      statusBarIconBrightness: Brightness.light,
-      systemNavigationBarColor: theme.surface,
-      statusBarBrightness: Brightness.dark,
-      systemNavigationBarIconBrightness:
-          theme.isDark ? Brightness.light : Brightness.dark,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return ProviderOrValue<LdPortalController>(
@@ -125,32 +100,27 @@ class LdPortal extends StatelessWidget {
           ),
           child: Stack(
             children: [
-              AnnotatedRegion<SystemUiOverlayStyle>(
-                value: controller.scaleContent
-                    ? scaledStyle(theme)
-                    : defaultStyle(theme),
-                child: Portal(
-                  child: Focus(
-                    descendantsAreFocusable: !controller.open,
-                    child: LdSpring(
-                      springConstant: 5,
-                      initialPosition: 0,
-                      position: controller.scaleContent ? 1 : 0,
-                      builder: (context, state) {
-                        return Transform.translate(
-                          offset: Offset(0, state.position * 20),
-                          child: Transform.scale(
-                            scale: (state.position * -0.1 + 1).clamp(0.0, 1.0),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(
-                                state.position * theme.sizingConfig.radiusL,
-                              ),
-                              child: child,
+              Portal(
+                child: Focus(
+                  descendantsAreFocusable: !controller.open,
+                  child: LdSpring(
+                    springConstant: 5,
+                    initialPosition: 0,
+                    position: controller.scaleContent ? 1 : 0,
+                    builder: (context, state) {
+                      return Transform.translate(
+                        offset: Offset(0, state.position * 20),
+                        child: Transform.scale(
+                          scale: (state.position * -0.1 + 1).clamp(0.0, 1.0),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                              state.position * theme.sizingConfig.radiusL,
                             ),
+                            child: child,
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
