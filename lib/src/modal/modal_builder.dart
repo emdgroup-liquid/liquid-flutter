@@ -11,11 +11,14 @@ class LdModalBuilder extends StatefulWidget {
 
   final LdModal modal;
 
+  final bool useRootNavigator;
+
   /// Creates a new sheet builder.
 
   const LdModalBuilder({
     required this.builder,
     required this.modal,
+    this.useRootNavigator = false,
     Key? key,
   }) : super(key: key);
 
@@ -30,7 +33,10 @@ class LdModalBuilderState extends State<LdModalBuilder> {
   }
 
   Future<dynamic> open(BuildContext context) async {
-    return await widget.modal.show(context);
+    return await widget.modal.show(
+      context,
+      useRootNavigator: widget.useRootNavigator,
+    );
   }
 
   @override

@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid/code_block.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid/components/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ModalDemo extends StatefulWidget {
   const ModalDemo({super.key});
@@ -20,6 +23,7 @@ class _DemoSheet extends StatelessWidget {
   final bool enableHeader;
   final bool userDismissable;
   final bool enableInsets;
+  final bool enableFooter;
 
   const _DemoSheet({
     required this.mode,
@@ -29,11 +33,13 @@ class _DemoSheet extends StatelessWidget {
     required this.enableHeader,
     required this.userDismissable,
     required this.enableInsets,
+    required this.enableFooter,
   });
 
   @override
   Widget build(BuildContext context) {
     return LdModalBuilder(
+      useRootNavigator: true,
       builder: (context, openSheet) {
         return LdButton(
           onPressed: () async {
@@ -47,11 +53,8 @@ class _DemoSheet extends StatelessWidget {
       modal: LdModal(
           mode: mode,
           enableScaling: enableScaling,
-
-          //showDragHandle: true,
           userCanDismiss: userDismissable,
           fixedDialogSize: fixedDialogSize ? const Size(400, 400) : null,
-          useSafeArea: !useScreenRadius,
           title: !enableHeader ? null : const Text("Title"),
           insets: useScreenRadius
               ? EdgeInsets.only(
@@ -65,10 +68,35 @@ class _DemoSheet extends StatelessWidget {
               : (enableInsets
                   ? const EdgeInsets.symmetric(horizontal: 32)
                   : EdgeInsets.zero),
-          topRadius:
-              useScreenRadius ? LdTheme.of(context).screenRadius - 2.5 : null,
-          bottomRadius:
-              useScreenRadius ? LdTheme.of(context).screenRadius - 2.5 : null,
+          topRadius: useScreenRadius
+              ? max(0, LdTheme.of(context).screenRadius - 2.5)
+              : null,
+          bottomRadius: useScreenRadius
+              ? max(0, LdTheme.of(context).screenRadius - 2.5)
+              : null,
+          actionBar: !enableFooter
+              ? null
+              : (context) => Row(
+                    children: [
+                      Expanded(
+                        child: LdButtonGhost(
+                          child: const Text("Cancel"),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ),
+                      ldSpacerL,
+                      Expanded(
+                        child: LdButton(
+                          child: const Text("Confirm"),
+                          onPressed: () {
+                            Navigator.of(context).pop("Hello world");
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
           modalContent: (
             context,
           ) =>
@@ -79,6 +107,7 @@ class _DemoSheet extends StatelessWidget {
                     enableInsets: enableInsets,
                     enableScaling: enableScaling,
                     fixedDialogSize: fixedDialogSize,
+                    enableFooter: enableFooter,
                     mode: mode,
                     useScreenRadius: useScreenRadius,
                     userDismissable: userDismissable,
@@ -115,6 +144,8 @@ class _ModalDemoState extends State<ModalDemo> {
 
   bool _enableHeader = true;
 
+  bool _enableFooter = true;
+
   bool _enableInset = false;
 
   LdModalTypeMode mode = LdModalTypeMode.auto;
@@ -126,9 +157,13 @@ class _ModalDemoState extends State<ModalDemo> {
         apiComponents: const ["LdModal", "LdModalBuilder", "LdModalPage"],
         demo: LdAutoSpace(
           children: [
-            const LdText(
+            LdText(
               "Allows to place content in a modal that overlays the current screen. "
-              "Liquid Modals are based on the https://pub.dev/packages/wolt_modal_sheet package. The LdModal components provide an easy wrapper around the existing APIs to make it easier to use in Liquid applications.",
+              "Liquid Modals are based on the [wolt_modal_sheet](https://pub.dev/packages/wolt_modal_sheet) package. The LdModal components provide an easy wrapper around the existing APIs to make it easier to use in Liquid applications.",
+              processLinks: true,
+              onLinkTap: (link) {
+                launchUrl(Uri.parse(link));
+              },
             ),
             const LdTextH("LdModalBuilder"),
             const LdText(
@@ -157,6 +192,7 @@ class _ModalDemoState extends State<ModalDemo> {
                   enableInsets: _enableInset,
                   fixedDialogSize: _fixedDialogSize,
                   enableHeader: _enableHeader,
+                  enableFooter: _enableFooter,
                   mode: mode,
                   enableScaling: _enableScaling,
                   useScreenRadius: _useScreenRadius,
@@ -188,6 +224,9 @@ class _ModalDemoState extends State<ModalDemo> {
               onChanged: (value) {
                 setState(() {
                   _useScreenRadius = value;
+                  if (value) {
+                    _enableFooter = false;
+                  }
                 });
               },
             ),
@@ -215,6 +254,15 @@ class _ModalDemoState extends State<ModalDemo> {
               onChanged: (value) {
                 setState(() {
                   _enableScaling = value;
+                });
+              },
+            ),
+            LdToggle(
+              label: "Enable footer",
+              checked: _enableFooter,
+              onChanged: (value) {
+                setState(() {
+                  _enableFooter = value;
                 });
               },
             ),
@@ -267,6 +315,27 @@ class _ModalDemoState extends State<ModalDemo> {
                 onPressed: () {
                   context.push("/components/modal/my-modal");
                 }),
+            const LdDivider(),
+            const LdTextH("Confirm modal"),
+            LdButton(
+              child: const Text("Open confirm modal"),
+              onPressed: () async {
+                final result = await confirmModal(
+                  context: context,
+                  description: "Are you sure you want to delete this item?",
+                  confirmColor: LdTheme.of(context).error,
+                  positive: const Text("Delete"),
+                  negative: const Text("Cancel"),
+                  useRootNavigator: true,
+                );
+
+                if (result) {
+                  LdNotificationsController.of(context).success("Confirmed");
+                } else {
+                  LdNotificationsController.of(context).error("Cancelled");
+                }
+              },
+            ),
           ],
         ));
   }

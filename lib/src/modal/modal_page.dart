@@ -12,6 +12,6 @@ class LdModalPage extends Page {
 
   @override
   Route<void> createRoute(BuildContext context) {
-    return builder.asRoute(this);
+    return builder.asRoute(this, context);
   }
 }
