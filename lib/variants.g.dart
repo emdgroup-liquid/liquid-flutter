@@ -1,6 +1,338 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
+class LdButtonGhost extends LdButton {
+  const LdButtonGhost({
+    required Widget child,
+    required Function onPressed,
+    bool autoLoading = true,
+    BorderRadius? borderRadius,
+    LdColor? color,
+    bool? active,
+    double? width,
+    bool disabled = false,
+    FocusNode? focusNode,
+    bool autoFocus = false,
+    MainAxisAlignment? alignment,
+    Widget? leading,
+    bool? circular,
+    bool loading = false,
+    String? loadingText,
+    String? errorText,
+    LdButtonMode mode = LdButtonMode.filled,
+    double? progress,
+    LdSize size = LdSize.m,
+    Widget? trailing,
+    Key? key,
+  }) : super(
+            child: child,
+            onPressed: onPressed,
+            autoLoading: autoLoading,
+            borderRadius: borderRadius,
+            color: color,
+            active: active,
+            width: width,
+            disabled: disabled,
+            focusNode: focusNode,
+            autoFocus: autoFocus,
+            alignment: alignment,
+            leading: leading,
+            circular: circular,
+            loading: loading,
+            loadingText: loadingText,
+            errorText: errorText,
+            mode: LdButtonMode.ghost,
+            progress: progress,
+            size: size,
+            trailing: trailing,
+            key: key);
+}
+
+class LdButtonVague extends LdButton {
+  const LdButtonVague({
+    required Widget child,
+    required Function onPressed,
+    bool autoLoading = true,
+    BorderRadius? borderRadius,
+    LdColor? color,
+    bool? active,
+    double? width,
+    bool disabled = false,
+    FocusNode? focusNode,
+    bool autoFocus = false,
+    MainAxisAlignment? alignment,
+    Widget? leading,
+    bool? circular,
+    bool loading = false,
+    String? loadingText,
+    String? errorText,
+    LdButtonMode mode = LdButtonMode.filled,
+    double? progress,
+    LdSize size = LdSize.m,
+    Widget? trailing,
+    Key? key,
+  }) : super(
+            child: child,
+            onPressed: onPressed,
+            autoLoading: autoLoading,
+            borderRadius: borderRadius,
+            color: color,
+            active: active,
+            width: width,
+            disabled: disabled,
+            focusNode: focusNode,
+            autoFocus: autoFocus,
+            alignment: alignment,
+            leading: leading,
+            circular: circular,
+            loading: loading,
+            loadingText: loadingText,
+            errorText: errorText,
+            mode: LdButtonMode.vague,
+            progress: progress,
+            size: size,
+            trailing: trailing,
+            key: key);
+}
+
+class LdButtonOutline extends LdButton {
+  const LdButtonOutline({
+    required Widget child,
+    required Function onPressed,
+    bool autoLoading = true,
+    BorderRadius? borderRadius,
+    LdColor? color,
+    bool? active,
+    double? width,
+    bool disabled = false,
+    FocusNode? focusNode,
+    bool autoFocus = false,
+    MainAxisAlignment? alignment,
+    Widget? leading,
+    bool? circular,
+    bool loading = false,
+    String? loadingText,
+    String? errorText,
+    LdButtonMode mode = LdButtonMode.filled,
+    double? progress,
+    LdSize size = LdSize.m,
+    Widget? trailing,
+    Key? key,
+  }) : super(
+            child: child,
+            onPressed: onPressed,
+            autoLoading: autoLoading,
+            borderRadius: borderRadius,
+            color: color,
+            active: active,
+            width: width,
+            disabled: disabled,
+            focusNode: focusNode,
+            autoFocus: autoFocus,
+            alignment: alignment,
+            leading: leading,
+            circular: circular,
+            loading: loading,
+            loadingText: loadingText,
+            errorText: errorText,
+            mode: LdButtonMode.outline,
+            progress: progress,
+            size: size,
+            trailing: trailing,
+            key: key);
+}
+
+class LdButtonFilled extends LdButton {
+  const LdButtonFilled({
+    required Widget child,
+    required Function onPressed,
+    bool autoLoading = true,
+    BorderRadius? borderRadius,
+    LdColor? color,
+    bool? active,
+    double? width,
+    bool disabled = false,
+    FocusNode? focusNode,
+    bool autoFocus = false,
+    MainAxisAlignment? alignment,
+    Widget? leading,
+    bool? circular,
+    bool loading = false,
+    String? loadingText,
+    String? errorText,
+    LdButtonMode mode = LdButtonMode.filled,
+    double? progress,
+    LdSize size = LdSize.m,
+    Widget? trailing,
+    Key? key,
+  }) : super(
+            child: child,
+            onPressed: onPressed,
+            autoLoading: autoLoading,
+            borderRadius: borderRadius,
+            color: color,
+            active: active,
+            width: width,
+            disabled: disabled,
+            focusNode: focusNode,
+            autoFocus: autoFocus,
+            alignment: alignment,
+            leading: leading,
+            circular: circular,
+            loading: loading,
+            loadingText: loadingText,
+            errorText: errorText,
+            mode: LdButtonMode.filled,
+            progress: progress,
+            size: size,
+            trailing: trailing,
+            key: key);
+}
+
+class LdButtonWarning extends LdButton {
+  LdButtonWarning({
+    required Widget child,
+    required Function onPressed,
+    bool autoLoading = true,
+    BorderRadius? borderRadius,
+    LdColor? color,
+    bool? active,
+    double? width,
+    bool disabled = false,
+    FocusNode? focusNode,
+    bool autoFocus = false,
+    MainAxisAlignment? alignment,
+    Widget? leading,
+    bool? circular,
+    bool loading = false,
+    String? loadingText,
+    String? errorText,
+    LdButtonMode mode = LdButtonMode.filled,
+    double? progress,
+    LdSize size = LdSize.m,
+    Widget? trailing,
+    Key? key,
+    required BuildContext context,
+  }) : super(
+            child: child,
+            onPressed: onPressed,
+            autoLoading: autoLoading,
+            borderRadius: borderRadius,
+            color: LdTheme.of(context).warning,
+            active: active,
+            width: width,
+            disabled: disabled,
+            focusNode: focusNode,
+            autoFocus: autoFocus,
+            alignment: alignment,
+            leading: leading,
+            circular: circular,
+            loading: loading,
+            loadingText: loadingText,
+            errorText: errorText,
+            mode: mode,
+            progress: progress,
+            size: size,
+            trailing: trailing,
+            key: key);
+}
+
+class LdButtonError extends LdButton {
+  LdButtonError({
+    required Widget child,
+    required Function onPressed,
+    bool autoLoading = true,
+    BorderRadius? borderRadius,
+    LdColor? color,
+    bool? active,
+    double? width,
+    bool disabled = false,
+    FocusNode? focusNode,
+    bool autoFocus = false,
+    MainAxisAlignment? alignment,
+    Widget? leading,
+    bool? circular,
+    bool loading = false,
+    String? loadingText,
+    String? errorText,
+    LdButtonMode mode = LdButtonMode.filled,
+    double? progress,
+    LdSize size = LdSize.m,
+    Widget? trailing,
+    Key? key,
+    required BuildContext context,
+  }) : super(
+            child: child,
+            onPressed: onPressed,
+            autoLoading: autoLoading,
+            borderRadius: borderRadius,
+            color: LdTheme.of(context).error,
+            active: active,
+            width: width,
+            disabled: disabled,
+            focusNode: focusNode,
+            autoFocus: autoFocus,
+            alignment: alignment,
+            leading: leading,
+            circular: circular,
+            loading: loading,
+            loadingText: loadingText,
+            errorText: errorText,
+            mode: mode,
+            progress: progress,
+            size: size,
+            trailing: trailing,
+            key: key);
+}
+
+class LdButtonSuccess extends LdButton {
+  LdButtonSuccess({
+    required Widget child,
+    required Function onPressed,
+    bool autoLoading = true,
+    BorderRadius? borderRadius,
+    LdColor? color,
+    bool? active,
+    double? width,
+    bool disabled = false,
+    FocusNode? focusNode,
+    bool autoFocus = false,
+    MainAxisAlignment? alignment,
+    Widget? leading,
+    bool? circular,
+    bool loading = false,
+    String? loadingText,
+    String? errorText,
+    LdButtonMode mode = LdButtonMode.filled,
+    double? progress,
+    LdSize size = LdSize.m,
+    Widget? trailing,
+    Key? key,
+    required BuildContext context,
+  }) : super(
+            child: child,
+            onPressed: onPressed,
+            autoLoading: autoLoading,
+            borderRadius: borderRadius,
+            color: LdTheme.of(context).success,
+            active: active,
+            width: width,
+            disabled: disabled,
+            focusNode: focusNode,
+            autoFocus: autoFocus,
+            alignment: alignment,
+            leading: leading,
+            circular: circular,
+            loading: loading,
+            loadingText: loadingText,
+            errorText: errorText,
+            mode: mode,
+            progress: progress,
+            size: size,
+            trailing: trailing,
+            key: key);
+}
+
 class LdTextP extends LdText {
   const LdTextP(
     String text, {
@@ -11,8 +343,10 @@ class LdTextP extends LdText {
     TextDecoration? decoration,
     LdSize size = LdSize.m,
     LdTextType? type = LdTextType.paragraph,
+    void Function(String)? onLinkTap,
     FontWeight? fontWeight,
     double? lineHeight,
+    bool processLinks = false,
     Color? color,
   }) : super(text,
             key: key,
@@ -22,8 +356,10 @@ class LdTextP extends LdText {
             decoration: decoration,
             size: size,
             type: LdTextType.paragraph,
+            onLinkTap: onLinkTap,
             fontWeight: fontWeight,
             lineHeight: lineHeight,
+            processLinks: processLinks,
             color: color);
 }
 
@@ -37,8 +373,10 @@ class LdTextPl extends LdText {
     TextDecoration? decoration,
     LdSize size = LdSize.m,
     LdTextType? type = LdTextType.paragraph,
+    void Function(String)? onLinkTap,
     FontWeight? fontWeight,
     double? lineHeight,
+    bool processLinks = false,
     Color? color,
   }) : super(text,
             key: key,
@@ -48,8 +386,10 @@ class LdTextPl extends LdText {
             decoration: decoration,
             size: LdSize.l,
             type: LdTextType.paragraph,
+            onLinkTap: onLinkTap,
             fontWeight: fontWeight,
             lineHeight: lineHeight,
+            processLinks: processLinks,
             color: color);
 }
 
@@ -63,8 +403,10 @@ class LdTextPs extends LdText {
     TextDecoration? decoration,
     LdSize size = LdSize.m,
     LdTextType? type = LdTextType.paragraph,
+    void Function(String)? onLinkTap,
     FontWeight? fontWeight,
     double? lineHeight,
+    bool processLinks = false,
     Color? color,
   }) : super(text,
             key: key,
@@ -74,8 +416,10 @@ class LdTextPs extends LdText {
             decoration: decoration,
             size: LdSize.s,
             type: LdTextType.paragraph,
+            onLinkTap: onLinkTap,
             fontWeight: fontWeight,
             lineHeight: lineHeight,
+            processLinks: processLinks,
             color: color);
 }
 
@@ -89,8 +433,10 @@ class LdTextPxs extends LdText {
     TextDecoration? decoration,
     LdSize size = LdSize.m,
     LdTextType? type = LdTextType.paragraph,
+    void Function(String)? onLinkTap,
     FontWeight? fontWeight,
     double? lineHeight,
+    bool processLinks = false,
     Color? color,
   }) : super(text,
             key: key,
@@ -100,8 +446,10 @@ class LdTextPxs extends LdText {
             decoration: decoration,
             size: LdSize.xs,
             type: LdTextType.paragraph,
+            onLinkTap: onLinkTap,
             fontWeight: fontWeight,
             lineHeight: lineHeight,
+            processLinks: processLinks,
             color: color);
 }
 
@@ -115,8 +463,10 @@ class LdTextHl extends LdText {
     TextDecoration? decoration,
     LdSize size = LdSize.m,
     LdTextType? type = LdTextType.paragraph,
+    void Function(String)? onLinkTap,
     FontWeight? fontWeight,
     double? lineHeight,
+    bool processLinks = false,
     Color? color,
   }) : super(text,
             key: key,
@@ -126,8 +476,10 @@ class LdTextHl extends LdText {
             decoration: decoration,
             size: LdSize.l,
             type: LdTextType.headline,
+            onLinkTap: onLinkTap,
             fontWeight: fontWeight,
             lineHeight: lineHeight,
+            processLinks: processLinks,
             color: color);
 }
 
@@ -141,8 +493,10 @@ class LdTextH extends LdText {
     TextDecoration? decoration,
     LdSize size = LdSize.m,
     LdTextType? type = LdTextType.paragraph,
+    void Function(String)? onLinkTap,
     FontWeight? fontWeight,
     double? lineHeight,
+    bool processLinks = false,
     Color? color,
   }) : super(text,
             key: key,
@@ -152,8 +506,10 @@ class LdTextH extends LdText {
             decoration: decoration,
             size: LdSize.m,
             type: LdTextType.headline,
+            onLinkTap: onLinkTap,
             fontWeight: fontWeight,
             lineHeight: lineHeight,
+            processLinks: processLinks,
             color: color);
 }
 
@@ -167,8 +523,10 @@ class LdTextHs extends LdText {
     TextDecoration? decoration,
     LdSize size = LdSize.m,
     LdTextType? type = LdTextType.paragraph,
+    void Function(String)? onLinkTap,
     FontWeight? fontWeight,
     double? lineHeight,
+    bool processLinks = false,
     Color? color,
   }) : super(text,
             key: key,
@@ -178,8 +536,10 @@ class LdTextHs extends LdText {
             decoration: decoration,
             size: LdSize.s,
             type: LdTextType.headline,
+            onLinkTap: onLinkTap,
             fontWeight: fontWeight,
             lineHeight: lineHeight,
+            processLinks: processLinks,
             color: color);
 }
 
@@ -193,8 +553,10 @@ class LdTextHxs extends LdText {
     TextDecoration? decoration,
     LdSize size = LdSize.m,
     LdTextType? type = LdTextType.paragraph,
+    void Function(String)? onLinkTap,
     FontWeight? fontWeight,
     double? lineHeight,
+    bool processLinks = false,
     Color? color,
   }) : super(text,
             key: key,
@@ -204,8 +566,10 @@ class LdTextHxs extends LdText {
             decoration: decoration,
             size: LdSize.xs,
             type: LdTextType.headline,
+            onLinkTap: onLinkTap,
             fontWeight: fontWeight,
             lineHeight: lineHeight,
+            processLinks: processLinks,
             color: color);
 }
 
@@ -219,8 +583,10 @@ class LdTextL extends LdText {
     TextDecoration? decoration,
     LdSize size = LdSize.m,
     LdTextType? type = LdTextType.paragraph,
+    void Function(String)? onLinkTap,
     FontWeight? fontWeight,
     double? lineHeight,
+    bool processLinks = false,
     Color? color,
   }) : super(text,
             key: key,
@@ -230,8 +596,10 @@ class LdTextL extends LdText {
             decoration: decoration,
             size: size,
             type: LdTextType.label,
+            onLinkTap: onLinkTap,
             fontWeight: fontWeight,
             lineHeight: lineHeight,
+            processLinks: processLinks,
             color: color);
 }
 
@@ -245,8 +613,10 @@ class LdTextLs extends LdText {
     TextDecoration? decoration,
     LdSize size = LdSize.m,
     LdTextType? type = LdTextType.paragraph,
+    void Function(String)? onLinkTap,
     FontWeight? fontWeight,
     double? lineHeight,
+    bool processLinks = false,
     Color? color,
   }) : super(text,
             key: key,
@@ -256,8 +626,10 @@ class LdTextLs extends LdText {
             decoration: decoration,
             size: LdSize.s,
             type: LdTextType.label,
+            onLinkTap: onLinkTap,
             fontWeight: fontWeight,
             lineHeight: lineHeight,
+            processLinks: processLinks,
             color: color);
 }
 
@@ -271,8 +643,10 @@ class LdTextLl extends LdText {
     TextDecoration? decoration,
     LdSize size = LdSize.m,
     LdTextType? type = LdTextType.paragraph,
+    void Function(String)? onLinkTap,
     FontWeight? fontWeight,
     double? lineHeight,
+    bool processLinks = false,
     Color? color,
   }) : super(text,
             key: key,
@@ -282,8 +656,10 @@ class LdTextLl extends LdText {
             decoration: decoration,
             size: LdSize.l,
             type: LdTextType.label,
+            onLinkTap: onLinkTap,
             fontWeight: fontWeight,
             lineHeight: lineHeight,
+            processLinks: processLinks,
             color: color);
 }
 
@@ -297,8 +673,10 @@ class LdTextLxs extends LdText {
     TextDecoration? decoration,
     LdSize size = LdSize.m,
     LdTextType? type = LdTextType.paragraph,
+    void Function(String)? onLinkTap,
     FontWeight? fontWeight,
     double? lineHeight,
+    bool processLinks = false,
     Color? color,
   }) : super(text,
             key: key,
@@ -308,8 +686,10 @@ class LdTextLxs extends LdText {
             decoration: decoration,
             size: LdSize.xs,
             type: LdTextType.label,
+            onLinkTap: onLinkTap,
             fontWeight: fontWeight,
             lineHeight: lineHeight,
+            processLinks: processLinks,
             color: color);
 }
 
@@ -323,8 +703,10 @@ class LdTextCaption extends LdText {
     TextDecoration? decoration,
     LdSize size = LdSize.m,
     LdTextType? type = LdTextType.paragraph,
+    void Function(String)? onLinkTap,
     FontWeight? fontWeight,
     double? lineHeight,
+    bool processLinks = false,
     Color? color,
   }) : super(text,
             key: key,
@@ -334,9 +716,113 @@ class LdTextCaption extends LdText {
             decoration: decoration,
             size: size,
             type: LdTextType.caption,
+            onLinkTap: onLinkTap,
             fontWeight: fontWeight,
             lineHeight: lineHeight,
+            processLinks: processLinks,
             color: color);
+}
+
+class LdBadgeSuccess extends LdBadge {
+  LdBadgeSuccess({
+    required Widget child,
+    LdColor? color,
+    LdSize size = LdSize.m,
+    bool symmetric = false,
+    int? maxLines = 1,
+    Key? key,
+    required BuildContext context,
+  }) : super(
+            child: child,
+            color: LdTheme.of(context).success,
+            size: size,
+            symmetric: symmetric,
+            maxLines: maxLines,
+            key: key);
+}
+
+class LdBadgeWarning extends LdBadge {
+  LdBadgeWarning({
+    required Widget child,
+    LdColor? color,
+    LdSize size = LdSize.m,
+    bool symmetric = false,
+    int? maxLines = 1,
+    Key? key,
+    required BuildContext context,
+  }) : super(
+            child: child,
+            color: LdTheme.of(context).warning,
+            size: size,
+            symmetric: symmetric,
+            maxLines: maxLines,
+            key: key);
+}
+
+class LdBadgeError extends LdBadge {
+  LdBadgeError({
+    required Widget child,
+    LdColor? color,
+    LdSize size = LdSize.m,
+    bool symmetric = false,
+    int? maxLines = 1,
+    Key? key,
+    required BuildContext context,
+  }) : super(
+            child: child,
+            color: LdTheme.of(context).error,
+            size: size,
+            symmetric: symmetric,
+            maxLines: maxLines,
+            key: key);
+}
+
+class LdTagSuccess extends LdTag {
+  LdTagSuccess({
+    Key? key,
+    required Widget child,
+    LdColor? color,
+    Function? onDismiss,
+    LdSize size = LdSize.m,
+    required BuildContext context,
+  }) : super(
+            key: key,
+            child: child,
+            color: LdTheme.of(context).success,
+            onDismiss: onDismiss,
+            size: size);
+}
+
+class LdTagWarning extends LdTag {
+  LdTagWarning({
+    Key? key,
+    required Widget child,
+    LdColor? color,
+    Function? onDismiss,
+    LdSize size = LdSize.m,
+    required BuildContext context,
+  }) : super(
+            key: key,
+            child: child,
+            color: LdTheme.of(context).warning,
+            onDismiss: onDismiss,
+            size: size);
+}
+
+class LdTagError extends LdTag {
+  LdTagError({
+    Key? key,
+    required Widget child,
+    LdColor? color,
+    Function? onDismiss,
+    LdSize size = LdSize.m,
+    required BuildContext context,
+  }) : super(
+            key: key,
+            child: child,
+            color: LdTheme.of(context).error,
+            onDismiss: onDismiss,
+            size: size);
 }
 
 class LdCheckboxSuccess extends LdCheckbox {
@@ -397,426 +883,6 @@ class LdCheckboxError extends LdCheckbox {
             size: size,
             disabled: disabled,
             key: key);
-}
-
-class LdBadgeSuccess extends LdBadge {
-  LdBadgeSuccess({
-    required Widget child,
-    LdColor? color,
-    LdSize size = LdSize.m,
-    bool symmetric = false,
-    int? maxLines = 1,
-    Key? key,
-    required BuildContext context,
-  }) : super(
-            child: child,
-            color: LdTheme.of(context).success,
-            size: size,
-            symmetric: symmetric,
-            maxLines: maxLines,
-            key: key);
-}
-
-class LdBadgeWarning extends LdBadge {
-  LdBadgeWarning({
-    required Widget child,
-    LdColor? color,
-    LdSize size = LdSize.m,
-    bool symmetric = false,
-    int? maxLines = 1,
-    Key? key,
-    required BuildContext context,
-  }) : super(
-            child: child,
-            color: LdTheme.of(context).warning,
-            size: size,
-            symmetric: symmetric,
-            maxLines: maxLines,
-            key: key);
-}
-
-class LdBadgeError extends LdBadge {
-  LdBadgeError({
-    required Widget child,
-    LdColor? color,
-    LdSize size = LdSize.m,
-    bool symmetric = false,
-    int? maxLines = 1,
-    Key? key,
-    required BuildContext context,
-  }) : super(
-            child: child,
-            color: LdTheme.of(context).error,
-            size: size,
-            symmetric: symmetric,
-            maxLines: maxLines,
-            key: key);
-}
-
-class LdButtonGhost extends LdButton {
-  const LdButtonGhost({
-    required Widget child,
-    required Function onPressed,
-    bool autoLoading = true,
-    BorderRadius? borderRadius,
-    LdColor? color,
-    bool? active,
-    double? width,
-    bool disabled = false,
-    FocusNode? focusNode,
-    MainAxisAlignment? alignment,
-    Widget? leading,
-    bool? circular,
-    bool loading = false,
-    String? loadingText,
-    String? errorText,
-    LdButtonMode mode = LdButtonMode.filled,
-    double? progress,
-    LdSize size = LdSize.m,
-    Widget? trailing,
-    Key? key,
-  }) : super(
-            child: child,
-            onPressed: onPressed,
-            autoLoading: autoLoading,
-            borderRadius: borderRadius,
-            color: color,
-            active: active,
-            width: width,
-            disabled: disabled,
-            focusNode: focusNode,
-            alignment: alignment,
-            leading: leading,
-            circular: circular,
-            loading: loading,
-            loadingText: loadingText,
-            errorText: errorText,
-            mode: LdButtonMode.ghost,
-            progress: progress,
-            size: size,
-            trailing: trailing,
-            key: key);
-}
-
-class LdButtonVague extends LdButton {
-  const LdButtonVague({
-    required Widget child,
-    required Function onPressed,
-    bool autoLoading = true,
-    BorderRadius? borderRadius,
-    LdColor? color,
-    bool? active,
-    double? width,
-    bool disabled = false,
-    FocusNode? focusNode,
-    MainAxisAlignment? alignment,
-    Widget? leading,
-    bool? circular,
-    bool loading = false,
-    String? loadingText,
-    String? errorText,
-    LdButtonMode mode = LdButtonMode.filled,
-    double? progress,
-    LdSize size = LdSize.m,
-    Widget? trailing,
-    Key? key,
-  }) : super(
-            child: child,
-            onPressed: onPressed,
-            autoLoading: autoLoading,
-            borderRadius: borderRadius,
-            color: color,
-            active: active,
-            width: width,
-            disabled: disabled,
-            focusNode: focusNode,
-            alignment: alignment,
-            leading: leading,
-            circular: circular,
-            loading: loading,
-            loadingText: loadingText,
-            errorText: errorText,
-            mode: LdButtonMode.vague,
-            progress: progress,
-            size: size,
-            trailing: trailing,
-            key: key);
-}
-
-class LdButtonOutline extends LdButton {
-  const LdButtonOutline({
-    required Widget child,
-    required Function onPressed,
-    bool autoLoading = true,
-    BorderRadius? borderRadius,
-    LdColor? color,
-    bool? active,
-    double? width,
-    bool disabled = false,
-    FocusNode? focusNode,
-    MainAxisAlignment? alignment,
-    Widget? leading,
-    bool? circular,
-    bool loading = false,
-    String? loadingText,
-    String? errorText,
-    LdButtonMode mode = LdButtonMode.filled,
-    double? progress,
-    LdSize size = LdSize.m,
-    Widget? trailing,
-    Key? key,
-  }) : super(
-            child: child,
-            onPressed: onPressed,
-            autoLoading: autoLoading,
-            borderRadius: borderRadius,
-            color: color,
-            active: active,
-            width: width,
-            disabled: disabled,
-            focusNode: focusNode,
-            alignment: alignment,
-            leading: leading,
-            circular: circular,
-            loading: loading,
-            loadingText: loadingText,
-            errorText: errorText,
-            mode: LdButtonMode.outline,
-            progress: progress,
-            size: size,
-            trailing: trailing,
-            key: key);
-}
-
-class LdButtonFilled extends LdButton {
-  const LdButtonFilled({
-    required Widget child,
-    required Function onPressed,
-    bool autoLoading = true,
-    BorderRadius? borderRadius,
-    LdColor? color,
-    bool? active,
-    double? width,
-    bool disabled = false,
-    FocusNode? focusNode,
-    MainAxisAlignment? alignment,
-    Widget? leading,
-    bool? circular,
-    bool loading = false,
-    String? loadingText,
-    String? errorText,
-    LdButtonMode mode = LdButtonMode.filled,
-    double? progress,
-    LdSize size = LdSize.m,
-    Widget? trailing,
-    Key? key,
-  }) : super(
-            child: child,
-            onPressed: onPressed,
-            autoLoading: autoLoading,
-            borderRadius: borderRadius,
-            color: color,
-            active: active,
-            width: width,
-            disabled: disabled,
-            focusNode: focusNode,
-            alignment: alignment,
-            leading: leading,
-            circular: circular,
-            loading: loading,
-            loadingText: loadingText,
-            errorText: errorText,
-            mode: LdButtonMode.filled,
-            progress: progress,
-            size: size,
-            trailing: trailing,
-            key: key);
-}
-
-class LdButtonWarning extends LdButton {
-  LdButtonWarning({
-    required Widget child,
-    required Function onPressed,
-    bool autoLoading = true,
-    BorderRadius? borderRadius,
-    LdColor? color,
-    bool? active,
-    double? width,
-    bool disabled = false,
-    FocusNode? focusNode,
-    MainAxisAlignment? alignment,
-    Widget? leading,
-    bool? circular,
-    bool loading = false,
-    String? loadingText,
-    String? errorText,
-    LdButtonMode mode = LdButtonMode.filled,
-    double? progress,
-    LdSize size = LdSize.m,
-    Widget? trailing,
-    Key? key,
-    required BuildContext context,
-  }) : super(
-            child: child,
-            onPressed: onPressed,
-            autoLoading: autoLoading,
-            borderRadius: borderRadius,
-            color: LdTheme.of(context).warning,
-            active: active,
-            width: width,
-            disabled: disabled,
-            focusNode: focusNode,
-            alignment: alignment,
-            leading: leading,
-            circular: circular,
-            loading: loading,
-            loadingText: loadingText,
-            errorText: errorText,
-            mode: mode,
-            progress: progress,
-            size: size,
-            trailing: trailing,
-            key: key);
-}
-
-class LdButtonError extends LdButton {
-  LdButtonError({
-    required Widget child,
-    required Function onPressed,
-    bool autoLoading = true,
-    BorderRadius? borderRadius,
-    LdColor? color,
-    bool? active,
-    double? width,
-    bool disabled = false,
-    FocusNode? focusNode,
-    MainAxisAlignment? alignment,
-    Widget? leading,
-    bool? circular,
-    bool loading = false,
-    String? loadingText,
-    String? errorText,
-    LdButtonMode mode = LdButtonMode.filled,
-    double? progress,
-    LdSize size = LdSize.m,
-    Widget? trailing,
-    Key? key,
-    required BuildContext context,
-  }) : super(
-            child: child,
-            onPressed: onPressed,
-            autoLoading: autoLoading,
-            borderRadius: borderRadius,
-            color: LdTheme.of(context).error,
-            active: active,
-            width: width,
-            disabled: disabled,
-            focusNode: focusNode,
-            alignment: alignment,
-            leading: leading,
-            circular: circular,
-            loading: loading,
-            loadingText: loadingText,
-            errorText: errorText,
-            mode: mode,
-            progress: progress,
-            size: size,
-            trailing: trailing,
-            key: key);
-}
-
-class LdButtonSuccess extends LdButton {
-  LdButtonSuccess({
-    required Widget child,
-    required Function onPressed,
-    bool autoLoading = true,
-    BorderRadius? borderRadius,
-    LdColor? color,
-    bool? active,
-    double? width,
-    bool disabled = false,
-    FocusNode? focusNode,
-    MainAxisAlignment? alignment,
-    Widget? leading,
-    bool? circular,
-    bool loading = false,
-    String? loadingText,
-    String? errorText,
-    LdButtonMode mode = LdButtonMode.filled,
-    double? progress,
-    LdSize size = LdSize.m,
-    Widget? trailing,
-    Key? key,
-    required BuildContext context,
-  }) : super(
-            child: child,
-            onPressed: onPressed,
-            autoLoading: autoLoading,
-            borderRadius: borderRadius,
-            color: LdTheme.of(context).success,
-            active: active,
-            width: width,
-            disabled: disabled,
-            focusNode: focusNode,
-            alignment: alignment,
-            leading: leading,
-            circular: circular,
-            loading: loading,
-            loadingText: loadingText,
-            errorText: errorText,
-            mode: mode,
-            progress: progress,
-            size: size,
-            trailing: trailing,
-            key: key);
-}
-
-class LdTagSuccess extends LdTag {
-  LdTagSuccess({
-    Key? key,
-    required Widget child,
-    LdColor? color,
-    Function? onDismiss,
-    LdSize size = LdSize.m,
-    required BuildContext context,
-  }) : super(
-            key: key,
-            child: child,
-            color: LdTheme.of(context).success,
-            onDismiss: onDismiss,
-            size: size);
-}
-
-class LdTagWarning extends LdTag {
-  LdTagWarning({
-    Key? key,
-    required Widget child,
-    LdColor? color,
-    Function? onDismiss,
-    LdSize size = LdSize.m,
-    required BuildContext context,
-  }) : super(
-            key: key,
-            child: child,
-            color: LdTheme.of(context).warning,
-            onDismiss: onDismiss,
-            size: size);
-}
-
-class LdTagError extends LdTag {
-  LdTagError({
-    Key? key,
-    required Widget child,
-    LdColor? color,
-    Function? onDismiss,
-    LdSize size = LdSize.m,
-    required BuildContext context,
-  }) : super(
-            key: key,
-            child: child,
-            color: LdTheme.of(context).error,
-            onDismiss: onDismiss,
-            size: size);
 }
 
 class LdRadioSuccess extends LdRadio {
