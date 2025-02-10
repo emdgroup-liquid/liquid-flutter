@@ -59,9 +59,8 @@ class _LiquidExampleState extends State<LiquidExample> {
     return Provider<AppRouter>(
         create: (context) => AppRouter(),
         child: Builder(builder: (BuildContext context) {
-          return LdNotificationProvider(
-            child: LdThemeProvider(
-                child: LdThemedAppBuilder(appBuilder: (context, theme) {
+          return LdNotificationProvider(child: LdThemeProvider(
+            child: LdThemedAppBuilder(appBuilder: (context, theme) {
               // We use a root navigator because else our nested navigation will not work
               var router = context.read<AppRouter>().router;
 
@@ -74,8 +73,8 @@ class _LiquidExampleState extends State<LiquidExample> {
                 theme: theme,
                 routerConfig: router,
               );
-            })),
-          );
+            }),
+          ));
         }));
   }
 }

@@ -25,75 +25,73 @@ class ChemicalScreen extends StatefulWidget {
 class _ChemicalScreenState extends State<ChemicalScreen> {
   @override
   Widget build(BuildContext context) {
-    return ListView(
-        padding: LdTheme.of(context).pad(size: LdSize.l) * 2,
-        children: [
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+    return ListView(children: [
+      LdContainer(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          LdAutoSpace(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            LdBreadcrumb.fromStrings(
+              const ["Home", "Chemicals", "Polyjuice potion"],
+            ),
+            const _Quantity(),
+            const _ProductKeyInfos(),
+            ldSpacerL,
             LdAutoSpace(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  LdBreadcrumb.fromStrings(
-                    const ["Home", "Chemicals", "Polyjuice potion"],
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      LdButton(
+                          child: const Text("Add to cart"),
+                          mode: LdButtonMode.outline,
+                          leading: const Icon(Icons.shopping_bag),
+                          onPressed: () {
+                            LdNotificationsController.of(context)
+                                .addNotification(LdNotification(
+                              type: LdNotificationType.info,
+                              message: "Added to cart",
+                            ));
+                          }),
+                      LdButton(
+                          child: const Text(
+                            "Acces certificate",
+                          ),
+                          mode: LdButtonMode.outline,
+                          leading: const Icon(Icons.download),
+                          onPressed: () {
+                            LdNotificationsController.of(context)
+                                .addNotification(LdNotification(
+                              type: LdNotificationType.error,
+                              message: "Downloading certificate failed",
+                            ));
+                          }),
+                    ],
                   ),
-                  const _Quantity(),
-                  const _ProductKeyInfos(),
-                  ldSpacerL,
-                  LdAutoSpace(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            LdButton(
-                                child: const Text("Add to cart"),
-                                mode: LdButtonMode.outline,
-                                leading: const Icon(Icons.shopping_bag),
-                                onPressed: () {
-                                  LdNotificationsController.of(context)
-                                      .addNotification(LdNotification(
-                                    type: LdNotificationType.info,
-                                    message: "Added to cart",
-                                  ));
-                                }),
-                            LdButton(
-                                child: const Text(
-                                  "Acces certificate",
-                                ),
-                                mode: LdButtonMode.outline,
-                                leading: const Icon(Icons.download),
-                                onPressed: () {
-                                  LdNotificationsController.of(context)
-                                      .addNotification(LdNotification(
-                                    type: LdNotificationType.error,
-                                    message: "Downloading certificate failed",
-                                  ));
-                                }),
-                          ],
-                        ),
-                        const LdDivider(),
-                        const LdInput(
-                          label: "Notes",
-                          hint: "Add a note....",
-                          maxLines: 3,
-                        ),
-                        LdButton(
-                            child: const Text("Save"),
-                            onPressed: () {
-                              LdNotificationsController.of(context)
-                                  .addNotification(LdNotification(
-                                type: LdNotificationType.success,
-                                message: "Saved",
-                              ));
-                            })
-                      ]),
-                  ldSpacerL,
-                  const _OtherPotions(),
-                  ldSpacerL,
-                  const _Accordion(),
+                  const LdDivider(),
+                  const LdInput(
+                    label: "Notes",
+                    hint: "Add a note....",
+                    maxLines: 3,
+                  ),
+                  LdButton(
+                      child: const Text("Save"),
+                      onPressed: () {
+                        LdNotificationsController.of(context)
+                            .addNotification(LdNotification(
+                          type: LdNotificationType.success,
+                          message: "Saved",
+                        ));
+                      })
                 ]),
+            ldSpacerL,
+            const _OtherPotions(),
+            ldSpacerL,
+            const _Accordion(),
           ]),
-        ]);
+        ]),
+      ),
+    ]);
   }
 }
 
