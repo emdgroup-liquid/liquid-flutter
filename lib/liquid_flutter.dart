@@ -3,6 +3,7 @@ library liquid_flutter;
 import 'package:flutter/foundation.dart';
 
 export 'src/accordion.dart';
+export 'src/avatar.dart';
 export 'src/appbar.dart';
 export 'src/autospace.dart';
 export 'src/badge.dart';
