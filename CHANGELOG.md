@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [19.0.1](https://github.com/emdgroup-liquid/liquid-flutter/compare/v19.0.0...v19.0.1) (2025-02-12)
+
+
+### Bug Fixes
+
+* ldAvatar not rendering icons correctly ([fd61608](https://github.com/emdgroup-liquid/liquid-flutter/commit/fd61608c6b801fd6191c35df9d479103c41c39ae))
+
 ## [19.0.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v18.2.0...v19.0.0) (2025-02-10)
 
 
