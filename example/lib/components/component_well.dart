@@ -18,8 +18,9 @@ class ShowSourceCodeOptions {
   /// The code between the `begin` and `end` comments will be displayed.
   final String tag;
 
-  /// The path to the source code file. If not provided, it will be tried to
-  /// be inferred from the current route.
+  /// The path to the source code file, e.g. "lib/components/reactive_form.dart".
+  /// If no path is provided, it will be tried to be inferred from the current
+  /// route.
   final String? path;
 
   ShowSourceCodeOptions({required this.tag, this.path});
@@ -73,7 +74,8 @@ class _ComponentWellState extends State<ComponentWell> {
 
   /// Builds the child with a button to toggle between the demo and the source code.
   Widget _buildChildWithSourceCode(BuildContext context) {
-    final _sourcePath = "lib${GoRouter.of(context).state?.pageKey.value}.dart";
+    final _sourcePath = widget.showSourceCodeOptions?.path ??
+        "lib${GoRouter.of(context).state?.pageKey.value}.dart";
     return FutureBuilder<String>(
       future: rootBundle.loadString(_sourcePath),
       builder: (context, snapshot) {
