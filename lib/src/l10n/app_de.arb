@@ -15,6 +15,7 @@
   "ok": "OK", 
   "refresh": "Aktualisieren",
   "retry": "Erneut versuchen",
+  "retryIn": "Erneuter Versuch in {seconds}s...",
   "searchAgain": "Erneut suchen",
   "selectDate": "Datum auswählen",
   "submit": "Absenden",
