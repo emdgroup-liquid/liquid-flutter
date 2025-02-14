@@ -43,6 +43,11 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
   String get retry => 'Erneut versuchen';
 
   @override
+  String retryIn(Object seconds) {
+    return 'Erneuter Versuch in ${seconds}s...';
+  }
+
+  @override
   String get choose => 'Auswählen';
 
   @override

@@ -36,6 +36,7 @@ class LdSubmitCenteredBuilder<T> extends LdSubmitBuilder<T> {
                         exception: state.error!,
                         direction: Axis.vertical,
                         retry: controller.canRetry ? controller.trigger : null,
+                        retryState: controller.state.retryState,
                       )
               else if (state.type == LdSubmitStateType.idle)
                 submitButtonBuilder != null

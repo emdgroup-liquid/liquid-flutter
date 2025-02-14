@@ -11,6 +11,7 @@
   "errorOccurred": "An error occurred",
   "failed": "Failed",
   "retry": "Retry",
+  "retryIn": "Retry in {seconds}s...",
   "choose": "Choose",
   "submit": "Submit",
   "selectDate": "Select date",

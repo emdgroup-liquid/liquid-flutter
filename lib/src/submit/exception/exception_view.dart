@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 class LdExceptionView extends StatelessWidget {
   final LdException? exception;
   final VoidCallback? retry;
+  final LdSubmitRetryState? retryState;
 
   final Axis direction;
 
@@ -14,6 +15,7 @@ class LdExceptionView extends StatelessWidget {
     super.key,
     required this.exception,
     this.retry,
+    this.retryState,
     this.direction = Axis.vertical,
   });
 
@@ -49,10 +51,17 @@ class LdExceptionView extends StatelessWidget {
   }
 
   _buildRetryButton(BuildContext context) {
+    final isRetrying = (retryState?.delay ?? 0) > 0;
+    final text = isRetrying
+        ? LiquidLocalizations.of(context).retryIn(
+            Duration(milliseconds: retryState!.delay).inSeconds,
+          )
+        : LiquidLocalizations.of(context).retry;
     return LdButton(
-      child: Text(LiquidLocalizations.of(context).retry),
+      child: Text(text),
       mode: LdButtonMode.filled,
       color: LdTheme.of(context).error,
+      disabled: isRetrying,
       onPressed: retry!,
     );
   }

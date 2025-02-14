@@ -43,6 +43,11 @@ class LiquidLocalizationsEn extends LiquidLocalizations {
   String get retry => 'Retry';
 
   @override
+  String retryIn(Object seconds) {
+    return 'Retry in ${seconds}s...';
+  }
+
+  @override
   String get choose => 'Choose';
 
   @override
