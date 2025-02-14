@@ -167,6 +167,12 @@ abstract class LiquidLocalizations {
   /// **'Retry'**
   String get retry;
 
+  /// No description provided for @retryIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry in {seconds}s...'**
+  String retryIn(Object seconds);
+
   /// No description provided for @choose.
   ///
   /// In en, this message translates to:

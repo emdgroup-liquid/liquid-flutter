@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
@@ -57,7 +58,12 @@ class LdSubmitController<T> {
   }
 
   Future<void> _trigger() async {
-    _setState(LdSubmitState<T>(type: LdSubmitStateType.loading));
+    _setState(
+      LdSubmitState<T>(
+        type: LdSubmitStateType.loading,
+        retryState: state.retryState,
+      ),
+    );
 
     T res;
     try {
@@ -77,7 +83,60 @@ class LdSubmitController<T> {
       }
 
       if (state.type != LdSubmitStateType.loading) return;
-      _setState(LdSubmitState(type: LdSubmitStateType.error, error: exception));
+
+      // Retry logic if automatic retries are configured
+      if (config.automaticRetry != null) {
+        final retryCount = (state.retryState?.retryCount ?? 0) + 1;
+        final retryDelay = config.automaticRetry!.initialAutomaticRetryDelay *
+            (1 << (retryCount - 1)); // Exponential backoff delay
+        final shouldRetry =
+            retryCount <= config.automaticRetry!.maxAutomaticRetryAttempts;
+
+        if (shouldRetry) {
+          if (ldPrintDebugMessages) {
+            debugPrint("Retrying in ${retryDelay ~/ 1000} seconds");
+          }
+
+          // We want to update the state each second (in order to update the UI)
+          for (var i = 0; i < retryDelay ~/ 1000; i++) {
+            final currentRetryState = LdSubmitRetryState(
+              retryCount: retryCount,
+              delay: retryDelay - (i * 1000),
+            );
+
+            _setState(
+              LdSubmitState<T>(
+                type: LdSubmitStateType.error,
+                retryState: currentRetryState,
+                error: exception,
+              ),
+            );
+
+            await Future.delayed(const Duration(seconds: 1));
+
+            if (state.type != LdSubmitStateType.error) {
+              return; // User canceled or state changed for some reason
+            }
+          }
+
+          // Handle the remaining milliseconds after the loop
+          await Future.delayed(Duration(milliseconds: retryDelay % 1000));
+
+          // Trigger the action again
+          await _trigger();
+          return;
+        }
+      }
+
+      _setState(
+        LdSubmitState(
+          type: LdSubmitStateType.error,
+          error: exception,
+          retryState: state.retryState?.copyWith(
+            delay: 0,
+          ),
+        ),
+      );
     }
   }
 

@@ -213,6 +213,35 @@ class _SubmitDemoState extends State<SubmitDemo> {
               )
             ],
           ),
+          LdBundle(
+            children: [
+              const LdTextH("Automatic retries"),
+              const LdTextP(
+                "You can pass an LdSubmitAutomaticRetryConfig to the LdSubmitConfig to enable automatic retries. The delay between retries will increase exponentially.",
+              ),
+              ComponentWell(
+                child: LdSubmit(
+                  config: LdSubmitConfig(
+                    automaticRetry: const LdSubmitAutomaticRetryConfig(
+                      maxAutomaticRetryAttempts: 3,
+                      initialAutomaticRetryDelay: 3000,
+                    ),
+                    action: () {
+                      return Future.delayed(
+                        const Duration(seconds: 2),
+                        () {
+                          throw LdException(
+                            message: "Something went wrong",
+                            moreInfo: "Nothing actually happened",
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              )
+            ],
+          ),
           const LdBundle(
             children: [
               LdTextH("LdSubmitConfig"),
