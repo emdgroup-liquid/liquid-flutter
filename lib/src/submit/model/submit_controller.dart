@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -87,8 +88,13 @@ class LdSubmitController<T> {
       // Retry logic if automatic retries are configured
       if (config.automaticRetry != null) {
         final retryCount = (state.retryState?.retryCount ?? 0) + 1;
-        final retryDelay = config.automaticRetry!.initialAutomaticRetryDelay *
-            (1 << (retryCount - 1)); // Exponential backoff delay
+        final retryDelay =
+            // Start with some jitter to avoid thundering herd
+            Random().nextInt(1500) +
+                // Calculate the delay based on the initial delay and the retry
+                // count, following an exponential backoff strategy
+                config.automaticRetry!.initialAutomaticRetryDelay *
+                    (1 << (retryCount - 1));
         final shouldRetry =
             retryCount <= config.automaticRetry!.maxAutomaticRetryAttempts;
 
