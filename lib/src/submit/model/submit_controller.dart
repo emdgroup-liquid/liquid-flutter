@@ -138,9 +138,6 @@ class LdSubmitController<T> {
         LdSubmitState(
           type: LdSubmitStateType.error,
           error: exception,
-          retryState: state.retryState?.copyWith(
-            delay: 0,
-          ),
         ),
       );
     }
