@@ -78,6 +78,8 @@ class LdMasterDetail<T> extends StatefulWidget {
 
   final LdMasterDetailOnSelectCallback<T>? onSelectionChange;
 
+  final bool Function(SizingInformation size)? customSplitPredicate;
+
   const LdMasterDetail({
     required this.builder,
     this.detailPresentationMode = MasterDetailPresentationMode.page,
@@ -92,6 +94,9 @@ class LdMasterDetail<T> extends StatefulWidget {
 
     /// The flex value for the detail widget. Defaults to 3.
     this.masterDetailFlex = 3,
+
+    /// A custom predicate to determine if the split view should be used.
+    this.customSplitPredicate,
     super.key,
   });
 
@@ -146,7 +151,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
       _selectedItem = item;
     });
     widget.onSelectionChange?.call(item);
-    if (!isLarge) {
+    if (!useSplitView) {
       _inDetailView = true;
 
       if (widget.detailPresentationMode == MasterDetailPresentationMode.page) {
@@ -213,10 +218,10 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
   void _didChangeSize(bool isLarge) async {
     await Future.delayed(Duration.zero);
 
-    bool wasLarge = this.isLarge;
+    bool wasLarge = this.useSplitView;
 
     setState(() {
-      this.isLarge = isLarge;
+      this.useSplitView = isLarge;
     });
 
     final _previousSelectedItem = _selectedItem;
@@ -232,7 +237,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
     }
   }
 
-  bool isLarge = false;
+  bool useSplitView = false;
 
   Widget buildMaster(
     BuildContext context,
@@ -346,18 +351,27 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
     );
   }
 
+  bool _useSplitView(SizingInformation size) {
+    if (widget.customSplitPredicate != null) {
+      return widget.customSplitPredicate!(size) &&
+          widget.layoutMode != MasterDetailLayoutMode.compact;
+    }
+    return ((size.isTablet && size.screenSize.width > size.screenSize.height) ||
+            size.isDesktop) &&
+        widget.layoutMode != MasterDetailLayoutMode.compact;
+  }
+
   @override
   Widget build(BuildContext _) {
     return ResponsiveBuilder(
       builder: (context, size) {
-        bool isLarge = !size.isMobile &&
-            widget.layoutMode != MasterDetailLayoutMode.compact;
+        bool useSplit = _useSplitView(size);
 
-        if (this.isLarge != isLarge) {
-          _didChangeSize(isLarge);
+        if (this.useSplitView != useSplit) {
+          _didChangeSize(useSplit);
         }
 
-        return buildContent(context, isLarge);
+        return buildContent(context, useSplit);
       },
     );
   }
