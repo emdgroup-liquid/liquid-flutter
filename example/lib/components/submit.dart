@@ -222,9 +222,11 @@ class _SubmitDemoState extends State<SubmitDemo> {
               ComponentWell(
                 child: LdSubmit(
                   config: LdSubmitConfig(
-                    automaticRetry: const LdSubmitAutomaticRetryConfig(
-                      maxAutomaticRetryAttempts: 3,
-                      initialAutomaticRetryDelay: 3000,
+                    retryConfig: const LdSubmitRetryConfig(
+                      performAutomaticRetry: false,
+                      disableRetryButton: true,
+                      maxRetryAttempts: 0,
+                      initialRetryCountdown: 0,
                     ),
                     action: () {
                       return Future.delayed(

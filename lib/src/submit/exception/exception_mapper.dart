@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
@@ -49,47 +50,40 @@ class LdExceptionMapper {
     return context.read<LdExceptionMapper>();
   }
 
-  LdException? handle(dynamic e, {StackTrace? stackTrace}) {
+  LdException handle(
+    dynamic e, {
+    StackTrace? stackTrace,
+  }) {
     if (e is LdException) {
       return e;
     }
 
-    if (e is SocketException) {
-      return LdException(
-        message: localizations.networkError,
-        canRetry: true,
-        stackTrace: stackTrace,
-        moreInfo: e.toString(),
-        exception: e,
-      );
-    }
-
-    if (e is TimeoutException) {
-      return LdException(
-        message: localizations.timeoutError,
-        canRetry: true,
-        stackTrace: stackTrace,
-        moreInfo: e.toString(),
-        exception: e,
-      );
-    }
-
-    if (e is FormatException) {
-      return LdException(
-        message: localizations.formatError,
-        canRetry: true,
-        stackTrace: stackTrace,
-        moreInfo: e.toString(),
-        exception: e,
-      );
-    }
-
-    return LdException(
+    final exception = LdException(
       message: localizations.unknownError,
       canRetry: true,
       stackTrace: stackTrace,
       moreInfo: e.toString(),
       exception: e,
     );
+
+    if (e is SocketException) {
+      return exception.copyWith(
+        message: localizations.networkError,
+      );
+    }
+
+    if (e is TimeoutException) {
+      return exception.copyWith(
+        message: localizations.timeoutError,
+      );
+    }
+
+    if (e is FormatException) {
+      return exception.copyWith(
+        message: localizations.formatError,
+      );
+    }
+
+    return exception;
   }
 }

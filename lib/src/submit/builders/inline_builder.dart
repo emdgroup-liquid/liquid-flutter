@@ -44,7 +44,6 @@ class LdSubmitInlineBuilder<T> extends LdSubmitBuilder<T> {
                   exception: state.error!,
                   direction: Axis.horizontal,
                   retry: controller.canRetry ? controller.trigger : null,
-                  retryState: controller.state.retryState,
                 )
             else if (submitButtonBuilder != null)
               submitButtonBuilder!(context, controller)

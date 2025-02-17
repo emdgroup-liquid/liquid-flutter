@@ -58,11 +58,10 @@ class LdSubmitController<T> {
     _setState(LdSubmitState<T>(type: LdSubmitStateType.idle));
   }
 
-  Future<void> _trigger() async {
+  Future<void> _trigger({LdExceptionRetryState? retryState}) async {
     _setState(
       LdSubmitState<T>(
         type: LdSubmitStateType.loading,
-        retryState: state.retryState,
       ),
     );
 
@@ -77,7 +76,17 @@ class LdSubmitController<T> {
 
       _setState(LdSubmitState<T>(type: LdSubmitStateType.result, result: res));
     } catch (e, s) {
-      final exception = exceptionMapper.handle(e, stackTrace: s);
+      final retryCount = (retryState?.retryCount ?? 0) + 1;
+      final canRetry =
+          retryCount <= (config.retryConfig?.maxRetryAttempts ?? 1);
+      final exception = exceptionMapper
+          .handle(
+            e,
+            stackTrace: s,
+          )
+          .copyWith(
+            canRetry: canRetry,
+          );
 
       if (ldPrintDebugMessages) {
         debugPrint("An error occured in LdSubmitController: $e \n $s");
@@ -86,17 +95,20 @@ class LdSubmitController<T> {
       if (state.type != LdSubmitStateType.loading) return;
 
       // Retry logic if automatic retries are configured
-      if (config.automaticRetry != null) {
-        final retryCount = (state.retryState?.retryCount ?? 0) + 1;
+      if (config.retryConfig != null && exception.canRetry) {
         final retryDelay =
             // Start with some jitter to avoid thundering herd
             Random().nextInt(1500) +
                 // Calculate the delay based on the initial delay and the retry
                 // count, following an exponential backoff strategy
-                config.automaticRetry!.initialAutomaticRetryDelay *
+                config.retryConfig!.initialRetryCountdown *
                     (1 << (retryCount - 1));
-        final shouldRetry =
-            retryCount <= config.automaticRetry!.maxAutomaticRetryAttempts;
+        final shouldRetry = retryCount <= config.retryConfig!.maxRetryAttempts;
+
+        retryState = LdExceptionRetryState(
+          retryCount: retryCount,
+          delay: retryDelay,
+        );
 
         if (shouldRetry) {
           if (ldPrintDebugMessages) {
@@ -105,22 +117,21 @@ class LdSubmitController<T> {
 
           // We want to update the state each second (in order to update the UI)
           for (var i = 0; i < retryDelay ~/ 1000; i++) {
-            final currentRetryState = LdSubmitRetryState(
-              retryCount: retryCount,
-              delay: retryDelay - (i * 1000),
-            );
-
             _setState(
               LdSubmitState<T>(
                 type: LdSubmitStateType.error,
-                retryState: currentRetryState,
-                error: exception,
+                error: exception.copyWith(
+                  canRetry: !config.retryConfig!.disableRetryButton,
+                  retryState: retryState.copyWith(
+                    delay: retryDelay - i * 1000,
+                  ),
+                ),
               ),
             );
 
             await Future.delayed(const Duration(seconds: 1));
 
-            if (state.type != LdSubmitStateType.error) {
+            if (_disposed || state.type != LdSubmitStateType.error) {
               return; // User canceled or state changed for some reason
             }
           }
@@ -129,15 +140,26 @@ class LdSubmitController<T> {
           await Future.delayed(Duration(milliseconds: retryDelay % 1000));
 
           // Trigger the action again
-          await _trigger();
-          return;
+          if (config.retryConfig!.performAutomaticRetry) {
+            await _trigger(
+              retryState: retryState.copyWith(
+                delay: 0,
+                retryCount: retryCount,
+              ),
+            );
+            return;
+          }
         }
       }
 
       _setState(
         LdSubmitState(
           type: LdSubmitStateType.error,
-          error: exception,
+          error: exception.copyWith(
+            retryState: retryState?.copyWith(
+              delay: 0,
+            ),
+          ),
         ),
       );
     }
@@ -161,7 +183,7 @@ class LdSubmitController<T> {
       }
       return;
     }
-    await _trigger();
+    await _trigger(retryState: state.error?.retryState);
   }
 
   void reset() {
