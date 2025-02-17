@@ -3215,6 +3215,12 @@ const ldDocComponents = [
         description: '',
         features: ['final'],
       ),
+      LdDocProperty(
+        name: 'customSplitPredicate',
+        type: 'bool Function(SizingInformation)?',
+        description: '',
+        features: ['final'],
+      ),
     ],
     constructors: [
       LdDocConstructor(
@@ -3270,6 +3276,13 @@ const ldDocComponents = [
             required: false,
           ),
           LdDocParameter(
+            name: 'customSplitPredicate',
+            type: 'bool Function(SizingInformation)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
             name: 'key',
             type: 'Key?',
             description: '',
@@ -3300,7 +3313,7 @@ const ldDocComponents = [
         features: [],
       ),
       LdDocProperty(
-        name: 'isLarge',
+        name: 'useSplitView',
         type: 'bool',
         description: '',
         features: [],
@@ -3331,6 +3344,7 @@ const ldDocComponents = [
       'buildMaster',
       'buildDetail',
       'buildContent',
+      '_useSplitView',
       'build',
     ],
   ),
