@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [19.1.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v19.0.1...v19.1.0) (2025-02-17)
+
+
+### Features
+
+* add custom split view predicate to LdMasterDetail ([d7d8afb](https://github.com/emdgroup-liquid/liquid-flutter/commit/d7d8afb3d1f39d25153b955e726ba049e4c4b198))
+
 ### [19.0.1](https://github.com/emdgroup-liquid/liquid-flutter/compare/v19.0.0...v19.0.1) (2025-02-12)
 
 
