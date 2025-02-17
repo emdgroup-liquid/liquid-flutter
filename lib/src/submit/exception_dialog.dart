@@ -4,10 +4,11 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 /// Renders an LdException in a dialog
 class LdExceptionDialog extends StatelessWidget {
   final LdException? error;
-  final void Function() close;
 
-  const LdExceptionDialog(
-      {super.key, required this.error, required this.close});
+  const LdExceptionDialog({
+    super.key,
+    required this.error,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +30,7 @@ class LdExceptionDialog extends StatelessWidget {
           width: double.infinity,
           child: Text(LiquidLocalizations.of(context).close),
           onPressed: () {
-            close();
+            Navigator.of(context).pop();
           },
         )
       ],
