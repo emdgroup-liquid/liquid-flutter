@@ -114,7 +114,10 @@ class LdExceptionView extends StatelessWidget {
           type: exception?.type ?? LdHintType.error,
           size: LdSize.l,
         ),
-        LdTextP(exception?.message ?? ""),
+        LdTextP(
+          exception?.message ?? "",
+          textAlign: TextAlign.center,
+        ),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -134,11 +137,11 @@ class LdExceptionView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdModalBuilder(
+      useRootNavigator: true,
       modal: LdModal(
         size: LdSize.xs,
         modalContent: (context) => LdExceptionDialog(
           error: exception,
-          close: () => Navigator.of(context).pop(),
         ),
       ),
       builder: (context, open) => switch (direction) {
