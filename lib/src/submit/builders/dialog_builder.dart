@@ -56,7 +56,6 @@ class LdSubmitDialogBuilder<T> extends LdSubmitBuilder<T> {
             exception: controller.state.error!,
             direction: Axis.vertical,
             retry: controller.canRetry ? controller.trigger : null,
-            retryState: controller.state.retryState,
           ).padL();
   }
 

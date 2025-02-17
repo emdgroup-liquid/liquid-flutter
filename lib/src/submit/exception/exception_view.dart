@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 class LdExceptionView extends StatelessWidget {
   final LdException? exception;
   final VoidCallback? retry;
-  final LdSubmitRetryState? retryState;
 
   final Axis direction;
 
@@ -15,7 +14,6 @@ class LdExceptionView extends StatelessWidget {
     super.key,
     required this.exception,
     this.retry,
-    this.retryState,
     this.direction = Axis.vertical,
   });
 
@@ -51,18 +49,23 @@ class LdExceptionView extends StatelessWidget {
   }
 
   _buildRetryButton(BuildContext context) {
-    final isRetrying = (retryState?.delay ?? 0) > 0;
+    final isRetrying = (exception?.retryState?.delay ?? 0) > 0;
     final text = isRetrying
         ? LiquidLocalizations.of(context).retryIn(
-            Duration(milliseconds: retryState!.delay).inSeconds,
+            Duration(milliseconds: exception!.retryState!.delay).inSeconds,
           )
         : LiquidLocalizations.of(context).retry;
+    if (!isRetrying && exception?.canRetry == false) {
+      // hide the button if the exception can't be retried and there is no retry
+      // countdown.
+      return const SizedBox.shrink();
+    }
     return LdButton(
       child: Text(text),
       mode: LdButtonMode.filled,
       color: LdTheme.of(context).error,
-      disabled: isRetrying,
-      onPressed: retry!,
+      disabled: exception?.canRetry == false,
+      onPressed: retry ?? () {},
     );
   }
 
@@ -93,7 +96,10 @@ class LdExceptionView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildDialogButton(context, moreInfo),
-            if (retry != null) ...[ldSpacerM, _buildRetryButton(context)],
+            if (retry != null || exception?.retryState != null) ...[
+              ldSpacerM,
+              _buildRetryButton(context)
+            ],
           ],
         )
       ],
