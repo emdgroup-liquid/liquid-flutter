@@ -36,6 +36,12 @@ class LdSubmitRetryConfig {
           maxRetryAttempts >= 0,
           "maxRetryAttempts must be greater than 0",
         );
+
+  /// A configuration that does not allow any retries.
+  factory LdSubmitRetryConfig.noRetries() => const LdSubmitRetryConfig(
+        performAutomaticRetry: false,
+        maxRetryAttempts: 0,
+      );
 }
 
 /// A configuration for a submit action.
