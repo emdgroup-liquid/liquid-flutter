@@ -157,7 +157,7 @@ class LdModal {
       return LdSheetType(
         theme: LdTheme.of(context),
         topRadius: topRadius,
-        bottomRadius: bottomRadius ?? LdTheme.of(context).screenRadius,
+        bottomRadius: bottomRadius ?? 0,
         index: this.index ?? index,
         insets: insets ?? EdgeInsets.all(_defaultSheetInset),
       );
@@ -467,12 +467,7 @@ class LdModal {
       {bool useRootNavigator = false}) async {
     LdPortalController? controller;
 
-    if (useRootNavigator) {
-      //context = Navigator.of(context, rootNavigator: true).context;
-      controller = LdPortalController.maybeOf(context);
-    } else {
-      controller = LdPortalController.maybeOf(context);
-    }
+    controller = LdPortalController.maybeOf(context);
 
     LdPortalEntry? entry;
     int index = 0;
@@ -497,7 +492,7 @@ class LdModal {
       modalBarrierColor: _getModalBarrierColor(context),
       enableDrag: userCanDismiss,
       pageContentDecorator: _getContentDecorator,
-      modalTypeBuilder: (_) => _getSheetType(
+      modalTypeBuilder: (context) => _getSheetType(
         context,
         index: index,
       ),
