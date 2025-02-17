@@ -18,15 +18,14 @@ class LdExceptionMapperProvider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (exceptionMapper != null) {
-      // If an exception mapper is already provided, don't override it.
-      if (context.read<LdExceptionMapper?>() != null) {
-        return child;
-      }
-
       return Provider<LdExceptionMapper>.value(
         value: exceptionMapper!,
         child: child,
       );
+    }
+    // If an exception mapper is already provided, don't override it.
+    if (context.read<LdExceptionMapper?>() != null) {
+      return child;
     }
     final localizations = LiquidLocalizations.of(context);
     return Provider(
