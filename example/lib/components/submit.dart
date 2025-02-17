@@ -215,18 +215,18 @@ class _SubmitDemoState extends State<SubmitDemo> {
           ),
           LdBundle(
             children: [
-              const LdTextH("Automatic retries"),
+              const LdTextH("(Automatic) Retries"),
               const LdTextP(
-                "You can pass an LdSubmitAutomaticRetryConfig to the LdSubmitConfig to enable automatic retries. The delay between retries will increase exponentially.",
+                "You can pass an LdSubmitRetryConfig to the LdSubmitConfig to enable (automatic) retries, or to block the retry button for a certain amount of time before allowing the user to trigger it again. The delay between retries will increase exponentially.",
               ),
               ComponentWell(
                 child: LdSubmit(
                   config: LdSubmitConfig(
                     retryConfig: const LdSubmitRetryConfig(
-                      performAutomaticRetry: false,
+                      performAutomaticRetry: true,
                       disableRetryButton: true,
-                      maxRetryAttempts: 0,
-                      initialRetryCountdown: 0,
+                      maxRetryAttempts: 3,
+                      initialRetryCountdown: 3000,
                     ),
                     action: () {
                       return Future.delayed(
