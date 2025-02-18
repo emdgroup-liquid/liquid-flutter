@@ -6,15 +6,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-
 import 'package:syntax_highlight/syntax_highlight.dart';
 
 class CodeBlock extends StatefulWidget {
   final String code;
   final String language;
+  final bool expanded;
 
-  const CodeBlock({Key? key, required this.code, this.language = "dart"})
-      : super(key: key);
+  const CodeBlock({
+    Key? key,
+    required this.code,
+    this.language = "dart",
+    this.expanded = false,
+  }) : super(key: key);
 
   @override
   State<CodeBlock> createState() => _CodeBlockState();
@@ -30,6 +34,7 @@ class _CodeBlockState extends State<CodeBlock> {
   @override
   void initState() {
     lines = widget.code.trim().split("\n").length;
+    expanded = widget.expanded;
     loadHighlighter();
     super.initState();
   }

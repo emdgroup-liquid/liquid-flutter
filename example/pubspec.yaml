@@ -53,6 +53,7 @@ flutter:
   assets:
     - liquid_flutter_icon.jpg
     - assets/
+    - lib/components/
 
   fonts:
     - family: Lato
