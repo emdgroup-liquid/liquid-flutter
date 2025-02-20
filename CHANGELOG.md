@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [19.2.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v19.1.0...v19.2.0) (2025-02-20)
+
+
+### Features
+
+* add "show source code" toggle for demos ([ca3e3ed](https://github.com/emdgroup-liquid/liquid-flutter/commit/ca3e3ed0e37522726ca36e826e1cbd4b9344388f))
+
+
+### Bug Fixes
+
+* update documentation for ShowSourceCodeOptions and fix source path logic ([675538a](https://github.com/emdgroup-liquid/liquid-flutter/commit/675538a057caa814d0071f32dd1f4da35bdeeee4))
+
 ## [19.1.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v19.0.1...v19.1.0) (2025-02-17)
 
 
