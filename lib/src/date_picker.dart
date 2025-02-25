@@ -29,7 +29,7 @@ class LdDatePicker extends StatelessWidget {
     this.buttonMode = LdButtonMode.filled,
     required this.onChanged,
     this.disabled = false,
-    this.useRootNavigator = false,
+    required this.useRootNavigator,
   });
 
   DateTime get _initialDate => value ?? DateTime.now();
