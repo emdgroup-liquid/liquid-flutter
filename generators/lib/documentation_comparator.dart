@@ -457,7 +457,7 @@ void main(List<String> args) async {
       compareDocComponentLists(remoteComponents, localComponents);
 
   // print api changes
-  var result = ApiChangeType.minor;
+  var result = ApiChangeType.patch;
   for (var change in apiChanges) {
     result = result.atLeast(change.type);
     if (verbose) {
