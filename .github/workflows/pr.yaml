@@ -60,13 +60,14 @@ jobs:
           https://raw.githubusercontent.com/emdgroup-liquid/liquid-flutter/refs/heads/main/lib/documentation.dart -v)
 
           API_CHANGE_TYPE=$(echo "$API_CHANGELOG" | tail -n 1 | awk '{print $NF}')
+          echo "API_CHANGE_TYPE=$API_CHANGE_TYPE" >> $GITHUB_ENV
+          echo "::set-output name=API_CHANGELOG::$API_CHANGELOG"
+          
           echo "API_CHANGELOG output:"
           echo "$API_CHANGELOG"
           echo "Detected API_CHANGE_TYPE: $API_CHANGE_TYPE"
-          echo "API_CHANGELOG=$API_CHANGELOG" >> $GITHUB_ENV
-          echo "API_CHANGE_TYPE=$API_CHANGE_TYPE" >> $GITHUB_ENV
 
-      # Extract previous version from pubspec.yaml
+    # Extract previous version from pubspec.yaml
       - name: Get previous version
         id: get_previous_version
         run: |
@@ -110,4 +111,4 @@ jobs:
       - name: 💬 Comment on PR with new version
         uses: thollander/actions-comment-pull-request@v2
         with:
-          message: "New version ${{ steps.get_new_version.outputs.result }} 🚀\n\nDetected API changes:\n${{ env.API_CHANGELOG }}"
+          message: "New version ${{ steps.get_new_version.outputs.result }} 🚀\n\nDetected API changes:\n${{ steps.detect_change_type.outputs }}"
