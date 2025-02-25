@@ -225,7 +225,7 @@ List<ApiChange> compareLdDocConstructors(
         component: componentName,
         description:
             "${oldParam.nameString} became required in ${newConstructor.nameString}",
-        type: ApiChangeType.minor,
+        type: ApiChangeType.major.atMost(atMostChangeType),
       ));
     }
     if (oldParam.named != newParam.named) {
