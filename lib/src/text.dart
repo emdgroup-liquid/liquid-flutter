@@ -98,7 +98,7 @@ class LdText extends StatelessWidget {
   const LdText(this.text,
       {Key? key,
       this.textAlign,
-      this.maxLines,
+      required this.maxLines,
       this.overflow,
       this.decoration,
       this.size = LdSize.m,
