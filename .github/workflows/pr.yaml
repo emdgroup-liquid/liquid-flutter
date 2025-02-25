@@ -62,9 +62,11 @@ jobs:
 
           API_CHANGE_TYPE=$(echo "$API_CHANGELOG" | tail -n 1 | awk '{print $NF}')
           echo "API_CHANGE_TYPE=$API_CHANGE_TYPE" >> $GITHUB_ENV
-          echo "$API_CHANGELOG<<EOF" >> $GITHUB_ENV
-          echo "$API_CHANGELOG" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          {
+            echo 'API_CHANGELOG<<EOF'
+            echo "$API_CHANGELOG"
+            echo EOF
+          } >> "$GITHUB_ENV"
   
           echo "API_CHANGELOG output:"
           echo "$API_CHANGELOG"
