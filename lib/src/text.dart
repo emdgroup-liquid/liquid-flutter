@@ -98,7 +98,7 @@ class LdText extends StatelessWidget {
   const LdText(this.text,
       {Key? key,
       this.textAlign,
-      required this.maxLines,
+      this.maxLines,
       this.overflow,
       this.decoration,
       this.size = LdSize.m,
@@ -107,7 +107,8 @@ class LdText extends StatelessWidget {
       this.fontWeight,
       this.lineHeight,
       this.processLinks = false,
-      this.color})
+      this.color,
+      String randomTestParam = ""})
       : super(key: key);
 
   @override
