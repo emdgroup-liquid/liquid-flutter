@@ -88,7 +88,7 @@ jobs:
             DETECTED_CHANGE="patch"
           fi
 
-          echo "Expected: $API_CHANGE_TYPE | Detected: $DETECTED_CHANGE"
+          echo "Expected: At least $API_CHANGE_TYPE | Detected: $DETECTED_CHANGE"
 
           # Define priority levels
           PRIORITY_MAP=("patch" "minor" "major")

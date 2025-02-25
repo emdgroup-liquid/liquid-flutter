@@ -466,5 +466,5 @@ void main(List<String> args) async {
       );
     }
   }
-  print(verbose ? 'Final result: ${result.name}' : result.name);
+  print(verbose ? '\nFinal result: ${result.name}' : result.name);
 }
