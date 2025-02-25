@@ -207,7 +207,7 @@ const ldDocComponents = [
             type: 'bool',
             description: '',
             named: true,
-            required: false,
+            required: true,
           ),
           LdDocParameter(
             name: 'onChanged',
