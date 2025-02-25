@@ -56,8 +56,9 @@ jobs:
       - name: Run api change type detection
         id: detect_change_type
         run: |
-          dart ./generators/lib/documentation_comparator.dart ./lib/documentation.dart https://raw.githubusercontent.com/emdgroup-liquid/liquid-flutter/refs/heads/main/lib/documentation.dart > version_change.txt
-          echo "CHANGE_TYPE=$(cat version_change.txt)" >> $GITHUB_ENV
+          dart ./generators/lib/documentation_comparator.dart ./lib/documentation.dart https://raw.githubusercontent.com/emdgroup-liquid/liquid-flutter/refs/heads/main/lib/documentation.dart -v > api_changes.txt
+          echo "API_CHANGELOG=$(cat api_changelog.txt)" >> $GITHUB_ENV
+          echo "API_CHANGE_TYPE=$(tail -n 1 version_change.txt | awk '{print $NF}')" >> $GITHUB_ENV
 
       # Extract previous version from pubspec.yaml
       - name: Get previous version
@@ -81,20 +82,20 @@ jobs:
             DETECTED_CHANGE="patch"
           fi
 
-          echo "Expected: $CHANGE_TYPE | Detected: $DETECTED_CHANGE"
+          echo "Expected: $API_CHANGE_TYPE | Detected: $DETECTED_CHANGE"
 
           # Define priority levels
           PRIORITY_MAP=("patch" "minor" "major")
 
           # Get index of expected and detected changes
           for i in "${!PRIORITY_MAP[@]}"; do
-            [[ "${PRIORITY_MAP[$i]}" == "$CHANGE_TYPE" ]] && EXPECTED_INDEX=$i
+            [[ "${PRIORITY_MAP[$i]}" == "$API_CHANGE_TYPE" ]] && EXPECTED_INDEX=$i
             [[ "${PRIORITY_MAP[$i]}" == "$DETECTED_CHANGE" ]] && DETECTED_INDEX=$i
           done
 
           # Fail only if the detected change is LESS significant than the expected change
           if [[ "$DETECTED_INDEX" -lt "$EXPECTED_INDEX" ]]; then
-            echo "❌ Version bump mismatch! Expected at least $CHANGE_TYPE, but detected $DETECTED_CHANGE."
+            echo "❌ Version bump mismatch! Expected at least $API_CHANGE_TYPE, but detected $DETECTED_CHANGE."
             exit 1
           else
             echo "✅ Version bump is correct."
@@ -103,4 +104,4 @@ jobs:
       - name: 💬 Comment on PR with new version
         uses: thollander/actions-comment-pull-request@v2
         with:
-          message: "New version ${{ steps.get_new_version.outputs.result }} 🚀 "
+          message: "New version ${{ steps.get_new_version.outputs.result }} 🚀\n\nDetected API changes:\n${{ env.API_CHANGELOG }}"
