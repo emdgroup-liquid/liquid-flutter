@@ -22,6 +22,7 @@ extension ListExtension<T> on List<T> {
   }
 }
 
+/// Helper extension to extract properties from a `CollectionElement`.
 extension CollectionElementExtension on CollectionElement {
   Map<String, dynamic> get properties {
     final map = <String, dynamic>{};
@@ -37,6 +38,7 @@ extension CollectionElementExtension on CollectionElement {
     return map;
   }
 
+  /// Helper method to extract a property from a `CollectionElement`.
   T get<T>(String name) {
     final property = properties[name];
     if ((T == List<String>) && property is ListLiteral) {
@@ -47,30 +49,33 @@ extension CollectionElementExtension on CollectionElement {
     return property as T;
   }
 
+  /// Helper method to extract the value of an expression, if it is of a simple
+  /// type.
   dynamic _extractValue(Expression expr) {
     if (expr is SimpleStringLiteral) {
       return expr.value;
     } else if (expr is BooleanLiteral) {
       return expr.value;
     }
+    // if needed, we can add more types here
     return expr;
   }
 }
 
 /// Parse a `LdDocComponent` from a `MethodInvocation` AST node.
-LdDocComponent parseLdDocComponent(MethodInvocation expr) {
+LdDocComponent parseLdDocComponent(MethodInvocation docExpr) {
   // Extract the component data
-  final name = expr.get<String>('name');
-  final isNullSafe = expr.get<bool?>('isNullSafe') ?? false;
-  final description = expr.get<String>('description');
-  final methods = expr.get<List<String>>('methods');
+  final name = docExpr.get<String>('name');
+  final isNullSafe = docExpr.get<bool?>('isNullSafe') ?? false;
+  final description = docExpr.get<String>('description');
+  final methods = docExpr.get<List<String>>('methods');
 
   // Parse constructors
   final constructors = <LdDocConstructor>[];
-  final constructorsArg = expr.get<ListLiteral>('constructors');
-  for (final constructor in constructorsArg.elements) {
+  final constructorsArg = docExpr.get<ListLiteral>('constructors');
+  for (final constrExpr in constructorsArg.elements) {
     final signature = <LdDocParameter>[];
-    final params = constructor.get<ListLiteral?>('signature');
+    final params = constrExpr.get<ListLiteral?>('signature');
     for (CollectionElement param in params?.elements ?? []) {
       signature.add(LdDocParameter(
         name: param.get<String>('name'),
@@ -81,7 +86,7 @@ LdDocComponent parseLdDocComponent(MethodInvocation expr) {
       ));
     }
     constructors.add(LdDocConstructor(
-      name: constructor.get<String>('name'),
+      name: constrExpr.get<String>('name'),
       signature: signature,
       features: [],
     ));
@@ -89,13 +94,13 @@ LdDocComponent parseLdDocComponent(MethodInvocation expr) {
 
   // Parse properties
   final properties = <LdDocProperty>[];
-  final propertiesArg = expr.get<ListLiteral>('properties');
-  for (final property in propertiesArg.elements) {
+  final propertiesArg = docExpr.get<ListLiteral>('properties');
+  for (final propExpr in propertiesArg.elements) {
     properties.add(LdDocProperty(
-      name: property.get<String>('name'),
-      type: property.get<String>('type'),
-      description: property.get<String>('description'),
-      features: property.get<List<String>>('features'),
+      name: propExpr.get<String>('name'),
+      type: propExpr.get<String>('type'),
+      description: propExpr.get<String>('description'),
+      features: propExpr.get<List<String>>('features'),
     ));
   }
 
@@ -148,6 +153,11 @@ Future<List<LdDocComponent>> extractLdDocComponents(Uri uri) async {
   return components;
 }
 
+/// The type of change that was detected in the API.
+/// A [patch] change is a change that does not break the API.
+/// A [minor] change is a change that adds new features to the API or introduces
+/// backwards-compatible changes.
+/// A [major] change is a change that breaks the API or removes features.
 enum ApiChangeType {
   patch,
   minor,
