@@ -150,4 +150,89 @@ void main() {
     expect(find.byType(LdLoader), findsNothing);
     expect(find.text("Submit"), findsOneWidget);
   });
+
+  testWidgets("LdSubmit Automatic Retries", (WidgetTester tester) async {
+    Completer<int> completer = Completer<int>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [LiquidLocalizations.delegate],
+        home: LdThemeProvider(
+          child: LdPortal(
+            child: Scaffold(
+              body: Portal(
+                child: LdSubmit<int>(
+                  config: LdSubmitConfig(
+                    action: () async {
+                      return await completer.future;
+                    },
+                    retryConfig: const LdSubmitRetryConfig(
+                      performAutomaticRetry: true,
+                      maxRetryAttempts: 3,
+                      initialRetryCountdown: 1000,
+                    ),
+                  ),
+                  builder: const LdSubmitInlineBuilder<int>(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle(); // Ensure the UI is ready
+
+    expect(find.byType(LdSubmit<int>), findsOneWidget);
+    expect(find.byType(LdButton), findsOneWidget);
+    expect(find.text("Submit"), findsOneWidget);
+
+    // Trigger the action
+    await tester.tap(find.text("Submit"));
+    await tester.pump();
+
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.text("Loading..."), findsOneWidget);
+
+    // Simulate failure and automatic retry
+    completer.completeError(Exception('Error'));
+    // first retry will happen after 1 second, so we check if the "Retry in"
+    // text is there after 0.5 seconds
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.textContaining("Retry in"), findsOneWidget);
+    completer = Completer<int>();
+    // wait a bit more until the retry happens
+    await tester.pump(const Duration(milliseconds: 1500));
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.text("Loading..."), findsOneWidget);
+
+    // Second retry
+    completer.completeError(Exception('Error'));
+    // second retry will happen after 2 seconds, so we check if the "Retry in"
+    // text is still there after 1.5 seconds
+    await tester.pump(const Duration(milliseconds: 1500));
+    expect(find.textContaining("Retry in"), findsOneWidget);
+    completer = Completer<int>();
+    // wait a bit more until the retry happens
+    await tester.pump(const Duration(milliseconds: 3000));
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.text("Loading..."), findsOneWidget);
+
+    // Third retry
+    completer.completeError(Exception('Error'));
+    // third retry will happen after 4 seconds, so we check if the "Retry in"
+    // text is still there after 3 seconds
+    await tester.pump(const Duration(milliseconds: 3000));
+    expect(find.textContaining("Retry in"), findsOneWidget);
+    completer = Completer<int>();
+    // wait a bit more until the retry happens
+    await tester.pump(const Duration(milliseconds: 5000));
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.text("Loading..."), findsOneWidget);
+
+    // Success case
+    completer.complete(42);
+    await tester.pumpAndSettle();
+    expect(find.text("Submit"), findsOneWidget);
+  });
 }
