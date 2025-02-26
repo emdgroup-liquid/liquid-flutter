@@ -202,7 +202,7 @@ void main() {
     expect(find.textContaining("Retry in"), findsOneWidget);
     completer = Completer<int>();
     // wait a bit more until the retry happens
-    await tester.pump(const Duration(milliseconds: 1500));
+    await tester.pump(const Duration(milliseconds: 3000));
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     expect(find.text("Loading..."), findsOneWidget);
 
@@ -221,12 +221,12 @@ void main() {
     // Third retry
     completer.completeError(Exception('Error'));
     // third retry will happen after 4 seconds, so we check if the "Retry in"
-    // text is still there after 3 seconds
-    await tester.pump(const Duration(milliseconds: 3000));
+    // text is still there after 3.5 seconds
+    await tester.pump(const Duration(milliseconds: 3500));
     expect(find.textContaining("Retry in"), findsOneWidget);
     completer = Completer<int>();
     // wait a bit more until the retry happens
-    await tester.pump(const Duration(milliseconds: 5000));
+    await tester.pump(const Duration(milliseconds: 3000));
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     expect(find.text("Loading..."), findsOneWidget);
 
