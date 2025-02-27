@@ -130,6 +130,15 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
                 layoutMode: _layoutMode,
                 detailPresentationMode: _presentationMode,
                 builder: ExampleBuilder<int>(_paginator),
+                detailsUrlBuilder: ({item, required uri}) {
+                  return uri.replace(
+                    queryParameters:
+                        item == null ? {} : {"item": item.toString()},
+                  );
+                },
+                detailsUrlParser: (uri) {
+                  return int.parse(uri.queryParameters["item"]!);
+                },
               ),
             ),
           ),
