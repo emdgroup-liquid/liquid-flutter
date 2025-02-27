@@ -107,7 +107,7 @@ class _ComponentWellState extends State<ComponentWell> {
     // for each instance of the ComponentWell widget on the page. This should be
     // safe as we assume that it gets called only once per instance on a page
     // and in the correct order for the widget tree.
-    _pageKey = GoRouter.of(context).state?.pageKey;
+    _pageKey = GoRouter.of(context).state.pageKey;
     if (_pageKey != null) {
       _instanceIndex = _instanceCounters.putIfAbsent(_pageKey!, () => 0);
       _instanceCounters[_pageKey!] = _instanceIndex + 1;
