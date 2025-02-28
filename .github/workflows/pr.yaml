@@ -58,7 +58,7 @@ jobs:
         id: detect_change_type
         run: |
           API_CHANGELOG=$(dart ./generators/lib/doc_comparator/doc_comparator.dart \
-          HEAD:./lib/documentation.dart main:./lib/documentation.dart -v)
+          HEAD:./lib/documentation.dart origin/main:./lib/documentation.dart -v)
 
           API_CHANGE_TYPE=$(echo "$API_CHANGELOG" | tail -n 1 | awk '{print $NF}')
           echo "API_CHANGE_TYPE=$API_CHANGE_TYPE" >> $GITHUB_ENV

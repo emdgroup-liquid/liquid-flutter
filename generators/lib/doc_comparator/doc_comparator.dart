@@ -16,7 +16,7 @@ void main(List<String> args) async {
     print(
         '  where <newFile> and <baseFile> can be paths within the GIT repository that you prefix with a branch, tag or commit hash, or URLs to the raw file on GitHub.\n');
     print(
-        'Example: dart doc_comparator.dart HEAD:./lib/documentation.dart main:./lib/documentation.dart\n');
+        'Example: dart doc_comparator.dart HEAD:./lib/documentation.dart origin/main:./lib/documentation.dart\n');
     print('Options:');
     print('  --help, -h: Show this help message');
     print('  --verbose, -v: Print detailed information about the changes');
@@ -29,8 +29,8 @@ void main(List<String> args) async {
       args.where((element) => !element.startsWith('-')).toList();
   final newFile =
       positionalArgs.elementAtOrNull(0) ?? 'HEAD:./lib/documentation.dart';
-  final baseFile =
-      positionalArgs.elementAtOrNull(1) ?? 'main:./lib/documentation.dart';
+  final baseFile = positionalArgs.elementAtOrNull(1) ??
+      'origin/main:./lib/documentation.dart';
   final newContent = newFile.startsWith('https')
       ? await _getRemoteContent(Uri.parse(newFile))
       : await _getGitFileContent(newFile);
