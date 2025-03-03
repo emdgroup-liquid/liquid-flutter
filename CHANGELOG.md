@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [19.3.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v19.2.0...v19.3.0) (2025-03-03)
+
+
+### Features
+
+* add URL handling in LdMasterDetail ([c81cee4](https://github.com/emdgroup-liquid/liquid-flutter/commit/c81cee49d13bc64a532433f4a6022e417dc4612f))
+* add URL handling in LdMasterDetail ([8b2f751](https://github.com/emdgroup-liquid/liquid-flutter/commit/8b2f7510573954953fd3a8b97190c6e88a8cbc7c))
+
+
+### Bug Fixes
+
+* resolve null safety issue by removing unnecessary null check for GoRouter state's pageKey ([97cae06](https://github.com/emdgroup-liquid/liquid-flutter/commit/97cae062d362031870b900f541195a4236491c89))
+
 ## [19.2.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v19.1.0...v19.2.0) (2025-02-20)
 
 
