@@ -138,18 +138,25 @@ class LdMasterDetail<T> extends StatefulWidget {
   /// Helper function to create a router configuration that uses this component
   /// as a shell route.
   static ShellRoute createShellRoute<T>({
-    required Widget Function(
-      BuildContext context,
-      GoRouterState state,
-    ) childBuilder,
+    required Widget child,
     required LdMasterDetailShellRouteConfig<T> routeConfig,
+    Page Function(BuildContext context, GoRouterState state, Widget child)?
+        pageBuilder,
   }) {
+    pageBuilder ??= (context, state, child) => NoTransitionPage<void>(
+          key: state.pageKey,
+          child: child,
+        );
     return ShellRoute(
-      pageBuilder: (context, state, child) => NoTransitionPage<void>(
-        key: state.pageKey,
-        child: Provider<LdMasterDetailShellRouteConfig<T>?>.value(
-          value: routeConfig, // Provide the routeConfig to LdMasterDetail
-          child: childBuilder(context, state),
+      // _ is the placeholder from the dummy widgets of the routes
+      pageBuilder: (context, state, _) => pageBuilder!(
+        context,
+        state,
+        // We wrap the child in a provider to make the route configuration
+        // available to LdMasterDetail
+        Provider<LdMasterDetailShellRouteConfig<T>?>.value(
+          value: routeConfig,
+          child: child,
         ),
       ),
 

@@ -251,7 +251,7 @@ class AppRouter {
                 key: state.pageKey, child: const Spring()),
           ),
           LdMasterDetail.createShellRoute<int>(
-            childBuilder: (context, state) => const MasterDetailDemo(),
+            child: const MasterDetailDemo(),
             routeConfig: LdMasterDetailShellRouteConfig<int>(
               basePath: "/components/master-detail",
               detailPath: "detail/:id",
