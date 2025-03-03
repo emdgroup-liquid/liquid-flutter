@@ -250,10 +250,14 @@ class AppRouter {
             pageBuilder: (context, state) => NoTransitionPage<void>(
                 key: state.pageKey, child: const Spring()),
           ),
-          GoRoute(
-            path: "/components/master-detail",
-            pageBuilder: (context, state) => NoTransitionPage<void>(
-                key: state.pageKey, child: const MasterDetailDemo()),
+          LdMasterDetail.createShellRoute<int>(
+            childBuilder: (context, state) => const MasterDetailDemo(),
+            routeConfig: LdMasterDetailShellRouteConfig<int>(
+              basePath: "/components/master-detail",
+              detailPath: "detail/:id",
+              itemProvider: (id) => int.tryParse(id),
+              itemIdGetter: (item) => item.toString(),
+            ),
           ),
           GoRoute(
             path: "/components/notification",
