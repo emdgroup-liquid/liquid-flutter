@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+
 import 'package:liquid_flutter/src/submit/builders/submit_button.dart';
 import 'package:provider/provider.dart';
 
@@ -40,10 +41,21 @@ class LdSubmitInlineBuilder<T> extends LdSubmitBuilder<T> {
               if (errorBuilder != null)
                 errorBuilder!(context, state.error!, controller)
               else
-                LdExceptionView(
-                  exception: state.error!,
-                  direction: Axis.horizontal,
-                  retry: controller.canRetry ? controller.trigger : null,
+                Row(
+                  children: [
+                    LdExceptionView(
+                      exception: state.error!,
+                      direction: Axis.horizontal,
+                      retry: controller.canRetry ? controller.trigger : null,
+                    ),
+                    if (controller.showRetryIndicator)
+                      LdExceptionRetryIndicator(
+                        attempt: controller.state.attempt,
+                        remainingTime: controller.state.remainingRetryTime ??
+                            Duration.zero,
+                        totalRetryTime: controller.totalRetryTime,
+                      ),
+                  ],
                 )
             else if (submitButtonBuilder != null)
               submitButtonBuilder!(context, controller)

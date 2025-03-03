@@ -8,13 +8,14 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 /// controller to configure the submit action.
 class LdSubmitController<T> {
   final LdSubmitConfig<T> config;
-
   final LdExceptionMapper exceptionMapper;
-
-  final StreamController<LdSubmitState<T>> _stateController =
-      StreamController<LdSubmitState<T>>.broadcast();
+  final _stateController = StreamController<LdSubmitState<T>>.broadcast();
 
   Stream<LdSubmitState<T>> get stateStream => _stateController.stream;
+
+  Timer? _retryTimer;
+
+  final jitter = Random().nextInt(1500);
 
   LdSubmitController({
     required this.exceptionMapper,
@@ -32,15 +33,32 @@ class LdSubmitController<T> {
 
   void _setState(LdSubmitState<T> newState) {
     state = newState;
+
     if (_stateController.isClosed) return;
     _stateController.add(newState);
+
+    if (newState.remainingRetryTime != null &&
+        (_retryTimer == null || _retryTimer?.isActive == false)) {
+      _setupRetryTimer();
+    } else if (newState.remainingRetryTime == null) {
+      _retryTimer?.cancel();
+      _retryTimer = null;
+    }
   }
 
-  bool get canCancel =>
-      config.allowCancel == true && state.type == LdSubmitStateType.loading;
+  void _setupRetryTimer() {
+    _retryTimer?.cancel();
+    _retryTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      _retryTimerTick();
+    });
+  }
+
+  bool get showRetryIndicator => _retryTimer?.isActive == true;
+
+  bool get canCancel => config.allowCancel == true && _isLoading;
 
   Future<void> cancel() async {
-    if (config.allowCancel == false) {
+    if (!canCancel) {
       if (ldPrintDebugMessages) {
         debugPrint("Cannot cancel, allowCancel is false");
       }
@@ -58,10 +76,23 @@ class LdSubmitController<T> {
     _setState(LdSubmitState<T>(type: LdSubmitStateType.idle));
   }
 
-  Future<void> _trigger({LdExceptionRetryState? retryState}) async {
+  int get _maxRetryAttempts => config.retryConfig?.maxAttempts ?? 1;
+
+  Duration _getRetryDelay(int attempt) {
+    return Duration(milliseconds: pow(2, attempt).toInt() * 1000 + jitter);
+  }
+
+  Duration get totalRetryTime => _getRetryDelay(state.attempt);
+
+  Future<void> _trigger() async {
+    if (disposed) {
+      return;
+    }
+
     _setState(
       LdSubmitState<T>(
         type: LdSubmitStateType.loading,
+        attempt: state.attempt + 1,
       ),
     );
 
@@ -72,109 +103,77 @@ class LdSubmitController<T> {
       } else {
         res = await config.action();
       }
-      if (state.type != LdSubmitStateType.loading) return;
+      if (!_isLoading) return;
 
-      _setState(LdSubmitState<T>(type: LdSubmitStateType.result, result: res));
+      _setState(
+        LdSubmitState<T>(type: LdSubmitStateType.result, result: res),
+      );
     } catch (e, s) {
-      final retryCount = (retryState?.retryCount ?? 0) + 1;
-      final canRetry =
-          retryCount <= (config.retryConfig?.maxRetryAttempts ?? 1);
-      final exception = exceptionMapper
-          .handle(
-            e,
-            stackTrace: s,
-          )
-          .copyWith(
-            canRetry: canRetry,
-          );
+      // Somehow the state is not loading anymore...
+      if (!_isLoading) return;
+
+      // Convert the exception using the exceptionMapper
+      final exception = exceptionMapper.handle(e, stackTrace: s);
 
       if (ldPrintDebugMessages) {
         debugPrint("An error occured in LdSubmitController: $e \n $s");
       }
 
-      if (state.type != LdSubmitStateType.loading) return;
-
-      // Retry logic if automatic retries are configured
-      if (config.retryConfig != null && exception.canRetry) {
-        final retryDelay =
-            // Start with some jitter to avoid thundering herd
-            Random().nextInt(1500) +
-                // Calculate the delay based on the initial delay and the retry
-                // count, following an exponential backoff strategy
-                config.retryConfig!.initialRetryCountdown *
-                    (1 << (retryCount - 1));
-        final shouldRetry = retryCount <= config.retryConfig!.maxRetryAttempts;
-
-        retryState = LdExceptionRetryState(
-          retryCount: retryCount,
-          delay: retryDelay,
-        );
-
-        if (shouldRetry) {
-          if (ldPrintDebugMessages) {
-            debugPrint("Retrying in ${retryDelay ~/ 1000} seconds");
-          }
-
-          // We want to update the state each second (in order to update the UI)
-          for (var i = 0; i < retryDelay ~/ 1000; i++) {
-            _setState(
-              LdSubmitState<T>(
-                type: LdSubmitStateType.error,
-                error: exception.copyWith(
-                  canRetry: !config.retryConfig!.disableRetryButton,
-                  retryState: retryState.copyWith(
-                    delay: retryDelay - i * 1000,
-                  ),
-                ),
-              ),
-            );
-
-            await Future.delayed(const Duration(seconds: 1));
-
-            if (_disposed || state.type != LdSubmitStateType.error) {
-              return; // User canceled or state changed for some reason
-            }
-          }
-
-          // Handle the remaining milliseconds after the loop
-          await Future.delayed(Duration(milliseconds: retryDelay % 1000));
-
-          // Trigger the action again
-          if (config.retryConfig!.performAutomaticRetry) {
-            await _trigger(
-              retryState: retryState.copyWith(
-                delay: 0,
-                retryCount: retryCount,
-              ),
-            );
-            return;
-          }
-        }
-      }
-
       _setState(
         LdSubmitState(
           type: LdSubmitStateType.error,
+          attempt: state.attempt,
           error: exception.copyWith(
-            retryState: retryState?.copyWith(
-              delay: 0,
-            ),
+            attempt: state.attempt,
           ),
         ),
       );
+
+      // Handle the retry logic
+      final retryConfig = config.retryConfig;
+
+      final lastAttempt = state.attempt;
+      final exhaustedRetries = lastAttempt >= _maxRetryAttempts;
+
+      // Retry logic if automatic retries are configured, the exception can be
+      // retried and the retries have not been exhausted yet.
+      if (retryConfig != null && exception.canRetry && !exhaustedRetries) {
+        var retryDelay = _getRetryDelay(lastAttempt);
+
+        _setState(
+          LdSubmitState<T>(
+            type: LdSubmitStateType.error,
+            attempt: lastAttempt,
+            remainingRetryTime: retryDelay,
+            error: exception.copyWith(
+              attempt: lastAttempt,
+            ),
+          ),
+        );
+      }
     }
   }
 
-  bool get canRetry =>
-      state.type == LdSubmitStateType.error && state.error?.canRetry == true;
+  bool get _isError => state.type == LdSubmitStateType.error;
+  bool get _isLoading => state.type == LdSubmitStateType.loading;
+  bool get _isResult => state.type == LdSubmitStateType.result;
+  bool get _isIdle => state.type == LdSubmitStateType.idle;
 
-  bool get canRetrigger =>
-      state.type == LdSubmitStateType.error && state.error?.canRetry == true;
+  bool get canRetry {
+    if (!_isError) return false;
+    if (state.error?.canRetry == false) return false;
+    if (config.retryConfig != null) {
+      if (config.retryConfig!.disableRetryButton == true) return false;
+      if (state.attempt >= _maxRetryAttempts) return false;
+    }
+
+    return true;
+  }
+
+  bool get canRetrigger => _isError && state.error?.canRetry == true;
 
   bool get canTrigger =>
-      state.type == LdSubmitStateType.idle ||
-      canRetry ||
-      (state.type == LdSubmitStateType.result && config.allowResubmit == true);
+      _isIdle || canRetry || (_isResult && config.allowResubmit == true);
 
   Future<void> trigger() async {
     if (!canTrigger) {
@@ -183,7 +182,32 @@ class LdSubmitController<T> {
       }
       return;
     }
-    await _trigger(retryState: state.error?.retryState);
+    await _trigger();
+  }
+
+  void _retryTimerTick() {
+    if (_isError && state.remainingRetryTime != null) {
+      final remaining = state.remainingRetryTime! -
+          const Duration(
+            milliseconds: 100,
+          );
+
+      _setState(
+        state.copyWith(
+          remainingRetryTime: remaining,
+        ),
+      );
+
+      if (remaining <= Duration.zero) {
+        _nextAttempt();
+      }
+    }
+  }
+
+  void _nextAttempt() {
+    if (_isError) {
+      _trigger();
+    }
   }
 
   void reset() {
@@ -198,9 +222,11 @@ class LdSubmitController<T> {
   bool get disposed => _disposed;
 
   void dispose() {
-    if (state.type == LdSubmitStateType.loading) {
+    if (_isLoading) {
       cancel();
     }
+    _retryTimer?.cancel();
+
     _disposed = true;
     _stateController.close();
   }

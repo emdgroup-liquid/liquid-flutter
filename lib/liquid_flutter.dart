@@ -71,6 +71,7 @@ export 'src/portal.dart';
 export 'src/submit/exception_more_info_button.dart';
 export 'src/submit/exception/exception_view.dart';
 export 'src/submit/exception/exception.dart';
+export 'src/submit/exception/retry_indicator.dart';
 export 'src/submit/submit_loading_indicator.dart';
 export 'src/submit/submit.dart';
 export 'src/submit/builders/centered_builder.dart';

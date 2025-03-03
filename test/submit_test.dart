@@ -151,8 +151,17 @@ void main() {
     expect(find.text("Submit"), findsOneWidget);
   });
 
-  testWidgets("LdSubmit Automatic Retries", (WidgetTester tester) async {
-    Completer<int> completer = Completer<int>();
+  testWidgets("LdSubmit with custom exception mapper",
+      (WidgetTester tester) async {
+    final customMapper = LdExceptionMapper(
+      localizations: LiquidLocalizationsEn(),
+      onException: (e, {stackTrace}) {
+        return LdException(
+          message: "Custom exception",
+          type: LdHintType.error,
+        );
+      },
+    );
 
     await tester.pumpWidget(
       MaterialApp(
@@ -160,19 +169,13 @@ void main() {
         home: LdThemeProvider(
           child: LdPortal(
             child: Scaffold(
-              body: Portal(
+              body: LdExceptionMapperProvider(
+                exceptionMapper: customMapper,
                 child: LdSubmit<int>(
-                  config: LdSubmitConfig(
-                    action: () async {
-                      return await completer.future;
-                    },
-                    retryConfig: const LdSubmitRetryConfig(
-                      performAutomaticRetry: true,
-                      maxRetryAttempts: 3,
-                      initialRetryCountdown: 1000,
-                    ),
-                  ),
-                  builder: const LdSubmitInlineBuilder<int>(),
+                  config: LdSubmitConfig(action: () async {
+                    await Future.delayed(const Duration(milliseconds: 100));
+                    throw TimeoutException('Timeout');
+                  }),
                 ),
               ),
             ),
@@ -181,58 +184,116 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle(); // Ensure the UI is ready
+    await tester.pumpAndSettle();
 
+    // Verify initial state
     expect(find.byType(LdSubmit<int>), findsOneWidget);
     expect(find.byType(LdButton), findsOneWidget);
-    expect(find.text("Submit"), findsOneWidget);
 
-    // Trigger the action
-    await tester.tap(find.text("Submit"));
+    // Trigger action that will fail
+    await tester.tap(find.byType(LdButton));
     await tester.pump();
 
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    // Verify loading state
     expect(find.text("Loading..."), findsOneWidget);
 
-    // Simulate failure and automatic retry
-    completer.completeError(Exception('Error'));
-    // first retry will happen after 1 second, so we check if the "Retry in"
-    // text is there after 0.5 seconds
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(find.textContaining("Retry in"), findsOneWidget);
-    completer = Completer<int>();
-    // wait a bit more until the retry happens
-    await tester.pump(const Duration(milliseconds: 3000));
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    expect(find.text("Loading..."), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 200));
 
-    // Second retry
-    completer.completeError(Exception('Error'));
-    // second retry will happen after 2 seconds, so we check if the "Retry in"
-    // text is still there after 1.5 seconds
-    await tester.pump(const Duration(milliseconds: 1500));
-    expect(find.textContaining("Retry in"), findsOneWidget);
-    completer = Completer<int>();
-    // wait a bit more until the retry happens
-    await tester.pump(const Duration(milliseconds: 3000));
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    expect(find.text("Loading..."), findsOneWidget);
+    // Verify error state
+    expect(find.text("Custom exception"), findsOneWidget);
+    expect(
+      find.byType(LdButton),
+      findsNWidgets(2),
+    ); // Retry + More Info buttons
+  });
 
-    // Third retry
-    completer.completeError(Exception('Error'));
-    // third retry will happen after 4 seconds, so we check if the "Retry in"
-    // text is still there after 3.5 seconds
-    await tester.pump(const Duration(milliseconds: 3500));
-    expect(find.textContaining("Retry in"), findsOneWidget);
-    completer = Completer<int>();
-    // wait a bit more until the retry happens
-    await tester.pump(const Duration(milliseconds: 3000));
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    expect(find.text("Loading..."), findsOneWidget);
+  testWidgets("LdSubmit with retry config", (WidgetTester tester) async {
+    int calls = 0;
 
-    // Success case
-    completer.complete(42);
+    final controller = LdSubmitController(
+      exceptionMapper: LdExceptionMapper(
+        localizations: LiquidLocalizationsEn(),
+      ),
+      config: LdSubmitConfig(
+        action: () async {
+          calls++;
+
+          await Future.delayed(const Duration(milliseconds: 100));
+
+          throw Exception('Intentional error');
+        },
+        retryConfig: LdSubmitRetryConfig(
+          performAutomaticRetry: true,
+          maxAttempts: 2,
+          initialRetryCountdown: const Duration(milliseconds: 100),
+          disableRetryButton: true,
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [LiquidLocalizations.delegate],
+        home: LdThemeProvider(
+          child: LdPortal(
+            child: Scaffold(
+              body: LdSubmit<int>(
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
     await tester.pumpAndSettle();
-    expect(find.text("Submit"), findsOneWidget);
+
+    // Verify initial state
+    expect(find.byType(LdSubmit<int>), findsOneWidget);
+    expect(find.byType(LdButton), findsOneWidget);
+
+    // Trigger action that will fail
+    await tester.tap(find.byType(LdButton));
+
+    expect(calls, 1);
+
+    await tester.pump();
+
+    // Verify loading state
+    expect(find.text("Loading..."), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // Complete with error
+
+    await tester.pump();
+
+    final retryButton = find.byKey(const Key('retry-button'));
+
+    // Because we pass [disableRetryButton] to true, the retry button
+    // should not be shown
+
+    expect(retryButton, findsNothing);
+
+    expect(find.byType(LdExceptionRetryIndicator), findsOneWidget);
+
+    // Wait for retry countdown (can be up to 2 seconds because of jitter)
+
+    await tester.pump(controller.totalRetryTime);
+
+    await tester.pump();
+
+    expect(calls, 2);
+
+    // Verify automatic retry is triggered
+    expect(find.text("Loading..."), findsOneWidget);
+
+    await tester.pumpAndSettle();
+
+    // Verify retry button is disabled again
+    expect(retryButton, findsNothing);
+
+    // There should now be no retry indicator, because we exceeded the max attempts
+    expect(find.byType(LdExceptionRetryIndicator), findsNothing);
   });
 }

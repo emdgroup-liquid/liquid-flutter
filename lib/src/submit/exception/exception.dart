@@ -7,7 +7,7 @@ class LdExceptionRetryState {
 
   /// The left time to retry in milliseconds.
   /// It will be decremented each second by the [LdSubmitController].
-  final int delay;
+  final Duration delay;
 
   LdExceptionRetryState({
     required this.retryCount,
@@ -16,7 +16,7 @@ class LdExceptionRetryState {
 
   copyWith({
     int? retryCount,
-    int? delay,
+    Duration? delay,
   }) {
     return LdExceptionRetryState(
       retryCount: retryCount ?? this.retryCount,
@@ -38,10 +38,7 @@ class LdException extends Error {
   final String? moreInfo;
   final bool canRetry;
   final LdHintType type;
-
-  /// The state of the retry mechanism for this exception. Tracks the current
-  /// retry count and the left time to retry in milliseconds.
-  final LdExceptionRetryState? retryState;
+  final int? attempt;
 
   final dynamic exception;
 
@@ -53,9 +50,9 @@ class LdException extends Error {
     this.canRetry = true,
     this.type = LdHintType.error,
     this.moreInfo,
+    this.attempt,
     this.stackTrace,
     this.exception,
-    this.retryState,
   });
 
   LdException copyWith({
@@ -63,7 +60,7 @@ class LdException extends Error {
     String? moreInfo,
     bool? canRetry,
     LdHintType? type,
-    LdExceptionRetryState? retryState,
+    int? attempt,
     dynamic exception,
     StackTrace? stackTrace,
   }) {
@@ -72,9 +69,13 @@ class LdException extends Error {
       moreInfo: moreInfo ?? this.moreInfo,
       canRetry: canRetry ?? this.canRetry,
       type: type ?? this.type,
-      retryState: retryState ?? this.retryState,
       exception: exception ?? this.exception,
       stackTrace: stackTrace ?? this.stackTrace,
     );
+  }
+
+  @override
+  String toString() {
+    return 'LdException(message: $message, moreInfo: $moreInfo, canRetry: $canRetry, type: $type, retryState: $attempt, exception: $exception, stackTrace: $stackTrace)';
   }
 }
