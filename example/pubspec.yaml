@@ -91,3 +91,4 @@ icons_launcher:
 dependency_overrides:
   liquid_flutter:
     path: ./../
+  go_router: any

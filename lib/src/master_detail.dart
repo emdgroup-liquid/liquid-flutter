@@ -2,12 +2,18 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 typedef LdMasterDetailOnSelect<T> = Future<bool> Function(T item);
 typedef LdMasterDetailOnSelectCallback<T> = void Function(T? item);
+
+extension GoRouterExt on GoRouter {
+  /// Shortcut to get the current URI from the [GoRouter].
+  Uri get uri => routeInformationProvider.value.uri;
+}
 
 abstract class LdMasterDetailBuilder<T> {
   Widget buildDetailTitle(
@@ -80,6 +86,10 @@ class LdMasterDetail<T> extends StatefulWidget {
 
   final bool Function(SizingInformation size)? customSplitPredicate;
 
+  final Uri Function({T? item, required Uri uri})? detailsUrlBuilder;
+
+  final T? Function(Uri uri)? detailsUrlParser;
+
   const LdMasterDetail({
     required this.builder,
     this.detailPresentationMode = MasterDetailPresentationMode.page,
@@ -97,6 +107,12 @@ class LdMasterDetail<T> extends StatefulWidget {
 
     /// A custom predicate to determine if the split view should be used.
     this.customSplitPredicate,
+
+    /// A function to build the query parameters for the URL.
+    this.detailsUrlBuilder,
+
+    /// A function to parse the URL path into an item.
+    this.detailsUrlParser,
     super.key,
   });
 
@@ -118,6 +134,15 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
     await Future.delayed(Duration.zero);
     if (widget.selectedItem != null) {
       _onSelect(widget.selectedItem!);
+      return;
+    }
+
+    if (widget.detailsUrlParser != null) {
+      final Uri uri = GoRouter.of(context).uri;
+      final T item = widget.detailsUrlParser!(uri) as T;
+      if (item != null) {
+        _onSelect(item);
+      }
     }
   }
 
@@ -140,9 +165,12 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
     if (_inDetailView) {
       _navigator.maybePop();
     }
-    if (widget.detailPresentationMode == MasterDetailPresentationMode.dialog) {
-      //LdPortalController.of(context).closeEntry(_dialogKey);
+
+    if (widget.detailsUrlBuilder != null) {
+      Uri uri = GoRouter.of(context).uri;
+      GoRouter.of(context).go(widget.detailsUrlBuilder!(uri: uri).toString());
     }
+
     widget.onSelectionChange?.call(null);
   }
 
@@ -150,7 +178,14 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
     setState(() {
       _selectedItem = item;
     });
+
     widget.onSelectionChange?.call(item);
+    if (widget.detailsUrlBuilder != null) {
+      Uri uri = GoRouter.of(context).uri;
+      GoRouter.of(context)
+          .go(widget.detailsUrlBuilder!(item: item, uri: uri).toString());
+    }
+
     if (!useSplitView) {
       _inDetailView = true;
 
