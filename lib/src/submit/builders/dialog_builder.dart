@@ -50,13 +50,25 @@ class LdSubmitDialogBuilder<T> extends LdSubmitBuilder<T> {
     BuildContext context,
     LdSubmitController<T> controller,
   ) {
-    return errorBuilder != null
-        ? errorBuilder!(context, controller.state.error!, controller)
-        : LdExceptionView(
-            exception: controller.state.error!,
-            direction: Axis.vertical,
-            retry: controller.canRetry ? controller.trigger : null,
-          ).padL();
+    if (errorBuilder != null) {
+      return errorBuilder!(context, controller.state.error!, controller);
+    }
+
+    return LdAutoSpace(
+      children: [
+        LdExceptionView(
+          exception: controller.state.error!,
+          direction: Axis.vertical,
+          retry: controller.canRetry ? controller.trigger : null,
+        ),
+        if (controller.showRetryIndicator)
+          LdExceptionRetryIndicator(
+            attempt: controller.state.attempt,
+            remainingTime: controller.state.remainingRetryTime ?? Duration.zero,
+            totalRetryTime: controller.totalRetryTime,
+          ),
+      ],
+    );
   }
 
   @override

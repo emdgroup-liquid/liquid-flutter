@@ -5,8 +5,8 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 /// Configuration for (automatic) retries of a submit action.
 class LdSubmitRetryConfig {
   final bool performAutomaticRetry;
-  final int maxRetryAttempts;
-  final int initialRetryCountdown;
+  final int maxAttempts;
+  final Duration initialRetryCountdown;
   final bool disableRetryButton;
 
   const LdSubmitRetryConfig({
@@ -14,14 +14,14 @@ class LdSubmitRetryConfig {
     /// the retry button for a certain amount of time.
     this.performAutomaticRetry = true,
 
-    /// The maximum number of retry attempts. After this number is reached, the
+    /// The maximum number of attempts. After this number is reached, the
     /// retry button will be hidden. If set to 0, the retry button will be hidden
     /// immediately.
-    this.maxRetryAttempts = 3,
+    this.maxAttempts = 3,
 
     /// The initial countdown in milliseconds for the retry button. This value
     /// will be doubled after each failed attempt.
-    this.initialRetryCountdown = 1000,
+    this.initialRetryCountdown = const Duration(seconds: 1),
 
     /// If set to true, the retry button will be disabled while the delay is
     /// counting down. Hence, the user cannot trigger a retry manually.
@@ -29,18 +29,18 @@ class LdSubmitRetryConfig {
   })  : assert(
           !performAutomaticRetry ||
               !disableRetryButton ||
-              initialRetryCountdown > 0,
+              initialRetryCountdown > Duration.zero,
           "If either performAutomaticRetry or disableRetryButton is true, the initialRetryCountdown must be greater than 0",
         ),
         assert(
-          maxRetryAttempts >= 0,
+          maxAttempts >= 0,
           "maxRetryAttempts must be greater than 0",
         );
 
   /// A configuration that does not allow any retries.
   factory LdSubmitRetryConfig.noRetries() => const LdSubmitRetryConfig(
         performAutomaticRetry: false,
-        maxRetryAttempts: 0,
+        maxAttempts: 0,
       );
 }
 
@@ -55,6 +55,7 @@ class LdSubmitConfig<T> {
   final bool? allowCancel;
   final LdSubmitCallback<T> action;
   final VoidCallback? onCanceled;
+
   final LdSubmitRetryConfig? retryConfig;
 
   const LdSubmitConfig({

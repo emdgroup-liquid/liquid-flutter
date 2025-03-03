@@ -43,7 +43,16 @@ class LdExceptionMapperProvider extends StatelessWidget {
 class LdExceptionMapper {
   final LiquidLocalizations localizations;
 
-  const LdExceptionMapper({required this.localizations});
+  /// A function that can be used to handle custom exceptions. If the function
+  /// returns a non-null LdException, it will be used instead of the default
+  /// exception mapper. Otherwise, the default exception mapper will be used.
+  /// This function will never be called if the exception is already an LdException.
+  final LdException? Function(dynamic e, {StackTrace? stackTrace})? onException;
+
+  const LdExceptionMapper({
+    required this.localizations,
+    this.onException,
+  });
 
   static LdExceptionMapper of(BuildContext context) {
     return context.read<LdExceptionMapper>();
@@ -55,6 +64,13 @@ class LdExceptionMapper {
   }) {
     if (e is LdException) {
       return e;
+    }
+
+    if (onException != null) {
+      final exception = onException!(e, stackTrace: stackTrace);
+      if (exception != null) {
+        return exception;
+      }
     }
 
     final exception = LdException(

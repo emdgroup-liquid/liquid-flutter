@@ -49,23 +49,17 @@ class LdExceptionView extends StatelessWidget {
   }
 
   _buildRetryButton(BuildContext context) {
-    final isRetrying = (exception?.retryState?.delay ?? 0) > 0;
-    final text = isRetrying
-        ? LiquidLocalizations.of(context).retryIn(
-            Duration(milliseconds: exception!.retryState!.delay).inSeconds,
-          )
-        : LiquidLocalizations.of(context).retry;
-    if (!isRetrying && exception?.canRetry == false) {
-      // hide the button if the exception can't be retried and there is no retry
-      // countdown.
-      return const SizedBox.shrink();
-    }
-    return LdButton(
-      child: Text(text),
-      mode: LdButtonMode.filled,
-      color: LdTheme.of(context).error,
-      disabled: exception?.canRetry == false,
-      onPressed: retry ?? () {},
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        LdButton(
+          child: Text(LiquidLocalizations.of(context).retry),
+          key: const Key('retry-button'),
+          mode: LdButtonMode.filled,
+          color: LdTheme.of(context).error,
+          onPressed: retry!,
+        ),
+      ],
     );
   }
 
@@ -96,10 +90,7 @@ class LdExceptionView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildDialogButton(context, moreInfo),
-            if (retry != null || exception?.retryState != null) ...[
-              ldSpacerM,
-              _buildRetryButton(context)
-            ],
+            if (retry != null) ...[ldSpacerM, _buildRetryButton(context)],
           ],
         )
       ],
