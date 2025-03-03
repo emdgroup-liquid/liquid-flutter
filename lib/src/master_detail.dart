@@ -5,6 +5,7 @@ import 'package:flutter_portal/flutter_portal.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:multi_split_view/multi_split_view.dart';
+import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 typedef LdMasterDetailOnSelect<T> = Future<bool> Function(T item);
@@ -67,6 +68,34 @@ enum MasterDetailPresentationMode { page, dialog }
 
 enum MasterDetailLayoutMode { auto, split, compact }
 
+/// Configuration for a master detail shell route.
+class LdMasterDetailShellRouteConfig<T> {
+  final String basePath;
+  final String detailPath;
+  final String Function(T item) itemIdGetter;
+  final T? Function(String id) itemProvider;
+
+  String get detailPathParam => detailPath
+      .split('/')
+      .lastWhere((segment) => segment.startsWith(':'))
+      .substring(1);
+
+  LdMasterDetailShellRouteConfig({
+    /// The base path for the master detail view.
+    required this.basePath,
+
+    /// The path, if the detail view is shown (either as a page, dialog, or in
+    /// a separate view).
+    required this.detailPath,
+
+    /// A function to get the item ID from an item.
+    required this.itemIdGetter,
+
+    /// A function to retrieve an item from an ID.
+    required this.itemProvider,
+  });
+}
+
 /// A master detail view that shows a list of items on the left and a detail view on the right.
 /// The detail view is shown as a page or a dialog if the screen is small.
 class LdMasterDetail<T> extends StatefulWidget {
@@ -86,10 +115,6 @@ class LdMasterDetail<T> extends StatefulWidget {
 
   final bool Function(SizingInformation size)? customSplitPredicate;
 
-  final Uri Function({T? item, required Uri uri})? detailsUrlBuilder;
-
-  final T? Function(Uri uri)? detailsUrlParser;
-
   const LdMasterDetail({
     required this.builder,
     this.detailPresentationMode = MasterDetailPresentationMode.page,
@@ -107,14 +132,43 @@ class LdMasterDetail<T> extends StatefulWidget {
 
     /// A custom predicate to determine if the split view should be used.
     this.customSplitPredicate,
-
-    /// A function to build the query parameters for the URL.
-    this.detailsUrlBuilder,
-
-    /// A function to parse the URL path into an item.
-    this.detailsUrlParser,
     super.key,
   });
+
+  /// Helper function to create a router configuration that uses this component
+  /// as a shell route.
+  static ShellRoute createShellRoute<T>({
+    required Widget Function(
+      BuildContext context,
+      GoRouterState state,
+    ) childBuilder,
+    required LdMasterDetailShellRouteConfig<T> routeConfig,
+  }) {
+    return ShellRoute(
+      pageBuilder: (context, state, child) => NoTransitionPage<void>(
+        key: state.pageKey,
+        child: Provider<LdMasterDetailShellRouteConfig<T>?>.value(
+          value: routeConfig, // Provide the routeConfig to LdMasterDetail
+          child: childBuilder(context, state),
+        ),
+      ),
+
+      // We just define the routes with a dummy builder, as the actual
+      // building is done in the childBuilder
+      routes: [
+        // Dummy base route
+        GoRoute(
+          path: routeConfig.basePath,
+          builder: (context, state) => const SizedBox.shrink(),
+        ),
+        // Dummy detail route
+        GoRoute(
+          path: "/${routeConfig.basePath}/${routeConfig.detailPath}",
+          builder: (context, state) => const SizedBox.shrink(),
+        ),
+      ],
+    );
+  }
 
   @override
   State<LdMasterDetail<T>> createState() => _LdMasterDetailState<T>();
@@ -123,6 +177,8 @@ class LdMasterDetail<T> extends StatefulWidget {
 class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
     with SingleTickerProviderStateMixin {
   T? _selectedItem;
+  LdMasterDetailShellRouteConfig<T>? get _routeConfig =>
+      Provider.of<LdMasterDetailShellRouteConfig<T>?>(context, listen: false);
 
   @override
   initState() {
@@ -137,11 +193,19 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
       return;
     }
 
-    if (widget.detailsUrlParser != null) {
-      final Uri uri = GoRouter.of(context).uri;
-      final T item = widget.detailsUrlParser!(uri) as T;
-      if (item != null) {
-        _onSelect(item);
+    _handleInitialRoute();
+  }
+
+  /// Try to select an item from the route parameters.
+  void _handleInitialRoute() {
+    final routeConfig = _routeConfig;
+    if (routeConfig != null && _selectedItem == null) {
+      final router = GoRouter.of(context);
+      final itemId = router.state.pathParameters[routeConfig.detailPathParam];
+      final selectedItem =
+          itemId != null ? routeConfig.itemProvider(itemId) : null;
+      if (selectedItem != null) {
+        _onSelect(selectedItem);
       }
     }
   }
@@ -162,29 +226,37 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
     setState(() {
       _selectedItem = null;
     });
+
     if (_inDetailView) {
       _navigator.maybePop();
     }
 
-    if (widget.detailsUrlBuilder != null) {
-      Uri uri = GoRouter.of(context).uri;
-      GoRouter.of(context).go(widget.detailsUrlBuilder!(uri: uri).toString());
+    final routeConfig = _routeConfig;
+    if (routeConfig != null) {
+      // Go back to the base path if the detail view is closed
+      GoRouter.of(context).go(routeConfig.basePath);
     }
 
     widget.onSelectionChange?.call(null);
   }
 
   Future<bool> _onSelect(T item) async {
+    final routeConfig = _routeConfig;
+    if (routeConfig != null) {
+      final itemId = routeConfig.itemIdGetter(item);
+      GoRouter.of(context).go(
+        "${routeConfig.basePath}/${routeConfig.detailPath}".replaceFirst(
+          ":${routeConfig.detailPathParam}",
+          itemId,
+        ),
+      );
+    }
+
     setState(() {
       _selectedItem = item;
     });
 
     widget.onSelectionChange?.call(item);
-    if (widget.detailsUrlBuilder != null) {
-      Uri uri = GoRouter.of(context).uri;
-      GoRouter.of(context)
-          .go(widget.detailsUrlBuilder!(item: item, uri: uri).toString());
-    }
 
     if (!useSplitView) {
       _inDetailView = true;
@@ -397,7 +469,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
   }
 
   @override
-  Widget build(BuildContext _) {
+  Widget build(BuildContext context) {
     return ResponsiveBuilder(
       builder: (context, size) {
         bool useSplit = _useSplitView(size);
