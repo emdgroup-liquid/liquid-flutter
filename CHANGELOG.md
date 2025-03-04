@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [19.4.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v19.3.0...v19.4.0) (2025-03-04)
+
+
+### Features
+
+* add automatic retry mechanism for LdSubmit ([8d66475](https://github.com/emdgroup-liquid/liquid-flutter/commit/8d66475c4ba08bf11ae7b5d9efead2565eac2791))
+
+
+### Bug Fixes
+
+* adjust LdSubmit to use a timer ([e3728f4](https://github.com/emdgroup-liquid/liquid-flutter/commit/e3728f4a9cd634d610f28079d9bb5dd218233149))
+* align exception in center ([6cc898d](https://github.com/emdgroup-liquid/liquid-flutter/commit/6cc898d21371227da80eb22f1de3fb62126f8839))
+* Ensure existing exception mapper is not overridden when already present ([008a33a](https://github.com/emdgroup-liquid/liquid-flutter/commit/008a33a1b9673796a7fe8e8b48067a9913ca9005))
+* exception dialog popping the wrong context ([d3c7023](https://github.com/emdgroup-liquid/liquid-flutter/commit/d3c70233980b37ce44f56f1374ce490c08e7d047))
+* reset retryState in final error handling of submit controller ([03262ac](https://github.com/emdgroup-liquid/liquid-flutter/commit/03262acb722e94188186257deb1f0f57716648ea))
+
 ## [19.3.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v19.2.0...v19.3.0) (2025-03-03)
 
 
