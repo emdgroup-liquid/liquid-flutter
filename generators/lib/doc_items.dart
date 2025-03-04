@@ -36,6 +36,9 @@ class Property {
   String description;
 
   List<String> features;
+
+  String get nameString => "parameter '$name'";
+  String get typeString => "type '$type'";
 }
 
 class Constructor {
@@ -50,6 +53,8 @@ class Constructor {
   List<Parameter> signature;
 
   List<String> features;
+
+  String get nameString => "constructor '${name.isEmpty ? 'default' : name}'";
 }
 
 class Parameter {
@@ -70,4 +75,7 @@ class Parameter {
   bool named;
 
   bool required;
+
+  String get nameString => "parameter '$name'";
+  String get typeString => "type '$type'";
 }
