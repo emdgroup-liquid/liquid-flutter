@@ -163,6 +163,8 @@ void main() {
       },
     );
 
+    final completer = Completer<void>();
+
     await tester.pumpWidget(
       MaterialApp(
         localizationsDelegates: const [LiquidLocalizations.delegate],
@@ -173,7 +175,7 @@ void main() {
                 exceptionMapper: customMapper,
                 child: LdSubmit<int>(
                   config: LdSubmitConfig(action: () async {
-                    await Future.delayed(const Duration(milliseconds: 100));
+                    await completer.future;
                     throw TimeoutException('Timeout');
                   }),
                 ),
@@ -197,7 +199,9 @@ void main() {
     // Verify loading state
     expect(find.text("Loading..."), findsOneWidget);
 
-    await tester.pump(const Duration(milliseconds: 200));
+    completer.complete();
+
+    await tester.pumpAndSettle();
 
     // Verify error state
     expect(find.text("Custom exception"), findsOneWidget);
@@ -210,6 +214,8 @@ void main() {
   testWidgets("LdSubmit with retry config", (WidgetTester tester) async {
     int calls = 0;
 
+    var completer = Completer<void>();
+
     final controller = LdSubmitController(
       exceptionMapper: LdExceptionMapper(
         localizations: LiquidLocalizationsEn(),
@@ -218,7 +224,7 @@ void main() {
         action: () async {
           calls++;
 
-          await Future.delayed(const Duration(milliseconds: 100));
+          await completer.future;
 
           throw Exception('Intentional error');
         },
@@ -262,7 +268,9 @@ void main() {
     // Verify loading state
     expect(find.text("Loading..."), findsOneWidget);
 
-    await tester.pump(const Duration(milliseconds: 200));
+    completer.complete();
+
+    await tester.pump();
 
     // Complete with error
 
@@ -272,21 +280,20 @@ void main() {
 
     // Because we pass [disableRetryButton] to true, the retry button
     // should not be shown
-
     expect(retryButton, findsNothing);
-
     expect(find.byType(LdExceptionRetryIndicator), findsOneWidget);
 
-    // Wait for retry countdown (can be up to 2 seconds because of jitter)
+    completer = Completer<void>();
 
     await tester.pump(controller.totalRetryTime);
-
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
 
     expect(calls, 2);
 
     // Verify automatic retry is triggered
     expect(find.text("Loading..."), findsOneWidget);
+
+    completer.complete();
 
     await tester.pumpAndSettle();
 
