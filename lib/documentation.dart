@@ -11336,6 +11336,79 @@ const ldDocComponents = [
     methods: ['build'],
   ),
   LdDocComponent(
+    name: 'LdSubmitRetryConfig',
+    isNullSafe: true,
+    description: ' Configuration for (automatic) retries of a submit action.',
+    properties: [
+      LdDocProperty(
+        name: 'performAutomaticRetry',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'maxAttempts',
+        type: 'int',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'initialRetryCountdown',
+        type: 'Duration',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'disableRetryButton',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'performAutomaticRetry',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'maxAttempts',
+            type: 'int',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'initialRetryCountdown',
+            type: 'Duration',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'disableRetryButton',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      ),
+      LdDocConstructor(
+        name: 'noRetries',
+        signature: [],
+        features: ['factory'],
+      ),
+    ],
+    methods: [],
+  ),
+  LdDocComponent(
     name: 'LdSubmitConfig',
     isNullSafe: true,
     description: ' A configuration for a submit action.',
@@ -11349,12 +11422,6 @@ const ldDocComponents = [
       LdDocProperty(
         name: 'submitText',
         type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'allowRetry',
-        type: 'bool?',
         description: '',
         features: ['final'],
       ),
@@ -11400,6 +11467,12 @@ const ldDocComponents = [
         description: '',
         features: ['final'],
       ),
+      LdDocProperty(
+        name: 'retryConfig',
+        type: 'LdSubmitRetryConfig?',
+        description: '',
+        features: ['final'],
+      ),
     ],
     constructors: [
       LdDocConstructor(
@@ -11415,13 +11488,6 @@ const ldDocComponents = [
           LdDocParameter(
             name: 'submitText',
             type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'allowRetry',
-            type: 'bool?',
             description: '',
             named: true,
             required: false,
@@ -11469,6 +11535,13 @@ const ldDocComponents = [
             required: false,
           ),
           LdDocParameter(
+            name: 'retryConfig',
+            type: 'LdSubmitRetryConfig?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
             name: 'action',
             type: 'Future<T> Function()',
             description: '',
@@ -11503,6 +11576,30 @@ const ldDocComponents = [
         type: 'T?',
         description: '',
         features: ['final'],
+      ),
+      LdDocProperty(
+        name: '_attempt',
+        type: 'int',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: '_remainingRetryTime',
+        type: 'Duration?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'attempt',
+        type: 'int',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'remainingRetryTime',
+        type: 'Duration?',
+        description: '',
+        features: [],
       ),
       LdDocProperty(
         name: 'type',
@@ -11542,6 +11639,20 @@ const ldDocComponents = [
             required: false,
           ),
           LdDocParameter(
+            name: 'attempt',
+            type: 'int',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'remainingRetryTime',
+            type: 'Duration?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
             name: 'result',
             type: 'T?',
             description: '',
@@ -11552,7 +11663,10 @@ const ldDocComponents = [
         features: [],
       )
     ],
-    methods: [],
+    methods: [
+      'toString',
+      'copyWith',
+    ],
   ),
   LdDocComponent(
     name: 'LdSubmitController',
@@ -11579,6 +11693,18 @@ const ldDocComponents = [
         features: ['final'],
       ),
       LdDocProperty(
+        name: '_retryTimer',
+        type: 'Timer?',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'jitter',
+        type: 'int',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
         name: 'state',
         type: 'LdSubmitState<T>',
         description: '',
@@ -11597,7 +11723,49 @@ const ldDocComponents = [
         features: [],
       ),
       LdDocProperty(
+        name: 'showRetryIndicator',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
         name: 'canCancel',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_maxRetryAttempts',
+        type: 'int',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'totalRetryTime',
+        type: 'Duration',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_isError',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_isLoading',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_isResult',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_isIdle',
         type: 'bool',
         description: '',
         features: [],
@@ -11652,9 +11820,13 @@ const ldDocComponents = [
     methods: [
       'init',
       '_setState',
+      '_setupRetryTimer',
       'cancel',
+      '_getRetryDelay',
       '_trigger',
       'trigger',
+      '_retryTimerTick',
+      '_nextAttempt',
       'reset',
       'dispose',
     ],
@@ -11706,13 +11878,7 @@ const ldDocComponents = [
         type: 'LdException?',
         description: '',
         features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'close',
-        type: 'void Function()',
-        description: '',
-        features: ['final'],
-      ),
+      )
     ],
     constructors: [
       LdDocConstructor(
@@ -11728,13 +11894,6 @@ const ldDocComponents = [
           LdDocParameter(
             name: 'error',
             type: 'LdException?',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'close',
-            type: 'void Function()',
             description: '',
             named: true,
             required: true,
@@ -11805,7 +11964,14 @@ const ldDocComponents = [
         type: 'LiquidLocalizations',
         description: '',
         features: ['final'],
-      )
+      ),
+      LdDocProperty(
+        name: 'onException',
+        type: 'LdException? Function(dynamic, {StackTrace? stackTrace})?',
+        description:
+            '/// A function that can be used to handle custom exceptions. If the function\n/// returns a non-null LdException, it will be used instead of the default\n/// exception mapper. Otherwise, the default exception mapper will be used.\n/// This function will never be called if the exception is already an LdException.',
+        features: ['final'],
+      ),
     ],
     constructors: [
       LdDocConstructor(
@@ -11817,7 +11983,14 @@ const ldDocComponents = [
             description: '',
             named: true,
             required: true,
-          )
+          ),
+          LdDocParameter(
+            name: 'onException',
+            type: 'LdException? Function(dynamic, {StackTrace? stackTrace})?',
+            description: '',
+            named: true,
+            required: false,
+          ),
         ],
         features: ['const'],
       )
@@ -11931,6 +12104,52 @@ const ldDocComponents = [
     ],
   ),
   LdDocComponent(
+    name: 'LdExceptionRetryState',
+    isNullSafe: true,
+    description: ' The state of the retry mechanism.',
+    properties: [
+      LdDocProperty(
+        name: 'retryCount',
+        type: 'int',
+        description: '/// The current retry count',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'delay',
+        type: 'Duration',
+        description:
+            '/// The left time to retry in milliseconds.\n/// It will be decremented each second by the [LdSubmitController].',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'retryCount',
+            type: 'int',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'delay',
+            type: 'Duration',
+            description: '',
+            named: true,
+            required: true,
+          ),
+        ],
+        features: [],
+      )
+    ],
+    methods: [
+      'copyWith',
+      'toString',
+    ],
+  ),
+  LdDocComponent(
     name: 'LdException',
     isNullSafe: true,
     description:
@@ -11957,6 +12176,12 @@ const ldDocComponents = [
       LdDocProperty(
         name: 'type',
         type: 'LdHintType',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'attempt',
+        type: 'int?',
         description: '',
         features: ['final'],
       ),
@@ -12006,6 +12231,13 @@ const ldDocComponents = [
             required: false,
           ),
           LdDocParameter(
+            name: 'attempt',
+            type: 'int?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
             name: 'stackTrace',
             type: 'StackTrace?',
             description: '',
@@ -12023,7 +12255,78 @@ const ldDocComponents = [
         features: [],
       )
     ],
-    methods: [],
+    methods: [
+      'copyWith',
+      'toString',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdExceptionRetryIndicator',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'attempt',
+        type: 'int',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'remainingTime',
+        type: 'Duration',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'totalRetryTime',
+        type: 'Duration',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'progress',
+        type: 'double',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'attempt',
+            type: 'int',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'remainingTime',
+            type: 'Duration',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'totalRetryTime',
+            type: 'Duration',
+            description: '',
+            named: true,
+            required: true,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
   ),
   LdDocComponent(
     name: 'LdSubmitLoadingIndicator',
@@ -12246,7 +12549,7 @@ const ldDocComponents = [
         features: [],
       )
     ],
-    methods: [],
+    methods: ['retryIn'],
   ),
   LdDocComponent(
     name: 'LiquidLocalizations',
@@ -12443,7 +12746,10 @@ const ldDocComponents = [
         features: [],
       )
     ],
-    methods: ['of'],
+    methods: [
+      'of',
+      'retryIn',
+    ],
   ),
   LdDocComponent(
     name: '_LiquidLocalizationsDelegate',
@@ -12622,7 +12928,7 @@ const ldDocComponents = [
         features: [],
       )
     ],
-    methods: [],
+    methods: ['retryIn'],
   ),
   LdDocComponent(
     name: 'LdNotification',
