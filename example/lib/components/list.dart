@@ -18,10 +18,12 @@ class _ListDemoState extends State<ListDemo> {
   bool _groupSequentially = false;
 
   bool _simulateError = false;
+  bool _bidirectionalScrolling = false;
 
   final Set<int> _selectedItems = {};
 
-  late final LdPaginator<int> _paginator = LdPaginator<int>(
+  late LdPaginator<int> _paginator = LdPaginator<int>(
+    startPage: 0,
     fetchListFunction: _fetchItems,
   );
 
@@ -41,13 +43,11 @@ class _ListDemoState extends State<ListDemo> {
       );
     }
 
-    if (loadedItems >= 100) {
-      return LdListPage<int>(newItems: [], hasMore: false, total: 100);
-    }
     return LdListPage<int>(
-        newItems: List.generate(10, (index) => loadedItems + index),
-        hasMore: true,
-        total: 100);
+      newItems: List.generate(10, (index) => page * 10 + index),
+      hasMore: page < 9,
+      total: 100,
+    );
   }
 
   void _selectItem(int item) {
@@ -165,6 +165,18 @@ class _ListDemoState extends State<ListDemo> {
                     onChanged: (value) {
                       setState(() {
                         _simulateError = value;
+                      });
+                    }),
+                LdToggle(
+                    checked: _bidirectionalScrolling,
+                    label: "Bidirectional scrolling",
+                    onChanged: (value) {
+                      setState(() {
+                        _bidirectionalScrolling = value;
+                        _paginator = LdPaginator<int>(
+                          startPage: _bidirectionalScrolling ? 5 : 0,
+                          fetchListFunction: _fetchItems,
+                        );
                       });
                     }),
               ],
