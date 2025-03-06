@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [19.5.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v19.4.0...v19.5.0) (2025-03-06)
+
+
+### Features
+
+* add API change type detection in pr workflow ([bef4ee8](https://github.com/emdgroup-liquid/liquid-flutter/commit/bef4ee88d31e0e6f6599baf4b3fc58a6912914f6))
+* implement api documentation comparator script ([ed76990](https://github.com/emdgroup-liquid/liquid-flutter/commit/ed7699032b8d61399688ef5c7bc92df6ba98f063))
+
+
+### Bug Fixes
+
+* update pr workflow to use origin/main as reference for API detection ([0c84aa6](https://github.com/emdgroup-liquid/liquid-flutter/commit/0c84aa62d4bd3bf77e4fc2027c656406ca48ad2b))
+
 ## [19.4.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v19.3.0...v19.4.0) (2025-03-04)
 
 
