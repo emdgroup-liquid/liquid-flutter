@@ -116,8 +116,7 @@ class _LdListState<T, GroupingCriterion>
     extends State<LdList<T, GroupingCriterion>> {
   // Holds the items that are currently displayed in the list
   List<_ListItem<T, GroupingCriterion>> _groupedItems = [];
-  final ScrollController _scrollController =
-      ScrollController(keepScrollOffset: false);
+  final ScrollController _scrollController = ScrollController();
   bool _initialScrollPerformed = false;
 
   // Re-group the items in the list
@@ -377,7 +376,8 @@ class _LdListState<T, GroupingCriterion>
           !_scrollController.hasClients ||
           !mounted ||
           !widget.isBidirectionalScrollingEnabled ||
-          !widget.showMissingItemsAsLoading) {
+          !widget.showMissingItemsAsLoading ||
+          _groupedItems.isEmpty) {
         return;
       }
       _initialScrollPerformed = true;
