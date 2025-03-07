@@ -85,6 +85,8 @@ jobs:
         run: |
           IFS='.' read -r OLD_MAJOR OLD_MINOR OLD_PATCH <<< "$PREVIOUS_VERSION"
           IFS='.' read -r NEW_MAJOR NEW_MINOR NEW_PATCH <<< "${{ steps.get_new_version.outputs.result }}"
+          echo "Old version: $PREVIOUS_VERSION"
+          echo "New version: ${{ steps.get_new_version.outputs.result }}"
 
           if [[ "$NEW_MAJOR" -gt "$OLD_MAJOR" ]]; then
             DETECTED_CHANGE="major"
