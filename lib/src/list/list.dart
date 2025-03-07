@@ -1,19 +1,42 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/list/list_error.dart';
+import 'package:liquid_flutter/src/list/position_retained_scroll_physics.dart';
 
 class _ListItem<T, SeperationCriterion> {
   _ListItem({
     this.item,
     this.isSeparator = false,
     this.seperationCriterion,
+    this.page,
   });
   final T? item;
   // use a bool since T or SeperationCriterion can be null
   final bool isSeparator;
   final SeperationCriterion? seperationCriterion;
+
+  /// The page this item belongs to
+  final int? page;
+}
+
+extension GetItemList<T> on LdPaginator<T> {
+  List<_ListItem<T, GroupingCriterion>> currentList<GroupingCriterion>() {
+    final result = <_ListItem<T, GroupingCriterion>>[];
+    for (int i = 0; i < totalItems ~/ pageSize; i++) {
+      final page = pages[i];
+      if (page != null) {
+        result.addAll(page.newItems
+            .map((item) => _ListItem<T, GroupingCriterion>(item: item, page: i))
+            .toList());
+      } else {
+        result.addAll(List<_ListItem<T, GroupingCriterion>>.filled(
+          pageSize,
+          _ListItem<T, GroupingCriterion>(page: i),
+        ));
+      }
+    }
+    return result;
+  }
 }
 
 class LdList<T, GroupingCriterion> extends StatefulWidget {
@@ -56,9 +79,13 @@ class LdList<T, GroupingCriterion> extends StatefulWidget {
 
   // Bidirectional scrolling properties
   final bool? enableBidirectionalScrolling;
-  bool get _enableBidirectionalScrolling =>
+  bool get isBidirectionalScrollingEnabled =>
       enableBidirectionalScrolling ?? data.startPage > 0;
-  final double topScrollThreshold;
+
+  /// Whether or not each missing item (i.e. items of a page that is not loaded
+  /// yet) should be shown as a loading indicator.
+  /// This is automatically set to true if [assumedItemHeight] is not null.
+  bool get showMissingItemsAsLoading => assumedItemHeight != null;
 
   const LdList({
     super.key,
@@ -78,7 +105,6 @@ class LdList<T, GroupingCriterion> extends StatefulWidget {
     this.groupSequentialItems = false,
     this.shrinkWrap = false,
     this.enableBidirectionalScrolling,
-    this.topScrollThreshold = 50.0,
   });
 
   @override
@@ -90,11 +116,9 @@ class _LdListState<T, GroupingCriterion>
     extends State<LdList<T, GroupingCriterion>> {
   // Holds the items that are currently displayed in the list
   List<_ListItem<T, GroupingCriterion>> _groupedItems = [];
-  final ScrollController _scrollController = ScrollController();
-  bool _isLoadingPrevious = false;
-
-  final topLoadingKey = GlobalKey();
-  final bottomLoadingKey = GlobalKey();
+  final ScrollController _scrollController =
+      ScrollController(keepScrollOffset: false);
+  bool _initialScrollPerformed = false;
 
   // Re-group the items in the list
   List<_ListItem<T, GroupingCriterion>> _groupItemsSequentially() {
@@ -104,8 +128,12 @@ class _LdListState<T, GroupingCriterion>
 
     GroupingCriterion? lastSeperationCriterion;
 
-    for (final item in widget.data.currentList) {
-      final seperationCriterion = widget.groupingCriterion!(item);
+    for (final item in widget.data.currentList<GroupingCriterion>()) {
+      if (item.item == null) {
+        groupedItems.add(_ListItem<T, GroupingCriterion>(page: item.page));
+        continue;
+      }
+      final seperationCriterion = widget.groupingCriterion!(item.item!);
       if (lastSeperationCriterion != seperationCriterion) {
         groupedItems.add(
           _ListItem(
@@ -115,7 +143,7 @@ class _LdListState<T, GroupingCriterion>
         );
         lastSeperationCriterion = seperationCriterion;
       }
-      groupedItems.add(_ListItem(item: item));
+      groupedItems.add(item);
     }
 
     return groupedItems;
@@ -124,118 +152,40 @@ class _LdListState<T, GroupingCriterion>
   List<_ListItem<T, GroupingCriterion>> _groupItemsUniformly() {
     final Map<GroupingCriterion, List<T>> groupedItems = {};
 
-    for (final item in widget.data.currentList) {
-      final seperationCriterion = widget.groupingCriterion!(item);
+    final emptyItems = <_ListItem<T, GroupingCriterion>>[];
+    for (final item in widget.data.currentList<GroupingCriterion>()) {
+      if (item.item == null) {
+        emptyItems.add(_ListItem<T, GroupingCriterion>(page: item.page));
+        continue;
+      }
+      final seperationCriterion = widget.groupingCriterion!(item.item!);
       if (!groupedItems.containsKey(seperationCriterion)) {
         groupedItems[seperationCriterion] = [];
       }
-      groupedItems[seperationCriterion]!.add(item);
+      groupedItems[seperationCriterion]!.add(item.item!);
     }
 
-    return groupedItems.entries
-        .map((entry) => [
-              _ListItem<T, GroupingCriterion>(
-                isSeparator: true,
-                seperationCriterion: entry.key,
-              ),
-              ...entry.value
-                  .map((item) => _ListItem<T, GroupingCriterion>(item: item))
-            ])
-        .expand((element) => element)
-        .toList(growable: false);
+    return [
+      ...groupedItems.entries
+          .map((entry) => [
+                _ListItem<T, GroupingCriterion>(
+                  isSeparator: true,
+                  seperationCriterion: entry.key,
+                ),
+                ...entry.value
+                    .map((item) => _ListItem<T, GroupingCriterion>(item: item))
+              ])
+          .expand((element) => element)
+          .toList(growable: false),
+      ...emptyItems
+    ].toList(growable: false);
   }
 
   @override
   void initState() {
     widget.data.addListener(_onDataChange);
     _onDataChange();
-    _initBidirectionalScrolling();
     super.initState();
-  }
-
-  /// Initialize bidirectional scrolling if enabled
-  /// Returns true if bidirectional scrolling is enabled
-  bool _initBidirectionalScrolling() {
-    if (widget._enableBidirectionalScrolling) {
-      _scrollController.addListener(_scrollListener);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scrollController.hasClients &&
-            _scrollController.position.pixels <= widget.topScrollThreshold &&
-            widget.data.hasMoreDataPrev) {
-          _loadPreviousPage(forceScrollUp: true);
-        }
-      });
-    }
-    return widget._enableBidirectionalScrolling;
-  }
-
-  void _scrollListener() {
-    if (!widget._enableBidirectionalScrolling ||
-        widget.data.busy ||
-        _isLoadingPrevious) {
-      return;
-    }
-
-    final topThreshold =
-        (widget.assumedItemHeight ?? 0) * widget.data.remainingItemsAbove +
-            widget.topScrollThreshold;
-
-    // Check if we're at the top and need to load previous
-    if (_scrollController.position.pixels <= topThreshold &&
-        widget.data.hasMoreDataPrev) {
-      _loadPreviousPage();
-    }
-  }
-
-  Future<void> _loadPreviousPage({forceScrollUp = false}) async {
-    if (_isLoadingPrevious) return;
-
-    setState(() {
-      _isLoadingPrevious = true;
-    });
-
-    // Save the current list before prepending
-    final previousList = List.from(widget.data.currentList);
-
-    // Load previous page data
-    await widget.data.previousPage();
-
-    final scrollUp = widget.assumedItemHeight == null &&
-        widget.data.currentList.length - previousList.length > 0;
-    print('Scroll up: $scrollUp, force: $forceScrollUp');
-
-    if (forceScrollUp || scrollUp) {
-      // If the list has changed, we scroll a bit up to make the transition
-      // smoother (otherwise the user would be directly at the top of the list
-      // and expect another load to happen)
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollUp();
-      });
-    }
-
-    setState(() {
-      _isLoadingPrevious = false;
-    });
-  }
-
-  void _scrollUp() {
-    if (!_scrollController.hasClients) {
-      return;
-    }
-    print('Scrolling up');
-
-    final jumpOffsetItemCount = widget.assumedItemHeight != null
-        ? widget.data.remainingItemsAbove
-        : widget.header != null
-            ? 2
-            : 1;
-    final jumpOffset = max(
-        jumpOffsetItemCount * (widget.assumedItemHeight ?? 50.0),
-        widget.topScrollThreshold * 2);
-
-    // reset scroll controller velocity
-    _scrollController.position
-        .jumpTo(_scrollController.position.pixels + jumpOffset);
   }
 
   @override
@@ -248,13 +198,7 @@ class _LdListState<T, GroupingCriterion>
     if (widget.data != oldWidget.data) {
       oldWidget.data.removeListener(_onDataChange);
       widget.data.addListener(_onDataChange);
-    }
-
-    if (widget._enableBidirectionalScrolling !=
-        oldWidget._enableBidirectionalScrolling) {
-      if (!_initBidirectionalScrolling()) {
-        _scrollController.removeListener(_scrollListener);
-      }
+      _initialScrollPerformed = false;
     }
 
     super.didUpdateWidget(oldWidget);
@@ -263,7 +207,6 @@ class _LdListState<T, GroupingCriterion>
   @override
   void dispose() {
     widget.data.removeListener(_onDataChange);
-    _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
     super.dispose();
   }
@@ -288,28 +231,20 @@ class _LdListState<T, GroupingCriterion>
         widget.seperatorBuilder != null) {
       setState(() {
         _groupedItems = intersperse(
-                _ListItem<T, GroupingCriterion>(isSeparator: true),
-                widget.data.currentList
-                    .map((item) => _ListItem<T, GroupingCriterion>(item: item)))
-            .toList(growable: false);
+            _ListItem<T, GroupingCriterion>(isSeparator: true),
+            widget.data
+                .currentList<GroupingCriterion>()
+                .map((item) => item)).toList(growable: false);
       });
     } else {
       setState(() {
-        _groupedItems = widget.data.currentList
-            .map((item) => _ListItem<T, GroupingCriterion>(item: item))
+        _groupedItems = widget.data
+            .currentList<GroupingCriterion>()
+            .map((item) => item)
             .toList(growable: false);
       });
     }
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        // Force a layout rebuild and position recalculation
-        _scrollController.position.didUpdateScrollPositionBy(0.0);
-
-        // Optional: Trigger a minimal jump to force position adjustment
-        _scrollController.jumpTo(_scrollController.position.pixels);
-      }
-    });
+    _maybePerformInitialScroll();
   }
 
   Future<void> _onRefresh() async {
@@ -324,12 +259,12 @@ class _LdListState<T, GroupingCriterion>
     return LdListEmpty(onRefresh: _onRefresh);
   }
 
-  Widget _buildLoadMore(BuildContext context) {
+  Widget _buildLoadMore(BuildContext context, {bool isTop = false}) {
     if (widget.loadingBuilder != null) {
       return widget.loadingBuilder!(
         context,
-        widget.data.currentPage,
-        widget.data.currentList.length,
+        isTop ? widget.data.currentTopPage : widget.data.currentBottomPage,
+        widget.data.currentItemCount,
       );
     }
 
@@ -347,57 +282,57 @@ class _LdListState<T, GroupingCriterion>
   @override
   Widget build(BuildContext context) {
     final showNextLoadingIndicator =
-        widget.data.hasMoreDataNext || widget.data.busy;
-    final showPrevLoadingIndicator = widget._enableBidirectionalScrolling &&
-        (widget.data.hasMoreDataPrev || _isLoadingPrevious);
-
-    int count = _groupedItems.length;
+        !widget.showMissingItemsAsLoading && (widget.data.hasMoreDataNext);
+    final showPrevLoadingIndicator = !widget.showMissingItemsAsLoading &&
+        widget.isBidirectionalScrollingEnabled &&
+        widget.data.hasMoreDataPrev;
+    int count = _groupedItems.length +
+        (showPrevLoadingIndicator ? 1 : 0) +
+        (showNextLoadingIndicator ? 1 : 0);
 
     if (widget.data.hasError) {
       return _buildError(widget.data.error!);
     }
 
-    if (widget.data.currentList.isEmpty && !widget.data.busy) {
+    if (widget.data.currentItemCount == 0 && !widget.data.busy) {
       return _buildEmpty(context);
     }
 
+    // If we are showing missing items as loading, we don't have to "hack" with
+    // the physics to retain the position. Additionally, if we are grouping
+    // items, the [PositionRetainedScrollPhysics] will also be glitchy.
+    final useRetainedScrollPhysics = widget.isBidirectionalScrollingEnabled &&
+        !widget.showMissingItemsAsLoading &&
+        widget.groupingCriterion == null;
     final list = CustomScrollView(
       controller: _scrollController,
       primary: widget.primary,
       shrinkWrap: widget.shrinkWrap,
-      physics: widget.physics ??
-          (widget.shrinkWrap
-              ? const NeverScrollableScrollPhysics()
-              : const AlwaysScrollableScrollPhysics()),
+      physics: PositionRetainedScrollPhysics(
+        shouldRetain: useRetainedScrollPhysics,
+        parent: widget.physics ??
+            (widget.shrinkWrap
+                ? const NeverScrollableScrollPhysics()
+                : const AlwaysScrollableScrollPhysics()),
+      ),
       slivers: [
-        if (widget.header != null)
-          SliverToBoxAdapter(
-            child: widget.header!,
-          ),
-        if (showPrevLoadingIndicator)
-          SliverToBoxAdapter(
-            child: Column(
-              children: [
-                if (widget.assumedItemHeight != null)
-                  SizedBox(
-                    height: widget.data.remainingItemsAbove *
-                        widget.assumedItemHeight!,
-                  ),
-                KeyedSubtree(
-                  key: topLoadingKey,
-                  child: _buildLoadMore(context),
-                ),
-              ],
-            ),
-          ),
+        if (widget.header != null) SliverToBoxAdapter(child: widget.header!),
         SliverList.builder(
           itemCount: count,
           itemBuilder: (context, index) {
-            final item = _groupedItems[index];
-
-            if (index == count - 1 && showNextLoadingIndicator) {
-              widget.data.nextPage();
+            if (showPrevLoadingIndicator && index == 0) {
+              widget.data.previousPage();
+              return _buildLoadMore(context, isTop: true);
             }
+
+            if (showNextLoadingIndicator && index == count - 1) {
+              widget.data.nextPage();
+              return _buildLoadMore(context, isTop: false);
+            }
+
+            index -= showPrevLoadingIndicator ? 1 : 0;
+            final item = _groupedItems[index];
+            final page = item.page;
 
             if (item.isSeparator) {
               return widget.seperatorBuilder!(
@@ -406,26 +341,26 @@ class _LdListState<T, GroupingCriterion>
               );
             }
 
-            return widget.itemBuilder(context, item.item as T, index);
+            if (item.item == null) {
+              // This is a "placeholder" item (a page that is not loaded yet)
+              if (widget.assumedItemHeight == null) {
+                // If we don't know the item height, there are no "placeholder"
+                // UI elements
+                return const SizedBox.shrink();
+              }
+              if (page != null) {
+                widget.data.jumpToPage(page); // call the loading operation
+              }
+              // build a "placeholder" item
+              return SizedBox.fromSize(
+                size: Size.fromHeight(widget.assumedItemHeight!),
+                child: _buildLoadMore(context),
+              );
+            }
+            return widget.itemBuilder(context, item.item!, index);
           },
         ),
-        if (showNextLoadingIndicator)
-          SliverToBoxAdapter(
-            child: Column(
-              children: [
-                _buildLoadMore(context),
-                if (widget.assumedItemHeight != null)
-                  SizedBox(
-                    height: widget.data.remainingItemsBelow *
-                        widget.assumedItemHeight!,
-                  )
-              ],
-            ),
-          ),
-        if (widget.footer != null)
-          SliverToBoxAdapter(
-            child: widget.footer!,
-          ),
+        if (widget.footer != null) SliverToBoxAdapter(child: widget.footer!),
       ],
     );
 
@@ -433,5 +368,32 @@ class _LdListState<T, GroupingCriterion>
       onRefresh: widget.data.refreshList,
       child: list,
     );
+  }
+
+  void _maybePerformInitialScroll() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // we don't need to perform the initial scroll under certain conditions
+      if (_initialScrollPerformed ||
+          !_scrollController.hasClients ||
+          !mounted ||
+          !widget.isBidirectionalScrollingEnabled ||
+          !widget.showMissingItemsAsLoading) {
+        return;
+      }
+      _initialScrollPerformed = true;
+      if (widget.isBidirectionalScrollingEnabled) {
+        _scrollToIndex(widget.data.startPage * widget.data.pageSize);
+      }
+    });
+  }
+
+  /// Scroll to a specific index in the list based on the item index
+  /// As ListView doesn't have a built-in method to scroll to a certain item,
+  /// we have to estimate the position based on the item index and the assumed
+  /// item height.
+  _scrollToIndex(int index) {
+    index += (widget.header != null ? 1 : 0);
+    final double pixels = index * (widget.assumedItemHeight ?? 50);
+    _scrollController.jumpTo(pixels);
   }
 }

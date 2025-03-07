@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/src/list/list_page.dart';
@@ -9,21 +10,30 @@ typedef FetchListFunction<T> = Future<LdListPage<T>> Function(
   String? pageToken,
 );
 
-enum PaginatorOperation { nextPage, prevPage, refreshList }
+enum PaginatorOperation { nextPage, prevPage, refreshList, jumpToPage }
 
 class LdPaginator<T> extends ChangeNotifier {
   FetchListFunction<T> fetchListFunction;
   final int startPage;
+  final Duration debounceTime;
 
   LdPaginator({
     required this.fetchListFunction,
     bool autoLoad = true,
+
+    /// The page to start loading from. If you set this to a positive number,
+    /// it may enable the "bidirectional scrolling" feature of [LdList].
     this.startPage = 0,
+
+    /// A debounce time to prevent multiple fetches within a short time frame.
+    /// This is particularly useful in a scenario where the user gave an
+    /// [assumedItemHeight] to [LdList] and is scrolling to a certain page
+    /// quickly. The debounce time will prevent fetching all the pages in
+    /// between.
+    this.debounceTime = const Duration(milliseconds: 500),
   }) {
-    _currentTopPage = startPage;
-    _currentBottomPage = startPage;
     if (autoLoad) {
-      loadPage(startPage);
+      jumpToPage(startPage);
     }
   }
 
@@ -48,50 +58,48 @@ class LdPaginator<T> extends ChangeNotifier {
     });
   }
 
-  void updateWhere(bool Function(T) predicate, T Function(T) update) {
-    final index = _currentList.indexWhere(predicate);
-    if (index != -1) {
-      _currentList[index] = update(_currentList[index]);
-      notifyListeners();
-    }
-  }
+  final SplayTreeMap<int, LdListPage<T>> _loadedPages = SplayTreeMap();
+  Map<int, LdListPage<T>> get pages => _loadedPages;
+  Timer? _debounceTimer;
 
-  final List<T> _currentList = [];
-  int _currentTopPage = 0;
-  int _currentBottomPage = 0;
-  bool _hasMoreDataBottom = true;
-  bool _hasMoreDataTop = true;
-
-  int _totalItems = 0;
-  int get totalItems => _totalItems;
+  int get currentItemCount =>
+      _loadedPages.values.fold(0, (sum, page) => sum + page.newItems.length);
 
   int get remainingItemsAbove => !hasMoreDataPrev
       ? 0
       : _currentTopPage *
-          (_currentList.length ~/ (_currentBottomPage - _currentTopPage + 1));
+          (currentItemCount ~/ (_currentBottomPage - _currentTopPage + 1));
+
   int get remainingItemsBelow => !hasMoreDataNext
       ? 0
-      : (_totalItems - _currentList.length) - remainingItemsAbove;
+      : (_totalItems - currentItemCount) - remainingItemsAbove;
 
-  List<T> get currentList => _currentList;
+  /// Returns the average page size among all loaded pages
+  int get pageSize =>
+      _loadedPages.isEmpty ? 10 : currentItemCount ~/ _loadedPages.length;
+
+  int _totalItems = 0;
+  int get totalItems => _totalItems;
+
+  int _currentTopPage = 0;
+  int _currentBottomPage = 0;
+
+  bool _hasMoreDataBottom = true;
+  bool _hasMoreDataTop = true;
+
   int get currentTopPage => _currentTopPage;
   int get currentBottomPage => _currentBottomPage;
 
-  // For backward compatibility
-  int get currentPage => _currentBottomPage;
-
   bool get hasMoreDataNext => _hasMoreDataBottom;
   bool get hasMoreDataPrev => _hasMoreDataTop && _currentTopPage > 0;
-
-  // For backward compatibility
-  bool get hasMoreData => hasMoreDataNext;
-  bool get hasMorePrevData => hasMoreDataPrev;
 
   final Map<PaginatorOperation, bool> _busyStates = {
     PaginatorOperation.nextPage: false,
     PaginatorOperation.prevPage: false,
     PaginatorOperation.refreshList: false,
+    PaginatorOperation.jumpToPage: false,
   };
+
   bool get busy => _busyStates.values.any((e) => e);
   bool busyWith(PaginatorOperation operation) => _busyStates[operation] == true;
 
@@ -99,25 +107,22 @@ class LdPaginator<T> extends ChangeNotifier {
   Object? get error => _error;
   bool get hasError => _error != null;
 
-  // Completer to manage ongoing pagination operations
-  Completer<void>? _currentOperation;
+  Completer? _currentOperation;
 
   void _setError(Object? error) {
     _error = error;
     notifyListeners();
   }
 
-  void _setBusy(bool isBusy,
-      {PaginatorOperation operation = PaginatorOperation.refreshList}) {
+  void _setBusy(bool isBusy, {required PaginatorOperation operation}) {
+    if (_busyStates[operation] == isBusy) return; // no change, skip
     _busyStates[operation] = isBusy;
-    notifyListeners();
+    notifyListeners(); // only notify if there is a change
   }
 
   Future<Iterable<T>?> _fetchPage(int pageToFetch,
       {PaginatorOperation operation = PaginatorOperation.refreshList}) async {
-    if (_busyStates[operation] == true) {
-      return null;
-    }
+    if (busyWith(operation)) return null;
 
     _setBusy(true, operation: operation);
     Iterable<T>? list;
@@ -125,7 +130,7 @@ class LdPaginator<T> extends ChangeNotifier {
     try {
       final page = await fetchListFunction(
         pageToFetch,
-        operation == PaginatorOperation.refreshList ? 0 : _currentList.length,
+        currentItemCount,
         null,
       );
 
@@ -133,14 +138,13 @@ class LdPaginator<T> extends ChangeNotifier {
         _setError(page.error);
       } else {
         _totalItems = page.total;
+        _loadedPages[pageToFetch] = page;
         list = page.newItems;
-
-        // Update appropriate pagination flags based on where we're fetching from
-        if (pageToFetch <= _currentTopPage) {
-          _hasMoreDataTop = pageToFetch > 0;
-        }
-        if (pageToFetch >= _currentBottomPage) {
-          _hasMoreDataBottom = page.hasMore;
+        _hasMoreDataTop = _loadedPages.containsKey(0) ? false : true;
+        _hasMoreDataBottom = page.hasMore;
+        // if all pages are loaded, set total items to current item count
+        if (!_hasMoreDataTop && !_hasMoreDataBottom) {
+          _totalItems = currentItemCount;
         }
 
         _setError(null);
@@ -153,111 +157,127 @@ class LdPaginator<T> extends ChangeNotifier {
     return list;
   }
 
-  /// Load more data (next page) and append to bottom
+  /// Jump to a specific page while keeping track of gaps
+  Future<void> jumpToPage(int page) async {
+    return _debounceAndSafeExecute(() async {
+      if (_loadedPages.containsKey(page)) {
+        // Page already loaded, update top/bottom indicators
+        _updatePageRange();
+        notifyListeners();
+      } else {
+        final newElements =
+            await _fetchPage(page, operation: PaginatorOperation.jumpToPage);
+        if (newElements != null && newElements.isNotEmpty) {
+          _updatePageRange();
+          notifyListeners();
+        }
+      }
+    });
+  }
+
+  /// Load next page
   Future<void> nextPage() async {
     if (!hasMoreDataNext || busyWith(PaginatorOperation.nextPage)) return;
-    return _safeExecute(() async {
-      if (!hasMoreDataNext || busyWith(PaginatorOperation.nextPage)) return;
+    return _debounceAndSafeExecute(() async {
       final nextPageNumber = _currentBottomPage + 1;
       final newElements = await _fetchPage(nextPageNumber,
           operation: PaginatorOperation.nextPage);
-
       if (newElements != null && newElements.isNotEmpty) {
-        _currentList.addAll(newElements);
-        _currentBottomPage = nextPageNumber;
+        _updatePageRange();
         notifyListeners();
       }
     });
   }
 
-  /// Load previous page data and prepend to the current list
+  /// Load previous page
   Future<void> previousPage() async {
-    if (!hasMoreDataPrev || busyWith(PaginatorOperation.prevPage)) return;
-    return _safeExecute(() async {
-      if (!hasMoreDataPrev || busyWith(PaginatorOperation.prevPage)) return;
+    if (!hasMoreDataPrev || busyWith(PaginatorOperation.prevPage)) return null;
+    return await _debounceAndSafeExecute(() async {
       final prevPageNumber = _currentTopPage - 1;
       final newElements = await _fetchPage(prevPageNumber,
           operation: PaginatorOperation.prevPage);
-
       if (newElements != null && newElements.isNotEmpty) {
-        _currentList.insertAll(0, newElements);
-        _currentTopPage = prevPageNumber;
+        _updatePageRange();
         notifyListeners();
       }
     });
   }
 
-  /// Load a specific page, replacing current content
-  Future<void> loadPage(int page) async {
-    return _safeExecute(() async {
-      final newElements = await _fetchPage(page);
-
-      if (newElements != null && newElements.isNotEmpty) {
-        _currentList.clear();
-        _currentList.addAll(newElements);
-        _currentTopPage = page;
-        _currentBottomPage = page;
-        notifyListeners();
-      }
-    });
-  }
-
-  /// Refresh the list, keeps the current content until the initial page is loaded
+  /// Refresh List
   Future<void> refreshList() async {
+    _debounceTimer?.cancel();
     return _safeExecute(() async {
-      if (busyWith(PaginatorOperation.refreshList)) return;
-
-      // Reset to the initial page (either startPage or current page based on preference)
-      final pageToRefresh = startPage;
-      final refreshedPage = await _fetchPage(pageToRefresh,
+      final refreshedPage = await _fetchPage(startPage,
           operation: PaginatorOperation.refreshList);
-
       if (refreshedPage != null) {
-        _currentList.clear();
-        _currentList.addAll(refreshedPage);
-        _currentTopPage = pageToRefresh;
-        _currentBottomPage = pageToRefresh;
-        notifyListeners();
-      } else {
+        _updatePageRange();
         notifyListeners();
       }
     });
+  }
+
+  /// Update page tracking
+  void _updatePageRange() {
+    final loadedPages = _loadedPages.keys.toList();
+    if (loadedPages.isNotEmpty) {
+      _currentTopPage = loadedPages.reduce((a, b) => a < b ? a : b);
+      _currentBottomPage = loadedPages.reduce((a, b) => a > b ? a : b);
+    }
   }
 
   /// Clear and reset the pagination without fetching any data.
   void reset() {
+    _debounceTimer?.cancel();
     _safeExecute(() async {
       _currentTopPage = startPage;
       _currentBottomPage = startPage;
       _hasMoreDataBottom = true;
       _hasMoreDataTop = startPage > 0;
-      _currentList.clear();
+      _loadedPages.clear();
       _busyStates.updateAll((key, value) => false);
       _error = null;
       notifyListeners();
     });
   }
 
-  /// Ensures only one pagination operation runs at a time
-  Future<void> _safeExecute(Future<void> Function() operation) async {
-    // If there's an ongoing operation, wait for it to complete
-    await _currentOperation?.future;
+  /// Debounce a task to prevent multiple executions within a short time frame.
+  void _debounce(void Function() task) {
+    _debounceTimer?.cancel(); // Cancel the previous timer
+    _debounceTimer = Timer(debounceTime, task); // Schedule the new task
+  }
 
-    // Create a new completer for this operation
-    final completer = Completer<void>();
+  /// Safely executes an operation, handles errors, and ensures cleanup.
+  Future<R?> _safeExecute<R>(Future<R> Function() operation) async {
+    await _currentOperation?.future; // Wait for pending operation to complete
+    final completer = Completer<R?>();
     _currentOperation = completer;
 
     try {
-      await operation();
-      completer.complete();
+      final result = await operation();
+      completer.complete(result); // Complete with the result
     } catch (e) {
-      completer.completeError(e);
+      completer.completeError(e); // Propagate the error
       rethrow;
     } finally {
-      // Clear the current operation if it's the same one
       if (_currentOperation == completer) {
-        _currentOperation = null;
+        _currentOperation = null; // Clean up
       }
     }
+
+    return completer.future;
+  }
+
+  /// Combine [debounce] and [safeExecute] to prevent multiple executions
+  Future<R?> _debounceAndSafeExecute<R>(Future<R> Function() operation) async {
+    final completer = Completer<R?>();
+
+    _debounce(() async {
+      await _currentOperation?.future; // Wait for pending operation to complete
+      final result =
+          await _safeExecute(operation); // Safely execute the operation
+      completer.complete(result); // Complete the outer completer
+    });
+
+    return completer.future;
   }
 }
