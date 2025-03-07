@@ -3,17 +3,22 @@ import 'package:liquid_generators/doc_comparator/api_change.dart';
 import 'package:liquid_generators/doc_items.dart';
 
 extension ParameterStringExt on Parameter {
-  String get nameString => "parameter '$name'";
+  String get nameString => "${required ? "required " : "optional "}"
+      "${named ? "named " : ""}"
+      "${name.startsWith('_') ? "private " : ""}"
+      "parameter '$name'";
   String get typeString => "type '$type'";
 }
 
 extension PropertyStringExt on Property {
-  String get nameString => "property '$name'";
+  String get nameString => "${name.startsWith('_') ? "private " : ""}"
+      "property '$name'";
   String get typeString => "type '$type'";
 }
 
 extension ConstructorStringExt on Constructor {
-  String get nameString => "constructor '${name.isEmpty ? 'default' : name}'";
+  String get nameString => "${name.startsWith("_") ? "private " : ""}"
+      "constructor '${name.isEmpty ? 'default' : name}'";
 }
 
 extension DocComponentListApiChangesExt on List<DocComponent> {
@@ -100,7 +105,9 @@ extension ConstructorApiChangesExt on Constructor {
           component: componentName,
           description:
               "${oldParam.nameString} was removed in ${newConstructor.nameString}",
-          type: ApiChangeType.major.atMost(atMostChangeType),
+          type: ApiChangeType.major.atMost(atMostChangeType).atMost(
+                oldParam.required ? ApiChangeType.major : ApiChangeType.minor,
+              ),
         ));
         continue;
       }
@@ -146,7 +153,7 @@ extension ConstructorApiChangesExt on Constructor {
         changes.add(ApiChange(
           component: componentName,
           description:
-              "${newParam.required ? "Required" : "Optional"} ${newParam.nameString} was added in ${newConstructor.nameString}",
+              "${newParam.nameString} was added in ${newConstructor.nameString}",
           type: newParam.required ? ApiChangeType.major : ApiChangeType.minor,
         ));
       }
@@ -165,7 +172,7 @@ extension ConstructorListApiChangesExt on List<Constructor> {
   }) {
     final changes = <ApiChange>[];
     final atMostChangeType = componentName.startsWith('_')
-        ? ApiChangeType.patch
+        ? ApiChangeType.patch // changes to private comps are considered patch
         : ApiChangeType.major;
 
     for (var i = 0; i < length; i++) {
@@ -208,18 +215,21 @@ extension PropertyListApiChangesExt on List<Property> {
     required String componentName,
   }) {
     final changes = <ApiChange>[];
-    final atMostChangeType = componentName.startsWith('_')
-        ? ApiChangeType.patch
+    final componentAtMostChangeType = componentName.startsWith('_')
+        ? ApiChangeType.patch // changes to private comps are considered patch
         : ApiChangeType.major;
 
     for (var i = 0; i < length; i++) {
       final newProperty = newProperties
           .firstWhereOrNull((element) => element.name == this[i].name);
+      final propertyAtMostChangeType = this[i].name.startsWith('_')
+          ? ApiChangeType.patch // changes to private props are considered patch
+          : componentAtMostChangeType;
       if (newProperty == null) {
         changes.add(ApiChange(
           component: componentName,
           description: "${this[i].nameString} was removed",
-          type: ApiChangeType.major.atMost(atMostChangeType),
+          type: ApiChangeType.major.atMost(propertyAtMostChangeType),
         ));
         continue;
       }
@@ -228,7 +238,7 @@ extension PropertyListApiChangesExt on List<Property> {
           component: componentName,
           description:
               "${this[i].nameString} type changed from ${this[i].typeString} to ${newProperty.typeString}",
-          type: ApiChangeType.major.atMost(atMostChangeType),
+          type: ApiChangeType.major.atMost(propertyAtMostChangeType),
         ));
       }
     }
@@ -240,7 +250,9 @@ extension PropertyListApiChangesExt on List<Property> {
         changes.add(ApiChange(
           component: componentName,
           description: "${newProperties[i].nameString} was added",
-          type: ApiChangeType.minor,
+          type: ApiChangeType.minor.atMost(newProperties[i].name.startsWith('_')
+              ? ApiChangeType.patch // private new props are considered patch
+              : componentAtMostChangeType),
         ));
       }
     }
