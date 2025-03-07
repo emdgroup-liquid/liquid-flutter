@@ -100,7 +100,7 @@ class _ListDemoState extends State<ListDemo> {
                     subtitle: Text("This is a Footer"),
                   ),
                   data: _paginator,
-                  assumedItemHeight: _assumeItemHeight ? 66 : null,
+                  assumedItemHeight: _assumeItemHeight ? 50 : null,
                   groupingCriterion:
                       _enableGrouping ? (item) => item % 10 : null,
                   groupSequentialItems: _groupSequentially,
