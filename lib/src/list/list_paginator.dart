@@ -191,7 +191,7 @@ class LdPaginator<T> extends ChangeNotifier {
 
   /// Load previous page
   Future<void> previousPage() async {
-    if (!hasMoreDataPrev || busyWith(PaginatorOperation.prevPage)) return null;
+    if (!hasMoreDataPrev || busyWith(PaginatorOperation.prevPage)) return;
     return await _debounceAndSafeExecute(() async {
       final prevPageNumber = _currentTopPage - 1;
       final newElements = await _fetchPage(prevPageNumber,
