@@ -32,7 +32,7 @@ void main(List<String> args) async {
   final magnitude = mag != null
       ? ApiChangeMagnitude.values
           .firstWhereOrNull((element) => element.toString().contains(mag))
-      : null;
+      : ApiChangeMagnitude.patch;
 
   final positionalArgs =
       args.where((element) => !element.startsWith('-')).toList();
