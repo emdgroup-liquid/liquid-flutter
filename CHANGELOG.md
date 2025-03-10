@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [19.5.1](https://github.com/emdgroup-liquid/liquid-flutter/compare/v19.5.0...v19.5.1) (2025-03-10)
+
+
+### Bug Fixes
+
+* refactor doc_comparator to handle local file paths fix PR workflow to compare the correct documentation.dart files ([2aae3d1](https://github.com/emdgroup-liquid/liquid-flutter/commit/2aae3d1c05770cb4283079d59e3a6d3e341e0a3c))
+* resolve issues with api change detection and corresponding workflow ([5bf72fe](https://github.com/emdgroup-liquid/liquid-flutter/commit/5bf72fe712e5c5cd47f0aa79248bda16f39f15cf))
+
 ## [19.5.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v19.4.0...v19.5.0) (2025-03-06)
 
 
