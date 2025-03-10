@@ -58,7 +58,7 @@ jobs:
         id: detect_change_type
         run: |
           API_CHANGELOG=$(dart ./generators/lib/doc_comparator/doc_comparator.dart \
-          HEAD:./lib/documentation.dart origin/main:./lib/documentation.dart -v)
+          ./lib/documentation.dart origin/main:./lib/documentation.dart)
 
           API_CHANGE_TYPE=$(echo "$API_CHANGELOG" | tail -n 1 | awk '{print $NF}')
           echo "API_CHANGE_TYPE=$API_CHANGE_TYPE" >> $GITHUB_ENV
@@ -85,6 +85,8 @@ jobs:
         run: |
           IFS='.' read -r OLD_MAJOR OLD_MINOR OLD_PATCH <<< "$PREVIOUS_VERSION"
           IFS='.' read -r NEW_MAJOR NEW_MINOR NEW_PATCH <<< "${{ steps.get_new_version.outputs.result }}"
+          echo "Old version: $PREVIOUS_VERSION"
+          echo "New version: ${{ steps.get_new_version.outputs.result }}"
 
           if [[ "$NEW_MAJOR" -gt "$OLD_MAJOR" ]]; then
             DETECTED_CHANGE="major"

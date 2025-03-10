@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:liquid_generators/doc_comparator/api_change.dart';
+import 'package:liquid_generators/doc_comparator/api_change_formatter.dart';
 import 'package:liquid_generators/doc_comparator/doc_ext.dart';
 import 'package:liquid_generators/doc_comparator/doc_parser.dart';
 
@@ -19,11 +20,19 @@ void main(List<String> args) async {
         'Example: dart doc_comparator.dart HEAD:./lib/documentation.dart origin/main:./lib/documentation.dart\n');
     print('Options:');
     print('  --help, -h: Show this help message');
-    print('  --verbose, -v: Print detailed information about the changes');
+    print('  --mag=<level>: Show only changes up to the specified magnitude');
+    print('    <level> can be one of: major, minor, patch, or none');
+    print('    Default is patch');
     return;
   }
 
-  final verbose = args.contains('--verbose') || args.contains('-v');
+  final magArg =
+      args.firstWhereOrNull((element) => element.startsWith('--mag='));
+  final mag = magArg?.split('=').last;
+  final magnitude = mag != null
+      ? ApiChangeMagnitude.values
+          .firstWhereOrNull((element) => element.toString().contains(mag))
+      : null;
 
   final positionalArgs =
       args.where((element) => !element.startsWith('-')).toList();
@@ -31,28 +40,31 @@ void main(List<String> args) async {
       positionalArgs.elementAtOrNull(0) ?? 'HEAD:./lib/documentation.dart';
   final baseFile = positionalArgs.elementAtOrNull(1) ??
       'origin/main:./lib/documentation.dart';
-  final newContent = newFile.startsWith('https')
-      ? await _getRemoteContent(Uri.parse(newFile))
-      : await _getGitFileContent(newFile);
-  final baseContent = baseFile.startsWith('https')
-      ? await _getRemoteContent(Uri.parse(baseFile))
-      : await _getGitFileContent(baseFile);
+  final newContent = await _getFileContent(newFile);
+  final baseContent = await _getFileContent(baseFile);
 
   final apiChanges = parseLdDocComponentsFile(baseContent).compareTo(
     parseLdDocComponentsFile(newContent),
   );
+  print(ApiChangeFormatter(apiChanges, showUpToMagnitude: magnitude).format());
+}
 
-  // print api changes
-  var result = ApiChangeType.patch;
-  for (var change in apiChanges) {
-    result = result.atLeast(change.type);
-    if (verbose) {
-      print(
-        "[${change.type.name}] change in '${change.component}': ${change.description}",
-      );
-    }
+Future<String> _getFileContent(String path) {
+  if (path.startsWith('https')) {
+    return _getRemoteContent(Uri.parse(path));
+  } else if (path.contains(':')) {
+    return _getGitFileContent(path);
+  } else {
+    return _getLocalFileContent(path);
   }
-  print(verbose ? '\nFinal result: ${result.name}' : result.name);
+}
+
+Future<String> _getLocalFileContent(String path) async {
+  final file = File(path);
+  if (!file.existsSync()) {
+    throw ArgumentError('File not found: $path');
+  }
+  return File(path).readAsStringSync();
 }
 
 Future<String> _getRemoteContent(Uri uri) async {
