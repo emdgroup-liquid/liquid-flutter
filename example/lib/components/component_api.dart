@@ -189,11 +189,6 @@ class ComponentApi extends StatelessWidget {
                           )
                         ],
                       ),
-                      e.description.isEmpty
-                          ? Container()
-                          : LdTextPs(
-                              e.description,
-                            ),
                       ldSpacerS,
                     ],
                   );
