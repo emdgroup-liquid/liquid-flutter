@@ -1,28 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid/chemical_screen.dart';
-import 'package:liquid/components/context_menu.dart';
-import 'package:liquid/components/date_time_pickers.dart';
-import 'package:liquid/components/indicator.dart';
-import 'package:liquid/components/reveal.dart';
-import 'package:liquid/components/runner.dart';
 import 'package:liquid/components/autospace.dart';
 import 'package:liquid/components/button.dart';
 import 'package:liquid/components/card.dart';
 import 'package:liquid/components/choose.dart';
-
+import 'package:liquid/components/context_menu.dart';
+import 'package:liquid/components/date_time_pickers.dart';
 import 'package:liquid/components/drawer.dart';
+import 'package:liquid/components/exception.dart';
 import 'package:liquid/components/icons.dart';
+import 'package:liquid/components/indicator.dart';
 import 'package:liquid/components/list.dart';
 import 'package:liquid/components/list_full_screen.dart';
-
 import 'package:liquid/components/loader.dart';
 import 'package:liquid/components/master_detail.dart';
 import 'package:liquid/components/material.dart';
+import 'package:liquid/components/modal.dart';
 import 'package:liquid/components/orb.dart';
 import 'package:liquid/components/radio.dart';
+import 'package:liquid/components/reveal.dart';
+import 'package:liquid/components/runner.dart';
 import 'package:liquid/components/select.dart';
-import 'package:liquid/components/modal.dart';
 import 'package:liquid/components/slider.dart';
 import 'package:liquid/components/spring.dart';
 import 'package:liquid/components/submit.dart';
@@ -37,9 +36,7 @@ import 'package:liquid/demos/typography_documentation.dart';
 import 'package:liquid/home.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-import 'window/app_scaffold.dart';
 import 'components/accordion.dart';
-
 import 'components/badge.dart';
 import 'components/breadcrumb.dart';
 import 'components/checkbox.dart';
@@ -50,6 +47,7 @@ import 'components/input.dart';
 import 'components/notification.dart';
 import 'components/table.dart';
 import 'components/tag.dart';
+import 'window/app_scaffold.dart';
 
 class AppRouter {
   AppRouter();
@@ -181,6 +179,15 @@ class AppRouter {
             path: "/components/divider",
             pageBuilder: (context, state) => NoTransitionPage<void>(
                 key: state.pageKey, child: const DividerDemo()),
+          ),
+          GoRoute(
+            path: "/components/exception",
+            pageBuilder: (context, state) {
+              return NoTransitionPage<void>(
+                key: state.pageKey,
+                child: const ExceptionDemo(),
+              );
+            },
           ),
           GoRoute(
             path: "/components/form",

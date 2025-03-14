@@ -31,15 +31,7 @@ class ComponentsAccordion extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (component.description.isNotEmpty)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (component.description.isNotEmpty)
-                          LdText(
-                            component.description,
-                          ),
-                      ],
-                    ),
+                    LdText(component.description),
                   ComponentApi(component: component)
                 ],
               ));
