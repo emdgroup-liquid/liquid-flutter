@@ -60,7 +60,7 @@ jobs:
           API_CHANGELOG=$(dart ./generators/lib/doc_comparator/doc_comparator.dart \
           ./lib/documentation.dart origin/main:./lib/documentation.dart)
 
-          API_CHANGE_TYPE=$(echo "$API_CHANGELOG" | tail -n 1 | awk '{print $NF}')
+          API_CHANGE_TYPE=$(echo "$API_CHANGELOG" | head -n 1 | grep -oE "major|minor|patch")
           echo "API_CHANGE_TYPE=$API_CHANGE_TYPE" >> $GITHUB_ENV
           {
             echo 'API_CHANGELOG<<EOF'
