@@ -1,15 +1,14 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
-import 'package:fuzzy/fuzzy.dart';
-import 'package:liquid_flutter_emd_theme/liquid_flutter_emd_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+import 'package:fuzzy/fuzzy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:liquid/router.dart';
 import 'package:liquid/window/size_selector.dart';
 import 'package:liquid/window/theme_selector.dart';
-
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter_emd_theme/liquid_flutter_emd_theme.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -48,6 +47,7 @@ const components = [
   ),
   _Component("Divider", "/components/divider", Icons.horizontal_rule),
   _Component("Drawer", "/components/drawer", Icons.menu),
+  _Component("Exception", "/components/exception", Icons.error),
   _Component("Form", "/components/form", LdIcons.pen),
   _Component("Hint", "/components/hint", Icons.info),
   _Component("Icon", "/components/icon", Icons.image),
