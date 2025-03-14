@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/submit/exception_dialog.dart';
 import 'package:provider/provider.dart';
 
 /// Renders an LdException
 class LdExceptionView extends StatelessWidget {
+  /// The exception to render
   final LdException? exception;
+
+  /// A callback to retry the action that caused the exception
+  /// If null, the retry button will not be displayed
   final VoidCallback? retry;
 
+  /// The direction of the exception view, either [Axis.vertical] or
+  /// [Axis.horizontal].
   final Axis direction;
 
   const LdExceptionView({
@@ -17,6 +22,8 @@ class LdExceptionView extends StatelessWidget {
     this.direction = Axis.vertical,
   });
 
+  /// Creates an LdExceptionView from a dynamic error.
+  /// Uses the [LdExceptionMapper] to map the error to an LdException.
   factory LdExceptionView.fromDynamic(
     dynamic error,
     BuildContext context, {
