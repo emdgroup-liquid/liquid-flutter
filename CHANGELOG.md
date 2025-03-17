@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [19.5.2](https://github.com/emdgroup-liquid/liquid-flutter/compare/v19.5.1...v19.5.2) (2025-03-17)
+
 ### [19.5.1](https://github.com/emdgroup-liquid/liquid-flutter/compare/v19.5.0...v19.5.1) (2025-03-10)
 
 
