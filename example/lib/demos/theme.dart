@@ -1,12 +1,12 @@
-import 'package:liquid_flutter_emd_theme/liquid_flutter_emd_theme.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid/code_block.dart';
 import 'package:liquid/color_selector.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid/components/components_accordion.dart';
 import 'package:liquid/demos/ld_color_swatches.dart';
-import 'package:collection/collection.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter_emd_theme/liquid_flutter_emd_theme.dart';
 
 class ThemeDemo extends StatefulWidget {
   const ThemeDemo({Key? key}) : super(key: key);
@@ -221,6 +221,68 @@ class _ThemeDemoState extends State<ThemeDemo> {
                 theme.primary.hover(theme.isDark);
                 theme.primary.active(theme.isDark);
                 theme.primary.focus(theme.isDark);
+              """),
+            ],
+          ),
+          const LdBundle(
+            children: [
+              LdTextH("Global Configuration Flags"),
+              LdTextP(
+                "Liquid provides several global configuration flags that can be used to customize the behavior of the framework.",
+              ),
+              CodeBlock(
+                code: """
+                /// This variable defines whether TextStyle should use the `liquid_flutter`
+                /// package prefix when defining the font family.
+                ///
+                /// If a font is defined in a package, this will be prefixed with
+                /// 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto'). The
+                /// prefixing is done by the constructor when the `package` argument is
+                /// provided.
+                ///
+                /// This is particularly useful when:
+                /// - You're using a package that provides custom fonts
+                /// - You're creating a package that includes custom fonts
+                /// - You want to keep your fonts organized in separate packages
+                ///
+                /// Defaults to true
+                var ldIncludeFontPackage = true;
+                
+                /// This flag is used to disable animations in the library.
+                /// This is useful for golden tests, as animations can cause flakiness
+                /// and take time until they complete and the screen or widget is stable.
+                ///
+                /// Defaults to false
+                var ldDisableAnimations = false;
+                
+                /// Whether LiquidFlutter should print debug messages.
+                ///
+                /// Defaults to [kDebugMode]
+                var ldPrintDebugMessages = kDebugMode;
+              """,
+                expanded: true,
+              ),
+              LdHint(
+                type: LdHintType.info,
+                child: LdText(
+                  "These flags should be set early in your application's lifecycle, ideally before any widgets are built.",
+                ),
+              ),
+              LdTextP(
+                "Example usage in your main.dart file:",
+              ),
+              CodeBlock(code: """
+                // Import the liquid_flutter package
+                import 'package:liquid_flutter/liquid_flutter.dart';
+                
+                void main() {
+                  // Configure global flags
+                  ldIncludeFontPackage = false;
+                  ldDisableAnimations = false;
+                  ldPrintDebugMessages = true; 
+                  
+                  runApp(MyApp());
+                }
               """),
             ],
           ),
