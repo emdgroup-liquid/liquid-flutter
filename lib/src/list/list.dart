@@ -54,6 +54,8 @@ class LdList<T, GroupingCriterion> extends StatefulWidget {
 
   final Widget? footer;
 
+  final LdRetryConfig? retryConfig;
+
   // Selection controls
 
   const LdList({
@@ -73,6 +75,7 @@ class LdList<T, GroupingCriterion> extends StatefulWidget {
     this.footer,
     this.groupSequentialItems = false,
     this.shrinkWrap = false,
+    this.retryConfig = const LdRetryConfig(),
   });
 
   @override
@@ -84,6 +87,7 @@ class _LdListState<T, GroupingCriterion>
     extends State<LdList<T, GroupingCriterion>> {
   // Holds the items that are currently displayed in the list
   List<_ListItem<T, GroupingCriterion>> _groupedItems = [];
+  late final LdRetryController _retryController;
 
   // Re-group the items in the list
 
@@ -137,6 +141,10 @@ class _LdListState<T, GroupingCriterion>
 
   @override
   void initState() {
+    this._retryController = LdRetryController(
+      onRetry: _onRefresh,
+      config: widget.retryConfig ?? const LdRetryConfig(),
+    );
     widget.data.addListener(_onDataChange);
     _onDataChange();
     super.initState();
@@ -159,6 +167,7 @@ class _LdListState<T, GroupingCriterion>
 
   @override
   void dispose() {
+    _retryController.dispose();
     widget.data.removeListener(_onDataChange);
     super.dispose();
   }
@@ -167,6 +176,14 @@ class _LdListState<T, GroupingCriterion>
     await Future.delayed(Duration.zero);
     if (!mounted) {
       return;
+    }
+
+    if (widget.data.busy) {
+      _retryController.notifyOperationStarted();
+    } else if (widget.data.hasError) {
+      _retryController.handleError(canRetry: true);
+    } else {
+      _retryController.notifyOperationCompleted();
     }
 
     if (widget.seperatorBuilder != null && widget.groupingCriterion != null) {
@@ -198,6 +215,7 @@ class _LdListState<T, GroupingCriterion>
   }
 
   Future<void> _onRefresh() async {
+    _retryController.notifyOperationStarted();
     await widget.data.refreshList();
   }
 
@@ -226,7 +244,10 @@ class _LdListState<T, GroupingCriterion>
       return widget.errorBuilder!(context, error, _onRefresh);
     }
 
-    return LdListError(error: error, onRefresh: _onRefresh);
+    return LdListError(
+      error: error,
+      retryController: _retryController,
+    );
   }
 
   @override

@@ -7,10 +7,11 @@ class LdListError extends StatelessWidget {
   /// Error to display will be converted to string
   final Object error;
 
-  /// Function to call when user clicks on retry button
-  final Future<void> Function() onRefresh;
+  /// The instance of the [LdRetryController] of the list
+  final LdRetryController retryController;
 
-  const LdListError({Key? key, required this.error, required this.onRefresh})
+  const LdListError(
+      {Key? key, required this.error, required this.retryController})
       : super(key: key);
 
   @override
@@ -24,7 +25,7 @@ class LdListError extends StatelessWidget {
               error,
               context,
               direction: Axis.vertical,
-              retry: onRefresh,
+              retryController: retryController,
             ),
           ),
         ],

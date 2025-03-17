@@ -32,23 +32,10 @@ class LdSubmitCenteredBuilder<T> extends LdSubmitBuilder<T> {
               if (state.type == LdSubmitStateType.error)
                 errorBuilder != null
                     ? errorBuilder!(context, state.error!, controller)
-                    : LdAutoSpace(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          LdExceptionView(
-                            exception: state.error!,
-                            direction: Axis.vertical,
-                            retry:
-                                controller.canRetry ? controller.trigger : null,
-                          ),
-                          if (controller.showRetryIndicator)
-                            LdExceptionRetryIndicator(
-                              attempt: state.attempt,
-                              remainingTime:
-                                  state.remainingRetryTime ?? Duration.zero,
-                              totalRetryTime: controller.totalRetryTime,
-                            ),
-                        ],
+                    : LdExceptionView(
+                        exception: state.error!,
+                        direction: Axis.vertical,
+                        retryController: controller.retryController,
                       )
               else if (state.type == LdSubmitStateType.idle)
                 submitButtonBuilder != null

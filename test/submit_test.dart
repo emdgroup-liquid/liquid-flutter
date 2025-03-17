@@ -228,10 +228,10 @@ void main() {
 
           throw Exception('Intentional error');
         },
-        retryConfig: LdSubmitRetryConfig(
-          performAutomaticRetry: true,
+        retryConfig: LdRetryConfig(
+          enableAutomaticRetries: true,
           maxAttempts: 2,
-          initialRetryCountdown: const Duration(milliseconds: 100),
+          baseDelay: const Duration(milliseconds: 100),
           disableRetryButton: true,
         ),
       ),
@@ -285,7 +285,7 @@ void main() {
 
     completer = Completer<void>();
 
-    await tester.pump(controller.totalRetryTime);
+    await tester.pump(controller.retryController.state.totalRetryDelay);
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(calls, 2);

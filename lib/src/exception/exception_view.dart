@@ -7,6 +7,9 @@ class LdExceptionView extends StatelessWidget {
   /// The exception to render
   final LdException? exception;
 
+  /// The controller for managing retry operations
+  final LdRetryController? retryController;
+
   /// A callback to retry the action that caused the exception
   /// If null, the retry button will not be displayed
   final VoidCallback? retry;
@@ -18,9 +21,13 @@ class LdExceptionView extends StatelessWidget {
   const LdExceptionView({
     super.key,
     required this.exception,
+    this.retryController,
     this.retry,
     this.direction = Axis.vertical,
-  });
+  }) : assert(
+          retryController == null || retry == null,
+          'Cannot provide both retryController and retry. Use only one.',
+        );
 
   /// Creates an LdExceptionView from a dynamic error.
   /// Uses the [LdExceptionMapper] to map the error to an LdException.
@@ -28,6 +35,7 @@ class LdExceptionView extends StatelessWidget {
     dynamic error,
     BuildContext context, {
     Axis direction = Axis.vertical,
+    LdRetryController? retryController,
     VoidCallback? retry,
   }) {
     final exceptionMapper = context.read<LdExceptionMapper?>() ??
@@ -39,6 +47,7 @@ class LdExceptionView extends StatelessWidget {
 
     return LdExceptionView(
       exception: ldException,
+      retryController: retryController,
       retry: retry,
       direction: direction,
     );
@@ -55,18 +64,32 @@ class LdExceptionView extends StatelessWidget {
     }
   }
 
-  _buildRetryButton(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        LdButton(
-          child: Text(LiquidLocalizations.of(context).retry),
-          key: const Key('retry-button'),
-          mode: LdButtonMode.filled,
-          color: LdTheme.of(context).error,
-          onPressed: retry!,
-        ),
-      ],
+  /// Creates a lightweight LdRetryController if a retry callback is provided
+  LdRetryController? _createRetryController() {
+    if (retry != null) {
+      return LdRetryController(
+        onRetry: retry!,
+        config: LdRetryConfig.unlimitedManualRetries(),
+      );
+    }
+    return retryController;
+  }
+
+  _buildRetryButton(BuildContext context, LdRetryController? controller) {
+    return LdButton(
+      child: Text(LiquidLocalizations.of(context).retry),
+      key: const Key('retry-button'),
+      mode: LdButtonMode.filled,
+      color: LdTheme.of(context).error,
+      onPressed: controller?.retry ?? () {},
+      loading: controller?.state.isRetrying == true,
+    );
+  }
+
+  _buildRetryIndicator(BuildContext context, LdRetryController? controller) {
+    if (!(controller?.showRetryIndicator == true)) return const SizedBox();
+    return LdExceptionRetryIndicator(
+      retryState: controller!.state,
     );
   }
 
@@ -86,7 +109,11 @@ class LdExceptionView extends StatelessWidget {
     );
   }
 
-  _buildHorizontal(BuildContext context, VoidCallback moreInfo) {
+  _buildHorizontal(
+    BuildContext context,
+    VoidCallback moreInfo,
+    LdRetryController? controller,
+  ) {
     return LdAutoSpace(
       children: [
         LdHint(
@@ -97,14 +124,21 @@ class LdExceptionView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildDialogButton(context, moreInfo),
-            if (retry != null) ...[ldSpacerM, _buildRetryButton(context)],
+            if (controller?.showRetryButton == true) ...[
+              ldSpacerM,
+              _buildRetryButton(context, controller),
+            ],
           ],
         )
       ],
     );
   }
 
-  _buildVertical(BuildContext context, VoidCallback moreInfo) {
+  _buildVertical(
+    BuildContext context,
+    VoidCallback moreInfo,
+    LdRetryController? controller,
+  ) {
     return LdAutoSpace(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -120,11 +154,11 @@ class LdExceptionView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Flexible(child: _buildDialogButton(context, moreInfo)),
-            if (retry != null) ...[
+            if (controller?.showRetryButton == true) ...[
               ldSpacerM,
               Flexible(
-                child: _buildRetryButton(context),
-              )
+                child: _buildRetryButton(context, controller),
+              ),
             ],
           ],
         )
@@ -134,18 +168,31 @@ class LdExceptionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LdModalBuilder(
-      useRootNavigator: true,
-      modal: LdModal(
-        size: LdSize.xs,
-        modalContent: (context) => LdExceptionDialog(
-          error: exception,
-        ),
-      ),
-      builder: (context, open) => switch (direction) {
-        (Axis.horizontal) => _buildHorizontal(context, open),
-        (Axis.vertical) => _buildVertical(context, open),
-      },
-    );
+    final controller = _createRetryController();
+
+    return StreamBuilder<LdRetryState>(
+        stream: controller!.stateStream,
+        builder: (context, snapshot) {
+          return LdAutoSpace(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                LdModalBuilder(
+                  useRootNavigator: true,
+                  modal: LdModal(
+                    size: LdSize.xs,
+                    modalContent: (context) => LdExceptionDialog(
+                      error: exception,
+                    ),
+                  ),
+                  builder: (context, open) => switch (direction) {
+                    (Axis.horizontal) =>
+                      _buildHorizontal(context, open, controller),
+                    (Axis.vertical) =>
+                      _buildVertical(context, open, controller),
+                  },
+                ),
+                _buildRetryIndicator(context, controller),
+              ]);
+        });
   }
 }

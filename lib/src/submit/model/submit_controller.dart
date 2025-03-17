@@ -1,26 +1,43 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 /// Handles the lifecyle of a submit action. Pass a [LdSubmitConfig] to the
 /// controller to configure the submit action.
+/// Updated LdSubmitController that uses LdRetryController
 class LdSubmitController<T> {
   final LdSubmitConfig<T> config;
   final LdExceptionMapper exceptionMapper;
   final _stateController = StreamController<LdSubmitState<T>>.broadcast();
+  late final LdRetryController _retryController;
+  LdRetryController get retryController => _retryController;
 
   Stream<LdSubmitState<T>> get stateStream => _stateController.stream;
-
-  Timer? _retryTimer;
-
-  final jitter = Random().nextInt(1500);
 
   LdSubmitController({
     required this.exceptionMapper,
     required this.config,
-  });
+  }) {
+    _retryController = LdRetryController(
+      onRetry: _nextAttempt,
+      config: config.retryConfig ?? const LdRetryConfig(),
+    );
+
+    // Listen to retry state changes to update submit state
+    _retryController.stateStream.listen((retryState) {
+      if (state.type == LdSubmitStateType.error) {
+        _stateController.add(
+          LdSubmitState<T>(
+            type: LdSubmitStateType.error,
+            error: state.error?.copyWith(
+              attempt: retryState.attempt,
+            ),
+          ),
+        );
+      }
+    });
+  }
 
   LdSubmitState<T> state = LdSubmitState<T>(type: LdSubmitStateType.idle);
 
@@ -33,27 +50,10 @@ class LdSubmitController<T> {
 
   void _setState(LdSubmitState<T> newState) {
     state = newState;
-
-    if (_stateController.isClosed) return;
-    _stateController.add(newState);
-
-    if (newState.remainingRetryTime != null &&
-        (_retryTimer == null || _retryTimer?.isActive == false)) {
-      _setupRetryTimer();
-    } else if (newState.remainingRetryTime == null) {
-      _retryTimer?.cancel();
-      _retryTimer = null;
+    if (!_stateController.isClosed) {
+      _stateController.add(newState);
     }
   }
-
-  void _setupRetryTimer() {
-    _retryTimer?.cancel();
-    _retryTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      _retryTimerTick();
-    });
-  }
-
-  bool get showRetryIndicator => _retryTimer?.isActive == true;
 
   bool get canCancel => config.allowCancel == true && _isLoading;
 
@@ -73,27 +73,19 @@ class LdSubmitController<T> {
       debugPrint("Cancelling submit controller");
     }
 
+    _retryController.reset();
     _setState(LdSubmitState<T>(type: LdSubmitStateType.idle));
   }
 
-  int get _maxRetryAttempts => config.retryConfig?.maxAttempts ?? 1;
-
-  Duration _getRetryDelay(int attempt) {
-    return Duration(milliseconds: pow(2, attempt).toInt() * 1000 + jitter);
-  }
-
-  Duration get totalRetryTime => _getRetryDelay(state.attempt);
-
   Future<void> _trigger() async {
-    if (disposed) {
+    if (_disposed) {
       return;
     }
 
+    _retryController.notifyOperationStarted();
+
     _setState(
-      LdSubmitState<T>(
-        type: LdSubmitStateType.loading,
-        attempt: state.attempt + 1,
-      ),
+      LdSubmitState<T>(type: LdSubmitStateType.loading),
     );
 
     T res;
@@ -104,6 +96,8 @@ class LdSubmitController<T> {
         res = await config.action();
       }
       if (!_isLoading) return;
+
+      _retryController.notifyOperationCompleted();
 
       _setState(
         LdSubmitState<T>(type: LdSubmitStateType.result, result: res),
@@ -116,41 +110,20 @@ class LdSubmitController<T> {
       final exception = exceptionMapper.handle(e, stackTrace: s);
 
       if (ldPrintDebugMessages) {
-        debugPrint("An error occured in LdSubmitController: $e \n $s");
+        debugPrint("An error occurred in LdSubmitController: $e \n $s");
       }
 
       _setState(
         LdSubmitState(
           type: LdSubmitStateType.error,
-          attempt: state.attempt,
           error: exception.copyWith(
-            attempt: state.attempt,
+            attempt: _retryController.state.attempt,
           ),
         ),
       );
 
-      // Handle the retry logic
-      final retryConfig = config.retryConfig;
-
-      final lastAttempt = state.attempt;
-      final exhaustedRetries = lastAttempt >= _maxRetryAttempts;
-
-      // Retry logic if automatic retries are configured, the exception can be
-      // retried and the retries have not been exhausted yet.
-      if (retryConfig != null && exception.canRetry && !exhaustedRetries) {
-        var retryDelay = _getRetryDelay(lastAttempt);
-
-        _setState(
-          LdSubmitState<T>(
-            type: LdSubmitStateType.error,
-            attempt: lastAttempt,
-            remainingRetryTime: retryDelay,
-            error: exception.copyWith(
-              attempt: lastAttempt,
-            ),
-          ),
-        );
-      }
+      // Handle the retry logic through the retry controller
+      _retryController.handleError(canRetry: exception.canRetry);
     }
   }
 
@@ -159,16 +132,7 @@ class LdSubmitController<T> {
   bool get _isResult => state.type == LdSubmitStateType.result;
   bool get _isIdle => state.type == LdSubmitStateType.idle;
 
-  bool get canRetry {
-    if (!_isError) return false;
-    if (state.error?.canRetry == false) return false;
-    if (config.retryConfig != null) {
-      if (config.retryConfig!.disableRetryButton == true) return false;
-      if (state.attempt >= _maxRetryAttempts) return false;
-    }
-
-    return true;
-  }
+  bool get canRetry => _retryController.state.canRetry;
 
   bool get canRetrigger => _isError && state.error?.canRetry == true;
 
@@ -185,25 +149,6 @@ class LdSubmitController<T> {
     await _trigger();
   }
 
-  void _retryTimerTick() {
-    if (_isError && state.remainingRetryTime != null) {
-      final remaining = state.remainingRetryTime! -
-          const Duration(
-            milliseconds: 100,
-          );
-
-      _setState(
-        state.copyWith(
-          remainingRetryTime: remaining,
-        ),
-      );
-
-      if (remaining <= Duration.zero) {
-        _nextAttempt();
-      }
-    }
-  }
-
   void _nextAttempt() {
     if (_isError) {
       _trigger();
@@ -214,6 +159,7 @@ class LdSubmitController<T> {
     if (ldPrintDebugMessages) {
       debugPrint("Resetting submit controller");
     }
+    _retryController.reset();
     _setState(LdSubmitState<T>(type: LdSubmitStateType.idle));
   }
 
@@ -225,8 +171,7 @@ class LdSubmitController<T> {
     if (_isLoading) {
       cancel();
     }
-    _retryTimer?.cancel();
-
+    _retryController.dispose();
     _disposed = true;
     _stateController.close();
   }

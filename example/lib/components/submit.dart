@@ -223,11 +223,11 @@ class _SubmitDemoState extends State<SubmitDemo> {
                 child: LdSubmit<void>(
                   builder: const LdSubmitCenteredBuilder<void>(),
                   config: LdSubmitConfig<void>(
-                    retryConfig: const LdSubmitRetryConfig(
-                      performAutomaticRetry: true,
+                    retryConfig: const LdRetryConfig(
+                      enableAutomaticRetries: true,
                       disableRetryButton: false,
                       maxAttempts: 4,
-                      initialRetryCountdown: Duration(seconds: 3),
+                      baseDelay: Duration(seconds: 1),
                     ),
                     action: () {
                       return Future.delayed(
