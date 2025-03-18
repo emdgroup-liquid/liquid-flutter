@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/list/list_error.dart';
 
 class _ListItem<T, SeperationCriterion> {
   _ListItem({
@@ -244,10 +243,22 @@ class _LdListState<T, GroupingCriterion>
       return widget.errorBuilder!(context, error, _onRefresh);
     }
 
-    return LdListError(
-      error: error,
-      retryController: _retryController,
-    );
+    // return the default error view (LdExceptionView)
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IntrinsicWidth(
+            child: LdExceptionView.fromDynamic(
+              error,
+              context,
+              direction: Axis.vertical,
+              retryController: _retryController,
+            ),
+          ),
+        ],
+      ),
+    ).padL();
   }
 
   @override
