@@ -1,34 +1,77 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid/components/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:provider/provider.dart';
 
-class ExceptionDemo extends StatelessWidget {
+class ExceptionDemo extends StatefulWidget {
   const ExceptionDemo({Key? key}) : super(key: key);
 
   @override
+  _ExceptionDemoState createState() => _ExceptionDemoState();
+}
+
+class _ExceptionDemoState extends State<ExceptionDemo> {
+  late LdRetryController retryController;
+  Timer? errorTriggerTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    retryController = LdRetryController(
+      onRetry: () async {
+        final retry = await LdNotificationsController.of(context).confirm(
+          "Fire another automatic retry?",
+        );
+        if (retry == true) {
+          retryController.handleError(canRetry: true);
+          return;
+        }
+        retryController.notifyOperationCompleted();
+      },
+      config: const LdRetryConfig(
+        enableAutomaticRetries: true,
+        maxAttempts: 999,
+        baseDelay: Duration(seconds: 1),
+      ),
+    );
+    retryController.handleError(canRetry: true);
+  }
+
+  @override
+  void dispose() {
+    errorTriggerTimer?.cancel();
+    retryController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ComponentPage(
+    return Provider<LdRetryController>.value(
+      value: retryController,
+      child: ComponentPage(
         apiComponents: const ["LdExceptionView", "LdException"],
         title: "Drawer",
         demo: ComponentWell(
           child: Center(
-            child: LdExceptionView(
-              exception: LdException(
-                message: "Error message",
-                moreInfo: "Nothing actually went wrong, this is just a demo",
-                stackTrace: StackTrace.current,
-              ),
-              retry: () {
-                LdNotificationsController.of(context).addNotification(
-                  LdNotification(
-                    message: "Retry pressed",
-                    type: LdNotificationType.acknowledge,
+            child: Consumer<LdRetryController>(
+              builder: (context, retryController, child) {
+                return LdExceptionView(
+                  exception: LdException(
+                    message: "Error message",
+                    moreInfo:
+                        "Nothing actually went wrong, this is just a demo",
+                    stackTrace: StackTrace.current,
                   ),
+                  retryController: retryController,
                 );
               },
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

@@ -24,7 +24,7 @@ class LdRetryState {
     this.attempt = 0,
     this.remainingRetryTime,
     this.isRetrying = false,
-    this.canRetry = false,
+    this.canRetry = true,
     this.totalRetryDelay,
   });
 
@@ -38,7 +38,9 @@ class LdRetryState {
   }) {
     return LdRetryState(
       attempt: attempt ?? this.attempt,
-      remainingRetryTime: remainingRetryTime ?? this.remainingRetryTime,
+      remainingRetryTime: remainingRetryTime == Duration.zero
+          ? null
+          : remainingRetryTime ?? this.remainingRetryTime,
       isRetrying: isRetrying ?? this.isRetrying,
       canRetry: canRetry ?? this.canRetry,
       totalRetryDelay: totalRetryDelay ?? this.totalRetryDelay,
@@ -81,16 +83,16 @@ class LdRetryController {
   void _setState(LdRetryState newState) {
     _state = newState;
 
-    if (!_stateController.isClosed) {
-      _stateController.add(newState);
-    }
-
     if (newState.remainingRetryTime != null &&
         (_retryTimer == null || !_retryTimer!.isActive)) {
       _setupRetryTimer();
     } else if (newState.remainingRetryTime == null) {
       _retryTimer?.cancel();
       _retryTimer = null;
+    }
+
+    if (!_stateController.isClosed) {
+      _stateController.add(newState);
     }
   }
 
@@ -117,7 +119,8 @@ class LdRetryController {
 
       _setState(
         _state.copyWith(
-          remainingRetryTime: remaining > Duration.zero ? remaining : null,
+          remainingRetryTime:
+              remaining > Duration.zero ? remaining : Duration.zero,
         ),
       );
 
@@ -129,8 +132,6 @@ class LdRetryController {
 
   /// Executes the retry operation
   void _executeRetry() {
-    _retryTimer?.cancel();
-    _retryTimer = null;
     if (_canRetryError && _state.attempt < config.maxAttempts) {
       _setState(
         _state.copyWith(
