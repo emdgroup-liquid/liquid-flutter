@@ -22,9 +22,9 @@ class LdRetryConfig {
 
   const LdRetryConfig({
     this.maxAttempts = 4,
-    this.enableAutomaticRetries = true,
+    this.enableAutomaticRetries = false,
     this.disableRetryButton = false,
-    this.baseDelay = const Duration(seconds: 1),
+    this.baseDelay = const Duration(seconds: 3),
     this.useJitter = true,
   })  : assert(
           !enableAutomaticRetries ||
@@ -42,8 +42,14 @@ class LdRetryConfig {
         maxAttempts: 1,
       );
 
+  /// A configuration that allows unlimited retries that have to be triggered manually.
   factory LdRetryConfig.unlimitedManualRetries() => const LdRetryConfig(
         enableAutomaticRetries: false,
         maxAttempts: 999999,
+      );
+
+  /// A configuration that allows 3 automatic retries with exponential backoff.
+  factory LdRetryConfig.defaultAutomaticRetries() => const LdRetryConfig(
+        enableAutomaticRetries: true,
       );
 }
