@@ -1,6 +1,6 @@
 {
   "name": "liquid-flutter",
-  "version": "19.5.2",
+  "version": "19.5.3",
   "description": "Liquid Oxygen components build for flutter",
   "scripts": {
     "test": "flutter test"
