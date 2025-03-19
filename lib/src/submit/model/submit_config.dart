@@ -2,48 +2,6 @@ import 'dart:ui';
 
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-/// Configuration for (automatic) retries of a submit action.
-class LdSubmitRetryConfig {
-  final bool performAutomaticRetry;
-  final int maxAttempts;
-  final Duration initialRetryCountdown;
-  final bool disableRetryButton;
-
-  const LdSubmitRetryConfig({
-    /// If set to false, you can still use [LdSubmitRetryConfig] in order to block
-    /// the retry button for a certain amount of time.
-    this.performAutomaticRetry = true,
-
-    /// The maximum number of attempts. After this number is reached, the
-    /// retry button will be hidden. If set to 0, the retry button will be hidden
-    /// immediately.
-    this.maxAttempts = 3,
-
-    /// The initial countdown in milliseconds for the retry button. This value
-    /// will be doubled after each failed attempt.
-    this.initialRetryCountdown = const Duration(seconds: 1),
-
-    /// If set to true, the retry button will be disabled while the delay is
-    /// counting down. Hence, the user cannot trigger a retry manually.
-    this.disableRetryButton = false,
-  })  : assert(
-          !performAutomaticRetry ||
-              !disableRetryButton ||
-              initialRetryCountdown > Duration.zero,
-          "If either performAutomaticRetry or disableRetryButton is true, the initialRetryCountdown must be greater than 0",
-        ),
-        assert(
-          maxAttempts >= 0,
-          "maxRetryAttempts must be greater than 0",
-        );
-
-  /// A configuration that does not allow any retries.
-  factory LdSubmitRetryConfig.noRetries() => const LdSubmitRetryConfig(
-        performAutomaticRetry: false,
-        maxAttempts: 0,
-      );
-}
-
 /// A configuration for a submit action.
 class LdSubmitConfig<T> {
   final String? loadingText;
@@ -56,7 +14,7 @@ class LdSubmitConfig<T> {
   final LdSubmitCallback<T> action;
   final VoidCallback? onCanceled;
 
-  final LdSubmitRetryConfig? retryConfig;
+  final LdRetryConfig? retryConfig;
 
   const LdSubmitConfig({
     /// The text to display when the action is loading

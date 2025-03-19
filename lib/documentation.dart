@@ -74,443 +74,6 @@ class LdDocParameter {
 
 const ldDocComponents = [
   LdDocComponent(
-    name: 'LdLoader',
-    isNullSafe: true,
-    description: ' a loading indicator (indeterminate)',
-    properties: [
-      LdDocProperty(
-        name: 'size',
-        type: 'double',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'speed',
-        type: 'Duration',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'neutral',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'size',
-            type: 'double',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'neutral',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'speed',
-            type: 'Duration',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['createState'],
-  ),
-  LdDocComponent(
-    name: '_LdLoaderState',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: '_animationController',
-        type: 'AnimationController',
-        description: '',
-        features: ['late'],
-      )
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
-    methods: [
-      'initState',
-      'dispose',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: '_LoadingPainter',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'animation',
-        type: 'Animation<double>',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'loaderSize',
-        type: 'double',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'baseColor',
-        type: 'Color',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'accentColor',
-        type: 'Color',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'accentColor2',
-        type: 'Color',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'animation',
-            type: 'Animation<double>',
-            description: '',
-            named: false,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'loaderSize',
-            type: 'double',
-            description: '',
-            named: false,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'baseColor',
-            type: 'Color',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'accentColor',
-            type: 'Color',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'accentColor2',
-            type: 'Color',
-            description: '',
-            named: true,
-            required: true,
-          ),
-        ],
-        features: [],
-      )
-    ],
-    methods: [
-      'paint',
-      'shouldRepaint',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdHint',
-    isNullSafe: true,
-    description: ' A colored badge with an icon and a text',
-    properties: [
-      LdDocProperty(
-        name: 'child',
-        type: 'Widget?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'type',
-        type: 'LdHintType',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'size',
-        type: 'LdSize',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'child',
-            type: 'Widget?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'type',
-            type: 'LdHintType',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'size',
-            type: 'LdSize',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdInfoIcon',
-    isNullSafe: true,
-    description: ' Draws an i in emd shapes',
-    properties: [],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          )
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdExclamationIcon',
-    isNullSafe: true,
-    description: ' An exclamation icon in emd shapes',
-    properties: [],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          )
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdCrossIcon',
-    isNullSafe: true,
-    description: ' A cross icon.',
-    properties: [],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          )
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdDivider',
-    isNullSafe: true,
-    description: ' Divides some content with a horizontal',
-    properties: [
-      LdDocProperty(
-        name: 'height',
-        type: 'double?',
-        description: '',
-        features: ['final'],
-      )
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'height',
-            type: 'double?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdCard',
-    isNullSafe: true,
-    description:
-        ' A simple card component with a shadow to elevate it from the page. Header and Footer are optional and separated by color.',
-    properties: [
-      LdDocProperty(
-        name: 'child',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'padding',
-        type: 'EdgeInsets?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'header',
-        type: 'Widget?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'footer',
-        type: 'Widget?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'expandChild',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'flat',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'child',
-            type: 'Widget',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'header',
-            type: 'Widget?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'footer',
-            type: 'Widget?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'flat',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'expandChild',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'padding',
-            type: 'EdgeInsets?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
     name: 'LdMasterDetailBuilder',
     isNullSafe: true,
     description: '',
@@ -801,30 +364,86 @@ const ldDocComponents = [
     methods: ['build'],
   ),
   LdDocComponent(
-    name: 'ExpandablePageView',
+    name: '_Default',
+    isNullSafe: true,
+    description: '',
+    properties: [],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [],
+  ),
+  LdDocComponent(
+    name: '_LdSizeItem',
     isNullSafe: true,
     description: '',
     properties: [
       LdDocProperty(
-        name: 'itemBuilder',
-        type: 'Widget Function(BuildContext, int)',
+        name: 'size',
+        type: 'LdSize',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'controller',
-        type: 'PageController?',
+        name: 'multiplier',
+        type: 'int',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'size',
+            type: 'LdSize',
+            description: '',
+            named: false,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'multiplier',
+            type: 'int',
+            description: '',
+            named: false,
+            required: true,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: [],
+  ),
+  LdDocComponent(
+    name: 'LdAutoSpace',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'children',
+        type: 'List<Widget>',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'onPageChanged',
-        type: 'void Function(int)?',
+        name: 'defaultSpacing',
+        type: 'LdSize',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'reverse',
+        name: 'crossAxisAlignment',
+        type: 'CrossAxisAlignment',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'animate',
         type: 'bool',
         description: '',
         features: ['final'],
@@ -835,28 +454,28 @@ const ldDocComponents = [
         name: '',
         signature: [
           LdDocParameter(
-            name: 'itemBuilder',
-            type: 'Widget Function(BuildContext, int)',
+            name: 'children',
+            type: 'List<Widget>',
             description: '',
             named: true,
             required: true,
           ),
           LdDocParameter(
-            name: 'controller',
-            type: 'PageController?',
+            name: 'defaultSpacing',
+            type: 'LdSize',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'onPageChanged',
-            type: 'void Function(int)?',
+            name: 'crossAxisAlignment',
+            type: 'CrossAxisAlignment',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'reverse',
+            name: 'animate',
             type: 'bool',
             description: '',
             named: true,
@@ -873,342 +492,15 @@ const ldDocComponents = [
         features: ['const'],
       )
     ],
-    methods: ['createState'],
-  ),
-  LdDocComponent(
-    name: '_ExpandablePageViewState',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: '_pageController',
-        type: 'PageController?',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_heights',
-        type: 'Map<int, double>',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_currentPage',
-        type: 'int',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_currentHeight',
-        type: 'double',
-        description: '',
-        features: [],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
     methods: [
-      'initState',
-      'dispose',
+      '_generateSpacings',
       'build',
-      '_onSizeChange',
-      '_itemBuilder',
-      '_updatePage',
     ],
   ),
   LdDocComponent(
-    name: 'SizeReportingWidget',
+    name: 'LdBundle',
     isNullSafe: true,
     description: '',
-    properties: [
-      LdDocProperty(
-        name: 'child',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onSizeChange',
-        type: 'void Function(Size)',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'child',
-            type: 'Widget',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'onSizeChange',
-            type: 'void Function(Size)',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['createState'],
-  ),
-  LdDocComponent(
-    name: '_SizeReportingWidgetState',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: '_oldSize',
-        type: 'Size?',
-        description: '',
-        features: [],
-      )
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
-    methods: [
-      'build',
-      '_notifySize',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdAppBar',
-    isNullSafe: true,
-    description: '',
-    properties: [],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'context',
-            type: 'BuildContext',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'title',
-            type: 'Widget?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'actions',
-            type: 'List<Widget>?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'leading',
-            type: 'Widget?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'elevation',
-            type: 'double?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'iconTheme',
-            type: 'IconThemeData?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'primary',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'centerTitle',
-            type: 'bool?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'titleSpacing',
-            type: 'double?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'toolbarOpacity',
-            type: 'double',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'bottomOpacity',
-            type: 'double',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'toolbarHeight',
-            type: 'double?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'titleTextStyle',
-            type: 'TextStyle?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'backgroundColor',
-            type: 'Color?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'actionsIconTheme',
-            type: 'IconThemeData?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'flexibleSpace',
-            type: 'Widget?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'foregroundColor',
-            type: 'Color?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'automaticallyImplyLeading',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'clipBehavior',
-            type: 'Clip?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'shape',
-            type: 'ShapeBorder?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'toolbarTextStyle',
-            type: 'TextStyle?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'leadingWidth',
-            type: 'double?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'notificationPredicate',
-            type: 'bool Function(ScrollNotification)',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'forceMaterialTransparency',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'scrolledUnderElevation',
-            type: 'double?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'surfaceTintColor',
-            type: 'Color?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'excludeHeaderSemantics',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: [],
-      )
-    ],
-    methods: [],
-  ),
-  LdDocComponent(
-    name: 'LdBreadcrumb',
-    isNullSafe: true,
-    description: ' A breadcrumb widget.',
     properties: [
       LdDocProperty(
         name: 'children',
@@ -1237,1975 +529,9 @@ const ldDocComponents = [
           ),
         ],
         features: ['const'],
-      ),
-      LdDocConstructor(
-        name: 'fromStrings',
-        signature: [
-          LdDocParameter(
-            name: 'items',
-            type: 'List<String>',
-            description: '',
-            named: false,
-            required: true,
-          )
-        ],
-        features: ['factory'],
-      ),
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: '_LdPadding',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'size',
-        type: 'LdSize',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'child',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'balanced',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'size',
-            type: 'LdSize',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'child',
-            type: 'Widget',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'balanced',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
       )
     ],
     methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdIndicator',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'type',
-        type: 'LdIndicatorType',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'size',
-        type: 'LdSize',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'customSize',
-        type: 'double?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'type',
-            type: 'LdIndicatorType',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'size',
-            type: 'LdSize',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'customSize',
-            type: 'double?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdBadge',
-    isNullSafe: true,
-    description:
-        ' A rounded fully opaque label with a background [color].\n Can be used to display a small amount of information.\n',
-    properties: [
-      LdDocProperty(
-        name: 'child',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'color',
-        type: 'LdColor?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'symmetric',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'maxLines',
-        type: 'int?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'size',
-        type: 'LdSize',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'child',
-            type: 'Widget',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'color',
-            type: 'LdColor?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'size',
-            type: 'LdSize',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'symmetric',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'maxLines',
-            type: 'int?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdDatePicker',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'label',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'minDate',
-        type: 'DateTime?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'maxDate',
-        type: 'DateTime?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'value',
-        type: 'DateTime?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'displayFormat',
-        type: 'String',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'buttonMode',
-        type: 'LdButtonMode',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'disabled',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'useRootNavigator',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onChanged',
-        type: 'void Function(DateTime?)',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: '_initialDate',
-        type: 'DateTime',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'initialDateJiffy',
-        type: 'Jiffy',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'initialDateString',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'label',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'value',
-            type: 'DateTime?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'minDate',
-            type: 'DateTime?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'maxDate',
-            type: 'DateTime?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'displayFormat',
-            type: 'String',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'buttonMode',
-            type: 'LdButtonMode',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'onChanged',
-            type: 'void Function(DateTime?)',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'disabled',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'useRootNavigator',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: '_DatePickerSheet',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'value',
-        type: 'DateTime',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onChanged',
-        type: 'void Function(DateTime)',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'label',
-        type: 'String',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'minDate',
-        type: 'DateTime?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'maxDate',
-        type: 'DateTime?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'dismiss',
-        type: 'void Function()',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'value',
-            type: 'DateTime',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'label',
-            type: 'String',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'onChanged',
-            type: 'void Function(DateTime)',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'dismiss',
-            type: 'void Function()',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'minDate',
-            type: 'DateTime?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'maxDate',
-            type: 'DateTime?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['createState'],
-  ),
-  LdDocComponent(
-    name: '_DatePickerSheetState',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: '_selectedDate',
-        type: 'DateTime',
-        description: '',
-        features: ['late'],
-      ),
-      LdDocProperty(
-        name: '_pageController',
-        type: 'PageController?',
-        description: '',
-        features: ['late'],
-      ),
-      LdDocProperty(
-        name: '_animating',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_pageControllerIsValid',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_currentPage',
-        type: 'int',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_viewDate',
-        type: 'DateTime',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'showTodayButton',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'nextMonthIsValid',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'previousMonthIsValid',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
-    methods: [
-      'monthSince0',
-      'initState',
-      'didUpdateWidget',
-      'dispose',
-      'viewDate',
-      '_buildMonthSelect',
-      '_buildYearSelect',
-      'isSelected',
-      'containsValidDate',
-      'isValidDate',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: '_MonthView',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'viewDate',
-        type: 'DateTime',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'selectedDate',
-        type: 'DateTime',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onSelected',
-        type: 'void Function(DateTime)',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'minDate',
-        type: 'DateTime?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'maxDate',
-        type: 'DateTime?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'viewDate',
-            type: 'DateTime',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'selectedDate',
-            type: 'DateTime',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'onSelected',
-            type: 'void Function(DateTime)',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'minDate',
-            type: 'DateTime?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'maxDate',
-            type: 'DateTime?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: [
-      'isSameDay',
-      'isToday',
-      'isSelected',
-      'isValidDate',
-      '_buildWeekDayHeaders',
-      '_buttonMode',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdSurfaceInfo',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'isSurface',
-        type: 'bool',
-        description: '',
-        features: [],
-      )
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'isSurface',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: true,
-          )
-        ],
-        features: [],
-      )
-    ],
-    methods: ['of'],
-  ),
-  LdDocComponent(
-    name: 'LdAutoBackground',
-    isNullSafe: true,
-    description:
-        ' A widget that will change its background color based on the parent surface',
-    properties: [
-      LdDocProperty(
-        name: 'child',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'invert',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'child',
-            type: 'Widget',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'invert',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdOrb',
-    isNullSafe: true,
-    description:
-        ' an animated illustration of an orb filled with liquid that has some waves and a [filling] level.',
-    properties: [
-      LdDocProperty(
-        name: 'size',
-        type: 'double',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'filling',
-        type: 'double',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'paintBackground',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'filling',
-            type: 'double',
-            description: '',
-            named: false,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'size',
-            type: 'double',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'paintBackground',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['createState'],
-  ),
-  LdDocComponent(
-    name: '_LdOrbState',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: '_animationController',
-        type: 'AnimationController?',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_tween',
-        type: 'Tween<double>',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: '_animation',
-        type: 'Animation<double>?',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_angle',
-        type: 'double',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_streamSubscription',
-        type: 'StreamSubscription<AccelerometerEvent>?',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_fill',
-        type: 'double',
-        description: '',
-        features: [],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
-    methods: [
-      'initState',
-      'dispose',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: 'ReflectionPainter',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'theme',
-        type: 'LdTheme',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'inset',
-        type: 'double',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'orbSize',
-        type: 'Size',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'theme',
-            type: 'LdTheme',
-            description: '',
-            named: false,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'orbSize',
-            type: 'Size',
-            description: '',
-            named: false,
-            required: true,
-          ),
-        ],
-        features: [],
-      )
-    ],
-    methods: [
-      'shouldRepaint',
-      'paint',
-    ],
-  ),
-  LdDocComponent(
-    name: '_OrbPainter',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: '_orbSize',
-        type: 'Size',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'fillPercentage',
-        type: 'double',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'paintBackground',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'animationProgress',
-        type: 'double',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'theme',
-        type: 'LdTheme',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'inset',
-        type: 'double',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'width',
-        type: 'double',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'height',
-        type: 'double',
-        description: '',
-        features: [],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: '_orbSize',
-            type: 'Size',
-            description: '',
-            named: false,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'fillPercentage',
-            type: 'double',
-            description: '',
-            named: false,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'animationProgress',
-            type: 'double',
-            description: '',
-            named: false,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'paintBackground',
-            type: 'bool',
-            description: '',
-            named: false,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'theme',
-            type: 'LdTheme',
-            description: '',
-            named: false,
-            required: true,
-          ),
-        ],
-        features: [],
-      )
-    ],
-    methods: [
-      '_positionOnCircle',
-      'paint',
-      'shouldRepaint',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdCheckbox',
-    isNullSafe: true,
-    description: ' A checkbox control.',
-    properties: [
-      LdDocProperty(
-        name: 'label',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'checked',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'disabled',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'size',
-        type: 'LdSize',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onChanged',
-        type: 'dynamic Function(bool)?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'color',
-        type: 'LdColor?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'label',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'checked',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'onChanged',
-            type: 'dynamic Function(bool)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'color',
-            type: 'LdColor?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'size',
-            type: 'LdSize',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'disabled',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['createState'],
-  ),
-  LdDocComponent(
-    name: '_LdCheckboxState',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'hovering',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'tapping',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdInput',
-    isNullSafe: true,
-    description: ' An input field',
-    properties: [
-      LdDocProperty(
-        name: 'label',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'hint',
-        type: 'String',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onChanged',
-        type: 'dynamic Function(String?)?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onBlur',
-        type: 'dynamic Function(String?)?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onSubmitted',
-        type: 'dynamic Function(String?)?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'controller',
-        type: 'TextEditingController?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'autofillHints',
-        type: 'Iterable<String>?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'obscureText',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'autofocus',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'textInputAction',
-        type: 'TextInputAction?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'keyboardType',
-        type: 'TextInputType?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'focusNode',
-        type: 'FocusNode?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'size',
-        type: 'LdSize',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'valid',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'showClear',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'disabled',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'loading',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'maxLines',
-        type: 'int?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'minLines',
-        type: 'int?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'hint',
-            type: 'String',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'controller',
-            type: 'TextEditingController?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'label',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'obscureText',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'maxLines',
-            type: 'int?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'minLines',
-            type: 'int?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'autofocus',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'showClear',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'size',
-            type: 'LdSize',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'onBlur',
-            type: 'dynamic Function(String?)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'valid',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'loading',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'focusNode',
-            type: 'FocusNode?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'autofillHints',
-            type: 'Iterable<String>?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'disabled',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'textInputAction',
-            type: 'TextInputAction?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'onSubmitted',
-            type: 'dynamic Function(String?)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'keyboardType',
-            type: 'TextInputType?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'onChanged',
-            type: 'dynamic Function(String?)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['createState'],
-  ),
-  LdDocComponent(
-    name: '_LdInputState',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: '_focusNode',
-        type: 'FocusNode',
-        description: '',
-        features: [
-          'final',
-          'late',
-        ],
-      ),
-      LdDocProperty(
-        name: '_createdFocusNode',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_controller',
-        type: 'TextEditingController',
-        description: '',
-        features: [
-          'final',
-          'late',
-        ],
-      ),
-      LdDocProperty(
-        name: '_createdController',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_hovering',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'theme',
-        type: 'LdTheme',
-        description: '',
-        features: [],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
-    methods: [
-      'initState',
-      'dispose',
-      '_onTextChange',
-      '_onFocusChange',
-      'cursorHeight',
-      'contentPadding',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdSelectItem',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'value',
-        type: 'T',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'key',
-        type: 'Key?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'child',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'enabled',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'searchString',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'value',
-            type: 'T',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'child',
-            type: 'Widget',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'enabled',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'searchString',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: [],
-  ),
-  LdDocComponent(
-    name: 'LdSelect',
-    isNullSafe: true,
-    description: ' a wrapper around [DropdownButton]',
-    properties: [
-      LdDocProperty(
-        name: 'label',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'items',
-        type: 'List<LdSelectItem<T>>',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'disabled',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'size',
-        type: 'LdSize',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'placeholder',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onSurface',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'value',
-        type: 'T?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'focusNode',
-        type: 'FocusNode?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'valid',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onChange',
-        type: 'dynamic Function(T)?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'items',
-            type: 'List<LdSelectItem<T>>',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'label',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'onChange',
-            type: 'dynamic Function(T)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'size',
-            type: 'LdSize',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'placeholder',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'disabled',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'focusNode',
-            type: 'FocusNode?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'value',
-            type: 'T?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'valid',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'onSurface',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['createState'],
-  ),
-  LdDocComponent(
-    name: '_LdSelectState',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'isOpen',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_focusNode',
-        type: 'FocusNode?',
-        description: '',
-        features: ['late'],
-      ),
-      LdDocProperty(
-        name: '_controller',
-        type: 'ScrollController',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
-    methods: [
-      'initState',
-      'dispose',
-      '_buildInitialItem',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdFormHint',
-    isNullSafe: true,
-    description: ' Hint for a form field',
-    properties: [
-      LdDocProperty(
-        name: 'hint',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'type',
-        type: 'LdHintType',
-        description: '',
-        features: [],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'hint',
-            type: 'String',
-            description: '',
-            named: false,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'type',
-            type: 'LdHintType',
-            description: '',
-            named: false,
-            required: true,
-          ),
-        ],
-        features: [],
-      )
-    ],
-    methods: [],
-  ),
-  LdDocComponent(
-    name: 'LdFormItem',
-    isNullSafe: true,
-    description: ' A form item in a [LdForm]',
-    properties: [
-      LdDocProperty(
-        name: 'child',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'key',
-        type: 'String',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'String',
-            description: '',
-            named: false,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'child',
-            type: 'Widget',
-            description: '',
-            named: false,
-            required: true,
-          ),
-        ],
-        features: [],
-      )
-    ],
-    methods: [],
-  ),
-  LdDocComponent(
-    name: 'LdForm',
-    isNullSafe: true,
-    description: ' Liquid Design Form that wraps a [Form] widget',
-    properties: [
-      LdDocProperty(
-        name: 'fields',
-        type: 'List<LdFormItem>',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'loading',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'disabled',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'submitString',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'submitButtonMode',
-        type: 'LdButtonMode',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'hints',
-        type: 'Map<String, LdFormHint>',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onSubmit',
-        type: 'Future<void> Function()?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'fields',
-            type: 'List<LdFormItem>',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'disabled',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'hints',
-            type: 'Map<String, LdFormHint>',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'loading',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'onSubmit',
-            type: 'Future<void> Function()?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'submitButtonMode',
-            type: 'LdButtonMode',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'submitString',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['createState'],
-  ),
-  LdDocComponent(
-    name: '_LdFormState',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: '_loading',
-        type: 'bool',
-        description: '',
-        features: [],
-      )
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
-    methods: [
-      '_buildHint',
-      '_buildField',
-      'didUpdateWidget',
-      '_buildSubmit',
-      'build',
-    ],
   ),
   LdDocComponent(
     name: 'LdInputColorBundle',
@@ -3511,871 +837,37 @@ const ldDocComponents = [
     methods: ['fromTouchableStatus'],
   ),
   LdDocComponent(
-    name: 'LdBlurringHeader',
+    name: 'LdSelectItem',
     isNullSafe: true,
     description: '',
     properties: [
-      LdDocProperty(
-        name: 'child',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'scrollController',
-        type: 'ScrollController',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'borderRadius',
-        type: 'BorderRadius?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'child',
-            type: 'Widget',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'scrollController',
-            type: 'ScrollController',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'borderRadius',
-            type: 'BorderRadius?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['createState'],
-  ),
-  LdDocComponent(
-    name: '_LdBlurringHeaderState',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'scrollOffset',
-        type: 'double',
-        description: '',
-        features: [],
-      )
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
-    methods: [
-      'initState',
-      'dispose',
-      '_updateScrollOffset',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdCollapse',
-    isNullSafe: true,
-    description: ' A utility to collapse some content',
-    properties: [
-      LdDocProperty(
-        name: 'child',
-        type: 'Widget',
-        description: '/// Widget to collapse',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'collapsed',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'axis',
-        type: 'Axis',
-        description: '/// Which direction to collapse',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'child',
-            type: 'Widget',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'collapsed',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'axis',
-            type: 'Axis',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['createState'],
-  ),
-  LdDocComponent(
-    name: '_LdCollapseState',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: '_controller',
-        type: 'AnimationController?',
-        description: '',
-        features: [],
-      )
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
-    methods: [
-      'dispose',
-      'initState',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: '_Default',
-    isNullSafe: true,
-    description: '',
-    properties: [],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
-    methods: [],
-  ),
-  LdDocComponent(
-    name: '_LdSizeItem',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'size',
-        type: 'LdSize',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'multiplier',
-        type: 'int',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'size',
-            type: 'LdSize',
-            description: '',
-            named: false,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'multiplier',
-            type: 'int',
-            description: '',
-            named: false,
-            required: true,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: [],
-  ),
-  LdDocComponent(
-    name: 'LdAutoSpace',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'children',
-        type: 'List<Widget>',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'defaultSpacing',
-        type: 'LdSize',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'crossAxisAlignment',
-        type: 'CrossAxisAlignment',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'animate',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'children',
-            type: 'List<Widget>',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'defaultSpacing',
-            type: 'LdSize',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'crossAxisAlignment',
-            type: 'CrossAxisAlignment',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'animate',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: [
-      '_generateSpacings',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdBundle',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'children',
-        type: 'List<Widget>',
-        description: '',
-        features: ['final'],
-      )
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'children',
-            type: 'List<Widget>',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdRadio',
-    isNullSafe: true,
-    description: ' a radio box',
-    properties: [
-      LdDocProperty(
-        name: 'label',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'checked',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'disabled',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'size',
-        type: 'LdSize',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'color',
-        type: 'LdColor?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onChanged',
-        type: 'dynamic Function(bool)?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'label',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'checked',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'size',
-            type: 'LdSize',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'onChanged',
-            type: 'dynamic Function(bool)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'color',
-            type: 'LdColor?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'disabled',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: [
-      '_onTap',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdSlider',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'onSlideComplete',
-        type: 'void Function()',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'hint',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'label',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'disabled',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'onSlideComplete',
-            type: 'void Function()',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'hint',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'label',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'disabled',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['createState'],
-  ),
-  LdDocComponent(
-    name: '_LdSliderState',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: '_value',
-        type: 'double',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_max',
-        type: 'double',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_threshold',
-        type: 'double',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: '_sliding',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_controller',
-        type: 'AnimationController',
-        description: '',
-        features: ['late'],
-      ),
-      LdDocProperty(
-        name: '_opacityController',
-        type: 'AnimationController',
-        description: '',
-        features: ['late'],
-      ),
-      LdDocProperty(
-        name: 'reachedThreshold',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
-    methods: [
-      'initState',
-      'dispose',
-      '_onDragStart',
-      '_onDragUpdate',
-      '_onDragEnd',
-      'activeColor',
-      'buildThumb',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdToggle',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'label',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'checked',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'size',
-        type: 'LdSize',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'disabled',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onChanged',
-        type: 'dynamic Function(bool)?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'color',
-        type: 'LdColor?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'label',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'checked',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'size',
-            type: 'LdSize',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'onChanged',
-            type: 'dynamic Function(bool)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'color',
-            type: 'LdColor?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'disabled',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['createState'],
-  ),
-  LdDocComponent(
-    name: '_LdToggleState',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: '_controller',
-        type: 'AnimationController',
-        description: '',
-        features: ['late'],
-      ),
-      LdDocProperty(
-        name: '_theme',
-        type: 'LdTheme',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_thumbSize',
-        type: 'double',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_gap',
-        type: 'double',
-        description: '',
-        features: [],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
-    methods: [
-      'initState',
-      'dispose',
-      'didUpdateWidget',
-      '_updateStatus',
-      '_onTap',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdMute',
-    isNullSafe: true,
-    description: ' LdMute allows you to use the LdTheme to make a muted text',
-    properties: [
-      LdDocProperty(
-        name: 'child',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      )
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'child',
-            type: 'Widget',
-            description: '',
-            named: true,
-            required: true,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdTabs',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'children',
-        type: 'List<Widget>',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'controller',
-        type: 'TabController?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'children',
-            type: 'List<Widget>',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'controller',
-            type: 'TabController?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdTimePicker',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'useRootNavigator',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'disabled',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'label',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
       LdDocProperty(
         name: 'value',
-        type: 'TimeOfDay?',
+        type: 'T',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'onChanged',
-        type: 'void Function(TimeOfDay?)',
+        name: 'key',
+        type: 'Key?',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'minutePrecision',
-        type: 'int',
+        name: 'child',
+        type: 'Widget',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'buttonMode',
-        type: 'LdButtonMode',
+        name: 'enabled',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'searchString',
+        type: 'String?',
         description: '',
         features: ['final'],
       ),
@@ -4384,116 +876,12 @@ const ldDocComponents = [
       LdDocConstructor(
         name: '',
         signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'useRootNavigator',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'onChanged',
-            type: 'void Function(TimeOfDay?)',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'disabled',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'label',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'buttonMode',
-            type: 'LdButtonMode',
-            description: '',
-            named: true,
-            required: false,
-          ),
           LdDocParameter(
             name: 'value',
-            type: 'TimeOfDay?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'minutePrecision',
-            type: 'int',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdTimePickerWidget',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'minutePrecision',
-        type: 'int',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'initialTime',
-        type: 'TimeOfDay?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onTimeSelected',
-        type: 'void Function(TimeOfDay)',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'initialTime',
-            type: 'TimeOfDay?',
+            type: 'T',
             description: '',
             named: true,
             required: true,
-          ),
-          LdDocParameter(
-            name: 'onTimeSelected',
-            type: 'void Function(TimeOfDay)',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'minutePrecision',
-            type: 'int',
-            description: '',
-            named: true,
-            required: false,
           ),
           LdDocParameter(
             name: 'key',
@@ -4502,80 +890,47 @@ const ldDocComponents = [
             named: true,
             required: false,
           ),
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'enabled',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'searchString',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
         ],
         features: ['const'],
       )
     ],
-    methods: ['createState'],
+    methods: [],
   ),
   LdDocComponent(
-    name: '_LdTimePickerWidgetState',
+    name: 'LdSelect',
     isNullSafe: true,
-    description: '',
+    description: ' a wrapper around [DropdownButton]',
     properties: [
       LdDocProperty(
-        name: '_hourController',
-        type: 'FixedExtentScrollController',
+        name: 'label',
+        type: 'String?',
         description: '',
         features: ['final'],
       ),
-      LdDocProperty(
-        name: '_minuteController',
-        type: 'FixedExtentScrollController',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: '_hourFocusNode',
-        type: 'FocusNode',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: '_hourControllerText',
-        type: 'TextEditingController',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: '_minuteControllerText',
-        type: 'TextEditingController',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: '_time',
-        type: 'TimeOfDay?',
-        description: '',
-        features: ['late'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
-    methods: [
-      'initState',
-      'dispose',
-      '_applyWheels',
-      '_applyText',
-      '_hourTextChanged',
-      '_minuteTextChanged',
-      '_submit',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdChoose',
-    isNullSafe: true,
-    description: ' A widget that presents a dropdown in a seperate page.',
-    properties: [
       LdDocProperty(
         name: 'items',
-        type: 'Iterable<LdSelectItem<T>>',
+        type: 'List<LdSelectItem<T>>',
         description: '',
         features: ['final'],
       ),
@@ -4586,466 +941,44 @@ const ldDocComponents = [
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'allowEmpty',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'mode',
-        type: 'LdChooseMode',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'multiple',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'value',
-        type: 'Set<T>?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onChange',
-        type: 'dynamic Function(Set<T>)',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'truncateDisplay',
-        type: 'int?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
         name: 'size',
         type: 'LdSize',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'label',
-        type: 'String?',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
         name: 'placeholder',
-        type: 'Text?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'navigator',
-        type: 'NavigatorState?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'enableSearch',
-        type: 'bool?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'items',
-            type: 'Iterable<LdSelectItem<T>>',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'allowEmpty',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'disabled',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'label',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'multiple',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'mode',
-            type: 'LdChooseMode',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'navigator',
-            type: 'NavigatorState?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'onChange',
-            type: 'dynamic Function(Set<T>)',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'placeholder',
-            type: 'Text?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'size',
-            type: 'LdSize',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'truncateDisplay',
-            type: 'int?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'enableSearch',
-            type: 'bool?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'value',
-            type: 'Set<T>?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['createState'],
-  ),
-  LdDocComponent(
-    name: '_LdChooseState',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: '_sheetKey',
-        type: 'Key',
-        description: '',
-        features: [
-          'final',
-          'late',
-        ],
-      ),
-      LdDocProperty(
-        name: '_enableSearch',
-        type: 'bool',
-        description: '',
-        features: ['late'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
-    methods: [
-      'initState',
-      'dispose',
-      '_onTap',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: '_LdChoosePage',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'child',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'label',
-        type: 'String',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'child',
-            type: 'Widget',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'label',
-            type: 'String',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: '_LdChooseList',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'items',
-        type: 'Iterable<LdSelectItem<T>>',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'value',
-        type: 'Set<T>?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'multiple',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'shrinkWrap',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onDismiss',
-        type: 'void Function()',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onChange',
-        type: 'dynamic Function(Set<T>)?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'enableSearch',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'allowEmpty',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'items',
-            type: 'Iterable<LdSelectItem<T>>',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'value',
-            type: 'Set<T>?',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'multiple',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'onChange',
-            type: 'dynamic Function(Set<T>)?',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'allowEmpty',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'onDismiss',
-            type: 'void Function()',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'shrinkWrap',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'enableSearch',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['createState'],
-  ),
-  LdDocComponent(
-    name: '_LdChooseListState',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: '_value',
-        type: 'Set<T>',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_searchController',
-        type: 'TextEditingController',
-        description: '',
-        features: ['late'],
-      ),
-      LdDocProperty(
-        name: '_searchResults',
-        type: 'List<LdSelectItem<T>>?',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_fuze',
-        type: 'Fuzzy<LdSelectItem<T>>',
-        description: '',
-        features: [
-          'final',
-          'late',
-        ],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
-    methods: [
-      '_onSearchQueryChanged',
-      'initState',
-      'dispose',
-      '_onTap',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdFormLabel',
-    isNullSafe: true,
-    description:
-        ' A label for a form field. This is a convenience widget that wraps a [Text]\n and [ldSpacerS]. THIS WIDGET contains outer padding.!',
-    properties: [
-      LdDocProperty(
-        name: 'label',
         type: 'String?',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'size',
-        type: 'LdSize',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'disabled',
+        name: 'onSurface',
         type: 'bool',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'direction',
-        type: 'Axis',
+        name: 'value',
+        type: 'T?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'focusNode',
+        type: 'FocusNode?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'valid',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onChange',
+        type: 'dynamic Function(T)?',
         description: '',
         features: ['final'],
       ),
@@ -5055,8 +988,22 @@ const ldDocComponents = [
         name: '',
         signature: [
           LdDocParameter(
+            name: 'items',
+            type: 'List<LdSelectItem<T>>',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
             name: 'label',
             type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'onChange',
+            type: 'dynamic Function(T)?',
             description: '',
             named: true,
             required: false,
@@ -5066,11 +1013,11 @@ const ldDocComponents = [
             type: 'LdSize',
             description: '',
             named: true,
-            required: true,
+            required: false,
           ),
           LdDocParameter(
-            name: 'direction',
-            type: 'Axis',
+            name: 'placeholder',
+            type: 'String?',
             description: '',
             named: true,
             required: false,
@@ -5083,203 +1030,36 @@ const ldDocComponents = [
             required: false,
           ),
           LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdCol',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'title',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'sort',
-        type: 'int Function(T, T)?',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'weight',
-        type: 'double',
-        description: '',
-        features: [],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'title',
-            type: 'String',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'sort',
-            type: 'int Function(T, T)?',
+            name: 'focusNode',
+            type: 'FocusNode?',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'weight',
-            type: 'double',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: [],
-      )
-    ],
-    methods: [],
-  ),
-  LdDocComponent(
-    name: 'LdTable',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'columns',
-        type: 'List<LdCol<T>>',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'rows',
-        type: 'List<T>',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'buildRow',
-        type: 'List<Widget> Function(T)',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onSelectChange',
-        type: 'dynamic Function(T, bool)?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'selectedRows',
-        type: 'Set<T>',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'allowSort',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'header',
-        type: 'Widget?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'rowCount',
-        type: 'int',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'density',
-        type: 'LdTableDensity',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
+            name: 'value',
+            type: 'T?',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'columns',
-            type: 'List<LdCol<T>>',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'rows',
-            type: 'List<T>',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'buildRow',
-            type: 'List<Widget> Function(T)',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'onSelectChange',
-            type: 'dynamic Function(T, bool)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'selectedRows',
-            type: 'Set<T>',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'header',
-            type: 'Widget?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'allowSort',
+            name: 'valid',
             type: 'bool',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'rowCount',
-            type: 'int',
+            name: 'onSurface',
+            type: 'bool',
             description: '',
             named: true,
-            required: true,
+            required: false,
           ),
           LdDocParameter(
-            name: 'density',
-            type: 'LdTableDensity',
+            name: 'key',
+            type: 'Key?',
             description: '',
             named: true,
             required: false,
@@ -5291,51 +1071,27 @@ const ldDocComponents = [
     methods: ['createState'],
   ),
   LdDocComponent(
-    name: '_LdTableState',
+    name: '_LdSelectState',
     isNullSafe: true,
     description: '',
     properties: [
       LdDocProperty(
-        name: 'width',
-        type: 'double',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_sortByCol',
-        type: 'int',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_sortDir',
+        name: 'isOpen',
         type: 'bool',
         description: '',
         features: [],
       ),
       LdDocProperty(
-        name: '_sortedRows',
-        type: 'List<T>',
+        name: '_focusNode',
+        type: 'FocusNode?',
         description: '',
         features: ['late'],
       ),
       LdDocProperty(
-        name: '_rowPadding',
-        type: 'double',
+        name: '_controller',
+        type: 'ScrollController',
         description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_checkboxSize',
-        type: 'LdSize',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'selectable',
-        type: 'bool',
-        description: '',
-        features: [],
+        features: ['final'],
       ),
     ],
     constructors: [
@@ -5347,59 +1103,10 @@ const ldDocComponents = [
     ],
     methods: [
       'initState',
-      '_resort',
-      '_colWidth',
+      'dispose',
+      '_buildInitialItem',
       'build',
     ],
-  ),
-  LdDocComponent(
-    name: 'LdAvatar',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'child',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'color',
-        type: 'LdColor?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'child',
-            type: 'Widget',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'color',
-            type: 'LdColor?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
   ),
   LdDocComponent(
     name: 'LdText',
@@ -5581,17 +1288,52 @@ const ldDocComponents = [
     methods: ['build'],
   ),
   LdDocComponent(
-    name: 'LdReveal',
+    name: 'LdFormHint',
     isNullSafe: true,
-    description:
-        ' A utility to reveal some content, with a fade in and collapse effect',
+    description: ' Hint for a form field',
     properties: [
       LdDocProperty(
-        name: 'revealed',
-        type: 'bool',
+        name: 'hint',
+        type: 'String',
         description: '',
-        features: ['final'],
+        features: [],
       ),
+      LdDocProperty(
+        name: 'type',
+        type: 'LdHintType',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'hint',
+            type: 'String',
+            description: '',
+            named: false,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'type',
+            type: 'LdHintType',
+            description: '',
+            named: false,
+            required: true,
+          ),
+        ],
+        features: [],
+      )
+    ],
+    methods: [],
+  ),
+  LdDocComponent(
+    name: 'LdFormItem',
+    isNullSafe: true,
+    description: ' A form item in a [LdForm]',
+    properties: [
       LdDocProperty(
         name: 'child',
         type: 'Widget',
@@ -5599,44 +1341,8 @@ const ldDocComponents = [
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'transformXOffset',
-        type: 'double',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'transformYOffset',
-        type: 'double',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'springConstant',
-        type: 'double',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'dampingCoefficient',
-        type: 'double',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'mass',
-        type: 'double',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'initialRevealed',
-        type: 'bool?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'bufferSprings',
-        type: 'int?',
+        name: 'key',
+        type: 'String',
         description: '',
         features: ['final'],
       ),
@@ -5646,67 +1352,125 @@ const ldDocComponents = [
         name: '',
         signature: [
           LdDocParameter(
-            name: 'revealed',
-            type: 'bool',
+            name: 'key',
+            type: 'String',
             description: '',
-            named: true,
+            named: false,
             required: true,
-          ),
-          LdDocParameter(
-            name: 'transformXOffset',
-            type: 'double',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'transformYOffset',
-            type: 'double',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'initialRevealed',
-            type: 'bool?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'mass',
-            type: 'double',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'bufferSprings',
-            type: 'int?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'springConstant',
-            type: 'double',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'dampingCoefficient',
-            type: 'double',
-            description: '',
-            named: true,
-            required: false,
           ),
           LdDocParameter(
             name: 'child',
             type: 'Widget',
             description: '',
+            named: false,
+            required: true,
+          ),
+        ],
+        features: [],
+      )
+    ],
+    methods: [],
+  ),
+  LdDocComponent(
+    name: 'LdForm',
+    isNullSafe: true,
+    description: ' Liquid Design Form that wraps a [Form] widget',
+    properties: [
+      LdDocProperty(
+        name: 'fields',
+        type: 'List<LdFormItem>',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'loading',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'disabled',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'submitString',
+        type: 'String?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'submitButtonMode',
+        type: 'LdButtonMode',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'hints',
+        type: 'Map<String, LdFormHint>',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onSubmit',
+        type: 'Future<void> Function()?',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'fields',
+            type: 'List<LdFormItem>',
+            description: '',
             named: true,
             required: true,
+          ),
+          LdDocParameter(
+            name: 'disabled',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'hints',
+            type: 'Map<String, LdFormHint>',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'loading',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'onSubmit',
+            type: 'Future<void> Function()?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'submitButtonMode',
+            type: 'LdButtonMode',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'submitString',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
           ),
           LdDocParameter(
             name: 'key',
@@ -5717,16 +1481,394 @@ const ldDocComponents = [
           ),
         ],
         features: ['const'],
-      ),
+      )
+    ],
+    methods: ['createState'],
+  ),
+  LdDocComponent(
+    name: '_LdFormState',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: '_loading',
+        type: 'bool',
+        description: '',
+        features: [],
+      )
+    ],
+    constructors: [
       LdDocConstructor(
-        name: 'quick',
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [
+      '_buildHint',
+      '_buildField',
+      'didUpdateWidget',
+      '_buildSubmit',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdToggle',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'label',
+        type: 'String?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'checked',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'size',
+        type: 'LdSize',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'disabled',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onChanged',
+        type: 'dynamic Function(bool)?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'color',
+        type: 'LdColor?',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
         signature: [
           LdDocParameter(
-            name: 'revealed',
+            name: 'label',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'checked',
             type: 'bool',
             description: '',
             named: true,
             required: true,
+          ),
+          LdDocParameter(
+            name: 'size',
+            type: 'LdSize',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'onChanged',
+            type: 'dynamic Function(bool)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'color',
+            type: 'LdColor?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'disabled',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['createState'],
+  ),
+  LdDocComponent(
+    name: '_LdToggleState',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: '_controller',
+        type: 'AnimationController',
+        description: '',
+        features: ['late'],
+      ),
+      LdDocProperty(
+        name: '_theme',
+        type: 'LdTheme',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_thumbSize',
+        type: 'double',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_gap',
+        type: 'double',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [
+      'initState',
+      'dispose',
+      'didUpdateWidget',
+      '_updateStatus',
+      '_onTap',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdBadge',
+    isNullSafe: true,
+    description:
+        ' A rounded fully opaque label with a background [color].\n Can be used to display a small amount of information.\n',
+    properties: [
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'color',
+        type: 'LdColor?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'symmetric',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'maxLines',
+        type: 'int?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'size',
+        type: 'LdSize',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'color',
+            type: 'LdColor?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'size',
+            type: 'LdSize',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'symmetric',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'maxLines',
+            type: 'int?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdPortalEntry',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'scaleContent',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'key',
+        type: 'Key',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'hashCode',
+        type: 'int',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'scaleContent',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: [],
+      )
+    ],
+    methods: ['=='],
+  ),
+  LdDocComponent(
+    name: 'LdPortalController',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: '_entries',
+        type: 'List<LdPortalEntry>',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'entries',
+        type: 'List<LdPortalEntry>',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'scaleContent',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'open',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [
+      'registerEntry',
+      'indexOf',
+      'removeEntry',
+      'of',
+      'maybeOf',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdPortal',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'controller',
+        type: 'LdPortalController?',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
           ),
           LdDocParameter(
             name: 'child',
@@ -5736,39 +1878,329 @@ const ldDocComponents = [
             required: true,
           ),
           LdDocParameter(
-            name: 'initialRevealed',
-            type: 'bool?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'transformXOffset',
-            type: 'double',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'transformYOffset',
-            type: 'double',
+            name: 'controller',
+            type: 'LdPortalController?',
             description: '',
             named: true,
             required: false,
           ),
         ],
-        features: ['factory'],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'ProviderOrValue',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'value',
+        type: 'T?',
+        description: '',
+        features: ['final'],
       ),
+      LdDocProperty(
+        name: 'create',
+        type: 'T Function(BuildContext)?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'dispose',
+        type: 'void Function(BuildContext, T)?',
+        description:
+            '/// Dispose function for the provider, only used if [value] is null',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'builder',
+        type: 'Widget Function(BuildContext, Widget?)',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget?',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
       LdDocConstructor(
-        name: 'slow',
+        name: '',
         signature: [
           LdDocParameter(
-            name: 'revealed',
-            type: 'bool',
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'value',
+            type: 'T?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'create',
+            type: 'T Function(BuildContext)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'dispose',
+            type: 'void Function(BuildContext, T)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'builder',
+            type: 'Widget Function(BuildContext, Widget?)',
             description: '',
             named: true,
             required: true,
           ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdRunnerLog',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'messages',
+        type: 'List<String>',
+        description: '',
+        features: ['final'],
+      )
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'messages',
+            type: 'List<String>',
+            description: '',
+            named: true,
+            required: true,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['createState'],
+  ),
+  LdDocComponent(
+    name: '_LdRunnerLogState',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: '_node',
+        type: 'FocusNode',
+        description: '',
+        features: ['final'],
+      )
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [
+      'dispose',
+      'buildLine',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdRunnerStep',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'title',
+        type: 'Widget',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'status',
+        type: 'LdIndicatorType',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'disabled',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'trailing',
+        type: 'Widget?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'isExpanded',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onPress',
+        type: 'void Function()?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'children',
+        type: 'List<Widget>',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'title',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'status',
+            type: 'LdIndicatorType',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'disabled',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'trailing',
+            type: 'Widget?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'isExpanded',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'onPress',
+            type: 'void Function()?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'children',
+            type: 'List<Widget>',
+            description: '',
+            named: true,
+            required: true,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdCard',
+    isNullSafe: true,
+    description:
+        ' A simple card component with a shadow to elevate it from the page. Header and Footer are optional and separated by color.',
+    properties: [
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'padding',
+        type: 'EdgeInsets?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'header',
+        type: 'Widget?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'footer',
+        type: 'Widget?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'expandChild',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'flat',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
           LdDocParameter(
             name: 'child',
             type: 'Widget',
@@ -5777,29 +2209,50 @@ const ldDocComponents = [
             required: true,
           ),
           LdDocParameter(
-            name: 'initialRevealed',
-            type: 'bool?',
+            name: 'header',
+            type: 'Widget?',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'transformXOffset',
-            type: 'double',
+            name: 'footer',
+            type: 'Widget?',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'transformYOffset',
-            type: 'double',
+            name: 'flat',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'expandChild',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'padding',
+            type: 'EdgeInsets?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
             description: '',
             named: true,
             required: false,
           ),
         ],
-        features: ['factory'],
-      ),
+        features: ['const'],
+      )
     ],
     methods: ['build'],
   ),
@@ -6308,6 +2761,2285 @@ const ldDocComponents = [
       '_border',
       '_padding',
       'build',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdBlurringHeader',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'scrollController',
+        type: 'ScrollController',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'borderRadius',
+        type: 'BorderRadius?',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'scrollController',
+            type: 'ScrollController',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'borderRadius',
+            type: 'BorderRadius?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['createState'],
+  ),
+  LdDocComponent(
+    name: '_LdBlurringHeaderState',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'scrollOffset',
+        type: 'double',
+        description: '',
+        features: [],
+      )
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [
+      'initState',
+      'dispose',
+      '_updateScrollOffset',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdContainer',
+    isNullSafe: true,
+    description:
+        ' Allows you to horizontally center your content on a larger screen by padding it on the sides',
+    properties: [
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'padding',
+        type: 'EdgeInsets?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'maxWidth',
+        type: 'double',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'maxWidth',
+            type: 'double',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'padding',
+            type: 'EdgeInsets?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdCheckbox',
+    isNullSafe: true,
+    description: ' A checkbox control.',
+    properties: [
+      LdDocProperty(
+        name: 'label',
+        type: 'String?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'checked',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'disabled',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'size',
+        type: 'LdSize',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onChanged',
+        type: 'dynamic Function(bool)?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'color',
+        type: 'LdColor?',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'label',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'checked',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'onChanged',
+            type: 'dynamic Function(bool)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'color',
+            type: 'LdColor?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'size',
+            type: 'LdSize',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'disabled',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['createState'],
+  ),
+  LdDocComponent(
+    name: '_LdCheckboxState',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'hovering',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'tapping',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdTimePicker',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'useRootNavigator',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'disabled',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'label',
+        type: 'String?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'value',
+        type: 'TimeOfDay?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onChanged',
+        type: 'void Function(TimeOfDay?)',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'minutePrecision',
+        type: 'int',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'buttonMode',
+        type: 'LdButtonMode',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'useRootNavigator',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'onChanged',
+            type: 'void Function(TimeOfDay?)',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'disabled',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'label',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'buttonMode',
+            type: 'LdButtonMode',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'value',
+            type: 'TimeOfDay?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'minutePrecision',
+            type: 'int',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdTimePickerWidget',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'minutePrecision',
+        type: 'int',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'initialTime',
+        type: 'TimeOfDay?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onTimeSelected',
+        type: 'void Function(TimeOfDay)',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'initialTime',
+            type: 'TimeOfDay?',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'onTimeSelected',
+            type: 'void Function(TimeOfDay)',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'minutePrecision',
+            type: 'int',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['createState'],
+  ),
+  LdDocComponent(
+    name: '_LdTimePickerWidgetState',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: '_hourController',
+        type: 'FixedExtentScrollController',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: '_minuteController',
+        type: 'FixedExtentScrollController',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: '_hourFocusNode',
+        type: 'FocusNode',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: '_hourControllerText',
+        type: 'TextEditingController',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: '_minuteControllerText',
+        type: 'TextEditingController',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: '_time',
+        type: 'TimeOfDay?',
+        description: '',
+        features: ['late'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [
+      'initState',
+      'dispose',
+      '_applyWheels',
+      '_applyText',
+      '_hourTextChanged',
+      '_minuteTextChanged',
+      '_submit',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdRadio',
+    isNullSafe: true,
+    description: ' a radio box',
+    properties: [
+      LdDocProperty(
+        name: 'label',
+        type: 'String?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'checked',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'disabled',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'size',
+        type: 'LdSize',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'color',
+        type: 'LdColor?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onChanged',
+        type: 'dynamic Function(bool)?',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'label',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'checked',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'size',
+            type: 'LdSize',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'onChanged',
+            type: 'dynamic Function(bool)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'color',
+            type: 'LdColor?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'disabled',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: [
+      '_onTap',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdAccordion',
+    isNullSafe: true,
+    description: ' a collection of collapsible items in a group.',
+    properties: [
+      LdDocProperty(
+        name: 'childBuilder',
+        type: 'Widget Function(BuildContext, int)',
+        description:
+            '/// Function that is called to build each item in the accordion.',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'headerBuilder',
+        type: 'Widget Function(BuildContext, int)',
+        description:
+            '/// Function that is called to build each header in the accordion.',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'itemCount',
+        type: 'int',
+        description: '/// The number of items in the accordion.',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'initialOpenIndex',
+        type: 'Set<int>',
+        description:
+            '/// The index of the items that should be open by default.',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'headerPadding',
+        type: 'EdgeInsets?',
+        description: '/// The padding to apply to the header.',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'childPadding',
+        type: 'EdgeInsets?',
+        description: '/// The padding to apply to the child.',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'allowMultipleOpen',
+        type: 'bool',
+        description: '/// Whether or not multiple items can be open at once.',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'speed',
+        type: 'Duration',
+        description: '/// The duration of the animation.',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'curveExpand',
+        type: 'Curve',
+        description: '/// The curve to use when expanding.',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'curveCollapse',
+        type: 'Curve',
+        description: '/// The curve to use when collapsing.',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'elevateActive',
+        type: 'bool',
+        description: '/// Whether or not to elevate the active item.',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'childBuilder',
+            type: 'Widget Function(BuildContext, int)',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'headerBuilder',
+            type: 'Widget Function(BuildContext, int)',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'itemCount',
+            type: 'int',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'allowMultipleOpen',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'childPadding',
+            type: 'EdgeInsets?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'curveCollapse',
+            type: 'Curve',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'curveExpand',
+            type: 'Curve',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'elevateActive',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'headerPadding',
+            type: 'EdgeInsets?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'initialOpenIndex',
+            type: 'Set<int>',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'speed',
+            type: 'Duration',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      ),
+      LdDocConstructor(
+        name: 'fromList',
+        signature: [
+          LdDocParameter(
+            name: 'items',
+            type: 'List<LdAccordionItem>',
+            description: '',
+            named: false,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'elevateActive',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'allowMultipleOpen',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'initialOpenIndex',
+            type: 'Set<int>',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['factory'],
+      ),
+    ],
+    methods: ['createState'],
+  ),
+  LdDocComponent(
+    name: 'LdAccordionItem',
+    isNullSafe: true,
+    description:
+        ' item of an accordion used in utility constructor [LdAccordion.fromList].',
+    properties: [
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'header',
+        type: 'Widget',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'header',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+        ],
+        features: [],
+      )
+    ],
+    methods: [],
+  ),
+  LdDocComponent(
+    name: '_LdAccordionChild',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'header',
+        type: 'Widget',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'elevateActive',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'speed',
+        type: 'Duration',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'headerPadding',
+        type: 'EdgeInsets',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'childPadding',
+        type: 'EdgeInsets',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onPressed',
+        type: 'dynamic Function()',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'curveExpand',
+        type: 'Curve',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'curveCollapse',
+        type: 'Curve',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'collapsed',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'collapsed',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'elevateActive',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'onPressed',
+            type: 'dynamic Function()',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'headerPadding',
+            type: 'EdgeInsets',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'childPadding',
+            type: 'EdgeInsets',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'speed',
+            type: 'Duration',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'header',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'curveExpand',
+            type: 'Curve',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'curveCollapse',
+            type: 'Curve',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: '_LdAccordionState',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'openIndex',
+        type: 'Set<int>',
+        description: '',
+        features: [],
+      )
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [
+      'build',
+      'didUpdateWidget',
+      'initState',
+      '_onTap',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdTabs',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'children',
+        type: 'List<Widget>',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'controller',
+        type: 'TabController?',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'children',
+            type: 'List<Widget>',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'controller',
+            type: 'TabController?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdAvatar',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'color',
+        type: 'LdColor?',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'color',
+            type: 'LdColor?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdDatePicker',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'label',
+        type: 'String?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'minDate',
+        type: 'DateTime?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'maxDate',
+        type: 'DateTime?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'value',
+        type: 'DateTime?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'displayFormat',
+        type: 'String',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'buttonMode',
+        type: 'LdButtonMode',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'disabled',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'useRootNavigator',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onChanged',
+        type: 'void Function(DateTime?)',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: '_initialDate',
+        type: 'DateTime',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'initialDateJiffy',
+        type: 'Jiffy',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'initialDateString',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'label',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'value',
+            type: 'DateTime?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'minDate',
+            type: 'DateTime?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'maxDate',
+            type: 'DateTime?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'displayFormat',
+            type: 'String',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'buttonMode',
+            type: 'LdButtonMode',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'onChanged',
+            type: 'void Function(DateTime?)',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'disabled',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'useRootNavigator',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: '_DatePickerSheet',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'value',
+        type: 'DateTime',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onChanged',
+        type: 'void Function(DateTime)',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'label',
+        type: 'String',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'minDate',
+        type: 'DateTime?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'maxDate',
+        type: 'DateTime?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'dismiss',
+        type: 'void Function()',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'value',
+            type: 'DateTime',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'label',
+            type: 'String',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'onChanged',
+            type: 'void Function(DateTime)',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'dismiss',
+            type: 'void Function()',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'minDate',
+            type: 'DateTime?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'maxDate',
+            type: 'DateTime?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['createState'],
+  ),
+  LdDocComponent(
+    name: '_DatePickerSheetState',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: '_selectedDate',
+        type: 'DateTime',
+        description: '',
+        features: ['late'],
+      ),
+      LdDocProperty(
+        name: '_pageController',
+        type: 'PageController?',
+        description: '',
+        features: ['late'],
+      ),
+      LdDocProperty(
+        name: '_animating',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_pageControllerIsValid',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_currentPage',
+        type: 'int',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_viewDate',
+        type: 'DateTime',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'showTodayButton',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'nextMonthIsValid',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'previousMonthIsValid',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [
+      'monthSince0',
+      'initState',
+      'didUpdateWidget',
+      'dispose',
+      'viewDate',
+      '_buildMonthSelect',
+      '_buildYearSelect',
+      'isSelected',
+      'containsValidDate',
+      'isValidDate',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: '_MonthView',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'viewDate',
+        type: 'DateTime',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'selectedDate',
+        type: 'DateTime',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onSelected',
+        type: 'void Function(DateTime)',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'minDate',
+        type: 'DateTime?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'maxDate',
+        type: 'DateTime?',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'viewDate',
+            type: 'DateTime',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'selectedDate',
+            type: 'DateTime',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'onSelected',
+            type: 'void Function(DateTime)',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'minDate',
+            type: 'DateTime?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'maxDate',
+            type: 'DateTime?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: [
+      'isSameDay',
+      'isToday',
+      'isSelected',
+      'isValidDate',
+      '_buildWeekDayHeaders',
+      '_buttonMode',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdTag',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onDismiss',
+        type: 'Function?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'size',
+        type: 'LdSize',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'color',
+        type: 'LdColor?',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'color',
+            type: 'LdColor?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'onDismiss',
+            type: 'Function?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'size',
+            type: 'LdSize',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: [
+      '_padding',
+      '_fontSize',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdContextMenu',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'visible',
+        type: 'bool?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'dismissOnOutsideTap',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'listenForTaps',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'blurMode',
+        type: 'LdContextMenuBlurMode',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'zoomMode',
+        type: 'LdContextZoomMode',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'builder',
+        type: 'Widget Function(BuildContext, bool)',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'menuBuilder',
+        type: 'Widget Function(BuildContext, void Function())',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'builder',
+            type: 'Widget Function(BuildContext, bool)',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'menuBuilder',
+            type: 'Widget Function(BuildContext, void Function())',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'dismissOnOutsideTap',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'blurMode',
+            type: 'LdContextMenuBlurMode',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'zoomMode',
+            type: 'LdContextZoomMode',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'listenForTaps',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'visible',
+            type: 'bool?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['createState'],
+  ),
+  LdDocComponent(
+    name: '_LdContextMenuState',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: '_triggerKey',
+        type: 'GlobalKey<State<StatefulWidget>>',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: '_visible',
+        type: 'bool',
+        description: '',
+        features: ['late'],
+      ),
+      LdDocProperty(
+        name: '_belowBottom',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_mobile',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_shouldBlur',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_shouldZoom',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [
+      'didUpdateWidget',
+      '_dismiss',
+      '_open',
+      'buildTrigger',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdCol',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'title',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'sort',
+        type: 'int Function(T, T)?',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'weight',
+        type: 'double',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'title',
+            type: 'String',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'sort',
+            type: 'int Function(T, T)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'weight',
+            type: 'double',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: [],
+      )
+    ],
+    methods: [],
+  ),
+  LdDocComponent(
+    name: 'LdTable',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'columns',
+        type: 'List<LdCol<T>>',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'rows',
+        type: 'List<T>',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'buildRow',
+        type: 'List<Widget> Function(T)',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onSelectChange',
+        type: 'dynamic Function(T, bool)?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'selectedRows',
+        type: 'Set<T>',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'allowSort',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'header',
+        type: 'Widget?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'rowCount',
+        type: 'int',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'density',
+        type: 'LdTableDensity',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'columns',
+            type: 'List<LdCol<T>>',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'rows',
+            type: 'List<T>',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'buildRow',
+            type: 'List<Widget> Function(T)',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'onSelectChange',
+            type: 'dynamic Function(T, bool)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'selectedRows',
+            type: 'Set<T>',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'header',
+            type: 'Widget?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'allowSort',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'rowCount',
+            type: 'int',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'density',
+            type: 'LdTableDensity',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['createState'],
+  ),
+  LdDocComponent(
+    name: '_LdTableState',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'width',
+        type: 'double',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_sortByCol',
+        type: 'int',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_sortDir',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_sortedRows',
+        type: 'List<T>',
+        description: '',
+        features: ['late'],
+      ),
+      LdDocProperty(
+        name: '_rowPadding',
+        type: 'double',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_checkboxSize',
+        type: 'LdSize',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'selectable',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [
+      'initState',
+      '_resort',
+      '_colWidth',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: 'ExpandablePageView',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'itemBuilder',
+        type: 'Widget Function(BuildContext, int)',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'controller',
+        type: 'PageController?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onPageChanged',
+        type: 'void Function(int)?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'reverse',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'itemBuilder',
+            type: 'Widget Function(BuildContext, int)',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'controller',
+            type: 'PageController?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'onPageChanged',
+            type: 'void Function(int)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'reverse',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['createState'],
+  ),
+  LdDocComponent(
+    name: '_ExpandablePageViewState',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: '_pageController',
+        type: 'PageController?',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_heights',
+        type: 'Map<int, double>',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_currentPage',
+        type: 'int',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_currentHeight',
+        type: 'double',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [
+      'initState',
+      'dispose',
+      'build',
+      '_onSizeChange',
+      '_itemBuilder',
+      '_updatePage',
+    ],
+  ),
+  LdDocComponent(
+    name: 'SizeReportingWidget',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onSizeChange',
+        type: 'void Function(Size)',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'onSizeChange',
+            type: 'void Function(Size)',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['createState'],
+  ),
+  LdDocComponent(
+    name: '_SizeReportingWidgetState',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: '_oldSize',
+        type: 'Size?',
+        description: '',
+        features: [],
+      )
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [
+      'build',
+      '_notifySize',
     ],
   ),
   LdDocComponent(
@@ -6829,27 +5561,545 @@ const ldDocComponents = [
     ],
   ),
   LdDocComponent(
-    name: 'LdPortalEntry',
+    name: 'LdHint',
+    isNullSafe: true,
+    description: ' A colored badge with an icon and a text',
+    properties: [
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'type',
+        type: 'LdHintType',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'size',
+        type: 'LdSize',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'type',
+            type: 'LdHintType',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'size',
+            type: 'LdSize',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdInfoIcon',
+    isNullSafe: true,
+    description: ' Draws an i in emd shapes',
+    properties: [],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          )
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdExclamationIcon',
+    isNullSafe: true,
+    description: ' An exclamation icon in emd shapes',
+    properties: [],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          )
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdCrossIcon',
+    isNullSafe: true,
+    description: ' A cross icon.',
+    properties: [],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          )
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdBreadcrumb',
+    isNullSafe: true,
+    description: ' A breadcrumb widget.',
+    properties: [
+      LdDocProperty(
+        name: 'children',
+        type: 'List<Widget>',
+        description: '',
+        features: ['final'],
+      )
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'children',
+            type: 'List<Widget>',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      ),
+      LdDocConstructor(
+        name: 'fromStrings',
+        signature: [
+          LdDocParameter(
+            name: 'items',
+            type: 'List<String>',
+            description: '',
+            named: false,
+            required: true,
+          )
+        ],
+        features: ['factory'],
+      ),
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdInput',
+    isNullSafe: true,
+    description: ' An input field',
+    properties: [
+      LdDocProperty(
+        name: 'label',
+        type: 'String?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'hint',
+        type: 'String',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onChanged',
+        type: 'dynamic Function(String?)?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onBlur',
+        type: 'dynamic Function(String?)?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onSubmitted',
+        type: 'dynamic Function(String?)?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'controller',
+        type: 'TextEditingController?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'autofillHints',
+        type: 'Iterable<String>?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'obscureText',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'autofocus',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'textInputAction',
+        type: 'TextInputAction?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'keyboardType',
+        type: 'TextInputType?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'focusNode',
+        type: 'FocusNode?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'size',
+        type: 'LdSize',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'valid',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'showClear',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'disabled',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'loading',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'maxLines',
+        type: 'int?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'minLines',
+        type: 'int?',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'hint',
+            type: 'String',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'controller',
+            type: 'TextEditingController?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'label',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'obscureText',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'maxLines',
+            type: 'int?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'minLines',
+            type: 'int?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'autofocus',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'showClear',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'size',
+            type: 'LdSize',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'onBlur',
+            type: 'dynamic Function(String?)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'valid',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'loading',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'focusNode',
+            type: 'FocusNode?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'autofillHints',
+            type: 'Iterable<String>?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'disabled',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'textInputAction',
+            type: 'TextInputAction?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'onSubmitted',
+            type: 'dynamic Function(String?)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'keyboardType',
+            type: 'TextInputType?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'onChanged',
+            type: 'dynamic Function(String?)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['createState'],
+  ),
+  LdDocComponent(
+    name: '_LdInputState',
     isNullSafe: true,
     description: '',
     properties: [
       LdDocProperty(
-        name: 'scaleContent',
+        name: '_focusNode',
+        type: 'FocusNode',
+        description: '',
+        features: [
+          'final',
+          'late',
+        ],
+      ),
+      LdDocProperty(
+        name: '_createdFocusNode',
         type: 'bool',
         description: '',
         features: [],
       ),
       LdDocProperty(
-        name: 'key',
-        type: 'Key',
+        name: '_controller',
+        type: 'TextEditingController',
+        description: '',
+        features: [
+          'final',
+          'late',
+        ],
+      ),
+      LdDocProperty(
+        name: '_createdController',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_hovering',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'theme',
+        type: 'LdTheme',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [
+      'initState',
+      'dispose',
+      '_onTextChange',
+      '_onFocusChange',
+      'cursorHeight',
+      'contentPadding',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdSlider',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'onSlideComplete',
+        type: 'void Function()',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'hashCode',
-        type: 'int',
+        name: 'hint',
+        type: 'String?',
         description: '',
-        features: [],
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'label',
+        type: 'String?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'disabled',
+        type: 'bool',
+        description: '',
+        features: ['final'],
       ),
     ],
     constructors: [
@@ -6858,49 +6108,88 @@ const ldDocComponents = [
         signature: [
           LdDocParameter(
             name: 'key',
-            type: 'Key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'onSlideComplete',
+            type: 'void Function()',
             description: '',
             named: true,
             required: true,
           ),
           LdDocParameter(
-            name: 'scaleContent',
+            name: 'hint',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'label',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'disabled',
             type: 'bool',
             description: '',
             named: true,
             required: false,
           ),
         ],
-        features: [],
+        features: ['const'],
       )
     ],
-    methods: ['=='],
+    methods: ['createState'],
   ),
   LdDocComponent(
-    name: 'LdPortalController',
+    name: '_LdSliderState',
     isNullSafe: true,
     description: '',
     properties: [
       LdDocProperty(
-        name: '_entries',
-        type: 'List<LdPortalEntry>',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'entries',
-        type: 'List<LdPortalEntry>',
+        name: '_value',
+        type: 'double',
         description: '',
         features: [],
       ),
       LdDocProperty(
-        name: 'scaleContent',
+        name: '_max',
+        type: 'double',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_threshold',
+        type: 'double',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: '_sliding',
         type: 'bool',
         description: '',
         features: [],
       ),
       LdDocProperty(
-        name: 'open',
+        name: '_controller',
+        type: 'AnimationController',
+        description: '',
+        features: ['late'],
+      ),
+      LdDocProperty(
+        name: '_opacityController',
+        type: 'AnimationController',
+        description: '',
+        features: ['late'],
+      ),
+      LdDocProperty(
+        name: 'reachedThreshold',
         type: 'bool',
         description: '',
         features: [],
@@ -6914,15 +6203,245 @@ const ldDocComponents = [
       )
     ],
     methods: [
-      'registerEntry',
-      'indexOf',
-      'removeEntry',
-      'of',
-      'maybeOf',
+      'initState',
+      'dispose',
+      '_onDragStart',
+      '_onDragUpdate',
+      '_onDragEnd',
+      'activeColor',
+      'buildThumb',
+      'build',
     ],
   ),
   LdDocComponent(
-    name: 'LdPortal',
+    name: 'LdChoose',
+    isNullSafe: true,
+    description: ' A widget that presents a dropdown in a seperate page.',
+    properties: [
+      LdDocProperty(
+        name: 'items',
+        type: 'Iterable<LdSelectItem<T>>',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'disabled',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'allowEmpty',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'mode',
+        type: 'LdChooseMode',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'multiple',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'value',
+        type: 'Set<T>?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onChange',
+        type: 'dynamic Function(Set<T>)',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'truncateDisplay',
+        type: 'int?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'size',
+        type: 'LdSize',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'label',
+        type: 'String?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'placeholder',
+        type: 'Text?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'navigator',
+        type: 'NavigatorState?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'enableSearch',
+        type: 'bool?',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'items',
+            type: 'Iterable<LdSelectItem<T>>',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'allowEmpty',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'disabled',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'label',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'multiple',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'mode',
+            type: 'LdChooseMode',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'navigator',
+            type: 'NavigatorState?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'onChange',
+            type: 'dynamic Function(Set<T>)',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'placeholder',
+            type: 'Text?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'size',
+            type: 'LdSize',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'truncateDisplay',
+            type: 'int?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'enableSearch',
+            type: 'bool?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'value',
+            type: 'Set<T>?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['createState'],
+  ),
+  LdDocComponent(
+    name: '_LdChooseState',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: '_sheetKey',
+        type: 'Key',
+        description: '',
+        features: [
+          'final',
+          'late',
+        ],
+      ),
+      LdDocProperty(
+        name: '_enableSearch',
+        type: 'bool',
+        description: '',
+        features: ['late'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [
+      'initState',
+      'dispose',
+      '_onTap',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: '_LdChoosePage',
     isNullSafe: true,
     description: '',
     properties: [
@@ -6933,11 +6452,423 @@ const ldDocComponents = [
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'controller',
-        type: 'LdPortalController?',
+        name: 'label',
+        type: 'String',
         description: '',
         features: ['final'],
       ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'label',
+            type: 'String',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: '_LdChooseList',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'items',
+        type: 'Iterable<LdSelectItem<T>>',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'value',
+        type: 'Set<T>?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'multiple',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'shrinkWrap',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onDismiss',
+        type: 'void Function()',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onChange',
+        type: 'dynamic Function(Set<T>)?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'enableSearch',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'allowEmpty',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'items',
+            type: 'Iterable<LdSelectItem<T>>',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'value',
+            type: 'Set<T>?',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'multiple',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'onChange',
+            type: 'dynamic Function(Set<T>)?',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'allowEmpty',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'onDismiss',
+            type: 'void Function()',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'shrinkWrap',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'enableSearch',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['createState'],
+  ),
+  LdDocComponent(
+    name: '_LdChooseListState',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: '_value',
+        type: 'Set<T>',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_searchController',
+        type: 'TextEditingController',
+        description: '',
+        features: ['late'],
+      ),
+      LdDocProperty(
+        name: '_searchResults',
+        type: 'List<LdSelectItem<T>>?',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_fuze',
+        type: 'Fuzzy<LdSelectItem<T>>',
+        description: '',
+        features: [
+          'final',
+          'late',
+        ],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [
+      '_onSearchQueryChanged',
+      'initState',
+      'dispose',
+      '_onTap',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: '_LdPadding',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'size',
+        type: 'LdSize',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'balanced',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'size',
+            type: 'LdSize',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'balanced',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdWindowFrame',
+    isNullSafe: true,
+    description:
+        ' Show a frame around the window that has a surface color. Only is shown on\n Windows, Linux, and MacOS.',
+    properties: [
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'frameBuilder',
+        type: 'Widget Function(BuildContext, Widget)',
+        description:
+            '/// The frameBuilder can be used to wrap the child in a frame. This is useful\n/// for wrapping it in a [MoveWindow] widget.',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'title',
+        type: 'Text',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'showWindowFrame',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'title',
+            type: 'Text',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'frameBuilder',
+            type: 'Widget Function(BuildContext, Widget)',
+            description: '',
+            named: true,
+            required: true,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdIndicator',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'type',
+        type: 'LdIndicatorType',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'size',
+        type: 'LdSize',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'customSize',
+        type: 'double?',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'type',
+            type: 'LdIndicatorType',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'size',
+            type: 'LdSize',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'customSize',
+            type: 'double?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdMute',
+    isNullSafe: true,
+    description: ' LdMute allows you to use the LdTheme to make a muted text',
+    properties: [
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget',
+        description: '',
+        features: ['final'],
+      )
     ],
     constructors: [
       LdDocConstructor(
@@ -6957,9 +6888,78 @@ const ldDocComponents = [
             named: true,
             required: true,
           ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdFormLabel',
+    isNullSafe: true,
+    description:
+        ' A label for a form field. This is a convenience widget that wraps a [Text]\n and [ldSpacerS]. THIS WIDGET contains outer padding.!',
+    properties: [
+      LdDocProperty(
+        name: 'label',
+        type: 'String?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'size',
+        type: 'LdSize',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'disabled',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'direction',
+        type: 'Axis',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
           LdDocParameter(
-            name: 'controller',
-            type: 'LdPortalController?',
+            name: 'label',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'size',
+            type: 'LdSize',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'direction',
+            type: 'Axis',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'disabled',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
             description: '',
             named: true,
             required: false,
@@ -6971,38 +6971,149 @@ const ldDocComponents = [
     methods: ['build'],
   ),
   LdDocComponent(
-    name: 'ProviderOrValue',
+    name: 'LdDivider',
+    isNullSafe: true,
+    description: ' Divides some content with a horizontal',
+    properties: [
+      LdDocProperty(
+        name: 'height',
+        type: 'double?',
+        description: '',
+        features: ['final'],
+      )
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'height',
+            type: 'double?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdCollapse',
+    isNullSafe: true,
+    description: ' A utility to collapse some content',
+    properties: [
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget',
+        description: '/// Widget to collapse',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'collapsed',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'axis',
+        type: 'Axis',
+        description: '/// Which direction to collapse',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'collapsed',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'axis',
+            type: 'Axis',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['createState'],
+  ),
+  LdDocComponent(
+    name: '_LdCollapseState',
     isNullSafe: true,
     description: '',
     properties: [
       LdDocProperty(
-        name: 'value',
-        type: 'T?',
+        name: '_controller',
+        type: 'AnimationController?',
+        description: '',
+        features: [],
+      )
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [
+      'dispose',
+      'initState',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdOrb',
+    isNullSafe: true,
+    description:
+        ' an animated illustration of an orb filled with liquid that has some waves and a [filling] level.',
+    properties: [
+      LdDocProperty(
+        name: 'size',
+        type: 'double',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'create',
-        type: 'T Function(BuildContext)?',
+        name: 'filling',
+        type: 'double',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'dispose',
-        type: 'void Function(BuildContext, T)?',
-        description:
-            '/// Dispose function for the provider, only used if [value] is null',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'builder',
-        type: 'Widget Function(BuildContext, Widget?)',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'child',
-        type: 'Widget?',
+        name: 'paintBackground',
+        type: 'bool',
         description: '',
         features: ['final'],
       ),
@@ -7012,52 +7123,247 @@ const ldDocComponents = [
         name: '',
         signature: [
           LdDocParameter(
+            name: 'filling',
+            type: 'double',
+            description: '',
+            named: false,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'size',
+            type: 'double',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'paintBackground',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
             name: 'key',
             type: 'Key?',
             description: '',
             named: true,
             required: false,
           ),
-          LdDocParameter(
-            name: 'value',
-            type: 'T?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'create',
-            type: 'T Function(BuildContext)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'child',
-            type: 'Widget?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'dispose',
-            type: 'void Function(BuildContext, T)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'builder',
-            type: 'Widget Function(BuildContext, Widget?)',
-            description: '',
-            named: true,
-            required: true,
-          ),
         ],
         features: ['const'],
       )
     ],
-    methods: ['build'],
+    methods: ['createState'],
+  ),
+  LdDocComponent(
+    name: '_LdOrbState',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: '_animationController',
+        type: 'AnimationController?',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_tween',
+        type: 'Tween<double>',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: '_animation',
+        type: 'Animation<double>?',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_angle',
+        type: 'double',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_streamSubscription',
+        type: 'StreamSubscription<AccelerometerEvent>?',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_fill',
+        type: 'double',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [
+      'initState',
+      'dispose',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: 'ReflectionPainter',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'theme',
+        type: 'LdTheme',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'inset',
+        type: 'double',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'orbSize',
+        type: 'Size',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'theme',
+            type: 'LdTheme',
+            description: '',
+            named: false,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'orbSize',
+            type: 'Size',
+            description: '',
+            named: false,
+            required: true,
+          ),
+        ],
+        features: [],
+      )
+    ],
+    methods: [
+      'shouldRepaint',
+      'paint',
+    ],
+  ),
+  LdDocComponent(
+    name: '_OrbPainter',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: '_orbSize',
+        type: 'Size',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'fillPercentage',
+        type: 'double',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'paintBackground',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'animationProgress',
+        type: 'double',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'theme',
+        type: 'LdTheme',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'inset',
+        type: 'double',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'width',
+        type: 'double',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'height',
+        type: 'double',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: '_orbSize',
+            type: 'Size',
+            description: '',
+            named: false,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'fillPercentage',
+            type: 'double',
+            description: '',
+            named: false,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'animationProgress',
+            type: 'double',
+            description: '',
+            named: false,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'paintBackground',
+            type: 'bool',
+            description: '',
+            named: false,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'theme',
+            type: 'LdTheme',
+            description: '',
+            named: false,
+            required: true,
+          ),
+        ],
+        features: [],
+      )
+    ],
+    methods: [
+      '_positionOnCircle',
+      'paint',
+      'shouldRepaint',
+    ],
   ),
   LdDocComponent(
     name: 'LdSwitch',
@@ -7178,347 +7484,57 @@ const ldDocComponents = [
     ],
   ),
   LdDocComponent(
-    name: 'LdRunnerLog',
+    name: 'LdLoader',
     isNullSafe: true,
-    description: '',
+    description: ' a loading indicator (indeterminate)',
     properties: [
       LdDocProperty(
-        name: 'messages',
-        type: 'List<String>',
-        description: '',
-        features: ['final'],
-      )
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'messages',
-            type: 'List<String>',
-            description: '',
-            named: true,
-            required: true,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['createState'],
-  ),
-  LdDocComponent(
-    name: '_LdRunnerLogState',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: '_node',
-        type: 'FocusNode',
-        description: '',
-        features: ['final'],
-      )
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
-    methods: [
-      'dispose',
-      'buildLine',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdRunnerStep',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'title',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'status',
-        type: 'LdIndicatorType',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'disabled',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'trailing',
-        type: 'Widget?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'isExpanded',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onPress',
-        type: 'void Function()?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'children',
-        type: 'List<Widget>',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'title',
-            type: 'Widget',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'status',
-            type: 'LdIndicatorType',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'disabled',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'trailing',
-            type: 'Widget?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'isExpanded',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'onPress',
-            type: 'void Function()?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'children',
-            type: 'List<Widget>',
-            description: '',
-            named: true,
-            required: true,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdContainer',
-    isNullSafe: true,
-    description:
-        ' Allows you to horizontally center your content on a larger screen by padding it on the sides',
-    properties: [
-      LdDocProperty(
-        name: 'child',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'padding',
-        type: 'EdgeInsets?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'maxWidth',
+        name: 'size',
         type: 'double',
         description: '',
         features: ['final'],
       ),
+      LdDocProperty(
+        name: 'speed',
+        type: 'Duration',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'neutral',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
     ],
     constructors: [
       LdDocConstructor(
         name: '',
         signature: [
           LdDocParameter(
-            name: 'child',
-            type: 'Widget',
+            name: 'key',
+            type: 'Key?',
             description: '',
             named: true,
-            required: true,
+            required: false,
           ),
           LdDocParameter(
-            name: 'maxWidth',
+            name: 'size',
             type: 'double',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'padding',
-            type: 'EdgeInsets?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdContextMenu',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'visible',
-        type: 'bool?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'dismissOnOutsideTap',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'listenForTaps',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'blurMode',
-        type: 'LdContextMenuBlurMode',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'zoomMode',
-        type: 'LdContextZoomMode',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'builder',
-        type: 'Widget Function(BuildContext, bool)',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'menuBuilder',
-        type: 'Widget Function(BuildContext, void Function())',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'builder',
-            type: 'Widget Function(BuildContext, bool)',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'menuBuilder',
-            type: 'Widget Function(BuildContext, void Function())',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'dismissOnOutsideTap',
+            name: 'neutral',
             type: 'bool',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'blurMode',
-            type: 'LdContextMenuBlurMode',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'zoomMode',
-            type: 'LdContextZoomMode',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'listenForTaps',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'visible',
-            type: 'bool?',
+            name: 'speed',
+            type: 'Duration',
             description: '',
             named: true,
             required: false,
@@ -7530,46 +7546,16 @@ const ldDocComponents = [
     methods: ['createState'],
   ),
   LdDocComponent(
-    name: '_LdContextMenuState',
+    name: '_LdLoaderState',
     isNullSafe: true,
     description: '',
     properties: [
       LdDocProperty(
-        name: '_triggerKey',
-        type: 'GlobalKey<State<StatefulWidget>>',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: '_visible',
-        type: 'bool',
+        name: '_animationController',
+        type: 'AnimationController',
         description: '',
         features: ['late'],
-      ),
-      LdDocProperty(
-        name: '_belowBottom',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_mobile',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_shouldBlur',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_shouldZoom',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
+      )
     ],
     constructors: [
       LdDocConstructor(
@@ -7579,43 +7565,45 @@ const ldDocComponents = [
       )
     ],
     methods: [
-      'didUpdateWidget',
-      '_dismiss',
-      '_open',
-      'buildTrigger',
+      'initState',
+      'dispose',
       'build',
     ],
   ),
   LdDocComponent(
-    name: 'LdWindowFrame',
+    name: '_LoadingPainter',
     isNullSafe: true,
-    description:
-        ' Show a frame around the window that has a surface color. Only is shown on\n Windows, Linux, and MacOS.',
+    description: '',
     properties: [
       LdDocProperty(
-        name: 'child',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'frameBuilder',
-        type: 'Widget Function(BuildContext, Widget)',
-        description:
-            '/// The frameBuilder can be used to wrap the child in a frame. This is useful\n/// for wrapping it in a [MoveWindow] widget.',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'title',
-        type: 'Text',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'showWindowFrame',
-        type: 'bool',
+        name: 'animation',
+        type: 'Animation<double>',
         description: '',
         features: [],
+      ),
+      LdDocProperty(
+        name: 'loaderSize',
+        type: 'double',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'baseColor',
+        type: 'Color',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'accentColor',
+        type: 'Color',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'accentColor2',
+        type: 'Color',
+        description: '',
+        features: ['final'],
       ),
     ],
     constructors: [
@@ -7623,15 +7611,193 @@ const ldDocComponents = [
         name: '',
         signature: [
           LdDocParameter(
+            name: 'animation',
+            type: 'Animation<double>',
+            description: '',
+            named: false,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'loaderSize',
+            type: 'double',
+            description: '',
+            named: false,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'baseColor',
+            type: 'Color',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'accentColor',
+            type: 'Color',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'accentColor2',
+            type: 'Color',
+            description: '',
+            named: true,
+            required: true,
+          ),
+        ],
+        features: [],
+      )
+    ],
+    methods: [
+      'paint',
+      'shouldRepaint',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdReveal',
+    isNullSafe: true,
+    description:
+        ' A utility to reveal some content, with a fade in and collapse effect',
+    properties: [
+      LdDocProperty(
+        name: 'revealed',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'transformXOffset',
+        type: 'double',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'transformYOffset',
+        type: 'double',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'springConstant',
+        type: 'double',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'dampingCoefficient',
+        type: 'double',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'mass',
+        type: 'double',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'initialRevealed',
+        type: 'bool?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'bufferSprings',
+        type: 'int?',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'revealed',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'transformXOffset',
+            type: 'double',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'transformYOffset',
+            type: 'double',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'initialRevealed',
+            type: 'bool?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'mass',
+            type: 'double',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'bufferSprings',
+            type: 'int?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'springConstant',
+            type: 'double',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'dampingCoefficient',
+            type: 'double',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
             name: 'key',
             type: 'Key?',
             description: '',
             named: true,
             required: false,
           ),
+        ],
+        features: ['const'],
+      ),
+      LdDocConstructor(
+        name: 'quick',
+        signature: [
           LdDocParameter(
-            name: 'title',
-            type: 'Text',
+            name: 'revealed',
+            type: 'bool',
             description: '',
             named: true,
             required: true,
@@ -7644,15 +7810,70 @@ const ldDocComponents = [
             required: true,
           ),
           LdDocParameter(
-            name: 'frameBuilder',
-            type: 'Widget Function(BuildContext, Widget)',
+            name: 'initialRevealed',
+            type: 'bool?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'transformXOffset',
+            type: 'double',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'transformYOffset',
+            type: 'double',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['factory'],
+      ),
+      LdDocConstructor(
+        name: 'slow',
+        signature: [
+          LdDocParameter(
+            name: 'revealed',
+            type: 'bool',
             description: '',
             named: true,
             required: true,
           ),
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'initialRevealed',
+            type: 'bool?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'transformXOffset',
+            type: 'double',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'transformYOffset',
+            type: 'double',
+            description: '',
+            named: true,
+            required: false,
+          ),
         ],
-        features: ['const'],
-      )
+        features: ['factory'],
+      ),
     ],
     methods: ['build'],
   ),
@@ -7706,77 +7927,50 @@ const ldDocComponents = [
     methods: ['build'],
   ),
   LdDocComponent(
-    name: 'LdAccordion',
+    name: 'LdSurfaceInfo',
     isNullSafe: true,
-    description: ' a collection of collapsible items in a group.',
+    description: '',
     properties: [
       LdDocProperty(
-        name: 'childBuilder',
-        type: 'Widget Function(BuildContext, int)',
-        description:
-            '/// Function that is called to build each item in the accordion.',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'headerBuilder',
-        type: 'Widget Function(BuildContext, int)',
-        description:
-            '/// Function that is called to build each header in the accordion.',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'itemCount',
-        type: 'int',
-        description: '/// The number of items in the accordion.',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'initialOpenIndex',
-        type: 'Set<int>',
-        description:
-            '/// The index of the items that should be open by default.',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'headerPadding',
-        type: 'EdgeInsets?',
-        description: '/// The padding to apply to the header.',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'childPadding',
-        type: 'EdgeInsets?',
-        description: '/// The padding to apply to the child.',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'allowMultipleOpen',
+        name: 'isSurface',
         type: 'bool',
-        description: '/// Whether or not multiple items can be open at once.',
+        description: '',
+        features: [],
+      )
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'isSurface',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: true,
+          )
+        ],
+        features: [],
+      )
+    ],
+    methods: ['of'],
+  ),
+  LdDocComponent(
+    name: 'LdAutoBackground',
+    isNullSafe: true,
+    description:
+        ' A widget that will change its background color based on the parent surface',
+    properties: [
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget',
+        description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'speed',
-        type: 'Duration',
-        description: '/// The duration of the animation.',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'curveExpand',
-        type: 'Curve',
-        description: '/// The curve to use when expanding.',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'curveCollapse',
-        type: 'Curve',
-        description: '/// The curve to use when collapsing.',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'elevateActive',
+        name: 'invert',
         type: 'bool',
-        description: '/// Whether or not to elevate the active item.',
+        description: '',
         features: ['final'],
       ),
     ],
@@ -7785,78 +7979,354 @@ const ldDocComponents = [
         name: '',
         signature: [
           LdDocParameter(
-            name: 'childBuilder',
-            type: 'Widget Function(BuildContext, int)',
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget',
             description: '',
             named: true,
             required: true,
           ),
           LdDocParameter(
-            name: 'headerBuilder',
-            type: 'Widget Function(BuildContext, int)',
+            name: 'invert',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdAppBar',
+    isNullSafe: true,
+    description: '',
+    properties: [],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'context',
+            type: 'BuildContext',
             description: '',
             named: true,
             required: true,
           ),
           LdDocParameter(
-            name: 'itemCount',
-            type: 'int',
+            name: 'title',
+            type: 'Widget?',
             description: '',
             named: true,
-            required: true,
+            required: false,
           ),
           LdDocParameter(
-            name: 'allowMultipleOpen',
+            name: 'actions',
+            type: 'List<Widget>?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'leading',
+            type: 'Widget?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'elevation',
+            type: 'double?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'iconTheme',
+            type: 'IconThemeData?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'primary',
             type: 'bool',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'childPadding',
-            type: 'EdgeInsets?',
+            name: 'centerTitle',
+            type: 'bool?',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'curveCollapse',
-            type: 'Curve',
+            name: 'titleSpacing',
+            type: 'double?',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'curveExpand',
-            type: 'Curve',
+            name: 'toolbarOpacity',
+            type: 'double',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'elevateActive',
+            name: 'bottomOpacity',
+            type: 'double',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'toolbarHeight',
+            type: 'double?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'titleTextStyle',
+            type: 'TextStyle?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'backgroundColor',
+            type: 'Color?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'actionsIconTheme',
+            type: 'IconThemeData?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'flexibleSpace',
+            type: 'Widget?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'foregroundColor',
+            type: 'Color?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'automaticallyImplyLeading',
             type: 'bool',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'headerPadding',
-            type: 'EdgeInsets?',
+            name: 'clipBehavior',
+            type: 'Clip?',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'initialOpenIndex',
-            type: 'Set<int>',
+            name: 'shape',
+            type: 'ShapeBorder?',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'speed',
-            type: 'Duration',
+            name: 'toolbarTextStyle',
+            type: 'TextStyle?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'leadingWidth',
+            type: 'double?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'notificationPredicate',
+            type: 'bool Function(ScrollNotification)',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'forceMaterialTransparency',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'scrolledUnderElevation',
+            type: 'double?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'surfaceTintColor',
+            type: 'Color?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'excludeHeaderSemantics',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: [],
+      )
+    ],
+    methods: [],
+  ),
+  LdDocComponent(
+    name: 'LdDrawerItemSection',
+    isNullSafe: true,
+    description:
+        ' A section in the drawer that can contain a collapsable sub-items',
+    properties: [
+      LdDocProperty(
+        name: 'leading',
+        type: 'Widget?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'trailing',
+        type: 'Widget?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'disabled',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'active',
+        type: 'bool?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'initiallyExpanded',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'children',
+        type: 'List<Widget>?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onTap',
+        type: 'dynamic Function()?',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'leading',
+            type: 'Widget?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'trailing',
+            type: 'Widget?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'initiallyExpanded',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'onTap',
+            type: 'dynamic Function()?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'active',
+            type: 'bool?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'disabled',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'children',
+            type: 'List<Widget>?',
             description: '',
             named: true,
             required: false,
@@ -7870,232 +8340,76 @@ const ldDocComponents = [
           ),
         ],
         features: ['const'],
-      ),
-      LdDocConstructor(
-        name: 'fromList',
-        signature: [
-          LdDocParameter(
-            name: 'items',
-            type: 'List<LdAccordionItem>',
-            description: '',
-            named: false,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'elevateActive',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'allowMultipleOpen',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'initialOpenIndex',
-            type: 'Set<int>',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['factory'],
-      ),
+      )
     ],
     methods: ['createState'],
   ),
   LdDocComponent(
-    name: 'LdAccordionItem',
-    isNullSafe: true,
-    description:
-        ' item of an accordion used in utility constructor [LdAccordion.fromList].',
-    properties: [
-      LdDocProperty(
-        name: 'child',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'header',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'child',
-            type: 'Widget',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'header',
-            type: 'Widget',
-            description: '',
-            named: true,
-            required: true,
-          ),
-        ],
-        features: [],
-      )
-    ],
-    methods: [],
-  ),
-  LdDocComponent(
-    name: '_LdAccordionChild',
+    name: '_LdDrawerItemSectionState',
     isNullSafe: true,
     description: '',
     properties: [
       LdDocProperty(
-        name: 'child',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'header',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'elevateActive',
+        name: '_expanded',
         type: 'bool',
         description: '',
-        features: ['final'],
+        features: [],
       ),
       LdDocProperty(
-        name: 'speed',
-        type: 'Duration',
+        name: '_theme',
+        type: 'LdTheme',
         description: '',
-        features: ['final'],
+        features: [],
       ),
       LdDocProperty(
-        name: 'headerPadding',
-        type: 'EdgeInsets',
+        name: '_trailingItem',
+        type: 'Widget',
         description: '',
-        features: ['final'],
+        features: [],
       ),
       LdDocProperty(
-        name: 'childPadding',
-        type: 'EdgeInsets',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onPressed',
-        type: 'dynamic Function()',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'curveExpand',
-        type: 'Curve',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'curveCollapse',
-        type: 'Curve',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'collapsed',
+        name: '_isExpanded',
         type: 'bool',
         description: '',
-        features: ['final'],
+        features: [],
       ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [
+      'initState',
+      '_leading',
+      '_onTap',
+      'buildItem',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdSectionHeader',
+    isNullSafe: true,
+    description: ' A title for a section in the drawer',
+    properties: [
+      LdDocProperty(
+        name: 'text',
+        type: 'String',
+        description: '',
+        features: ['final'],
+      )
     ],
     constructors: [
       LdDocConstructor(
         name: '',
         signature: [
           LdDocParameter(
-            name: 'collapsed',
-            type: 'bool',
+            name: 'text',
+            type: 'String',
             description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'child',
-            type: 'Widget',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'elevateActive',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'onPressed',
-            type: 'dynamic Function()',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'headerPadding',
-            type: 'EdgeInsets',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'childPadding',
-            type: 'EdgeInsets',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'speed',
-            type: 'Duration',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'header',
-            type: 'Widget',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'curveExpand',
-            type: 'Curve',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'curveCollapse',
-            type: 'Curve',
-            description: '',
-            named: true,
+            named: false,
             required: true,
           ),
           LdDocParameter(
@@ -8112,45 +8426,916 @@ const ldDocComponents = [
     methods: ['build'],
   ),
   LdDocComponent(
-    name: '_LdAccordionState',
+    name: 'LdDrawerHeader',
     isNullSafe: true,
-    description: '',
+    description:
+        ' The header of a drawer, that contains the application or menu title',
     properties: [
       LdDocProperty(
-        name: 'openIndex',
-        type: 'Set<int>',
-        description: '',
-        features: [],
-      )
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
-    methods: [
-      'build',
-      'didUpdateWidget',
-      'initState',
-      '_onTap',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdTag',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'child',
+        name: 'title',
         type: 'Widget',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'onDismiss',
-        type: 'Function?',
+        name: 'showBack',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'scrollController',
+        type: 'ScrollController?',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'title',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'showBack',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'scrollController',
+            type: 'ScrollController?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LiquidLocalizations',
+    isNullSafe: true,
+    description:
+        ' Callers can lookup localized strings with an instance of LiquidLocalizations\n returned by `LiquidLocalizations.of(context)`.\n\n Applications need to include `LiquidLocalizations.delegate()` in their app\'s\n `localizationDelegates` list, and the locales they support in the app\'s\n `supportedLocales` list. For example:\n\n ```dart\n import \'generated/liquid_localizations.dart\';\n\n return MaterialApp(\n   localizationsDelegates: LiquidLocalizations.localizationsDelegates,\n   supportedLocales: LiquidLocalizations.supportedLocales,\n   home: MyApplicationHome(),\n );\n ```\n\n ## Update pubspec.yaml\n\n Please make sure to update your pubspec.yaml to include the following\n packages:\n\n ```yaml\n dependencies:\n   # Internationalization support.\n   flutter_localizations:\n     sdk: flutter\n   intl: any # Use the pinned version from flutter_localizations\n\n   # Rest of dependencies\n ```\n\n ## iOS Applications\n\n iOS applications define key application metadata, including supported\n locales, in an Info.plist file that is built into the application bundle.\n To configure the locales supported by your app, you’ll need to edit this\n file.\n\n First, open your project’s ios/Runner.xcworkspace Xcode workspace file.\n Then, in the Project Navigator, open the Info.plist file under the Runner\n project’s Runner folder.\n\n Next, select the Information Property List item, select Add Item from the\n Editor menu, then select Localizations from the pop-up menu.\n\n Select and expand the newly-created Localizations item then, for each\n locale your application supports, add a new item and select the locale\n you wish to add from the pop-up menu in the Value field. This list should\n be consistent with the languages listed in the LiquidLocalizations.supportedLocales\n property.',
+    properties: [
+      LdDocProperty(
+        name: 'localeName',
+        type: 'String',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'delegate',
+        type: 'LocalizationsDelegate<LiquidLocalizations>',
+        description: '',
+        features: [
+          'static',
+          'const',
+        ],
+      ),
+      LdDocProperty(
+        name: 'localizationsDelegates',
+        type: 'List<LocalizationsDelegate<dynamic>>',
+        description:
+            '/// A list of this localizations delegate along with the default localizations\n/// delegates.\n///\n/// Returns a list of localizations delegates containing this delegate along with\n/// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,\n/// and GlobalWidgetsLocalizations.delegate.\n///\n/// Additional delegates can be added by appending to this list in\n/// MaterialApp. This list does not have to be used at all if a custom list\n/// of delegates is preferred or required.',
+        features: [
+          'static',
+          'const',
+        ],
+      ),
+      LdDocProperty(
+        name: 'supportedLocales',
+        type: 'List<Locale>',
+        description:
+            '/// A list of this localizations delegate\'s supported locales.',
+        features: [
+          'static',
+          'const',
+        ],
+      ),
+      LdDocProperty(
+        name: 'searchAgain',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'search',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'noItemsFound',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'cancel',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'confirm',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'ok',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'done',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'enterText',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'refresh',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'errorOccurred',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'failed',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'retry',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'choose',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'submit',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'selectDate',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'selectTime',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'unknownError',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'moreInfo',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'close',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'loading',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'networkError',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'timeoutError',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'formatError',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'locale',
+            type: 'String',
+            description: '',
+            named: false,
+            required: true,
+          )
+        ],
+        features: [],
+      )
+    ],
+    methods: [
+      'of',
+      'retryIn',
+    ],
+  ),
+  LdDocComponent(
+    name: '_LiquidLocalizationsDelegate',
+    isNullSafe: true,
+    description: '',
+    properties: [],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: ['const'],
+      )
+    ],
+    methods: [
+      'load',
+      'isSupported',
+      'shouldReload',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LiquidLocalizationsDe',
+    isNullSafe: true,
+    description: ' The translations for German (`de`).',
+    properties: [
+      LdDocProperty(
+        name: 'searchAgain',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'search',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'noItemsFound',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'cancel',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'confirm',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'ok',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'done',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'enterText',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'refresh',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'errorOccurred',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'failed',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'retry',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'choose',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'submit',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'selectDate',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'selectTime',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'unknownError',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'moreInfo',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'close',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'loading',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'networkError',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'timeoutError',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'formatError',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'locale',
+            type: 'String',
+            description: '',
+            named: false,
+            required: false,
+          )
+        ],
+        features: [],
+      )
+    ],
+    methods: ['retryIn'],
+  ),
+  LdDocComponent(
+    name: 'LiquidLocalizationsEn',
+    isNullSafe: true,
+    description: ' The translations for English (`en`).',
+    properties: [
+      LdDocProperty(
+        name: 'searchAgain',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'search',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'noItemsFound',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'cancel',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'confirm',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'ok',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'done',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'enterText',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'refresh',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'errorOccurred',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'failed',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'retry',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'choose',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'submit',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'selectDate',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'selectTime',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'unknownError',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'moreInfo',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'close',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'loading',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'networkError',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'timeoutError',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'formatError',
+        type: 'String',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'locale',
+            type: 'String',
+            description: '',
+            named: false,
+            required: false,
+          )
+        ],
+        features: [],
+      )
+    ],
+    methods: ['retryIn'],
+  ),
+  LdDocComponent(
+    name: 'LdSubmitLoadingIndicator',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'loading',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'loadingText',
+        type: 'String?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'direction',
+        type: 'Axis',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'loading',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'loadingText',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'direction',
+            type: 'Axis',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdSubmitDialogBuilder',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'showSubmitButton',
+        type: 'bool?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'dialogKey',
+        type: 'Key',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'resultBuilder',
+            type: 'Widget Function(BuildContext, T, LdSubmitController<T>)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'errorBuilder',
+            type:
+                'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'loadingBuilder',
+            type: 'Widget Function(BuildContext, LdSubmitController<T>)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'submitButtonBuilder',
+            type: 'Widget Function(BuildContext, LdSubmitController<T>)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'showSubmitButton',
+            type: 'bool?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: [],
+      )
+    ],
+    methods: [
+      'buildLoadingDialog',
+      'buildErrorDialog',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdSubmitCustomBuilder',
+    isNullSafe: true,
+    description:
+        ' A custom builder that allows you to build your own submit widget.',
+    properties: [
+      LdDocProperty(
+        name: 'builder',
+        type:
+            'Widget Function(BuildContext, LdSubmitController<T>, LdSubmitStateType)',
+        description: '',
+        features: ['final'],
+      )
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'builder',
+            type:
+                'Widget Function(BuildContext, LdSubmitController<T>, LdSubmitStateType)',
+            description: '',
+            named: true,
+            required: true,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdSubmitCenteredBuilder',
+    isNullSafe: true,
+    description: '',
+    properties: [],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'resultBuilder',
+            type: 'Widget Function(BuildContext, T, LdSubmitController<T>)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'submitButtonBuilder',
+            type: 'Widget Function(BuildContext, LdSubmitController<T>)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'loadingBuilder',
+            type: 'Widget Function(BuildContext, LdSubmitController<T>)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'errorBuilder',
+            type:
+                'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdSubmitInlineBuilder',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'showSubmitButton',
+        type: 'bool?',
+        description: '',
+        features: ['final'],
+      )
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'resultBuilder',
+            type: 'Widget Function(BuildContext, T, LdSubmitController<T>)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'submitButtonBuilder',
+            type: 'Widget Function(BuildContext, LdSubmitController<T>)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'errorBuilder',
+            type:
+                'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'showSubmitButton',
+            type: 'bool?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: [
+      'buildSubmitButton',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdSubmitButton',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'controller',
+        type: 'LdSubmitController<dynamic>',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'leading',
+        type: 'Widget?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'trailing',
+        type: 'Widget?',
         description: '',
         features: ['final'],
       ),
@@ -8179,22 +9364,22 @@ const ldDocComponents = [
             required: false,
           ),
           LdDocParameter(
-            name: 'child',
-            type: 'Widget',
+            name: 'controller',
+            type: 'LdSubmitController<dynamic>',
             description: '',
             named: true,
             required: true,
           ),
           LdDocParameter(
-            name: 'color',
-            type: 'LdColor?',
+            name: 'leading',
+            type: 'Widget?',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'onDismiss',
-            type: 'Function?',
+            name: 'trailing',
+            type: 'Widget?',
             description: '',
             named: true,
             required: false,
@@ -8206,50 +9391,764 @@ const ldDocComponents = [
             named: true,
             required: false,
           ),
+          LdDocParameter(
+            name: 'color',
+            type: 'LdColor?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdSubmitController',
+    isNullSafe: true,
+    description:
+        ' Handles the lifecyle of a submit action. Pass a [LdSubmitConfig] to the\n controller to configure the submit action.',
+    properties: [
+      LdDocProperty(
+        name: 'config',
+        type: 'LdSubmitConfig<T>',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'exceptionMapper',
+        type: 'LdExceptionMapper',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: '_stateController',
+        type: 'StreamController<LdSubmitState<T>>',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: '_retryTimer',
+        type: 'Timer?',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'jitter',
+        type: 'int',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'state',
+        type: 'LdSubmitState<T>',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_disposed',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'stateStream',
+        type: 'Stream<LdSubmitState<T>>',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'showRetryIndicator',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'canCancel',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_maxRetryAttempts',
+        type: 'int',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'totalRetryTime',
+        type: 'Duration',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_isError',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_isLoading',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_isResult',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_isIdle',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'canRetry',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'canRetrigger',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'canTrigger',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'disposed',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'exceptionMapper',
+            type: 'LdExceptionMapper',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'config',
+            type: 'LdSubmitConfig<T>',
+            description: '',
+            named: true,
+            required: true,
+          ),
+        ],
+        features: [],
+      )
+    ],
+    methods: [
+      'init',
+      '_setState',
+      '_setupRetryTimer',
+      'cancel',
+      '_getRetryDelay',
+      '_trigger',
+      'trigger',
+      '_retryTimerTick',
+      '_nextAttempt',
+      'reset',
+      'dispose',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdSubmitRetryConfig',
+    isNullSafe: true,
+    description: ' Configuration for (automatic) retries of a submit action.',
+    properties: [
+      LdDocProperty(
+        name: 'performAutomaticRetry',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'maxAttempts',
+        type: 'int',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'initialRetryCountdown',
+        type: 'Duration',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'disableRetryButton',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'performAutomaticRetry',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'maxAttempts',
+            type: 'int',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'initialRetryCountdown',
+            type: 'Duration',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'disableRetryButton',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      ),
+      LdDocConstructor(
+        name: 'noRetries',
+        signature: [],
+        features: ['factory'],
+      ),
+    ],
+    methods: [],
+  ),
+  LdDocComponent(
+    name: 'LdSubmitConfig',
+    isNullSafe: true,
+    description: ' A configuration for a submit action.',
+    properties: [
+      LdDocProperty(
+        name: 'loadingText',
+        type: 'String?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'submitText',
+        type: 'String?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'allowResubmit',
+        type: 'bool?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'withHaptics',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'autoTrigger',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'timeout',
+        type: 'Duration?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'allowCancel',
+        type: 'bool?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'action',
+        type: 'Future<T> Function()',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onCanceled',
+        type: 'void Function()?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'retryConfig',
+        type: 'LdSubmitRetryConfig?',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'loadingText',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'submitText',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'allowResubmit',
+            type: 'bool?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'withHaptics',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'autoTrigger',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'allowCancel',
+            type: 'bool?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'onCanceled',
+            type: 'void Function()?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'timeout',
+            type: 'Duration?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'retryConfig',
+            type: 'LdSubmitRetryConfig?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'action',
+            type: 'Future<T> Function()',
+            description: '',
+            named: true,
+            required: true,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: [],
+  ),
+  LdDocComponent(
+    name: 'LdSubmitState',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: '_type',
+        type: 'LdSubmitStateType',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: '_error',
+        type: 'LdException?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: '_result',
+        type: 'T?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: '_attempt',
+        type: 'int',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: '_remainingRetryTime',
+        type: 'Duration?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'attempt',
+        type: 'int',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'remainingRetryTime',
+        type: 'Duration?',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'type',
+        type: 'LdSubmitStateType',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'error',
+        type: 'LdException?',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'result',
+        type: 'T?',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'type',
+            type: 'LdSubmitStateType',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'error',
+            type: 'LdException?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'attempt',
+            type: 'int',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'remainingRetryTime',
+            type: 'Duration?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'result',
+            type: 'T?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: [],
+      )
+    ],
+    methods: [
+      'toString',
+      'copyWith',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdSubmitBuilder',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'resultBuilder',
+        type: 'Widget Function(BuildContext, T, LdSubmitController<T>)?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'submitButtonBuilder',
+        type: 'Widget Function(BuildContext, LdSubmitController<T>)?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'loadingBuilder',
+        type: 'Widget Function(BuildContext, LdSubmitController<T>)?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'errorBuilder',
+        type:
+            'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'resultBuilder',
+            type: 'Widget Function(BuildContext, T, LdSubmitController<T>)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'submitButtonBuilder',
+            type: 'Widget Function(BuildContext, LdSubmitController<T>)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'loadingBuilder',
+            type: 'Widget Function(BuildContext, LdSubmitController<T>)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'errorBuilder',
+            type:
+                'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: [],
+  ),
+  LdDocComponent(
+    name: 'LdSubmit',
+    isNullSafe: true,
+    description:
+        ' A component that handles making requests and displaying errors.\n You can use this component to wrap around a button that makes a request.\n It will handle the loading state and display errors.\n It also has a default exception mapper that will handle common exceptions.\n You can also provide your own exception mapper.\n The default builder is a button that will display a loading spinner when loading.',
+    properties: [
+      LdDocProperty(
+        name: 'config',
+        type: 'LdSubmitConfig<T>?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'controller',
+        type: 'LdSubmitController<T>?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'builder',
+        type: 'Widget?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'submitBuilder',
+        type: 'Widget',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'config',
+            type: 'LdSubmitConfig<T>?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'controller',
+            type: 'LdSubmitController<T>?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'builder',
+            type: 'Widget?',
+            description: '',
+            named: true,
+            required: false,
+          ),
         ],
         features: ['const'],
       )
     ],
     methods: [
-      '_padding',
-      '_fontSize',
+      '_buildProvider',
       'build',
     ],
   ),
   LdDocComponent(
-    name: 'LdColorBundle',
+    name: 'LdPalette',
     isNullSafe: true,
-    description: ' Current active colors',
+    description: ' Describes how to build a pallete of colors for a theme.',
     properties: [
+      LdDocProperty(
+        name: 'isDark',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'primary',
+        type: 'LdColor',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'secondary',
+        type: 'LdColor',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'success',
+        type: 'LdColor',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'warning',
+        type: 'LdColor',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'error',
+        type: 'LdColor',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'neutral',
+        type: 'LdColor',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'background',
+        type: 'Color',
+        description: '',
+        features: [
+          'final',
+          'late',
+        ],
+      ),
       LdDocProperty(
         name: 'surface',
         type: 'Color',
         description: '',
-        features: ['final'],
+        features: [
+          'final',
+          'late',
+        ],
       ),
       LdDocProperty(
         name: 'border',
         type: 'Color',
         description: '',
-        features: ['final'],
+        features: [
+          'final',
+          'late',
+        ],
+      ),
+      LdDocProperty(
+        name: 'stroke',
+        type: 'Color',
+        description: '',
+        features: [
+          'final',
+          'late',
+        ],
       ),
       LdDocProperty(
         name: 'text',
         type: 'Color',
         description: '',
-        features: ['final'],
+        features: [
+          'final',
+          'late',
+        ],
       ),
       LdDocProperty(
-        name: 'placeholder',
+        name: 'textMuted',
         type: 'Color',
         description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'icon',
-        type: 'Color',
-        description: '',
-        features: ['late'],
+        features: [
+          'final',
+          'late',
+        ],
       ),
     ],
     constructors: [
@@ -8257,36 +10156,50 @@ const ldDocComponents = [
         name: '',
         signature: [
           LdDocParameter(
-            name: 'surface',
-            type: 'Color',
+            name: 'isDark',
+            type: 'bool',
             description: '',
             named: true,
             required: true,
           ),
           LdDocParameter(
-            name: 'text',
-            type: 'Color',
+            name: 'primary',
+            type: 'LdColor',
             description: '',
             named: true,
             required: true,
           ),
           LdDocParameter(
-            name: 'border',
-            type: 'Color',
+            name: 'secondary',
+            type: 'LdColor',
             description: '',
             named: true,
             required: true,
           ),
           LdDocParameter(
-            name: 'placeholder',
-            type: 'Color',
+            name: 'success',
+            type: 'LdColor',
             description: '',
             named: true,
-            required: false,
+            required: true,
           ),
           LdDocParameter(
-            name: 'icon',
-            type: 'Color?',
+            name: 'warning',
+            type: 'LdColor',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'error',
+            type: 'LdColor',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'neutral',
+            type: 'LdColor',
             description: '',
             named: true,
             required: false,
@@ -8298,33 +10211,39 @@ const ldDocComponents = [
     methods: [],
   ),
   LdDocComponent(
-    name: 'LdTouchableStatus',
+    name: 'LdColor',
     isNullSafe: true,
     description: '',
     properties: [
       LdDocProperty(
-        name: 'hovering',
-        type: 'bool',
+        name: 'shades',
+        type: 'List<Color>',
         description: '',
-        features: [],
+        features: ['final'],
       ),
       LdDocProperty(
-        name: 'focus',
-        type: 'bool',
+        name: '_center',
+        type: 'int',
         description: '',
-        features: [],
+        features: ['final'],
       ),
       LdDocProperty(
-        name: 'active',
-        type: 'bool',
+        name: '_darkCenter',
+        type: 'int',
         description: '',
-        features: [],
+        features: ['final'],
       ),
       LdDocProperty(
-        name: 'disabled',
-        type: 'bool',
+        name: 'luminanceThreshold',
+        type: 'double',
         description: '',
-        features: [],
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'disabledAlpha',
+        type: 'int',
+        description: '',
+        features: ['final'],
       ),
     ],
     constructors: [
@@ -8332,38 +10251,59 @@ const ldDocComponents = [
         name: '',
         signature: [
           LdDocParameter(
-            name: 'hovering',
-            type: 'bool',
+            name: 'shades',
+            type: 'List<Color>',
+            description: '',
+            named: false,
+            required: true,
+          ),
+          LdDocParameter(
+            name: '_center',
+            type: 'int',
+            description: '',
+            named: false,
+            required: true,
+          ),
+          LdDocParameter(
+            name: '_darkCenter',
+            type: 'int',
+            description: '',
+            named: false,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'luminanceThreshold',
+            type: 'double',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'focus',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'active',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'disabled',
-            type: 'bool',
+            name: 'disabledAlpha',
+            type: 'int',
             description: '',
             named: true,
             required: false,
           ),
         ],
-        features: [],
+        features: ['const'],
       )
     ],
-    methods: [],
+    methods: [
+      'center',
+      'fromCenter',
+      'fromDarkCenter',
+      'moveRelative',
+      'relative',
+      'idle',
+      'hover',
+      'active',
+      'focus',
+      'locateColor',
+      'toString',
+      'contrastingText',
+      'disabled',
+    ],
   ),
   LdDocComponent(
     name: 'LdTouchableSurface',
@@ -8542,1575 +10482,39 @@ const ldDocComponents = [
     ],
   ),
   LdDocComponent(
-    name: 'LdDrawerHeader',
+    name: 'LdColorBundle',
     isNullSafe: true,
-    description:
-        ' The header of a drawer, that contains the application or menu title',
+    description: ' Current active colors',
     properties: [
-      LdDocProperty(
-        name: 'title',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'showBack',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'scrollController',
-        type: 'ScrollController?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'title',
-            type: 'Widget',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'showBack',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'scrollController',
-            type: 'ScrollController?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdSectionHeader',
-    isNullSafe: true,
-    description: ' A title for a section in the drawer',
-    properties: [
-      LdDocProperty(
-        name: 'text',
-        type: 'String',
-        description: '',
-        features: ['final'],
-      )
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'text',
-            type: 'String',
-            description: '',
-            named: false,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdDrawerItemSection',
-    isNullSafe: true,
-    description:
-        ' A section in the drawer that can contain a collapsable sub-items',
-    properties: [
-      LdDocProperty(
-        name: 'leading',
-        type: 'Widget?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'child',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'trailing',
-        type: 'Widget?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'disabled',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'active',
-        type: 'bool?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'initiallyExpanded',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'children',
-        type: 'List<Widget>?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onTap',
-        type: 'dynamic Function()?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'leading',
-            type: 'Widget?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'child',
-            type: 'Widget',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'trailing',
-            type: 'Widget?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'initiallyExpanded',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'onTap',
-            type: 'dynamic Function()?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'active',
-            type: 'bool?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'disabled',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'children',
-            type: 'List<Widget>?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['createState'],
-  ),
-  LdDocComponent(
-    name: '_LdDrawerItemSectionState',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: '_expanded',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_theme',
-        type: 'LdTheme',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_trailingItem',
-        type: 'Widget',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_isExpanded',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
-    methods: [
-      'initState',
-      '_leading',
-      '_onTap',
-      'buildItem',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdListPage',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'newItems',
-        type: 'List<T>',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'hasMore',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'total',
-        type: 'int',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'nextPageToken',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'error',
-        type: 'Object?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'newItems',
-            type: 'List<T>',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'hasMore',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'total',
-            type: 'int',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'error',
-            type: 'Object?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'nextPageToken',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: [],
-      )
-    ],
-    methods: [],
-  ),
-  LdDocComponent(
-    name: '_ListItem',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'item',
-        type: 'T?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'isSeparator',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'seperationCriterion',
-        type: 'SeperationCriterion?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'item',
-            type: 'T?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'isSeparator',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'seperationCriterion',
-            type: 'SeperationCriterion?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: [],
-      )
-    ],
-    methods: [],
-  ),
-  LdDocComponent(
-    name: 'LdList',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'itemBuilder',
-        type: 'Widget Function(BuildContext, T, int)',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'emptyBuilder',
-        type: 'Widget Function(BuildContext, Future<void> Function())?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'errorBuilder',
-        type: 'Widget Function(BuildContext, Object?, void Function())?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'assumedItemHeight',
-        type: 'double?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'data',
-        type: 'LdPaginator<T>',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'loadingBuilder',
-        type: 'Widget Function(BuildContext, int, int)?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'areEqual',
-        type: 'bool Function(T, T)?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'groupingCriterion',
-        type: 'GroupingCriterion Function(T)?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'seperatorBuilder',
-        type: 'Widget Function(BuildContext, GroupingCriterion)?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'groupSequentialItems',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'shrinkWrap',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'physics',
-        type: 'ScrollPhysics?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'header',
-        type: 'Widget?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'primary',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'footer',
-        type: 'Widget?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'areEqual',
-            type: 'bool Function(T, T)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'emptyBuilder',
-            type: 'Widget Function(BuildContext, Future<void> Function())?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'errorBuilder',
-            type: 'Widget Function(BuildContext, Object?, void Function())?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'header',
-            type: 'Widget?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'loadingBuilder',
-            type: 'Widget Function(BuildContext, int, int)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'assumedItemHeight',
-            type: 'double?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'physics',
-            type: 'ScrollPhysics?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'itemBuilder',
-            type: 'Widget Function(BuildContext, T, int)',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'data',
-            type: 'LdPaginator<T>',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'seperatorBuilder',
-            type: 'Widget Function(BuildContext, GroupingCriterion)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'groupingCriterion',
-            type: 'GroupingCriterion Function(T)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'primary',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'footer',
-            type: 'Widget?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'groupSequentialItems',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'shrinkWrap',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['createState'],
-  ),
-  LdDocComponent(
-    name: '_LdListState',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: '_groupedItems',
-        type: 'List<_ListItem<T, GroupingCriterion>>',
-        description: '',
-        features: [],
-      )
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
-    methods: [
-      '_groupItemsSequentially',
-      '_groupItemsUniformly',
-      'initState',
-      'didUpdateWidget',
-      'dispose',
-      '_onDataChange',
-      '_onRefresh',
-      '_buildEmpty',
-      '_buildLoadMore',
-      '_buildError',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdPaginator',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'fetchListFunction',
-        type: 'Future<LdListPage<T>> Function(int, int, String?)',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_currentList',
-        type: 'List<T>',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: '_currentPage',
-        type: 'int',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_hasMoreData',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_totalItems',
-        type: 'int',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_busy',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_error',
-        type: 'Object?',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'totalItems',
-        type: 'int',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'remainingItems',
-        type: 'int',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'currentList',
-        type: 'List<T>',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'currentPage',
-        type: 'int',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'hasMoreData',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'busy',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'error',
-        type: 'Object?',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'hasError',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'fetchListFunction',
-            type: 'Future<LdListPage<T>> Function(int, int, String?)',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'autoLoad',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: [],
-      ),
-      LdDocConstructor(
-        name: 'fromList',
-        signature: [
-          LdDocParameter(
-            name: 'list',
-            type: 'List<T>',
-            description: '',
-            named: false,
-            required: true,
-          )
-        ],
-        features: ['factory'],
-      ),
-    ],
-    methods: [
-      'updateWhere',
-      '_setError',
-      '_setBusy',
-      '_fetchNextPage',
-      'nextPage',
-      'refreshList',
-      'reset',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdListEmpty',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'onRefresh',
-        type: 'Function?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'text',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'onRefresh',
-            type: 'Function?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'text',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdListError',
-    isNullSafe: true,
-    description: ' Widget to display when an error occurs while loading a list',
-    properties: [
-      LdDocProperty(
-        name: 'error',
-        type: 'Object',
-        description: '/// Error to display will be converted to string',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onRefresh',
-        type: 'Future<void> Function()',
-        description: '/// Function to call when user clicks on retry button',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'error',
-            type: 'Object',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'onRefresh',
-            type: 'Future<void> Function()',
-            description: '',
-            named: true,
-            required: true,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdListItemLoading',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'hasLeading',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'hasTrailing',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'hasSubContent',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'hasSubtitle',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'hasLeading',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'hasTrailing',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'hasSubContent',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'hasSubtitle',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdAnimatedLoadingGradient',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'height',
-        type: 'double',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'width',
-        type: 'double?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'width',
-            type: 'double?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'height',
-            type: 'double',
-            description: '',
-            named: true,
-            required: true,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['createState'],
-  ),
-  LdDocComponent(
-    name: '_LdAnimatedLoadingGradientState',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'colorList',
-        type: 'List<Color>',
-        description: '',
-        features: ['late'],
-      ),
-      LdDocProperty(
-        name: 'alignmentList',
-        type: 'List<Alignment>',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'index',
-        type: 'int',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'bottomColor',
-        type: 'Color',
-        description: '',
-        features: ['late'],
-      ),
-      LdDocProperty(
-        name: 'topColor',
-        type: 'Color',
-        description: '',
-        features: ['late'],
-      ),
-      LdDocProperty(
-        name: 'begin',
-        type: 'Alignment',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'end',
-        type: 'Alignment',
-        description: '',
-        features: [],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
-    methods: [
-      'initState',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdListSeperator',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'child',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onSurface',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'child',
-            type: 'Widget',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'onSurface',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdListItem',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'leading',
-        type: 'Widget?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'trailing',
-        type: 'Widget?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'padding',
-        type: 'EdgeInsets?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'title',
-        type: 'Widget?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'active',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'subtitle',
-        type: 'Widget?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onTap',
-        type: 'void Function()?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'width',
-        type: 'double?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'selectDisabled',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onSelectionChange',
-        type: 'void Function(bool)?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'radioSelection',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'subContent',
-        type: 'Widget?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'isSelected',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'trailingForward',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'disabled',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'tradeLeadingForSelectionControl',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'showSelectionControls',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'leading',
-            type: 'Widget?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'trailing',
-            type: 'Widget?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'title',
-            type: 'Widget?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'active',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'isSelected',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'radioSelection',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'disabled',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'selectDisabled',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'trailingForward',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'showSelectionControls',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'onSelectionChange',
-            type: 'void Function(bool)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'tradeLeadingForSelectionControl',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'padding',
-            type: 'EdgeInsets?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'onTap',
-            type: 'void Function()?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'subtitle',
-            type: 'Widget?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'width',
-            type: 'double?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'subContent',
-            type: 'Widget?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdColor',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'shades',
-        type: 'List<Color>',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: '_center',
-        type: 'int',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: '_darkCenter',
-        type: 'int',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'luminanceThreshold',
-        type: 'double',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'disabledAlpha',
-        type: 'int',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'shades',
-            type: 'List<Color>',
-            description: '',
-            named: false,
-            required: true,
-          ),
-          LdDocParameter(
-            name: '_center',
-            type: 'int',
-            description: '',
-            named: false,
-            required: true,
-          ),
-          LdDocParameter(
-            name: '_darkCenter',
-            type: 'int',
-            description: '',
-            named: false,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'luminanceThreshold',
-            type: 'double',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'disabledAlpha',
-            type: 'int',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: [
-      'center',
-      'fromCenter',
-      'fromDarkCenter',
-      'moveRelative',
-      'relative',
-      'idle',
-      'hover',
-      'active',
-      'focus',
-      'locateColor',
-      'toString',
-      'contrastingText',
-      'disabled',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdPalette',
-    isNullSafe: true,
-    description: ' Describes how to build a pallete of colors for a theme.',
-    properties: [
-      LdDocProperty(
-        name: 'isDark',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'primary',
-        type: 'LdColor',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'secondary',
-        type: 'LdColor',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'success',
-        type: 'LdColor',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'warning',
-        type: 'LdColor',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'error',
-        type: 'LdColor',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'neutral',
-        type: 'LdColor',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'background',
-        type: 'Color',
-        description: '',
-        features: [
-          'final',
-          'late',
-        ],
-      ),
       LdDocProperty(
         name: 'surface',
         type: 'Color',
         description: '',
-        features: [
-          'final',
-          'late',
-        ],
+        features: ['final'],
       ),
       LdDocProperty(
         name: 'border',
         type: 'Color',
         description: '',
-        features: [
-          'final',
-          'late',
-        ],
-      ),
-      LdDocProperty(
-        name: 'stroke',
-        type: 'Color',
-        description: '',
-        features: [
-          'final',
-          'late',
-        ],
+        features: ['final'],
       ),
       LdDocProperty(
         name: 'text',
         type: 'Color',
         description: '',
-        features: [
-          'final',
-          'late',
-        ],
+        features: ['final'],
       ),
       LdDocProperty(
-        name: 'textMuted',
+        name: 'placeholder',
         type: 'Color',
         description: '',
-        features: [
-          'final',
-          'late',
-        ],
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'icon',
+        type: 'Color',
+        description: '',
+        features: ['late'],
       ),
     ],
     constructors: [
@@ -10118,50 +10522,36 @@ const ldDocComponents = [
         name: '',
         signature: [
           LdDocParameter(
-            name: 'isDark',
-            type: 'bool',
+            name: 'surface',
+            type: 'Color',
             description: '',
             named: true,
             required: true,
           ),
           LdDocParameter(
-            name: 'primary',
-            type: 'LdColor',
+            name: 'text',
+            type: 'Color',
             description: '',
             named: true,
             required: true,
           ),
           LdDocParameter(
-            name: 'secondary',
-            type: 'LdColor',
+            name: 'border',
+            type: 'Color',
             description: '',
             named: true,
             required: true,
           ),
           LdDocParameter(
-            name: 'success',
-            type: 'LdColor',
+            name: 'placeholder',
+            type: 'Color',
             description: '',
             named: true,
-            required: true,
+            required: false,
           ),
           LdDocParameter(
-            name: 'warning',
-            type: 'LdColor',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'error',
-            type: 'LdColor',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'neutral',
-            type: 'LdColor',
+            name: 'icon',
+            type: 'Color?',
             description: '',
             named: true,
             required: false,
@@ -10171,6 +10561,129 @@ const ldDocComponents = [
       )
     ],
     methods: [],
+  ),
+  LdDocComponent(
+    name: 'LdTouchableStatus',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'hovering',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'focus',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'active',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'disabled',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'hovering',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'focus',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'active',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'disabled',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: [],
+      )
+    ],
+    methods: [],
+  ),
+  LdDocComponent(
+    name: 'LdThemedAppBuilder',
+    isNullSafe: true,
+    description:
+        ' Allows you to build a styled material app\n ```dart\n LdThemedAppBuilder((context,themeData) => MaterialApp(\n  theme: themeData,\n home: ....))\n ```',
+    properties: [
+      LdDocProperty(
+        name: 'appBuilder',
+        type: 'MaterialApp Function(BuildContext, ThemeData)',
+        description: '',
+        features: ['final'],
+      )
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'appBuilder',
+            type: 'MaterialApp Function(BuildContext, ThemeData)',
+            description: '',
+            named: true,
+            required: true,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['createState'],
+  ),
+  LdDocComponent(
+    name: '_LdThemedAppBuilderState',
+    isNullSafe: true,
+    description: '',
+    properties: [],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [
+      'initState',
+      'dispose',
+      'build',
+    ],
   ),
   LdDocComponent(
     name: 'LdThemeProvider',
@@ -10818,17 +11331,22 @@ const ldDocComponents = [
     methods: [],
   ),
   LdDocComponent(
-    name: 'LdThemedAppBuilder',
+    name: 'LdAnimatedLoadingGradient',
     isNullSafe: true,
-    description:
-        ' Allows you to build a styled material app\n ```dart\n LdThemedAppBuilder((context,themeData) => MaterialApp(\n  theme: themeData,\n home: ....))\n ```',
+    description: '',
     properties: [
       LdDocProperty(
-        name: 'appBuilder',
-        type: 'MaterialApp Function(BuildContext, ThemeData)',
+        name: 'height',
+        type: 'double',
         description: '',
         features: ['final'],
-      )
+      ),
+      LdDocProperty(
+        name: 'width',
+        type: 'double?',
+        description: '',
+        features: ['final'],
+      ),
     ],
     constructors: [
       LdDocConstructor(
@@ -10842,8 +11360,15 @@ const ldDocComponents = [
             required: false,
           ),
           LdDocParameter(
-            name: 'appBuilder',
-            type: 'MaterialApp Function(BuildContext, ThemeData)',
+            name: 'width',
+            type: 'double?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'height',
+            type: 'double',
             description: '',
             named: true,
             required: true,
@@ -10855,10 +11380,53 @@ const ldDocComponents = [
     methods: ['createState'],
   ),
   LdDocComponent(
-    name: '_LdThemedAppBuilderState',
+    name: '_LdAnimatedLoadingGradientState',
     isNullSafe: true,
     description: '',
-    properties: [],
+    properties: [
+      LdDocProperty(
+        name: 'colorList',
+        type: 'List<Color>',
+        description: '',
+        features: ['late'],
+      ),
+      LdDocProperty(
+        name: 'alignmentList',
+        type: 'List<Alignment>',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'index',
+        type: 'int',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'bottomColor',
+        type: 'Color',
+        description: '',
+        features: ['late'],
+      ),
+      LdDocProperty(
+        name: 'topColor',
+        type: 'Color',
+        description: '',
+        features: ['late'],
+      ),
+      LdDocProperty(
+        name: 'begin',
+        type: 'Alignment',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'end',
+        type: 'Alignment',
+        description: '',
+        features: [],
+      ),
+    ],
     constructors: [
       LdDocConstructor(
         name: '',
@@ -10868,114 +11436,101 @@ const ldDocComponents = [
     ],
     methods: [
       'initState',
-      'dispose',
       'build',
     ],
   ),
   LdDocComponent(
-    name: 'LdSubmitBuilder',
+    name: 'LdPaginator',
     isNullSafe: true,
     description: '',
     properties: [
       LdDocProperty(
-        name: 'resultBuilder',
-        type: 'Widget Function(BuildContext, T, LdSubmitController<T>)?',
+        name: 'fetchListFunction',
+        type: 'Future<LdListPage<T>> Function(int, int, String?)',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: '_currentList',
+        type: 'List<T>',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'submitButtonBuilder',
-        type: 'Widget Function(BuildContext, LdSubmitController<T>)?',
+        name: '_currentPage',
+        type: 'int',
         description: '',
-        features: ['final'],
+        features: [],
       ),
       LdDocProperty(
-        name: 'loadingBuilder',
-        type: 'Widget Function(BuildContext, LdSubmitController<T>)?',
+        name: '_hasMoreData',
+        type: 'bool',
         description: '',
-        features: ['final'],
+        features: [],
       ),
       LdDocProperty(
-        name: 'errorBuilder',
-        type:
-            'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
+        name: '_totalItems',
+        type: 'int',
         description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'resultBuilder',
-            type: 'Widget Function(BuildContext, T, LdSubmitController<T>)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'submitButtonBuilder',
-            type: 'Widget Function(BuildContext, LdSubmitController<T>)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'loadingBuilder',
-            type: 'Widget Function(BuildContext, LdSubmitController<T>)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'errorBuilder',
-            type:
-                'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: [],
-  ),
-  LdDocComponent(
-    name: 'LdSubmit',
-    isNullSafe: true,
-    description:
-        ' A component that handles making requests and displaying errors.\n You can use this component to wrap around a button that makes a request.\n It will handle the loading state and display errors.\n It also has a default exception mapper that will handle common exceptions.\n You can also provide your own exception mapper.\n The default builder is a button that will display a loading spinner when loading.',
-    properties: [
-      LdDocProperty(
-        name: 'config',
-        type: 'LdSubmitConfig<T>?',
-        description: '',
-        features: ['final'],
+        features: [],
       ),
       LdDocProperty(
-        name: 'controller',
-        type: 'LdSubmitController<T>?',
+        name: '_busy',
+        type: 'bool',
         description: '',
-        features: ['final'],
+        features: [],
       ),
       LdDocProperty(
-        name: 'builder',
-        type: 'Widget?',
+        name: '_error',
+        type: 'Object?',
         description: '',
-        features: ['final'],
+        features: [],
       ),
       LdDocProperty(
-        name: 'submitBuilder',
-        type: 'Widget',
+        name: 'totalItems',
+        type: 'int',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'remainingItems',
+        type: 'int',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'currentList',
+        type: 'List<T>',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'currentPage',
+        type: 'int',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'hasMoreData',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'busy',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'error',
+        type: 'Object?',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'hasError',
+        type: 'bool',
         description: '',
         features: [],
       ),
@@ -10985,29 +11540,85 @@ const ldDocComponents = [
         name: '',
         signature: [
           LdDocParameter(
+            name: 'fetchListFunction',
+            type: 'Future<LdListPage<T>> Function(int, int, String?)',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'autoLoad',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: [],
+      ),
+      LdDocConstructor(
+        name: 'fromList',
+        signature: [
+          LdDocParameter(
+            name: 'list',
+            type: 'List<T>',
+            description: '',
+            named: false,
+            required: true,
+          )
+        ],
+        features: ['factory'],
+      ),
+    ],
+    methods: [
+      'updateWhere',
+      '_setError',
+      '_setBusy',
+      '_fetchNextPage',
+      'nextPage',
+      'refreshList',
+      'reset',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdListSeperator',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onSurface',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'onSurface',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
             name: 'key',
             type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'config',
-            type: 'LdSubmitConfig<T>?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'controller',
-            type: 'LdSubmitController<T>?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'builder',
-            type: 'Widget?',
             description: '',
             named: true,
             required: false,
@@ -11016,22 +11627,158 @@ const ldDocComponents = [
         features: ['const'],
       )
     ],
-    methods: [
-      '_buildProvider',
-      'build',
-    ],
+    methods: ['build'],
   ),
   LdDocComponent(
-    name: 'LdSubmitInlineBuilder',
+    name: '_ListItem',
     isNullSafe: true,
     description: '',
     properties: [
       LdDocProperty(
-        name: 'showSubmitButton',
-        type: 'bool?',
+        name: 'item',
+        type: 'T?',
         description: '',
         features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'isSeparator',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'seperationCriterion',
+        type: 'SeperationCriterion?',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'item',
+            type: 'T?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'isSeparator',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'seperationCriterion',
+            type: 'SeperationCriterion?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: [],
       )
+    ],
+    methods: [],
+  ),
+  LdDocComponent(
+    name: 'LdList',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'itemBuilder',
+        type: 'Widget Function(BuildContext, T, int)',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'emptyBuilder',
+        type: 'Widget Function(BuildContext, Future<void> Function())?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'errorBuilder',
+        type: 'Widget Function(BuildContext, Object?, void Function())?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'assumedItemHeight',
+        type: 'double?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'data',
+        type: 'LdPaginator<T>',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'loadingBuilder',
+        type: 'Widget Function(BuildContext, int, int)?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'areEqual',
+        type: 'bool Function(T, T)?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'groupingCriterion',
+        type: 'GroupingCriterion Function(T)?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'seperatorBuilder',
+        type: 'Widget Function(BuildContext, GroupingCriterion)?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'groupSequentialItems',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'shrinkWrap',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'physics',
+        type: 'ScrollPhysics?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'header',
+        type: 'Widget?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'primary',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'footer',
+        type: 'Widget?',
+        description: '',
+        features: ['final'],
+      ),
     ],
     constructors: [
       LdDocConstructor(
@@ -11045,30 +11792,106 @@ const ldDocComponents = [
             required: false,
           ),
           LdDocParameter(
-            name: 'resultBuilder',
-            type: 'Widget Function(BuildContext, T, LdSubmitController<T>)?',
+            name: 'areEqual',
+            type: 'bool Function(T, T)?',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'submitButtonBuilder',
-            type: 'Widget Function(BuildContext, LdSubmitController<T>)?',
+            name: 'emptyBuilder',
+            type: 'Widget Function(BuildContext, Future<void> Function())?',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
             name: 'errorBuilder',
-            type:
-                'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
+            type: 'Widget Function(BuildContext, Object?, void Function())?',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'showSubmitButton',
-            type: 'bool?',
+            name: 'header',
+            type: 'Widget?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'loadingBuilder',
+            type: 'Widget Function(BuildContext, int, int)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'assumedItemHeight',
+            type: 'double?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'physics',
+            type: 'ScrollPhysics?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'itemBuilder',
+            type: 'Widget Function(BuildContext, T, int)',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'data',
+            type: 'LdPaginator<T>',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'seperatorBuilder',
+            type: 'Widget Function(BuildContext, GroupingCriterion)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'groupingCriterion',
+            type: 'GroupingCriterion Function(T)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'primary',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'footer',
+            type: 'Widget?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'groupSequentialItems',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'shrinkWrap',
+            type: 'bool',
             description: '',
             named: true,
             required: false,
@@ -11077,22 +11900,46 @@ const ldDocComponents = [
         features: ['const'],
       )
     ],
-    methods: [
-      'buildSubmitButton',
-      'build',
-    ],
+    methods: ['createState'],
   ),
   LdDocComponent(
-    name: 'LdSubmitButton',
+    name: '_LdListState',
     isNullSafe: true,
     description: '',
     properties: [
       LdDocProperty(
-        name: 'controller',
-        type: 'LdSubmitController<dynamic>',
+        name: '_groupedItems',
+        type: 'List<_ListItem<T, GroupingCriterion>>',
         description: '',
-        features: ['final'],
-      ),
+        features: [],
+      )
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [
+      '_groupItemsSequentially',
+      '_groupItemsUniformly',
+      'initState',
+      'didUpdateWidget',
+      'dispose',
+      '_onDataChange',
+      '_onRefresh',
+      '_buildEmpty',
+      '_buildLoadMore',
+      '_buildError',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdListItem',
+    isNullSafe: true,
+    description: '',
+    properties: [
       LdDocProperty(
         name: 'leading',
         type: 'Widget?',
@@ -11106,14 +11953,92 @@ const ldDocComponents = [
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'size',
-        type: 'LdSize',
+        name: 'padding',
+        type: 'EdgeInsets?',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'color',
-        type: 'LdColor?',
+        name: 'title',
+        type: 'Widget?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'active',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'subtitle',
+        type: 'Widget?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onTap',
+        type: 'void Function()?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'width',
+        type: 'double?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'selectDisabled',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onSelectionChange',
+        type: 'void Function(bool)?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'radioSelection',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'subContent',
+        type: 'Widget?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'isSelected',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'trailingForward',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'disabled',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'tradeLeadingForSelectionControl',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'showSelectionControls',
+        type: 'bool',
         description: '',
         features: ['final'],
       ),
@@ -11128,13 +12053,6 @@ const ldDocComponents = [
             description: '',
             named: true,
             required: false,
-          ),
-          LdDocParameter(
-            name: 'controller',
-            type: 'LdSubmitController<dynamic>',
-            description: '',
-            named: true,
-            required: true,
           ),
           LdDocParameter(
             name: 'leading',
@@ -11151,773 +12069,148 @@ const ldDocComponents = [
             required: false,
           ),
           LdDocParameter(
-            name: 'size',
-            type: 'LdSize',
+            name: 'title',
+            type: 'Widget?',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'color',
-            type: 'LdColor?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdSubmitCenteredBuilder',
-    isNullSafe: true,
-    description: '',
-    properties: [],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'resultBuilder',
-            type: 'Widget Function(BuildContext, T, LdSubmitController<T>)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'submitButtonBuilder',
-            type: 'Widget Function(BuildContext, LdSubmitController<T>)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'loadingBuilder',
-            type: 'Widget Function(BuildContext, LdSubmitController<T>)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'errorBuilder',
-            type:
-                'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdSubmitDialogBuilder',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'showSubmitButton',
-        type: 'bool?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'dialogKey',
-        type: 'Key',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'resultBuilder',
-            type: 'Widget Function(BuildContext, T, LdSubmitController<T>)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'errorBuilder',
-            type:
-                'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'loadingBuilder',
-            type: 'Widget Function(BuildContext, LdSubmitController<T>)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'submitButtonBuilder',
-            type: 'Widget Function(BuildContext, LdSubmitController<T>)?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'showSubmitButton',
-            type: 'bool?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: [],
-      )
-    ],
-    methods: [
-      'buildLoadingDialog',
-      'buildErrorDialog',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdSubmitCustomBuilder',
-    isNullSafe: true,
-    description:
-        ' A custom builder that allows you to build your own submit widget.',
-    properties: [
-      LdDocProperty(
-        name: 'builder',
-        type:
-            'Widget Function(BuildContext, LdSubmitController<T>, LdSubmitStateType)',
-        description: '',
-        features: ['final'],
-      )
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'builder',
-            type:
-                'Widget Function(BuildContext, LdSubmitController<T>, LdSubmitStateType)',
-            description: '',
-            named: true,
-            required: true,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdSubmitRetryConfig',
-    isNullSafe: true,
-    description: ' Configuration for (automatic) retries of a submit action.',
-    properties: [
-      LdDocProperty(
-        name: 'performAutomaticRetry',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'maxAttempts',
-        type: 'int',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'initialRetryCountdown',
-        type: 'Duration',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'disableRetryButton',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'performAutomaticRetry',
+            name: 'active',
             type: 'bool',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'maxAttempts',
-            type: 'int',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'initialRetryCountdown',
-            type: 'Duration',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'disableRetryButton',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      ),
-      LdDocConstructor(
-        name: 'noRetries',
-        signature: [],
-        features: ['factory'],
-      ),
-    ],
-    methods: [],
-  ),
-  LdDocComponent(
-    name: 'LdSubmitConfig',
-    isNullSafe: true,
-    description: ' A configuration for a submit action.',
-    properties: [
-      LdDocProperty(
-        name: 'loadingText',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'submitText',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'allowResubmit',
-        type: 'bool?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'withHaptics',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'autoTrigger',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'timeout',
-        type: 'Duration?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'allowCancel',
-        type: 'bool?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'action',
-        type: 'Future<T> Function()',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onCanceled',
-        type: 'void Function()?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'retryConfig',
-        type: 'LdSubmitRetryConfig?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'loadingText',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'submitText',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'allowResubmit',
-            type: 'bool?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'withHaptics',
+            name: 'isSelected',
             type: 'bool',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'autoTrigger',
+            name: 'radioSelection',
             type: 'bool',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'allowCancel',
-            type: 'bool?',
+            name: 'disabled',
+            type: 'bool',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'onCanceled',
+            name: 'selectDisabled',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'trailingForward',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'showSelectionControls',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'onSelectionChange',
+            type: 'void Function(bool)?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'tradeLeadingForSelectionControl',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'padding',
+            type: 'EdgeInsets?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'onTap',
             type: 'void Function()?',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'timeout',
-            type: 'Duration?',
+            name: 'subtitle',
+            type: 'Widget?',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'retryConfig',
-            type: 'LdSubmitRetryConfig?',
+            name: 'width',
+            type: 'double?',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'action',
-            type: 'Future<T> Function()',
+            name: 'subContent',
+            type: 'Widget?',
             description: '',
             named: true,
-            required: true,
+            required: false,
           ),
         ],
         features: ['const'],
       )
     ],
-    methods: [],
+    methods: ['build'],
   ),
   LdDocComponent(
-    name: 'LdSubmitState',
+    name: 'LdListPage',
     isNullSafe: true,
     description: '',
     properties: [
       LdDocProperty(
-        name: '_type',
-        type: 'LdSubmitStateType',
+        name: 'newItems',
+        type: 'List<T>',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: '_error',
-        type: 'LdException?',
+        name: 'hasMore',
+        type: 'bool',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: '_result',
-        type: 'T?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: '_attempt',
+        name: 'total',
         type: 'int',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: '_remainingRetryTime',
-        type: 'Duration?',
+        name: 'nextPageToken',
+        type: 'String?',
         description: '',
         features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'attempt',
-        type: 'int',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'remainingRetryTime',
-        type: 'Duration?',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'type',
-        type: 'LdSubmitStateType',
-        description: '',
-        features: [],
       ),
       LdDocProperty(
         name: 'error',
-        type: 'LdException?',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'result',
-        type: 'T?',
-        description: '',
-        features: [],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'type',
-            type: 'LdSubmitStateType',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'error',
-            type: 'LdException?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'attempt',
-            type: 'int',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'remainingRetryTime',
-            type: 'Duration?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'result',
-            type: 'T?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: [],
-      )
-    ],
-    methods: [
-      'toString',
-      'copyWith',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdSubmitController',
-    isNullSafe: true,
-    description:
-        ' Handles the lifecyle of a submit action. Pass a [LdSubmitConfig] to the\n controller to configure the submit action.',
-    properties: [
-      LdDocProperty(
-        name: 'config',
-        type: 'LdSubmitConfig<T>',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'exceptionMapper',
-        type: 'LdExceptionMapper',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: '_stateController',
-        type: 'StreamController<LdSubmitState<T>>',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: '_retryTimer',
-        type: 'Timer?',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'jitter',
-        type: 'int',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'state',
-        type: 'LdSubmitState<T>',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_disposed',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'stateStream',
-        type: 'Stream<LdSubmitState<T>>',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'showRetryIndicator',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'canCancel',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_maxRetryAttempts',
-        type: 'int',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'totalRetryTime',
-        type: 'Duration',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_isError',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_isLoading',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_isResult',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: '_isIdle',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'canRetry',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'canRetrigger',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'canTrigger',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'disposed',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'exceptionMapper',
-            type: 'LdExceptionMapper',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'config',
-            type: 'LdSubmitConfig<T>',
-            description: '',
-            named: true,
-            required: true,
-          ),
-        ],
-        features: [],
-      )
-    ],
-    methods: [
-      'init',
-      '_setState',
-      '_setupRetryTimer',
-      'cancel',
-      '_getRetryDelay',
-      '_trigger',
-      'trigger',
-      '_retryTimerTick',
-      '_nextAttempt',
-      'reset',
-      'dispose',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdExceptionMoreInfoButton',
-    isNullSafe: true,
-    description:
-        ' LdExceptionMoreInfoButton is a button that will open a dialog with more info',
-    properties: [
-      LdDocProperty(
-        name: 'error',
-        type: 'LdException?',
-        description: '',
-        features: ['final'],
-      )
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'error',
-            type: 'LdException?',
-            description: '',
-            named: true,
-            required: true,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdExceptionDialog',
-    isNullSafe: true,
-    description: ' Renders an LdException in a dialog',
-    properties: [
-      LdDocProperty(
-        name: 'error',
-        type: 'LdException?',
-        description: '',
-        features: ['final'],
-      )
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'error',
-            type: 'LdException?',
-            description: '',
-            named: true,
-            required: true,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdExceptionMapperProvider',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'child',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'exceptionMapper',
-        type: 'LdExceptionMapper?',
+        type: 'Object?',
         description: '',
         features: ['final'],
       ),
@@ -11927,273 +12220,72 @@ const ldDocComponents = [
         name: '',
         signature: [
           LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'child',
-            type: 'Widget',
+            name: 'newItems',
+            type: 'List<T>',
             description: '',
             named: true,
             required: true,
           ),
           LdDocParameter(
-            name: 'exceptionMapper',
-            type: 'LdExceptionMapper?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdExceptionMapper',
-    isNullSafe: true,
-    description:
-        ' A mapper that maps exceptions to LdExceptions that are displayed in the UI.\n You can provide your own exception mapper to handle custom exceptions.\n The default exception mapper will handle common exceptions like network errors.',
-    properties: [
-      LdDocProperty(
-        name: 'localizations',
-        type: 'LiquidLocalizations',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onException',
-        type: 'LdException? Function(dynamic, {StackTrace? stackTrace})?',
-        description:
-            '/// A function that can be used to handle custom exceptions. If the function\n/// returns a non-null LdException, it will be used instead of the default\n/// exception mapper. Otherwise, the default exception mapper will be used.\n/// This function will never be called if the exception is already an LdException.',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'localizations',
-            type: 'LiquidLocalizations',
+            name: 'hasMore',
+            type: 'bool',
             description: '',
             named: true,
             required: true,
           ),
           LdDocParameter(
-            name: 'onException',
-            type: 'LdException? Function(dynamic, {StackTrace? stackTrace})?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: [
-      'of',
-      'handle',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdExceptionView',
-    isNullSafe: true,
-    description: ' Renders an LdException',
-    properties: [
-      LdDocProperty(
-        name: 'exception',
-        type: 'LdException?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'retry',
-        type: 'void Function()?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'direction',
-        type: 'Axis',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'exception',
-            type: 'LdException?',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'retry',
-            type: 'void Function()?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'direction',
-            type: 'Axis',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      ),
-      LdDocConstructor(
-        name: 'fromDynamic',
-        signature: [
-          LdDocParameter(
-            name: 'error',
-            type: 'dynamic',
-            description: '',
-            named: false,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'context',
-            type: 'BuildContext',
-            description: '',
-            named: false,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'direction',
-            type: 'Axis',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'retry',
-            type: 'void Function()?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['factory'],
-      ),
-    ],
-    methods: [
-      'color',
-      '_buildRetryButton',
-      '_buildDialogButton',
-      '_buildHorizontal',
-      '_buildVertical',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdExceptionRetryState',
-    isNullSafe: true,
-    description: ' The state of the retry mechanism.',
-    properties: [
-      LdDocProperty(
-        name: 'retryCount',
-        type: 'int',
-        description: '/// The current retry count',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'delay',
-        type: 'Duration',
-        description:
-            '/// The left time to retry in milliseconds.\n/// It will be decremented each second by the [LdSubmitController].',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'retryCount',
+            name: 'total',
             type: 'int',
             description: '',
             named: true,
             required: true,
           ),
           LdDocParameter(
-            name: 'delay',
-            type: 'Duration',
+            name: 'error',
+            type: 'Object?',
             description: '',
             named: true,
-            required: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'nextPageToken',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
           ),
         ],
         features: [],
       )
     ],
-    methods: [
-      'copyWith',
-      'toString',
-    ],
+    methods: [],
   ),
   LdDocComponent(
-    name: 'LdException',
+    name: 'LdListItemLoading',
     isNullSafe: true,
-    description:
-        ' A renderable exception. Has a message, more info, and a type (LdHintType).\n Can also contain a stack trace as well as the flag that the action causing\n the exception can be retried.',
+    description: '',
     properties: [
       LdDocProperty(
-        name: 'message',
-        type: 'String',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'moreInfo',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'canRetry',
+        name: 'hasLeading',
         type: 'bool',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'type',
-        type: 'LdHintType',
+        name: 'hasTrailing',
+        type: 'bool',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'attempt',
-        type: 'int?',
+        name: 'hasSubContent',
+        type: 'bool',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'exception',
-        type: 'dynamic',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'stackTrace',
-        type: 'StackTrace?',
+        name: 'hasSubtitle',
+        type: 'bool',
         description: '',
         features: ['final'],
       ),
@@ -12203,91 +12295,160 @@ const ldDocComponents = [
         name: '',
         signature: [
           LdDocParameter(
-            name: 'message',
-            type: 'String',
+            name: 'key',
+            type: 'Key?',
             description: '',
             named: true,
-            required: true,
+            required: false,
           ),
           LdDocParameter(
-            name: 'canRetry',
+            name: 'hasLeading',
             type: 'bool',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'type',
-            type: 'LdHintType',
+            name: 'hasTrailing',
+            type: 'bool',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'moreInfo',
-            type: 'String?',
+            name: 'hasSubContent',
+            type: 'bool',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'attempt',
-            type: 'int?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'stackTrace',
-            type: 'StackTrace?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'exception',
-            type: 'dynamic',
+            name: 'hasSubtitle',
+            type: 'bool',
             description: '',
             named: true,
             required: false,
           ),
         ],
-        features: [],
+        features: ['const'],
       )
     ],
-    methods: [
-      'copyWith',
-      'toString',
-    ],
+    methods: ['build'],
   ),
   LdDocComponent(
-    name: 'LdExceptionRetryIndicator',
+    name: 'LdListError',
+    isNullSafe: true,
+    description: ' Widget to display when an error occurs while loading a list',
+    properties: [
+      LdDocProperty(
+        name: 'error',
+        type: 'Object',
+        description: '/// Error to display will be converted to string',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onRefresh',
+        type: 'Future<void> Function()',
+        description: '/// Function to call when user clicks on retry button',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'error',
+            type: 'Object',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'onRefresh',
+            type: 'Future<void> Function()',
+            description: '',
+            named: true,
+            required: true,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdListEmpty',
     isNullSafe: true,
     description: '',
     properties: [
       LdDocProperty(
-        name: 'attempt',
+        name: 'onRefresh',
+        type: 'Function?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'text',
+        type: 'String?',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'onRefresh',
+            type: 'Function?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'text',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdSheetType',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'index',
         type: 'int',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'remainingTime',
-        type: 'Duration',
+        name: 'insets',
+        type: 'EdgeInsets',
         description: '',
         features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'totalRetryTime',
-        type: 'Duration',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'progress',
-        type: 'double',
-        description: '',
-        features: [],
       ),
     ],
     constructors: [
@@ -12295,1170 +12456,69 @@ const ldDocComponents = [
         name: '',
         signature: [
           LdDocParameter(
-            name: 'key',
-            type: 'Key?',
+            name: 'theme',
+            type: 'LdTheme',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'insets',
+            type: 'EdgeInsets',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'attempt',
+            name: 'topRadius',
+            type: 'double?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'bottomRadius',
+            type: 'double?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'index',
             type: 'int',
             description: '',
             named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'remainingTime',
-            type: 'Duration',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'totalRetryTime',
-            type: 'Duration',
-            description: '',
-            named: true,
-            required: true,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdSubmitLoadingIndicator',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'loading',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'loadingText',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'direction',
-        type: 'Axis',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
             required: false,
           ),
-          LdDocParameter(
-            name: 'loading',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'loadingText',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'direction',
-            type: 'Axis',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LiquidLocalizationsDe',
-    isNullSafe: true,
-    description: ' The translations for German (`de`).',
-    properties: [
-      LdDocProperty(
-        name: 'searchAgain',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'search',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'noItemsFound',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'cancel',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'confirm',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'ok',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'done',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'enterText',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'refresh',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'errorOccurred',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'failed',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'retry',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'choose',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'submit',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'selectDate',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'selectTime',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'unknownError',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'moreInfo',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'close',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'loading',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'networkError',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'timeoutError',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'formatError',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'locale',
-            type: 'String',
-            description: '',
-            named: false,
-            required: false,
-          )
-        ],
-        features: [],
-      )
-    ],
-    methods: ['retryIn'],
-  ),
-  LdDocComponent(
-    name: 'LiquidLocalizations',
-    isNullSafe: true,
-    description:
-        ' Callers can lookup localized strings with an instance of LiquidLocalizations\n returned by `LiquidLocalizations.of(context)`.\n\n Applications need to include `LiquidLocalizations.delegate()` in their app\'s\n `localizationDelegates` list, and the locales they support in the app\'s\n `supportedLocales` list. For example:\n\n ```dart\n import \'generated/liquid_localizations.dart\';\n\n return MaterialApp(\n   localizationsDelegates: LiquidLocalizations.localizationsDelegates,\n   supportedLocales: LiquidLocalizations.supportedLocales,\n   home: MyApplicationHome(),\n );\n ```\n\n ## Update pubspec.yaml\n\n Please make sure to update your pubspec.yaml to include the following\n packages:\n\n ```yaml\n dependencies:\n   # Internationalization support.\n   flutter_localizations:\n     sdk: flutter\n   intl: any # Use the pinned version from flutter_localizations\n\n   # Rest of dependencies\n ```\n\n ## iOS Applications\n\n iOS applications define key application metadata, including supported\n locales, in an Info.plist file that is built into the application bundle.\n To configure the locales supported by your app, you’ll need to edit this\n file.\n\n First, open your project’s ios/Runner.xcworkspace Xcode workspace file.\n Then, in the Project Navigator, open the Info.plist file under the Runner\n project’s Runner folder.\n\n Next, select the Information Property List item, select Add Item from the\n Editor menu, then select Localizations from the pop-up menu.\n\n Select and expand the newly-created Localizations item then, for each\n locale your application supports, add a new item and select the locale\n you wish to add from the pop-up menu in the Value field. This list should\n be consistent with the languages listed in the LiquidLocalizations.supportedLocales\n property.',
-    properties: [
-      LdDocProperty(
-        name: 'localeName',
-        type: 'String',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'delegate',
-        type: 'LocalizationsDelegate<LiquidLocalizations>',
-        description: '',
-        features: [
-          'static',
-          'const',
-        ],
-      ),
-      LdDocProperty(
-        name: 'localizationsDelegates',
-        type: 'List<LocalizationsDelegate<dynamic>>',
-        description:
-            '/// A list of this localizations delegate along with the default localizations\n/// delegates.\n///\n/// Returns a list of localizations delegates containing this delegate along with\n/// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,\n/// and GlobalWidgetsLocalizations.delegate.\n///\n/// Additional delegates can be added by appending to this list in\n/// MaterialApp. This list does not have to be used at all if a custom list\n/// of delegates is preferred or required.',
-        features: [
-          'static',
-          'const',
-        ],
-      ),
-      LdDocProperty(
-        name: 'supportedLocales',
-        type: 'List<Locale>',
-        description:
-            '/// A list of this localizations delegate\'s supported locales.',
-        features: [
-          'static',
-          'const',
-        ],
-      ),
-      LdDocProperty(
-        name: 'searchAgain',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'search',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'noItemsFound',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'cancel',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'confirm',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'ok',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'done',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'enterText',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'refresh',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'errorOccurred',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'failed',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'retry',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'choose',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'submit',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'selectDate',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'selectTime',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'unknownError',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'moreInfo',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'close',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'loading',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'networkError',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'timeoutError',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'formatError',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'locale',
-            type: 'String',
-            description: '',
-            named: false,
-            required: true,
-          )
         ],
         features: [],
       )
     ],
     methods: [
-      'of',
-      'retryIn',
+      'layoutModal',
+      'positionModal',
     ],
   ),
   LdDocComponent(
-    name: '_LiquidLocalizationsDelegate',
-    isNullSafe: true,
-    description: '',
-    properties: [],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: ['const'],
-      )
-    ],
-    methods: [
-      'load',
-      'isSupported',
-      'shouldReload',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LiquidLocalizationsEn',
-    isNullSafe: true,
-    description: ' The translations for English (`en`).',
-    properties: [
-      LdDocProperty(
-        name: 'searchAgain',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'search',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'noItemsFound',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'cancel',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'confirm',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'ok',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'done',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'enterText',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'refresh',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'errorOccurred',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'failed',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'retry',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'choose',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'submit',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'selectDate',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'selectTime',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'unknownError',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'moreInfo',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'close',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'loading',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'networkError',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'timeoutError',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'formatError',
-        type: 'String',
-        description: '',
-        features: [],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'locale',
-            type: 'String',
-            description: '',
-            named: false,
-            required: false,
-          )
-        ],
-        features: [],
-      )
-    ],
-    methods: ['retryIn'],
-  ),
-  LdDocComponent(
-    name: 'LdNotification',
+    name: 'LdDialogType',
     isNullSafe: true,
     description: '',
     properties: [
       LdDocProperty(
-        name: 'message',
-        type: 'String',
-        description: '/// Message of the notification',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'subMessage',
-        type: 'String?',
-        description: '/// Submessage of the notification',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'duration',
-        type: 'Duration?',
-        description:
-            '/// Duration of the notification. If null the notification will not be dismissed automatically',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'color',
-        type: 'LdColor?',
-        description: '/// If the notification is a big notification',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'type',
-        type: 'LdNotificationType',
+        name: 'size',
+        type: 'LdSize',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'removing',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'didConfirm',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-      LdDocProperty(
-        name: 'key',
-        type: 'Key',
+        name: 'fixedSize',
+        type: 'Size?',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'canDismiss',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'showBackdrop',
-        type: 'bool',
-        description: '',
-        features: [],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'message',
-            type: 'String',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'type',
-            type: 'LdNotificationType',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'subMessage',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'color',
-            type: 'LdColor?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'canDismiss',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'removing',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'didConfirm',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'duration',
-            type: 'Duration?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: [],
-      )
-    ],
-    methods: [],
-  ),
-  LdDocComponent(
-    name: 'LdInputNotification',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'inputKey',
-        type: 'Key',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'inputHint',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'inputLabel',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'inputType',
-        type: 'TextInputType',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'submitText',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'inputCompleter',
-        type: 'Completer<String?>',
-        description:
-            '/// Completer that gets resolved when the user entered something in the input field',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'message',
-            type: 'String',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'type',
-            type: 'LdNotificationType',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'inputHint',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'inputLabel',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'submitText',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'inputType',
-            type: 'TextInputType',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'subMessage',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'color',
-            type: 'LdColor?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'canDismiss',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'duration',
-            type: 'Duration?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: [],
-      )
-    ],
-    methods: [],
-  ),
-  LdDocComponent(
-    name: 'LdConfirmNotification',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'cancelKey',
-        type: 'Key',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'confirmKey',
-        type: 'Key',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'confirmText',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'cancelText',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'confirmationCompleter',
-        type: 'Completer<bool?>',
-        description:
-            '/// Completer that gets resolved when the user confirms the notification or it is dismissed',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'message',
-            type: 'String',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'type',
-            type: 'LdNotificationType',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'subMessage',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'color',
-            type: 'LdColor?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'canDismiss',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'duration',
-            type: 'Duration?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'confirmText',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'cancelText',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: [],
-      )
-    ],
-    methods: [],
-  ),
-  LdDocComponent(
-    name: 'LdAcknowledgeNotification',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'dismissKey',
-        type: 'Key',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'acknowledgeText',
-        type: 'String?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'message',
-            type: 'String',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'type',
-            type: 'LdNotificationType',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'subMessage',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'color',
-            type: 'LdColor?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'canDismiss',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'duration',
-            type: 'Duration?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'acknowledgeText',
-            type: 'String?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: [],
-      )
-    ],
-    methods: [],
-  ),
-  LdDocComponent(
-    name: 'LdNotificationProvider',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'child',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'notifier',
-        type: 'LdNotificationsController?',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'child',
-            type: 'Widget',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'notifier',
-            type: 'LdNotificationsController?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdNotificationPortal',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'child',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      )
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'child',
-            type: 'Widget',
-            description: '',
-            named: true,
-            required: true,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['build'],
-  ),
-  LdDocComponent(
-    name: 'LdNotificationWidget',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'notification',
-        type: 'LdNotification',
+        name: 'theme',
+        type: 'LdTheme',
         description: '',
         features: ['final'],
       ),
@@ -13468,95 +12528,24 @@ const ldDocComponents = [
         description: '',
         features: ['final'],
       ),
-      LdDocProperty(
-        name: 'removing',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'didConfirm',
-        type: 'bool',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onDismiss',
-        type: 'void Function()',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onConfirm',
-        type: 'void Function()',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onCancel',
-        type: 'void Function()',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onSubmitInput',
-        type: 'dynamic Function(String)',
-        description: '',
-        features: ['final'],
-      ),
     ],
     constructors: [
       LdDocConstructor(
         name: '',
         signature: [
           LdDocParameter(
-            name: 'key',
-            type: 'Key?',
+            name: 'theme',
+            type: 'LdTheme',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'size',
+            type: 'LdSize',
             description: '',
             named: true,
             required: false,
-          ),
-          LdDocParameter(
-            name: 'notification',
-            type: 'LdNotification',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'removing',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'didConfirm',
-            type: 'bool',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'onConfirm',
-            type: 'void Function()',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'onSubmitInput',
-            type: 'dynamic Function(String)',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'onCancel',
-            type: 'void Function()',
-            description: '',
-            named: true,
-            required: true,
           ),
           LdDocParameter(
             name: 'index',
@@ -13566,86 +12555,43 @@ const ldDocComponents = [
             required: false,
           ),
           LdDocParameter(
-            name: 'onDismiss',
-            type: 'void Function()',
+            name: 'fixedSize',
+            type: 'Size?',
             description: '',
             named: true,
-            required: true,
+            required: false,
           ),
         ],
-        features: ['const'],
-      )
-    ],
-    methods: [
-      '_colorBundle',
-      '_theme',
-      '_icon',
-      '_buildConfirmationButtons',
-      '_buildAcknowledgeButton',
-      '_buildNotificationBody',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdNotificationsController',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: '_notifications',
-        type: 'List<LdNotification>',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'notifications',
-        type: 'List<LdNotification>',
-        description: '',
-        features: [],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
         features: [],
       )
     ],
     methods: [
-      'error',
-      'success',
-      'warning',
-      'confirm',
-      'enterText',
-      'addNotification',
-      'onConfirmedNotification',
-      'onInputSubmitted',
-      'onDismissNotification',
-      'onCancelledNotification',
-      'clearNotifications',
-      'of',
+      'positionModal',
+      'layoutModal',
     ],
   ),
   LdDocComponent(
-    name: 'ImplicitBlur',
+    name: 'LdModalBuilder',
     isNullSafe: true,
-    description: '',
+    description:
+        ' A utility widget that displays a sheet when a button is pressed. Attention: This requries are flutter_portal to be placed at the root of your application. See https://pub.dev/packages/flutter_portal',
     properties: [
       LdDocProperty(
-        name: 'sigma',
-        type: 'double',
+        name: 'builder',
+        type: 'Widget Function(BuildContext, Future<dynamic> Function())',
+        description:
+            '/// The builder for the button that opens the sheet. Calll the `onPress` callback to open the sheet.',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'modal',
+        type: 'LdModal',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'child',
-        type: 'Widget',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'duration',
-        type: 'Duration',
+        name: 'useRootNavigator',
+        type: 'bool',
         description: '',
         features: ['final'],
       ),
@@ -13655,32 +12601,32 @@ const ldDocComponents = [
         name: '',
         signature: [
           LdDocParameter(
-            name: 'key',
-            type: 'Key?',
+            name: 'builder',
+            type: 'Widget Function(BuildContext, Future<dynamic> Function())',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'modal',
+            type: 'LdModal',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'useRootNavigator',
+            type: 'bool',
             description: '',
             named: true,
             required: false,
           ),
           LdDocParameter(
-            name: 'sigma',
-            type: 'double',
+            name: 'key',
+            type: 'Key?',
             description: '',
             named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'child',
-            type: 'Widget',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'duration',
-            type: 'Duration',
-            description: '',
-            named: true,
-            required: true,
+            required: false,
           ),
         ],
         features: ['const'],
@@ -13689,26 +12635,10 @@ const ldDocComponents = [
     methods: ['createState'],
   ),
   LdDocComponent(
-    name: '_ImplicitBlurState',
+    name: 'LdModalBuilderState',
     isNullSafe: true,
     description: '',
-    properties: [
-      LdDocProperty(
-        name: '_controller',
-        type: 'AnimationController',
-        description: '',
-        features: [
-          'final',
-          'late',
-        ],
-      ),
-      LdDocProperty(
-        name: '_tween',
-        type: 'Tween<double>',
-        description: '',
-        features: [],
-      ),
-    ],
+    properties: [],
     constructors: [
       LdDocConstructor(
         name: '',
@@ -13718,81 +12648,7 @@ const ldDocComponents = [
     ],
     methods: [
       'initState',
-      'dispose',
-      'didUpdateWidget',
-      'build',
-    ],
-  ),
-  LdDocComponent(
-    name: 'NotificationInput',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'notification',
-        type: 'LdInputNotification',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'onSubmitted',
-        type: 'dynamic Function(String)',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'key',
-            type: 'Key?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'notification',
-            type: 'LdInputNotification',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'onSubmitted',
-            type: 'dynamic Function(String)',
-            description: '',
-            named: true,
-            required: true,
-          ),
-        ],
-        features: ['const'],
-      )
-    ],
-    methods: ['createState'],
-  ),
-  LdDocComponent(
-    name: '_NotificationInputState',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: '_controller',
-        type: 'TextEditingController',
-        description: '',
-        features: ['final'],
-      )
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [],
-        features: [],
-      )
-    ],
-    methods: [
-      'dispose',
+      'open',
       'build',
     ],
   ),
@@ -14233,19 +13089,19 @@ const ldDocComponents = [
     ],
   ),
   LdDocComponent(
-    name: 'LdSheetType',
+    name: 'LdExceptionMapperProvider',
     isNullSafe: true,
     description: '',
     properties: [
       LdDocProperty(
-        name: 'index',
-        type: 'int',
+        name: 'child',
+        type: 'Widget',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'insets',
-        type: 'EdgeInsets',
+        name: 'exceptionMapper',
+        type: 'LdExceptionMapper?',
         description: '',
         features: ['final'],
       ),
@@ -14255,142 +13111,383 @@ const ldDocComponents = [
         name: '',
         signature: [
           LdDocParameter(
-            name: 'theme',
-            type: 'LdTheme',
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget',
             description: '',
             named: true,
             required: true,
           ),
           LdDocParameter(
-            name: 'insets',
-            type: 'EdgeInsets',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'topRadius',
-            type: 'double?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'bottomRadius',
-            type: 'double?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'index',
-            type: 'int',
+            name: 'exceptionMapper',
+            type: 'LdExceptionMapper?',
             description: '',
             named: true,
             required: false,
           ),
         ],
-        features: [],
+        features: ['const'],
       )
     ],
-    methods: [
-      'layoutModal',
-      'positionModal',
-    ],
+    methods: ['build'],
   ),
   LdDocComponent(
-    name: 'LdDialogType',
-    isNullSafe: true,
-    description: '',
-    properties: [
-      LdDocProperty(
-        name: 'size',
-        type: 'LdSize',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'fixedSize',
-        type: 'Size?',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'theme',
-        type: 'LdTheme',
-        description: '',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'index',
-        type: 'int',
-        description: '',
-        features: ['final'],
-      ),
-    ],
-    constructors: [
-      LdDocConstructor(
-        name: '',
-        signature: [
-          LdDocParameter(
-            name: 'theme',
-            type: 'LdTheme',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'size',
-            type: 'LdSize',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'index',
-            type: 'int',
-            description: '',
-            named: true,
-            required: false,
-          ),
-          LdDocParameter(
-            name: 'fixedSize',
-            type: 'Size?',
-            description: '',
-            named: true,
-            required: false,
-          ),
-        ],
-        features: [],
-      )
-    ],
-    methods: [
-      'positionModal',
-      'layoutModal',
-    ],
-  ),
-  LdDocComponent(
-    name: 'LdModalBuilder',
+    name: 'LdExceptionMapper',
     isNullSafe: true,
     description:
-        ' A utility widget that displays a sheet when a button is pressed. Attention: This requries are flutter_portal to be placed at the root of your application. See https://pub.dev/packages/flutter_portal',
+        ' A mapper that maps exceptions to LdExceptions that are displayed in the UI.\n You can provide your own exception mapper to handle custom exceptions.\n The default exception mapper will handle common exceptions like network errors.',
     properties: [
       LdDocProperty(
-        name: 'builder',
-        type: 'Widget Function(BuildContext, Future<dynamic> Function())',
-        description:
-            '/// The builder for the button that opens the sheet. Calll the `onPress` callback to open the sheet.',
-        features: ['final'],
-      ),
-      LdDocProperty(
-        name: 'modal',
-        type: 'LdModal',
+        name: 'localizations',
+        type: 'LiquidLocalizations',
         description: '',
         features: ['final'],
       ),
       LdDocProperty(
-        name: 'useRootNavigator',
+        name: 'onException',
+        type: 'LdException? Function(dynamic, {StackTrace? stackTrace})?',
+        description:
+            '/// A function that can be used to handle custom exceptions. If the function\n/// returns a non-null LdException, it will be used instead of the default\n/// exception mapper. Otherwise, the default exception mapper will be used.\n/// This function will never be called if the exception is already an LdException.',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'localizations',
+            type: 'LiquidLocalizations',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'onException',
+            type: 'LdException? Function(dynamic, {StackTrace? stackTrace})?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: [
+      'of',
+      'handle',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdExceptionMoreInfoButton',
+    isNullSafe: true,
+    description:
+        ' LdExceptionMoreInfoButton is a button that will open a dialog with more info',
+    properties: [
+      LdDocProperty(
+        name: 'error',
+        type: 'LdException?',
+        description: '',
+        features: ['final'],
+      )
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'error',
+            type: 'LdException?',
+            description: '',
+            named: true,
+            required: true,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdExceptionDialog',
+    isNullSafe: true,
+    description: ' Renders an LdException in a dialog',
+    properties: [
+      LdDocProperty(
+        name: 'error',
+        type: 'LdException?',
+        description: '',
+        features: ['final'],
+      )
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'error',
+            type: 'LdException?',
+            description: '',
+            named: true,
+            required: true,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdException',
+    isNullSafe: true,
+    description:
+        ' A renderable exception. Has a message, more info, and a type (LdHintType).\n Can also contain a stack trace as well as the flag that the action causing\n the exception can be retried.',
+    properties: [
+      LdDocProperty(
+        name: 'message',
+        type: 'String',
+        description: '/// The message of the exception.',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'moreInfo',
+        type: 'String?',
+        description:
+            '/// Additional information about the exception, e.g. a detailed explanation\n/// of what went wrong.',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'canRetry',
         type: 'bool',
+        description:
+            '/// Whether the action causing the exception can be retried.',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'type',
+        type: 'LdHintType',
+        description:
+            '/// The type of the exception. By default, it is [LdHintType.error].',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'exception',
+        type: 'dynamic',
+        description: '/// The actual [Exception] that caused this exception.',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'attempt',
+        type: 'int?',
+        description:
+            '/// The number of attempts that have been made to resolve the exception.\n/// This can be useful for debugging.',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'stackTrace',
+        type: 'StackTrace?',
+        description: '/// The stack trace of the exception.',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'message',
+            type: 'String',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'canRetry',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'type',
+            type: 'LdHintType',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'moreInfo',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'attempt',
+            type: 'int?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'stackTrace',
+            type: 'StackTrace?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'exception',
+            type: 'dynamic',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: [],
+      )
+    ],
+    methods: ['copyWith'],
+  ),
+  LdDocComponent(
+    name: 'LdExceptionView',
+    isNullSafe: true,
+    description: ' Renders an LdException',
+    properties: [
+      LdDocProperty(
+        name: 'exception',
+        type: 'LdException?',
+        description: '/// The exception to render',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'retry',
+        type: 'void Function()?',
+        description:
+            '/// A callback to retry the action that caused the exception\n/// If null, the retry button will not be displayed',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'direction',
+        type: 'Axis',
+        description:
+            '/// The direction of the exception view, either [Axis.vertical] or\n/// [Axis.horizontal].',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'exception',
+            type: 'LdException?',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'retry',
+            type: 'void Function()?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'direction',
+            type: 'Axis',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['const'],
+      ),
+      LdDocConstructor(
+        name: 'fromDynamic',
+        signature: [
+          LdDocParameter(
+            name: 'error',
+            type: 'dynamic',
+            description: '',
+            named: false,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'context',
+            type: 'BuildContext',
+            description: '',
+            named: false,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'direction',
+            type: 'Axis',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'retry',
+            type: 'void Function()?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: ['factory'],
+      ),
+    ],
+    methods: [
+      'color',
+      '_buildRetryButton',
+      '_buildDialogButton',
+      '_buildHorizontal',
+      '_buildVertical',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdNotificationProvider',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'notifier',
+        type: 'LdNotificationsController?',
         description: '',
         features: ['final'],
       ),
@@ -14400,22 +13497,15 @@ const ldDocComponents = [
         name: '',
         signature: [
           LdDocParameter(
-            name: 'builder',
-            type: 'Widget Function(BuildContext, Future<dynamic> Function())',
+            name: 'child',
+            type: 'Widget',
             description: '',
             named: true,
             required: true,
           ),
           LdDocParameter(
-            name: 'modal',
-            type: 'LdModal',
-            description: '',
-            named: true,
-            required: true,
-          ),
-          LdDocParameter(
-            name: 'useRootNavigator',
-            type: 'bool',
+            name: 'notifier',
+            type: 'LdNotificationsController?',
             description: '',
             named: true,
             required: false,
@@ -14431,13 +13521,738 @@ const ldDocComponents = [
         features: ['const'],
       )
     ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdNotificationPortal',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget',
+        description: '',
+        features: ['final'],
+      )
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
+  ),
+  LdDocComponent(
+    name: 'LdNotificationWidget',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'notification',
+        type: 'LdNotification',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'index',
+        type: 'int',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'removing',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'didConfirm',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onDismiss',
+        type: 'void Function()',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onConfirm',
+        type: 'void Function()',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onCancel',
+        type: 'void Function()',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onSubmitInput',
+        type: 'dynamic Function(String)',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'notification',
+            type: 'LdNotification',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'removing',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'didConfirm',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'onConfirm',
+            type: 'void Function()',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'onSubmitInput',
+            type: 'dynamic Function(String)',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'onCancel',
+            type: 'void Function()',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'index',
+            type: 'int',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'onDismiss',
+            type: 'void Function()',
+            description: '',
+            named: true,
+            required: true,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: [
+      '_colorBundle',
+      '_theme',
+      '_icon',
+      '_buildConfirmationButtons',
+      '_buildAcknowledgeButton',
+      '_buildNotificationBody',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdNotification',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'message',
+        type: 'String',
+        description: '/// Message of the notification',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'subMessage',
+        type: 'String?',
+        description: '/// Submessage of the notification',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'duration',
+        type: 'Duration?',
+        description:
+            '/// Duration of the notification. If null the notification will not be dismissed automatically',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'color',
+        type: 'LdColor?',
+        description: '/// If the notification is a big notification',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'type',
+        type: 'LdNotificationType',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'removing',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'didConfirm',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+      LdDocProperty(
+        name: 'key',
+        type: 'Key',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'canDismiss',
+        type: 'bool',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'showBackdrop',
+        type: 'bool',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'message',
+            type: 'String',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'type',
+            type: 'LdNotificationType',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'subMessage',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'color',
+            type: 'LdColor?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'canDismiss',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'removing',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'didConfirm',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'duration',
+            type: 'Duration?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: [],
+      )
+    ],
+    methods: [],
+  ),
+  LdDocComponent(
+    name: 'LdInputNotification',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'inputKey',
+        type: 'Key',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'inputHint',
+        type: 'String?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'inputLabel',
+        type: 'String?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'inputType',
+        type: 'TextInputType',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'submitText',
+        type: 'String?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'inputCompleter',
+        type: 'Completer<String?>',
+        description:
+            '/// Completer that gets resolved when the user entered something in the input field',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'message',
+            type: 'String',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'type',
+            type: 'LdNotificationType',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'inputHint',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'inputLabel',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'submitText',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'inputType',
+            type: 'TextInputType',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'subMessage',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'color',
+            type: 'LdColor?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'canDismiss',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'duration',
+            type: 'Duration?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: [],
+      )
+    ],
+    methods: [],
+  ),
+  LdDocComponent(
+    name: 'LdConfirmNotification',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'cancelKey',
+        type: 'Key',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'confirmKey',
+        type: 'Key',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'confirmText',
+        type: 'String?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'cancelText',
+        type: 'String?',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'confirmationCompleter',
+        type: 'Completer<bool?>',
+        description:
+            '/// Completer that gets resolved when the user confirms the notification or it is dismissed',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'message',
+            type: 'String',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'type',
+            type: 'LdNotificationType',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'subMessage',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'color',
+            type: 'LdColor?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'canDismiss',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'duration',
+            type: 'Duration?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'confirmText',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'cancelText',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: [],
+      )
+    ],
+    methods: [],
+  ),
+  LdDocComponent(
+    name: 'LdAcknowledgeNotification',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'dismissKey',
+        type: 'Key',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'acknowledgeText',
+        type: 'String?',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'message',
+            type: 'String',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'type',
+            type: 'LdNotificationType',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'subMessage',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'color',
+            type: 'LdColor?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'canDismiss',
+            type: 'bool',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'duration',
+            type: 'Duration?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'acknowledgeText',
+            type: 'String?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+        ],
+        features: [],
+      )
+    ],
+    methods: [],
+  ),
+  LdDocComponent(
+    name: 'LdNotificationsController',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: '_notifications',
+        type: 'List<LdNotification>',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'notifications',
+        type: 'List<LdNotification>',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [
+      'error',
+      'success',
+      'warning',
+      'confirm',
+      'enterText',
+      'addNotification',
+      'onConfirmedNotification',
+      'onInputSubmitted',
+      'onDismissNotification',
+      'onCancelledNotification',
+      'clearNotifications',
+      'of',
+    ],
+  ),
+  LdDocComponent(
+    name: 'ImplicitBlur',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'sigma',
+        type: 'double',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'child',
+        type: 'Widget',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'duration',
+        type: 'Duration',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'sigma',
+            type: 'double',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'child',
+            type: 'Widget',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'duration',
+            type: 'Duration',
+            description: '',
+            named: true,
+            required: true,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
     methods: ['createState'],
   ),
   LdDocComponent(
-    name: 'LdModalBuilderState',
+    name: '_ImplicitBlurState',
     isNullSafe: true,
     description: '',
-    properties: [],
+    properties: [
+      LdDocProperty(
+        name: '_controller',
+        type: 'AnimationController',
+        description: '',
+        features: [
+          'final',
+          'late',
+        ],
+      ),
+      LdDocProperty(
+        name: '_tween',
+        type: 'Tween<double>',
+        description: '',
+        features: [],
+      ),
+    ],
     constructors: [
       LdDocConstructor(
         name: '',
@@ -14447,8 +14262,150 @@ const ldDocComponents = [
     ],
     methods: [
       'initState',
-      'open',
+      'dispose',
+      'didUpdateWidget',
       'build',
     ],
+  ),
+  LdDocComponent(
+    name: 'NotificationInput',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'notification',
+        type: 'LdInputNotification',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'onSubmitted',
+        type: 'dynamic Function(String)',
+        description: '',
+        features: ['final'],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'notification',
+            type: 'LdInputNotification',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'onSubmitted',
+            type: 'dynamic Function(String)',
+            description: '',
+            named: true,
+            required: true,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['createState'],
+  ),
+  LdDocComponent(
+    name: '_NotificationInputState',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: '_controller',
+        type: 'TextEditingController',
+        description: '',
+        features: ['final'],
+      )
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [],
+        features: [],
+      )
+    ],
+    methods: [
+      'dispose',
+      'build',
+    ],
+  ),
+  LdDocComponent(
+    name: 'LdExceptionRetryIndicator',
+    isNullSafe: true,
+    description: '',
+    properties: [
+      LdDocProperty(
+        name: 'attempt',
+        type: 'int',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'remainingTime',
+        type: 'Duration',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'totalRetryTime',
+        type: 'Duration',
+        description: '',
+        features: ['final'],
+      ),
+      LdDocProperty(
+        name: 'progress',
+        type: 'double',
+        description: '',
+        features: [],
+      ),
+    ],
+    constructors: [
+      LdDocConstructor(
+        name: '',
+        signature: [
+          LdDocParameter(
+            name: 'key',
+            type: 'Key?',
+            description: '',
+            named: true,
+            required: false,
+          ),
+          LdDocParameter(
+            name: 'attempt',
+            type: 'int',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'remainingTime',
+            type: 'Duration',
+            description: '',
+            named: true,
+            required: true,
+          ),
+          LdDocParameter(
+            name: 'totalRetryTime',
+            type: 'Duration',
+            description: '',
+            named: true,
+            required: true,
+          ),
+        ],
+        features: ['const'],
+      )
+    ],
+    methods: ['build'],
   ),
 ];

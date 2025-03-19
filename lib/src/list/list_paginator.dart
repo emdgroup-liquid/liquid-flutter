@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:liquid_flutter/src/list/list_page.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
 
 typedef FetchListFunction<T> = Future<LdListPage<T>> Function(
   int page,
@@ -10,7 +10,7 @@ typedef FetchListFunction<T> = Future<LdListPage<T>> Function(
 );
 
 class LdPaginator<T> extends ChangeNotifier {
-  FetchListFunction<T> fetchListFunction;
+  final FetchListFunction<T> fetchListFunction;
 
   LdPaginator({
     required this.fetchListFunction,
