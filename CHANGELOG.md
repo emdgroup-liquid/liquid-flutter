@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [20.0.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v19.5.3...v20.0.0) (2025-03-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* Add LdExceptionView as "standalone" component and make (automatic) retry functionality re-usable (#29)
+
+### Features
+
+* Add LdExceptionView as "standalone" component and make (automatic) retry functionality re-usable ([#29](https://github.com/emdgroup-liquid/liquid-flutter/issues/29)) ([81cbdb9](https://github.com/emdgroup-liquid/liquid-flutter/commit/81cbdb94af5c94bfddf03f021aead6ac833c09ce))
+
 ### [19.5.3](https://github.com/emdgroup-liquid/liquid-flutter/compare/v19.5.2...v19.5.3) (2025-03-18)
 
 ### [19.5.2](https://github.com/emdgroup-liquid/liquid-flutter/compare/v19.5.1...v19.5.2) (2025-03-17)
