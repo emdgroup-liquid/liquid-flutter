@@ -12,29 +12,31 @@ class LdRetryConfig {
   /// Can only be used in combination with [enableAutomaticRetries].
   final Duration baseDelay;
 
-  /// Whether to disable the manual retry button.
+  /// Whether to hide the manual retry button.
   /// Can only be used in combination with [enableAutomaticRetries].
-  final bool disableRetryButton;
+  final bool hideManualRetryButton;
 
   /// Whether to add jitter to retry delays
   /// Can only be used in combination with [enableAutomaticRetries].
   final bool useJitter;
 
   const LdRetryConfig({
-    this.maxAttempts = 4,
+    this.maxAttempts = 999999,
     this.enableAutomaticRetries = false,
-    this.disableRetryButton = false,
+    this.hideManualRetryButton = false,
     this.baseDelay = const Duration(seconds: 3),
-    this.useJitter = true,
+    this.useJitter = false,
   })  : assert(
-          !enableAutomaticRetries ||
-              !disableRetryButton ||
-              baseDelay > Duration.zero,
-          "If enableAutomaticRetries is true, disableRetryButton must be false and baseDelay must be greater than 0",
+          enableAutomaticRetries == false || baseDelay > Duration.zero,
+          "If enableAutomaticRetries is true, the baseDelay must be greater than 0",
         ),
         assert(
           maxAttempts >= 1,
           "maxRetryAttempts must be greater than 1",
+        ),
+        assert(
+          enableAutomaticRetries || (!hideManualRetryButton && !useJitter),
+          "hideManualRetryButton and useJitter can only be true if enableAutomaticRetries is true",
         );
 
   /// A configuration that does not allow any retries.
@@ -49,7 +51,13 @@ class LdRetryConfig {
       );
 
   /// A configuration that allows 3 automatic retries with exponential backoff.
-  factory LdRetryConfig.defaultAutomaticRetries() => const LdRetryConfig(
+  factory LdRetryConfig.defaultAutomaticRetries({
+    Duration baseDelay = const Duration(seconds: 3),
+  }) =>
+      LdRetryConfig(
+        baseDelay: baseDelay,
+        maxAttempts: 4,
         enableAutomaticRetries: true,
+        useJitter: true,
       );
 }

@@ -72,7 +72,7 @@ class LdRetryController {
   bool get showRetryIndicator => _retryTimer?.isActive == true;
 
   /// Whether the retry button should be shown
-  bool get showRetryButton => !config.disableRetryButton && _state.canRetry;
+  bool get showRetryButton => !config.hideManualRetryButton && _state.canRetry;
 
   LdRetryController({
     required this.onRetry,

@@ -232,7 +232,7 @@ void main() {
           enableAutomaticRetries: true,
           maxAttempts: 2,
           baseDelay: const Duration(milliseconds: 100),
-          disableRetryButton: true,
+          hideManualRetryButton: true,
         ),
       ),
     );

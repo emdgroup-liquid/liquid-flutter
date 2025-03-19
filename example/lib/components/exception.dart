@@ -31,10 +31,10 @@ class _ExceptionDemoState extends State<ExceptionDemo> {
         }
         retryController.notifyOperationCompleted();
       },
-      config: const LdRetryConfig(
+      config: LdRetryConfig(
         enableAutomaticRetries: true,
         maxAttempts: 999,
-        baseDelay: Duration(seconds: 1),
+        baseDelay: const Duration(seconds: 1),
       ),
     );
     retryController.handleError(canRetry: true);
