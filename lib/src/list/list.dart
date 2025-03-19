@@ -74,7 +74,7 @@ class LdList<T, GroupingCriterion> extends StatefulWidget {
     this.footer,
     this.groupSequentialItems = false,
     this.shrinkWrap = false,
-    this.retryConfig = const LdRetryConfig(),
+    this.retryConfig,
   });
 
   @override
@@ -142,7 +142,7 @@ class _LdListState<T, GroupingCriterion>
   void initState() {
     this._retryController = LdRetryController(
       onRetry: _onRefresh,
-      config: widget.retryConfig ?? const LdRetryConfig(),
+      config: widget.retryConfig ?? LdRetryConfig.unlimitedManualRetries(),
     );
     widget.data.addListener(_onDataChange);
     _onDataChange();
@@ -245,18 +245,11 @@ class _LdListState<T, GroupingCriterion>
 
     // return the default error view (LdExceptionView)
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IntrinsicWidth(
-            child: LdExceptionView.fromDynamic(
-              error,
-              context,
-              direction: Axis.vertical,
-              retryController: _retryController,
-            ),
-          ),
-        ],
+      child: LdExceptionView.fromDynamic(
+        error,
+        context,
+        direction: Axis.vertical,
+        retryController: _retryController,
       ),
     ).padL();
   }
