@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/list/list_error.dart';
-import 'package:liquid_flutter/src/list/position_retained_scroll_physics.dart';
 
 class _ListItem<T, SeperationCriterion> {
   _ListItem({
@@ -85,7 +84,7 @@ class LdList<T, GroupingCriterion> extends StatefulWidget {
   /// Whether or not each missing item (i.e. items of a page that is not loaded
   /// yet) should be shown as a loading indicator.
   /// This is automatically set to true if [assumedItemHeight] is not null.
-  bool get showMissingItemsAsLoading => assumedItemHeight != null;
+  bool get showMissingItemsAsLoading => true;
 
   const LdList({
     super.key,
@@ -118,6 +117,11 @@ class _LdListState<T, GroupingCriterion>
   List<_ListItem<T, GroupingCriterion>> _groupedItems = [];
   final ScrollController _scrollController = ScrollController();
   bool _initialScrollPerformed = false;
+  double? calculatedAssumedItemHeight;
+
+  double? getAssumedItemHeight() {
+    return widget.assumedItemHeight ?? calculatedAssumedItemHeight;
+  }
 
   // Re-group the items in the list
   List<_ListItem<T, GroupingCriterion>> _groupItemsSequentially() {
@@ -243,6 +247,7 @@ class _LdListState<T, GroupingCriterion>
             .toList(growable: false);
       });
     }
+    _maybeCalculateAssumedItemHeight();
     _maybePerformInitialScroll();
   }
 
@@ -297,23 +302,13 @@ class _LdListState<T, GroupingCriterion>
       return _buildEmpty(context);
     }
 
-    // If we are showing missing items as loading, we don't have to "hack" with
-    // the physics to retain the position. Additionally, if we are grouping
-    // items, the [PositionRetainedScrollPhysics] will also be glitchy.
-    final useRetainedScrollPhysics = widget.isBidirectionalScrollingEnabled &&
-        !widget.showMissingItemsAsLoading &&
-        widget.groupingCriterion == null;
     final list = CustomScrollView(
       controller: _scrollController,
       primary: widget.primary,
       shrinkWrap: widget.shrinkWrap,
-      physics: PositionRetainedScrollPhysics(
-        shouldRetain: useRetainedScrollPhysics,
-        parent: widget.physics ??
-            (widget.shrinkWrap
-                ? const NeverScrollableScrollPhysics()
-                : const AlwaysScrollableScrollPhysics()),
-      ),
+      physics: widget.shrinkWrap
+          ? const NeverScrollableScrollPhysics()
+          : const AlwaysScrollableScrollPhysics(),
       slivers: [
         if (widget.header != null) SliverToBoxAdapter(child: widget.header!),
         SliverList.builder(
@@ -341,18 +336,20 @@ class _LdListState<T, GroupingCriterion>
             }
 
             if (item.item == null) {
-              // This is a "placeholder" item (a page that is not loaded yet)
-              if (widget.assumedItemHeight == null) {
-                // If we don't know the item height, there are no "placeholder"
-                // UI elements
+              if (getAssumedItemHeight() == null) {
+                // as long as we don't know any assumed item height (neither
+                // as parameter nor calculated), we can't build a "placeholder"
                 return const SizedBox.shrink();
               }
+              // This is a "placeholder" item (a page that is not loaded yet)
               if (page != null) {
                 widget.data.jumpToPage(page); // call the loading operation
               }
               // build a "placeholder" item
-              return SizedBox.fromSize(
-                size: Size.fromHeight(widget.assumedItemHeight!),
+              return ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: getAssumedItemHeight()!,
+                ),
                 child: _buildLoadMore(context),
               );
             }
@@ -369,6 +366,23 @@ class _LdListState<T, GroupingCriterion>
     );
   }
 
+  /// Helper method to calculate the assumed item height based on the current
+  /// scroll extent and the current item count.
+  void _maybeCalculateAssumedItemHeight() {
+    if (calculatedAssumedItemHeight != null ||
+        widget.data.currentItemCount == 0) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      calculatedAssumedItemHeight = _scrollController.position.extentTotal /
+          (widget.data.currentItemCount + (widget.header != null ? 1 : 0));
+      // force a rebuild to apply the new height
+      setState(() {});
+    });
+  }
+
+  /// Helper method to perform the initial scroll to the correct position
+  /// based on the current page.
   void _maybePerformInitialScroll() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // we don't need to perform the initial scroll under certain conditions
@@ -393,7 +407,7 @@ class _LdListState<T, GroupingCriterion>
   /// item height.
   _scrollToIndex(int index) {
     index += (widget.header != null ? 1 : 0);
-    final double pixels = index * (widget.assumedItemHeight ?? 50);
+    final double pixels = index * (getAssumedItemHeight() ?? 50);
     _scrollController.jumpTo(pixels);
   }
 }
