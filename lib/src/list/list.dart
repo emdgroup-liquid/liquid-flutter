@@ -7,16 +7,26 @@ class _ListItem<T, SeperationCriterion> {
     this.isSeparator = false,
     this.seperationCriterion,
     this.page,
-  });
+  }) :
+        // if this is no separator, page should not be null
+        assert(isSeparator || page != null);
+
   final T? item;
   // use a bool since T or SeperationCriterion can be null
   final bool isSeparator;
   final SeperationCriterion? seperationCriterion;
 
-  /// The page this item belongs to
+  /// The page number that this item belongs to.
+  /// It can be that item is null and page is not null, which means that this
+  /// item is yet to be loaded from the appropriate page.
+  /// If both item and page are null, this is probably a separator item.
   final int? page;
 }
 
+/// An extension function to create a list of [_ListItem]s from a [LdPaginator]
+/// instance.
+///
+///
 extension GetItemList<T> on LdPaginator<T> {
   List<_ListItem<T, GroupingCriterion>> currentList<GroupingCriterion>() {
     final result = <_ListItem<T, GroupingCriterion>>[];
@@ -82,11 +92,6 @@ class LdList<T, GroupingCriterion> extends StatefulWidget {
   bool get isBidirectionalScrollingEnabled =>
       enableBidirectionalScrolling ?? data.startPage > 0;
 
-  /// Whether or not each missing item (i.e. items of a page that is not loaded
-  /// yet) should be shown as a loading indicator.
-  /// This is automatically set to true if [assumedItemHeight] is not null.
-  bool get showMissingItemsAsLoading => true;
-
   const LdList({
     super.key,
     this.areEqual,
@@ -120,10 +125,12 @@ class _LdListState<T, GroupingCriterion>
   final ScrollController _scrollController = ScrollController();
   bool _initialScrollPerformed = false;
   double? calculatedAssumedItemHeight;
+  GlobalKey? _firstListItemWidgetKey;
 
-  double? getAssumedItemHeight() {
-    return widget.assumedItemHeight ?? calculatedAssumedItemHeight;
-  }
+  /// We either provide an assumed item height as a parameter or we calculate
+  /// it after the first items have been loaded.
+  double? get assumedItemHeight =>
+      widget.assumedItemHeight ?? calculatedAssumedItemHeight;
 
   late final LdRetryController _retryController;
 
@@ -281,11 +288,11 @@ class _LdListState<T, GroupingCriterion>
     return LdListEmpty(onRefresh: _onRefresh);
   }
 
-  Widget _buildLoadMore(BuildContext context, {bool isTop = false}) {
+  Widget _buildLoadMore(BuildContext context, int page) {
     if (widget.loadingBuilder != null) {
       return widget.loadingBuilder!(
         context,
-        isTop ? widget.data.currentTopPage : widget.data.currentBottomPage,
+        page,
         widget.data.currentItemCount,
       );
     }
@@ -311,14 +318,7 @@ class _LdListState<T, GroupingCriterion>
 
   @override
   Widget build(BuildContext context) {
-    final showNextLoadingIndicator =
-        !widget.showMissingItemsAsLoading && (widget.data.hasMoreDataNext);
-    final showPrevLoadingIndicator = !widget.showMissingItemsAsLoading &&
-        widget.isBidirectionalScrollingEnabled &&
-        widget.data.hasMoreDataPrev;
-    int count = _groupedItems.length +
-        (showPrevLoadingIndicator ? 1 : 0) +
-        (showNextLoadingIndicator ? 1 : 0);
+    int count = _groupedItems.length;
 
     if (widget.data.hasError) {
       return _buildError(widget.data.error!);
@@ -338,20 +338,14 @@ class _LdListState<T, GroupingCriterion>
               : const AlwaysScrollableScrollPhysics()),
       slivers: [
         if (widget.header != null) SliverToBoxAdapter(child: widget.header!),
+
+        // if there is nothing to show yet, just show a simple loading indicator:
+        if (widget.data.currentItemCount == 0)
+          SliverToBoxAdapter(child: _buildLoadMore(context, -1)),
+
         SliverList.builder(
           itemCount: count,
           itemBuilder: (context, index) {
-            if (showPrevLoadingIndicator && index == 0) {
-              widget.data.previousPage();
-              return _buildLoadMore(context, isTop: true);
-            }
-
-            if (showNextLoadingIndicator && index == count - 1) {
-              widget.data.nextPage();
-              return _buildLoadMore(context, isTop: false);
-            }
-
-            index -= showPrevLoadingIndicator ? 1 : 0;
             final item = _groupedItems[index];
             final page = item.page;
 
@@ -363,24 +357,29 @@ class _LdListState<T, GroupingCriterion>
             }
 
             if (item.item == null) {
-              if (getAssumedItemHeight() == null) {
+              // if item is null and this is no separator, this is a "placeholder"
+              // item and we have to fetch the data for the appropriate page
+              // (page should never be null at this point)
+              if (assumedItemHeight == null || page == null) {
                 // as long as we don't know any assumed item height (neither
                 // as parameter nor calculated), we can't build a "placeholder"
                 return const SizedBox.shrink();
               }
-              // This is a "placeholder" item (a page that is not loaded yet)
-              if (page != null) {
-                widget.data.jumpToPage(page); // call the loading operation
-              }
+              // call the loading operation for the appropriate page
+              widget.data.jumpToPage(page);
+
               // build a "placeholder" item
-              return ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: getAssumedItemHeight()!,
-                ),
-                child: _buildLoadMore(context),
+              return SizedBox(
+                height: assumedItemHeight!,
+                child: _buildLoadMore(context, page),
               );
             }
-            return widget.itemBuilder(context, item.item!, index);
+            bool buildingFirstRealItem = _firstListItemWidgetKey == null;
+            _firstListItemWidgetKey ??= GlobalKey();
+            return KeyedSubtree(
+              key: buildingFirstRealItem ? _firstListItemWidgetKey : null,
+              child: widget.itemBuilder(context, item.item!, index),
+            );
           },
         ),
         if (widget.footer != null) SliverToBoxAdapter(child: widget.footer!),
@@ -401,10 +400,13 @@ class _LdListState<T, GroupingCriterion>
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      calculatedAssumedItemHeight = _scrollController.position.extentTotal /
-          (widget.data.currentItemCount + (widget.header != null ? 1 : 0));
-      // force a rebuild to apply the new height
-      setState(() {});
+      final RenderBox? renderBox = _firstListItemWidgetKey?.currentContext
+          ?.findRenderObject() as RenderBox?;
+      if (renderBox != null) {
+        // assume that the first item has the same height as all other items
+        calculatedAssumedItemHeight = renderBox.size.height;
+        setState(() {});
+      }
     });
   }
 
@@ -417,14 +419,12 @@ class _LdListState<T, GroupingCriterion>
           !_scrollController.hasClients ||
           !mounted ||
           !widget.isBidirectionalScrollingEnabled ||
-          !widget.showMissingItemsAsLoading ||
+          assumedItemHeight == null ||
           _groupedItems.isEmpty) {
         return;
       }
       _initialScrollPerformed = true;
-      if (widget.isBidirectionalScrollingEnabled) {
-        _scrollToIndex(widget.data.startPage * widget.data.pageSize);
-      }
+      _scrollToIndex(widget.data.startPage * widget.data.pageSize);
     });
   }
 
@@ -434,7 +434,7 @@ class _LdListState<T, GroupingCriterion>
   /// item height.
   _scrollToIndex(int index) {
     index += (widget.header != null ? 1 : 0);
-    final double pixels = index * (getAssumedItemHeight() ?? 50);
+    final double pixels = index * assumedItemHeight!;
     _scrollController.jumpTo(pixels);
   }
 }
