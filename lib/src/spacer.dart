@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 var ldDebugSpacings = false;
+var ldDebugSpacingsColor = Colors.blue.withAlpha(100);
 
 class LdSpacer extends StatelessWidget {
   final LdSize size;
@@ -27,7 +28,7 @@ class LdSpacer extends StatelessWidget {
 
     if (ldDebugSpacings) {
       return Container(
-        color: Colors.red,
+        color: ldDebugSpacingsColor,
         height: height,
         width: width,
       );

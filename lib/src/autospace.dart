@@ -116,7 +116,8 @@ class LdAutoSpace extends StatelessWidget {
           (_, _) => (LdSize.m, 1),
         };
 
-        finalChildren.add(SizedBox(
+        finalChildren.add(Container(
+          color: ldDebugSpacings ? ldDebugSpacingsColor : null,
           height: theme.paddingSize(size: spacerSize) * multiplier * 0.5,
         ));
 
