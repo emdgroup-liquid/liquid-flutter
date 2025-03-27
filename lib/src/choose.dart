@@ -20,6 +20,7 @@ class LdChoose<T> extends StatefulWidget {
   final bool disabled;
   final bool allowEmpty;
   final LdChooseMode mode;
+  final bool useRootNavigator;
 
   final bool multiple;
   final Set<T>? value;
@@ -28,16 +29,16 @@ class LdChoose<T> extends StatefulWidget {
   final LdSize size;
   final String? label;
   final Text? placeholder;
-  final NavigatorState? navigator;
+
   final bool? enableSearch;
   const LdChoose({
     required this.items,
     this.allowEmpty = false,
+    this.useRootNavigator = true,
     this.disabled = false,
     this.label,
     this.multiple = false,
     this.mode = LdChooseMode.auto,
-    this.navigator,
     required this.onChange,
     this.placeholder,
     this.size = LdSize.m,
@@ -68,6 +69,14 @@ class _LdChooseState<T> extends State<LdChoose<T>> {
   }
 
   @override
+  void didUpdateWidget(LdChoose<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.enableSearch != null) {
+      _enableSearch = widget.enableSearch!;
+    }
+  }
+
+  @override
   void dispose() {
     super.dispose();
   }
@@ -79,7 +88,9 @@ class _LdChooseState<T> extends State<LdChoose<T>> {
       result = value;
     }
 
-    final nav = widget.navigator ?? Navigator.of(context);
+    final nav = widget.useRootNavigator
+        ? Navigator.of(context)
+        : Navigator.of(context, rootNavigator: true);
 
     if (widget.mode == LdChooseMode.page ||
         (widget.mode == LdChooseMode.auto && widget.items.length > 10)) {
@@ -131,6 +142,7 @@ class _LdChooseState<T> extends State<LdChoose<T>> {
           size: widget.size,
         ),
         LdModalBuilder(
+            useRootNavigator: widget.useRootNavigator,
             modal: LdModal(
               key: _sheetKey,
               title:
