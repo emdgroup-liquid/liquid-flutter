@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
-import 'package:liquid/components/component_well.dart';
+import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class FormDemo extends StatefulWidget {
@@ -74,8 +74,6 @@ class _FormDemoState extends State<FormDemo> {
                             onChange: (value) {
                               //print(value);
                             },
-                            navigator:
-                                Navigator.of(context, rootNavigator: true),
                             items: const [
                               LdSelectItem(
                                   value: "1", child: Text("First choice")),
