@@ -48,6 +48,7 @@ export 'src/list/list_item.dart';
 export 'src/list/list_loading.dart';
 export 'src/list/list_page.dart';
 export 'src/list/list_paginator.dart';
+export 'src/list/list_item_toggle.dart';
 export 'src/list/list_seperator.dart';
 export 'src/loading.dart';
 export 'src/master_detail.dart';
