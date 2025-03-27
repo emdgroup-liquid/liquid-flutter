@@ -6,7 +6,17 @@ class LdAvatar extends StatelessWidget {
 
   final LdColor? color;
 
-  const LdAvatar({super.key, required this.child, this.color});
+  final bool circular;
+
+  final LdSize size;
+
+  const LdAvatar({
+    super.key,
+    required this.child,
+    this.color,
+    this.circular = false,
+    this.size = LdSize.m,
+  });
 
   @override
   build(BuildContext context) {
@@ -14,22 +24,23 @@ class LdAvatar extends StatelessWidget {
 
     final foreground = color ?? theme.primary;
 
-    final textIconColor = foreground.contrastingText(
-      foreground.idle(theme.isDark),
-    );
+    final fillColor = foreground.idle(theme.isDark).withAlpha(26);
+
+    final textIconColor = foreground.idle(theme.isDark);
 
     return Container(
-      height: theme.paddingSize() * 3,
-      width: theme.paddingSize() * 3,
+      height: theme.paddingSize(size: size) * 3,
+      width: theme.paddingSize(size: size) * 3,
       decoration: BoxDecoration(
-        color: foreground.idle(theme.isDark),
-        borderRadius: theme.radius(LdSize.s),
+        color: fillColor,
+        borderRadius: circular ? null : theme.radius(LdSize.m),
+        shape: circular ? BoxShape.circle : BoxShape.rectangle,
       ),
       child: Center(
         child: IconTheme(
           data: IconThemeData(
             color: textIconColor,
-            size: theme.paragraphSize(null) * 1.2,
+            size: theme.paragraphSize(size) * 1.2,
           ),
           child: DefaultTextStyle(
             child: child,
