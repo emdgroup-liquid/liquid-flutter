@@ -18,7 +18,7 @@ class LdListSeperator extends StatelessWidget {
         padding: theme.balPad(LdSize.s),
         width: double.infinity,
         decoration: BoxDecoration(
-          color: info.isSurface ? theme.background : theme.neutralShade(2),
+          color: info.isSurface ? theme.background : theme.neutralShade(1),
           border: Border(
             bottom: BorderSide(
               color: theme.border,
