@@ -28,14 +28,19 @@ class LdSubmitDialogBuilder<T> extends LdSubmitBuilder<T> {
             animate: true,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              ldSpacerL,
               const LdLoader(
                 size: 48,
               ),
               if (controller.config.loadingText != null)
-                Text(controller.config.loadingText!)
+                LdTextP(
+                  controller.config.loadingText!,
+                  textAlign: TextAlign.center,
+                )
               else
-                Text(
+                LdTextP(
                   LiquidLocalizations.of(context).loading,
+                  textAlign: TextAlign.center,
                 ),
               if (controller.canCancel)
                 LdButtonGhost(
@@ -43,7 +48,7 @@ class LdSubmitDialogBuilder<T> extends LdSubmitBuilder<T> {
                   child: Text(LiquidLocalizations.of(context).cancel),
                 ),
             ],
-          ).padL();
+          ).padL().padL();
   }
 
   Widget buildErrorDialog(
@@ -58,7 +63,7 @@ class LdSubmitDialogBuilder<T> extends LdSubmitBuilder<T> {
       exception: controller.state.error!,
       direction: Axis.vertical,
       retryController: controller.retryController,
-    );
+    ).padL();
   }
 
   @override
@@ -94,7 +99,11 @@ class LdSubmitDialogBuilder<T> extends LdSubmitBuilder<T> {
             children: [
               Positioned.fill(
                 child: ColoredBox(
-                  color: LdTheme.of(context).surface.withAlpha(204),
+                  color: LdTheme.of(context)
+                      .palette
+                      .neutral
+                      .shades[8]
+                      .withAlpha(200),
                 ),
               ),
               ModalBarrier(onDismiss: () {
@@ -110,13 +119,33 @@ class LdSubmitDialogBuilder<T> extends LdSubmitBuilder<T> {
                 }
               }),
               Center(
-                child: switch (controller.state.type) {
-                  (LdSubmitStateType.loading) =>
-                    buildLoadingDialog(context, controller),
-                  (LdSubmitStateType.error) =>
-                    buildErrorDialog(context, controller),
-                  (_) => Container(),
-                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: LdTheme.of(context).surface,
+                    border: Border.all(
+                      color: LdTheme.of(context).border,
+                      width: 1,
+                    ),
+                    borderRadius: LdTheme.of(context).radius(LdSize.l),
+                  ),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minWidth: 300,
+                      minHeight: 200,
+                      maxWidth: 400,
+                      maxHeight: 400,
+                    ),
+                    child: Center(
+                      child: switch (controller.state.type) {
+                        (LdSubmitStateType.loading) =>
+                          buildLoadingDialog(context, controller),
+                        (LdSubmitStateType.error) =>
+                          buildErrorDialog(context, controller),
+                        (_) => Container(),
+                      },
+                    ),
+                  ),
+                ).padL(),
               ),
             ],
           ),
