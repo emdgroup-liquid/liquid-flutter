@@ -26,6 +26,6 @@ void main() {
                 .decoration as BoxDecoration)
             .color;
 
-    expect(color, const Color(0x6415803d));
+    expect(color, const Color(0x3215803d));
   });
 }
