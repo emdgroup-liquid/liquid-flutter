@@ -15,7 +15,7 @@ extension FontSize on LdThemeSize {
           case LdSize.m:
             return 12;
           case LdSize.l:
-            return 16;
+            return 14;
         }
       case LdThemeSize.m:
         switch (size) {
@@ -113,7 +113,7 @@ extension FontSize on LdThemeSize {
           case LdSize.m:
             return 24;
           case LdSize.l:
-            return 28;
+            return 32;
         }
     }
   }
