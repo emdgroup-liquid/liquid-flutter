@@ -33,10 +33,19 @@ class LdModalBuilderState extends State<LdModalBuilder> {
   }
 
   Future<dynamic> open(BuildContext context) async {
+    final safeContext = widget.useRootNavigator
+        ? Navigator.of(context, rootNavigator: true)
+        : Navigator.of(context);
+
     return await widget.modal.show(
-      context,
+      safeContext.context,
       useRootNavigator: widget.useRootNavigator,
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
