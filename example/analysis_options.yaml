@@ -6,3 +6,4 @@ linter:
 analyzer:
   exclude:
     - lib/oss_licenses.dart
+    - build/**

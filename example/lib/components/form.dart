@@ -74,8 +74,6 @@ class _FormDemoState extends State<FormDemo> {
                             onChange: (value) {
                               //print(value);
                             },
-                            navigator:
-                                Navigator.of(context, rootNavigator: true),
                             items: const [
                               LdSelectItem(
                                   value: "1", child: Text("First choice")),

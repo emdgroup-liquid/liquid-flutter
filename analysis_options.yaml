@@ -7,3 +7,4 @@ analyzer:
   exclude:
     - example/lib/**/*.demo.dart
     - lib/oss_licenses.dart
+    - example/build/**
