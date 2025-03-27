@@ -296,13 +296,15 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
               );
             }),
           ),
-          /*PortalTarget(
+          PortalTarget(
             child: Container(),
             visible: isOpen,
             portalFollower: GestureDetector(
               behavior: HitTestBehavior.opaque,
               child: Container(
-                decoration: BoxDecoration(color: Colors.black.withAlpha(0)),
+                decoration: BoxDecoration(
+                  color: Colors.black.withAlpha(0),
+                ),
               ),
               onTap: () {
                 setState(() {
@@ -310,7 +312,7 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
                 });
               },
             ),
-          ),*/
+          ),
         ],
       ),
     );
