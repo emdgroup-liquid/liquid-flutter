@@ -111,7 +111,7 @@ class LdModal {
   final Map<LdThemeSize, double> _actionBarHeight = {
     LdThemeSize.l: 150,
     LdThemeSize.m: 120,
-    LdThemeSize.s: 64,
+    LdThemeSize.s: 70,
   };
   final double _contentActionBarPadding = 12;
   final double _defaultSheetInset = 2;
@@ -173,7 +173,11 @@ class LdModal {
 
   /// Whether the modal in auto mode should show a sheet based on the device type.
   bool _autoShowsSheet(BuildContext context) {
-    final deviceType = getDeviceType(MediaQuery.sizeOf(context));
+    if (!context.mounted) return false;
+    final mediaQuery = MediaQuery.maybeOf(context);
+    if (mediaQuery == null) return false;
+
+    final deviceType = getDeviceType(mediaQuery.size);
     return deviceType == DeviceScreenType.watch ||
         deviceType == DeviceScreenType.mobile;
   }
