@@ -20,10 +20,6 @@ TextStyle ldBuildTextStyle(LdTheme theme, LdTextType type, LdSize size,
         fontWeight = FontWeight.w400;
         break;
       case LdTextType.label:
-        if (size == LdSize.l) {
-          fontWeight = FontWeight.w400;
-          break;
-        }
         fontWeight = FontWeight.w700;
         break;
       case LdTextType.caption:
