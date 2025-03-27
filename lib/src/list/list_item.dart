@@ -112,18 +112,24 @@ class LdListItem extends StatelessWidget {
                     initialRevealed: showSelectionControls,
                   ),
                   if (leading != null)
-                    LdReveal.quick(
-                      child: Row(
-                        children: [
-                          leading!,
-                          ldSpacerM,
-                        ],
+                    IconTheme(
+                      data: IconThemeData(
+                        color: theme.text,
+                        size: theme.labelSize(LdSize.l) * 1.2,
                       ),
-                      //axis: Axis.horizontal,
-                      revealed: !(showSelectionControls &&
-                          tradeLeadingForSelectionControl),
-                      initialRevealed: !(showSelectionControls &&
-                          tradeLeadingForSelectionControl),
+                      child: LdReveal.quick(
+                        child: Row(
+                          children: [
+                            leading!,
+                            ldSpacerM,
+                          ],
+                        ),
+                        //axis: Axis.horizontal,
+                        revealed: !(showSelectionControls &&
+                            tradeLeadingForSelectionControl),
+                        initialRevealed: !(showSelectionControls &&
+                            tradeLeadingForSelectionControl),
+                      ),
                     ),
                   Flexible(
                     fit: effectiveWidth == double.infinity
@@ -136,14 +142,24 @@ class LdListItem extends StatelessWidget {
                           DefaultTextStyle(
                             child: title!,
                             style: ldBuildTextStyle(
-                                theme, LdTextType.label, LdSize.m,
-                                color: colors.text),
+                              theme,
+                              LdTextType.label,
+                              LdSize.l,
+                              color: colors.text,
+                            ),
                           ),
-                        if (subtitle != null)
+                        if (subtitle != null) ...[
+                          ldSpacerXS,
                           DefaultTextStyle(
                               style: ldBuildTextStyle(
-                                  theme, LdTextType.paragraph, LdSize.s),
+                                theme,
+                                LdTextType.paragraph,
+                                lineHeight: 1,
+                                LdSize.s,
+                                color: theme.textMuted,
+                              ),
                               child: subtitle!),
+                        ],
                         if (subContent != null) subContent!,
                       ],
                     ),
@@ -153,7 +169,8 @@ class LdListItem extends StatelessWidget {
                     ldSpacerM,
                     Icon(
                       Icons.chevron_right,
-                      color: colors.text,
+                      size: theme.labelSize(LdSize.l) * 1.2,
+                      color: theme.textMuted,
                     )
                   ],
                 ]),
