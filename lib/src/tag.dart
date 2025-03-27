@@ -37,7 +37,7 @@ class LdTag extends StatelessWidget {
             ? color.center(theme.isDark)
             : color.moveRelative(
                 color.center(theme.isDark), theme.isDark ? -2 : 2))
-        .withAlpha(100);
+        .withAlpha(theme.isDark ? 50 : 50);
 
     final text = color.moveRelative(
       color.center(theme.isDark),
