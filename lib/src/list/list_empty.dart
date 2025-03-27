@@ -9,12 +9,11 @@ class LdListEmpty extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = LdTheme.of(context, listen: true);
     return Center(
       child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Icon(Icons.search_off, color: theme.textMuted, size: 48),
+        const LdAvatar(child: Icon(Icons.search_off)),
         ldSpacerM,
-        LdTextPl(text ?? LiquidLocalizations.of(context).noItemsFound),
+        LdTextP(text ?? LiquidLocalizations.of(context).noItemsFound),
         ldSpacerM,
         if (onRefresh != null)
           LdButton(
