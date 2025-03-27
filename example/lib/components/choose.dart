@@ -98,7 +98,6 @@ class _ChooseDemoState extends State<ChooseDemo> {
                     ),
                   ],
                 ),
-                /*end demo:LdChoose*/
                 ldSpacerM,
               ],
             ),
