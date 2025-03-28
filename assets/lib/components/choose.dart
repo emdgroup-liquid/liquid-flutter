@@ -37,10 +37,8 @@ class _ChooseDemoState extends State<ChooseDemo> {
             onSurface: _onSurface,
             child: Column(
               children: [
-                /*begin demo:LdChoose*/
                 LdChoose<String>(
                   label: "Your pie choice",
-                  navigator: Navigator.of(context),
                   allowEmpty: _allowEmpty,
                   disabled: _disabled,
                   multiple: _multiple,
@@ -93,7 +91,6 @@ class _ChooseDemoState extends State<ChooseDemo> {
                     ),
                   ],
                 ),
-                /*end demo:LdChoose*/
                 ldSpacerM,
               ],
             ),
