@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [21.0.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v20.0.0...v21.0.0) (2025-03-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* useRootNavigator parameter for LdChoose to superseed the navigator parameter.
+* implement "lazy loading" of pages for LdPaginator and LdList
+
+### Features
+
+* Add LdListItemToggle component for enhanced list item interaction ([a3f1588](https://github.com/emdgroup-liquid/liquid-flutter/commit/a3f1588c898eb91dd68d1e4313c95003fe076307))
+* Enhance LdAvatar with circular shape and size options ([8730cf2](https://github.com/emdgroup-liquid/liquid-flutter/commit/8730cf266f8de15559cd5e3c04ef35e2743bfc76))
+* implement "lazy loading" of pages for LdPaginator and LdList ([a55741e](https://github.com/emdgroup-liquid/liquid-flutter/commit/a55741e830dc13fec9164a91d6bccce69b24ce83))
+* useRootNavigator parameter for LdChoose to superseed the navigator parameter. ([8292ed8](https://github.com/emdgroup-liquid/liquid-flutter/commit/8292ed8bdba810b7b307f914b3e6d5742e068ac8))
+
+
+### Bug Fixes
+
+* Adjust alpha value for color based on theme darkness in LdTag ([263ccb7](https://github.com/emdgroup-liquid/liquid-flutter/commit/263ccb77e3a9eefdfe633e6e27b739a448999cb0))
+* resolve "perform initial scroll" not working properly ([a0a119a](https://github.com/emdgroup-liquid/liquid-flutter/commit/a0a119a8b5facab28d7e217c0a62a2200e7bbd46))
+* resolve linter issue ([f4e95db](https://github.com/emdgroup-liquid/liquid-flutter/commit/f4e95dbaa44f65171a3a1874b6d6cf6420ce21dc))
+* Update action bar height and improve device type detection in LdModal ([c7e273e](https://github.com/emdgroup-liquid/liquid-flutter/commit/c7e273ed597e6e462de6dba7fd225012455d37d1))
+* Update color expectation in tag_test ([4bf73f2](https://github.com/emdgroup-liquid/liquid-flutter/commit/4bf73f225572306081c4e1937a67e8a7d699ee99))
+* Update font size values in LdThemeSize extension ([6a47dc1](https://github.com/emdgroup-liquid/liquid-flutter/commit/6a47dc13aba0e0b145219339ed6bb89166c307d9))
+
 ## [20.0.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v19.5.3...v20.0.0) (2025-03-19)
 
 
