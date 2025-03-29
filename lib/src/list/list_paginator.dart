@@ -130,7 +130,10 @@ class LdPaginator<T> extends ChangeNotifier {
     try {
       final page = await fetchListFunction(
         pageToFetch,
-        currentItemCount,
+        switch (operation) {
+          PaginatorOperation.refreshList => 0,
+          _ => currentItemCount,
+        },
         null,
       );
 

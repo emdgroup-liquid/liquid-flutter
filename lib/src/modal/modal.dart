@@ -110,11 +110,11 @@ class LdModal {
 
   final Map<LdThemeSize, double> _actionBarHeight = {
     LdThemeSize.l: 150,
-    LdThemeSize.m: 120,
+    LdThemeSize.m: 60,
     LdThemeSize.s: 70,
   };
   final double _contentActionBarPadding = 12;
-  final double _defaultSheetInset = 2;
+  final double _defaultSheetInset = 0;
 
   bool get shouldScale {
     return enableScaling == true ||
@@ -288,8 +288,8 @@ class LdModal {
     return [
       if (contentSlivers != null)
         SliverWoltModalSheetPage(
-          backgroundColor: theme.background,
-          surfaceTintColor: theme.background,
+          backgroundColor: theme.surface,
+          surfaceTintColor: theme.surface,
           sabGradientColor: theme.surface,
           hasSabGradient: hasSabGradient(context),
           stickyActionBar: _getStickyActionBar(context),
@@ -310,8 +310,8 @@ class LdModal {
         ),
       if (modalContent != null)
         WoltModalSheetPage(
-          backgroundColor: theme.background,
-          surfaceTintColor: theme.background,
+          backgroundColor: theme.surface,
+          surfaceTintColor: theme.surface,
           sabGradientColor: theme.surface,
           hasSabGradient: hasSabGradient(context),
           stickyActionBar: _getStickyActionBar(context),
@@ -343,37 +343,25 @@ class LdModal {
 
     final theme = LdTheme.of(context, listen: true);
 
-    var sabPadding = padding ?? theme.pad(size: LdSize.l);
-
-    // Add some more padding for sheets because they are
-    // placed at the very bottom
-    if (isSheet(context)) {
-      sabPadding += EdgeInsets.only(
-        bottom: theme.paddingSize(size: LdSize.l),
-      );
-    }
+    var sabPadding = padding ?? theme.pad(size: LdSize.m);
 
     return _getInjectables(
       context,
-      (context) => ConstrainedBox(
-        constraints:
-            BoxConstraints(maxHeight: _actionBarHeight[theme.themeSize]!),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (!hasSabGradient(context))
-              const LdDivider(
-                height: 1,
-              ),
-            Container(
-              color: theme.surface,
-              padding: sabPadding,
-              child: Builder(builder: (context) {
-                return actionBar!(context);
-              }),
+      (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!hasSabGradient(context))
+            const LdDivider(
+              height: 1,
             ),
-          ],
-        ),
+          Container(
+            color: theme.surface,
+            padding: sabPadding,
+            child: Builder(builder: (context) {
+              return actionBar!(context);
+            }),
+          ),
+        ],
       ),
     );
   }
@@ -451,12 +439,15 @@ class LdModal {
       sized: false, // important
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent, // set color to transparent
-        statusBarIconBrightness: Brightness.dark,
+        statusBarIconBrightness: Brightness.light,
         statusBarBrightness: Brightness.dark,
       ),
       child: PopScope(
         canPop: userCanDismiss,
-        child: LdPortal(child: child),
+        child: Provider.value(
+          value: LdSurfaceInfo(isSurface: true),
+          child: LdPortal(child: child),
+        ),
       ),
     );
   }

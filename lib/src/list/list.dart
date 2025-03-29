@@ -30,6 +30,9 @@ class _ListItem<T, SeperationCriterion> {
 extension GetItemList<T> on LdPaginator<T> {
   List<_ListItem<T, GroupingCriterion>> currentList<GroupingCriterion>() {
     final result = <_ListItem<T, GroupingCriterion>>[];
+    if (totalItems == 0) {
+      return result;
+    }
     for (int i = 0; i < totalItems ~/ pageSize; i++) {
       final page = pages[i];
       if (page != null) {
@@ -186,8 +189,12 @@ class _LdListState<T, GroupingCriterion>
                   isSeparator: true,
                   seperationCriterion: entry.key,
                 ),
-                ...entry.value
-                    .map((item) => _ListItem<T, GroupingCriterion>(item: item))
+                ...entry.value.map(
+                  (item) => _ListItem<T, GroupingCriterion>(
+                    item: item,
+                    page: entry.value.indexOf(item),
+                  ),
+                )
               ])
           .expand((element) => element)
           .toList(growable: false),
