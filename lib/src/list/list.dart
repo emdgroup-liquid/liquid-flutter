@@ -30,6 +30,7 @@ class _ListItem<T, SeperationCriterion> {
 extension GetItemList<T> on LdPaginator<T> {
   List<_ListItem<T, GroupingCriterion>> currentList<GroupingCriterion>() {
     final result = <_ListItem<T, GroupingCriterion>>[];
+    if (totalItems == 0) return result;
     for (int i = 0; i < totalItems ~/ pageSize; i++) {
       final page = pages[i];
       if (page != null) {
@@ -164,7 +165,8 @@ class _LdListState<T, GroupingCriterion>
   }
 
   List<_ListItem<T, GroupingCriterion>> _groupItemsUniformly() {
-    final Map<GroupingCriterion, List<T>> groupedItems = {};
+    final Map<GroupingCriterion, List<_ListItem<T, GroupingCriterion>>>
+        groupedItems = {};
 
     final emptyItems = <_ListItem<T, GroupingCriterion>>[];
     for (final item in widget.data.currentList<GroupingCriterion>()) {
@@ -176,7 +178,12 @@ class _LdListState<T, GroupingCriterion>
       if (!groupedItems.containsKey(seperationCriterion)) {
         groupedItems[seperationCriterion] = [];
       }
-      groupedItems[seperationCriterion]!.add(item.item!);
+      groupedItems[seperationCriterion]!.add(
+        _ListItem(
+          item: item.item,
+          page: item.page,
+        ),
+      );
     }
 
     return [
@@ -186,8 +193,7 @@ class _LdListState<T, GroupingCriterion>
                   isSeparator: true,
                   seperationCriterion: entry.key,
                 ),
-                ...entry.value
-                    .map((item) => _ListItem<T, GroupingCriterion>(item: item))
+                ...entry.value,
               ])
           .expand((element) => element)
           .toList(growable: false),

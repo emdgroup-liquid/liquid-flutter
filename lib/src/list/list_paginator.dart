@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:liquid_flutter/src/list/list_page.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
 
 typedef FetchListFunction<T> = Future<LdListPage<T>> Function(
   int page,
@@ -38,24 +39,28 @@ class LdPaginator<T> extends ChangeNotifier {
   }
 
   factory LdPaginator.fromList(List<T> list) {
-    return LdPaginator(fetchListFunction: (
-      int page,
-      int loadedItems,
-      String? pageToken,
-    ) async {
-      if (loadedItems == 0) {
+    return LdPaginator(
+      // for LdPaginators with a fixed list, we set the debounce time to 0
+      debounceTime: const Duration(milliseconds: 0),
+      fetchListFunction: (
+        int page,
+        int loadedItems,
+        String? pageToken,
+      ) async {
+        if (loadedItems == 0) {
+          return LdListPage<T>(
+            newItems: list,
+            hasMore: false,
+            total: list.length,
+          );
+        }
         return LdListPage<T>(
-          newItems: list,
+          newItems: <T>[],
           hasMore: false,
           total: list.length,
         );
-      }
-      return LdListPage<T>(
-        newItems: <T>[],
-        hasMore: false,
-        total: list.length,
-      );
-    });
+      },
+    );
   }
 
   final SplayTreeMap<int, LdListPage<T>> _loadedPages = SplayTreeMap();
@@ -75,8 +80,10 @@ class LdPaginator<T> extends ChangeNotifier {
       : (_totalItems - currentItemCount) - remainingItemsAbove;
 
   /// Returns the average page size among all loaded pages
-  int get pageSize =>
-      _loadedPages.isEmpty ? 10 : currentItemCount ~/ _loadedPages.length;
+  int get pageSize => max(
+        1, // return at least 1 to prevent division by zero
+        _loadedPages.isEmpty ? 10 : currentItemCount ~/ _loadedPages.length,
+      );
 
   int _totalItems = 0;
   int get totalItems => _totalItems;
