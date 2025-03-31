@@ -104,7 +104,7 @@ void main() {
               ),
             ),
           );
-          await tester.pumpAndSettle();
+          await tester.pumpAndSettle(const Duration(milliseconds: 500));
           return null;
         },
         "Empty State": (tester, place) async {
@@ -121,7 +121,7 @@ void main() {
               ),
             ),
           );
-          await tester.pumpAndSettle();
+          await tester.pumpAndSettle(const Duration(milliseconds: 500));
           return null;
         },
         "Error State": (tester, place) async {
@@ -141,7 +141,7 @@ void main() {
               ),
             ),
           );
-          await tester.pumpAndSettle();
+          await tester.pumpAndSettle(const Duration(milliseconds: 500));
           return null;
         },
       });
@@ -162,7 +162,7 @@ void main() {
       );
 
       // Wait for any animations to complete
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
 
       // Verify that each item is displayed
       for (int i = 0; i < 5; i++) {
@@ -203,7 +203,7 @@ void main() {
       );
 
       // Wait for any animations to complete
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
 
       // Verify group headers and items are displayed
       expect(find.text('Group A'), findsOneWidget);
@@ -232,7 +232,7 @@ void main() {
       );
 
       // Wait for any animations to complete
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
 
       // Verify empty state is displayed
       expect(find.text('No items found'), findsOneWidget);
