@@ -7,7 +7,8 @@ class LdAppBar extends AppBar {
     super.key,
     required BuildContext context,
     Widget? title,
-    super.actions,
+    List<Widget>? actions,
+    bool actionsDisabled = false,
     super.leading,
     super.elevation,
     super.iconTheme,
@@ -32,6 +33,7 @@ class LdAppBar extends AppBar {
     super.scrolledUnderElevation,
     super.surfaceTintColor,
     super.excludeHeaderSemantics,
+    bool loading = false,
   }) : super(
           shadowColor: LdTheme.of(context, listen: true).neutralShade(1),
           systemOverlayStyle: SystemUiOverlayStyle(
@@ -56,11 +58,31 @@ class LdAppBar extends AppBar {
               (LdTheme.of(context).themeSize == LdThemeSize.s
                   ? 48
                   : kToolbarHeight),
-          bottom: const PreferredSize(
-            preferredSize: Size.fromHeight(1),
-            child: LdDivider(
-              height: 1,
-            ),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(1),
+            child: loading
+                ? LinearProgressIndicator(
+                    minHeight: 1,
+                    backgroundColor: LdTheme.of(context).surface,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      LdTheme.of(context).primaryColor,
+                    ),
+                    value: null,
+                  )
+                : const LdDivider(height: 1),
           ),
+          actions: actions?.map((action) {
+            if (actionsDisabled) {
+              // Wrap each action in an AbsorbPointer to block interactions
+              return AbsorbPointer(
+                child: Opacity(
+                  // Optionally reduce opacity to indicate disabled state
+                  opacity: 0.5,
+                  child: action,
+                ),
+              );
+            }
+            return action;
+          }).toList(),
         );
 }
