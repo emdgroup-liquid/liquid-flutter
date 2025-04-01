@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
@@ -31,15 +33,28 @@ extension GetItemList<T> on LdPaginator<T> {
   List<_ListItem<T, GroupingCriterion>> currentList<GroupingCriterion>() {
     final result = <_ListItem<T, GroupingCriterion>>[];
     if (totalItems == 0) return result;
-    for (int i = 0; i < totalItems ~/ pageSize; i++) {
+    // the page count is either the number of pages we have loaded, or we
+    // calculate it based on the total items and the page size
+    final pageCount = max((totalItems / pageSize).ceil(), pages.length);
+    for (int i = 0; i < pageCount; i++) {
       final page = pages[i];
       if (page != null) {
         result.addAll(page.newItems
             .map((item) => _ListItem<T, GroupingCriterion>(item: item, page: i))
             .toList());
       } else {
+        if (i > (pages.keys.lastOrNull ?? i) && result.length >= totalItems) {
+          // do not add more placeholders if we already have all items
+          break;
+        }
+
+        // the number of placeholders is either the page size or the remaining
+        // items (whichever is smaller)
+        final placeholderCount =
+            max(1, min(pageSize, totalItems - result.length));
         result.addAll(List<_ListItem<T, GroupingCriterion>>.filled(
-          pageSize,
+          // clamp the number of items to the remaining items
+          placeholderCount,
           _ListItem<T, GroupingCriterion>(page: i),
         ));
       }
