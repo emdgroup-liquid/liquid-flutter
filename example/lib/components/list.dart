@@ -43,10 +43,12 @@ class _ListDemoState extends State<ListDemo> {
       );
     }
 
+    // return a list of 10 items for each page, except for the last page
+    // in total, there are 95 items
     return LdListPage<int>(
-      newItems: List.generate(10, (index) => page * 10 + index),
+      newItems: List.generate(page == 9 ? 5 : 10, (index) => page * 10 + index),
       hasMore: page < 9,
-      total: 100,
+      total: 95,
     );
   }
 
