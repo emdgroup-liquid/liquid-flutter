@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -10,6 +9,8 @@ typedef FetchListFunction<T> = Future<LdListPage<T>> Function(
   int loadedItems,
   String? pageToken,
 );
+
+const _defaultPageSize = 10;
 
 class LdPaginator<T> extends ChangeNotifier {
   FetchListFunction<T> fetchListFunction;
@@ -69,11 +70,12 @@ class LdPaginator<T> extends ChangeNotifier {
   int get currentItemCount =>
       _loadedPages.values.fold(0, (sum, page) => sum + page.newItems.length);
 
-  /// Returns the average page size among all loaded pages
-  int get pageSize => max(
-        1, // return at least 1 to prevent division by zero
-        _loadedPages.isEmpty ? 10 : currentItemCount ~/ _loadedPages.length,
-      );
+  int _pageSize = _defaultPageSize;
+
+  /// Returns the most common page size among the loaded pages.
+  /// We use the most common page size rather than the "average" page size,
+  /// as it is more realistic to have a consistent page size.
+  int get pageSize => _pageSize;
 
   int _totalItems = 0;
   int get totalItems => _totalItems;
@@ -113,6 +115,7 @@ class LdPaginator<T> extends ChangeNotifier {
       } else {
         _totalItems = page.total;
         _loadedPages[pageToFetch] = page;
+        _recalculateMostCommonPageSize();
         list = page.newItems;
 
         _setError(null);
@@ -123,6 +126,22 @@ class LdPaginator<T> extends ChangeNotifier {
     _setBusy(false);
 
     return list;
+  }
+
+  /// Calculates the most common page size among the loaded pages.
+  void _recalculateMostCommonPageSize() {
+    _pageSize = _loadedPages.values.isEmpty
+        ? _defaultPageSize
+        : _loadedPages.values
+            .fold<Map<int, int>>(
+              {},
+              (map, page) => map
+                ..update(page.newItems.length, (count) => count + 1,
+                    ifAbsent: () => 1),
+            )
+            .entries
+            .reduce((max, entry) => entry.value > max.value ? entry : max)
+            .key;
   }
 
   /// Jump to a specific page while keeping track of gaps
