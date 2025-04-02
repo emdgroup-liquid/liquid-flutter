@@ -209,7 +209,6 @@ class _LdCrudMasterDetailState<T extends CrudItemMixin<T>>
 
   @override
   Widget build(BuildContext context) {
-    ;
     return ListenableBuilder(
       listenable: (_controller as LdCrudMasterDetailController<T>).data,
       builder: (context, child) {

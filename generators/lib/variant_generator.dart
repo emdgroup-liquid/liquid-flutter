@@ -107,6 +107,7 @@ class VariantBuilder implements Builder {
           }
         }
       } catch (e) {
+        // ignore: avoid_print
         print('Error analyzing file ${input.path}: $e');
       }
     }
