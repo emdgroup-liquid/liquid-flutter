@@ -47,6 +47,14 @@ class CrudItemState<T> {
       CrudItemState(type: CrudLoadingStateType.error, error: error);
 }
 
+/// [LdCrudMasterDetailController] automatically manages the state of a list of
+/// items of type [T] and their CRUD operations. It performs UI operations like
+/// selecting and deselecting items, updating the UI based on the state and
+/// result of a CRUD operation, and handling the loading state of the app bar.
+///
+/// It also handles callbacks for CRUD operations like [create], [update], and
+/// [delete] when they succeed or fail, and provides a [save] method to create
+/// or update an item based on its state.
 class LdCrudMasterDetailController<T extends CrudItemMixin<T>>
     extends LdMasterDetailController<T> {
   /// The [CrudOperations] instance to perform CRUD operations.
