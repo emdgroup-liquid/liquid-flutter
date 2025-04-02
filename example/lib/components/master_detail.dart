@@ -2,93 +2,339 @@ import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-class ExampleBuilder<int> extends LdMasterDetailBuilder<int> {
-  final LdPaginator<int> _paginator;
+final exampleTitles =
+    "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy "
+            "eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam "
+            "voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet "
+            "clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."
+        .split(" ");
 
-  ExampleBuilder(this._paginator);
+class ExampleItem with CrudItemMixin<ExampleItem> {
+  @override
+  final int? id;
+  final String name;
+
+  ExampleItem(this.id, this.name);
 
   @override
-  Widget buildDetail(
-      BuildContext context, item, bool isSeparatePage, VoidCallback deselect) {
+  String toString() {
+    return "ExampleItem($id, $name)";
+  }
+}
+
+class ExampleRepository extends CrudOperations<ExampleItem> {
+  static int pageSize = 25;
+  final List<ExampleItem> _data = List.generate(
+    exampleTitles.length,
+    (index) => ExampleItem(index, exampleTitles[index]),
+  );
+
+  /// Find the next available ID
+  int? _nextId;
+  int get nextId {
+    _nextId ??= _data.lastOrNull?.id ?? -1;
+    _nextId = _nextId! + 1;
+    return _nextId!;
+  }
+
+  @override
+  Future<ExampleItem> create(ExampleItem item) async {
+    if (!item.isNew) {
+      throw LdException(message: "Item already exists");
+    }
+    final newItem = ExampleItem(nextId, item.name);
+    await Future.delayed(const Duration(seconds: 1));
+    _data.add(newItem);
+    return Future.value(newItem);
+  }
+
+  @override
+  Future<ExampleItem> update(ExampleItem item) async {
+    await Future.delayed(const Duration(seconds: 1));
+    final index = _data.indexWhere((element) => element.id == item.id);
+    if (index != -1) {
+      _data[index] = item;
+    }
+    return Future.value(item);
+  }
+
+  @override
+  Future<void> delete(ExampleItem item) async {
+    await Future.delayed(const Duration(seconds: 1));
+    _data.removeWhere((element) => element.id == item.id);
+  }
+
+  @override
+  FetchListFunction<ExampleItem> get fetchAll =>
+      (page, loadedItems, nextPageToken) async {
+        final newItems = _data.skip(page * pageSize).take(pageSize).toList();
+        await Future.delayed(const Duration(seconds: 1));
+
+        return LdListPage<ExampleItem>(
+          newItems: newItems,
+          hasMore: page * pageSize + loadedItems < _data.length,
+          total: _data.length,
+        );
+      };
+}
+
+class ExampleBuilder extends LdMasterDetailBuilder<ExampleItem> {
+  final LdPaginator<ExampleItem> paginator;
+
+  ExampleBuilder(this.paginator);
+
+  static Widget createDetailWidget(
+    BuildContext context,
+    ExampleItem item,
+    bool isSeparatePage,
+    MasterDetailController<ExampleItem> controller,
+  ) {
     return LdAutoSpace(
       children: [
         const LdTextHl("Detail"),
-        LdTextL("Item $item"),
-        LdButton(onPressed: deselect, child: const Text("Go back"))
+        LdTextL("Item ${item.id}: ${item.name}"),
+        LdButton(
+          child: const Text("Go back"),
+          onPressed: controller.onDeselect,
+        )
       ],
     ).padL();
   }
 
-  @override
-  Widget buildDetailTitle(
-      BuildContext context, item, bool isSeparatePage, VoidCallback deselect) {
-    return Text("Detail $item");
-  }
-
-  @override
-  Widget buildMaster(BuildContext context, LdMasterDetailOnSelect<int> onSelect,
-      int? selectedItem, bool isSeparatePage) {
-    return LdList<int, void>(
-      data: _paginator,
+  static Widget createMasterWidget(
+    BuildContext context,
+    ExampleItem? selectedItem,
+    bool isSeparatePage,
+    MasterDetailController<ExampleItem> controller,
+    LdPaginator<ExampleItem> paginator,
+  ) {
+    return LdList<ExampleItem, void>(
+      data: paginator,
+      assumedItemHeight: 60,
       itemBuilder: (context, item, index) {
         return LdListItem(
           trailingForward: isSeparatePage,
-          active: selectedItem == item,
-          title: Text("Item $item"),
-          subtitle: const Text("This is a subtitle"),
+          active: selectedItem?.id == item.id,
+          title: Text(item.name),
+          subtitle: Text("ID: ${item.id}"),
           onTap: () {
-            onSelect(item);
+            controller.onSelect(item);
           },
         );
       },
     );
   }
 
+  static Widget createMasterTitle(
+      BuildContext context, ExampleItem? selectedItem) {
+    return const Text("List of Example Items");
+  }
+
+  static Widget createDetailTitle(BuildContext context, ExampleItem item) {
+    return Text("Detail ${item.name}");
+  }
+
   @override
-  Widget buildMasterTitle(
+  Widget buildDetail(
+    BuildContext context,
+    ExampleItem item,
+    bool isSeparatePage,
+    MasterDetailController<ExampleItem> controller,
+  ) {
+    return createDetailWidget(context, item, isSeparatePage, controller);
+  }
+
+  @override
+  Widget buildDetailTitle(
+    BuildContext context,
+    ExampleItem item,
+    bool isSeparatePage,
+    MasterDetailController<ExampleItem> controller,
+  ) {
+    return createDetailTitle(context, item);
+  }
+
+  @override
+  Widget buildMaster(
+    BuildContext context,
+    ExampleItem? selectedItem,
+    bool isSeparatePage,
+    MasterDetailController<ExampleItem> controller,
+  ) {
+    return createMasterWidget(
+      context,
+      selectedItem,
+      isSeparatePage,
+      controller,
+      paginator,
+    );
+  }
+
+  @override
+  Widget buildMasterTitle(BuildContext context, ExampleItem? selectedItem,
+      bool isSeparatePage, MasterDetailController<ExampleItem> controller) {
+    return createMasterTitle(context, selectedItem);
+  }
+}
+
+class ExampleCrudBuilder extends LdCrudMasterDetailBuilder<ExampleItem> {
+  @override
+  Widget buildDetail(
+    BuildContext context,
+    ExampleItem item,
+    bool isSeparatePage,
+    CrudMasterDetailController<ExampleItem> controller,
+  ) {
+    return ExampleBuilder.createDetailWidget(
+      context,
+      item,
+      isSeparatePage,
+      controller,
+    );
+  }
+
+  @override
+  Widget buildDetailTitle(
+    BuildContext context,
+    ExampleItem item,
+    bool isSeparatePage,
+    CrudMasterDetailController<ExampleItem> controller,
+  ) {
+    return ExampleBuilder.createDetailTitle(context, item);
+  }
+
+  @override
+  Widget buildMaster(
+    BuildContext context,
+    ExampleItem? selectedItem,
+    bool isSeparatePage,
+    CrudMasterDetailController<ExampleItem> controller,
+  ) {
+    return ExampleBuilder.createMasterWidget(
+      context,
+      selectedItem,
+      isSeparatePage,
+      controller,
+      controller.data,
+    );
+  }
+
+  @override
+  Widget buildMasterTitle(BuildContext context, ExampleItem? selectedItem,
+      bool isSeparatePage, CrudMasterDetailController<ExampleItem> controller) {
+    return ExampleBuilder.createMasterTitle(context, selectedItem);
+  }
+
+  @override
+  List<Widget> buildMasterActions(
       BuildContext context,
-      LdMasterDetailOnSelect<int> onSelect,
-      int? selectedItem,
-      bool isSeparatePage) {
-    return const Text("List of items");
+      ExampleItem? selectedItem,
+      bool isSeparatePage,
+      CrudMasterDetailController<ExampleItem> controller) {
+    return [
+      IconButton(
+        icon: const Icon(Icons.add),
+        onPressed: () async {
+          controller.create(ExampleItem(null, "New item"),
+              onItemCreated: (item) {
+            LdNotificationsController.of(context).success(
+              "Item successfully created",
+            );
+          });
+        },
+      ),
+    ];
+  }
+
+  @override
+  List<Widget> buildDetailActions(BuildContext context, ExampleItem item,
+      bool isSeparatePage, CrudMasterDetailController<ExampleItem> controller) {
+    return [
+      IconButton(
+        icon: const Icon(Icons.edit),
+        onPressed: () async {
+          final notification =
+              (await LdNotificationsController.of(context).addNotification(
+            LdInputNotification(
+              inputHint: "Edit item",
+              inputLabel: "Name",
+              type: LdNotificationType.enterText,
+              message: "Enter new name",
+            ),
+          )) as LdInputNotification;
+          final newName = await notification.inputCompleter.future;
+          if (newName?.isNotEmpty ?? false) {
+            controller.save(ExampleItem(item.id, newName!),
+                onItemSaved: (item) {
+              LdNotificationsController.of(context).success(
+                "Item successfully saved",
+              );
+            });
+          }
+        },
+      ),
+      IconButton(
+        onPressed: () async {
+          await controller.delete(item, onItemDeleted: (item) {
+            LdNotificationsController.of(context).error(
+              "Item deleted",
+            );
+          });
+        },
+        icon: const Icon(Icons.delete),
+      ),
+    ];
   }
 }
 
 class MasterDetailDemo extends StatefulWidget {
-  const MasterDetailDemo({super.key});
+  const MasterDetailDemo({Key? key}) : super(key: key);
 
   @override
   State<MasterDetailDemo> createState() => _MasterDetailDemoState();
 }
 
 class _MasterDetailDemoState extends State<MasterDetailDemo> {
-  late final LdPaginator<int> _paginator = LdPaginator<int>(
-    fetchListFunction: _fetchItems,
-    pageSize: 30,
-  );
+  final ExampleRepository _crudRepository = ExampleRepository();
+  Future<LdListPage<ExampleItem>> _fetchItems(
+    int page,
+    int loadedItems,
+    String? nextPageToken,
+  ) async {
+    await Future.delayed(const Duration(seconds: 1));
+
+    if (loadedItems == 200) {
+      return LdListPage<ExampleItem>(newItems: [], hasMore: false, total: 100);
+    }
+    return LdListPage<ExampleItem>(
+      newItems: List.generate(
+        30,
+        (index) => ExampleItem(index, "Item $index"),
+      ),
+      hasMore: true,
+      total: 200,
+    );
+  }
 
   MasterDetailLayoutMode _layoutMode = MasterDetailLayoutMode.split;
   MasterDetailPresentationMode _presentationMode =
       MasterDetailPresentationMode.dialog;
 
-  Future<LdListPage<int>> _fetchItems({
-    required int offset,
-    required int pageSize,
-    String? pageToken,
-  }) async {
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    return LdListPage<int>(
-      newItems: List.generate(pageSize, (index) => offset + index),
-      hasMore: offset + pageSize < 200,
-      total: 200,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
       title: "LdMasterDetail",
+      apiComponents: const [
+        "LdMasterDetail",
+        "LdMasterDetailBuilder",
+        "LdMasterDetailController",
+        "LdCrudMasterDetail",
+        "CrudOperations",
+        "CrudItemMixin",
+        "LdCrudMasterDetailBuilder",
+        "LdCrudMasterDetailController",
+        "LdCrudPaginator"
+      ],
       demo: LdAutoSpace(
         children: [
           LdSelect(
@@ -127,7 +373,32 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
               child: LdMasterDetail(
                 layoutMode: _layoutMode,
                 detailPresentationMode: _presentationMode,
-                builder: ExampleBuilder<int>(_paginator),
+                builder: ExampleBuilder(
+                  LdPaginator(fetchListFunction: _fetchItems),
+                ),
+              ),
+            ),
+          ),
+          ldSpacerM,
+          const LdTextH(
+            "LdCrudMasterDetail",
+          ),
+          ldSpacerM,
+          const LdTextP(
+            "LdCrudMasterDetail extends the LdMasterDetail widget to provide CRUD functionality for a list of items of type T. "
+            "It handles various CRUD operations like create, update, delete, and fetch and also performs the usual UI operations "
+            "like selecting and deselecting items or updating the UI based on the state and result of a CRUD operation.",
+          ),
+          SizedBox(
+            height: 300,
+            child: LdCard(
+              padding: EdgeInsets.zero,
+              expandChild: true,
+              child: LdCrudMasterDetail(
+                layoutMode: _layoutMode,
+                detailPresentationMode: _presentationMode,
+                builder: ExampleCrudBuilder(),
+                crud: _crudRepository,
               ),
             ),
           ),
