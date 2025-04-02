@@ -87,7 +87,7 @@ class ExampleBuilder extends LdMasterDetailBuilder<ExampleItem> {
     BuildContext context,
     ExampleItem item,
     bool isSeparatePage,
-    MasterDetailController<ExampleItem> controller,
+    LdMasterDetailController<ExampleItem> controller,
   ) {
     return LdAutoSpace(
       children: [
@@ -105,7 +105,7 @@ class ExampleBuilder extends LdMasterDetailBuilder<ExampleItem> {
     BuildContext context,
     ExampleItem? selectedItem,
     bool isSeparatePage,
-    MasterDetailController<ExampleItem> controller,
+    LdMasterDetailController<ExampleItem> controller,
     LdPaginator<ExampleItem> paginator,
   ) {
     return LdList<ExampleItem, void>(
@@ -139,7 +139,7 @@ class ExampleBuilder extends LdMasterDetailBuilder<ExampleItem> {
     BuildContext context,
     ExampleItem item,
     bool isSeparatePage,
-    MasterDetailController<ExampleItem> controller,
+    LdMasterDetailController<ExampleItem> controller,
   ) {
     return createDetailWidget(context, item, isSeparatePage, controller);
   }
@@ -149,7 +149,7 @@ class ExampleBuilder extends LdMasterDetailBuilder<ExampleItem> {
     BuildContext context,
     ExampleItem item,
     bool isSeparatePage,
-    MasterDetailController<ExampleItem> controller,
+    LdMasterDetailController<ExampleItem> controller,
   ) {
     return createDetailTitle(context, item);
   }
@@ -159,7 +159,7 @@ class ExampleBuilder extends LdMasterDetailBuilder<ExampleItem> {
     BuildContext context,
     ExampleItem? selectedItem,
     bool isSeparatePage,
-    MasterDetailController<ExampleItem> controller,
+    LdMasterDetailController<ExampleItem> controller,
   ) {
     return createMasterWidget(
       context,
@@ -172,7 +172,7 @@ class ExampleBuilder extends LdMasterDetailBuilder<ExampleItem> {
 
   @override
   Widget buildMasterTitle(BuildContext context, ExampleItem? selectedItem,
-      bool isSeparatePage, MasterDetailController<ExampleItem> controller) {
+      bool isSeparatePage, LdMasterDetailController<ExampleItem> controller) {
     return createMasterTitle(context, selectedItem);
   }
 }
@@ -183,7 +183,7 @@ class ExampleCrudBuilder extends LdCrudMasterDetailBuilder<ExampleItem> {
     BuildContext context,
     ExampleItem item,
     bool isSeparatePage,
-    CrudMasterDetailController<ExampleItem> controller,
+    LdCrudMasterDetailController<ExampleItem> controller,
   ) {
     return ExampleBuilder.createDetailWidget(
       context,
@@ -198,7 +198,7 @@ class ExampleCrudBuilder extends LdCrudMasterDetailBuilder<ExampleItem> {
     BuildContext context,
     ExampleItem item,
     bool isSeparatePage,
-    CrudMasterDetailController<ExampleItem> controller,
+    LdCrudMasterDetailController<ExampleItem> controller,
   ) {
     return ExampleBuilder.createDetailTitle(context, item);
   }
@@ -208,7 +208,7 @@ class ExampleCrudBuilder extends LdCrudMasterDetailBuilder<ExampleItem> {
     BuildContext context,
     ExampleItem? selectedItem,
     bool isSeparatePage,
-    CrudMasterDetailController<ExampleItem> controller,
+    LdCrudMasterDetailController<ExampleItem> controller,
   ) {
     return ExampleBuilder.createMasterWidget(
       context,
@@ -220,8 +220,11 @@ class ExampleCrudBuilder extends LdCrudMasterDetailBuilder<ExampleItem> {
   }
 
   @override
-  Widget buildMasterTitle(BuildContext context, ExampleItem? selectedItem,
-      bool isSeparatePage, CrudMasterDetailController<ExampleItem> controller) {
+  Widget buildMasterTitle(
+      BuildContext context,
+      ExampleItem? selectedItem,
+      bool isSeparatePage,
+      LdCrudMasterDetailController<ExampleItem> controller) {
     return ExampleBuilder.createMasterTitle(context, selectedItem);
   }
 
@@ -230,7 +233,7 @@ class ExampleCrudBuilder extends LdCrudMasterDetailBuilder<ExampleItem> {
       BuildContext context,
       ExampleItem? selectedItem,
       bool isSeparatePage,
-      CrudMasterDetailController<ExampleItem> controller) {
+      LdCrudMasterDetailController<ExampleItem> controller) {
     return [
       IconButton(
         icon: const Icon(Icons.add),
@@ -247,8 +250,11 @@ class ExampleCrudBuilder extends LdCrudMasterDetailBuilder<ExampleItem> {
   }
 
   @override
-  List<Widget> buildDetailActions(BuildContext context, ExampleItem item,
-      bool isSeparatePage, CrudMasterDetailController<ExampleItem> controller) {
+  List<Widget> buildDetailActions(
+      BuildContext context,
+      ExampleItem item,
+      bool isSeparatePage,
+      LdCrudMasterDetailController<ExampleItem> controller) {
     return [
       IconButton(
         icon: const Icon(Icons.edit),
