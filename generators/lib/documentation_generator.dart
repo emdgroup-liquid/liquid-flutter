@@ -1,15 +1,15 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:build/build.dart';
 import 'package:code_builder/code_builder.dart';
-import 'package:glob/glob.dart';
-import 'package:source_gen/source_gen.dart';
 import 'package:dart_style/dart_style.dart';
-import 'doc_items.dart' as out;
-
+import 'package:glob/glob.dart';
 import 'package:path/path.dart' as p;
-import 'dart:async';
+import 'package:source_gen/source_gen.dart';
+
+import 'doc_items.dart' as out;
 
 Class buildDataClass(String name, Map<String, String> properties) {
   return Class(
@@ -117,50 +117,54 @@ class ListAllClassesBuilder implements Builder {
     ];
 
     for (final input in assets) {
-      final library = await buildStep.resolver.libraryFor(input);
-      final classesInLibrary = LibraryReader(library).classes;
+      try {
+        final library = await buildStep.resolver.libraryFor(input);
+        final classesInLibrary = LibraryReader(library).classes;
 
-      for (final classItem in classesInLibrary) {
-        classes.add(out.DocComponent(
-          name: classItem.name,
-          isNullSafe: true,
-          description:
-              classItem.documentationComment?.replaceAll("///", "") ?? "",
-          constructors: classItem.constructors
-              .map((e) => out.Constructor(
-                    name: e.name.toString(),
-                    signature: e.parameters
-                        .map((param) => out.Parameter(
-                              description: param.documentationComment ?? "",
-                              name: param.name.toString(),
-                              type: param.type.toString(),
-                              named: param.isNamed,
-                              required: param.isRequired,
-                            ))
-                        .toList(),
-                    features: [
-                      if (e.isConst) "const",
-                      if (e.isFactory) "factory",
-                      if (e.isExternal) "external",
-                    ],
-                  ))
-              .toList(),
-          properties: classItem.fields
-              .map((e) => out.Property(
-                    name: e.name.toString(),
-                    type: e.type.toString(),
-                    description: e.documentationComment ?? "",
-                    features: [
-                      if (e.isStatic) "static",
-                      if (e.isCovariant) "covariant",
-                      if (e.isFinal) "final",
-                      if (e.isConst) "const",
-                      if (e.isLate) "late",
-                    ],
-                  ))
-              .toList(),
-          methods: classItem.methods.map((e) => e.name.toString()).toList(),
-        ));
+        for (final classItem in classesInLibrary) {
+          classes.add(out.DocComponent(
+            name: classItem.name,
+            isNullSafe: true,
+            description:
+                classItem.documentationComment?.replaceAll("///", "") ?? "",
+            constructors: classItem.constructors
+                .map((e) => out.Constructor(
+                      name: e.name.toString(),
+                      signature: e.parameters
+                          .map((param) => out.Parameter(
+                                description: param.documentationComment ?? "",
+                                name: param.name.toString(),
+                                type: param.type.toString(),
+                                named: param.isNamed,
+                                required: param.isRequired,
+                              ))
+                          .toList(),
+                      features: [
+                        if (e.isConst) "const",
+                        if (e.isFactory) "factory",
+                        if (e.isExternal) "external",
+                      ],
+                    ))
+                .toList(),
+            properties: classItem.fields
+                .map((e) => out.Property(
+                      name: e.name.toString(),
+                      type: e.type.toString(),
+                      description: e.documentationComment ?? "",
+                      features: [
+                        if (e.isStatic) "static",
+                        if (e.isCovariant) "covariant",
+                        if (e.isFinal) "final",
+                        if (e.isConst) "const",
+                        if (e.isLate) "late",
+                      ],
+                    ))
+                .toList(),
+            methods: classItem.methods.map((e) => e.name.toString()).toList(),
+          ));
+        }
+      } catch (e) {
+        print('Error analyzing file ${input.path}: $e');
       }
     }
 
