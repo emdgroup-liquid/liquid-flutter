@@ -4,6 +4,8 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
+part '../master_detail/crud_paginator.dart';
+
 typedef FetchListFunction<T> = Future<LdListPage<T>> Function(
   int page,
   int loadedItems,

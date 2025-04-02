@@ -11,4 +11,20 @@ class LdListPage<T> {
     this.error,
     this.nextPageToken,
   });
+
+  LdListPage<T> copyWith({
+    List<T>? newItems,
+    bool? hasMore,
+    int? total,
+    String? nextPageToken,
+    Object? error,
+  }) {
+    return LdListPage<T>(
+      newItems: newItems ?? this.newItems,
+      hasMore: hasMore ?? this.hasMore,
+      total: total ?? this.total,
+      nextPageToken: nextPageToken ?? this.nextPageToken,
+      error: error ?? this.error,
+    );
+  }
 }
