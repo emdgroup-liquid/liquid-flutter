@@ -47,8 +47,8 @@ class CrudItemState<T> {
       CrudItemState(type: CrudLoadingStateType.error, error: error);
 }
 
-class CrudMasterDetailController<T extends CrudItemMixin<T>>
-    extends MasterDetailController<T> {
+class LdCrudMasterDetailController<T extends CrudItemMixin<T>>
+    extends LdMasterDetailController<T> {
   /// The [CrudOperations] instance to perform CRUD operations.
   final CrudOperations<T> crud;
 
@@ -61,7 +61,7 @@ class CrudMasterDetailController<T extends CrudItemMixin<T>>
     fetchListFunction: crud.fetchAll,
   );
 
-  CrudMasterDetailController({
+  LdCrudMasterDetailController({
     required this.crud,
     required super.onSelect,
     required super.onDeselect,
@@ -191,7 +191,7 @@ class _LdCrudMasterDetailState<T extends CrudItemMixin<T>>
     extends _LdMasterDetailState<T> {
   @override
   void _initController() {
-    _controller = CrudMasterDetailController(
+    _controller = LdCrudMasterDetailController(
       crud: (widget as LdCrudMasterDetail<T>).crud,
       onSelect: _onSelect,
       onDeselect: _onDeselect,
@@ -203,7 +203,7 @@ class _LdCrudMasterDetailState<T extends CrudItemMixin<T>>
   Widget build(BuildContext context) {
     ;
     return ListenableBuilder(
-      listenable: (_controller as CrudMasterDetailController<T>).data,
+      listenable: (_controller as LdCrudMasterDetailController<T>).data,
       builder: (context, child) {
         return super.build(context);
       },

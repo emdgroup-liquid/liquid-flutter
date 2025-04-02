@@ -1,6 +1,7 @@
 part of 'master_detail.dart';
 
-abstract class _LdMasterDetailBuilder<T, C extends MasterDetailController<T>> {
+abstract class _LdMasterDetailBuilder<T,
+    C extends LdMasterDetailController<T>> {
   Widget buildDetailTitle(
     BuildContext context,
     T item,
@@ -49,7 +50,7 @@ abstract class _LdMasterDetailBuilder<T, C extends MasterDetailController<T>> {
 }
 
 abstract class LdMasterDetailBuilder<T>
-    extends _LdMasterDetailBuilder<T, MasterDetailController<T>> {}
+    extends _LdMasterDetailBuilder<T, LdMasterDetailController<T>> {}
 
 abstract class LdCrudMasterDetailBuilder<T extends CrudItemMixin<T>>
-    extends _LdMasterDetailBuilder<T, CrudMasterDetailController<T>> {}
+    extends _LdMasterDetailBuilder<T, LdCrudMasterDetailController<T>> {}

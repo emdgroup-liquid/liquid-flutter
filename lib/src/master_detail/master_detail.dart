@@ -19,14 +19,14 @@ extension GoRouterExt on GoRouter {
   Uri get uri => routeInformationProvider.value.uri;
 }
 
-class MasterDetailController<T> {
+class LdMasterDetailController<T> {
   final Future<bool> Function(T item) onSelect;
   final Function onDeselect;
 
   bool get isMasterAppBarLoading => false;
   bool isDetailsAppBarLoading(T item) => false;
 
-  MasterDetailController({
+  LdMasterDetailController({
     required this.onSelect,
     required this.onDeselect,
   });
@@ -73,7 +73,7 @@ class LdMasterDetail<T> extends StatefulWidget {
 
   final double masterDetailFlex;
 
-  final _LdMasterDetailBuilder<T, MasterDetailController<T>> builder;
+  final _LdMasterDetailBuilder<T, LdMasterDetailController<T>> builder;
 
   final NavigatorState? navigator;
 
@@ -157,7 +157,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
 
   LdMasterDetailShellRouteConfig<T>? get _routeConfig =>
       Provider.of<LdMasterDetailShellRouteConfig<T>?>(context, listen: false);
-  late final MasterDetailController<T> _controller;
+  late final LdMasterDetailController<T> _controller;
 
   @override
   initState() {
@@ -167,7 +167,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
   }
 
   void _initController() {
-    _controller = MasterDetailController(
+    _controller = LdMasterDetailController(
       onSelect: _onSelect,
       onDeselect: _onDeselect,
     );
@@ -475,9 +475,9 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
 }
 
 class _DetailPage<T> extends StatelessWidget {
-  final _LdMasterDetailBuilder<T, MasterDetailController<T>> builder;
+  final _LdMasterDetailBuilder<T, LdMasterDetailController<T>> builder;
   final T item;
-  final MasterDetailController<T> controller;
+  final LdMasterDetailController<T> controller;
 
   const _DetailPage({
     required this.builder,
