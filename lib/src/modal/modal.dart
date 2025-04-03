@@ -212,15 +212,21 @@ class LdModal {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
-                padding: EdgeInsets.only(
-                  right: padding?.right ?? theme.paddingSize(size: LdSize.m),
+              padding: EdgeInsets.only(
+                right: padding?.right ?? theme.paddingSize(size: LdSize.m),
+              ),
+              child: Container(
+                constraints: BoxConstraints(
+                  maxHeight: navbarHeight(context),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     ...actions!(context),
                   ],
-                )),
+                ),
+              ),
+            ),
           ],
         ),
       );

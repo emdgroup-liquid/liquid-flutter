@@ -284,6 +284,12 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
             true,
             _controller,
           ),
+          actions: (context) => widget.builder.buildDetailActions(
+            context,
+            item,
+            true,
+            _controller,
+          ),
         ).show(context);
         setState(() {
           _inDetailView = false;
