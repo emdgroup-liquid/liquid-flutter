@@ -1,9 +1,9 @@
-name: "PR to Main"
+name: "PR to Dev"
 on:
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
-      - main
+      - dev
 
 jobs:
   validate_pr:
@@ -40,9 +40,9 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "gh-actions@emdgroup.com"
 
-      - name: 🔂 Run standard-version
+      - name: 🔂 Run standard-version for dev
         run: |
-          npx standard-version --skip.tag --skip.commit
+          npx standard-version --prerelease dev --skip.tag --skip.commit
       - name: ⏎ Get new version
         uses: actions/github-script@v7
         id: get_new_version
@@ -58,7 +58,7 @@ jobs:
         id: detect_change_type
         run: |
           API_CHANGELOG=$(dart ./generators/lib/doc_comparator/doc_comparator.dart \
-          ./lib/documentation.dart origin/main:./lib/documentation.dart)
+          ./lib/documentation.dart origin/dev:./lib/documentation.dart)
 
           API_CHANGE_TYPE=$(echo "$API_CHANGELOG" | head -n 1 | grep -oE "major|minor|patch")
           echo "API_CHANGE_TYPE=$API_CHANGE_TYPE" >> $GITHUB_ENV
@@ -67,12 +67,12 @@ jobs:
             echo "$API_CHANGELOG"
             echo EOF
           } >> "$GITHUB_ENV"
-  
+          
           echo "API_CHANGELOG output:"
           echo "$API_CHANGELOG"
           echo "Detected API_CHANGE_TYPE: $API_CHANGE_TYPE"
 
-    # Extract previous version from pubspec.yaml
+      # Extract previous version from pubspec.yaml
       - name: Get previous version
         id: get_previous_version
         run: |
@@ -83,10 +83,14 @@ jobs:
       - name: Validate version bump
         id: validate_version
         run: |
-          IFS='.' read -r OLD_MAJOR OLD_MINOR OLD_PATCH <<< "$PREVIOUS_VERSION"
-          IFS='.' read -r NEW_MAJOR NEW_MINOR NEW_PATCH <<< "${{ steps.get_new_version.outputs.result }}"
-          echo "Old version: $PREVIOUS_VERSION"
-          echo "New version: ${{ steps.get_new_version.outputs.result }}"
+          # Extract base version without prerelease
+          OLD_BASE_VERSION=$(echo "$PREVIOUS_VERSION" | sed 's/-.*//')
+          NEW_BASE_VERSION=$(echo "${{ steps.get_new_version.outputs.result }}" | sed 's/-.*//')
+          
+          IFS='.' read -r OLD_MAJOR OLD_MINOR OLD_PATCH <<< "$OLD_BASE_VERSION"
+          IFS='.' read -r NEW_MAJOR NEW_MINOR NEW_PATCH <<< "$NEW_BASE_VERSION"
+          echo "Old version: $PREVIOUS_VERSION (base: $OLD_BASE_VERSION)"
+          echo "New version: ${{ steps.get_new_version.outputs.result }} (base: $NEW_BASE_VERSION)"
 
           if [[ "$NEW_MAJOR" -gt "$OLD_MAJOR" ]]; then
             DETECTED_CHANGE="major"
@@ -118,4 +122,4 @@ jobs:
       - name: 💬 Comment on PR with new version
         uses: thollander/actions-comment-pull-request@v2
         with:
-          message: "New version ${{ steps.get_new_version.outputs.result }} 🚀\n\nDetected API changes:\n${{ env.API_CHANGELOG }}"
+          message: "New dev version ${{ steps.get_new_version.outputs.result }} 🚀\n\nDetected API changes:\n${{ env.API_CHANGELOG }}"
