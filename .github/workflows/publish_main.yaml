@@ -5,6 +5,8 @@ on:
       - main
 jobs:
   release_liquid_flutter:
+    permissions:
+      id-token: write
     runs-on: ubuntu-latest
     steps:
       - name: 🔑 Get token for bumper app
@@ -104,6 +106,9 @@ jobs:
           name: Release ${{ steps.get_new_version.outputs.result }}
           body_path: last_version.md
           prerelease: false
+
+      # - name: Publish to pub.dev
+      #   uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
 
       - name: Build example
         run: |
