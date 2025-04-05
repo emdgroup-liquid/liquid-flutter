@@ -11,6 +11,7 @@ class LdListItem extends StatelessWidget {
   final bool active;
   final Widget? subtitle;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
   final double? width;
   final bool selectDisabled;
   final OnSelectionChange? onSelectionChange;
@@ -39,6 +40,7 @@ class LdListItem extends StatelessWidget {
     this.tradeLeadingForSelectionControl = false,
     this.padding,
     this.onTap,
+    this.onLongPress,
     this.subtitle,
     this.width,
     this.subContent,
@@ -70,6 +72,7 @@ class LdListItem extends StatelessWidget {
           onTap?.call();
         }
       },
+      onLongPress: onLongPress,
       active: active || (showSelectionControls && isSelected),
       disabled: disabled,
       color: theme.palette.primary,
