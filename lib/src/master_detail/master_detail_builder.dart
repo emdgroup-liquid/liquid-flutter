@@ -11,7 +11,7 @@ abstract class _LdMasterDetailBuilder<T,
 
   Widget buildMasterTitle(
     BuildContext context,
-    T? selectedItem,
+    T? openItem,
     bool isSeparatePage,
     C controller,
   );
@@ -25,14 +25,14 @@ abstract class _LdMasterDetailBuilder<T,
 
   Widget buildMaster(
     BuildContext context,
-    T? selectedItem,
+    T? openItem,
     bool isSeparatePage,
     C controller,
   );
 
   List<Widget> buildMasterActions(
     BuildContext context,
-    T? selectedItem,
+    T? openItem,
     bool isSeparatePage,
     C controller,
   ) {

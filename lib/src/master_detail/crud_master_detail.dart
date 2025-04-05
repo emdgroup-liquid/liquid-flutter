@@ -41,7 +41,7 @@ class LdCrudMasterDetailController<T extends CrudItemMixin<T>>
 
   /// A function to get the currently selected item from the state of the
   /// [LdMasterDetail] widget.
-  final T? Function() getSelectedItem;
+  final T? Function() getOpenItem;
 
   /// [LdCrudPaginator] is used to hold the list of items and their states.
   late final data = LdCrudPaginator<T>(
@@ -50,9 +50,9 @@ class LdCrudMasterDetailController<T extends CrudItemMixin<T>>
 
   LdCrudMasterDetailController({
     required this.crud,
-    required super.onSelect,
-    required super.onDeselect,
-    required this.getSelectedItem,
+    required super.onOpenItem,
+    required super.onCloseItem,
+    required this.getOpenItem,
   });
 
   @override
@@ -79,8 +79,8 @@ class LdCrudMasterDetailController<T extends CrudItemMixin<T>>
   }) async {
     await _executeCrudOperation<void>(item, () => crud.delete(item));
     onItemDeleted?.call(item);
-    if (getSelectedItem()?.id == item.id) {
-      onDeselect();
+    if (getOpenItem()?.id == item.id) {
+      onCloseItem();
     }
   }
 
@@ -125,8 +125,8 @@ class LdCrudMasterDetailController<T extends CrudItemMixin<T>>
     final T itemResult = item.isNew
         ? await create(item, onItemCreated: onItemSaved)
         : await update(item, onItemUpdated: onItemSaved);
-    if (item.isNew || itemResult.id == getSelectedItem()?.id) {
-      onSelect(itemResult);
+    if (item.isNew || itemResult.id == getOpenItem()?.id) {
+      onOpenItem(itemResult);
     }
   }
 
@@ -180,15 +180,15 @@ class LdCrudMasterDetail<T extends CrudItemMixin<T>> extends LdMasterDetail<T> {
     MasterDetailLayoutMode layoutMode = MasterDetailLayoutMode.auto,
     T? selectedItem,
     NavigatorState? navigator,
-    LdMasterDetailOnSelectCallback<T>? onSelectionChange,
+    LdMasterDetailOnOpenItemChange<T>? onSelectionChange,
     bool Function(SizingInformation size)? customSplitPredicate,
   }) : super(
           builder: builder,
           detailPresentationMode: detailPresentationMode,
           layoutMode: layoutMode,
-          selectedItem: selectedItem,
+          openItem: selectedItem,
           navigator: navigator,
-          onSelectionChange: onSelectionChange,
+          onOpenItemChange: onSelectionChange,
           customSplitPredicate: customSplitPredicate,
         );
 
@@ -202,9 +202,9 @@ class _LdCrudMasterDetailState<T extends CrudItemMixin<T>>
   void _initController() {
     _controller = LdCrudMasterDetailController(
       crud: (widget as LdCrudMasterDetail<T>).crud,
-      onSelect: _onSelect,
-      onDeselect: _onDeselect,
-      getSelectedItem: () => _selectedItem,
+      onOpenItem: _onOpenItem,
+      onCloseItem: _onCloseItem,
+      getOpenItem: () => _openItem,
     );
   }
 
