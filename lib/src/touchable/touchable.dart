@@ -206,11 +206,13 @@ class LdTouchableSurface extends StatefulWidget {
 
   final FocusNode? focusNode;
   final Function() onTap;
+  final Function()? onLongPress;
   final Widget Function(BuildContext contxt, LdColorBundle colorBundle,
       LdTouchableStatus status) builder;
   const LdTouchableSurface({
     super.key,
     required this.onTap,
+    this.onLongPress,
     this.color,
     required this.builder,
     this.focusNode,
@@ -312,6 +314,9 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
               behavior: HitTestBehavior.opaque,
               onTap: () {
                 if (!widget.disabled) widget.onTap();
+              },
+              onLongPress: () {
+                if (!widget.disabled) widget.onLongPress?.call();
               },
               child: widget.builder(
                 context,
