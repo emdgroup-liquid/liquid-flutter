@@ -8,6 +8,12 @@ abstract class CrudOperations<T> {
   Future<T> create(T item);
   Future<T> update(T item);
   Future<void> delete(T item);
+  Future<void> batchDelete(Iterable<T> items) async {
+    for (final item in items) {
+      await this.delete(item);
+    }
+  }
+
   FetchListFunction<T> get fetchAll;
 }
 
@@ -18,33 +24,6 @@ mixin CrudItemMixin<T> {
 
   /// By default, an item is considered new if it does not have an [id].
   bool get isNew => id == null;
-}
-
-enum CrudLoadingStateType { initial, loading, success, error }
-
-class CrudItemState<T> {
-  final CrudLoadingStateType type;
-  final LdException? error;
-  final T? data;
-
-  CrudItemState({
-    required this.type,
-    this.error,
-    this.data,
-  });
-
-  factory CrudItemState.initial() =>
-      CrudItemState(type: CrudLoadingStateType.initial);
-
-  factory CrudItemState.loading() =>
-      CrudItemState(type: CrudLoadingStateType.loading);
-
-  /// In case data is null, it was a successful delete operation
-  factory CrudItemState.success(T? data) =>
-      CrudItemState(type: CrudLoadingStateType.success, data: data);
-
-  factory CrudItemState.error(LdException error) =>
-      CrudItemState(type: CrudLoadingStateType.error, error: error);
 }
 
 /// [LdCrudMasterDetailController] automatically manages the state of a list of
@@ -102,6 +81,28 @@ class LdCrudMasterDetailController<T extends CrudItemMixin<T>>
     onItemDeleted?.call(item);
     if (getSelectedItem()?.id == item.id) {
       onDeselect();
+    }
+  }
+
+  Future<void> batchDelete(
+    Iterable<T> items, {
+    LdMasterDetailCrudItemCallback<T>? onItemDeleted,
+    VoidCallback? onItemsDeleted,
+  }) async {
+    // set list busy in general
+    data.updateItemState(null, CrudItemState.loading());
+    try {
+      await crud.batchDelete(items);
+      for (final item in items) {
+        // remove all items from list
+        data.updateItemState(item.id, CrudItemState.deleted());
+        onItemDeleted?.call(item);
+      }
+      onItemsDeleted?.call();
+      data.toggleMultiSelectMode(forceValue: false);
+    } catch (e) {
+      // set list error
+      data.updateItemState(null, CrudItemState.error(e as LdException));
     }
   }
 
