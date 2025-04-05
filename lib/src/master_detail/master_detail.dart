@@ -11,8 +11,8 @@ import 'package:responsive_builder/responsive_builder.dart';
 part 'crud_master_detail.dart';
 part 'master_detail_builder.dart';
 
-typedef LdMasterDetailOnSelect<T> = Future<bool> Function(T item);
-typedef LdMasterDetailOnSelectCallback<T> = void Function(T? item);
+typedef LdMasterDetailOnOpenItem<T> = Future<bool> Function(T item);
+typedef LdMasterDetailOnOpenItemChange<T> = void Function(T? item);
 
 extension GoRouterExt on GoRouter {
   /// Shortcut to get the current URI from the [GoRouter].
@@ -20,15 +20,15 @@ extension GoRouterExt on GoRouter {
 }
 
 class LdMasterDetailController<T> {
-  final Future<bool> Function(T item) onSelect;
-  final Function onDeselect;
+  final Future<bool> Function(T item) onOpenItem;
+  final Function onCloseItem;
 
   bool get isMasterAppBarLoading => false;
   bool isDetailsAppBarLoading(T item) => false;
 
   LdMasterDetailController({
-    required this.onSelect,
-    required this.onDeselect,
+    required this.onOpenItem,
+    required this.onCloseItem,
   });
 
   void dispose() {}
@@ -69,7 +69,7 @@ class LdMasterDetailShellRouteConfig<T> {
 /// A master detail view that shows a list of items on the left and a detail view on the right.
 /// The detail view is shown as a page or a dialog if the screen is small.
 class LdMasterDetail<T> extends StatefulWidget {
-  final T? selectedItem;
+  final T? openItem;
 
   final double masterDetailFlex;
 
@@ -81,7 +81,7 @@ class LdMasterDetail<T> extends StatefulWidget {
 
   final MasterDetailLayoutMode layoutMode;
 
-  final LdMasterDetailOnSelectCallback<T>? onSelectionChange;
+  final LdMasterDetailOnOpenItemChange<T>? onOpenItemChange;
 
   final bool Function(SizingInformation size)? customSplitPredicate;
 
@@ -91,11 +91,11 @@ class LdMasterDetail<T> extends StatefulWidget {
     this.layoutMode = MasterDetailLayoutMode.auto,
 
     /// The initial item to show in the detail widget.
-    this.selectedItem,
+    this.openItem,
     this.navigator,
 
-    /// Called when an item is selected or deselected.
-    this.onSelectionChange,
+    /// Called when an item is opened or closed.
+    this.onOpenItemChange,
 
     /// The flex value for the detail widget. Defaults to 3.
     this.masterDetailFlex = 3,
@@ -153,7 +153,7 @@ class LdMasterDetail<T> extends StatefulWidget {
 
 class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
     with SingleTickerProviderStateMixin {
-  T? _selectedItem;
+  T? _openItem;
 
   LdMasterDetailShellRouteConfig<T>? get _routeConfig =>
       Provider.of<LdMasterDetailShellRouteConfig<T>?>(context, listen: false);
@@ -163,36 +163,35 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
   initState() {
     _initController();
     super.initState();
-    unawaited(_selectInitialItem());
+    unawaited(_openInitialItem());
   }
 
   void _initController() {
     _controller = LdMasterDetailController(
-      onSelect: _onSelect,
-      onDeselect: _onDeselect,
+      onOpenItem: _onOpenItem,
+      onCloseItem: _onCloseItem,
     );
   }
 
-  Future<void> _selectInitialItem() async {
+  Future<void> _openInitialItem() async {
     await Future.delayed(Duration.zero);
-    if (widget.selectedItem != null) {
-      _onSelect(widget.selectedItem!);
+    if (widget.openItem != null) {
+      _onOpenItem(widget.openItem!);
       return;
     }
 
     _handleInitialRoute();
   }
 
-  /// Try to select an item from the route parameters.
+  /// Try to open an item from the route parameters.
   void _handleInitialRoute() {
     final routeConfig = _routeConfig;
-    if (routeConfig != null && _selectedItem == null) {
+    if (routeConfig != null && _openItem == null) {
       final router = GoRouter.of(context);
       final itemId = router.state.pathParameters[routeConfig.detailPathParam];
-      final selectedItem =
-          itemId != null ? routeConfig.itemProvider(itemId) : null;
-      if (selectedItem != null) {
-        _onSelect(selectedItem);
+      final openItem = itemId != null ? routeConfig.itemProvider(itemId) : null;
+      if (openItem != null) {
+        _onOpenItem(openItem);
       }
     }
   }
@@ -200,18 +199,18 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
   @override
   didUpdateWidget(LdMasterDetail<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.selectedItem != widget.selectedItem) {
+    if (oldWidget.openItem != widget.openItem) {
       setState(() {
-        _selectedItem = widget.selectedItem;
+        _openItem = widget.openItem;
       });
     }
   }
 
   NavigatorState get _navigator => widget.navigator ?? Navigator.of(context);
 
-  void _onDeselect() async {
+  void _onCloseItem() async {
     setState(() {
-      _selectedItem = null;
+      _openItem = null;
     });
 
     if (_inDetailView) {
@@ -224,10 +223,10 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
       GoRouter.of(context).go(routeConfig.basePath);
     }
 
-    widget.onSelectionChange?.call(null);
+    widget.onOpenItemChange?.call(null);
   }
 
-  Future<bool> _onSelect(T item) async {
+  Future<bool> _onOpenItem(T item) async {
     final routeConfig = _routeConfig;
     if (routeConfig != null) {
       final itemId = routeConfig.itemIdGetter(item);
@@ -240,10 +239,10 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
     }
 
     setState(() {
-      _selectedItem = item;
+      _openItem = item;
     });
 
-    widget.onSelectionChange?.call(item);
+    widget.onOpenItemChange?.call(item);
 
     if (!useSplitView) {
       _inDetailView = true;
@@ -262,9 +261,9 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
         );
         setState(() {
           _inDetailView = false;
-          _selectedItem = null;
+          _openItem = null;
         });
-        widget.onSelectionChange?.call(null);
+        widget.onOpenItemChange?.call(null);
       }
 
       if (widget.detailPresentationMode ==
@@ -293,9 +292,9 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
         ).show(context);
         setState(() {
           _inDetailView = false;
-          _selectedItem = null;
+          _openItem = null;
         });
-        widget.onSelectionChange?.call(null);
+        widget.onOpenItemChange?.call(null);
       }
     }
 
@@ -305,14 +304,14 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
   bool _inDetailView = false;
 
   void _onDialogDismiss() {
-    _onDeselect();
+    _onCloseItem();
   }
 
   void onPop(bool onPop) {
     setState(() {
-      _selectedItem = null;
+      _openItem = null;
     });
-    widget.onSelectionChange?.call(null);
+    widget.onOpenItemChange?.call(null);
   }
 
   void _didChangeSize(bool isLarge) async {
@@ -324,7 +323,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
       this.useSplitView = isLarge;
     });
 
-    final _previousSelectedItem = _selectedItem;
+    final _previousOpenItem = _openItem;
 
     if (!wasLarge && isLarge && _inDetailView) {
       _navigator.maybePop();
@@ -332,8 +331,8 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
 
     await Future.delayed(Duration.zero);
 
-    if (_previousSelectedItem != null) {
-      _onSelect(_previousSelectedItem);
+    if (_previousOpenItem != null) {
+      _onOpenItem(_previousOpenItem);
     }
   }
 
@@ -341,8 +340,8 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
 
   Widget buildMaster(
     BuildContext context,
-    LdMasterDetailOnSelect<T> onSelect,
-    T? selectedItem,
+    LdMasterDetailOnOpenItem<T> onOpenItem,
+    T? openItem,
     bool isSeparatePage,
   ) {
     return Scaffold(
@@ -352,13 +351,13 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
         context: context,
         title: widget.builder.buildMasterTitle(
           context,
-          _selectedItem,
+          _openItem,
           true,
           _controller,
         ),
         actions: widget.builder.buildMasterActions(
           context,
-          _selectedItem,
+          _openItem,
           true,
           _controller,
         ),
@@ -367,7 +366,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
       backgroundColor: LdTheme.of(context).background,
       body: widget.builder.buildMaster(
         context,
-        selectedItem,
+        openItem,
         isSeparatePage,
         _controller,
       ),
@@ -407,11 +406,10 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
   ) {
     final theme = LdTheme.of(context, listen: true);
 
-    final detail = _selectedItem != null
-        ? buildDetail(context, _selectedItem!, !isLarge)
-        : null;
+    final detail =
+        _openItem != null ? buildDetail(context, _openItem!, !isLarge) : null;
 
-    final master = buildMaster(context, _onSelect, _selectedItem, !isLarge);
+    final master = buildMaster(context, _onOpenItem, _openItem, !isLarge);
 
     if (isLarge) {
       return MultiSplitViewTheme(
@@ -451,7 +449,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
       );
     }
 
-    return buildMaster(context, _onSelect, _selectedItem, false);
+    return buildMaster(context, _onOpenItem, _openItem, false);
   }
 
   bool _useSplitView(SizingInformation size) {
