@@ -54,6 +54,8 @@ class ExampleRepository extends CrudOperations<ExampleItem> {
     final index = _data.indexWhere((element) => element.id == item.id);
     if (index != -1) {
       _data[index] = item;
+    } else {
+      Future.error(LdException(message: "Item with id ${item.id} not found."));
     }
     return Future.value(item);
   }
@@ -119,6 +121,26 @@ class ExampleBuilder extends LdMasterDetailBuilder<ExampleItem> {
           subtitle: Text("ID: ${item.id}"),
           onTap: () {
             controller.onSelect(item);
+          },
+          isSelected: (controller is LdCrudMasterDetailController<ExampleItem>)
+              ? controller.data.isItemSelected(item)
+              : false,
+          showSelectionControls:
+              (controller is LdCrudMasterDetailController<ExampleItem>)
+                  ? controller.data.isMultiSelectMode
+                  : false,
+          onSelectionChange: (selected) {
+            if (controller is LdCrudMasterDetailController<ExampleItem>) {
+              controller.data.toggleItemSelection(item);
+            }
+          },
+          onLongPress: () {
+            if (controller is LdCrudMasterDetailController<ExampleItem>) {
+              controller.data.toggleMultiSelectMode();
+              if (controller.data.isMultiSelectMode) {
+                controller.data.toggleItemSelection(item);
+              }
+            }
           },
         );
       },
@@ -234,6 +256,23 @@ class ExampleCrudBuilder extends LdCrudMasterDetailBuilder<ExampleItem> {
       ExampleItem? selectedItem,
       bool isSeparatePage,
       LdCrudMasterDetailController<ExampleItem> controller) {
+    if (controller.data.isMultiSelectMode) {
+      return [
+        IconButton(
+          icon: const Icon(Icons.delete),
+          onPressed: () async {
+            controller.batchDelete(
+              controller.data.selectedItems,
+              onItemsDeleted: () {
+                LdNotificationsController.of(context).error(
+                  "Items deleted",
+                );
+              },
+            );
+          },
+        ),
+      ];
+    }
     return [
       IconButton(
         icon: const Icon(Icons.add),
