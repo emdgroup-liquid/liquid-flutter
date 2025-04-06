@@ -122,11 +122,11 @@ class LdCrudPaginator<T extends CrudItemMixin<T>> extends LdPaginator<T> {
     for (var e in _loadedPages.entries) {
       final index = e.value.newItems.indexWhere((e) => e.id == id);
       if (index != -1) {
+        _totalItems -= 1;
         _loadedPages[e.key] = e.value.copyWith(
           newItems: List.from(e.value.newItems)..removeAt(index),
-          total: e.value.total - 1,
+          total: _totalItems,
         );
-        _totalItems = e.value.total - 1;
         notifyListeners();
         continue;
       }
