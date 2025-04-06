@@ -247,6 +247,11 @@ class ExampleCrudBuilder extends LdCrudMasterDetailBuilder<ExampleItem> {
     bool isSeparatePage,
     LdCrudMasterDetailController<ExampleItem> controller,
   ) {
+    if (controller.data.isMultiSelectMode) {
+      return Text(
+        "${controller.data.selectedItems.length}/${controller.data.totalItems} selected",
+      );
+    }
     return ExampleBuilder.createMasterTitle(context, openItem);
   }
 
