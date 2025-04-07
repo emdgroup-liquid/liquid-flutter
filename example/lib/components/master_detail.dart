@@ -1,3 +1,6 @@
+import 'dart:collection';
+
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -24,17 +27,24 @@ class ExampleItem with CrudItemMixin<ExampleItem> {
 
 class ExampleRepository extends CrudOperations<ExampleItem> {
   static int pageSize = 25;
-  final List<ExampleItem> _data = List.generate(
-    exampleTitles.length,
-    (index) => ExampleItem(index, exampleTitles[index]),
+  final SplayTreeMap<int, List<ExampleItem>> _data = SplayTreeMap.from(
+    List.generate(exampleTitles.length, (i) => ExampleItem(i, exampleTitles[i]))
+        .groupListsBy((item) => item.id! ~/ 25),
   );
 
   /// Find the next available ID
   int? _nextId;
   int get nextId {
-    _nextId ??= _data.lastOrNull?.id ?? -1;
+    _nextId ??= _data.values.lastOrNull?.lastOrNull?.id;
     _nextId = _nextId! + 1;
     return _nextId!;
+  }
+
+  int get itemsCount {
+    return _data.values.fold(
+      0,
+      (previousValue, element) => previousValue + element.length,
+    );
   }
 
   @override
@@ -44,38 +54,52 @@ class ExampleRepository extends CrudOperations<ExampleItem> {
     }
     final newItem = ExampleItem(nextId, item.name);
     await Future.delayed(const Duration(seconds: 1));
-    _data.add(newItem);
+    if ((_data.values.lastOrNull?.length ?? pageSize) < pageSize) {
+      // add item to last page
+      _data.values.lastOrNull?.add(newItem);
+    } else {
+      // add new page
+      _data[_data.length] = [newItem];
+    }
     return Future.value(newItem);
   }
 
   @override
   Future<ExampleItem> update(ExampleItem item) async {
     await Future.delayed(const Duration(seconds: 1));
-    final index = _data.indexWhere((element) => element.id == item.id);
-    if (index != -1) {
-      _data[index] = item;
-    } else {
-      Future.error(LdException(message: "Item with id ${item.id} not found."));
+
+    for (var page in _data.values) {
+      final index = page.indexWhere((element) => element.id == item.id);
+      if (index != -1) {
+        page[index] = item;
+        return Future.value(item);
+      }
     }
-    return Future.value(item);
+    throw LdException(message: "Item not found");
   }
 
   @override
   Future<void> delete(ExampleItem item) async {
     await Future.delayed(const Duration(seconds: 1));
-    _data.removeWhere((element) => element.id == item.id);
+    for (var page in _data.values) {
+      final index = page.indexWhere((element) => element.id == item.id);
+      if (index != -1) {
+        page.removeAt(index);
+        return;
+      }
+    }
   }
 
   @override
   FetchListFunction<ExampleItem> get fetchAll =>
       (page, loadedItems, nextPageToken) async {
-        final newItems = _data.skip(page * pageSize).take(pageSize).toList();
         await Future.delayed(const Duration(seconds: 1));
 
+        final newItems = _data[page] ?? [];
         return LdListPage<ExampleItem>(
           newItems: newItems,
-          hasMore: page * pageSize + loadedItems < _data.length,
-          total: _data.length,
+          hasMore: page < _data.length - 1,
+          total: itemsCount,
         );
       };
 }
