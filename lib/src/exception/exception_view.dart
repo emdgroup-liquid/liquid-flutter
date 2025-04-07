@@ -153,12 +153,10 @@ class LdExceptionView extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Flexible(child: _buildDialogButton(context, moreInfo)),
+            _buildDialogButton(context, moreInfo),
             if (controller?.showRetryButton == true) ...[
               ldSpacerM,
-              Flexible(
-                child: _buildRetryButton(context, controller),
-              ),
+              _buildRetryButton(context, controller),
             ],
           ],
         )
