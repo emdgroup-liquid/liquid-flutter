@@ -169,7 +169,7 @@ class LdExceptionView extends StatelessWidget {
     final controller = _createRetryController();
 
     return StreamBuilder<LdRetryState>(
-        stream: controller!.stateStream,
+        stream: controller?.stateStream ?? const Stream.empty(),
         builder: (context, snapshot) {
           return LdAutoSpace(
               crossAxisAlignment: CrossAxisAlignment.center,
