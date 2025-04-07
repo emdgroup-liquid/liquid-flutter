@@ -117,7 +117,8 @@ class LdExceptionView extends StatelessWidget {
     return LdAutoSpace(
       children: [
         LdHint(
-          child: Text(exception?.message ?? ""),
+          child: Text(exception?.message ??
+              LiquidLocalizations.of(context).unknownError),
           type: exception?.type ?? LdHintType.error,
         ),
         Row(
@@ -147,7 +148,7 @@ class LdExceptionView extends StatelessWidget {
           size: LdSize.l,
         ),
         LdTextP(
-          exception?.message ?? "",
+          exception?.message ?? LiquidLocalizations.of(context).unknownError,
           textAlign: TextAlign.center,
         ),
         Row(
