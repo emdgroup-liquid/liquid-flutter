@@ -128,7 +128,7 @@ class LdCrudPaginator<T extends CrudItemMixin<T>> extends LdPaginator<T> {
           total: _totalItems,
         );
         notifyListeners();
-        continue;
+        return;
       }
     }
   }
