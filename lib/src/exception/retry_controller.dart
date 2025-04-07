@@ -59,9 +59,6 @@ class LdRetryController {
   /// Function to be called when a retry should be executed
   final void Function() onRetry;
 
-  /// Whether an error happened that can be retried
-  bool _canRetryError = false;
-
   /// Stream of retry states
   Stream<LdRetryState> get stateStream => _stateController.stream;
 
@@ -132,7 +129,7 @@ class LdRetryController {
 
   /// Executes the retry operation
   void _executeRetry() {
-    if (_canRetryError && _state.attempt < config.maxAttempts) {
+    if (state.canRetry && _state.attempt < config.maxAttempts) {
       _setState(
         _state.copyWith(
           isRetrying: true,
@@ -147,7 +144,6 @@ class LdRetryController {
     if (showRetryIndicator) {
       return; // we are already counting down, we cannot handle another error
     }
-    _canRetryError = canRetry;
     final attempt = _state.attempt + 1;
     final exhaustedRetries = attempt >= config.maxAttempts;
 
@@ -186,7 +182,6 @@ class LdRetryController {
   void reset() {
     _retryTimer?.cancel();
     _setState(const LdRetryState());
-    _canRetryError = false;
   }
 
   /// Notifies the controller that an operation has started
