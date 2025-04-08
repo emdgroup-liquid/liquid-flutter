@@ -1,11 +1,4 @@
 builders:
-  doc_generator:
-    target: ":liquid_generators"
-    import: "package:liquid_generators/documentation_generator.dart"
-    builder_factories: ["docGenerator"]
-    build_extensions: { ".dart": [".doc_generator.g.part"] }
-    auto_apply: dependents
-    build_to: source
   variant_generator:
     target: ":liquid_generators"
     import: "package:liquid_generators/variant_generator.dart"
