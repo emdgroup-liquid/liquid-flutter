@@ -73,19 +73,9 @@ jobs:
             const fs = require('fs');
             const package = JSON.parse(fs.readFileSync('package.json', 'utf8'));
             return package.version;
-
-      - name: Checkout mtrust-api-guard action
-        uses: actions/checkout@v3
-        with:
-          repository: emdgroup/mtrust-api-guard
-          path: ./.github/actions/mtrust-api-guard
-
-      - name: Install dependencies for the action
-        run: dart pub get
-        working-directory: ./.github/actions/mtrust-api-guard
             
       - name: Run M-Trust API Guard
-        uses: ./.github/actions/mtrust-api-guard
+        uses: emdgroup/mtrust-api-guard@main  # Or pin to a commit/tag
         with:
           src_path: './lib'
           base_doc: 'origin/main:./lib/documentation.dart'
