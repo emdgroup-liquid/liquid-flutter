@@ -73,74 +73,13 @@ jobs:
             const fs = require('fs');
             const package = JSON.parse(fs.readFileSync('package.json', 'utf8'));
             return package.version;
-
-      # Run Dart script to determine the expected version bump type
-      - name: Run api change type detection
-        id: detect_change_type
-        run: |
-          API_CHANGELOG=$(dart ./generators/lib/doc_comparator/doc_comparator.dart \
-          ./lib/documentation.dart origin/main:./lib/documentation.dart)
-
-          API_CHANGE_TYPE=$(echo "$API_CHANGELOG" | head -n 1 | grep -oE "major|minor|patch")
-          echo "API_CHANGE_TYPE=$API_CHANGE_TYPE" >> $GITHUB_ENV
-          {
-            echo 'API_CHANGELOG<<EOF'
-            echo "$API_CHANGELOG"
-            echo EOF
-          } >> "$GITHUB_ENV"
-  
-          echo "API_CHANGELOG output:"
-          echo "$API_CHANGELOG"
-          echo "Detected API_CHANGE_TYPE: $API_CHANGE_TYPE"
-
-    # Extract previous version from pubspec.yaml
-      - name: Get previous version
-        id: get_previous_version
-        run: |
-          PREVIOUS_VERSION=$(grep 'version:' pubspec.yaml | sed 's/version: //')
-          echo "PREVIOUS_VERSION=$PREVIOUS_VERSION" >> $GITHUB_ENV
-
-      # Validate that the computed version increment matches the Dart script result
-      - name: Validate version bump
-        id: validate_version
-        run: |
-          # Extract base version without prerelease
-          OLD_BASE_VERSION=$(echo "$PREVIOUS_VERSION" | sed 's/-.*//')
-          NEW_BASE_VERSION=$(echo "${{ steps.get_new_version.outputs.result }}" | sed 's/-.*//')
-          
-          IFS='.' read -r OLD_MAJOR OLD_MINOR OLD_PATCH <<< "$OLD_BASE_VERSION"
-          IFS='.' read -r NEW_MAJOR NEW_MINOR NEW_PATCH <<< "$NEW_BASE_VERSION"
-          echo "Old version: $PREVIOUS_VERSION (base: $OLD_BASE_VERSION)"
-          echo "New version: ${{ steps.get_new_version.outputs.result }} (base: $NEW_BASE_VERSION)"
-          
-          if [[ "$NEW_MAJOR" -gt "$OLD_MAJOR" ]]; then
-          DETECTED_CHANGE="major"
-          elif [[ "$NEW_MINOR" -gt "$OLD_MINOR" ]]; then
-          DETECTED_CHANGE="minor"
-          else
-          DETECTED_CHANGE="patch"
-          fi
-
-          echo "Expected: At least $API_CHANGE_TYPE | Detected: $DETECTED_CHANGE"
-
-          # Define priority levels
-          PRIORITY_MAP=("patch" "minor" "major")
-
-          # Get index of expected and detected changes
-          for i in "${!PRIORITY_MAP[@]}"; do
-            [[ "${PRIORITY_MAP[$i]}" == "$API_CHANGE_TYPE" ]] && EXPECTED_INDEX=$i
-            [[ "${PRIORITY_MAP[$i]}" == "$DETECTED_CHANGE" ]] && DETECTED_INDEX=$i
-          done
-
-          # Fail only if the detected change is LESS significant than the expected change
-          if [[ "$DETECTED_INDEX" -lt "$EXPECTED_INDEX" ]]; then
-            echo "❌ Version bump mismatch! Expected at least $API_CHANGE_TYPE, but detected $DETECTED_CHANGE."
-            exit 1
-          else
-            echo "✅ Version bump is correct."
-          fi
-
-      - name: 💬 Comment on PR with new version
-        uses: thollander/actions-comment-pull-request@v2
+            
+      - name: Run M-Trust API Guard
+        uses: emdgroup/mtrust-api-guard@main  # Or pin to a commit/tag
         with:
-          message: "New version ${{ steps.get_new_version.outputs.result }} 🚀\n\nDetected API changes:\n${{ env.API_CHANGELOG }}"
+          src_path: './lib'
+          base_doc: 'origin/main:./lib/documentation.dart'
+          new_doc: './lib/documentation.dart'
+          new_version: '${{ steps.get_new_version.outputs.result }}'
+          comment_on_pr: true
+          fail_on_error: true
