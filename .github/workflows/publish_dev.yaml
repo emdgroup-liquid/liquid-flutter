@@ -1,0 +1,120 @@
+name: "Release Dev"
+on:
+  # push:
+  #   branches:
+  #     - dev
+jobs:
+  release_liquid_flutter_dev:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔑 Get token for bumper app
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.bumper_app_id }}
+          private-key: ${{ secrets.bumper_key }}
+      - name: 👀 Checkout code
+        uses: actions/checkout@v2
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Configure git
+        run: |
+          git fetch --prune --unshallow
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "gh-actions@emdgroup.com"
+      - name: 🔂 Run standard-version for dev
+        run: |
+          npx standard-version --prerelease dev --skip.tag
+      - name: ⏎ Get new version
+        uses: actions/github-script@v7
+        id: get_new_version
+        with:
+          result-encoding: string
+          script: |
+            const fs = require('fs');
+            const package = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            return package.version;
+      - run: npm install yaml
+      - name: Update version in pubspec
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const yaml = require("yaml");
+            const version = '${{ steps.get_new_version.outputs.result }}';
+            const pubspec = yaml.parse(fs.readFileSync('pubspec.yaml', 'utf8'));
+            pubspec.version = version;
+            fs.writeFileSync('pubspec.yaml', yaml.stringify(pubspec));
+      - name: Run build runner
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+      - name: Generate l10n
+        run: flutter gen-l10n
+      - name: Run tests
+        run: flutter test
+
+      - name: Run linter
+        run: flutter analyze
+      - name: Add changed source files
+        run: |
+          git add pubspec.yaml lib/ package.json
+          git commit -m "chore(release): ${{ steps.get_new_version.outputs.result }} [skip ci]"
+      - name: Dry run publish
+        run: flutter pub publish --dry-run
+
+      - run: |
+          git push origin dev
+
+      - name: 🪵 Extract changelog for current version
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const changelog = fs.readFileSync("CHANGELOG.md", "utf8");
+            const lines = changelog.split("\n");
+            let lastVersion = [];
+            for (let line of lines) {
+                // Match the version header, by looking for a markdown header followed by semver  (optionally wrapped in [])
+                // Semver regex from https://semver.org/
+                if (line.match(/^#{2,} \[?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?\]?/)) {
+                    if (lastVersion.length != 0) {
+                        break;
+                    } else {
+                        console.log("Extracting changelog for: " + line)
+                        lastVersion.push(line);
+                        continue;
+                    }
+                }
+                if (lastVersion.length > 0) {
+                    lastVersion.push(line);
+                }
+            }
+
+            fs.writeFileSync("last_version.md", lastVersion.slice(1).join("\n").trim(), "utf8");
+
+      # Create a release
+      - name: 🚀 Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.get_new_version.outputs.result }}
+          name: Release ${{ steps.get_new_version.outputs.result }}
+          body_path: last_version.md
+          prerelease: true
+
+      # - name: Publish to pub.dev
+      #   uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+
+      - name: Build example
+        run: |
+          cd example 
+          flutter build web --release --base-href /liquid-flutter/dev/
+      - name: Deploy example
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./example/build/web
+          destination_dir: dev

@@ -1,0 +1,65 @@
+name: "PR to Dev"
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - dev
+
+jobs:
+  validate_pr:
+    permissions:
+      pull-requests: write
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/semantic_pull_request.yml@v1
+  validate_dart:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Run build runner
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+      - name: Generate l10n
+        run: flutter gen-l10n
+      - name: Run tests
+        run: flutter test
+      - name: Upload test failures
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-failures
+          path: test/failures/
+          if-no-files-found: ignore
+      - name: Run linter
+        run: flutter analyze
+      - name: Configure git
+        run: |
+          git fetch --prune --unshallow
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "gh-actions@emdgroup.com"
+
+      - name: 🔂 Run standard-version for dev
+        run: |
+          npx standard-version --prerelease dev --skip.tag --skip.commit
+      - name: ⏎ Get new version
+        uses: actions/github-script@v7
+        id: get_new_version
+        with:
+          result-encoding: string
+          script: |
+            const fs = require('fs');
+            const package = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            return package.version;
+
+      - name: Run M-Trust API Guard for dev
+        uses: emdgroup/mtrust-api-guard@main  # Or pin to a commit/tag
+        with:
+          src_path: './lib'
+          base_doc: 'origin/main:./lib/documentation.dart'
+          new_doc: './lib/documentation.dart'
+          new_version: '${{ steps.get_new_version.outputs.result }}'
+          comment_on_pr: true
+          pr_comment_message: "New *DEV* version {version} 🚀\n\nDetected API changes:\n{changelog}"
+          fail_on_error: false
