@@ -16,7 +16,7 @@ dependencies:
   responsive_builder: ^0.7.0
   multi_split_view: ^2.4.0
   flutter_portal: ^1.1.3
-  sensors_plus: ^5.0.1
+  sensors_plus: ">=5.0.1 <7.0.0"
   collection: ^1.18.0
   flutter_svg: ^2.0.10+1
   flutter_sticky_header: ^0.7.0
