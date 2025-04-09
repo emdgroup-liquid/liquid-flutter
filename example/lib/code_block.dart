@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:liquid/source_code.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
@@ -45,6 +44,9 @@ class _CodeBlockState extends State<CodeBlock> {
 
   @override
   Widget build(BuildContext context) {
+    bool isDesktop =
+        kIsWeb || Platform.isWindows || Platform.isMacOS || Platform.isLinux;
+
     return LayoutBuilder(
       builder: (context, _) => LdCard(
         padding: EdgeInsets.zero,
@@ -54,29 +56,28 @@ class _CodeBlockState extends State<CodeBlock> {
               code: widget.code,
               padding: LdTheme.of(context).pad(),
             ),
-            if (kIsWeb ||
-                Platform.isWindows ||
-                Platform.isMacOS ||
-                Platform.isLinux)
+            if (isDesktop)
               Align(
-                  alignment: Alignment.topRight,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: LdButton(
-                      color: shadSky,
-                      size: LdSize.s,
-                      mode: LdButtonMode.outline,
-                      onPressed: () {
-                        Clipboard.setData(ClipboardData(text: widget.code));
-                        LdNotificationsController.of(context).addNotification(
-                          LdNotification(
-                              message: "Copied to clipboard",
-                              type: LdNotificationType.success),
-                        );
-                      },
-                      child: const Text("Copy"),
-                    ),
-                  )),
+                alignment: Alignment.topRight,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: LdButton(
+                    color: shadSky,
+                    size: LdSize.s,
+                    mode: LdButtonMode.outline,
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: widget.code));
+                      LdNotificationsController.of(context).addNotification(
+                        LdNotification(
+                          message: "Copied to clipboard",
+                          type: LdNotificationType.success,
+                        ),
+                      );
+                    },
+                    child: const Text("Copy"),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
