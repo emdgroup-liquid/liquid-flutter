@@ -56,7 +56,7 @@ jobs:
       - name: Run M-Trust API Guard for dev
         uses: emdgroup/mtrust-api-guard@fix_string_escaping_comment # Or pin to a commit/tag
         with:
-          src_path: "./lib"
+          src_path: "./lib/**/*.dart"
           base_doc: "origin/main:./lib/documentation.dart"
           new_doc: "./lib/documentation.dart"
           new_version: "${{ steps.get_new_version.outputs.result }}"
