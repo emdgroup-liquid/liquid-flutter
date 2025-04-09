@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-import 'component_well.dart';
+import 'component_well/component_well.dart';
 
 class AccordionDemo extends StatefulWidget {
   const AccordionDemo({Key? key}) : super(key: key);
@@ -53,24 +53,21 @@ class _AccordionDemoState extends State<AccordionDemo> {
         title: "LdAccordion",
         demo: LdAutoSpace(
           children: [
-            SizedBox(
-              height: 300,
-              child: ComponentWell(
-                  child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    const LdDivider(),
-                    LdAccordion.fromList([
-                      LdAccordionItem(
-                          child: const Text(
-                              "This is some content in an accordion"),
-                          header: const Text("Header")),
-                    ]),
-                    const LdDivider(),
-                  ],
-                ),
-              )),
-            ),
+            ComponentWell(
+                child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const LdDivider(),
+                  LdAccordion.fromList([
+                    LdAccordionItem(
+                        child:
+                            const Text("This is some content in an accordion"),
+                        header: const Text("Header")),
+                  ]),
+                  const LdDivider(),
+                ],
+              ),
+            )),
             ComponentWell(
               onSurface: _onSurface,
               child: LdAutoSpace(

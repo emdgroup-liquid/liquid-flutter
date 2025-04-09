@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-import 'component_well.dart';
+import 'component_well/component_well.dart';
 
 class SwitchDemo extends StatefulWidget {
   const SwitchDemo({Key? key}) : super(key: key);
