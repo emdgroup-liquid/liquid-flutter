@@ -63,3 +63,4 @@ jobs:
           comment_on_pr: true
           pr_comment_message: "New *DEV* version {version} 🚀\n\nDetected API changes:\n{changelog}"
           fail_on_error: false
+          mtrust_api_guard_ref: "fix_string_escaping_comment"

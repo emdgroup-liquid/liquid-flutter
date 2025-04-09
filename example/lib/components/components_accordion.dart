@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid/components/component_api.dart';
-import 'package:liquid_flutter/documentation.dart';
+import 'package:liquid_flutter/documentation.g.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class ComponentsAccordion extends StatelessWidget {
@@ -13,7 +13,7 @@ class ComponentsAccordion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<LdDocComponent> relevantComponents = ldDocComponents
+    List<DocComponent> relevantComponents = docComponents
         .where((element) => components.contains(element.name))
         .toList();
 
