@@ -95,8 +95,9 @@ class LdPaginator<T> extends ChangeNotifier {
   }
 
   void _setBusy(bool isBusy) {
+    if (isBusy == _busy) return; // only notify if there is a change
     _busy = isBusy;
-    notifyListeners(); // only notify if there is a change
+    notifyListeners();
   }
 
   Future<Iterable<T>?> _fetchPage(int pageToFetch) async {
