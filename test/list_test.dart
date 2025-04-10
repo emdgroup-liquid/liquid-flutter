@@ -38,7 +38,7 @@ void main() {
       Widget? footer,
     }) {
       return SizedBox(
-        width: 300,
+        width: 500,
         height: 500,
         child: LdList<String, String?>(
           data: data,
@@ -111,7 +111,7 @@ void main() {
           final paginator = LdPaginator<String>.fromList([]);
           await place(
             SizedBox(
-              width: 300,
+              width: 500,
               height: 500,
               child: LdList<String, String>(
                 data: paginator,
@@ -133,7 +133,7 @@ void main() {
           );
           await place(
             SizedBox(
-              width: 300,
+              width: 500,
               height: 500,
               child: LdList<String, String>(
                 data: errorProducingPaginator,
@@ -327,7 +327,7 @@ void main() {
         expect(find.text('Item ${i + 1}'), findsNothing);
       }
 
-      // Refresh the list
+      // Refresh the list.
       await paginator.refreshList();
       await tester.pumpAndSettle();
 
