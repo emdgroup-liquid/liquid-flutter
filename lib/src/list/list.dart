@@ -425,7 +425,8 @@ class _LdListState<T, GroupingCriterion>
           ?.findRenderObject() as RenderBox?;
       if (renderBox != null) {
         // assume that the first item has the same height as all other items
-        calculatedAssumedItemHeight = renderBox.size.height;
+        // also, we assume a minimum height of 60 pixels
+        calculatedAssumedItemHeight = max(60, renderBox.size.height);
         setState(() {});
       }
     });
