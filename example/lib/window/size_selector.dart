@@ -3,7 +3,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
 class SizeSelector extends StatefulWidget {
-  const SizeSelector({Key? key}) : super(key: key);
+  const SizeSelector({super.key});
 
   @override
   State<SizeSelector> createState() => _SizeSelectorState();

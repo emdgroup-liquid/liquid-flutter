@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class ListFullScreen extends StatefulWidget {
-  const ListFullScreen({Key? key}) : super(key: key);
+  const ListFullScreen({super.key});
 
   @override
   State<ListFullScreen> createState() => _ListFullScreenState();
@@ -35,14 +35,14 @@ class _ListFullScreenState extends State<ListFullScreen> {
       data: _paginator,
       groupingCriterion: (item) => (item - 1) ~/ 10,
       seperatorBuilder: (context, remainder) => LdListSeperator(
-        child: Text("Group $remainder"),
         onSurface: false,
+        child: Text("Group $remainder"),
       ),
       itemBuilder: (context, item, index) {
         return LdListItem(
           leading: LdAvatar(
-            child: Text(item.toString()),
             color: LdTheme.of(context).palette.success,
+            child: Text(item.toString()),
           ),
           trailingForward: true,
           title: const Text("This is an item in a list"),

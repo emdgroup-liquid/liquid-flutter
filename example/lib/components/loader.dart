@@ -4,7 +4,7 @@ import 'package:liquid/components/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class LoaderDemo extends StatelessWidget {
-  const LoaderDemo({Key? key}) : super(key: key);
+  const LoaderDemo({super.key});
 
   @override
   Widget build(BuildContext context) {

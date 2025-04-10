@@ -9,7 +9,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_emd_theme/liquid_flutter_emd_theme.dart';
 
 class ThemeDemo extends StatefulWidget {
-  const ThemeDemo({Key? key}) : super(key: key);
+  const ThemeDemo({super.key});
 
   @override
   State<ThemeDemo> createState() => _ThemeDemoState();
@@ -371,7 +371,7 @@ class _ThemeDemoState extends State<ThemeDemo> {
                   ],
                 ),
               ))
-          .toList(),
+          ,
     ]);
   }
 }

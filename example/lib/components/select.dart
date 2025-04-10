@@ -4,7 +4,7 @@ import 'package:liquid/components/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class SelectDemo extends StatefulWidget {
-  const SelectDemo({Key? key}) : super(key: key);
+  const SelectDemo({super.key});
 
   @override
   State<SelectDemo> createState() => _SelectDemoState();

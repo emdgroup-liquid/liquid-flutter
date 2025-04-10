@@ -8,7 +8,7 @@ import 'package:liquid/components/components_accordion.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class SubmitDemo extends StatefulWidget {
-  const SubmitDemo({Key? key}) : super(key: key);
+  const SubmitDemo({super.key});
 
   @override
   State<SubmitDemo> createState() => _SubmitDemoState();

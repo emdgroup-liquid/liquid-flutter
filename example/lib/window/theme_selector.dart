@@ -4,7 +4,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
 class ThemeSelector extends StatefulWidget {
-  const ThemeSelector({Key? key}) : super(key: key);
+  const ThemeSelector({super.key});
 
   @override
   State<ThemeSelector> createState() => _ThemeSelectorState();

@@ -14,11 +14,11 @@ class CodeBlock extends StatefulWidget {
   final bool expanded;
 
   const CodeBlock({
-    Key? key,
+    super.key,
     required this.code,
     this.language = "dart",
     this.expanded = false,
-  }) : super(key: key);
+  });
 
   @override
   State<CodeBlock> createState() => _CodeBlockState();
@@ -63,13 +63,14 @@ class _CodeBlockState extends State<CodeBlock> {
   }
 
   void loadHighlighter() async {
+    final fontSize = LdTheme.of(context).paragraphSize(LdSize.s);
     theme = await HighlighterTheme.loadLightTheme();
     themeDark = await HighlighterTheme.loadFromAssets(
         ["assets/dark_plus.json", "assets/dark_vs.json"],
         TextStyle(
           fontFamily: "NotoSansMono",
           color: Colors.white,
-          fontSize: LdTheme.of(context).paragraphSize(LdSize.s),
+          fontSize: fontSize,
         ));
     if (mounted) {
       setState(() {});
@@ -144,6 +145,16 @@ class _CodeBlockState extends State<CodeBlock> {
                                         : 16,
                               ),
                               width: double.infinity,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    colors.surface.withAlpha(0),
+                                    colors.surface.withAlpha(233),
+                                  ],
+                                ),
+                              ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -164,16 +175,6 @@ class _CodeBlockState extends State<CodeBlock> {
                                               .first,
                                           fontWeight: FontWeight.bold)),
                                 ],
-                              ),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    colors.surface.withAlpha(0),
-                                    colors.surface.withAlpha(233),
-                                  ],
-                                ),
                               ),
                             ),
                           ),

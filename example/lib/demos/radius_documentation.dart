@@ -5,8 +5,8 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 class RadiusDocumentation extends StatelessWidget {
   const RadiusDocumentation({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -62,8 +62,8 @@ class BorderRadiusVisualizer extends StatelessWidget {
   const BorderRadiusVisualizer({
     required this.radius,
     required this.child,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -79,12 +79,12 @@ class BorderRadiusVisualizer extends StatelessWidget {
         LdTextPs(radius.topLeft.toString()),
         ldSpacerS,
         DefaultTextStyle(
-          child: child,
           style: ldBuildTextStyle(
             LdTheme.of(context),
             LdTextType.label,
             LdSize.m,
           ),
+          child: child,
         )
       ],
     );

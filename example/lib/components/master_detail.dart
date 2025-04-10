@@ -14,7 +14,7 @@ class ExampleBuilder<int> extends LdMasterDetailBuilder<int> {
       children: [
         const LdTextHl("Detail"),
         LdTextL("Item $item"),
-        LdButton(child: const Text("Go back"), onPressed: deselect)
+        LdButton(onPressed: deselect, child: const Text("Go back"))
       ],
     ).padL();
   }
@@ -55,7 +55,7 @@ class ExampleBuilder<int> extends LdMasterDetailBuilder<int> {
 }
 
 class MasterDetailDemo extends StatefulWidget {
-  const MasterDetailDemo({Key? key}) : super(key: key);
+  const MasterDetailDemo({super.key});
 
   @override
   State<MasterDetailDemo> createState() => _MasterDetailDemoState();

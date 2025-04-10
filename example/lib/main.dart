@@ -36,7 +36,7 @@ void main() async {
 }
 
 class LiquidExample extends StatefulWidget {
-  const LiquidExample({Key? key}) : super(key: key);
+  const LiquidExample({super.key});
 
   @override
   State<LiquidExample> createState() => _LiquidExampleState();

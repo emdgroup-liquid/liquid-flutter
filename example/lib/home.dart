@@ -8,7 +8,7 @@ import 'package:liquid/window/drawer.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  const Home({super.key});
 
   @override
   State<Home> createState() => _HomeState();
@@ -107,11 +107,11 @@ class _HomeState extends State<Home> {
             Row(
               children: [
                 Container(
-                  child: Image.asset("liquid_flutter_icon.jpg",
-                      width: 48, height: 48),
                   decoration:
                       BoxDecoration(borderRadius: theme.radius(LdSize.m)),
                   clipBehavior: Clip.hardEdge,
+                  child: Image.asset("liquid_flutter_icon.jpg",
+                      width: 48, height: 48),
                 ),
                 ldSpacerM,
                 const Flexible(
@@ -165,19 +165,19 @@ class _HomeState extends State<Home> {
             const LdTextHs("Demos"),
             Wrap(spacing: 8, runSpacing: 8, children: [
               LdButton(
-                  child: const Text("Chemical Inventory"),
                   mode: LdButtonMode.outline,
                   trailing: const Icon(LdIcons.arrow_right),
                   onPressed: () {
                     context.go("/chemical");
-                  }),
+                  },
+                  child: const Text("Chemical Inventory")),
               LdButton(
-                child: const Text("Task Demo"),
                 mode: LdButtonMode.outline,
                 trailing: const Icon(LdIcons.arrow_right),
                 onPressed: () {
                   context.go("/task-demo");
                 },
+                child: const Text("Task Demo"),
               ),
             ]),
             const LdDivider(),

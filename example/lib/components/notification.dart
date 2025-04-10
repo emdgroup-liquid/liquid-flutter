@@ -4,7 +4,7 @@ import 'package:liquid/components/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class NotificationDemo extends StatelessWidget {
-  const NotificationDemo({Key? key}) : super(key: key);
+  const NotificationDemo({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +46,6 @@ class NotificationDemo extends StatelessWidget {
                   );
                 }),
             LdButton(
-                child: const Text("Warning"),
                 mode: LdButtonMode.outline,
                 onPressed: () {
                   LdNotificationsController.of(context).addNotification(
@@ -55,9 +54,9 @@ class NotificationDemo extends StatelessWidget {
                       type: LdNotificationType.warning,
                     ),
                   );
-                }),
+                },
+                child: const Text("Warning")),
             LdButton(
-                child: const Text("Error"),
                 mode: LdButtonMode.outline,
                 onPressed: () {
                   LdNotificationsController.of(context).addNotification(
@@ -66,9 +65,9 @@ class NotificationDemo extends StatelessWidget {
                       type: LdNotificationType.error,
                     ),
                   );
-                }),
+                },
+                child: const Text("Error")),
             LdButton(
-                child: const Text("Long error message"),
                 mode: LdButtonMode.outline,
                 onPressed: () {
                   LdNotificationsController.of(context).addNotification(
@@ -78,7 +77,8 @@ class NotificationDemo extends StatelessWidget {
                       type: LdNotificationType.error,
                     ),
                   );
-                }),
+                },
+                child: const Text("Long error message")),
             LdButton(
                 child: const Text("Big info"),
                 onPressed: () {
@@ -134,7 +134,7 @@ class NotificationDemo extends StatelessWidget {
                     ),
                   )) as LdInputNotification;
                   final result = await notification.inputCompleter.future;
-
+                  if (!context.mounted) return;
                   LdNotificationsController.of(context).addNotification(
                     LdNotification(
                       message: "You entered: $result",

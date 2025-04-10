@@ -1,10 +1,11 @@
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class LdColorSwatches extends StatelessWidget {
   final LdColor color;
-  const LdColorSwatches({Key? key, required this.color}) : super(key: key);
+  const LdColorSwatches({super.key, required this.color});
 
   _buildSwatch(
     Color a,
@@ -65,12 +66,12 @@ class LdColorSwatches extends StatelessWidget {
       return LdTag(
           color: LdTheme.of(context).palette.success,
           size: LdSize.s,
-          child: Text("1:" + contrast.toStringAsFixed(1)));
+          child: Text("1:${contrast.toStringAsFixed(1)}"));
     }
     return LdTag(
         color: LdTheme.of(context).palette.error,
         size: LdSize.s,
-        child: Text("1:" + contrast.toStringAsFixed(1)));
+        child: Text("1:${contrast.toStringAsFixed(1)}"));
   }
 
   @override
