@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [21.0.2](https://github.com/emdgroup-liquid/liquid-flutter/compare/v21.0.1...v21.0.2) (2025-04-10)
+
+
+### Bug Fixes
+
+* exception view crashes for non-retrying cases ([#36](https://github.com/emdgroup-liquid/liquid-flutter/issues/36)) ([81d1bd5](https://github.com/emdgroup-liquid/liquid-flutter/commit/81d1bd5ce6c433ece967c2eaa4057247e0d8666d))
+
 ### [21.0.1](https://github.com/emdgroup-liquid/liquid-flutter/compare/v21.0.1-dev.0...v21.0.1) (2025-04-09)
 
 ## [21.0.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v20.0.0...v21.0.0) (2025-03-28)
