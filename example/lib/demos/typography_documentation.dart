@@ -6,8 +6,8 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 class TypographyDocumentation extends StatelessWidget {
   const TypographyDocumentation({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

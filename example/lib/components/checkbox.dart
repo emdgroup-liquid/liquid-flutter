@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid/components/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class CheckboxDemo extends StatefulWidget {
-  const CheckboxDemo({Key? key}) : super(key: key);
+  const CheckboxDemo({super.key});
 
   @override
   State<CheckboxDemo> createState() => _CheckboxDemoState();

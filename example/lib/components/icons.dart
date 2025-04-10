@@ -162,7 +162,7 @@ var icons = {
 };
 
 class IconDemo extends StatefulWidget {
-  const IconDemo({Key? key}) : super(key: key);
+  const IconDemo({super.key});
 
   @override
   State<IconDemo> createState() => _IconDemoState();

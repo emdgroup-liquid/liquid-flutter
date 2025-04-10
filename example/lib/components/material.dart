@@ -4,7 +4,7 @@ import 'package:liquid/components/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class MaterialDocumentation extends StatelessWidget {
-  const MaterialDocumentation({Key? key}) : super(key: key);
+  const MaterialDocumentation({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -14,8 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 class MainNavigationDrawer extends StatefulWidget {
   final bool persistent;
-  const MainNavigationDrawer({Key? key, this.persistent = false})
-      : super(key: key);
+  const MainNavigationDrawer({super.key, this.persistent = false});
 
   @override
   State<MainNavigationDrawer> createState() => _MainNavigationDrawerState();
@@ -175,11 +174,11 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                   title: Row(
                     children: [
                       Container(
-                        child: Image.asset("liquid_flutter_icon.jpg",
-                            width: 32, height: 32),
                         decoration:
                             BoxDecoration(borderRadius: theme.radius(LdSize.m)),
                         clipBehavior: Clip.hardEdge,
+                        child: Image.asset("liquid_flutter_icon.jpg",
+                            width: 32, height: 32),
                       ),
                       ldSpacerS,
                       const Column(
@@ -216,8 +215,8 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                           active: GoRouterState.of(context).uri.path == "/",
                           leading: const Icon(Icons.home),
                           onTap: () => _showPage(context, "/"),
-                          child: const Text("Home"),
                           trailing: const Icon(LdIcons.arrow_right),
+                          child: const Text("Home"),
                         ),
                         const LdSectionHeader("Demos"),
                         LdDrawerItemSection(
@@ -225,16 +224,16 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                               GoRouterState.of(context).uri.path == "/chemical",
                           leading: const Icon(LdIcons.beaker),
                           onTap: () => _showPage(context, "/chemical"),
-                          child: const Text("Magic"),
                           trailing: const Icon(LdIcons.arrow_right),
+                          child: const Text("Magic"),
                         ),
                         LdDrawerItemSection(
                           active: GoRouterState.of(context).uri.path ==
                               "/task-demo",
                           leading: const Icon(Icons.check),
                           onTap: () => _showPage(context, "/task-demo"),
-                          child: const Text("Task"),
                           trailing: const Icon(LdIcons.arrow_right),
+                          child: const Text("Task"),
                         ),
                         const LdSectionHeader("Documentation"),
                         LdDrawerItemSection(
@@ -242,40 +241,40 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                               GoRouterState.of(context).uri.path == "/theme",
                           leading: const Icon(Icons.format_paint),
                           onTap: () => _showPage(context, "/theme"),
-                          child: const Text("Theme"),
                           trailing: const Icon(LdIcons.arrow_right),
+                          child: const Text("Theme"),
                         ),
                         LdDrawerItemSection(
                           active:
                               GoRouterState.of(context).uri.path == "/layout",
                           leading: const Icon(Icons.token),
                           onTap: () => _showPage(context, "/layout"),
-                          child: const Text("Layout"),
                           trailing: const Icon(LdIcons.arrow_right),
+                          child: const Text("Layout"),
                         ),
                         LdDrawerItemSection(
                           active:
                               GoRouterState.of(context).uri.path == "/radius",
                           leading: const Icon(Icons.rounded_corner),
                           onTap: () => _showPage(context, "/radius"),
-                          child: const Text("Border Radius"),
                           trailing: const Icon(LdIcons.arrow_right),
+                          child: const Text("Border Radius"),
                         ),
                         LdDrawerItemSection(
                           active: GoRouterState.of(context).uri.path ==
                               "/typography",
                           leading: const Icon(Icons.text_format),
                           onTap: () => _showPage(context, "/typography"),
-                          child: const Text("Typography"),
                           trailing: const Icon(LdIcons.arrow_right),
+                          child: const Text("Typography"),
                         ),
                         LdDrawerItemSection(
                           active:
                               GoRouterState.of(context).uri.path == "/material",
                           leading: const Icon(Icons.text_format),
                           onTap: () => _showPage(context, "/material"),
-                          child: const Text("Material"),
                           trailing: const Icon(LdIcons.arrow_right),
+                          child: const Text("Material"),
                         ),
                         const LdSectionHeader("Components"),
                         LdInput(
@@ -287,32 +286,32 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                         ),
                         ..._componentsFiltered.map(
                           (e) => LdDrawerItemSection(
-                            child: Text(e.title),
                             active:
                                 GoRouterState.of(context).uri.path == e.route,
                             leading: Icon(e.icon),
                             //trailing: Icon(LdIcons.arrow_right),
                             onTap: () => _showPage(context, e.route),
+                            child: Text(e.title),
                           ),
                         ),
                         const LdDivider(),
                         LdDrawerItemSection(
                           onTap: () => launchUrl(
                               Uri.parse("https://emd.design/imprint")),
-                          child: const Text("Imprint"),
                           trailing: const Icon(Icons.north_east),
+                          child: const Text("Imprint"),
                         ),
                         LdDrawerItemSection(
                           onTap: () => launchUrl(
                               Uri.parse("https://emd.design/privacy")),
-                          child: const Text("Privacy"),
                           trailing: const Icon(Icons.north_east),
+                          child: const Text("Privacy"),
                         ),
                         LdDrawerItemSection(
                           onTap: () =>
                               launchUrl(Uri.parse("https://emd.design/terms")),
-                          child: const Text("Terms of use"),
                           trailing: const Icon(Icons.north_east),
+                          child: const Text("Terms of use"),
                         ),
                       ]),
                     ]),
@@ -426,6 +425,7 @@ class _FontSelectorState extends State<FontSelector> {
 
         await GoogleFonts.pendingFonts();
 
+        // ignore: use_build_context_synchronously
         LdNotificationsController.of(context).success(
           "Font changed to ${p0.first}",
         );
@@ -470,6 +470,7 @@ class _HeadlineFontSelectorState extends State<HeadlineFontSelector> {
 
         await GoogleFonts.pendingFonts();
 
+        // ignore: use_build_context_synchronously
         LdNotificationsController.of(context).success(
           "Font changed to ${p0.first}",
         );

@@ -10,7 +10,7 @@ class _Task {
 }
 
 class TaskDemo extends StatefulWidget {
-  const TaskDemo({Key? key}) : super(key: key);
+  const TaskDemo({super.key});
 
   @override
   State<TaskDemo> createState() => _TaskDemoState();
@@ -66,13 +66,13 @@ class _TaskDemoState extends State<TaskDemo> {
         Wrap(
           children: [
             LdHint(
-              child: Text("$done done"),
               type: LdHintType.success,
+              child: Text("$done done"),
             ),
             ldSpacerM,
             LdHint(
-              child: Text("${_tasks.length - done} pending"),
               type: LdHintType.info,
+              child: Text("${_tasks.length - done} pending"),
             )
           ],
         ),

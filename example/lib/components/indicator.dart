@@ -12,17 +12,11 @@ class IndicatorDemo extends StatelessWidget {
       text: "An indicator is a visual representation of a status or state.",
       demo:
           LdAutoSpace(crossAxisAlignment: CrossAxisAlignment.center, children: [
-        ...LdIndicatorType.values
-            .map(
-              (e) => Row(
-                children: [
-                  LdIndicator(type: e),
-                  ldSpacerM,
-                  LdTextPs(e.toString())
-                ],
-              ),
-            )
-            .toList()
+        ...LdIndicatorType.values.map(
+          (e) => Row(
+            children: [LdIndicator(type: e), ldSpacerM, LdTextPs(e.toString())],
+          ),
+        )
       ]),
       apiComponents: const [
         "LdIndicator",

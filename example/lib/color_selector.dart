@@ -6,11 +6,11 @@ class ColorSelctor extends StatelessWidget {
   final Map<String, LdColor> colors;
   final void Function(LdColor) onChanged;
   const ColorSelctor({
-    Key? key,
+    super.key,
     required this.active,
     required this.onChanged,
     required this.colors,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

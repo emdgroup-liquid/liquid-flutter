@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:liquid/components/components_accordion.dart';
-
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class ComponentPage extends StatelessWidget {
@@ -13,12 +11,12 @@ class ComponentPage extends StatelessWidget {
   final Widget? demo;
 
   const ComponentPage({
-    Key? key,
+    super.key,
     required this.title,
     this.apiComponents,
     this.demo,
     this.text,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

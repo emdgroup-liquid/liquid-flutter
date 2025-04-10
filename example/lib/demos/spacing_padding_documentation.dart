@@ -6,8 +6,8 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 class SpacingPaddingDocumentation extends StatelessWidget {
   const SpacingPaddingDocumentation({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -38,10 +38,10 @@ class SpacingPaddingDocumentation extends StatelessWidget {
             ),
             CodeBlock(code: "LdTheme.of(context).balPad(LdSize.m),"),
             LdHint(
+              type: LdHintType.info,
               child: LdTextP(
                 ".pad and .balPad will respect the Theme Size and change accordingly",
               ),
-              type: LdHintType.info,
             ),
           ],
         ),
@@ -81,10 +81,10 @@ class SpacingPaddingDocumentation extends StatelessWidget {
             ldVSpacerL,
                   """),
             LdHint(
+              type: LdHintType.info,
               child: LdTextP(
                 "LdSpacer will respect the Theme Size and change accordingly",
               ),
-              type: LdHintType.info,
             ),
           ],
         ),

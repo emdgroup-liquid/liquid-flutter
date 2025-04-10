@@ -1,7 +1,7 @@
-import 'package:liquid_flutter_emd_theme/liquid_flutter_emd_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter_emd_theme/liquid_flutter_emd_theme.dart';
 
 class _Person {
   final String name;
@@ -17,7 +17,7 @@ var people = const [
 ];
 
 class TableDemo extends StatefulWidget {
-  const TableDemo({Key? key}) : super(key: key);
+  const TableDemo({super.key});
 
   @override
   State<TableDemo> createState() => _TableDemoState();
@@ -44,9 +44,9 @@ class _TableDemoState extends State<TableDemo> {
               header: Row(children: [
                 LdButton(
                   leading: const Icon(LdIcons.filter),
-                  child: const Text("Filter"),
                   size: LdSize.m,
                   onPressed: () {},
+                  child: const Text("Filter"),
                 )
               ]),
               columns: [

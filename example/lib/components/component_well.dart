@@ -48,13 +48,13 @@ class ComponentWell extends StatefulWidget {
   final Color? color;
   final ShowSourceCodeOptions? showSourceCodeOptions;
   const ComponentWell({
-    Key? key,
+    super.key,
     this.padding,
     required this.child,
     this.color,
     this.onSurface = false,
     this.showSourceCodeOptions,
-  }) : super(key: key);
+  });
 
   @override
   State<ComponentWell> createState() => _ComponentWellState();
@@ -177,14 +177,14 @@ class _ComponentWellState extends State<ComponentWell> {
                   ),
                 ),
               ),
-            Visibility(child: widget.child, visible: !isShowingSourceCode),
+            Visibility(visible: !isShowingSourceCode, child: widget.child),
             if (componentWellChildCode?.isNotEmpty ?? false)
               Visibility(
+                visible: isShowingSourceCode,
                 child: CodeBlock(
                   code: componentWellChildCode!,
                   expanded: true,
                 ),
-                visible: isShowingSourceCode,
               ),
           ],
         );
