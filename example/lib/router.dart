@@ -45,6 +45,7 @@ import 'components/form.dart';
 import 'components/hint.dart';
 import 'components/input.dart';
 import 'components/notification.dart';
+import 'components/reactive_form.dart';
 import 'components/table.dart';
 import 'components/tag.dart';
 import 'window/app_scaffold.dart';
@@ -307,7 +308,13 @@ class AppRouter {
             path: "/components/tabs",
             pageBuilder: (context, state) => NoTransitionPage<void>(
                 key: state.pageKey, child: const TabsDemo()),
-          )
+          ),
+          GoRoute(
+              path: "/components/reactive_form",
+              pageBuilder: (context, state) {
+                return NoTransitionPage<void>(
+                    key: state.pageKey, child: const ReactiveFormDemo());
+              }),
         ]),
   ]);
 }

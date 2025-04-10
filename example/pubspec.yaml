@@ -13,6 +13,11 @@ dependencies:
     sdk: flutter
   liquid_flutter: ^18.0.0-0
   liquid_flutter_emd_theme: ^0.0.1-0
+  liquid_flutter_reactive_forms:
+    git:
+      url: https://github.com/emdgroup-liquid/liquid-flutter-reactive-forms.git
+      ref: master
+
   bitsdojo_window: ^0.1.2
   flutter_markdown: ^0.7.7
   flutter_animate: ^4.1.1

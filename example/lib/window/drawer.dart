@@ -60,6 +60,7 @@ const components = [
   _Component("Modal", "/components/modal", Icons.window),
   _Component("Orb", "/components/orb", Icons.circle),
   _Component("Radio", "/components/radio", Icons.radio_button_checked_rounded),
+  _Component("Reactive Form", "/components/reactive_form", LdIcons.pen),
   _Component("Reveal", "/components/reveal", Icons.remove_red_eye),
   _Component("Select", "/components/select", Icons.arrow_drop_down),
   _Component("Slider", "/components/slider", Icons.touch_app),
