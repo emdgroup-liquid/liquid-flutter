@@ -5,7 +5,7 @@ import 'component_page.dart';
 import 'component_well.dart';
 
 class LdSliderDemo extends StatefulWidget {
-  const LdSliderDemo({Key? key}) : super(key: key);
+  const LdSliderDemo({super.key});
 
   @override
   State<LdSliderDemo> createState() => _LdSliderDemoState();

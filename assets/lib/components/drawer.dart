@@ -4,7 +4,7 @@ import 'package:liquid/components/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class DrawerDemo extends StatelessWidget {
-  const DrawerDemo({Key? key}) : super(key: key);
+  const DrawerDemo({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +43,8 @@ class DrawerDemo extends StatelessWidget {
                         LdDrawerItemSection(child: Text("Item 3.2")),
                         ldSpacerS,
                         LdDrawerItemSection(
-                          child: Text("Item 3.3"),
                           trailing: Icon(Icons.arrow_right),
+                          child: Text("Item 3.3"),
                         )
                       ],
                     )

@@ -4,7 +4,7 @@ import 'package:liquid/components/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class ListDemo extends StatefulWidget {
-  const ListDemo({Key? key}) : super(key: key);
+  const ListDemo({super.key});
 
   @override
   State<ListDemo> createState() => _ListDemoState();
@@ -106,9 +106,10 @@ class _ListDemoState extends State<ListDemo> {
                   groupSequentialItems: _groupSequentially,
                   seperatorBuilder: _enableGrouping
                       ? (context, remainder) => LdListSeperator(
-                            child: Text("Remainder of division by 10 - " +
-                                remainder.toString()),
                             onSurface: _onSurface,
+                            child: Text(
+                              "Remainder of division by 10 - $remainder",
+                            ),
                           )
                       : null,
                   loadingBuilder: (context, currentPage, totalItems) {
@@ -120,8 +121,8 @@ class _ListDemoState extends State<ListDemo> {
                   itemBuilder: (context, item, index) {
                     return LdListItem(
                       leading: LdAvatar(
-                        child: Text(item.toString()),
                         color: LdTheme.of(context).palette.success,
+                        child: Text(item.toString()),
                       ),
                       trailingForward: true,
                       title: const Text("This is an item in a list"),
@@ -137,10 +138,10 @@ class _ListDemoState extends State<ListDemo> {
                 Row(
                   children: [
                     LdButton(
+                      onPressed: _paginator.refreshList,
                       child: const Text(
                         "Refresh list",
                       ),
-                      onPressed: _paginator.refreshList,
                     ),
                     ldSpacerM,
                     LdButton(
@@ -270,8 +271,8 @@ class _ListDemoState extends State<ListDemo> {
                           "I will  trade leading for selection control"),
                     ),
                     LdListSeperator(
-                      child: const Text("This is a separator"),
                       onSurface: _onSurface,
+                      child: const Text("This is a separator"),
                     ),
                     LdListItem(
                       disabled: true,

@@ -4,7 +4,7 @@ import 'package:liquid/components/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class AutoSpaceDemo extends StatefulWidget {
-  const AutoSpaceDemo({Key? key}) : super(key: key);
+  const AutoSpaceDemo({super.key});
 
   @override
   State<AutoSpaceDemo> createState() => _AutoSpaceDemoState();
@@ -33,9 +33,9 @@ class _AutoSpaceDemoState extends State<AutoSpaceDemo> {
                 "It will automatically space out elements based on their type",
               ),
               LdButton(
-                  child: const Text("Already have filled this form?"),
                   trailing: const Icon(Icons.arrow_right),
-                  onPressed: () {}),
+                  onPressed: () {},
+                  child: const Text("Already have filled this form?")),
               const LdInput(label: "Enter something here", hint: "Test"),
               ldSpacerS,
               const LdInput(

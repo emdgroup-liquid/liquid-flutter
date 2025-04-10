@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-
 import 'package:syntax_highlight/syntax_highlight.dart';
 
 class DemoCodeDialog extends StatefulWidget {
   final String demoCode;
 
-  const DemoCodeDialog({Key? key, required this.demoCode}) : super(key: key);
+  const DemoCodeDialog({super.key, required this.demoCode});
 
   @override
   State<DemoCodeDialog> createState() => _DemoCodeDialogState();
@@ -48,8 +47,8 @@ class _DemoCodeDialogState extends State<DemoCodeDialog> {
         leading: const Icon(Icons.code),
         size: LdSize.s,
         mode: LdButtonMode.outline,
-        child: const Text("Show Code"),
         onPressed: onPress,
+        child: const Text("Show Code"),
       ),
       modal: LdModal(
         title: const Text("Code Example"),

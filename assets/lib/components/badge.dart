@@ -4,7 +4,7 @@ import 'package:liquid/components/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class BadgeDemo extends StatelessWidget {
-  const BadgeDemo({Key? key}) : super(key: key);
+  const BadgeDemo({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -48,12 +48,12 @@ class BadgeDemo extends StatelessWidget {
                       ),
                     ]),
               )
-              .toList(),
+              ,
           const LdDivider(),
           const LdTextP("symmetric = true, causes the badge to be a circle"),
           const LdBadge(
-            child: Icon(Icons.photo),
             symmetric: true,
+            child: Icon(Icons.photo),
           ),
         ]),
       ),

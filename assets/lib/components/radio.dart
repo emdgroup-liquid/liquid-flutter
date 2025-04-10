@@ -4,7 +4,7 @@ import 'package:liquid/components/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class RadioDemo extends StatefulWidget {
-  const RadioDemo({Key? key}) : super(key: key);
+  const RadioDemo({super.key});
 
   @override
   State<RadioDemo> createState() => _RadioDemoState();

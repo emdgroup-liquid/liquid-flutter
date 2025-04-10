@@ -44,7 +44,7 @@ class _DemoSheet extends StatelessWidget {
         return LdButton(
           onPressed: () async {
             final result = (await openSheet()) as String?;
-
+            if (!context.mounted) return;
             LdNotificationsController.of(context).success(result.toString());
           },
           child: const Text("Open modal"),
@@ -310,11 +310,12 @@ class _ModalDemoState extends State<ModalDemo> {
               ),
             """),
             LdButton(
-                child: const Text("Open route example"),
-                leading: const Icon(Icons.open_in_new),
-                onPressed: () {
-                  context.push("/components/modal/my-modal");
-                }),
+              leading: const Icon(Icons.open_in_new),
+              onPressed: () {
+                context.push("/components/modal/my-modal");
+              },
+              child: const Text("Open route example"),
+            ),
             const LdDivider(),
             const LdTextH("Confirm modal"),
             LdButton(
@@ -329,6 +330,7 @@ class _ModalDemoState extends State<ModalDemo> {
                   useRootNavigator: true,
                 );
 
+                if (!context.mounted) return;
                 if (result) {
                   LdNotificationsController.of(context).success("Confirmed");
                 } else {

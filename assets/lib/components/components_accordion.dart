@@ -7,9 +7,9 @@ class ComponentsAccordion extends StatelessWidget {
   final Set<String> components;
 
   const ComponentsAccordion({
-    Key? key,
+    super.key,
     required this.components,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

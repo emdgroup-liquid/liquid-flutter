@@ -6,8 +6,8 @@ class ComponentApi extends StatelessWidget {
   final LdDocComponent component;
   const ComponentApi({
     required this.component,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -47,81 +47,75 @@ class ComponentApi extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ...positionalParameters
-                            .map((parameter) => Column(
+                        ...positionalParameters.map((parameter) => Column(
+                              children: [
+                                Row(
                                   children: [
-                                    Row(
-                                      children: [
-                                        if (parameter.description.isNotEmpty)
-                                          LdTextPs(parameter.description),
-                                        Text(
-                                          parameter.type,
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                        ldSpacerS,
-                                        Text(
-                                          parameter.name,
-                                          style: const TextStyle(fontSize: 12),
-                                        ),
-                                        parameter == constructor.signature.last
-                                            ? Container()
-                                            : const Text(","),
-                                      ],
+                                    if (parameter.description.isNotEmpty)
+                                      LdTextPs(parameter.description),
+                                    Text(
+                                      parameter.type,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                      ),
                                     ),
+                                    ldSpacerS,
+                                    Text(
+                                      parameter.name,
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                    parameter == constructor.signature.last
+                                        ? Container()
+                                        : const Text(","),
                                   ],
-                                ))
-                            .toList(),
+                                ),
+                              ],
+                            )),
                         namedParameters.isNotEmpty &&
                                 positionalParameters.isNotEmpty
                             ? const LdTextL(
                                 "{",
                               )
                             : Container(),
-                        ...namedParameters
-                            .map((parameter) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 2.0),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      if (parameter.required)
-                                        LdTagSuccess(
-                                            context: context,
-                                            child: const Text("Required"),
-                                            size: LdSize.s),
-                                      ldSpacerXS,
-                                      Expanded(
-                                        child: Text.rich(TextSpan(children: [
-                                          TextSpan(
-                                            text: parameter.type,
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: parameter.required
-                                                  ? FontWeight.bold
-                                                  : FontWeight.normal,
-                                            ),
-                                          ),
-                                          const TextSpan(text: " "),
-                                          TextSpan(
-                                            text: parameter.name,
-                                            style:
-                                                const TextStyle(fontSize: 12),
-                                          ),
-                                          if (parameter ==
-                                              constructor.signature.last)
-                                            const TextSpan(text: ","),
-                                        ])),
+                        ...namedParameters.map((parameter) => Padding(
+                              padding: const EdgeInsets.only(bottom: 2.0),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (parameter.required)
+                                    LdTagSuccess(
+                                        context: context,
+                                        size: LdSize.s,
+                                        child: const Text("Required")),
+                                  ldSpacerXS,
+                                  Expanded(
+                                    child: Text.rich(TextSpan(children: [
+                                      TextSpan(
+                                        text: parameter.type,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: parameter.required
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                        ),
                                       ),
-                                      ldSpacerS,
-                                      parameter == constructor.signature.last
-                                          ? Container()
-                                          : const Text(","),
-                                    ],
+                                      const TextSpan(text: " "),
+                                      TextSpan(
+                                        text: parameter.name,
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                      if (parameter ==
+                                          constructor.signature.last)
+                                        const TextSpan(text: ","),
+                                    ])),
                                   ),
-                                ))
-                            .toList(),
+                                  ldSpacerS,
+                                  parameter == constructor.signature.last
+                                      ? Container()
+                                      : const Text(","),
+                                ],
+                              ),
+                            )),
                       ],
                     ),
                   ),
@@ -182,8 +176,8 @@ class ComponentApi extends StatelessWidget {
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 4),
                               child: LdTag(
-                                child: Text(e),
                                 size: LdSize.s,
+                                child: Text(e),
                               ),
                             ),
                           )
