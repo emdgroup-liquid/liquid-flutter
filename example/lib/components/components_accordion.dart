@@ -13,7 +13,7 @@ class ComponentsAccordion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<LdDocComponent> relevantComponents = ldDocComponents
+    List<DocComponent> relevantComponents = docComponents
         .where((element) => components.contains(element.name))
         .toList();
 
