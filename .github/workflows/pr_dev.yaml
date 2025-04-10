@@ -57,9 +57,9 @@ jobs:
         if: ${{ github.actor != 'dependabot[bot]' }}
         uses: emdgroup/mtrust-api-guard@main  # Or pin to a commit/tag
         with:
-          src_path: './lib'
-          base_doc: 'origin/dev:./lib/documentation.dart'
-          new_doc: './lib/documentation.dart'
+          src_path: './lib/src'
+          base_doc: 'origin/dev:./lib/documentation.g.dart'
+          new_doc: './lib/documentation.g.dart'
           new_version: '${{ steps.get_new_version.outputs.result }}'
           comment_on_pr: true
           pr_comment_message: "New *DEV* version {version} 🚀\n\nDetected API changes:\n{changelog}"
