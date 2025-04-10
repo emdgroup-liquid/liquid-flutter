@@ -9480,12 +9480,6 @@ const ldDocComponents = [
         features: ['final'],
       ),
       LdDocProperty(
-        name: '_canRetryError',
-        type: 'bool',
-        description: '/// Whether an error happened that can be retried',
-        features: [],
-      ),
-      LdDocProperty(
         name: 'stateStream',
         type: 'Stream<LdRetryState>',
         description: '',
