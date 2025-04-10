@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
@@ -30,15 +32,29 @@ class _ListItem<T, SeperationCriterion> {
 extension GetItemList<T> on LdPaginator<T> {
   List<_ListItem<T, GroupingCriterion>> currentList<GroupingCriterion>() {
     final result = <_ListItem<T, GroupingCriterion>>[];
-    for (int i = 0; i < totalItems ~/ pageSize; i++) {
+    if (totalItems == 0) return result;
+    // the page count is either the number of pages we have loaded, or we
+    // calculate it based on the total items and the page size
+    final pageCount = max((totalItems / pageSize).ceil(), pages.length);
+    for (int i = 0; i < pageCount; i++) {
       final page = pages[i];
       if (page != null) {
         result.addAll(page.newItems
             .map((item) => _ListItem<T, GroupingCriterion>(item: item, page: i))
             .toList());
       } else {
+        if (i > (pages.keys.lastOrNull ?? i) && result.length >= totalItems) {
+          // do not add more placeholders if we already have all items
+          break;
+        }
+
+        // the number of placeholders is either the page size or the remaining
+        // items (whichever is smaller)
+        final placeholderCount =
+            max(1, min(pageSize, totalItems - result.length));
         result.addAll(List<_ListItem<T, GroupingCriterion>>.filled(
-          pageSize,
+          // clamp the number of items to the remaining items
+          placeholderCount,
           _ListItem<T, GroupingCriterion>(page: i),
         ));
       }
@@ -164,7 +180,8 @@ class _LdListState<T, GroupingCriterion>
   }
 
   List<_ListItem<T, GroupingCriterion>> _groupItemsUniformly() {
-    final Map<GroupingCriterion, List<T>> groupedItems = {};
+    final Map<GroupingCriterion, List<_ListItem<T, GroupingCriterion>>>
+        groupedItems = {};
 
     final emptyItems = <_ListItem<T, GroupingCriterion>>[];
     for (final item in widget.data.currentList<GroupingCriterion>()) {
@@ -176,7 +193,12 @@ class _LdListState<T, GroupingCriterion>
       if (!groupedItems.containsKey(seperationCriterion)) {
         groupedItems[seperationCriterion] = [];
       }
-      groupedItems[seperationCriterion]!.add(item.item!);
+      groupedItems[seperationCriterion]!.add(
+        _ListItem(
+          item: item.item,
+          page: item.page,
+        ),
+      );
     }
 
     return [
@@ -186,8 +208,7 @@ class _LdListState<T, GroupingCriterion>
                   isSeparator: true,
                   seperationCriterion: entry.key,
                 ),
-                ...entry.value
-                    .map((item) => _ListItem<T, GroupingCriterion>(item: item))
+                ...entry.value,
               ])
           .expand((element) => element)
           .toList(growable: false),
@@ -404,7 +425,8 @@ class _LdListState<T, GroupingCriterion>
           ?.findRenderObject() as RenderBox?;
       if (renderBox != null) {
         // assume that the first item has the same height as all other items
-        calculatedAssumedItemHeight = renderBox.size.height;
+        // also, we assume a minimum height of 60 pixels
+        calculatedAssumedItemHeight = max(60, renderBox.size.height);
         setState(() {});
       }
     });
