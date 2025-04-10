@@ -54,10 +54,11 @@ jobs:
             return package.version;
 
       - name: Run M-Trust API Guard for dev
+        if: ${{ github.actor != 'dependabot[bot]' }}
         uses: emdgroup/mtrust-api-guard@main  # Or pin to a commit/tag
         with:
           src_path: './lib'
-          base_doc: 'origin/main:./lib/documentation.dart'
+          base_doc: 'origin/dev:./lib/documentation.dart'
           new_doc: './lib/documentation.dart'
           new_version: '${{ steps.get_new_version.outputs.result }}'
           comment_on_pr: true

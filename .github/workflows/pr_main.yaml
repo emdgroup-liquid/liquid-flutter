@@ -75,6 +75,7 @@ jobs:
             return package.version;
             
       - name: Run M-Trust API Guard
+        if: ${{ github.actor != 'dependabot[bot]' }}
         uses: emdgroup/mtrust-api-guard@main  # Or pin to a commit/tag
         with:
           src_path: './lib'
