@@ -100,7 +100,10 @@ class LdPaginator<T> extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<Iterable<T>?> _fetchPage(int pageToFetch) async {
+  Future<Iterable<T>?> _fetchPage(
+    int pageToFetch, {
+    bool refresh = false,
+  }) async {
     _setBusy(true);
     Iterable<T>? list;
 
@@ -110,6 +113,11 @@ class LdPaginator<T> extends ChangeNotifier {
         currentItemCount,
         null,
       );
+
+      if (refresh) {
+        // if this is a refresh operation, we clear the loaded pages, etc.
+        _reset();
+      }
 
       if (page.error != null) {
         _setError(page.error);
@@ -163,19 +171,29 @@ class LdPaginator<T> extends ChangeNotifier {
 
   /// Refresh List means to clear the list and fetch the first page again.
   Future<void> refreshList() async {
-    _setBusy(true); // already set busy state to true (before debounced fetch)
-    await reset();
-    jumpToPage(startPage);
+    return _safeExecute(() async {
+      final newElements = await _fetchPage(0, refresh: true);
+      if (newElements != null && newElements.isNotEmpty) {
+        notifyListeners();
+      }
+    });
   }
 
   /// Clear and reset the pagination without fetching any data.
   Future<void> reset() {
     _debounceTimer?.cancel();
     return _safeExecute(() async {
-      _loadedPages.clear();
-      _error = null;
+      _reset();
       notifyListeners();
     });
+  }
+
+  /// Reset internal state of the paginator.
+  void _reset() {
+    _loadedPages.clear();
+    _totalItems = 0;
+    _pageSize = _defaultPageSize;
+    _error = null;
   }
 
   /// Debounce a task to prevent multiple executions within a short time frame.
@@ -210,7 +228,6 @@ class LdPaginator<T> extends ChangeNotifier {
     final completer = Completer<R?>();
 
     _debounce(() async {
-      await _currentOperation?.future; // Wait for pending operation to complete
       final result =
           await _safeExecute(operation); // Safely execute the operation
       completer.complete(result); // Complete the outer completer
