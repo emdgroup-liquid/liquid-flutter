@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [21.0.5](https://github.com/emdgroup-liquid/liquid-flutter/compare/v21.0.4...v21.0.5) (2025-04-10)
+
+
+### Bug Fixes
+
+* resolve issues with LdList when grouping is activated ([#33](https://github.com/emdgroup-liquid/liquid-flutter/issues/33)) ([2813ccd](https://github.com/emdgroup-liquid/liquid-flutter/commit/2813ccd18e5302c0d4277c86a77f28a245b8b7dc))
+
 ### [21.0.4](https://github.com/emdgroup-liquid/liquid-flutter/compare/v21.0.3...v21.0.4) (2025-04-10)
 
 ### [21.0.3](https://github.com/emdgroup-liquid/liquid-flutter/compare/v21.0.2...v21.0.3) (2025-04-10)
