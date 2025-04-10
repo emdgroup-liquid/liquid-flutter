@@ -1,7 +1,5 @@
 targets:
   $default:
     builders:
-      liquid_generators:doc_generator:
-        enabled: true
       liquid_generators:variant_generator:
         enabled: true
