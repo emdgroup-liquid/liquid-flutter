@@ -39,7 +39,7 @@ jobs:
         run: flutter analyze
       - name: Configure git
         run: |
-          git fetch --prune --unshallow
+          git fetch --prune
           git config --global user.name "GitHub Actions"
           git config --global user.email "gh-actions@emdgroup.com"
 
