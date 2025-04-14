@@ -15,6 +15,11 @@ class ReactiveFormDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     return ComponentPage(
       title: "LdReactiveForm",
+      apiComponents: [
+        "LdReactiveForm",
+        "LdReactiveFormItem",
+        "LdFormSubmitConfig",
+      ],
       demo: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
