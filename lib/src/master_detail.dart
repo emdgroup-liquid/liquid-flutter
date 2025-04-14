@@ -339,10 +339,6 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
   Widget buildContent(BuildContext context, bool isLarge) {
     final theme = LdTheme.of(context, listen: true);
 
-    final detail = _selectedItem != null
-        ? buildDetail(context, _selectedItem!, !isLarge)
-        : null;
-
     final master = buildMaster(
       context,
       _onSelect,
@@ -356,25 +352,35 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
           dividerThickness: 2,
         ),
         child: MultiSplitView(
-            initialAreas: [
-              Area(weight: 1),
-              Area(weight: widget.masterDetailFlex)
-            ],
-            dividerBuilder: (
-              axis,
-              index,
-              resizable,
-              dragging,
-              highlighted,
-              themeData,
-            ) =>
-                Center(
-                  child: Container(color: theme.border, width: 2),
-                ),
-            children: [
-              FocusTraversalGroup(child: master),
-              FocusTraversalGroup(child: detail ?? Container()),
-            ]),
+          initialAreas: [
+            Area(
+              flex: 1,
+              builder: (context, area) => FocusTraversalGroup(child: master),
+            ),
+            Area(
+              flex: widget.masterDetailFlex,
+              builder: (context, area) {
+                final detail = _selectedItem != null
+                    ? buildDetail(context, _selectedItem!, !isLarge)
+                    : null;
+                return FocusTraversalGroup(
+                  child: detail ?? Container(),
+                );
+              },
+            )
+          ],
+          dividerBuilder: (
+            axis,
+            index,
+            resizable,
+            dragging,
+            highlighted,
+            themeData,
+          ) =>
+              Center(
+            child: Container(color: theme.border, width: 2),
+          ),
+        ),
       );
     }
 
