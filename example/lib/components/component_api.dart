@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:liquid_flutter/documentation.dart';
+import 'package:liquid_flutter/documentation.g.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class ComponentApi extends StatelessWidget {
-  final LdDocComponent component;
+  final DocComponent component;
   const ComponentApi({
     required this.component,
     super.key,
