@@ -38,7 +38,7 @@ dependencies:
   url_launcher: ^6.3.1
   fuzzy: ^0.5.1
   collection: ^1.19.0
-  liquid_flutter_reactive_forms: 0.0.1
+  liquid_flutter_reactive_forms: 0.0.3
 
 dev_dependencies:
   flutter_test:
@@ -93,6 +93,6 @@ icons_launcher:
 dependency_overrides:
   liquid_flutter:
     path: ./../
-  liquid_flutter_reactive_forms:
-    path: ./../../liquid-flutter-reactive-forms
+  # liquid_flutter_reactive_forms:
+  #   path: ./../../liquid-flutter-reactive-forms
   go_router: any
