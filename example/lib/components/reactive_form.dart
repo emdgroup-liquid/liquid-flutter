@@ -125,7 +125,7 @@ class ReactiveFormDemo extends StatelessWidget {
                   max: 10,
                   valueFormatter: (value) => value == null
                       ? ''
-                      : value.toStringAsFixed(0) + ' out of 10',
+                      : '${value.toStringAsFixed(0)} out of 10',
                   hintBuilder: (state) {
                     final value = state.control.value;
                     if (value == null) {
