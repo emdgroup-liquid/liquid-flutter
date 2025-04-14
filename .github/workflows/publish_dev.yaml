@@ -74,7 +74,7 @@ jobs:
         with:
           script: |
             const fs = require("fs");
-            const changelog = fs.readFileSync("CHANGELOG.dev.md", "utf8");
+            const changelog = fs.readFileSync("CHANGELOG.md", "utf8");
             const lines = changelog.split("\n");
             let lastVersion = [];
             for (let line of lines) {
