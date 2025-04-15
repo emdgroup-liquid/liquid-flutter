@@ -64,25 +64,23 @@ class MasterDetailDemo extends StatefulWidget {
 class _MasterDetailDemoState extends State<MasterDetailDemo> {
   late final LdPaginator<int> _paginator = LdPaginator<int>(
     fetchListFunction: _fetchItems,
+    pageSize: 30,
   );
 
   MasterDetailLayoutMode _layoutMode = MasterDetailLayoutMode.split;
   MasterDetailPresentationMode _presentationMode =
       MasterDetailPresentationMode.dialog;
 
-  Future<LdListPage<int>> _fetchItems(
-    int page,
-    int loadedItems,
-    String? nextPageToken,
-  ) async {
-    await Future.delayed(const Duration(seconds: 1));
+  Future<LdListPage<int>> _fetchItems({
+    required int offset,
+    required int pageSize,
+    String? pageToken,
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 500));
 
-    if (loadedItems == 200) {
-      return LdListPage<int>(newItems: [], hasMore: false, total: 100);
-    }
     return LdListPage<int>(
-      newItems: List.generate(30, (index) => loadedItems + index),
-      hasMore: true,
+      newItems: List.generate(pageSize, (index) => offset + index),
+      hasMore: offset + pageSize < 200,
       total: 200,
     );
   }

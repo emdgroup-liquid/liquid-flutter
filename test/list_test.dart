@@ -44,7 +44,7 @@ void main() {
           data: data,
           assumedItemHeight: 60,
           groupingCriterion: grouping,
-          seperatorBuilder: seperatorBuilder ??
+          separatorBuilder: seperatorBuilder ??
               (context, criterion) {
                 // add a divider between groups by default
                 return const LdDivider();
@@ -126,7 +126,11 @@ void main() {
         },
         "Error State": (tester, place) async {
           final errorProducingPaginator = LdPaginator<String>(
-            fetchListFunction: (page, loadedItems, pageToken) {
+            fetchListFunction: ({
+              required offset,
+              required pageSize,
+              pageToken,
+            }) {
               throw LdException(message: "Intentional error");
             },
             debounceTime: const Duration(milliseconds: 0),
@@ -196,7 +200,7 @@ void main() {
           LdList<String, String>(
             data: paginator,
             groupingCriterion: (item) => item.split(':')[0].trim(),
-            seperatorBuilder: (context, criterion) => Text(criterion),
+            separatorBuilder: (context, criterion) => Text(criterion),
             itemBuilder: (context, item, index) => Text(item),
           ),
         ),
@@ -241,16 +245,17 @@ void main() {
     testWidgets('LdList handles pagination', (WidgetTester tester) async {
       // Create a custom paginator with multiple pages
       final fiveItemsPerPagePaginator = LdPaginator<String>(
-        fetchListFunction: (page, loadedItems, pageToken) async {
+        pageSize: 5,
+        fetchListFunction: (
+            {required offset, required pageSize, pageToken}) async {
           // Simulate a delay for network request
           await Future.delayed(const Duration(milliseconds: 100));
 
           // Each page has 5 items
-          const pageSize = 5;
           final totalItems = sampleItems.length;
 
           // Calculate start and end indices
-          final startIndex = page * pageSize;
+          final startIndex = offset;
           final endIndex = (startIndex + pageSize < totalItems)
               ? startIndex + pageSize
               : totalItems;
