@@ -23,15 +23,15 @@ class _ListDemoState extends State<ListDemo> {
   final Set<int> _selectedItems = {};
 
   late LdPaginator<int> _paginator = LdPaginator<int>(
-    startPage: 0,
+    initialOffset: 0,
     fetchListFunction: _fetchItems,
   );
 
-  Future<LdListPage<int>> _fetchItems(
-    int page,
-    int loadedItems,
-    String? nextPageToken,
-  ) async {
+  Future<LdListPage<int>> _fetchItems({
+    required int offset,
+    required int pageSize,
+    String? pageToken,
+  }) async {
     await Future.delayed(const Duration(milliseconds: 500));
 
     if (_simulateError) {
@@ -46,8 +46,11 @@ class _ListDemoState extends State<ListDemo> {
     // return a list of 10 items for each page, except for the last page
     // in total, there are 95 items
     return LdListPage<int>(
-      newItems: List.generate(page == 9 ? 5 : 10, (index) => page * 10 + index),
-      hasMore: page < 9,
+      newItems: List.generate(
+        pageSize,
+        (index) => offset + index,
+      ),
+      hasMore: offset + pageSize < 95,
       total: 95,
     );
   }
@@ -106,7 +109,7 @@ class _ListDemoState extends State<ListDemo> {
                   groupingCriterion:
                       _enableGrouping ? (item) => item % 10 : null,
                   groupSequentialItems: _groupSequentially,
-                  seperatorBuilder: _enableGrouping
+                  separatorBuilder: _enableGrouping
                       ? (context, remainder) => LdListSeperator(
                             onSurface: _onSurface,
                             child: Text(
@@ -177,7 +180,7 @@ class _ListDemoState extends State<ListDemo> {
                       setState(() {
                         _bidirectionalScrolling = value;
                         _paginator = LdPaginator<int>(
-                          startPage: _bidirectionalScrolling ? 5 : 0,
+                          initialOffset: _bidirectionalScrolling ? 50 : 0,
                           fetchListFunction: _fetchItems,
                         );
                       });
