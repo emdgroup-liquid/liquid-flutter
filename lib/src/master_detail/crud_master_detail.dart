@@ -1,0 +1,212 @@
+part of 'master_detail.dart';
+
+typedef LdMasterDetailCrudItemCallback<T> = void Function(T item);
+
+/// Defines a repository that can perform CRUD operations on a given type [T]
+/// and fetch a list of items of type [T].
+abstract class CrudOperations<T> {
+  Future<T> create(T item);
+  Future<T> update(T item);
+  Future<void> delete(T item);
+  FetchListFunction<T> get fetchAll;
+}
+
+/// A mixin to add CRUD item properties to a class.
+/// A crud item must have an [id] property to uniquely identify the item.
+mixin CrudItemMixin<T> {
+  dynamic get id;
+
+  /// By default, an item is considered new if it does not have an [id].
+  bool get isNew => id == null;
+}
+
+enum CrudLoadingStateType { initial, loading, success, error }
+
+class CrudItemState<T> {
+  final CrudLoadingStateType type;
+  final LdException? error;
+  final T? data;
+
+  CrudItemState({
+    required this.type,
+    this.error,
+    this.data,
+  });
+
+  factory CrudItemState.initial() =>
+      CrudItemState(type: CrudLoadingStateType.initial);
+
+  factory CrudItemState.loading() =>
+      CrudItemState(type: CrudLoadingStateType.loading);
+
+  /// In case data is null, it was a successful delete operation
+  factory CrudItemState.success(T? data) =>
+      CrudItemState(type: CrudLoadingStateType.success, data: data);
+
+  factory CrudItemState.error(LdException error) =>
+      CrudItemState(type: CrudLoadingStateType.error, error: error);
+}
+
+class CrudMasterDetailController<T extends CrudItemMixin<T>>
+    extends MasterDetailController<T> {
+  /// The [CrudOperations] instance to perform CRUD operations.
+  final CrudOperations<T> crud;
+
+  /// A function to get the currently selected item from the state of the
+  /// [LdMasterDetail] widget.
+  final T? Function() getSelectedItem;
+
+  /// [LdCrudPaginator] is used to hold the list of items and their states.
+  late final data = LdCrudPaginator<T>(
+    fetchListFunction: crud.fetchAll,
+  );
+
+  CrudMasterDetailController({
+    required this.crud,
+    required super.onSelect,
+    required super.onDeselect,
+    required this.getSelectedItem,
+  });
+
+  @override
+  bool get isMasterAppBarLoading => data.busy;
+
+  @override
+  bool isDetailsAppBarLoading(T item) {
+    return data.getItemState(item.id)?.type == CrudLoadingStateType.loading;
+  }
+
+  Future<T> create(
+    T item, {
+    LdMasterDetailCrudItemCallback<T>? onItemCreated,
+  }) async {
+    final result =
+        await _executeCrudOperation<T>(item, () => crud.create(item));
+    onItemCreated?.call(result);
+    return result;
+  }
+
+  Future<void> delete(
+    T item, {
+    LdMasterDetailCrudItemCallback<T>? onItemDeleted,
+  }) async {
+    await _executeCrudOperation<void>(item, () => crud.delete(item));
+    onItemDeleted?.call(item);
+    if (getSelectedItem()?.id == item.id) {
+      onDeselect();
+    }
+  }
+
+  Future<T> update(
+    T item, {
+    LdMasterDetailCrudItemCallback<T>? onItemUpdated,
+  }) async {
+    final result =
+        await _executeCrudOperation<T>(item, () => crud.update(item));
+    onItemUpdated?.call(item);
+    return result;
+  }
+
+  FetchListFunction<T> get fetchAll => data.fetchListFunction;
+
+  Future<void> save(
+    T item, {
+    LdMasterDetailCrudItemCallback<T>? onItemSaved,
+  }) async {
+    final T itemResult = item.isNew
+        ? await create(item, onItemCreated: onItemSaved)
+        : await update(item, onItemUpdated: onItemSaved);
+    if (item.isNew || itemResult.id == getSelectedItem()?.id) {
+      onSelect(itemResult);
+    }
+  }
+
+  Future<R> _executeCrudOperation<R>(
+    T item,
+    Future<R> Function() operation,
+  ) async {
+    data.updateItemState(item.id, CrudItemState.loading());
+    try {
+      final result = await operation();
+      // if R is not void and result is null, throw an exception
+      if (result == null && R == T) {
+        throw LdException(message: "Operation failed");
+      }
+      data.updateItemState(
+        item.id,
+        CrudItemState.success(result as T?),
+      );
+      return result;
+    } catch (e) {
+      data.updateItemState(
+        item.id,
+        CrudItemState.error(e as LdException),
+      );
+      return Future.error(e);
+    }
+  }
+
+  @override
+  void dispose() {
+    data.dispose();
+    super.dispose();
+  }
+}
+
+/// [LdCrudMasterDetail] extends the [LdMasterDetail] widget to provide CRUD
+/// functionality for a list of items of type [T].
+///
+/// It handles various CRUD operations like create, update, delete, and fetch
+/// and also performs the usual UI operations like selecting and deselecting
+/// items or updating the UI based on the state and result of a CRUD operation.
+class LdCrudMasterDetail<T extends CrudItemMixin<T>> extends LdMasterDetail<T> {
+  final CrudOperations<T> crud;
+
+  const LdCrudMasterDetail({
+    super.key,
+    required LdCrudMasterDetailBuilder<T> builder,
+    required this.crud,
+    MasterDetailPresentationMode detailPresentationMode =
+        MasterDetailPresentationMode.page,
+    MasterDetailLayoutMode layoutMode = MasterDetailLayoutMode.auto,
+    T? selectedItem,
+    NavigatorState? navigator,
+    LdMasterDetailOnSelectCallback<T>? onSelectionChange,
+    bool Function(SizingInformation size)? customSplitPredicate,
+  }) : super(
+          builder: builder,
+          detailPresentationMode: detailPresentationMode,
+          layoutMode: layoutMode,
+          selectedItem: selectedItem,
+          navigator: navigator,
+          onSelectionChange: onSelectionChange,
+          customSplitPredicate: customSplitPredicate,
+        );
+
+  @override
+  State<LdMasterDetail<T>> createState() => _LdCrudMasterDetailState<T>();
+}
+
+class _LdCrudMasterDetailState<T extends CrudItemMixin<T>>
+    extends _LdMasterDetailState<T> {
+  @override
+  void _initController() {
+    _controller = CrudMasterDetailController(
+      crud: (widget as LdCrudMasterDetail<T>).crud,
+      onSelect: _onSelect,
+      onDeselect: _onDeselect,
+      getSelectedItem: () => _selectedItem,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ;
+    return ListenableBuilder(
+      listenable: (_controller as CrudMasterDetailController<T>).data,
+      builder: (context, child) {
+        return super.build(context);
+      },
+    );
+  }
+}

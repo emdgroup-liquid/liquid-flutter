@@ -8,6 +8,9 @@ import 'package:multi_split_view/multi_split_view.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
+part 'crud_master_detail.dart';
+part 'master_detail_builder.dart';
+
 typedef LdMasterDetailOnSelect<T> = Future<bool> Function(T item);
 typedef LdMasterDetailOnSelectCallback<T> = void Function(T? item);
 
@@ -16,52 +19,19 @@ extension GoRouterExt on GoRouter {
   Uri get uri => routeInformationProvider.value.uri;
 }
 
-abstract class LdMasterDetailBuilder<T> {
-  Widget buildDetailTitle(
-    BuildContext context,
-    T item,
-    bool isSeparatePage,
-    Function() deselect,
-  );
+class MasterDetailController<T> {
+  final Future<bool> Function(T item) onSelect;
+  final Function onDeselect;
 
-  Widget buildMasterTitle(
-    BuildContext context,
-    LdMasterDetailOnSelect<T> onSelect,
-    T? selectedItem,
-    bool isSeparatePage,
-  );
+  bool get isMasterAppBarLoading => false;
+  bool isDetailsAppBarLoading(T item) => false;
 
-  Widget buildDetail(
-    BuildContext context,
-    T item,
-    bool isSeparatePage,
-    Function() deselect,
-  );
+  MasterDetailController({
+    required this.onSelect,
+    required this.onDeselect,
+  });
 
-  Widget buildMaster(
-    BuildContext context,
-    LdMasterDetailOnSelect<T> onSelect,
-    T? selectedItem,
-    bool isSeparatePage,
-  );
-
-  List<Widget> buildMasterActions(
-    BuildContext context,
-    LdMasterDetailOnSelect<T> onSelect,
-    T? selectedItem,
-    bool isSeparatePage,
-  ) {
-    return [];
-  }
-
-  List<Widget> buildDetailActions(
-    BuildContext context,
-    T item,
-    bool isSeparatePage,
-    Function() deselect,
-  ) {
-    return [];
-  }
+  void dispose() {}
 }
 
 enum MasterDetailPresentationMode { page, dialog }
@@ -103,7 +73,7 @@ class LdMasterDetail<T> extends StatefulWidget {
 
   final double masterDetailFlex;
 
-  final LdMasterDetailBuilder<T> builder;
+  final _LdMasterDetailBuilder<T, MasterDetailController<T>> builder;
 
   final NavigatorState? navigator;
 
@@ -184,13 +154,23 @@ class LdMasterDetail<T> extends StatefulWidget {
 class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
     with SingleTickerProviderStateMixin {
   T? _selectedItem;
+
   LdMasterDetailShellRouteConfig<T>? get _routeConfig =>
       Provider.of<LdMasterDetailShellRouteConfig<T>?>(context, listen: false);
+  late final MasterDetailController<T> _controller;
 
   @override
   initState() {
+    _initController();
     super.initState();
     unawaited(_selectInitialItem());
+  }
+
+  void _initController() {
+    _controller = MasterDetailController(
+      onSelect: _onSelect,
+      onDeselect: _onDeselect,
+    );
   }
 
   Future<void> _selectInitialItem() async {
@@ -275,7 +255,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
               return _DetailPage(
                 builder: widget.builder,
                 item: item,
-                deselect: _onDeselect,
+                controller: _controller,
               );
             },
           ),
@@ -296,13 +276,13 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
             context,
             item,
             true,
-            _onDeselect,
+            _controller,
           ),
           title: widget.builder.buildDetailTitle(
             context,
             item,
             true,
-            _onDeselect,
+            _controller,
           ),
         ).show(context);
         setState(() {
@@ -361,69 +341,71 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
   ) {
     return Scaffold(
       appBar: LdAppBar(
+        loading: _controller.isMasterAppBarLoading,
         scrolledUnderElevation: isSeparatePage ? 4 : 0,
         context: context,
         title: widget.builder.buildMasterTitle(
           context,
-          _onSelect,
           _selectedItem,
           true,
+          _controller,
         ),
         actions: widget.builder.buildMasterActions(
           context,
-          _onSelect,
           _selectedItem,
           true,
+          _controller,
         ),
+        actionsDisabled: _controller.isMasterAppBarLoading,
       ),
       backgroundColor: LdTheme.of(context).background,
       body: widget.builder.buildMaster(
         context,
-        onSelect,
         selectedItem,
         isSeparatePage,
+        _controller,
       ),
     );
   }
 
-  Widget buildDetail(BuildContext context, T item, bool isSeparatePage) {
+  Widget buildDetail(
+    BuildContext context,
+    T item,
+    bool isSeparatePage,
+  ) {
     return Scaffold(
       appBar: LdAppBar(
+        context: context,
         automaticallyImplyLeading: false,
         scrolledUnderElevation: isSeparatePage ? 4 : 0,
-        context: context,
-        title: widget.builder.buildDetailTitle(
-          context,
-          item,
-          isSeparatePage,
-          _onDeselect,
-        ),
-        actions: widget.builder.buildDetailActions(
-          context,
-          item,
-          isSeparatePage,
-          _onDeselect,
-        ),
+        title: widget.builder
+            .buildDetailTitle(context, item, isSeparatePage, _controller),
+        actions: widget.builder
+            .buildDetailActions(context, item, isSeparatePage, _controller),
+        actionsDisabled: _controller.isDetailsAppBarLoading(item),
+        loading: _controller.isDetailsAppBarLoading(item),
       ),
       backgroundColor: LdTheme.of(context).background,
       body: widget.builder.buildDetail(
         context,
         item,
         isSeparatePage,
-        _onDeselect,
+        _controller,
       ),
     );
   }
 
-  Widget buildContent(BuildContext context, bool isLarge) {
+  Widget buildContent(
+    BuildContext context,
+    bool isLarge,
+  ) {
     final theme = LdTheme.of(context, listen: true);
 
-    final master = buildMaster(
-      context,
-      _onSelect,
-      _selectedItem,
-      !isLarge,
-    );
+    final detail = _selectedItem != null
+        ? buildDetail(context, _selectedItem!, !isLarge)
+        : null;
+
+    final master = buildMaster(context, _onSelect, _selectedItem, !isLarge);
 
     if (isLarge) {
       return MultiSplitViewTheme(
@@ -463,12 +445,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
       );
     }
 
-    return buildMaster(
-      context,
-      _onSelect,
-      _selectedItem,
-      false,
-    );
+    return buildMaster(context, _onSelect, _selectedItem, false);
   }
 
   bool _useSplitView(SizingInformation size) {
@@ -498,14 +475,14 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
 }
 
 class _DetailPage<T> extends StatelessWidget {
-  final LdMasterDetailBuilder builder;
+  final _LdMasterDetailBuilder<T, MasterDetailController<T>> builder;
   final T item;
-  final VoidCallback deselect;
+  final MasterDetailController<T> controller;
 
   const _DetailPage({
     required this.builder,
     required this.item,
-    required this.deselect,
+    required this.controller,
     super.key,
   });
 
@@ -516,10 +493,12 @@ class _DetailPage<T> extends StatelessWidget {
         backgroundColor: LdTheme.of(context).background,
         appBar: LdAppBar(
           context: context,
-          title: builder.buildDetailTitle(context, item, true, deselect),
-          actions: builder.buildDetailActions(context, item, true, deselect),
+          title: builder.buildDetailTitle(context, item, true, controller),
+          actions: builder.buildDetailActions(context, item, true, controller),
+          actionsDisabled: controller.isDetailsAppBarLoading(item),
+          loading: controller.isDetailsAppBarLoading(item),
         ),
-        body: builder.buildDetail(context, item, true, deselect),
+        body: builder.buildDetail(context, item, true, controller),
       ),
     );
   }
