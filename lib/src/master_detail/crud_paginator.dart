@@ -96,21 +96,17 @@ class LdCrudPaginator<T extends CrudItemMixin<T>> extends LdPaginator<T> {
   }
 
   void _add(T item) {
-    final lastPage = pages.entries.last.value;
-    if (!lastPage.hasMore) {
-      // if the last page has already been loaded, add the item to the last page
-      lastPage.newItems.add(item);
-      _totalItems += 1;
-    }
-
+    // Add item to the list
+    _items.add(item);
+    _totalItems += 1;
     notifyListeners();
   }
 
   bool _update(T item) {
-    for (var page in pages.values) {
-      final index = page.newItems.indexWhere((e) => e.id == item.id);
-      if (index != -1) {
-        page.newItems[index] = item;
+    // Update item in the list
+    for (var i = 0; i < _items.length; i++) {
+      if (_items[i]?.id == item.id) {
+        _items[i] = item;
         notifyListeners();
         return true;
       }
@@ -119,14 +115,11 @@ class LdCrudPaginator<T extends CrudItemMixin<T>> extends LdPaginator<T> {
   }
 
   Future<void> _delete(dynamic id) async {
-    for (var e in _loadedPages.entries) {
-      final index = e.value.newItems.indexWhere((e) => e.id == id);
-      if (index != -1) {
+    // Delete item from the list
+    for (var i = 0; i < _items.length; i++) {
+      if (_items[i]?.id == id) {
+        _items.removeAt(i);
         _totalItems -= 1;
-        _loadedPages[e.key] = e.value.copyWith(
-          newItems: List.from(e.value.newItems)..removeAt(index),
-          total: _totalItems,
-        );
         notifyListeners();
         return;
       }

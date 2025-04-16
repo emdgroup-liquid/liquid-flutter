@@ -406,11 +406,6 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
   ) {
     final theme = LdTheme.of(context, listen: true);
 
-    final detail =
-        _openItem != null ? buildDetail(context, _openItem!, !isLarge) : null;
-
-    final master = buildMaster(context, _onOpenItem, _openItem, !isLarge);
-
     if (isLarge) {
       return MultiSplitViewTheme(
         data: MultiSplitViewThemeData(
@@ -420,13 +415,15 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
           initialAreas: [
             Area(
               flex: 1,
-              builder: (context, area) => FocusTraversalGroup(child: master),
+              builder: (context, area) => FocusTraversalGroup(
+                child: buildMaster(context, _onOpenItem, _openItem, !isLarge),
+              ),
             ),
             Area(
               flex: widget.masterDetailFlex,
               builder: (context, area) {
-                final detail = _selectedItem != null
-                    ? buildDetail(context, _selectedItem!, !isLarge)
+                final detail = _openItem != null
+                    ? buildDetail(context, _openItem!, !isLarge)
                     : null;
                 return FocusTraversalGroup(
                   child: detail ?? Container(),

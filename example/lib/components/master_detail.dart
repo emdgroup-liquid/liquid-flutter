@@ -1,4 +1,4 @@
-import 'dart:collection';
+import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -26,26 +26,18 @@ class ExampleItem with CrudItemMixin<ExampleItem> {
 }
 
 class ExampleRepository extends CrudOperations<ExampleItem> {
-  static int pageSize = 25;
-  final SplayTreeMap<int, List<ExampleItem>> _data = SplayTreeMap.from(
-    List.generate(exampleTitles.length, (i) => ExampleItem(i, exampleTitles[i]))
-        .groupListsBy((item) => item.id! ~/ 25),
-  );
+  final List<ExampleItem> _items = List.generate(
+      exampleTitles.length, (i) => ExampleItem(i, exampleTitles[i]));
 
   /// Find the next available ID
   int? _nextId;
   int get nextId {
-    _nextId ??= _data.values.lastOrNull?.lastOrNull?.id;
-    _nextId = _nextId! + 1;
+    _nextId ??= _items.lastOrNull?.id;
+    _nextId = (_nextId ?? -1) + 1;
     return _nextId!;
   }
 
-  int get itemsCount {
-    return _data.values.fold(
-      0,
-      (previousValue, element) => previousValue + element.length,
-    );
-  }
+  int get itemsCount => _items.length;
 
   @override
   Future<ExampleItem> create(ExampleItem item) async {
@@ -54,13 +46,8 @@ class ExampleRepository extends CrudOperations<ExampleItem> {
     }
     final newItem = ExampleItem(nextId, item.name);
     await Future.delayed(const Duration(seconds: 1));
-    if ((_data.values.lastOrNull?.length ?? pageSize) < pageSize) {
-      // add item to last page
-      _data.values.lastOrNull?.add(newItem);
-    } else {
-      // add new page
-      _data[_data.length] = [newItem];
-    }
+
+    _items.add(newItem);
     return Future.value(newItem);
   }
 
@@ -68,12 +55,10 @@ class ExampleRepository extends CrudOperations<ExampleItem> {
   Future<ExampleItem> update(ExampleItem item) async {
     await Future.delayed(const Duration(seconds: 1));
 
-    for (var page in _data.values) {
-      final index = page.indexWhere((element) => element.id == item.id);
-      if (index != -1) {
-        page[index] = item;
-        return Future.value(item);
-      }
+    final index = _items.indexWhere((element) => element.id == item.id);
+    if (index != -1) {
+      _items[index] = item;
+      return Future.value(item);
     }
     throw LdException(message: "Item not found");
   }
@@ -81,24 +66,30 @@ class ExampleRepository extends CrudOperations<ExampleItem> {
   @override
   Future<void> delete(ExampleItem item) async {
     await Future.delayed(const Duration(seconds: 1));
-    for (var page in _data.values) {
-      final index = page.indexWhere((element) => element.id == item.id);
-      if (index != -1) {
-        page.removeAt(index);
-        return;
-      }
+
+    final index = _items.indexWhere((element) => element.id == item.id);
+    if (index != -1) {
+      _items.removeAt(index);
+      return;
     }
+    throw LdException(message: "Item not found");
   }
 
   @override
-  FetchListFunction<ExampleItem> get fetchAll =>
-      (page, loadedItems, nextPageToken) async {
+  FetchListFunction<ExampleItem> get fetchAll => ({
+        required int offset,
+        required int pageSize,
+        String? pageToken,
+      }) async {
         await Future.delayed(const Duration(seconds: 1));
-
-        final newItems = _data[page] ?? [];
+        final endIndex = min(offset + pageSize, _items.length);
+        final pageItems = offset >= _items.length
+            ? <ExampleItem>[]
+            : _items.sublist(offset, endIndex);
+        final hasMore = endIndex < _items.length;
         return LdListPage<ExampleItem>(
-          newItems: newItems,
-          hasMore: page < _data.length - 1,
+          newItems: pageItems,
+          hasMore: hasMore,
           total: itemsCount,
         );
       };
@@ -120,8 +111,8 @@ class ExampleBuilder extends LdMasterDetailBuilder<ExampleItem> {
         const LdTextHl("Detail"),
         LdTextL("Item ${item.id}: ${item.name}"),
         LdButton(
-          child: const Text("Go back"),
           onPressed: controller.onCloseItem,
+          child: const Text("Go back"),
         )
       ],
     ).padL();
@@ -281,10 +272,11 @@ class ExampleCrudBuilder extends LdCrudMasterDetailBuilder<ExampleItem> {
 
   @override
   List<Widget> buildMasterActions(
-      BuildContext context,
-      ExampleItem? openItem,
-      bool isSeparatePage,
-      LdCrudMasterDetailController<ExampleItem> controller) {
+    BuildContext context,
+    ExampleItem? openItem,
+    bool isSeparatePage,
+    LdCrudMasterDetailController<ExampleItem> controller,
+  ) {
     if (controller.data.isMultiSelectMode) {
       return [
         IconButton(
@@ -299,6 +291,11 @@ class ExampleCrudBuilder extends LdCrudMasterDetailBuilder<ExampleItem> {
               },
             );
           },
+        ),
+        IconButton(
+          // Add a dummy button to force a layout change
+          icon: const Icon(Icons.help),
+          onPressed: () {},
         ),
       ];
     }
@@ -362,7 +359,7 @@ class ExampleCrudBuilder extends LdCrudMasterDetailBuilder<ExampleItem> {
 }
 
 class MasterDetailDemo extends StatefulWidget {
-  const MasterDetailDemo({Key? key}) : super(key: key);
+  const MasterDetailDemo({super.key});
 
   @override
   State<MasterDetailDemo> createState() => _MasterDetailDemoState();
@@ -370,22 +367,19 @@ class MasterDetailDemo extends StatefulWidget {
 
 class _MasterDetailDemoState extends State<MasterDetailDemo> {
   final ExampleRepository _crudRepository = ExampleRepository();
-  Future<LdListPage<ExampleItem>> _fetchItems(
-    int page,
-    int loadedItems,
-    String? nextPageToken,
-  ) async {
-    await Future.delayed(const Duration(seconds: 1));
+  Future<LdListPage<ExampleItem>> _fetchItems({
+    required int offset,
+    required int pageSize,
+    String? pageToken,
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 500));
 
-    if (loadedItems == 200) {
-      return LdListPage<ExampleItem>(newItems: [], hasMore: false, total: 100);
-    }
     return LdListPage<ExampleItem>(
       newItems: List.generate(
-        30,
-        (index) => ExampleItem(index, "Item $index"),
+        pageSize,
+        (index) => ExampleItem(offset + index, "Item ${offset + index}"),
       ),
-      hasMore: true,
+      hasMore: offset + pageSize < 200,
       total: 200,
     );
   }
