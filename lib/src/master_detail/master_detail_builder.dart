@@ -52,5 +52,7 @@ abstract class _LdMasterDetailBuilder<T,
 abstract class LdMasterDetailBuilder<T>
     extends _LdMasterDetailBuilder<T, LdMasterDetailController<T>> {}
 
+/// A builder for a CRUD master detail view.
+/// For [buildMaster], [LdCrudMasterList] may be a good fit.
 abstract class LdCrudMasterDetailBuilder<T extends CrudItemMixin<T>>
     extends _LdMasterDetailBuilder<T, LdCrudMasterDetailController<T>> {}

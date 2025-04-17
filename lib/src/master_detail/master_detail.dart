@@ -255,6 +255,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
                 builder: widget.builder,
                 item: item,
                 controller: _controller,
+                actions: buildDetailActions(context, item, true),
               );
             },
           ),
@@ -355,11 +356,10 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
           true,
           _controller,
         ),
-        actions: widget.builder.buildMasterActions(
+        actions: buildMasterActions(
           context,
-          _openItem,
-          true,
-          _controller,
+          openItem,
+          isSeparatePage,
         ),
         actionsDisabled: _controller.isMasterAppBarLoading,
       ),
@@ -370,6 +370,19 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
         isSeparatePage,
         _controller,
       ),
+    );
+  }
+
+  List<Widget> buildMasterActions(
+    BuildContext context,
+    T? openItem,
+    bool isSeparatePage,
+  ) {
+    return widget.builder.buildMasterActions(
+      context,
+      openItem,
+      isSeparatePage,
+      _controller,
     );
   }
 
@@ -385,8 +398,11 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
         scrolledUnderElevation: isSeparatePage ? 4 : 0,
         title: widget.builder
             .buildDetailTitle(context, item, isSeparatePage, _controller),
-        actions: widget.builder
-            .buildDetailActions(context, item, isSeparatePage, _controller),
+        actions: buildDetailActions(
+          context,
+          item,
+          isSeparatePage,
+        ),
         actionsDisabled: _controller.isDetailsAppBarLoading(item),
         loading: _controller.isDetailsAppBarLoading(item),
       ),
@@ -397,6 +413,19 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
         isSeparatePage,
         _controller,
       ),
+    );
+  }
+
+  List<Widget> buildDetailActions(
+    BuildContext context,
+    T item,
+    bool isSeparatePage,
+  ) {
+    return widget.builder.buildDetailActions(
+      context,
+      item,
+      isSeparatePage,
+      _controller,
     );
   }
 
@@ -479,11 +508,13 @@ class _DetailPage<T> extends StatelessWidget {
   final _LdMasterDetailBuilder<T, LdMasterDetailController<T>> builder;
   final T item;
   final LdMasterDetailController<T> controller;
+  final List<Widget> actions;
 
   const _DetailPage({
     required this.builder,
     required this.item,
     required this.controller,
+    required this.actions,
     super.key,
   });
 
@@ -495,7 +526,7 @@ class _DetailPage<T> extends StatelessWidget {
         appBar: LdAppBar(
           context: context,
           title: builder.buildDetailTitle(context, item, true, controller),
-          actions: builder.buildDetailActions(context, item, true, controller),
+          actions: actions,
           actionsDisabled: controller.isDetailsAppBarLoading(item),
           loading: controller.isDetailsAppBarLoading(item),
         ),

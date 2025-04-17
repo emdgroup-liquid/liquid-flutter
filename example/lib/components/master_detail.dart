@@ -277,41 +277,7 @@ class ExampleCrudBuilder extends LdCrudMasterDetailBuilder<ExampleItem> {
     bool isSeparatePage,
     LdCrudMasterDetailController<ExampleItem> controller,
   ) {
-    if (controller.data.isMultiSelectMode) {
-      return [
-        IconButton(
-          icon: const Icon(Icons.delete),
-          onPressed: () async {
-            controller.batchDelete(
-              controller.data.selectedItems,
-              onItemsDeleted: () {
-                LdNotificationsController.of(context).error(
-                  "Items deleted",
-                );
-              },
-            );
-          },
-        ),
-        IconButton(
-          // Add a dummy button to force a layout change
-          icon: const Icon(Icons.help),
-          onPressed: () {},
-        ),
-      ];
-    }
-    return [
-      IconButton(
-        icon: const Icon(Icons.add),
-        onPressed: () async {
-          controller.create(ExampleItem(null, "New item"),
-              onItemCreated: (item) {
-            LdNotificationsController.of(context).success(
-              "Item successfully created",
-            );
-          });
-        },
-      ),
-    ];
+    return [];
   }
 
   @override
@@ -320,41 +286,7 @@ class ExampleCrudBuilder extends LdCrudMasterDetailBuilder<ExampleItem> {
       ExampleItem item,
       bool isSeparatePage,
       LdCrudMasterDetailController<ExampleItem> controller) {
-    return [
-      IconButton(
-        icon: const Icon(Icons.edit),
-        onPressed: () async {
-          final notification =
-              (await LdNotificationsController.of(context).addNotification(
-            LdInputNotification(
-              inputHint: "Edit item",
-              inputLabel: "Name",
-              type: LdNotificationType.enterText,
-              message: "Enter new name",
-            ),
-          )) as LdInputNotification;
-          final newName = await notification.inputCompleter.future;
-          if (newName?.isNotEmpty ?? false) {
-            controller.save(ExampleItem(item.id, newName!),
-                onItemSaved: (item) {
-              LdNotificationsController.of(context).success(
-                "Item successfully saved",
-              );
-            });
-          }
-        },
-      ),
-      IconButton(
-        onPressed: () async {
-          await controller.delete(item, onItemDeleted: (item) {
-            LdNotificationsController.of(context).error(
-              "Item deleted",
-            );
-          });
-        },
-        icon: const Icon(Icons.delete),
-      ),
-    ];
+    return [];
   }
 }
 
@@ -467,6 +399,49 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
                 detailPresentationMode: _presentationMode,
                 builder: ExampleCrudBuilder(),
                 crud: _crudRepository,
+                itemActions: [
+                  LdMasterDetailItemAction<ExampleItem>.updateItem(
+                    getNewItem: (item) async {
+                      final notification =
+                          (await LdNotificationsController.of(context)
+                              .addNotification(
+                        LdInputNotification(
+                          inputHint: "Edit item",
+                          inputLabel: "Name",
+                          type: LdNotificationType.enterText,
+                          message: "Enter new name",
+                        ),
+                      )) as LdInputNotification;
+                      final newName = await notification.inputCompleter.future;
+                      if (newName?.isNotEmpty ?? false) {
+                        return ExampleItem(item.id, newName!);
+                      }
+                      return null;
+                    },
+                  ),
+                  LdMasterDetailItemAction<ExampleItem>.deleteItem(),
+                ],
+                listActions: [
+                  LdMasterDetailListAction<ExampleItem>.newItemAction(
+                    getNewItem: () async {
+                      final notification =
+                          (await LdNotificationsController.of(context)
+                              .addNotification(
+                        LdInputNotification(
+                          inputHint: "Create item",
+                          inputLabel: "Name",
+                          type: LdNotificationType.enterText,
+                          message: "Enter new name",
+                        ),
+                      )) as LdInputNotification;
+                      final newName = await notification.inputCompleter.future;
+                      if (newName?.isNotEmpty ?? false) {
+                        return ExampleItem(null, newName!);
+                      }
+                      return null;
+                    },
+                  ),
+                ],
               ),
             ),
           ),

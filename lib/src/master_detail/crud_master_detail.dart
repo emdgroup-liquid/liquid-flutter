@@ -43,8 +43,8 @@ class LdCrudMasterDetailController<T extends CrudItemMixin<T>>
   /// [LdMasterDetail] widget.
   final T? Function() getOpenItem;
 
-  /// [LdCrudPaginator] is used to hold the list of items and their states.
-  late final data = LdCrudPaginator<T>(
+  /// [LdCrudListState] is used to hold the list of items and their states.
+  late final data = LdCrudListState<T>(
     fetchListFunction: crud.fetchAll,
   );
 
@@ -60,96 +60,29 @@ class LdCrudMasterDetailController<T extends CrudItemMixin<T>>
 
   @override
   bool isDetailsAppBarLoading(T item) {
-    return data.getItemState(item.id)?.type == CrudLoadingStateType.loading;
+    return data.isItemLoading(item.id);
   }
 
-  Future<T> create(
-    T item, {
-    LdMasterDetailCrudItemCallback<T>? onItemCreated,
-  }) async {
-    final result =
-        await _executeCrudOperation<T>(item, () => crud.create(item));
-    onItemCreated?.call(result);
-    return result;
-  }
-
-  Future<void> delete(
-    T item, {
-    LdMasterDetailCrudItemCallback<T>? onItemDeleted,
-  }) async {
-    await _executeCrudOperation<void>(item, () => crud.delete(item));
-    onItemDeleted?.call(item);
-    if (getOpenItem()?.id == item.id) {
-      onCloseItem();
-    }
-  }
-
-  Future<void> batchDelete(
-    Iterable<T> items, {
-    LdMasterDetailCrudItemCallback<T>? onItemDeleted,
-    VoidCallback? onItemsDeleted,
-  }) async {
-    // set list busy in general
-    data.updateItemState(null, CrudItemState.loading());
-    try {
-      await crud.batchDelete(items);
-      for (final item in items) {
-        // remove all items from list
-        data.updateItemState(item.id, CrudItemState.deleted());
-        onItemDeleted?.call(item);
-      }
-      onItemsDeleted?.call();
-      data.toggleMultiSelectMode(forceValue: false);
-    } catch (e) {
-      // set list error
-      data.updateItemState(null, CrudItemState.error(e as LdException));
-    }
-  }
-
-  Future<T> update(
-    T item, {
-    LdMasterDetailCrudItemCallback<T>? onItemUpdated,
-  }) async {
-    final result =
-        await _executeCrudOperation<T>(item, () => crud.update(item));
-    onItemUpdated?.call(item);
-    return result;
-  }
-
-  FetchListFunction<T> get fetchAll => data.fetchListFunction;
-
-  Future<void> save(
-    T item, {
-    LdMasterDetailCrudItemCallback<T>? onItemSaved,
-  }) async {
-    final T itemResult = item.isNew
-        ? await create(item, onItemCreated: onItemSaved)
-        : await update(item, onItemUpdated: onItemSaved);
-    if (item.isNew || itemResult.id == getOpenItem()?.id) {
-      onOpenItem(itemResult);
-    }
-  }
-
-  Future<R> _executeCrudOperation<R>(
+  Future<R> executeCrudOperation<R>(
     T item,
     Future<R> Function() operation,
   ) async {
-    data.updateItemState(item.id, CrudItemState.loading());
+    data.handleItemStateEvent(item.id, CrudItemStateEvent.loading(null));
     try {
       final result = await operation();
       // if R is not void and result is null, throw an exception
       if (result == null && R == T) {
         throw LdException(message: "Operation failed");
       }
-      data.updateItemState(
+      data.handleItemStateEvent(
         item.id,
-        CrudItemState.success(result as T?),
+        CrudItemStateEvent.success(result as T),
       );
       return result;
     } catch (e) {
-      data.updateItemState(
+      data.handleItemStateEvent(
         item.id,
-        CrudItemState.error(e as LdException),
+        CrudItemStateEvent.error(e as LdException),
       );
       return Future.error(e);
     }
@@ -170,11 +103,15 @@ class LdCrudMasterDetailController<T extends CrudItemMixin<T>>
 /// items or updating the UI based on the state and result of a CRUD operation.
 class LdCrudMasterDetail<T extends CrudItemMixin<T>> extends LdMasterDetail<T> {
   final CrudOperations<T> crud;
+  final List<LdMasterDetailItemAction<T>> itemActions;
+  final List<LdMasterDetailListAction<T>> listActions;
 
   const LdCrudMasterDetail({
     super.key,
     required LdCrudMasterDetailBuilder<T> builder,
     required this.crud,
+    this.itemActions = const [],
+    this.listActions = const [],
     MasterDetailPresentationMode detailPresentationMode =
         MasterDetailPresentationMode.page,
     MasterDetailLayoutMode layoutMode = MasterDetailLayoutMode.auto,
@@ -217,4 +154,52 @@ class _LdCrudMasterDetailState<T extends CrudItemMixin<T>>
       },
     );
   }
+
+  @override
+  List<Widget> buildMasterActions(
+      BuildContext context, T? openItem, bool isSeparatePage) {
+    final controller = (_controller as LdCrudMasterDetailController<T>);
+    return [
+      ...super.buildMasterActions(context, openItem, isSeparatePage),
+      ...(widget as LdCrudMasterDetail<T>)
+          .listActions
+          .where((action) =>
+              action.displayModes.contains(ActionDisplayModes.masterActionBar))
+          .map(
+            (action) => action.childBuilder(
+              () async => await action.onAction(
+                controller.data.isMultiSelectMode
+                    ? controller.data.selectedItems.toList()
+                    : controller.data.items,
+                (_controller as LdCrudMasterDetailController<T>),
+              ),
+            ),
+          )
+    ];
+  }
+
+  @override
+  List<Widget> buildDetailActions(
+      BuildContext context, T item, bool isSeparatePage) {
+    return [
+      ...super.buildDetailActions(context, item, isSeparatePage),
+      ...(widget as LdCrudMasterDetail<T>)
+          .itemActions
+          .where((action) =>
+              action.displayModes.contains(ActionDisplayModes.detailActionBar))
+          .map(
+            (action) => action.childBuilder(
+              () async => await action.onAction(
+                item,
+                (_controller as LdCrudMasterDetailController<T>),
+              ),
+            ),
+          )
+    ];
+  }
+
+  List<LdMasterDetailAction<T, dynamic>> get actions => [
+        ...(widget as LdCrudMasterDetail<T>).itemActions,
+        ...(widget as LdCrudMasterDetail<T>).listActions,
+      ];
 }
