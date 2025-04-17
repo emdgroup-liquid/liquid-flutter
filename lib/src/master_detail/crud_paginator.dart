@@ -1,38 +1,39 @@
 part of '../list/list_paginator.dart';
 
-enum CrudLoadingStateType { initial, loading, success, error }
+enum CrudLoadingStateType { loading, success, error }
 
-class CrudItemState<T> {
+/// A state event for a CRUD item.
+/// It can be loading, success, error or deleted.
+/// If an operation fails, the error is set.
+/// If the operation is successful, the data is set (for create and update),
+/// or null (for delete).
+class CrudItemStateEvent<T> {
   final CrudLoadingStateType type;
   final LdException? error;
   final T? data;
 
-  CrudItemState({
+  CrudItemStateEvent._({
     required this.type,
     this.error,
     this.data,
   });
 
-  factory CrudItemState.initial() =>
-      CrudItemState(type: CrudLoadingStateType.initial);
+  factory CrudItemStateEvent.loading(T? data) =>
+      CrudItemStateEvent._(type: CrudLoadingStateType.loading, data: data);
 
-  factory CrudItemState.loading() =>
-      CrudItemState(type: CrudLoadingStateType.loading);
+  factory CrudItemStateEvent.success(T data) =>
+      CrudItemStateEvent._(type: CrudLoadingStateType.success, data: data);
 
-  /// In case data is null, it was a successful delete operation
-  factory CrudItemState.success(T? data) =>
-      CrudItemState(type: CrudLoadingStateType.success, data: data);
+  factory CrudItemStateEvent.deleted() =>
+      CrudItemStateEvent._(type: CrudLoadingStateType.success, data: null);
 
-  factory CrudItemState.deleted() =>
-      CrudItemState(type: CrudLoadingStateType.success, data: null);
-
-  factory CrudItemState.error(LdException error) =>
-      CrudItemState(type: CrudLoadingStateType.error, error: error);
+  factory CrudItemStateEvent.error(LdException error) =>
+      CrudItemStateEvent._(type: CrudLoadingStateType.error, error: error);
 }
 
 /// Extends [LdPaginator] to add CRUD operations and item states.
-class LdCrudPaginator<T extends CrudItemMixin<T>> extends LdPaginator<T> {
-  final Map<dynamic, CrudItemState<T>> itemStates = {};
+class LdCrudListState<T extends CrudItemMixin<T>> extends LdPaginator<T> {
+  final Map<dynamic, CrudItemStateEvent<T>> itemStates = {};
 
   // Add multiselect properties
   final Set<T> _selectedItems = {};
@@ -42,9 +43,12 @@ class LdCrudPaginator<T extends CrudItemMixin<T>> extends LdPaginator<T> {
   bool _isMultiSelectMode = false;
   bool get isMultiSelectMode => _isMultiSelectMode;
 
-  LdCrudPaginator({required super.fetchListFunction});
+  LdCrudListState({required super.fetchListFunction});
 
-  void updateItemState(dynamic id, CrudItemState<T> state) {
+  /// Intelligently handles item state events, e.g. loading, success, error.
+  /// It knows which state was caused by which operation and updates the
+  /// item list accordingly.
+  void handleItemStateEvent(dynamic id, CrudItemStateEvent<T> state) {
     // Update item state
     if (id != null) {
       itemStates[id] = state;
@@ -70,8 +74,17 @@ class LdCrudPaginator<T extends CrudItemMixin<T>> extends LdPaginator<T> {
     notifyListeners();
   }
 
-  CrudItemState<T>? getItemState(dynamic id) {
-    return itemStates[id];
+  T? getItemOptimistically(dynamic id) {
+    return itemStates[id]?.data ??
+        items.firstWhere((item) => item?.id == id, orElse: () => null);
+  }
+
+  LdException? getItemError(dynamic id) {
+    return itemStates[id]?.error;
+  }
+
+  bool isItemLoading(dynamic id) {
+    return itemStates[id]?.type == CrudLoadingStateType.loading;
   }
 
   void toggleMultiSelectMode({bool? forceValue}) {
