@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid/components/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class ContextMenuDemo extends StatefulWidget {
   const ContextMenuDemo({super.key});
@@ -14,6 +15,34 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
   LdContextMenuBlurMode _blurMode = LdContextMenuBlurMode.mobileOnly;
   LdContextZoomMode _zoomMode = LdContextZoomMode.mobileOnly;
 
+  _buildMenu(BuildContext context, VoidCallback onDismiss) =>
+      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        LdListItem(
+          width: double.infinity,
+          trailing: const Icon(LucideIcons.arrowRight),
+          onTap: () {
+            onDismiss();
+          },
+          title: const Text("Button 1"),
+        ),
+        LdListItem(
+          width: double.infinity,
+          trailing: const Icon(LucideIcons.arrowRight),
+          onTap: () async {
+            await Future.delayed(const Duration(seconds: 1));
+            onDismiss();
+          },
+          title: const Text("Button 2"),
+        ),
+        LdListItem(
+          width: double.infinity,
+          trailing: const Icon(LucideIcons.trash),
+          onTap: () {
+            onDismiss();
+          },
+          title: const Text("Button 2"),
+        ),
+      ]);
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
@@ -22,49 +51,16 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
           children: [
             ComponentWell(
               onSurface: true,
+              padding: EdgeInsets.zero,
               child: LdContextMenu(
                 zoomMode: _zoomMode,
                 blurMode: _blurMode,
                 menuBuilder: (context, onDismiss) {
                   return ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: 150,
-                    ),
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          LdButtonGhost(
-                            width: double.infinity,
-                            trailing: const Icon(Icons.arrow_forward),
-                            onPressed: () {
-                              onDismiss();
-                            },
-                            child: const Text("Button 1"),
-                          ),
-                          ldSpacerXS,
-                          LdButtonGhost(
-                            width: double.infinity,
-                            trailing: const Icon(Icons.arrow_forward),
-                            onPressed: () async {
-                              await Future.delayed(const Duration(seconds: 1));
-                              onDismiss();
-                            },
-                            child: const Text("Button 2"),
-                          ),
-                          ldSpacerXS,
-                          const LdDivider(),
-                          ldSpacerS,
-                          LdButtonGhost(
-                            width: double.infinity,
-                            color: shadRed,
-                            trailing: const Icon(Icons.remove),
-                            onPressed: () {
-                              onDismiss();
-                            },
-                            child: const Text("Button 2"),
-                          ),
-                        ]),
-                  );
+                      constraints: const BoxConstraints(
+                        maxWidth: 150,
+                      ),
+                      child: _buildMenu(context, onDismiss));
                 },
                 builder: (context, shuttle) => LdListItem(
                   width: double.infinity,
@@ -85,44 +81,7 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
                     menuBuilder: (context, onDismiss) {
                       return ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 150),
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              LdButtonGhost(
-                                width: double.infinity,
-                                size: LdSize.s,
-                                trailing: const Icon(Icons.arrow_forward),
-                                onPressed: () {
-                                  onDismiss();
-                                },
-                                child: const Text("Button 1"),
-                              ),
-                              ldSpacerXS,
-                              LdButtonGhost(
-                                width: double.infinity,
-                                size: LdSize.s,
-                                trailing: const Icon(Icons.arrow_forward),
-                                onPressed: () async {
-                                  await Future.delayed(
-                                      const Duration(seconds: 1));
-                                  onDismiss();
-                                },
-                                child: const Text("Button 2"),
-                              ),
-                              ldSpacerXS,
-                              const LdDivider(),
-                              ldSpacerS,
-                              LdButtonGhost(
-                                width: double.infinity,
-                                size: LdSize.s,
-                                color: LdTheme.of(context).error,
-                                trailing: const Icon(Icons.remove),
-                                onPressed: () {
-                                  onDismiss();
-                                },
-                                child: const Text("Button 2"),
-                              ),
-                            ]),
+                        child: _buildMenu(context, onDismiss),
                       );
                     },
                     builder: (context, shuttle) => LdButton(

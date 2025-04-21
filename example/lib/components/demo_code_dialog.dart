@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:syntax_highlight/syntax_highlight.dart';
 
 class DemoCodeDialog extends StatefulWidget {
@@ -44,7 +45,7 @@ class _DemoCodeDialogState extends State<DemoCodeDialog> {
 
     return LdModalBuilder(
       builder: (context, onPress) => LdButton(
-        leading: const Icon(Icons.code),
+        leading: const Icon(LucideIcons.code),
         size: LdSize.s,
         mode: LdButtonMode.outline,
         onPressed: onPress,

@@ -3,6 +3,7 @@ import 'package:liquid/color_selector.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid/components/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class ButtonDemo extends StatefulWidget {
   const ButtonDemo({super.key});
@@ -73,7 +74,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                             mode: _mode,
                             active: _active,
                             disabled: _disabled,
-                            leading: const Icon(Icons.donut_large),
+                            leading: const Icon(LucideIcons.donut),
                             size: _size,
                             onPressed: () async {
                               await Future.delayed(const Duration(seconds: 1));
@@ -90,16 +91,10 @@ class _ButtonDemoState extends State<ButtonDemo> {
                         value: _mode,
                         label: "Mode",
                         items: const [
-                          LdSelectItem(
-                              child: Text("Filled"),
-                              value: LdButtonMode.filled),
-                          LdSelectItem(
-                              child: Text("Outline"),
-                              value: LdButtonMode.outline),
-                          LdSelectItem(
-                              child: Text("Ghost"), value: LdButtonMode.ghost),
-                          LdSelectItem(
-                              child: Text("Vague"), value: LdButtonMode.vague),
+                          LdSelectItem(child: Text("Filled"), value: LdButtonMode.filled),
+                          LdSelectItem(child: Text("Outline"), value: LdButtonMode.outline),
+                          LdSelectItem(child: Text("Ghost"), value: LdButtonMode.ghost),
+                          LdSelectItem(child: Text("Vague"), value: LdButtonMode.vague),
                         ],
                         onChange: _changeMode),
                   ],
@@ -129,15 +124,10 @@ class _ButtonDemoState extends State<ButtonDemo> {
                         value: _size,
                         label: "Size",
                         items: const [
-                          LdSelectItem(
-                              child: Text("Extra Small (XS)"),
-                              value: LdSize.xs),
-                          LdSelectItem(
-                              child: Text("Small (S)"), value: LdSize.s),
-                          LdSelectItem(
-                              child: Text("Medium (M)"), value: LdSize.m),
-                          LdSelectItem(
-                              child: Text("Large (L)"), value: LdSize.l),
+                          LdSelectItem(child: Text("Extra Small (XS)"), value: LdSize.xs),
+                          LdSelectItem(child: Text("Small (S)"), value: LdSize.s),
+                          LdSelectItem(child: Text("Medium (M)"), value: LdSize.m),
+                          LdSelectItem(child: Text("Large (L)"), value: LdSize.l),
                         ],
                         onChange: _changeSize),
                   ],
@@ -207,28 +197,26 @@ class _ButtonDemoState extends State<ButtonDemo> {
                       /*begin demo:LdButtonLeadingTrailing*/
                       // leading widget
                       LdButton(
-                        leading: const Icon(Icons.square),
+                        leading: const Icon(LucideIcons.square),
                         child: const Text("Primary"),
                         onPressed: () {
                           LdNotificationsController.of(context).addNotification(
                             LdNotification(
                               type: LdNotificationType.success,
-                              message:
-                                  "You pressed a button with a leading widget!",
+                              message: "You pressed a button with a leading widget!",
                             ),
                           );
                         },
                       ),
                       // trailing widget
                       LdButton(
-                        trailing: const Icon(Icons.square),
+                        trailing: const Icon(LucideIcons.square),
                         child: const Text("Primary"),
                         onPressed: () {
                           LdNotificationsController.of(context).addNotification(
                             LdNotification(
                               type: LdNotificationType.success,
-                              message:
-                                  "You pressed a button with a trailing widget!",
+                              message: "You pressed a button with a trailing widget!",
                             ),
                           );
                         },
@@ -276,14 +264,14 @@ class _ButtonDemoState extends State<ButtonDemo> {
                       LdButton(
                         size: LdSize.s,
                         mode: LdButtonMode.ghost,
-                        child: const Icon(Icons.square),
+                        child: const Icon(LucideIcons.square),
                         onPressed: () async {
                           await Future.delayed(const Duration(seconds: 1));
                         },
                       ),
                       ldSpacerM,
                       LdButton(
-                        child: const Icon(Icons.square),
+                        child: const Icon(LucideIcons.square),
                         onPressed: () async {
                           await Future.delayed(const Duration(seconds: 1));
                           throw Exception("I'm an error");
@@ -293,7 +281,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                       LdButton(
                         size: LdSize.l,
                         mode: LdButtonMode.vague,
-                        child: const Icon(Icons.square),
+                        child: const Icon(LucideIcons.square),
                         onPressed: () async {
                           await Future.delayed(const Duration(seconds: 1));
                         },
@@ -315,14 +303,13 @@ class _ButtonDemoState extends State<ButtonDemo> {
                   child: Column(
                     children: [
                       LdButton(
-                        leading: const Icon(Icons.abc),
-                        trailing: const Icon(Icons.arrow_right),
+                        leading: const Icon(LucideIcons.airVent),
+                        trailing: const Icon(LucideIcons.arrowRight),
                         mode: LdButtonMode.outline,
                         onPressed: () {
                           LdNotificationsController.of(context).addNotification(
                             LdNotification(
-                                message: "You pressed the full width button",
-                                type: LdNotificationType.success),
+                                message: "You pressed the full width button", type: LdNotificationType.success),
                           );
                         },
                         width: double.infinity,

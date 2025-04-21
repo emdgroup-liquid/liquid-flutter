@@ -16,10 +16,6 @@ class LdSheetType extends WoltBottomSheetType {
     this.index = 0,
   }) : super(
           shapeBorder: RoundedRectangleBorder(
-            side: BorderSide(
-              color: theme.stroke,
-              width: 1,
-            ),
             borderRadius: BorderRadius.only(
               bottomLeft: Radius.circular(bottomRadius ?? 0),
               bottomRight: Radius.circular(bottomRadius ?? 0),
@@ -37,8 +33,7 @@ class LdSheetType extends WoltBottomSheetType {
   BoxConstraints layoutModal(Size availableSize) {
     if (insets != EdgeInsets.zero) {
       return super.layoutModal(
-        Size(availableSize.width - insets.horizontal,
-            availableSize.height - insets.vertical - index * 48),
+        Size(availableSize.width - insets.horizontal, availableSize.height - insets.vertical - index * 48),
       );
     }
 
@@ -46,8 +41,7 @@ class LdSheetType extends WoltBottomSheetType {
   }
 
   @override
-  Offset positionModal(
-      Size availableSize, Size modalContentSize, TextDirection _) {
+  Offset positionModal(Size availableSize, Size modalContentSize, TextDirection _) {
     final xOffset = max(
       0.0,
       (availableSize.width - modalContentSize.width) / 2,
@@ -82,12 +76,9 @@ class LdDialogType extends WoltDialogType {
         );
 
   @override
-  Offset positionModal(
-      Size availableSize, Size modalContentSize, TextDirection _) {
-    final xOffset =
-        max(0.0, (availableSize.width - modalContentSize.width) / 2);
-    final yOffset = max(
-        0.0, (availableSize.height - modalContentSize.height + index * 64) / 2);
+  Offset positionModal(Size availableSize, Size modalContentSize, TextDirection _) {
+    final xOffset = max(0.0, (availableSize.width - modalContentSize.width) / 2);
+    final yOffset = max(0.0, (availableSize.height - modalContentSize.height + index * 64) / 2);
     return Offset(xOffset, yOffset);
   }
 

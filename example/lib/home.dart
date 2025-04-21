@@ -1,4 +1,3 @@
-import 'package:liquid_flutter_emd_theme/liquid_flutter_emd_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid/chemical_screen.dart';
 import 'package:liquid/code_block.dart';
@@ -6,6 +5,7 @@ import 'package:liquid/code_block.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid/window/drawer.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -62,13 +62,9 @@ class _HomeState extends State<Home> {
                                           height: 1000,
                                           width: 2000,
                                           child: Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              SizedBox(
-                                                  width: 250,
-                                                  child:
-                                                      MainNavigationDrawer()),
+                                              SizedBox(width: 250, child: MainNavigationDrawer()),
                                               Expanded(child: ChemicalScreen()),
                                             ],
                                           ),
@@ -86,11 +82,7 @@ class _HomeState extends State<Home> {
                             gradient: LinearGradient(
                               begin: Alignment.bottomLeft,
                               end: Alignment.topRight,
-                              colors: [
-                                background.withAlpha(0),
-                                background.withAlpha(200),
-                                background
-                              ],
+                              colors: [background.withAlpha(0), background.withAlpha(200), background],
                               stops: const [0, 0.8, 0.85],
                             ),
                           )))
@@ -107,11 +99,9 @@ class _HomeState extends State<Home> {
             Row(
               children: [
                 Container(
-                  decoration:
-                      BoxDecoration(borderRadius: theme.radius(LdSize.m)),
+                  decoration: BoxDecoration(borderRadius: theme.radius(LdSize.m)),
                   clipBehavior: Clip.hardEdge,
-                  child: Image.asset("liquid_flutter_icon.jpg",
-                      width: 48, height: 48),
+                  child: Image.asset("liquid_flutter_icon.jpg", width: 48, height: 48),
                 ),
                 ldSpacerM,
                 const Flexible(
@@ -166,14 +156,14 @@ class _HomeState extends State<Home> {
             Wrap(spacing: 8, runSpacing: 8, children: [
               LdButton(
                   mode: LdButtonMode.outline,
-                  trailing: const Icon(LdIcons.arrow_right),
+                  trailing: const Icon(LucideIcons.arrowRight),
                   onPressed: () {
                     context.go("/chemical");
                   },
                   child: const Text("Chemical Inventory")),
               LdButton(
                 mode: LdButtonMode.outline,
-                trailing: const Icon(LdIcons.arrow_right),
+                trailing: const Icon(LucideIcons.arrowRight),
                 onPressed: () {
                   context.go("/task-demo");
                 },

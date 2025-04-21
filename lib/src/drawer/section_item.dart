@@ -101,15 +101,20 @@ class _LdDrawerItemSectionState extends State<LdDrawerItemSection> {
                   ),
             Expanded(
                 child: DefaultTextStyle(
-                    style: ldBuildTextStyle(_theme, LdTextType.label, LdSize.m,
-                        color: colorBundle.text),
+                    style: ldBuildTextStyle(
+                      _theme,
+                      LdTextType.label,
+                      LdSize.m,
+                      color: _theme.text,
+                    ),
                     child: widget.child)),
             IconTheme(
-                data: IconThemeData(
-                  color: colorBundle.icon,
-                  size: _theme.paragraphSize(LdSize.s),
-                ),
-                child: _trailingItem),
+              data: IconThemeData(
+                color: colorBundle.icon,
+                size: _theme.paragraphSize(LdSize.s),
+              ),
+              child: _trailingItem,
+            ),
           ])),
     );
   }

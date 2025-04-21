@@ -6,6 +6,7 @@ import 'package:liquid/code_block.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid/components/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ModalDemo extends StatefulWidget {
@@ -60,20 +61,11 @@ class _DemoSheet extends StatelessWidget {
               ? EdgeInsets.only(
                   left: 0,
                   right: 5,
-                  bottom: MediaQuery.paddingOf(
-                              Scaffold.maybeOf(context)?.context ?? context)
-                          .bottom /
-                      2,
+                  bottom: MediaQuery.paddingOf(Scaffold.maybeOf(context)?.context ?? context).bottom / 2,
                 )
-              : (enableInsets
-                  ? const EdgeInsets.symmetric(horizontal: 32)
-                  : EdgeInsets.zero),
-          topRadius: useScreenRadius
-              ? max(0, LdTheme.of(context).screenRadius - 2.5)
-              : null,
-          bottomRadius: useScreenRadius
-              ? max(0, LdTheme.of(context).screenRadius - 2.5)
-              : null,
+              : (enableInsets ? const EdgeInsets.symmetric(horizontal: 32) : EdgeInsets.zero),
+          topRadius: useScreenRadius ? max(0, LdTheme.of(context).screenRadius - 2.5) : null,
+          bottomRadius: useScreenRadius ? max(0, LdTheme.of(context).screenRadius - 2.5) : null,
           actionBar: !enableFooter
               ? null
               : (context) => Row(
@@ -102,30 +94,34 @@ class _DemoSheet extends StatelessWidget {
           ) =>
               LdAutoSpace(
                 children: [
-                  _DemoSheet(
-                    enableHeader: enableHeader,
-                    enableInsets: enableInsets,
-                    enableScaling: enableScaling,
-                    fixedDialogSize: fixedDialogSize,
-                    enableFooter: enableFooter,
-                    mode: mode,
-                    useScreenRadius: useScreenRadius,
-                    userDismissable: userDismissable,
+                  Padding(
+                    padding: const EdgeInsets.only(right: 32.0),
+                    child: const LdTextP(
+                        "It's about managing expectations tiger team it is all exactly as i said, but i don't like it. Let's unpack that later we should leverage existing asserts that ladder up to the message. We need to socialize the comms with the wider stakeholder community we're building the plane while we're flying it, but if you want to motivate these clowns, try less carrot and more stick, race without a finish line performance review, so what do you feel you would bring to the table if you were hired for this position."),
                   ),
                   const LdTextP(
                       "It's about managing expectations tiger team it is all exactly as i said, but i don't like it. Let's unpack that later we should leverage existing asserts that ladder up to the message. We need to socialize the comms with the wider stakeholder community we're building the plane while we're flying it, but if you want to motivate these clowns, try less carrot and more stick, race without a finish line performance review, so what do you feel you would bring to the table if you were hired for this position."),
-                  const LdTextP(
-                      "It's about managing expectations tiger team it is all exactly as i said, but i don't like it. Let's unpack that later we should leverage existing asserts that ladder up to the message. We need to socialize the comms with the wider stakeholder community we're building the plane while we're flying it, but if you want to motivate these clowns, try less carrot and more stick, race without a finish line performance review, so what do you feel you would bring to the table if you were hired for this position."),
-                  const LdTextPs(
-                      "Filler text by http://officeipsum.com/index.php"),
-                  LdButton(
-                    child: const Text("Return a result"),
-                    onPressed: () {
-                      Navigator.of(context).pop("Hello world");
-                    },
-                  ),
-                  const SizedBox(
-                    height: 200,
+                  const LdTextPs("Filler text by http://officeipsum.com/index.php"),
+                  Row(
+                    children: [
+                      _DemoSheet(
+                        enableHeader: enableHeader,
+                        enableInsets: enableInsets,
+                        enableScaling: enableScaling,
+                        fixedDialogSize: fixedDialogSize,
+                        enableFooter: enableFooter,
+                        mode: mode,
+                        useScreenRadius: useScreenRadius,
+                        userDismissable: userDismissable,
+                      ),
+                      ldSpacerM,
+                      LdButton(
+                        child: const Text("Return a result"),
+                        onPressed: () {
+                          Navigator.of(context).pop("Hello world");
+                        },
+                      ),
+                    ],
                   ),
                 ],
               )),
@@ -310,7 +306,7 @@ class _ModalDemoState extends State<ModalDemo> {
               ),
             """),
             LdButton(
-              leading: const Icon(Icons.open_in_new),
+              leading: const Icon(LucideIcons.squareArrowOutUpRight),
               onPressed: () {
                 context.push("/components/modal/my-modal");
               },

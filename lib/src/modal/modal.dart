@@ -3,7 +3,10 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/modal/size_notifier.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
@@ -48,14 +51,17 @@ class LdModal {
 
   final EdgeInsets? padding;
 
+  final EdgeInsets? headerPadding;
+
+  final EdgeInsets? actionBarPadding;
+
   /// The title of the modal.
   final Widget? title;
 
   /// A list of listenables to be injected into the modal. That can be read
   /// from the various builder contexts, useful for updating the modal content
   /// based on external state like a viewmodel.
-  final List<ListenableProvider> Function(BuildContext dialogContext)?
-      injectables;
+  final List<ListenableProvider> Function(BuildContext dialogContext)? injectables;
 
   /// The size of the modal.
   final LdSize? size;
@@ -75,6 +81,8 @@ class LdModal {
   /// Whether the modal should use safe area. Defaults to true.
   final bool useSafeArea;
 
+  /// Whether to show the drag handle. Defaults to true.
+  @Deprecated("No longer an option. Will not render drag handle.")
   final bool? showDragHandle;
 
   final Widget Function(BuildContext context)? actionBar;
@@ -88,6 +96,7 @@ class LdModal {
     this.noHeader = false,
     this.showDragHandle,
     this.padding,
+    this.headerPadding,
     this.title,
     this.actions,
     this.contentSlivers,
@@ -97,6 +106,7 @@ class LdModal {
     this.onDismiss,
     this.size,
     this.actionBar,
+    this.actionBarPadding,
     this.topRadius,
     this.bottomRadius,
     this.insets,
@@ -104,32 +114,18 @@ class LdModal {
     this.fixedDialogSize,
     this.index,
   }) {
-    assert(!(userCanDismiss == false && showDismissButton),
-        "showDismissButton is true but userCanDismiss is false");
+    assert(!(userCanDismiss == false && showDismissButton), "showDismissButton is true but userCanDismiss is false");
   }
 
-  final Map<LdThemeSize, double> _actionBarHeight = {
-    LdThemeSize.l: 150,
-    LdThemeSize.m: 120,
-    LdThemeSize.s: 70,
-  };
-  final double _contentActionBarPadding = 12;
-  final double _defaultSheetInset = 2;
+  final double _defaultSheetInset = 0;
 
   bool get shouldScale {
-    return enableScaling == true ||
-        (!kIsWeb && Platform.isIOS && mode != LdModalTypeMode.dialog);
+    return enableScaling == true || (!kIsWeb && Platform.isIOS && mode != LdModalTypeMode.dialog);
   }
 
   bool get barrierDismissible => userCanDismiss;
   bool get enableDrag => userCanDismiss;
   bool get isTopBarLayerAlwaysVisible => title != null;
-
-  bool get _isMobile => kIsWeb || Platform.isIOS || Platform.isAndroid;
-
-  bool _showDragHandle(BuildContext context) =>
-      showDragHandle ?? (isSheet(context) && _isMobile);
-
   bool get hasTopBarLayer => title != null;
 
   double navbarHeight(BuildContext context) {
@@ -149,15 +145,14 @@ class LdModal {
   /// Returns whether [mode] or screen size of [context] will
   /// result in  a sheet being shown
   bool isSheet(BuildContext context) =>
-      mode == LdModalTypeMode.sheet ||
-      (mode == LdModalTypeMode.auto && _autoShowsSheet(context));
+      mode == LdModalTypeMode.sheet || (mode == LdModalTypeMode.auto && _autoShowsSheet(context));
 
   WoltModalType _getSheetType(BuildContext context, {int index = 0}) {
     if (isSheet(context)) {
       return LdSheetType(
         theme: LdTheme.of(context),
         topRadius: topRadius,
-        bottomRadius: bottomRadius ?? LdTheme.of(context).screenRadius,
+        bottomRadius: bottomRadius,
         index: this.index ?? index,
         insets: insets ?? EdgeInsets.all(_defaultSheetInset),
       );
@@ -178,8 +173,7 @@ class LdModal {
     if (mediaQuery == null) return false;
 
     final deviceType = getDeviceType(mediaQuery.size);
-    return deviceType == DeviceScreenType.watch ||
-        deviceType == DeviceScreenType.mobile;
+    return deviceType == DeviceScreenType.watch || deviceType == DeviceScreenType.mobile;
   }
 
   Widget _getInjectables(
@@ -203,23 +197,18 @@ class LdModal {
 
   Widget? _getTrailingNavBarWidget(BuildContext context) {
     if (actions != null) {
-      final theme = LdTheme.of(context);
       return _getInjectables(
         context,
         (context) => Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Padding(
-                padding: EdgeInsets.only(
-                  right: padding?.right ?? theme.paddingSize(size: LdSize.m),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ...actions!(context),
-                  ],
-                )),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ...actions!(context),
+              ],
+            ),
           ],
         ),
       );
@@ -227,10 +216,9 @@ class LdModal {
 
     if (userCanDismiss && showDismissButton) {
       final dismissButton = Builder(builder: (context) {
-        return LdButton(
-          size: LdSize.s,
+        return LdButtonVague(
           mode: title != null ? LdButtonMode.ghost : LdButtonMode.vague,
-          child: const Icon(Icons.clear),
+          child: const Icon(LucideIcons.x),
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -241,13 +229,7 @@ class LdModal {
         return _getInjectables(
           context,
           (context) => Column(
-            children: [
-              Padding(
-                padding:
-                    EdgeInsets.only(top: topRadius! / 2, right: topRadius! / 2),
-                child: dismissButton,
-              )
-            ],
+            children: [dismissButton],
           ),
         );
       }
@@ -257,15 +239,7 @@ class LdModal {
         (context) => Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Padding(
-              padding: EdgeInsets.only(
-                right: padding?.right ??
-                    LdTheme.of(context).paddingSize(
-                      size: LdSize.l,
-                    ),
-              ),
-              child: dismissButton,
-            ),
+            dismissButton,
           ],
         ),
       );
@@ -274,90 +248,120 @@ class LdModal {
     return null;
   }
 
+  EdgeInsets _navigationBarPadding(BuildContext context) {
+    if (headerPadding != null) {
+      return headerPadding!;
+    }
+
+    if (topRadius != null) {
+      return EdgeInsets.only(
+        top: topRadius! / 2,
+        left: topRadius! / 2,
+        right: topRadius! / 2,
+        bottom: topRadius! / 2,
+      );
+    }
+
+    final theme = LdTheme.of(context);
+
+    return padding ?? theme.pad(size: LdSize.m);
+  }
+
   List<SliverWoltModalSheetPage> _getPageList(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
 
-    final contentPadding = padding ?? theme.pad(size: LdSize.l);
+    var contentPadding = padding ?? theme.pad(size: LdSize.l);
 
-    final actionBarPadding = EdgeInsets.only(
-      bottom: actionBar != null
-          ? _actionBarHeight[theme.themeSize]! + _contentActionBarPadding
-          : 0,
-    );
+    final sizeNotifier = ValueNotifier<Size>(Size.zero);
 
     return [
-      if (contentSlivers != null)
-        SliverWoltModalSheetPage(
-          backgroundColor: theme.background,
-          surfaceTintColor: theme.background,
-          sabGradientColor: theme.surface,
-          hasSabGradient: hasSabGradient(context),
-          stickyActionBar: _getStickyActionBar(context),
-          mainContentSliversBuilder: (context) => contentSlivers!(context)
-              .map(
-                (e) => SliverPadding(
-                  padding: contentPadding + actionBarPadding,
-                  sliver: e,
+      SliverWoltModalSheetPage(
+        backgroundColor: theme.background,
+        surfaceTintColor: theme.background,
+        sabGradientColor: theme.surface,
+        hasSabGradient: hasSabGradient(context),
+        stickyActionBar: _getStickyActionBar(context, sizeNotifier),
+        mainContentSliversBuilder: (context) => [
+          SliverStickyHeader.builder(
+              overlapsContent: title == null,
+              builder: (context, state) => Container(
+                    padding: _navigationBarPadding(context),
+                    decoration: BoxDecoration(
+                      color: title != null ? theme.background : null,
+                      border: title != null
+                          ? Border(
+                              bottom: BorderSide(
+                                color: theme.border,
+                                width: 1,
+                              ),
+                            )
+                          : null,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        if (title != null)
+                          Expanded(
+                            child: DefaultTextStyle(
+                              style: ldBuildTextStyle(
+                                theme,
+                                LdTextType.label,
+                                LdSize.m,
+                              ),
+                              child: title!,
+                            ),
+                          ),
+                        _getTrailingNavBarWidget(context) ?? const SizedBox.shrink(),
+                      ],
+                    ),
+                  ),
+              sliver: SliverToBoxAdapter(
+                child: _getInjectables(
+                  context,
+                  (context) => ValueListenableBuilder<Size>(
+                    valueListenable: sizeNotifier,
+                    builder: (context, size, child) {
+                      return Padding(
+                        padding: contentPadding +
+                            EdgeInsets.only(
+                              bottom: size.height + (hasSabGradient(context) ? 10 : 0),
+                            ),
+                        child: modalContent != null ? modalContent!(context) : const SizedBox.shrink(),
+                      );
+                    },
+                  ),
                 ),
-              )
-              .toList(),
-          trailingNavBarWidget: _getTrailingNavBarWidget(
-            context,
-          ),
-          isTopBarLayerAlwaysVisible: title != null,
-          topBar: _getTopBar(context),
-          navBarHeight: navbarHeight(context),
-        ),
-      if (modalContent != null)
-        WoltModalSheetPage(
-          backgroundColor: theme.background,
-          surfaceTintColor: theme.background,
-          sabGradientColor: theme.surface,
-          hasSabGradient: hasSabGradient(context),
-          stickyActionBar: _getStickyActionBar(context),
-          child: _getInjectables(
-            context,
-            (context) => Padding(
-              padding: contentPadding + actionBarPadding,
-              child: modalContent!(context),
-            ),
-          ),
-          trailingNavBarWidget: _getTrailingNavBarWidget(
-            context,
-          ),
-          isTopBarLayerAlwaysVisible: isTopBarLayerAlwaysVisible,
-          topBar: _getTopBar(context),
-          navBarHeight: navbarHeight(context),
-          hasTopBarLayer: hasTopBarLayer,
-        ),
+              )),
+          if (contentSlivers != null) ...contentSlivers!(context),
+        ],
+        hasTopBarLayer: false,
+      ),
     ];
   }
 
-  bool hasSabGradient(BuildContext context) =>
-      actionBar != null && isSheet(context);
+  bool hasSabGradient(BuildContext context) => actionBar != null && isSheet(context);
 
-  Widget? _getStickyActionBar(BuildContext context) {
+  Widget? _getStickyActionBar(BuildContext context, ValueNotifier<Size> sizeNotifier) {
     if (actionBar == null) {
       return null;
     }
 
     final theme = LdTheme.of(context, listen: true);
 
-    var sabPadding = padding ?? theme.pad(size: LdSize.l);
+    var sabPadding = actionBarPadding ?? padding ?? theme.pad(size: LdSize.m);
 
     // Add some more padding for sheets because they are
     // placed at the very bottom
     if (isSheet(context)) {
       sabPadding += EdgeInsets.only(
-        bottom: theme.paddingSize(size: LdSize.l),
+        bottom: theme.paddingSize(size: LdSize.m),
       );
     }
 
     return _getInjectables(
       context,
-      (context) => ConstrainedBox(
-        constraints:
-            BoxConstraints(maxHeight: _actionBarHeight[theme.themeSize]!),
+      (context) => MeasureSize(
+        sizeNotifier: sizeNotifier,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -378,60 +382,12 @@ class LdModal {
     );
   }
 
-  Widget? _getTopBar(BuildContext context) {
-    if (title == null) {
-      return null;
-    }
-
-    final theme = LdTheme.of(context, listen: true);
-
-    var padding = theme.pad(size: LdSize.m);
-
-    if (topRadius != null) {
-      padding = EdgeInsets.only(
-        left: topRadius! / 2,
-        right: topRadius! / 2,
-      );
-    }
-
-    return _getInjectables(
-      context,
-      (context) => LdAutoBackground(
-        child: Column(children: [
-          if (_showDragHandle(context)) const SizedBox(height: 8),
-          Expanded(
-            child: Padding(
-              padding: padding,
-              child: Row(children: [
-                Flexible(
-                  fit: topRadius != null ? FlexFit.tight : FlexFit.loose,
-                  child: DefaultTextStyle(
-                    style: ldBuildTextStyle(
-                      theme,
-                      LdTextType.label,
-                      LdSize.m,
-                      lineHeight: 1,
-                    ),
-                    textAlign: topRadius != null ? TextAlign.center : null,
-                    maxLines: 1,
-                    child: title!,
-                  ),
-                ),
-              ]),
-            ),
-          ),
-          const LdDivider(height: 1)
-        ]),
-      ),
-    );
-  }
-
   WoltModalSheetRoute asRoute(RouteSettings settings, BuildContext context) {
     return WoltModalSheetRoute(
       useSafeArea: useSafeArea,
       barrierDismissible: userCanDismiss,
       enableDrag: enableDrag,
-      showDragHandle: _showDragHandle(context),
+      showDragHandle: false,
       modalBarrierColor: _getModalBarrierColor(context),
       settings: settings,
       pageContentDecorator: _getContentDecorator,
@@ -467,8 +423,7 @@ class LdModal {
     return theme.palette.neutral.shades.last.withAlpha(150);
   }
 
-  Future<dynamic> show(BuildContext context,
-      {bool useRootNavigator = false}) async {
+  Future<dynamic> show(BuildContext context, {bool useRootNavigator = false}) async {
     LdPortalController? controller;
 
     if (useRootNavigator) {
@@ -497,7 +452,7 @@ class LdModal {
       context: context,
       useSafeArea: useSafeArea,
       useRootNavigator: useRootNavigator,
-      showDragHandle: _showDragHandle(context),
+      showDragHandle: false,
       modalBarrierColor: _getModalBarrierColor(context),
       enableDrag: userCanDismiss,
       pageContentDecorator: _getContentDecorator,

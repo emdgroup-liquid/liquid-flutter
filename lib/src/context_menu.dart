@@ -53,8 +53,7 @@ class LdContextMenu extends StatefulWidget {
 
   final Widget Function(BuildContext context, bool isShuttle) builder;
 
-  final Widget Function(BuildContext context, VoidCallback onDismiss)
-      menuBuilder;
+  final Widget Function(BuildContext context, VoidCallback onDismiss) menuBuilder;
 
   @override
   State<LdContextMenu> createState() => _LdContextMenuState();
@@ -102,12 +101,9 @@ class _LdContextMenuState extends State<LdContextMenu> {
   }
 
   void _open(BuildContext context) {
-    final menuPosition =
-        ((_triggerKey.currentContext?.findRenderObject() as RenderBox?)
-            ?.localToGlobal(Offset.zero));
+    final menuPosition = ((_triggerKey.currentContext?.findRenderObject() as RenderBox?)?.localToGlobal(Offset.zero));
 
-    if (menuPosition != null &&
-        menuPosition.dy > MediaQuery.of(context).size.height / 2) {
+    if (menuPosition != null && menuPosition.dy > MediaQuery.of(context).size.height / 2) {
       _belowBottom = true;
     } else {
       _belowBottom = false;
@@ -138,26 +134,31 @@ class _LdContextMenuState extends State<LdContextMenu> {
     final theme = LdTheme.of(context, listen: true);
 
     final zoomShuttle = LdSpring(
-      initialPosition: 1,
-      position: _visible && _shouldZoom ? 1.1 : 1,
-      builder: (context, state) => ConstrainedBox(
-        constraints: _triggerKey.currentContext != null
-            ? BoxConstraints(
-                maxWidth: (_triggerKey.currentContext!.findRenderObject()
-                        as RenderBox)
-                    .size
-                    .width)
-            : const BoxConstraints(),
-        child: Column(
-          children: [
-            Transform.scale(
-              scale: state.position,
-              child: widget.builder(context, true),
-            ),
-          ],
-        ),
-      ),
-    );
+        initialPosition: 1,
+        position: _visible && _shouldZoom ? 1.1 : 1,
+        builder: (context, state) => ConstrainedBox(
+              constraints: _triggerKey.currentContext != null
+                  ? BoxConstraints(
+                      maxWidth: (_triggerKey.currentContext!.findRenderObject() as RenderBox).size.width,
+                    )
+                  : const BoxConstraints(),
+              child: Column(
+                children: [
+                  Transform.scale(
+                      scale: state.position,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(boxShadow: [
+                          BoxShadow(
+                            color: theme.palette.neutral.shades.last.withAlpha(51),
+                            blurRadius: 10,
+                            offset: const Offset(0, 0),
+                          )
+                        ]),
+                        child: widget.builder(context, true),
+                      )),
+                ],
+              ),
+            ));
 
     final menu = LdSpring(
         initialPosition: 0,
@@ -170,7 +171,7 @@ class _LdContextMenuState extends State<LdContextMenu> {
             opacity: state.position.clamp(0, 1),
             child: Container(
               margin: const EdgeInsets.symmetric(vertical: 8),
-              padding: LdTheme.of(context).pad(size: LdSize.s),
+              clipBehavior: Clip.hardEdge,
               decoration: BoxDecoration(
                 color: theme.surface,
                 border: Border.all(
@@ -207,9 +208,7 @@ class _LdContextMenuState extends State<LdContextMenu> {
             sigma: _visible && _shouldBlur ? 10 : 0,
             duration: 300.ms,
             child: Container(
-              color: _mobile
-                  ? theme.palette.neutral.shades.last.withAlpha(100)
-                  : Colors.transparent,
+              color: _mobile ? theme.palette.neutral.shades.last.withAlpha(100) : Colors.transparent,
             )),
       ),
       child: PortalTarget(
@@ -230,15 +229,11 @@ class _LdContextMenuState extends State<LdContextMenu> {
         portalFollower: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
-          children: _belowBottom
-              ? [menu, ldSpacerM, zoomShuttle]
-              : [zoomShuttle, ldSpacerM, menu],
+          children: _belowBottom ? [menu, ldSpacerM, zoomShuttle] : [zoomShuttle, ldSpacerM, menu],
         ),
 
         // Trigger
-        child: widget.listenForTaps
-            ? buildTrigger(context)
-            : widget.builder(context, false),
+        child: widget.listenForTaps ? buildTrigger(context) : widget.builder(context, false),
       ),
     );
   }

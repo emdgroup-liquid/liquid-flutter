@@ -9,13 +9,7 @@ class LdTag extends StatelessWidget {
   final LdSize size;
 
   final LdColor? color;
-  const LdTag(
-      {Key? key,
-      required this.child,
-      this.color,
-      this.onDismiss,
-      this.size = LdSize.m})
-      : super(key: key);
+  const LdTag({Key? key, required this.child, this.color, this.onDismiss, this.size = LdSize.m}) : super(key: key);
 
   double _padding(LdTheme theme) {
     return theme.paddingSize(size: size);
@@ -35,13 +29,12 @@ class LdTag extends StatelessWidget {
 
     final background = (!onSurface
             ? color.center(theme.isDark)
-            : color.moveRelative(
-                color.center(theme.isDark), theme.isDark ? -2 : 2))
-        .withAlpha(theme.isDark ? 50 : 50);
+            : color.moveRelative(color.center(theme.isDark), theme.isDark ? -2 : 2))
+        .withAlpha(theme.isDark ? 50 : 100);
 
     final text = color.moveRelative(
       color.center(theme.isDark),
-      onSurface ? (theme.isDark ? -4 : 3) : (theme.isDark ? -3 : 0),
+      onSurface ? (theme.isDark ? -4 : 4) : (theme.isDark ? -3 : 4),
     );
 
     final fontSize = _fontSize(theme);

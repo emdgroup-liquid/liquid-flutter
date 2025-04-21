@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid/components/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class AutoSpaceDemo extends StatefulWidget {
   const AutoSpaceDemo({super.key});
@@ -33,7 +34,7 @@ class _AutoSpaceDemoState extends State<AutoSpaceDemo> {
                 "It will automatically space out elements based on their type",
               ),
               LdButton(
-                  trailing: const Icon(Icons.arrow_right),
+                  trailing: const Icon(LucideIcons.arrowRight),
                   onPressed: () {},
                   child: const Text("Already have filled this form?")),
               const LdInput(label: "Enter something here", hint: "Test"),
