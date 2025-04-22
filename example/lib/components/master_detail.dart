@@ -166,7 +166,7 @@ class ExampleBuilder extends LdMasterDetailBuilder<ExampleItem> {
 
 class ExampleCrudBuilder extends LdCrudMasterDetailBuilder<ExampleItem> {
   @override
-  Widget buildDetail(
+  Widget buildDetailContent(
     BuildContext context,
     ExampleItem item,
     bool isSeparatePage,

@@ -58,4 +58,35 @@ abstract class LdCrudMasterDetailBuilder<T extends CrudItemMixin<T>>
     extends _LdMasterDetailBuilder<T, LdMasterDetailController<T>> {
   LdCrudListState<T> getData(BuildContext context) =>
       context.read<LdCrudListState<T>>();
+
+  @override
+  Widget buildDetail(
+    BuildContext context,
+    T item,
+    bool isSeparatePage,
+    LdMasterDetailController<T> controller,
+  ) {
+    final error = getData(context).getItemError(item);
+    if (error != null) {
+      return buildDetailError(context, item, error, isSeparatePage, controller);
+    }
+    return buildDetailContent(context, item, isSeparatePage, controller);
+  }
+
+  Widget buildDetailContent(
+    BuildContext context,
+    T item,
+    bool isSeparatePage,
+    LdMasterDetailController<T> controller,
+  );
+
+  Widget buildDetailError(
+    BuildContext context,
+    T item,
+    LdException error,
+    bool isSeparatePage,
+    LdMasterDetailController<T> controller,
+  ) {
+    return Center(child: LdExceptionView(exception: error));
+  }
 }
