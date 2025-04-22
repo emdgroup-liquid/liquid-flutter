@@ -20,6 +20,16 @@ typedef ActionCallback<T extends CrudItemMixin<T>, Arg> = FutureOr<dynamic>
   LdCrudOperations<T> crud,
 );
 
+/// A master detail action contains a widget that can be used to perform an action on a master detail item
+/// or a list of master detail items.
+///
+/// It can be used to provide UI for actions like create, update, delete, etc.
+///
+/// The action is executed optimistically, meaning that the new state of the item
+/// is immediately reflected in [CrudListState#getItemOptimistically].
+///
+/// If the action is successful, the item is updated in the list.
+/// If the action fails, the item state is set to [CrudItemStateEvent.error].
 class LdMasterDetailAction<T extends CrudItemMixin<T>, Arg> {
   final Widget Function(Function actionCallback) childBuilder;
   final Set<ActionDisplayModes> displayModes;
@@ -31,9 +41,10 @@ class LdMasterDetailAction<T extends CrudItemMixin<T>, Arg> {
     required this.onAction,
   });
 
-  static Stream<R> optimisticExecution<T extends CrudItemMixin<T>, R>(
-      T item, Future<R> Function() operation, LdCrudListState<T> listState,
-      {T Function(R result)? parseResult}) async* {
+  static Stream<R>
+      executeOperationOptimistically<T extends CrudItemMixin<T>, R>(
+          T item, Future<R> Function() operation, LdCrudListState<T> listState,
+          {T Function(R result)? parseResult}) async* {
     listState.handleItemStateEvent(item.id, CrudItemStateEvent.loading(item));
     try {
       final result = await operation();
@@ -90,7 +101,7 @@ class LdMasterDetailListAction<T extends CrudItemMixin<T>>
       ) async {
         final newItem = await getNewItem();
         if (newItem != null) {
-          await LdMasterDetailAction.optimisticExecution<T, T>(
+          await LdMasterDetailAction.executeOperationOptimistically<T, T>(
             newItem,
             () => crud.create(newItem),
             listState,
@@ -189,7 +200,7 @@ class LdMasterDetailItemAction<T extends CrudItemMixin<T>>
         LdCrudListState<T> listState,
         LdCrudOperations<T> crud,
       ) async {
-        await LdMasterDetailAction.optimisticExecution<T, void>(
+        await LdMasterDetailAction.executeOperationOptimistically<T, void>(
           item,
           () async => await crud.delete(item),
           listState,
@@ -224,7 +235,8 @@ class LdMasterDetailItemAction<T extends CrudItemMixin<T>>
         LdCrudOperations<T> crud,
       ) async {
         final newItem = await getNewItem(item);
-        final itemResult = await LdMasterDetailAction.optimisticExecution<T, T>(
+        final itemResult =
+            await LdMasterDetailAction.executeOperationOptimistically<T, T>(
           item,
           () => crud.update(newItem!),
           listState,
