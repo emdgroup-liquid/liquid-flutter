@@ -15,7 +15,13 @@ class LdSurfaceInfo {
 class LdAutoBackground extends StatelessWidget {
   final Widget child;
   final bool invert;
-  const LdAutoBackground({super.key, required this.child, this.invert = false});
+  final BorderRadius? borderRadius;
+  const LdAutoBackground({
+    super.key,
+    required this.child,
+    this.invert = false,
+    this.borderRadius,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -23,8 +29,12 @@ class LdAutoBackground extends StatelessWidget {
 
     return Consumer<LdSurfaceInfo>(builder: (context, info, _) {
       final parentIsSurface = info.isSurface ^ invert;
-      return ColoredBox(
-        color: parentIsSurface ? theme.background : theme.surface,
+      return Container(
+        clipBehavior: Clip.hardEdge,
+        decoration: BoxDecoration(
+          color: parentIsSurface ? theme.background : theme.surface,
+          borderRadius: borderRadius,
+        ),
         child: Provider.value(
           value: LdSurfaceInfo(isSurface: !parentIsSurface),
           child: child,

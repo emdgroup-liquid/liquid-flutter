@@ -7,6 +7,7 @@ import 'package:liquid/components/components_accordion.dart';
 import 'package:liquid/demos/ld_color_swatches.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_emd_theme/liquid_flutter_emd_theme.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class ThemeDemo extends StatefulWidget {
   const ThemeDemo({super.key});
@@ -142,7 +143,7 @@ class _ThemeDemoState extends State<ThemeDemo> {
                                   offset: Offset(state.position, 0),
                                   child: const SizedBox(
                                     height: 32,
-                                    child: Icon(Icons.arrow_downward),
+                                    child: Icon(LucideIcons.arrowDown),
                                   ),
                                 ),
                               ),
@@ -155,7 +156,7 @@ class _ThemeDemoState extends State<ThemeDemo> {
                                   offset: Offset(state.position, 0),
                                   child: const SizedBox(
                                     height: 32,
-                                    child: Icon(Icons.arrow_upward),
+                                    child: Icon(LucideIcons.arrowUp),
                                   ),
                                 ),
                               ),
@@ -328,50 +329,48 @@ class _ThemeDemoState extends State<ThemeDemo> {
   Row _buildShades() {
     final theme = LdTheme.of(context, listen: true);
     return Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-      ...e.shades
-          .mapIndexed((index, shade) => SizedBox(
-                width: 32,
-                child: Column(
-                  children: [
-                    const LdDivider(),
-                    SizedBox(
-                      height: 53,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Tooltip(
-                            message: "${shade.toString()} \n",
-                            child: LdTouchableSurface(
-                              active: _selectedShade == shade,
-                              color: e,
-                              onTap: () {
-                                setState(() {
-                                  _selectedShade = shade;
-                                });
-                              },
-                              builder: (context, colors, status) => Container(
-                                height: 32,
-                                width: 32,
-                                decoration: BoxDecoration(
-                                  color: shade,
-                                  border: Border.all(
-                                    color: status.active
-                                        ? theme.absolute
-                                        : theme.border,
-                                    width: 2,
-                                  ),
-                                ),
+      ...e.shades.mapIndexed((index, shade) => SizedBox(
+            width: 32,
+            child: Column(
+              children: [
+                const LdDivider(),
+                SizedBox(
+                  height: 53,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Tooltip(
+                        message: "${shade.toString()} \n",
+                        child: LdTouchableSurface(
+                          active: _selectedShade == shade,
+                          color: e,
+                          onTap: () {
+                            setState(() {
+                              _selectedShade = shade;
+                            });
+                          },
+                          builder: (context, colors, status) => Container(
+                            height: 32,
+                            width: 32,
+                            decoration: BoxDecoration(
+                              color: shade,
+                              border: Border.all(
+                                color: status.active
+                                    ? theme.absolute
+                                    : theme.border,
+                                width: 2,
                               ),
                             ),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                    const LdDivider(),
-                  ],
+                    ],
+                  ),
                 ),
-              ))
-          ,
+                const LdDivider(),
+              ],
+            ),
+          )),
     ]);
   }
 }

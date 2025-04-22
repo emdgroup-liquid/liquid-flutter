@@ -25,21 +25,29 @@ class ExampleBuilder<int> extends LdMasterDetailBuilder<int> {
     return Text("Detail $item");
   }
 
+  final _selectedItem = ValueNotifier<int?>(null);
+
   @override
   Widget buildMaster(BuildContext context, LdMasterDetailOnSelect<int> onSelect,
       int? selectedItem, bool isSeparatePage) {
     return LdList<int, void>(
-      data: _paginator,
+      paginator: _paginator,
       itemBuilder: (context, item, index) {
-        return LdListItem(
-          trailingForward: isSeparatePage,
-          active: selectedItem == item,
-          title: Text("Item $item"),
-          subtitle: const Text("This is a subtitle"),
-          onTap: () {
-            onSelect(item);
-          },
-        );
+        return ListenableBuilder(
+            listenable: _selectedItem,
+            builder: (context, _) {
+              return LdListItem(
+                trailingForward: isSeparatePage,
+                active: _selectedItem.value == item,
+                title: Text("Item $item"),
+                subtitle: const Text("This is a subtitle"),
+                onTap: () {
+                  onSelect(item);
+
+                  _selectedItem.value = item;
+                },
+              );
+            });
       },
     );
   }
@@ -135,7 +143,7 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
                   );
                 },
                 detailsUrlParser: (uri) {
-                  return int.parse(uri.queryParameters["item"]!);
+                  return int.parse(uri.queryParameters["item"] ?? "0");
                 },
               ),
             ),

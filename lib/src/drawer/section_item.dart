@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 /// A section in the drawer that can contain a collapsable sub-items
@@ -58,7 +59,7 @@ class _LdDrawerItemSectionState extends State<LdDrawerItemSection> {
     }
     if (widget.children != null) {
       return AnimatedRotation(
-          child: const Icon(Icons.arrow_forward_ios_rounded),
+          child: const Icon(LucideIcons.chevronRight),
           duration: const Duration(milliseconds: 200),
           turns: _isExpanded ? 0.25 : 0);
     }

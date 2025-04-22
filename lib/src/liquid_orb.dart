@@ -15,7 +15,9 @@ class LdOrb extends StatefulWidget {
   final double filling;
   final bool paintBackground;
 
-  const LdOrb(this.filling, {this.size = 150, this.paintBackground = false, Key? key}) : super(key: key);
+  const LdOrb(this.filling,
+      {this.size = 150, this.paintBackground = false, Key? key})
+      : super(key: key);
 
   @override
   State<LdOrb> createState() => _LdOrbState();
@@ -41,7 +43,8 @@ class _LdOrbState extends State<LdOrb> with TickerProviderStateMixin {
 
     _animationController!.repeat(reverse: false);
     if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-      _streamSubscription = accelerometerEventStream().listen((AccelerometerEvent event) {
+      _streamSubscription =
+          accelerometerEventStream().listen((AccelerometerEvent event) {
         setState(() {
           double x = event.x, y = event.y, z = event.z;
           // Normalize vector
@@ -79,7 +82,9 @@ class _LdOrbState extends State<LdOrb> with TickerProviderStateMixin {
           duration: const Duration(milliseconds: 500),
           child: Container(
             clipBehavior: Clip.hardEdge,
-            decoration: BoxDecoration(boxShadow: const [], borderRadius: BorderRadius.circular(widget.size / 2)),
+            decoration: BoxDecoration(
+                boxShadow: const [],
+                borderRadius: BorderRadius.circular(widget.size / 2)),
             height: widget.size,
             width: widget.size,
             child: LdSpring(
@@ -101,7 +106,8 @@ class _LdOrbState extends State<LdOrb> with TickerProviderStateMixin {
             ),
           ),
         ),
-        CustomPaint(painter: ReflectionPainter(theme, Size(widget.size, widget.size)))
+        CustomPaint(
+            painter: ReflectionPainter(theme, Size(widget.size, widget.size)))
       ],
     );
   }
@@ -157,7 +163,8 @@ class _OrbPainter extends CustomPainter {
   final LdTheme theme;
   final double inset = 5.0;
 
-  _OrbPainter(this._orbSize, this.fillPercentage, this.animationProgress, this.paintBackground, this.theme);
+  _OrbPainter(this._orbSize, this.fillPercentage, this.animationProgress,
+      this.paintBackground, this.theme);
 
   double get width => _orbSize.width - 2 * inset;
 
@@ -168,11 +175,21 @@ class _OrbPainter extends CustomPainter {
     double offset = 0,
   }) {
     if (left) {
-      return Offset(cos(pi * (1 - (fillPercentage - offset)) + 0.5 * pi) * width / 2 + width / 2 + inset,
-          sin(pi * (1 - (fillPercentage - offset)) + 0.5 * pi) * height / 2 + height / 2 + inset);
+      return Offset(
+          cos(pi * (1 - (fillPercentage - offset)) + 0.5 * pi) * width / 2 +
+              width / 2 +
+              inset,
+          sin(pi * (1 - (fillPercentage - offset)) + 0.5 * pi) * height / 2 +
+              height / 2 +
+              inset);
     } else {
-      return Offset(sin(pi * (1 - max((fillPercentage - offset), 0))) * width / 2 + width / 2 + inset,
-          cos(pi * (1 - max((fillPercentage - offset), 0))) * height / 2 + height / 2 + inset);
+      return Offset(
+          sin(pi * (1 - max((fillPercentage - offset), 0))) * width / 2 +
+              width / 2 +
+              inset,
+          cos(pi * (1 - max((fillPercentage - offset), 0))) * height / 2 +
+              height / 2 +
+              inset);
     }
   }
 
@@ -186,7 +203,8 @@ class _OrbPainter extends CustomPainter {
 
     // Draw a white circle if the option paintBackground is given
     if (paintBackground) {
-      canvas.drawCircle(center, _orbSize.width / 2 - 10, Paint()..color = theme.neutralShade(0));
+      canvas.drawCircle(center, _orbSize.width / 2 - 10,
+          Paint()..color = theme.neutralShade(0));
     }
 
     // Wave height is biggest in the middle of the bowl at upper and lower bounds the waves become smaller
@@ -201,7 +219,8 @@ class _OrbPainter extends CustomPainter {
     var waveWidth = (waveEnd.dx - waveStart.dx);
 
     // Wave offset is responsible for moving the waves
-    var waveOffset = sin(animationProgress * 2 * pi) * waveWidth * 0.125 + waveWidth * 0.125;
+    var waveOffset =
+        sin(animationProgress * 2 * pi) * waveWidth * 0.125 + waveWidth * 0.125;
 
     Path path = Path();
 
@@ -224,7 +243,8 @@ class _OrbPainter extends CustomPainter {
     );
 
     // Circle to the bottom middle
-    path.arcToPoint(Offset(center.dx, inset + height), radius: Radius.circular(height / 2));
+    path.arcToPoint(Offset(center.dx, inset + height),
+        radius: Radius.circular(height / 2));
 
     // To the start of the wave to close the path
     path.arcToPoint(waveStart, radius: Radius.circular(height / 2));
@@ -232,7 +252,7 @@ class _OrbPainter extends CustomPainter {
     canvas.drawPath(
         path,
         Paint()
-          ..color = theme.palette.primary.active(theme.isDark)
+          ..color = theme.palette.primary.active(theme.isDark).withAlpha(100)
           ..style = PaintingStyle.fill);
 
     Path secondWave = Path();
@@ -254,13 +274,14 @@ class _OrbPainter extends CustomPainter {
       waveEnd.dy,
     );
 
-    secondWave.arcToPoint(Offset(center.dx, inset + height), radius: Radius.circular(height / 2));
+    secondWave.arcToPoint(Offset(center.dx, inset + height),
+        radius: Radius.circular(height / 2));
 
     secondWave.arcToPoint(waveStart, radius: Radius.circular(height / 2));
 
     canvas.drawPath(
       secondWave,
-      Paint()..color = theme.palette.primary.hover(theme.isDark),
+      Paint()..color = theme.palette.primary.hover(theme.isDark).withAlpha(50),
     );
 
     // Grey border
@@ -276,13 +297,19 @@ class _OrbPainter extends CustomPainter {
       alphaRamp = 0;
     }
 
-    var bubbleColor = theme.palette.primary.active(theme.isDark).withAlpha((alphaRamp * 255).toInt());
+    var bubbleColor = theme.palette.primary
+        .active(theme.isDark)
+        .withAlpha((alphaRamp * 255).toInt());
 
     // draw to bubbles
     canvas.drawCircle(
-        Offset(width * 0.75, fillPercentage * height + height / 3), width / 30, Paint()..color = bubbleColor);
+        Offset(width * 0.75, fillPercentage * height + height / 3),
+        width / 30,
+        Paint()..color = bubbleColor);
     canvas.drawCircle(
-        Offset(width * 0.8, fillPercentage * height + height / 2.5), width / 50, Paint()..color = bubbleColor);
+        Offset(width * 0.8, fillPercentage * height + height / 2.5),
+        width / 50,
+        Paint()..color = bubbleColor);
 
     // draw border last
     canvas.drawCircle(center, height / 2, border);

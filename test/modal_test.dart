@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 import 'golden_utils.dart';
@@ -45,7 +46,7 @@ void main() {
     expect(find.text("Dialog title"), findsOneWidget);
     expect(find.text("Dialog content"), findsOneWidget);
 
-    await test.tap(find.byIcon(Icons.clear));
+    await test.tap(find.byIcon(LucideIcons.x));
 
     await test.pumpAndSettle();
   });

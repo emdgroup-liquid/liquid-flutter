@@ -21,6 +21,7 @@ import 'package:liquid_flutter/src/spring.dart';
 import 'package:liquid_flutter/src/theme/theme.dart';
 import 'package:liquid_flutter/src/tokens.dart';
 import 'package:liquid_flutter/variants.g.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class LdNotificationProvider extends StatelessWidget {
@@ -313,7 +314,7 @@ class LdNotificationWidget extends StatelessWidget {
                       LdButtonGhost(
                         color: _colorBundle(context),
                         onPressed: onDismiss,
-                        child: const Icon(Icons.clear),
+                        child: const Icon(LucideIcons.x),
                       ).animate().fade(delay: 400.ms)
                   ],
                 )),
