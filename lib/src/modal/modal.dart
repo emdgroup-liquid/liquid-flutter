@@ -316,21 +316,23 @@ class LdModal {
                     ),
                   ),
               sliver: SliverToBoxAdapter(
-                child: _getInjectables(
-                  context,
-                  (context) => ValueListenableBuilder<Size>(
-                    valueListenable: sizeNotifier,
-                    builder: (context, size, child) {
-                      return Padding(
-                        padding: contentPadding +
-                            EdgeInsets.only(
-                              bottom: size.height + (hasSabGradient(context) ? 10 : 0),
-                            ),
-                        child: modalContent != null ? modalContent!(context) : const SizedBox.shrink(),
-                      );
-                    },
-                  ),
-                ),
+                child: LdAutoBackground(
+                    invert: false,
+                    child: _getInjectables(
+                      context,
+                      (context) => ValueListenableBuilder<Size>(
+                        valueListenable: sizeNotifier,
+                        builder: (context, size, child) {
+                          return Padding(
+                            padding: contentPadding +
+                                EdgeInsets.only(
+                                  bottom: size.height + (hasSabGradient(context) ? 10 : 0),
+                                ),
+                            child: modalContent != null ? modalContent!(context) : const SizedBox.shrink(),
+                          );
+                        },
+                      ),
+                    )),
               )),
           if (contentSlivers != null) ...contentSlivers!(context),
         ],
@@ -420,7 +422,7 @@ class LdModal {
   Color _getModalBarrierColor(BuildContext context) {
     final theme = LdTheme.of(context);
 
-    return theme.palette.neutral.shades.last.withAlpha(150);
+    return theme.palette.neutral.shades[8].withAlpha(150);
   }
 
   Future<dynamic> show(BuildContext context, {bool useRootNavigator = false}) async {
