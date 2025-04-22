@@ -21,12 +21,26 @@ class _LdSliderDemoState extends State<LdSliderDemo> {
       demo: LdAutoSpace(
         children: [
           ComponentWell(
-            child: Column(
+            child: LdAutoSpace(
               children: [
                 LdSlider(
                   hint: "Swipe right...",
                   label: "Confirm account deletion",
                   disabled: _disabled,
+                  onSlideComplete: () {
+                    LdNotificationsController.of(context).addNotification(
+                      LdNotification(
+                          message: "You slid the slider!",
+                          type: LdNotificationType.info),
+                    );
+                  },
+                ),
+                ldSpacerL,
+                LdSlider(
+                  hint: "Swipe right...",
+                  label: "Confirm account deletion",
+                  disabled: _disabled,
+                  color: LdTheme.of(context).palette.error,
                   onSlideComplete: () {
                     LdNotificationsController.of(context).addNotification(
                       LdNotification(
