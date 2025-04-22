@@ -14,57 +14,9 @@ part 'master_detail_builder.dart';
 typedef LdMasterDetailOnOpenItem<T> = Future<bool> Function(T item);
 typedef LdMasterDetailOnOpenItemChange<T> = void Function(T? item);
 
-extension GoRouterExt on GoRouter {
-  /// Shortcut to get the current URI from the [GoRouter].
-  Uri get uri => routeInformationProvider.value.uri;
-}
-
-class LdMasterDetailController<T> {
-  final Future<bool> Function(T item) onOpenItem;
-  final Function onCloseItem;
-
-  bool get isMasterAppBarLoading => false;
-  bool isDetailsAppBarLoading(T item) => false;
-
-  LdMasterDetailController({
-    required this.onOpenItem,
-    required this.onCloseItem,
-  });
-
-  void dispose() {}
-}
-
 enum MasterDetailPresentationMode { page, dialog }
 
 enum MasterDetailLayoutMode { auto, split, compact }
-
-/// Configuration for a master detail shell route.
-class LdMasterDetailShellRouteConfig<T> {
-  final String basePath;
-  final String detailPath;
-  final String Function(T item) itemIdGetter;
-  final T? Function(String id) itemProvider;
-
-  String get detailPathParam => detailPath
-      .split('/')
-      .lastWhere((segment) => segment.startsWith(':'))
-      .substring(1);
-
-  LdMasterDetailShellRouteConfig({
-    /// The base path for the master detail view.
-    required this.basePath,
-
-    /// The path, if the detail view is shown (either as a page, dialog, or in
-    /// a separate view).
-    required this.detailPath,
-
-    /// A function to get the item ID from an item.
-    required this.itemIdGetter,
-
-    /// A function to retrieve an item from an ID.
-    required this.itemProvider,
-  });
-}
 
 /// A master detail view that shows a list of items on the left and a detail view on the right.
 /// The detail view is shown as a page or a dialog if the screen is small.
@@ -113,37 +65,10 @@ class LdMasterDetail<T> extends StatefulWidget {
     Page Function(BuildContext context, GoRouterState state, Widget child)?
         pageBuilder,
   }) {
-    pageBuilder ??= (context, state, child) => NoTransitionPage<void>(
-          key: state.pageKey,
-          child: child,
-        );
-    return ShellRoute(
-      // _ is the placeholder from the dummy widgets of the routes
-      pageBuilder: (context, state, _) => pageBuilder!(
-        context,
-        state,
-        // We wrap the child in a provider to make the route configuration
-        // available to LdMasterDetail
-        Provider<LdMasterDetailShellRouteConfig<T>?>.value(
-          value: routeConfig,
-          child: child,
-        ),
-      ),
-
-      // We just define the routes with a dummy builder, as the actual
-      // building is done in the childBuilder
-      routes: [
-        // Dummy base route
-        GoRoute(
-          path: routeConfig.basePath,
-          builder: (context, state) => const SizedBox.shrink(),
-        ),
-        // Dummy detail route
-        GoRoute(
-          path: "/${routeConfig.basePath}/${routeConfig.detailPath}",
-          builder: (context, state) => const SizedBox.shrink(),
-        ),
-      ],
+    return createMasterDetailShellRoute<T>(
+      child: child,
+      routeConfig: routeConfig,
+      pageBuilder: pageBuilder,
     );
   }
 
@@ -157,20 +82,20 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
 
   LdMasterDetailShellRouteConfig<T>? get _routeConfig =>
       Provider.of<LdMasterDetailShellRouteConfig<T>?>(context, listen: false);
-  late final LdMasterDetailController<T> _controller;
+  late final LdMasterDetailController<T> _controller =
+      LdMasterDetailController<T>(
+    getOpenItem: () => _openItem,
+    onOpenItem: _onOpenItem,
+    onCloseItem: _onCloseItem,
+  );
+
+  final bool _isMasterAppBarLoading = false;
+  final bool _isDetailsAppBarLoading = false;
 
   @override
   initState() {
-    _initController();
     super.initState();
     unawaited(_openInitialItem());
-  }
-
-  void _initController() {
-    _controller = LdMasterDetailController(
-      onOpenItem: _onOpenItem,
-      onCloseItem: _onCloseItem,
-    );
   }
 
   Future<void> _openInitialItem() async {
@@ -256,6 +181,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
                 item: item,
                 controller: _controller,
                 actions: buildDetailActions(context, item, true),
+                isDetailsAppBarLoading: _isDetailsAppBarLoading,
               );
             },
           ),
@@ -347,7 +273,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
   ) {
     return Scaffold(
       appBar: LdAppBar(
-        loading: _controller.isMasterAppBarLoading,
+        loading: _isMasterAppBarLoading,
         scrolledUnderElevation: isSeparatePage ? 4 : 0,
         context: context,
         title: widget.builder.buildMasterTitle(
@@ -361,7 +287,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
           openItem,
           isSeparatePage,
         ),
-        actionsDisabled: _controller.isMasterAppBarLoading,
+        actionsDisabled: _isMasterAppBarLoading,
       ),
       backgroundColor: LdTheme.of(context).background,
       body: widget.builder.buildMaster(
@@ -403,8 +329,8 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
           item,
           isSeparatePage,
         ),
-        actionsDisabled: _controller.isDetailsAppBarLoading(item),
-        loading: _controller.isDetailsAppBarLoading(item),
+        actionsDisabled: _isDetailsAppBarLoading,
+        loading: _isDetailsAppBarLoading,
       ),
       backgroundColor: LdTheme.of(context).background,
       body: widget.builder.buildDetail(
@@ -509,12 +435,13 @@ class _DetailPage<T> extends StatelessWidget {
   final T item;
   final LdMasterDetailController<T> controller;
   final List<Widget> actions;
-
+  final bool isDetailsAppBarLoading;
   const _DetailPage({
     required this.builder,
     required this.item,
     required this.controller,
     required this.actions,
+    required this.isDetailsAppBarLoading,
     super.key,
   });
 
@@ -527,8 +454,8 @@ class _DetailPage<T> extends StatelessWidget {
           context: context,
           title: builder.buildDetailTitle(context, item, true, controller),
           actions: actions,
-          actionsDisabled: controller.isDetailsAppBarLoading(item),
-          loading: controller.isDetailsAppBarLoading(item),
+          actionsDisabled: isDetailsAppBarLoading,
+          loading: isDetailsAppBarLoading,
         ),
         body: builder.buildDetail(context, item, true, controller),
       ),

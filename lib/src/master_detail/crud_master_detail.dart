@@ -4,7 +4,7 @@ typedef LdMasterDetailCrudItemCallback<T> = void Function(T item);
 
 /// Defines a repository that can perform CRUD operations on a given type [T]
 /// and fetch a list of items of type [T].
-abstract class CrudOperations<T> {
+abstract class LdCrudOperations<T> {
   Future<T> create(T item);
   Future<T> update(T item);
   Future<void> delete(T item);
@@ -26,75 +26,6 @@ mixin CrudItemMixin<T> {
   bool get isNew => id == null;
 }
 
-/// [LdCrudMasterDetailController] automatically manages the state of a list of
-/// items of type [T] and their CRUD operations. It performs UI operations like
-/// selecting and deselecting items, updating the UI based on the state and
-/// result of a CRUD operation, and handling the loading state of the app bar.
-///
-/// It also handles callbacks for CRUD operations like [create], [update], and
-/// [delete] when they succeed or fail, and provides a [save] method to create
-/// or update an item based on its state.
-class LdCrudMasterDetailController<T extends CrudItemMixin<T>>
-    extends LdMasterDetailController<T> {
-  /// The [CrudOperations] instance to perform CRUD operations.
-  final CrudOperations<T> crud;
-
-  /// A function to get the currently selected item from the state of the
-  /// [LdMasterDetail] widget.
-  final T? Function() getOpenItem;
-
-  /// [LdCrudListState] is used to hold the list of items and their states.
-  late final data = LdCrudListState<T>(
-    fetchListFunction: crud.fetchAll,
-  );
-
-  LdCrudMasterDetailController({
-    required this.crud,
-    required super.onOpenItem,
-    required super.onCloseItem,
-    required this.getOpenItem,
-  });
-
-  @override
-  bool get isMasterAppBarLoading => data.busy;
-
-  @override
-  bool isDetailsAppBarLoading(T item) {
-    return data.isItemLoading(item.id);
-  }
-
-  Future<R> executeCrudOperation<R>(
-    T item,
-    Future<R> Function() operation,
-  ) async {
-    data.handleItemStateEvent(item.id, CrudItemStateEvent.loading(null));
-    try {
-      final result = await operation();
-      // if R is not void and result is null, throw an exception
-      if (result == null && R == T) {
-        throw LdException(message: "Operation failed");
-      }
-      data.handleItemStateEvent(
-        item.id,
-        CrudItemStateEvent.success(result as T),
-      );
-      return result;
-    } catch (e) {
-      data.handleItemStateEvent(
-        item.id,
-        CrudItemStateEvent.error(e as LdException),
-      );
-      return Future.error(e);
-    }
-  }
-
-  @override
-  void dispose() {
-    data.dispose();
-    super.dispose();
-  }
-}
-
 /// [LdCrudMasterDetail] extends the [LdMasterDetail] widget to provide CRUD
 /// functionality for a list of items of type [T].
 ///
@@ -102,7 +33,7 @@ class LdCrudMasterDetailController<T extends CrudItemMixin<T>>
 /// and also performs the usual UI operations like selecting and deselecting
 /// items or updating the UI based on the state and result of a CRUD operation.
 class LdCrudMasterDetail<T extends CrudItemMixin<T>> extends LdMasterDetail<T> {
-  final CrudOperations<T> crud;
+  final LdCrudOperations<T> crud;
   final List<LdMasterDetailItemAction<T>> itemActions;
   final List<LdMasterDetailListAction<T>> listActions;
 
@@ -135,30 +66,33 @@ class LdCrudMasterDetail<T extends CrudItemMixin<T>> extends LdMasterDetail<T> {
 
 class _LdCrudMasterDetailState<T extends CrudItemMixin<T>>
     extends _LdMasterDetailState<T> {
+  late final _crud = (widget as LdCrudMasterDetail<T>).crud;
+  late final _data = LdCrudListState<T>(
+    fetchListFunction: _crud.fetchAll,
+  );
+
   @override
-  void _initController() {
-    _controller = LdCrudMasterDetailController(
-      crud: (widget as LdCrudMasterDetail<T>).crud,
-      onOpenItem: _onOpenItem,
-      onCloseItem: _onCloseItem,
-      getOpenItem: () => _openItem,
-    );
-  }
+  bool get _isMasterAppBarLoading => _data.busy;
+
+  @override
+  bool get _isDetailsAppBarLoading => _data.isItemLoading(_openItem);
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: (_controller as LdCrudMasterDetailController<T>).data,
-      builder: (context, child) {
-        return super.build(context);
-      },
+    return ListenableProvider<LdCrudListState<T>>.value(
+      value: _data,
+      child: ListenableBuilder(
+        listenable: _data,
+        builder: (context, child) {
+          return super.build(context);
+        },
+      ),
     );
   }
 
   @override
   List<Widget> buildMasterActions(
       BuildContext context, T? openItem, bool isSeparatePage) {
-    final controller = (_controller as LdCrudMasterDetailController<T>);
     return [
       ...super.buildMasterActions(context, openItem, isSeparatePage),
       ...(widget as LdCrudMasterDetail<T>)
@@ -168,10 +102,12 @@ class _LdCrudMasterDetailState<T extends CrudItemMixin<T>>
           .map(
             (action) => action.childBuilder(
               () async => await action.onAction(
-                controller.data.isMultiSelectMode
-                    ? controller.data.selectedItems.toList()
-                    : controller.data.items,
-                (_controller as LdCrudMasterDetailController<T>),
+                _data.isMultiSelectMode
+                    ? _data.selectedItems.toList()
+                    : _data.items,
+                _controller,
+                _data,
+                _crud,
               ),
             ),
           )
@@ -191,7 +127,9 @@ class _LdCrudMasterDetailState<T extends CrudItemMixin<T>>
             (action) => action.childBuilder(
               () async => await action.onAction(
                 item,
-                (_controller as LdCrudMasterDetailController<T>),
+                _controller,
+                _data,
+                _crud,
               ),
             ),
           )

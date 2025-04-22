@@ -25,7 +25,7 @@ class ExampleItem with CrudItemMixin<ExampleItem> {
   }
 }
 
-class ExampleRepository extends CrudOperations<ExampleItem> {
+class ExampleRepository extends LdCrudOperations<ExampleItem> {
   final List<ExampleItem> _items = List.generate(
       exampleTitles.length, (i) => ExampleItem(i, exampleTitles[i]));
 
@@ -100,7 +100,8 @@ class ExampleBuilder extends LdMasterDetailBuilder<ExampleItem> {
 
   ExampleBuilder(this.paginator);
 
-  static Widget createDetailWidget(
+  @override
+  Widget buildDetail(
     BuildContext context,
     ExampleItem item,
     bool isSeparatePage,
@@ -111,19 +112,29 @@ class ExampleBuilder extends LdMasterDetailBuilder<ExampleItem> {
         const LdTextHl("Detail"),
         LdTextL("Item ${item.id}: ${item.name}"),
         LdButton(
-          onPressed: controller.onCloseItem,
+          onPressed: controller.closeItem,
           child: const Text("Go back"),
         )
       ],
     ).padL();
   }
 
-  static Widget createMasterWidget(
+  @override
+  Widget buildDetailTitle(
+    BuildContext context,
+    ExampleItem item,
+    bool isSeparatePage,
+    LdMasterDetailController<ExampleItem> controller,
+  ) {
+    return Text("Detail ${item.name}");
+  }
+
+  @override
+  Widget buildMaster(
     BuildContext context,
     ExampleItem? openItem,
     bool isSeparatePage,
     LdMasterDetailController<ExampleItem> controller,
-    LdPaginator<ExampleItem> paginator,
   ) {
     return LdList<ExampleItem, void>(
       data: paginator,
@@ -135,81 +146,21 @@ class ExampleBuilder extends LdMasterDetailBuilder<ExampleItem> {
           title: Text(item.name),
           subtitle: Text("ID: ${item.id}"),
           onTap: () {
-            controller.onOpenItem(item);
-          },
-          isSelected: (controller is LdCrudMasterDetailController<ExampleItem>)
-              ? controller.data.isItemSelected(item)
-              : false,
-          showSelectionControls:
-              (controller is LdCrudMasterDetailController<ExampleItem>)
-                  ? controller.data.isMultiSelectMode
-                  : false,
-          onSelectionChange: (selected) {
-            if (controller is LdCrudMasterDetailController<ExampleItem>) {
-              controller.data.toggleItemSelection(item);
-            }
-          },
-          onLongPress: () {
-            if (controller is LdCrudMasterDetailController<ExampleItem>) {
-              controller.data.toggleMultiSelectMode();
-              if (controller.data.isMultiSelectMode) {
-                controller.data.toggleItemSelection(item);
-              }
-            }
+            controller.openItem(item);
           },
         );
       },
     );
   }
 
-  static Widget createMasterTitle(BuildContext context, ExampleItem? openItem) {
-    return const Text("List of Example Items");
-  }
-
-  static Widget createDetailTitle(BuildContext context, ExampleItem item) {
-    return Text("Detail ${item.name}");
-  }
-
   @override
-  Widget buildDetail(
-    BuildContext context,
-    ExampleItem item,
-    bool isSeparatePage,
-    LdMasterDetailController<ExampleItem> controller,
-  ) {
-    return createDetailWidget(context, item, isSeparatePage, controller);
-  }
-
-  @override
-  Widget buildDetailTitle(
-    BuildContext context,
-    ExampleItem item,
-    bool isSeparatePage,
-    LdMasterDetailController<ExampleItem> controller,
-  ) {
-    return createDetailTitle(context, item);
-  }
-
-  @override
-  Widget buildMaster(
+  Widget buildMasterTitle(
     BuildContext context,
     ExampleItem? openItem,
     bool isSeparatePage,
     LdMasterDetailController<ExampleItem> controller,
   ) {
-    return createMasterWidget(
-      context,
-      openItem,
-      isSeparatePage,
-      controller,
-      paginator,
-    );
-  }
-
-  @override
-  Widget buildMasterTitle(BuildContext context, ExampleItem? openItem,
-      bool isSeparatePage, LdMasterDetailController<ExampleItem> controller) {
-    return createMasterTitle(context, openItem);
+    return const Text("List of Example Items");
   }
 }
 
@@ -219,14 +170,18 @@ class ExampleCrudBuilder extends LdCrudMasterDetailBuilder<ExampleItem> {
     BuildContext context,
     ExampleItem item,
     bool isSeparatePage,
-    LdCrudMasterDetailController<ExampleItem> controller,
+    LdMasterDetailController<ExampleItem> controller,
   ) {
-    return ExampleBuilder.createDetailWidget(
-      context,
-      item,
-      isSeparatePage,
-      controller,
-    );
+    return LdAutoSpace(
+      children: [
+        const LdTextHl("Detail"),
+        LdTextL("Item ${item.id}: ${item.name}"),
+        LdButton(
+          onPressed: controller.closeItem,
+          child: const Text("Go back"),
+        )
+      ],
+    ).padL();
   }
 
   @override
@@ -234,9 +189,9 @@ class ExampleCrudBuilder extends LdCrudMasterDetailBuilder<ExampleItem> {
     BuildContext context,
     ExampleItem item,
     bool isSeparatePage,
-    LdCrudMasterDetailController<ExampleItem> controller,
+    LdMasterDetailController<ExampleItem> controller,
   ) {
-    return ExampleBuilder.createDetailTitle(context, item);
+    return Text("Detail ${item.name}");
   }
 
   @override
@@ -244,14 +199,14 @@ class ExampleCrudBuilder extends LdCrudMasterDetailBuilder<ExampleItem> {
     BuildContext context,
     ExampleItem? openItem,
     bool isSeparatePage,
-    LdCrudMasterDetailController<ExampleItem> controller,
+    LdMasterDetailController<ExampleItem> controller,
   ) {
-    return ExampleBuilder.createMasterWidget(
-      context,
-      openItem,
-      isSeparatePage,
-      controller,
-      controller.data,
+    return LdCrudMasterList(
+      data: getData(context),
+      controller: controller,
+      titleBuilder: (context, item) => Text(item.name),
+      subtitleBuilder: (context, item) => Text("ID: ${item.id}"),
+      openItem: openItem,
     );
   }
 
@@ -260,14 +215,13 @@ class ExampleCrudBuilder extends LdCrudMasterDetailBuilder<ExampleItem> {
     BuildContext context,
     ExampleItem? openItem,
     bool isSeparatePage,
-    LdCrudMasterDetailController<ExampleItem> controller,
+    LdMasterDetailController<ExampleItem> controller,
   ) {
-    if (controller.data.isMultiSelectMode) {
-      return Text(
-        "${controller.data.selectedItems.length}/${controller.data.totalItems} selected",
-      );
-    }
-    return ExampleBuilder.createMasterTitle(context, openItem);
+    final data = getData(context);
+    final title = data.isMultiSelectMode
+        ? "${data.selectedItems.length}/${data.totalItems} selected"
+        : "List of Example Items";
+    return Text(title);
   }
 
   @override
@@ -275,17 +229,18 @@ class ExampleCrudBuilder extends LdCrudMasterDetailBuilder<ExampleItem> {
     BuildContext context,
     ExampleItem? openItem,
     bool isSeparatePage,
-    LdCrudMasterDetailController<ExampleItem> controller,
+    LdMasterDetailController<ExampleItem> controller,
   ) {
     return [];
   }
 
   @override
   List<Widget> buildDetailActions(
-      BuildContext context,
-      ExampleItem item,
-      bool isSeparatePage,
-      LdCrudMasterDetailController<ExampleItem> controller) {
+    BuildContext context,
+    ExampleItem item,
+    bool isSeparatePage,
+    LdMasterDetailController<ExampleItem> controller,
+  ) {
     return [];
   }
 }

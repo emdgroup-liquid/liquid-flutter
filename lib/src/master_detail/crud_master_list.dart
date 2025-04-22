@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-/// A wrapper around [LdList] that handles selection and item actions.
+/// A wrapper around [LdList] that handles selection and item actions based
+/// on the [LdCrudListState] of a [LdCrudMasterDetail]. It can be a good fit
+/// for a master list in a [LdCrudMasterDetail].
+///
+/// For more complex use cases, you might want to use a custom master list
+/// implementation.
 class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
-  final LdCrudMasterDetailController<T> controller;
+  final LdCrudListState<T> data;
+  final T? openItem;
+  final LdMasterDetailController<T> controller;
   final Widget Function(BuildContext context, T item) titleBuilder;
   final Widget Function(BuildContext context, T item)? subtitleBuilder;
   final Widget Function(BuildContext context, T item)? subContentBuilder;
@@ -12,8 +19,10 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
 
   const LdCrudMasterList({
     super.key,
+    required this.data,
     required this.controller,
     required this.titleBuilder,
+    this.openItem,
     this.isSeparatePage = false,
     this.subtitleBuilder,
     this.subContentBuilder,
@@ -22,27 +31,27 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final showSelectionControls = controller.data.isMultiSelectMode;
+    final showSelectionControls = data.isMultiSelectMode;
     return LdList<T, void>(
-      data: controller.data,
+      data: data,
       assumedItemHeight: assumedItemHeight,
       itemBuilder: (context, item, index) {
-        final isSelected = controller.data.isItemSelected(item);
-        final isActive = controller.getOpenItem()?.id == item.id;
+        final isSelected = data.isItemSelected(item);
+        final isActive = openItem?.id == item.id;
 
         return LdListItem(
           trailingForward: isSeparatePage,
           active: isActive,
           isSelected: isSelected,
           showSelectionControls: showSelectionControls,
-          onTap: () => controller.onOpenItem(item),
+          onTap: () => controller.openItem(item),
           onSelectionChange: (selected) {
-            controller.data.toggleItemSelection(item);
+            data.toggleItemSelection(item);
           },
           onLongPress: () {
-            controller.data.toggleMultiSelectMode();
-            if (controller.data.isMultiSelectMode) {
-              controller.data.toggleItemSelection(item);
+            data.toggleMultiSelectMode();
+            if (data.isMultiSelectMode) {
+              data.toggleItemSelection(item);
             }
           },
           title: titleBuilder(context, item),

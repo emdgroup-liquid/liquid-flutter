@@ -29,6 +29,11 @@ class CrudItemStateEvent<T> {
 
   factory CrudItemStateEvent.error(LdException error) =>
       CrudItemStateEvent._(type: CrudLoadingStateType.error, error: error);
+
+  @override
+  String toString() {
+    return "CrudItemStateEvent(type: $type, data: $data, error: $error)";
+  }
 }
 
 /// Extends [LdPaginator] to add CRUD operations and item states.
@@ -74,17 +79,16 @@ class LdCrudListState<T extends CrudItemMixin<T>> extends LdPaginator<T> {
     notifyListeners();
   }
 
-  T? getItemOptimistically(dynamic id) {
-    return itemStates[id]?.data ??
-        items.firstWhere((item) => item?.id == id, orElse: () => null);
+  T? getItemOptimistically(T? item) {
+    return itemStates[item?.id]?.data ?? item;
   }
 
-  LdException? getItemError(dynamic id) {
-    return itemStates[id]?.error;
+  LdException? getItemError(T? item) {
+    return itemStates[item?.id]?.error;
   }
 
-  bool isItemLoading(dynamic id) {
-    return itemStates[id]?.type == CrudLoadingStateType.loading;
+  bool isItemLoading(T? item) {
+    return itemStates[item?.id]?.type == CrudLoadingStateType.loading;
   }
 
   void toggleMultiSelectMode({bool? forceValue}) {
@@ -98,6 +102,9 @@ class LdCrudListState<T extends CrudItemMixin<T>> extends LdPaginator<T> {
   void toggleItemSelection(T item) {
     if (_selectedItems.contains(item)) {
       _selectedItems.remove(item);
+      if (_selectedItems.isEmpty) {
+        _isMultiSelectMode = false;
+      }
     } else {
       _selectedItems.add(item);
     }
