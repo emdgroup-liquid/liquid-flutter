@@ -18,7 +18,7 @@ class CrudItemStateEvent<T> {
     this.data,
   });
 
-  factory CrudItemStateEvent.loading(T? data) =>
+  factory CrudItemStateEvent.loading([T? data]) =>
       CrudItemStateEvent._(type: CrudLoadingStateType.loading, data: data);
 
   factory CrudItemStateEvent.success(T data) =>

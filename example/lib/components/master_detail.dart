@@ -396,6 +396,7 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
                       return null;
                     },
                   ),
+                  LdMasterDetailListAction<ExampleItem>.batchDeleteItems(),
                 ],
               ),
             ),

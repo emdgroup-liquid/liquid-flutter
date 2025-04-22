@@ -93,12 +93,14 @@ class _LdCrudMasterDetailState<T extends CrudItemMixin<T>>
   @override
   List<Widget> buildMasterActions(
       BuildContext context, T? openItem, bool isSeparatePage) {
+    final displayMode = _data.isMultiSelectMode
+        ? ActionDisplayModes.masterActionBarMultiSelect
+        : ActionDisplayModes.masterActionBar;
     return [
       ...super.buildMasterActions(context, openItem, isSeparatePage),
       ...(widget as LdCrudMasterDetail<T>)
           .listActions
-          .where((action) =>
-              action.displayModes.contains(ActionDisplayModes.masterActionBar))
+          .where((action) => action.displayModes.contains(displayMode))
           .map(
             (action) => action.childBuilder(
               () async => await action.onAction(

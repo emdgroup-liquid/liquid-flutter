@@ -7,8 +7,9 @@ enum ActionLoadingStyle { dialog, actionBar }
 
 enum ActionDisplayModes {
   masterActionBar,
-  detailActionBar,
+  masterActionBarMultiSelect,
   kebabMenu,
+  detailActionBar,
 }
 
 typedef ActionCallback<T extends CrudItemMixin<T>, Arg> = FutureOr<dynamic>
@@ -98,6 +99,58 @@ class LdMasterDetailListAction<T extends CrudItemMixin<T>>
           return true;
         }
         return false;
+      },
+    );
+  }
+
+  factory LdMasterDetailListAction.batchDeleteItems({
+    LdMasterDetailCrudItemCallback<T>? onItemDeleted,
+    Future<void> Function(List<T?>)? onItemsDeleted,
+  }) {
+    return LdMasterDetailListAction<T>(
+      childBuilder: (Function actionCallback) {
+        return IconButton(
+          onPressed: () => actionCallback(),
+          icon: const Icon(Icons.delete_forever),
+        );
+      },
+      displayModes: {
+        ActionDisplayModes.masterActionBarMultiSelect,
+      },
+      onAction: (
+        List<T?> list,
+        LdMasterDetailController<T> controller,
+        LdCrudListState<T> listState,
+        LdCrudOperations<T> crud,
+      ) async {
+        final itemsToDeleteIds = list.map((e) => e?.id).toSet();
+        final newList = listState.items
+            .where((e) => !itemsToDeleteIds.contains(e?.id))
+            .toList();
+
+        // set list busy in general
+        listState.handleItemStateEvent(
+          null,
+          CrudItemStateEvent.loading(),
+        );
+        try {
+          await crud.batchDelete(list.map((e) => e!));
+          for (final item in list) {
+            if (item == null) continue;
+            // remove all items from list
+            listState.handleItemStateEvent(
+                item.id, CrudItemStateEvent.deleted());
+            onItemDeleted?.call(item);
+          }
+          onItemsDeleted?.call(newList);
+          listState.toggleMultiSelectMode(forceValue: false);
+        } catch (e) {
+          // set list error
+          listState.handleItemStateEvent(
+            null,
+            CrudItemStateEvent.error(e as LdException),
+          );
+        }
       },
     );
   }
