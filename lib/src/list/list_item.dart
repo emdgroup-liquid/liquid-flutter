@@ -16,6 +16,8 @@ class LdListItem extends StatelessWidget {
   final bool selectDisabled;
   final OnSelectionChange? onSelectionChange;
   final bool radioSelection;
+
+  final BorderRadius? borderRadius;
   final Widget? subContent;
   final bool isSelected;
   final bool trailingForward;
@@ -35,6 +37,7 @@ class LdListItem extends StatelessWidget {
     this.disabled = false,
     this.selectDisabled = false,
     this.trailingForward = false,
+    this.borderRadius,
     this.showSelectionControls = false,
     this.onSelectionChange,
     this.tradeLeadingForSelectionControl = false,
@@ -80,100 +83,104 @@ class LdListItem extends StatelessWidget {
             color: colors.text,
             size: theme.labelSize(LdSize.l) * 1.2,
           ),
-          child: LdAutoBackground(
-            invert: true,
-            child: Container(
-              width: effectiveWidth,
-              padding: padding ?? theme.balPad(LdSize.m),
-              decoration: BoxDecoration(
-                color: colors.surface,
-              ),
-              child: Row(
-                  mainAxisSize: effectiveWidth != double.infinity ? MainAxisSize.min : MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    LdReveal.quick(
-                      child: Row(
-                        children: [
-                          if (radioSelection)
-                            LdRadio(
-                                checked: isSelected,
-                                disabled: disabled,
-                                onChanged: (value) {
-                                  onSelectionChange?.call(value);
-                                })
-                          else
-                            LdCheckbox(
-                                checked: isSelected,
-                                disabled: disabled,
-                                onChanged: (value) {
-                                  onSelectionChange?.call(value);
-                                }),
-                          ldSpacerM,
-                        ],
-                      ),
-                      revealed: showSelectionControls,
-                      initialRevealed: showSelectionControls,
+          child: Container(
+            width: effectiveWidth,
+            padding: padding ?? theme.balPad(LdSize.m),
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: borderRadius,
+            ),
+            child: Row(
+                mainAxisSize: effectiveWidth != double.infinity
+                    ? MainAxisSize.min
+                    : MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  LdReveal.quick(
+                    child: Row(
+                      children: [
+                        if (radioSelection)
+                          LdRadio(
+                              checked: isSelected,
+                              disabled: disabled,
+                              onChanged: (value) {
+                                onSelectionChange?.call(value);
+                              })
+                        else
+                          LdCheckbox(
+                              checked: isSelected,
+                              disabled: disabled,
+                              onChanged: (value) {
+                                onSelectionChange?.call(value);
+                              }),
+                        ldSpacerM,
+                      ],
                     ),
-                    if (leading != null)
-                      IconTheme(
-                        data: IconThemeData(
-                          color: theme.text,
-                          size: theme.labelSize(LdSize.l) * 1.2,
-                        ),
-                        child: LdReveal.quick(
-                          child: Row(
-                            children: [
-                              leading!,
-                              ldSpacerM,
-                            ],
-                          ),
-                          //axis: Axis.horizontal,
-                          revealed: !(showSelectionControls && tradeLeadingForSelectionControl),
-                          initialRevealed: !(showSelectionControls && tradeLeadingForSelectionControl),
-                        ),
+                    revealed: showSelectionControls,
+                    initialRevealed: showSelectionControls,
+                  ),
+                  if (leading != null)
+                    IconTheme(
+                      data: IconThemeData(
+                        color: theme.text,
+                        size: theme.labelSize(LdSize.l) * 1.2,
                       ),
-                    Flexible(
-                      fit: effectiveWidth == double.infinity ? FlexFit.tight : FlexFit.loose,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (title != null)
-                            DefaultTextStyle(
-                              child: title!,
+                      child: LdReveal.quick(
+                        child: Row(
+                          children: [
+                            leading!,
+                            ldSpacerM,
+                          ],
+                        ),
+                        //axis: Axis.horizontal,
+                        revealed: !(showSelectionControls &&
+                            tradeLeadingForSelectionControl),
+                        initialRevealed: !(showSelectionControls &&
+                            tradeLeadingForSelectionControl),
+                      ),
+                    ),
+                  Flexible(
+                    fit: effectiveWidth == double.infinity
+                        ? FlexFit.tight
+                        : FlexFit.loose,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (title != null)
+                          DefaultTextStyle(
+                            child: title!,
+                            style: ldBuildTextStyle(
+                              theme,
+                              LdTextType.label,
+                              LdSize.m,
+                              color: theme.text,
+                            ),
+                          ),
+                        if (subtitle != null) ...[
+                          DefaultTextStyle(
                               style: ldBuildTextStyle(
                                 theme,
-                                LdTextType.label,
-                                LdSize.m,
-                                color: theme.text,
+                                LdTextType.paragraph,
+                                lineHeight: 1.5,
+                                LdSize.s,
+                                color: theme.textMuted,
                               ),
-                            ),
-                          if (subtitle != null) ...[
-                            DefaultTextStyle(
-                                style: ldBuildTextStyle(
-                                  theme,
-                                  LdTextType.paragraph,
-                                  lineHeight: 1.5,
-                                  LdSize.s,
-                                  color: theme.textMuted,
-                                ),
-                                child: subtitle!),
-                          ],
-                          if (subContent != null) subContent!,
+                              child: subtitle!),
                         ],
-                      ),
+                        if (subContent != null) subContent!,
+                      ],
                     ),
-                    if (trailing != null) ...[ldSpacerM, trailing!],
-                    if (trailing == null && trailingForward) ...[
-                      ldSpacerM,
-                      Icon(
-                        LucideIcons.chevronRight,
-                        size: theme.labelSize(LdSize.l) * 1.2,
-                        color: theme.textMuted,
-                      )
-                    ],
-                  ]),
-            ),
+                  ),
+                  if (trailing != null) ...[ldSpacerM, trailing!],
+                  if (trailing == null && trailingForward) ...[
+                    ldSpacerM,
+                    Icon(
+                      LucideIcons.chevronRight,
+                      size: theme.labelSize(LdSize.l) * 1.2,
+                      color: theme.textMuted,
+                    )
+                  ],
+                ]),
           ),
         );
       },
