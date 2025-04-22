@@ -15,7 +15,6 @@ class _ListDemoState extends State<ListDemo> {
   bool _onSurface = false;
   bool _enableGrouping = false;
   bool _assumeItemHeight = false;
-  bool _groupSequentially = false;
 
   bool _simulateError = false;
   bool _bidirectionalScrolling = false;
@@ -104,16 +103,15 @@ class _ListDemoState extends State<ListDemo> {
                     title: Text("Footer"),
                     subtitle: Text("This is a Footer"),
                   ),
-                  data: _paginator,
+                  paginator: _paginator,
                   assumedItemHeight: _assumeItemHeight ? 50 : null,
                   groupingCriterion:
-                      _enableGrouping ? (item) => item % 10 : null,
-                  groupSequentialItems: _groupSequentially,
-                  separatorBuilder: _enableGrouping
+                      _enableGrouping ? (item) => item ~/ 10 : null,
+                  groupHeaderBuilder: _enableGrouping
                       ? (context, remainder) => LdListSeperator(
                             onSurface: _onSurface,
                             child: Text(
-                              "Remainder of division by 10 - $remainder",
+                              "Range $remainder",
                             ),
                           )
                       : null,
@@ -123,7 +121,15 @@ class _ListDemoState extends State<ListDemo> {
                       hasSubContent: false,
                     );
                   },
-                  itemBuilder: (context, item, index) {
+                  separatorBuilder: (
+                    context,
+                  ) {
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 16),
+                      child: const LdDivider(),
+                    );
+                  },
+                  itemBuilder: (context, item, state) {
                     return LdListItem(
                       leading: LdAvatar(
                         color: LdTheme.of(context).palette.success,
@@ -218,21 +224,45 @@ class _ListDemoState extends State<ListDemo> {
                         _enableGrouping = value;
                       });
                     }),
-                LdToggle(
-                  checked: _groupSequentially,
-                  label: "Group sequentially",
-                  onChanged: (value) {
-                    setState(() {
-                      _groupSequentially = value;
-                    });
-                  },
-                ),
-                const LdTextPs(
-                    "Sequential grouping preserves order, but does not group all items that have the same grouping criterion together."),
-                const LdTextPs(
-                    "Keep in mind that if you dont group sequentially and items are served in a different order than they are displayed, user experience will suffer to the list jumping around."),
               ],
             ),
+          ),
+          LdBundle(
+            children: [
+              const LdTextH("LdSelectableList"),
+              SizedBox(
+                height: 500,
+                child: LdSelectableList<int, void>(
+                  multiSelect: true,
+                  paginator: _paginator,
+                  listBuilder: (context, scrollController, itemBuilder) {
+                    return LdList<int, void>(
+                      scrollController: scrollController,
+                      paginator: _paginator,
+                      itemBuilder: itemBuilder,
+                    );
+                  },
+                  itemBuilder: ({
+                    required BuildContext context,
+                    required int item,
+                    required int index,
+                    required bool selected,
+                    required bool isMultiSelect,
+                    required void Function(bool selected) onSelectionChange,
+                    required VoidCallback onTap,
+                  }) {
+                    return LdListItem(
+                      active: selected,
+                      isSelected: selected,
+                      showSelectionControls: isMultiSelect,
+                      onSelectionChange: onSelectionChange,
+                      onTap: onTap,
+                      title: Text(item.toString()),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
           LdBundle(
             children: [
@@ -327,7 +357,7 @@ class _ListDemoState extends State<ListDemo> {
           const LdTextH("LdPaginator.fromList"),
           LdList(
             shrinkWrap: true,
-            data: LdPaginator.fromList(["1", "2"]),
+            paginator: LdPaginator.fromList(["1", "2"]),
             itemBuilder: (context, item, index) {
               return LdListItem(
                 leading: LdAvatar(

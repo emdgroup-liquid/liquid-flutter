@@ -41,10 +41,10 @@ void main() {
         width: 500,
         height: 500,
         child: LdList<String, String?>(
-          data: data,
+          paginator: data,
           assumedItemHeight: 60,
           groupingCriterion: grouping,
-          separatorBuilder: seperatorBuilder ??
+          groupHeaderBuilder: seperatorBuilder ??
               (context, criterion) {
                 // add a divider between groups by default
                 return const LdDivider();
@@ -114,7 +114,7 @@ void main() {
               width: 500,
               height: 500,
               child: LdList<String, String>(
-                data: paginator,
+                paginator: paginator,
                 itemBuilder: (context, item, index) {
                   return const SizedBox.shrink();
                 },
@@ -140,7 +140,7 @@ void main() {
               width: 500,
               height: 500,
               child: LdList<String, String>(
-                data: errorProducingPaginator,
+                paginator: errorProducingPaginator,
                 itemBuilder: (context, item, index) => const SizedBox.shrink(),
               ),
             ),
@@ -198,9 +198,9 @@ void main() {
       await tester.pumpWidget(
         _wrapWithMaterialApp(
           LdList<String, String>(
-            data: paginator,
+            paginator: paginator,
             groupingCriterion: (item) => item.split(':')[0].trim(),
-            separatorBuilder: (context, criterion) => Text(criterion),
+            groupHeaderBuilder: (context, criterion) => Text(criterion),
             itemBuilder: (context, item, index) => Text(item),
           ),
         ),
@@ -228,7 +228,7 @@ void main() {
       await tester.pumpWidget(
         _wrapWithMaterialApp(
           LdList<String, String>(
-            data: paginator,
+            paginator: paginator,
             emptyBuilder: (context, refresh) => const Text('No items found'),
             itemBuilder: (context, item, index) => Text(item),
           ),
