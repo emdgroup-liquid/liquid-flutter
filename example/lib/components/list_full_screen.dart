@@ -35,9 +35,9 @@ class _ListFullScreenState extends State<ListFullScreen> {
   @override
   Widget build(BuildContext context) {
     return LdList<int, int>(
-      data: _paginator,
+      paginator: _paginator,
       groupingCriterion: (item) => (item - 1) ~/ 10,
-      separatorBuilder: (context, remainder) => LdListSeperator(
+      groupHeaderBuilder: (context, remainder) => LdListSeperator(
         onSurface: false,
         child: Text("Group $remainder"),
       ),
