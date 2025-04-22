@@ -14,6 +14,7 @@ class ContextMenuDemo extends StatefulWidget {
 class _ContextMenuDemoState extends State<ContextMenuDemo> {
   LdContextMenuBlurMode _blurMode = LdContextMenuBlurMode.mobileOnly;
   LdContextZoomMode _zoomMode = LdContextZoomMode.mobileOnly;
+  LdContextPositionMode _positionMode = LdContextPositionMode.relativeTrigger;
 
   _buildMenu(BuildContext context, VoidCallback onDismiss) =>
       Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -55,6 +56,7 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
               child: LdContextMenu(
                 zoomMode: _zoomMode,
                 blurMode: _blurMode,
+                positionMode: _positionMode,
                 menuBuilder: (context, onDismiss) {
                   return ConstrainedBox(
                       constraints: const BoxConstraints(
@@ -63,14 +65,14 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
                       child: _buildMenu(context, onDismiss));
                 },
                 builder: (context, shuttle) => LdListItem(
+                  borderRadius: LdTheme.of(context).radius(LdSize.m),
                   width: double.infinity,
                   leading: const LdAvatar(
                     child: Text("C"),
                   ),
-                  disabled: shuttle,
                   title: const Text("Right click me"),
                 ),
-              ),
+              ).padM(),
             ),
             ComponentWell(
               child: Row(
@@ -78,6 +80,7 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
                   LdContextMenu(
                     zoomMode: _zoomMode,
                     blurMode: _blurMode,
+                    positionMode: _positionMode,
                     menuBuilder: (context, onDismiss) {
                       return ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 150),
@@ -117,6 +120,19 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
                 onChanged: (p0) {
                   setState(() {
                     _zoomMode = p0;
+                  });
+                }),
+            LdSwitch(
+                label: "Position",
+                children: const {
+                  LdContextPositionMode.auto: Text("Auto"),
+                  LdContextPositionMode.relativeTrigger: Text("Trigger"),
+                  LdContextPositionMode.relativeCursor: Text("Cursor"),
+                },
+                value: _positionMode,
+                onChanged: (p0) {
+                  setState(() {
+                    _positionMode = p0;
                   });
                 }),
           ],

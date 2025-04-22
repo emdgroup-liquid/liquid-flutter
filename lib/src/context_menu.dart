@@ -1,12 +1,11 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_portal/flutter_portal.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/notifications/implicit_blur.dart';
 
 enum LdContextMenuBlurMode {
   /// Blur on mobile
@@ -30,6 +29,17 @@ enum LdContextZoomMode {
   never,
 }
 
+enum LdContextPositionMode {
+  /// Automatically position the menu uses [relativeTrigger] on mobile and [relativeCursor] on desktop
+  auto,
+
+  /// Position relative to the trigger
+  relativeTrigger,
+
+  /// Position relative to the cursor
+  relativeCursor,
+}
+
 class LdContextMenu extends StatefulWidget {
   const LdContextMenu({
     super.key,
@@ -40,6 +50,7 @@ class LdContextMenu extends StatefulWidget {
     this.zoomMode = LdContextZoomMode.mobileOnly,
     this.listenForTaps = true,
     this.visible,
+    this.positionMode = LdContextPositionMode.auto,
   });
 
   final bool? visible;
@@ -50,10 +61,12 @@ class LdContextMenu extends StatefulWidget {
 
   final LdContextMenuBlurMode blurMode;
   final LdContextZoomMode zoomMode;
+  final LdContextPositionMode positionMode;
 
   final Widget Function(BuildContext context, bool isShuttle) builder;
 
-  final Widget Function(BuildContext context, VoidCallback onDismiss) menuBuilder;
+  final Widget Function(BuildContext context, VoidCallback onDismiss)
+      menuBuilder;
 
   @override
   State<LdContextMenu> createState() => _LdContextMenuState();
@@ -62,9 +75,16 @@ class LdContextMenu extends StatefulWidget {
 class _LdContextMenuState extends State<LdContextMenu> {
   final GlobalKey _triggerKey = GlobalKey();
 
-  late bool _visible = widget.visible ?? false;
+  final _overlayPortalController = OverlayPortalController();
 
-  bool _belowBottom = false;
+  RenderBox? _triggerBox;
+
+  RenderBox? _menuBox;
+
+  final GlobalKey _menuKey = GlobalKey();
+
+  late bool _visible = widget.visible ?? false;
+  Offset? _cursorPosition;
 
   bool get _mobile => !kIsWeb && (Platform.isAndroid || Platform.isIOS);
 
@@ -80,9 +100,11 @@ class _LdContextMenuState extends State<LdContextMenu> {
   didUpdateWidget(LdContextMenu oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.visible != null && widget.visible != oldWidget.visible) {
-      setState(() {
-        _visible = widget.visible!;
-      });
+      if (widget.visible!) {
+        _overlayPortalController.show();
+      } else {
+        _overlayPortalController.hide();
+      }
     }
   }
 
@@ -94,80 +116,117 @@ class _LdContextMenuState extends State<LdContextMenu> {
     };
   }
 
+  LdContextPositionMode get _effectivePositionMode {
+    if (widget.positionMode == LdContextPositionMode.auto) {
+      return _mobile
+          ? LdContextPositionMode.relativeTrigger
+          : LdContextPositionMode.relativeCursor;
+    }
+    return widget.positionMode;
+  }
+
   void _dismiss() {
     setState(() {
       _visible = false;
     });
+    _overlayPortalController.hide();
   }
 
-  void _open(BuildContext context) {
-    final menuPosition = ((_triggerKey.currentContext?.findRenderObject() as RenderBox?)?.localToGlobal(Offset.zero));
+  Offset _insetMenuPositionToScreen(Offset position) {
+    final screenSize = MediaQuery.sizeOf(context);
 
-    if (menuPosition != null && menuPosition.dy > MediaQuery.of(context).size.height / 2) {
-      _belowBottom = true;
-    } else {
-      _belowBottom = false;
+    return Offset(
+      position.dx.clamp(0, screenSize.width - (_menuBox?.size.width ?? 0) - 10),
+      position.dy
+          .clamp(0, screenSize.height - (_menuBox?.size.height ?? 0) - 10),
+    );
+  }
+
+  Offset _getMenuPosition(BuildContext context) {
+    if (_effectivePositionMode == LdContextPositionMode.relativeTrigger) {
+      // This means the menu is positioned relative to the trigger
+
+      // Try to place the menu at the bottom of the trigger
+      final triggerPosition = _triggerBox?.localToGlobal(Offset.zero);
+      if (triggerPosition != null) {
+        return Offset(
+          triggerPosition.dx,
+          triggerPosition.dy + _triggerBox!.size.height,
+        );
+      }
     }
+
+    if (_effectivePositionMode == LdContextPositionMode.relativeCursor) {
+      // This means the menu is positioned relative to the cursor
+
+      return _cursorPosition ?? Offset.zero;
+    }
+
+    return Offset.zero;
+  }
+
+  void _open(BuildContext context, {Offset? globalPosition}) async {
+    _cursorPosition = globalPosition;
+
+    _triggerBox = _triggerKey.currentContext?.findRenderObject() as RenderBox?;
+
+    _overlayPortalController.show();
     setState(() {
       _visible = true;
     });
   }
 
-  Widget buildTrigger(BuildContext context) {
+  Widget _buildTriggerDetector(BuildContext context) {
     return GestureDetector(
-      onSecondaryTap: () {
-        _open(context);
+      key: _triggerKey,
+      onSecondaryTapDown: (details) {
+        _open(context, globalPosition: details.globalPosition);
       },
-      onLongPress: () {
+      onLongPressStart: (details) {
         if (!_mobile) {
           return;
         }
         HapticFeedback.heavyImpact();
-        _open(context);
+        _open(context, globalPosition: details.globalPosition);
       },
       child: widget.builder(context, false),
     );
+  }
+
+  Widget _buildZoom(BuildContext context, Widget child) {
+    if (_shouldZoom) {
+      return LdSpring(
+        initialPosition: 1,
+        position: _visible ? 1.1 : 1,
+        builder: (context, state) {
+          return Transform.scale(
+            scale: state.position,
+            child: child,
+          );
+        },
+      );
+    }
+    return child;
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
 
-    final zoomShuttle = LdSpring(
-        initialPosition: 1,
-        position: _visible && _shouldZoom ? 1.1 : 1,
-        builder: (context, state) => ConstrainedBox(
-              constraints: _triggerKey.currentContext != null
-                  ? BoxConstraints(
-                      maxWidth: (_triggerKey.currentContext!.findRenderObject() as RenderBox).size.width,
-                    )
-                  : const BoxConstraints(),
-              child: Column(
-                children: [
-                  Transform.scale(
-                      scale: state.position,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(boxShadow: [
-                          BoxShadow(
-                            color: theme.palette.neutral.shades.last.withAlpha(51),
-                            blurRadius: 10,
-                            offset: const Offset(0, 0),
-                          )
-                        ]),
-                        child: widget.builder(context, true),
-                      )),
-                ],
-              ),
-            ));
-
     final menu = LdSpring(
-        initialPosition: 0,
-        mass: 8,
-        springConstant: 15,
-        dampingCoefficient: 15,
-        position: _visible ? 1 : 0,
-        builder: (context, state) {
-          return Opacity(
+      initialPosition: 0,
+      mass: 8,
+      springConstant: 15,
+      dampingCoefficient: 15,
+      position: _visible ? 1 : 0,
+      builder: (context, state) {
+        final menuPosition = _insetMenuPositionToScreen(
+          _getMenuPosition(context),
+        );
+        return Positioned(
+          left: menuPosition.dx,
+          top: menuPosition.dy,
+          child: Opacity(
             opacity: state.position.clamp(0, 1),
             child: Container(
               margin: const EdgeInsets.symmetric(vertical: 8),
@@ -176,9 +235,10 @@ class _LdContextMenuState extends State<LdContextMenu> {
                 color: theme.surface,
                 border: Border.all(
                   color: theme.border,
+                  strokeAlign: BorderSide.strokeAlignOutside,
                   width: theme.borderWidth,
                 ),
-                borderRadius: theme.radius(LdSize.s),
+                borderRadius: theme.radius(LdSize.m),
                 boxShadow: [
                   BoxShadow(
                     color: theme.palette.neutral.shades.last.withAlpha(51),
@@ -192,49 +252,77 @@ class _LdContextMenuState extends State<LdContextMenu> {
                   alignment: Alignment.topLeft,
                   widthFactor: state.position.clamp(0, double.infinity),
                   heightFactor: state.position.clamp(0, double.infinity),
-                  child: widget.menuBuilder(context, _dismiss),
+                  child: KeyedSubtree(
+                    key: _menuKey,
+                    child: widget.menuBuilder(context, _dismiss),
+                  ),
                 ),
               ),
             ),
-          );
-        });
-
-    return PortalTarget(
-      visible: _visible,
-      // Backdrop
-      portalFollower: GestureDetector(
-        onTap: () => widget.dismissOnOutsideTap ? _dismiss() : null,
-        child: ImplicitBlur(
-            sigma: _visible && _shouldBlur ? 10 : 0,
-            duration: 300.ms,
-            child: Container(
-              color: _mobile ? theme.palette.neutral.shades.last.withAlpha(100) : Colors.transparent,
-            )),
-      ),
-      child: PortalTarget(
-        key: _triggerKey,
-        closeDuration: 300.ms,
-        visible: _visible,
-        anchor: _belowBottom
-            ? const Aligned(
-                follower: Alignment.bottomCenter,
-                target: Alignment.bottomCenter,
-                shiftToWithinBound: AxisFlag(y: true, x: true),
-              )
-            : const Aligned(
-                follower: Alignment.topCenter,
-                target: Alignment.topCenter,
-                shiftToWithinBound: AxisFlag(y: true, x: true),
-              ),
-        portalFollower: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: _belowBottom ? [menu, ldSpacerM, zoomShuttle] : [zoomShuttle, ldSpacerM, menu],
-        ),
-
-        // Trigger
-        child: widget.listenForTaps ? buildTrigger(context) : widget.builder(context, false),
-      ),
+          ),
+        );
+      },
     );
+
+    return OverlayPortal.targetsRootOverlay(
+        overlayChildBuilder: (context) => Stack(
+              fit: StackFit.expand,
+              children: [
+                if (_shouldBlur) ...[
+                  BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      color: Colors.black.withAlpha(51),
+                    ),
+                  ).animate().fadeIn(duration: 100.ms),
+                  if (_triggerBox != null)
+                    Positioned(
+                      left: _triggerBox!.localToGlobal(Offset.zero).dx,
+                      top: _triggerBox!.localToGlobal(Offset.zero).dy,
+                      width: _triggerBox!.size.width,
+                      height: _triggerBox!.size.height,
+                      child: _buildZoom(context, widget.builder(context, true)),
+                    ),
+                ],
+                ModalBarrier(
+                  onDismiss: _dismiss,
+                ),
+                menu,
+              ],
+            ),
+        controller: _overlayPortalController,
+        child: _buildZoom(context, _buildTriggerDetector(context)));
+  }
+}
+
+class _PostFrameCallback extends StatefulWidget {
+  const _PostFrameCallback({
+    super.key,
+    required this.child,
+    required this.postFrameCallback,
+  });
+
+  final Widget child;
+
+  final void Function(GlobalKey key) postFrameCallback;
+
+  @override
+  State<_PostFrameCallback> createState() => _PostFrameCallbackState();
+}
+
+class _PostFrameCallbackState extends State<_PostFrameCallback> {
+  final GlobalKey _key = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      widget.postFrameCallback(_key);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return KeyedSubtree(key: _key, child: widget.child);
   }
 }
