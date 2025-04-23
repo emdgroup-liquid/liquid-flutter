@@ -108,13 +108,11 @@ class LdList<T, GroupingCriterion> extends StatefulWidget {
   )? errorBuilder;
 
   /// Built when there are missing items that are being loaded
-  final Widget Function(BuildContext context, int position, int totalItems)?
-      loadingBuilder;
+  final Widget Function(BuildContext context, int position, int totalItems)? loadingBuilder;
 
   // Grouping configuration
   final GroupingCriterion Function(T item)? groupingCriterion;
-  final Widget Function(BuildContext context, GroupingCriterion criterion)?
-      groupHeaderBuilder;
+  final Widget Function(BuildContext context, GroupingCriterion criterion)? groupHeaderBuilder;
 
   /// Built between items. Not called between items and group headers.
   final Widget Function(BuildContext context)? separatorBuilder;
@@ -153,12 +151,10 @@ class LdList<T, GroupingCriterion> extends StatefulWidget {
   final LdRetryConfig? retryConfig;
 
   @override
-  State<LdList<T, GroupingCriterion>> createState() =>
-      _LdListState<T, GroupingCriterion>();
+  State<LdList<T, GroupingCriterion>> createState() => _LdListState<T, GroupingCriterion>();
 }
 
-class _LdListState<T, GroupingCriterion>
-    extends State<LdList<T, GroupingCriterion>> {
+class _LdListState<T, GroupingCriterion> extends State<LdList<T, GroupingCriterion>> {
   // State variables
   List<_ListItem<T, GroupingCriterion>> _groupedItems = [];
   late final ScrollController _scrollController;
@@ -167,8 +163,7 @@ class _LdListState<T, GroupingCriterion>
 
   late final LdRetryController _retryController;
 
-  double? get _effectiveAssumedHeight =>
-      widget.assumedItemHeight ?? calculatedItemHeight;
+  double? get _effectiveAssumedHeight => widget.assumedItemHeight ?? calculatedItemHeight;
 
   double? get calculatedItemHeight {
     if (_assumeItemKey == null) return null;
@@ -182,20 +177,15 @@ class _LdListState<T, GroupingCriterion>
 
     double initialOffset = 0;
 
-    if (widget.assumedItemHeight != null &&
-        widget.paginator.initialOffset != 0) {
-      initialOffset =
-          widget.paginator.initialOffset * widget.assumedItemHeight!;
+    if (widget.assumedItemHeight != null && widget.paginator.initialOffset != 0) {
+      initialOffset = widget.paginator.initialOffset * widget.assumedItemHeight!;
     }
 
     if (widget.scrollController != null) {
-      print("Using provided scroll controller");
       _scrollController = widget.scrollController!;
     } else if (widget.primary) {
-      print("Using primary scroll controller");
       _scrollController = PrimaryScrollController.of(context);
     } else {
-      print("Creating new scroll controller");
       _scrollController = ScrollController(
         initialScrollOffset: initialOffset,
       );
@@ -240,8 +230,7 @@ class _LdListState<T, GroupingCriterion>
   }
 
   bool _shouldRegroupItems(LdList<T, GroupingCriterion> oldWidget) {
-    return oldWidget.groupingCriterion != widget.groupingCriterion ||
-        widget.paginator != oldWidget.paginator;
+    return oldWidget.groupingCriterion != widget.groupingCriterion || widget.paginator != oldWidget.paginator;
   }
 
   bool _shouldUpdateDataListener(LdList<T, GroupingCriterion> oldWidget) {
@@ -330,13 +319,11 @@ class _LdListState<T, GroupingCriterion>
   void _updateGroupedItems() {
     setState(() {
       /// If grouping is enabled, we need to group the items
-      if (widget.groupHeaderBuilder != null &&
-          widget.groupingCriterion != null) {
+      if (widget.groupHeaderBuilder != null && widget.groupingCriterion != null) {
         _groupedItems = _groupItems();
 
         /// Only a separator is provided.. we need to intersperse the items
-      } else if (widget.groupingCriterion == null &&
-          widget.separatorBuilder != null) {
+      } else if (widget.groupingCriterion == null && widget.separatorBuilder != null) {
         _groupedItems = _createInterspersedList();
       } else {
         /// No grouping is provided.. we just use the items as is
@@ -366,9 +353,7 @@ class _LdListState<T, GroupingCriterion>
 
   ScrollPhysics get _scrollPhysics {
     return widget.physics ??
-        (widget.shrinkWrap
-            ? const NeverScrollableScrollPhysics()
-            : const AlwaysScrollableScrollPhysics());
+        (widget.shrinkWrap ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics());
   }
 
   List<Widget> _buildSlivers(BuildContext context) {
