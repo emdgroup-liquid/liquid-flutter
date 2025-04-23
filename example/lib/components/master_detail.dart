@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:provider/provider.dart';
 
 final exampleTitles =
     "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy "
@@ -95,156 +96,6 @@ class ExampleRepository extends LdCrudOperations<ExampleItem> {
       };
 }
 
-class ExampleBuilder extends LdMasterDetailBuilder<ExampleItem> {
-  final LdPaginator<ExampleItem> paginator;
-
-  ExampleBuilder(this.paginator);
-
-  @override
-  Widget buildDetail(
-    BuildContext context,
-    ExampleItem item,
-    bool isSeparatePage,
-    LdMasterDetailController<ExampleItem> controller,
-  ) {
-    return LdAutoSpace(
-      children: [
-        const LdTextHl("Detail"),
-        LdTextL("Item ${item.id}: ${item.name}"),
-        LdButton(
-          onPressed: controller.closeItem,
-          child: const Text("Go back"),
-        )
-      ],
-    ).padL();
-  }
-
-  @override
-  Widget buildDetailTitle(
-    BuildContext context,
-    ExampleItem item,
-    bool isSeparatePage,
-    LdMasterDetailController<ExampleItem> controller,
-  ) {
-    return Text("Detail ${item.name}");
-  }
-
-  @override
-  Widget buildMaster(
-    BuildContext context,
-    ExampleItem? openItem,
-    bool isSeparatePage,
-    LdMasterDetailController<ExampleItem> controller,
-  ) {
-    return LdList<ExampleItem, void>(
-      data: paginator,
-      assumedItemHeight: 60,
-      itemBuilder: (context, item, index) {
-        return LdListItem(
-          trailingForward: isSeparatePage,
-          active: openItem?.id == item.id,
-          title: Text(item.name),
-          subtitle: Text("ID: ${item.id}"),
-          onTap: () {
-            controller.openItem(item);
-          },
-        );
-      },
-    );
-  }
-
-  @override
-  Widget buildMasterTitle(
-    BuildContext context,
-    ExampleItem? openItem,
-    bool isSeparatePage,
-    LdMasterDetailController<ExampleItem> controller,
-  ) {
-    return const Text("List of Example Items");
-  }
-}
-
-class ExampleCrudBuilder extends LdCrudMasterDetailBuilder<ExampleItem> {
-  @override
-  Widget buildDetailContent(
-    BuildContext context,
-    ExampleItem item,
-    bool isSeparatePage,
-    LdMasterDetailController<ExampleItem> controller,
-  ) {
-    return LdAutoSpace(
-      children: [
-        const LdTextHl("Detail"),
-        LdTextL("Item ${item.id}: ${item.name}"),
-        LdButton(
-          onPressed: controller.closeItem,
-          child: const Text("Go back"),
-        )
-      ],
-    ).padL();
-  }
-
-  @override
-  Widget buildDetailTitle(
-    BuildContext context,
-    ExampleItem item,
-    bool isSeparatePage,
-    LdMasterDetailController<ExampleItem> controller,
-  ) {
-    return Text("Detail ${item.name}");
-  }
-
-  @override
-  Widget buildMaster(
-    BuildContext context,
-    ExampleItem? openItem,
-    bool isSeparatePage,
-    LdMasterDetailController<ExampleItem> controller,
-  ) {
-    return LdCrudMasterList(
-      data: getData(context),
-      controller: controller,
-      titleBuilder: (context, item) => Text(item.name),
-      subtitleBuilder: (context, item) => Text("ID: ${item.id}"),
-      openItem: openItem,
-    );
-  }
-
-  @override
-  Widget buildMasterTitle(
-    BuildContext context,
-    ExampleItem? openItem,
-    bool isSeparatePage,
-    LdMasterDetailController<ExampleItem> controller,
-  ) {
-    final data = getData(context);
-    final title = data.isMultiSelectMode
-        ? "${data.selectedItems.length}/${data.totalItems} selected"
-        : "List of Example Items";
-    return Text(title);
-  }
-
-  @override
-  List<Widget> buildMasterActions(
-    BuildContext context,
-    ExampleItem? openItem,
-    bool isSeparatePage,
-    LdMasterDetailController<ExampleItem> controller,
-  ) {
-    return [];
-  }
-
-  @override
-  List<Widget> buildDetailActions(
-    BuildContext context,
-    ExampleItem item,
-    bool isSeparatePage,
-    LdMasterDetailController<ExampleItem> controller,
-  ) {
-    return [];
-  }
-}
-
 class MasterDetailDemo extends StatefulWidget {
   const MasterDetailDemo({super.key});
 
@@ -325,11 +176,40 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
             child: LdCard(
               padding: EdgeInsets.zero,
               expandChild: true,
-              child: LdMasterDetail(
+              child: LdMasterDetail<ExampleItem>(
                 layoutMode: _layoutMode,
                 detailPresentationMode: _presentationMode,
-                builder: ExampleBuilder(
-                  LdPaginator(fetchListFunction: _fetchItems),
+                buildDetailTitle: (context, item, isSeparatePage, controller) =>
+                    Text("Detail ${item.name}"),
+                buildMasterTitle:
+                    (context, openItem, isSeparatePage, controller) =>
+                        const Text("List of Example Items"),
+                buildDetail: (context, item, isSeparatePage, controller) =>
+                    LdAutoSpace(
+                  children: [
+                    const LdTextHl("Detail"),
+                    LdTextL("Item ${item.id}: ${item.name}"),
+                    LdButton(
+                      onPressed: controller.closeItem,
+                      child: const Text("Go back"),
+                    )
+                  ],
+                ).padL(),
+                buildMaster: (context, openItem, isSeparatePage, controller) =>
+                    LdList<ExampleItem, void>(
+                  data: LdPaginator(fetchListFunction: _fetchItems),
+                  assumedItemHeight: 60,
+                  itemBuilder: (context, item, index) {
+                    return LdListItem(
+                      trailingForward: isSeparatePage,
+                      active: openItem?.id == item.id,
+                      title: Text(item.name),
+                      subtitle: Text("ID: ${item.id}"),
+                      onTap: () {
+                        controller.openItem(item);
+                      },
+                    );
+                  },
                 ),
               ),
             ),
@@ -349,10 +229,38 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
             child: LdCard(
               padding: EdgeInsets.zero,
               expandChild: true,
-              child: LdCrudMasterDetail(
+              child: LdCrudMasterDetail<ExampleItem>(
                 layoutMode: _layoutMode,
                 detailPresentationMode: _presentationMode,
-                builder: ExampleCrudBuilder(),
+                buildDetailTitle: (context, item, isSeparatePage, controller) =>
+                    Text("Detail ${item.name}"),
+                buildMasterTitle:
+                    (context, openItem, isSeparatePage, controller) {
+                  final data = context.read<LdCrudListState<ExampleItem>>();
+                  final title = data.isMultiSelectMode
+                      ? "${data.selectedItems.length}/${data.totalItems} selected"
+                      : "List of Example Items";
+                  return Text(title);
+                },
+                buildDetail: (context, item, isSeparatePage, controller) =>
+                    LdAutoSpace(
+                  children: [
+                    const LdTextHl("Detail"),
+                    LdTextL("Item ${item.id}: ${item.name}"),
+                    LdButton(
+                      onPressed: controller.closeItem,
+                      child: const Text("Go back"),
+                    )
+                  ],
+                ).padL(),
+                buildMaster: (context, openItem, isSeparatePage, controller) =>
+                    LdCrudMasterList<ExampleItem>(
+                  data: context.read<LdCrudListState<ExampleItem>>(),
+                  controller: controller,
+                  titleBuilder: (context, item) => Text(item.name),
+                  subtitleBuilder: (context, item) => Text("ID: ${item.id}"),
+                  openItem: openItem,
+                ),
                 crud: _crudRepository,
                 itemActions: [
                   LdMasterDetailItemAction<ExampleItem>.updateItem(

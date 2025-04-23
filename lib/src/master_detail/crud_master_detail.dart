@@ -36,29 +36,65 @@ class LdCrudMasterDetail<T extends CrudItemMixin<T>> extends LdMasterDetail<T> {
   final LdCrudOperations<T> crud;
   final List<LdMasterDetailItemAction<T>> itemActions;
   final List<LdMasterDetailListAction<T>> listActions;
+  final Widget Function(
+    BuildContext context,
+    LdException exception,
+    LdMasterDetailController<T> controller,
+  )? buildDetailError;
 
-  const LdCrudMasterDetail({
+  LdCrudMasterDetail({
     super.key,
-    required LdCrudMasterDetailBuilder<T> builder,
+    required super.buildDetailTitle,
+    required super.buildMasterTitle,
+    required Widget Function(
+      BuildContext context,
+      T item,
+      bool isSeparatePage,
+      LdMasterDetailController<T> controller,
+    ) buildDetail,
+    required super.buildMaster,
+    super.buildMasterActions,
+    super.buildDetailActions,
+    super.detailPresentationMode = MasterDetailPresentationMode.page,
+    super.layoutMode = MasterDetailLayoutMode.auto,
+    super.openItem,
+    super.navigator,
+    super.onOpenItemChange,
+    super.customSplitPredicate,
     required this.crud,
     this.itemActions = const [],
     this.listActions = const [],
-    MasterDetailPresentationMode detailPresentationMode =
-        MasterDetailPresentationMode.page,
-    MasterDetailLayoutMode layoutMode = MasterDetailLayoutMode.auto,
-    T? selectedItem,
-    NavigatorState? navigator,
-    LdMasterDetailOnOpenItemChange<T>? onSelectionChange,
-    bool Function(SizingInformation size)? customSplitPredicate,
+    this.buildDetailError,
   }) : super(
-          builder: builder,
-          detailPresentationMode: detailPresentationMode,
-          layoutMode: layoutMode,
-          openItem: selectedItem,
-          navigator: navigator,
-          onOpenItemChange: onSelectionChange,
-          customSplitPredicate: customSplitPredicate,
+          buildDetail: (context, item, isSeparatePage, controller) =>
+              _buildDetailWithErrorHandling(
+            context,
+            item,
+            isSeparatePage,
+            controller,
+            buildDetail,
+            buildDetailError,
+          ),
         );
+
+  static Widget _buildDetailWithErrorHandling<T extends CrudItemMixin<T>>(
+    BuildContext context,
+    T item,
+    bool isSeparatePage,
+    LdMasterDetailController<T> controller,
+    Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)
+        buildDetail,
+    Widget Function(BuildContext, LdException, LdMasterDetailController<T>)?
+        buildDetailError,
+  ) {
+    final data = context.read<LdCrudListState<T>>();
+    final error = data.getItemError(item);
+    if (error != null) {
+      return buildDetailError?.call(context, error, controller) ??
+          Center(child: LdExceptionView(exception: error));
+    }
+    return buildDetail(context, item, isSeparatePage, controller);
+  }
 
   @override
   State<LdMasterDetail<T>> createState() => _LdCrudMasterDetailState<T>();
