@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
-import 'package:liquid/components/component_well.dart';
+import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class InputDemo extends StatefulWidget {

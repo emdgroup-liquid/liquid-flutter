@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
-import 'package:liquid/components/component_well.dart';
+import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class ChooseDemo extends StatefulWidget {
@@ -17,7 +17,7 @@ class _ChooseDemoState extends State<ChooseDemo> {
   bool _allowEmpty = false;
   bool _disabled = false;
   bool _multiple = false;
-
+  bool _enableSearch = false;
   LdChooseMode _mode = LdChooseMode.auto;
 
   void _onChange(Set<String> value) {
@@ -30,8 +30,14 @@ class _ChooseDemoState extends State<ChooseDemo> {
   Widget build(BuildContext context) {
     return ComponentPage(
       title: "LdChoose",
-      demo: Column(
+      demo: LdAutoSpace(
         children: [
+          const LdTextP(
+            "LdChoose is a versatile dropdown selection component that allows users to select one or multiple items from a list of options. It supports both single and multiple selection modes, can be configured to require a selection or allow empty values, and adapts its appearance based on the platform and context.",
+          ),
+          const LdTextP(
+            "The component provides a searchable interface on desktop and a bottom sheet selector on mobile devices. It handles keyboard navigation, supports disabled items, and can truncate long selections for better display. Use LdChoose when you need a rich selection interface with built-in platform-specific behaviors.",
+          ),
           ComponentWell(
             onSurface: _onSurface,
             child: Column(
@@ -42,6 +48,7 @@ class _ChooseDemoState extends State<ChooseDemo> {
                   disabled: _disabled,
                   multiple: _multiple,
                   placeholder: const Text("Choose a pie"),
+                  enableSearch: _enableSearch,
                   value: _value,
                   truncateDisplay: 3,
                   mode: _mode,
@@ -163,6 +170,15 @@ class _ChooseDemoState extends State<ChooseDemo> {
                   });
                 },
                 label: "Disabled",
+              ),
+              LdToggle(
+                checked: _enableSearch,
+                onChanged: (p0) {
+                  setState(() {
+                    _enableSearch = p0;
+                  });
+                },
+                label: "Enable search",
               ),
             ],
           ),

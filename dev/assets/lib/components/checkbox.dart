@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
-import 'package:liquid/components/component_well.dart';
+import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class CheckboxDemo extends StatefulWidget {
@@ -11,85 +11,44 @@ class CheckboxDemo extends StatefulWidget {
 }
 
 class _CheckboxDemoState extends State<CheckboxDemo> {
-  bool _checkedA = true;
-  bool _checkedB = false;
-
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
       title: "LdCheckbox",
-      demo: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      demo: LdAutoSpace(
         children: [
+          const LdTextP(
+            "Checkboxes allow users to select one or more options from a set. They are commonly used for multiple-choice selections, task lists, and form submissions where multiple selections are allowed.",
+          ),
+          const LdTextP(
+            "Use a checkbox when the user needs to make multiple independent selections. For binary (on/off) choices where only one selection is possible, consider using a toggle switch instead. Toggles are better suited for immediate actions like enabling/disabling a setting, while checkboxes are ideal for selecting items that will be acted upon later, such as in a form submission.",
+          ),
           ComponentWell(
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const LdTextL("Large size"),
-              ldSpacerM,
-              LdCheckbox(
-                  label: "Checkbox",
-                  size: LdSize.l,
-                  checked: _checkedA,
-                  onChanged: (p0) => setState(() {
-                        _checkedA = p0 == true;
-                      })),
-              const SizedBox(
-                height: 8,
-              ),
-              LdCheckbox(
-                  label: "Checkbox",
-                  checked: _checkedB,
-                  size: LdSize.l,
-                  onChanged: (p0) => setState(() {
-                        _checkedB = p0 == true;
-                      })),
-              ldSpacerL,
-              const LdTextL(
-                "Medium size",
-              ),
-              ldSpacerM,
-              LdCheckbox(
-                  label: "Checkbox",
-                  checked: _checkedA,
-                  onChanged: (p0) => setState(() {
-                        _checkedA = p0 == true;
-                      })),
-              const SizedBox(
-                height: 8,
-              ),
-              LdCheckbox(
-                  label: "Checkbox",
-                  checked: _checkedB,
-                  onChanged: (p0) => setState(() {
-                        _checkedB = p0 == true;
-                      })),
-              const SizedBox(
-                height: 8,
-              ),
-              /*begin demo:LdCheckbox*/
-              const LdCheckbox(
-                label: "Checkbox",
-                checked: true,
-                disabled: true,
-              ),
-              /*end demo:LdCheckbox*/
-              ldSpacerM,
-              const LdTextL(
-                "Small size",
-              ),
-              ldSpacerM,
-              const LdCheckbox(
-                label: "Checkbox",
-                size: LdSize.s,
-                checked: true,
-              ),
-              ldSpacerS,
-              const LdCheckbox(
-                label: "Checkbox",
-                size: LdSize.s,
-                checked: true,
-              ),
-            ]),
+            child: Wrap(
+              spacing: 16,
+              runSpacing: 16,
+              children: [
+                ...LdSize.values.map(
+                  (e) => SizedBox(
+                    width: 200,
+                    child: LdBundle(
+                      children: [
+                        LdCheckbox(
+                          size: e,
+                          label: "Checkbox $e",
+                          checked: false,
+                        ),
+                        LdCheckbox(
+                          size: e,
+                          label: "Checkbox $e",
+                          checked: true,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

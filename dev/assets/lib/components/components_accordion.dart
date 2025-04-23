@@ -20,9 +20,8 @@ class ComponentsAccordion extends StatelessWidget {
         (formComp) => DocComponent.fromJson(formComp.toJson()),
       ),
     ];
-    List<DocComponent> relevantComponents = allDocComponents
-        .where((element) => components.contains(element.name))
-        .toList();
+    List<DocComponent> relevantComponents =
+        allDocComponents.where((element) => components.contains(element.name)).toList();
 
     return LdCard(
       padding: EdgeInsets.zero,
@@ -37,8 +36,7 @@ class ComponentsAccordion extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (component.description.isNotEmpty)
-                    LdText(component.description),
+                  if (component.description.isNotEmpty) LdText(component.description),
                   ComponentApi(component: component)
                 ],
               ));
