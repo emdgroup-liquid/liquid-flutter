@@ -31,12 +31,10 @@ class DocComponent {
       name: json['name'] as String,
       isNullSafe: json['isNullSafe'] as bool,
       description: json['description'] as String,
-      constructors: (json['constructors'] as List)
-          .map((item) => DocConstructor.fromJson(item as Map<String, dynamic>))
-          .toList(),
-      properties: (json['properties'] as List)
-          .map((item) => DocProperty.fromJson(item as Map<String, dynamic>))
-          .toList(),
+      constructors:
+          (json['constructors'] as List).map((item) => DocConstructor.fromJson(item as Map<String, dynamic>)).toList(),
+      properties:
+          (json['properties'] as List).map((item) => DocProperty.fromJson(item as Map<String, dynamic>)).toList(),
       methods: (json['methods'] as List).map((item) => item as String).toList(),
     );
   }
@@ -96,9 +94,8 @@ class DocConstructor {
   factory DocConstructor.fromJson(Map<String, dynamic> json) {
     return DocConstructor(
       name: json['name'] as String,
-      signature: (json['signature'] as List)
-          .map((item) => DocParameter.fromJson(item as Map<String, dynamic>))
-          .toList(),
+      signature:
+          (json['signature'] as List).map((item) => DocParameter.fromJson(item as Map<String, dynamic>)).toList(),
       features: (json['features'] as List).map((item) => item as String).toList(),
     );
   }
@@ -144,8 +141,7 @@ const docComponents = [
   DocComponent(
     name: 'LdDrawerItemSection',
     isNullSafe: true,
-    description:
-        ' A section in the drawer that can contain a collapsable sub-items',
+    description: ' A section in the drawer that can contain a collapsable sub-items',
     properties: [
       DocProperty(
         name: 'leading',
@@ -353,8 +349,7 @@ const docComponents = [
   DocComponent(
     name: 'LdDrawerHeader',
     isNullSafe: true,
-    description:
-        ' The header of a drawer, that contains the application or menu title',
+    description: ' The header of a drawer, that contains the application or menu title',
     properties: [
       DocProperty(
         name: 'title',
@@ -447,8 +442,7 @@ const docComponents = [
       DocProperty(
         name: 'supportedLocales',
         type: 'List<Locale>',
-        description:
-            '/// A list of this localizations delegate\'s supported locales.',
+        description: '/// A list of this localizations delegate\'s supported locales.',
         features: [
           'static',
           'const',
@@ -2267,8 +2261,7 @@ const docComponents = [
           ),
           DocParameter(
             name: 'errorBuilder',
-            type:
-                'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
+            type: 'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
             description: '',
             named: true,
             required: false,
@@ -2307,13 +2300,11 @@ const docComponents = [
   DocComponent(
     name: 'LdSubmitCustomBuilder',
     isNullSafe: true,
-    description:
-        ' A custom builder that allows you to build your own submit widget.',
+    description: ' A custom builder that allows you to build your own submit widget.',
     properties: [
       DocProperty(
         name: 'builder',
-        type:
-            'Widget Function(BuildContext, LdSubmitController<T>, LdSubmitStateType)',
+        type: 'Widget Function(BuildContext, LdSubmitController<T>, LdSubmitStateType)',
         description: '',
         features: ['final'],
       )
@@ -2331,8 +2322,7 @@ const docComponents = [
           ),
           DocParameter(
             name: 'builder',
-            type:
-                'Widget Function(BuildContext, LdSubmitController<T>, LdSubmitStateType)',
+            type: 'Widget Function(BuildContext, LdSubmitController<T>, LdSubmitStateType)',
             description: '',
             named: true,
             required: true,
@@ -2382,8 +2372,7 @@ const docComponents = [
           ),
           DocParameter(
             name: 'errorBuilder',
-            type:
-                'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
+            type: 'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
             description: '',
             named: true,
             required: false,
@@ -2433,8 +2422,7 @@ const docComponents = [
           ),
           DocParameter(
             name: 'errorBuilder',
-            type:
-                'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
+            type: 'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
             description: '',
             named: true,
             required: false,
@@ -2935,8 +2923,7 @@ const docComponents = [
       ),
       DocProperty(
         name: 'errorBuilder',
-        type:
-            'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
+        type: 'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
         description: '',
         features: ['final'],
       ),
@@ -2975,8 +2962,7 @@ const docComponents = [
           ),
           DocParameter(
             name: 'errorBuilder',
-            type:
-                'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
+            type: 'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
             description: '',
             named: true,
             required: false,
@@ -3682,8 +3668,7 @@ const docComponents = [
       DocProperty(
         name: 'dispose',
         type: 'void Function(BuildContext, T)?',
-        description:
-            '/// Dispose function for the provider, only used if [value] is null',
+        description: '/// Dispose function for the provider, only used if [value] is null',
         features: ['final'],
       ),
       DocProperty(
@@ -4626,8 +4611,7 @@ const docComponents = [
   DocComponent(
     name: 'LdContainer',
     isNullSafe: true,
-    description:
-        ' Allows you to horizontally center your content on a larger screen by padding it on the sides',
+    description: ' Allows you to horizontally center your content on a larger screen by padding it on the sides',
     properties: [
       DocProperty(
         name: 'child',
@@ -5491,8 +5475,7 @@ const docComponents = [
           ),
           DocParameter(
             name: 'builder',
-            type:
-                'Widget Function(BuildContext, LdColorBundle, LdTouchableStatus)',
+            type: 'Widget Function(BuildContext, LdColorBundle, LdTouchableStatus)',
             description: '',
             named: true,
             required: true,
@@ -5743,15 +5726,13 @@ const docComponents = [
       DocProperty(
         name: 'childBuilder',
         type: 'Widget Function(BuildContext, int)',
-        description:
-            '/// Function that is called to build each item in the accordion.',
+        description: '/// Function that is called to build each item in the accordion.',
         features: ['final'],
       ),
       DocProperty(
         name: 'headerBuilder',
         type: 'Widget Function(BuildContext, int)',
-        description:
-            '/// Function that is called to build each header in the accordion.',
+        description: '/// Function that is called to build each header in the accordion.',
         features: ['final'],
       ),
       DocProperty(
@@ -5763,8 +5744,7 @@ const docComponents = [
       DocProperty(
         name: 'initialOpenIndex',
         type: 'Set<int>',
-        description:
-            '/// The index of the items that should be open by default.',
+        description: '/// The index of the items that should be open by default.',
         features: ['final'],
       ),
       DocProperty(
@@ -5948,8 +5928,7 @@ const docComponents = [
   DocComponent(
     name: 'LdAccordionItem',
     isNullSafe: true,
-    description:
-        ' item of an accordion used in utility constructor [LdAccordion.fromList].',
+    description: ' item of an accordion used in utility constructor [LdAccordion.fromList].',
     properties: [
       DocProperty(
         name: 'child',
@@ -8674,15 +8653,13 @@ const docComponents = [
       DocProperty(
         name: 'darkPalette',
         type: 'LdPalette?',
-        description:
-            '/// The dark palette to use when [autoBrightness] is true defaults to [deepOcean]',
+        description: '/// The dark palette to use when [autoBrightness] is true defaults to [deepOcean]',
         features: ['final'],
       ),
       DocProperty(
         name: 'lightPalette',
         type: 'LdPalette?',
-        description:
-            '/// The light palette to use when [autoBrightness] is true defaults to [ocean]',
+        description: '/// The light palette to use when [autoBrightness] is true defaults to [ocean]',
         features: ['final'],
       ),
       DocProperty(
@@ -11488,8 +11465,7 @@ const docComponents = [
   DocComponent(
     name: 'LdOrb',
     isNullSafe: true,
-    description:
-        ' an animated illustration of an orb filled with liquid that has some waves and a [filling] level.',
+    description: ' an animated illustration of an orb filled with liquid that has some waves and a [filling] level.',
     properties: [
       DocProperty(
         name: 'size',
@@ -12034,8 +12010,7 @@ const docComponents = [
       DocProperty(
         name: 'contentSlivers',
         type: 'List<Widget> Function(BuildContext)?',
-        description:
-            '/// The slivers to be added to the sheet. Used instead of [modalContent] if provided.',
+        description: '/// The slivers to be added to the sheet. Used instead of [modalContent] if provided.',
         features: ['final'],
       ),
       DocProperty(
@@ -12066,8 +12041,7 @@ const docComponents = [
       DocProperty(
         name: 'disableScrolling',
         type: 'bool',
-        description:
-            '/// Whether the sheet should disable scrolling. Defaults to false.',
+        description: '/// Whether the sheet should disable scrolling. Defaults to false.',
         features: ['final'],
       ),
       DocProperty(
@@ -12147,15 +12121,13 @@ const docComponents = [
       DocProperty(
         name: 'insets',
         type: 'EdgeInsets?',
-        description:
-            '/// The inset for the modal from the edges of the screen.',
+        description: '/// The inset for the modal from the edges of the screen.',
         features: ['final'],
       ),
       DocProperty(
         name: 'useSafeArea',
         type: 'bool',
-        description:
-            '/// Whether the modal should use safe area. Defaults to true.',
+        description: '/// Whether the modal should use safe area. Defaults to true.',
         features: ['final'],
       ),
       DocProperty(
@@ -12322,8 +12294,7 @@ const docComponents = [
           ),
           DocParameter(
             name: 'injectables',
-            type:
-                'List<ListenableProvider<Listenable?>> Function(BuildContext)?',
+            type: 'List<ListenableProvider<Listenable?>> Function(BuildContext)?',
             description: '',
             named: true,
             required: false,
@@ -12684,8 +12655,7 @@ const docComponents = [
   DocComponent(
     name: 'LdExceptionMoreInfoButton',
     isNullSafe: true,
-    description:
-        ' LdExceptionMoreInfoButton is a button that will open a dialog with more info',
+    description: ' LdExceptionMoreInfoButton is a button that will open a dialog with more info',
     properties: [
       DocProperty(
         name: 'error',
@@ -12776,15 +12746,13 @@ const docComponents = [
       DocProperty(
         name: 'canRetry',
         type: 'bool',
-        description:
-            '/// Whether the action causing the exception can be retried.',
+        description: '/// Whether the action causing the exception can be retried.',
         features: ['final'],
       ),
       DocProperty(
         name: 'type',
         type: 'LdHintType',
-        description:
-            '/// The type of the exception. By default, it is [LdHintType.error].',
+        description: '/// The type of the exception. By default, it is [LdHintType.error].',
         features: ['final'],
       ),
       DocProperty(
@@ -13001,8 +12969,7 @@ const docComponents = [
       DocProperty(
         name: 'direction',
         type: 'Axis',
-        description:
-            '/// The direction of the exception view, either [Axis.vertical] or\n/// [Axis.horizontal].',
+        description: '/// The direction of the exception view, either [Axis.vertical] or\n/// [Axis.horizontal].',
         features: ['final'],
       ),
     ],
@@ -13220,8 +13187,7 @@ const docComponents = [
       DocProperty(
         name: 'onRetry',
         type: 'void Function()',
-        description:
-            '/// Function to be called when a retry should be executed',
+        description: '/// Function to be called when a retry should be executed',
         features: ['final'],
       ),
       DocProperty(
@@ -13459,8 +13425,7 @@ const docComponents = [
   DocComponent(
     name: 'LdReveal',
     isNullSafe: true,
-    description:
-        ' A utility to reveal some content, with a fade in and collapse effect',
+    description: ' A utility to reveal some content, with a fade in and collapse effect',
     properties: [
       DocProperty(
         name: 'revealed',
@@ -13919,8 +13884,7 @@ const docComponents = [
       DocProperty(
         name: 'duration',
         type: 'Duration?',
-        description:
-            '/// Duration of the notification. If null the notification will not be dismissed automatically',
+        description: '/// Duration of the notification. If null the notification will not be dismissed automatically',
         features: ['final'],
       ),
       DocProperty(
@@ -14070,8 +14034,7 @@ const docComponents = [
       DocProperty(
         name: 'inputCompleter',
         type: 'Completer<String?>',
-        description:
-            '/// Completer that gets resolved when the user entered something in the input field',
+        description: '/// Completer that gets resolved when the user entered something in the input field',
         features: ['final'],
       ),
     ],
@@ -14187,8 +14150,7 @@ const docComponents = [
       DocProperty(
         name: 'confirmationCompleter',
         type: 'Completer<bool?>',
-        description:
-            '/// Completer that gets resolved when the user confirms the notification or it is dismissed',
+        description: '/// Completer that gets resolved when the user confirms the notification or it is dismissed',
         features: ['final'],
       ),
     ],
@@ -14626,8 +14588,7 @@ const docComponents = [
   DocComponent(
     name: 'LdAutoBackground',
     isNullSafe: true,
-    description:
-        ' A widget that will change its background color based on the parent surface',
+    description: ' A widget that will change its background color based on the parent surface',
     properties: [
       DocProperty(
         name: 'child',
