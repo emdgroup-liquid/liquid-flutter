@@ -65,8 +65,7 @@ class LdContextMenu extends StatefulWidget {
 
   final Widget Function(BuildContext context, bool isShuttle) builder;
 
-  final Widget Function(BuildContext context, VoidCallback onDismiss)
-      menuBuilder;
+  final Widget Function(BuildContext context, VoidCallback onDismiss) menuBuilder;
 
   @override
   State<LdContextMenu> createState() => _LdContextMenuState();
@@ -78,8 +77,6 @@ class _LdContextMenuState extends State<LdContextMenu> {
   final _overlayPortalController = OverlayPortalController();
 
   RenderBox? _triggerBox;
-
-  RenderBox? _menuBox;
 
   final GlobalKey _menuKey = GlobalKey();
 
@@ -118,9 +115,7 @@ class _LdContextMenuState extends State<LdContextMenu> {
 
   LdContextPositionMode get _effectivePositionMode {
     if (widget.positionMode == LdContextPositionMode.auto) {
-      return _mobile
-          ? LdContextPositionMode.relativeTrigger
-          : LdContextPositionMode.relativeCursor;
+      return _mobile ? LdContextPositionMode.relativeTrigger : LdContextPositionMode.relativeCursor;
     }
     return widget.positionMode;
   }
@@ -135,10 +130,11 @@ class _LdContextMenuState extends State<LdContextMenu> {
   Offset _insetMenuPositionToScreen(Offset position) {
     final screenSize = MediaQuery.sizeOf(context);
 
+    final menuBox = _menuKey.currentContext?.findRenderObject() as RenderBox?;
+
     return Offset(
-      position.dx.clamp(0, screenSize.width - (_menuBox?.size.width ?? 0) - 10),
-      position.dy
-          .clamp(0, screenSize.height - (_menuBox?.size.height ?? 0) - 10),
+      position.dx.clamp(0, screenSize.width - (menuBox?.size.width ?? 0) - 10),
+      position.dy.clamp(0, screenSize.height - (menuBox?.size.height ?? 0) - 10),
     );
   }
 
