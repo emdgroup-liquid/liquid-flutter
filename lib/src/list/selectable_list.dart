@@ -34,25 +34,23 @@ class LdSelectableList<T, GroupingCriterion> extends StatefulWidget {
   });
 
   @override
-  State<LdSelectableList<T, GroupingCriterion>> createState() =>
-      _LdSelectableListState<T, GroupingCriterion>();
+  State<LdSelectableList<T, GroupingCriterion>> createState() => _LdSelectableListState<T, GroupingCriterion>();
 }
 
-class _LdSelectableListState<T, GroupingCriterion>
-    extends State<LdSelectableList<T, GroupingCriterion>> with ChangeNotifier {
+class _LdSelectableListState<T, GroupingCriterion> extends State<LdSelectableList<T, GroupingCriterion>>
+    with ChangeNotifier {
   Set<T> selectedItems = {};
 
   final FocusNode _focusNode = FocusNode();
 
   late final ScrollController _scrollController;
 
-  final OverlayPortalController _overlayPortalController =
-      OverlayPortalController();
+  final OverlayPortalController _overlayPortalController = OverlayPortalController();
 
   Offset? _dragStartOffset = Offset.zero;
   Offset? _dragEndOffset = Offset.zero;
 
-  Map<T, GlobalKey> _itemKeys = {};
+  final Map<T, GlobalKey> _itemKeys = {};
 
   final GlobalKey _rootKey = GlobalKey();
 
@@ -154,9 +152,7 @@ class _LdSelectableListState<T, GroupingCriterion>
           final index = widget.paginator.items.indexOf(item);
           final startIndex = widget.paginator.items.indexOf(selectedItems.last);
 
-          for (var i = min(startIndex, index);
-              i <= max(startIndex, index);
-              i++) {
+          for (var i = min(startIndex, index); i <= max(startIndex, index); i++) {
             final item = widget.paginator.items[i];
             if (item != null) {
               selectedItems.add(item);
@@ -224,8 +220,7 @@ class _LdSelectableListState<T, GroupingCriterion>
           // Check if we are close to the bottom of the list
 
           for (final item in _itemKeys.entries) {
-            final box =
-                item.value.currentContext?.findRenderObject() as RenderBox?;
+            final box = item.value.currentContext?.findRenderObject() as RenderBox?;
 
             if (box == null) continue;
 
@@ -265,8 +260,7 @@ class _LdSelectableListState<T, GroupingCriterion>
           focusNode: _focusNode,
           autofocus: true,
           onKeyEvent: (event) {
-            if (event.logicalKey == LogicalKeyboardKey.shiftLeft ||
-                event.logicalKey == LogicalKeyboardKey.shiftRight) {
+            if (event.logicalKey == LogicalKeyboardKey.shiftLeft || event.logicalKey == LogicalKeyboardKey.shiftRight) {
               _shiftPressed = event is KeyDownEvent;
             }
             if (event.logicalKey == LogicalKeyboardKey.controlLeft ||
@@ -276,8 +270,7 @@ class _LdSelectableListState<T, GroupingCriterion>
               _ctrlPressed = event is KeyDownEvent;
             }
           },
-          child: widget.listBuilder(context, _scrollController,
-              (context, item, index) {
+          child: widget.listBuilder(context, _scrollController, (context, item, index) {
             if (!_itemKeys.containsKey(item)) {
               _itemKeys[item] = GlobalKey();
             }
@@ -292,8 +285,7 @@ class _LdSelectableListState<T, GroupingCriterion>
                     index: index,
                     selected: isSelected(item),
                     isMultiSelect: isMultiSelect,
-                    onSelectionChange: (selected) =>
-                        onSelectionChange(item, selected),
+                    onSelectionChange: (selected) => onSelectionChange(item, selected),
                     onTap: () => onTap(item),
                   );
                 });
