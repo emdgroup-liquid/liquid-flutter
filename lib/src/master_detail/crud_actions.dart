@@ -3,17 +3,21 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-enum ActionLoadingStyle { dialog, actionBar }
+enum LdCrudActionLoadingStyle { dialog, actionBar }
 
-enum ActionDisplayModes {
-  masterActionBar,
-  masterActionBarMultiSelect,
-  kebabMenu,
-  detailActionBar,
-}
+/// A builder for a widget that can be used to perform an action on a master detail item
+/// or a list of master detail items.
+///
+/// The builder is called with a function that performs the action.
+/// The function is called with the arguments of the action.
+typedef LdCrudActionWidgetBuilder = Widget Function(
+  Function performActionCallback,
+);
 
-typedef ActionCallback<T extends CrudItemMixin<T>, Arg> = FutureOr<dynamic>
-    Function(
+/// The definition of a callback for an action that can be used to perform an action on a master detail item
+/// or a list of master detail items.
+typedef LdCrudActionCallback<T extends CrudItemMixin<T>, Arg>
+    = FutureOr<dynamic> Function(
   Arg arg,
   LdMasterDetailController<T> controller,
   LdCrudListState<T> listState,
@@ -31,20 +35,32 @@ typedef ActionCallback<T extends CrudItemMixin<T>, Arg> = FutureOr<dynamic>
 /// If the action is successful, the item is updated in the list.
 /// If the action fails, the item state is set to [CrudItemStateEvent.error].
 class LdMasterDetailAction<T extends CrudItemMixin<T>, Arg> {
-  final Widget Function(Function actionCallback) childBuilder;
-  final Set<ActionDisplayModes> displayModes;
-  final ActionCallback<T, Arg> onAction;
+  final LdCrudActionWidgetBuilder? kebabMenuBuilder;
+  final LdCrudActionWidgetBuilder? masterActionBarIconBuilder;
+  final LdCrudActionWidgetBuilder? masterActionMultiSelectBarIconBuilder;
+  final LdCrudActionWidgetBuilder? detailActionBarIconBuilder;
+  final LdCrudActionCallback<T, Arg> onAction;
 
   const LdMasterDetailAction({
-    required this.childBuilder,
-    required this.displayModes,
+    this.kebabMenuBuilder,
+    this.masterActionBarIconBuilder,
+    this.masterActionMultiSelectBarIconBuilder,
+    this.detailActionBarIconBuilder,
     required this.onAction,
-  });
+  }) : assert(
+          kebabMenuBuilder != null ||
+              masterActionBarIconBuilder != null ||
+              masterActionMultiSelectBarIconBuilder != null ||
+              detailActionBarIconBuilder != null,
+        );
 
   static Stream<R>
       executeOperationOptimistically<T extends CrudItemMixin<T>, R>(
-          T item, Future<R> Function() operation, LdCrudListState<T> listState,
-          {T Function(R result)? parseResult}) async* {
+    T item,
+    Future<R> Function() operation,
+    LdCrudListState<T> listState, {
+    T Function(R result)? parseResult,
+  }) async* {
     listState.handleItemStateEvent(item.id, CrudItemStateEvent.loading(item));
     try {
       final result = await operation();
@@ -74,8 +90,10 @@ class LdMasterDetailAction<T extends CrudItemMixin<T>, Arg> {
 class LdMasterDetailListAction<T extends CrudItemMixin<T>>
     extends LdMasterDetailAction<T, List<T?>> {
   const LdMasterDetailListAction({
-    required super.childBuilder,
-    required super.displayModes,
+    super.kebabMenuBuilder,
+    super.masterActionBarIconBuilder,
+    super.masterActionMultiSelectBarIconBuilder,
+    super.detailActionBarIconBuilder,
     required super.onAction,
   });
 
@@ -84,14 +102,11 @@ class LdMasterDetailListAction<T extends CrudItemMixin<T>>
     LdMasterDetailCrudItemCallback<T>? onItemCreated,
   }) {
     return LdMasterDetailListAction<T>(
-      childBuilder: (Function actionCallback) {
+      masterActionBarIconBuilder: (actionCallback) {
         return IconButton(
           onPressed: () => actionCallback(),
           icon: const Icon(Icons.add),
         );
-      },
-      displayModes: {
-        ActionDisplayModes.masterActionBar,
       },
       onAction: (
         List<T?> list,
@@ -117,14 +132,11 @@ class LdMasterDetailListAction<T extends CrudItemMixin<T>>
     Future<void> Function(List<T?>)? onItemsDeleted,
   }) {
     return LdMasterDetailListAction<T>(
-      childBuilder: (Function actionCallback) {
+      masterActionMultiSelectBarIconBuilder: (actionCallback) {
         return IconButton(
           onPressed: () => actionCallback(),
           icon: const Icon(Icons.delete_forever),
         );
-      },
-      displayModes: {
-        ActionDisplayModes.masterActionBarMultiSelect,
       },
       onAction: (
         List<T?> list,
@@ -168,29 +180,22 @@ class LdMasterDetailListAction<T extends CrudItemMixin<T>>
 class LdMasterDetailItemAction<T extends CrudItemMixin<T>>
     extends LdMasterDetailAction<T, T> {
   const LdMasterDetailItemAction({
-    required Widget Function(Function actionCallback) childBuilder,
-    Set<ActionDisplayModes> displayModes = const {
-      ActionDisplayModes.detailActionBar
-    },
-    required ActionCallback<T, T> onAction,
-  }) : super(
-          childBuilder: childBuilder,
-          displayModes: displayModes,
-          onAction: onAction,
-        );
+    super.kebabMenuBuilder,
+    super.masterActionBarIconBuilder,
+    super.masterActionMultiSelectBarIconBuilder,
+    super.detailActionBarIconBuilder,
+    required super.onAction,
+  });
 
   factory LdMasterDetailItemAction.deleteItem({
     LdMasterDetailCrudItemCallback<T>? onItemDeleted,
   }) {
     return LdMasterDetailItemAction(
-      childBuilder: (Function actionCallback) {
+      detailActionBarIconBuilder: (actionCallback) {
         return IconButton(
           onPressed: () => actionCallback(),
           icon: const Icon(Icons.delete),
         );
-      },
-      displayModes: {
-        ActionDisplayModes.detailActionBar,
       },
       onAction: (
         T item,
@@ -217,14 +222,11 @@ class LdMasterDetailItemAction<T extends CrudItemMixin<T>>
     LdMasterDetailCrudItemCallback<T>? onItemUpdated,
   }) {
     return LdMasterDetailItemAction(
-      childBuilder: (Function actionCallback) {
+      detailActionBarIconBuilder: (actionCallback) {
         return IconButton(
           onPressed: () => actionCallback(),
           icon: const Icon(Icons.edit),
         );
-      },
-      displayModes: {
-        ActionDisplayModes.detailActionBar,
       },
       onAction: (
         T item,

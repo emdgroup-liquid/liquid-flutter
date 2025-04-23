@@ -93,16 +93,15 @@ class _LdCrudMasterDetailState<T extends CrudItemMixin<T>>
   @override
   List<Widget> buildMasterActions(
       BuildContext context, T? openItem, bool isSeparatePage) {
-    final displayMode = _data.isMultiSelectMode
-        ? ActionDisplayModes.masterActionBarMultiSelect
-        : ActionDisplayModes.masterActionBar;
+    final actions = (widget as LdCrudMasterDetail<T>).listActions;
+    final builder = _data.isMultiSelectMode
+        ? (action) => action.masterActionMultiSelectBarIconBuilder
+        : (action) => action.masterActionBarIconBuilder;
+
     return [
       ...super.buildMasterActions(context, openItem, isSeparatePage),
-      ...(widget as LdCrudMasterDetail<T>)
-          .listActions
-          .where((action) => action.displayModes.contains(displayMode))
-          .map(
-            (action) => action.childBuilder(
+      ...actions.where((action) => builder(action) != null).map(
+            (action) => builder(action)!(
               () async => await action.onAction(
                 _data.isMultiSelectMode
                     ? _data.selectedItems.toList()
@@ -119,14 +118,13 @@ class _LdCrudMasterDetailState<T extends CrudItemMixin<T>>
   @override
   List<Widget> buildDetailActions(
       BuildContext context, T item, bool isSeparatePage) {
+    final actions = (widget as LdCrudMasterDetail<T>).itemActions;
     return [
       ...super.buildDetailActions(context, item, isSeparatePage),
-      ...(widget as LdCrudMasterDetail<T>)
-          .itemActions
-          .where((action) =>
-              action.displayModes.contains(ActionDisplayModes.detailActionBar))
+      ...actions
+          .where((action) => action.detailActionBarIconBuilder != null)
           .map(
-            (action) => action.childBuilder(
+            (action) => action.detailActionBarIconBuilder!(
               () async => await action.onAction(
                 item,
                 _controller,
