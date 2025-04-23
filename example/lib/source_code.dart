@@ -9,8 +9,7 @@ class SourceCode extends StatefulWidget {
   final String language;
   final EdgeInsets? padding;
 
-  const SourceCode(
-      {super.key, required this.code, this.language = "dart", this.padding});
+  const SourceCode({super.key, required this.code, this.language = "dart", this.padding});
 
   @override
   State<SourceCode> createState() => _SourceCodeState();
@@ -27,13 +26,14 @@ class _SourceCodeState extends State<SourceCode> {
   }
 
   void _loadHighlighter() async {
+    final ldTheme = LdTheme.of(context);
     theme = await HighlighterTheme.loadLightTheme();
     themeDark = await HighlighterTheme.loadFromAssets(
         ["assets/dark_plus.json", "assets/dark_vs.json"],
         TextStyle(
           fontFamily: "NotoSansMono",
-          color: Colors.white,
-          fontSize: LdTheme.of(context).paragraphSize(LdSize.s),
+          color: ldTheme.palette.neutral.shades.last,
+          fontSize: ldTheme.paragraphSize(LdSize.s),
         ));
     if (mounted) {
       setState(() {});

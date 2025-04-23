@@ -28,27 +28,25 @@ class _CheckboxDemoState extends State<CheckboxDemo> {
               spacing: 16,
               runSpacing: 16,
               children: [
-                ...LdSize.values
-                    .map(
-                      (e) => SizedBox(
-                        width: 200,
-                        child: LdBundle(
-                          children: [
-                            LdCheckbox(
-                              size: e,
-                              label: "Checkbox $e",
-                              checked: false,
-                            ),
-                            LdCheckbox(
-                              size: e,
-                              label: "Checkbox $e",
-                              checked: true,
-                            ),
-                          ],
+                ...LdSize.values.map(
+                  (e) => SizedBox(
+                    width: 200,
+                    child: LdBundle(
+                      children: [
+                        LdCheckbox(
+                          size: e,
+                          label: "Checkbox $e",
+                          checked: false,
                         ),
-                      ),
-                    )
-                    .toList(),
+                        LdCheckbox(
+                          size: e,
+                          label: "Checkbox $e",
+                          checked: true,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

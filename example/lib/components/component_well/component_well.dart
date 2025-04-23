@@ -13,13 +13,13 @@ class ComponentWell extends StatefulWidget {
   final Color? color;
   final ShowSourceCodeOptions? showSourceCodeOptions;
   const ComponentWell({
-    Key? key,
+    super.key,
     this.padding,
     required this.child,
     this.color,
     this.onSurface = false,
     this.showSourceCodeOptions,
-  }) : super(key: key);
+  });
 
   @override
   State<ComponentWell> createState() => _ComponentWellState();
@@ -34,8 +34,7 @@ class _ComponentWellState extends State<ComponentWell> {
 
   /// The path to the source code file. If no path was provided via the
   /// [ShowSourceCodeOptions], it will be inferred from the current route.
-  get _sourcePath =>
-      widget.showSourceCodeOptions?.path ?? "lib${_pageKey!.value}.dart";
+  get _sourcePath => widget.showSourceCodeOptions?.path ?? "lib${_pageKey!.value}.dart";
 
   @override
   Widget build(BuildContext context) {
@@ -48,8 +47,7 @@ class _ComponentWellState extends State<ComponentWell> {
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: widget.color ??
-                (widget.onSurface ? theme.surface : theme.background),
+            color: widget.color ?? (widget.onSurface ? theme.surface : theme.background),
             borderRadius: theme.radius(LdSize.m),
             border: Border.all(
               color: theme.border,
@@ -118,9 +116,9 @@ class _ComponentWellState extends State<ComponentWell> {
       builder: (context, showModal) {
         return LdButtonGhost(
           leading: const Icon(Icons.code),
-          child: const Text("Show Source Code"),
           autoLoading: false,
           onPressed: showModal,
+          child: const Text("Show Source Code"),
         );
       },
     );

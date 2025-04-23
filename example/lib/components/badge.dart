@@ -18,46 +18,44 @@ class BadgeDemo extends StatelessWidget {
           ),
           ComponentWell(
             child: LdAutoSpace(children: [
-              ...LdSize.values
-                  .map(
-                    (e) => Wrap(spacing: 8, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
-                      LdTextL(e.toString()),
-                      LdBadge(
-                        color: theme.primary,
-                        size: e,
-                        child: const Text("Hello"),
-                      ),
-                      LdBadge(
-                        color: theme.warning,
-                        size: e,
-                        child: const Text("Hello"),
-                      ),
-                      LdBadge(
-                        color: theme.success,
-                        size: e,
-                        child: const Text("Hello"),
-                      ),
-                      LdBadge(
-                        color: theme.secondary,
-                        size: e,
-                        child: const Text("Hello"),
-                      ),
-                      LdBadge(
-                        color: theme.error,
-                        size: e,
-                        child: const Text("Hello"),
-                      ),
-                    ]),
-                  )
-                  .toList(),
+              ...LdSize.values.map(
+                (e) => Wrap(spacing: 8, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                  LdTextL(e.toString()),
+                  LdBadge(
+                    color: theme.primary,
+                    size: e,
+                    child: const Text("Hello"),
+                  ),
+                  LdBadge(
+                    color: theme.warning,
+                    size: e,
+                    child: const Text("Hello"),
+                  ),
+                  LdBadge(
+                    color: theme.success,
+                    size: e,
+                    child: const Text("Hello"),
+                  ),
+                  LdBadge(
+                    color: theme.secondary,
+                    size: e,
+                    child: const Text("Hello"),
+                  ),
+                  LdBadge(
+                    color: theme.error,
+                    size: e,
+                    child: const Text("Hello"),
+                  ),
+                ]),
+              ),
             ]),
           ),
           const LdTextP("symmetric = true, causes the badge to be a circle"),
           const ComponentWell(
             child: Center(
               child: LdBadge(
-                child: Icon(Icons.photo),
                 symmetric: true,
+                child: Icon(Icons.photo),
               ),
             ),
           ),

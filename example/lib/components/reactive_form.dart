@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
-import 'package:liquid/components/component_well.dart';
+import 'package:liquid/components/component_well/component_well.dart';
+
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart';
 
@@ -63,13 +64,8 @@ class ReactiveFormDemo extends StatelessWidget {
                   key: 'email',
                   label: 'Enter your Email:',
                   inputFieldHint: 'john.doe@example.com',
-                  validators: [
-                    LdFormValidators.required,
-                    LdFormValidators.email
-                  ],
-                  validationMessages: {
-                    'email': (field) => 'This is not a valid email'
-                  },
+                  validators: [LdFormValidators.required, LdFormValidators.email],
+                  validationMessages: {'email': (field) => 'This is not a valid email'},
                 ),
                 LdReactiveFormItem.input<String>(
                   key: 'email2',
@@ -99,10 +95,7 @@ class ReactiveFormDemo extends StatelessWidget {
                   validators: [
                     LdFormValidators.equals(Pet.cats),
                   ],
-                  validationMessages: {
-                    'requiredEquals': (field) =>
-                        'Cats are the only correct answer'
-                  },
+                  validationMessages: {'requiredEquals': (field) => 'Cats are the only correct answer'},
                 ),
                 LdReactiveFormItem.multiSelect<FriesTopping>(
                   key: 'friesTopping',
@@ -123,9 +116,7 @@ class ReactiveFormDemo extends StatelessWidget {
                   label: 'How awesome is Liquid Flutter?',
                   min: 0,
                   max: 10,
-                  valueFormatter: (value) => value == null
-                      ? ''
-                      : '${value.toStringAsFixed(0)} out of 10',
+                  valueFormatter: (value) => value == null ? '' : '${value.toStringAsFixed(0)} out of 10',
                   hintBuilder: (state) {
                     final value = state.control.value;
                     if (value == null) {
@@ -153,10 +144,7 @@ class ReactiveFormDemo extends StatelessWidget {
                   label: 'I accept the terms of service',
                   initialValue: false,
                   validators: [LdFormValidators.requiredTrue],
-                  validationMessages: {
-                    'requiredTrue': (field) =>
-                        'You have to accept the terms of service'
-                  },
+                  validationMessages: {'requiredTrue': (field) => 'You have to accept the terms of service'},
                 ),
               ],
             ),
