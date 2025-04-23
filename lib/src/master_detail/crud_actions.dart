@@ -100,16 +100,14 @@ class LdMasterDetailListAction<T extends CrudItemMixin<T>>
         LdCrudOperations<T> crud,
       ) async {
         final newItem = await getNewItem();
-        if (newItem != null) {
-          await LdMasterDetailAction.executeOperationOptimistically<T, T>(
-            newItem,
-            () => crud.create(newItem),
-            listState,
-          ).first;
-          onItemCreated?.call(newItem);
-          return true;
-        }
-        return false;
+        if (newItem == null) return false;
+        await LdMasterDetailAction.executeOperationOptimistically<T, T>(
+          newItem,
+          () => crud.create(newItem),
+          listState,
+        ).first;
+        onItemCreated?.call(newItem);
+        return true;
       },
     );
   }
@@ -235,10 +233,11 @@ class LdMasterDetailItemAction<T extends CrudItemMixin<T>>
         LdCrudOperations<T> crud,
       ) async {
         final newItem = await getNewItem(item);
+        if (newItem == null) return false;
         final itemResult =
             await LdMasterDetailAction.executeOperationOptimistically<T, T>(
           item,
-          () => crud.update(newItem!),
+          () => crud.update(newItem),
           listState,
         ).first;
         onItemUpdated?.call(item);

@@ -57,6 +57,7 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
           title: titleBuilder(context, item),
           subtitle: subtitleBuilder?.call(context, item),
           subContent: subContentBuilder?.call(context, item),
+          trailing: data.isItemLoading(item) ? const LdLoader(size: 24) : null,
         );
       },
     );

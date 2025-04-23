@@ -138,6 +138,7 @@ class LdCrudListState<T extends CrudItemMixin<T>> extends LdPaginator<T> {
     // Delete item from the list
     for (var i = 0; i < _items.length; i++) {
       if (_items[i]?.id == id) {
+        _selectedItems.remove(_items[i]); // remove potential selection
         _items.removeAt(i);
         _totalItems -= 1;
         notifyListeners();

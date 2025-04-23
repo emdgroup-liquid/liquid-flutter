@@ -176,13 +176,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
         await _navigator.push(
           MaterialPageRoute(
             builder: (context) {
-              return _DetailPage(
-                builder: widget.builder,
-                item: item,
-                controller: _controller,
-                actions: buildDetailActions(context, item, true),
-                isDetailsAppBarLoading: _isDetailsAppBarLoading,
-              );
+              return _buildDetailPage(item);
             },
           ),
         );
@@ -426,6 +420,16 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
 
         return buildContent(context, useSplit);
       },
+    );
+  }
+
+  Widget _buildDetailPage(T item) {
+    return _DetailPage(
+      builder: widget.builder,
+      item: item,
+      controller: _controller,
+      actions: buildDetailActions(context, item, true),
+      isDetailsAppBarLoading: _isDetailsAppBarLoading,
     );
   }
 }

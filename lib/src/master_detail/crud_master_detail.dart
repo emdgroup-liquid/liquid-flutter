@@ -142,4 +142,17 @@ class _LdCrudMasterDetailState<T extends CrudItemMixin<T>>
         ...(widget as LdCrudMasterDetail<T>).itemActions,
         ...(widget as LdCrudMasterDetail<T>).listActions,
       ];
+
+  @override
+  Widget _buildDetailPage(T item) {
+    return ListenableProvider<LdCrudListState<T>>.value(
+      value: _data,
+      child: ListenableBuilder(
+        listenable: _data,
+        builder: (context, child) {
+          return super._buildDetailPage(item);
+        },
+      ),
+    );
+  }
 }
