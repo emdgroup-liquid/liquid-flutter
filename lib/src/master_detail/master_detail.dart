@@ -25,7 +25,7 @@ class LdMasterDetail<T> extends StatefulWidget {
 
   final double masterDetailFlex;
 
-  final _LdMasterDetailBuilder<T, LdMasterDetailController<T>> builder;
+  final _LdMasterDetailBuilder<T> builder;
 
   final NavigatorState? navigator;
 
@@ -435,7 +435,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
 }
 
 class _DetailPage<T> extends StatelessWidget {
-  final _LdMasterDetailBuilder<T, LdMasterDetailController<T>> builder;
+  final _LdMasterDetailBuilder<T> builder;
   final T item;
   final LdMasterDetailController<T> controller;
   final List<Widget> actions;

@@ -1,40 +1,39 @@
 part of 'master_detail.dart';
 
-abstract class _LdMasterDetailBuilder<T,
-    C extends LdMasterDetailController<T>> {
+abstract class _LdMasterDetailBuilder<T> {
   Widget buildDetailTitle(
     BuildContext context,
     T item,
     bool isSeparatePage,
-    C controller,
+    LdMasterDetailController<T> controller,
   );
 
   Widget buildMasterTitle(
     BuildContext context,
     T? openItem,
     bool isSeparatePage,
-    C controller,
+    LdMasterDetailController<T> controller,
   );
 
   Widget buildDetail(
     BuildContext context,
     T item,
     bool isSeparatePage,
-    C controller,
+    LdMasterDetailController<T> controller,
   );
 
   Widget buildMaster(
     BuildContext context,
     T? openItem,
     bool isSeparatePage,
-    C controller,
+    LdMasterDetailController<T> controller,
   );
 
   List<Widget> buildMasterActions(
     BuildContext context,
     T? openItem,
     bool isSeparatePage,
-    C controller,
+    LdMasterDetailController<T> controller,
   ) {
     return [];
   }
@@ -43,19 +42,18 @@ abstract class _LdMasterDetailBuilder<T,
     BuildContext context,
     T item,
     bool isSeparatePage,
-    C controller,
+    LdMasterDetailController<T> controller,
   ) {
     return [];
   }
 }
 
-abstract class LdMasterDetailBuilder<T>
-    extends _LdMasterDetailBuilder<T, LdMasterDetailController<T>> {}
+abstract class LdMasterDetailBuilder<T> extends _LdMasterDetailBuilder<T> {}
 
 /// A builder for a CRUD master detail view.
 /// For [buildMaster], [LdCrudMasterList] may be a good fit.
 abstract class LdCrudMasterDetailBuilder<T extends CrudItemMixin<T>>
-    extends _LdMasterDetailBuilder<T, LdMasterDetailController<T>> {
+    extends _LdMasterDetailBuilder<T> {
   LdCrudListState<T> getData(BuildContext context) =>
       context.read<LdCrudListState<T>>();
 
