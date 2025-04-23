@@ -8,8 +8,8 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 class LayoutDocumentation extends StatelessWidget {
   const LayoutDocumentation({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

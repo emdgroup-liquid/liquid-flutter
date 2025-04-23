@@ -4,7 +4,7 @@ import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class TabsDemo extends StatefulWidget {
-  const TabsDemo({Key? key}) : super(key: key);
+  const TabsDemo({super.key});
 
   @override
   State<TabsDemo> createState() => _TabsDemoState();

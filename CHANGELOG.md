@@ -2,7 +2,44 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-### [21.0.1-dev.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v21.0.0...v21.0.1-dev.0) (2025-04-03)
+## [22.0.0-dev.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v21.0.8...v22.0.0-dev.0) (2025-04-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* replace page-based with offset-based pagination logic
+
+* replace page-based with offset-based pagination logic ([216d8ce](https://github.com/emdgroup-liquid/liquid-flutter/commit/216d8ce383bafd36fb2eb26b6eb233d5ec0fae32))
+
+### [21.0.9-dev.1](https://github.com/emdgroup-liquid/liquid-flutter/compare/v21.0.8...v21.0.9-dev.1) (2025-04-14)
+
+### [21.0.9-dev.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v21.0.8...v21.0.9-dev.0) (2025-04-14)
+
+### [21.0.8](https://github.com/emdgroup-liquid/liquid-flutter/compare/v21.0.6...v21.0.8) (2025-04-14)
+
+### [21.0.7](https://github.com/emdgroup-liquid/liquid-flutter/compare/v21.0.6...v21.0.7) (2025-04-14)
+
+### [21.0.6](https://github.com/emdgroup-liquid/liquid-flutter/compare/v21.0.5...v21.0.6) (2025-04-10)
+
+### [21.0.5](https://github.com/emdgroup-liquid/liquid-flutter/compare/v21.0.4...v21.0.5) (2025-04-10)
+
+
+### Bug Fixes
+
+* resolve issues with LdList when grouping is activated ([#33](https://github.com/emdgroup-liquid/liquid-flutter/issues/33)) ([2813ccd](https://github.com/emdgroup-liquid/liquid-flutter/commit/2813ccd18e5302c0d4277c86a77f28a245b8b7dc))
+
+### [21.0.4](https://github.com/emdgroup-liquid/liquid-flutter/compare/v21.0.3...v21.0.4) (2025-04-10)
+
+### [21.0.3](https://github.com/emdgroup-liquid/liquid-flutter/compare/v21.0.2...v21.0.3) (2025-04-10)
+
+### [21.0.2](https://github.com/emdgroup-liquid/liquid-flutter/compare/v21.0.1...v21.0.2) (2025-04-10)
+
+
+### Bug Fixes
+
+* exception view crashes for non-retrying cases ([#36](https://github.com/emdgroup-liquid/liquid-flutter/issues/36)) ([81d1bd5](https://github.com/emdgroup-liquid/liquid-flutter/commit/81d1bd5ce6c433ece967c2eaa4057247e0d8666d))
+
+### [21.0.1](https://github.com/emdgroup-liquid/liquid-flutter/compare/v21.0.1-dev.0...v21.0.1) (2025-04-09)
 
 ## [21.0.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v20.0.0...v21.0.0) (2025-03-28)
 

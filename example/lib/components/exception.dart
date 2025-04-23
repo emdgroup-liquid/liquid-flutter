@@ -7,10 +7,10 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
 class ExceptionDemo extends StatefulWidget {
-  const ExceptionDemo({Key? key}) : super(key: key);
+  const ExceptionDemo({super.key});
 
   @override
-  _ExceptionDemoState createState() => _ExceptionDemoState();
+  State<ExceptionDemo> createState() => _ExceptionDemoState();
 }
 
 class _ExceptionDemoState extends State<ExceptionDemo> {

@@ -31,7 +31,6 @@ class _LdRevealDemoState extends State<LdRevealDemo> {
             child: LdAutoSpace(
               children: [
                 LdCard(
-                  child: const LdTextHs("This will stay at all times"),
                   footer: Row(
                     children: [
                       LdReveal(
@@ -52,6 +51,7 @@ class _LdRevealDemoState extends State<LdRevealDemo> {
                       const LdTextP("Some actions might reveal"),
                     ],
                   ),
+                  child: const LdTextHs("This will stay at all times"),
                 ),
                 const LdTextP(
                     "It's about managing expectations tiger team it is all exactly as i said, but i don't like it. Let's unpack that later we should leverage existing asserts that ladder up to the message. We need to socialize the comms with the wider stakeholder community we're building the plane while we're flying it, but if you want to motivate these clowns, try less carrot and more stick, race without a finish line performance review, so what do you feel you would bring to the table if you were hired for this position."),

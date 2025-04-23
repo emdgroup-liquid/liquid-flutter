@@ -8,7 +8,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import '../components/component_page.dart';
 
 class TokensDemo extends StatelessWidget {
-  const TokensDemo({Key? key}) : super(key: key);
+  const TokensDemo({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -46,8 +46,8 @@ class SpacerVisualizer extends StatelessWidget {
   const SpacerVisualizer({
     required this.child,
     required this.spacer,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -67,8 +67,8 @@ class SpacerVisualizer extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  child: spacer,
                   color: theme.surface,
+                  child: spacer,
                 ),
               ],
             )),

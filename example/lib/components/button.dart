@@ -5,7 +5,7 @@ import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class ButtonDemo extends StatefulWidget {
-  const ButtonDemo({Key? key}) : super(key: key);
+  const ButtonDemo({super.key});
 
   @override
   State<ButtonDemo> createState() => _ButtonDemoState();
@@ -69,7 +69,6 @@ class _ButtonDemoState extends State<ButtonDemo> {
                         children: [
                           /*begin demo:LdButton*/
                           LdButton(
-                            child: const Text("Button"),
                             color: _color,
                             mode: _mode,
                             active: _active,
@@ -79,6 +78,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                             onPressed: () async {
                               await Future.delayed(const Duration(seconds: 1));
                             },
+                            child: const Text("Button"),
                           ),
                           /*end demo:LdButton*/
                         ],
@@ -170,7 +170,6 @@ class _ButtonDemoState extends State<ButtonDemo> {
                       children: [
                         /*begin demo:LdButtonError*/
                         LdButton(
-                          child: const Text("I won't work"),
                           mode: LdButtonMode.filled,
                           color: LdTheme.of(context).warning,
                           onPressed: () async {
@@ -182,6 +181,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                               message: "Told you!",
                             );
                           },
+                          child: const Text("I won't work"),
                         ),
                         /*end demo:LdButtonError*/
                       ],
@@ -251,9 +251,9 @@ class _ButtonDemoState extends State<ButtonDemo> {
                     child: Column(children: [
                   /*begin demo:LdButtonDisabled*/
                   LdButton(
-                    child: const Text("Primary"),
                     onPressed: () {},
                     disabled: true,
+                    child: const Text("Primary"),
                   ),
                   /*end demo:LdButtonDisabled*/
                 ])),
@@ -317,7 +317,6 @@ class _ButtonDemoState extends State<ButtonDemo> {
                       LdButton(
                         leading: const Icon(Icons.abc),
                         trailing: const Icon(Icons.arrow_right),
-                        child: const Text("Full width"),
                         mode: LdButtonMode.outline,
                         onPressed: () {
                           LdNotificationsController.of(context).addNotification(
@@ -327,6 +326,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                           );
                         },
                         width: double.infinity,
+                        child: const Text("Full width"),
                       ),
                     ],
                   ),

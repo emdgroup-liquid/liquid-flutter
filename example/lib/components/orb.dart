@@ -4,7 +4,7 @@ import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class OrbDemo extends StatefulWidget {
-  const OrbDemo({Key? key}) : super(key: key);
+  const OrbDemo({super.key});
 
   @override
   State<OrbDemo> createState() => _OrbDemoState();

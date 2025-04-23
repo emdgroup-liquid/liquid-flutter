@@ -5,7 +5,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'component_well/component_well.dart';
 
 class AccordionDemo extends StatefulWidget {
-  const AccordionDemo({Key? key}) : super(key: key);
+  const AccordionDemo({super.key});
 
   @override
   State<AccordionDemo> createState() => _AccordionDemoState();

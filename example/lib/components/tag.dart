@@ -5,7 +5,7 @@ import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class TagDemo extends StatefulWidget {
-  const TagDemo({Key? key}) : super(key: key);
+  const TagDemo({super.key});
 
   @override
   State<TagDemo> createState() => _TagDemoState();
@@ -32,20 +32,20 @@ class _TagDemoState extends State<TagDemo> {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         LdTag(
-                          child: Text("XS Tag"),
                           size: LdSize.xs,
+                          child: Text("XS Tag"),
                         ),
                         LdTag(
-                          child: Text("Small Tag"),
                           size: LdSize.s,
+                          child: Text("Small Tag"),
                         ),
                         LdTag(
-                          child: Text("Medium Tag"),
                           size: LdSize.m,
+                          child: Text("Medium Tag"),
                         ),
                         LdTag(
-                          child: Text("Large Tag"),
                           size: LdSize.l,
+                          child: Text("Large Tag"),
                         ),
                       ])),
               LdToggle(

@@ -4,7 +4,7 @@ import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class FormDemo extends StatefulWidget {
-  const FormDemo({Key? key}) : super(key: key);
+  const FormDemo({super.key});
 
   @override
   State<FormDemo> createState() => _FormDemoState();

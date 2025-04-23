@@ -4,7 +4,7 @@ import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class HintDemo extends StatelessWidget {
-  const HintDemo({Key? key}) : super(key: key);
+  const HintDemo({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,9 +13,9 @@ class HintDemo extends StatelessWidget {
       demo: ComponentWell(
         child: LdAutoSpace(
           children: [
-            LdHint(child: Text("Hello world"), type: LdHintType.info),
-            LdHint(child: Text("Hello world"), type: LdHintType.error),
-            LdHint(child: Text("Hello world"), type: LdHintType.warning)
+            LdHint(type: LdHintType.info, child: Text("Hello world")),
+            LdHint(type: LdHintType.error, child: Text("Hello world")),
+            LdHint(type: LdHintType.warning, child: Text("Hello world"))
           ],
         ),
       ),

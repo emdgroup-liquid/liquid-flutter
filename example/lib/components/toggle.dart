@@ -6,7 +6,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'component_page.dart';
 
 class ToggleDemo extends StatefulWidget {
-  const ToggleDemo({Key? key}) : super(key: key);
+  const ToggleDemo({super.key});
 
   @override
   State<ToggleDemo> createState() => _ToggleDemoState();

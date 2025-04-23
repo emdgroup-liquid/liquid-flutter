@@ -5,7 +5,7 @@ import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class DividerDemo extends StatelessWidget {
-  const DividerDemo({Key? key}) : super(key: key);
+  const DividerDemo({super.key});
 
   @override
   Widget build(BuildContext context) {

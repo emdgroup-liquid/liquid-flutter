@@ -1,0 +1,55 @@
+name: Sync main to dev after updates
+
+on:
+  # run on both, after the "Release Main" workflow is completed and on push to main
+  workflow_run:
+    workflows: ["Release Main"]
+    types:
+      - completed
+    branches:
+      - main
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'CHANGELOG.md'
+      - 'package.json'
+      - 'pubspec.yaml'
+
+jobs:
+  sync_to_dev:
+    runs-on: ubuntu-latest
+    # Skip if triggered by push and the push was from the release workflow
+    if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip ci]')
+    steps:
+      - name: Get token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.bumper_app_id }}
+          private-key: ${{ secrets.bumper_key }}
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "gh-actions@emdgroup.com"
+
+      - name: Sync main to dev
+        run: |
+          # Make sure we have the latest main and dev
+          git fetch origin main dev
+          
+          # Checkout dev
+          git checkout dev
+          
+          # Merge main into dev
+          git merge origin/main -m "chore: sync changes from main [skip ci]"
+          
+          # Push changes to dev
+          git push origin dev

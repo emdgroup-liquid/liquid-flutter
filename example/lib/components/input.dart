@@ -4,7 +4,7 @@ import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class InputDemo extends StatefulWidget {
-  const InputDemo({Key? key}) : super(key: key);
+  const InputDemo({super.key});
 
   @override
   State<InputDemo> createState() => _InputDemoState();
@@ -61,9 +61,9 @@ class _InputDemoState extends State<InputDemo> {
                     ldSpacerS,
                     LdButton(
                       size: LdSize.s,
-                      child: const Text("Fitting button"),
                       onPressed: () {},
                       mode: LdButtonMode.outline,
+                      child: const Text("Fitting button"),
                     )
                   ],
                 ),
@@ -78,9 +78,9 @@ class _InputDemoState extends State<InputDemo> {
                     ),
                     ldSpacerM,
                     LdButton(
-                      child: const Text("Fitting button"),
                       onPressed: () {},
                       mode: LdButtonMode.outline,
+                      child: const Text("Fitting button"),
                     )
                   ],
                 ),
@@ -97,9 +97,9 @@ class _InputDemoState extends State<InputDemo> {
                     ldSpacerL,
                     LdButton(
                       size: LdSize.l,
-                      child: const Text("Fitting button"),
                       onPressed: () {},
                       mode: LdButtonMode.outline,
+                      child: const Text("Fitting button"),
                     )
                   ],
                 )

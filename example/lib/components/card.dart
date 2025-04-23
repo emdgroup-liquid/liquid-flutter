@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class CardDemo extends StatefulWidget {
-  const CardDemo({Key? key}) : super(key: key);
+  const CardDemo({super.key});
 
   @override
   State<CardDemo> createState() => _CardDemoState();
@@ -47,6 +46,9 @@ class _CardDemoState extends State<CardDemo> {
                       ipsum,
                     ],
                   ),
+                ),
+                ldSpacerM,
+                LdCard(
                   header: const Row(
                     children: [
                       LdTag(child: Text("Important information for you")),
@@ -58,6 +60,18 @@ class _CardDemoState extends State<CardDemo> {
                         child: const Text("Action"),
                         onPressed: () {},
                       ),
+                    ],
+                  ), // bool
+
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const LdTextH(
+                        "Hello footer",
+                      ),
+                      ldSpacerM,
+                      // lorem ipsum text
+                      ipsum,
                     ],
                   ),
                 ),

@@ -1,29 +1,32 @@
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:liquid_flutter/src/list/list_page.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
 
-typedef FetchListFunction<T> = Future<LdListPage<T>> Function(
-  int page,
-  int loadedItems,
+typedef FetchListFunction<T> = Future<LdListPage<T>> Function({
+  required int offset,
+  required int pageSize,
   String? pageToken,
-);
-
-enum PaginatorOperation { nextPage, prevPage, refreshList, jumpToPage }
+});
 
 class LdPaginator<T> extends ChangeNotifier {
-  FetchListFunction<T> fetchListFunction;
-  final int startPage;
+  final FetchListFunction<T> fetchListFunction;
+  final int pageSize;
+  final int initialOffset;
   final Duration debounceTime;
 
   LdPaginator({
     required this.fetchListFunction,
+
+    /// The number of items that are fetched at once.
+    /// The [pageSize] will be passed to the [FetchListFunction] and used to
+    /// "normalize" the offset to the nearest page size in the
+    /// [fetchPageAtOffset] method.
+    this.pageSize = 10,
     bool autoLoad = true,
 
-    /// The page to start loading from. If you set this to a positive number,
-    /// it may enable the "bidirectional scrolling" feature of [LdList].
-    this.startPage = 0,
+    /// The initial offset to start fetching items from.
+    this.initialOffset = 0,
 
     /// A debounce time to prevent multiple fetches within a short time frame.
     /// This is particularly useful in a scenario where the user gave an
@@ -33,75 +36,52 @@ class LdPaginator<T> extends ChangeNotifier {
     this.debounceTime = const Duration(milliseconds: 500),
   }) {
     if (autoLoad) {
-      jumpToPage(startPage);
+      _setBusy(true);
+      fetchItemsAtOffset(initialOffset);
     }
   }
 
   factory LdPaginator.fromList(List<T> list) {
-    return LdPaginator(fetchListFunction: (
-      int page,
-      int loadedItems,
-      String? pageToken,
-    ) async {
-      if (loadedItems == 0) {
+    return LdPaginator(
+      pageSize: list.length,
+      debounceTime: const Duration(milliseconds: 0),
+      fetchListFunction: ({
+        required int offset,
+        required int pageSize,
+        String? pageToken,
+      }) async {
+        if (offset == 0) {
+          return LdListPage<T>(
+            newItems: list,
+            hasMore: false,
+            total: list.length,
+          );
+        }
         return LdListPage<T>(
-          newItems: list,
+          newItems: <T>[],
           hasMore: false,
           total: list.length,
         );
-      }
-      return LdListPage<T>(
-        newItems: <T>[],
-        hasMore: false,
-        total: list.length,
-      );
-    });
+      },
+    );
   }
 
-  final SplayTreeMap<int, LdListPage<T>> _loadedPages = SplayTreeMap();
-  Map<int, LdListPage<T>> get pages => _loadedPages;
+  // List to store items at their exact position, with null for not-yet-loaded items
+  final List<T?> _items = [];
+  List<T?> get items => List.unmodifiable(_items);
+
+  // Track which ranges have been requested to prevent duplicate fetches
+  final Set<int> _requestedOffsets = {};
+
   Timer? _debounceTimer;
 
-  int get currentItemCount =>
-      _loadedPages.values.fold(0, (sum, page) => sum + page.newItems.length);
-
-  int get remainingItemsAbove => !hasMoreDataPrev
-      ? 0
-      : _currentTopPage *
-          (currentItemCount ~/ (_currentBottomPage - _currentTopPage + 1));
-
-  int get remainingItemsBelow => !hasMoreDataNext
-      ? 0
-      : (_totalItems - currentItemCount) - remainingItemsAbove;
-
-  /// Returns the average page size among all loaded pages
-  int get pageSize =>
-      _loadedPages.isEmpty ? 10 : currentItemCount ~/ _loadedPages.length;
+  int get currentItemCount => _items.where((item) => item != null).length;
 
   int _totalItems = 0;
   int get totalItems => _totalItems;
 
-  int _currentTopPage = 0;
-  int _currentBottomPage = 0;
-
-  bool _hasMoreDataBottom = true;
-  bool _hasMoreDataTop = true;
-
-  int get currentTopPage => _currentTopPage;
-  int get currentBottomPage => _currentBottomPage;
-
-  bool get hasMoreDataNext => _hasMoreDataBottom;
-  bool get hasMoreDataPrev => _hasMoreDataTop && _currentTopPage > 0;
-
-  final Map<PaginatorOperation, bool> _busyStates = {
-    PaginatorOperation.nextPage: false,
-    PaginatorOperation.prevPage: false,
-    PaginatorOperation.refreshList: false,
-    PaginatorOperation.jumpToPage: false,
-  };
-
-  bool get busy => _busyStates.values.any((e) => e);
-  bool busyWith(PaginatorOperation operation) => _busyStates[operation] == true;
+  bool _busy = false;
+  bool get busy => _busy;
 
   Object? _error;
   Object? get error => _error;
@@ -114,168 +94,158 @@ class LdPaginator<T> extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _setBusy(bool isBusy, {required PaginatorOperation operation}) {
-    if (_busyStates[operation] == isBusy) return; // no change, skip
-    _busyStates[operation] = isBusy;
-    notifyListeners(); // only notify if there is a change
+  void _setBusy(bool isBusy) {
+    if (isBusy == _busy) return;
+    _busy = isBusy;
+    notifyListeners();
   }
 
-  Future<Iterable<T>?> _fetchPage(int pageToFetch,
-      {PaginatorOperation operation = PaginatorOperation.refreshList}) async {
-    if (busyWith(operation)) return null;
+  // Get all non-null items in order
+  List<T> getAllLoadedItems() {
+    return _items.whereType<T>().toList();
+  }
 
-    _setBusy(true, operation: operation);
-    Iterable<T>? list;
+  // Check if position has a loaded item
+  bool isItemLoaded(int position) {
+    return position < _items.length && _items[position] != null;
+  }
+
+  // Get item at a specific position
+  T? getItemAt(int position) {
+    if (position < 0 || position >= _items.length) return null;
+    return _items[position];
+  }
+
+  Future<List<T>> _fetchItemsAtOffset(
+    int offset, {
+    bool refresh = false,
+  }) async {
+    if (_requestedOffsets.contains(offset) && !refresh) {
+      return [];
+    }
+
+    _requestedOffsets.add(offset);
+    _setBusy(true);
+
+    final List<T> loadedItems = [];
 
     try {
       final page = await fetchListFunction(
-        pageToFetch,
-        currentItemCount,
-        null,
+        offset: offset,
+        pageSize: pageSize,
+        pageToken: null,
       );
+
+      if (refresh) {
+        _reset();
+      }
 
       if (page.error != null) {
         _setError(page.error);
       } else {
         _totalItems = page.total;
-        _loadedPages[pageToFetch] = page;
-        list = page.newItems;
-        _hasMoreDataTop = _loadedPages.containsKey(0) ? false : true;
-        _hasMoreDataBottom = page.hasMore;
-        // if all pages are loaded, set total items to current item count
-        if (!_hasMoreDataTop && !_hasMoreDataBottom) {
-          _totalItems = currentItemCount;
+
+        // Ensure _items list is large enough
+        if (offset + page.newItems.length > _items.length) {
+          _items.length = offset + page.newItems.length;
+        }
+
+        // Insert items at their exact positions
+        for (int i = 0; i < page.newItems.length; i++) {
+          final item = page.newItems.elementAt(i);
+          _items[offset + i] = item;
+          loadedItems.add(item);
         }
 
         _setError(null);
       }
     } catch (e) {
       _setError(e);
+      _requestedOffsets.remove(offset); // Allow retry if there was an error
     }
-    _setBusy(false, operation: operation);
 
-    return list;
+    _setBusy(false);
+    return loadedItems;
   }
 
-  /// Jump to a specific page while keeping track of gaps
-  Future<void> jumpToPage(int page) async {
+  // Fetch items starting at a specific offset
+  Future<void> fetchItemsAtOffset(int offset) async {
+    if (offset < 0) offset = 0;
+
     return _debounceAndSafeExecute(() async {
-      if (_loadedPages.containsKey(page)) {
-        // Page already loaded, update top/bottom indicators
-        _updatePageRange();
-        notifyListeners();
-      } else {
-        final newElements =
-            await _fetchPage(page, operation: PaginatorOperation.jumpToPage);
-        if (newElements != null && newElements.isNotEmpty) {
-          _updatePageRange();
-          notifyListeners();
-        }
-      }
-    });
-  }
-
-  /// Load next page
-  Future<void> nextPage() async {
-    if (!hasMoreDataNext || busyWith(PaginatorOperation.nextPage)) return;
-    return _debounceAndSafeExecute(() async {
-      final nextPageNumber = _currentBottomPage + 1;
-      final newElements = await _fetchPage(nextPageNumber,
-          operation: PaginatorOperation.nextPage);
-      if (newElements != null && newElements.isNotEmpty) {
-        _updatePageRange();
+      final newItems = await _fetchItemsAtOffset(offset);
+      if (newItems.isNotEmpty) {
         notifyListeners();
       }
     });
   }
 
-  /// Load previous page
-  Future<void> previousPage() async {
-    if (!hasMoreDataPrev || busyWith(PaginatorOperation.prevPage)) return;
-    return await _debounceAndSafeExecute(() async {
-      final prevPageNumber = _currentTopPage - 1;
-      final newElements = await _fetchPage(prevPageNumber,
-          operation: PaginatorOperation.prevPage);
-      if (newElements != null && newElements.isNotEmpty) {
-        _updatePageRange();
-        notifyListeners();
-      }
-    });
+  /// Fetch items at a specific offset, normalized to the nearest page size
+  /// It makes sense to use this strategy in order to avoid fetching items
+  /// that are already loaded.
+  Future<void> fetchPageAtOffset(int offset) async {
+    // normalize position to the nearest page size
+    final pagedOffset = (offset ~/ pageSize) * pageSize;
+    return fetchItemsAtOffset(pagedOffset);
   }
 
-  /// Refresh List
+  // Refresh List - clear and fetch initial data
   Future<void> refreshList() async {
+    return _safeExecute(() async {
+      final newItems = await _fetchItemsAtOffset(initialOffset, refresh: true);
+      if (newItems.isNotEmpty) {
+        notifyListeners();
+      }
+    });
+  }
+
+  // Clear and reset without fetching data
+  Future<void> reset() {
     _debounceTimer?.cancel();
     return _safeExecute(() async {
-      final refreshedPage = await _fetchPage(startPage,
-          operation: PaginatorOperation.refreshList);
-      if (refreshedPage != null) {
-        _updatePageRange();
-        notifyListeners();
-      }
-    });
-  }
-
-  /// Update page tracking
-  void _updatePageRange() {
-    final loadedPages = _loadedPages.keys.toList();
-    if (loadedPages.isNotEmpty) {
-      _currentTopPage = loadedPages.reduce((a, b) => a < b ? a : b);
-      _currentBottomPage = loadedPages.reduce((a, b) => a > b ? a : b);
-    }
-  }
-
-  /// Clear and reset the pagination without fetching any data.
-  void reset() {
-    _debounceTimer?.cancel();
-    _safeExecute(() async {
-      _currentTopPage = startPage;
-      _currentBottomPage = startPage;
-      _hasMoreDataBottom = true;
-      _hasMoreDataTop = startPage > 0;
-      _loadedPages.clear();
-      _busyStates.updateAll((key, value) => false);
-      _error = null;
+      _reset();
       notifyListeners();
     });
   }
 
-  /// Debounce a task to prevent multiple executions within a short time frame.
-  void _debounce(void Function() task) {
-    _debounceTimer?.cancel(); // Cancel the previous timer
-    _debounceTimer = Timer(debounceTime, task); // Schedule the new task
+  void _reset() {
+    _items.clear();
+    _requestedOffsets.clear();
+    _totalItems = 0;
+    _error = null;
   }
 
-  /// Safely executes an operation, handles errors, and ensures cleanup.
+  void _debounce(void Function() task) {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(debounceTime, task);
+  }
+
   Future<R?> _safeExecute<R>(Future<R> Function() operation) async {
-    await _currentOperation?.future; // Wait for pending operation to complete
+    await _currentOperation?.future;
     final completer = Completer<R?>();
     _currentOperation = completer;
 
     try {
       final result = await operation();
-      completer.complete(result); // Complete with the result
+      completer.complete(result);
     } catch (e) {
-      completer.completeError(e); // Propagate the error
+      completer.completeError(e);
       rethrow;
     } finally {
       if (_currentOperation == completer) {
-        _currentOperation = null; // Clean up
+        _currentOperation = null;
       }
     }
 
     return completer.future;
   }
 
-  /// Combine [debounce] and [safeExecute] to prevent multiple executions
   Future<R?> _debounceAndSafeExecute<R>(Future<R> Function() operation) async {
     final completer = Completer<R?>();
 
     _debounce(() async {
-      await _currentOperation?.future; // Wait for pending operation to complete
-      final result =
-          await _safeExecute(operation); // Safely execute the operation
-      completer.complete(result); // Complete the outer completer
+      final result = await _safeExecute(operation);
+      completer.complete(result);
     });
 
     return completer.future;

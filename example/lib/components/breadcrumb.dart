@@ -4,7 +4,7 @@ import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class BreadcrumbDemo extends StatelessWidget {
-  const BreadcrumbDemo({Key? key}) : super(key: key);
+  const BreadcrumbDemo({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -1,48 +1,48 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-class _ListItem<T, SeperationCriterion> {
+class _ListItem<T, SeparationCriterion> {
   _ListItem({
     this.item,
     this.isSeparator = false,
-    this.seperationCriterion,
-    this.page,
+    this.separationCriterion,
+    this.position,
   }) :
-        // if this is no separator, page should not be null
-        assert(isSeparator || page != null);
+        // if this is not a separator, position should not be null
+        assert(isSeparator || position != null);
 
   final T? item;
-  // use a bool since T or SeperationCriterion can be null
+  // use a bool since T or SeparationCriterion can be null
   final bool isSeparator;
-  final SeperationCriterion? seperationCriterion;
+  final SeparationCriterion? separationCriterion;
 
-  /// The page number that this item belongs to.
-  /// It can be that item is null and page is not null, which means that this
-  /// item is yet to be loaded from the appropriate page.
-  /// If both item and page are null, this is probably a separator item.
-  final int? page;
+  /// The position that this item belongs to.
+  /// It can be that item is null and position is not null, which means that this
+  /// item is yet to be loaded from the appropriate position.
+  /// If both item and position are null, this is probably a separator item.
+  final int? position;
 }
 
 /// An extension function to create a list of [_ListItem]s from a [LdPaginator]
 /// instance.
-///
-///
 extension GetItemList<T> on LdPaginator<T> {
   List<_ListItem<T, GroupingCriterion>> currentList<GroupingCriterion>() {
     final result = <_ListItem<T, GroupingCriterion>>[];
-    for (int i = 0; i < totalItems ~/ pageSize; i++) {
-      final page = pages[i];
-      if (page != null) {
-        result.addAll(page.newItems
-            .map((item) => _ListItem<T, GroupingCriterion>(item: item, page: i))
-            .toList());
+    if (totalItems == 0) return result;
+
+    // Iterate through all positions up to totalItems
+    for (int i = 0; i < totalItems; i++) {
+      final item = getItemAt(i);
+      if (item != null) {
+        result.add(_ListItem<T, GroupingCriterion>(item: item, position: i));
       } else {
-        result.addAll(List<_ListItem<T, GroupingCriterion>>.filled(
-          pageSize,
-          _ListItem<T, GroupingCriterion>(page: i),
-        ));
+        // This is a placeholder for an item that hasn't been loaded yet
+        result.add(_ListItem<T, GroupingCriterion>(position: i));
       }
     }
+
     return result;
   }
 }
@@ -62,7 +62,7 @@ class LdList<T, GroupingCriterion> extends StatefulWidget {
   // Pagination
   final LdPaginator<T> data;
 
-  final Widget Function(BuildContext context, int currentPage, int totalItems)?
+  final Widget Function(BuildContext context, int position, int totalItems)?
       loadingBuilder;
 
   final bool Function(T a, T b)? areEqual;
@@ -71,7 +71,7 @@ class LdList<T, GroupingCriterion> extends StatefulWidget {
   final GroupingCriterion Function(T item)? groupingCriterion;
 
   final Widget Function(BuildContext context, GroupingCriterion criterion)?
-      seperatorBuilder;
+      separatorBuilder;
 
   final bool groupSequentialItems;
 
@@ -90,7 +90,7 @@ class LdList<T, GroupingCriterion> extends StatefulWidget {
   // Bidirectional scrolling properties
   final bool? enableBidirectionalScrolling;
   bool get isBidirectionalScrollingEnabled =>
-      enableBidirectionalScrolling ?? data.startPage > 0;
+      enableBidirectionalScrolling ?? data.initialOffset > 0;
 
   const LdList({
     super.key,
@@ -103,7 +103,7 @@ class LdList<T, GroupingCriterion> extends StatefulWidget {
     this.physics,
     required this.itemBuilder,
     required this.data,
-    this.seperatorBuilder,
+    this.separatorBuilder,
     this.groupingCriterion,
     this.primary = false,
     this.footer,
@@ -140,22 +140,23 @@ class _LdListState<T, GroupingCriterion>
       growable: true,
     );
 
-    GroupingCriterion? lastSeperationCriterion;
+    GroupingCriterion? lastSeparationCriterion;
 
     for (final item in widget.data.currentList<GroupingCriterion>()) {
       if (item.item == null) {
-        groupedItems.add(_ListItem<T, GroupingCriterion>(page: item.page));
+        groupedItems
+            .add(_ListItem<T, GroupingCriterion>(position: item.position));
         continue;
       }
-      final seperationCriterion = widget.groupingCriterion!(item.item!);
-      if (lastSeperationCriterion != seperationCriterion) {
+      final separationCriterion = widget.groupingCriterion!(item.item!);
+      if (lastSeparationCriterion != separationCriterion) {
         groupedItems.add(
           _ListItem(
             isSeparator: true,
-            seperationCriterion: seperationCriterion,
+            separationCriterion: separationCriterion,
           ),
         );
-        lastSeperationCriterion = seperationCriterion;
+        lastSeparationCriterion = separationCriterion;
       }
       groupedItems.add(item);
     }
@@ -164,34 +165,49 @@ class _LdListState<T, GroupingCriterion>
   }
 
   List<_ListItem<T, GroupingCriterion>> _groupItemsUniformly() {
-    final Map<GroupingCriterion, List<T>> groupedItems = {};
+    final Map<GroupingCriterion, List<_ListItem<T, GroupingCriterion>>>
+        groupedItems = {};
 
     final emptyItems = <_ListItem<T, GroupingCriterion>>[];
+    GroupingCriterion? lastSeparationCriterion;
     for (final item in widget.data.currentList<GroupingCriterion>()) {
       if (item.item == null) {
-        emptyItems.add(_ListItem<T, GroupingCriterion>(page: item.page));
+        final placeholder =
+            _ListItem<T, GroupingCriterion>(position: item.position);
+        if (lastSeparationCriterion != null) {
+          // if we can't know the separation criterion, let's just add the
+          // placeholder to the last group
+          groupedItems[lastSeparationCriterion]!.add(placeholder);
+        } else {
+          emptyItems.add(placeholder);
+        }
         continue;
       }
-      final seperationCriterion = widget.groupingCriterion!(item.item!);
-      if (!groupedItems.containsKey(seperationCriterion)) {
-        groupedItems[seperationCriterion] = [];
+      final separationCriterion = widget.groupingCriterion!(item.item!);
+      if (!groupedItems.containsKey(separationCriterion)) {
+        groupedItems[separationCriterion] = [];
       }
-      groupedItems[seperationCriterion]!.add(item.item!);
+      groupedItems[separationCriterion]!.add(
+        _ListItem(
+          item: item.item,
+          position: item.position,
+        ),
+      );
+      lastSeparationCriterion = separationCriterion;
     }
 
     return [
+      ...emptyItems,
       ...groupedItems.entries
           .map((entry) => [
                 _ListItem<T, GroupingCriterion>(
                   isSeparator: true,
-                  seperationCriterion: entry.key,
+                  separationCriterion: entry.key,
                 ),
-                ...entry.value
-                    .map((item) => _ListItem<T, GroupingCriterion>(item: item))
+                ...entry.value,
               ])
           .expand((element) => element)
           .toList(growable: false),
-      ...emptyItems
     ].toList(growable: false);
   }
 
@@ -244,7 +260,7 @@ class _LdListState<T, GroupingCriterion>
       _retryController.notifyOperationCompleted();
     }
 
-    if (widget.seperatorBuilder != null && widget.groupingCriterion != null) {
+    if (widget.separatorBuilder != null && widget.groupingCriterion != null) {
       if (widget.groupSequentialItems) {
         setState(() {
           _groupedItems = _groupItemsSequentially();
@@ -255,7 +271,7 @@ class _LdListState<T, GroupingCriterion>
         });
       }
     } else if (widget.groupingCriterion == null &&
-        widget.seperatorBuilder != null) {
+        widget.separatorBuilder != null) {
       setState(() {
         _groupedItems = intersperse(
             _ListItem<T, GroupingCriterion>(isSeparator: true),
@@ -288,12 +304,12 @@ class _LdListState<T, GroupingCriterion>
     return LdListEmpty(onRefresh: _onRefresh);
   }
 
-  Widget _buildLoadMore(BuildContext context, int page) {
+  Widget _buildLoadMore(BuildContext context, int position) {
     if (widget.loadingBuilder != null) {
       return widget.loadingBuilder!(
         context,
-        page,
-        widget.data.currentItemCount,
+        position,
+        widget.data.totalItems,
       );
     }
 
@@ -347,33 +363,33 @@ class _LdListState<T, GroupingCriterion>
           itemCount: count,
           itemBuilder: (context, index) {
             final item = _groupedItems[index];
-            final page = item.page;
+            final position = item.position;
 
             if (item.isSeparator) {
-              return widget.seperatorBuilder!(
+              return widget.separatorBuilder!(
                 context,
-                item.seperationCriterion as GroupingCriterion,
+                item.separationCriterion as GroupingCriterion,
               );
             }
 
             if (item.item == null) {
               // if item is null and this is no separator, this is a "placeholder"
-              // item and we have to fetch the data for the appropriate page
-              // (page should never be null at this point)
-              if (assumedItemHeight == null || page == null) {
+              // item and we have to fetch the data for the appropriate position
+              if (assumedItemHeight == null || position == null) {
                 // as long as we don't know any assumed item height (neither
                 // as parameter nor calculated), we can't build a "placeholder"
                 return const SizedBox.shrink();
               }
-              // call the loading operation for the appropriate page
-              widget.data.jumpToPage(page);
+              // call the loading operation for the appropriate position
+              widget.data.fetchPageAtOffset(position);
 
               // build a "placeholder" item
               return SizedBox(
                 height: assumedItemHeight!,
-                child: _buildLoadMore(context, page),
+                child: _buildLoadMore(context, position),
               );
             }
+
             bool buildingFirstRealItem = _firstListItemWidgetKey == null;
             _firstListItemWidgetKey ??= GlobalKey();
             return KeyedSubtree(
@@ -404,14 +420,14 @@ class _LdListState<T, GroupingCriterion>
           ?.findRenderObject() as RenderBox?;
       if (renderBox != null) {
         // assume that the first item has the same height as all other items
-        calculatedAssumedItemHeight = renderBox.size.height;
+        calculatedAssumedItemHeight = max(50, renderBox.size.height);
         setState(() {});
       }
     });
   }
 
   /// Helper method to perform the initial scroll to the correct position
-  /// based on the current page.
+  /// based on the initial offset.
   void _maybePerformInitialScroll() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // we don't need to perform the initial scroll under certain conditions
@@ -424,7 +440,7 @@ class _LdListState<T, GroupingCriterion>
         return;
       }
       _initialScrollPerformed = true;
-      _scrollToIndex(widget.data.startPage * widget.data.pageSize);
+      _scrollToIndex(widget.data.initialOffset);
     });
   }
 

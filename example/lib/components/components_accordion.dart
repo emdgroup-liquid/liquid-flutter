@@ -2,20 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:liquid/components/component_api.dart';
 import 'package:liquid_flutter/documentation.g.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart';
 
 class ComponentsAccordion extends StatelessWidget {
   final Set<String> components;
 
   const ComponentsAccordion({
-    Key? key,
+    super.key,
     required this.components,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    List<DocComponent> relevantComponents = docComponents
-        .where((element) => components.contains(element.name))
-        .toList();
+    final List<DocComponent> allDocComponents = [
+      ...docComponents,
+      ...ldReactiveFormDocComponents.map(
+        (formComp) => DocComponent.fromJson(formComp.toJson()),
+      ),
+    ];
+    List<DocComponent> relevantComponents =
+        allDocComponents.where((element) => components.contains(element.name)).toList();
 
     return LdCard(
       padding: EdgeInsets.zero,
@@ -30,8 +36,7 @@ class ComponentsAccordion extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (component.description.isNotEmpty)
-                    LdText(component.description),
+                  if (component.description.isNotEmpty) LdText(component.description),
                   ComponentApi(component: component)
                 ],
               ));

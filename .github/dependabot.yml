@@ -1,19 +1,13 @@
 version: 2
 updates:
-  # Root pubspec.yaml
   - package-ecosystem: "pub"
-    directory: "/"  # root project
+    directories:
+      - "/"
+      - "/example"
+      - "/generators"
     schedule:
       interval: "weekly"
-
-  # Example app
-  - package-ecosystem: "pub"
-    directory: "/example"
-    schedule:
-      interval: "weekly"
-
-  # Generator tools
-  - package-ecosystem: "pub"
-    directory: "/generators"
-    schedule:
-      interval: "weekly"
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"

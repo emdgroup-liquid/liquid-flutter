@@ -12,11 +12,11 @@ class CodeBlock extends StatefulWidget {
   final bool expanded;
 
   const CodeBlock({
-    Key? key,
+    super.key,
     required this.code,
     this.language = "dart",
     this.expanded = false,
-  }) : super(key: key);
+  });
 
   @override
   State<CodeBlock> createState() => _CodeBlockState();
@@ -44,8 +44,7 @@ class _CodeBlockState extends State<CodeBlock> {
 
   @override
   Widget build(BuildContext context) {
-    bool isDesktop =
-        kIsWeb || Platform.isWindows || Platform.isMacOS || Platform.isLinux;
+    bool isDesktop = kIsWeb || Platform.isWindows || Platform.isMacOS || Platform.isLinux;
 
     return LayoutBuilder(
       builder: (context, _) => LdCard(

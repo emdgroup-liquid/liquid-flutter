@@ -4,7 +4,7 @@ import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class BadgeDemo extends StatelessWidget {
-  const BadgeDemo({Key? key}) : super(key: key);
+  const BadgeDemo({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,38 +20,34 @@ class BadgeDemo extends StatelessWidget {
             child: LdAutoSpace(children: [
               ...LdSize.values
                   .map(
-                    (e) => Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          LdTextL(e.toString()),
-                          LdBadge(
-                            color: theme.primary,
-                            size: e,
-                            child: const Text("Hello"),
-                          ),
-                          LdBadge(
-                            color: theme.warning,
-                            size: e,
-                            child: const Text("Hello"),
-                          ),
-                          LdBadge(
-                            color: theme.success,
-                            size: e,
-                            child: const Text("Hello"),
-                          ),
-                          LdBadge(
-                            color: theme.secondary,
-                            size: e,
-                            child: const Text("Hello"),
-                          ),
-                          LdBadge(
-                            color: theme.error,
-                            size: e,
-                            child: const Text("Hello"),
-                          ),
-                        ]),
+                    (e) => Wrap(spacing: 8, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                      LdTextL(e.toString()),
+                      LdBadge(
+                        color: theme.primary,
+                        size: e,
+                        child: const Text("Hello"),
+                      ),
+                      LdBadge(
+                        color: theme.warning,
+                        size: e,
+                        child: const Text("Hello"),
+                      ),
+                      LdBadge(
+                        color: theme.success,
+                        size: e,
+                        child: const Text("Hello"),
+                      ),
+                      LdBadge(
+                        color: theme.secondary,
+                        size: e,
+                        child: const Text("Hello"),
+                      ),
+                      LdBadge(
+                        color: theme.error,
+                        size: e,
+                        child: const Text("Hello"),
+                      ),
+                    ]),
                   )
                   .toList(),
             ]),

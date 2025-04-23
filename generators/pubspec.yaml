@@ -13,3 +13,5 @@ dependencies:
   source_gen: ^1.4.0
   dart_style: ^2.3.4
   flutter_lints: ^1.0.0
+  path: ^1.9.0
+  collection: ^1.19.0

@@ -117,7 +117,8 @@ class LdExceptionView extends StatelessWidget {
     return LdAutoSpace(
       children: [
         LdHint(
-          child: Text(exception?.message ?? ""),
+          child: Text(exception?.message ??
+              LiquidLocalizations.of(context).unknownError),
           type: exception?.type ?? LdHintType.error,
         ),
         Row(
@@ -147,18 +148,16 @@ class LdExceptionView extends StatelessWidget {
           size: LdSize.l,
         ),
         LdTextP(
-          exception?.message ?? "",
+          exception?.message ?? LiquidLocalizations.of(context).unknownError,
           textAlign: TextAlign.center,
         ),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Flexible(child: _buildDialogButton(context, moreInfo)),
+            _buildDialogButton(context, moreInfo),
             if (controller?.showRetryButton == true) ...[
               ldSpacerM,
-              Flexible(
-                child: _buildRetryButton(context, controller),
-              ),
+              _buildRetryButton(context, controller),
             ],
           ],
         )
@@ -171,7 +170,7 @@ class LdExceptionView extends StatelessWidget {
     final controller = _createRetryController();
 
     return StreamBuilder<LdRetryState>(
-        stream: controller!.stateStream,
+        stream: controller?.stateStream ?? const Stream.empty(),
         builder: (context, snapshot) {
           return LdAutoSpace(
               crossAxisAlignment: CrossAxisAlignment.center,

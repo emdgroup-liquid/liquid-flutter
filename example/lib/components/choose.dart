@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class ChooseDemo extends StatefulWidget {
-  const ChooseDemo({Key? key}) : super(key: key);
+  const ChooseDemo({super.key});
 
   @override
   State<ChooseDemo> createState() => _ChooseDemoState();

@@ -15,6 +15,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for all branches and tags
+
       - name: Install Flutter
         uses: subosito/flutter-action@v2
       - name: Install dependencies
@@ -36,7 +39,7 @@ jobs:
         run: flutter analyze
       - name: Configure git
         run: |
-          git fetch --prune --unshallow
+          git fetch --prune
           git config --global user.name "GitHub Actions"
           git config --global user.email "gh-actions@emdgroup.com"
 
@@ -75,11 +78,13 @@ jobs:
             return package.version;
             
       - name: Run M-Trust API Guard
+        if: ${{ github.actor != 'dependabot[bot]' }}
         uses: emdgroup/mtrust-api-guard@main  # Or pin to a commit/tag
         with:
-          src_path: './lib'
-          base_doc: 'origin/main:./lib/documentation.dart'
-          new_doc: './lib/documentation.dart'
+          src_path: './lib/src'
+          base_doc: 'origin/main:./lib/documentation.g.dart'
+          new_doc: './lib/documentation.g.dart'
           new_version: '${{ steps.get_new_version.outputs.result }}'
           comment_on_pr: true
           fail_on_error: true
+          ref: ${{ github.ref }}

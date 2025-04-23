@@ -16,7 +16,7 @@ var potions = [
 ];
 
 class ChemicalScreen extends StatefulWidget {
-  const ChemicalScreen({Key? key}) : super(key: key);
+  const ChemicalScreen({super.key});
 
   @override
   State<ChemicalScreen> createState() => _ChemicalScreenState();
@@ -43,7 +43,6 @@ class _ChemicalScreenState extends State<ChemicalScreen> {
                     runSpacing: 8,
                     children: [
                       LdButton(
-                          child: const Text("Add to cart"),
                           mode: LdButtonMode.outline,
                           leading: const Icon(Icons.shopping_bag),
                           onPressed: () {
@@ -52,11 +51,9 @@ class _ChemicalScreenState extends State<ChemicalScreen> {
                               type: LdNotificationType.info,
                               message: "Added to cart",
                             ));
-                          }),
+                          },
+                          child: const Text("Add to cart")),
                       LdButton(
-                          child: const Text(
-                            "Acces certificate",
-                          ),
                           mode: LdButtonMode.outline,
                           leading: const Icon(Icons.download),
                           onPressed: () {
@@ -65,7 +62,10 @@ class _ChemicalScreenState extends State<ChemicalScreen> {
                               type: LdNotificationType.error,
                               message: "Downloading certificate failed",
                             ));
-                          }),
+                          },
+                          child: const Text(
+                            "Acces certificate",
+                          )),
                     ],
                   ),
                   const LdDivider(),
@@ -96,9 +96,7 @@ class _ChemicalScreenState extends State<ChemicalScreen> {
 }
 
 class _Quantity extends StatefulWidget {
-  const _Quantity({
-    Key? key,
-  }) : super(key: key);
+  const _Quantity();
 
   @override
   State<_Quantity> createState() => _QuantityState();
@@ -158,8 +156,8 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
                       return LdButtonOutline(
                         size: LdSize.s,
                         leading: const Icon(Icons.arrow_downward),
-                        child: const Text("Deduct"),
                         onPressed: onPress,
+                        child: const Text("Deduct"),
                       );
                     },
                     modal: LdModal(
@@ -220,9 +218,7 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
 }
 
 class _Accordion extends StatelessWidget {
-  const _Accordion({
-    Key? key,
-  }) : super(key: key);
+  const _Accordion();
 
   @override
   Widget build(BuildContext context) {
@@ -251,9 +247,7 @@ class _Accordion extends StatelessWidget {
 }
 
 class _OtherPotions extends StatelessWidget {
-  const _OtherPotions({
-    Key? key,
-  }) : super(key: key);
+  const _OtherPotions();
 
   @override
   Widget build(BuildContext context) {
@@ -269,7 +263,6 @@ class _OtherPotions extends StatelessWidget {
             ),
             const Spacer(),
             LdButton(
-                child: const Text("Shop for more"),
                 mode: LdButtonMode.outline,
                 onPressed: () {
                   LdNotificationsController.of(context).addNotification(
@@ -278,7 +271,8 @@ class _OtherPotions extends StatelessWidget {
                       message: "Redirecting to shop",
                     ),
                   );
-                }),
+                },
+                child: const Text("Shop for more")),
           ],
         ),
         columns: [LdCol(title: "Name"), LdCol(title: "Description")],
@@ -293,9 +287,7 @@ class _OtherPotions extends StatelessWidget {
 }
 
 class _ProductKeyInfos extends StatelessWidget {
-  const _ProductKeyInfos({
-    Key? key,
-  }) : super(key: key);
+  const _ProductKeyInfos();
 
   @override
   Widget build(BuildContext context) {
