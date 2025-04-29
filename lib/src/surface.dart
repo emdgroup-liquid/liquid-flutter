@@ -15,12 +15,14 @@ class LdSurfaceInfo {
 class LdAutoBackground extends StatelessWidget {
   final Widget child;
   final bool invert;
+  final bool? isSurface;
   final BorderRadius? borderRadius;
   const LdAutoBackground({
     super.key,
     required this.child,
     this.invert = false,
     this.borderRadius,
+    this.isSurface,
   });
 
   @override
@@ -28,7 +30,7 @@ class LdAutoBackground extends StatelessWidget {
     final theme = LdTheme.of(context, listen: true);
 
     return Consumer<LdSurfaceInfo>(builder: (context, info, _) {
-      final parentIsSurface = info.isSurface ^ invert;
+      final parentIsSurface = isSurface ?? info.isSurface ^ invert;
       return Container(
         clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(

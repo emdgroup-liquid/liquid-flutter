@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:liquid/components/components_accordion.dart';
+import 'package:liquid/components/layout/components_accordion.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class ComponentPage extends StatelessWidget {
@@ -43,8 +43,7 @@ class ComponentPage extends StatelessWidget {
                 "API Reference",
               ),
 
-              ComponentsAccordion(
-                  components: apiComponents?.toSet() ?? {title}),
+              ComponentsAccordion(components: apiComponents?.toSet() ?? {title}),
             ],
           ),
         ),

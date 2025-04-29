@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/src/color/color.dart';
 import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/touchable/touchable.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'tokens.dart';
 
@@ -52,9 +53,7 @@ class _LdCheckboxState extends State<LdCheckbox> {
 
     return LdTouchableSurface(
       color: reactiveColors,
-      mode: !widget.checked
-          ? LdTouchableSurfaceMode.outline
-          : LdTouchableSurfaceMode.solid,
+      mode: widget.checked ? LdTouchableSurfaceMode.solid : LdTouchableSurfaceMode.outline,
       disabled: widget.disabled,
       onTap: () {
         if (widget.onChanged != null) {
@@ -70,23 +69,27 @@ class _LdCheckboxState extends State<LdCheckbox> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-                key: const ValueKey("frame"),
-                height: checkboxSize,
-                width: checkboxSize,
-                child: Opacity(
-                  opacity: widget.checked ? 1 : 0,
-                  child: Icon(
-                    key: const ValueKey("checkmark"),
-                    Icons.done,
-                    color: colors.text,
-                    size: theme.labelSize(widget.size),
-                  ),
+              key: const ValueKey("frame"),
+              height: checkboxSize,
+              width: checkboxSize,
+              child: Opacity(
+                opacity: widget.checked ? 1 : 0,
+                child: Icon(
+                  key: const ValueKey("checkmark"),
+                  LucideIcons.check,
+                  color: colors.text,
+                  size: theme.labelSize(widget.size),
                 ),
-                decoration: BoxDecoration(
-                  color: colors.surface,
-                  border: Border.all(color: colors.border, width: 2),
-                  borderRadius: theme.radius(LdSize.s),
-                )),
+              ),
+              decoration: BoxDecoration(
+                color: colors.surface,
+                border: Border.all(
+                  color: colors.border,
+                  width: 2,
+                ),
+                borderRadius: theme.radius(LdSize.s),
+              ),
+            ),
             Flexible(child: label),
           ],
         ),

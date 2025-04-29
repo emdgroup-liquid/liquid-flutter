@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-import 'component_well/component_well.dart';
+import '../component_well/component_well.dart';
 
 class SwitchDemo extends StatefulWidget {
   const SwitchDemo({super.key});
@@ -18,8 +18,7 @@ class _SwitchDemoState extends State<SwitchDemo> {
   Widget build(BuildContext context) {
     return ComponentPage(
         title: "LdSwitch",
-        text:
-            "A component that allows the user to switch between several options",
+        text: "A component that allows the user to switch between several options",
         demo: ComponentWell(
             child: Padding(
           padding: const EdgeInsets.all(32.0),

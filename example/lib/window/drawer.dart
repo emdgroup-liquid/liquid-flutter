@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:liquid/router.dart';
+import 'package:liquid/window/font_selector.dart';
+import 'package:liquid/window/headline_font_selector.dart';
+import 'package:liquid/window/radius_selector.dart';
 import 'package:liquid/window/size_selector.dart';
 import 'package:liquid/window/theme_selector.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -21,56 +23,65 @@ class MainNavigationDrawer extends StatefulWidget {
   State<MainNavigationDrawer> createState() => _MainNavigationDrawerState();
 }
 
+enum ComponentCategory { layout, formElements, feedback, interaction, dataDisplay }
+
 class _Component {
   final String title;
   final String route;
   final IconData icon;
-  const _Component(this.title, this.route, this.icon);
+  final ComponentCategory category;
+
+  const _Component(this.title, this.route, this.icon, this.category);
 }
 
 const components = [
-  _Component("Action Runner", "/components/action-runner", LucideIcons.tableOfContents),
-  _Component("Autospace", "/components/autospace", LucideIcons.alignVerticalDistributeCenter),
-  _Component("Accordion", "/components/accordion", LucideIcons.listCollapse),
-  _Component("Badge", "/components/badge", LucideIcons.tag),
-  _Component("Breadcrumb", "/components/breadcrumb", LucideIcons.arrowRight),
-  _Component("Button", "/components/button", LucideIcons.pointer),
-  _Component("Card", "/components/card", LucideIcons.square),
-  _Component("Checkbox", "/components/checkbox", LucideIcons.circleCheck),
-  _Component("Context Menu", "/components/context-menu", LucideIcons.squareMousePointer),
-  _Component("Choose", "/components/choose", LucideIcons.textSelect),
-  _Component(
-    "Date/Time Picker",
-    "/components/date-time-picker",
-    LucideIcons.calendar,
-  ),
-  _Component("Divider", "/components/divider", LucideIcons.minus),
-  _Component("Drawer", "/components/drawer", LucideIcons.menu),
-  _Component("Exception", "/components/exception", LucideIcons.circleAlert),
-  _Component("Form", "/components/form", LucideIcons.penTool),
-  _Component("Hint", "/components/hint", LucideIcons.info),
-  _Component("Icon", "/components/icon", LucideIcons.image),
-  _Component("Indicator", "/components/indicator", LucideIcons.circleAlert),
-  _Component("Input", "/components/input", LucideIcons.textCursorInput),
-  _Component("List", "/components/list", LucideIcons.list),
-  _Component("List Demo", "/components/list-full-screen", LucideIcons.list),
-  _Component("Loader", "/components/loader", LucideIcons.loaderCircle),
-  _Component("Notification", "/components/notification", LucideIcons.bell),
-  _Component("Master detail", "/components/master-detail", LucideIcons.list),
-  _Component("Modal", "/components/modal", LucideIcons.messageSquare),
-  _Component("Orb", "/components/orb", LucideIcons.droplet),
-  _Component("Radio", "/components/radio", LucideIcons.circle),
-  _Component("Reactive Form", "/components/reactive_form", LucideIcons.signature),
-  _Component("Reveal", "/components/reveal", LucideIcons.eye),
-  _Component("Select", "/components/select", LucideIcons.arrowDown),
-  _Component("Slider", "/components/slider", LucideIcons.gitCommitHorizontal),
-  _Component("Submit", "/components/submit", LucideIcons.send),
-  _Component("Spring", "/components/spring", LucideIcons.shell),
-  _Component("Switch", "/components/switch", LucideIcons.betweenHorizontalStart),
-  _Component("Table", "/components/table", LucideIcons.grid3x3),
-  //_Component("Tabs", "/components/tabs", Icons.tab),
-  _Component("Tag", "/components/tag", LucideIcons.tag),
-  _Component("Toggle", "/components/toggle", Icons.toggle_on),
+  // Layout
+  _Component("Accordion", "/components/accordion", LucideIcons.listCollapse, ComponentCategory.layout),
+  _Component("Autospace", "/components/autospace", LucideIcons.alignVerticalDistributeCenter, ComponentCategory.layout),
+  _Component("Card", "/components/card", LucideIcons.square, ComponentCategory.layout),
+  _Component("Divider", "/components/divider", LucideIcons.minus, ComponentCategory.layout),
+  _Component("Drawer", "/components/drawer", LucideIcons.menu, ComponentCategory.layout),
+  _Component("Master detail", "/components/master-detail", LucideIcons.list, ComponentCategory.layout),
+  _Component("Spring", "/components/spring", LucideIcons.shell, ComponentCategory.layout),
+  _Component("List Item", "/components/list-item", LucideIcons.listTree, ComponentCategory.layout),
+  _Component("List Demo", "/components/list-full-screen", LucideIcons.list, ComponentCategory.layout),
+  _Component("Selectable List", "/components/selectable-list", LucideIcons.listCheck, ComponentCategory.layout),
+
+  // Form Elements
+  _Component("Checkbox", "/components/checkbox", LucideIcons.circleCheck, ComponentCategory.formElements),
+  _Component("Choose", "/components/choose", LucideIcons.textSelect, ComponentCategory.formElements),
+  _Component("Date/Time Picker", "/components/date-time-picker", LucideIcons.calendar, ComponentCategory.formElements),
+  _Component("Form", "/components/form", LucideIcons.penTool, ComponentCategory.formElements),
+  _Component("Input", "/components/input", LucideIcons.textCursorInput, ComponentCategory.formElements),
+  _Component("Radio", "/components/radio", LucideIcons.circle, ComponentCategory.formElements),
+  _Component("Reactive Form", "/components/reactive_form", LucideIcons.signature, ComponentCategory.formElements),
+  _Component("Select", "/components/select", LucideIcons.arrowDown, ComponentCategory.formElements),
+  _Component("Slider", "/components/slider", LucideIcons.gitCommitHorizontal, ComponentCategory.formElements),
+  _Component("Submit", "/components/submit", LucideIcons.send, ComponentCategory.formElements),
+  _Component("Switch", "/components/switch", LucideIcons.betweenHorizontalStart, ComponentCategory.formElements),
+  _Component("Toggle", "/components/toggle", Icons.toggle_on, ComponentCategory.formElements),
+
+  // Feedback & Indicators
+  _Component("Badge", "/components/badge", LucideIcons.tag, ComponentCategory.feedback),
+  _Component("Exception", "/components/exception", LucideIcons.circleAlert, ComponentCategory.feedback),
+  _Component("Hint", "/components/hint", LucideIcons.info, ComponentCategory.feedback),
+  _Component("Indicator", "/components/indicator", LucideIcons.circleAlert, ComponentCategory.feedback),
+  _Component("Loader", "/components/loader", LucideIcons.loaderCircle, ComponentCategory.feedback),
+  _Component("Notification", "/components/notification", LucideIcons.bell, ComponentCategory.feedback),
+  _Component("Reveal", "/components/reveal", LucideIcons.eye, ComponentCategory.feedback),
+
+  // Navigation & Interaction
+  _Component("Action Runner", "/components/action-runner", LucideIcons.tableOfContents, ComponentCategory.interaction),
+  _Component("Breadcrumb", "/components/breadcrumb", LucideIcons.arrowRight, ComponentCategory.interaction),
+  _Component("Button", "/components/button", LucideIcons.pointer, ComponentCategory.interaction),
+  _Component("Context Menu", "/components/context-menu", LucideIcons.squareMousePointer, ComponentCategory.interaction),
+  _Component("Modal", "/components/modal", LucideIcons.messageSquare, ComponentCategory.interaction),
+  _Component("Orb", "/components/orb", LucideIcons.droplet, ComponentCategory.interaction),
+
+  // Data Display
+  _Component("Icon", "/components/icon", LucideIcons.image, ComponentCategory.dataDisplay),
+  _Component("Table", "/components/table", LucideIcons.grid3x3, ComponentCategory.dataDisplay),
+  _Component("Tag", "/components/tag", LucideIcons.tag, ComponentCategory.dataDisplay),
 ];
 
 class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
@@ -81,13 +92,19 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
   late TextEditingController _search;
 
   final _fuzzy = Fuzzy<_Component>(components,
-      options: FuzzyOptions(keys: [
-        WeightedKey(
-          name: "title",
-          getter: (e) => e.title,
-          weight: 1,
-        ),
-      ]));
+      options: FuzzyOptions(
+        isCaseSensitive: false,
+        threshold: 0.3,
+        tokenSeparator: ",",
+        tokenize: true,
+        keys: [
+          WeightedKey(
+            name: "title",
+            getter: (e) => e.title,
+            weight: 1,
+          ),
+        ],
+      ));
 
   final ScrollController _scrollController = ScrollController();
 
@@ -129,21 +146,41 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
     setState(() {});
   }
 
-  void _onSearchChange(String query) {
-    if (query.trim().isEmpty) {
-      setState(() {
-        _componentsFiltered = components;
-      });
-      return;
-    }
+  void _onQueryChanged(String query) {
     setState(() {
-      _componentsFiltered = _fuzzy
-          .search(
-            query,
-          )
-          .map((e) => e.item)
-          .toList();
+      _componentsFiltered = _fuzzy.search(query).map((e) => e.item).toList();
     });
+  }
+
+  Widget _renderComponent(
+    BuildContext context,
+    _Component component,
+  ) {
+    final isActive = GoRouterState.of(context).uri.path.startsWith(component.route);
+
+    return LdDrawerItemSection(
+      active: isActive,
+      leading: Icon(component.icon),
+      onTap: () {
+        _showPage(context, component.route);
+      },
+      child: Text(component.title),
+    );
+  }
+
+  String _categoryTitle(ComponentCategory category) {
+    switch (category) {
+      case ComponentCategory.layout:
+        return "Layout";
+      case ComponentCategory.formElements:
+        return "Form Elements";
+      case ComponentCategory.feedback:
+        return "Feedback & Indicators";
+      case ComponentCategory.interaction:
+        return "Navigation & Interaction";
+      case ComponentCategory.dataDisplay:
+        return "Data Display";
+    }
   }
 
   @override
@@ -180,14 +217,16 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                         child: Image.asset("liquid_flutter_icon.jpg", width: 32, height: 32),
                       ),
                       ldSpacerS,
-                      const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Liquid Flutter",
-                          ),
-                          LdTextCaption(ldVersion)
-                        ],
+                      Expanded(
+                        child: const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Liquid Flutter",
+                            ),
+                            LdTextCaption(ldVersion)
+                          ],
+                        ),
                       ),
                     ],
                   ).padM(),
@@ -196,23 +235,43 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
               sliver: SliverPadding(
                 padding: LdTheme.of(context).pad(),
                 sliver: SliverList.list(key: const PageStorageKey('drawer_list_key'), children: [
-                  const ThemeSelector(),
-                  ldSpacerM,
-                  const SizeSelector(),
-                  ldSpacerM,
-                  const RadiusSelector(),
-                  ldSpacerM,
-                  const FontSelector(),
-                  ldSpacerM,
-                  const HeadlineFontSelector(),
+                  LdContextMenu(
+                      positionMode: LdContextPositionMode.relativeTrigger,
+                      builder: (context, shuttle, trigger) => Row(
+                            children: [
+                              LdButtonVague(
+                                  trailing: const Icon(LucideIcons.squareMousePointer),
+                                  onPressed: () {
+                                    trigger();
+                                  },
+                                  child: const Text("Theme")),
+                            ],
+                          ),
+                      menuBuilder: (context, openMenu) => SizedBox(
+                            height: 400,
+                            width: 300,
+                            child: SingleChildScrollView(
+                              child: LdAutoSpace(
+                                children: [
+                                  const ThemeSelector(),
+                                  ldSpacerM,
+                                  const SizeSelector(),
+                                  ldSpacerM,
+                                  const RadiusSelector(),
+                                  ldSpacerM,
+                                  const FontSelector(),
+                                  ldSpacerM,
+                                  const HeadlineFontSelector(),
+                                ],
+                              ).padL(),
+                            ),
+                          )),
                   ldSpacerM,
                   LdAutoSpace(children: [
-                    ldSpacerL,
                     LdDrawerItemSection(
                       active: GoRouterState.of(context).uri.path == "/",
                       leading: const Icon(LucideIcons.house),
                       onTap: () => _showPage(context, "/"),
-                      trailing: const Icon(LdIcons.arrow_right),
                       child: const Text("Home"),
                     ),
                     const LdSectionHeader("Demos"),
@@ -220,14 +279,12 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                       active: GoRouterState.of(context).uri.path == "/chemical",
                       leading: const Icon(LdIcons.beaker),
                       onTap: () => _showPage(context, "/chemical"),
-                      trailing: const Icon(LdIcons.arrow_right),
                       child: const Text("Magic"),
                     ),
                     LdDrawerItemSection(
                       active: GoRouterState.of(context).uri.path == "/task-demo",
                       leading: const Icon(LucideIcons.check),
                       onTap: () => _showPage(context, "/task-demo"),
-                      trailing: const Icon(LdIcons.arrow_right),
                       child: const Text("Task"),
                     ),
                     const LdSectionHeader("Documentation"),
@@ -235,28 +292,24 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                       active: GoRouterState.of(context).uri.path == "/theme",
                       leading: const Icon(LucideIcons.paintbrush),
                       onTap: () => _showPage(context, "/theme"),
-                      trailing: const Icon(LdIcons.arrow_right),
                       child: const Text("Theme"),
                     ),
                     LdDrawerItemSection(
                       active: GoRouterState.of(context).uri.path == "/layout",
                       leading: const Icon(LucideIcons.layoutDashboard),
                       onTap: () => _showPage(context, "/layout"),
-                      trailing: const Icon(LdIcons.arrow_right),
                       child: const Text("Layout"),
                     ),
                     LdDrawerItemSection(
                       active: GoRouterState.of(context).uri.path == "/radius",
                       leading: const Icon(LucideIcons.radius),
                       onTap: () => _showPage(context, "/radius"),
-                      trailing: const Icon(LdIcons.arrow_right),
                       child: const Text("Border Radius"),
                     ),
                     LdDrawerItemSection(
                       active: GoRouterState.of(context).uri.path == "/typography",
                       leading: const Icon(LucideIcons.text),
                       onTap: () => _showPage(context, "/typography"),
-                      trailing: const Icon(LdIcons.arrow_right),
                       child: const Text("Typography"),
                     ),
                     LdDrawerItemSection(
@@ -270,18 +323,21 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                       hint: "Search...",
                       controller: _search,
                       onChanged: (query) {
-                        _onSearchChange(query ?? "");
+                        if (query != null) {
+                          _onQueryChanged(query);
+                        }
                       },
                     ),
-                    ..._componentsFiltered.map(
-                      (e) => LdDrawerItemSection(
-                        active: GoRouterState.of(context).uri.path == e.route,
-                        leading: Icon(e.icon),
-                        //trailing: Icon(LdIcons.arrow_right),
-                        onTap: () => _showPage(context, e.route),
-                        child: Text(e.title),
-                      ),
-                    ),
+                    ...ComponentCategory.values.expand((category) {
+                      final categoryComponents = _componentsFiltered.where((c) => c.category == category).toList();
+                      if (categoryComponents.isEmpty) {
+                        return [];
+                      }
+                      return [
+                        LdSectionHeader(_categoryTitle(category)),
+                        ...categoryComponents.map((e) => _renderComponent(context, e)),
+                      ];
+                    }),
                     const LdDivider(),
                     LdDrawerItemSection(
                       onTap: () => launchUrl(Uri.parse("https://emd.design/imprint")),
@@ -305,170 +361,6 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
           ],
         ),
       ),
-    );
-  }
-}
-
-double defaultRadiusXs = 2.0;
-double defaultRadiusS = 4.0;
-double defaultRadiusM = 8.0;
-double defaultRadiusL = 16.0;
-
-double sharpRadius = 0.0;
-
-double roundedRadiusXs = 4.0;
-double roundedRadiusS = 8.0;
-double roundedRadiusM = 16.0;
-double roundedRadiusL = 32.0;
-
-enum RadiusMode {
-  sharp,
-  standard,
-  rounded,
-}
-
-class RadiusSelector extends StatefulWidget {
-  const RadiusSelector({super.key});
-
-  @override
-  State<RadiusSelector> createState() => _RadiusSelectorState();
-}
-
-class _RadiusSelectorState extends State<RadiusSelector> {
-  RadiusMode _mode = RadiusMode.standard;
-
-  @override
-  Widget build(BuildContext context) {
-    return LdSwitch<RadiusMode>(
-        label: "Radius Mode",
-        onChanged: (p0) {
-          final theme = LdTheme.of(context);
-
-          switch (p0) {
-            case RadiusMode.sharp:
-              theme.sizingConfig = LdSizingConfig(
-                radiusXS: sharpRadius,
-                radiusS: sharpRadius,
-                radiusM: sharpRadius,
-                radiusL: sharpRadius,
-              );
-              break;
-            case RadiusMode.standard:
-              theme.sizingConfig = LdSizingConfig(
-                radiusXS: defaultRadiusXs,
-                radiusS: defaultRadiusS,
-                radiusM: defaultRadiusM,
-                radiusL: defaultRadiusL,
-              );
-              break;
-            case RadiusMode.rounded:
-              theme.sizingConfig = LdSizingConfig(
-                radiusXS: roundedRadiusXs,
-                radiusS: roundedRadiusS,
-                radiusM: roundedRadiusM,
-                radiusL: roundedRadiusL,
-              );
-              break;
-          }
-          setState(() {
-            _mode = p0;
-          });
-        },
-        children: const {
-          RadiusMode.sharp: Text("Sharp", maxLines: 1),
-          RadiusMode.standard: Text("Standard", maxLines: 1),
-          RadiusMode.rounded: Text("Rounded", maxLines: 1),
-        },
-        value: _mode);
-  }
-}
-
-class FontSelector extends StatefulWidget {
-  const FontSelector({super.key});
-
-  @override
-  State<FontSelector> createState() => _FontSelectorState();
-}
-
-class _FontSelectorState extends State<FontSelector> {
-  String _family = "Lato";
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = LdTheme.of(context);
-    return LdChoose<String>(
-      label: "Font family",
-      mode: LdChooseMode.modal,
-      items: GoogleFonts.asMap().keys.map(
-            (font) => LdSelectItem(
-              value: font,
-              child: Text(font),
-            ),
-          ),
-      onChange: (p0) async {
-        final font = GoogleFonts.getFont(p0.first);
-
-        await GoogleFonts.pendingFonts();
-
-        // ignore: use_build_context_synchronously
-        LdNotificationsController.of(context).success(
-          "Font changed to ${p0.first}",
-        );
-
-        theme.fontFamily = font.fontFamily!;
-
-        theme.fontFamilyPackage = null;
-
-        setState(() {
-          _family = p0.first;
-        });
-      },
-      value: {_family},
-    );
-  }
-}
-
-class HeadlineFontSelector extends StatefulWidget {
-  const HeadlineFontSelector({super.key});
-
-  @override
-  State<HeadlineFontSelector> createState() => _HeadlineFontSelectorState();
-}
-
-class _HeadlineFontSelectorState extends State<HeadlineFontSelector> {
-  String _family = "Lato";
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = LdTheme.of(context);
-    return LdChoose<String>(
-      mode: LdChooseMode.modal,
-      label: "Headline font family",
-      items: GoogleFonts.asMap().entries.map(
-            (entry) => LdSelectItem(
-              value: entry.key,
-              child: Text(entry.key),
-            ),
-          ),
-      onChange: (p0) async {
-        final font = GoogleFonts.getFont(p0.first);
-
-        await GoogleFonts.pendingFonts();
-
-        // ignore: use_build_context_synchronously
-        LdNotificationsController.of(context).success(
-          "Font changed to ${p0.first}",
-        );
-
-        theme.headlineFontFamily = font.fontFamily!;
-
-        theme.fontFamilyPackage = null;
-
-        setState(() {
-          _family = p0.first;
-        });
-      },
-      value: {_family},
     );
   }
 }

@@ -43,6 +43,12 @@ class _CheckboxDemoState extends State<CheckboxDemo> {
                           label: "Checkbox $e",
                           checked: true,
                         ),
+                        LdCheckbox(
+                          size: e,
+                          label: "Checkbox $e",
+                          checked: true,
+                          disabled: true,
+                        ),
                       ],
                     ),
                   ),

@@ -24,8 +24,6 @@ class _DemoCodeDialogState extends State<DemoCodeDialog> {
 
   void prepareHighlighter() async {
     await Highlighter.initialize(['dart']);
-
-    _theme = await HighlighterTheme.loadLightTheme();
     _themeDark = await HighlighterTheme.loadDarkTheme();
     setState(() {});
   }
@@ -38,7 +36,7 @@ class _DemoCodeDialogState extends State<DemoCodeDialog> {
 
     final highlighter = Highlighter(
       language: 'dart',
-      theme: LdTheme.of(context).isDark ? _themeDark! : _theme!,
+      theme: _themeDark!,
     );
 
     var highlightedCode = highlighter.highlight(widget.demoCode);
@@ -57,12 +55,13 @@ class _DemoCodeDialogState extends State<DemoCodeDialog> {
           focusNode: FocusNode(),
           selectionControls: MaterialTextSelectionControls(),
           child: Container(
-            color: LdTheme.of(context).surface,
+            color: shadZinc.shades.last,
             child: SingleChildScrollView(
                 child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text.rich(
                 highlightedCode,
+                style: TextStyle(color: Colors.white),
               ),
             )),
           ),

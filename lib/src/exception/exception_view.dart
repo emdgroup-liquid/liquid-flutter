@@ -117,8 +117,7 @@ class LdExceptionView extends StatelessWidget {
     return LdAutoSpace(
       children: [
         LdHint(
-          child: Text(exception?.message ??
-              LiquidLocalizations.of(context).unknownError),
+          child: Text(exception?.message ?? LiquidLocalizations.of(context).unknownError),
           type: exception?.type ?? LdHintType.error,
         ),
         Row(
@@ -172,26 +171,22 @@ class LdExceptionView extends StatelessWidget {
     return StreamBuilder<LdRetryState>(
         stream: controller?.stateStream ?? const Stream.empty(),
         builder: (context, snapshot) {
-          return LdAutoSpace(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                LdModalBuilder(
-                  useRootNavigator: true,
-                  modal: LdModal(
-                    size: LdSize.xs,
-                    modalContent: (context) => LdExceptionDialog(
-                      error: exception,
-                    ),
-                  ),
-                  builder: (context, open) => switch (direction) {
-                    (Axis.horizontal) =>
-                      _buildHorizontal(context, open, controller),
-                    (Axis.vertical) =>
-                      _buildVertical(context, open, controller),
-                  },
+          return LdAutoSpace(crossAxisAlignment: CrossAxisAlignment.center, children: [
+            LdModalBuilder(
+              useRootNavigator: true,
+              modal: LdModal(
+                size: LdSize.xs,
+                modalContent: (context) => LdExceptionDialog(
+                  error: exception!,
                 ),
-                _buildRetryIndicator(context, controller),
-              ]);
+              ),
+              builder: (context, open) => switch (direction) {
+                (Axis.horizontal) => _buildHorizontal(context, open, controller),
+                (Axis.vertical) => _buildVertical(context, open, controller),
+              },
+            ),
+            _buildRetryIndicator(context, controller),
+          ]);
         });
   }
 }

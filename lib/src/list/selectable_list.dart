@@ -25,10 +25,13 @@ class LdSelectableList<T, GroupingCriterion> extends StatefulWidget {
 
   final LdPaginator<T> paginator;
 
+  final void Function(Set<T> selectedItems)? onSelectionChange;
+
   const LdSelectableList({
     super.key,
     required this.itemBuilder,
     required this.listBuilder,
+    this.onSelectionChange,
     this.multiSelect = false,
     required this.paginator,
   });
@@ -73,45 +76,73 @@ class _LdSelectableListState<T, GroupingCriterion> extends State<LdSelectableLis
   bool get isMultiSelect => widget.multiSelect;
 
   bool isSelected(T item) {
-    return selectedItems.contains(item);
+    return selectedItems.contains(item) || _dragRectItems.contains(item);
+  }
+
+  void _addToSelection(T item) {
+    if (isMultiSelect) {
+      selectedItems.add(item);
+    } else {
+      selectedItems = {item};
+    }
+    notifyListeners();
+    widget.onSelectionChange?.call(selectedItems);
+  }
+
+  void _removeFromSelection(T item) {
+    selectedItems.remove(item);
+    notifyListeners();
+    widget.onSelectionChange?.call(selectedItems);
+  }
+
+  void _clearSelection() {
+    selectedItems.clear();
+    notifyListeners();
+    widget.onSelectionChange?.call(selectedItems);
+  }
+
+  void _addMultipleToSelection(Set<T> items) {
+    if (isMultiSelect) {
+      selectedItems.addAll(items);
+      notifyListeners();
+      widget.onSelectionChange?.call(selectedItems);
+    } else {
+      selectedItems = {items.first};
+      notifyListeners();
+      widget.onSelectionChange?.call(selectedItems);
+    }
+  }
+
+  void _toggleItem(T item) {
+    if (selectedItems.contains(item)) {
+      _removeFromSelection(item);
+    } else {
+      _addToSelection(item);
+    }
   }
 
   void onTap(T item) {
     if (!isMultiSelect) {
-      if (selectedItems.contains(item)) {
-        selectedItems.remove(item);
-      } else {
-        selectedItems = {item};
-      }
-      notifyListeners();
+      _toggleItem(item);
       return;
     }
 
-    if (selectedItems.isEmpty) {
-      selectedItems.add(item);
-    } else {
-      if (_shiftPressed) {
-        final index = widget.paginator.items.indexOf(item);
-        final startIndex = widget.paginator.items.indexOf(selectedItems.last);
+    if (_shiftPressed) {
+      final index = widget.paginator.items.indexOf(item);
+      final startIndex = widget.paginator.items.indexOf(selectedItems.last);
 
-        for (var i = min(startIndex, index); i <= max(startIndex, index); i++) {
-          final item = widget.paginator.items[i];
-          if (item != null) {
-            selectedItems.add(item);
-          }
+      for (var i = min(startIndex, index); i <= max(startIndex, index); i++) {
+        final item = widget.paginator.items[i];
+        if (item != null) {
+          _addToSelection(item);
         }
-      } else if (_ctrlPressed) {
-        if (selectedItems.contains(item)) {
-          selectedItems.remove(item);
-        } else {
-          selectedItems.add(item);
-        }
-      } else {
-        selectedItems = {item};
       }
+    } else if (_ctrlPressed) {
+      _toggleItem(item);
+    } else {
+      _clearSelection();
+      _addToSelection(item);
     }
-
-    notifyListeners();
   }
 
   Rect? _dragRect() {
@@ -159,16 +190,16 @@ class _LdSelectableListState<T, GroupingCriterion> extends State<LdSelectableLis
             }
           }
         } else {
-          selectedItems.add(item);
+          _addToSelection(item);
         }
       } else {
-        selectedItems.remove(item);
+        _removeFromSelection(item);
       }
     } else {
       if (selected) {
-        selectedItems = {item};
+        _addToSelection(item);
       } else {
-        selectedItems.clear();
+        _clearSelection();
       }
     }
 
@@ -177,6 +208,35 @@ class _LdSelectableListState<T, GroupingCriterion> extends State<LdSelectableLis
 
   void clearSelection() {
     selectedItems.clear();
+    notifyListeners();
+  }
+
+  final Set<T> _dragRectItems = {};
+
+  void _onUpdateDragRect() {
+    for (final item in _itemKeys.entries) {
+      final box = item.value.currentContext?.findRenderObject() as RenderBox?;
+
+      if (box == null) continue;
+
+      final globalRect = box.localToGlobal(Offset.zero);
+
+      final rect = Rect.fromLTWH(
+        globalRect.dx,
+        globalRect.dy,
+        box.size.width,
+        box.size.height,
+      );
+
+      if (_isWithinDragRect(rect)) {
+        _dragRectItems.add(item.key);
+      } else {
+        _dragRectItems.remove(item.key);
+      }
+    }
+
+    setState(() {});
+
     notifyListeners();
   }
 
@@ -209,52 +269,87 @@ class _LdSelectableListState<T, GroupingCriterion> extends State<LdSelectableLis
         );
       },
       child: GestureDetector(
-        onPanStart: (details) {
+        onLongPressStart: (details) {
+          if (!isMultiSelect) {
+            return;
+          }
+
+          _dragRectItems.clear();
           _dragStartOffset = details.globalPosition;
           _overlayPortalController.show();
           _dragEndOffset = null;
+          notifyListeners();
         },
-        onPanUpdate: (details) {
+        onLongPressEnd: (details) {
+          if (!isMultiSelect) {
+            return;
+          }
+          _dragEndOffset = null;
+          _overlayPortalController.hide();
+          _dragStartOffset = null;
+
+          if (_ctrlPressed) {
+            selectedItems.addAll(_dragRectItems);
+          } else {
+            selectedItems.clear();
+            selectedItems.addAll(_dragRectItems);
+          }
+          _dragRectItems.clear();
+          notifyListeners();
+        },
+        onLongPressMoveUpdate: (details) {
+          if (!isMultiSelect) {
+            return;
+          }
           _dragEndOffset = details.globalPosition;
-
-          // Check if we are close to the bottom of the list
-
-          for (final item in _itemKeys.entries) {
-            final box = item.value.currentContext?.findRenderObject() as RenderBox?;
-
-            if (box == null) continue;
-
-            final globalRect = box.localToGlobal(Offset.zero);
-
-            final rect = Rect.fromLTWH(
-              globalRect.dx,
-              globalRect.dy,
-              box.size.width,
-              box.size.height,
-            );
-
-            if (_isWithinDragRect(rect)) {
-              selectedItems.add(item.key);
-            } else {
-              selectedItems.remove(item.key);
-            }
+          _onUpdateDragRect();
+          notifyListeners();
+        },
+        onPanStart: (details) {
+          if (!isMultiSelect) {
+            return;
           }
 
-          setState(() {});
+          _dragRectItems.clear();
+          _dragStartOffset = details.globalPosition;
+          _overlayPortalController.show();
+          _dragEndOffset = null;
+          notifyListeners();
+        },
+        onPanUpdate: (details) {
+          if (!isMultiSelect) {
+            return;
+          }
+
+          _dragEndOffset = details.globalPosition;
+          _onUpdateDragRect();
         },
         onPanCancel: () {
           if (_dragStartOffset != null) {
             _dragEndOffset = null;
             _overlayPortalController.hide();
             _dragStartOffset = null;
-            selectedItems.clear();
+            _dragRectItems.clear();
             notifyListeners();
           }
         },
         onPanEnd: (details) {
+          if (!isMultiSelect) {
+            return;
+          }
+
           _dragEndOffset = null;
           _overlayPortalController.hide();
           _dragStartOffset = null;
+
+          if (_ctrlPressed) {
+            selectedItems.addAll(_dragRectItems);
+          } else {
+            selectedItems.clear();
+            selectedItems.addAll(_dragRectItems);
+          }
+          _dragRectItems.clear();
+          notifyListeners();
         },
         child: KeyboardListener(
           focusNode: _focusNode,
@@ -277,7 +372,7 @@ class _LdSelectableListState<T, GroupingCriterion> extends State<LdSelectableLis
 
             return AnimatedBuilder(
                 animation: this,
-                key: _itemKeys[index],
+                key: _itemKeys[item],
                 builder: (context, child) {
                   return widget.itemBuilder(
                     context: context,
@@ -285,7 +380,10 @@ class _LdSelectableListState<T, GroupingCriterion> extends State<LdSelectableLis
                     index: index,
                     selected: isSelected(item),
                     isMultiSelect: isMultiSelect,
-                    onSelectionChange: (selected) => onSelectionChange(item, selected),
+                    onSelectionChange: (selected) => onSelectionChange(
+                      item,
+                      selected,
+                    ),
                     onTap: () => onTap(item),
                   );
                 });

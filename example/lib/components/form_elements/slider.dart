@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-import 'component_page.dart';
-import 'component_well/component_well.dart';
+import '../component_page.dart';
+import '../component_well/component_well.dart';
 
 class LdSliderDemo extends StatefulWidget {
   const LdSliderDemo({super.key});
@@ -29,9 +29,7 @@ class _LdSliderDemoState extends State<LdSliderDemo> {
                   disabled: _disabled,
                   onSlideComplete: () {
                     LdNotificationsController.of(context).addNotification(
-                      LdNotification(
-                          message: "You slid the slider!",
-                          type: LdNotificationType.info),
+                      LdNotification(message: "You slid the slider!", type: LdNotificationType.info),
                     );
                   },
                 ),
@@ -43,9 +41,7 @@ class _LdSliderDemoState extends State<LdSliderDemo> {
                   color: LdTheme.of(context).palette.error,
                   onSlideComplete: () {
                     LdNotificationsController.of(context).addNotification(
-                      LdNotification(
-                          message: "You slid the slider!",
-                          type: LdNotificationType.info),
+                      LdNotification(message: "You slid the slider!", type: LdNotificationType.info),
                     );
                   },
                 )

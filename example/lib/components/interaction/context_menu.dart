@@ -64,7 +64,12 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
                       ),
                       child: _buildMenu(context, onDismiss));
                 },
-                builder: (context, shuttle) => LdListItem(
+                builder: (
+                  context,
+                  shuttle,
+                  trigger,
+                ) =>
+                    LdListItem(
                   borderRadius: LdTheme.of(context).radius(LdSize.m),
                   width: double.infinity,
                   leading: const LdAvatar(
@@ -87,7 +92,12 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
                         child: _buildMenu(context, onDismiss),
                       );
                     },
-                    builder: (context, shuttle) => LdButton(
+                    builder: (
+                      context,
+                      shuttle,
+                      trigger,
+                    ) =>
+                        LdButton(
                       onPressed: () {},
                       child: const Text("Right click me"),
                     ),

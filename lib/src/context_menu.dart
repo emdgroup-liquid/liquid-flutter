@@ -63,9 +63,12 @@ class LdContextMenu extends StatefulWidget {
   final LdContextZoomMode zoomMode;
   final LdContextPositionMode positionMode;
 
-  final Widget Function(BuildContext context, bool isShuttle) builder;
+  final Widget Function(BuildContext context, bool isShuttle, VoidCallback trigger) builder;
 
-  final Widget Function(BuildContext context, VoidCallback onDismiss) menuBuilder;
+  final Widget Function(
+    BuildContext context,
+    VoidCallback onDismiss,
+  ) menuBuilder;
 
   @override
   State<LdContextMenu> createState() => _LdContextMenuState();
@@ -161,7 +164,7 @@ class _LdContextMenuState extends State<LdContextMenu> {
     return Offset.zero;
   }
 
-  void _open(BuildContext context, {Offset? globalPosition}) async {
+  void _open({Offset? globalPosition}) async {
     _cursorPosition = globalPosition;
 
     _triggerBox = _triggerKey.currentContext?.findRenderObject() as RenderBox?;
@@ -176,16 +179,16 @@ class _LdContextMenuState extends State<LdContextMenu> {
     return GestureDetector(
       key: _triggerKey,
       onSecondaryTapDown: (details) {
-        _open(context, globalPosition: details.globalPosition);
+        _open(globalPosition: details.globalPosition);
       },
       onLongPressStart: (details) {
         if (!_mobile) {
           return;
         }
         HapticFeedback.heavyImpact();
-        _open(context, globalPosition: details.globalPosition);
+        _open(globalPosition: details.globalPosition);
       },
-      child: widget.builder(context, false),
+      child: widget.builder(context, false, _open),
     );
   }
 
@@ -277,7 +280,7 @@ class _LdContextMenuState extends State<LdContextMenu> {
                       top: _triggerBox!.localToGlobal(Offset.zero).dy,
                       width: _triggerBox!.size.width,
                       height: _triggerBox!.size.height,
-                      child: _buildZoom(context, widget.builder(context, true)),
+                      child: _buildZoom(context, widget.builder(context, true, _open)),
                     ),
                 ],
                 ModalBarrier(

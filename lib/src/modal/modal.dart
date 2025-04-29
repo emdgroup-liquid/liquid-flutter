@@ -276,10 +276,9 @@ class LdModal {
 
     return [
       SliverWoltModalSheetPage(
-        backgroundColor: theme.background,
-        surfaceTintColor: theme.background,
-        sabGradientColor: theme.surface,
-        hasSabGradient: hasSabGradient(context),
+        backgroundColor: theme.surface,
+        hasSabGradient: false,
+        surfaceTintColor: theme.surface,
         stickyActionBar: _getStickyActionBar(context, sizeNotifier),
         mainContentSliversBuilder: (context) => [
           SliverStickyHeader.builder(
@@ -287,7 +286,7 @@ class LdModal {
               builder: (context, state) => Container(
                     padding: _navigationBarPadding(context),
                     decoration: BoxDecoration(
-                      color: title != null ? theme.background : null,
+                      color: title != null ? theme.surface : null,
                       border: title != null
                           ? Border(
                               bottom: BorderSide(
@@ -317,7 +316,7 @@ class LdModal {
                   ),
               sliver: SliverToBoxAdapter(
                 child: LdAutoBackground(
-                    invert: false,
+                    isSurface: false,
                     child: _getInjectables(
                       context,
                       (context) => ValueListenableBuilder<Size>(
@@ -367,17 +366,18 @@ class LdModal {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (!hasSabGradient(context))
+            if (!hasSabGradient(context)) ...[
               const LdDivider(
                 height: 1,
               ),
-            Container(
-              color: theme.surface,
-              padding: sabPadding,
-              child: Builder(builder: (context) {
-                return actionBar!(context);
-              }),
-            ),
+              Padding(padding: sabPadding, child: actionBar!(context))
+            ] else
+              _LdActionBarGradient(
+                child: Padding(
+                  padding: sabPadding,
+                  child: actionBar!(context),
+                ),
+              ),
           ],
         ),
       ),
@@ -470,5 +470,29 @@ class LdModal {
     }
 
     return res;
+  }
+}
+
+class _LdActionBarGradient extends StatelessWidget {
+  const _LdActionBarGradient({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = LdTheme.of(context, listen: true);
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.background,
+        boxShadow: [
+          BoxShadow(
+            color: theme.background.withAlpha(100),
+            blurRadius: 10,
+            offset: const Offset(0, -10),
+          ),
+        ],
+      ),
+      child: child,
+    );
   }
 }

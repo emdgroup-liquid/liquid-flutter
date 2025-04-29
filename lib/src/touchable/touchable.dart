@@ -95,11 +95,7 @@ LdColorBundle touchableColor(
           );
         }
 
-        return LdColorBundle(
-          surface: Colors.transparent,
-          text: foreground,
-          border: foreground,
-        );
+        return LdColorBundle(surface: Colors.transparent, text: foreground, border: foreground);
       }
     }
 
@@ -152,13 +148,13 @@ LdColorBundle touchableColor(
     if (active) {
       return LdColorBundle(
         surface: disabledColor.active(theme.isDark),
-        text: disabledColor.contrastingText(disabledColor.active(theme.isDark)),
+        text: disabledColor.contrastingText(disabledColor.active(theme.isDark)).withAlpha(disabledAlpha),
         border: Colors.transparent,
       );
     }
     return LdColorBundle(
       surface: disabledColor.idle(theme.isDark),
-      text: disabledColor.contrastingText(disabledColor.idle(theme.isDark)),
+      text: disabledColor.contrastingText(disabledColor.idle(theme.isDark)).withAlpha(disabledAlpha),
       border: Colors.transparent,
     );
   }
@@ -206,8 +202,7 @@ class LdTouchableSurface extends StatefulWidget {
 
   final FocusNode? focusNode;
   final Function() onTap;
-  final Widget Function(BuildContext contxt, LdColorBundle colorBundle,
-      LdTouchableStatus status) builder;
+  final Widget Function(BuildContext contxt, LdColorBundle colorBundle, LdTouchableStatus status) builder;
   const LdTouchableSurface({
     super.key,
     required this.onTap,
@@ -231,10 +226,15 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
 
   @override
   void initState() {
-    assert(widget.color != null ||
-        widget.mode == LdTouchableSurfaceMode.neutralGhost);
+    assert(widget.color != null || widget.mode == LdTouchableSurfaceMode.neutralGhost);
     _hasFocus = widget.focusNode?.hasFocus ?? false;
     super.initState();
+  }
+
+  void _safeSetState(VoidCallback fn) {
+    if (mounted) {
+      setState(fn);
+    }
   }
 
   bool get active => !widget.disabled && (_pressed || widget.active);
@@ -275,8 +275,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
       },
       onKeyEvent: (node, event) {
         if (event is KeyDownEvent && widget.disabled == false) {
-          if (event.logicalKey == LogicalKeyboardKey.enter ||
-              event.logicalKey == LogicalKeyboardKey.space) {
+          if (event.logicalKey == LogicalKeyboardKey.enter || event.logicalKey == LogicalKeyboardKey.space) {
             widget.onTap();
             return KeyEventResult.handled;
           }
@@ -285,27 +284,25 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
       },
       child: Builder(builder: (context) {
         return MouseRegion(
-          cursor: (widget.disabled)
-              ? SystemMouseCursors.basic
-              : SystemMouseCursors.click,
+          cursor: (widget.disabled) ? SystemMouseCursors.basic : SystemMouseCursors.click,
           onEnter: (event) {
-            setState(() {
+            _safeSetState(() {
               _hovering = true;
             });
           },
           onExit: (event) {
-            setState(() {
+            _safeSetState(() {
               _hovering = false;
             });
           },
           child: Listener(
-            onPointerDown: (_) => setState(() {
+            onPointerDown: (_) => _safeSetState(() {
               _pressed = true;
             }),
-            onPointerUp: (_) => setState(() {
+            onPointerUp: (_) => _safeSetState(() {
               _pressed = false;
             }),
-            onPointerCancel: (_) => setState(() {
+            onPointerCancel: (_) => _safeSetState(() {
               _pressed = false;
             }),
             child: GestureDetector(

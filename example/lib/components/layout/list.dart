@@ -105,8 +105,7 @@ class _ListDemoState extends State<ListDemo> {
                   ),
                   paginator: _paginator,
                   assumedItemHeight: _assumeItemHeight ? 50 : null,
-                  groupingCriterion:
-                      _enableGrouping ? (item) => item ~/ 10 : null,
+                  groupingCriterion: _enableGrouping ? (item) => item ~/ 10 : null,
                   groupHeaderBuilder: _enableGrouping
                       ? (context, remainder) => LdListSeperator(
                             onSurface: _onSurface,
@@ -200,8 +199,7 @@ class _ListDemoState extends State<ListDemo> {
               children: [
                 LdToggle(
                     checked: _assumeItemHeight,
-                    label:
-                        "Assume item height (by passing the assumedItemHeight parameter). ",
+                    label: "Assume item height (by passing the assumedItemHeight parameter). ",
                     onChanged: (value) {
                       setState(() {
                         _assumeItemHeight = value;
@@ -217,8 +215,7 @@ class _ListDemoState extends State<ListDemo> {
               children: [
                 LdToggle(
                     checked: _enableGrouping,
-                    label:
-                        "Enable grouping (by passing the groupingCriterion parameter and a seperatorBuilder)",
+                    label: "Enable grouping (by passing the groupingCriterion parameter and a seperatorBuilder)",
                     onChanged: (value) {
                       setState(() {
                         _enableGrouping = value;
@@ -228,128 +225,7 @@ class _ListDemoState extends State<ListDemo> {
             ),
           ),
           LdBundle(
-            children: [
-              const LdTextH("LdSelectableList"),
-              SizedBox(
-                height: 500,
-                child: LdSelectableList<int, void>(
-                  multiSelect: true,
-                  paginator: _paginator,
-                  listBuilder: (context, scrollController, itemBuilder) {
-                    return LdList<int, void>(
-                      scrollController: scrollController,
-                      paginator: _paginator,
-                      itemBuilder: itemBuilder,
-                    );
-                  },
-                  itemBuilder: ({
-                    required BuildContext context,
-                    required int item,
-                    required int index,
-                    required bool selected,
-                    required bool isMultiSelect,
-                    required void Function(bool selected) onSelectionChange,
-                    required VoidCallback onTap,
-                  }) {
-                    return LdListItem(
-                      active: selected,
-                      isSelected: selected,
-                      showSelectionControls: isMultiSelect,
-                      onSelectionChange: onSelectionChange,
-                      onTap: onTap,
-                      title: Text(item.toString()),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-          LdBundle(
-            children: [
-              const LdTextH("LdListItem"),
-              ComponentWell(
-                onSurface: _onSurface,
-                padding: EdgeInsets.zero,
-                child: Column(
-                  children: [
-                    LdListItem(
-                      showSelectionControls: _showSelectionControls,
-                      trailingForward: true,
-                      isSelected: _selectedItems.contains(0),
-                      onSelectionChange: (selected) => _selectItem(0),
-                      leading: const LdAvatar(
-                        child: Text("A"),
-                      ),
-                      title: const Text("Liquid Flutter List"),
-                      subtitle: const Text("This is a subtitle"),
-                    ),
-                    const LdDivider(
-                      height: 1,
-                    ),
-                    LdListItem(
-                      showSelectionControls: _showSelectionControls,
-                      tradeLeadingForSelectionControl: true,
-                      isSelected: _selectedItems.contains(1),
-                      onSelectionChange: (selected) => _selectItem(1),
-                      leading: const LdAvatar(
-                        child: Text("B"),
-                      ),
-                      onTap: () {
-                        LdNotificationsController.of(context).addNotification(
-                          LdNotification(
-                              message: "You pressed the list item",
-                              type: LdNotificationType.success),
-                        );
-                      },
-                      title: const Text("Press me"),
-                      subtitle: const Text(
-                          "I will  trade leading for selection control"),
-                    ),
-                    LdListSeperator(
-                      onSurface: _onSurface,
-                      child: const Text("This is a separator"),
-                    ),
-                    LdListItem(
-                      disabled: true,
-                      showSelectionControls: _showSelectionControls,
-                      isSelected: _selectedItems.contains(2),
-                      trailing: const LdTag(
-                        child: Text("Hyper hyper"),
-                      ),
-                      onSelectionChange: (selected) => _selectItem(2),
-                      leading: const LdAvatar(
-                        child: Text("C"),
-                      ),
-                      title: const Text("Press me"),
-                      subtitle: const Text("This is another subtitle"),
-                    ),
-                    LdListItem(
-                      leading: const LdAvatar(
-                        child: Text("D"),
-                      ),
-                      showSelectionControls: _showSelectionControls,
-                      radioSelection: true,
-                      isSelected: _selectedItems.contains(3),
-                      onSelectionChange: (selected) => _selectItem(3),
-                      title: const Text("Very Good Option"),
-                      subtitle: const Text("This is another subtitle"),
-                    )
-                  ],
-                ),
-              ),
-              ldSpacerM,
-              Row(
-                children: [
-                  Expanded(
-                    child: LdToggle(
-                      label: "Show selection controls",
-                      checked: _showSelectionControls,
-                      onChanged: _setSelectionControls,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            children: [],
           ),
           ldSpacerM,
           const LdDivider(),
@@ -379,9 +255,7 @@ class _ListDemoState extends State<ListDemo> {
                   child: LdListEmpty(
                     onRefresh: () {
                       LdNotificationsController.of(context).addNotification(
-                        LdNotification(
-                            message: "Refreshed",
-                            type: LdNotificationType.success),
+                        LdNotification(message: "Refreshed", type: LdNotificationType.success),
                       );
                     },
                   ))),

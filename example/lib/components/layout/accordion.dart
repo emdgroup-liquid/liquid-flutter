@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-import 'component_well/component_well.dart';
+import '../component_well/component_well.dart';
 
 class AccordionDemo extends StatefulWidget {
   const AccordionDemo({super.key});
@@ -58,12 +58,14 @@ class _AccordionDemoState extends State<AccordionDemo> {
               child: Column(
                 children: [
                   const LdDivider(),
-                  LdAccordion.fromList([
-                    LdAccordionItem(
-                        child:
-                            const Text("This is some content in an accordion"),
-                        header: const Text("Header")),
-                  ]),
+                  LdAccordion.fromList(
+                    [
+                      LdAccordionItem(
+                        child: const Text("This is some content in an accordion"),
+                        header: const Text("Header"),
+                      ),
+                    ],
+                  ),
                   const LdDivider(),
                 ],
               ),
@@ -78,23 +80,15 @@ class _AccordionDemoState extends State<AccordionDemo> {
                   ),
                   if (!_elevate) ...[
                     LdCard(padding: EdgeInsets.zero, child: accordion),
-                    const LdTextL(
-                        "Accordion is placed inside an LdCard with no padding")
+                    const LdTextL("Accordion is placed inside an LdCard with no padding")
                   ] else
                     accordion
                 ],
               ),
             ),
-            LdToggle(
-                label: "Allow multiple open",
-                checked: _allowMultiple,
-                onChanged: _toggleAllowMultiple),
-            LdToggle(
-                label: "Elevate", checked: _elevate, onChanged: _toggleElevate),
-            LdToggle(
-                label: "On Surface background",
-                checked: _onSurface,
-                onChanged: _toggleOnSurface)
+            LdToggle(label: "Allow multiple open", checked: _allowMultiple, onChanged: _toggleAllowMultiple),
+            LdToggle(label: "Elevate", checked: _elevate, onChanged: _toggleElevate),
+            LdToggle(label: "On Surface background", checked: _onSurface, onChanged: _toggleOnSurface)
           ],
         ));
   }

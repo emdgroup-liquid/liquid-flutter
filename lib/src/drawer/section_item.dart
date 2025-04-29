@@ -57,7 +57,7 @@ class _LdDrawerItemSectionState extends State<LdDrawerItemSection> {
     if (widget.trailing != null) {
       return widget.trailing!;
     }
-    if (widget.children != null) {
+    if (widget.children != null && widget.children!.isNotEmpty) {
       return AnimatedRotation(
           child: const Icon(LucideIcons.chevronRight),
           duration: const Duration(milliseconds: 200),
@@ -122,20 +122,30 @@ class _LdDrawerItemSectionState extends State<LdDrawerItemSection> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.children != null) {
+    if (widget.children != null && widget.children!.isNotEmpty) {
       return Column(
         children: [
           buildItem(context),
-          Padding(
-            padding: const EdgeInsets.only(left: 16.0),
-            child: LdCollapse(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: LdAutoSpace(
-                    children: widget.children!,
-                  ),
+          LdCollapse(
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  left: BorderSide(color: _theme.border),
                 ),
-                collapsed: !_isExpanded),
+              ),
+              margin: const EdgeInsets.only(
+                left: 8.0,
+                top: 4,
+              ),
+              padding: const EdgeInsets.only(left: 8.0, top: 4),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 4.0),
+                child: LdAutoSpace(
+                  children: widget.children!,
+                ),
+              ),
+            ),
+            collapsed: !_isExpanded,
           )
         ],
       );
