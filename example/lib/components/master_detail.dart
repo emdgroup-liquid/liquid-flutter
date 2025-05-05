@@ -104,7 +104,9 @@ class MasterDetailDemo extends StatefulWidget {
 }
 
 class _MasterDetailDemoState extends State<MasterDetailDemo> {
+  /// The repository used for the "crud" master detail demo list.
   final ExampleRepository _crudRepository = ExampleRepository();
+
   Future<LdListPage<ExampleItem>> _fetchItems({
     required int offset,
     required int pageSize,
@@ -121,6 +123,9 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
       total: 200,
     );
   }
+
+  /// The paginator used for the "normal" master detail demo list.
+  late final _paginator = LdPaginator(fetchListFunction: _fetchItems);
 
   MasterDetailLayoutMode _layoutMode = MasterDetailLayoutMode.split;
   MasterDetailPresentationMode _presentationMode =
@@ -197,7 +202,7 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
                 ).padL(),
                 buildMaster: (context, openItem, isSeparatePage, controller) =>
                     LdList<ExampleItem, void>(
-                  data: LdPaginator(fetchListFunction: _fetchItems),
+                  data: _paginator,
                   assumedItemHeight: 60,
                   itemBuilder: (context, item, index) {
                     return LdListItem(

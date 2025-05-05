@@ -269,7 +269,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                 ),
                 ComponentWell(
                     child: Column(children: [
-                  /*begin demo:LdButtonDisabled*/
+                  /*begin demo:LdButtonCircular*/
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -300,7 +300,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                       ),
                     ],
                   ),
-                  /*end demo:LdButtonDisabled*/
+                  /*end demo:LdButtonCircular*/
                 ])),
               ],
             ),
