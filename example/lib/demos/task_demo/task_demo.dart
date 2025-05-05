@@ -89,17 +89,10 @@ class TaskDemoState extends State<TaskDemo> {
                 },
                 data,
                 context: context,
-              )
-                  .then(
+              ).then(
                 (updatedItem) async => openTask?.id == item.id
                     ? await controller.openItem(item)
                     : null,
-              )
-                  .catchError(
-                (error) {
-                  print(error);
-                  return true;
-                },
               );
             },
           ),
