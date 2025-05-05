@@ -9,7 +9,7 @@ enum CrudLoadingStateType { loading, success, error }
 /// or null (for delete).
 class CrudItemStateEvent<T> {
   final CrudLoadingStateType type;
-  final LdException? error;
+  final dynamic error;
   final T? data;
 
   CrudItemStateEvent._({
@@ -27,7 +27,7 @@ class CrudItemStateEvent<T> {
   factory CrudItemStateEvent.deleted() =>
       CrudItemStateEvent._(type: CrudLoadingStateType.success, data: null);
 
-  factory CrudItemStateEvent.error(LdException error) =>
+  factory CrudItemStateEvent.error(dynamic error) =>
       CrudItemStateEvent._(type: CrudLoadingStateType.error, error: error);
 
   @override
@@ -53,7 +53,8 @@ class LdCrudListState<T extends CrudItemMixin<T>> extends LdPaginator<T> {
   /// Intelligently handles item state events, e.g. loading, success, error.
   /// It knows which state was caused by which operation and updates the
   /// item list accordingly.
-  void handleItemStateEvent(dynamic id, CrudItemStateEvent<T> state) {
+  void handleItemStateEvent(T? item, CrudItemStateEvent<T> state) {
+    final id = item?.id;
     // Update item state
     if (id != null) {
       itemStates[id] = state;
@@ -69,7 +70,7 @@ class LdCrudListState<T extends CrudItemMixin<T>> extends LdPaginator<T> {
       // If the state is success, update the item in the list
       if (state.data == null) {
         _delete(id);
-      } else if (id == null) {
+      } else if (item?.isNew ?? false) {
         _add(state.data!);
       } else {
         _update(state.data!);
@@ -79,11 +80,18 @@ class LdCrudListState<T extends CrudItemMixin<T>> extends LdPaginator<T> {
     notifyListeners();
   }
 
+  void clearItemState(T? item) {
+    if (item != null) {
+      itemStates.remove(item.id);
+      notifyListeners();
+    }
+  }
+
   T? getItemOptimistically(T? item) {
     return itemStates[item?.id]?.data ?? item;
   }
 
-  LdException? getItemError(T? item) {
+  Error? getItemError(T? item) {
     return itemStates[item?.id]?.error;
   }
 

@@ -1,4 +1,6 @@
+import 'package:flutter/widgets.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:provider/provider.dart';
 
 /// A renderable exception. Has a message, more info, and a type (LdHintType).
 /// Can also contain a stack trace as well as the flag that the action causing
@@ -37,6 +39,16 @@ class LdException extends Error {
     this.stackTrace,
     this.exception,
   });
+
+  factory LdException.fromDynamic(BuildContext context, dynamic e) {
+    final exceptionMapper = context.read<LdExceptionMapper?>() ??
+        LdExceptionMapper(
+          localizations: LiquidLocalizations.of(context),
+        );
+    final ldException = exceptionMapper.handle(e);
+
+    return ldException;
+  }
 
   LdException copyWith({
     String? message,

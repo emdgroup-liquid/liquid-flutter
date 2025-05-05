@@ -14,6 +14,8 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
   final Widget Function(BuildContext context, T item) titleBuilder;
   final Widget Function(BuildContext context, T item)? subtitleBuilder;
   final Widget Function(BuildContext context, T item)? subContentBuilder;
+  final Widget Function(BuildContext context, T item)? leadingBuilder;
+  final Widget Function(BuildContext context, T item)? trailingBuilder;
   final double assumedItemHeight;
   final bool isSeparatePage;
 
@@ -26,6 +28,8 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
     this.isSeparatePage = false,
     this.subtitleBuilder,
     this.subContentBuilder,
+    this.leadingBuilder,
+    this.trailingBuilder,
     this.assumedItemHeight = 60,
   });
 
@@ -37,7 +41,8 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
       assumedItemHeight: assumedItemHeight,
       itemBuilder: (context, item, index) {
         final isSelected = data.isItemSelected(item);
-        final isActive = openItem?.id == item.id;
+        final isActive =
+            (openItem?.id ?? controller.getOpenItem()?.id) == item.id;
 
         return LdListItem(
           trailingForward: isSeparatePage,
@@ -57,7 +62,34 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
           title: titleBuilder(context, item),
           subtitle: subtitleBuilder?.call(context, item),
           subContent: subContentBuilder?.call(context, item),
-          trailing: data.isItemLoading(item) ? const LdLoader(size: 24) : null,
+          leading: leadingBuilder?.call(context, item),
+          trailing: Row(
+            children: [
+              if (data.isItemLoading(item)) const LdLoader(size: 24),
+              if (data.getItemError(item) != null)
+                IconButton(
+                  onPressed: () {
+                    LdExceptionDialog(
+                      error: LdException.fromDynamic(
+                        context,
+                        data.getItemError(item),
+                      ),
+                      primaryButton: LdButtonGhost(
+                        child: Text(LiquidLocalizations.of(context).clearError),
+                        onPressed: () {
+                          data.clearItemState(item);
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ).show(context);
+                  },
+                  icon: const Icon(Icons.error),
+                  color: LdTheme.of(context).errorColor,
+                ),
+              ldSpacerXS,
+              trailingBuilder?.call(context, item) ?? const SizedBox.shrink(),
+            ],
+          ),
         );
       },
     );

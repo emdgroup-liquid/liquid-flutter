@@ -18,11 +18,12 @@ typedef LdCrudActionWidgetBuilder = Widget Function(
 /// or a list of master detail items.
 typedef LdCrudActionCallback<T extends CrudItemMixin<T>, Arg>
     = FutureOr<dynamic> Function(
-  Arg arg,
-  LdMasterDetailController<T> controller,
-  LdCrudListState<T> listState,
-  LdCrudOperations<T> crud,
-);
+  Arg arg, {
+  required BuildContext context,
+  required LdMasterDetailController<T> controller,
+  required LdCrudListState<T> listState,
+  required LdCrudOperations<T> crud,
+});
 
 /// A master detail action contains a widget that can be used to perform an action on a master detail item
 /// or a list of master detail items.
@@ -40,6 +41,8 @@ class LdMasterDetailAction<T extends CrudItemMixin<T>, Arg> {
   final LdCrudActionWidgetBuilder? masterActionMultiSelectBarIconBuilder;
   final LdCrudActionWidgetBuilder? detailActionBarIconBuilder;
   final LdCrudActionCallback<T, Arg> onAction;
+  final bool showErrorNotification;
+  final String? errorMessage;
 
   const LdMasterDetailAction({
     this.kebabMenuBuilder,
@@ -47,6 +50,8 @@ class LdMasterDetailAction<T extends CrudItemMixin<T>, Arg> {
     this.masterActionMultiSelectBarIconBuilder,
     this.detailActionBarIconBuilder,
     required this.onAction,
+    this.showErrorNotification = true,
+    this.errorMessage,
   }) : assert(
           kebabMenuBuilder != null ||
               masterActionBarIconBuilder != null ||
@@ -54,35 +59,67 @@ class LdMasterDetailAction<T extends CrudItemMixin<T>, Arg> {
               detailActionBarIconBuilder != null,
         );
 
-  static Stream<R>
-      executeOperationOptimistically<T extends CrudItemMixin<T>, R>(
+  static Future<R> optimisticExecution<T extends CrudItemMixin<T>, R>(
     T item,
-    Future<R> Function() operation,
+    Future<R> Function() crudAction,
     LdCrudListState<T> listState, {
+    required BuildContext context,
     T Function(R result)? parseResult,
-  }) async* {
-    listState.handleItemStateEvent(item.id, CrudItemStateEvent.loading(item));
+    bool showErrorNotification = true,
+    String? errorMessage,
+  }) async {
+    listState.handleItemStateEvent(item, CrudItemStateEvent.loading(item));
     try {
-      final result = await operation();
+      final result = await crudAction();
       // if R is not void and result is null, throw an exception
       if (result == null && R == T) {
         throw LdException(message: "Operation failed");
       }
       listState.handleItemStateEvent(
-        item.id,
+        item,
         result == null
             ? CrudItemStateEvent.deleted()
             : CrudItemStateEvent.success(
                 parseResult?.call(result) ?? result as T,
               ),
       );
-      yield result;
-    } catch (e) {
+      return result;
+    } catch (error) {
       listState.handleItemStateEvent(
-        item.id,
-        CrudItemStateEvent.error(e as LdException),
+        item,
+        CrudItemStateEvent.error(error),
       );
-      yield* Stream.error(e);
+
+      // Show error notification if configured and context is available
+      if (showErrorNotification) {
+        _showErrorNotification(
+          context,
+          LdException.fromDynamic(context, error),
+          errorMessage,
+        );
+      }
+
+      rethrow;
+    }
+  }
+
+  static void _showErrorNotification(
+    BuildContext context,
+    LdException error,
+    String? customErrorMessage,
+  ) async {
+    final notificationsController = LdNotificationsController.of(context);
+    const defaultErrorMessage = 'An error occurred during the operation';
+    final notification = LdConfirmNotification(
+      message: customErrorMessage ?? defaultErrorMessage,
+      type: LdNotificationType.error,
+      confirmText: 'Close',
+      cancelText: 'More info',
+    );
+
+    notificationsController.addNotification(notification);
+    if (await notification.confirmationCompleter.future == false) {
+      LdExceptionDialog(error: error).show(context);
     }
   }
 }
@@ -109,19 +146,20 @@ class LdMasterDetailListAction<T extends CrudItemMixin<T>>
         );
       },
       onAction: (
-        List<T?> list,
-        LdMasterDetailController<T> controller,
-        LdCrudListState<T> listState,
-        LdCrudOperations<T> crud,
-      ) async {
+        List<T?> list, {
+        required BuildContext context,
+        required LdMasterDetailController<T> controller,
+        required LdCrudListState<T> listState,
+        required LdCrudOperations<T> crud,
+      }) async {
         final newItem = await getNewItem();
         if (newItem == null) return false;
-        await LdMasterDetailAction.executeOperationOptimistically<T, T>(
-          newItem,
-          () => crud.create(newItem),
-          listState,
-        ).first;
-        onItemCreated?.call(newItem);
+        await LdMasterDetailAction.optimisticExecution<T, T>(
+                newItem, () => crud.create(newItem), listState,
+                context: context)
+            .then((createdItem) {
+          onItemCreated?.call(createdItem);
+        });
         return true;
       },
     );
@@ -139,11 +177,12 @@ class LdMasterDetailListAction<T extends CrudItemMixin<T>>
         );
       },
       onAction: (
-        List<T?> list,
-        LdMasterDetailController<T> controller,
-        LdCrudListState<T> listState,
-        LdCrudOperations<T> crud,
-      ) async {
+        List<T?> list, {
+        required BuildContext context,
+        required LdMasterDetailController<T> controller,
+        required LdCrudListState<T> listState,
+        required LdCrudOperations<T> crud,
+      }) async {
         final itemsToDeleteIds = list.map((e) => e?.id).toSet();
         final newList = listState.items
             .where((e) => !itemsToDeleteIds.contains(e?.id))
@@ -154,13 +193,23 @@ class LdMasterDetailListAction<T extends CrudItemMixin<T>>
           null,
           CrudItemStateEvent.loading(),
         );
+        for (final item in list) {
+          if (item == null) continue;
+          // set item busy
+          listState.handleItemStateEvent(
+            item,
+            CrudItemStateEvent.loading(item),
+          );
+        }
         try {
           await crud.batchDelete(list.map((e) => e!));
           for (final item in list) {
             if (item == null) continue;
             // remove all items from list
             listState.handleItemStateEvent(
-                item.id, CrudItemStateEvent.deleted());
+              item,
+              CrudItemStateEvent.deleted(),
+            );
             onItemDeleted?.call(item);
           }
           onItemsDeleted?.call(newList);
@@ -198,20 +247,23 @@ class LdMasterDetailItemAction<T extends CrudItemMixin<T>>
         );
       },
       onAction: (
-        T item,
-        LdMasterDetailController<T> controller,
-        LdCrudListState<T> listState,
-        LdCrudOperations<T> crud,
-      ) async {
-        await LdMasterDetailAction.executeOperationOptimistically<T, void>(
+        T item, {
+        required BuildContext context,
+        required LdMasterDetailController<T> controller,
+        required LdCrudListState<T> listState,
+        required LdCrudOperations<T> crud,
+      }) async {
+        await LdMasterDetailAction.optimisticExecution<T, void>(
           item,
           () async => await crud.delete(item),
           listState,
-        ).first;
-        onItemDeleted?.call(item);
-        if (controller.getOpenItem()?.id == item.id) {
-          controller.closeItem();
-        }
+          context: context,
+        ).then((value) {
+          onItemDeleted?.call(item);
+          if (controller.getOpenItem()?.id == item.id) {
+            controller.closeItem();
+          }
+        });
         return true;
       },
     );
@@ -219,33 +271,38 @@ class LdMasterDetailItemAction<T extends CrudItemMixin<T>>
 
   factory LdMasterDetailItemAction.updateItem({
     required Future<T?> Function(T) getNewItem,
+    LdCrudActionWidgetBuilder? detailActionBarIconBuilder,
     LdMasterDetailCrudItemCallback<T>? onItemUpdated,
   }) {
     return LdMasterDetailItemAction(
-      detailActionBarIconBuilder: (actionCallback) {
-        return IconButton(
-          onPressed: () => actionCallback(),
-          icon: const Icon(Icons.edit),
-        );
-      },
+      detailActionBarIconBuilder: detailActionBarIconBuilder ??
+          (actionCallback) {
+            return IconButton(
+              onPressed: () => actionCallback(),
+              icon: const Icon(Icons.edit),
+            );
+          },
       onAction: (
-        T item,
-        LdMasterDetailController<T> controller,
-        LdCrudListState<T> listState,
-        LdCrudOperations<T> crud,
-      ) async {
+        T item, {
+        required BuildContext context,
+        required LdMasterDetailController<T> controller,
+        required LdCrudListState<T> listState,
+        required LdCrudOperations<T> crud,
+      }) async {
         final newItem = await getNewItem(item);
         if (newItem == null) return false;
-        final itemResult =
-            await LdMasterDetailAction.executeOperationOptimistically<T, T>(
+        await LdMasterDetailAction.optimisticExecution<T, T>(
           item,
           () => crud.update(newItem),
           listState,
-        ).first;
-        onItemUpdated?.call(item);
-        if (itemResult.id == controller.getOpenItem()?.id) {
-          controller.openItem(itemResult);
-        }
+          context: context,
+        ).then((updatedItem) {
+          onItemUpdated?.call(updatedItem);
+          if (updatedItem.id == controller.getOpenItem()?.id) {
+            controller.openItem(updatedItem);
+          }
+          return updatedItem;
+        });
         return true;
       },
     );

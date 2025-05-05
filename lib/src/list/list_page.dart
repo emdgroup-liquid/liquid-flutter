@@ -1,3 +1,5 @@
+import 'dart:math';
+
 class LdListPage<T> {
   final List<T> newItems;
   final bool hasMore;
@@ -25,6 +27,22 @@ class LdListPage<T> {
       total: total ?? this.total,
       nextPageToken: nextPageToken ?? this.nextPageToken,
       error: error ?? this.error,
+    );
+  }
+
+  factory LdListPage.fromList(
+    List<T> items, {
+    int offset = 0,
+    int pageSize = 10,
+  }) {
+    final endIndex = min(offset + pageSize, items.length);
+    final pageItems =
+        offset >= items.length ? <T>[] : items.sublist(offset, endIndex);
+    final hasMore = endIndex < items.length;
+    return LdListPage<T>(
+      newItems: pageItems,
+      hasMore: hasMore,
+      total: items.length,
     );
   }
 }

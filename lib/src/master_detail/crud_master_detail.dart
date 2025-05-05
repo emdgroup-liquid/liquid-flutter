@@ -38,14 +38,14 @@ class LdCrudMasterDetail<T extends CrudItemMixin<T>> extends LdMasterDetail<T> {
   final List<LdMasterDetailListAction<T>> listActions;
   final Widget Function(
     BuildContext context,
-    LdException exception,
+    dynamic error,
     LdMasterDetailController<T> controller,
   )? buildDetailError;
 
   LdCrudMasterDetail({
     super.key,
-    required super.buildDetailTitle,
-    required super.buildMasterTitle,
+    super.buildDetailTitle,
+    super.buildMasterTitle,
     required Widget Function(
       BuildContext context,
       T item,
@@ -61,6 +61,7 @@ class LdCrudMasterDetail<T extends CrudItemMixin<T>> extends LdMasterDetail<T> {
     super.navigator,
     super.onOpenItemChange,
     super.customSplitPredicate,
+    super.masterDetailFlex,
     required this.crud,
     this.itemActions = const [],
     this.listActions = const [],
@@ -84,14 +85,14 @@ class LdCrudMasterDetail<T extends CrudItemMixin<T>> extends LdMasterDetail<T> {
     LdMasterDetailController<T> controller,
     Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)
         buildDetail,
-    Widget Function(BuildContext, LdException, LdMasterDetailController<T>)?
+    Widget Function(BuildContext, dynamic, LdMasterDetailController<T>)?
         buildDetailError,
   ) {
     final data = context.read<LdCrudListState<T>>();
     final error = data.getItemError(item);
     if (error != null) {
       return buildDetailError?.call(context, error, controller) ??
-          Center(child: LdExceptionView(exception: error));
+          Center(child: LdExceptionView.fromDynamic(error, context));
     }
     return buildDetail(context, item, isSeparatePage, controller);
   }
@@ -142,9 +143,10 @@ class _LdCrudMasterDetailState<T extends CrudItemMixin<T>>
                 _data.isMultiSelectMode
                     ? _data.selectedItems.toList()
                     : _data.items,
-                _controller,
-                _data,
-                _crud,
+                context: context,
+                controller: _controller,
+                listState: _data,
+                crud: _crud,
               ),
             ),
           )
@@ -163,9 +165,10 @@ class _LdCrudMasterDetailState<T extends CrudItemMixin<T>>
             (action) => action.detailActionBarIconBuilder!(
               () async => await action.onAction(
                 item,
-                _controller,
-                _data,
-                _crud,
+                context: context,
+                controller: _controller,
+                listState: _data,
+                crud: _crud,
               ),
             ),
           )
