@@ -13,7 +13,7 @@ class ListItemDemo extends StatefulWidget {
 class _ListItemDemoState extends State<ListItemDemo> {
   bool _showSelectionControls = false;
   final Set<int> _selectedItems = {};
-
+  bool _toggleValue = false;
   void _setSelectionControls(bool value) {
     setState(() {
       _showSelectionControls = value;
@@ -32,7 +32,8 @@ class _ListItemDemoState extends State<ListItemDemo> {
       title: "LdListItem",
       demo: LdAutoSpace(
         children: [
-          LdTextP("The LdListItem can be used to display information in a list format. It supports:"),
+          LdTextP(
+              "The LdListItem can be used to display information in a list format. It supports:"),
           Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: LdTextP(
@@ -46,6 +47,7 @@ class _ListItemDemoState extends State<ListItemDemo> {
           ),
           ldSpacerL,
           ComponentWell(
+            onSurface: true,
             padding: EdgeInsets.zero,
             child: Column(
               children: [
@@ -69,7 +71,9 @@ class _ListItemDemoState extends State<ListItemDemo> {
                   ),
                   onTap: () {
                     LdNotificationsController.of(context).addNotification(
-                      LdNotification(message: "You pressed the list item", type: LdNotificationType.success),
+                      LdNotification(
+                          message: "You pressed the list item",
+                          type: LdNotificationType.success),
                     );
                   },
                   title: Text("Press me"),
@@ -117,6 +121,28 @@ class _ListItemDemoState extends State<ListItemDemo> {
                 ),
               ),
             ],
+          ),
+          ComponentWell(
+            title: const LdTextH("LdListItemToggle"),
+            description: const LdTextP(
+              "The LdListItemToggle is a convenient wrapper around LdListItem and LdToggle. It is used to toggle the value of a boolean variable.",
+            ),
+            onSurface: true,
+            child: Column(
+              children: [
+                LdListItemToggle(
+                  checked: _toggleValue,
+                  borderRadius: LdTheme.of(context).radius(LdSize.m),
+                  onChanged: (value) {
+                    setState(() {
+                      _toggleValue = value;
+                    });
+                  },
+                  title: Text("Toggle me"),
+                  subtitle: Text("I will toggle the value"),
+                )
+              ],
+            ),
           ),
         ],
       ),
