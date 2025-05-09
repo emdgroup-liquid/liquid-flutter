@@ -45,7 +45,7 @@ LdColorBundle neutralGhostColor(
   if (focus) {
     return LdColorBundle(
       surface: theme.neutralShade(3),
-      text: palette.neutral.focus(theme.isDark),
+      text: palette.neutral.fromCenter(5, theme.isDark),
       border: Colors.transparent,
       icon: palette.neutral.focus(theme.isDark),
     );
@@ -95,7 +95,11 @@ LdColorBundle touchableColor(
           );
         }
 
-        return LdColorBundle(surface: Colors.transparent, text: foreground, border: foreground);
+        return LdColorBundle(
+          surface: Colors.transparent,
+          text: foreground,
+          border: foreground,
+        );
       }
     }
 
@@ -148,13 +152,17 @@ LdColorBundle touchableColor(
     if (active) {
       return LdColorBundle(
         surface: disabledColor.active(theme.isDark),
-        text: disabledColor.contrastingText(disabledColor.active(theme.isDark)).withAlpha(disabledAlpha),
+        text: disabledColor
+            .contrastingText(disabledColor.active(theme.isDark))
+            .withAlpha(disabledAlpha),
         border: Colors.transparent,
       );
     }
     return LdColorBundle(
       surface: disabledColor.idle(theme.isDark),
-      text: disabledColor.contrastingText(disabledColor.idle(theme.isDark)).withAlpha(disabledAlpha),
+      text: disabledColor
+          .contrastingText(disabledColor.idle(theme.isDark))
+          .withAlpha(disabledAlpha),
       border: Colors.transparent,
     );
   }
@@ -202,7 +210,8 @@ class LdTouchableSurface extends StatefulWidget {
 
   final FocusNode? focusNode;
   final Function() onTap;
-  final Widget Function(BuildContext contxt, LdColorBundle colorBundle, LdTouchableStatus status) builder;
+  final Widget Function(BuildContext contxt, LdColorBundle colorBundle,
+      LdTouchableStatus status) builder;
   const LdTouchableSurface({
     super.key,
     required this.onTap,
@@ -224,10 +233,17 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
   bool _pressed = false;
   bool _hasFocus = false;
 
+  FocusNode? _focusNode;
+
+  bool _createdFocusNode = false;
+
   @override
   void initState() {
-    assert(widget.color != null || widget.mode == LdTouchableSurfaceMode.neutralGhost);
+    assert(widget.color != null ||
+        widget.mode == LdTouchableSurfaceMode.neutralGhost);
     _hasFocus = widget.focusNode?.hasFocus ?? false;
+    _focusNode = widget.focusNode ?? FocusNode();
+    _createdFocusNode = widget.focusNode == null;
     super.initState();
   }
 
@@ -262,10 +278,18 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
   }
 
   @override
+  void dispose() {
+    if (_createdFocusNode) {
+      _focusNode?.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     var colors = _colorBundle;
     return Focus(
-      focusNode: widget.focusNode,
+      focusNode: _focusNode,
       autofocus: widget.autoFocus,
       canRequestFocus: !widget.disabled,
       onFocusChange: (value) {
@@ -275,7 +299,8 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
       },
       onKeyEvent: (node, event) {
         if (event is KeyDownEvent && widget.disabled == false) {
-          if (event.logicalKey == LogicalKeyboardKey.enter || event.logicalKey == LogicalKeyboardKey.space) {
+          if (event.logicalKey == LogicalKeyboardKey.enter ||
+              event.logicalKey == LogicalKeyboardKey.space) {
             widget.onTap();
             return KeyEventResult.handled;
           }
@@ -284,7 +309,9 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
       },
       child: Builder(builder: (context) {
         return MouseRegion(
-          cursor: (widget.disabled) ? SystemMouseCursors.basic : SystemMouseCursors.click,
+          cursor: (widget.disabled)
+              ? SystemMouseCursors.basic
+              : SystemMouseCursors.click,
           onEnter: (event) {
             _safeSetState(() {
               _hovering = true;
@@ -309,6 +336,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
               behavior: HitTestBehavior.opaque,
               onTap: () {
                 if (!widget.disabled) widget.onTap();
+                _focusNode?.requestFocus();
               },
               child: widget.builder(
                 context,
