@@ -68,6 +68,7 @@ class LdSwitch<T> extends StatelessWidget {
 
     return Flexible(
       child: LdButton(
+        circular: false,
         child: child,
         color: color,
         size: size,

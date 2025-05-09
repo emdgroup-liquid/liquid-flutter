@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:liquid/code_block.dart';
-import 'package:liquid/components/components_accordion.dart';
+import 'package:liquid/components/layout/components_accordion.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class SpacingPaddingDocumentation extends StatelessWidget {

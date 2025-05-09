@@ -36,6 +36,10 @@ class LdPaginator<T> extends ChangeNotifier {
     this.debounceTime = const Duration(milliseconds: 500),
   }) {
     if (autoLoad) {
+      for (var i = 0; i < initialOffset; i++) {
+        _items.add(null);
+      }
+
       _setBusy(true);
       fetchItemsAtOffset(initialOffset);
     }

@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:liquid_flutter/src/color/color.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
 
 import 'package:liquid_flutter/src/form_label.dart';
-import 'package:liquid_flutter/src/touchable/touchable.dart';
-
-import 'theme/theme.dart';
-import 'tokens.dart';
 
 enum LdRadioMode { primary, warning, error }
 
@@ -41,7 +37,7 @@ class LdRadio extends StatelessWidget {
 
     final size = this.size.clamp(LdSize.s, LdSize.l);
 
-    final checkboxSize = theme.paddingSize(size: size) * 2;
+    final radioSize = theme.paddingSize(size: size) * 2;
 
     final label = LdFormLabel(
       label: this.label,
@@ -51,36 +47,31 @@ class LdRadio extends StatelessWidget {
 
     return LdTouchableSurface(
         onTap: _onTap,
-        mode: !checked
-            ? LdTouchableSurfaceMode.outline
-            : LdTouchableSurfaceMode.solid,
+        mode: LdTouchableSurfaceMode.outline,
+        active: checked,
         disabled: disabled,
         color: color ?? theme.palette.primary,
         builder: (contxt, colorBundle, status) {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 100),
-                height: checkboxSize,
-                width: checkboxSize,
-                child: Center(
-                    child: Container(
-                  height: theme.paragraphSize(size),
-                  width: theme.paragraphSize(size),
-                  decoration: BoxDecoration(
-                      color: checked ? colorBundle.text : null,
-                      borderRadius: BorderRadius.circular(15)),
-                )),
-                key: const ValueKey("frame"),
-                decoration: BoxDecoration(
-                  color: colorBundle.surface,
-                  border: Border.all(
-                      color: colorBundle.border,
-                      width: checked ? theme.paddingSize(size: size) / 2 : 2),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-              ),
+              LdSpring(
+                  springConstant: 20,
+                  position: (checked ? 4 : 2),
+                  builder: (context, state) {
+                    return Container(
+                      height: radioSize,
+                      width: radioSize,
+                      key: const ValueKey("frame"),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: colorBundle.border,
+                          width: state.position,
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                    );
+                  }),
               if (this.label != null) Flexible(child: label)
             ],
           );

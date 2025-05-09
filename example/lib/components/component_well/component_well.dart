@@ -4,37 +4,61 @@ import 'package:go_router/go_router.dart';
 import 'package:liquid/components/component_well/show_source_code_options.dart';
 import 'package:liquid/components/component_well/source_code_extractor.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+// ignore: must_be_immutable
 class ComponentWell extends StatefulWidget {
   final Widget child;
   final EdgeInsets? padding;
   final bool onSurface;
+  final Widget? title;
+  final Widget? description;
   final Color? color;
-  final ShowSourceCodeOptions? showSourceCodeOptions;
-  const ComponentWell({
+  ShowSourceCodeOptions? showSourceCodeOptions;
+  ComponentWell({
     super.key,
     this.padding,
     required this.child,
     this.color,
     this.onSurface = false,
     this.showSourceCodeOptions,
-  });
+    this.title,
+    this.description,
+  }) {
+    if (showSourceCodeOptions == null) {
+      final file = StackTrace.current
+          .toString()
+          .split("\n")
+          .where((e) => e.contains("package:liquid/"))
+          .toList();
+
+      final pathRe = RegExp(r"package:liquid/(.*)\.dart");
+      final path = pathRe.firstMatch(file[1])?.group(1);
+
+      if (path == null) {
+        throw Exception("Could not infer the path to the source code");
+      }
+
+      showSourceCodeOptions = ShowSourceCodeOptions(path: "lib/$path.dart");
+    }
+  }
 
   @override
   State<ComponentWell> createState() => _ComponentWellState();
 }
 
+final Map<ValueKey<String>, int> instanceCounters = {};
+
 class _ComponentWellState extends State<ComponentWell> {
-  static final Map<ValueKey<String>, int> _instanceCounters = {};
+  late int instanceIndex; // Instance index for this widget
 
-  late int _instanceIndex; // Instance index for this widget
-
-  late ValueKey<String>? _pageKey; // Page key for this widget
+  late ValueKey<String>? pageKey; // Page key for this widget
 
   /// The path to the source code file. If no path was provided via the
   /// [ShowSourceCodeOptions], it will be inferred from the current route.
-  get _sourcePath => widget.showSourceCodeOptions?.path ?? "lib${_pageKey!.value}.dart";
+  get sourcePath =>
+      widget.showSourceCodeOptions?.path ?? "lib${pageKey!.value}.dart";
 
   @override
   Widget build(BuildContext context) {
@@ -44,10 +68,19 @@ class _ComponentWellState extends State<ComponentWell> {
 
     return LdAutoSpace(
       children: [
+        if (widget.title != null)
+          Row(
+            children: [
+              Expanded(child: widget.title!),
+              if (showSourceCode) buildSourceCodeModal(context)
+            ],
+          ),
+        if (widget.description != null) widget.description!,
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: widget.color ?? (widget.onSurface ? theme.surface : theme.background),
+            color: widget.color ??
+                (widget.onSurface ? theme.surface : theme.background),
             borderRadius: theme.radius(LdSize.m),
             border: Border.all(
               color: theme.border,
@@ -66,10 +99,10 @@ class _ComponentWellState extends State<ComponentWell> {
             child: widget.child,
           ),
         ),
-        if (showSourceCode)
+        if (showSourceCode && widget.title == null)
           Align(
             alignment: Alignment.centerRight,
-            child: _buildSourceCodeModal(context),
+            child: buildSourceCodeModal(context),
           ),
       ],
     );
@@ -77,48 +110,50 @@ class _ComponentWellState extends State<ComponentWell> {
 
   @override
   void initState() {
-    _pageKey = GoRouter.of(context).state.pageKey;
-    if (_pageKey != null) {
-      _instanceIndex = _instanceCounters.putIfAbsent(_pageKey!, () => 0);
-      _instanceCounters[_pageKey!] = _instanceIndex + 1;
+    pageKey = GoRouter.of(context).state.pageKey;
+
+    if (pageKey != null) {
+      instanceIndex = instanceCounters.putIfAbsent(pageKey!, () => 0);
+      instanceCounters[pageKey!] = instanceIndex + 1;
     }
+
     super.initState();
   }
 
   @override
   dispose() {
-    _instanceCounters.remove(_pageKey!);
+    instanceCounters.remove(pageKey!);
     super.dispose();
   }
 
   /// Builds the child with a button to toggle between the demo and the source code.
-  Widget _buildSourceCodeModal(BuildContext context) {
+  Widget buildSourceCodeModal(BuildContext context) {
     return LdModalBuilder(
       modal: LdModal(
         title: const Text("Source Code"),
         size: LdSize.l,
+        contentPadding: EdgeInsets.zero,
         modalContent: (context) => LdSubmit<String>(
           config: LdSubmitConfig(
               autoTrigger: true,
               action: () async {
                 // Load the source code
-                return await rootBundle.loadString(_sourcePath);
+                return await rootBundle.loadString(sourcePath);
               }),
           builder: LdSubmitCenteredBuilder<String>(
             resultBuilder: (context, result, controller) => SourceCodeExtractor(
               options: widget.showSourceCodeOptions,
               sourceCode: result,
-              index: _instanceIndex,
+              index: instanceIndex,
             ),
           ),
         ),
       ),
       builder: (context, showModal) {
         return LdButtonGhost(
-          leading: const Icon(Icons.code),
           autoLoading: false,
           onPressed: showModal,
-          child: const Text("Show Source Code"),
+          child: const Icon(LucideIcons.code),
         );
       },
     );

@@ -16,7 +16,6 @@ class SourceCode extends StatefulWidget {
 }
 
 class _SourceCodeState extends State<SourceCode> {
-  HighlighterTheme? theme;
   HighlighterTheme? themeDark;
 
   @override
@@ -27,12 +26,12 @@ class _SourceCodeState extends State<SourceCode> {
 
   void _loadHighlighter() async {
     final ldTheme = LdTheme.of(context);
-    theme = await HighlighterTheme.loadLightTheme();
+
     themeDark = await HighlighterTheme.loadFromAssets(
         ["assets/dark_plus.json", "assets/dark_vs.json"],
         TextStyle(
           fontFamily: "NotoSansMono",
-          color: ldTheme.palette.neutral.shades.last,
+          color: Colors.white,
           fontSize: ldTheme.paragraphSize(LdSize.s),
         ));
     if (mounted) {
@@ -63,7 +62,7 @@ class _SourceCodeState extends State<SourceCode> {
 
   @override
   Widget build(BuildContext context) {
-    if (theme == null) return const SizedBox();
+    if (themeDark == null) return const SizedBox();
 
     final code = reduceIndent(widget.code);
 

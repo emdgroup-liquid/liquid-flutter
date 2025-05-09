@@ -5,6 +5,7 @@ import 'package:flutter_portal/flutter_portal.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:multi_split_view/multi_split_view.dart';
+import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 typedef LdMasterDetailOnSelect<T> = Future<bool> Function(T item);
@@ -297,12 +298,17 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
           true,
         ),
       ),
-      backgroundColor: LdTheme.of(context).background,
-      body: widget.builder.buildMaster(
-        context,
-        onSelect,
-        selectedItem,
-        isSeparatePage,
+      backgroundColor: isSeparatePage
+          ? LdTheme.of(context).background
+          : LdTheme.of(context).surface,
+      body: Provider.value(
+        value: LdSurfaceInfo(isSurface: !isSeparatePage),
+        child: widget.builder.buildMaster(
+          context,
+          onSelect,
+          selectedItem,
+          isSeparatePage,
+        ),
       ),
     );
   }
@@ -339,14 +345,13 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
   Widget buildContent(BuildContext context, bool isLarge) {
     final theme = LdTheme.of(context, listen: true);
 
-    final master = buildMaster(
-      context,
-      _onSelect,
-      _selectedItem,
-      !isLarge,
-    );
-
     if (isLarge) {
+      final master = buildMaster(
+        context,
+        _onSelect,
+        _selectedItem,
+        false,
+      );
       return MultiSplitViewTheme(
         data: MultiSplitViewThemeData(
           dividerThickness: 2,
@@ -388,7 +393,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
       context,
       _onSelect,
       _selectedItem,
-      false,
+      true,
     );
   }
 

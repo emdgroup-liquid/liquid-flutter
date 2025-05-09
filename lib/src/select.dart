@@ -1,7 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_portal/flutter_portal.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/input_color_bundle.dart';
@@ -34,19 +32,19 @@ class LdSelect<T> extends StatefulWidget {
   final FocusNode? focusNode;
   final bool valid;
   final Function(T)? onChange;
-  const LdSelect(
-      {required this.items,
-      this.label,
-      this.onChange,
-      this.size = LdSize.m,
-      this.placeholder,
-      this.disabled = false,
-      this.focusNode,
-      this.value,
-      this.valid = true,
-      this.onSurface = false,
-      Key? key})
-      : super(key: key);
+  const LdSelect({
+    required this.items,
+    this.label,
+    this.onChange,
+    this.size = LdSize.m,
+    this.placeholder,
+    this.disabled = false,
+    this.focusNode,
+    this.value,
+    this.valid = true,
+    this.onSurface = false,
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<LdSelect<T>> createState() => _LdSelectState<T>();
@@ -57,7 +55,9 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
 
   late FocusNode? _focusNode;
 
+  final _overlayController = OverlayPortalController();
   final _controller = ScrollController();
+  final _menuKey = GlobalKey();
 
   @override
   void initState() {
@@ -71,6 +71,36 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
     _focusNode?.dispose();
     _controller.dispose();
     super.dispose();
+  }
+
+  (BoxConstraints, Offset) _insetDropdownSafely(
+    BuildContext context,
+    RenderBox menuBox,
+  ) {
+    final mediaQuery =
+        MediaQuery.of(Scaffold.maybeOf(context)?.context ?? context);
+
+    final screenSize = mediaQuery.size;
+
+    final dy = menuBox.localToGlobal(Offset.zero).dy;
+
+    final viewInsets = mediaQuery.viewPadding;
+
+    final maxWidth = screenSize.width - viewInsets.right - viewInsets.left;
+    final maxHeight = screenSize.height - viewInsets.bottom - dy;
+
+    return (
+      BoxConstraints(
+        minWidth: menuBox.size.width,
+        maxWidth: menuBox.size.width.clamp(0, maxWidth),
+        minHeight: 0,
+        maxHeight: maxHeight,
+      ),
+      Offset(
+        menuBox.localToGlobal(Offset.zero).dx,
+        dy,
+      ),
+    );
   }
 
   Widget _buildInitialItem(
@@ -107,214 +137,227 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
     var activeItem = widget.items
         .firstWhereOrNull((element) => element.value == widget.value);
 
-    return DefaultTextStyle(
-      style: TextStyle(
-          color: widget.disabled ? theme.textMuted : theme.text,
-          package: theme.fontFamilyPackage,
-          fontFamily: theme.fontFamily,
-          fontSize: theme.paragraphSize(size),
-          height: 1),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Include label if not null
-          LdFormLabel(label: widget.label, size: size),
-          Focus(
-            focusNode: _focusNode,
-            child: Builder(builder: (context) {
-              return PortalTarget(
-                visible: isOpen,
-                anchor: const Aligned(
-                  widthFactor: 1,
-                  follower: Alignment.topCenter,
-                  shiftToWithinBound: AxisFlag(y: true),
-                  target: Alignment.topCenter,
-                ),
-                portalFollower: SafeArea(
-                    child: Container(
-                        clipBehavior: Clip.hardEdge,
-                        decoration: BoxDecoration(
-                          color: theme.surface,
-                          borderRadius: theme.radius(LdSize.s),
-                          boxShadow: [ldShadowSticky],
-                          border: Border.all(
-                            color: theme.palette.border,
-                            width: 1,
-                          ),
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Padding(
-                              padding: theme.balPad(size),
-                              child: _buildInitialItem(
-                                activeItem,
-                                theme.textMuted,
-                                theme,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Include label if not null
+        LdFormLabel(label: widget.label, size: size),
+        Focus(
+          focusNode: _focusNode,
+          child: Builder(
+            builder: (context) {
+              return OverlayPortal.targetsRootOverlay(
+                controller: _overlayController,
+                overlayChildBuilder: (context) {
+                  final menuBox =
+                      _menuKey.currentContext?.findRenderObject() as RenderBox?;
+
+                  if (menuBox == null) {
+                    return const SizedBox.shrink();
+                  }
+
+                  final (constraints, offset) = _insetDropdownSafely(
+                    context,
+                    menuBox,
+                  );
+
+                  return Positioned(
+                    left: offset.dx,
+                    top: offset.dy,
+                    child: TapRegion(
+                      onTapOutside: (details) {
+                        setState(() {
+                          isOpen = false;
+                        });
+                      },
+                      child: LdSpring(
+                        position: isOpen ? 1 : 0,
+                        initialPosition: 0,
+                        onAnimationEnd: (context, state) {
+                          if (state.position == 0) {
+                            _overlayController.hide();
+                          }
+                        },
+                        builder: (context, state) {
+                          return Container(
+                            clipBehavior: Clip.hardEdge,
+                            constraints: constraints,
+                            decoration: BoxDecoration(
+                              color: theme.surface,
+                              borderRadius: theme.radius(LdSize.s),
+                              boxShadow: [ldShadowSticky],
+                              border: Border.all(
+                                color: theme.palette.border,
+                                width: 1,
                               ),
                             ),
-                            const LdDivider(
-                              height: 1,
-                            ),
-                            Scrollbar(
-                              controller: _controller,
-                              thumbVisibility: true,
-                              child: ListView.separated(
-                                shrinkWrap: true,
-                                controller: _controller,
-                                itemCount: widget.items.length,
-                                separatorBuilder: (context, index) =>
-                                    const LdDivider(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Padding(
+                                  padding: theme.balPad(size),
+                                  child: _buildInitialItem(
+                                    activeItem,
+                                    theme.textMuted,
+                                    theme,
+                                  ),
+                                ),
+                                const LdDivider(
                                   height: 1,
                                 ),
-                                itemBuilder: (context, index) {
-                                  var e = widget.items[index];
+                                ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxHeight: ((constraints.maxHeight -
+                                            menuBox.size.height) *
+                                        state.position.clamp(0, 1)),
+                                    maxWidth: constraints.maxWidth,
+                                  ),
+                                  child: Scrollbar(
+                                    controller: _controller,
+                                    thumbVisibility: true,
+                                    child: ListView.separated(
+                                      shrinkWrap: true,
+                                      controller: _controller,
+                                      itemCount: widget.items.length,
+                                      separatorBuilder: (context, index) =>
+                                          const LdDivider(
+                                        height: 1,
+                                      ),
+                                      itemBuilder: (context, index) {
+                                        var e = widget.items[index];
 
-                                  return LdTouchableSurface(
-                                    key: e.key ?? ValueKey(e.value),
-                                    disabled: e.enabled == false,
-                                    active: activeItem == e,
-                                    mode: LdTouchableSurfaceMode.neutralGhost,
-                                    onTap: () {
-                                      setState(() {
-                                        isOpen = false;
-                                      });
-                                      widget.onChange?.call(e.value);
-                                    },
-                                    builder: (contxt, colorBundle, status) {
-                                      return Container(
-                                        padding: theme.balPad(size),
-                                        width: double.infinity,
-                                        decoration: BoxDecoration(
-                                          color: colorBundle.surface,
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            SizedBox(
-                                              width: 12,
-                                              child: activeItem == e
-                                                  ? Icon(
-                                                      Icons.done,
-                                                      color: colorBundle.text,
-                                                      size: 12,
-                                                    )
-                                                  : null,
-                                            ),
-                                            ldSpacerS,
-                                            DefaultTextStyle(
-                                              child: Expanded(child: e.child),
-                                              style: TextStyle(
-                                                color: colorBundle.text,
-                                                package:
-                                                    theme.fontFamilyPackage,
-                                                fontFamily: theme.fontFamily,
+                                        return LdTouchableSurface(
+                                          key: e.key ?? ValueKey(e.value),
+                                          disabled: e.enabled == false,
+                                          active: activeItem == e,
+                                          mode: LdTouchableSurfaceMode
+                                              .neutralGhost,
+                                          onTap: () {
+                                            setState(() {
+                                              isOpen = false;
+                                            });
+                                            _overlayController.hide();
+                                            widget.onChange?.call(e.value);
+                                          },
+                                          builder:
+                                              (contxt, colorBundle, status) {
+                                            return Container(
+                                              padding: theme.balPad(size),
+                                              width: double.infinity,
+                                              decoration: BoxDecoration(
+                                                color: colorBundle.surface,
                                               ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-                              ).animate().custom(
-                                  duration: 300.ms,
-                                  curve: Curves.easeOutCubic,
-                                  builder: (context, animation, child) {
-                                    return ConstrainedBox(
-                                        constraints: BoxConstraints(
-                                          maxHeight: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                              0.5 *
-                                              animation,
-                                        ),
-                                        child: child);
-                                  }),
+                                              child: Row(
+                                                children: [
+                                                  SizedBox(
+                                                    width: 12,
+                                                    child: activeItem == e
+                                                        ? Icon(
+                                                            Icons.done,
+                                                            color: colorBundle
+                                                                .text,
+                                                            size: 12,
+                                                          )
+                                                        : null,
+                                                  ),
+                                                  ldSpacerS,
+                                                  DefaultTextStyle(
+                                                    child: Expanded(
+                                                        child: e.child),
+                                                    style: ldBuildTextStyle(
+                                                      theme,
+                                                      LdTextType.paragraph,
+                                                      size,
+                                                      color: colorBundle.text,
+                                                      lineHeight: 1,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ))),
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                },
                 child: Container(
+                  key: _menuKey,
                   decoration: BoxDecoration(
                     color: widget.onSurface ? theme.background : theme.surface,
                     borderRadius: theme.radius(LdSize.s),
                   ),
                   child: LdTouchableSurface(
-                      disabled: widget.disabled,
-                      onTap: () async {
-                        setState(() {
-                          isOpen = true;
-                        });
+                    disabled: widget.disabled,
+                    onTap: () async {
+                      setState(() {
+                        isOpen = true;
+                      });
 
-                        await Future.delayed(const Duration(milliseconds: 200));
+                      _overlayController.show();
 
-                        final selectedIndex = widget.items.indexWhere(
-                            (element) => element.value == widget.value);
+                      await Future.delayed(const Duration(milliseconds: 200));
 
-                        if (selectedIndex == -1) {
-                          return;
-                        }
+                      final selectedIndex = widget.items.indexWhere(
+                          (element) => element.value == widget.value);
 
-                        final fraction = selectedIndex / widget.items.length;
+                      if (selectedIndex == -1) {
+                        return;
+                      }
 
-                        _controller.animateTo(
-                          _controller.position.maxScrollExtent * fraction,
-                          duration: const Duration(milliseconds: 200),
-                          curve: Curves.easeInOut,
-                        );
-                      },
-                      color: theme.palette.primary,
-                      builder: (context, _, status) {
-                        final colors = LdInputColorBundle.fromTheme(
-                          theme,
-                          onSurface: widget.onSurface,
-                          isValid: widget.valid,
-                        ).fromTouchableStatus(status);
+                      final fraction = selectedIndex / widget.items.length;
 
-                        final initialItem = _buildInitialItem(
-                          activeItem,
-                          colors.placeholder,
-                          theme,
-                        );
+                      _controller.animateTo(
+                        _controller.position.maxScrollExtent * fraction,
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                    color: theme.palette.primary,
+                    builder: (context, _, status) {
+                      final colors = LdInputColorBundle.fromTheme(
+                        theme,
+                        onSurface: widget.onSurface,
+                        isValid: widget.valid,
+                      ).fromTouchableStatus(status);
 
-                        return Container(
-                          width: double.infinity,
-                          padding: theme.balPad(size),
-                          clipBehavior: Clip.hardEdge,
-                          decoration: BoxDecoration(
-                            color: colors.surface,
-                            borderRadius: theme.radius(LdSize.s),
-                            border: Border.all(
-                              color: colors.border,
-                              width: 1.5,
-                            ),
+                      final initialItem = _buildInitialItem(
+                        activeItem,
+                        colors.placeholder,
+                        theme,
+                      );
+
+                      return Container(
+                        width: double.infinity,
+                        padding: theme.balPad(size),
+                        clipBehavior: Clip.hardEdge,
+                        decoration: BoxDecoration(
+                          color: colors.surface,
+                          borderRadius: theme.radius(LdSize.s),
+                          border: Border.all(
+                            color: colors.border,
+                            width: 1.5,
                           ),
-                          child: initialItem,
-                        );
-                      }),
+                        ),
+                        child: initialItem,
+                      );
+                    },
+                  ),
                 ),
               );
-            }),
+            },
           ),
-          PortalTarget(
-            child: Container(),
-            visible: isOpen,
-            portalFollower: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.black.withAlpha(0),
-                ),
-              ),
-              onTap: () {
-                setState(() {
-                  isOpen = false;
-                });
-              },
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

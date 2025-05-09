@@ -110,8 +110,8 @@ class _LdAccordionChild extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var theme = LdTheme.of(context, listen: true);
-    var color =
-        LdSurfaceInfo.of(context).isSurface ? theme.background : theme.surface;
+
+    var color = elevateActive ? LdTheme.of(context).surface : null;
 
     return AnimatedContainer(
       duration: speed,
@@ -120,7 +120,6 @@ class _LdAccordionChild extends StatelessWidget {
       ),
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
-        color: !collapsed ? color : null,
         borderRadius: elevateActive ? theme.radius(LdSize.s) : null,
         boxShadow: elevateActive && !collapsed ? [ldShadowDefault] : null,
       ),
@@ -164,6 +163,8 @@ class _LdAccordionChild extends StatelessWidget {
             ),
           ),
           LdCollapse(
+            child: Container(
+              color: color,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -174,7 +175,9 @@ class _LdAccordionChild extends StatelessWidget {
                   ),
                 ],
               ),
-              collapsed: collapsed)
+            ),
+            collapsed: collapsed,
+          )
         ],
       ),
     );

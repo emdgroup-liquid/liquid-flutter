@@ -1,17 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-
-Iterable<T> intersperse<T>(T element, Iterable<T> iterable) sync* {
-  final iterator = iterable.iterator;
-  if (iterator.moveNext()) {
-    yield iterator.current;
-    while (iterator.moveNext()) {
-      yield element;
-      yield iterator.current;
-    }
-  }
-}
+import 'package:liquid_flutter/src/intersperse.dart';
 
 /// A breadcrumb widget.
 class LdBreadcrumb extends StatelessWidget {

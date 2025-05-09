@@ -3,7 +3,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 /// Renders an LdException in a dialog
 class LdExceptionDialog extends StatelessWidget {
-  final LdException? error;
+  final LdException error;
 
   const LdExceptionDialog({
     super.key,
@@ -16,13 +16,13 @@ class LdExceptionDialog extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         LdTextH(
-          error!.message,
+          error.message,
           textAlign: TextAlign.center,
         ),
-        if (error!.moreInfo != null)
+        if (error.moreInfo != null)
           LdMute(
             child: LdTextPs(
-              error!.moreInfo!,
+              error.moreInfo!,
               textAlign: TextAlign.center,
             ),
           ),
@@ -34,6 +34,6 @@ class LdExceptionDialog extends StatelessWidget {
           },
         )
       ],
-    ).padL().padL();
+    );
   }
 }

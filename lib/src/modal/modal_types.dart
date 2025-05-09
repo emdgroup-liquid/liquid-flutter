@@ -16,10 +16,6 @@ class LdSheetType extends WoltBottomSheetType {
     this.index = 0,
   }) : super(
           shapeBorder: RoundedRectangleBorder(
-            side: BorderSide(
-              color: theme.stroke,
-              width: 1,
-            ),
             borderRadius: BorderRadius.only(
               bottomLeft: Radius.circular(bottomRadius ?? 0),
               bottomRight: Radius.circular(bottomRadius ?? 0),

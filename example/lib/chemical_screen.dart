@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class _Potion {
   String name;
@@ -44,7 +45,7 @@ class _ChemicalScreenState extends State<ChemicalScreen> {
                     children: [
                       LdButton(
                           mode: LdButtonMode.outline,
-                          leading: const Icon(Icons.shopping_bag),
+                          leading: const Icon(LucideIcons.shoppingBag),
                           onPressed: () {
                             LdNotificationsController.of(context)
                                 .addNotification(LdNotification(
@@ -55,7 +56,7 @@ class _ChemicalScreenState extends State<ChemicalScreen> {
                           child: const Text("Add to cart")),
                       LdButton(
                           mode: LdButtonMode.outline,
-                          leading: const Icon(Icons.download),
+                          leading: const Icon(LucideIcons.download),
                           onPressed: () {
                             LdNotificationsController.of(context)
                                 .addNotification(LdNotification(
@@ -155,54 +156,54 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
                     builder: (context, onPress) {
                       return LdButtonOutline(
                         size: LdSize.s,
-                        leading: const Icon(Icons.arrow_downward),
+                        leading: const Icon(LucideIcons.arrowDown),
                         onPressed: onPress,
                         child: const Text("Deduct"),
                       );
                     },
                     modal: LdModal(
-                      modalContent: (context) => Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            LdButton(
-                                child: const Text("Deduct 0.1l"),
-                                onPressed: () {
-                                  _deduct(0.1);
-                                  Navigator.of(context).pop();
-                                }),
-                            ldSpacerM,
-                            LdButton(
-                                child: const Text("Deduct 0.2l"),
-                                onPressed: () {
-                                  _deduct(0.2);
-                                  Navigator.of(context).pop();
-                                }),
-                            ldSpacerM,
-                            LdButton(
-                                child: const Text("Deduct 0.5l"),
-                                onPressed: () {
-                                  _deduct(0.5);
-                                  Navigator.of(context).pop();
-                                }),
-                            ldSpacerM,
-                            ldSpacerM,
-                            LdButton(
-                                child: const Text("Add 0.1l"),
-                                onPressed: () {
-                                  _deduct(-0.1);
-                                  Navigator.of(context).pop();
-                                }),
-                            ldSpacerM,
-                            LdButton(
-                                child: const Text("Refill entirely"),
-                                onPressed: () {
-                                  _deduct(-1);
-                                  Navigator.of(context).pop();
-                                })
-                          ],
-                        ),
+                      headerPadding: LdTheme.of(context).pad(size: LdSize.m),
+                      contentPadding: EdgeInsets.zero,
+                      modalContent: (context) => Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          LdListItem(
+                              title: const Text("Deduct 0.1l"),
+                              leading: const Icon(LucideIcons.arrowDown),
+                              onTap: () {
+                                _deduct(0.1);
+                                Navigator.of(context).pop();
+                              }),
+                          LdListItem(
+                              title: const Text("Deduct 0.2l"),
+                              leading: const Icon(LucideIcons.arrowDown),
+                              onTap: () {
+                                _deduct(0.2);
+                                Navigator.of(context).pop();
+                              }),
+                          LdListItem(
+                              title: const Text("Deduct 0.5l"),
+                              leading: const Icon(LucideIcons.arrowDown),
+                              onTap: () {
+                                _deduct(0.5);
+                                Navigator.of(context).pop();
+                              }),
+                          LdListItem(
+                              title: const Text("Add 0.1l"),
+                              leading: const Icon(LucideIcons.arrowUp),
+                              onTap: () {
+                                _deduct(-0.1);
+                                Navigator.of(context).pop();
+                              }),
+                          LdDivider(),
+                          LdListItem(
+                              title: const Text("Refill entirely"),
+                              leading: const Icon(LucideIcons.arrowUp),
+                              onTap: () {
+                                _deduct(-1);
+                                Navigator.of(context).pop();
+                              })
+                        ],
                       ),
                       title: const Text("Deduct"),
                     ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 /// A section in the drawer that can contain a collapsable sub-items
@@ -56,9 +57,9 @@ class _LdDrawerItemSectionState extends State<LdDrawerItemSection> {
     if (widget.trailing != null) {
       return widget.trailing!;
     }
-    if (widget.children != null) {
+    if (widget.children != null && widget.children!.isNotEmpty) {
       return AnimatedRotation(
-          child: const Icon(Icons.arrow_forward_ios_rounded),
+          child: const Icon(LucideIcons.chevronRight),
           duration: const Duration(milliseconds: 200),
           turns: _isExpanded ? 0.25 : 0);
     }
@@ -101,35 +102,50 @@ class _LdDrawerItemSectionState extends State<LdDrawerItemSection> {
                   ),
             Expanded(
                 child: DefaultTextStyle(
-                    style: ldBuildTextStyle(_theme, LdTextType.label, LdSize.m,
-                        color: colorBundle.text),
+                    style: ldBuildTextStyle(
+                      _theme,
+                      LdTextType.label,
+                      LdSize.m,
+                      color: _theme.text,
+                    ),
                     child: widget.child)),
             IconTheme(
-                data: IconThemeData(
-                  color: colorBundle.icon,
-                  size: _theme.paragraphSize(LdSize.s),
-                ),
-                child: _trailingItem),
+              data: IconThemeData(
+                color: colorBundle.icon,
+                size: _theme.paragraphSize(LdSize.s),
+              ),
+              child: _trailingItem,
+            ),
           ])),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.children != null) {
+    if (widget.children != null && widget.children!.isNotEmpty) {
       return Column(
         children: [
           buildItem(context),
-          Padding(
-            padding: const EdgeInsets.only(left: 16.0),
-            child: LdCollapse(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: LdAutoSpace(
-                    children: widget.children!,
-                  ),
+          LdCollapse(
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  left: BorderSide(color: _theme.border),
                 ),
-                collapsed: !_isExpanded),
+              ),
+              margin: const EdgeInsets.only(
+                left: 8.0,
+                top: 4,
+              ),
+              padding: const EdgeInsets.only(left: 8.0, top: 4),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 4.0),
+                child: LdAutoSpace(
+                  children: widget.children!,
+                ),
+              ),
+            ),
+            collapsed: !_isExpanded,
           )
         ],
       );

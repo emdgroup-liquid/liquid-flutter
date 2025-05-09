@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:syntax_highlight/syntax_highlight.dart';
 
 class DemoCodeDialog extends StatefulWidget {
@@ -23,8 +24,6 @@ class _DemoCodeDialogState extends State<DemoCodeDialog> {
 
   void prepareHighlighter() async {
     await Highlighter.initialize(['dart']);
-
-    _theme = await HighlighterTheme.loadLightTheme();
     _themeDark = await HighlighterTheme.loadDarkTheme();
     setState(() {});
   }
@@ -37,14 +36,14 @@ class _DemoCodeDialogState extends State<DemoCodeDialog> {
 
     final highlighter = Highlighter(
       language: 'dart',
-      theme: LdTheme.of(context).isDark ? _themeDark! : _theme!,
+      theme: _themeDark!,
     );
 
     var highlightedCode = highlighter.highlight(widget.demoCode);
 
     return LdModalBuilder(
       builder: (context, onPress) => LdButton(
-        leading: const Icon(Icons.code),
+        leading: const Icon(LucideIcons.code),
         size: LdSize.s,
         mode: LdButtonMode.outline,
         onPressed: onPress,
@@ -56,12 +55,13 @@ class _DemoCodeDialogState extends State<DemoCodeDialog> {
           focusNode: FocusNode(),
           selectionControls: MaterialTextSelectionControls(),
           child: Container(
-            color: LdTheme.of(context).surface,
+            color: shadZinc.shades.last,
             child: SingleChildScrollView(
                 child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text.rich(
                 highlightedCode,
+                style: TextStyle(color: Colors.white),
               ),
             )),
           ),

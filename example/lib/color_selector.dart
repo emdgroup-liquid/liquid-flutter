@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class ColorSelctor extends StatelessWidget {
   final LdColor active;
@@ -28,9 +29,7 @@ class ColorSelctor extends StatelessWidget {
                 child: LdButton(
                   color: e.value,
                   active: e.value == active,
-                  child: e.value == active
-                      ? const Icon(Icons.check)
-                      : const Icon(Icons.circle),
+                  child: e.value == active ? const Icon(LucideIcons.check) : const Icon(LucideIcons.circle),
                   onPressed: () => onChanged(e.value),
                 ),
               ),

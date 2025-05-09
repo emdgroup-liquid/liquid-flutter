@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:provider/provider.dart';
 
@@ -49,7 +50,7 @@ class LdDrawerHeader extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Icon(Icons.arrow_back))
+                child: const Icon(LucideIcons.arrowLeft))
         ],
       ),
     );
