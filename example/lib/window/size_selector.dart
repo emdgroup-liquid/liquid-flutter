@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class SizeSelector extends StatefulWidget {
@@ -24,9 +25,9 @@ class _SizeSelectorState extends State<SizeSelector> {
         },
         label: "Theme Size",
         children: const {
-          LdThemeSize.s: Text("Small", maxLines: 1),
-          LdThemeSize.m: Text("Medium", maxLines: 1),
-          LdThemeSize.l: Text("Large", maxLines: 1),
+          LdThemeSize.s: Text("S"),
+          LdThemeSize.m: Text("M"),
+          LdThemeSize.l: Text("L"),
         });
   }
 }
