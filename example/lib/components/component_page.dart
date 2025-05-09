@@ -43,7 +43,10 @@ class ComponentPage extends StatelessWidget {
                 "API Reference",
               ),
 
-              ComponentsAccordion(components: apiComponents?.toSet() ?? {title}),
+              ComponentsAccordion(
+                components: apiComponents?.toSet() ?? {title},
+                initialOpenIndex: {0},
+              ),
             ],
           ),
         ),
