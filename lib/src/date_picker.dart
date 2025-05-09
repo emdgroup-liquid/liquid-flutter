@@ -60,7 +60,7 @@ class LdDatePicker extends StatelessWidget {
       modal: LdModal(
         key: const Key('date_picker_sheet'),
         size: LdSize.m,
-        padding: LdTheme.of(context).pad(size: LdSize.s),
+        contentPadding: LdTheme.of(context).pad(size: LdSize.s),
         title: Text(label ?? LiquidLocalizations.of(context).selectDate),
         modalContent: (
           context,
