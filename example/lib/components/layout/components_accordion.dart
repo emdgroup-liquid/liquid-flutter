@@ -10,7 +10,10 @@ class ComponentsAccordion extends StatelessWidget {
   const ComponentsAccordion({
     super.key,
     required this.components,
+    this.initialOpenIndex,
   });
+
+  final Set<int>? initialOpenIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -20,14 +23,16 @@ class ComponentsAccordion extends StatelessWidget {
         (formComp) => DocComponent.fromJson(formComp.toJson()),
       ),
     ];
-    List<DocComponent> relevantComponents =
-        allDocComponents.where((element) => components.contains(element.name)).toList();
+    List<DocComponent> relevantComponents = allDocComponents
+        .where((element) => components.contains(element.name))
+        .toList();
 
     return LdCard(
       padding: EdgeInsets.zero,
       child: LdAccordion(
         curveExpand: Curves.easeInOut,
         curveCollapse: Curves.easeInOut,
+        initialOpenIndex: initialOpenIndex ?? {},
         childBuilder: ((context, n) {
           var component = relevantComponents[n];
           return SelectableRegion(
@@ -36,7 +41,8 @@ class ComponentsAccordion extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (component.description.isNotEmpty) LdText(component.description),
+                  if (component.description.isNotEmpty)
+                    LdText(component.description),
                   ComponentApi(component: component)
                 ],
               ));
