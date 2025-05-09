@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [22.0.0-dev.2](https://github.com/emdgroup-liquid/liquid-flutter/compare/v21.0.8...v22.0.0-dev.2) (2025-05-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* LdModal, LdSelectableList, fixes for modals and remove uncessary function from LdPaginator (#53)
+* replace page-based with offset-based pagination logic
+* useRootNavigator parameter for LdChoose to superseed the navigator parameter.
+* implement "lazy loading" of pages for LdPaginator and LdList
+
+### Features
+
+* Add LdListItemToggle component for enhanced list item interaction ([26f41f4](https://github.com/emdgroup-liquid/liquid-flutter/commit/26f41f47b15409f33421f5a650e37c07bf27e524))
+* Enhance LdAvatar with circular shape and size options ([afd3139](https://github.com/emdgroup-liquid/liquid-flutter/commit/afd3139462b3dee3f0124d28a7249205f1415e1f))
+* implement "lazy loading" of pages for LdPaginator and LdList ([f20f8cc](https://github.com/emdgroup-liquid/liquid-flutter/commit/f20f8cc386da8f12972f7c98f76e33e4b3b6989a))
+* LdModal, LdSelectableList, fixes for modals and remove uncessary function from LdPaginator ([#53](https://github.com/emdgroup-liquid/liquid-flutter/issues/53)) ([9b0877c](https://github.com/emdgroup-liquid/liquid-flutter/commit/9b0877cafdc5cc5bf1a7d76c5615875babde2861))
+* useRootNavigator parameter for LdChoose to superseed the navigator parameter. ([449a068](https://github.com/emdgroup-liquid/liquid-flutter/commit/449a068ad4203def21bacd78dcd4ac58683a4276))
+
+
+### Bug Fixes
+
+* Adjust alpha value for color based on theme darkness in LdTag ([1870942](https://github.com/emdgroup-liquid/liquid-flutter/commit/187094209ba908cb6225b982816896acf5bb24a4))
+* resolve "perform initial scroll" not working properly ([44b3375](https://github.com/emdgroup-liquid/liquid-flutter/commit/44b3375fcd5e2b4eafcc0adf37281dc3dc44728f))
+* resolve linter issue ([8bc146e](https://github.com/emdgroup-liquid/liquid-flutter/commit/8bc146e0ff0d3626d477d772d2c08c38609b2ae2))
+* Update action bar height and improve device type detection in LdModal ([50389ee](https://github.com/emdgroup-liquid/liquid-flutter/commit/50389eefb921c79fbb0ce193e7b8c88f98b8576c))
+* Update color expectation in tag_test ([b64abe4](https://github.com/emdgroup-liquid/liquid-flutter/commit/b64abe47dbfa9c40962601d57b959cdfd2e1a6e9))
+* Update font size values in LdThemeSize extension ([43aeedc](https://github.com/emdgroup-liquid/liquid-flutter/commit/43aeedc5a8e4b96ad596899da3e63b199e35b528))
+* Update M-Trust API Guard action to use specific branch for string escaping ([1f0d882](https://github.com/emdgroup-liquid/liquid-flutter/commit/1f0d882046ec1e8f2e6b252be3f4009fc0ba9848))
+
+
+* replace page-based with offset-based pagination logic ([216d8ce](https://github.com/emdgroup-liquid/liquid-flutter/commit/216d8ce383bafd36fb2eb26b6eb233d5ec0fae32))
+
 ## [22.0.0-dev.1](https://github.com/emdgroup-liquid/liquid-flutter/compare/v21.0.8...v22.0.0-dev.1) (2025-04-23)
 
 
