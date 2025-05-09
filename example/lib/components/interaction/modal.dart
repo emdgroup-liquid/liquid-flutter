@@ -55,17 +55,27 @@ class _DemoSheet extends StatelessWidget {
           mode: mode,
           enableScaling: enableScaling,
           userCanDismiss: userDismissable,
+          showDismissButton: userDismissable,
           fixedDialogSize: fixedDialogSize ? const Size(400, 400) : null,
           title: !enableHeader ? null : const Text("Title"),
           insets: useScreenRadius
               ? EdgeInsets.only(
                   left: 0,
                   right: 5,
-                  bottom: MediaQuery.paddingOf(Scaffold.maybeOf(context)?.context ?? context).bottom / 2,
+                  bottom: MediaQuery.paddingOf(
+                              Scaffold.maybeOf(context)?.context ?? context)
+                          .bottom /
+                      2,
                 )
-              : (enableInsets ? const EdgeInsets.symmetric(horizontal: 32) : EdgeInsets.zero),
-          topRadius: useScreenRadius ? max(0, LdTheme.of(context).screenRadius - 2.5) : null,
-          bottomRadius: useScreenRadius ? max(0, LdTheme.of(context).screenRadius - 2.5) : null,
+              : (enableInsets
+                  ? const EdgeInsets.symmetric(horizontal: 32)
+                  : EdgeInsets.zero),
+          topRadius: useScreenRadius
+              ? max(0, LdTheme.of(context).screenRadius - 2.5)
+              : null,
+          bottomRadius: useScreenRadius
+              ? max(0, LdTheme.of(context).screenRadius - 2.5)
+              : null,
           actionBar: !enableFooter
               ? null
               : (context) => Row(
@@ -101,7 +111,8 @@ class _DemoSheet extends StatelessWidget {
                   ),
                   const LdTextP(
                       "It's about managing expectations tiger team it is all exactly as i said, but i don't like it. Let's unpack that later we should leverage existing asserts that ladder up to the message. We need to socialize the comms with the wider stakeholder community we're building the plane while we're flying it, but if you want to motivate these clowns, try less carrot and more stick, race without a finish line performance review, so what do you feel you would bring to the table if you were hired for this position."),
-                  const LdTextPs("Filler text by http://officeipsum.com/index.php"),
+                  const LdTextPs(
+                      "Filler text by http://officeipsum.com/index.php"),
                   Row(
                     children: [
                       _DemoSheet(
@@ -333,6 +344,118 @@ class _ModalDemoState extends State<ModalDemo> {
                   LdNotificationsController.of(context).error("Cancelled");
                 }
               },
+            ),
+            const LdTextH("Modal with screen radius"),
+            LdModalBuilder(
+              useRootNavigator: true,
+              builder: (context, openModal) {
+                return LdButton(
+                  onPressed: openModal,
+                  child: const Text("Open modal"),
+                );
+              },
+              modal: LdModal(
+                mode: LdModalTypeMode.sheet,
+                modalContent: (context) {
+                  return AspectRatio(
+                    aspectRatio: 1,
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Center(
+                            child: const LdText(
+                                "This is a modal with screen radius"),
+                          ),
+                        ),
+                        LdButtonVague(
+                          size: LdSize.l,
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text("Done"),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                topRadius: LdTheme.of(context).screenRadius,
+                bottomRadius: LdTheme.of(context).screenRadius,
+              ),
+            ),
+            const LdTextH("Modal with action button"),
+            LdModalBuilder(
+              useRootNavigator: true,
+              builder: (context, openModal) {
+                return LdButton(
+                  onPressed: openModal,
+                  child: const Text("Open modal"),
+                );
+              },
+              modal: LdModal(
+                actionBar: (context) {
+                  return LdButton(
+                    width: double.infinity,
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text("Action"),
+                  );
+                },
+                modalContent: (context) {
+                  return const LdText("This is a modal with screen radius");
+                },
+              ),
+            ),
+            const LdTextH("Modal with list items"),
+            LdModalBuilder(
+              useRootNavigator: true,
+              builder: (context, openModal) {
+                return LdButton(
+                  onPressed: openModal,
+                  child: const Text("Open modal"),
+                );
+              },
+              modal: LdModal(
+                contentPadding: const EdgeInsets.all(0),
+                title: const Text(
+                    "Modal with list items and long title for the header"),
+                actionBar: (context) {
+                  return LdButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text("Done"),
+                  );
+                },
+                actions: (context) {
+                  return [
+                    LdButton(
+                      child: const Text("Done"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ];
+                },
+                modalContent: (context) {
+                  return Column(
+                    children: [
+                      LdListItem(
+                        title: const Text("Item 1"),
+                        subtitle: const Text("Subtitle"),
+                      ),
+                      LdListItem(
+                        title: const Text("Item 2"),
+                        subtitle: const Text("Subtitle"),
+                      ),
+                      LdListItem(
+                        title: const Text("Item 3"),
+                        subtitle: const Text("Subtitle"),
+                      )
+                    ],
+                  );
+                },
+              ),
             ),
           ],
         ));
