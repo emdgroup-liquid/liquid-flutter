@@ -57,6 +57,11 @@ flutter:
     - liquid_flutter_icon.jpg
     - assets/
     - lib/components/
+    - lib/components/data_display/
+    - lib/components/layout/
+    - lib/components/interaction/
+    - lib/components/feedback/
+    - lib/components/form_elements/
 
   fonts:
     - family: Lato
