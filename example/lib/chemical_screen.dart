@@ -9,8 +9,10 @@ class _Potion {
 }
 
 var potions = [
-  _Potion("Alihotsy Draught", "A potion from the Alihotsy plant; causes hysterical laughter."),
-  _Potion("Dreamless Sleep Potion", "A potion that places the taker in a sleep that is dreamless."),
+  _Potion("Alihotsy Draught",
+      "A potion from the Alihotsy plant; causes hysterical laughter."),
+  _Potion("Dreamless Sleep Potion",
+      "A potion that places the taker in a sleep that is dreamless."),
   _Potion("Madame Glossy's Silver Polish", "A magical cleaning solution.")
 ];
 
@@ -34,50 +36,55 @@ class _ChemicalScreenState extends State<ChemicalScreen> {
             const _Quantity(),
             const _ProductKeyInfos(),
             ldSpacerL,
-            LdAutoSpace(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
+            LdAutoSpace(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      LdButton(
+                          mode: LdButtonMode.outline,
+                          leading: const Icon(LucideIcons.shoppingBag),
+                          onPressed: () {
+                            LdNotificationsController.of(context)
+                                .addNotification(LdNotification(
+                              type: LdNotificationType.info,
+                              message: "Added to cart",
+                            ));
+                          },
+                          child: const Text("Add to cart")),
+                      LdButton(
+                          mode: LdButtonMode.outline,
+                          leading: const Icon(LucideIcons.download),
+                          onPressed: () {
+                            LdNotificationsController.of(context)
+                                .addNotification(LdNotification(
+                              type: LdNotificationType.error,
+                              message: "Downloading certificate failed",
+                            ));
+                          },
+                          child: const Text(
+                            "Acces certificate",
+                          )),
+                    ],
+                  ),
+                  const LdDivider(),
+                  const LdInput(
+                    label: "Notes",
+                    hint: "Add a note....",
+                    maxLines: 3,
+                  ),
                   LdButton(
-                      mode: LdButtonMode.outline,
-                      leading: const Icon(LucideIcons.shoppingBag),
+                      child: const Text("Save"),
                       onPressed: () {
-                        LdNotificationsController.of(context).addNotification(LdNotification(
-                          type: LdNotificationType.info,
-                          message: "Added to cart",
+                        LdNotificationsController.of(context)
+                            .addNotification(LdNotification(
+                          type: LdNotificationType.success,
+                          message: "Saved",
                         ));
-                      },
-                      child: const Text("Add to cart")),
-                  LdButton(
-                      mode: LdButtonMode.outline,
-                      leading: const Icon(LucideIcons.download),
-                      onPressed: () {
-                        LdNotificationsController.of(context).addNotification(LdNotification(
-                          type: LdNotificationType.error,
-                          message: "Downloading certificate failed",
-                        ));
-                      },
-                      child: const Text(
-                        "Acces certificate",
-                      )),
-                ],
-              ),
-              const LdDivider(),
-              const LdInput(
-                label: "Notes",
-                hint: "Add a note....",
-                maxLines: 3,
-              ),
-              LdButton(
-                  child: const Text("Save"),
-                  onPressed: () {
-                    LdNotificationsController.of(context).addNotification(LdNotification(
-                      type: LdNotificationType.success,
-                      message: "Saved",
-                    ));
-                  })
-            ]),
+                      })
+                ]),
             ldSpacerL,
             const _OtherPotions(),
             ldSpacerL,
@@ -110,7 +117,8 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
   }
 
   void _deduct(amount) {
-    _quantityController.animateTo((_quantityController.value - amount).clamp(0, 1),
+    _quantityController.animateTo(
+        (_quantityController.value - amount).clamp(0, 1),
         duration: const Duration(milliseconds: 500));
   }
 
@@ -155,7 +163,7 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
                     },
                     modal: LdModal(
                       headerPadding: LdTheme.of(context).pad(size: LdSize.m),
-                      padding: EdgeInsets.zero,
+                      contentPadding: EdgeInsets.zero,
                       modalContent: (context) => Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -227,7 +235,13 @@ class _Accordion extends StatelessWidget {
             );
           }),
           headerBuilder: ((context, n) {
-            return Text(["Stock", "Ingredients", "Preparation", "Usage", "Side effects"][n]);
+            return Text([
+              "Stock",
+              "Ingredients",
+              "Preparation",
+              "Usage",
+              "Side effects"
+            ][n]);
           })),
     );
   }
