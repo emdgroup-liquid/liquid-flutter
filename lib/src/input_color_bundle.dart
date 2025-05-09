@@ -59,7 +59,6 @@ class LdInputColorBundle {
     bool isValid = true,
   }) {
     final surface = theme.palette.surface;
-    final background = theme.palette.background;
 
     final border = theme.border;
     final borderInvalid = theme.palette.error;
@@ -68,7 +67,8 @@ class LdInputColorBundle {
       backgroundIdle: surface,
       backgroundHover: surface,
       backgroundFocus: surface,
-      backgroundDisabled: onSurface ? surface : background,
+      backgroundDisabled:
+          theme.isDark ? theme.neutralShade(2) : theme.neutralShade(1),
       borderIdle: isValid ? border : borderInvalid.fromCenter(1, theme.isDark),
       borderHover: isValid
           ? theme.palette.neutral.relative(theme.isDark, 3)
@@ -80,11 +80,11 @@ class LdInputColorBundle {
       textIdle: theme.palette.text,
       textHover: theme.palette.text,
       textFocus: theme.palette.text,
-      textDisabled: theme.palette.textMuted,
+      textDisabled: theme.textMuted,
       placeholderIdle: theme.palette.textMuted,
       placeholderHover: theme.palette.textMuted,
       placeholderFocus: theme.palette.textMuted,
-      placeholderDisabled: theme.palette.textMuted,
+      placeholderDisabled: theme.palette.neutral.relative(theme.isDark, 5),
       iconIdle: theme.palette.primary.fromCenter(1, theme.isDark),
       iconHover: theme.palette.primary.fromCenter(2, theme.isDark),
       iconFocus: theme.palette.primary.fromCenter(-1, theme.isDark),
