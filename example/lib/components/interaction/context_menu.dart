@@ -17,33 +17,38 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
   LdContextPositionMode _positionMode = LdContextPositionMode.relativeTrigger;
 
   _buildMenu(BuildContext context, VoidCallback onDismiss) =>
-      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        LdListItem(
-          width: double.infinity,
-          trailing: const Icon(LucideIcons.arrowRight),
-          onTap: () {
-            onDismiss();
-          },
-          title: const Text("Button 1"),
-        ),
-        LdListItem(
-          width: double.infinity,
-          trailing: const Icon(LucideIcons.arrowRight),
-          onTap: () async {
-            await Future.delayed(const Duration(seconds: 1));
-            onDismiss();
-          },
-          title: const Text("Button 2"),
-        ),
-        LdListItem(
-          width: double.infinity,
-          trailing: const Icon(LucideIcons.trash),
-          onTap: () {
-            onDismiss();
-          },
-          title: const Text("Button 2"),
-        ),
-      ]);
+      SingleChildScrollView(
+        child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              LdListItem(
+                width: double.infinity,
+                trailing: const Icon(LucideIcons.arrowRight),
+                onTap: () {
+                  onDismiss();
+                },
+                title: const Text("Button 1"),
+              ),
+              LdListItem(
+                width: double.infinity,
+                trailing: const Icon(LucideIcons.arrowRight),
+                onTap: () async {
+                  await Future.delayed(const Duration(seconds: 1));
+                  onDismiss();
+                },
+                title: const Text("Button 2"),
+              ),
+              LdListItem(
+                width: double.infinity,
+                trailing: const Icon(LucideIcons.trash),
+                onTap: () {
+                  onDismiss();
+                },
+                title: const Text("Button 2"),
+              ),
+            ]),
+      );
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
