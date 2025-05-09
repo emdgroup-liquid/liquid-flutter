@@ -157,7 +157,7 @@ class _LdChooseState<T> extends State<LdChoose<T>> {
                   onPressed: Navigator.of(context).pop,
                 ),
               ],
-              padding: EdgeInsets.zero,
+              contentPadding: EdgeInsets.zero,
               headerPadding: LdTheme.of(context).pad(),
               contentSlivers: (context) {
                 return [
