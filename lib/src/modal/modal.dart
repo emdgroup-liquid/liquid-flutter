@@ -1,5 +1,4 @@
 import 'dart:io' if (dart.library.io) 'dart:io';
-import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -49,7 +48,7 @@ class LdModal {
   )
   final bool noHeader;
 
-  final EdgeInsets? padding;
+  final EdgeInsets? contentPadding;
 
   final EdgeInsets? headerPadding;
 
@@ -61,7 +60,8 @@ class LdModal {
   /// A list of listenables to be injected into the modal. That can be read
   /// from the various builder contexts, useful for updating the modal content
   /// based on external state like a viewmodel.
-  final List<ListenableProvider> Function(BuildContext dialogContext)? injectables;
+  final List<ListenableProvider> Function(BuildContext dialogContext)?
+      injectables;
 
   /// The size of the modal.
   final LdSize? size;
@@ -95,7 +95,7 @@ class LdModal {
     this.disableScrolling = false,
     this.noHeader = false,
     this.showDragHandle,
-    this.padding,
+    this.contentPadding,
     this.headerPadding,
     this.title,
     this.actions,
@@ -114,66 +114,56 @@ class LdModal {
     this.fixedDialogSize,
     this.index,
   }) {
-    assert(!(userCanDismiss == false && showDismissButton), "showDismissButton is true but userCanDismiss is false");
+    assert(!(userCanDismiss == false && showDismissButton),
+        "showDismissButton is true but userCanDismiss is false");
   }
-
-  final double _defaultSheetInset = 0;
 
   bool get shouldScale {
-    return enableScaling == true || (!kIsWeb && Platform.isIOS && mode != LdModalTypeMode.dialog);
+    return enableScaling == true ||
+        (!kIsWeb && Platform.isIOS && mode != LdModalTypeMode.dialog);
   }
 
-  bool get barrierDismissible => userCanDismiss;
-  bool get enableDrag => userCanDismiss;
-  bool get isTopBarLayerAlwaysVisible => title != null;
-  bool get hasTopBarLayer => title != null;
+  bool get _enableDrag => userCanDismiss;
 
-  double navbarHeight(BuildContext context) {
-    final theme = LdTheme.of(context);
-    final size = switch (theme.themeSize) {
-      LdThemeSize.l => 82.0,
-      LdThemeSize.m => 62.0,
-      LdThemeSize.s => 38.0,
-    };
-    if (topRadius != null) {
-      return max(topRadius! + 10, size);
-    }
-
-    return size;
-  }
-
-  /// Returns whether [mode] or screen size of [context] will
-  /// result in  a sheet being shown
-  bool isSheet(BuildContext context) =>
-      mode == LdModalTypeMode.sheet || (mode == LdModalTypeMode.auto && _autoShowsSheet(context));
-
-  WoltModalType _getSheetType(BuildContext context, {int index = 0}) {
-    if (isSheet(context)) {
-      return LdSheetType(
-        theme: LdTheme.of(context),
-        topRadius: topRadius,
-        bottomRadius: bottomRadius,
-        index: this.index ?? index,
-        insets: insets ?? EdgeInsets.all(_defaultSheetInset),
-      );
-    }
-
-    return LdDialogType(
-      theme: LdTheme.of(context),
-      size: size ?? LdSize.m,
-      fixedSize: fixedDialogSize,
-      index: this.index ?? index,
-    );
-  }
-
-  /// Whether the modal in auto mode should show a sheet based on the device type.
+  /// Whether the modal in auto mode should show a sheet based on the
+  /// device type.
   bool _autoShowsSheet(BuildContext context) {
     if (!context.mounted) return false;
     final mediaQuery = MediaQuery.maybeOf(context);
     if (mediaQuery == null) return false;
 
     final deviceType = getDeviceType(mediaQuery.size);
-    return deviceType == DeviceScreenType.watch || deviceType == DeviceScreenType.mobile;
+    return deviceType == DeviceScreenType.watch ||
+        deviceType == DeviceScreenType.mobile;
+  }
+
+  /// Returns whether [mode] or screen size of [context] will
+  /// result in  a sheet being shown
+  bool _isSheet(BuildContext context) =>
+      mode == LdModalTypeMode.sheet ||
+      (mode == LdModalTypeMode.auto && _autoShowsSheet(context));
+
+  bool _hasSabGradient(BuildContext context) =>
+      actionBar != null && _isSheet(context);
+
+  /// Returns the correct [WoltModalType] based on the [mode] and [context].
+  WoltModalType _getSheetType(BuildContext context, {int index = 0}) {
+    final theme = LdTheme.of(context);
+
+    if (_isSheet(context)) {
+      return LdSheetType(
+        theme: theme,
+        topRadius: topRadius,
+        bottomRadius: bottomRadius,
+        index: this.index ?? index,
+      );
+    }
+    return LdDialogType(
+      theme: theme,
+      size: size ?? LdSize.m,
+      fixedSize: fixedDialogSize,
+      index: this.index ?? index,
+    );
   }
 
   Widget _getInjectables(
@@ -262,15 +252,60 @@ class LdModal {
       );
     }
 
+    return LdTheme.of(context).pad(size: LdSize.m);
+  }
+
+  EdgeInsets _contentPadding(BuildContext context) {
     final theme = LdTheme.of(context);
 
-    return padding ?? theme.pad(size: LdSize.m);
+    if (contentPadding != null) {
+      return contentPadding!;
+    }
+
+    EdgeInsets defaultContentPadding = EdgeInsets.zero;
+
+    if (topRadius != null) {
+      defaultContentPadding = EdgeInsets.only(
+        top: topRadius! / 2,
+        left: topRadius! / 2,
+        right: topRadius! / 2,
+        bottom: topRadius! / 2,
+      );
+    } else {
+      defaultContentPadding = theme.pad(size: LdSize.l);
+    }
+
+    if (_hasSabGradient(context)) {
+      defaultContentPadding += EdgeInsets.only(
+        bottom: theme.paddingSize(size: LdSize.m),
+      );
+    }
+
+    return defaultContentPadding;
+  }
+
+  EdgeInsets _sabPadding(BuildContext context) {
+    final theme = LdTheme.of(context, listen: true);
+    if (actionBarPadding != null) {
+      return actionBarPadding!;
+    } else {
+      EdgeInsets sabPadding = LdTheme.of(context).pad(size: LdSize.l);
+      // Add some more padding for sheets
+      if (_isSheet(context)) {
+        if (theme.screenRadius != 0) {
+          if (theme.screenRadius / 2 > sabPadding.left) {
+            sabPadding = EdgeInsets.all(
+              theme.screenRadius / 2,
+            );
+          }
+        }
+      }
+      return sabPadding;
+    }
   }
 
   List<SliverWoltModalSheetPage> _getPageList(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
-
-    var contentPadding = padding ?? theme.pad(size: LdSize.l);
 
     final sizeNotifier = ValueNotifier<Size>(Size.zero);
 
@@ -310,7 +345,8 @@ class LdModal {
                               child: title!,
                             ),
                           ),
-                        _getTrailingNavBarWidget(context) ?? const SizedBox.shrink(),
+                        _getTrailingNavBarWidget(context) ??
+                            const SizedBox.shrink(),
                       ],
                     ),
                   ),
@@ -323,11 +359,11 @@ class LdModal {
                         valueListenable: sizeNotifier,
                         builder: (context, size, child) {
                           return Padding(
-                            padding: contentPadding +
-                                EdgeInsets.only(
-                                  bottom: size.height + (hasSabGradient(context) ? 10 : 0),
-                                ),
-                            child: modalContent != null ? modalContent!(context) : const SizedBox.shrink(),
+                            padding: _contentPadding(context) +
+                                EdgeInsets.only(bottom: size.height),
+                            child: modalContent != null
+                                ? modalContent!(context)
+                                : const SizedBox.shrink(),
                           );
                         },
                       ),
@@ -340,45 +376,40 @@ class LdModal {
     ];
   }
 
-  bool hasSabGradient(BuildContext context) => actionBar != null && isSheet(context);
-
-  Widget? _getStickyActionBar(BuildContext context, ValueNotifier<Size> sizeNotifier) {
+  Widget? _getStickyActionBar(
+      BuildContext context, ValueNotifier<Size> sizeNotifier) {
     if (actionBar == null) {
       return null;
     }
 
-    final theme = LdTheme.of(context, listen: true);
-
-    var sabPadding = actionBarPadding ?? padding ?? theme.pad(size: LdSize.m);
-
-    // Add some more padding for sheets because they are
-    // placed at the very bottom
-    if (isSheet(context)) {
-      sabPadding += EdgeInsets.only(
-        bottom: theme.paddingSize(size: LdSize.m),
-      );
-    }
+    final sabPadding = _sabPadding(context);
 
     return _getInjectables(
       context,
-      (context) => MeasureSize(
-        sizeNotifier: sizeNotifier,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (!hasSabGradient(context)) ...[
-              const LdDivider(
-                height: 1,
-              ),
-              Padding(padding: sabPadding, child: actionBar!(context))
-            ] else
-              _LdActionBarGradient(
-                child: Padding(
+      (context) => LdAutoBackground(
+        child: MeasureSize(
+          sizeNotifier: sizeNotifier,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (!_hasSabGradient(context)) ...[
+                const LdDivider(
+                  height: 1,
+                ),
+                Padding(
                   padding: sabPadding,
                   child: actionBar!(context),
+                )
+              ] else
+                _LdActionBarGradient(
+                  child: Padding(
+                    padding: sabPadding,
+                    child: actionBar!(context),
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -388,7 +419,7 @@ class LdModal {
     return WoltModalSheetRoute(
       useSafeArea: useSafeArea,
       barrierDismissible: userCanDismiss,
-      enableDrag: enableDrag,
+      enableDrag: _enableDrag,
       showDragHandle: false,
       modalBarrierColor: _getModalBarrierColor(context),
       settings: settings,
@@ -414,37 +445,30 @@ class LdModal {
       ),
       child: PopScope(
         canPop: userCanDismiss,
-        child: LdPortal(child: child),
+        child: Builder(builder: (context) {
+          return CallbackShortcuts(
+            bindings: {
+              const SingleActivator(LogicalKeyboardKey.escape): () {
+                Navigator.of(context).maybePop();
+              },
+            },
+            child: LdPortal(child: child),
+          );
+        }),
       ),
     );
   }
 
   Color _getModalBarrierColor(BuildContext context) {
     final theme = LdTheme.of(context);
-
     return theme.palette.neutral.shades[8].withAlpha(150);
   }
 
-  Future<dynamic> show(BuildContext context, {bool useRootNavigator = false}) async {
-    LdPortalController? controller;
-
-    if (useRootNavigator) {
-      //context = Navigator.of(context, rootNavigator: true).context;
-      controller = LdPortalController.maybeOf(context);
-    } else {
-      controller = LdPortalController.maybeOf(context);
-    }
-
-    LdPortalEntry? entry;
-    int index = 0;
-
-    if (controller != null) {
-      entry = controller.registerEntry(
-        scaleContent: shouldScale,
-      );
-      index = controller.indexOf(entry);
-    }
-
+  /// Show the modal.
+  Future<dynamic> show(
+    BuildContext context, {
+    bool useRootNavigator = false,
+  }) async {
     final res = await WoltModalSheet.show(
       modalDecorator: (child) => KeyedSubtree(
         child: child,
@@ -460,14 +484,10 @@ class LdModal {
       pageContentDecorator: _getContentDecorator,
       modalTypeBuilder: (_) => _getSheetType(
         context,
-        index: index,
+        index: 0,
       ),
       pageListBuilder: (_) => _getPageList(context),
     );
-
-    if (entry != null) {
-      if (controller?.open ?? false) controller?.removeEntry(entry);
-    }
 
     return res;
   }
