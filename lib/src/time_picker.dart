@@ -56,7 +56,7 @@ class LdTimePicker extends StatelessWidget {
         size: LdSize.m,
         fixedDialogSize: const Size(300, 300),
         title: label != null ? LdTextL(label!) : null,
-        padding: LdTheme.of(context).pad(size: LdSize.s),
+        contentPadding: LdTheme.of(context).pad(size: LdSize.s),
         modalContent: (
           context,
         ) =>
