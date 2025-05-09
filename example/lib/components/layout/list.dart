@@ -11,15 +11,12 @@ class ListDemo extends StatefulWidget {
 }
 
 class _ListDemoState extends State<ListDemo> {
-  bool _showSelectionControls = false;
   bool _onSurface = false;
   bool _enableGrouping = false;
   bool _assumeItemHeight = false;
 
   bool _simulateError = false;
   bool _bidirectionalScrolling = false;
-
-  final Set<int> _selectedItems = {};
 
   late LdPaginator<int> _paginator = LdPaginator<int>(
     initialOffset: 0,
@@ -54,25 +51,9 @@ class _ListDemoState extends State<ListDemo> {
     );
   }
 
-  void _selectItem(int item) {
-    setState(() {
-      if (_selectedItems.contains(item)) {
-        _selectedItems.remove(item);
-      } else {
-        _selectedItems.add(item);
-      }
-    });
-  }
-
   void _setOnSurface(bool value) {
     setState(() {
       _onSurface = value;
-    });
-  }
-
-  void _setSelectionControls(bool value) {
-    setState(() {
-      _showSelectionControls = value;
     });
   }
 
@@ -105,7 +86,8 @@ class _ListDemoState extends State<ListDemo> {
                   ),
                   paginator: _paginator,
                   assumedItemHeight: _assumeItemHeight ? 50 : null,
-                  groupingCriterion: _enableGrouping ? (item) => item ~/ 10 : null,
+                  groupingCriterion:
+                      _enableGrouping ? (item) => item ~/ 10 : null,
                   groupHeaderBuilder: _enableGrouping
                       ? (context, remainder) => LdListSeperator(
                             onSurface: _onSurface,
@@ -199,7 +181,8 @@ class _ListDemoState extends State<ListDemo> {
               children: [
                 LdToggle(
                     checked: _assumeItemHeight,
-                    label: "Assume item height (by passing the assumedItemHeight parameter). ",
+                    label:
+                        "Assume item height (by passing the assumedItemHeight parameter). ",
                     onChanged: (value) {
                       setState(() {
                         _assumeItemHeight = value;
@@ -215,7 +198,8 @@ class _ListDemoState extends State<ListDemo> {
               children: [
                 LdToggle(
                     checked: _enableGrouping,
-                    label: "Enable grouping (by passing the groupingCriterion parameter and a seperatorBuilder)",
+                    label:
+                        "Enable grouping (by passing the groupingCriterion parameter and a seperatorBuilder)",
                     onChanged: (value) {
                       setState(() {
                         _enableGrouping = value;
@@ -255,7 +239,9 @@ class _ListDemoState extends State<ListDemo> {
                   child: LdListEmpty(
                     onRefresh: () {
                       LdNotificationsController.of(context).addNotification(
-                        LdNotification(message: "Refreshed", type: LdNotificationType.success),
+                        LdNotification(
+                            message: "Refreshed",
+                            type: LdNotificationType.success),
                       );
                     },
                   ))),
