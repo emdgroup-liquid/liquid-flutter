@@ -10,6 +10,7 @@ class LdListItemToggle extends StatelessWidget {
   final bool disabled;
   final LdSize size;
   final LdColor? color;
+  final BorderRadius? borderRadius;
   final EdgeInsets? padding;
 
   const LdListItemToggle({
@@ -23,6 +24,7 @@ class LdListItemToggle extends StatelessWidget {
     this.size = LdSize.m,
     this.color,
     this.padding,
+    this.borderRadius,
   });
 
   @override
@@ -31,6 +33,7 @@ class LdListItemToggle extends StatelessWidget {
       leading: leading,
       title: title,
       subtitle: subtitle,
+      borderRadius: borderRadius,
       disabled: disabled,
       padding: padding,
       onTap: onChanged != null ? () => onChanged!(!checked) : null,
