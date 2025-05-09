@@ -26,7 +26,7 @@ class _CardDemoState extends State<CardDemo> {
             "Cards can be styled with or without elevation (flat), and can be placed on different background surfaces. They automatically adapt their appearance based on the theme and surface they're placed on.",
           ),
           const LdTextH("Flat Card with child only"),
-          const ComponentWell(
+          ComponentWell(
             child: LdCard(
               child: LdTextL("Hello world"),
             ),
@@ -79,7 +79,7 @@ class _CardDemoState extends State<CardDemo> {
             ),
           ),
           const LdTextH("Card on surface"),
-          const ComponentWell(
+          ComponentWell(
             onSurface: true,
             child: LdCard(
               child: LdAutoSpace(
@@ -94,7 +94,7 @@ class _CardDemoState extends State<CardDemo> {
             ),
           ),
           const LdTextH("Elevated Card"),
-          const ComponentWell(
+          ComponentWell(
             child: LdCard(
               flat: false,
               child: LdAutoSpace(
