@@ -63,7 +63,8 @@ class LdContextMenu extends StatefulWidget {
   final LdContextZoomMode zoomMode;
   final LdContextPositionMode positionMode;
 
-  final Widget Function(BuildContext context, bool isShuttle, VoidCallback trigger) builder;
+  final Widget Function(
+      BuildContext context, bool isShuttle, VoidCallback trigger) builder;
 
   final Widget Function(
     BuildContext context,
@@ -118,7 +119,9 @@ class _LdContextMenuState extends State<LdContextMenu> {
 
   LdContextPositionMode get _effectivePositionMode {
     if (widget.positionMode == LdContextPositionMode.auto) {
-      return _mobile ? LdContextPositionMode.relativeTrigger : LdContextPositionMode.relativeCursor;
+      return _mobile
+          ? LdContextPositionMode.relativeTrigger
+          : LdContextPositionMode.relativeCursor;
     }
     return widget.positionMode;
   }
@@ -130,14 +133,32 @@ class _LdContextMenuState extends State<LdContextMenu> {
     _overlayPortalController.hide();
   }
 
-  Offset _insetMenuPositionToScreen(Offset position) {
-    final screenSize = MediaQuery.sizeOf(context);
+  Size _resizeMenuToScreen(BuildContext context, RenderBox menuBox) {
+    final mediaQuery = MediaQuery.of(
+      Scaffold.maybeOf(context)?.context ?? context,
+    );
 
-    final menuBox = _menuKey.currentContext?.findRenderObject() as RenderBox?;
+    final position = _getMenuPosition(context);
+
+    final viewInsets = mediaQuery.viewInsets;
+    final screenSize = mediaQuery.size;
+
+    return Size(
+      screenSize.width - viewInsets.right - viewInsets.left - position.dx - 20,
+      screenSize.height - viewInsets.bottom - viewInsets.top - position.dy - 20,
+    );
+  }
+
+  Offset _insetMenuPositionToScreen(Offset position, RenderBox menuBox) {
+    final mediaQuery =
+        MediaQuery.of(Scaffold.maybeOf(context)?.context ?? context);
+
+    final inset = mediaQuery.viewInsets;
+    final screenSize = mediaQuery.size;
 
     return Offset(
-      position.dx.clamp(0, screenSize.width - (menuBox?.size.width ?? 0) - 10),
-      position.dy.clamp(0, screenSize.height - (menuBox?.size.height ?? 0) - 10),
+      position.dx.clamp(0, screenSize.width - inset.right - inset.left - 10),
+      position.dy.clamp(0, screenSize.height - inset.bottom - inset.top - 10),
     );
   }
 
@@ -219,15 +240,30 @@ class _LdContextMenuState extends State<LdContextMenu> {
       dampingCoefficient: 15,
       position: _visible ? 1 : 0,
       builder: (context, state) {
+        final triggerBox =
+            _triggerKey.currentContext?.findRenderObject() as RenderBox?;
+
+        if (triggerBox == null) {
+          return const SizedBox.shrink();
+        }
+
         final menuPosition = _insetMenuPositionToScreen(
           _getMenuPosition(context),
+          triggerBox,
         );
+
+        final size = _resizeMenuToScreen(context, triggerBox);
+
         return Positioned(
           left: menuPosition.dx,
           top: menuPosition.dy,
           child: Opacity(
             opacity: state.position.clamp(0, 1),
             child: Container(
+              constraints: BoxConstraints(
+                maxWidth: size.width,
+                maxHeight: size.height,
+              ),
               margin: const EdgeInsets.symmetric(vertical: 8),
               clipBehavior: Clip.hardEdge,
               decoration: BoxDecoration(
@@ -264,33 +300,40 @@ class _LdContextMenuState extends State<LdContextMenu> {
     );
 
     return OverlayPortal.targetsRootOverlay(
-        overlayChildBuilder: (context) => Stack(
-              fit: StackFit.expand,
-              children: [
-                if (_shouldBlur) ...[
-                  BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Container(
-                      color: Colors.black.withAlpha(51),
-                    ),
-                  ).animate().fadeIn(duration: 100.ms),
-                  if (_triggerBox != null)
-                    Positioned(
-                      left: _triggerBox!.localToGlobal(Offset.zero).dx,
-                      top: _triggerBox!.localToGlobal(Offset.zero).dy,
-                      width: _triggerBox!.size.width,
-                      height: _triggerBox!.size.height,
-                      child: _buildZoom(context, widget.builder(context, true, _open)),
-                    ),
-                ],
-                ModalBarrier(
-                  onDismiss: _dismiss,
+      overlayChildBuilder: (context) => Stack(
+        fit: StackFit.expand,
+        children: [
+          if (_shouldBlur) ...[
+            BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                color: Colors.black.withAlpha(51),
+              ),
+            ).animate().fadeIn(duration: 100.ms),
+            if (_triggerBox != null)
+              Positioned(
+                left: _triggerBox!.localToGlobal(Offset.zero).dx,
+                top: _triggerBox!.localToGlobal(Offset.zero).dy,
+                width: _triggerBox!.size.width,
+                height: _triggerBox!.size.height,
+                child: _buildZoom(
+                  context,
+                  widget.builder(context, true, _open),
                 ),
-                menu,
-              ],
-            ),
-        controller: _overlayPortalController,
-        child: _buildZoom(context, _buildTriggerDetector(context)));
+              ),
+          ],
+          ModalBarrier(
+            onDismiss: _dismiss,
+          ),
+          menu,
+        ],
+      ),
+      controller: _overlayPortalController,
+      child: _buildZoom(
+        context,
+        _buildTriggerDetector(context),
+      ),
+    );
   }
 }
 
