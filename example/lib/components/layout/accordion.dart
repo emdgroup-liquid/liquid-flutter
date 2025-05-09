@@ -53,42 +53,60 @@ class _AccordionDemoState extends State<AccordionDemo> {
         title: "LdAccordion",
         demo: LdAutoSpace(
           children: [
-            ComponentWell(
-                child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  const LdDivider(),
-                  LdAccordion.fromList(
-                    [
-                      LdAccordionItem(
-                        child: const Text("This is some content in an accordion"),
-                        header: const Text("Header"),
-                      ),
-                    ],
-                  ),
-                  const LdDivider(),
-                ],
-              ),
-            )),
+            LdTextP(
+              "The LdAccordion component provides a way to organize content into collapsible sections. "
+              "It's useful for presenting information in a compact format where users can expand sections they're interested in.",
+            ),
+            LdTextP(
+              "You can create an accordion either by using the standard constructor with builders for headers and content, "
+              "or by using the convenient LdAccordion.fromList constructor with predefined LdAccordionItem objects.",
+            ),
             ComponentWell(
               onSurface: _onSurface,
+              title: const LdTextHs("Demo"),
               child: LdAutoSpace(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const LdTextH(
-                    "Standard",
-                  ),
                   if (!_elevate) ...[
                     LdCard(padding: EdgeInsets.zero, child: accordion),
-                    const LdTextL("Accordion is placed inside an LdCard with no padding")
+                    const LdTextL(
+                        "Accordion is placed inside an LdCard with no padding")
                   ] else
                     accordion
                 ],
               ),
             ),
-            LdToggle(label: "Allow multiple open", checked: _allowMultiple, onChanged: _toggleAllowMultiple),
-            LdToggle(label: "Elevate", checked: _elevate, onChanged: _toggleElevate),
-            LdToggle(label: "On Surface background", checked: _onSurface, onChanged: _toggleOnSurface)
+            LdToggle(
+              label: "Allow multiple open",
+              checked: _allowMultiple,
+              onChanged: _toggleAllowMultiple,
+            ),
+            LdToggle(
+              label: "Elevate",
+              checked: _elevate,
+              onChanged: _toggleElevate,
+            ),
+            LdToggle(
+                label: "On Surface background",
+                checked: _onSurface,
+                onChanged: _toggleOnSurface),
+            LdDivider(),
+            ComponentWell(
+                title: const LdTextHs(".fromList constructor"),
+                child: Column(
+                  children: [
+                    LdAccordion.fromList(
+                      [
+                        LdAccordionItem(
+                          child: const Text(
+                            "This is some content in an accordion",
+                          ),
+                          header: const Text("Header"),
+                        ),
+                      ],
+                    ),
+                  ],
+                )),
           ],
         ));
   }
