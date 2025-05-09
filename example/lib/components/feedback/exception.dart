@@ -53,7 +53,7 @@ class _ExceptionDemoState extends State<ExceptionDemo> {
       value: retryController,
       child: ComponentPage(
         apiComponents: const ["LdExceptionView", "LdException"],
-        title: "Drawer",
+        title: "LdException",
         demo: ComponentWell(
           child: Center(
             child: Consumer<LdRetryController>(
