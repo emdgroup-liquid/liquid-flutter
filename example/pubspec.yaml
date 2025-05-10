@@ -39,6 +39,7 @@ dependencies:
   fuzzy: ^0.5.1
   collection: ^1.19.0
   liquid_flutter_reactive_forms: 0.0.3
+  lucide_icons_flutter: ^3.0.3
 
 dev_dependencies:
   flutter_test:
@@ -56,6 +57,11 @@ flutter:
     - liquid_flutter_icon.jpg
     - assets/
     - lib/components/
+    - lib/components/data_display/
+    - lib/components/layout/
+    - lib/components/interaction/
+    - lib/components/feedback/
+    - lib/components/form_elements/
 
   fonts:
     - family: Lato

@@ -37,12 +37,9 @@ class LdAppBar extends AppBar {
           systemOverlayStyle: SystemUiOverlayStyle(
             statusBarColor: LdTheme.of(context).surface,
             systemNavigationBarColor: LdTheme.of(context).surface,
-            systemNavigationBarIconBrightness:
-                LdTheme.of(context).isDark ? Brightness.light : Brightness.dark,
-            statusBarIconBrightness:
-                LdTheme.of(context).isDark ? Brightness.light : Brightness.dark,
-            statusBarBrightness:
-                LdTheme.of(context).isDark ? Brightness.dark : Brightness.light,
+            systemNavigationBarIconBrightness: LdTheme.of(context).isDark ? Brightness.light : Brightness.dark,
+            statusBarIconBrightness: LdTheme.of(context).isDark ? Brightness.light : Brightness.dark,
+            statusBarBrightness: LdTheme.of(context).isDark ? Brightness.dark : Brightness.light,
           ),
           title: DefaultTextStyle(
             style: ldBuildTextStyle(
@@ -52,10 +49,7 @@ class LdAppBar extends AppBar {
             ),
             child: title ?? const SizedBox(),
           ),
-          toolbarHeight: toolbarHeight ??
-              (LdTheme.of(context).themeSize == LdThemeSize.s
-                  ? 48
-                  : kToolbarHeight),
+          toolbarHeight: toolbarHeight ?? (LdTheme.of(context).themeSize == LdThemeSize.s ? 48 : kToolbarHeight),
           bottom: const PreferredSize(
             preferredSize: Size.fromHeight(1),
             child: LdDivider(

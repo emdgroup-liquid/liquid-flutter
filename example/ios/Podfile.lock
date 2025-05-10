@@ -2,7 +2,7 @@ PODS:
   - device_info_plus (0.0.1):
     - Flutter
   - Flutter (1.0.0)
-  - haptic_feedback (0.4.2):
+  - haptic_feedback (0.5.1):
     - Flutter
   - package_info_plus (0.4.5):
     - Flutter
@@ -40,13 +40,13 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
-  device_info_plus: bf2e3232933866d73fe290f2942f2156cdd10342
+  device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  haptic_feedback: ccbfbef39de4757f4bdf0ef03e7dfb3ffb4363d3
-  package_info_plus: c0502532a26c7662a62a356cebe2692ec5fe4ec4
-  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
-  sensors_plus: 18a9b346c43e157da17d2c8e99def703f9efb9d8
-  url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
+  haptic_feedback: fd1d8509833f58f164fc12122c0357fa9b2750e0
+  package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
+  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
+  sensors_plus: 6a11ed0c2e1d0bd0b20b4029d3bad27d96e0c65b
+  url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
 
 PODFILE CHECKSUM: c4c93c5f6502fe2754f48404d3594bf779584011
 

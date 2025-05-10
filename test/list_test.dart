@@ -32,8 +32,8 @@ void main() {
     Widget _buildBasicListWidget({
       required LdPaginator<String> data,
       String Function(String item)? grouping,
-      Widget Function(BuildContext context, String? criterion)?
-          seperatorBuilder,
+      Widget Function(BuildContext context, String? criterion)? groupingBuilder,
+      Widget Function(BuildContext context)? seperatorBuilder,
       Widget? header,
       Widget? footer,
     }) {
@@ -41,13 +41,14 @@ void main() {
         width: 500,
         height: 500,
         child: LdList<String, String?>(
-          data: data,
+          paginator: data,
           assumedItemHeight: 60,
           groupingCriterion: grouping,
-          seperatorBuilder: seperatorBuilder ??
+          separatorBuilder: seperatorBuilder ?? (context) => const LdDivider(),
+          groupHeaderBuilder: groupingBuilder ??
               (context, criterion) {
                 // add a divider between groups by default
-                return const LdDivider();
+                return Text("Group $criterion").padS();
               },
           itemBuilder: (context, item, index) {
             return LdListItem(
@@ -78,15 +79,15 @@ void main() {
             _buildBasicListWidget(
               data: LdPaginator<String>.fromList(sampleItems.sublist(0, 10)),
               // build two groups, items 1-5 and 6-10
-              grouping: (item) => int.parse(item.split(' ')[1]) <= 5
-                  ? 'Group 1-5'
-                  : 'Group 6-10',
-              seperatorBuilder: (context, criterion) {
-                return LdAutoSpace(children: [
-                  const LdDivider(),
-                  LdTextCaption(criterion!),
-                  const LdDivider(),
-                ]);
+              grouping: (item) => int.parse(item.split(' ')[1]) <= 5 ? 'Group 1-5' : 'Group 6-10',
+              groupingBuilder: (context, criterion) {
+                return LdAutoSpace(
+                  children: [
+                    const LdDivider(),
+                    LdTextCaption(criterion!),
+                    const LdDivider(),
+                  ],
+                );
               },
               header: const LdListItem(
                 leading: LdAvatar(
@@ -114,7 +115,7 @@ void main() {
               width: 500,
               height: 500,
               child: LdList<String, String>(
-                data: paginator,
+                paginator: paginator,
                 itemBuilder: (context, item, index) {
                   return const SizedBox.shrink();
                 },
@@ -126,7 +127,11 @@ void main() {
         },
         "Error State": (tester, place) async {
           final errorProducingPaginator = LdPaginator<String>(
-            fetchListFunction: (page, loadedItems, pageToken) {
+            fetchListFunction: ({
+              required offset,
+              required pageSize,
+              pageToken,
+            }) {
               throw LdException(message: "Intentional error");
             },
             debounceTime: const Duration(milliseconds: 0),
@@ -136,7 +141,7 @@ void main() {
               width: 500,
               height: 500,
               child: LdList<String, String>(
-                data: errorProducingPaginator,
+                paginator: errorProducingPaginator,
                 itemBuilder: (context, item, index) => const SizedBox.shrink(),
               ),
             ),
@@ -176,8 +181,7 @@ void main() {
       expect(find.text('Footer'), findsOneWidget);
     });
 
-    testWidgets('LdList handles grouping criteria correctly',
-        (WidgetTester tester) async {
+    testWidgets('LdList handles grouping criteria correctly', (WidgetTester tester) async {
       // Sample grouped data
       final groupedItems = [
         'Group A: Item 1',
@@ -194,9 +198,9 @@ void main() {
       await tester.pumpWidget(
         _wrapWithMaterialApp(
           LdList<String, String>(
-            data: paginator,
+            paginator: paginator,
             groupingCriterion: (item) => item.split(':')[0].trim(),
-            seperatorBuilder: (context, criterion) => Text(criterion),
+            groupHeaderBuilder: (context, criterion) => Text(criterion),
             itemBuilder: (context, item, index) => Text(item),
           ),
         ),
@@ -224,7 +228,7 @@ void main() {
       await tester.pumpWidget(
         _wrapWithMaterialApp(
           LdList<String, String>(
-            data: paginator,
+            paginator: paginator,
             emptyBuilder: (context, refresh) => const Text('No items found'),
             itemBuilder: (context, item, index) => Text(item),
           ),
@@ -241,19 +245,17 @@ void main() {
     testWidgets('LdList handles pagination', (WidgetTester tester) async {
       // Create a custom paginator with multiple pages
       final fiveItemsPerPagePaginator = LdPaginator<String>(
-        fetchListFunction: (page, loadedItems, pageToken) async {
+        pageSize: 5,
+        fetchListFunction: ({required offset, required pageSize, pageToken}) async {
           // Simulate a delay for network request
           await Future.delayed(const Duration(milliseconds: 100));
 
           // Each page has 5 items
-          const pageSize = 5;
           final totalItems = sampleItems.length;
 
           // Calculate start and end indices
-          final startIndex = page * pageSize;
-          final endIndex = (startIndex + pageSize < totalItems)
-              ? startIndex + pageSize
-              : totalItems;
+          final startIndex = offset;
+          final endIndex = (startIndex + pageSize < totalItems) ? startIndex + pageSize : totalItems;
 
           // Return results if valid range
           if (startIndex < totalItems) {
@@ -299,8 +301,7 @@ void main() {
       expect(find.text('Item 20'), findsOneWidget);
     });
 
-    testWidgets('LdList handles reset and refresh',
-        (WidgetTester tester) async {
+    testWidgets('LdList handles reset and refresh', (WidgetTester tester) async {
       final paginator = LdPaginator<String>.fromList(
         sampleItems.sublist(0, 5),
       );

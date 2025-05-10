@@ -12,7 +12,7 @@ class LdColor {
     this._center,
     this._darkCenter, {
     this.luminanceThreshold = 0.179,
-    this.disabledAlpha = 50,
+    this.disabledAlpha = 150,
   });
 
   Color center(bool isDark) => isDark ? shades[_darkCenter] : shades[_center];
@@ -24,8 +24,7 @@ class LdColor {
   }
 
   /// Get the dark center color of the palette
-  Color fromDarkCenter(int offset) =>
-      shades[(_darkCenter + offset).clamp(0, shades.length - 1)];
+  Color fromDarkCenter(int offset) => shades[(_darkCenter + offset).clamp(0, shades.length - 1)];
 
   /// Move the color relative to the palette
   /// returns the new color
@@ -90,13 +89,7 @@ class LdColor {
   final int disabledAlpha;
 
   LdColor disabled(bool isDark) => LdColor(
-        shades
-            .map((e) => Color.alphaBlend(
-                isDark
-                    ? ldWht.withAlpha(disabledAlpha)
-                    : ldBlk.withAlpha(disabledAlpha),
-                e))
-            .toList(),
+        shades.map((e) => Color.alphaBlend(ldBlk.withAlpha(disabledAlpha), e)).toList(),
         _center,
         _darkCenter,
       );

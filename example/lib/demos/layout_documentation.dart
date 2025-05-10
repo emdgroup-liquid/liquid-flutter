@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:liquid/code_block.dart';
 import 'package:liquid/components/component_page.dart';
-import 'package:liquid/components/components_accordion.dart';
+import 'package:liquid/components/layout/components_accordion.dart';
 import 'package:liquid/demos/spacing_padding_documentation.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
@@ -23,8 +23,7 @@ class LayoutDocumentation extends StatelessWidget {
         demo: LdAutoSpace(children: [
           LdBundle(
             children: [
-              LdTextP(
-                  "To create consistent layouts, Liquid provides a set of predefined components."),
+              LdTextP("To create consistent layouts, Liquid provides a set of predefined components."),
               LdTextHs("🦄 LdAutoSpace"),
               ComponentsAccordion(components: {"LdAutoSpace", "LdBundle"}),
               MarkdownBody(

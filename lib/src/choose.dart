@@ -5,6 +5,7 @@ import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/input_color_bundle.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../liquid_flutter.dart';
 
@@ -148,15 +149,16 @@ class _LdChooseState<T> extends State<LdChoose<T>> {
               title:
                   Text(widget.label ?? LiquidLocalizations.of(context).choose),
               actions: (context) => [
+                ldSpacerM,
                 LdButtonGhost(
                   child: Text(
                     LiquidLocalizations.of(context).done,
                   ),
                   onPressed: Navigator.of(context).pop,
                 ),
-                ldSpacerM,
               ],
-              padding: EdgeInsets.zero,
+              contentPadding: EdgeInsets.zero,
+              headerPadding: LdTheme.of(context).pad(),
               contentSlivers: (context) {
                 return [
                   _LdChooseList<T>(
@@ -167,6 +169,9 @@ class _LdChooseState<T> extends State<LdChoose<T>> {
                     enableSearch: _enableSearch,
                     multiple: widget.multiple,
                     allowEmpty: widget.allowEmpty,
+                  ),
+                  const SliverToBoxAdapter(
+                    child: ldSpacerL,
                   )
                 ];
               },
@@ -235,9 +240,11 @@ class _LdChooseState<T> extends State<LdChoose<T>> {
                             ),
                           ),
                         ),
-                        Icon(Icons.arrow_forward_ios,
-                            size: theme.labelSize(widget.size),
-                            color: theme.primaryColor)
+                        Icon(
+                          LucideIcons.chevronRight,
+                          size: theme.labelSize(widget.size),
+                          color: theme.primaryColor,
+                        )
                       ],
                     ),
                     padding: theme.balPad(widget.size),

@@ -24,8 +24,9 @@ class LdExceptionMoreInfoButton extends StatelessWidget {
       ),
       modal: LdModal(
         noHeader: true,
+        showDismissButton: false,
         modalContent: (context) => LdExceptionDialog(
-          error: error,
+          error: error!,
         ),
         actions: (context) => [
           LdButtonGhost(

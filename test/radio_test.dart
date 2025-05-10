@@ -67,13 +67,13 @@ void main() {
 
     expect(find.byType(LdRadio), findsOneWidget);
 
-    final radio = ((test.firstWidget(find.byKey(const ValueKey("frame")))
-            as AnimatedContainer)
-        .decoration as BoxDecoration);
+    final radio =
+        ((test.firstWidget(find.byKey(const ValueKey("frame"))) as Container)
+            .decoration as BoxDecoration);
 
     expect(
-      radio.color,
-      shadAmber.idle(false),
+      radio.border?.top.color,
+      shadAmber.active(false),
     );
     // check if color is correct by finding the box decoration
   });

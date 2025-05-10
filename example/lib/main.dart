@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:liquid/router.dart';
@@ -13,6 +14,8 @@ import 'package:provider/provider.dart';
 import 'package:syntax_highlight/syntax_highlight.dart';
 
 GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+
+final searchFocusNode = FocusNode();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -59,22 +62,32 @@ class _LiquidExampleState extends State<LiquidExample> {
     return Provider<AppRouter>(
         create: (context) => AppRouter(),
         child: Builder(builder: (BuildContext context) {
-          return LdNotificationProvider(child: LdThemeProvider(
-            child: LdThemedAppBuilder(appBuilder: (context, theme) {
-              // We use a root navigator because else our nested navigation will not work
-              var router = context.read<AppRouter>().router;
+          return CallbackShortcuts(
+              bindings: {
+                const SingleActivator(LogicalKeyboardKey.keyK, meta: true): () {
+                  searchFocusNode.requestFocus();
+                },
+                const SingleActivator(LogicalKeyboardKey.keyK, control: true):
+                    () {
+                  searchFocusNode.requestFocus();
+                },
+              },
+              child: LdNotificationProvider(child: LdThemeProvider(
+                child: LdThemedAppBuilder(appBuilder: (context, theme) {
+                  // We use a root navigator because else our nested navigation will not work
+                  var router = context.read<AppRouter>().router;
 
-              return MaterialApp.router(
-                localizationsDelegates:
-                    LiquidLocalizations.localizationsDelegates,
-                locale: const Locale('en'),
-                title: 'Liquid Design Demo',
-                debugShowCheckedModeBanner: false,
-                theme: theme,
-                routerConfig: router,
-              );
-            }),
-          ));
+                  return MaterialApp.router(
+                    localizationsDelegates:
+                        LiquidLocalizations.localizationsDelegates,
+                    locale: const Locale('en'),
+                    title: 'Liquid Design Demo',
+                    debugShowCheckedModeBanner: false,
+                    theme: theme,
+                    routerConfig: router,
+                  );
+                }),
+              )));
         }));
   }
 }

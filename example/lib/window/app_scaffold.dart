@@ -29,7 +29,7 @@ class _AppScaffoldState extends State<AppScaffold> {
 
     return ResponsiveBuilder(
       builder: (context, size) {
-        final split = size.screenSize.width > 800;
+        final split = size.screenSize.width > 900;
         return LdWindowFrame(
           title: const Text("Liquid Flutter"),
           frameBuilder: (context, child) => GestureDetector(

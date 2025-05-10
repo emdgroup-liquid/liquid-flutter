@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/shrinkwrap_pageview.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 class LdDatePicker extends StatelessWidget {
@@ -58,9 +59,9 @@ class LdDatePicker extends StatelessWidget {
       ),
       modal: LdModal(
         key: const Key('date_picker_sheet'),
-        noHeader: true,
         size: LdSize.m,
-        padding: LdTheme.of(context).pad(size: LdSize.s),
+        contentPadding: LdTheme.of(context).pad(size: LdSize.s),
+        title: Text(label ?? LiquidLocalizations.of(context).selectDate),
         modalContent: (
           context,
         ) =>
@@ -289,7 +290,7 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
   @override
   Widget build(BuildContext context) {
     final previousMonth = LdButtonGhost(
-      child: const Icon(Icons.arrow_back),
+      child: const Icon(LucideIcons.arrowLeft),
       disabled: !previousMonthIsValid,
       onPressed: () {
         viewDate(
@@ -303,7 +304,7 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
     );
 
     final nextMonth = LdButtonGhost(
-      child: const Icon(Icons.arrow_forward),
+      child: const Icon(LucideIcons.arrowRight),
       disabled: !nextMonthIsValid,
       onPressed: () {
         viewDate(DateTime(
@@ -539,6 +540,7 @@ class _MonthView extends StatelessWidget {
               child: AspectRatio(
                 aspectRatio: aspectRatio,
                 child: LdButton(
+                  circular: true,
                   mode: _buttonMode(day),
                   key: Key("day_${day.year}_${day.month}_${day.day}"),
                   size: LdSize.s,
@@ -565,6 +567,7 @@ class _MonthView extends StatelessWidget {
               aspectRatio: aspectRatio,
               child: LdButton(
                 size: LdSize.s,
+                circular: true,
                 key: Key("day_${day.year}_${day.month}_${day.day}"),
                 mode: _buttonMode(day),
                 disabled: !isValidDate(day),
@@ -589,6 +592,7 @@ class _MonthView extends StatelessWidget {
               child: AspectRatio(
                 aspectRatio: aspectRatio,
                 child: LdButtonGhost(
+                  circular: true,
                   mode: _buttonMode(day),
                   key: Key("day_${day.year}_${day.month}_${day.day}"),
                   active: isSelected(day),
