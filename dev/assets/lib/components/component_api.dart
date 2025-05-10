@@ -88,7 +88,7 @@ class ComponentApi extends StatelessWidget {
                                         size: LdSize.s,
                                         child: const Text("Required")),
                                   ldSpacerXS,
-                                  Expanded(
+                                  Flexible(
                                     child: Text.rich(TextSpan(children: [
                                       TextSpan(
                                         text: parameter.type,
@@ -102,7 +102,12 @@ class ComponentApi extends StatelessWidget {
                                       const TextSpan(text: " "),
                                       TextSpan(
                                         text: parameter.name,
-                                        style: const TextStyle(fontSize: 12),
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: parameter.required
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                        ),
                                       ),
                                       if (parameter ==
                                           constructor.signature.last)
