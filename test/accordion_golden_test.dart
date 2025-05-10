@@ -42,7 +42,7 @@ void main() {
               return SizedBox(height: 50, child: Text("Test $n"));
             },
             itemCount: 2,
-            elevateActive: true,
+            wrapActiveInCard: true,
             initialOpenIndex: const {0},
             headerBuilder: (context, n) {
               return Text("Header $n");
@@ -57,7 +57,7 @@ void main() {
             return SizedBox(height: 50, child: Text("Test $n"));
           },
           itemCount: 2,
-          elevateActive: true,
+          wrapActiveInCard: true,
           initialOpenIndex: const {0, 1},
           headerBuilder: (context, n) {
             return Text("Header $n");

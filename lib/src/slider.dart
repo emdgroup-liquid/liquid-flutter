@@ -13,13 +13,7 @@ class LdSlider extends StatefulWidget {
   final String? label;
   final bool disabled;
 
-  const LdSlider(
-      {super.key,
-      required this.onSlideComplete,
-      this.hint,
-      this.color,
-      this.label,
-      this.disabled = false});
+  const LdSlider({super.key, required this.onSlideComplete, this.hint, this.color, this.label, this.disabled = false});
 
   @override
   State<LdSlider> createState() => _LdSliderState();
@@ -31,22 +25,23 @@ class _LdSliderState extends State<LdSlider> with TickerProviderStateMixin {
   final double _threshold = 0.8;
   bool _sliding = false;
 
-  late AnimationController _controller;
-  late AnimationController _opacityController;
+  AnimationController? _controller;
+  AnimationController? _opacityController;
   @override
   initState() {
-    _controller = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 500));
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
 
-    _opacityController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 200), value: 1);
+    _opacityController = AnimationController(vsync: this, duration: const Duration(milliseconds: 200), value: 1);
 
     super.initState();
   }
 
   @override
   dispose() {
-    _controller.dispose();
+    _controller?.dispose();
+    _opacityController?.dispose();
+    _controller = null;
+    _opacityController = null;
     super.dispose();
   }
 
@@ -63,13 +58,13 @@ class _LdSliderState extends State<LdSlider> with TickerProviderStateMixin {
 
   _onDragUpdate(DragUpdateDetails details) {
     if (widget.disabled) {
-      _controller.value = 0;
+      _controller?.value = 0;
       _value = 0;
       return;
     }
     setState(() {
       _value = (details.localPosition.dx - 48 / 2) / _max;
-      _controller.value = _value;
+      _controller?.value = _value;
       /*if (_value > _threshold && !_reached) {
         HapticFeedback.heavyImpact();
         _reached = true;
@@ -85,21 +80,23 @@ class _LdSliderState extends State<LdSlider> with TickerProviderStateMixin {
     if (_value > _threshold) {
       HapticFeedback.mediumImpact();
       widget.onSlideComplete();
-      await _controller.animateTo(1);
+
+      await _controller?.animateTo(1);
       await Future.delayed(const Duration(milliseconds: 300));
-      await _opacityController.animateTo(0,
-          duration: const Duration(milliseconds: 300));
+      await _opacityController?.animateTo(0, duration: const Duration(milliseconds: 300));
 
-      _controller.value = 0.0;
-      _opacityController.animateTo(1);
+      _controller?.value = 0.0;
+      _opacityController?.animateTo(1);
     } else {
-      _controller.animateTo(0);
+      _controller?.animateTo(0);
     }
-    setState(() {
-      _value = 0;
 
-      _sliding = false;
-    });
+    if (mounted) {
+      setState(() {
+        _value = 0;
+        _sliding = false;
+      });
+    }
   }
 
   bool get _reachedThreshold => _value > _threshold;
@@ -107,8 +104,7 @@ class _LdSliderState extends State<LdSlider> with TickerProviderStateMixin {
   double get _thumbSize => 40;
   double get _thumbPadding => 4;
 
-  Color _activeColor(LdTheme theme) =>
-      (widget.color ?? theme.palette.primary).active(
+  Color _activeColor(LdTheme theme) => (widget.color ?? theme.palette.primary).active(
         theme.isDark,
       );
 
@@ -121,8 +117,7 @@ class _LdSliderState extends State<LdSlider> with TickerProviderStateMixin {
   }
 
   Widget _buildThumb(LdTheme theme, BoxConstraints constraints) {
-    Color iconColor =
-        (widget.color ?? theme.palette.primary).idle(theme.isDark);
+    Color iconColor = (widget.color ?? theme.palette.primary).idle(theme.isDark);
     Color borderColor = theme.border;
     Color thumbColor = theme.neutralShade(2);
 
@@ -138,16 +133,16 @@ class _LdSliderState extends State<LdSlider> with TickerProviderStateMixin {
       iconColor = theme.neutralShade(3);
     }
 
+    final slideValue = _controller?.value ?? 0;
+    final opacityValue = _opacityController?.value ?? 1;
+
+    final availableWidth = constraints.maxWidth - _thumbSize - _thumbPadding * 2 - theme.borderWidth * 2;
+
     return Positioned(
-      left: _controller.value *
-              (constraints.maxWidth -
-                  _thumbSize -
-                  _thumbPadding * 2 -
-                  theme.borderWidth * 2) +
-          _thumbPadding,
+      left: slideValue * availableWidth + _thumbPadding,
       top: _thumbPadding,
       child: Opacity(
-        opacity: _opacityController.value,
+        opacity: opacityValue,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           width: _thumbSize,
@@ -196,15 +191,14 @@ class _LdSliderState extends State<LdSlider> with TickerProviderStateMixin {
             child: LdAutoBackground(
                 borderRadius: theme.radius(LdSize.m),
                 child: GestureDetector(
-                  onHorizontalDragStart: (details) =>
-                      _onDragStart(details, constraints),
+                  onHorizontalDragStart: (details) => _onDragStart(details, constraints),
                   onHorizontalDragUpdate: _onDragUpdate,
                   onHorizontalDragEnd: _onDragEnd,
                   child: AnimatedBuilder(
-                    animation: _opacityController,
+                    animation: _opacityController!,
                     builder: (context, child) {
                       return AnimatedBuilder(
-                        animation: _controller,
+                        animation: _controller!,
                         builder: (context, child) {
                           return Stack(
                             children: [
@@ -212,9 +206,7 @@ class _LdSliderState extends State<LdSlider> with TickerProviderStateMixin {
                                 Center(
                                   child: Opacity(
                                     child: LdMute(child: LdTextL(widget.hint!)),
-                                    opacity: widget.disabled
-                                        ? 0.2
-                                        : 1 - _controller.value,
+                                    opacity: widget.disabled ? 0.2 : 1 - _controller!.value,
                                   ),
                                 ),
                               _buildThumb(theme, constraints)

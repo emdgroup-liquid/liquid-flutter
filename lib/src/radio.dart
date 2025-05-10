@@ -57,7 +57,7 @@ class LdRadio extends StatelessWidget {
             children: [
               LdSpring(
                   springConstant: 20,
-                  position: (checked ? 4 : 2),
+                  position: (checked ? radioSize / 4 : radioSize / 8),
                   builder: (context, state) {
                     return Container(
                       height: radioSize,
