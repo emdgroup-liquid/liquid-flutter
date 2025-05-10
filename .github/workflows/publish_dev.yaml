@@ -6,6 +6,9 @@ on:
 jobs:
   release_liquid_flutter_dev:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
     steps:
       - name: 🔑 Get token for bumper app
         uses: actions/create-github-app-token@v1
