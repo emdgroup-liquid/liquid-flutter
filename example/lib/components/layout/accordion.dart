@@ -14,11 +14,11 @@ class AccordionDemo extends StatefulWidget {
 class _AccordionDemoState extends State<AccordionDemo> {
   bool _onSurface = false;
   bool _allowMultiple = false;
-  bool _elevate = false;
-
-  _toggleElevate(bool newState) {
+  bool _wrapActiveInCard = false;
+  bool _flatCard = false;
+  _toggleFlatCard(bool newState) {
     setState(() {
-      _elevate = newState;
+      _flatCard = newState;
     });
   }
 
@@ -34,11 +34,18 @@ class _AccordionDemoState extends State<AccordionDemo> {
     });
   }
 
+  _toggleWrapActiveInCard(bool newState) {
+    setState(() {
+      _wrapActiveInCard = newState;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final accordion = LdAccordion(
       headerBuilder: (context, n) => Text("Accordion $n"),
-      elevateActive: _elevate,
+      wrapActiveInCard: _wrapActiveInCard,
+      flatCard: _flatCard,
       allowMultipleOpen: _allowMultiple,
       childBuilder: (context, n) => LdAutoSpace(
         children: [
@@ -67,10 +74,9 @@ class _AccordionDemoState extends State<AccordionDemo> {
               child: LdAutoSpace(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (!_elevate) ...[
+                  if (!_wrapActiveInCard) ...[
                     LdCard(padding: EdgeInsets.zero, child: accordion),
-                    const LdTextL(
-                        "Accordion is placed inside an LdCard with no padding")
+                    const LdTextL("Accordion is placed inside an LdCard with no padding")
                   ] else
                     accordion
                 ],
@@ -82,14 +88,17 @@ class _AccordionDemoState extends State<AccordionDemo> {
               onChanged: _toggleAllowMultiple,
             ),
             LdToggle(
-              label: "Elevate",
-              checked: _elevate,
-              onChanged: _toggleElevate,
+              label: "Wrap active in card",
+              checked: _wrapActiveInCard,
+              onChanged: _toggleWrapActiveInCard,
             ),
             LdToggle(
-                label: "On Surface background",
-                checked: _onSurface,
-                onChanged: _toggleOnSurface),
+              label: "Flat card",
+              checked: _flatCard,
+              disabled: !_wrapActiveInCard,
+              onChanged: _toggleFlatCard,
+            ),
+            LdToggle(label: "On Surface background", checked: _onSurface, onChanged: _toggleOnSurface),
             LdDivider(),
             ComponentWell(
                 title: const LdTextHs(".fromList constructor"),
