@@ -3,7 +3,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 /// Renders an LdException in a dialog
 class LdExceptionDialog extends StatelessWidget {
-  final LdException? error;
+  final LdException error;
   final Widget? primaryButton;
 
   const LdExceptionDialog({

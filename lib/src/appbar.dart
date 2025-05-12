@@ -39,9 +39,12 @@ class LdAppBar extends AppBar {
           systemOverlayStyle: SystemUiOverlayStyle(
             statusBarColor: LdTheme.of(context).surface,
             systemNavigationBarColor: LdTheme.of(context).surface,
-            systemNavigationBarIconBrightness: LdTheme.of(context).isDark ? Brightness.light : Brightness.dark,
-            statusBarIconBrightness: LdTheme.of(context).isDark ? Brightness.light : Brightness.dark,
-            statusBarBrightness: LdTheme.of(context).isDark ? Brightness.dark : Brightness.light,
+            systemNavigationBarIconBrightness:
+                LdTheme.of(context).isDark ? Brightness.light : Brightness.dark,
+            statusBarIconBrightness:
+                LdTheme.of(context).isDark ? Brightness.light : Brightness.dark,
+            statusBarBrightness:
+                LdTheme.of(context).isDark ? Brightness.dark : Brightness.light,
           ),
           title: DefaultTextStyle(
             style: ldBuildTextStyle(
@@ -68,5 +71,18 @@ class LdAppBar extends AppBar {
                   )
                 : const LdDivider(height: 1),
           ),
+          actions: actions?.map((action) {
+            if (actionsDisabled) {
+              // Wrap each action in an AbsorbPointer to block interactions
+              return AbsorbPointer(
+                child: Opacity(
+                  // Optionally reduce opacity to indicate disabled state
+                  opacity: 0.5,
+                  child: action,
+                ),
+              );
+            }
+            return action;
+          }).toList(),
         );
 }

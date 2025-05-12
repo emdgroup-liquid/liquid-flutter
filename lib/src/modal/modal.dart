@@ -1,5 +1,5 @@
 import 'dart:io' if (dart.library.io) 'dart:io';
-import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -188,28 +188,17 @@ class LdModal {
 
   Widget? _getTrailingNavBarWidget(BuildContext context) {
     if (actions != null) {
-      final theme = LdTheme.of(context);
       return _getInjectables(
         context,
         (context) => Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Padding(
-              padding: EdgeInsets.only(
-                right: padding?.right ?? theme.paddingSize(size: LdSize.m),
-              ),
-              child: Container(
-                constraints: BoxConstraints(
-                  maxHeight: navbarHeight(context),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ...actions!(context),
-                  ],
-                ),
-              ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ...actions!(context),
+              ],
             ),
           ],
         ),

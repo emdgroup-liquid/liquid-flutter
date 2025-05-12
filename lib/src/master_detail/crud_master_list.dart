@@ -37,7 +37,7 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
   Widget build(BuildContext context) {
     final showSelectionControls = data.isMultiSelectMode;
     return LdList<T, void>(
-      data: data,
+      paginator: data,
       assumedItemHeight: assumedItemHeight,
       itemBuilder: (context, item, index) {
         final isSelected = data.isItemSelected(item);

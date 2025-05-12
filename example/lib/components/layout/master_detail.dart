@@ -202,7 +202,7 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
                 ).padL(),
                 buildMaster: (context, openItem, isSeparatePage, controller) =>
                     LdList<ExampleItem, void>(
-                  data: _paginator,
+                  paginator: _paginator,
                   assumedItemHeight: 60,
                   itemBuilder: (context, item, index) {
                     return LdListItem(
