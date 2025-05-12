@@ -34,8 +34,10 @@ class _LdOrbState extends State<LdOrb> with TickerProviderStateMixin {
 
   @override
   void initState() {
-    _animationController =
-        AnimationController(vsync: this, duration: const Duration(seconds: 4));
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    );
 
     _animation = _tween.animate(_animationController!);
 
@@ -250,7 +252,7 @@ class _OrbPainter extends CustomPainter {
     canvas.drawPath(
         path,
         Paint()
-          ..color = theme.palette.primary.active(theme.isDark)
+          ..color = theme.palette.primary.active(theme.isDark).withAlpha(100)
           ..style = PaintingStyle.fill);
 
     Path secondWave = Path();
@@ -279,7 +281,7 @@ class _OrbPainter extends CustomPainter {
 
     canvas.drawPath(
       secondWave,
-      Paint()..color = theme.palette.primary.hover(theme.isDark),
+      Paint()..color = theme.palette.primary.hover(theme.isDark).withAlpha(50),
     );
 
     // Grey border

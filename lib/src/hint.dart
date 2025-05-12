@@ -19,11 +19,13 @@ class LdHint extends StatelessWidget {
   final Widget? child;
   final LdHintType type;
   final LdSize size;
+  final CrossAxisAlignment crossAxisAlignment;
 
   const LdHint({
     this.child,
     required this.type,
     this.size = LdSize.m,
+    this.crossAxisAlignment = CrossAxisAlignment.center,
     super.key,
   });
 
@@ -34,7 +36,7 @@ class LdHint extends StatelessWidget {
     return Container(
       constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
       child: IntrinsicWidth(
-        child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+        child: Row(crossAxisAlignment: crossAxisAlignment, children: [
           LdIndicator(
             type: switch (type) {
               LdHintType.error => LdIndicatorType.error,
@@ -52,7 +54,12 @@ class LdHint extends StatelessWidget {
             Expanded(
               child: DefaultTextStyle(
                 child: child!,
-                style: ldBuildTextStyle(theme, LdTextType.label, LdSize.m),
+                style: ldBuildTextStyle(
+                  theme,
+                  LdTextType.paragraph,
+                  LdSize.m,
+                  lineHeight: 1.2,
+                ),
               ),
             ),
           ]
@@ -99,9 +106,7 @@ class LdExclamationIcon extends StatelessWidget {
           ),
           SizedBox(height: size * 0.12),
           Container(
-            decoration: BoxDecoration(
-                color: style.color,
-                borderRadius: BorderRadius.circular(size * 0.15)),
+            decoration: BoxDecoration(color: style.color, borderRadius: BorderRadius.circular(size * 0.15)),
             height: size * 0.25,
             width: size * 0.25,
           )
@@ -130,9 +135,7 @@ class LdCrossIcon extends StatelessWidget {
             child: Transform.rotate(
               angle: -0.25 * pi,
               child: Container(
-                decoration: BoxDecoration(
-                    color: style.color,
-                    borderRadius: BorderRadius.circular(size * 0.2)),
+                decoration: BoxDecoration(color: style.color, borderRadius: BorderRadius.circular(size * 0.2)),
                 height: size * 1,
                 width: size * 0.2,
               ),
@@ -142,9 +145,7 @@ class LdCrossIcon extends StatelessWidget {
             child: Transform.rotate(
               angle: 0.25 * pi,
               child: Container(
-                decoration: BoxDecoration(
-                    color: style.color,
-                    borderRadius: BorderRadius.circular(size * 0.2)),
+                decoration: BoxDecoration(color: style.color, borderRadius: BorderRadius.circular(size * 0.2)),
                 height: size * 1,
                 width: size * 0.2,
               ),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+
 import 'package:provider/provider.dart';
 
 import 'touchable/touchable_colors.dart';
@@ -210,7 +212,8 @@ class _LdButtonState extends State<LdButton> {
   }
 
   bool get _circular {
-    return widget.circular == true || widget.child is Icon;
+    return widget.circular == true ||
+        (widget.child is Icon && widget.circular == null);
   }
 
   @override
@@ -252,7 +255,7 @@ class _LdButtonState extends State<LdButton> {
               colors: colors,
               status: status,
               center: centerText,
-              circular: !_failed && _circular,
+              circular: _circular,
               width: widget.width,
               mode: widget.mode,
               borderRadius: widget.borderRadius ?? _theme.radius(LdSize.s),
@@ -285,6 +288,12 @@ class _LdButtonState extends State<LdButton> {
                       builder: (context, state) {
                         if (!_failed) {
                           return const SizedBox();
+                        }
+
+                        if (_circular) {
+                          return const Icon(
+                            LucideIcons.x,
+                          );
                         }
 
                         final errorText = widget.errorText ??

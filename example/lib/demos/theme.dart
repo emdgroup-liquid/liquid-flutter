@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:liquid/code_block.dart';
 import 'package:liquid/color_selector.dart';
 import 'package:liquid/components/component_page.dart';
-import 'package:liquid/components/components_accordion.dart';
+import 'package:liquid/components/layout/components_accordion.dart';
 import 'package:liquid/demos/ld_color_swatches.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_emd_theme/liquid_flutter_emd_theme.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class ThemeDemo extends StatefulWidget {
   const ThemeDemo({super.key});
@@ -43,13 +44,7 @@ class _ThemeDemoState extends State<ThemeDemo> {
   Widget build(BuildContext context) {
     return ComponentPage(
       title: "Theme & Colors",
-      apiComponents: const [
-        "LdTheme",
-        "LdThemeProvider",
-        "LdColorNames",
-        "LdReactiveColorBundle",
-        "LdReactiveColor"
-      ],
+      apiComponents: const ["LdTheme", "LdThemeProvider", "LdColorNames", "LdReactiveColorBundle", "LdReactiveColor"],
       demo: LdAutoSpace(
         children: [
           const LdBundle(
@@ -87,8 +82,7 @@ class _ThemeDemoState extends State<ThemeDemo> {
                           });
                         }),
                     const LdDivider(),
-                    const LdTextP(
-                        "EMD Brand Colors (liquid_flutter_emd_theme package (see notes on license))"),
+                    const LdTextP("EMD Brand Colors (liquid_flutter_emd_theme package (see notes on license))"),
                     ColorSelctor(
                         active: e,
                         colors: const {
@@ -116,19 +110,11 @@ class _ThemeDemoState extends State<ThemeDemo> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                SizedBox(
-                                    height: 32,
-                                    child:
-                                        Center(child: LdTextL("Dark center"))),
+                                SizedBox(height: 32, child: Center(child: LdTextL("Dark center"))),
                                 LdDivider(),
-                                SizedBox(
-                                    height: 53,
-                                    child: Center(child: LdTextL("Shades"))),
+                                SizedBox(height: 53, child: Center(child: LdTextL("Shades"))),
                                 LdDivider(),
-                                SizedBox(
-                                    height: 32,
-                                    child:
-                                        Center(child: LdTextL("Light center"))),
+                                SizedBox(height: 32, child: Center(child: LdTextL("Light center"))),
                               ],
                             ),
                           ),
@@ -137,25 +123,22 @@ class _ThemeDemoState extends State<ThemeDemo> {
                             children: [
                               LdSpring(
                                 position: e.shades.indexOf(e.center(true)) * 33,
-                                builder: (context, state) =>
-                                    Transform.translate(
+                                builder: (context, state) => Transform.translate(
                                   offset: Offset(state.position, 0),
                                   child: const SizedBox(
                                     height: 32,
-                                    child: Icon(Icons.arrow_downward),
+                                    child: Icon(LucideIcons.arrowDown),
                                   ),
                                 ),
                               ),
                               _buildShades(),
                               LdSpring(
-                                position:
-                                    e.shades.indexOf(e.center(false)) * 33,
-                                builder: (context, state) =>
-                                    Transform.translate(
+                                position: e.shades.indexOf(e.center(false)) * 33,
+                                builder: (context, state) => Transform.translate(
                                   offset: Offset(state.position, 0),
                                   child: const SizedBox(
                                     height: 32,
-                                    child: Icon(Icons.arrow_upward),
+                                    child: Icon(LucideIcons.arrowUp),
                                   ),
                                 ),
                               ),
@@ -167,15 +150,13 @@ class _ThemeDemoState extends State<ThemeDemo> {
                     if (_selectedShade != null)
                       LdAutoSpace(
                         children: [
-                          LdTextHs(
-                              "Selected shade: ${e.shades.indexOf(_selectedShade!)}"),
+                          LdTextHs("Selected shade: ${e.shades.indexOf(_selectedShade!)}"),
                           CodeBlock(
                             code:
                                 "final absoluteColor = ${colorNames[e]}.shades[${e.shades.indexOf(_selectedShade!)}];",
                           ),
                           const LdTextHs("Relative colors:"),
-                          const LdTextP(
-                              "Use the relative methods to get colors depending on the brightness."),
+                          const LdTextP("Use the relative methods to get colors depending on the brightness."),
                           const LdHint(
                               type: LdHintType.warning,
                               child: Text(
@@ -328,50 +309,46 @@ class _ThemeDemoState extends State<ThemeDemo> {
   Row _buildShades() {
     final theme = LdTheme.of(context, listen: true);
     return Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-      ...e.shades
-          .mapIndexed((index, shade) => SizedBox(
-                width: 32,
-                child: Column(
-                  children: [
-                    const LdDivider(),
-                    SizedBox(
-                      height: 53,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Tooltip(
-                            message: "${shade.toString()} \n",
-                            child: LdTouchableSurface(
-                              active: _selectedShade == shade,
-                              color: e,
-                              onTap: () {
-                                setState(() {
-                                  _selectedShade = shade;
-                                });
-                              },
-                              builder: (context, colors, status) => Container(
-                                height: 32,
-                                width: 32,
-                                decoration: BoxDecoration(
-                                  color: shade,
-                                  border: Border.all(
-                                    color: status.active
-                                        ? theme.absolute
-                                        : theme.border,
-                                    width: 2,
-                                  ),
-                                ),
+      ...e.shades.mapIndexed((index, shade) => SizedBox(
+            width: 32,
+            child: Column(
+              children: [
+                const LdDivider(),
+                SizedBox(
+                  height: 53,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Tooltip(
+                        message: "${shade.toString()} \n",
+                        child: LdTouchableSurface(
+                          active: _selectedShade == shade,
+                          color: e,
+                          onTap: () {
+                            setState(() {
+                              _selectedShade = shade;
+                            });
+                          },
+                          builder: (context, colors, status) => Container(
+                            height: 32,
+                            width: 32,
+                            decoration: BoxDecoration(
+                              color: shade,
+                              border: Border.all(
+                                color: status.active ? theme.absolute : theme.border,
+                                width: 2,
                               ),
                             ),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                    const LdDivider(),
-                  ],
+                    ],
+                  ),
                 ),
-              ))
-          ,
+                const LdDivider(),
+              ],
+            ),
+          )),
     ]);
   }
 }

@@ -18,13 +18,13 @@ class LdExceptionDialog extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         LdTextH(
-          error!.message,
+          error.message,
           textAlign: TextAlign.center,
         ),
-        if (error!.moreInfo != null)
+        if (error.moreInfo != null)
           LdMute(
             child: LdTextPs(
-              error!.moreInfo!,
+              error.moreInfo!,
               textAlign: TextAlign.center,
             ),
           ),
@@ -37,7 +37,7 @@ class LdExceptionDialog extends StatelessWidget {
               },
             )
       ],
-    ).padL().padL();
+    );
   }
 
   void show(BuildContext context) {

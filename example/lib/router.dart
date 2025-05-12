@@ -1,33 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid/chemical_screen.dart';
-import 'package:liquid/components/autospace.dart';
-import 'package:liquid/components/button.dart';
-import 'package:liquid/components/card.dart';
-import 'package:liquid/components/choose.dart';
-import 'package:liquid/components/context_menu.dart';
-import 'package:liquid/components/date_time_pickers.dart';
-import 'package:liquid/components/drawer.dart';
-import 'package:liquid/components/exception.dart';
-import 'package:liquid/components/icons.dart';
-import 'package:liquid/components/indicator.dart';
-import 'package:liquid/components/list.dart';
-import 'package:liquid/components/list_full_screen.dart';
-import 'package:liquid/components/loader.dart';
-import 'package:liquid/components/master_detail.dart';
+import 'package:liquid/components/layout/autospace.dart';
+import 'package:liquid/components/interaction/button.dart';
+import 'package:liquid/components/layout/card.dart';
+import 'package:liquid/components/form_elements/choose.dart';
+import 'package:liquid/components/interaction/context_menu.dart';
+import 'package:liquid/components/form_elements/date_time_pickers.dart';
+import 'package:liquid/components/layout/drawer.dart';
+import 'package:liquid/components/feedback/exception.dart';
+import 'package:liquid/components/data_display/icon.dart';
+import 'package:liquid/components/feedback/indicator.dart';
+import 'package:liquid/components/layout/list.dart';
+import 'package:liquid/components/layout/list_full_screen.dart';
+import 'package:liquid/components/feedback/loader.dart';
+import 'package:liquid/components/layout/list_item.dart';
+import 'package:liquid/components/layout/master_detail.dart';
+import 'package:liquid/components/layout/selectable_list.dart';
 import 'package:liquid/components/material.dart';
-import 'package:liquid/components/modal.dart';
-import 'package:liquid/components/orb.dart';
-import 'package:liquid/components/radio.dart';
-import 'package:liquid/components/reveal.dart';
-import 'package:liquid/components/runner.dart';
-import 'package:liquid/components/select.dart';
-import 'package:liquid/components/slider.dart';
-import 'package:liquid/components/spring.dart';
-import 'package:liquid/components/submit.dart';
-import 'package:liquid/components/switch.dart';
+import 'package:liquid/components/interaction/modal.dart';
+import 'package:liquid/components/interaction/orb.dart';
+import 'package:liquid/components/form_elements/radio.dart';
+import 'package:liquid/components/feedback/reveal.dart';
+import 'package:liquid/components/interaction/action_runner.dart';
+import 'package:liquid/components/form_elements/select.dart';
+import 'package:liquid/components/form_elements/slider.dart';
+import 'package:liquid/components/layout/spring.dart';
+import 'package:liquid/components/form_elements/submit.dart';
+import 'package:liquid/components/form_elements/switch.dart';
 import 'package:liquid/components/tab.dart';
-import 'package:liquid/components/toggle.dart';
+import 'package:liquid/components/form_elements/toggle.dart';
 import 'package:liquid/demos/layout_documentation.dart';
 import 'package:liquid/demos/radius_documentation.dart';
 import 'package:liquid/demos/task_demo/task_demo.dart';
@@ -36,18 +38,18 @@ import 'package:liquid/demos/typography_documentation.dart';
 import 'package:liquid/home.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-import 'components/accordion.dart';
-import 'components/badge.dart';
-import 'components/breadcrumb.dart';
-import 'components/checkbox.dart';
-import 'components/divider.dart';
-import 'components/form.dart';
-import 'components/hint.dart';
-import 'components/input.dart';
-import 'components/notification.dart';
-import 'components/reactive_form.dart';
-import 'components/table.dart';
-import 'components/tag.dart';
+import 'components/layout/accordion.dart';
+import 'components/feedback/badge.dart';
+import 'components/interaction/breadcrumb.dart';
+import 'components/form_elements/checkbox.dart';
+import 'components/layout/divider.dart';
+import 'components/form_elements/form.dart';
+import 'components/feedback/hint.dart';
+import 'components/form_elements/input.dart';
+import 'components/feedback/notification.dart';
+import 'components/form_elements/reactive_form.dart';
+import 'components/data_display/table.dart';
+import 'components/data_display/tag.dart';
 import 'window/app_scaffold.dart';
 
 class AppRouter {
@@ -302,6 +304,16 @@ class AppRouter {
             path: "/components/list",
             pageBuilder: (context, state) => NoTransitionPage<void>(
                 key: state.pageKey, child: const ListDemo()),
+          ),
+          GoRoute(
+            path: "/components/list-item",
+            pageBuilder: (context, state) => NoTransitionPage<void>(
+                key: state.pageKey, child: const ListItemDemo()),
+          ),
+          GoRoute(
+            path: "/components/selectable-list",
+            pageBuilder: (context, state) => NoTransitionPage<void>(
+                key: state.pageKey, child: const SelectableListDemo()),
           ),
           GoRoute(
             path: "/components/list-full-screen",

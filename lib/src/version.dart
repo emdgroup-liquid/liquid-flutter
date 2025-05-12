@@ -1,2 +1,2 @@
-/// Version of the library 
+/// Version of the library
 const ldVersion = "21.0.6";

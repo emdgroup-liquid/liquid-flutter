@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 void main() {
   testWidgets('LdDrawer', (WidgetTester test) async {
@@ -19,12 +20,12 @@ void main() {
                   LdSectionHeader("Section 1"),
                   LdDrawerItemSection(
                       active: true,
-                      leading: Icon(Icons.circle),
+                      leading: Icon(LucideIcons.circle),
                       child: Text("Item 1")),
                   LdDrawerItemSection(
-                      leading: Icon(Icons.circle), child: Text("Item 2")),
+                      leading: Icon(LucideIcons.circle), child: Text("Item 2")),
                   LdDrawerItemSection(
-                    leading: Icon(Icons.circle),
+                    leading: Icon(LucideIcons.circle),
                     initiallyExpanded: true,
                     child: Text("Item 3"),
                     children: [
@@ -32,7 +33,7 @@ void main() {
                       LdDrawerItemSection(child: Text("Item 3.2")),
                       LdDrawerItemSection(
                         child: Text("Item 3.3"),
-                        trailing: Icon(Icons.arrow_right),
+                        trailing: Icon(LucideIcons.arrowRight),
                       )
                     ],
                   )

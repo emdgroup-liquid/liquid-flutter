@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
-import 'package:liquid/components/component_well.dart';
+import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class MaterialDocumentation extends StatelessWidget {
   const MaterialDocumentation({super.key});
@@ -21,8 +22,8 @@ class MaterialDocumentation extends StatelessWidget {
             OutlinedButton(
                 onPressed: () {}, child: const Text("Outlined Button")),
             FloatingActionButton(
-                onPressed: () {}, child: const Icon(Icons.add)),
-            IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
+                onPressed: () {}, child: const Icon(LucideIcons.plus)),
+            IconButton(onPressed: () {}, icon: const Icon(LucideIcons.plus)),
             const TextField(
               decoration: InputDecoration(
                 border: OutlineInputBorder(),

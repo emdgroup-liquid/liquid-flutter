@@ -27,14 +27,12 @@ class LdToggle extends StatefulWidget {
   State<LdToggle> createState() => _LdToggleState();
 }
 
-class _LdToggleState extends State<LdToggle>
-    with SingleTickerProviderStateMixin {
+class _LdToggleState extends State<LdToggle> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
   void initState() {
-    _controller = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 300));
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
 
     _updateStatus();
     super.initState();
@@ -131,8 +129,8 @@ class _LdToggleState extends State<LdToggle>
           final thumbColor = switch ((widget.checked, status.hovering)) {
             (true, true) => colors.contrastingText(colors.idle(_theme.isDark)),
             (true, false) => colors.contrastingText(colors.idle(_theme.isDark)),
-            (false, true) => _theme.neutralShade(4),
-            (false, false) => _theme.neutralShade(7),
+            (false, true) => _theme.neutralShade(2),
+            (false, false) => _theme.neutralShade(1),
           };
 
           final background = switch ((widget.checked, status.hovering)) {
@@ -172,8 +170,7 @@ class _LdToggleState extends State<LdToggle>
                               shape: BoxShape.circle,
                             ),
                             height: _thumbSize,
-                            width: _thumbSize +
-                                (2 * state.velocity).clamp(0, _gap),
+                            width: _thumbSize + (2 * state.velocity).clamp(0, _gap),
                           )),
                     ),
                   ]),

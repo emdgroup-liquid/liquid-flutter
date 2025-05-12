@@ -1,26 +1,16 @@
 name: Sync main to dev after updates
 
 on:
-  # run on both, after the "Release Main" workflow is completed and on push to main
   workflow_run:
     workflows: ["Release Main"]
     types:
       - completed
     branches:
       - main
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - 'CHANGELOG.md'
-      - 'package.json'
-      - 'pubspec.yaml'
 
 jobs:
   sync_to_dev:
     runs-on: ubuntu-latest
-    # Skip if triggered by push and the push was from the release workflow
-    if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip ci]')
     steps:
       - name: Get token
         uses: actions/create-github-app-token@v1
@@ -48,8 +38,20 @@ jobs:
           # Checkout dev
           git checkout dev
           
-          # Merge main into dev
-          git merge origin/main -m "chore: sync changes from main [skip ci]"
+          # First try to merge with "ours" strategy for version files
+          git merge origin/main -m "chore: sync changes from main [skip ci]" -X theirs -- package.json pubspec.yaml CHANGELOG.md
+      
+          # If there are conflicts, resolve some files with 'theirs'
+          if git ls-files -u | grep -q .; then
+            echo "Conflicts found — resolving specific files in favor of main..."
+            
+            git checkout --theirs package.json
+            git checkout --theirs pubspec.yaml
+            git checkout --theirs CHANGELOG.md
+            
+            git add package.json pubspec.yaml CHANGELOG.md
+            git commit -m "chore: auto-resolve merge conflicts from main [skip ci]"
+          fi
           
           # Push changes to dev
           git push origin dev

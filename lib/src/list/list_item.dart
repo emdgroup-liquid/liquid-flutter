@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 typedef OnSelectionChange = void Function(bool selected);
 
@@ -16,6 +17,8 @@ class LdListItem extends StatelessWidget {
   final bool selectDisabled;
   final OnSelectionChange? onSelectionChange;
   final bool radioSelection;
+
+  final BorderRadius? borderRadius;
   final Widget? subContent;
   final bool isSelected;
   final bool trailingForward;
@@ -35,6 +38,7 @@ class LdListItem extends StatelessWidget {
     this.disabled = false,
     this.selectDisabled = false,
     this.trailingForward = false,
+    this.borderRadius,
     this.showSelectionControls = false,
     this.onSelectionChange,
     this.tradeLeadingForSelectionControl = false,
@@ -77,18 +81,20 @@ class LdListItem extends StatelessWidget {
       disabled: disabled,
       color: theme.palette.primary,
       builder: (contxt, colors, status) {
-        return LdAutoBackground(
-          invert: true,
+        return IconTheme(
+          data: IconThemeData(
+            color: colors.text,
+            size: theme.labelSize(LdSize.l) * 1.2,
+          ),
           child: Container(
             width: effectiveWidth,
             padding: padding ?? theme.balPad(LdSize.m),
             decoration: BoxDecoration(
               color: colors.surface,
+              borderRadius: borderRadius,
             ),
             child: Row(
-                mainAxisSize: effectiveWidth != double.infinity
-                    ? MainAxisSize.min
-                    : MainAxisSize.max,
+                mainAxisSize: effectiveWidth != double.infinity ? MainAxisSize.min : MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   LdReveal.quick(
@@ -128,16 +134,12 @@ class LdListItem extends StatelessWidget {
                           ],
                         ),
                         //axis: Axis.horizontal,
-                        revealed: !(showSelectionControls &&
-                            tradeLeadingForSelectionControl),
-                        initialRevealed: !(showSelectionControls &&
-                            tradeLeadingForSelectionControl),
+                        revealed: !(showSelectionControls && tradeLeadingForSelectionControl),
+                        initialRevealed: !(showSelectionControls && tradeLeadingForSelectionControl),
                       ),
                     ),
                   Flexible(
-                    fit: effectiveWidth == double.infinity
-                        ? FlexFit.tight
-                        : FlexFit.loose,
+                    fit: effectiveWidth == double.infinity ? FlexFit.tight : FlexFit.loose,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -147,17 +149,16 @@ class LdListItem extends StatelessWidget {
                             style: ldBuildTextStyle(
                               theme,
                               LdTextType.label,
-                              LdSize.l,
-                              color: colors.text,
+                              LdSize.m,
+                              color: theme.text,
                             ),
                           ),
                         if (subtitle != null) ...[
-                          ldSpacerXS,
                           DefaultTextStyle(
                               style: ldBuildTextStyle(
                                 theme,
                                 LdTextType.paragraph,
-                                lineHeight: 1,
+                                lineHeight: 1.5,
                                 LdSize.s,
                                 color: theme.textMuted,
                               ),
@@ -171,7 +172,7 @@ class LdListItem extends StatelessWidget {
                   if (trailing == null && trailingForward) ...[
                     ldSpacerM,
                     Icon(
-                      Icons.chevron_right,
+                      LucideIcons.chevronRight,
                       size: theme.labelSize(LdSize.l) * 1.2,
                       color: theme.textMuted,
                     )

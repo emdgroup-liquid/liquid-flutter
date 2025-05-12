@@ -1,11 +1,10 @@
-import 'package:liquid_flutter_emd_theme/liquid_flutter_emd_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid/chemical_screen.dart';
 import 'package:liquid/code_block.dart';
 
 import 'package:go_router/go_router.dart';
-import 'package:liquid/window/drawer.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -56,21 +55,21 @@ class _HomeState extends State<Home> {
                                   children: [
                                     Align(
                                       alignment: Alignment.topLeft,
-                                      child: SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        child: SizedBox(
-                                          height: 1000,
-                                          width: 2000,
-                                          child: Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              SizedBox(
-                                                  width: 250,
-                                                  child:
-                                                      MainNavigationDrawer()),
-                                              Expanded(child: ChemicalScreen()),
-                                            ],
+                                      child: FocusScope(
+                                        canRequestFocus: false,
+                                        child: SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          child: SizedBox(
+                                            height: 1000,
+                                            width: 2000,
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Expanded(
+                                                    child: ChemicalScreen()),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -166,14 +165,14 @@ class _HomeState extends State<Home> {
             Wrap(spacing: 8, runSpacing: 8, children: [
               LdButton(
                   mode: LdButtonMode.outline,
-                  trailing: const Icon(LdIcons.arrow_right),
+                  trailing: const Icon(LucideIcons.arrowRight),
                   onPressed: () {
                     context.go("/chemical");
                   },
                   child: const Text("Chemical Inventory")),
               LdButton(
                 mode: LdButtonMode.outline,
-                trailing: const Icon(LdIcons.arrow_right),
+                trailing: const Icon(LucideIcons.arrowRight),
                 onPressed: () {
                   context.go("/task-demo");
                 },

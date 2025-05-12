@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class LdListEmpty extends StatelessWidget {
   final Function? onRefresh;
@@ -11,7 +12,7 @@ class LdListEmpty extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Column(mainAxisSize: MainAxisSize.min, children: [
-        const LdAvatar(child: Icon(Icons.search_off)),
+        const LdAvatar(child: Icon(LucideIcons.searchSlash)),
         ldSpacerM,
         LdTextP(text ?? LiquidLocalizations.of(context).noItemsFound),
         ldSpacerM,

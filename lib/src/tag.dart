@@ -37,11 +37,11 @@ class LdTag extends StatelessWidget {
             ? color.center(theme.isDark)
             : color.moveRelative(
                 color.center(theme.isDark), theme.isDark ? -2 : 2))
-        .withAlpha(theme.isDark ? 50 : 50);
+        .withAlpha(theme.isDark ? 50 : 100);
 
     final text = color.moveRelative(
       color.center(theme.isDark),
-      onSurface ? (theme.isDark ? -4 : 3) : (theme.isDark ? -3 : 0),
+      onSurface ? (theme.isDark ? -4 : 4) : (theme.isDark ? -3 : 4),
     );
 
     final fontSize = _fontSize(theme);
@@ -64,17 +64,23 @@ class LdTag extends StatelessWidget {
                   ),
                 ),
               Expanded(
-                child: DefaultTextStyle(
-                    child: child,
-                    style: TextStyle(
-                      height: 1,
-                      color: text,
-                      overflow: TextOverflow.ellipsis,
-                      package: theme.fontFamilyPackage,
-                      fontFamily: theme.fontFamily,
-                      fontWeight: FontWeight.bold,
-                      fontSize: fontSize,
-                    )),
+                child: IconTheme(
+                  data: IconThemeData(
+                    color: text,
+                    size: fontSize,
+                  ),
+                  child: DefaultTextStyle(
+                      child: child,
+                      style: TextStyle(
+                        height: 1,
+                        color: text,
+                        overflow: TextOverflow.ellipsis,
+                        package: theme.fontFamilyPackage,
+                        fontFamily: theme.fontFamily,
+                        fontWeight: FontWeight.bold,
+                        fontSize: fontSize,
+                      )),
+                ),
               ),
             ],
           ),

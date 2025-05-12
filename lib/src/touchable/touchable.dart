@@ -45,7 +45,7 @@ LdColorBundle neutralGhostColor(
   if (focus) {
     return LdColorBundle(
       surface: theme.neutralShade(3),
-      text: palette.neutral.focus(theme.isDark),
+      text: palette.neutral.fromCenter(5, theme.isDark),
       border: Colors.transparent,
       icon: palette.neutral.focus(theme.isDark),
     );
@@ -152,13 +152,17 @@ LdColorBundle touchableColor(
     if (active) {
       return LdColorBundle(
         surface: disabledColor.active(theme.isDark),
-        text: disabledColor.contrastingText(disabledColor.active(theme.isDark)),
+        text: disabledColor
+            .contrastingText(disabledColor.active(theme.isDark))
+            .withAlpha(disabledAlpha),
         border: Colors.transparent,
       );
     }
     return LdColorBundle(
       surface: disabledColor.idle(theme.isDark),
-      text: disabledColor.contrastingText(disabledColor.idle(theme.isDark)),
+      text: disabledColor
+          .contrastingText(disabledColor.idle(theme.isDark))
+          .withAlpha(disabledAlpha),
       border: Colors.transparent,
     );
   }
@@ -231,12 +235,24 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
   bool _pressed = false;
   bool _hasFocus = false;
 
+  FocusNode? _focusNode;
+
+  bool _createdFocusNode = false;
+
   @override
   void initState() {
     assert(widget.color != null ||
         widget.mode == LdTouchableSurfaceMode.neutralGhost);
     _hasFocus = widget.focusNode?.hasFocus ?? false;
+    _focusNode = widget.focusNode ?? FocusNode();
+    _createdFocusNode = widget.focusNode == null;
     super.initState();
+  }
+
+  void _safeSetState(VoidCallback fn) {
+    if (mounted) {
+      setState(fn);
+    }
   }
 
   bool get active => !widget.disabled && (_pressed || widget.active);
@@ -264,10 +280,18 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
   }
 
   @override
+  void dispose() {
+    if (_createdFocusNode) {
+      _focusNode?.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     var colors = _colorBundle;
     return Focus(
-      focusNode: widget.focusNode,
+      focusNode: _focusNode,
       autofocus: widget.autoFocus,
       canRequestFocus: !widget.disabled,
       onFocusChange: (value) {
@@ -291,29 +315,30 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
               ? SystemMouseCursors.basic
               : SystemMouseCursors.click,
           onEnter: (event) {
-            setState(() {
+            _safeSetState(() {
               _hovering = true;
             });
           },
           onExit: (event) {
-            setState(() {
+            _safeSetState(() {
               _hovering = false;
             });
           },
           child: Listener(
-            onPointerDown: (_) => setState(() {
+            onPointerDown: (_) => _safeSetState(() {
               _pressed = true;
             }),
-            onPointerUp: (_) => setState(() {
+            onPointerUp: (_) => _safeSetState(() {
               _pressed = false;
             }),
-            onPointerCancel: (_) => setState(() {
+            onPointerCancel: (_) => _safeSetState(() {
               _pressed = false;
             }),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {
                 if (!widget.disabled) widget.onTap();
+                _focusNode?.requestFocus();
               },
               onLongPress: () {
                 if (!widget.disabled) widget.onLongPress?.call();

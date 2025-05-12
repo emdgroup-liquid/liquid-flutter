@@ -14,4 +14,4 @@ const shadRed = LdColor([
   Color.fromRGBO(153, 27, 27, 1),
   Color.fromRGBO(127, 29, 29, 1),
   Color.fromRGBO(69, 10, 10, 1),
-], 5, 6);
+], 5, 6, disabledAlpha: 10);

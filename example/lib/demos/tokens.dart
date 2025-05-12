@@ -18,21 +18,15 @@ class TokensDemo extends StatelessWidget {
           children: [
             LdAccordion.fromList(
               [
-                LdAccordionItem(
-                    header: const Text("Layout"),
-                    child: const LayoutDocumentation()),
+                LdAccordionItem(header: const Text("Layout"), child: const LayoutDocumentation()),
                 LdAccordionItem(
                   header: const Text("Spacing & Padding"),
                   child: const SpacingPaddingDocumentation(),
                 ),
-                LdAccordionItem(
-                    child: const RadiusDocumentation(),
-                    header: const Text("Border Radius")),
-                LdAccordionItem(
-                    child: const TypographyDocumentation(),
-                    header: const Text("Typography")),
+                LdAccordionItem(child: const RadiusDocumentation(), header: const Text("Border Radius")),
+                LdAccordionItem(child: const TypographyDocumentation(), header: const Text("Typography")),
               ],
-              elevateActive: true,
+              wrapActiveInCard: true,
             ),
             const SpacingPaddingDocumentation(),
           ],
@@ -60,9 +54,7 @@ class SpacerVisualizer extends StatelessWidget {
             height: 100,
             width: 100,
             decoration: BoxDecoration(
-                border: Border.all(color: theme.border),
-                borderRadius: theme.radius(LdSize.s),
-                color: theme.surface),
+                border: Border.all(color: theme.border), borderRadius: theme.radius(LdSize.s), color: theme.surface),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

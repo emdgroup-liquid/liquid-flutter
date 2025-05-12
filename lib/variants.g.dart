@@ -1,60 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-class LdBadgeSuccess extends LdBadge {
-  LdBadgeSuccess({
-    required Widget child,
-    LdColor? color,
-    LdSize size = LdSize.m,
-    bool symmetric = false,
-    int? maxLines = 1,
-    Key? key,
-    required BuildContext context,
-  }) : super(
-            child: child,
-            color: LdTheme.of(context).success,
-            size: size,
-            symmetric: symmetric,
-            maxLines: maxLines,
-            key: key);
-}
-
-class LdBadgeWarning extends LdBadge {
-  LdBadgeWarning({
-    required Widget child,
-    LdColor? color,
-    LdSize size = LdSize.m,
-    bool symmetric = false,
-    int? maxLines = 1,
-    Key? key,
-    required BuildContext context,
-  }) : super(
-            child: child,
-            color: LdTheme.of(context).warning,
-            size: size,
-            symmetric: symmetric,
-            maxLines: maxLines,
-            key: key);
-}
-
-class LdBadgeError extends LdBadge {
-  LdBadgeError({
-    required Widget child,
-    LdColor? color,
-    LdSize size = LdSize.m,
-    bool symmetric = false,
-    int? maxLines = 1,
-    Key? key,
-    required BuildContext context,
-  }) : super(
-            child: child,
-            color: LdTheme.of(context).error,
-            size: size,
-            symmetric: symmetric,
-            maxLines: maxLines,
-            key: key);
-}
-
 class LdCheckboxSuccess extends LdCheckbox {
   LdCheckboxSuccess({
     String? label,
@@ -111,66 +57,6 @@ class LdCheckboxError extends LdCheckbox {
             onChanged: onChanged,
             color: LdTheme.of(context).error,
             size: size,
-            disabled: disabled,
-            key: key);
-}
-
-class LdRadioSuccess extends LdRadio {
-  LdRadioSuccess({
-    String? label,
-    required bool checked,
-    LdSize size = LdSize.s,
-    dynamic Function(bool)? onChanged,
-    LdColor? color,
-    bool disabled = false,
-    Key? key,
-    required BuildContext context,
-  }) : super(
-            label: label,
-            checked: checked,
-            size: size,
-            onChanged: onChanged,
-            color: LdTheme.of(context).success,
-            disabled: disabled,
-            key: key);
-}
-
-class LdRadioWarning extends LdRadio {
-  LdRadioWarning({
-    String? label,
-    required bool checked,
-    LdSize size = LdSize.s,
-    dynamic Function(bool)? onChanged,
-    LdColor? color,
-    bool disabled = false,
-    Key? key,
-    required BuildContext context,
-  }) : super(
-            label: label,
-            checked: checked,
-            size: size,
-            onChanged: onChanged,
-            color: LdTheme.of(context).warning,
-            disabled: disabled,
-            key: key);
-}
-
-class LdRadioError extends LdRadio {
-  LdRadioError({
-    String? label,
-    required bool checked,
-    LdSize size = LdSize.s,
-    dynamic Function(bool)? onChanged,
-    LdColor? color,
-    bool disabled = false,
-    Key? key,
-    required BuildContext context,
-  }) : super(
-            label: label,
-            checked: checked,
-            size: size,
-            onChanged: onChanged,
-            color: LdTheme.of(context).error,
             disabled: disabled,
             key: key);
 }
@@ -897,6 +783,66 @@ class LdButtonSuccess extends LdButton {
             key: key);
 }
 
+class LdRadioSuccess extends LdRadio {
+  LdRadioSuccess({
+    String? label,
+    required bool checked,
+    LdSize size = LdSize.s,
+    dynamic Function(bool)? onChanged,
+    LdColor? color,
+    bool disabled = false,
+    Key? key,
+    required BuildContext context,
+  }) : super(
+            label: label,
+            checked: checked,
+            size: size,
+            onChanged: onChanged,
+            color: LdTheme.of(context).success,
+            disabled: disabled,
+            key: key);
+}
+
+class LdRadioWarning extends LdRadio {
+  LdRadioWarning({
+    String? label,
+    required bool checked,
+    LdSize size = LdSize.s,
+    dynamic Function(bool)? onChanged,
+    LdColor? color,
+    bool disabled = false,
+    Key? key,
+    required BuildContext context,
+  }) : super(
+            label: label,
+            checked: checked,
+            size: size,
+            onChanged: onChanged,
+            color: LdTheme.of(context).warning,
+            disabled: disabled,
+            key: key);
+}
+
+class LdRadioError extends LdRadio {
+  LdRadioError({
+    String? label,
+    required bool checked,
+    LdSize size = LdSize.s,
+    dynamic Function(bool)? onChanged,
+    LdColor? color,
+    bool disabled = false,
+    Key? key,
+    required BuildContext context,
+  }) : super(
+            label: label,
+            checked: checked,
+            size: size,
+            onChanged: onChanged,
+            color: LdTheme.of(context).error,
+            disabled: disabled,
+            key: key);
+}
+
 class LdTagSuccess extends LdTag {
   LdTagSuccess({
     Key? key,
@@ -943,4 +889,58 @@ class LdTagError extends LdTag {
             color: LdTheme.of(context).error,
             onDismiss: onDismiss,
             size: size);
+}
+
+class LdBadgeSuccess extends LdBadge {
+  LdBadgeSuccess({
+    required Widget child,
+    LdColor? color,
+    LdSize size = LdSize.m,
+    bool symmetric = false,
+    int? maxLines = 1,
+    Key? key,
+    required BuildContext context,
+  }) : super(
+            child: child,
+            color: LdTheme.of(context).success,
+            size: size,
+            symmetric: symmetric,
+            maxLines: maxLines,
+            key: key);
+}
+
+class LdBadgeWarning extends LdBadge {
+  LdBadgeWarning({
+    required Widget child,
+    LdColor? color,
+    LdSize size = LdSize.m,
+    bool symmetric = false,
+    int? maxLines = 1,
+    Key? key,
+    required BuildContext context,
+  }) : super(
+            child: child,
+            color: LdTheme.of(context).warning,
+            size: size,
+            symmetric: symmetric,
+            maxLines: maxLines,
+            key: key);
+}
+
+class LdBadgeError extends LdBadge {
+  LdBadgeError({
+    required Widget child,
+    LdColor? color,
+    LdSize size = LdSize.m,
+    bool symmetric = false,
+    int? maxLines = 1,
+    Key? key,
+    required BuildContext context,
+  }) : super(
+            child: child,
+            color: LdTheme.of(context).error,
+            size: size,
+            symmetric: symmetric,
+            maxLines: maxLines,
+            key: key);
 }

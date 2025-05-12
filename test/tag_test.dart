@@ -22,10 +22,8 @@ void main() {
     expect(find.byType(LdTag), findsOneWidget);
 
     final color =
-        ((test.firstWidget<Container>(find.byKey(const ValueKey("tagBox"))))
-                .decoration as BoxDecoration)
-            .color;
+        ((test.firstWidget<Container>(find.byKey(const ValueKey("tagBox")))).decoration as BoxDecoration).color;
 
-    expect(color, const Color(0x3215803d));
+    expect(color, const Color(0x6415803d));
   });
 }
