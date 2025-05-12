@@ -45,10 +45,17 @@ class LdCrudListState<T extends CrudItemMixin<T>> extends LdPaginator<T> {
   Set<T> get selectedItems => Set.from(_selectedItems);
   int get selectedItemCount => _selectedItems.length;
 
-  bool _isMultiSelectMode = false;
-  bool get isMultiSelectMode => _isMultiSelectMode;
+  bool get isMultiSelectMode => _selectedItems.isNotEmpty;
 
   LdCrudListState({required super.fetchListFunction});
+
+  /// Updates the selected items using a new set of selections from LdSelectableList
+  void updateItemSelection(Set<T> selectedItems) {
+    print("updateItemSelection: $selectedItems");
+    _selectedItems.clear();
+    _selectedItems.addAll(selectedItems);
+    notifyListeners();
+  }
 
   /// Intelligently handles item state events, e.g. loading, success, error.
   /// It knows which state was caused by which operation and updates the
@@ -97,26 +104,6 @@ class LdCrudListState<T extends CrudItemMixin<T>> extends LdPaginator<T> {
 
   bool isItemLoading(T? item) {
     return itemStates[item?.id]?.type == CrudLoadingStateType.loading;
-  }
-
-  void toggleMultiSelectMode({bool? forceValue}) {
-    _isMultiSelectMode = forceValue ?? !_isMultiSelectMode;
-    if (!_isMultiSelectMode) {
-      _selectedItems.clear();
-    }
-    notifyListeners();
-  }
-
-  void toggleItemSelection(T item) {
-    if (_selectedItems.contains(item)) {
-      _selectedItems.remove(item);
-      if (_selectedItems.isEmpty) {
-        _isMultiSelectMode = false;
-      }
-    } else {
-      _selectedItems.add(item);
-    }
-    notifyListeners();
   }
 
   bool isItemSelected(T item) {

@@ -214,7 +214,7 @@ class LdMasterDetailListAction<T extends CrudItemMixin<T>>
             onItemDeleted?.call(item);
           }
           onItemsDeleted?.call(newList);
-          listState.toggleMultiSelectMode(forceValue: false);
+          listState.updateItemSelection({}); // clear selection
         } catch (e) {
           // set list error
           listState.handleItemStateEvent(

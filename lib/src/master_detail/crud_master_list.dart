@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-/// A wrapper around [LdList] that handles selection and item actions based
+/// A wrapper around [LdSelectableList] that handles selection and item actions based
 /// on the [LdCrudListState] of a [LdCrudMasterDetail]. It can be a good fit
 /// for a master list in a [LdCrudMasterDetail].
 ///
@@ -36,29 +36,47 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final showSelectionControls = data.isMultiSelectMode;
-    return LdList<T, void>(
+    return LdSelectableList<T, void>(
+      multiSelect: true,
       paginator: data,
-      assumedItemHeight: assumedItemHeight,
-      itemBuilder: (context, item, index) {
-        final isSelected = data.isItemSelected(item);
+      onSelectionChange: (selectedItems) {
+        if (selectedItems.length == 1) {
+          controller.openItem(selectedItems.first);
+          return;
+        }
+        data.updateItemSelection(selectedItems);
+      },
+      listBuilder: (context, scrollController, itemBuilder) {
+        return LdList<T, void>(
+          paginator: data,
+          assumedItemHeight: assumedItemHeight,
+          scrollController: scrollController,
+          itemBuilder: itemBuilder,
+        );
+      },
+      itemBuilder: ({
+        required BuildContext context,
+        required T item,
+        required int index,
+        required bool selected,
+        required bool isMultiSelect,
+        required void Function(bool selected) onSelectionChange,
+        required VoidCallback onTap,
+      }) {
         final isActive =
             (openItem?.id ?? controller.getOpenItem()?.id) == item.id;
 
         return LdListItem(
           trailingForward: isSeparatePage,
           active: isActive,
-          isSelected: isSelected,
+          isSelected: selected,
           showSelectionControls: showSelectionControls,
-          onTap: () => controller.openItem(item),
-          onSelectionChange: (selected) {
-            data.toggleItemSelection(item);
-          },
+          onTap: onTap,
           onLongPress: () {
-            data.toggleMultiSelectMode();
-            if (data.isMultiSelectMode) {
-              data.toggleItemSelection(item);
-            }
+            onTap();
+            data.updateItemSelection({item});
           },
+          onSelectionChange: onSelectionChange,
           title: titleBuilder(context, item),
           subtitle: subtitleBuilder?.call(context, item),
           subContent: subContentBuilder?.call(context, item),
@@ -74,14 +92,8 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
                         context,
                         data.getItemError(item),
                       ),
-                      primaryButton: LdButtonGhost(
-                        child: Text(LiquidLocalizations.of(context).clearError),
-                        onPressed: () {
-                          data.clearItemState(item);
-                          Navigator.of(context).pop();
-                        },
-                      ),
                     ).show(context);
+                    data.clearItemState(item);
                   },
                   icon: const Icon(Icons.error),
                   color: LdTheme.of(context).errorColor,
