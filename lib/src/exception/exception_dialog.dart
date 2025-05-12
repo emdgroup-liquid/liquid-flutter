@@ -40,8 +40,8 @@ class LdExceptionDialog extends StatelessWidget {
     );
   }
 
-  void show(BuildContext context) {
-    LdModal(
+  Future<dynamic> show(BuildContext context) async {
+    return LdModal(
       noHeader: true,
       modalContent: (context) => this,
       userCanDismiss: true,

@@ -36,22 +36,12 @@ class LdCrudMasterDetail<T extends CrudItemMixin<T>> extends LdMasterDetail<T> {
   final LdCrudOperations<T> crud;
   final List<LdMasterDetailItemAction<T>> itemActions;
   final List<LdMasterDetailListAction<T>> listActions;
-  final Widget Function(
-    BuildContext context,
-    dynamic error,
-    LdMasterDetailController<T> controller,
-  )? buildDetailError;
 
-  LdCrudMasterDetail({
+  const LdCrudMasterDetail({
     super.key,
     super.buildDetailTitle,
     super.buildMasterTitle,
-    required Widget Function(
-      BuildContext context,
-      T item,
-      bool isSeparatePage,
-      LdMasterDetailController<T> controller,
-    ) buildDetail,
+    required super.buildDetail,
     required super.buildMaster,
     super.buildMasterActions,
     super.buildDetailActions,
@@ -65,37 +55,7 @@ class LdCrudMasterDetail<T extends CrudItemMixin<T>> extends LdMasterDetail<T> {
     required this.crud,
     this.itemActions = const [],
     this.listActions = const [],
-    this.buildDetailError,
-  }) : super(
-          buildDetail: (context, item, isSeparatePage, controller) =>
-              _buildDetailWithErrorHandling(
-            context,
-            item,
-            isSeparatePage,
-            controller,
-            buildDetail,
-            buildDetailError,
-          ),
-        );
-
-  static Widget _buildDetailWithErrorHandling<T extends CrudItemMixin<T>>(
-    BuildContext context,
-    T item,
-    bool isSeparatePage,
-    LdMasterDetailController<T> controller,
-    Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)
-        buildDetail,
-    Widget Function(BuildContext, dynamic, LdMasterDetailController<T>)?
-        buildDetailError,
-  ) {
-    final data = context.read<LdCrudListState<T>>();
-    final error = data.getItemError(item);
-    if (error != null) {
-      return buildDetailError?.call(context, error, controller) ??
-          Center(child: LdExceptionView.fromDynamic(error, context));
-    }
-    return buildDetail(context, item, isSeparatePage, controller);
-  }
+  });
 
   @override
   State<LdMasterDetail<T>> createState() => _LdCrudMasterDetailState<T>();

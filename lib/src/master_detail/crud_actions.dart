@@ -115,6 +115,7 @@ class LdMasterDetailAction<T extends CrudItemMixin<T>, Arg> {
       type: LdNotificationType.error,
       confirmText: 'Close',
       cancelText: 'More info',
+      duration: const Duration(seconds: 5),
     );
 
     notificationsController.addNotification(notification);
