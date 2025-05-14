@@ -49,7 +49,6 @@ class TaskDemoState extends State<TaskDemo> {
       key: _masterDetailKey,
       crud: _repository,
       masterDetailBuilder: (context, builders, listState) {
-        final openItem = null; //state.controller.getOpenItem();
         return LdMasterDetail.builders(
           builders: builders,
           masterDetailFlex: 2,

@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 // Create a value notifier provider to store and update the argument
 class _ArgNotifier<Arg> extends ChangeNotifier {
   Arg? _arg;
-
   Arg? get arg => _arg;
 
   void setArg(Arg? value) {
@@ -16,6 +15,9 @@ class _ArgNotifier<Arg> extends ChangeNotifier {
   }
 }
 
+/// Settings to configure the behavior of CRUD actions.
+/// [showDialogLoading] controls whether to show a loading dialog during the action.
+/// [showErrorNotification] controls whether to show an error notification on failure.
 class LdCrudActionSettings {
   final bool showDialogLoading;
   final bool showErrorNotification;
