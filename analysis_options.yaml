@@ -8,3 +8,6 @@ analyzer:
     - example/lib/**/*.demo.dart
     - lib/oss_licenses.dart
     - example/build/**
+
+formatter:
+  page_width: 120

@@ -172,7 +172,6 @@ class LdCrudAction<T extends CrudItemMixin<T>, Arg, Result> extends StatelessWid
       action: (crud, newItem) => crud.update(newItem),
       onActionCompleted: (masterDetail, arg, result) {
         final controller = masterDetail.controller;
-        print("controller.getOpenItem()?.id: ${controller.getOpenItem()?.id}, arg.id: ${arg.id}");
         if (controller.getOpenItem()?.id == arg.id) {
           controller.openItem(result); // refresh the open item
         }
