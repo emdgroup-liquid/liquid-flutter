@@ -235,6 +235,7 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
               padding: EdgeInsets.zero,
               expandChild: true,
               child: LdCrudMasterDetail<ExampleItem>(
+                crud: _crudRepository,
                 layoutMode: _layoutMode,
                 detailPresentationMode: _presentationMode,
                 buildDetailTitle: (context, item, isSeparatePage, controller) =>
@@ -262,35 +263,15 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
                     LdCrudMasterList<ExampleItem>(
                   data: context.read<LdCrudListState<ExampleItem>>(),
                   controller: controller,
-                  titleBuilder: (context, item) => Text(item.name),
-                  subtitleBuilder: (context, item) => Text("ID: ${item.id}"),
+                  titleBuilder: (context, item, optimisticItem) =>
+                      Text(item.name),
+                  subtitleBuilder: (context, item, optimisticItem) =>
+                      Text("ID: ${item.id}"),
                   openItem: openItem,
                 ),
-                crud: _crudRepository,
-                itemActions: [
-                  LdMasterDetailItemAction<ExampleItem>.updateItem(
-                    getNewItem: (item) async {
-                      final notification =
-                          (await LdNotificationsController.of(context)
-                              .addNotification(
-                        LdInputNotification(
-                          inputHint: "Edit item",
-                          inputLabel: "Name",
-                          type: LdNotificationType.enterText,
-                          message: "Enter new name",
-                        ),
-                      )) as LdInputNotification;
-                      final newName = await notification.inputCompleter.future;
-                      if (newName?.isNotEmpty ?? false) {
-                        return ExampleItem(item.id, newName!);
-                      }
-                      return null;
-                    },
-                  ),
-                  LdMasterDetailItemAction<ExampleItem>.deleteItem(),
-                ],
-                listActions: [
-                  LdMasterDetailListAction<ExampleItem>.newItemAction(
+                buildMasterActions:
+                    (context, openItem, isSeparatePage, controller) => [
+                  LdCrudAction.createItem<ExampleItem>(
                     getNewItem: () async {
                       final notification =
                           (await LdNotificationsController.of(context)
@@ -309,7 +290,30 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
                       return null;
                     },
                   ),
-                  LdMasterDetailListAction<ExampleItem>.batchDeleteItems(),
+                  LdCrudAction.deleteSelectedItems<ExampleItem>(),
+                ],
+                buildDetailActions:
+                    (context, item, isSeparatePage, controller) => [
+                  LdCrudAction.updateItem<ExampleItem>(
+                    getUpdatedItem: () async {
+                      final notification =
+                          (await LdNotificationsController.of(context)
+                              .addNotification(
+                        LdInputNotification(
+                          inputHint: "Edit item",
+                          inputLabel: "Name",
+                          type: LdNotificationType.enterText,
+                          message: "Enter new name",
+                        ),
+                      )) as LdInputNotification;
+                      final newName = await notification.inputCompleter.future;
+                      if (newName?.isNotEmpty ?? false) {
+                        return ExampleItem(item.id, newName!);
+                      }
+                      return null;
+                    },
+                  ),
+                  LdCrudAction.deleteOpenItem<ExampleItem>(),
                 ],
               ),
             ),

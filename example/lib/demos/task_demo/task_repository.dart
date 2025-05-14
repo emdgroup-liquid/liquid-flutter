@@ -75,8 +75,6 @@ class TaskRepository extends LdCrudOperations<Task> {
   @override
   Future<Task> update(Task item) async {
     await _fakeDelay();
-    throw UnimplementedError(
-        'Update operation is not implemented in TaskRepository');
     final index = _tasks.indexWhere((task) => task.id == item.id);
     if (index != -1) {
       _tasks[index] = item;

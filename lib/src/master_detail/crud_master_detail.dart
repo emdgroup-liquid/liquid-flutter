@@ -9,6 +9,7 @@ abstract class LdCrudOperations<T> {
   Future<T> update(T item);
   Future<void> delete(T item);
   Future<void> batchDelete(Iterable<T> items) async {
+    print("Deleting ${items.length} items");
     for (final item in items) {
       await this.delete(item);
     }
@@ -26,6 +27,16 @@ mixin CrudItemMixin<T> {
   bool get isNew => id == null;
 }
 
+typedef ErrorDetailPresentationMode = MasterDetailPresentationMode;
+
+enum ErrorNotificationMode { none, notification, autoOpen }
+
+enum LoadingIndicatorStyle {
+  none,
+  actionBarLoading,
+  dialogLoading,
+}
+
 /// [LdCrudMasterDetail] extends the [LdMasterDetail] widget to provide CRUD
 /// functionality for a list of items of type [T].
 ///
@@ -34,8 +45,9 @@ mixin CrudItemMixin<T> {
 /// items or updating the UI based on the state and result of a CRUD operation.
 class LdCrudMasterDetail<T extends CrudItemMixin<T>> extends LdMasterDetail<T> {
   final LdCrudOperations<T> crud;
-  final List<LdMasterDetailItemAction<T>> itemActions;
-  final List<LdMasterDetailListAction<T>> listActions;
+  final ErrorNotificationMode errorNotificationMode;
+  final ErrorDetailPresentationMode errorDetailPresentationMode;
+  final Set<LoadingIndicatorStyle> loadingIndicatorStyles;
 
   const LdCrudMasterDetail({
     super.key,
@@ -53,99 +65,58 @@ class LdCrudMasterDetail<T extends CrudItemMixin<T>> extends LdMasterDetail<T> {
     super.customSplitPredicate,
     super.masterDetailFlex,
     required this.crud,
-    this.itemActions = const [],
-    this.listActions = const [],
+    this.errorNotificationMode = ErrorNotificationMode.none,
+    this.errorDetailPresentationMode = MasterDetailPresentationMode.page,
+    this.loadingIndicatorStyles = const {
+      LoadingIndicatorStyle.actionBarLoading,
+      LoadingIndicatorStyle.dialogLoading,
+    },
   });
 
   @override
-  State<LdMasterDetail<T>> createState() => _LdCrudMasterDetailState<T>();
+  State<LdMasterDetail<T>> createState() => LdCrudMasterDetailState<T>();
 }
 
-class _LdCrudMasterDetailState<T extends CrudItemMixin<T>>
-    extends _LdMasterDetailState<T> {
-  late final _crud = (widget as LdCrudMasterDetail<T>).crud;
-  late final _data = LdCrudListState<T>(
-    fetchListFunction: _crud.fetchAll,
+class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends _LdMasterDetailState<T> {
+  @override
+  LdCrudMasterDetail<T> get widget => super.widget as LdCrudMasterDetail<T>;
+
+  late final crud = widget.crud;
+  late final listState = LdCrudListState<T>(
+    fetchListFunction: crud.fetchAll,
   );
+  LdMasterDetailController<T> get controller => _controller;
+
+  bool get _showActionBarLoading => widget.loadingIndicatorStyles.contains(LoadingIndicatorStyle.actionBarLoading);
 
   @override
-  bool get _isMasterAppBarLoading => _data.busy;
+  bool get _isMasterAppBarLoading => _showActionBarLoading && listState.busy;
 
   @override
-  bool get _isDetailsAppBarLoading => _data.isItemLoading(_openItem);
+  bool get _isDetailsAppBarLoading => _showActionBarLoading && _openItem != null && listState.isItemLoading(_openItem!);
 
   @override
   Widget build(BuildContext context) {
-    return ListenableProvider<LdCrudListState<T>>.value(
-      value: _data,
-      child: ListenableBuilder(
-        listenable: _data,
-        builder: (context, child) {
-          return super.build(context);
-        },
+    return ListenableProvider<LdMasterDetailController<T>>.value(
+      value: _controller,
+      child: ListenableProvider<LdCrudListState<T>>.value(
+        value: listState,
+        child: ListenableBuilder(
+          listenable: listState,
+          builder: (context, child) {
+            return super.build(context);
+          },
+        ),
       ),
     );
   }
 
   @override
-  List<Widget> buildMasterActions(
-      BuildContext context, T? openItem, bool isSeparatePage) {
-    final actions = (widget as LdCrudMasterDetail<T>).listActions;
-    final builder = _data.isMultiSelectMode
-        ? (action) => action.masterActionMultiSelectBarIconBuilder
-        : (action) => action.masterActionBarIconBuilder;
-
-    return [
-      ...super.buildMasterActions(context, openItem, isSeparatePage),
-      ...actions.where((action) => builder(action) != null).map(
-            (action) => builder(action)!(
-              () async => await action.onAction(
-                _data.isMultiSelectMode
-                    ? _data.selectedItems.toList()
-                    : _data.items,
-                context: context,
-                controller: _controller,
-                listState: _data,
-                crud: _crud,
-              ),
-            ),
-          )
-    ];
-  }
-
-  @override
-  List<Widget> buildDetailActions(
-      BuildContext context, T item, bool isSeparatePage) {
-    final actions = (widget as LdCrudMasterDetail<T>).itemActions;
-    return [
-      ...super.buildDetailActions(context, item, isSeparatePage),
-      ...actions
-          .where((action) => action.detailActionBarIconBuilder != null)
-          .map(
-            (action) => action.detailActionBarIconBuilder!(
-              () async => await action.onAction(
-                item,
-                context: context,
-                controller: _controller,
-                listState: _data,
-                crud: _crud,
-              ),
-            ),
-          )
-    ];
-  }
-
-  List<LdMasterDetailAction<T, dynamic>> get actions => [
-        ...(widget as LdCrudMasterDetail<T>).itemActions,
-        ...(widget as LdCrudMasterDetail<T>).listActions,
-      ];
-
-  @override
   Widget _buildDetailPage(T item) {
     return ListenableProvider<LdCrudListState<T>>.value(
-      value: _data,
+      value: listState,
       child: ListenableBuilder(
-        listenable: _data,
+        listenable: listState,
         builder: (context, child) {
           return super._buildDetailPage(item);
         },

@@ -18,14 +18,11 @@ class CrudItemStateEvent<T> {
     this.data,
   });
 
-  factory CrudItemStateEvent.loading([T? data]) =>
-      CrudItemStateEvent._(type: CrudLoadingStateType.loading, data: data);
+  factory CrudItemStateEvent.loading([T? data]) => CrudItemStateEvent._(type: CrudLoadingStateType.loading, data: data);
 
-  factory CrudItemStateEvent.success(T data) =>
-      CrudItemStateEvent._(type: CrudLoadingStateType.success, data: data);
+  factory CrudItemStateEvent.success(T data) => CrudItemStateEvent._(type: CrudLoadingStateType.success, data: data);
 
-  factory CrudItemStateEvent.deleted() =>
-      CrudItemStateEvent._(type: CrudLoadingStateType.success, data: null);
+  factory CrudItemStateEvent.deleted() => CrudItemStateEvent._(type: CrudLoadingStateType.success, data: null);
 
   factory CrudItemStateEvent.error(dynamic error) =>
       CrudItemStateEvent._(type: CrudLoadingStateType.error, error: error);
@@ -51,7 +48,6 @@ class LdCrudListState<T extends CrudItemMixin<T>> extends LdPaginator<T> {
 
   /// Updates the selected items using a new set of selections from LdSelectableList
   void updateItemSelection(Set<T> selectedItems) {
-    print("updateItemSelection: $selectedItems");
     _selectedItems.clear();
     _selectedItems.addAll(selectedItems);
     notifyListeners();
@@ -94,16 +90,16 @@ class LdCrudListState<T extends CrudItemMixin<T>> extends LdPaginator<T> {
     }
   }
 
-  T? getItemOptimistically(T? item) {
-    return itemStates[item?.id]?.data ?? item;
+  T getItemOptimistically(T item) {
+    return itemStates[item.id]?.data ?? item;
   }
 
-  Error? getItemError(T? item) {
-    return itemStates[item?.id]?.error;
+  Error? getItemError(T item) {
+    return itemStates[item.id]?.error;
   }
 
-  bool isItemLoading(T? item) {
-    return itemStates[item?.id]?.type == CrudLoadingStateType.loading;
+  bool isItemLoading(T item) {
+    return itemStates[item.id]?.type == CrudLoadingStateType.loading;
   }
 
   bool isItemSelected(T item) {

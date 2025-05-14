@@ -11,11 +11,11 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
   final LdCrudListState<T> data;
   final T? openItem;
   final LdMasterDetailController<T> controller;
-  final Widget Function(BuildContext context, T item) titleBuilder;
-  final Widget Function(BuildContext context, T item)? subtitleBuilder;
-  final Widget Function(BuildContext context, T item)? subContentBuilder;
-  final Widget Function(BuildContext context, T item)? leadingBuilder;
-  final Widget Function(BuildContext context, T item)? trailingBuilder;
+  final Widget Function(BuildContext context, T item, T optimisticItem) titleBuilder;
+  final Widget Function(BuildContext context, T item, T optimisticItem)? subtitleBuilder;
+  final Widget Function(BuildContext context, T item, T optimisticItem)? subContentBuilder;
+  final Widget Function(BuildContext context, T item, T optimisticItem)? leadingBuilder;
+  final Widget Function(BuildContext context, T item, T optimisticItem)? trailingBuilder;
   final double assumedItemHeight;
   final bool isSeparatePage;
 
@@ -63,8 +63,8 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
         required void Function(bool selected) onSelectionChange,
         required VoidCallback onTap,
       }) {
-        final isActive =
-            (openItem?.id ?? controller.getOpenItem()?.id) == item.id;
+        final isActive = (openItem?.id ?? controller.getOpenItem()?.id) == item.id;
+        final optimisticItem = data.getItemOptimistically(item)!;
 
         return LdListItem(
           trailingForward: isSeparatePage,
@@ -77,10 +77,10 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
             data.updateItemSelection({item});
           },
           onSelectionChange: onSelectionChange,
-          title: titleBuilder(context, item),
-          subtitle: subtitleBuilder?.call(context, item),
-          subContent: subContentBuilder?.call(context, item),
-          leading: leadingBuilder?.call(context, item),
+          title: titleBuilder(context, item, optimisticItem),
+          subtitle: subtitleBuilder?.call(context, item, optimisticItem),
+          subContent: subContentBuilder?.call(context, item, optimisticItem),
+          leading: leadingBuilder?.call(context, item, optimisticItem),
           trailing: Row(
             children: [
               if (data.isItemLoading(item)) const LdLoader(size: 24),
@@ -99,7 +99,7 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
                   color: LdTheme.of(context).errorColor,
                 ),
               ldSpacerXS,
-              trailingBuilder?.call(context, item) ?? const SizedBox.shrink(),
+              trailingBuilder?.call(context, item, optimisticItem) ?? const SizedBox.shrink(),
             ],
           ),
         );

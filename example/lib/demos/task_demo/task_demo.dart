@@ -62,8 +62,8 @@ class TaskDemoState extends State<TaskDemo> {
           data: context.read<LdCrudListState<Task>>(),
           openItem: openTask,
           controller: controller,
-          titleBuilder: (context, item) => Text(item.task),
-          subtitleBuilder: (context, item) => Row(
+          titleBuilder: (context, item, optimisticItem) => Text(item.task),
+          subtitleBuilder: (context, item, optimisticItem) => Row(
             children: [
               Icon(
                 Icons.fiber_manual_record,
@@ -74,28 +74,20 @@ class TaskDemoState extends State<TaskDemo> {
               Text(item.due),
             ],
           ),
-          trailingBuilder: (context, item) => LdButtonVague(
-            size: LdSize.l,
-            child: Icon(
-              item.done ? Icons.check : null,
-              color: item.done ? Colors.green : Colors.grey,
-            ),
-            onPressed: () async {
-              final data = context.read<LdCrudListState<Task>>();
-              LdMasterDetailAction.optimisticExecution(
-                item,
-                () {
-                  return _repository.update(item.copyWith(done: !item.done));
-                },
-                data,
-                context: context,
-              ).then(
-                (updatedItem) async => openTask?.id == item.id
-                    ? await controller.openItem(item)
-                    : null,
-              );
-            },
-          ),
+          trailingBuilder: (context, item, optimisticItem) {
+            return LdCrudAction.updateItem<Task>(
+              actionButtonBuilder: (context, triggerAction) => LdButtonVague(
+                size: LdSize.l,
+                autoLoading: false,
+                onPressed: triggerAction,
+                child: Icon(
+                  optimisticItem.done ? Icons.check : null,
+                  color: item.done ? Colors.green : Colors.grey,
+                ),
+              ),
+              getUpdatedItem: () => item.copyWith(done: !item.done),
+            );
+          },
         );
       },
       buildDetail: (context, item, isSeparatePage, controller) =>
@@ -122,36 +114,7 @@ class TaskDemoState extends State<TaskDemo> {
               _applyFilter(value, crudList);
             },
           ),
-        ];
-      },
-      buildDetailActions: (context, item, isSeparatePage, controller) => [
-        if (!isEditingDetail)
-          IconButton(
-            onPressed: () => setIsEditingDetail(true),
-            icon: const Icon(Icons.edit),
-          ),
-      ],
-      itemActions: [
-        if (isEditingDetail) ...[
-          LdMasterDetailItemAction<Task>.updateItem(
-            detailActionBarIconBuilder: (actionCallback) {
-              return LdButtonGhost(
-                onPressed: () => actionCallback(),
-                leading: const Icon(Icons.check),
-                child: const Text("Save"),
-              );
-            },
-            getNewItem: (item) async {
-              return taskDetailPageState?.editingTask;
-            },
-            onItemUpdated: (item) => setIsEditingDetail(false),
-          ),
-          LdMasterDetailItemAction<Task>.deleteItem()
-        ]
-      ],
-      listActions: [
-        LdMasterDetailListAction.newItemAction(
-          getNewItem: () async {
+          LdCrudAction.createItem<Task>(getNewItem: () async {
             final createNewTaskKey = GlobalKey();
             final newTask = await LdModal(
               modalContent: (context) => TaskDetailPage(
@@ -184,9 +147,23 @@ class TaskDemoState extends State<TaskDemo> {
               ),
             ).show(context, useRootNavigator: true);
             return newTask;
-          },
-        ),
-        LdMasterDetailListAction.batchDeleteItems(),
+          }),
+          LdCrudAction.deleteSelectedItems<Task>(),
+        ];
+      },
+      buildDetailActions: (context, item, isSeparatePage, controller) => [
+        if (!isEditingDetail)
+          IconButton(
+            onPressed: () => setIsEditingDetail(true),
+            icon: const Icon(Icons.edit),
+          ),
+        if (isEditingDetail) ...[
+          LdCrudAction.updateItem<Task>(
+            getUpdatedItem: () async => taskDetailPageState?.editingTask,
+            onItemUpdated: (masterDetail, item) => setIsEditingDetail(false),
+          ),
+          LdCrudAction.deleteOpenItem<Task>()
+        ]
       ],
       onOpenItemChange: (item) async {
         setState(() => isEditingDetail = false);
