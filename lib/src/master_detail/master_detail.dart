@@ -25,6 +25,28 @@ typedef LdDetailBuilder<T, W> = W Function(
   LdMasterDetailController<T> controller,
 );
 
+class LdMasterDetailBuilders<T> {
+  final LdDetailBuilder<T, Widget>? buildDetailTitle;
+  final LdMasterBuilder<T, Widget>? buildMasterTitle;
+  final LdDetailBuilder<T, Widget> buildDetail;
+  final LdMasterBuilder<T, Widget> buildMaster;
+  final LdMasterBuilder<T, List<Widget>>? buildMasterActions;
+  final LdDetailBuilder<T, List<Widget>>? buildDetailActions;
+  final bool Function(T? openItem)? isMasterAppBarLoading;
+  final bool Function(T? openItem)? isDetailAppBarLoading;
+
+  const LdMasterDetailBuilders({
+    this.buildDetailTitle,
+    this.buildMasterTitle,
+    required this.buildDetail,
+    required this.buildMaster,
+    this.buildMasterActions,
+    this.buildDetailActions,
+    this.isMasterAppBarLoading,
+    this.isDetailAppBarLoading,
+  });
+}
+
 enum MasterDetailPresentationMode { page, dialog }
 
 enum MasterDetailLayoutMode { auto, split, compact }
@@ -45,6 +67,9 @@ class LdMasterDetail<T> extends StatefulWidget {
   final LdMasterDetailOnOpenItemChange<T>? onOpenItemChange;
 
   final bool Function(SizingInformation size)? customSplitPredicate;
+
+  final bool Function(T? openItem)? isMasterAppBarLoading;
+  final bool Function(T? openItem)? isDetailsAppBarLoading;
 
   // Callback functions to replace the builder class
   final LdDetailBuilder<T, Widget>? buildDetailTitle;
@@ -76,8 +101,41 @@ class LdMasterDetail<T> extends StatefulWidget {
 
     /// A custom predicate to determine if the split view should be used.
     this.customSplitPredicate,
+    this.isMasterAppBarLoading,
+    this.isDetailsAppBarLoading,
     super.key,
   });
+
+  /// Convenience constructor to create a [LdMasterDetail] with a [LdMasterDetailBuilders] object.
+  /// This is useful to avoid boilerplate code when creating the master and detail widgets.
+  factory LdMasterDetail.builders({
+    required LdMasterDetailBuilders<T> builders,
+    T? openItem,
+    double masterDetailFlex = 3,
+    NavigatorState? navigator,
+    MasterDetailPresentationMode detailPresentationMode = MasterDetailPresentationMode.page,
+    MasterDetailLayoutMode layoutMode = MasterDetailLayoutMode.auto,
+    LdMasterDetailOnOpenItemChange<T>? onOpenItemChange,
+    bool Function(SizingInformation size)? customSplitPredicate,
+  }) {
+    return LdMasterDetail<T>(
+      buildDetailTitle: builders.buildDetailTitle,
+      buildMasterTitle: builders.buildMasterTitle,
+      buildDetail: builders.buildDetail,
+      buildMaster: builders.buildMaster,
+      buildMasterActions: builders.buildMasterActions,
+      buildDetailActions: builders.buildDetailActions,
+      openItem: openItem,
+      navigator: navigator,
+      detailPresentationMode: detailPresentationMode,
+      layoutMode: layoutMode,
+      onOpenItemChange: onOpenItemChange,
+      masterDetailFlex: masterDetailFlex,
+      customSplitPredicate: customSplitPredicate,
+      isMasterAppBarLoading: builders.isMasterAppBarLoading,
+      isDetailsAppBarLoading: builders.isDetailAppBarLoading,
+    );
+  }
 
   /// Helper function to create a router configuration that uses this component
   /// as a shell route.
@@ -107,9 +165,8 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
     onOpenItem: _onOpenItem,
     onCloseItem: _onCloseItem,
   );
-
-  final bool _isMasterAppBarLoading = false;
-  final bool _isDetailsAppBarLoading = false;
+  bool get isMasterAppBarLoading => widget.isMasterAppBarLoading?.call(_openItem) ?? false;
+  bool get isDetailsAppBarLoading => widget.isDetailsAppBarLoading?.call(_openItem) ?? false;
 
   @override
   initState() {
@@ -287,7 +344,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
   ) {
     return Scaffold(
       appBar: LdAppBar(
-        loading: _isMasterAppBarLoading,
+        loading: isMasterAppBarLoading,
         scrolledUnderElevation: isSeparatePage ? 4 : 0,
         context: context,
         title: widget.buildMasterTitle?.call(
@@ -301,7 +358,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
           openItem,
           isSeparatePage,
         ),
-        actionsDisabled: _isMasterAppBarLoading,
+        actionsDisabled: isMasterAppBarLoading,
       ),
       backgroundColor: LdTheme.of(context).background,
       body: widget.buildMaster(
@@ -348,8 +405,8 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
           item,
           isSeparatePage,
         ),
-        actionsDisabled: _isDetailsAppBarLoading,
-        loading: _isDetailsAppBarLoading,
+        actionsDisabled: isDetailsAppBarLoading,
+        loading: isDetailsAppBarLoading,
       ),
       backgroundColor: LdTheme.of(context).background,
       body: widget.buildDetail(
@@ -453,7 +510,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
           buildDetailActions(context, item, isSeparatePage),
       item: item,
       controller: _controller,
-      isDetailsAppBarLoading: _isDetailsAppBarLoading,
+      isDetailsAppBarLoading: isDetailsAppBarLoading,
     );
   }
 }

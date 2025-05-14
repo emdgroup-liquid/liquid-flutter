@@ -28,8 +28,6 @@ mixin CrudItemMixin<T> {
 
 typedef ErrorDetailPresentationMode = MasterDetailPresentationMode;
 
-enum ErrorNotificationMode { none, notification, autoOpen }
-
 enum LoadingIndicatorStyle {
   none,
   actionBarLoading,
@@ -54,6 +52,24 @@ typedef LdCrudMasterBuilder<T extends CrudItemMixin<T>, W> = W Function(
   LdCrudListState<T> listState,
 );
 
+class LdCrudMasterDetailBuilders<T extends CrudItemMixin<T>> {
+  final LdCrudDetailBuilder<T, Widget>? buildDetailTitle;
+  final LdCrudMasterBuilder<T, Widget>? buildMasterTitle;
+  final LdCrudDetailBuilder<T, Widget> buildDetail;
+  final LdCrudMasterBuilder<T, Widget> buildMaster;
+  final LdCrudMasterBuilder<T, List<Widget>>? buildMasterActions;
+  final LdCrudDetailBuilder<T, List<Widget>>? buildDetailActions;
+
+  const LdCrudMasterDetailBuilders({
+    this.buildDetailTitle,
+    this.buildMasterTitle,
+    required this.buildDetail,
+    required this.buildMaster,
+    this.buildMasterActions,
+    this.buildDetailActions,
+  });
+}
+
 /// [LdCrudMasterDetail] is a wrapper around [LdMasterDetail] that provides CRUD
 /// functionality for a list of items of type [T].
 ///
@@ -62,9 +78,7 @@ typedef LdCrudMasterBuilder<T extends CrudItemMixin<T>, W> = W Function(
 /// items or updating the UI based on the state and result of a CRUD operation.
 class LdCrudMasterDetail<T extends CrudItemMixin<T>> extends StatefulWidget {
   final LdCrudOperations<T> crud;
-  final ErrorNotificationMode errorNotificationMode;
-  final ErrorDetailPresentationMode errorDetailPresentationMode;
-  final Set<LoadingIndicatorStyle> loadingIndicatorStyles;
+  final LdCrudActionSettings defaultActionSettings;
 
   // LdCrudMasterDetails-pecific builders
   final LdCrudDetailBuilder<T, Widget>? buildDetailTitle;
@@ -73,15 +87,13 @@ class LdCrudMasterDetail<T extends CrudItemMixin<T>> extends StatefulWidget {
   final LdCrudMasterBuilder<T, Widget> buildMaster;
   final LdCrudMasterBuilder<T, List<Widget>>? buildMasterActions;
   final LdCrudDetailBuilder<T, List<Widget>>? buildDetailActions;
+  final bool Function(T? openItem, LdCrudListState<T> listState)? isMasterAppBarLoading;
+  final bool Function(T? openItem, LdCrudListState<T> listState)? isDetailAppBarLoading;
 
   final LdMasterDetail<T> Function(
     BuildContext context,
-    LdDetailBuilder<T, Widget>? buildDetailTitle,
-    LdMasterBuilder<T, Widget>? buildMasterTitle,
-    LdDetailBuilder<T, Widget> buildDetail,
-    LdMasterBuilder<T, Widget> buildMaster,
-    LdMasterBuilder<T, List<Widget>>? buildMasterActions,
-    LdDetailBuilder<T, List<Widget>>? buildDetailActions,
+    LdMasterDetailBuilders<T> masterDetailBuilders,
+    LdCrudListState<T> listState,
   ) masterDetailBuilder;
 
   const LdCrudMasterDetail({
@@ -94,12 +106,9 @@ class LdCrudMasterDetail<T extends CrudItemMixin<T>> extends StatefulWidget {
     this.buildMasterTitle,
     this.buildMasterActions,
     this.buildDetailActions,
-    this.errorNotificationMode = ErrorNotificationMode.none,
-    this.errorDetailPresentationMode = MasterDetailPresentationMode.page,
-    this.loadingIndicatorStyles = const {
-      LoadingIndicatorStyle.actionBarLoading,
-      LoadingIndicatorStyle.dialogLoading,
-    },
+    this.defaultActionSettings = const LdCrudActionSettings(),
+    this.isMasterAppBarLoading,
+    this.isDetailAppBarLoading,
   });
 
   @override
@@ -111,7 +120,15 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
   late final listState = LdCrudListState<T>(
     fetchListFunction: crud.fetchAll,
   );
-  late LdMasterDetailController<T> controller;
+
+  bool _isMasterAppBarLoading(T? openItem) {
+    return widget.isMasterAppBarLoading?.call(openItem, listState) ?? listState.busy;
+  }
+
+  bool _isDetailAppBarLoading(T? openItem) {
+    return widget.isDetailAppBarLoading?.call(openItem, listState) ??
+        openItem != null && listState.isItemLoading(openItem);
+  }
 
   @override
   void initState() {
@@ -123,12 +140,17 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
     return _wrapWithStateProviders(
       widget.masterDetailBuilder(
         context,
-        _wrapCrudDetailBuilder(widget.buildDetailTitle),
-        _wrapCrudMasterBuilder(widget.buildMasterTitle),
-        _wrapCrudDetailBuilder(widget.buildDetail)!,
-        _wrapCrudMasterBuilder(widget.buildMaster)!,
-        _wrapBuildMasterActions(widget.buildMasterActions),
-        _wrapBuildDetailActions(widget.buildDetailActions),
+        LdMasterDetailBuilders<T>(
+          buildDetailTitle: _wrapCrudDetailBuilder(widget.buildDetailTitle),
+          buildMasterTitle: _wrapCrudMasterBuilder(widget.buildMasterTitle),
+          buildDetail: _wrapCrudDetailBuilder(widget.buildDetail)!,
+          buildMaster: _wrapCrudMasterBuilder(widget.buildMaster)!,
+          buildMasterActions: _wrapBuildMasterActions(widget.buildMasterActions),
+          buildDetailActions: _wrapBuildDetailActions(widget.buildDetailActions),
+          isMasterAppBarLoading: (openItem) => _isMasterAppBarLoading(openItem),
+          isDetailAppBarLoading: (openItem) => _isDetailAppBarLoading(openItem),
+        ),
+        listState,
       ),
     );
   }
@@ -152,6 +174,7 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
     return original == null
         ? null
         : (context, openItem, isSeparatePage, controller) {
+            final listState = context.watch<LdCrudListState<T>>();
             return _wrapWithStateProviders(
               original.call(
                 context,
@@ -169,6 +192,7 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
     return original == null
         ? null
         : (context, item, isSeparatePage, ctrl) {
+            final listState = context.watch<LdCrudListState<T>>();
             return _wrapWithStateProviders(
               original.call(
                 context,
@@ -184,7 +208,7 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
 
   LdMasterBuilder<T, List<Widget>>? _wrapBuildMasterActions(LdCrudMasterBuilder<T, List<Widget>>? original) {
     return (context, openItem, isSeparatePage, ctrl) {
-      controller = ctrl;
+      final listState = context.watch<LdCrudListState<T>>();
       return (original?.call(
                 context,
                 openItem,
@@ -201,7 +225,7 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
 
   LdDetailBuilder<T, List<Widget>>? _wrapBuildDetailActions(LdCrudDetailBuilder<T, List<Widget>>? original) {
     return (context, item, isSeparatePage, ctrl) {
-      controller = ctrl;
+      final listState = context.watch<LdCrudListState<T>>();
       return (original?.call(
                 context,
                 item,

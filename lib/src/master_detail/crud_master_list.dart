@@ -8,9 +8,9 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 /// For more complex use cases, you might want to use a custom master list
 /// implementation.
 class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
-  final LdCrudListState<T> data;
   final T? openItem;
   final LdMasterDetailController<T> controller;
+  final LdCrudListState<T> listState;
   final Widget Function(BuildContext context, T item, T optimisticItem) titleBuilder;
   final Widget Function(BuildContext context, T item, T optimisticItem)? subtitleBuilder;
   final Widget Function(BuildContext context, T item, T optimisticItem)? subContentBuilder;
@@ -21,9 +21,9 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
 
   const LdCrudMasterList({
     super.key,
-    required this.data,
     required this.controller,
     required this.titleBuilder,
+    required this.listState,
     this.openItem,
     this.isSeparatePage = false,
     this.subtitleBuilder,
@@ -35,20 +35,20 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final showSelectionControls = data.isMultiSelectMode;
+    final showSelectionControls = listState.isMultiSelectMode;
     return LdSelectableList<T, void>(
       multiSelect: true,
-      paginator: data,
+      paginator: listState,
       onSelectionChange: (selectedItems) {
         if (selectedItems.length == 1) {
           controller.openItem(selectedItems.first);
           return;
         }
-        data.updateItemSelection(selectedItems);
+        listState.updateItemSelection(selectedItems);
       },
       listBuilder: (context, scrollController, itemBuilder) {
         return LdList<T, void>(
-          paginator: data,
+          paginator: listState,
           assumedItemHeight: assumedItemHeight,
           scrollController: scrollController,
           itemBuilder: itemBuilder,
@@ -64,7 +64,7 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
         required VoidCallback onTap,
       }) {
         final isActive = (openItem?.id ?? controller.getOpenItem()?.id) == item.id;
-        final optimisticItem = data.getItemOptimistically(item);
+        final optimisticItem = listState.getItemOptimistically(item);
 
         return LdListItem(
           trailingForward: isSeparatePage,
@@ -74,7 +74,7 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
           onTap: onTap,
           onLongPress: () {
             onTap();
-            data.updateItemSelection({item});
+            listState.updateItemSelection({item});
           },
           onSelectionChange: onSelectionChange,
           title: titleBuilder(context, item, optimisticItem),
@@ -83,21 +83,7 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
           leading: leadingBuilder?.call(context, item, optimisticItem),
           trailing: Row(
             children: [
-              if (data.isItemLoading(item)) const LdLoader(size: 24),
-              if (data.getItemError(item) != null)
-                IconButton(
-                  onPressed: () {
-                    LdExceptionDialog(
-                      error: LdException.fromDynamic(
-                        context,
-                        data.getItemError(item),
-                      ),
-                    ).show(context);
-                    data.clearItemState(item);
-                  },
-                  icon: const Icon(Icons.error),
-                  color: LdTheme.of(context).errorColor,
-                ),
+              if (listState.isItemLoading(item)) const LdLoader(size: 20),
               ldSpacerXS,
               trailingBuilder?.call(context, item, optimisticItem) ?? const SizedBox.shrink(),
             ],

@@ -48,25 +48,16 @@ class TaskDemoState extends State<TaskDemo> {
     return LdCrudMasterDetail<Task>(
       key: _masterDetailKey,
       crud: _repository,
-      masterDetailBuilder: (context,
-              buildDetailTitle,
-              buildMasterTitle,
-              buildDetail,
-              buildMaster,
-              buildMasterActions,
-              buildDetailActions) =>
-          LdMasterDetail(
-        buildMaster: buildMaster,
-        buildDetail: buildDetail,
-        buildMasterActions: buildMasterActions,
-        buildDetailActions: buildDetailActions,
-        buildDetailTitle: buildDetailTitle,
-        buildMasterTitle: buildMasterTitle,
-        masterDetailFlex: 2,
-        onOpenItemChange: (item) async {
-          setState(() => isEditingDetail = false);
-        },
-      ),
+      masterDetailBuilder: (context, builders, listState) {
+        final openItem = null; //state.controller.getOpenItem();
+        return LdMasterDetail.builders(
+          builders: builders,
+          masterDetailFlex: 2,
+          onOpenItemChange: (item) async {
+            setState(() => isEditingDetail = false);
+          },
+        );
+      },
       buildMasterTitle: (context, openTask, optimisticOpenTask, isSeparatePage,
               controller, listState) =>
           LdAutoSpace(
@@ -78,17 +69,18 @@ class TaskDemoState extends State<TaskDemo> {
       ),
       buildMaster: (context, openTask, optimisticOpenTask, isSeparatePage,
           controller, listState) {
-        return LdCrudMasterList(
-          data: context.read<LdCrudListState<Task>>(),
+        return LdCrudMasterList<Task>(
+          listState: listState,
           openItem: openTask,
           controller: controller,
-          titleBuilder: (context, item, optimisticItem) => Text(item.task),
+          titleBuilder: (context, item, optimisticItem) =>
+              Text(optimisticItem.task),
           subtitleBuilder: (context, item, optimisticItem) => Row(
             children: [
               Icon(
                 Icons.fiber_manual_record,
                 size: 12,
-                color: TaskPriorityUIX(item.priority).color,
+                color: TaskPriorityUIX(optimisticItem.priority).color,
               ),
               const SizedBox(width: 2),
               Text(item.due),
@@ -96,6 +88,7 @@ class TaskDemoState extends State<TaskDemo> {
           ),
           trailingBuilder: (context, item, optimisticItem) {
             return LdCrudAction.updateItem<Task>(
+              controller: controller,
               actionButtonBuilder: (context, triggerAction) => LdButtonVague(
                 size: LdSize.l,
                 autoLoading: false,
@@ -184,10 +177,11 @@ class TaskDemoState extends State<TaskDemo> {
           ),
         if (isEditingDetail) ...[
           LdCrudAction.updateItem<Task>(
+            controller: controller,
             getUpdatedItem: () async => taskDetailPageState?.editingTask,
             onItemUpdated: (masterDetail, item) => setIsEditingDetail(false),
           ),
-          LdCrudAction.deleteOpenItem<Task>()
+          LdCrudAction.deleteOpenItem<Task>(controller: controller)
         ]
       ],
     );

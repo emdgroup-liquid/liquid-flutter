@@ -235,18 +235,9 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
               expandChild: true,
               child: LdCrudMasterDetail<ExampleItem>(
                 crud: _crudRepository,
-                masterDetailBuilder: (context,
-                        buildDetailTitle,
-                        buildMasterTitle,
-                        buildDetail,
-                        buildMaster,
-                        buildMasterActions,
-                        buildDetailActions) =>
-                    LdMasterDetail(
-                  buildDetail: buildDetail,
-                  buildMaster: buildMaster,
-                  buildMasterActions: buildMasterActions,
-                  buildDetailActions: buildDetailActions,
+                masterDetailBuilder: (context, builders, listState) =>
+                    LdMasterDetail.builders(
+                  builders: builders,
                   layoutMode: _layoutMode,
                   detailPresentationMode: _presentationMode,
                 ),
@@ -285,10 +276,7 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
                 buildMaster: (context, openItem, optimisticOpenItem,
                         isSeparatePage, controller, listState) =>
                     LdCrudMasterList<ExampleItem>(
-                  data: context
-                      .findAncestorStateOfType<
-                          LdCrudMasterDetailState<ExampleItem>>()!
-                      .listState,
+                  listState: listState,
                   controller: controller,
                   titleBuilder: (context, item, optimisticItem) =>
                       Text(item.name),
@@ -324,6 +312,7 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
                         isSeparatePage, controller, listState) =>
                     [
                   LdCrudAction.updateItem<ExampleItem>(
+                    controller: controller,
                     getUpdatedItem: () async {
                       final notification =
                           (await LdNotificationsController.of(context)
@@ -342,7 +331,9 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
                       return null;
                     },
                   ),
-                  LdCrudAction.deleteOpenItem<ExampleItem>(),
+                  LdCrudAction.deleteOpenItem<ExampleItem>(
+                    controller: controller,
+                  ),
                 ],
               ),
             ),
