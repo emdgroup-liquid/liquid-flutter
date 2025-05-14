@@ -4,7 +4,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:provider/provider.dart';
 
 final exampleTitles =
     "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy "
@@ -236,19 +235,43 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
               expandChild: true,
               child: LdCrudMasterDetail<ExampleItem>(
                 crud: _crudRepository,
-                layoutMode: _layoutMode,
-                detailPresentationMode: _presentationMode,
-                buildDetailTitle: (context, item, isSeparatePage, controller) =>
+                masterDetailBuilder: (context,
+                        buildDetailTitle,
+                        buildMasterTitle,
+                        buildDetail,
+                        buildMaster,
+                        buildMasterActions,
+                        buildDetailActions) =>
+                    LdMasterDetail(
+                  buildDetail: buildDetail,
+                  buildMaster: buildMaster,
+                  buildMasterActions: buildMasterActions,
+                  buildDetailActions: buildDetailActions,
+                  layoutMode: _layoutMode,
+                  detailPresentationMode: _presentationMode,
+                ),
+                buildDetailTitle: (context, item, optimisticItem,
+                        isSeparatePage, controller, listState) =>
                     Text("Detail ${item.name}"),
-                buildMasterTitle:
-                    (context, openItem, isSeparatePage, controller) {
-                  final data = context.read<LdCrudListState<ExampleItem>>();
+                buildMasterTitle: (context, openItem, optimisticOpenItem,
+                    isSeparatePage, controller, listState) {
+                  final data = context
+                      .findAncestorStateOfType<
+                          LdCrudMasterDetailState<ExampleItem>>()!
+                      .listState;
                   final title = data.isMultiSelectMode
                       ? "${data.selectedItems.length}/${data.totalItems} selected"
                       : "List of Example Items";
                   return Text(title);
                 },
-                buildDetail: (context, item, isSeparatePage, controller) =>
+                buildDetail: (
+                  context,
+                  item,
+                  optimisticItem,
+                  isSeparatePage,
+                  controller,
+                  listState,
+                ) =>
                     LdAutoSpace(
                   children: [
                     const LdTextHl("Detail"),
@@ -259,9 +282,13 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
                     )
                   ],
                 ).padL(),
-                buildMaster: (context, openItem, isSeparatePage, controller) =>
+                buildMaster: (context, openItem, optimisticOpenItem,
+                        isSeparatePage, controller, listState) =>
                     LdCrudMasterList<ExampleItem>(
-                  data: context.read<LdCrudListState<ExampleItem>>(),
+                  data: context
+                      .findAncestorStateOfType<
+                          LdCrudMasterDetailState<ExampleItem>>()!
+                      .listState,
                   controller: controller,
                   titleBuilder: (context, item, optimisticItem) =>
                       Text(item.name),
@@ -269,8 +296,9 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
                       Text("ID: ${item.id}"),
                   openItem: openItem,
                 ),
-                buildMasterActions:
-                    (context, openItem, isSeparatePage, controller) => [
+                buildMasterActions: (context, openItem, optimisticOpenItem,
+                        isSeparatePage, controller, listState) =>
+                    [
                   LdCrudAction.createItem<ExampleItem>(
                     getNewItem: () async {
                       final notification =
@@ -292,8 +320,9 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
                   ),
                   LdCrudAction.deleteSelectedItems<ExampleItem>(),
                 ],
-                buildDetailActions:
-                    (context, item, isSeparatePage, controller) => [
+                buildDetailActions: (context, item, optimisticItem,
+                        isSeparatePage, controller, listState) =>
+                    [
                   LdCrudAction.updateItem<ExampleItem>(
                     getUpdatedItem: () async {
                       final notification =

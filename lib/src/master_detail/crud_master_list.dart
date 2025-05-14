@@ -64,7 +64,7 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
         required VoidCallback onTap,
       }) {
         final isActive = (openItem?.id ?? controller.getOpenItem()?.id) == item.id;
-        final optimisticItem = data.getItemOptimistically(item)!;
+        final optimisticItem = data.getItemOptimistically(item);
 
         return LdListItem(
           trailingForward: isSeparatePage,

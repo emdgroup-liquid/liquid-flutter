@@ -12,6 +12,18 @@ part 'crud_master_detail.dart';
 
 typedef LdMasterDetailOnOpenItem<T> = Future<bool> Function(T item);
 typedef LdMasterDetailOnOpenItemChange<T> = void Function(T? item);
+typedef LdMasterBuilder<T, W> = W Function(
+  BuildContext context,
+  T? openItem,
+  bool isSeparatePage,
+  LdMasterDetailController<T> controller,
+);
+typedef LdDetailBuilder<T, W> = W Function(
+  BuildContext context,
+  T item,
+  bool isSeparatePage,
+  LdMasterDetailController<T> controller,
+);
 
 enum MasterDetailPresentationMode { page, dialog }
 
@@ -35,21 +47,12 @@ class LdMasterDetail<T> extends StatefulWidget {
   final bool Function(SizingInformation size)? customSplitPredicate;
 
   // Callback functions to replace the builder class
-  final Widget Function(BuildContext context, T item, bool isSeparatePage,
-      LdMasterDetailController<T> controller)? buildDetailTitle;
-  final Widget Function(BuildContext context, T? openItem, bool isSeparatePage,
-      LdMasterDetailController<T> controller)? buildMasterTitle;
-  final Widget Function(BuildContext context, T item, bool isSeparatePage,
-      LdMasterDetailController<T> controller) buildDetail;
-  final Widget Function(BuildContext context, T? openItem, bool isSeparatePage,
-      LdMasterDetailController<T> controller) buildMaster;
-  final List<Widget> Function(
-      BuildContext context,
-      T? openItem,
-      bool isSeparatePage,
-      LdMasterDetailController<T> controller)? buildMasterActions;
-  final List<Widget> Function(BuildContext context, T item, bool isSeparatePage,
-      LdMasterDetailController<T> controller)? buildDetailActions;
+  final LdDetailBuilder<T, Widget>? buildDetailTitle;
+  final LdMasterBuilder<T, Widget>? buildMasterTitle;
+  final LdDetailBuilder<T, Widget> buildDetail;
+  final LdMasterBuilder<T, Widget> buildMaster;
+  final LdMasterBuilder<T, List<Widget>>? buildMasterActions;
+  final LdDetailBuilder<T, List<Widget>>? buildDetailActions;
 
   const LdMasterDetail({
     this.buildDetailTitle,
@@ -81,8 +84,7 @@ class LdMasterDetail<T> extends StatefulWidget {
   static ShellRoute createShellRoute<T>({
     required Widget child,
     required LdMasterDetailShellRouteConfig<T> routeConfig,
-    Page Function(BuildContext context, GoRouterState state, Widget child)?
-        pageBuilder,
+    Page Function(BuildContext context, GoRouterState state, Widget child)? pageBuilder,
   }) {
     return createMasterDetailShellRoute<T>(
       child: child,
@@ -95,14 +97,12 @@ class LdMasterDetail<T> extends StatefulWidget {
   State<LdMasterDetail<T>> createState() => _LdMasterDetailState<T>();
 }
 
-class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
-    with SingleTickerProviderStateMixin {
+class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTickerProviderStateMixin {
   T? _openItem;
 
   LdMasterDetailShellRouteConfig<T>? get _routeConfig =>
       Provider.of<LdMasterDetailShellRouteConfig<T>?>(context, listen: false);
-  late final LdMasterDetailController<T> _controller =
-      LdMasterDetailController<T>(
+  late final LdMasterDetailController<T> _controller = LdMasterDetailController<T>(
     getOpenItem: () => _openItem,
     onOpenItem: _onOpenItem,
     onCloseItem: _onCloseItem,
@@ -206,8 +206,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
         widget.onOpenItemChange?.call(null);
       }
 
-      if (widget.detailPresentationMode ==
-          MasterDetailPresentationMode.dialog) {
+      if (widget.detailPresentationMode == MasterDetailPresentationMode.dialog) {
         _inDetailView = true;
         await LdModal(
           onDismiss: _onDialogDismiss,
@@ -398,9 +397,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
             Area(
               flex: widget.masterDetailFlex,
               builder: (context, area) {
-                final detail = _openItem != null
-                    ? buildDetail(context, _openItem!, !isLarge)
-                    : null;
+                final detail = _openItem != null ? buildDetail(context, _openItem!, !isLarge) : null;
                 return FocusTraversalGroup(
                   child: detail ?? Container(),
                 );
@@ -427,11 +424,9 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
 
   bool _useSplitView(SizingInformation size) {
     if (widget.customSplitPredicate != null) {
-      return widget.customSplitPredicate!(size) &&
-          widget.layoutMode != MasterDetailLayoutMode.compact;
+      return widget.customSplitPredicate!(size) && widget.layoutMode != MasterDetailLayoutMode.compact;
     }
-    return ((size.isTablet && size.screenSize.width > size.screenSize.height) ||
-            size.isDesktop) &&
+    return ((size.isTablet && size.screenSize.width > size.screenSize.height) || size.isDesktop) &&
         widget.layoutMode != MasterDetailLayoutMode.compact;
   }
 
@@ -464,12 +459,12 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
 }
 
 class _DetailPage<T> extends StatelessWidget {
-  final Widget Function(BuildContext context, T item, bool isSeparatePage,
-      LdMasterDetailController<T> controller)? buildDetailTitle;
-  final Widget Function(BuildContext context, T item, bool isSeparatePage,
-      LdMasterDetailController<T> controller) buildDetail;
-  final List<Widget> Function(BuildContext context, T item, bool isSeparatePage,
-      LdMasterDetailController<T> controller)? buildDetailActions;
+  final Widget Function(BuildContext context, T item, bool isSeparatePage, LdMasterDetailController<T> controller)?
+      buildDetailTitle;
+  final Widget Function(BuildContext context, T item, bool isSeparatePage, LdMasterDetailController<T> controller)
+      buildDetail;
+  final List<Widget> Function(
+      BuildContext context, T item, bool isSeparatePage, LdMasterDetailController<T> controller)? buildDetailActions;
   final T item;
   final LdMasterDetailController<T> controller;
   final bool isDetailsAppBarLoading;

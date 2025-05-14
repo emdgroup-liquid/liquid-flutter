@@ -48,8 +48,27 @@ class TaskDemoState extends State<TaskDemo> {
     return LdCrudMasterDetail<Task>(
       key: _masterDetailKey,
       crud: _repository,
-      masterDetailFlex: 2,
-      buildMasterTitle: (context, openTask, isSeparatePage, controller) =>
+      masterDetailBuilder: (context,
+              buildDetailTitle,
+              buildMasterTitle,
+              buildDetail,
+              buildMaster,
+              buildMasterActions,
+              buildDetailActions) =>
+          LdMasterDetail(
+        buildMaster: buildMaster,
+        buildDetail: buildDetail,
+        buildMasterActions: buildMasterActions,
+        buildDetailActions: buildDetailActions,
+        buildDetailTitle: buildDetailTitle,
+        buildMasterTitle: buildMasterTitle,
+        masterDetailFlex: 2,
+        onOpenItemChange: (item) async {
+          setState(() => isEditingDetail = false);
+        },
+      ),
+      buildMasterTitle: (context, openTask, optimisticOpenTask, isSeparatePage,
+              controller, listState) =>
           LdAutoSpace(
         defaultSpacing: LdSize.xs,
         children: [
@@ -57,7 +76,8 @@ class TaskDemoState extends State<TaskDemo> {
           LdTextL(_filterStatusText),
         ],
       ),
-      buildMaster: (context, openTask, isSeparatePage, controller) {
+      buildMaster: (context, openTask, optimisticOpenTask, isSeparatePage,
+          controller, listState) {
         return LdCrudMasterList(
           data: context.read<LdCrudListState<Task>>(),
           openItem: openTask,
@@ -90,15 +110,18 @@ class TaskDemoState extends State<TaskDemo> {
           },
         );
       },
-      buildDetail: (context, item, isSeparatePage, controller) =>
+      buildDetail: (context, item, optimisticItem, isSeparatePage, controller,
+              listState) =>
           TaskDetailPage(
         key: taskDetailPageKey,
         task: item,
         isEditing: isEditingDetail,
       ),
-      buildDetailTitle: (context, item, isSeparatePage, controller) =>
+      buildDetailTitle: (context, item, optimisticItem, isSeparatePage,
+              controller, listState) =>
           Text("Task Details"),
-      buildMasterActions: (context, openItem, isSeparatePage, controller) {
+      buildMasterActions: (context, openItem, optimisticOpenItem,
+          isSeparatePage, controller, listState) {
         final crudList = context.read<LdCrudListState<Task>>();
         final filterByDoneValues = {
           null: Text("All"),
@@ -151,7 +174,9 @@ class TaskDemoState extends State<TaskDemo> {
           LdCrudAction.deleteSelectedItems<Task>(),
         ];
       },
-      buildDetailActions: (context, item, isSeparatePage, controller) => [
+      buildDetailActions: (context, item, optimisticItem, isSeparatePage,
+              controller, listState) =>
+          [
         if (!isEditingDetail)
           IconButton(
             onPressed: () => setIsEditingDetail(true),
@@ -165,9 +190,6 @@ class TaskDemoState extends State<TaskDemo> {
           LdCrudAction.deleteOpenItem<Task>()
         ]
       ],
-      onOpenItemChange: (item) async {
-        setState(() => isEditingDetail = false);
-      },
     );
   }
 }

@@ -42,7 +42,7 @@ class LdCrudAction<T extends CrudItemMixin<T>, Arg, Result> extends StatelessWid
       create: (_) => _ArgNotifier<Arg>(),
       child: Builder(
         builder: (providerContext) {
-          final masterDetail = context.findAncestorStateOfType<LdCrudMasterDetailState<T>>()!;
+          final masterDetail = context.read<LdCrudMasterDetailState<T>>();
           final argNotifier = Provider.of<_ArgNotifier<Arg>>(providerContext);
 
           // Inline helper function to build the submit button
