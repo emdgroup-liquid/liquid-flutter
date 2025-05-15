@@ -55,7 +55,6 @@ ThemeData getMaterialTheme(LdTheme theme) {
       appBarTheme: AppBarTheme(
         backgroundColor: theme.surface,
         surfaceTintColor: theme.surface,
-        centerTitle: false,
         foregroundColor: theme.text,
         shadowColor: theme.neutralShade(2),
       ),

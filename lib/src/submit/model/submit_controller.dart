@@ -95,6 +95,7 @@ class LdSubmitController<T> {
       } else {
         res = await config.action();
       }
+
       if (!_isLoading) return;
 
       _retryController.notifyOperationCompleted();
@@ -110,7 +111,9 @@ class LdSubmitController<T> {
       final exception = exceptionMapper.handle(e, stackTrace: s);
 
       if (ldPrintDebugMessages) {
-        debugPrint("An error occurred in LdSubmitController: $e \n $s");
+        debugPrint(
+          "An error occurred in LdSubmitController<${T.toString()}>: $e \n $s",
+        );
       }
 
       _setState(
