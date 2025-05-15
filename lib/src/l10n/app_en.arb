@@ -19,6 +19,7 @@
   "unknownError": "An unknown error occurred",
   "moreInfo": "More info",
   "close": "Close",
+  "clearError": "Clear error",
   "loading": "Loading...",
   "networkError": "A network error occurred. Please make sure you are connected to the internet and try again.",
   "timeoutError": "The request timed out. Please try again.",

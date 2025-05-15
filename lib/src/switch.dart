@@ -26,6 +26,7 @@ class LdSwitch<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         LdFormLabel(label: label, size: size),

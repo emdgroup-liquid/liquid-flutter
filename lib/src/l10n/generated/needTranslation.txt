@@ -1,6 +1,7 @@
 {
   "de": [
     "search",
-    "selectTime"
+    "selectTime",
+    "clearError"
   ]
 }

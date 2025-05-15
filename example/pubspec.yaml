@@ -20,6 +20,7 @@ dependencies:
   responsive_builder: ^0.7.0
   syntax_highlight: ^0.4.0
   implicitly_animated_list: ^2.2.0
+  js: ^0.6.7
 
   provider: ^6.0.2
 

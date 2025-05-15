@@ -32,7 +32,7 @@ import 'package:liquid/components/tab.dart';
 import 'package:liquid/components/form_elements/toggle.dart';
 import 'package:liquid/demos/layout_documentation.dart';
 import 'package:liquid/demos/radius_documentation.dart';
-import 'package:liquid/demos/task_demo.dart';
+import 'package:liquid/demos/task_demo/task_demo.dart';
 import 'package:liquid/demos/theme.dart';
 import 'package:liquid/demos/typography_documentation.dart';
 import 'package:liquid/home.dart';
@@ -252,10 +252,14 @@ class AppRouter {
             pageBuilder: (context, state) => NoTransitionPage<void>(
                 key: state.pageKey, child: const Spring()),
           ),
-          GoRoute(
-            path: "/components/master-detail",
-            pageBuilder: (context, state) => NoTransitionPage<void>(
-                key: state.pageKey, child: const MasterDetailDemo()),
+          LdMasterDetail.createShellRoute<int>(
+            child: const MasterDetailDemo(),
+            routeConfig: LdMasterDetailShellRouteConfig<int>(
+              basePath: "/components/master-detail",
+              detailPath: "detail/:id",
+              itemProvider: (id) => int.tryParse(id),
+              itemIdGetter: (item) => item.toString(),
+            ),
           ),
           GoRoute(
             path: "/components/notification",

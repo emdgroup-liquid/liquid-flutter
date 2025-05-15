@@ -1,4 +1,5 @@
 import 'dart:io' if (dart.library.io) 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -210,6 +211,7 @@ class LdModal {
           mode: title != null ? LdButtonMode.ghost : LdButtonMode.vague,
           child: const Icon(LucideIcons.x),
           onPressed: () {
+            onDismiss?.call();
             Navigator.of(context).pop();
           },
         );
@@ -431,6 +433,8 @@ class LdModal {
       pageListBuilderNotifier: ValueNotifier(
         (context) => _getPageList(context),
       ),
+      onModalDismissedWithBarrierTap: onDismiss,
+      onModalDismissedWithDrag: onDismiss,
     );
   }
 
@@ -445,6 +449,11 @@ class LdModal {
       ),
       child: PopScope(
         canPop: userCanDismiss,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) {
+            onDismiss?.call();
+          }
+        },
         child: Builder(builder: (context) {
           return CallbackShortcuts(
             bindings: {

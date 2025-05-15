@@ -27,14 +27,11 @@ class ComponentWell extends StatefulWidget {
     this.description,
   }) {
     if (showSourceCodeOptions == null) {
-      final file = StackTrace.current
-          .toString()
-          .split("\n")
-          .where((e) => e.contains("package:liquid/"))
-          .toList();
-
-      final pathRe = RegExp(r"package:liquid/(.*)\.dart");
-      final path = pathRe.firstMatch(file[1])?.group(1);
+      final stackTrace = StackTrace.current.toString();
+      final fullPathRegex = RegExp(r"package(:|s/)liquid/(.*?)\.dart");
+      // skip the first match, as it belongs to this file (component_well.dart), while the second match is the calling file
+      final match = fullPathRegex.allMatches(stackTrace).skip(1).firstOrNull;
+      final path = match?.group(2);
 
       if (path == null) {
         throw Exception("Could not infer the path to the source code");

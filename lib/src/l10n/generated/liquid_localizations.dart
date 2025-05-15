@@ -215,6 +215,12 @@ abstract class LiquidLocalizations {
   /// **'Close'**
   String get close;
 
+  /// No description provided for @clearError.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear error'**
+  String get clearError;
+
   /// No description provided for @loading.
   ///
   /// In en, this message translates to:

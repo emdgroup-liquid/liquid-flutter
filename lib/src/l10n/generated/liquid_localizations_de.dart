@@ -71,6 +71,9 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
   String get close => 'Schließen';
 
   @override
+  String get clearError => 'Clear error';
+
+  @override
   String get loading => 'Laden...';
 
   @override

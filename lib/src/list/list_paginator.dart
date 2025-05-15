@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+
+part '../master_detail/crud_list_state.dart';
 
 typedef FetchListFunction<T> = Future<LdListPage<T>> Function({
   required int offset,
@@ -151,7 +154,7 @@ class LdPaginator<T> extends ChangeNotifier {
 
         // Ensure _items list is large enough
         if (offset + page.newItems.length > _items.length) {
-          _items.length = offset + page.newItems.length;
+          _items.length = max(offset + page.newItems.length, _totalItems);
         }
 
         // Insert items at their exact positions
