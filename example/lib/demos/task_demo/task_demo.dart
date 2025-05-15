@@ -163,7 +163,7 @@ class TaskDemoState extends State<TaskDemo> {
             ).show(context, useRootNavigator: true);
             return newTask;
           }),
-          LdCrudAction.deleteSelectedItems<Task>(),
+          LdCrudAction.deleteSelectedItems<Task>(controller: controller),
         ];
       },
       buildDetailActions: (context, item, optimisticItem, isSeparatePage,
@@ -177,7 +177,7 @@ class TaskDemoState extends State<TaskDemo> {
         if (isEditingDetail) ...[
           LdCrudAction.updateItem<Task>(
             controller: controller,
-            getUpdatedItem: () async => taskDetailPageState?.editingTask,
+            getUpdatedItem: () => taskDetailPageState?.editingTask,
             onItemUpdated: (masterDetail, item) => setIsEditingDetail(false),
           ),
           LdCrudAction.deleteOpenItem<Task>(controller: controller)

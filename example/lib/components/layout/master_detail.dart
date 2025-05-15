@@ -306,7 +306,9 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
                       return null;
                     },
                   ),
-                  LdCrudAction.deleteSelectedItems<ExampleItem>(),
+                  LdCrudAction.deleteSelectedItems<ExampleItem>(
+                    controller: controller,
+                  ),
                 ],
                 buildDetailActions: (context, item, optimisticItem,
                         isSeparatePage, controller, listState) =>
@@ -332,8 +334,7 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
                     },
                   ),
                   LdCrudAction.deleteOpenItem<ExampleItem>(
-                    controller: controller,
-                  ),
+                      controller: controller),
                 ],
               ),
             ),

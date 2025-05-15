@@ -1,6 +1,6 @@
 part of '../list/list_paginator.dart';
 
-enum CrudLoadingStateType { loading, success, error }
+enum CrudItemStateType { loading, success, error }
 
 /// A state event for a CRUD item.
 /// It can be loading, success, error or deleted.
@@ -8,7 +8,7 @@ enum CrudLoadingStateType { loading, success, error }
 /// If the operation is successful, the data is set (for create and update),
 /// or null (for delete).
 class CrudItemStateEvent<T> {
-  final CrudLoadingStateType type;
+  final CrudItemStateType type;
   final dynamic error;
   final T? data;
 
@@ -18,14 +18,27 @@ class CrudItemStateEvent<T> {
     this.data,
   });
 
-  factory CrudItemStateEvent.loading([T? data]) => CrudItemStateEvent._(type: CrudLoadingStateType.loading, data: data);
+  factory CrudItemStateEvent.fromDynamic({
+    required CrudItemStateType type,
+    dynamic dataErrorOrNull,
+  }) {
+    if (type == CrudItemStateType.loading) {
+      return CrudItemStateEvent._(type: type, data: dataErrorOrNull);
+    } else if (type == CrudItemStateType.success) {
+      return CrudItemStateEvent._(type: type, data: dataErrorOrNull);
+    } else if (type == CrudItemStateType.error) {
+      return CrudItemStateEvent._(type: type, error: dataErrorOrNull);
+    }
+    throw ArgumentError('Invalid state type');
+  }
 
-  factory CrudItemStateEvent.success(T data) => CrudItemStateEvent._(type: CrudLoadingStateType.success, data: data);
+  factory CrudItemStateEvent.loading([T? data]) => CrudItemStateEvent._(type: CrudItemStateType.loading, data: data);
 
-  factory CrudItemStateEvent.deleted() => CrudItemStateEvent._(type: CrudLoadingStateType.success, data: null);
+  factory CrudItemStateEvent.success(T data) => CrudItemStateEvent._(type: CrudItemStateType.success, data: data);
 
-  factory CrudItemStateEvent.error(dynamic error) =>
-      CrudItemStateEvent._(type: CrudLoadingStateType.error, error: error);
+  factory CrudItemStateEvent.deleted() => CrudItemStateEvent._(type: CrudItemStateType.success, data: null);
+
+  factory CrudItemStateEvent.error(dynamic error) => CrudItemStateEvent._(type: CrudItemStateType.error, error: error);
 
   @override
   String toString() {
@@ -63,13 +76,13 @@ class LdCrudListState<T extends CrudItemMixin<T>> extends LdPaginator<T> {
       itemStates[id] = state;
     } else {
       // let's just set the general busy state, if we can't to it on item level
-      _setBusy(state.type == CrudLoadingStateType.loading);
-      if (state.type == CrudLoadingStateType.error) {
+      _setBusy(state.type == CrudItemStateType.loading);
+      if (state.type == CrudItemStateType.error) {
         // same goes for error state
         _setError(state.error!);
       }
     }
-    if (state.type == CrudLoadingStateType.success) {
+    if (state.type == CrudItemStateType.success) {
       // If the state is success, update the item in the list
       if (state.data == null) {
         _delete(id);
@@ -99,7 +112,7 @@ class LdCrudListState<T extends CrudItemMixin<T>> extends LdPaginator<T> {
   }
 
   bool isItemLoading(T item) {
-    return itemStates[item.id]?.type == CrudLoadingStateType.loading;
+    return itemStates[item.id]?.type == CrudItemStateType.loading;
   }
 
   bool isItemSelected(T item) {

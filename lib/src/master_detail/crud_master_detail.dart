@@ -137,8 +137,12 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
 
   @override
   Widget build(BuildContext context) {
-    return _wrapWithStateProviders(
-      widget.masterDetailBuilder(
+    return MultiProvider(
+      providers: [
+        Provider<LdCrudMasterDetailState<T>>.value(value: this),
+        ListenableProvider<LdCrudListState<T>>.value(value: listState),
+      ],
+      child: widget.masterDetailBuilder(
         context,
         LdMasterDetailBuilders<T>(
           buildDetailTitle: _wrapCrudDetailBuilder(widget.buildDetailTitle),
@@ -155,35 +159,18 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
     );
   }
 
-  Widget _wrapWithStateProviders(Widget widget) {
-    return Provider<LdCrudMasterDetailState<T>>.value(
-      value: this,
-      child: ListenableProvider<LdCrudListState<T>>.value(
-        value: listState,
-        child: ListenableBuilder(
-          listenable: listState,
-          builder: (context, child) {
-            return widget;
-          },
-        ),
-      ),
-    );
-  }
-
   LdMasterBuilder<T, Widget>? _wrapCrudMasterBuilder(LdCrudMasterBuilder<T, Widget>? original) {
     return original == null
         ? null
         : (context, openItem, isSeparatePage, controller) {
             final listState = context.watch<LdCrudListState<T>>();
-            return _wrapWithStateProviders(
-              original.call(
-                context,
-                openItem,
-                openItem == null ? null : listState.getItemOptimistically(openItem),
-                isSeparatePage,
-                controller,
-                listState,
-              ),
+            return original.call(
+              context,
+              openItem,
+              openItem == null ? null : listState.getItemOptimistically(openItem),
+              isSeparatePage,
+              controller,
+              listState,
             );
           };
   }
@@ -193,15 +180,13 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
         ? null
         : (context, item, isSeparatePage, ctrl) {
             final listState = context.watch<LdCrudListState<T>>();
-            return _wrapWithStateProviders(
-              original.call(
-                context,
-                item,
-                listState.getItemOptimistically(item),
-                isSeparatePage,
-                ctrl,
-                listState,
-              ),
+            return original.call(
+              context,
+              item,
+              listState.getItemOptimistically(item),
+              isSeparatePage,
+              ctrl,
+              listState,
             );
           };
   }
@@ -218,7 +203,6 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
                 listState,
               ) ??
               [])
-          .map((widget) => _wrapWithStateProviders(widget))
           .toList();
     };
   }
@@ -235,7 +219,6 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
                 listState,
               ) ??
               [])
-          .map((widget) => _wrapWithStateProviders(widget))
           .toList();
     };
   }
