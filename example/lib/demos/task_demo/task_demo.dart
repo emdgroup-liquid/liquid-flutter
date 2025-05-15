@@ -152,7 +152,9 @@ class TaskDemoState extends State<TaskDemo> {
                         final state = (createNewTaskKey.currentState
                             as TaskDetailPageState);
                         final newTask = state.editingTask;
-                        Navigator.of(context).pop(newTask);
+                        Navigator.of(context).pop(
+                          newTask?.task.isNotEmpty == true ? newTask : null,
+                        );
                       },
                     ),
                   ),
@@ -173,19 +175,12 @@ class TaskDemoState extends State<TaskDemo> {
               icon: const Icon(Icons.edit),
             ),
           if (isEditingDetail) ...[
-            KeyedSubtree(
-              key: GlobalObjectKey("appBarUpdate"),
-              child: LdCrudAction.updateItem<Task>(
-                controller: controller,
-                getUpdatedItem: () => taskDetailPageState?.editingTask,
-                onItemUpdated: (masterDetail, item) =>
-                    setIsEditingDetail(false),
-              ),
+            LdCrudAction.updateItem<Task>(
+              controller: controller,
+              getUpdatedItem: () => taskDetailPageState?.editingTask,
+              onItemUpdated: (masterDetail, item) => setIsEditingDetail(false),
             ),
-            KeyedSubtree(
-              key: GlobalObjectKey("appBarDelete"),
-              child: LdCrudAction.deleteOpenItem<Task>(controller: controller),
-            )
+            LdCrudAction.deleteOpenItem<Task>(controller: controller)
           ]
         ];
       },

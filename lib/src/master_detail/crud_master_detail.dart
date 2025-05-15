@@ -161,17 +161,9 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
     return original == null
         ? null
         : (context, openItem, isSeparatePage, controller) {
-            return ListenableBuilder(
-              listenable: listState,
-              builder: (context, child) => original.call(
-                context,
-                openItem,
-                openItem == null ? null : listState.getItemOptimistically(openItem),
-                isSeparatePage,
-                controller,
-                listState,
-              ),
-            );
+            final listState = context.watch<LdCrudListState<T>>();
+            final optimisticOpenItem = openItem == null ? null : listState.getItemOptimistically(openItem);
+            return original.call(context, openItem, optimisticOpenItem, isSeparatePage, controller, listState);
           };
   }
 
@@ -179,32 +171,29 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
     return original == null
         ? null
         : (context, item, isSeparatePage, ctrl) {
-            return ListenableBuilder(
-              listenable: listState,
-              builder: (context, child) => original.call(
-                context,
-                item,
-                listState.getItemOptimistically(item),
-                isSeparatePage,
-                ctrl,
-                listState,
-              ),
-            );
+            final listState = context.watch<LdCrudListState<T>>();
+            final optimisticItem = listState.getItemOptimistically(item);
+            return original.call(context, item, optimisticItem, isSeparatePage, ctrl, listState);
           };
+  }
+
+  Widget _wrapCrudActionWithKey(Widget widget, int index, [T? item]) {
+    if (widget is LdCrudAction) {
+      // wrap LdCrudAction with KeyedSubtree to keep track the state of the action
+      return KeyedSubtree(
+        key: GlobalObjectKey("$hashCode$index${item?.id}"),
+        child: widget,
+      );
+    }
+    return widget;
   }
 
   LdMasterBuilder<T, List<Widget>>? _wrapBuildMasterActions(LdCrudMasterBuilder<T, List<Widget>>? original) {
     return (context, openItem, isSeparatePage, ctrl) {
       final listState = context.watch<LdCrudListState<T>>();
-      return (original?.call(
-                context,
-                openItem,
-                openItem == null ? null : listState.getItemOptimistically(openItem),
-                isSeparatePage,
-                ctrl,
-                listState,
-              ) ??
-              [])
+      final optimisticOpenItem = openItem == null ? null : listState.getItemOptimistically(openItem);
+      return (original?.call(context, openItem, optimisticOpenItem, isSeparatePage, ctrl, listState) ?? [])
+          .mapIndexed((index, action) => _wrapCrudActionWithKey(action, index))
           .toList();
     };
   }
@@ -212,15 +201,9 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
   LdDetailBuilder<T, List<Widget>>? _wrapBuildDetailActions(LdCrudDetailBuilder<T, List<Widget>>? original) {
     return (context, item, isSeparatePage, ctrl) {
       final listState = context.watch<LdCrudListState<T>>();
-      return (original?.call(
-                context,
-                item,
-                listState.getItemOptimistically(item),
-                isSeparatePage,
-                ctrl,
-                listState,
-              ) ??
-              [])
+      final optimisticItem = listState.getItemOptimistically(item);
+      return (original?.call(context, item, optimisticItem, isSeparatePage, ctrl, listState) ?? [])
+          .mapIndexed((index, action) => _wrapCrudActionWithKey(action, index, item))
           .toList();
     };
   }
