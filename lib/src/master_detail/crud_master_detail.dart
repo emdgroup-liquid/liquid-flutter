@@ -93,7 +93,6 @@ class LdCrudMasterDetail<T extends CrudItemMixin<T>> extends StatefulWidget {
   final LdMasterDetail<T> Function(
     BuildContext context,
     LdMasterDetailBuilders<T> masterDetailBuilders,
-    LdCrudListState<T> listState,
   ) masterDetailBuilder;
 
   const LdCrudMasterDetail({
@@ -154,7 +153,6 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
           isMasterAppBarLoading: (openItem) => _isMasterAppBarLoading(openItem),
           isDetailAppBarLoading: (openItem) => _isDetailAppBarLoading(openItem),
         ),
-        listState,
       ),
     );
   }
@@ -163,14 +161,16 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
     return original == null
         ? null
         : (context, openItem, isSeparatePage, controller) {
-            final listState = context.watch<LdCrudListState<T>>();
-            return original.call(
-              context,
-              openItem,
-              openItem == null ? null : listState.getItemOptimistically(openItem),
-              isSeparatePage,
-              controller,
-              listState,
+            return ListenableBuilder(
+              listenable: listState,
+              builder: (context, child) => original.call(
+                context,
+                openItem,
+                openItem == null ? null : listState.getItemOptimistically(openItem),
+                isSeparatePage,
+                controller,
+                listState,
+              ),
             );
           };
   }
@@ -179,14 +179,16 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
     return original == null
         ? null
         : (context, item, isSeparatePage, ctrl) {
-            final listState = context.watch<LdCrudListState<T>>();
-            return original.call(
-              context,
-              item,
-              listState.getItemOptimistically(item),
-              isSeparatePage,
-              ctrl,
-              listState,
+            return ListenableBuilder(
+              listenable: listState,
+              builder: (context, child) => original.call(
+                context,
+                item,
+                listState.getItemOptimistically(item),
+                isSeparatePage,
+                ctrl,
+                listState,
+              ),
             );
           };
   }

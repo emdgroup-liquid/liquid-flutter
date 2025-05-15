@@ -69,7 +69,7 @@ class LdMasterDetail<T> extends StatefulWidget {
   final bool Function(SizingInformation size)? customSplitPredicate;
 
   final bool Function(T? openItem)? isMasterAppBarLoading;
-  final bool Function(T? openItem)? isDetailsAppBarLoading;
+  final bool Function(T? openItem)? isDetailAppBarLoading;
 
   // Callback functions to replace the builder class
   final LdDetailBuilder<T, Widget>? buildDetailTitle;
@@ -102,7 +102,7 @@ class LdMasterDetail<T> extends StatefulWidget {
     /// A custom predicate to determine if the split view should be used.
     this.customSplitPredicate,
     this.isMasterAppBarLoading,
-    this.isDetailsAppBarLoading,
+    this.isDetailAppBarLoading,
     super.key,
   });
 
@@ -133,7 +133,7 @@ class LdMasterDetail<T> extends StatefulWidget {
       masterDetailFlex: masterDetailFlex,
       customSplitPredicate: customSplitPredicate,
       isMasterAppBarLoading: builders.isMasterAppBarLoading,
-      isDetailsAppBarLoading: builders.isDetailAppBarLoading,
+      isDetailAppBarLoading: builders.isDetailAppBarLoading,
     );
   }
 
@@ -166,7 +166,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
     onCloseItem: _onCloseItem,
   );
   bool get isMasterAppBarLoading => widget.isMasterAppBarLoading?.call(_openItem) ?? false;
-  bool get isDetailsAppBarLoading => widget.isDetailsAppBarLoading?.call(_openItem) ?? false;
+  bool get isDetailsAppBarLoading => widget.isDetailAppBarLoading?.call(_openItem) ?? false;
 
   @override
   initState() {

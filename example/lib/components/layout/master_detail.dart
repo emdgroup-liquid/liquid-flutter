@@ -235,7 +235,7 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
               expandChild: true,
               child: LdCrudMasterDetail<ExampleItem>(
                 crud: _crudRepository,
-                masterDetailBuilder: (context, builders, listState) =>
+                masterDetailBuilder: (context, builders) =>
                     LdMasterDetail.builders(
                   builders: builders,
                   layoutMode: _layoutMode,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:provider/provider.dart';
 
 import 'task_detail_page.dart';
 import 'task_model.dart';
@@ -48,7 +47,7 @@ class TaskDemoState extends State<TaskDemo> {
     return LdCrudMasterDetail<Task>(
       key: _masterDetailKey,
       crud: _repository,
-      masterDetailBuilder: (context, builders, listState) {
+      masterDetailBuilder: (context, builders) {
         return LdMasterDetail.builders(
           builders: builders,
           masterDetailFlex: 2,
@@ -114,7 +113,6 @@ class TaskDemoState extends State<TaskDemo> {
           Text("Task Details"),
       buildMasterActions: (context, openItem, optimisticOpenItem,
           isSeparatePage, controller, listState) {
-        final crudList = context.read<LdCrudListState<Task>>();
         final filterByDoneValues = {
           null: Text("All"),
           true: Text("Done"),
@@ -126,7 +124,7 @@ class TaskDemoState extends State<TaskDemo> {
             value: _filterByDone,
             onChanged: (value) {
               setState(() => _filterByDone = value);
-              _applyFilter(value, crudList);
+              _applyFilter(value, listState);
             },
           ),
           LdCrudAction.createItem<Task>(getNewItem: () async {
@@ -167,22 +165,30 @@ class TaskDemoState extends State<TaskDemo> {
         ];
       },
       buildDetailActions: (context, item, optimisticItem, isSeparatePage,
-              controller, listState) =>
-          [
-        if (!isEditingDetail)
-          IconButton(
-            onPressed: () => setIsEditingDetail(true),
-            icon: const Icon(Icons.edit),
-          ),
-        if (isEditingDetail) ...[
-          LdCrudAction.updateItem<Task>(
-            controller: controller,
-            getUpdatedItem: () => taskDetailPageState?.editingTask,
-            onItemUpdated: (masterDetail, item) => setIsEditingDetail(false),
-          ),
-          LdCrudAction.deleteOpenItem<Task>(controller: controller)
-        ]
-      ],
+          controller, listState) {
+        return [
+          if (!isEditingDetail)
+            IconButton(
+              onPressed: () => setIsEditingDetail(true),
+              icon: const Icon(Icons.edit),
+            ),
+          if (isEditingDetail) ...[
+            KeyedSubtree(
+              key: GlobalObjectKey("appBarUpdate"),
+              child: LdCrudAction.updateItem<Task>(
+                controller: controller,
+                getUpdatedItem: () => taskDetailPageState?.editingTask,
+                onItemUpdated: (masterDetail, item) =>
+                    setIsEditingDetail(false),
+              ),
+            ),
+            KeyedSubtree(
+              key: GlobalObjectKey("appBarDelete"),
+              child: LdCrudAction.deleteOpenItem<Task>(controller: controller),
+            )
+          ]
+        ];
+      },
     );
   }
 }
