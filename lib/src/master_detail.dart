@@ -284,7 +284,6 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
     return Scaffold(
       appBar: LdAppBar(
         scrolledUnderElevation: isSeparatePage ? 4 : 0,
-        context: context,
         title: widget.builder.buildMasterTitle(
           context,
           _onSelect,
@@ -318,7 +317,6 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
       appBar: LdAppBar(
         automaticallyImplyLeading: false,
         scrolledUnderElevation: isSeparatePage ? 4 : 0,
-        context: context,
         title: widget.builder.buildDetailTitle(
           context,
           item,
@@ -441,7 +439,6 @@ class _DetailPage<T> extends StatelessWidget {
       child: Scaffold(
         backgroundColor: LdTheme.of(context).background,
         appBar: LdAppBar(
-          context: context,
           title: builder.buildDetailTitle(context, item, true, deselect),
           actions: builder.buildDetailActions(context, item, true, deselect),
         ),

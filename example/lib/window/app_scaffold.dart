@@ -44,9 +44,7 @@ class _AppScaffoldState extends State<AppScaffold> {
             child: Scaffold(
               drawer: !split ? const MainNavigationDrawer() : null,
               backgroundColor: themeService.background,
-              appBar: size.isMobile
-                  ? LdAppBar(context: context, title: widget.title)
-                  : null,
+              appBar: size.isMobile ? LdAppBar(title: widget.title) : null,
               body: LdNotificationPortal(
                 child: (split)
                     ? Stack(
