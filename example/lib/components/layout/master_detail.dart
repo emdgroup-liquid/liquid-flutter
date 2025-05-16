@@ -246,12 +246,8 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
                     Text("Detail ${item.name}"),
                 buildMasterTitle: (context, openItem, optimisticOpenItem,
                     isSeparatePage, controller, listState) {
-                  final data = context
-                      .findAncestorStateOfType<
-                          LdCrudMasterDetailState<ExampleItem>>()!
-                      .listState;
-                  final title = data.isMultiSelectMode
-                      ? "${data.selectedItems.length}/${data.totalItems} selected"
+                  final title = listState.isMultiSelectMode
+                      ? "${listState.selectedItems.length}/${listState.totalItems} selected"
                       : "List of Example Items";
                   return Text(title);
                 },

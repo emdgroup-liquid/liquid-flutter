@@ -35,6 +35,7 @@ class LdMasterDetailBuilders<T> {
   final LdDetailBuilder<T, List<Widget>>? buildDetailActions;
   final bool Function(T? openItem)? isMasterAppBarLoading;
   final bool Function(T? openItem)? isDetailAppBarLoading;
+  final List<InheritedProvider> Function(BuildContext context)? injectables;
 
   const LdMasterDetailBuilders({
     this.buildDetailTitle,
@@ -45,6 +46,7 @@ class LdMasterDetailBuilders<T> {
     this.buildDetailActions,
     this.isMasterAppBarLoading,
     this.isDetailAppBarLoading,
+    this.injectables,
   });
 }
 
@@ -79,6 +81,7 @@ class LdMasterDetail<T> extends StatefulWidget {
   final LdMasterBuilder<T, Widget> buildMaster;
   final LdMasterBuilder<T, List<Widget>>? buildMasterActions;
   final LdDetailBuilder<T, List<Widget>>? buildDetailActions;
+  final List<InheritedProvider> Function(BuildContext context)? injectables;
 
   const LdMasterDetail({
     this.buildDetailTitle,
@@ -104,6 +107,14 @@ class LdMasterDetail<T> extends StatefulWidget {
     this.customSplitPredicate,
     this.isMasterAppBarLoading,
     this.isDetailAppBarLoading,
+
+    /// A list of providers to be injected to provide context to the [LdMasterDetail] widget.
+    ///
+    /// This is useful to provide dependencies to the detail widget, such as a repository or a service.
+    ///
+    /// Simply wrapping the [LdMasterDetail] widget with a [Provider] is not enough, as [LdMasterDetail] can open
+    /// the detail widget in a separate page or dialog, and the provider would not be available in that context.
+    this.injectables,
     super.key,
   });
 
@@ -135,6 +146,7 @@ class LdMasterDetail<T> extends StatefulWidget {
       customSplitPredicate: customSplitPredicate,
       isMasterAppBarLoading: builders.isMasterAppBarLoading,
       isDetailAppBarLoading: builders.isDetailAppBarLoading,
+      injectables: builders.injectables,
     );
   }
 
@@ -168,6 +180,19 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
   );
   bool get isMasterAppBarLoading => widget.isMasterAppBarLoading?.call(_openItem) ?? false;
   bool get isDetailsAppBarLoading => widget.isDetailAppBarLoading?.call(_openItem) ?? false;
+
+  Widget? _getInjectables(BuildContext context, Widget? child) {
+    final List<InheritedProvider> injectables = [
+      ...widget.injectables?.call(context) ?? [],
+      ChangeNotifierProvider<LdMasterDetailController<T>>.value(
+        value: _controller,
+      ),
+    ];
+    return MultiProvider(
+      providers: injectables,
+      child: child,
+    );
+  }
 
   @override
   initState() {
@@ -253,7 +278,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
         await _navigator.push(
           MaterialPageRoute(
             builder: (context) {
-              return _buildDetailPage(item);
+              return _getInjectables(context, _buildDetailPage(item))!;
             },
           ),
         );
@@ -267,27 +292,11 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
       if (widget.detailPresentationMode == MasterDetailPresentationMode.dialog) {
         _inDetailView = true;
         await LdModal(
+          injectables: widget.injectables,
           onDismiss: _onDialogDismiss,
-          modalContent: (context) => widget.buildDetail(
-            context,
-            item,
-            true,
-            _controller,
-          ),
-          title: widget.buildMasterTitle?.call(
-            context,
-            _openItem,
-            true,
-            _controller,
-          ),
-          actions: (context) =>
-              widget.buildMasterActions?.call(
-                context,
-                _openItem,
-                true,
-                _controller,
-              ) ??
-              [],
+          modalContent: (context) => widget.buildDetail(context, item, true, _controller),
+          title: widget.buildDetailTitle?.call(context, item, true, _controller),
+          actions: (context) => widget.buildDetailActions?.call(context, item, true, _controller) ?? [],
         ).show(context);
         setState(() {
           _inDetailView = false;
@@ -490,7 +499,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveBuilder(
+    return _getInjectables(context, ResponsiveBuilder(
       builder: (context, size) {
         bool useSplit = _useSplitView(size);
 
@@ -500,7 +509,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
 
         return buildContent(context, useSplit);
       },
-    );
+    ))!;
   }
 
   Widget _buildDetailPage(T item) {

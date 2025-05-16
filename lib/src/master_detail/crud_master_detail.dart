@@ -116,9 +116,11 @@ class LdCrudMasterDetail<T extends CrudItemMixin<T>> extends StatefulWidget {
 
 class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMasterDetail<T>> {
   late final crud = widget.crud;
-  late final listState = LdCrudListState<T>(
+  late final _listState = LdCrudListState<T>(
     fetchListFunction: crud.fetchAll,
   );
+  LdCrudListState<T> get listState => _listState;
+  LdMasterDetailController<T> get controller => context.read<LdMasterDetailController<T>>();
 
   bool _isMasterAppBarLoading(T? openItem) {
     return widget.isMasterAppBarLoading?.call(openItem, listState) ?? listState.busy;
@@ -136,23 +138,21 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        Provider<LdCrudMasterDetailState<T>>.value(value: this),
-        ListenableProvider<LdCrudListState<T>>.value(value: listState),
-      ],
-      child: widget.masterDetailBuilder(
-        context,
-        LdMasterDetailBuilders<T>(
-          buildDetailTitle: _wrapCrudDetailBuilder(widget.buildDetailTitle),
-          buildMasterTitle: _wrapCrudMasterBuilder(widget.buildMasterTitle),
-          buildDetail: _wrapCrudDetailBuilder(widget.buildDetail)!,
-          buildMaster: _wrapCrudMasterBuilder(widget.buildMaster)!,
-          buildMasterActions: _wrapBuildMasterActions(widget.buildMasterActions),
-          buildDetailActions: _wrapBuildDetailActions(widget.buildDetailActions),
-          isMasterAppBarLoading: (openItem) => _isMasterAppBarLoading(openItem),
-          isDetailAppBarLoading: (openItem) => _isDetailAppBarLoading(openItem),
-        ),
+    return widget.masterDetailBuilder(
+      context,
+      LdMasterDetailBuilders<T>(
+        buildDetailTitle: _wrapCrudDetailBuilder(widget.buildDetailTitle),
+        buildMasterTitle: _wrapCrudMasterBuilder(widget.buildMasterTitle),
+        buildDetail: _wrapCrudDetailBuilder(widget.buildDetail)!,
+        buildMaster: _wrapCrudMasterBuilder(widget.buildMaster)!,
+        buildMasterActions: _wrapBuildMasterActions(widget.buildMasterActions),
+        buildDetailActions: _wrapBuildDetailActions(widget.buildDetailActions),
+        isMasterAppBarLoading: (openItem) => _isMasterAppBarLoading(openItem),
+        isDetailAppBarLoading: (openItem) => _isDetailAppBarLoading(openItem),
+        injectables: (context) => [
+          Provider<LdCrudMasterDetailState<T>>.value(value: this),
+          ListenableProvider<LdCrudListState<T>>.value(value: listState),
+        ],
       ),
     );
   }
@@ -161,7 +161,7 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
     return original == null
         ? null
         : (context, openItem, isSeparatePage, controller) {
-            final listState = context.watch<LdCrudListState<T>>();
+            final listState = isSeparatePage ? _listState : context.watch<LdCrudListState<T>>();
             final optimisticOpenItem = openItem == null ? null : listState.getItemOptimistically(openItem);
             return original.call(context, openItem, optimisticOpenItem, isSeparatePage, controller, listState);
           };
@@ -171,7 +171,7 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
     return original == null
         ? null
         : (context, item, isSeparatePage, ctrl) {
-            final listState = context.watch<LdCrudListState<T>>();
+            final listState = isSeparatePage ? _listState : context.watch<LdCrudListState<T>>();
             final optimisticItem = listState.getItemOptimistically(item);
             return original.call(context, item, optimisticItem, isSeparatePage, ctrl, listState);
           };
@@ -179,6 +179,7 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
 
   Widget _wrapCrudActionWithKey(Widget widget, int index, [T? item]) {
     if (widget is LdCrudAction) {
+      print("$hashCode $index ${item?.id}");
       // wrap LdCrudAction with KeyedSubtree to keep track the state of the action
       return KeyedSubtree(
         key: GlobalObjectKey("$hashCode$index${item?.id}"),
@@ -190,7 +191,7 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
 
   LdMasterBuilder<T, List<Widget>>? _wrapBuildMasterActions(LdCrudMasterBuilder<T, List<Widget>>? original) {
     return (context, openItem, isSeparatePage, ctrl) {
-      final listState = context.watch<LdCrudListState<T>>();
+      final listState = isSeparatePage ? _listState : context.watch<LdCrudListState<T>>();
       final optimisticOpenItem = openItem == null ? null : listState.getItemOptimistically(openItem);
       return (original?.call(context, openItem, optimisticOpenItem, isSeparatePage, ctrl, listState) ?? [])
           .mapIndexed((index, action) => _wrapCrudActionWithKey(action, index))
@@ -200,7 +201,8 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
 
   LdDetailBuilder<T, List<Widget>>? _wrapBuildDetailActions(LdCrudDetailBuilder<T, List<Widget>>? original) {
     return (context, item, isSeparatePage, ctrl) {
-      final listState = context.watch<LdCrudListState<T>>();
+      print("Building detail actions for $item");
+      final listState = isSeparatePage ? _listState : context.watch<LdCrudListState<T>>();
       final optimisticItem = listState.getItemOptimistically(item);
       return (original?.call(context, item, optimisticItem, isSeparatePage, ctrl, listState) ?? [])
           .mapIndexed((index, action) => _wrapCrudActionWithKey(action, index, item))
