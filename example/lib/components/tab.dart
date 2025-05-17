@@ -32,6 +32,7 @@ class _TabsDemoState extends State<TabsDemo>
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/tab.dart",
       title: "LdTabs",
       demo: ComponentWell(
         child: Column(

@@ -22,6 +22,7 @@ class _LdRevealDemoState extends State<LdRevealDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/feedback/reveal.dart",
       title: "LdReveal",
       apiComponents: const ["LdReveal"],
       demo: LdAutoSpace(children: [

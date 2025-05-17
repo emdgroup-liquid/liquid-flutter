@@ -29,6 +29,7 @@ class _ListItemDemoState extends State<ListItemDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/layout/list_item.dart",
       title: "LdListItem",
       demo: LdAutoSpace(
         children: [

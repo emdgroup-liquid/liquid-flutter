@@ -17,6 +17,7 @@ class _AutoSpaceDemoState extends State<AutoSpaceDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/layout/autospace.dart",
       title: "LdAutoSpace",
       demo: LdAutoSpace(children: [
         ComponentWell(

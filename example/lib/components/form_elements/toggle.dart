@@ -34,6 +34,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+        path: "lib/components/form_elements/toggle.dart",
         title: "LdToggle",
         demo: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

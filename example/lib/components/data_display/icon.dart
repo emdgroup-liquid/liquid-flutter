@@ -187,6 +187,7 @@ class _IconDemoState extends State<IconDemo> {
     var theme = LdTheme.of(context);
 
     return ComponentPage(
+      path: "lib/components/data_display/icon.dart",
       title: "Icons",
       demo: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

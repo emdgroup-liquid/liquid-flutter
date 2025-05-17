@@ -18,6 +18,7 @@ class _SubmitDemoState extends State<SubmitDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/form_elements/submit.dart",
       title: "LdSubmit",
       apiComponents: const ["LdSubmit"],
       demo: LdAutoSpace(
@@ -108,7 +109,8 @@ class _SubmitDemoState extends State<SubmitDemo> {
               const LdTextP(
                 "The LdSubmitCenteredBuilder will center the loading and error states. It is perfect for loading a new page (e.g. a detail view). ",
               ),
-              const ComponentsAccordion(components: {"LdSubmitCenteredBuilder"}),
+              const ComponentsAccordion(
+                  components: {"LdSubmitCenteredBuilder"}),
               ComponentWell(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -206,7 +208,8 @@ class _SubmitDemoState extends State<SubmitDemo> {
                 config: LdSubmitConfig(
                     autoTrigger: true,
                     action: () {
-                      return Future.delayed(const Duration(seconds: 2), () => 42);
+                      return Future.delayed(
+                          const Duration(seconds: 2), () => 42);
                     }),
               )
             ],
@@ -249,7 +252,8 @@ class _SubmitDemoState extends State<SubmitDemo> {
               LdTextP(
                 "The LdSubmitController handles the state of the LdSubmit component. It posesses a .state property of type LdSubmitState.",
               ),
-              LdTextP("You can observe the controller through its .stateStream property."),
+              LdTextP(
+                  "You can observe the controller through its .stateStream property."),
               ComponentsAccordion(components: {
                 "LdSubmitController",
                 "LdSubmitState",

@@ -8,6 +8,7 @@ class DateTimePickerDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/form_elements/date_time_pickers.dart",
       title: 'Date and Time Pickers',
       apiComponents: const [
         "LdDatePicker",

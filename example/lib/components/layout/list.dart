@@ -60,6 +60,7 @@ class _ListDemoState extends State<ListDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/layout/list.dart",
       title: "LdList",
       demo: LdAutoSpace(
         crossAxisAlignment: CrossAxisAlignment.start,

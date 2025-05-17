@@ -12,6 +12,7 @@ class TypographyDocumentation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const ComponentPage(
+      path: "lib/demos/typography_documentation.dart",
       title: "Typography",
       apiComponents: [
         "LdText",

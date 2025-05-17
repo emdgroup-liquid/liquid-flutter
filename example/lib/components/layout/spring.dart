@@ -27,6 +27,7 @@ class _SpringState extends State<Spring> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/layout/spring.dart",
       title: 'Spring',
       demo: LdAutoSpace(
         children: [

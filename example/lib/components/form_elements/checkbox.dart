@@ -14,6 +14,7 @@ class _CheckboxDemoState extends State<CheckboxDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/form_elements/checkbox.dart",
       title: "LdCheckbox",
       demo: LdAutoSpace(
         children: [

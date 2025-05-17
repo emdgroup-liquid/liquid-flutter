@@ -52,6 +52,7 @@ class _ExceptionDemoState extends State<ExceptionDemo> {
     return Provider<LdRetryController>.value(
       value: retryController,
       child: ComponentPage(
+        path: "lib/components/feedback/exception.dart",
         apiComponents: const ["LdExceptionView", "LdException"],
         title: "LdException",
         demo: ComponentWell(
