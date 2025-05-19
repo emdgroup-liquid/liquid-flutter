@@ -5,15 +5,17 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
 /// Settings to configure the behavior of CRUD actions.
-/// [showDialogLoading] controls whether to show a loading dialog during the action.
-/// [showErrorNotification] controls whether to show an error notification on failure.
+/// [showLoadingDialog] controls whether to show a loading dialog during the action.
+/// [errorNotificationMessage] is a message to be displayed in case of an error.
+/// You can customize these settings when creating a [LdCrudAction].
+/// The default settings (from [LdCrudMasterDetail]) are used if not provided.
 class LdCrudActionSettings {
-  final bool showDialogLoading;
-  final bool showErrorNotification;
+  final bool showLoadingDialog;
+  final String? errorNotificationMessage;
 
   const LdCrudActionSettings({
-    this.showDialogLoading = true,
-    this.showErrorNotification = true,
+    this.showLoadingDialog = true,
+    this.errorNotificationMessage,
   });
 }
 
@@ -157,11 +159,13 @@ class LdCrudAction<T extends CrudItemMixin<T>, Arg, Result> extends StatefulWidg
 
 class _LdCrudActionState<T extends CrudItemMixin<T>, Arg, Result> extends State<LdCrudAction<T, Arg, Result>> {
   Arg? _obtainedArg;
+  LdSubmitController<Result>? _submitController;
 
   @override
   Widget build(BuildContext context) {
     final masterDetail = context.read<LdCrudMasterDetailState<T>>();
-    final ldSubmitBuilder = (widget.settings ?? masterDetail.widget.defaultActionSettings).showDialogLoading
+    final actionSettings = widget.settings ?? masterDetail.widget.defaultActionSettings;
+    final ldSubmitBuilder = actionSettings.showLoadingDialog
         ? LdSubmitDialogBuilder<Result>(
             submitButtonBuilder: (submitButtonContext, submitController) =>
                 _buildSubmitButton(masterDetail, submitController))
@@ -192,6 +196,17 @@ class _LdCrudActionState<T extends CrudItemMixin<T>, Arg, Result> extends State<
             return result;
           } catch (error) {
             _handleArgEvent(listState, arg, CrudItemStateType.error, error);
+            if (actionSettings.errorNotificationMessage?.isNotEmpty ?? false) {
+              final notification = LdConfirmNotification(
+                message: actionSettings.errorNotificationMessage!,
+                type: LdNotificationType.error,
+                confirmText: LiquidLocalizations.of(context).moreInfo,
+              );
+              LdNotificationsController.of(context).addNotification(notification);
+              notification.confirmationCompleter.future.then((confirmed) {
+                if (confirmed == true) _showErrorDialog(context);
+              });
+            }
             rethrow;
           }
         },
@@ -203,6 +218,7 @@ class _LdCrudActionState<T extends CrudItemMixin<T>, Arg, Result> extends State<
     LdCrudMasterDetailState<T> masterDetail,
     LdSubmitController<Result> submitController,
   ) {
+    _submitController = submitController;
     return widget.actionButtonBuilder(masterDetail, () async {
       // Get and store the argument immediately before triggering
       final obtainedArg = await widget.obtainArg(masterDetail);
@@ -216,21 +232,26 @@ class _LdCrudActionState<T extends CrudItemMixin<T>, Arg, Result> extends State<
     BuildContext context,
     LdSubmitController<Result> submitController,
   ) {
+    _submitController = submitController;
     return IconButton(
-      onPressed: () {
-        LdModal(
-          modalContent: (context) => LdExceptionView(
-            exception: submitController.state.error!,
-            retryController: submitController.retryController,
-          ),
-          title: Text(LiquidLocalizations.of(context).errorOccurred),
-          userCanDismiss: true,
-          onDismiss: () => submitController.reset(),
-        ).show(context);
-      },
+      onPressed: () => _showErrorDialog(context),
       icon: const Icon(Icons.error),
       color: LdTheme.of(context).errorColor,
     );
+  }
+
+  void _showErrorDialog(
+    BuildContext context,
+  ) {
+    LdModal(
+      modalContent: (context) => LdExceptionView(
+        exception: _submitController!.state.error!,
+        retryController: _submitController!.retryController,
+      ),
+      title: Text(LiquidLocalizations.of(context).errorOccurred),
+      userCanDismiss: true,
+      onDismiss: () => _submitController!.reset(),
+    ).show(context);
   }
 
   /// Passes a [CrudItemStateEvent] to the [listState] for the given [arg] and (optional) [result].

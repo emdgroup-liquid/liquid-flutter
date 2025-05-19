@@ -47,6 +47,11 @@ class TaskDemoState extends State<TaskDemo> {
     return LdCrudMasterDetail<Task>(
       key: _masterDetailKey,
       crud: _repository,
+      defaultActionSettings: const LdCrudActionSettings(
+        showLoadingDialog: false,
+        errorNotificationMessage:
+            "An error occurred while performing the action.",
+      ),
       masterDetailBuilder: (context, builders) {
         return LdMasterDetail.builders(
           builders: builders,
