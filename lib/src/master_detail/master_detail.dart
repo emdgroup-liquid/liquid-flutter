@@ -265,6 +265,13 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
       );
     }
 
+    bool isSameItem = false;
+    if (_openItem is CrudItemMixin && item is CrudItemMixin) {
+      isSameItem = const DeepCollectionEquality().equals(
+        (_openItem as CrudItemMixin).id,
+        (item as CrudItemMixin).id,
+      );
+    }
     setState(() {
       _openItem = item;
     });
@@ -274,36 +281,25 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
     if (!useSplitView) {
       _inDetailView = true;
 
+      Route? route;
       if (widget.detailPresentationMode == MasterDetailPresentationMode.page) {
-        await _navigator.push(
-          MaterialPageRoute(
-            builder: (context) {
-              return _getInjectables(context, _buildDetailPage(item))!;
-            },
-          ),
+        route = MaterialPageRoute(
+          builder: (context) {
+            return _getInjectables(context, _buildDetailPage(item))!;
+          },
         );
-        setState(() {
-          _inDetailView = false;
-          _openItem = null;
-        });
-        widget.onOpenItemChange?.call(null);
-      }
-
-      if (widget.detailPresentationMode == MasterDetailPresentationMode.dialog) {
-        _inDetailView = true;
-        await LdModal(
+      } else if (widget.detailPresentationMode == MasterDetailPresentationMode.dialog) {
+        route = LdModal(
           injectables: widget.injectables,
           onDismiss: _onDialogDismiss,
           modalContent: (context) => widget.buildDetail(context, item, true, _controller),
           title: widget.buildDetailTitle?.call(context, item, true, _controller),
           actions: (context) => widget.buildDetailActions?.call(context, item, true, _controller) ?? [],
-        ).show(context);
-        setState(() {
-          _inDetailView = false;
-          _openItem = null;
-        });
-        widget.onOpenItemChange?.call(null);
+        ).asRoute(const RouteSettings(), context);
       }
+
+      isSameItem ? _navigator.pushReplacement(route!) : _navigator.push(route!);
+      widget.onOpenItemChange?.call(null);
     }
 
     return Future.value(true);
