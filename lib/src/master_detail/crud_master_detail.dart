@@ -179,7 +179,6 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
 
   Widget _wrapCrudActionWithKey(Widget widget, int index, [T? item]) {
     if (widget is LdCrudAction) {
-      print("$hashCode $index ${item?.id}");
       // wrap LdCrudAction with KeyedSubtree to keep track the state of the action
       return KeyedSubtree(
         key: GlobalObjectKey("$hashCode$index${item?.id}"),
@@ -201,7 +200,6 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
 
   LdDetailBuilder<T, List<Widget>>? _wrapBuildDetailActions(LdCrudDetailBuilder<T, List<Widget>>? original) {
     return (context, item, isSeparatePage, ctrl) {
-      print("Building detail actions for $item");
       final listState = isSeparatePage ? _listState : context.watch<LdCrudListState<T>>();
       final optimisticItem = listState.getItemOptimistically(item);
       return (original?.call(context, item, optimisticItem, isSeparatePage, ctrl, listState) ?? [])
