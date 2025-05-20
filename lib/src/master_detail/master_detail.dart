@@ -274,8 +274,6 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
       );
     }
 
-    print("useSplitView: $useSplitView");
-
     bool isSameItem = false;
     if (_openItem is CrudItemMixin && item is CrudItemMixin) {
       isSameItem = const DeepCollectionEquality().equals(
@@ -290,7 +288,6 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
     widget.onOpenItemChange?.call(item);
 
     if (!useSplitView) {
-      print("open item: $item");
       _inDetailView = true;
 
       Route? route;
