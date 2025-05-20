@@ -253,6 +253,7 @@ class AppRouter {
                 key: state.pageKey, child: const Spring()),
           ),
           LdMasterDetail.createCompositeShellRoute(
+            basePath: "/components/master-detail",
             pageBuilder: (context, state, child) => NoTransitionPage<void>(
               key: state.pageKey,
               child: child,
@@ -260,7 +261,6 @@ class AppRouter {
             child: const MasterDetailDemo(),
             routeConfigs: [
               LdMasterDetailShellRouteConfig<ExampleItem>(
-                basePath: "/components/master-detail",
                 detailPath: "detail/:id",
                 pathToItem: (id) => ExampleItem(
                   int.tryParse(id),
@@ -270,7 +270,6 @@ class AppRouter {
               ),
               LdMasterDetailShellRouteConfig<ExampleItem>(
                 id: "crudRouteConfig",
-                basePath: "/components/master-detail",
                 detailPath: "crud-detail/:crudId",
                 pathToItem: (id) =>
                     ExampleRepository.instance().getItemById(int.parse(id)),

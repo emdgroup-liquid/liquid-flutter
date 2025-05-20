@@ -159,20 +159,32 @@ class LdMasterDetail<T> extends StatefulWidget {
   /// as a shell route.
   static ShellRoute createShellRoute<T>({
     required Widget child,
+    required String basePath,
     required LdMasterDetailShellRouteConfig<T> routeConfig,
     Page Function(BuildContext context, GoRouterState state, Widget child)? pageBuilder,
   }) {
-    return createMasterDetailShellRoute<T>(child: child, routeConfig: routeConfig, pageBuilder: pageBuilder);
+    return createMasterDetailShellRoute<T>(
+      child: child,
+      basePath: basePath,
+      routeConfig: routeConfig,
+      pageBuilder: pageBuilder,
+    );
   }
 
   /// Helper function to create a router configuration that handles multiple master-detail
   /// components, each with its own sub-route.
   static ShellRoute createCompositeShellRoute({
     required Widget child,
+    required String basePath,
     required List<LdMasterDetailShellRouteConfig> routeConfigs,
     Page Function(BuildContext context, GoRouterState state, Widget child)? pageBuilder,
   }) {
-    return createMasterDetailCompositeShellRoute(child: child, routeConfigs: routeConfigs, pageBuilder: pageBuilder);
+    return createMasterDetailCompositeShellRoute(
+      child: child,
+      basePath: basePath,
+      routeConfigs: routeConfigs,
+      pageBuilder: pageBuilder,
+    );
   }
 
   @override
@@ -182,10 +194,10 @@ class LdMasterDetail<T> extends StatefulWidget {
 class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTickerProviderStateMixin {
   T? _openItem;
 
-  LdMasterDetailShellRouteConfig<T>? get _routeConfig =>
-      Provider.of<Map<String, LdMasterDetailShellRouteConfig>?>(context,
-          listen: false)?[widget.routeConfigId ?? T.toString()] as LdMasterDetailShellRouteConfig<T>? ??
-      Provider.of<LdMasterDetailShellRouteConfig<T>?>(context, listen: false);
+  late final LdMasterDetailRouteConfig? _routeConfig = Provider.of<LdMasterDetailRouteConfig?>(context, listen: false);
+  LdMasterDetailShellRouteConfig<T>? get _detailRouteConfig =>
+      _routeConfig?.value[widget.routeConfigId ?? T.toString()] as LdMasterDetailShellRouteConfig<T>?;
+
   late final LdMasterDetailController<T> _controller = LdMasterDetailController<T>(
     getOpenItem: () => _openItem,
     onOpenItem: _onOpenItem,
@@ -224,10 +236,10 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
 
   /// Try to open an item from the route parameters.
   void _handleInitialRoute() async {
-    if (_routeConfig != null && _openItem == null) {
+    if (_detailRouteConfig != null && _openItem == null) {
       final router = GoRouter.of(context);
-      final itemId = router.state.pathParameters[_routeConfig!.detailPathParam];
-      final openItem = itemId != null ? await _routeConfig!.pathToItem(itemId) : null;
+      final itemId = router.state.pathParameters[_detailRouteConfig!.detailPathParam];
+      final openItem = itemId != null ? await _detailRouteConfig!.pathToItem(itemId) : null;
       _openItem = openItem;
     }
   }
@@ -253,25 +265,22 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
       _navigator.maybePop();
     }
 
-    final routeConfig = _routeConfig;
-    if (routeConfig != null) {
+    if (_routeConfig?.basePath != null) {
       // Go back to the base path if the detail view is closed
-      GoRouter.of(context).go(routeConfig.basePath);
+      GoRouter.of(context).go(_routeConfig!.basePath!);
     }
 
     widget.onOpenItemChange?.call(null);
   }
 
   Future<bool> _onOpenItem(T item) async {
-    final routeConfig = _routeConfig;
-    if (routeConfig != null) {
-      final pathParam = routeConfig.itemToPath(item);
-      GoRouter.of(context).go(
-        "${routeConfig.basePath}/${routeConfig.detailPath}".replaceFirst(
-          ":${routeConfig.detailPathParam}",
-          pathParam,
-        ),
-      );
+    if (_routeConfig?.basePath != null && _detailRouteConfig != null) {
+      // get the current route configuration of GoRouter
+      final router = GoRouter.of(context);
+      final pathParams = router.state.pathParameters;
+      pathParams[_detailRouteConfig!.detailPathParam] = _detailRouteConfig!.itemToPath(item);
+      final path = _routeConfig!.compositePathWithParams(pathParams);
+      router.go(path);
     }
 
     bool isSameItem = false;

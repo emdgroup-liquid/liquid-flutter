@@ -4,13 +4,32 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+typedef BasePath = String;
+typedef RouteConfigId = String;
+typedef LdMasterDetailRouteConfig = MapEntry<BasePath, Map<RouteConfigId, LdMasterDetailShellRouteConfig>>;
+
+extension LdMasterDetailRouteConfigsX on LdMasterDetailRouteConfig {
+  String? get basePath => key;
+  String get compositePath {
+    return "/$basePath/${value.entries.map((entry) => entry.value.detailPath).join('/')}";
+  }
+
+  String compositePathWithParams(Map<String, String> params) {
+    String path = basePath ?? '';
+    for (var entry in value.entries) {
+      if (params.containsKey(entry.value.detailPathParam)) {
+        path +=
+            '/${entry.value.detailPath.replaceFirst(':${entry.value.detailPathParam}', params[entry.value.detailPathParam]!)}';
+      }
+    }
+    return path;
+  }
+}
+
 /// Configuration for a master detail shell route.
 class LdMasterDetailShellRouteConfig<T> {
   final String _id;
   String get id => _id;
-
-  /// The base path for the master detail view.
-  final String basePath;
 
   /// The path, if the detail view is shown (either as a page, dialog, or in
   /// a separate view).
@@ -27,7 +46,6 @@ class LdMasterDetailShellRouteConfig<T> {
 
   /// Creates a new shell route configuration.
   LdMasterDetailShellRouteConfig({
-    required this.basePath,
     required this.detailPath,
     required this.itemToPath,
     required this.pathToItem,
@@ -39,11 +57,13 @@ class LdMasterDetailShellRouteConfig<T> {
 /// as a shell route.
 ShellRoute createMasterDetailShellRoute<T>({
   required Widget child,
+  required String basePath,
   required LdMasterDetailShellRouteConfig<T> routeConfig,
   Page Function(BuildContext context, GoRouterState state, Widget child)? pageBuilder,
 }) {
   return createMasterDetailCompositeShellRoute(
     child: child,
+    basePath: basePath,
     routeConfigs: [routeConfig],
     pageBuilder: pageBuilder,
   );
@@ -51,6 +71,7 @@ ShellRoute createMasterDetailShellRoute<T>({
 
 ShellRoute createMasterDetailCompositeShellRoute({
   required Widget child,
+  required String basePath,
   required List<LdMasterDetailShellRouteConfig> routeConfigs,
   Page Function(BuildContext context, GoRouterState state, Widget child)? pageBuilder,
 }) {
@@ -61,33 +82,33 @@ ShellRoute createMasterDetailCompositeShellRoute({
 
   // Create a map of routeConfig.id to routeConfig for easy lookup
   // from [LdMasterDetail]
-  final routeConfigMap = <String, LdMasterDetailShellRouteConfig>{};
+  final map = <String, LdMasterDetailShellRouteConfig>{};
   for (var config in routeConfigs) {
-    routeConfigMap[config.id] = config;
+    map[config.id] = config;
   }
+  final routeConfig = LdMasterDetailRouteConfig(basePath, map);
 
   return ShellRoute(
-    pageBuilder: (context, state, _) => pageBuilder!(
-        context,
-        state,
-        Provider<Map<String, LdMasterDetailShellRouteConfig>>.value(
-          value: routeConfigMap,
-          child: child,
-        )),
+    pageBuilder: (context, state, _) =>
+        pageBuilder!(context, state, Provider<LdMasterDetailRouteConfig>.value(value: routeConfig, child: child)),
     routes: [
+      GoRoute(
+        path: basePath,
+        builder: (context, state) => const SizedBox.shrink(),
+      ),
       ...routeConfigs
           .map((routeConfig) => [
                 GoRoute(
-                  path: routeConfig.basePath,
-                  builder: (context, state) => const SizedBox.shrink(),
-                ),
-                GoRoute(
-                  path: "/${routeConfig.basePath}/${routeConfig.detailPath}",
+                  path: "/$basePath/${routeConfig.detailPath}",
                   builder: (context, state) => const SizedBox.shrink(),
                 ),
               ])
           .expand((element) => element)
           .toList(growable: false),
+      GoRoute(
+        path: routeConfig.compositePath,
+        builder: (context, state) => const SizedBox.shrink(),
+      ),
     ],
   );
 }
