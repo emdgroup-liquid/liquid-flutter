@@ -57,6 +57,8 @@ enum MasterDetailLayoutMode { auto, split, compact }
 /// A master detail view that shows a list of items on the left and a detail view on the right.
 /// The detail view is shown as a page or a dialog if the screen is small.
 class LdMasterDetail<T> extends StatefulWidget {
+  final String? routeConfigId;
+
   final T? openItem;
 
   final double masterDetailFlex;
@@ -84,6 +86,7 @@ class LdMasterDetail<T> extends StatefulWidget {
   final List<InheritedProvider> Function(BuildContext context)? injectables;
 
   const LdMasterDetail({
+    this.routeConfigId,
     this.buildDetailTitle,
     this.buildMasterTitle,
     required this.buildDetail,
@@ -129,6 +132,7 @@ class LdMasterDetail<T> extends StatefulWidget {
     MasterDetailLayoutMode layoutMode = MasterDetailLayoutMode.auto,
     LdMasterDetailOnOpenItemChange<T>? onOpenItemChange,
     bool Function(SizingInformation size)? customSplitPredicate,
+    String? routeConfigId,
   }) {
     return LdMasterDetail<T>(
       buildDetailTitle: builders.buildDetailTitle,
@@ -147,6 +151,7 @@ class LdMasterDetail<T> extends StatefulWidget {
       isMasterAppBarLoading: builders.isMasterAppBarLoading,
       isDetailAppBarLoading: builders.isDetailAppBarLoading,
       injectables: builders.injectables,
+      routeConfigId: routeConfigId,
     );
   }
 
@@ -157,11 +162,17 @@ class LdMasterDetail<T> extends StatefulWidget {
     required LdMasterDetailShellRouteConfig<T> routeConfig,
     Page Function(BuildContext context, GoRouterState state, Widget child)? pageBuilder,
   }) {
-    return createMasterDetailShellRoute<T>(
-      child: child,
-      routeConfig: routeConfig,
-      pageBuilder: pageBuilder,
-    );
+    return createMasterDetailShellRoute<T>(child: child, routeConfig: routeConfig, pageBuilder: pageBuilder);
+  }
+
+  /// Helper function to create a router configuration that handles multiple master-detail
+  /// components, each with its own sub-route.
+  static ShellRoute createCompositeShellRoute({
+    required Widget child,
+    required List<LdMasterDetailShellRouteConfig> routeConfigs,
+    Page Function(BuildContext context, GoRouterState state, Widget child)? pageBuilder,
+  }) {
+    return createMasterDetailCompositeShellRoute(child: child, routeConfigs: routeConfigs, pageBuilder: pageBuilder);
   }
 
   @override
@@ -172,6 +183,8 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
   T? _openItem;
 
   LdMasterDetailShellRouteConfig<T>? get _routeConfig =>
+      Provider.of<Map<String, LdMasterDetailShellRouteConfig>?>(context,
+          listen: false)?[widget.routeConfigId ?? T.toString()] as LdMasterDetailShellRouteConfig<T>? ??
       Provider.of<LdMasterDetailShellRouteConfig<T>?>(context, listen: false);
   late final LdMasterDetailController<T> _controller = LdMasterDetailController<T>(
     getOpenItem: () => _openItem,
@@ -206,20 +219,16 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
       _onOpenItem(widget.openItem!);
       return;
     }
-
     _handleInitialRoute();
   }
 
   /// Try to open an item from the route parameters.
-  void _handleInitialRoute() {
-    final routeConfig = _routeConfig;
-    if (routeConfig != null && _openItem == null) {
+  void _handleInitialRoute() async {
+    if (_routeConfig != null && _openItem == null) {
       final router = GoRouter.of(context);
-      final itemId = router.state.pathParameters[routeConfig.detailPathParam];
-      final openItem = itemId != null ? routeConfig.itemProvider(itemId) : null;
-      if (openItem != null) {
-        _onOpenItem(openItem);
-      }
+      final itemId = router.state.pathParameters[_routeConfig!.detailPathParam];
+      final openItem = itemId != null ? await _routeConfig!.pathToItem(itemId) : null;
+      _openItem = openItem;
     }
   }
 
@@ -256,14 +265,16 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
   Future<bool> _onOpenItem(T item) async {
     final routeConfig = _routeConfig;
     if (routeConfig != null) {
-      final itemId = routeConfig.itemIdGetter(item);
+      final pathParam = routeConfig.itemToPath(item);
       GoRouter.of(context).go(
         "${routeConfig.basePath}/${routeConfig.detailPath}".replaceFirst(
           ":${routeConfig.detailPathParam}",
-          itemId,
+          pathParam,
         ),
       );
     }
+
+    print("useSplitView: $useSplitView");
 
     bool isSameItem = false;
     if (_openItem is CrudItemMixin && item is CrudItemMixin) {
@@ -279,6 +290,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
     widget.onOpenItemChange?.call(item);
 
     if (!useSplitView) {
+      print("open item: $item");
       _inDetailView = true;
 
       Route? route;

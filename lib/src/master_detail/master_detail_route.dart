@@ -1,9 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 /// Configuration for a master detail shell route.
 class LdMasterDetailShellRouteConfig<T> {
+  final String _id;
+  String get id => _id;
+
   /// The base path for the master detail view.
   final String basePath;
 
@@ -12,24 +17,22 @@ class LdMasterDetailShellRouteConfig<T> {
   final String detailPath;
 
   /// A function to get the item ID from an item.
-  final String Function(T item) itemIdGetter;
+  final String Function(T item) itemToPath;
 
-  /// A function to retrieve an item from an ID.
-  final T? Function(String id) itemProvider;
+  /// A function to retrieve an item from a path parameter.
+  final FutureOr<T?> Function(String pathParam) pathToItem;
 
   /// Gets the detail path parameter name from the detail path.
-  String get detailPathParam => detailPath
-      .split('/')
-      .lastWhere((segment) => segment.startsWith(':'))
-      .substring(1);
+  String get detailPathParam => detailPath.split('/').lastWhere((segment) => segment.startsWith(':')).substring(1);
 
   /// Creates a new shell route configuration.
   LdMasterDetailShellRouteConfig({
     required this.basePath,
     required this.detailPath,
-    required this.itemIdGetter,
-    required this.itemProvider,
-  });
+    required this.itemToPath,
+    required this.pathToItem,
+    String? id,
+  }) : _id = id ?? T.toString();
 }
 
 /// Helper function to create a router configuration that uses the master detail component
@@ -37,39 +40,54 @@ class LdMasterDetailShellRouteConfig<T> {
 ShellRoute createMasterDetailShellRoute<T>({
   required Widget child,
   required LdMasterDetailShellRouteConfig<T> routeConfig,
-  Page Function(BuildContext context, GoRouterState state, Widget child)?
-      pageBuilder,
+  Page Function(BuildContext context, GoRouterState state, Widget child)? pageBuilder,
+}) {
+  return createMasterDetailCompositeShellRoute(
+    child: child,
+    routeConfigs: [routeConfig],
+    pageBuilder: pageBuilder,
+  );
+}
+
+ShellRoute createMasterDetailCompositeShellRoute({
+  required Widget child,
+  required List<LdMasterDetailShellRouteConfig> routeConfigs,
+  Page Function(BuildContext context, GoRouterState state, Widget child)? pageBuilder,
 }) {
   pageBuilder ??= (context, state, child) => NoTransitionPage<void>(
         key: state.pageKey,
         child: child,
       );
-  return ShellRoute(
-    // _ is the placeholder from the dummy widgets of the routes
-    pageBuilder: (context, state, _) => pageBuilder!(
-      context,
-      state,
-      // We wrap the child in a provider to make the route configuration
-      // available to LdMasterDetail
-      Provider<LdMasterDetailShellRouteConfig<T>?>.value(
-        value: routeConfig,
-        child: child,
-      ),
-    ),
 
-    // We just define the routes with a dummy builder, as the actual
-    // building is done in the childBuilder
+  // Create a map of routeConfig.id to routeConfig for easy lookup
+  // from [LdMasterDetail]
+  final routeConfigMap = <String, LdMasterDetailShellRouteConfig>{};
+  for (var config in routeConfigs) {
+    routeConfigMap[config.id] = config;
+  }
+
+  return ShellRoute(
+    pageBuilder: (context, state, _) => pageBuilder!(
+        context,
+        state,
+        Provider<Map<String, LdMasterDetailShellRouteConfig>>.value(
+          value: routeConfigMap,
+          child: child,
+        )),
     routes: [
-      // Dummy base route
-      GoRoute(
-        path: routeConfig.basePath,
-        builder: (context, state) => const SizedBox.shrink(),
-      ),
-      // Dummy detail route
-      GoRoute(
-        path: "/${routeConfig.basePath}/${routeConfig.detailPath}",
-        builder: (context, state) => const SizedBox.shrink(),
-      ),
+      ...routeConfigs
+          .map((routeConfig) => [
+                GoRoute(
+                  path: routeConfig.basePath,
+                  builder: (context, state) => const SizedBox.shrink(),
+                ),
+                GoRoute(
+                  path: "/${routeConfig.basePath}/${routeConfig.detailPath}",
+                  builder: (context, state) => const SizedBox.shrink(),
+                ),
+              ])
+          .expand((element) => element)
+          .toList(growable: false),
     ],
   );
 }
