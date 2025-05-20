@@ -370,7 +370,6 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
       appBar: LdAppBar(
         loading: isMasterAppBarLoading,
         scrolledUnderElevation: isSeparatePage ? 4 : 0,
-        context: context,
         title: widget.buildMasterTitle?.call(
           context,
           openItem,
@@ -415,7 +414,6 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
   ) {
     return Scaffold(
       appBar: LdAppBar(
-        context: context,
         automaticallyImplyLeading: false,
         scrolledUnderElevation: isSeparatePage ? 4 : 0,
         title: widget.buildDetailTitle?.call(
@@ -565,7 +563,6 @@ class _DetailPage<T> extends StatelessWidget {
       child: Scaffold(
         backgroundColor: LdTheme.of(context).background,
         appBar: LdAppBar(
-          context: context,
           title: buildDetailTitle?.call(
             context,
             item,

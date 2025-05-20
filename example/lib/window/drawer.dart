@@ -64,6 +64,8 @@ const components = [
       ComponentCategory.layout),
   _Component("Selectable List", "/components/selectable-list",
       LucideIcons.listCheck, ComponentCategory.layout),
+  _Component("AppBar", "/components/appbar", LucideIcons.layoutPanelTop,
+      ComponentCategory.layout),
 
   // Form Elements
   _Component("Checkbox", "/components/checkbox", LucideIcons.circleCheck,
@@ -238,13 +240,13 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
       elevation: 0,
       shape: const RoundedRectangleBorder(),
       backgroundColor: theme.surface,
-      child: SafeArea(
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border(
-              right: BorderSide(color: theme.border, width: 1),
-            ),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            right: BorderSide(color: theme.border, width: 1),
           ),
+        ),
+        child: SafeArea(
           child: CustomScrollView(
             controller: _scrollController,
             slivers: [

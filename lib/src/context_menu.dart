@@ -157,8 +157,8 @@ class _LdContextMenuState extends State<LdContextMenu> {
     final screenSize = mediaQuery.size;
 
     return Offset(
-      position.dx.clamp(0, screenSize.width - inset.right - inset.left - 10),
-      position.dy.clamp(0, screenSize.height - inset.bottom - inset.top - 10),
+      position.dx.clamp(10, screenSize.width - inset.right - inset.left - 10),
+      position.dy.clamp(10, screenSize.height - inset.bottom - inset.top - 10),
     );
   }
 

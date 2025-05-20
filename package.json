@@ -1,6 +1,6 @@
 {
   "name": "liquid-flutter",
-  "version": "22.0.0-dev.4",
+  "version": "22.0.0-dev.5",
   "description": "Liquid Oxygen components build for flutter",
   "scripts": {
     "test": "flutter test"
@@ -9,6 +9,6 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "yaml": "^2.7.1"
+    "yaml": "^2.8.0"
   }
 }

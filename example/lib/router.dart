@@ -51,6 +51,7 @@ import 'components/interaction/breadcrumb.dart';
 import 'components/layout/accordion.dart';
 import 'components/layout/divider.dart';
 import 'window/app_scaffold.dart';
+import 'components/layout/appbar.dart';
 
 class AppRouter {
   AppRouter();
@@ -347,6 +348,11 @@ class AppRouter {
                 return NoTransitionPage<void>(
                     key: state.pageKey, child: const ReactiveFormDemo());
               }),
+          GoRoute(
+            path: "/components/appbar",
+            pageBuilder: (context, state) => NoTransitionPage<void>(
+                key: state.pageKey, child: const AppBarDemo()),
+          ),
         ]),
   ]);
 }
