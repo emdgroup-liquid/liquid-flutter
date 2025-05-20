@@ -29,6 +29,15 @@ class ExampleRepository extends LdCrudOperations<ExampleItem> {
   final List<ExampleItem> _items = List.generate(
       exampleTitles.length, (i) => ExampleItem(i, exampleTitles[i]));
 
+  ExampleRepository._privateConstructor();
+
+  static final ExampleRepository _instance =
+      ExampleRepository._privateConstructor();
+
+  factory ExampleRepository.instance() {
+    return _instance;
+  }
+
   /// Find the next available ID
   int? _nextId;
   int get nextId {
@@ -75,6 +84,10 @@ class ExampleRepository extends LdCrudOperations<ExampleItem> {
     throw LdException(message: "Item not found");
   }
 
+  ExampleItem? getItemById(int id) {
+    return _items.firstWhereOrNull((element) => element.id == id);
+  }
+
   @override
   FetchListFunction<ExampleItem> get fetchAll => ({
         required int offset,
@@ -103,9 +116,6 @@ class MasterDetailDemo extends StatefulWidget {
 }
 
 class _MasterDetailDemoState extends State<MasterDetailDemo> {
-  /// The repository used for the "crud" master detail demo list.
-  final ExampleRepository _crudRepository = ExampleRepository();
-
   Future<LdListPage<ExampleItem>> _fetchItems({
     required int offset,
     required int pageSize,
@@ -234,12 +244,13 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
               padding: EdgeInsets.zero,
               expandChild: true,
               child: LdCrudMasterDetail<ExampleItem>(
-                crud: _crudRepository,
+                crud: ExampleRepository.instance(),
                 masterDetailBuilder: (context, builders) =>
                     LdMasterDetail.builders(
                   builders: builders,
                   layoutMode: _layoutMode,
                   detailPresentationMode: _presentationMode,
+                  routeConfigId: "crudRouteConfig",
                 ),
                 buildDetailTitle: (context, item, optimisticItem,
                         isSeparatePage, controller, listState) =>
