@@ -263,7 +263,7 @@ class _CrudMasterDetailDemoState extends State<CrudMasterDetailDemo> {
                   buildMasterActions: (context, openItem, optimisticOpenItem,
                           isSeparatePage, controller, listState) =>
                       [
-                    LdCrudAction.createItem<ExampleItem>(
+                    LdCrudCreateAction<ExampleItem>(
                       getNewItem: () async {
                         final notification =
                             (await LdNotificationsController.of(context)
@@ -283,12 +283,12 @@ class _CrudMasterDetailDemoState extends State<CrudMasterDetailDemo> {
                         return null;
                       },
                     ),
-                    LdCrudAction.deleteSelectedItems<ExampleItem>(),
+                    LdCrudDeleteSelectedAction<ExampleItem>(),
                   ],
                   buildDetailActions: (context, item, optimisticItem,
                           isSeparatePage, controller, listState) =>
                       [
-                    LdCrudAction.updateItem<ExampleItem>(
+                    LdCrudUpdateAction<ExampleItem>(
                       getUpdatedItem: () async {
                         final notification =
                             (await LdNotificationsController.of(context)
@@ -308,7 +308,7 @@ class _CrudMasterDetailDemoState extends State<CrudMasterDetailDemo> {
                         return null;
                       },
                     ),
-                    LdCrudAction.deleteItem<ExampleItem>(),
+                    LdCrudDeleteAction<ExampleItem>(),
                   ],
                 ),
               ),

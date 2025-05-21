@@ -2,6 +2,9 @@
   "de": [
     "search",
     "selectTime",
-    "clearError"
+    "clearError",
+    "delete",
+    "deleteSelected",
+    "save"
   ]
 }

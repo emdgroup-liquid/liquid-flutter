@@ -99,7 +99,7 @@ class TaskDemoState extends State<TaskDemo> {
                 ],
               ),
               trailingBuilder: (context, item, optimisticItem) {
-                return LdCrudAction.updateItem<Task>(
+                return LdCrudUpdateAction<Task>(
                   actionButtonBuilder: (context, triggerAction) =>
                       LdButtonVague(
                     size: LdSize.l,
@@ -114,8 +114,8 @@ class TaskDemoState extends State<TaskDemo> {
                 );
               },
               contextActionsBuilder: (context, item, optimisticItem) => [
-                LdCrudAction.deleteItem<Task>(item: item),
-                LdCrudAction.deleteSelectedItems<Task>(),
+                LdCrudDeleteAction<Task>(item: item),
+                LdCrudDeleteSelectedAction<Task>(),
               ],
             );
           },
@@ -145,7 +145,7 @@ class TaskDemoState extends State<TaskDemo> {
                   _applyFilter(value, listState);
                 },
               ),
-              LdCrudAction.createItem<Task>(getNewItem: () async {
+              LdCrudCreateAction<Task>(getNewItem: () async {
                 final createNewTaskKey = GlobalKey();
                 final newTask = await LdModal(
                   modalContent: (context) => TaskDetailPage(
@@ -181,7 +181,7 @@ class TaskDemoState extends State<TaskDemo> {
                 ).show(context, useRootNavigator: true);
                 return newTask;
               }),
-              LdCrudAction.deleteSelectedItems<Task>(),
+              LdCrudDeleteSelectedAction<Task>(),
             ];
           },
           buildDetailActions: (context, item, optimisticItem, isSeparatePage,
@@ -193,12 +193,12 @@ class TaskDemoState extends State<TaskDemo> {
                   icon: const Icon(Icons.edit),
                 ),
               if (isEditingDetail) ...[
-                LdCrudAction.updateItem<Task>(
+                LdCrudUpdateAction<Task>(
                   getUpdatedItem: () => taskDetailPageState?.editingTask,
                   onItemUpdated: (masterDetail, item) =>
                       setIsEditingDetail(false),
                 ),
-                LdCrudAction.deleteItem<Task>()
+                LdCrudDeleteAction<Task>()
               ]
             ];
           },

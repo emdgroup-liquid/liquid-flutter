@@ -102,6 +102,8 @@ class ExampleRepository extends LdCrudOperations<ExampleItem> {
 }
 
 void main() {
+  final Key createActionKey = UniqueKey();
+
   Future<void> pumpSampleCrudMasterDetail(WidgetTester tester) async {
     await tester.pumpWidget(
       withLiquidTheme(
@@ -113,7 +115,10 @@ void main() {
             buildMasterTitle: (context, openItem, optimisticOpenItem, isSeparatePage, controller, listState) =>
                 const Text('CRUD Master View'),
             buildMasterActions: (context, openItem, optimisticOpenItem, isSeparatePage, controller, listState) => [
-              LdCrudAction.createItem<ExampleItem>(getNewItem: () => ExampleItem(null, "Another New Item")),
+              LdCrudCreateAction<ExampleItem>(
+                key: createActionKey,
+                getNewItem: () => ExampleItem(null, "Another New Item"),
+              ),
             ],
             buildMaster: (context, openItem, optimisticOpenItem, isSeparatePage, controller, listState) =>
                 LdCrudMasterList(
@@ -126,10 +131,10 @@ void main() {
             buildDetail: (context, item, optimisticItem, isSeparatePage, controller, listState) =>
                 Text('CRUD Detail View: $item'),
             buildDetailActions: (context, item, optimisticItem, isSeparatePage, controller, listState) => [
-              LdCrudAction.updateItem<ExampleItem>(
+              LdCrudUpdateAction<ExampleItem>(
                 getUpdatedItem: () => ExampleItem(item.id, "Updated ${item.name}"),
               ),
-              LdCrudAction.deleteItem<ExampleItem>(),
+              LdCrudDeleteAction<ExampleItem>(),
             ],
             masterDetailBuilder: (context, masterDetailBuilders) =>
                 LdMasterDetail.builders(builders: masterDetailBuilders),
@@ -156,8 +161,8 @@ void main() {
     testWidgets('handles CRUD create operation', (WidgetTester tester) async {
       await pumpSampleCrudMasterDetail(tester);
 
-      await tester.tap(find.byIcon(Icons.add));
-      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(createActionKey));
+      await tester.pumpAndSettle(const Duration(seconds: 2));
 
       expect(find.text('Another New Item'), findsOneWidget);
     });
