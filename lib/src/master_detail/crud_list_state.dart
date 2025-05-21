@@ -1,49 +1,11 @@
 part of '../list/list_paginator.dart';
 
-enum CrudItemStateType { loading, success, error }
-
 /// A state event for a CRUD item.
-/// It can be loading, success, error or deleted.
-/// If an operation fails, the error is set.
-/// If the operation is successful, the data is set (for create and update),
-/// or null (for delete).
-class CrudItemStateEvent<T> {
-  final CrudItemStateType type;
-  final dynamic error;
-  final T? data;
+typedef CrudItemStateEvent<T extends CrudItemMixin<T>> = LdSubmitState<T>;
+typedef CrudItemStateType = LdSubmitStateType;
 
-  CrudItemStateEvent._({
-    required this.type,
-    this.error,
-    this.data,
-  });
-
-  factory CrudItemStateEvent.fromDynamic({
-    required CrudItemStateType type,
-    dynamic dataErrorOrNull,
-  }) {
-    if (type == CrudItemStateType.loading) {
-      return CrudItemStateEvent._(type: type, data: dataErrorOrNull);
-    } else if (type == CrudItemStateType.success) {
-      return CrudItemStateEvent._(type: type, data: dataErrorOrNull);
-    } else if (type == CrudItemStateType.error) {
-      return CrudItemStateEvent._(type: type, error: dataErrorOrNull);
-    }
-    throw ArgumentError('Invalid state type');
-  }
-
-  factory CrudItemStateEvent.loading([T? data]) => CrudItemStateEvent._(type: CrudItemStateType.loading, data: data);
-
-  factory CrudItemStateEvent.success(T data) => CrudItemStateEvent._(type: CrudItemStateType.success, data: data);
-
-  factory CrudItemStateEvent.deleted() => CrudItemStateEvent._(type: CrudItemStateType.success, data: null);
-
-  factory CrudItemStateEvent.error(dynamic error) => CrudItemStateEvent._(type: CrudItemStateType.error, error: error);
-
-  @override
-  String toString() {
-    return "CrudItemStateEvent(type: $type, data: $data, error: $error)";
-  }
+extension CrudItemStateEventX<T extends CrudItemMixin<T>> on CrudItemStateEvent<T> {
+  bool get isDeletedEvent => type == LdSubmitStateType.result && result == null;
 }
 
 /// Extends [LdPaginator] to add CRUD operations and item states.
@@ -82,14 +44,12 @@ class LdCrudListState<T extends CrudItemMixin<T>> extends LdPaginator<T> {
         _setError(state.error!);
       }
     }
-    if (state.type == CrudItemStateType.success) {
+    if (state.type == CrudItemStateType.result) {
       // If the state is success, update the item in the list
-      if (state.data == null) {
+      if (state.isDeletedEvent) {
         _delete(id);
-      } else if (item?.isNew ?? false) {
-        _add(state.data!);
       } else {
-        _update(state.data!);
+        item?.isNew == true ? _add(state.result!) : _update(state.result!);
       }
       _setBusy(false);
     }
@@ -104,7 +64,7 @@ class LdCrudListState<T extends CrudItemMixin<T>> extends LdPaginator<T> {
   }
 
   T getItemOptimistically(T item) {
-    return itemStates[item.id]?.data ?? item;
+    return itemStates[item.id]?.result ?? item;
   }
 
   Error? getItemError(T item) {
