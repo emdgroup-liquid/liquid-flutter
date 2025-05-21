@@ -24,6 +24,7 @@ class LdListItem extends StatelessWidget {
   final bool trailingForward;
   final bool disabled;
   final bool tradeLeadingForSelectionControl;
+  final bool showBothTrailingAndTrailingForward;
 
   final bool showSelectionControls;
 
@@ -48,6 +49,7 @@ class LdListItem extends StatelessWidget {
     this.subtitle,
     this.width,
     this.subContent,
+    this.showBothTrailingAndTrailingForward = false,
   });
 
   @override
@@ -169,7 +171,7 @@ class LdListItem extends StatelessWidget {
                     ),
                   ),
                   if (trailing != null) ...[ldSpacerM, trailing!],
-                  if (trailing == null && trailingForward) ...[
+                  if (trailingForward && (trailing == null || showBothTrailingAndTrailingForward)) ...[
                     ldSpacerM,
                     Icon(
                       LucideIcons.chevronRight,
