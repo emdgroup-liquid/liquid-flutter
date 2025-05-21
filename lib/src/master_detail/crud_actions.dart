@@ -113,7 +113,7 @@ class LdCrudAction<T extends CrudItemMixin<T>, Arg, Result> extends StatefulWidg
             if (isInAppBar) {
               return IconButton(
                 onPressed: triggerAction,
-                icon: const Icon(LucideIcons.delete),
+                icon: const Icon(LucideIcons.trash),
               );
             }
 
@@ -121,12 +121,12 @@ class LdCrudAction<T extends CrudItemMixin<T>, Arg, Result> extends StatefulWidg
             if (isInContextMenu) {
               return LdListItem(
                 onTap: triggerAction,
-                title: const Text("Delete"),
-                leading: const Icon(LucideIcons.delete),
+                title: Text(LiquidLocalizations.of(context).delete),
+                leading: const Icon(LucideIcons.trash),
               );
             }
 
-            return LdButton(child: const Text("Delete"), onPressed: triggerAction);
+            return LdButton(child: Text(LiquidLocalizations.of(context).delete), onPressed: triggerAction);
           },
         );
     return LdCrudAction<T, T, void>(
@@ -151,14 +151,35 @@ class LdCrudAction<T extends CrudItemMixin<T>, Arg, Result> extends StatefulWidg
     String? confirmationMessage,
     LdCrudActionBuilder<T>? actionButtonBuilder,
   }) {
+    defaultBuilder(masterDetail, triggerAction) => Builder(
+          builder: (context) {
+            if (masterDetail.listState.selectedItemCount == 0) {
+              return const SizedBox.shrink();
+            }
+
+            final isInAppBar = context.findAncestorWidgetOfExactType<LdAppBar>() != null;
+            if (isInAppBar) {
+              return IconButton(
+                onPressed: triggerAction,
+                icon: const Icon(LucideIcons.listX),
+              );
+            }
+
+            final isInContextMenu = context.findAncestorWidgetOfExactType<LdContextMenu>() != null;
+            if (isInContextMenu) {
+              return LdListItem(
+                onTap: triggerAction,
+                title: Text(LiquidLocalizations.of(context).deleteSelected),
+                leading: const Icon(LucideIcons.listX),
+              );
+            }
+
+            return LdButton(child: Text(LiquidLocalizations.of(context).deleteSelected), onPressed: triggerAction);
+          },
+        );
+
     return LdCrudAction<T, List<T>, void>(
-      builder: actionButtonBuilder ??
-          (masterDetail, triggerAction) => masterDetail.listState.selectedItemCount == 0
-              ? const SizedBox.shrink()
-              : IconButton(
-                  onPressed: triggerAction,
-                  icon: const Icon(Icons.delete_forever),
-                ),
+      builder: actionButtonBuilder ?? defaultBuilder,
       action: (crud, items) => crud.batchDelete(items),
       onActionCompleted: (masterDetail, controller, arg, result) {
         masterDetail.listState.updateItemSelection({});

@@ -115,6 +115,7 @@ class TaskDemoState extends State<TaskDemo> {
               },
               contextActionsBuilder: (context, item, optimisticItem) => [
                 LdCrudAction.deleteItem<Task>(item: item),
+                LdCrudAction.deleteSelectedItems<Task>(),
               ],
             );
           },

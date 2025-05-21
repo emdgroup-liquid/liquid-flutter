@@ -244,6 +244,24 @@ abstract class LiquidLocalizations {
   /// In en, this message translates to:
   /// **'An error occurred while processing the request. Please try again.'**
   String get formatError;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @deleteSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete selected'**
+  String get deleteSelected;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
 }
 
 class _LiquidLocalizationsDelegate extends LocalizationsDelegate<LiquidLocalizations> {

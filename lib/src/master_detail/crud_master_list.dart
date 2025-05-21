@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-typedef ContextActionBuilder<T extends CrudItemMixin<T>> = LdCrudAction<T, dynamic, dynamic> Function(T item);
-
 /// A wrapper around [LdSelectableList] that handles selection and item actions based
 /// on the [LdCrudListState] of a [LdCrudMasterDetail]. It can be a good fit
 /// for a master list in a [LdCrudMasterDetail].
@@ -21,8 +19,7 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
   final double assumedItemHeight;
   final bool isSeparatePage;
   final bool showLoadingIndicator;
-  final List<LdCrudAction<T, dynamic, dynamic>> Function(BuildContext context, T item, T optimisticItem)?
-      contextActionsBuilder;
+  final List<Widget> Function(BuildContext context, T item, T optimisticItem)? contextActionsBuilder;
 
   const LdCrudMasterList({
     super.key,
