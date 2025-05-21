@@ -100,7 +100,6 @@ class TaskDemoState extends State<TaskDemo> {
               ),
               trailingBuilder: (context, item, optimisticItem) {
                 return LdCrudAction.updateItem<Task>(
-                  controller: controller,
                   actionButtonBuilder: (context, triggerAction) =>
                       LdButtonVague(
                     size: LdSize.l,
@@ -114,6 +113,9 @@ class TaskDemoState extends State<TaskDemo> {
                   getUpdatedItem: () => item.copyWith(done: !item.done),
                 );
               },
+              contextActionsBuilder: (context, item, optimisticItem) => [
+                LdCrudAction.deleteItem<Task>(item: item),
+              ],
             );
           },
           buildDetail: (context, item, optimisticItem, isSeparatePage,
@@ -178,7 +180,7 @@ class TaskDemoState extends State<TaskDemo> {
                 ).show(context, useRootNavigator: true);
                 return newTask;
               }),
-              LdCrudAction.deleteSelectedItems<Task>(controller: controller),
+              LdCrudAction.deleteSelectedItems<Task>(),
             ];
           },
           buildDetailActions: (context, item, optimisticItem, isSeparatePage,
@@ -191,12 +193,11 @@ class TaskDemoState extends State<TaskDemo> {
                 ),
               if (isEditingDetail) ...[
                 LdCrudAction.updateItem<Task>(
-                  controller: controller,
                   getUpdatedItem: () => taskDetailPageState?.editingTask,
                   onItemUpdated: (masterDetail, item) =>
                       setIsEditingDetail(false),
                 ),
-                LdCrudAction.deleteOpenItem<Task>(controller: controller)
+                LdCrudAction.deleteItem<Task>()
               ]
             ];
           },

@@ -21,6 +21,7 @@ import 'package:liquid/components/interaction/modal.dart';
 import 'package:liquid/components/interaction/orb.dart';
 import 'package:liquid/components/layout/autospace.dart';
 import 'package:liquid/components/layout/card.dart';
+import 'package:liquid/components/layout/crud_master_detail.dart';
 import 'package:liquid/components/layout/drawer.dart';
 import 'package:liquid/components/layout/list.dart';
 import 'package:liquid/components/layout/list_full_screen.dart';
@@ -49,9 +50,9 @@ import 'components/form_elements/input.dart';
 import 'components/form_elements/reactive_form.dart';
 import 'components/interaction/breadcrumb.dart';
 import 'components/layout/accordion.dart';
+import 'components/layout/appbar.dart';
 import 'components/layout/divider.dart';
 import 'window/app_scaffold.dart';
-import 'components/layout/appbar.dart';
 
 class AppRouter {
   AppRouter();
@@ -253,30 +254,35 @@ class AppRouter {
             pageBuilder: (context, state) => NoTransitionPage<void>(
                 key: state.pageKey, child: const Spring()),
           ),
-          LdMasterDetail.createCompositeShellRoute(
+          LdMasterDetail.createShellRoute(
             basePath: "/components/master-detail",
             pageBuilder: (context, state, child) => NoTransitionPage<void>(
               key: state.pageKey,
               child: child,
             ),
             child: const MasterDetailDemo(),
-            routeConfigs: [
-              LdMasterDetailShellRouteConfig<ExampleItem>(
-                detailPath: "detail/:id",
-                pathToItem: (id) => ExampleItem(
-                  int.tryParse(id),
-                  "Item $id",
-                ),
-                itemToPath: (item) => item.id.toString(),
+            routeConfig: LdMasterDetailShellRouteConfig<ExampleItem>(
+              detailPath: "detail/:id",
+              pathToItem: (id) => ExampleItem(
+                int.tryParse(id),
+                "Item $id",
               ),
-              LdMasterDetailShellRouteConfig<ExampleItem>(
-                id: "crudRouteConfig",
-                detailPath: "crud-detail/:crudId",
-                pathToItem: (id) =>
-                    ExampleRepository.instance().getItemById(int.parse(id)),
-                itemToPath: (item) => item.id!.toString(),
-              ),
-            ],
+              itemToPath: (item) => item.id.toString(),
+            ),
+          ),
+          LdMasterDetail.createShellRoute(
+            basePath: "/components/crud-master-detail",
+            pageBuilder: (context, state, child) => NoTransitionPage<void>(
+              key: state.pageKey,
+              child: child,
+            ),
+            child: const CrudMasterDetailDemo(),
+            routeConfig: LdMasterDetailShellRouteConfig<ExampleItem>(
+              detailPath: "detail/:id",
+              pathToItem: (id) => ExampleRepository.instance()
+                  .getItemById(int.tryParse(id) ?? -1),
+              itemToPath: (item) => item.id.toString(),
+            ),
           ),
           GoRoute(
             path: "/components/notification",
