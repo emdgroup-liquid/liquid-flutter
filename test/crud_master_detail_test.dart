@@ -127,10 +127,9 @@ void main() {
                 Text('CRUD Detail View: $item'),
             buildDetailActions: (context, item, optimisticItem, isSeparatePage, controller, listState) => [
               LdCrudAction.updateItem<ExampleItem>(
-                controller: controller,
                 getUpdatedItem: () => ExampleItem(item.id, "Updated ${item.name}"),
               ),
-              LdCrudAction.deleteOpenItem<ExampleItem>(controller: controller),
+              LdCrudAction.deleteItem<ExampleItem>(),
             ],
             masterDetailBuilder: (context, masterDetailBuilders) =>
                 LdMasterDetail.builders(builders: masterDetailBuilders),

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 /// Settings to configure the behavior of CRUD actions.
@@ -19,14 +20,14 @@ class LdCrudActionSettings {
   });
 }
 
-typedef LdCrudActionButtonBuilder<T extends CrudItemMixin<T>> = Widget Function(
+typedef LdCrudActionBuilder<T extends CrudItemMixin<T>> = Widget Function(
     LdCrudMasterDetailState<T> masterDetail, VoidCallback triggerAction);
 
 /// A widget that provides a CRUD action button for a [LdCrudMasterDetail].
 /// It handles the action logic and provides a button to trigger the action.
 ///
 /// There are several predefined actions available, such as [createItem], [updateItem],
-/// [deleteOpenItem], and [deleteSelectedItems].
+/// [deleteItem], and [deleteSelectedItems].
 ///
 /// You can also create custom actions by providing your own [action] and [obtainArg].
 ///
@@ -36,16 +37,19 @@ typedef LdCrudActionButtonBuilder<T extends CrudItemMixin<T>> = Widget Function(
 ///
 /// It uses [LdSubmit] to handle the loading state and error handling.
 class LdCrudAction<T extends CrudItemMixin<T>, Arg, Result> extends StatefulWidget {
-  final LdCrudActionButtonBuilder<T> actionButtonBuilder;
-  final FutureOr<Arg?> Function(LdCrudMasterDetailState<T> masterDetail) obtainArg;
+  final LdCrudActionBuilder<T> builder;
+  final FutureOr<Arg?> Function(LdCrudMasterDetailState<T> masterDetail, LdMasterDetailController<T> controller)
+      obtainArg;
   final FutureOr<Result> Function(LdCrudOperations<T> crud, Arg arg) action;
-  final Function(LdCrudMasterDetailState<T> masterDetail, Arg arg, Result result)? onActionCompleted;
+  final Function(
+          LdCrudMasterDetailState<T> masterDetail, LdMasterDetailController<T> controller, Arg arg, Result result)?
+      onActionCompleted;
   final LdCrudActionSettings? settings;
 
   /// Creates a new action for CRUD operations.
   /// [Arg] must be either [T] or [Iterable<T>].
   const LdCrudAction({
-    required this.actionButtonBuilder,
+    required this.builder,
     required this.action,
     required this.obtainArg,
     this.onActionCompleted,
@@ -59,10 +63,10 @@ class LdCrudAction<T extends CrudItemMixin<T>, Arg, Result> extends StatefulWidg
   static LdCrudAction<T, T, T> createItem<T extends CrudItemMixin<T>>({
     required FutureOr<T?> Function() getNewItem,
     Function(LdCrudMasterDetailState<T> masterDetail, T newItem)? onItemCreated,
-    LdCrudActionButtonBuilder<T>? actionButtonBuilder,
+    LdCrudActionBuilder<T>? actionButtonBuilder,
   }) {
     return LdCrudAction<T, T, T>(
-      actionButtonBuilder: actionButtonBuilder ??
+      builder: actionButtonBuilder ??
           (masterDetail, triggerAction) => masterDetail.listState.selectedItemCount > 0
               ? const SizedBox.shrink()
               : IconButton(
@@ -70,68 +74,85 @@ class LdCrudAction<T extends CrudItemMixin<T>, Arg, Result> extends StatefulWidg
                   icon: const Icon(Icons.add),
                 ),
       action: (crud, newItem) => crud.create(newItem),
-      onActionCompleted: (masterDetail, arg, result) => onItemCreated?.call(masterDetail, result),
-      obtainArg: (masterDetail) async => getNewItem(),
+      onActionCompleted: (masterDetail, controller, arg, result) => onItemCreated?.call(masterDetail, result),
+      obtainArg: (masterDetail, controller) async => getNewItem(),
     );
   }
 
   static LdCrudAction<T, T, T> updateItem<T extends CrudItemMixin<T>>({
-    required LdMasterDetailController<T> controller,
     required FutureOr<T?> Function() getUpdatedItem,
     Function(LdCrudMasterDetailState<T> masterDetail, T updatedItem)? onItemUpdated,
-    LdCrudActionButtonBuilder<T>? actionButtonBuilder,
+    LdCrudActionBuilder<T>? actionButtonBuilder,
   }) {
     return LdCrudAction<T, T, T>(
-      actionButtonBuilder: actionButtonBuilder ??
+      builder: actionButtonBuilder ??
           (context, triggerAction) => IconButton(
                 onPressed: triggerAction,
-                icon: const Icon(Icons.save),
+                icon: const Icon(LucideIcons.save),
               ),
       action: (crud, newItem) => crud.update(newItem),
-      onActionCompleted: (masterDetail, arg, result) {
+      onActionCompleted: (masterDetail, controller, arg, result) {
         if (controller.getOpenItem()?.id == arg.id) {
           controller.openItem(result); // refresh the open item
         }
         onItemUpdated?.call(masterDetail, result);
       },
-      obtainArg: (masterDetail) async => getUpdatedItem(),
+      obtainArg: (masterDetail, controller) async => getUpdatedItem(),
     );
   }
 
-  static LdCrudAction<T, T, void> deleteOpenItem<T extends CrudItemMixin<T>>({
-    required LdMasterDetailController<T> controller,
+  static LdCrudAction<T, T, void> deleteItem<T extends CrudItemMixin<T>>({
+    /// The item to be deleted. If null, the currently open item will be used.
+    T? item,
     String? confirmationMessage,
-    LdCrudActionButtonBuilder<T>? actionButtonBuilder,
+    LdCrudActionBuilder<T>? builder,
   }) {
-    return LdCrudAction<T, T, void>(
-      actionButtonBuilder: actionButtonBuilder ??
-          (masterDetail, triggerAction) => IconButton(
+    defaultBuilder(masterDetail, triggerAction) => Builder(
+          builder: (context) {
+            final isInAppBar = context.findAncestorWidgetOfExactType<LdAppBar>() != null;
+            if (isInAppBar) {
+              return IconButton(
                 onPressed: triggerAction,
-                icon: const Icon(Icons.delete),
-              ),
+                icon: const Icon(LucideIcons.delete),
+              );
+            }
+
+            final isInContextMenu = context.findAncestorWidgetOfExactType<LdContextMenu>() != null;
+            if (isInContextMenu) {
+              return LdListItem(
+                onTap: triggerAction,
+                title: const Text("Delete"),
+                leading: const Icon(LucideIcons.delete),
+              );
+            }
+
+            return LdButton(child: const Text("Delete"), onPressed: triggerAction);
+          },
+        );
+    return LdCrudAction<T, T, void>(
+      builder: builder ?? defaultBuilder,
       action: (crud, item) => crud.delete(item),
-      onActionCompleted: (masterDetail, arg, result) {
+      onActionCompleted: (masterDetail, controller, arg, result) {
         if (controller.getOpenItem()?.id == arg.id) {
           controller.closeItem();
         }
       },
-      obtainArg: (masterDetail) async {
+      obtainArg: (masterDetail, controller) async {
         if (confirmationMessage?.isNotEmpty ?? false) {
           final confirmed = await LdNotificationsController.of(masterDetail.context).confirm(confirmationMessage!);
           if (confirmed != true) return null;
         }
-        return controller.getOpenItem();
+        return item ?? controller.getOpenItem();
       },
     );
   }
 
   static LdCrudAction<T, List<T>, void> deleteSelectedItems<T extends CrudItemMixin<T>>({
-    required LdMasterDetailController<T> controller,
     String? confirmationMessage,
-    LdCrudActionButtonBuilder<T>? actionButtonBuilder,
+    LdCrudActionBuilder<T>? actionButtonBuilder,
   }) {
     return LdCrudAction<T, List<T>, void>(
-      actionButtonBuilder: actionButtonBuilder ??
+      builder: actionButtonBuilder ??
           (masterDetail, triggerAction) => masterDetail.listState.selectedItemCount == 0
               ? const SizedBox.shrink()
               : IconButton(
@@ -139,14 +160,14 @@ class LdCrudAction<T extends CrudItemMixin<T>, Arg, Result> extends StatefulWidg
                   icon: const Icon(Icons.delete_forever),
                 ),
       action: (crud, items) => crud.batchDelete(items),
-      onActionCompleted: (masterDetail, arg, result) {
+      onActionCompleted: (masterDetail, controller, arg, result) {
         masterDetail.listState.updateItemSelection({});
         final openItem = controller.getOpenItem();
         if (openItem != null && arg.any((item) => item.id == openItem.id)) {
           controller.closeItem();
         }
       },
-      obtainArg: (masterDetail) async {
+      obtainArg: (masterDetail, controller) async {
         if (confirmationMessage?.isNotEmpty ?? false) {
           final confirmed = await LdNotificationsController.of(masterDetail.context).confirm(confirmationMessage!);
           if (confirmed != true) return null;
@@ -164,14 +185,15 @@ class _LdCrudActionState<T extends CrudItemMixin<T>, Arg, Result> extends State<
   @override
   Widget build(BuildContext context) {
     final masterDetail = context.read<LdCrudMasterDetailState<T>>();
+    final controller = context.read<LdMasterDetailController<T>>();
     final actionSettings = widget.settings ?? masterDetail.widget.defaultActionSettings;
     final ldSubmitBuilder = actionSettings.showLoadingDialog
         ? LdSubmitDialogBuilder<Result>(
             submitButtonBuilder: (submitButtonContext, submitController) =>
-                _buildSubmitButton(masterDetail, submitController))
+                _buildSubmitButton(masterDetail, controller, submitController))
         : LdSubmitInlineBuilder<Result>(
             submitButtonBuilder: (submitButtonContext, submitController) =>
-                _buildSubmitButton(masterDetail, submitController),
+                _buildSubmitButton(masterDetail, controller, submitController),
             errorBuilder: (context, exception, submitController) => _buildErrorButton(context, submitController),
           );
 
@@ -185,17 +207,17 @@ class _LdCrudActionState<T extends CrudItemMixin<T>, Arg, Result> extends State<
           }
 
           final listState = masterDetail.listState;
-          _handleArgEvent(listState, arg, CrudItemStateType.loading, arg);
+          _handleArgEvent(listState, arg, LdSubmitStateType.loading, data: arg);
           try {
             final result = await widget.action(
               masterDetail.crud,
               arg,
             );
-            _handleArgEvent(listState, arg, CrudItemStateType.success, result);
-            widget.onActionCompleted?.call(masterDetail, arg, result);
+            _handleArgEvent(listState, arg, LdSubmitStateType.result, data: result);
+            widget.onActionCompleted?.call(masterDetail, controller, arg, result);
             return result;
           } catch (error) {
-            _handleArgEvent(listState, arg, CrudItemStateType.error, error);
+            _handleArgEvent(listState, arg, LdSubmitStateType.error, error: error);
             if (actionSettings.errorNotificationMessage?.isNotEmpty ?? false) {
               final notification = LdConfirmNotification(
                 message: actionSettings.errorNotificationMessage!,
@@ -216,12 +238,13 @@ class _LdCrudActionState<T extends CrudItemMixin<T>, Arg, Result> extends State<
 
   Widget _buildSubmitButton(
     LdCrudMasterDetailState<T> masterDetail,
+    LdMasterDetailController<T> masterDetailController,
     LdSubmitController<Result> submitController,
   ) {
     _submitController = submitController;
-    return widget.actionButtonBuilder(masterDetail, () async {
+    return widget.builder(masterDetail, () async {
       // Get and store the argument immediately before triggering
-      final obtainedArg = await widget.obtainArg(masterDetail);
+      final obtainedArg = await widget.obtainArg(masterDetail, masterDetailController);
       if (obtainedArg == null) return;
       _obtainedArg = obtainedArg;
       submitController.trigger();
@@ -233,10 +256,10 @@ class _LdCrudActionState<T extends CrudItemMixin<T>, Arg, Result> extends State<
     LdSubmitController<Result> submitController,
   ) {
     _submitController = submitController;
-    return IconButton(
+    return LdButtonVague(
       onPressed: () => _showErrorDialog(context),
-      icon: const Icon(Icons.error),
-      color: LdTheme.of(context).errorColor,
+      child: const Icon(LucideIcons.x),
+      color: LdTheme.of(context).error,
     );
   }
 
@@ -258,26 +281,35 @@ class _LdCrudActionState<T extends CrudItemMixin<T>, Arg, Result> extends State<
   /// If [arg] is a single item, it will pass the event to that item.
   /// If [arg] is a list of items, it will pass the event to each item in the list.
   /// If [arg] is null, it will pass the event to the list state itself.
-  void _handleArgEvent(LdCrudListState<T> listState, Arg arg, CrudItemStateType eventType, [dynamic result]) {
+  void _handleArgEvent(
+    LdCrudListState<T> listState,
+    Arg arg,
+    LdSubmitStateType eventType, {
+    dynamic data,
+    dynamic error,
+  }) {
     if (arg is T) {
-      listState.handleItemStateEvent(arg, CrudItemStateEvent.fromDynamic(type: eventType, dataErrorOrNull: result));
+      listState.handleItemStateEvent(arg, CrudItemStateEvent<T>(type: eventType, result: data, error: error));
       return;
     }
     if (arg is Iterable<T>) {
-      if (result is Iterable<T>) {
+      if (data is Iterable<T>) {
         for (final item in arg) {
           listState.handleItemStateEvent(
             item,
-            CrudItemStateEvent.fromDynamic(type: eventType, dataErrorOrNull: result.firstWhere((e) => e.id == item.id)),
+            CrudItemStateEvent<T>(type: eventType, result: data.firstWhere((e) => e.id == item.id)),
           );
         }
         return;
       }
       for (final item in arg) {
-        listState.handleItemStateEvent(item, CrudItemStateEvent.fromDynamic(type: eventType, dataErrorOrNull: result));
+        listState.handleItemStateEvent(
+          item,
+          CrudItemStateEvent<T>(type: eventType, result: data, error: error),
+        );
       }
       return;
     }
-    listState.handleItemStateEvent(null, CrudItemStateEvent.fromDynamic(type: eventType, dataErrorOrNull: result));
+    listState.handleItemStateEvent(null, CrudItemStateEvent<T>(type: eventType, result: data, error: error));
   }
 }

@@ -120,7 +120,6 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
     fetchListFunction: crud.fetchAll,
   );
   LdCrudListState<T> get listState => _listState;
-  LdMasterDetailController<T> get controller => context.read<LdMasterDetailController<T>>();
 
   bool _isMasterAppBarLoading(T? openItem) {
     return widget.isMasterAppBarLoading?.call(openItem, listState) ?? listState.busy;
