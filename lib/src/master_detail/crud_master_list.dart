@@ -18,6 +18,7 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
   final Widget Function(BuildContext context, T item, T optimisticItem)? trailingBuilder;
   final double assumedItemHeight;
   final bool isSeparatePage;
+  final bool showLoadingIndicator;
 
   const LdCrudMasterList({
     super.key,
@@ -31,6 +32,7 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
     this.leadingBuilder,
     this.trailingBuilder,
     this.assumedItemHeight = 60,
+    this.showLoadingIndicator = true,
   });
 
   @override
@@ -83,11 +85,12 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
           leading: leadingBuilder?.call(context, item, optimisticItem),
           trailing: Row(
             children: [
-              if (listState.isItemLoading(item)) const LdLoader(size: 20),
+              if (showLoadingIndicator && listState.isItemLoading(item)) const LdLoader(size: 20),
               ldSpacerXS,
               trailingBuilder?.call(context, item, optimisticItem) ?? const SizedBox.shrink(),
             ],
           ),
+          showBothTrailingAndTrailingForward: true,
         );
       },
     );

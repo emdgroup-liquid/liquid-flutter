@@ -498,7 +498,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
       );
     }
 
-    return buildMaster(context, _onOpenItem, _openItem, false);
+    return buildMaster(context, _onOpenItem, _openItem, true);
   }
 
   bool _useSplitView(SizingInformation size) {
