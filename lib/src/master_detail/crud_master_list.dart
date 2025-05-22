@@ -108,7 +108,7 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
     }
     return LdContextMenu(
       menuBuilder: (context, onDismiss) => ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 200),
+        constraints: const BoxConstraints(maxWidth: 150),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
