@@ -103,6 +103,8 @@ class ExampleRepository extends LdCrudOperations<ExampleItem> {
 
 void main() {
   final Key createActionKey = UniqueKey();
+  final Key updateActionKey = UniqueKey();
+  final Key deleteActionKey = UniqueKey();
 
   Future<void> pumpSampleCrudMasterDetail(WidgetTester tester) async {
     await tester.pumpWidget(
@@ -132,9 +134,10 @@ void main() {
                 Text('CRUD Detail View: $item'),
             buildDetailActions: (context, item, optimisticItem, isSeparatePage, controller, listState) => [
               LdCrudUpdateAction<ExampleItem>(
+                key: updateActionKey,
                 getUpdatedItem: () => ExampleItem(item.id, "Updated ${item.name}"),
               ),
-              LdCrudDeleteAction<ExampleItem>(),
+              LdCrudDeleteAction<ExampleItem>(key: deleteActionKey),
             ],
             masterDetailBuilder: (context, masterDetailBuilders) =>
                 LdMasterDetail.builders(builders: masterDetailBuilders),
@@ -173,7 +176,7 @@ void main() {
       await tester.tap(find.text('Item 5'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.save));
+      await tester.tap(find.byKey(updateActionKey));
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
       expect(find.text('CRUD Detail View: ExampleItem(5, Updated Item 5)'), findsOneWidget);
@@ -187,7 +190,7 @@ void main() {
 
       expect(find.text('CRUD Detail View: ExampleItem(6, Item 6)'), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.delete));
+      await tester.tap(find.byKey(deleteActionKey));
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
       // Assert that the item is deleted from the master view and the detail view is closed
