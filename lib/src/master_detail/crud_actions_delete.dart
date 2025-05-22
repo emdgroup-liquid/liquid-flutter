@@ -26,30 +26,6 @@ class LdCrudDeleteAction<T extends CrudItemMixin<T>> extends LdCrudAction<T, T, 
 
   static Widget _defaultBuilder<T extends CrudItemMixin<T>>(
       LdCrudMasterDetailState<T> masterDetail, VoidCallback triggerAction) {
-    return Builder(
-      builder: (context) {
-        final isInAppBar = context.findAncestorWidgetOfExactType<LdAppBar>() != null;
-        if (isInAppBar) {
-          return IconButton(
-            onPressed: triggerAction,
-            icon: const Icon(Icons.delete),
-          );
-        }
-
-        final isInContextMenu = context.findAncestorWidgetOfExactType<LdContextMenu>() != null;
-        if (isInContextMenu) {
-          return LdListItem(
-            onTap: triggerAction,
-            title: Text(LiquidLocalizations.of(context).delete),
-            leading: const Icon(Icons.delete),
-          );
-        }
-
-        return LdButton(
-          child: Text(LiquidLocalizations.of(context).delete),
-          onPressed: triggerAction,
-        );
-      },
-    );
+    return LdContextAwareCrudActionBuilder.delete(masterDetail: masterDetail, triggerAction: triggerAction);
   }
 }

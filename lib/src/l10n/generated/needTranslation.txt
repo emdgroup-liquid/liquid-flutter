@@ -3,8 +3,9 @@
     "search",
     "selectTime",
     "clearError",
+    "createNew",
     "delete",
     "deleteSelected",
-    "save"
+    "edit"
   ]
 }

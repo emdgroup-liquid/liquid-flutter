@@ -52,6 +52,7 @@ export 'src/list/list_paginator.dart';
 export 'src/list/list_seperator.dart';
 export 'src/list/selectable_list.dart';
 export 'src/loading.dart';
+export 'src/master_detail/crud_action_builder.dart';
 export 'src/master_detail/crud_actions.dart';
 export 'src/master_detail/crud_actions_create.dart';
 export 'src/master_detail/crud_actions_delete.dart';

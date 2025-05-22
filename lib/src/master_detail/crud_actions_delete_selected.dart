@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class LdCrudDeleteSelectedAction<T extends CrudItemMixin<T>> extends LdCrudAction<T, List<T>, void> {
   LdCrudDeleteSelectedAction({
@@ -28,32 +27,6 @@ class LdCrudDeleteSelectedAction<T extends CrudItemMixin<T>> extends LdCrudActio
 
   static Widget _defaultBuilder<T extends CrudItemMixin<T>>(
       LdCrudMasterDetailState<T> masterDetail, VoidCallback triggerAction) {
-    if (masterDetail.listState.selectedItemCount == 0) {
-      return const SizedBox.shrink();
-    }
-
-    return Builder(
-      builder: (context) {
-        if (context.findAncestorWidgetOfExactType<LdAppBar>() != null) {
-          return IconButton(
-            onPressed: triggerAction,
-            icon: const Icon(LucideIcons.listX),
-          );
-        }
-
-        if (context.findAncestorWidgetOfExactType<LdContextMenu>() != null) {
-          return LdListItem(
-            onTap: triggerAction,
-            title: Text(LiquidLocalizations.of(context).deleteSelected),
-            leading: const Icon(LucideIcons.listX),
-          );
-        }
-
-        return LdButton(
-          child: Text(LiquidLocalizations.of(context).deleteSelected),
-          onPressed: triggerAction,
-        );
-      },
-    );
+    return LdContextAwareCrudActionBuilder.deleteMultiple(masterDetail: masterDetail, triggerAction: triggerAction);
   }
 }

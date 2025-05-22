@@ -23,9 +23,6 @@ class LdCrudUpdateAction<T extends CrudItemMixin<T>> extends LdCrudAction<T, T, 
 
   static Widget _defaultBuilder<T extends CrudItemMixin<T>>(
       LdCrudMasterDetailState<T> masterDetail, VoidCallback triggerAction) {
-    return IconButton(
-      onPressed: triggerAction,
-      icon: const Icon(Icons.save),
-    );
+    return LdContextAwareCrudActionBuilder.edit(masterDetail: masterDetail, triggerAction: triggerAction);
   }
 }

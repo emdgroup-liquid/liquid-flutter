@@ -20,9 +20,6 @@ class LdCrudActionSettings {
   });
 }
 
-typedef LdCrudActionBuilder<T extends CrudItemMixin<T>> = Widget Function(
-    LdCrudMasterDetailState<T> masterDetail, VoidCallback triggerAction);
-
 /// A widget that provides a CRUD action button for a [LdCrudMasterDetail].
 /// It handles the action logic and provides a button to trigger the action.
 ///
@@ -127,7 +124,7 @@ class _LdCrudActionState<T extends CrudItemMixin<T>, Arg, Result> extends State<
     LdMasterDetailController<T> masterDetailController,
     LdSubmitController<Result> submitController,
   ) {
-    _submitController = submitController;
+    _submitController ??= submitController;
     return widget.builder(masterDetail, () async {
       // Get and store the argument immediately before triggering
       final obtainedArg = await widget.obtainArg(masterDetail, masterDetailController);
@@ -141,7 +138,7 @@ class _LdCrudActionState<T extends CrudItemMixin<T>, Arg, Result> extends State<
     BuildContext context,
     LdSubmitController<Result> submitController,
   ) {
-    _submitController = submitController;
+    _submitController ??= submitController;
     return LdButtonVague(
       onPressed: () => _showErrorDialog(context),
       child: const Icon(LucideIcons.x),
@@ -197,5 +194,11 @@ class _LdCrudActionState<T extends CrudItemMixin<T>, Arg, Result> extends State<
       return;
     }
     listState.handleItemStateEvent(null, CrudItemStateEvent<T>(type: eventType, result: data, error: error));
+  }
+
+  @override
+  void dispose() {
+    _submitController?.dispose();
+    super.dispose();
   }
 }

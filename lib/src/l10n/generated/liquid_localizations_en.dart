@@ -86,11 +86,14 @@ class LiquidLocalizationsEn extends LiquidLocalizations {
   String get formatError => 'An error occurred while processing the request. Please try again.';
 
   @override
+  String get createNew => 'Create new';
+
+  @override
   String get delete => 'Delete';
 
   @override
   String get deleteSelected => 'Delete selected';
 
   @override
-  String get save => 'Save';
+  String get edit => 'Edit';
 }

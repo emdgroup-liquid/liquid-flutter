@@ -19,6 +19,11 @@ class ExampleItem with CrudItemMixin<ExampleItem> {
   final String name;
 
   ExampleItem(this.id, this.name);
+
+  @override
+  String toString() {
+    return "ExampleItem(id: $id, name: $name)";
+  }
 }
 
 class ExampleRepository extends LdCrudOperations<ExampleItem> {
@@ -216,12 +221,13 @@ class _CrudMasterDetailDemoState extends State<CrudMasterDetailDemo> {
                         ? "An error occurred while performing the operation."
                         : null,
                   ),
-                  masterDetailBuilder: (context, builders) =>
-                      LdMasterDetail.builders(
-                    builders: builders,
-                    layoutMode: _layoutMode,
-                    detailPresentationMode: _presentationMode,
-                  ),
+                  masterDetailBuilder: (context, builders) {
+                    return LdMasterDetail.builders(
+                      builders: builders,
+                      layoutMode: _layoutMode,
+                      detailPresentationMode: _presentationMode,
+                    );
+                  },
                   buildDetailTitle: (context, item, optimisticItem,
                           isSeparatePage, controller, listState) =>
                       Text("Detail ${item.name}"),
@@ -232,84 +238,55 @@ class _CrudMasterDetailDemoState extends State<CrudMasterDetailDemo> {
                         : "List of Example Items";
                     return Text(title);
                   },
-                  buildDetail: (
-                    context,
-                    item,
-                    optimisticItem,
-                    isSeparatePage,
-                    controller,
-                    listState,
-                  ) =>
-                      LdAutoSpace(
-                    children: [
-                      const LdTextHl("Detail"),
-                      LdTextL("Item ${item.id}: ${item.name}"),
-                      LdButton(
-                        onPressed: controller.closeItem,
-                        child: const Text("Go back"),
-                      )
-                    ],
-                  ).padL(),
+                  buildDetail: (context, item, optimisticItem, isSeparatePage,
+                      controller, listState) {
+                    return LdAutoSpace(
+                      children: [
+                        const LdTextHl("Detail"),
+                        LdTextL("Item ${item.id}: ${item.name}"),
+                        LdButton(
+                          onPressed: controller.closeItem,
+                          child: const Text("Go back"),
+                        )
+                      ],
+                    ).padL();
+                  },
                   buildMaster: (context, openItem, optimisticOpenItem,
-                          isSeparatePage, controller, listState) =>
-                      LdCrudMasterList<ExampleItem>(
-                    listState: listState,
-                    controller: controller,
-                    titleBuilder: (context, item, optimisticItem) =>
-                        Text(item.name),
-                    subtitleBuilder: (context, item, optimisticItem) =>
-                        Text("ID: ${item.id}"),
-                  ),
+                      isSeparatePage, controller, listState) {
+                    return LdCrudMasterList<ExampleItem>(
+                      listState: listState,
+                      controller: controller,
+                      titleBuilder: (context, item, optimisticItem) =>
+                          Text(item.name),
+                      subtitleBuilder: (context, item, optimisticItem) =>
+                          Text("ID: ${item.id}"),
+                      contextActionsBuilder: (context, item, selectedItems) => [
+                        LdCrudUpdateAction<ExampleItem>(
+                          getUpdatedItem: () => _getNewItemFromInput(item.id),
+                        ),
+                        LdCrudDeleteAction<ExampleItem>(),
+                        LdCrudDeleteSelectedAction<ExampleItem>(),
+                      ],
+                    );
+                  },
                   buildMasterActions: (context, openItem, optimisticOpenItem,
-                          isSeparatePage, controller, listState) =>
-                      [
-                    LdCrudCreateAction<ExampleItem>(
-                      getNewItem: () async {
-                        final notification =
-                            (await LdNotificationsController.of(context)
-                                .addNotification(
-                          LdInputNotification(
-                            inputHint: "Create item",
-                            inputLabel: "Name",
-                            type: LdNotificationType.enterText,
-                            message: "Enter new name",
-                          ),
-                        )) as LdInputNotification;
-                        final newName =
-                            await notification.inputCompleter.future;
-                        if (newName?.isNotEmpty ?? false) {
-                          return ExampleItem(null, newName!);
-                        }
-                        return null;
-                      },
-                    ),
-                    LdCrudDeleteSelectedAction<ExampleItem>(),
-                  ],
+                      isSeparatePage, controller, listState) {
+                    return [
+                      LdCrudCreateAction<ExampleItem>(
+                        getNewItem: _getNewItemFromInput,
+                      ),
+                      LdCrudDeleteSelectedAction<ExampleItem>(),
+                    ];
+                  },
                   buildDetailActions: (context, item, optimisticItem,
-                          isSeparatePage, controller, listState) =>
-                      [
-                    LdCrudUpdateAction<ExampleItem>(
-                      getUpdatedItem: () async {
-                        final notification =
-                            (await LdNotificationsController.of(context)
-                                .addNotification(
-                          LdInputNotification(
-                            inputHint: "Edit item",
-                            inputLabel: "Name",
-                            type: LdNotificationType.enterText,
-                            message: "Enter new name",
-                          ),
-                        )) as LdInputNotification;
-                        final newName =
-                            await notification.inputCompleter.future;
-                        if (newName?.isNotEmpty ?? false) {
-                          return ExampleItem(item.id, newName!);
-                        }
-                        return null;
-                      },
-                    ),
-                    LdCrudDeleteAction<ExampleItem>(),
-                  ],
+                      isSeparatePage, controller, listState) {
+                    return [
+                      LdCrudUpdateAction<ExampleItem>(
+                        getUpdatedItem: () => _getNewItemFromInput(item.id),
+                      ),
+                      LdCrudDeleteAction<ExampleItem>(),
+                    ];
+                  },
                 ),
               ),
             ),
@@ -317,5 +294,22 @@ class _CrudMasterDetailDemoState extends State<CrudMasterDetailDemo> {
         ],
       ),
     );
+  }
+
+  Future<ExampleItem?> _getNewItemFromInput([dynamic itemId]) async {
+    final notification =
+        (await LdNotificationsController.of(context).addNotification(
+      LdInputNotification(
+        inputHint: "Create item",
+        inputLabel: "Name",
+        type: LdNotificationType.enterText,
+        message: "Enter new name",
+      ),
+    )) as LdInputNotification;
+    final newName = await notification.inputCompleter.future;
+    if (newName?.isNotEmpty ?? false) {
+      return ExampleItem(itemId, newName!);
+    }
+    return null;
   }
 }
