@@ -1,0 +1,113 @@
+part of '../list/list_paginator.dart';
+
+/// A state event for a CRUD item.
+typedef CrudItemStateEvent<T extends CrudItemMixin<T>> = LdSubmitState<T>;
+typedef CrudItemStateType = LdSubmitStateType;
+
+extension CrudItemStateEventX<T extends CrudItemMixin<T>> on CrudItemStateEvent<T> {
+  bool get isDeletedEvent => type == LdSubmitStateType.result && result == null;
+}
+
+/// Extends [LdPaginator] to add CRUD operations and item states.
+class LdCrudListState<T extends CrudItemMixin<T>> extends LdPaginator<T> {
+  final Map<dynamic, CrudItemStateEvent<T>> itemStates = {};
+
+  // Add multiselect properties
+  final Set<T> _selectedItems = {};
+  Set<T> get selectedItems => Set.from(_selectedItems);
+  int get selectedItemCount => _selectedItems.length;
+
+  bool get isMultiSelectMode => _selectedItems.isNotEmpty;
+
+  LdCrudListState({required super.fetchListFunction});
+
+  /// Updates the selected items using a new set of selections from LdSelectableList
+  void updateItemSelection(Set<T> selectedItems) {
+    _selectedItems.clear();
+    _selectedItems.addAll(selectedItems);
+    notifyListeners();
+  }
+
+  /// Intelligently handles item state events, e.g. loading, success, error.
+  /// It knows which state was caused by which operation and updates the
+  /// item list accordingly.
+  void handleItemStateEvent(T? item, CrudItemStateEvent<T> state) {
+    final id = item?.id;
+    // Update item state
+    if (id != null) {
+      itemStates[id] = state;
+    } else {
+      // let's just set the general busy state, if we can't to it on item level
+      _setBusy(state.type == CrudItemStateType.loading);
+      if (state.type == CrudItemStateType.error) {
+        // same goes for error state
+        _setError(state.error!);
+      }
+    }
+    if (state.type == CrudItemStateType.result) {
+      // If the state is success, update the item in the list
+      if (state.isDeletedEvent) {
+        _delete(id);
+      } else {
+        item?.isNew == true ? _add(state.result!) : _update(state.result!);
+      }
+      _setBusy(false);
+    }
+    notifyListeners();
+  }
+
+  void clearItemState(T? item) {
+    if (item != null) {
+      itemStates.remove(item.id);
+      notifyListeners();
+    }
+  }
+
+  T getItemOptimistically(T item) {
+    return itemStates[item.id]?.result ?? item;
+  }
+
+  Error? getItemError(T item) {
+    return itemStates[item.id]?.error;
+  }
+
+  bool isItemLoading(T item) {
+    return itemStates[item.id]?.type == CrudItemStateType.loading;
+  }
+
+  bool isItemSelected(T item) {
+    return _selectedItems.contains(item);
+  }
+
+  void _add(T item) {
+    // Add item to the list
+    _items.add(item);
+    _totalItems += 1;
+    notifyListeners();
+  }
+
+  bool _update(T item) {
+    // Update item in the list
+    for (var i = 0; i < _items.length; i++) {
+      if (_items[i]?.id == item.id) {
+        _items[i] = item;
+        notifyListeners();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Future<void> _delete(dynamic id) async {
+    // Delete item from the list
+    for (var i = 0; i < _items.length; i++) {
+      if (_items[i]?.id == id) {
+        _selectedItems.remove(_items[i]); // remove potential selection
+        _items.removeAt(i);
+        _totalItems -= 1;
+        notifyListeners();
+        return;
+      }
+    }
+  }
+}

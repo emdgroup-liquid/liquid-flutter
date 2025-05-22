@@ -56,6 +56,8 @@ const components = [
       ComponentCategory.layout),
   _Component("Master detail", "/components/master-detail", LucideIcons.list,
       ComponentCategory.layout),
+  _Component("CRUD Master detail", "/components/crud-master-detail",
+      LucideIcons.listTodo, ComponentCategory.layout),
   _Component("Spring", "/components/spring", LucideIcons.shell,
       ComponentCategory.layout),
   _Component("List Item", "/components/list-item", LucideIcons.listTree,

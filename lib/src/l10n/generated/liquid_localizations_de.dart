@@ -71,6 +71,9 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
   String get close => 'Schließen';
 
   @override
+  String get clearError => 'Clear error';
+
+  @override
   String get loading => 'Laden...';
 
   @override
@@ -81,4 +84,16 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
 
   @override
   String get formatError => 'Ein Fehler beim Verarbeiten der Anfrage ist aufgetreten. Bitte versuchen Sie es erneut.';
+
+  @override
+  String get createNew => 'Create new';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get deleteSelected => 'Delete selected';
+
+  @override
+  String get edit => 'Edit';
 }

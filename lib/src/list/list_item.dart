@@ -12,6 +12,7 @@ class LdListItem extends StatelessWidget {
   final bool active;
   final Widget? subtitle;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
   final double? width;
   final bool selectDisabled;
   final OnSelectionChange? onSelectionChange;
@@ -23,6 +24,7 @@ class LdListItem extends StatelessWidget {
   final bool trailingForward;
   final bool disabled;
   final bool tradeLeadingForSelectionControl;
+  final bool showBothTrailingAndTrailingForward;
 
   final bool showSelectionControls;
 
@@ -43,9 +45,11 @@ class LdListItem extends StatelessWidget {
     this.tradeLeadingForSelectionControl = false,
     this.padding,
     this.onTap,
+    this.onLongPress,
     this.subtitle,
     this.width,
     this.subContent,
+    this.showBothTrailingAndTrailingForward = false,
   });
 
   @override
@@ -74,6 +78,7 @@ class LdListItem extends StatelessWidget {
           onTap?.call();
         }
       },
+      onLongPress: onLongPress,
       active: active || (showSelectionControls && isSelected),
       disabled: disabled,
       color: theme.palette.primary,
@@ -166,7 +171,7 @@ class LdListItem extends StatelessWidget {
                     ),
                   ),
                   if (trailing != null) ...[ldSpacerM, trailing!],
-                  if (trailing == null && trailingForward) ...[
+                  if (trailingForward && (trailing == null || showBothTrailingAndTrailingForward)) ...[
                     ldSpacerM,
                     Icon(
                       LucideIcons.chevronRight,

@@ -19,8 +19,13 @@
   "unknownError": "An unknown error occurred",
   "moreInfo": "More info",
   "close": "Close",
+  "clearError": "Clear error",
   "loading": "Loading...",
   "networkError": "A network error occurred. Please make sure you are connected to the internet and try again.",
   "timeoutError": "The request timed out. Please try again.",
-  "formatError": "An error occurred while processing the request. Please try again."
+  "formatError": "An error occurred while processing the request. Please try again.",
+  "createNew": "Create new",
+  "delete": "Delete",
+  "deleteSelected": "Delete selected",
+  "edit": "Edit"
 }

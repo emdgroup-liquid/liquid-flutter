@@ -31,6 +31,8 @@ class LdAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Color? surfaceTintColor;
   final bool? excludeHeaderSemantics;
   final BuildContext? context;
+  final bool loading;
+  final bool actionsDisabled;
 
   const LdAppBar({
     super.key,
@@ -64,6 +66,8 @@ class LdAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.scrolledUnderElevation,
     this.surfaceTintColor,
     this.excludeHeaderSemantics,
+    this.loading = false,
+    this.actionsDisabled = false,
   });
 
   @override
@@ -90,7 +94,6 @@ class LdAppBar extends StatelessWidget implements PreferredSizeWidget {
       children: [
         AppBar(
           key: key,
-          actions: actions,
           leading: leading,
           elevation: elevation,
           iconTheme: iconTheme,
@@ -99,8 +102,7 @@ class LdAppBar extends StatelessWidget implements PreferredSizeWidget {
           titleSpacing: titleSpacing,
           toolbarOpacity: toolbarOpacity ?? 1.0,
           bottomOpacity: bottomOpacity ?? 1.0,
-          toolbarHeight: toolbarHeight ??
-              (theme.themeSize == LdThemeSize.s ? 48 : kToolbarHeight),
+          toolbarHeight: toolbarHeight ?? (theme.themeSize == LdThemeSize.s ? 48 : kToolbarHeight),
           titleTextStyle: titleTextStyle,
           backgroundColor: backgroundColor,
           actionsIconTheme: actionsIconTheme,
@@ -111,8 +113,7 @@ class LdAppBar extends StatelessWidget implements PreferredSizeWidget {
           shape: shape,
           toolbarTextStyle: toolbarTextStyle,
           leadingWidth: leadingWidth,
-          notificationPredicate: notificationPredicate ??
-              (notification) => notification.depth == 0,
+          notificationPredicate: notificationPredicate ?? (notification) => notification.depth == 0,
           forceMaterialTransparency: forceMaterialTransparency ?? false,
           scrolledUnderElevation: scrolledUnderElevation,
           surfaceTintColor: surfaceTintColor,
@@ -121,12 +122,9 @@ class LdAppBar extends StatelessWidget implements PreferredSizeWidget {
           systemOverlayStyle: SystemUiOverlayStyle(
             statusBarColor: theme.surface,
             systemNavigationBarColor: theme.surface,
-            systemNavigationBarIconBrightness:
-                theme.isDark ? Brightness.light : Brightness.dark,
-            statusBarIconBrightness:
-                theme.isDark ? Brightness.light : Brightness.dark,
-            statusBarBrightness:
-                theme.isDark ? Brightness.dark : Brightness.light,
+            systemNavigationBarIconBrightness: theme.isDark ? Brightness.light : Brightness.dark,
+            statusBarIconBrightness: theme.isDark ? Brightness.light : Brightness.dark,
+            statusBarBrightness: theme.isDark ? Brightness.dark : Brightness.light,
           ),
           title: DefaultTextStyle(
             style: ldBuildTextStyle(
@@ -136,8 +134,31 @@ class LdAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
             child: title ?? const SizedBox(),
           ),
+          actions: actions?.map((action) {
+            if (actionsDisabled) {
+              // Wrap each action in an AbsorbPointer to block interactions
+              return AbsorbPointer(
+                child: Opacity(
+                  // Optionally reduce opacity to indicate disabled state
+                  opacity: 0.5,
+                  child: action,
+                ),
+              );
+            }
+            return action;
+          }).toList(),
         ),
-        const LdDivider(height: 1),
+        if (loading)
+          LinearProgressIndicator(
+            minHeight: 1,
+            backgroundColor: LdTheme.of(context).surface,
+            valueColor: AlwaysStoppedAnimation<Color>(
+              LdTheme.of(context).primaryColor,
+            ),
+            value: null,
+          )
+        else
+          const LdDivider(height: 1),
       ],
     );
   }

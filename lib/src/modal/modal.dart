@@ -1,4 +1,5 @@
 import 'dart:io' if (dart.library.io) 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -60,8 +61,7 @@ class LdModal {
   /// A list of listenables to be injected into the modal. That can be read
   /// from the various builder contexts, useful for updating the modal content
   /// based on external state like a viewmodel.
-  final List<ListenableProvider> Function(BuildContext dialogContext)?
-      injectables;
+  final List<InheritedProvider> Function(BuildContext dialogContext)? injectables;
 
   /// The size of the modal.
   final LdSize? size;
@@ -114,13 +114,11 @@ class LdModal {
     this.fixedDialogSize,
     this.index,
   }) {
-    assert(!(userCanDismiss == false && showDismissButton),
-        "showDismissButton is true but userCanDismiss is false");
+    assert(!(userCanDismiss == false && showDismissButton), "showDismissButton is true but userCanDismiss is false");
   }
 
   bool get shouldScale {
-    return enableScaling == true ||
-        (!kIsWeb && Platform.isIOS && mode != LdModalTypeMode.dialog);
+    return enableScaling == true || (!kIsWeb && Platform.isIOS && mode != LdModalTypeMode.dialog);
   }
 
   bool get _enableDrag => userCanDismiss;
@@ -133,18 +131,15 @@ class LdModal {
     if (mediaQuery == null) return false;
 
     final deviceType = getDeviceType(mediaQuery.size);
-    return deviceType == DeviceScreenType.watch ||
-        deviceType == DeviceScreenType.mobile;
+    return deviceType == DeviceScreenType.watch || deviceType == DeviceScreenType.mobile;
   }
 
   /// Returns whether [mode] or screen size of [context] will
   /// result in  a sheet being shown
   bool _isSheet(BuildContext context) =>
-      mode == LdModalTypeMode.sheet ||
-      (mode == LdModalTypeMode.auto && _autoShowsSheet(context));
+      mode == LdModalTypeMode.sheet || (mode == LdModalTypeMode.auto && _autoShowsSheet(context));
 
-  bool _hasSabGradient(BuildContext context) =>
-      actionBar != null && _isSheet(context);
+  bool _hasSabGradient(BuildContext context) => actionBar != null && _isSheet(context);
 
   /// Returns the correct [WoltModalType] based on the [mode] and [context].
   WoltModalType _getSheetType(BuildContext context, {int index = 0}) {
@@ -210,6 +205,7 @@ class LdModal {
           mode: title != null ? LdButtonMode.ghost : LdButtonMode.vague,
           child: const Icon(LucideIcons.x),
           onPressed: () {
+            onDismiss?.call();
             Navigator.of(context).pop();
           },
         );
@@ -345,8 +341,7 @@ class LdModal {
                               child: title!,
                             ),
                           ),
-                        _getTrailingNavBarWidget(context) ??
-                            const SizedBox.shrink(),
+                        _getTrailingNavBarWidget(context) ?? const SizedBox.shrink(),
                       ],
                     ),
                   ),
@@ -359,11 +354,8 @@ class LdModal {
                         valueListenable: sizeNotifier,
                         builder: (context, size, child) {
                           return Padding(
-                            padding: _contentPadding(context) +
-                                EdgeInsets.only(bottom: size.height),
-                            child: modalContent != null
-                                ? modalContent!(context)
-                                : const SizedBox.shrink(),
+                            padding: _contentPadding(context) + EdgeInsets.only(bottom: size.height),
+                            child: modalContent != null ? modalContent!(context) : const SizedBox.shrink(),
                           );
                         },
                       ),
@@ -376,8 +368,7 @@ class LdModal {
     ];
   }
 
-  Widget? _getStickyActionBar(
-      BuildContext context, ValueNotifier<Size> sizeNotifier) {
+  Widget? _getStickyActionBar(BuildContext context, ValueNotifier<Size> sizeNotifier) {
     if (actionBar == null) {
       return null;
     }
@@ -431,6 +422,8 @@ class LdModal {
       pageListBuilderNotifier: ValueNotifier(
         (context) => _getPageList(context),
       ),
+      onModalDismissedWithBarrierTap: onDismiss,
+      onModalDismissedWithDrag: onDismiss,
     );
   }
 
@@ -445,6 +438,11 @@ class LdModal {
       ),
       child: PopScope(
         canPop: userCanDismiss,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) {
+            onDismiss?.call();
+          }
+        },
         child: Builder(builder: (context) {
           return CallbackShortcuts(
             bindings: {

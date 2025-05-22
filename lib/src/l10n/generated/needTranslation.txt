@@ -1,6 +1,11 @@
 {
   "de": [
     "search",
-    "selectTime"
+    "selectTime",
+    "clearError",
+    "createNew",
+    "delete",
+    "deleteSelected",
+    "edit"
   ]
 }

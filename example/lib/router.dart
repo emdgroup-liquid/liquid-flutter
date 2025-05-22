@@ -1,57 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid/chemical_screen.dart';
-import 'package:liquid/components/layout/autospace.dart';
-import 'package:liquid/components/interaction/button.dart';
-import 'package:liquid/components/layout/card.dart';
-import 'package:liquid/components/form_elements/choose.dart';
-import 'package:liquid/components/interaction/context_menu.dart';
-import 'package:liquid/components/form_elements/date_time_pickers.dart';
-import 'package:liquid/components/layout/drawer.dart';
-import 'package:liquid/components/feedback/exception.dart';
 import 'package:liquid/components/data_display/icon.dart';
+import 'package:liquid/components/feedback/exception.dart';
 import 'package:liquid/components/feedback/indicator.dart';
+import 'package:liquid/components/feedback/loader.dart';
+import 'package:liquid/components/feedback/reveal.dart';
+import 'package:liquid/components/form_elements/choose.dart';
+import 'package:liquid/components/form_elements/date_time_pickers.dart';
+import 'package:liquid/components/form_elements/radio.dart';
+import 'package:liquid/components/form_elements/select.dart';
+import 'package:liquid/components/form_elements/slider.dart';
+import 'package:liquid/components/form_elements/submit.dart';
+import 'package:liquid/components/form_elements/switch.dart';
+import 'package:liquid/components/form_elements/toggle.dart';
+import 'package:liquid/components/interaction/action_runner.dart';
+import 'package:liquid/components/interaction/button.dart';
+import 'package:liquid/components/interaction/context_menu.dart';
+import 'package:liquid/components/interaction/modal.dart';
+import 'package:liquid/components/interaction/orb.dart';
+import 'package:liquid/components/layout/autospace.dart';
+import 'package:liquid/components/layout/card.dart';
+import 'package:liquid/components/layout/crud_master_detail.dart';
+import 'package:liquid/components/layout/drawer.dart';
 import 'package:liquid/components/layout/list.dart';
 import 'package:liquid/components/layout/list_full_screen.dart';
-import 'package:liquid/components/feedback/loader.dart';
 import 'package:liquid/components/layout/list_item.dart';
 import 'package:liquid/components/layout/master_detail.dart';
 import 'package:liquid/components/layout/selectable_list.dart';
-import 'package:liquid/components/material.dart';
-import 'package:liquid/components/interaction/modal.dart';
-import 'package:liquid/components/interaction/orb.dart';
-import 'package:liquid/components/form_elements/radio.dart';
-import 'package:liquid/components/feedback/reveal.dart';
-import 'package:liquid/components/interaction/action_runner.dart';
-import 'package:liquid/components/form_elements/select.dart';
-import 'package:liquid/components/form_elements/slider.dart';
 import 'package:liquid/components/layout/spring.dart';
-import 'package:liquid/components/form_elements/submit.dart';
-import 'package:liquid/components/form_elements/switch.dart';
+import 'package:liquid/components/material.dart';
 import 'package:liquid/components/tab.dart';
-import 'package:liquid/components/form_elements/toggle.dart';
 import 'package:liquid/demos/layout_documentation.dart';
 import 'package:liquid/demos/radius_documentation.dart';
-import 'package:liquid/demos/task_demo.dart';
+import 'package:liquid/demos/task_demo/task_demo.dart';
 import 'package:liquid/demos/theme.dart';
 import 'package:liquid/demos/typography_documentation.dart';
 import 'package:liquid/home.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-import 'components/layout/accordion.dart';
-import 'components/feedback/badge.dart';
-import 'components/interaction/breadcrumb.dart';
-import 'components/form_elements/checkbox.dart';
-import 'components/layout/divider.dart';
-import 'components/form_elements/form.dart';
-import 'components/feedback/hint.dart';
-import 'components/form_elements/input.dart';
-import 'components/feedback/notification.dart';
-import 'components/form_elements/reactive_form.dart';
 import 'components/data_display/table.dart';
 import 'components/data_display/tag.dart';
-import 'window/app_scaffold.dart';
+import 'components/feedback/badge.dart';
+import 'components/feedback/hint.dart';
+import 'components/feedback/notification.dart';
+import 'components/form_elements/checkbox.dart';
+import 'components/form_elements/form.dart';
+import 'components/form_elements/input.dart';
+import 'components/form_elements/reactive_form.dart';
+import 'components/interaction/breadcrumb.dart';
+import 'components/layout/accordion.dart';
 import 'components/layout/appbar.dart';
+import 'components/layout/divider.dart';
+import 'window/app_scaffold.dart';
 
 class AppRouter {
   AppRouter();
@@ -253,10 +254,35 @@ class AppRouter {
             pageBuilder: (context, state) => NoTransitionPage<void>(
                 key: state.pageKey, child: const Spring()),
           ),
-          GoRoute(
-            path: "/components/master-detail",
-            pageBuilder: (context, state) => NoTransitionPage<void>(
-                key: state.pageKey, child: const MasterDetailDemo()),
+          LdMasterDetail.createShellRoute(
+            basePath: "/components/master-detail",
+            pageBuilder: (context, state, child) => NoTransitionPage<void>(
+              key: state.pageKey,
+              child: child,
+            ),
+            child: const MasterDetailDemo(),
+            routeConfig: LdMasterDetailShellRouteConfig<ExampleItem>(
+              detailPath: "detail/:id",
+              pathToItem: (id) => ExampleItem(
+                int.tryParse(id),
+                "Item $id",
+              ),
+              itemToPath: (item) => item.id.toString(),
+            ),
+          ),
+          LdMasterDetail.createShellRoute(
+            basePath: "/components/crud-master-detail",
+            pageBuilder: (context, state, child) => NoTransitionPage<void>(
+              key: state.pageKey,
+              child: child,
+            ),
+            child: const CrudMasterDetailDemo(),
+            routeConfig: LdMasterDetailShellRouteConfig<ExampleItem>(
+              detailPath: "detail/:id",
+              pathToItem: (id) => ExampleRepository.instance()
+                  .getItemById(int.tryParse(id) ?? -1),
+              itemToPath: (item) => item.id.toString(),
+            ),
           ),
           GoRoute(
             path: "/components/notification",

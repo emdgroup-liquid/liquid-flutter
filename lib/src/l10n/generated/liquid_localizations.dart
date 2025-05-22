@@ -215,6 +215,12 @@ abstract class LiquidLocalizations {
   /// **'Close'**
   String get close;
 
+  /// No description provided for @clearError.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear error'**
+  String get clearError;
+
   /// No description provided for @loading.
   ///
   /// In en, this message translates to:
@@ -238,6 +244,30 @@ abstract class LiquidLocalizations {
   /// In en, this message translates to:
   /// **'An error occurred while processing the request. Please try again.'**
   String get formatError;
+
+  /// No description provided for @createNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new'**
+  String get createNew;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @deleteSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete selected'**
+  String get deleteSelected;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
 }
 
 class _LiquidLocalizationsDelegate extends LocalizationsDelegate<LiquidLocalizations> {
