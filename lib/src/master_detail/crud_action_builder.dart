@@ -150,7 +150,7 @@ class LdContextAwareCrudActionBuilder<T extends CrudItemMixin<T>> extends Statel
 
       return LdListItem(
         onTap: triggerAction,
-        title: Text(actionText ?? LiquidLocalizations.of(context).edit),
+        title: Text(actionText ?? ""),
         leading: Icon(actionIcon),
       );
     }
