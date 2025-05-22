@@ -113,8 +113,21 @@ class TaskDemoState extends State<TaskDemo> {
                   getUpdatedItem: () => item.copyWith(done: !item.done),
                 );
               },
-              contextActionsBuilder: (context, item, optimisticItem) => [
-                LdCrudDeleteAction<Task>(item: item),
+              contextActionsBuilder: (context, item, selectedItems) => [
+                if (selectedItems.length <= 1) ...[
+                  LdCrudUpdateAction<Task>(
+                    actionButtonBuilder: (context, triggerAction) => LdListItem(
+                      title: Text("Mark as ${item.done ? 'Pending' : 'Done'}"),
+                      leading: Icon(
+                        item.done ? Icons.check : Icons.check_box_outline_blank,
+                        color: item.done ? Colors.green : Colors.grey,
+                      ),
+                      onTap: triggerAction,
+                    ),
+                    getUpdatedItem: () => item.copyWith(done: !item.done),
+                  ),
+                  LdCrudDeleteAction<Task>(item: item),
+                ],
                 LdCrudDeleteSelectedAction<Task>(),
               ],
             );

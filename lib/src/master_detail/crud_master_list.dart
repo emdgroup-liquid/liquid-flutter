@@ -19,7 +19,7 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
   final double assumedItemHeight;
   final bool isSeparatePage;
   final bool showLoadingIndicator;
-  final List<Widget> Function(BuildContext context, T item, T optimisticItem)? contextActionsBuilder;
+  final List<Widget> Function(BuildContext context, T item, Set<T> selectedItems)? contextActionsBuilder;
 
   const LdCrudMasterList({
     super.key,
@@ -113,7 +113,7 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: contextActionsBuilder!(context, item, optimisticItem),
+            children: contextActionsBuilder!(context, item, listState.selectedItems),
           ),
         ),
       ),
