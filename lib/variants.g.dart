@@ -1,6 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
+class LdTagSuccess extends LdTag {
+  LdTagSuccess({
+    Key? key,
+    required Widget child,
+    LdColor? color,
+    Function? onDismiss,
+    LdSize size = LdSize.m,
+    required BuildContext context,
+  }) : super(
+            key: key,
+            child: child,
+            color: LdTheme.of(context).success,
+            onDismiss: onDismiss,
+            size: size);
+}
+
+class LdTagWarning extends LdTag {
+  LdTagWarning({
+    Key? key,
+    required Widget child,
+    LdColor? color,
+    Function? onDismiss,
+    LdSize size = LdSize.m,
+    required BuildContext context,
+  }) : super(
+            key: key,
+            child: child,
+            color: LdTheme.of(context).warning,
+            onDismiss: onDismiss,
+            size: size);
+}
+
+class LdTagError extends LdTag {
+  LdTagError({
+    Key? key,
+    required Widget child,
+    LdColor? color,
+    Function? onDismiss,
+    LdSize size = LdSize.m,
+    required BuildContext context,
+  }) : super(
+            key: key,
+            child: child,
+            color: LdTheme.of(context).error,
+            onDismiss: onDismiss,
+            size: size);
+}
+
 class LdCheckboxSuccess extends LdCheckbox {
   LdCheckboxSuccess({
     String? label,
@@ -451,6 +499,60 @@ class LdTextCaption extends LdText {
             color: color);
 }
 
+class LdBadgeSuccess extends LdBadge {
+  LdBadgeSuccess({
+    required Widget child,
+    LdColor? color,
+    LdSize size = LdSize.m,
+    bool symmetric = false,
+    int? maxLines = 1,
+    Key? key,
+    required BuildContext context,
+  }) : super(
+            child: child,
+            color: LdTheme.of(context).success,
+            size: size,
+            symmetric: symmetric,
+            maxLines: maxLines,
+            key: key);
+}
+
+class LdBadgeWarning extends LdBadge {
+  LdBadgeWarning({
+    required Widget child,
+    LdColor? color,
+    LdSize size = LdSize.m,
+    bool symmetric = false,
+    int? maxLines = 1,
+    Key? key,
+    required BuildContext context,
+  }) : super(
+            child: child,
+            color: LdTheme.of(context).warning,
+            size: size,
+            symmetric: symmetric,
+            maxLines: maxLines,
+            key: key);
+}
+
+class LdBadgeError extends LdBadge {
+  LdBadgeError({
+    required Widget child,
+    LdColor? color,
+    LdSize size = LdSize.m,
+    bool symmetric = false,
+    int? maxLines = 1,
+    Key? key,
+    required BuildContext context,
+  }) : super(
+            child: child,
+            color: LdTheme.of(context).error,
+            size: size,
+            symmetric: symmetric,
+            maxLines: maxLines,
+            key: key);
+}
+
 class LdButtonGhost extends LdButton {
   const LdButtonGhost({
     required Widget child,
@@ -840,107 +942,5 @@ class LdRadioError extends LdRadio {
             onChanged: onChanged,
             color: LdTheme.of(context).error,
             disabled: disabled,
-            key: key);
-}
-
-class LdTagSuccess extends LdTag {
-  LdTagSuccess({
-    Key? key,
-    required Widget child,
-    LdColor? color,
-    Function? onDismiss,
-    LdSize size = LdSize.m,
-    required BuildContext context,
-  }) : super(
-            key: key,
-            child: child,
-            color: LdTheme.of(context).success,
-            onDismiss: onDismiss,
-            size: size);
-}
-
-class LdTagWarning extends LdTag {
-  LdTagWarning({
-    Key? key,
-    required Widget child,
-    LdColor? color,
-    Function? onDismiss,
-    LdSize size = LdSize.m,
-    required BuildContext context,
-  }) : super(
-            key: key,
-            child: child,
-            color: LdTheme.of(context).warning,
-            onDismiss: onDismiss,
-            size: size);
-}
-
-class LdTagError extends LdTag {
-  LdTagError({
-    Key? key,
-    required Widget child,
-    LdColor? color,
-    Function? onDismiss,
-    LdSize size = LdSize.m,
-    required BuildContext context,
-  }) : super(
-            key: key,
-            child: child,
-            color: LdTheme.of(context).error,
-            onDismiss: onDismiss,
-            size: size);
-}
-
-class LdBadgeSuccess extends LdBadge {
-  LdBadgeSuccess({
-    required Widget child,
-    LdColor? color,
-    LdSize size = LdSize.m,
-    bool symmetric = false,
-    int? maxLines = 1,
-    Key? key,
-    required BuildContext context,
-  }) : super(
-            child: child,
-            color: LdTheme.of(context).success,
-            size: size,
-            symmetric: symmetric,
-            maxLines: maxLines,
-            key: key);
-}
-
-class LdBadgeWarning extends LdBadge {
-  LdBadgeWarning({
-    required Widget child,
-    LdColor? color,
-    LdSize size = LdSize.m,
-    bool symmetric = false,
-    int? maxLines = 1,
-    Key? key,
-    required BuildContext context,
-  }) : super(
-            child: child,
-            color: LdTheme.of(context).warning,
-            size: size,
-            symmetric: symmetric,
-            maxLines: maxLines,
-            key: key);
-}
-
-class LdBadgeError extends LdBadge {
-  LdBadgeError({
-    required Widget child,
-    LdColor? color,
-    LdSize size = LdSize.m,
-    bool symmetric = false,
-    int? maxLines = 1,
-    Key? key,
-    required BuildContext context,
-  }) : super(
-            child: child,
-            color: LdTheme.of(context).error,
-            size: size,
-            symmetric: symmetric,
-            maxLines: maxLines,
             key: key);
 }
