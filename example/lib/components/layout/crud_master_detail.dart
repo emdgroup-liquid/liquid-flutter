@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:liquid/code_block.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -139,9 +140,13 @@ class _CrudMasterDetailDemoState extends State<CrudMasterDetailDemo> {
     return ComponentPage(
       title: "LdCrudMasterDetail",
       apiComponents: const [
-        "LdMasterDetail",
-        "LdMasterDetailBuilder",
-        "LdMasterDetailController",
+        "LdCrudMasterDetail",
+        "LdCrudListState",
+        "LdCrudMasterList",
+        "LdCrudActionSettings",
+        "LdCrudAction",
+        "LdCrudActionBuilder",
+        "LdContextAwareCrudActionBuilder",
       ],
       demo: LdAutoSpace(
         children: [
@@ -150,6 +155,88 @@ class _CrudMasterDetailDemoState extends State<CrudMasterDetailDemo> {
             "It handles various CRUD operations like create, update, delete, and fetchAll, and performs the usual UI operations "
             "like selecting and deselecting items or updating the UI based on the state and result of a CRUD operation.",
           ),
+          ldSpacerM,
+          LdTextP(
+              "The recommended way to use LdCrudMasterDetail is to wrap it around the LdMasterDetail widget using the .builders constructor. This allows you to provide all master/detail UI and action builders in a single place, and ensures that CRUD state and actions are properly wired up."),
+          ldSpacerS,
+          CodeBlock(code: '''
+LdCrudMasterDetail<ExampleItem>(
+  crud: ExampleRepository.instance(),
+  masterDetailBuilder: (context, builders) {
+    return LdMasterDetail.builders(
+      builders: builders,
+      layoutMode: _layoutMode,
+      detailPresentationMode: _presentationMode,
+    );
+  },
+  buildMaster: (context, openItem, optimisticOpenItem, isSeparatePage, controller, listState) {
+    return LdCrudMasterList<ExampleItem>(
+      listState: listState,
+      controller: controller,
+      titleBuilder: (context, item, optimisticItem) => Text(item.name),
+      subtitleBuilder: (context, item, optimisticItem) => Text("ID: \${item.id}"),
+      contextActionsBuilder: (context, item, selectedItems) => [
+        LdCrudDeleteAction<ExampleItem>(),
+      ],
+    );
+  },
+  buildDetail: (context, item, optimisticItem, isSeparatePage, controller, listState) {
+    return LdAutoSpace(
+      children: [
+        const LdTextHl("Detail"),
+        LdTextL("Item \${item.id}: \${item.name}"),
+        LdButton(
+          onPressed: controller.closeItem,
+          child: const Text("Go back"),
+        )
+      ],
+    ).padL();
+  },
+  // ...other builders and settings...
+)'''),
+          ldSpacerS,
+          LdTextP(
+              "The builders parameter is an instance of LdCrudMasterDetailBuilders, which provides all the necessary "
+              "builder functions for master/detail UI and actions."),
+          ldSpacerL,
+          LdTextP(
+              "LdCrudAction is the base widget for all CRUD actions (create, update, delete, etc). It handles argument "
+              "acquisition, action execution, and result handling. For context-aware action buttons (e.g. showing as "
+              "an icon in the app bar, a menu item in a context menu, or a button elsewhere), the built-in actions "
+              "like LdCrudDeleteAction use LdContextAwareCrudActionBuilder by default."),
+          ldSpacerS,
+          CodeBlock(code: '''
+// Example of a custom edit action using LdCrudAction (usually you would use the built-in LdCrudUpdateAction)
+LdCrudAction<ExampleItem, ExampleItem, ExampleItem>(
+  builder: (masterDetail, triggerAction) => IconButton(
+    icon: const Icon(Icons.edit),
+    onPressed: triggerAction,
+  ),
+  obtainArg: (masterDetail, controller) async {
+    final item = controller.getOpenItem();
+    if (item == null) return null;
+    return await LdNotificationsController.of(context).addNotification(
+      LdInputNotification(
+        inputHint: "Edit item",
+        inputLabel: "Name",
+        type: LdNotificationType.enterText,
+        message: "Enter new name",
+        initialValue: item.name,
+      ),
+    ) as LdInputNotification;
+  },
+  action: (crud, updatedItem) => crud.update(updatedItem),
+  onActionCompleted: (masterDetail, controller, arg, result) {
+    if (controller.getOpenItem()?.id == arg.id) {
+      controller.openItem(result); // refresh the open item
+    }
+    onItemUpdated?.call(masterDetail, result);
+  },
+)'''),
+          ldSpacerS,
+          LdTextP(
+              "For many cases, you can use built-in actions directly. They will adapt to the UI context automatically "
+              "and perform argument acquisition, action execution, and result handling for you."),
           ldSpacerL,
           const LdTextH("Demo"),
           ldSpacerS,
@@ -207,7 +294,6 @@ class _CrudMasterDetailDemoState extends State<CrudMasterDetailDemo> {
           ),
           ComponentWell(
             padding: EdgeInsets.zero,
-            title: const LdTextHs("Demo"),
             child: SizedBox(
               height: 300,
               child: LdCard(
