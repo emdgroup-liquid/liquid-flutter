@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [22.0.2](https://github.com/emdgroup-liquid/liquid-flutter/compare/v22.0.1...v22.0.2) (2025-05-22)
+
+
+### Bug Fixes
+
+* resolve Flutter 3.32 breaking changes ([#59](https://github.com/emdgroup-liquid/liquid-flutter/issues/59)) ([b27c205](https://github.com/emdgroup-liquid/liquid-flutter/commit/b27c2056043c6ce5d10efdb2cd08104a5948f37e))
+
 ### [22.0.1](https://github.com/emdgroup-liquid/liquid-flutter/compare/v22.0.0-dev.4...v22.0.1) (2025-05-10)
 
 ## [22.0.0](https://github.com/emdgroup-liquid/liquid-flutter/compare/v22.0.0-dev.4...v22.0.0) (2025-05-10)
