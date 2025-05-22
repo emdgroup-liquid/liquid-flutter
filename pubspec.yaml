@@ -9,7 +9,7 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  intl: ^0.19.0
+  intl: ^0.20.2
   provider: ^6.0.2
   flutter_animate: ^4.1.1
   haptic_feedback: ">=0.4.2 <0.6.0"
@@ -20,7 +20,7 @@ dependencies:
   sensors_plus: ">=5.0.1 <7.0.0"
   collection: ^1.18.0
   flutter_svg: ^2.0.10+1
-  flutter_sticky_header: ^0.7.0
+  flutter_sticky_header: ^0.8.0
   jiffy: ^6.3.1
   wolt_modal_sheet: ">=0.9.4 <0.12.0"
   fuzzy: ^0.5.1
@@ -38,6 +38,7 @@ dev_dependencies:
   golden_toolkit: ^0.15.0
   change_case: ^2.1.0
 flutter:
+  generate: true
   uses-material-design: true
   assets:
     - assets/
