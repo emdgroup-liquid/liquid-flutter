@@ -27,6 +27,7 @@ class _InputDemoState extends State<InputDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/form_elements/input.dart",
       title: "LdInput",
       demo: LdAutoSpace(
         children: [

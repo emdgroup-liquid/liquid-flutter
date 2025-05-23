@@ -16,6 +16,7 @@ class _OrbDemoState extends State<OrbDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+        path: "lib/components/interaction/orb.dart",
         title: "LdOrb",
         demo: Column(
           children: [

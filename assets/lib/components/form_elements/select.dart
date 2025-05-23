@@ -19,6 +19,7 @@ class _SelectDemoState extends State<SelectDemo> {
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
     return ComponentPage(
+      path: "lib/components/form_elements/select.dart",
       title: "LdSelect",
       demo: ComponentWell(
         color: _onSurface ? theme.surface : theme.background,

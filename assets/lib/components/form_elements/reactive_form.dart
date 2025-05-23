@@ -15,6 +15,7 @@ class ReactiveFormDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/form_elements/reactive_form.dart",
       title: "LdReactiveForm",
       apiComponents: [
         "LdReactiveForm",
@@ -64,8 +65,13 @@ class ReactiveFormDemo extends StatelessWidget {
                   key: 'email',
                   label: 'Enter your Email:',
                   inputFieldHint: 'john.doe@example.com',
-                  validators: [LdFormValidators.required, LdFormValidators.email],
-                  validationMessages: {'email': (field) => 'This is not a valid email'},
+                  validators: [
+                    LdFormValidators.required,
+                    LdFormValidators.email
+                  ],
+                  validationMessages: {
+                    'email': (field) => 'This is not a valid email'
+                  },
                 ),
                 LdReactiveFormItem.input<String>(
                   key: 'email2',
@@ -95,7 +101,10 @@ class ReactiveFormDemo extends StatelessWidget {
                   validators: [
                     LdFormValidators.equals(Pet.cats),
                   ],
-                  validationMessages: {'requiredEquals': (field) => 'Cats are the only correct answer'},
+                  validationMessages: {
+                    'requiredEquals': (field) =>
+                        'Cats are the only correct answer'
+                  },
                 ),
                 LdReactiveFormItem.multiSelect<FriesTopping>(
                   key: 'friesTopping',
@@ -116,7 +125,9 @@ class ReactiveFormDemo extends StatelessWidget {
                   label: 'How awesome is Liquid Flutter?',
                   min: 0,
                   max: 10,
-                  valueFormatter: (value) => value == null ? '' : '${value.toStringAsFixed(0)} out of 10',
+                  valueFormatter: (value) => value == null
+                      ? ''
+                      : '${value.toStringAsFixed(0)} out of 10',
                   hintBuilder: (state) {
                     final value = state.control.value;
                     if (value == null) {
@@ -144,7 +155,10 @@ class ReactiveFormDemo extends StatelessWidget {
                   label: 'I accept the terms of service',
                   initialValue: false,
                   validators: [LdFormValidators.requiredTrue],
-                  validationMessages: {'requiredTrue': (field) => 'You have to accept the terms of service'},
+                  validationMessages: {
+                    'requiredTrue': (field) =>
+                        'You have to accept the terms of service'
+                  },
                 ),
               ],
             ),

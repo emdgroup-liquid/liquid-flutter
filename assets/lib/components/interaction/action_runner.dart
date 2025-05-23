@@ -15,6 +15,7 @@ class _ActionRunnerDemoState extends State<ActionRunnerDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+        path: "lib/components/interaction/action_runner.dart",
         title: "Action Runner",
         apiComponents: const [
           "LdRunnerStep",

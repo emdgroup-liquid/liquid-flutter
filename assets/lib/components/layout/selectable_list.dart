@@ -48,6 +48,7 @@ class _SelectableListDemoState extends State<SelectableListDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/layout/selectable_list.dart",
       title: "LdSelectableList",
       demo: LdAutoSpace(
         crossAxisAlignment: CrossAxisAlignment.start,
