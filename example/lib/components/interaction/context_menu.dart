@@ -52,6 +52,7 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+        path: "lib/components/interaction/context_menu.dart",
         title: "LdContextMenu",
         demo: LdAutoSpace(
           children: [

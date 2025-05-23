@@ -278,7 +278,6 @@ class _LdChoosePage<T> extends StatelessWidget {
     var theme = LdTheme.of(context, listen: true);
     return Scaffold(
       appBar: LdAppBar(
-        context: context,
         title: Text(label),
       ),
       backgroundColor: theme.background,

@@ -10,6 +10,7 @@ class BadgeDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context);
     return ComponentPage(
+      path: "lib/components/feedback/badge.dart",
       title: "LdBadge",
       demo: LdAutoSpace(
         children: [

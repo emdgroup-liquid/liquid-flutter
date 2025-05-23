@@ -16,6 +16,7 @@ class _CardDemoState extends State<CardDemo> {
     var ipsum = const Text(
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nunc vel tincidunt lacinia, nunc nisl aliquam nisl, eu aliquet nisl nisl eu ante.");
     return ComponentPage(
+      path: "lib/components/layout/card.dart",
       title: "LdCard",
       demo: LdAutoSpace(
         children: [

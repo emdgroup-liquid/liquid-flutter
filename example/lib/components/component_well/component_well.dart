@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:liquid/components/component_page.dart';
 import 'package:liquid/components/component_well/show_source_code_options.dart';
 import 'package:liquid/components/component_well/source_code_extractor.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -25,24 +26,7 @@ class ComponentWell extends StatefulWidget {
     this.showSourceCodeOptions,
     this.title,
     this.description,
-  }) {
-    if (showSourceCodeOptions == null) {
-      final file = StackTrace.current
-          .toString()
-          .split("\n")
-          .where((e) => e.contains("package:liquid/"))
-          .toList();
-
-      final pathRe = RegExp(r"package:liquid/(.*)\.dart");
-      final path = pathRe.firstMatch(file[1])?.group(1);
-
-      if (path == null) {
-        throw Exception("Could not infer the path to the source code");
-      }
-
-      showSourceCodeOptions = ShowSourceCodeOptions(path: "lib/$path.dart");
-    }
-  }
+  });
 
   @override
   State<ComponentWell> createState() => _ComponentWellState();
@@ -55,16 +39,18 @@ class _ComponentWellState extends State<ComponentWell> {
 
   late ValueKey<String>? pageKey; // Page key for this widget
 
-  /// The path to the source code file. If no path was provided via the
-  /// [ShowSourceCodeOptions], it will be inferred from the current route.
-  get sourcePath =>
-      widget.showSourceCodeOptions?.path ?? "lib${pageKey!.value}.dart";
-
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
 
-    final showSourceCode = widget.showSourceCodeOptions?.showButton ?? true;
+    var path = widget.showSourceCodeOptions?.path;
+
+    if (widget.showSourceCodeOptions == null) {
+      path = Provider.of<ComponentPagePath>(context).path;
+    }
+
+    final showSourceCode =
+        widget.showSourceCodeOptions?.showButton ?? true && path != null;
 
     return LdAutoSpace(
       children: [
@@ -72,7 +58,7 @@ class _ComponentWellState extends State<ComponentWell> {
           Row(
             children: [
               Expanded(child: widget.title!),
-              if (showSourceCode) buildSourceCodeModal(context)
+              if (showSourceCode) buildSourceCodeModal(context, path!)
             ],
           ),
         if (widget.description != null) widget.description!,
@@ -102,7 +88,7 @@ class _ComponentWellState extends State<ComponentWell> {
         if (showSourceCode && widget.title == null)
           Align(
             alignment: Alignment.centerRight,
-            child: buildSourceCodeModal(context),
+            child: buildSourceCodeModal(context, path!),
           ),
       ],
     );
@@ -127,7 +113,7 @@ class _ComponentWellState extends State<ComponentWell> {
   }
 
   /// Builds the child with a button to toggle between the demo and the source code.
-  Widget buildSourceCodeModal(BuildContext context) {
+  Widget buildSourceCodeModal(BuildContext context, String sourcePath) {
     return LdModalBuilder(
       modal: LdModal(
         title: const Text("Source Code"),

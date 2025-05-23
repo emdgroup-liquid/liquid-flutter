@@ -9,6 +9,7 @@ class HintDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/feedback/hint.dart",
       title: "LdHint",
       apiComponents: const ["LdHint", "LdHintType"],
       demo: ComponentWell(

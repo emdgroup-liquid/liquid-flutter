@@ -53,6 +53,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+        path: "lib/components/interaction/button.dart",
         title: "LdButton",
         apiComponents: const [
           "LdButton",
@@ -91,10 +92,16 @@ class _ButtonDemoState extends State<ButtonDemo> {
                         value: _mode,
                         label: "Mode",
                         items: const [
-                          LdSelectItem(child: Text("Filled"), value: LdButtonMode.filled),
-                          LdSelectItem(child: Text("Outline"), value: LdButtonMode.outline),
-                          LdSelectItem(child: Text("Ghost"), value: LdButtonMode.ghost),
-                          LdSelectItem(child: Text("Vague"), value: LdButtonMode.vague),
+                          LdSelectItem(
+                              child: Text("Filled"),
+                              value: LdButtonMode.filled),
+                          LdSelectItem(
+                              child: Text("Outline"),
+                              value: LdButtonMode.outline),
+                          LdSelectItem(
+                              child: Text("Ghost"), value: LdButtonMode.ghost),
+                          LdSelectItem(
+                              child: Text("Vague"), value: LdButtonMode.vague),
                         ],
                         onChange: _changeMode),
                   ],
@@ -124,10 +131,15 @@ class _ButtonDemoState extends State<ButtonDemo> {
                         value: _size,
                         label: "Size",
                         items: const [
-                          LdSelectItem(child: Text("Extra Small (XS)"), value: LdSize.xs),
-                          LdSelectItem(child: Text("Small (S)"), value: LdSize.s),
-                          LdSelectItem(child: Text("Medium (M)"), value: LdSize.m),
-                          LdSelectItem(child: Text("Large (L)"), value: LdSize.l),
+                          LdSelectItem(
+                              child: Text("Extra Small (XS)"),
+                              value: LdSize.xs),
+                          LdSelectItem(
+                              child: Text("Small (S)"), value: LdSize.s),
+                          LdSelectItem(
+                              child: Text("Medium (M)"), value: LdSize.m),
+                          LdSelectItem(
+                              child: Text("Large (L)"), value: LdSize.l),
                         ],
                         onChange: _changeSize),
                   ],
@@ -203,7 +215,8 @@ class _ButtonDemoState extends State<ButtonDemo> {
                           LdNotificationsController.of(context).addNotification(
                             LdNotification(
                               type: LdNotificationType.success,
-                              message: "You pressed a button with a leading widget!",
+                              message:
+                                  "You pressed a button with a leading widget!",
                             ),
                           );
                         },
@@ -216,7 +229,8 @@ class _ButtonDemoState extends State<ButtonDemo> {
                           LdNotificationsController.of(context).addNotification(
                             LdNotification(
                               type: LdNotificationType.success,
-                              message: "You pressed a button with a trailing widget!",
+                              message:
+                                  "You pressed a button with a trailing widget!",
                             ),
                           );
                         },
@@ -309,7 +323,8 @@ class _ButtonDemoState extends State<ButtonDemo> {
                         onPressed: () {
                           LdNotificationsController.of(context).addNotification(
                             LdNotification(
-                                message: "You pressed the full width button", type: LdNotificationType.success),
+                                message: "You pressed the full width button",
+                                type: LdNotificationType.success),
                           );
                         },
                         width: double.infinity,
