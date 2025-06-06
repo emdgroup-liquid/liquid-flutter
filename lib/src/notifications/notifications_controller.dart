@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:liquid_flutter/src/notifications/notification.dart';
 import 'package:liquid_flutter/src/notifications/notification_type.dart';
 import 'package:provider/provider.dart';
@@ -99,6 +100,9 @@ class LdNotificationsController extends ChangeNotifier {
   Future<LdNotification> addNotification(LdNotification notification) async {
     _notifications.add(notification);
     notifyListeners();
+    if (notification.haptics != null) {
+      Haptics.vibrate(notification.haptics!);
+    }
     await Future.delayed(const Duration(milliseconds: 100));
 
     if (notification.duration != null) {

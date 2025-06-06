@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/input_color_bundle.dart';
@@ -238,6 +239,9 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
                                               isOpen = false;
                                             });
                                             _overlayController.hide();
+                                            Haptics.vibrate(
+                                              HapticsType.selection,
+                                            );
                                             widget.onChange?.call(e.value);
                                           },
                                           builder:

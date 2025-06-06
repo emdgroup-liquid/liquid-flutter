@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/form_label.dart';
 import 'package:provider/provider.dart';
@@ -27,12 +27,14 @@ class LdToggle extends StatefulWidget {
   State<LdToggle> createState() => _LdToggleState();
 }
 
-class _LdToggleState extends State<LdToggle> with SingleTickerProviderStateMixin {
+class _LdToggleState extends State<LdToggle>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
   void initState() {
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 300));
 
     _updateStatus();
     super.initState();
@@ -67,7 +69,7 @@ class _LdToggleState extends State<LdToggle> with SingleTickerProviderStateMixin
 
   void _onTap() {
     if (widget.onChanged != null) {
-      HapticFeedback.selectionClick();
+      Haptics.vibrate(HapticsType.selection);
       widget.onChanged!(!widget.checked);
     }
   }
@@ -170,7 +172,8 @@ class _LdToggleState extends State<LdToggle> with SingleTickerProviderStateMixin
                               shape: BoxShape.circle,
                             ),
                             height: _thumbSize,
-                            width: _thumbSize + (2 * state.velocity).clamp(0, _gap),
+                            width: _thumbSize +
+                                (2 * state.velocity).clamp(0, _gap),
                           )),
                     ),
                   ]),

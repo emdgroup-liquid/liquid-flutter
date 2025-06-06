@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 /// a collection of collapsible items in a group.
@@ -121,7 +122,8 @@ class _LdAccordionChild extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var theme = LdTheme.of(context, listen: true);
-    var color = LdSurfaceInfo.of(context).isSurface ? theme.background : theme.surface;
+    var color =
+        LdSurfaceInfo.of(context).isSurface ? theme.background : theme.surface;
 
     bool hasShadow = !collapsed && wrapActiveInCard && !flatCard;
 
@@ -135,7 +137,9 @@ class _LdAccordionChild extends StatelessWidget {
         color: !collapsed ? color : null,
         borderRadius: wrapActiveInCard ? theme.radius(LdSize.s) : null,
         border: Border.all(
-          color: wrapActiveInCard && !collapsed ? theme.border : Colors.transparent,
+          color: wrapActiveInCard && !collapsed
+              ? theme.border
+              : Colors.transparent,
           width: theme.borderWidth,
           strokeAlign: BorderSide.strokeAlignOutside,
         ),
@@ -216,9 +220,12 @@ class _LdAccordionState extends State<LdAccordion> {
       child: ListView.separated(
         padding: EdgeInsets.zero,
         shrinkWrap: widget.shrinkWrap,
-        physics: widget.shrinkWrap ? const NeverScrollableScrollPhysics() : null,
+        physics:
+            widget.shrinkWrap ? const NeverScrollableScrollPhysics() : null,
         itemCount: widget.itemCount,
-        separatorBuilder: (context, n) => !widget.wrapActiveInCard ? const LdDivider() : const SizedBox.shrink(),
+        separatorBuilder: (context, n) => !widget.wrapActiveInCard
+            ? const LdDivider()
+            : const SizedBox.shrink(),
         itemBuilder: (context, n) => _LdAccordionChild(
           curveCollapse: widget.curveCollapse,
           curveExpand: widget.curveExpand,
@@ -259,6 +266,7 @@ class _LdAccordionState extends State<LdAccordion> {
   }
 
   void _onTap(int n) {
+    Haptics.vibrate(HapticsType.selection);
     if (openIndex.contains(n)) {
       setState(() {
         openIndex.remove(n);

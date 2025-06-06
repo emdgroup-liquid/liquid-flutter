@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 import 'package:liquid_flutter/src/form_label.dart';
@@ -27,6 +28,7 @@ class LdRadio extends StatelessWidget {
 
   void _onTap() {
     if (onChanged != null) {
+      Haptics.vibrate(HapticsType.selection);
       onChanged!(!checked);
     }
   }

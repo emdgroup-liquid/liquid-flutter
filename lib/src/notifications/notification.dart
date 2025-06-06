@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class LdNotification {
@@ -17,6 +18,9 @@ class LdNotification {
 
   final LdColor? color;
   final LdNotificationType type;
+
+  late final HapticsType? haptics;
+
   bool removing;
   bool didConfirm;
 
@@ -38,9 +42,37 @@ class LdNotification {
     this.color,
     this.canDismiss = true,
     this.removing = false,
+    HapticsType? haptics,
     this.didConfirm = false,
     this.duration = const Duration(seconds: 5),
-  });
+  }) {
+    if (haptics == null) {
+      switch (type) {
+        case LdNotificationType.confirm:
+          this.haptics = HapticsType.warning;
+          break;
+        case LdNotificationType.acknowledge:
+          this.haptics = HapticsType.warning;
+          break;
+        case LdNotificationType.enterText:
+          this.haptics = HapticsType.warning;
+          break;
+        case LdNotificationType.info:
+          this.haptics = HapticsType.light;
+          break;
+        case LdNotificationType.success:
+          this.haptics = HapticsType.success;
+          break;
+        case LdNotificationType.error:
+          this.haptics = HapticsType.error;
+          break;
+        case LdNotificationType.warning:
+          this.haptics = HapticsType.warning;
+          break;
+        default:
+      }
+    }
+  }
 }
 
 class LdInputNotification extends LdNotification {
