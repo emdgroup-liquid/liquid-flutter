@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [22.0.4](https://github.com/emdgroup-liquid/liquid-flutter/compare/v22.0.3...v22.0.4) (2025-06-06)
+
+
+### Bug Fixes
+
+*  haptic feedback  ([43c95b3](https://github.com/emdgroup-liquid/liquid-flutter/commit/43c95b3b1b1de01874fea12676e307e7fa1a030e))
+
 ### [22.0.3](https://github.com/emdgroup-liquid/liquid-flutter/compare/v22.0.2...v22.0.3) (2025-05-23)
 
 
