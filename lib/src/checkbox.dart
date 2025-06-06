@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:liquid_flutter/src/color/color.dart';
 import 'package:liquid_flutter/src/form_label.dart';
+import 'package:liquid_flutter/src/haptics.dart';
 import 'package:liquid_flutter/src/touchable/touchable.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -32,9 +34,6 @@ class LdCheckbox extends StatefulWidget {
 }
 
 class _LdCheckboxState extends State<LdCheckbox> {
-  bool hovering = false;
-  bool tapping = false;
-
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
@@ -53,12 +52,15 @@ class _LdCheckboxState extends State<LdCheckbox> {
 
     return LdTouchableSurface(
       color: reactiveColors,
-      mode: widget.checked ? LdTouchableSurfaceMode.solid : LdTouchableSurfaceMode.outline,
+      mode: widget.checked
+          ? LdTouchableSurfaceMode.solid
+          : LdTouchableSurfaceMode.outline,
       disabled: widget.disabled,
       onTap: () {
         if (widget.onChanged != null) {
           widget.onChanged!(!widget.checked);
         }
+        LdHaptics.vibrate(HapticsType.selection);
       },
       builder: (context, colors, status) => Semantics(
         checked: widget.checked,

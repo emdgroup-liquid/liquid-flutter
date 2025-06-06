@@ -7,7 +7,7 @@ class LdSubmitConfig<T> {
   final String? loadingText;
   final String? submitText;
   final bool? allowResubmit;
-  final bool withHaptics;
+  final bool? withHaptics;
   final bool autoTrigger;
   final Duration? timeout;
   final bool? allowCancel;
@@ -27,7 +27,7 @@ class LdSubmitConfig<T> {
     this.allowResubmit,
 
     /// Whether to trigger haptics when the action is triggered
-    this.withHaptics = true,
+    this.withHaptics,
 
     /// Whether to automatically trigger the action when mounted
     this.autoTrigger = false,
@@ -49,4 +49,6 @@ class LdSubmitConfig<T> {
     /// The action to trigger that will return  T
     required this.action,
   });
+
+  bool get hapticsEnabled => withHaptics ?? !autoTrigger;
 }

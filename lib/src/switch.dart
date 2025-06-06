@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/form_label.dart';
+import 'package:liquid_flutter/src/haptics.dart';
 
 class LdSwitch<T> extends StatelessWidget {
   final Function(T)? onChanged;
@@ -74,6 +76,7 @@ class LdSwitch<T> extends StatelessWidget {
         size: size,
         disabled: disabled,
         onPressed: () {
+          LdHaptics.vibrate(HapticsType.selection);
           _onTap(key);
         },
         borderRadius: borderRadius,
