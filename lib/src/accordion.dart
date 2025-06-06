@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/haptics.dart';
 
 /// a collection of collapsible items in a group.
 class LdAccordion extends StatefulWidget {
@@ -266,7 +267,7 @@ class _LdAccordionState extends State<LdAccordion> {
   }
 
   void _onTap(int n) {
-    Haptics.vibrate(HapticsType.selection);
+    LdHaptics.vibrate(HapticsType.selection);
     if (openIndex.contains(n)) {
       setState(() {
         openIndex.remove(n);

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/form_label.dart';
+import 'package:liquid_flutter/src/haptics.dart';
 import 'package:provider/provider.dart';
 
 // a switch that can be turned on and off
@@ -69,7 +70,7 @@ class _LdToggleState extends State<LdToggle>
 
   void _onTap() {
     if (widget.onChanged != null) {
-      Haptics.vibrate(HapticsType.selection);
+      LdHaptics.vibrate(HapticsType.selection);
       widget.onChanged!(!widget.checked);
     }
   }

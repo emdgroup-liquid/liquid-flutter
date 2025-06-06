@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/form_label.dart';
+import 'package:liquid_flutter/src/haptics.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class LdSlider extends StatefulWidget {
@@ -77,9 +78,9 @@ class _LdSliderState extends State<LdSlider> with TickerProviderStateMixin {
       _controller?.value = _value;
 
       if (_value > _threshold) {
-        Haptics.vibrate(HapticsType.rigid);
+        LdHaptics.vibrate(HapticsType.rigid);
       } else {
-        Haptics.vibrate(HapticsType.soft);
+        LdHaptics.vibrate(HapticsType.soft);
       }
     });
   }
@@ -89,7 +90,7 @@ class _LdSliderState extends State<LdSlider> with TickerProviderStateMixin {
       return;
     }
     if (_value > _threshold) {
-      Haptics.vibrate(HapticsType.heavy);
+      LdHaptics.vibrate(HapticsType.heavy);
       widget.onSlideComplete();
 
       await _controller?.animateTo(1);

@@ -3,6 +3,7 @@ import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 import 'package:liquid_flutter/src/form_label.dart';
+import 'package:liquid_flutter/src/haptics.dart';
 
 enum LdRadioMode { primary, warning, error }
 
@@ -28,7 +29,7 @@ class LdRadio extends StatelessWidget {
 
   void _onTap() {
     if (onChanged != null) {
-      Haptics.vibrate(HapticsType.selection);
+      LdHaptics.vibrate(HapticsType.selection);
       onChanged!(!checked);
     }
   }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/haptics.dart';
 
 /// Handles the lifecyle of a submit action. Pass a [LdSubmitConfig] to the
 /// controller to configure the submit action.
@@ -84,7 +85,7 @@ class LdSubmitController<T> {
     }
 
     if (config.hapticsEnabled) {
-      Haptics.vibrate(HapticsType.light);
+      LdHaptics.vibrate(HapticsType.light);
     }
 
     _retryController.notifyOperationStarted();
@@ -109,7 +110,7 @@ class LdSubmitController<T> {
       );
 
       if (config.hapticsEnabled) {
-        Haptics.vibrate(HapticsType.success);
+        LdHaptics.vibrate(HapticsType.success);
       }
     } catch (e, s) {
       // Somehow the state is not loading anymore...
@@ -123,7 +124,7 @@ class LdSubmitController<T> {
       }
 
       if (config.hapticsEnabled) {
-        Haptics.vibrate(HapticsType.error);
+        LdHaptics.vibrate(HapticsType.error);
       }
 
       _setState(
