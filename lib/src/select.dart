@@ -5,7 +5,6 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/haptics.dart';
 import 'package:liquid_flutter/src/input_color_bundle.dart';
-import 'package:liquid_flutter/src/touchable/touchable_status.dart';
 
 class LdSelectItem<T> {
   final T value;
@@ -313,19 +312,6 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
     required LdSelectItem<T>? activeItem,
     required TextStyle defaultTextStyle,
   }) {
-    final colors = LdInputColorBundle.fromTheme(
-      theme,
-      onSurface: widget.onSurface,
-      isValid: widget.valid,
-    ).fromTouchableStatus(LdTouchableStatus());
-    final initialItem = DefaultTextStyle(
-      child: _buildInitialItem(
-        activeItem,
-        colors.placeholder,
-        theme,
-      ),
-      style: defaultTextStyle,
-    );
     return Container(
       key: _menuKey,
       decoration: BoxDecoration(
