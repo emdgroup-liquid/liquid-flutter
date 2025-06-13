@@ -24,8 +24,7 @@ class LdSpring extends StatefulWidget {
   final double initialPosition;
   final bool paused;
 
-  final void Function(BuildContext context, LdSpringState state)?
-      onAnimationEnd;
+  final void Function(BuildContext context, LdSpringState state)? onAnimationEnd;
 
   final Widget Function(
     BuildContext context,
@@ -92,8 +91,7 @@ class _Spring {
   }
 }
 
-class _LdSpringState extends State<LdSpring>
-    with SingleTickerProviderStateMixin {
+class _LdSpringState extends State<LdSpring> with SingleTickerProviderStateMixin {
   late final _Spring _spring = _Spring(
     springConstant: widget.springConstant,
     dampingCoefficient: widget.dampingCoefficient,
@@ -235,8 +233,7 @@ class LdChainedSprings extends StatefulWidget {
   State<LdChainedSprings> createState() => _LdChainedSpringsState();
 }
 
-class _LdChainedSpringsState extends State<LdChainedSprings>
-    with SingleTickerProviderStateMixin {
+class _LdChainedSpringsState extends State<LdChainedSprings> with SingleTickerProviderStateMixin {
   late final List<_Spring> _springs = [];
 
   Ticker? _ticker;
@@ -358,6 +355,131 @@ class _LdChainedSpringsState extends State<LdChainedSprings>
       );
     }
 
+    return widget.builder(
+      context,
+      _springs.map((spring) {
+        return LdSpringState(
+          position: spring.position,
+          force: spring.force,
+          velocity: spring.velocity,
+          isMoving: _ticker?.isActive ?? false,
+        );
+      }).toList(),
+    );
+  }
+}
+
+class LdMultiSpring extends StatefulWidget {
+  final List<double> targetPositions;
+  final List<double>? initialPositions;
+  final double mass;
+  final double springConstant;
+  final double dampingCoefficient;
+  final bool paused;
+  final Widget Function(BuildContext context, List<LdSpringState> states) builder;
+
+  const LdMultiSpring({
+    super.key,
+    required this.targetPositions,
+    this.initialPositions,
+    this.mass = 5,
+    this.springConstant = 10,
+    this.dampingCoefficient = 9,
+    this.paused = false,
+    required this.builder,
+  });
+
+  @override
+  State<LdMultiSpring> createState() => _LdMultiSpringState();
+}
+
+class _LdMultiSpringState extends State<LdMultiSpring> with SingleTickerProviderStateMixin {
+  late final List<_Spring> _springs = [];
+  Ticker? _ticker;
+
+  @override
+  void initState() {
+    _createSprings();
+    _ticker ??= createTicker((elapsed) {
+      update();
+      setState(() {});
+    });
+    if (_ticker?.isTicking != true) {
+      _ticker?.start();
+    }
+    super.initState();
+  }
+
+  void _createSprings() {
+    final count = widget.targetPositions.length;
+    if (_springs.length == count) return;
+    if (_springs.length > count) {
+      _springs.removeRange(count, _springs.length);
+    }
+    if (_springs.length < count) {
+      _springs.addAll(List.generate(count - _springs.length, (i) {
+        return _Spring(
+          springConstant: widget.springConstant,
+          dampingCoefficient: widget.dampingCoefficient,
+          mass: widget.mass,
+          position: widget.initialPositions != null && i < widget.initialPositions!.length
+              ? widget.initialPositions![i]
+              : 1.0,
+          targetPosition: widget.targetPositions[i],
+        );
+      }));
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant LdMultiSpring oldWidget) {
+    _createSprings();
+    for (var i = 0; i < _springs.length; i++) {
+      _springs[i].mass = widget.mass;
+      _springs[i].springConstant = widget.springConstant;
+      _springs[i].dampingCoefficient = widget.dampingCoefficient;
+      _springs[i].targetPosition = widget.targetPositions[i];
+    }
+    if (!_springs.any((spring) => spring.active)) {
+      _ticker?.stop();
+    } else if (_ticker?.isTicking != true) {
+      _ticker?.start();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  void update() {
+    if (widget.paused) return;
+    for (final spring in _springs) {
+      spring.update();
+    }
+    if (!_springs.any((spring) => spring.active)) {
+      _ticker?.stop();
+    }
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _ticker?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (ldDisableAnimations) {
+      return widget.builder(
+        context,
+        List.generate(widget.targetPositions.length, (i) {
+          return LdSpringState(
+            position: widget.targetPositions[i],
+            force: 0,
+            velocity: 0,
+            isMoving: false,
+          );
+        }),
+      );
+    }
     return widget.builder(
       context,
       _springs.map((spring) {
