@@ -31,12 +31,10 @@ class DocComponent {
       name: json['name'] as String,
       isNullSafe: json['isNullSafe'] as bool,
       description: json['description'] as String,
-      constructors: (json['constructors'] as List)
-          .map((item) => DocConstructor.fromJson(item as Map<String, dynamic>))
-          .toList(),
-      properties: (json['properties'] as List)
-          .map((item) => DocProperty.fromJson(item as Map<String, dynamic>))
-          .toList(),
+      constructors:
+          (json['constructors'] as List).map((item) => DocConstructor.fromJson(item as Map<String, dynamic>)).toList(),
+      properties:
+          (json['properties'] as List).map((item) => DocProperty.fromJson(item as Map<String, dynamic>)).toList(),
       methods: (json['methods'] as List).map((item) => item as String).toList(),
     );
   }
@@ -96,9 +94,8 @@ class DocConstructor {
   factory DocConstructor.fromJson(Map<String, dynamic> json) {
     return DocConstructor(
       name: json['name'] as String,
-      signature: (json['signature'] as List)
-          .map((item) => DocParameter.fromJson(item as Map<String, dynamic>))
-          .toList(),
+      signature:
+          (json['signature'] as List).map((item) => DocParameter.fromJson(item as Map<String, dynamic>)).toList(),
       features: (json['features'] as List).map((item) => item as String).toList(),
     );
   }
@@ -217,8 +214,7 @@ const docComponents = [
   DocComponent(
     name: 'LdDrawerItemSection',
     isNullSafe: true,
-    description:
-        ' A section in the drawer that can contain a collapsable sub-items',
+    description: ' A section in the drawer that can contain a collapsable sub-items',
     properties: [
       DocProperty(
         name: 'leading',
@@ -426,8 +422,7 @@ const docComponents = [
   DocComponent(
     name: 'LdDrawerHeader',
     isNullSafe: true,
-    description:
-        ' The header of a drawer, that contains the application or menu title',
+    description: ' The header of a drawer, that contains the application or menu title',
     properties: [
       DocProperty(
         name: 'title',
@@ -520,8 +515,7 @@ const docComponents = [
       DocProperty(
         name: 'supportedLocales',
         type: 'List<Locale>',
-        description:
-            '/// A list of this localizations delegate\'s supported locales.',
+        description: '/// A list of this localizations delegate\'s supported locales.',
         features: [
           'static',
           'const',
@@ -2153,8 +2147,7 @@ const docComponents = [
           ),
           DocParameter(
             name: 'errorBuilder',
-            type:
-                'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
+            type: 'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
             description: '',
             named: true,
             required: false,
@@ -2193,13 +2186,11 @@ const docComponents = [
   DocComponent(
     name: 'LdSubmitCustomBuilder',
     isNullSafe: true,
-    description:
-        ' A custom builder that allows you to build your own submit widget.',
+    description: ' A custom builder that allows you to build your own submit widget.',
     properties: [
       DocProperty(
         name: 'builder',
-        type:
-            'Widget Function(BuildContext, LdSubmitController<T>, LdSubmitStateType)',
+        type: 'Widget Function(BuildContext, LdSubmitController<T>, LdSubmitStateType)',
         description: '',
         features: ['final'],
       )
@@ -2217,8 +2208,7 @@ const docComponents = [
           ),
           DocParameter(
             name: 'builder',
-            type:
-                'Widget Function(BuildContext, LdSubmitController<T>, LdSubmitStateType)',
+            type: 'Widget Function(BuildContext, LdSubmitController<T>, LdSubmitStateType)',
             description: '',
             named: true,
             required: true,
@@ -2268,8 +2258,7 @@ const docComponents = [
           ),
           DocParameter(
             name: 'errorBuilder',
-            type:
-                'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
+            type: 'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
             description: '',
             named: true,
             required: false,
@@ -2319,8 +2308,7 @@ const docComponents = [
           ),
           DocParameter(
             name: 'errorBuilder',
-            type:
-                'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
+            type: 'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
             description: '',
             named: true,
             required: false,
@@ -2821,8 +2809,7 @@ const docComponents = [
       ),
       DocProperty(
         name: 'errorBuilder',
-        type:
-            'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
+        type: 'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
         description: '',
         features: ['final'],
       ),
@@ -2861,8 +2848,7 @@ const docComponents = [
           ),
           DocParameter(
             name: 'errorBuilder',
-            type:
-                'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
+            type: 'Widget Function(BuildContext, LdException, LdSubmitController<T>)?',
             description: '',
             named: true,
             required: false,
@@ -3568,8 +3554,7 @@ const docComponents = [
       DocProperty(
         name: 'dispose',
         type: 'void Function(BuildContext, T)?',
-        description:
-            '/// Dispose function for the provider, only used if [value] is null',
+        description: '/// Dispose function for the provider, only used if [value] is null',
         features: ['final'],
       ),
       DocProperty(
@@ -4022,8 +4007,7 @@ const docComponents = [
       DocProperty(
         name: 'pathToItem',
         type: 'FutureOr<T?> Function(String)',
-        description:
-            '/// A function to retrieve an item from a path parameter.',
+        description: '/// A function to retrieve an item from a path parameter.',
         features: ['final'],
       ),
       DocProperty(
@@ -4084,43 +4068,37 @@ const docComponents = [
     properties: [
       DocProperty(
         name: 'buildDetailTitle',
-        type:
-            'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
+        type: 'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
         description: '',
         features: ['final'],
       ),
       DocProperty(
         name: 'buildMasterTitle',
-        type:
-            'Widget Function(BuildContext, T?, bool, LdMasterDetailController<T>)?',
+        type: 'Widget Function(BuildContext, T?, bool, LdMasterDetailController<T>)?',
         description: '',
         features: ['final'],
       ),
       DocProperty(
         name: 'buildDetail',
-        type:
-            'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)',
+        type: 'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)',
         description: '',
         features: ['final'],
       ),
       DocProperty(
         name: 'buildMaster',
-        type:
-            'Widget Function(BuildContext, T?, bool, LdMasterDetailController<T>)',
+        type: 'Widget Function(BuildContext, T?, bool, LdMasterDetailController<T>)',
         description: '',
         features: ['final'],
       ),
       DocProperty(
         name: 'buildMasterActions',
-        type:
-            'List<Widget> Function(BuildContext, T?, bool, LdMasterDetailController<T>)?',
+        type: 'List<Widget> Function(BuildContext, T?, bool, LdMasterDetailController<T>)?',
         description: '',
         features: ['final'],
       ),
       DocProperty(
         name: 'buildDetailActions',
-        type:
-            'List<Widget> Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
+        type: 'List<Widget> Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
         description: '',
         features: ['final'],
       ),
@@ -4149,48 +4127,42 @@ const docComponents = [
         signature: [
           DocParameter(
             name: 'buildDetailTitle',
-            type:
-                'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
+            type: 'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
             description: '',
             named: true,
             required: false,
           ),
           DocParameter(
             name: 'buildMasterTitle',
-            type:
-                'Widget Function(BuildContext, T?, bool, LdMasterDetailController<T>)?',
+            type: 'Widget Function(BuildContext, T?, bool, LdMasterDetailController<T>)?',
             description: '',
             named: true,
             required: false,
           ),
           DocParameter(
             name: 'buildDetail',
-            type:
-                'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)',
+            type: 'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)',
             description: '',
             named: true,
             required: true,
           ),
           DocParameter(
             name: 'buildMaster',
-            type:
-                'Widget Function(BuildContext, T?, bool, LdMasterDetailController<T>)',
+            type: 'Widget Function(BuildContext, T?, bool, LdMasterDetailController<T>)',
             description: '',
             named: true,
             required: true,
           ),
           DocParameter(
             name: 'buildMasterActions',
-            type:
-                'List<Widget> Function(BuildContext, T?, bool, LdMasterDetailController<T>)?',
+            type: 'List<Widget> Function(BuildContext, T?, bool, LdMasterDetailController<T>)?',
             description: '',
             named: true,
             required: false,
           ),
           DocParameter(
             name: 'buildDetailActions',
-            type:
-                'List<Widget> Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
+            type: 'List<Widget> Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
             description: '',
             named: true,
             required: false,
@@ -4290,43 +4262,37 @@ const docComponents = [
       ),
       DocProperty(
         name: 'buildDetailTitle',
-        type:
-            'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
+        type: 'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
         description: '',
         features: ['final'],
       ),
       DocProperty(
         name: 'buildMasterTitle',
-        type:
-            'Widget Function(BuildContext, T?, bool, LdMasterDetailController<T>)?',
+        type: 'Widget Function(BuildContext, T?, bool, LdMasterDetailController<T>)?',
         description: '',
         features: ['final'],
       ),
       DocProperty(
         name: 'buildDetail',
-        type:
-            'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)',
+        type: 'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)',
         description: '',
         features: ['final'],
       ),
       DocProperty(
         name: 'buildMaster',
-        type:
-            'Widget Function(BuildContext, T?, bool, LdMasterDetailController<T>)',
+        type: 'Widget Function(BuildContext, T?, bool, LdMasterDetailController<T>)',
         description: '',
         features: ['final'],
       ),
       DocProperty(
         name: 'buildMasterActions',
-        type:
-            'List<Widget> Function(BuildContext, T?, bool, LdMasterDetailController<T>)?',
+        type: 'List<Widget> Function(BuildContext, T?, bool, LdMasterDetailController<T>)?',
         description: '',
         features: ['final'],
       ),
       DocProperty(
         name: 'buildDetailActions',
-        type:
-            'List<Widget> Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
+        type: 'List<Widget> Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
         description: '',
         features: ['final'],
       ),
@@ -4350,48 +4316,42 @@ const docComponents = [
           ),
           DocParameter(
             name: 'buildDetailTitle',
-            type:
-                'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
+            type: 'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
             description: '',
             named: true,
             required: false,
           ),
           DocParameter(
             name: 'buildMasterTitle',
-            type:
-                'Widget Function(BuildContext, T?, bool, LdMasterDetailController<T>)?',
+            type: 'Widget Function(BuildContext, T?, bool, LdMasterDetailController<T>)?',
             description: '',
             named: true,
             required: false,
           ),
           DocParameter(
             name: 'buildDetail',
-            type:
-                'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)',
+            type: 'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)',
             description: '',
             named: true,
             required: true,
           ),
           DocParameter(
             name: 'buildMaster',
-            type:
-                'Widget Function(BuildContext, T?, bool, LdMasterDetailController<T>)',
+            type: 'Widget Function(BuildContext, T?, bool, LdMasterDetailController<T>)',
             description: '',
             named: true,
             required: true,
           ),
           DocParameter(
             name: 'buildMasterActions',
-            type:
-                'List<Widget> Function(BuildContext, T?, bool, LdMasterDetailController<T>)?',
+            type: 'List<Widget> Function(BuildContext, T?, bool, LdMasterDetailController<T>)?',
             description: '',
             named: true,
             required: false,
           ),
           DocParameter(
             name: 'buildDetailActions',
-            type:
-                'List<Widget> Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
+            type: 'List<Widget> Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
             description: '',
             named: true,
             required: false,
@@ -4565,8 +4525,7 @@ const docComponents = [
       ),
       DocProperty(
         name: '_routeConfig',
-        type:
-            'MapEntry<String, Map<String, LdMasterDetailShellRouteConfig<dynamic>>>?',
+        type: 'MapEntry<String, Map<String, LdMasterDetailShellRouteConfig<dynamic>>>?',
         description: '',
         features: [
           'final',
@@ -4654,22 +4613,19 @@ const docComponents = [
     properties: [
       DocProperty(
         name: 'buildDetailTitle',
-        type:
-            'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
+        type: 'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
         description: '',
         features: ['final'],
       ),
       DocProperty(
         name: 'buildDetail',
-        type:
-            'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)',
+        type: 'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)',
         description: '',
         features: ['final'],
       ),
       DocProperty(
         name: 'buildDetailActions',
-        type:
-            'List<Widget> Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
+        type: 'List<Widget> Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
         description: '',
         features: ['final'],
       ),
@@ -4698,24 +4654,21 @@ const docComponents = [
         signature: [
           DocParameter(
             name: 'buildDetailTitle',
-            type:
-                'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
+            type: 'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
             description: '',
             named: true,
             required: false,
           ),
           DocParameter(
             name: 'buildDetail',
-            type:
-                'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)',
+            type: 'Widget Function(BuildContext, T, bool, LdMasterDetailController<T>)',
             description: '',
             named: true,
             required: true,
           ),
           DocParameter(
             name: 'buildDetailActions',
-            type:
-                'List<Widget> Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
+            type: 'List<Widget> Function(BuildContext, T, bool, LdMasterDetailController<T>)?',
             description: '',
             named: true,
             required: true,
@@ -4762,8 +4715,7 @@ const docComponents = [
     properties: [
       DocProperty(
         name: 'fetchAll',
-        type:
-            'Future<LdListPage<T>> Function({required int offset, required int pageSize, String? pageToken})',
+        type: 'Future<LdListPage<T>> Function({required int offset, required int pageSize, String? pageToken})',
         description: '',
         features: [],
       )
@@ -4789,43 +4741,37 @@ const docComponents = [
     properties: [
       DocProperty(
         name: 'buildDetailTitle',
-        type:
-            'Widget Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
+        type: 'Widget Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
         description: '',
         features: ['final'],
       ),
       DocProperty(
         name: 'buildMasterTitle',
-        type:
-            'Widget Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
+        type: 'Widget Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
         description: '',
         features: ['final'],
       ),
       DocProperty(
         name: 'buildDetail',
-        type:
-            'Widget Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)',
+        type: 'Widget Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)',
         description: '',
         features: ['final'],
       ),
       DocProperty(
         name: 'buildMaster',
-        type:
-            'Widget Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)',
+        type: 'Widget Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)',
         description: '',
         features: ['final'],
       ),
       DocProperty(
         name: 'buildMasterActions',
-        type:
-            'List<Widget> Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
+        type: 'List<Widget> Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
         description: '',
         features: ['final'],
       ),
       DocProperty(
         name: 'buildDetailActions',
-        type:
-            'List<Widget> Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
+        type: 'List<Widget> Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
         description: '',
         features: ['final'],
       ),
@@ -4836,48 +4782,42 @@ const docComponents = [
         signature: [
           DocParameter(
             name: 'buildDetailTitle',
-            type:
-                'Widget Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
+            type: 'Widget Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
             description: '',
             named: true,
             required: false,
           ),
           DocParameter(
             name: 'buildMasterTitle',
-            type:
-                'Widget Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
+            type: 'Widget Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
             description: '',
             named: true,
             required: false,
           ),
           DocParameter(
             name: 'buildDetail',
-            type:
-                'Widget Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)',
+            type: 'Widget Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)',
             description: '',
             named: true,
             required: true,
           ),
           DocParameter(
             name: 'buildMaster',
-            type:
-                'Widget Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)',
+            type: 'Widget Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)',
             description: '',
             named: true,
             required: true,
           ),
           DocParameter(
             name: 'buildMasterActions',
-            type:
-                'List<Widget> Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
+            type: 'List<Widget> Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
             description: '',
             named: true,
             required: false,
           ),
           DocParameter(
             name: 'buildDetailActions',
-            type:
-                'List<Widget> Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
+            type: 'List<Widget> Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
             description: '',
             named: true,
             required: false,
@@ -4908,43 +4848,37 @@ const docComponents = [
       ),
       DocProperty(
         name: 'buildDetailTitle',
-        type:
-            'Widget Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
+        type: 'Widget Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
         description: '',
         features: ['final'],
       ),
       DocProperty(
         name: 'buildMasterTitle',
-        type:
-            'Widget Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
+        type: 'Widget Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
         description: '',
         features: ['final'],
       ),
       DocProperty(
         name: 'buildDetail',
-        type:
-            'Widget Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)',
+        type: 'Widget Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)',
         description: '',
         features: ['final'],
       ),
       DocProperty(
         name: 'buildMaster',
-        type:
-            'Widget Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)',
+        type: 'Widget Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)',
         description: '',
         features: ['final'],
       ),
       DocProperty(
         name: 'buildMasterActions',
-        type:
-            'List<Widget> Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
+        type: 'List<Widget> Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
         description: '',
         features: ['final'],
       ),
       DocProperty(
         name: 'buildDetailActions',
-        type:
-            'List<Widget> Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
+        type: 'List<Widget> Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
         description: '',
         features: ['final'],
       ),
@@ -4962,8 +4896,7 @@ const docComponents = [
       ),
       DocProperty(
         name: 'masterDetailBuilder',
-        type:
-            'LdMasterDetail<T> Function(BuildContext, LdMasterDetailBuilders<T>)',
+        type: 'LdMasterDetail<T> Function(BuildContext, LdMasterDetailBuilders<T>)',
         description: '',
         features: ['final'],
       ),
@@ -4988,56 +4921,49 @@ const docComponents = [
           ),
           DocParameter(
             name: 'masterDetailBuilder',
-            type:
-                'LdMasterDetail<T> Function(BuildContext, LdMasterDetailBuilders<T>)',
+            type: 'LdMasterDetail<T> Function(BuildContext, LdMasterDetailBuilders<T>)',
             description: '',
             named: true,
             required: true,
           ),
           DocParameter(
             name: 'buildDetail',
-            type:
-                'Widget Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)',
+            type: 'Widget Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)',
             description: '',
             named: true,
             required: true,
           ),
           DocParameter(
             name: 'buildMaster',
-            type:
-                'Widget Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)',
+            type: 'Widget Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)',
             description: '',
             named: true,
             required: true,
           ),
           DocParameter(
             name: 'buildDetailTitle',
-            type:
-                'Widget Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
+            type: 'Widget Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
             description: '',
             named: true,
             required: false,
           ),
           DocParameter(
             name: 'buildMasterTitle',
-            type:
-                'Widget Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
+            type: 'Widget Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
             description: '',
             named: true,
             required: false,
           ),
           DocParameter(
             name: 'buildMasterActions',
-            type:
-                'List<Widget> Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
+            type: 'List<Widget> Function(BuildContext, T?, T?, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
             description: '',
             named: true,
             required: false,
           ),
           DocParameter(
             name: 'buildDetailActions',
-            type:
-                'List<Widget> Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
+            type: 'List<Widget> Function(BuildContext, T, T, bool, LdMasterDetailController<T>, LdCrudListState<T>)?',
             description: '',
             named: true,
             required: false,
@@ -5150,8 +5076,7 @@ const docComponents = [
           ),
           DocParameter(
             name: 'builder',
-            type:
-                'Widget Function(LdCrudMasterDetailState<T>, void Function())?',
+            type: 'Widget Function(LdCrudMasterDetailState<T>, void Function())?',
             description: '',
             named: true,
             required: false,
@@ -5189,22 +5114,19 @@ const docComponents = [
       DocProperty(
         name: 'triggerAction',
         type: 'void Function()',
-        description:
-            '/// The action to trigger when the widget is interacted with',
+        description: '/// The action to trigger when the widget is interacted with',
         features: ['final'],
       ),
       DocProperty(
         name: 'masterDetail',
         type: 'LdCrudMasterDetailState<T>',
-        description:
-            '/// The master detail state for accessing multi-select mode and other state',
+        description: '/// The master detail state for accessing multi-select mode and other state',
         features: ['final'],
       ),
       DocProperty(
         name: 'actionIcon',
         type: 'IconData?',
-        description:
-            '/// Icon to use in the app bar and context menu default builders',
+        description: '/// Icon to use in the app bar and context menu default builders',
         features: ['final'],
       ),
       DocProperty(
@@ -5222,22 +5144,19 @@ const docComponents = [
       DocProperty(
         name: 'hideInContextMenuInSingleSelectMode',
         type: 'bool',
-        description:
-            '/// Whether to hide the widget in single-select mode when in context menu',
+        description: '/// Whether to hide the widget in single-select mode when in context menu',
         features: ['final'],
       ),
       DocProperty(
         name: 'hideInAppBarInMultiSelectMode',
         type: 'bool?',
-        description:
-            '/// Whether to hide the widget in single-select mode when in app bar',
+        description: '/// Whether to hide the widget in single-select mode when in app bar',
         features: ['final'],
       ),
       DocProperty(
         name: 'hideInContextMenuInMultiSelectMode',
         type: 'bool?',
-        description:
-            '/// Whether to hide the widget in multi-select mode when in context menu',
+        description: '/// Whether to hide the widget in multi-select mode when in context menu',
         features: ['final'],
       ),
     ],
@@ -5472,8 +5391,7 @@ const docComponents = [
       ),
       DocProperty(
         name: 'obtainArg',
-        type:
-            'FutureOr<Arg?> Function(LdCrudMasterDetailState<T>, LdMasterDetailController<T>)',
+        type: 'FutureOr<Arg?> Function(LdCrudMasterDetailState<T>, LdMasterDetailController<T>)',
         description: '',
         features: ['final'],
       ),
@@ -5485,8 +5403,7 @@ const docComponents = [
       ),
       DocProperty(
         name: 'onActionCompleted',
-        type:
-            'dynamic Function(LdCrudMasterDetailState<T>, LdMasterDetailController<T>, Arg, Result)?',
+        type: 'dynamic Function(LdCrudMasterDetailState<T>, LdMasterDetailController<T>, Arg, Result)?',
         description: '',
         features: ['final'],
       ),
@@ -5503,8 +5420,7 @@ const docComponents = [
         signature: [
           DocParameter(
             name: 'builder',
-            type:
-                'Widget Function(LdCrudMasterDetailState<T>, void Function())',
+            type: 'Widget Function(LdCrudMasterDetailState<T>, void Function())',
             description: '',
             named: true,
             required: true,
@@ -5518,16 +5434,14 @@ const docComponents = [
           ),
           DocParameter(
             name: 'obtainArg',
-            type:
-                'FutureOr<Arg?> Function(LdCrudMasterDetailState<T>, LdMasterDetailController<T>)',
+            type: 'FutureOr<Arg?> Function(LdCrudMasterDetailState<T>, LdMasterDetailController<T>)',
             description: '',
             named: true,
             required: true,
           ),
           DocParameter(
             name: 'onActionCompleted',
-            type:
-                'dynamic Function(LdCrudMasterDetailState<T>, LdMasterDetailController<T>, Arg, Result)?',
+            type: 'dynamic Function(LdCrudMasterDetailState<T>, LdMasterDetailController<T>, Arg, Result)?',
             description: '',
             named: true,
             required: false,
@@ -5618,8 +5532,7 @@ const docComponents = [
           ),
           DocParameter(
             name: 'builder',
-            type:
-                'Widget Function(LdCrudMasterDetailState<T>, void Function())?',
+            type: 'Widget Function(LdCrudMasterDetailState<T>, void Function())?',
             description: '',
             named: true,
             required: false,
@@ -5639,8 +5552,7 @@ const docComponents = [
       DocProperty(
         name: 'getOpenItem',
         type: 'T? Function()',
-        description:
-            '/// Returns the currently open item, or null if no item is open.',
+        description: '/// Returns the currently open item, or null if no item is open.',
         features: ['final'],
       ),
       DocProperty(
@@ -5729,8 +5641,7 @@ const docComponents = [
           ),
           DocParameter(
             name: 'actionButtonBuilder',
-            type:
-                'Widget Function(LdCrudMasterDetailState<T>, void Function())?',
+            type: 'Widget Function(LdCrudMasterDetailState<T>, void Function())?',
             description: '',
             named: true,
             required: false,
@@ -5766,8 +5677,7 @@ const docComponents = [
           ),
           DocParameter(
             name: 'actionButtonBuilder',
-            type:
-                'Widget Function(LdCrudMasterDetailState<T>, void Function())?',
+            type: 'Widget Function(LdCrudMasterDetailState<T>, void Function())?',
             description: '',
             named: true,
             required: false,
@@ -6478,8 +6388,7 @@ const docComponents = [
   DocComponent(
     name: 'LdContainer',
     isNullSafe: true,
-    description:
-        ' Allows you to horizontally center your content on a larger screen by padding it on the sides',
+    description: ' Allows you to horizontally center your content on a larger screen by padding it on the sides',
     properties: [
       DocProperty(
         name: 'child',
@@ -7356,8 +7265,7 @@ const docComponents = [
           ),
           DocParameter(
             name: 'builder',
-            type:
-                'Widget Function(BuildContext, LdColorBundle, LdTouchableStatus)',
+            type: 'Widget Function(BuildContext, LdColorBundle, LdTouchableStatus)',
             description: '',
             named: true,
             required: true,
@@ -7622,15 +7530,13 @@ const docComponents = [
       DocProperty(
         name: 'childBuilder',
         type: 'Widget Function(BuildContext, int)',
-        description:
-            '/// Function that is called to build each item in the accordion.',
+        description: '/// Function that is called to build each item in the accordion.',
         features: ['final'],
       ),
       DocProperty(
         name: 'headerBuilder',
         type: 'Widget Function(BuildContext, int)',
-        description:
-            '/// Function that is called to build each header in the accordion.',
+        description: '/// Function that is called to build each header in the accordion.',
         features: ['final'],
       ),
       DocProperty(
@@ -7642,8 +7548,7 @@ const docComponents = [
       DocProperty(
         name: 'initialOpenIndex',
         type: 'Set<int>',
-        description:
-            '/// The index of the items that should be open by default.',
+        description: '/// The index of the items that should be open by default.',
         features: ['final'],
       ),
       DocProperty(
@@ -7697,8 +7602,7 @@ const docComponents = [
       DocProperty(
         name: 'shrinkWrap',
         type: 'bool',
-        description:
-            '/// Whether or not to shrink the accordion to the content.',
+        description: '/// Whether or not to shrink the accordion to the content.',
         features: ['final'],
       ),
     ],
@@ -7861,8 +7765,7 @@ const docComponents = [
   DocComponent(
     name: 'LdAccordionItem',
     isNullSafe: true,
-    description:
-        ' item of an accordion used in utility constructor [LdAccordion.fromList].',
+    description: ' item of an accordion used in utility constructor [LdAccordion.fromList].',
     properties: [
       DocProperty(
         name: 'child',
@@ -10714,15 +10617,13 @@ const docComponents = [
       DocProperty(
         name: 'darkPalette',
         type: 'LdPalette?',
-        description:
-            '/// The dark palette to use when [autoBrightness] is true defaults to [deepOcean]',
+        description: '/// The dark palette to use when [autoBrightness] is true defaults to [deepOcean]',
         features: ['final'],
       ),
       DocProperty(
         name: 'lightPalette',
         type: 'LdPalette?',
-        description:
-            '/// The light palette to use when [autoBrightness] is true defaults to [ocean]',
+        description: '/// The light palette to use when [autoBrightness] is true defaults to [ocean]',
         features: ['final'],
       ),
       DocProperty(
@@ -11962,8 +11863,7 @@ const docComponents = [
     properties: [
       DocProperty(
         name: 'fetchListFunction',
-        type:
-            'Future<LdListPage<T>> Function({required int offset, required int pageSize, String? pageToken})',
+        type: 'Future<LdListPage<T>> Function({required int offset, required int pageSize, String? pageToken})',
         description: '',
         features: ['final'],
       ),
@@ -12070,8 +11970,7 @@ const docComponents = [
         signature: [
           DocParameter(
             name: 'fetchListFunction',
-            type:
-                'Future<LdListPage<T>> Function({required int offset, required int pageSize, String? pageToken})',
+            type: 'Future<LdListPage<T>> Function({required int offset, required int pageSize, String? pageToken})',
             description: '',
             named: true,
             required: true,
@@ -12141,8 +12040,7 @@ const docComponents = [
   DocComponent(
     name: 'LdCrudListState',
     isNullSafe: true,
-    description:
-        ' Extends [LdPaginator] to add CRUD operations and item states.',
+    description: ' Extends [LdPaginator] to add CRUD operations and item states.',
     properties: [
       DocProperty(
         name: 'itemStates',
@@ -12181,8 +12079,7 @@ const docComponents = [
         signature: [
           DocParameter(
             name: 'fetchListFunction',
-            type:
-                'Future<LdListPage<T>> Function({required int offset, required int pageSize, String? pageToken})',
+            type: 'Future<LdListPage<T>> Function({required int offset, required int pageSize, String? pageToken})',
             description: '',
             named: true,
             required: true,
@@ -12337,8 +12234,7 @@ const docComponents = [
       DocProperty(
         name: 'emptyBuilder',
         type: 'Widget Function(BuildContext, Future<void> Function())?',
-        description:
-            '/// Built when there are no items call [refresh] to trigger [paginator]\'s refresh\n/// function',
+        description: '/// Built when there are no items call [refresh] to trigger [paginator]\'s refresh\n/// function',
         features: ['final'],
       ),
       DocProperty(
@@ -12351,8 +12247,7 @@ const docComponents = [
       DocProperty(
         name: 'loadingBuilder',
         type: 'Widget Function(BuildContext, int, int)?',
-        description:
-            '/// Built when there are missing items that are being loaded',
+        description: '/// Built when there are missing items that are being loaded',
         features: ['final'],
       ),
       DocProperty(
@@ -12370,8 +12265,7 @@ const docComponents = [
       DocProperty(
         name: 'separatorBuilder',
         type: 'Widget Function(BuildContext)?',
-        description:
-            '/// Built between items. Not called between items and group headers.',
+        description: '/// Built between items. Not called between items and group headers.',
         features: ['final'],
       ),
       DocProperty(
@@ -12403,8 +12297,7 @@ const docComponents = [
       DocProperty(
         name: 'shrinkWrap',
         type: 'bool',
-        description:
-            '/// Whether the list should be wrapped in a shrink-wrap container.',
+        description: '/// Whether the list should be wrapped in a shrink-wrap container.',
         features: ['final'],
       ),
       DocProperty(
@@ -12416,8 +12309,7 @@ const docComponents = [
       DocProperty(
         name: 'primary',
         type: 'bool',
-        description:
-            '/// Whether the list is the primary scroll view of the screen.',
+        description: '/// Whether the list is the primary scroll view of the screen.',
         features: ['final'],
       ),
       DocProperty(
@@ -12429,8 +12321,7 @@ const docComponents = [
       DocProperty(
         name: 'footer',
         type: 'Widget?',
-        description:
-            '/// A widget that is displayed at the bottom of the list.',
+        description: '/// A widget that is displayed at the bottom of the list.',
         features: ['final'],
       ),
       DocProperty(
@@ -14063,8 +13954,7 @@ const docComponents = [
   DocComponent(
     name: 'LdOrb',
     isNullSafe: true,
-    description:
-        ' an animated illustration of an orb filled with liquid that has some waves and a [filling] level.',
+    description: ' an animated illustration of an orb filled with liquid that has some waves and a [filling] level.',
     properties: [
       DocProperty(
         name: 'size',
@@ -14690,8 +14580,7 @@ const docComponents = [
       DocProperty(
         name: 'contentSlivers',
         type: 'List<Widget> Function(BuildContext)?',
-        description:
-            '/// The slivers to be added to the sheet. Used instead of [modalContent] if provided.',
+        description: '/// The slivers to be added to the sheet. Used instead of [modalContent] if provided.',
         features: ['final'],
       ),
       DocProperty(
@@ -14722,8 +14611,7 @@ const docComponents = [
       DocProperty(
         name: 'disableScrolling',
         type: 'bool',
-        description:
-            '/// Whether the sheet should disable scrolling. Defaults to false.',
+        description: '/// Whether the sheet should disable scrolling. Defaults to false.',
         features: ['final'],
       ),
       DocProperty(
@@ -14815,15 +14703,13 @@ const docComponents = [
       DocProperty(
         name: 'insets',
         type: 'EdgeInsets?',
-        description:
-            '/// The inset for the modal from the edges of the screen.',
+        description: '/// The inset for the modal from the edges of the screen.',
         features: ['final'],
       ),
       DocProperty(
         name: 'useSafeArea',
         type: 'bool',
-        description:
-            '/// Whether the modal should use safe area. Defaults to true.',
+        description: '/// Whether the modal should use safe area. Defaults to true.',
         features: ['final'],
       ),
       DocProperty(
@@ -14955,7 +14841,7 @@ const docComponents = [
           ),
           DocParameter(
             name: 'injectables',
-            type: 'List<InheritedProvider<dynamic>> Function(BuildContext)?',
+            type: 'List<ListenableProvider<Listenable?>> Function(BuildContext)?',
             description: '',
             named: true,
             required: false,
@@ -15352,8 +15238,7 @@ const docComponents = [
   DocComponent(
     name: 'LdExceptionMoreInfoButton',
     isNullSafe: true,
-    description:
-        ' LdExceptionMoreInfoButton is a button that will open a dialog with more info',
+    description: ' LdExceptionMoreInfoButton is a button that will open a dialog with more info',
     properties: [
       DocProperty(
         name: 'error',
@@ -15460,15 +15345,13 @@ const docComponents = [
       DocProperty(
         name: 'canRetry',
         type: 'bool',
-        description:
-            '/// Whether the action causing the exception can be retried.',
+        description: '/// Whether the action causing the exception can be retried.',
         features: ['final'],
       ),
       DocProperty(
         name: 'type',
         type: 'LdHintType',
-        description:
-            '/// The type of the exception. By default, it is [LdHintType.error].',
+        description: '/// The type of the exception. By default, it is [LdHintType.error].',
         features: ['final'],
       ),
       DocProperty(
@@ -15705,8 +15588,7 @@ const docComponents = [
       DocProperty(
         name: 'direction',
         type: 'Axis',
-        description:
-            '/// The direction of the exception view, either [Axis.vertical] or\n/// [Axis.horizontal].',
+        description: '/// The direction of the exception view, either [Axis.vertical] or\n/// [Axis.horizontal].',
         features: ['final'],
       ),
     ],
@@ -15924,8 +15806,7 @@ const docComponents = [
       DocProperty(
         name: 'onRetry',
         type: 'void Function()',
-        description:
-            '/// Function to be called when a retry should be executed',
+        description: '/// Function to be called when a retry should be executed',
         features: ['final'],
       ),
       DocProperty(
@@ -16163,8 +16044,7 @@ const docComponents = [
   DocComponent(
     name: 'LdReveal',
     isNullSafe: true,
-    description:
-        ' A utility to reveal some content, with a fade in and collapse effect',
+    description: ' A utility to reveal some content, with a fade in and collapse effect',
     properties: [
       DocProperty(
         name: 'revealed',
@@ -16623,8 +16503,7 @@ const docComponents = [
       DocProperty(
         name: 'duration',
         type: 'Duration?',
-        description:
-            '/// Duration of the notification. If null the notification will not be dismissed automatically',
+        description: '/// Duration of the notification. If null the notification will not be dismissed automatically',
         features: ['final'],
       ),
       DocProperty(
@@ -16774,8 +16653,7 @@ const docComponents = [
       DocProperty(
         name: 'inputCompleter',
         type: 'Completer<String?>',
-        description:
-            '/// Completer that gets resolved when the user entered something in the input field',
+        description: '/// Completer that gets resolved when the user entered something in the input field',
         features: ['final'],
       ),
     ],
@@ -16891,8 +16769,7 @@ const docComponents = [
       DocProperty(
         name: 'confirmationCompleter',
         type: 'Completer<bool?>',
-        description:
-            '/// Completer that gets resolved when the user confirms the notification or it is dismissed',
+        description: '/// Completer that gets resolved when the user confirms the notification or it is dismissed',
         features: ['final'],
       ),
     ],
@@ -17330,8 +17207,7 @@ const docComponents = [
   DocComponent(
     name: 'LdAutoBackground',
     isNullSafe: true,
-    description:
-        ' A widget that will change its background color based on the parent surface',
+    description: ' A widget that will change its background color based on the parent surface',
     properties: [
       DocProperty(
         name: 'child',

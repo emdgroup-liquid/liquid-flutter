@@ -43,6 +43,7 @@ class _ThemeDemoState extends State<ThemeDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/demos/theme.dart",
       title: "Theme & Colors",
       apiComponents: const ["LdTheme", "LdThemeProvider", "LdColorNames", "LdReactiveColorBundle", "LdReactiveColor"],
       demo: LdAutoSpace(
@@ -335,7 +336,9 @@ class _ThemeDemoState extends State<ThemeDemo> {
                             decoration: BoxDecoration(
                               color: shade,
                               border: Border.all(
-                                color: status.active ? theme.absolute : theme.border,
+                                color: status.active
+                                    ? theme.absolute
+                                    : theme.border,
                                 width: 2,
                               ),
                             ),

@@ -10,6 +10,7 @@ class BreadcrumbDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/interaction/breadcrumb.dart",
       title: "LdBreadcrumb",
       demo: ComponentWell(
         child: Column(
@@ -20,11 +21,19 @@ class BreadcrumbDemo extends StatelessWidget {
               children: [
                 Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: [Icon(LucideIcons.square), ldSpacerXS, Text("Components")],
+                  children: [
+                    Icon(LucideIcons.square),
+                    ldSpacerXS,
+                    Text("Components")
+                  ],
                 ),
                 Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: [Icon(LucideIcons.square), ldSpacerXS, Text("Breadcrumb")],
+                  children: [
+                    Icon(LucideIcons.square),
+                    ldSpacerXS,
+                    Text("Breadcrumb")
+                  ],
                 )
               ],
             )

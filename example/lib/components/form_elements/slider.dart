@@ -17,6 +17,7 @@ class _LdSliderDemoState extends State<LdSliderDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/form_elements/slider.dart",
       title: "LdSlider",
       demo: LdAutoSpace(
         children: [
@@ -42,6 +43,20 @@ class _LdSliderDemoState extends State<LdSliderDemo> {
                   onSlideComplete: () {
                     LdNotificationsController.of(context).addNotification(
                       LdNotification(message: "You slid the slider!", type: LdNotificationType.info),
+                    );
+                  },
+                ),
+                ldSpacerL,
+                LdSlider(
+                  hint: "Swipe right...",
+                  label: "Confirm account deletion",
+                  disabled: _disabled,
+                  color: LdTheme.of(context).palette.error,
+                  onSlideComplete: () {
+                    LdNotificationsController.of(context).addNotification(
+                      LdNotification(
+                          message: "You slid the slider!",
+                          type: LdNotificationType.info),
                     );
                   },
                 )

@@ -57,6 +57,7 @@ class _AccordionDemoState extends State<AccordionDemo> {
     );
 
     return ComponentPage(
+        path: "lib/components/layout/accordion.dart",
         title: "LdAccordion",
         demo: LdAutoSpace(
           children: [
@@ -76,7 +77,8 @@ class _AccordionDemoState extends State<AccordionDemo> {
                 children: [
                   if (!_wrapActiveInCard) ...[
                     LdCard(padding: EdgeInsets.zero, child: accordion),
-                    const LdTextL("Accordion is placed inside an LdCard with no padding")
+                    const LdTextL(
+                        "Accordion is placed inside an LdCard with no padding")
                   ] else
                     accordion
                 ],
@@ -98,7 +100,10 @@ class _AccordionDemoState extends State<AccordionDemo> {
               disabled: !_wrapActiveInCard,
               onChanged: _toggleFlatCard,
             ),
-            LdToggle(label: "On Surface background", checked: _onSurface, onChanged: _toggleOnSurface),
+            LdToggle(
+                label: "On Surface background",
+                checked: _onSurface,
+                onChanged: _toggleOnSurface),
             LdDivider(),
             ComponentWell(
                 title: const LdTextHs(".fromList constructor"),

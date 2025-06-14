@@ -15,6 +15,7 @@ class ReactiveFormDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/form_elements/reactive_form.dart",
       title: "LdReactiveForm",
       apiComponents: [
         "LdReactiveForm",

@@ -1,114 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-class LdTagSuccess extends LdTag {
-  LdTagSuccess({
-    Key? key,
-    required Widget child,
-    LdColor? color,
-    Function? onDismiss,
-    LdSize size = LdSize.m,
-    required BuildContext context,
-  }) : super(
-            key: key,
-            child: child,
-            color: LdTheme.of(context).success,
-            onDismiss: onDismiss,
-            size: size);
-}
-
-class LdTagWarning extends LdTag {
-  LdTagWarning({
-    Key? key,
-    required Widget child,
-    LdColor? color,
-    Function? onDismiss,
-    LdSize size = LdSize.m,
-    required BuildContext context,
-  }) : super(
-            key: key,
-            child: child,
-            color: LdTheme.of(context).warning,
-            onDismiss: onDismiss,
-            size: size);
-}
-
-class LdTagError extends LdTag {
-  LdTagError({
-    Key? key,
-    required Widget child,
-    LdColor? color,
-    Function? onDismiss,
-    LdSize size = LdSize.m,
-    required BuildContext context,
-  }) : super(
-            key: key,
-            child: child,
-            color: LdTheme.of(context).error,
-            onDismiss: onDismiss,
-            size: size);
-}
-
-class LdCheckboxSuccess extends LdCheckbox {
-  LdCheckboxSuccess({
-    String? label,
-    required bool checked,
-    dynamic Function(bool)? onChanged,
-    LdColor? color,
-    LdSize size = LdSize.s,
-    bool disabled = false,
-    Key? key,
-    required BuildContext context,
-  }) : super(
-            label: label,
-            checked: checked,
-            onChanged: onChanged,
-            color: LdTheme.of(context).success,
-            size: size,
-            disabled: disabled,
-            key: key);
-}
-
-class LdCheckboxWarning extends LdCheckbox {
-  LdCheckboxWarning({
-    String? label,
-    required bool checked,
-    dynamic Function(bool)? onChanged,
-    LdColor? color,
-    LdSize size = LdSize.s,
-    bool disabled = false,
-    Key? key,
-    required BuildContext context,
-  }) : super(
-            label: label,
-            checked: checked,
-            onChanged: onChanged,
-            color: LdTheme.of(context).warning,
-            size: size,
-            disabled: disabled,
-            key: key);
-}
-
-class LdCheckboxError extends LdCheckbox {
-  LdCheckboxError({
-    String? label,
-    required bool checked,
-    dynamic Function(bool)? onChanged,
-    LdColor? color,
-    LdSize size = LdSize.s,
-    bool disabled = false,
-    Key? key,
-    required BuildContext context,
-  }) : super(
-            label: label,
-            checked: checked,
-            onChanged: onChanged,
-            color: LdTheme.of(context).error,
-            size: size,
-            disabled: disabled,
-            key: key);
-}
-
 class LdTextP extends LdText {
   const LdTextP(
     String text, {
@@ -885,6 +777,66 @@ class LdButtonSuccess extends LdButton {
             key: key);
 }
 
+class LdCheckboxSuccess extends LdCheckbox {
+  LdCheckboxSuccess({
+    String? label,
+    required bool checked,
+    dynamic Function(bool)? onChanged,
+    LdColor? color,
+    LdSize size = LdSize.s,
+    bool disabled = false,
+    Key? key,
+    required BuildContext context,
+  }) : super(
+            label: label,
+            checked: checked,
+            onChanged: onChanged,
+            color: LdTheme.of(context).success,
+            size: size,
+            disabled: disabled,
+            key: key);
+}
+
+class LdCheckboxWarning extends LdCheckbox {
+  LdCheckboxWarning({
+    String? label,
+    required bool checked,
+    dynamic Function(bool)? onChanged,
+    LdColor? color,
+    LdSize size = LdSize.s,
+    bool disabled = false,
+    Key? key,
+    required BuildContext context,
+  }) : super(
+            label: label,
+            checked: checked,
+            onChanged: onChanged,
+            color: LdTheme.of(context).warning,
+            size: size,
+            disabled: disabled,
+            key: key);
+}
+
+class LdCheckboxError extends LdCheckbox {
+  LdCheckboxError({
+    String? label,
+    required bool checked,
+    dynamic Function(bool)? onChanged,
+    LdColor? color,
+    LdSize size = LdSize.s,
+    bool disabled = false,
+    Key? key,
+    required BuildContext context,
+  }) : super(
+            label: label,
+            checked: checked,
+            onChanged: onChanged,
+            color: LdTheme.of(context).error,
+            size: size,
+            disabled: disabled,
+            key: key);
+}
+
 class LdRadioSuccess extends LdRadio {
   LdRadioSuccess({
     String? label,
@@ -943,4 +895,52 @@ class LdRadioError extends LdRadio {
             color: LdTheme.of(context).error,
             disabled: disabled,
             key: key);
+}
+
+class LdTagSuccess extends LdTag {
+  LdTagSuccess({
+    Key? key,
+    required Widget child,
+    LdColor? color,
+    Function? onDismiss,
+    LdSize size = LdSize.m,
+    required BuildContext context,
+  }) : super(
+            key: key,
+            child: child,
+            color: LdTheme.of(context).success,
+            onDismiss: onDismiss,
+            size: size);
+}
+
+class LdTagWarning extends LdTag {
+  LdTagWarning({
+    Key? key,
+    required Widget child,
+    LdColor? color,
+    Function? onDismiss,
+    LdSize size = LdSize.m,
+    required BuildContext context,
+  }) : super(
+            key: key,
+            child: child,
+            color: LdTheme.of(context).warning,
+            onDismiss: onDismiss,
+            size: size);
+}
+
+class LdTagError extends LdTag {
+  LdTagError({
+    Key? key,
+    required Widget child,
+    LdColor? color,
+    Function? onDismiss,
+    LdSize size = LdSize.m,
+    required BuildContext context,
+  }) : super(
+            key: key,
+            child: child,
+            color: LdTheme.of(context).error,
+            onDismiss: onDismiss,
+            size: size);
 }

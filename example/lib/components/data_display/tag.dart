@@ -17,6 +17,7 @@ class _TagDemoState extends State<TagDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/data_display/tag.dart",
       title: "LdTag",
       demo: LdAutoSpace(
         children: [

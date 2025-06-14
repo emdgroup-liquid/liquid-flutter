@@ -24,6 +24,7 @@ class _FormDemoState extends State<FormDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/form_elements/form.dart",
       title: "LdForm",
       demo: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

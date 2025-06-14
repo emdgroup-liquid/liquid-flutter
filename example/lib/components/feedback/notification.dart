@@ -9,8 +9,13 @@ class NotificationDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/feedback/notification.dart",
       title: "LdNotification",
-      apiComponents: const ["LdNotifier", "LdNotifcationPortal", "LdNotification"],
+      apiComponents: const [
+        "LdNotifier",
+        "LdNotifcationPortal",
+        "LdNotification"
+      ],
       text: """
   Allows you to display notifications in a "toast" style. 
   
@@ -134,13 +139,18 @@ class NotificationDemo extends StatelessWidget {
               LdButton(
                   child: const Text("Big info"),
                   onPressed: () {
-                    LdNotificationsController.of(context).addNotification(LdNotification(
-                        type: LdNotificationType.info, message: "Hello World", subMessage: "This is a submessage"));
+                    LdNotificationsController.of(context).addNotification(
+                        LdNotification(
+                            type: LdNotificationType.info,
+                            message: "Hello World",
+                            subMessage: "This is a submessage"));
                   }),
               LdButton(
                   child: const Text("Loading"),
                   onPressed: () async {
-                    final notification = await LdNotificationsController.of(context).addNotification(
+                    final notification =
+                        await LdNotificationsController.of(context)
+                            .addNotification(
                       LdNotification(
                         type: LdNotificationType.loading,
                         canDismiss: false,
@@ -175,7 +185,9 @@ class NotificationDemo extends StatelessWidget {
                 onPressed: () {
                   LdNotificationsController.of(context).addNotification(
                     LdConfirmNotification(
-                        type: LdNotificationType.confirm, message: "Hello World", subMessage: "This is a submessage"),
+                        type: LdNotificationType.confirm,
+                        message: "Hello World",
+                        subMessage: "This is a submessage"),
                   );
                 },
               ),
@@ -207,7 +219,9 @@ class NotificationDemo extends StatelessWidget {
               child: LdButton(
                 child: const Text("Enter text"),
                 onPressed: () async {
-                  final notification = (await LdNotificationsController.of(context).addNotification(
+                  final notification =
+                      (await LdNotificationsController.of(context)
+                          .addNotification(
                     LdInputNotification(
                       inputHint: "John Doe",
                       inputLabel: "Your name",

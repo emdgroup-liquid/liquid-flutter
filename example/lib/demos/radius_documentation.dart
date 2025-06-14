@@ -12,6 +12,7 @@ class RadiusDocumentation extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context);
     return ComponentPage(
+      path: "lib/demos/radius_documentation.dart",
       title: "Border Radius",
       demo: LdAutoSpace(children: [
         const LdTextP(
@@ -35,11 +36,11 @@ class RadiusDocumentation extends StatelessWidget {
               ),
               BorderRadiusVisualizer(
                 radius: theme.radius(LdSize.m),
-                child: const Text("theme.radius(LdSize.m)d"),
+                child: const Text("theme.radius(LdSize.m)"),
               ),
               BorderRadiusVisualizer(
                 radius: theme.radius(LdSize.l),
-                child: const Text("theme.radius(LdSize.l)g"),
+                child: const Text("theme.radius(LdSize.l)"),
               ),
             ],
           ),

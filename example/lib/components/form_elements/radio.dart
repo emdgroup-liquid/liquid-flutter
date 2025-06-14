@@ -16,6 +16,7 @@ class _RadioDemoState extends State<RadioDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/form_elements/radio.dart",
       title: "LdRadio",
       demo: ComponentWell(
         child: Padding(

@@ -31,6 +31,7 @@ class _TableDemoState extends State<TableDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/data_display/table.dart",
       title: "LdTable",
       demo: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -20,7 +20,7 @@ jobs:
           private-key: ${{ secrets.bumper_key }}
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
@@ -38,19 +38,47 @@ jobs:
           # Checkout dev
           git checkout dev
           
-          # First try to merge with "ours" strategy for version files
-          git merge origin/main -m "chore: sync changes from main [skip ci]" -X theirs -- package.json pubspec.yaml CHANGELOG.md
-      
-          # If there are conflicts, resolve some files with 'theirs'
-          if git ls-files -u | grep -q .; then
-            echo "Conflicts found — resolving specific files in favor of main..."
+          # Try to merge main into dev
+          if git merge origin/main -m "chore: sync changes from main [skip ci]" --no-edit; then
+            echo "Merge successful without conflicts"
+          else
+            echo "Conflicts found — resolving..."
             
-            git checkout --theirs package.json
-            git checkout --theirs pubspec.yaml
-            git checkout --theirs CHANGELOG.md
+            # Resolve conflicts by taking main's version for package.json and CHANGELOG.md
+            git checkout --theirs package.json || true
+            git checkout --theirs CHANGELOG.md || true
             
-            git add package.json pubspec.yaml CHANGELOG.md
-            git commit -m "chore: auto-resolve merge conflicts from main [skip ci]"
+            # For pubspec.yaml, keep dev version but update version number from package.json
+            git checkout --ours pubspec.yaml || true
+            
+            # Add resolved files
+            git add package.json CHANGELOG.md pubspec.yaml
+            
+            # Check if there are still unresolved conflicts
+            if git ls-files -u | grep -v -E "(package\.json|pubspec\.yaml|CHANGELOG\.md)" | grep -q .; then
+              echo "Still have unresolved conflicts in other files:"
+              git ls-files -u
+              exit 1
+            fi
+            
+            # Complete the merge
+            git commit -m "chore: sync changes from main with auto-resolved conflicts [skip ci]"
+          fi
+          
+          # Extract version from package.json and update pubspec.yaml
+          echo "Updating pubspec.yaml version from package.json..."
+          
+          # Get version from package.json
+          VERSION=$(node -p "require('./package.json').version")
+          echo "Found version: $VERSION"
+          
+          # Update pubspec.yaml version using sed
+          sed -i "s/^version: .*/version: $VERSION/" pubspec.yaml
+          
+          # Commit the version update if there are changes
+          if ! git diff --quiet pubspec.yaml; then
+            git add pubspec.yaml
+            git commit -m "chore: update pubspec.yaml version to $VERSION [skip ci]"
           fi
           
           # Push changes to dev

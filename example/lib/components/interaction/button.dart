@@ -53,6 +53,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+        path: "lib/components/interaction/button.dart",
         title: "LdButton",
         apiComponents: const [
           "LdButton",

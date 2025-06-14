@@ -80,7 +80,7 @@ class LdListItem extends StatelessWidget {
       },
       onLongPress: onLongPress,
       active: active || (showSelectionControls && isSelected),
-      disabled: disabled,
+      disabled: disabled || (!showSelectionControls && onTap == null),
       color: theme.palette.primary,
       builder: (contxt, colors, status) {
         return IconTheme(

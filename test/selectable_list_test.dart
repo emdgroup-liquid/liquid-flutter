@@ -70,9 +70,6 @@ void main() {
     });
 
     testWidgets('selects multiple items with drag rectangle', (WidgetTester tester) async {
-      await tester.pumpWidget(buildTestWidget(multiSelect: true));
-      await tester.pumpAndSettle();
-      // Find the position of the first and last item
       final first = tester.getCenter(find.byKey(const ValueKey('A')));
       final last = tester.getCenter(find.byKey(const ValueKey('C')));
 
@@ -107,9 +104,6 @@ void main() {
     });
 
     testWidgets('toggles selection with ctrl+click', (WidgetTester tester) async {
-      await tester.pumpWidget(buildTestWidget(multiSelect: true));
-      await tester.pumpAndSettle();
-      // Tap first item
       await tester.tap(find.byKey(const ValueKey('A')));
       await tester.pumpAndSettle();
 

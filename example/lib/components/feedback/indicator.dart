@@ -8,6 +8,7 @@ class IndicatorDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/feedback/indicator.dart",
       title: "LdIndicator",
       text: "An indicator is a visual representation of a status or state.",
       demo:

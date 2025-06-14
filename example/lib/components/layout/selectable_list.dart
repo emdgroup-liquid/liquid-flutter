@@ -48,6 +48,7 @@ class _SelectableListDemoState extends State<SelectableListDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/layout/selectable_list.dart",
       title: "LdSelectableList",
       demo: LdAutoSpace(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,7 +117,7 @@ class _SelectableListDemoState extends State<SelectableListDemo> {
                     leading: LdAvatar(child: Text(item.formula)),
                     isSelected: selected,
                     radioSelection: !isMultiSelect,
-                    showSelectionControls: showSelectionControls,
+                    showSelectionControls: _showSelectionControls,
                     onSelectionChange: onSelectionChange,
                     onTap: onTap,
                     subtitle: Text(item.subtitle),

@@ -10,6 +10,7 @@ class DrawerDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+        path: "lib/components/layout/drawer.dart",
         apiComponents: const ["LdDrawerItemSection", "LdSectionHeader"],
         title: "Drawer",
         demo: LdAutoSpace(

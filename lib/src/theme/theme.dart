@@ -284,10 +284,10 @@ class LdSizingConfig {
   double themeLPaddingL;
 
   LdSizingConfig({
-    this.radiusXS = 2.0,
-    this.radiusS = 4.0,
-    this.radiusM = 8.0,
-    this.radiusL = 16.0,
+    this.radiusXS = 4.0,
+    this.radiusS = 8.0,
+    this.radiusM = 16.0,
+    this.radiusL = 24.0,
     this.themeSPaddingXS = 4.0,
     this.themeSPaddingS = 8.0,
     this.themeSPaddingM = 10.0,

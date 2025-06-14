@@ -9,6 +9,7 @@ class LoaderDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/feedback/loader.dart",
       title: "LdLoader",
       demo: ComponentWell(
         child: Column(

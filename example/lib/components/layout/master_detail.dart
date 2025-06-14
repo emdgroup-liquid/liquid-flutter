@@ -39,6 +39,7 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/layout/master_detail.dart",
       title: "LdMasterDetail",
       apiComponents: const [
         "LdMasterDetail",

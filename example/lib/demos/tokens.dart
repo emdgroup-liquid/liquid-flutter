@@ -13,6 +13,7 @@ class TokensDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+        path: "lib/demos/tokens.dart",
         title: "Layout & Tokens",
         demo: Column(
           children: [

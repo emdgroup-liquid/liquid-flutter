@@ -11,6 +11,7 @@ class DividerDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/layout/divider.dart",
       title: "LdDivider",
       demo: LdAutoSpace(
         children: [

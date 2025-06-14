@@ -356,7 +356,7 @@ class _ButtonShape extends StatelessWidget {
     var borderWidth = EdgeInsets.all(_border(context)?.left.width ?? 0);
 
     if (circular) {
-      return theme.pad(size: size.adjust(-1)) - borderWidth;
+      EdgeInsets.zero;
     }
 
     return theme.balPad(size) - borderWidth;
@@ -389,7 +389,8 @@ class _ButtonShape extends StatelessWidget {
           child: child,
           data: IconThemeData(
             color: colors.text,
-            size: theme.labelSize(size),
+            size:
+                circular ? theme.labelSize(size) * 1.5 : theme.labelSize(size),
           ),
         ),
       ),

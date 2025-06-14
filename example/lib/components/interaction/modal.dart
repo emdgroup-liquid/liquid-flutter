@@ -160,6 +160,7 @@ class _ModalDemoState extends State<ModalDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+        path: "lib/components/interaction/modal.dart",
         title: "LdModal",
         apiComponents: const ["LdModal", "LdModalBuilder", "LdModalPage"],
         demo: LdAutoSpace(

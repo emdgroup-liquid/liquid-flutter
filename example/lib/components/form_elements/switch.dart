@@ -17,6 +17,7 @@ class _SwitchDemoState extends State<SwitchDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+        path: "lib/components/form_elements/switch.dart",
         title: "LdSwitch",
         text: "A component that allows the user to switch between several options",
         demo: ComponentWell(

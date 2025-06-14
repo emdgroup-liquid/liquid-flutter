@@ -29,6 +29,7 @@ class _ChooseDemoState extends State<ChooseDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/form_elements/choose.dart",
       title: "LdChoose",
       demo: LdAutoSpace(
         children: [

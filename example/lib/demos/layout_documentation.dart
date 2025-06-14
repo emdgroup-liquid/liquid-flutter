@@ -14,6 +14,7 @@ class LayoutDocumentation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const ComponentPage(
+        path: "lib/demos/layout_documentation.dart",
         apiComponents: [
           "LdAutoSpace",
           "LdSpacer",

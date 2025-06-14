@@ -10,6 +10,7 @@ class MaterialDocumentation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/material.dart",
       title: "Material Components",
       demo: ComponentWell(
         child: LdAutoSpace(

@@ -18,6 +18,7 @@ class _SubmitDemoState extends State<SubmitDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/form_elements/submit.dart",
       title: "LdSubmit",
       apiComponents: const ["LdSubmit"],
       demo: LdAutoSpace(
