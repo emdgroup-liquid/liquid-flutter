@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:js/js.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'task_model.dart';
 
@@ -21,7 +21,8 @@ class TaskRepository extends LdCrudOperations<Task> {
   }
 
   Future<void> _initStorage() async {
-    final storedTasks = await WebStorage.getStringList(_storageKey);
+    final prefs = await SharedPreferences.getInstance();
+    final storedTasks = prefs.getStringList(_storageKey);
     if (storedTasks != null) {
       _tasks.addAll(
         storedTasks
@@ -35,9 +36,10 @@ class TaskRepository extends LdCrudOperations<Task> {
   }
 
   Future<void> _saveTasks() async {
+    final prefs = await SharedPreferences.getInstance();
     final taskJsonList =
         _tasks.map((task) => jsonEncode(task.toJson())).toList();
-    await WebStorage.setStringList(_storageKey, taskJsonList);
+    await prefs.setStringList(_storageKey, taskJsonList);
   }
 
   @override
@@ -161,25 +163,3 @@ final List<Task> sampleTasks = [
     description: "API documentation and user guides completed",
   ),
 ];
-
-@JS('localStorage')
-external Storage get localStorage;
-
-@JS()
-@anonymous
-class Storage {
-  external String? getItem(String key);
-  external void setItem(String key, String value);
-}
-
-class WebStorage {
-  static Future<List<String>?> getStringList(String key) async {
-    final value = localStorage.getItem(key);
-    if (value == null) return null;
-    return value.split('|||');
-  }
-
-  static Future<void> setStringList(String key, List<String> value) async {
-    localStorage.setItem(key, value.join('|||'));
-  }
-}
