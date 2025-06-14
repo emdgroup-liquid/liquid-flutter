@@ -9,6 +9,7 @@ class AppBarDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/layout/appbar.dart",
       title: "LdAppBar",
       text: """
 `LdAppBar` is a cross-platform app bar widget that adapts its appearance to the Liquid Design system. It supports all standard AppBar features and is styled to match the current theme. Use it as a drop-in replacement for Flutter's AppBar for a consistent look and feel across your app.

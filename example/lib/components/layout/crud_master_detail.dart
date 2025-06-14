@@ -6,7 +6,6 @@ import 'package:liquid/code_block.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/master_detail/crud_item_mixin.dart';
 
 final exampleTitles =
     "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy "
@@ -139,6 +138,7 @@ class _CrudMasterDetailDemoState extends State<CrudMasterDetailDemo> {
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
+      path: "lib/components/layout/crud_master_detail.dart",
       title: "LdCrudMasterDetail",
       apiComponents: const [
         "LdCrudMasterDetail",

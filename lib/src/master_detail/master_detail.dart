@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/master_detail/crud_item_mixin.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -364,20 +363,19 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
   ) {
     return Scaffold(
       appBar: LdAppBar(
-        loading: isMasterAppBarLoading,
-        scrolledUnderElevation: isSeparatePage ? 4 : 0,
         title: widget.buildMasterTitle?.call(
           context,
           openItem,
           isSeparatePage,
           _controller,
         ),
-        actions: buildMasterActions(
-          context,
-          openItem,
-          isSeparatePage,
-        ),
-        actionsDisabled: isMasterAppBarLoading,
+        trailing: Row(
+          children: buildMasterActions(
+            context,
+            openItem,
+            isSeparatePage,
+          ),
+        ).spaceM(),
       ),
       backgroundColor: LdTheme.of(context).background,
       body: widget.buildMaster(
@@ -410,21 +408,19 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTicker
   ) {
     return Scaffold(
       appBar: LdAppBar(
-        automaticallyImplyLeading: false,
-        scrolledUnderElevation: isSeparatePage ? 4 : 0,
         title: widget.buildDetailTitle?.call(
           context,
           item,
           isSeparatePage,
           _controller,
         ),
-        actions: buildDetailActions(
-          context,
-          item,
-          isSeparatePage,
-        ),
-        actionsDisabled: isDetailsAppBarLoading,
-        loading: isDetailsAppBarLoading,
+        trailing: Row(
+          children: buildDetailActions(
+            context,
+            item,
+            isSeparatePage,
+          ),
+        ).spaceM(),
       ),
       backgroundColor: LdTheme.of(context).background,
       body: widget.buildDetail(
@@ -565,17 +561,22 @@ class _DetailPage<T> extends StatelessWidget {
             true,
             controller,
           ),
-          actions: buildDetailActions?.call(
-                context,
-                item,
-                true,
-                controller,
-              ) ??
-              [],
-          actionsDisabled: isDetailsAppBarLoading,
-          loading: isDetailsAppBarLoading,
+          trailing: Row(
+            children: buildDetailActions?.call(
+                  context,
+                  item,
+                  true,
+                  controller,
+                ) ??
+                [],
+          ).spaceM(),
         ),
-        body: buildDetail(context, item, true, controller),
+        body: buildDetail(
+          context,
+          item,
+          true,
+          controller,
+        ),
       ),
     );
   }
