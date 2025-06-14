@@ -24,9 +24,9 @@ extension FontSize on LdThemeSize {
           case LdSize.s:
             return 12;
           case LdSize.m:
-            return 16;
+            return 14;
           case LdSize.l:
-            return 18;
+            return 16;
         }
       case LdThemeSize.l:
         switch (size) {
@@ -37,7 +37,7 @@ extension FontSize on LdThemeSize {
           case LdSize.m:
             return 18;
           case LdSize.l:
-            return 24;
+            return 20;
         }
     }
   }
@@ -69,13 +69,13 @@ extension FontSize on LdThemeSize {
       case LdThemeSize.l:
         switch (size) {
           case LdSize.xs:
-            return 12;
-          case LdSize.s:
             return 14;
-          case LdSize.m:
+          case LdSize.s:
             return 16;
-          case LdSize.l:
+          case LdSize.m:
             return 18;
+          case LdSize.l:
+            return 20;
         }
     }
   }
