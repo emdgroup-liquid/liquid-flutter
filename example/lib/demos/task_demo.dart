@@ -1,6 +1,8 @@
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:implicitly_animated_list/implicitly_animated_list.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class _Task {
   final String task;
@@ -57,85 +59,137 @@ class _TaskDemoState extends State<TaskDemo> {
   @override
   Widget build(BuildContext context) {
     var done = _tasks.where((element) => element.done).length;
-    return LdContainer(
-      child: ListView(children: [
-        const LdTextH(
-          "Your tasks",
-        ),
-        ldSpacerM,
-        Wrap(
-          children: [
-            LdHint(
-              type: LdHintType.success,
-              child: Text("$done done"),
+    return LdWindowFrame(
+      title: const Text("Liquid Flutter"),
+      frameBuilder: (context, child) => GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onPanStart: (details) {
+          appWindow.startDragging();
+        },
+        onDoubleTap: () => appWindow.maximizeOrRestore(),
+        child: child,
+      ),
+      child: Scaffold(
+        appBar: LdAppBar(
+          title: const Text("Task Demo"),
+          trailing: LdContextMenu(
+            blurMode: LdContextMenuBlurMode.never,
+            builder: (context, isOpen, open) => LdButtonGhost(
+              onPressed: open,
+              child: const Icon(LucideIcons.ellipsisVertical),
             ),
-            ldSpacerM,
-            LdHint(
-              type: LdHintType.info,
-              child: Text("${_tasks.length - done} pending"),
-            )
-          ],
+            menuBuilder: (context, dismiss) {
+              return SizedBox(
+                width: 200,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    LdListItem(
+                      leading: const Icon(LucideIcons.plus),
+                      title: const Text("Add task"),
+                      onTap: dismiss,
+                    ),
+                    LdListItem(
+                      leading: const Icon(LucideIcons.trash),
+                      title: const Text("Clear all"),
+                      onTap: dismiss,
+                    ),
+                    LdDivider(),
+                    LdListItem(
+                      leading: const Icon(LucideIcons.settings),
+                      title: const Text("Settings"),
+                      onTap: dismiss,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
-        ldSpacerM,
-        Row(
-          children: [
-            Expanded(
-                child: LdInput(
-              controller: _controller,
-              hint: "Add a task",
-              onSubmitted: (p0) {
-                _addTask(_controller.text);
-              },
-            )),
-            ldSpacerS,
-            LdButton(
-                child: const Text("Add"),
-                onPressed: () {
-                  _addTask(_controller.text);
-                })
-          ],
-        ),
-        ldSpacerL,
-        LdToggle(
-          label: "Hide done",
-          size: LdSize.m,
-          checked: _hideDone,
-          onChanged: (p0) {
-            setState(() {
-              _hideDone = p0;
-            });
-          },
-        ),
-        ldSpacerL,
-        LdCard(
+        body: LdContainer(
           padding: EdgeInsets.zero,
-          child: ImplicitlyAnimatedList<_Task>(
-              padding: EdgeInsets.zero,
-              shrinkWrap: true,
-              itemData: _hideDone
-                  ? _tasks
-                      .where(
-                        (element) => !element.done,
-                      )
-                      .toList()
-                  : _tasks,
-              itemEquality: (a, b) => a.task == b.task,
-              key: _animatedListKey,
-              physics: const NeverScrollableScrollPhysics(),
-              itemBuilder: ((context, task) {
-                return LdListItem(
-                  showSelectionControls: true,
-                  subtitle: Text("Due ${task.due}"),
-                  width: double.infinity,
-                  isSelected: task.done,
-                  title: Text(task.task),
-                  onSelectionChange: (selected) {
-                    _setComplete(_tasks.indexOf(task), selected);
+          child: ListView(
+              padding: LdTheme.of(context).pad(size: LdSize.l),
+              children: [
+                const LdTextH(
+                  "Your tasks",
+                ),
+                ldSpacerM,
+                Wrap(
+                  children: [
+                    LdHint(
+                      type: LdHintType.success,
+                      child: Text("$done done"),
+                    ),
+                    ldSpacerM,
+                    LdHint(
+                      type: LdHintType.info,
+                      child: Text("${_tasks.length - done} pending"),
+                    )
+                  ],
+                ),
+                ldSpacerM,
+                Row(
+                  children: [
+                    Expanded(
+                        child: LdInput(
+                      controller: _controller,
+                      hint: "Add a task",
+                      onSubmitted: (p0) {
+                        _addTask(_controller.text);
+                      },
+                    )),
+                    ldSpacerS,
+                    LdButton(
+                        child: const Text("Add"),
+                        onPressed: () {
+                          _addTask(_controller.text);
+                        })
+                  ],
+                ),
+                ldSpacerL,
+                LdToggle(
+                  label: "Hide done",
+                  size: LdSize.m,
+                  checked: _hideDone,
+                  onChanged: (p0) {
+                    setState(() {
+                      _hideDone = p0;
+                    });
                   },
-                );
-              })),
-        )
-      ]),
+                ),
+                ldSpacerL,
+                LdCard(
+                  padding: EdgeInsets.zero,
+                  child: ImplicitlyAnimatedList<_Task>(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      itemData: _hideDone
+                          ? _tasks
+                              .where(
+                                (element) => !element.done,
+                              )
+                              .toList()
+                          : _tasks,
+                      itemEquality: (a, b) => a.task == b.task,
+                      key: _animatedListKey,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemBuilder: ((context, task) {
+                        return LdListItem(
+                          showSelectionControls: true,
+                          subtitle: Text("Due ${task.due}"),
+                          width: double.infinity,
+                          isSelected: task.done,
+                          title: Text(task.task),
+                          onSelectionChange: (selected) {
+                            _setComplete(_tasks.indexOf(task), selected);
+                          },
+                        );
+                      })),
+                )
+              ]),
+        ),
+      ),
     );
   }
 }
