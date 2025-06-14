@@ -1,144 +1,169 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class LdAppBar extends StatelessWidget implements PreferredSizeWidget {
+class LdAppBar extends StatefulWidget implements PreferredSizeWidget {
   final Widget? title;
-  final List<Widget>? actions;
   final Widget? leading;
-  final double? elevation;
-  final IconThemeData? iconTheme;
-  final bool? primary;
+  final Widget? trailing;
   final bool? centerTitle;
-  final double? titleSpacing;
-  final double? toolbarOpacity;
-  final double? bottomOpacity;
-  final double? toolbarHeight;
-  final TextStyle? titleTextStyle;
+  final bool? primary;
   final Color? backgroundColor;
-  final IconThemeData? actionsIconTheme;
-  final Widget? flexibleSpace;
-  final Color? foregroundColor;
-  final bool? automaticallyImplyLeading;
-  final Clip? clipBehavior;
-  final ShapeBorder? shape;
-  final TextStyle? toolbarTextStyle;
-  final double? leadingWidth;
-  final ScrollNotificationPredicate? notificationPredicate;
-  final bool? forceMaterialTransparency;
-  final double? scrolledUnderElevation;
-  final Color? surfaceTintColor;
-  final bool? excludeHeaderSemantics;
-  final BuildContext? context;
+  final bool? implyLeading;
+  final bool addContainer;
+  final bool elevateOnScroll;
 
   const LdAppBar({
     super.key,
-    @Deprecated(
-      "Context is no longer needed you can simply remove this parameter",
-    )
-    this.context,
     this.title,
-    this.actions,
     this.leading,
-    this.elevation,
-    this.iconTheme,
-    this.primary,
+    this.trailing,
     this.centerTitle,
-    this.titleSpacing,
-    this.toolbarOpacity,
-    this.bottomOpacity,
-    this.toolbarHeight,
-    this.titleTextStyle,
+    this.primary,
     this.backgroundColor,
-    this.actionsIconTheme,
-    this.flexibleSpace,
-    this.foregroundColor,
-    this.automaticallyImplyLeading,
-    this.clipBehavior,
-    this.shape,
-    this.toolbarTextStyle,
-    this.leadingWidth,
-    this.notificationPredicate,
-    this.forceMaterialTransparency,
-    this.scrolledUnderElevation,
-    this.surfaceTintColor,
-    this.excludeHeaderSemantics,
+    this.addContainer = true,
+    this.implyLeading,
+    this.elevateOnScroll = true,
   });
 
   @override
-  Size get preferredSize {
-    if (toolbarHeight != null) {
-      return Size.fromHeight(toolbarHeight! + 1);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 1);
+
+  @override
+  State<LdAppBar> createState() => _LdAppBarState();
+}
+
+class _LdAppBarState extends State<LdAppBar> {
+  bool _scrolledUnder = false;
+
+  bool get _isDesktop {
+    final platform = defaultTargetPlatform;
+    return platform == TargetPlatform.macOS ||
+        platform == TargetPlatform.linux ||
+        platform == TargetPlatform.windows;
+  }
+
+  void _handleScrollNotification(ScrollNotification notification) {
+    if (notification.depth == 0) {
+      final bool scrolled = notification.metrics.extentBefore > 0;
+      if (scrolled != _scrolledUnder) {
+        setState(() {
+          _scrolledUnder = scrolled;
+        });
+      }
+    }
+  }
+
+  Widget? _buildLeading(BuildContext context) {
+    if (widget.leading != null) return widget.leading;
+    final imply = widget.implyLeading ?? true;
+    if (!imply) return null;
+    final ModalRoute<Object?>? parentRoute = ModalRoute.of(context);
+    final bool canPop = parentRoute?.canPop ?? false;
+    if (canPop) {
+      return LdButtonGhost(
+        child: const Icon(LucideIcons.arrowLeft),
+        onPressed: () => Navigator.of(context).maybePop(),
+      );
     }
 
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return const Size.fromHeight(kToolbarHeight + 1);
-      default:
-        return const Size.fromHeight(kToolbarHeight + 1);
+    final scaffold = Scaffold.of(context);
+    if (scaffold.hasDrawer) {
+      return LdButtonGhost(
+        child: const Icon(LucideIcons.menu),
+        onPressed: () => scaffold.openDrawer(),
+      );
     }
+
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        AppBar(
-          key: key,
-          actions: actions,
-          leading: leading,
-          elevation: elevation,
-          iconTheme: iconTheme,
-          primary: primary ?? true,
-          centerTitle: centerTitle,
-          titleSpacing: titleSpacing,
-          toolbarOpacity: toolbarOpacity ?? 1.0,
-          bottomOpacity: bottomOpacity ?? 1.0,
-          toolbarHeight: toolbarHeight ??
-              (theme.themeSize == LdThemeSize.s ? 48 : kToolbarHeight),
-          titleTextStyle: titleTextStyle,
-          backgroundColor: backgroundColor,
-          actionsIconTheme: actionsIconTheme,
-          flexibleSpace: flexibleSpace,
-          foregroundColor: foregroundColor,
-          automaticallyImplyLeading: automaticallyImplyLeading ?? true,
-          clipBehavior: clipBehavior ?? Clip.none,
-          shape: shape,
-          toolbarTextStyle: toolbarTextStyle,
-          leadingWidth: leadingWidth,
-          notificationPredicate: notificationPredicate ??
-              (notification) => notification.depth == 0,
-          forceMaterialTransparency: forceMaterialTransparency ?? false,
-          scrolledUnderElevation: scrolledUnderElevation,
-          surfaceTintColor: surfaceTintColor,
-          excludeHeaderSemantics: excludeHeaderSemantics ?? false,
-          shadowColor: theme.neutralShade(1),
-          systemOverlayStyle: SystemUiOverlayStyle(
-            statusBarColor: theme.surface,
-            systemNavigationBarColor: theme.surface,
-            systemNavigationBarIconBrightness:
-                theme.isDark ? Brightness.light : Brightness.dark,
-            statusBarIconBrightness:
-                theme.isDark ? Brightness.light : Brightness.dark,
-            statusBarBrightness:
-                theme.isDark ? Brightness.dark : Brightness.light,
-          ),
-          title: DefaultTextStyle(
-            style: ldBuildTextStyle(
-              theme,
-              LdTextType.headline,
-              LdSize.s,
-            ),
-            child: title ?? const SizedBox(),
+    final backgroundColor = widget.backgroundColor ?? theme.surface;
+    final showShadow = _scrolledUnder && widget.elevateOnScroll != false;
+
+    final leading = _buildLeading(context);
+
+    final hasLeadingOrTrailing = leading != null || widget.trailing != null;
+
+    final isCenterTitle =
+        widget.centerTitle ?? (!_isDesktop && !hasLeadingOrTrailing);
+
+    final appBar = Container(
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        boxShadow: showShadow
+            ? [
+                BoxShadow(
+                  color: theme.neutralShade(1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : null,
+      ),
+      child: SafeArea(
+        top: widget.primary ?? true,
+        bottom: false,
+        minimum: EdgeInsets.zero,
+        child: SizedBox(
+          height: switch (theme.themeSize) {
+            LdThemeSize.s => 46,
+            LdThemeSize.m => 56,
+            LdThemeSize.l => 64,
+          },
+          child: LdContainer(
+            padding: LdTheme.of(context)
+                .pad(size: LdSize.l)
+                .copyWith(top: 0, bottom: 0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                if (leading != null) ...[
+                  leading,
+                ],
+                Expanded(
+                  child: Align(
+                    alignment:
+                        isCenterTitle ? Alignment.center : Alignment.centerLeft,
+                    child: DefaultTextStyle(
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: ldBuildTextStyle(
+                        theme,
+                        LdTextType.headline,
+                        LdSize.s,
+                        lineHeight: 1,
+                      ),
+                      child: widget.title ?? const SizedBox(),
+                    ),
+                  ),
+                ),
+                if (widget.trailing != null) ...[
+                  widget.trailing!,
+                ],
+              ],
+            ).spaceM(),
           ),
         ),
-        const LdDivider(height: 1),
-      ],
+      ),
+    );
+
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        _handleScrollNotification(notification);
+        return false;
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          appBar,
+          const LdDivider(height: 1),
+        ],
+      ),
     );
   }
 }

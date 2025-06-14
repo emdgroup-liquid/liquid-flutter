@@ -120,6 +120,8 @@ const components = [
       ComponentCategory.interaction),
   _Component("Orb", "/components/orb", LucideIcons.droplet,
       ComponentCategory.interaction),
+  _Component("App Bar", "/components/appbar", LucideIcons.layoutPanelTop,
+      ComponentCategory.interaction),
 
   // Data Display
   _Component("Icon", "/components/icon", LucideIcons.image,
