@@ -20,23 +20,28 @@ class LdContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var size = MediaQuery.of(context).size;
-    final theme = LdTheme.of(context, listen: true);
-
     // Default padding is the balanced L
 
-    var finalPadding = padding ?? (theme.pad(size: LdSize.l) * 1);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final theme = LdTheme.of(context, listen: true);
+        var finalPadding = padding ?? (theme.pad(size: LdSize.l) * 1);
 
-    // If the screen is larger than the max width, center the content
-    if (size.width > maxWidth) {
-      finalPadding = EdgeInsets.symmetric(
-          horizontal: max((size.width - maxWidth) / 2, finalPadding.horizontal),
-          vertical: finalPadding.vertical);
-    }
-
-    return Padding(
-      padding: finalPadding,
-      child: child,
+        // If the screen is larger than the max width, center the content
+        if (constraints.maxWidth > maxWidth) {
+          finalPadding = EdgeInsets.symmetric(
+              horizontal: max((constraints.maxWidth - maxWidth) / 2,
+                  finalPadding.horizontal),
+              vertical: finalPadding.vertical);
+        }
+        return Padding(
+          padding: finalPadding,
+          child: SizedBox(
+            width: constraints.maxWidth,
+            child: child,
+          ),
+        );
+      },
     );
   }
 }
