@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -130,59 +131,66 @@ class _LdContextMenuState extends State<LdContextMenu> {
     setState(() {
       _visible = false;
     });
-    _overlayPortalController.hide();
   }
 
-  Size _resizeMenuToScreen(BuildContext context, RenderBox menuBox) {
+  (Rect, Alignment) _resizeMenuToScreen(
+    BuildContext context,
+    Size menuSize,
+  ) {
     final mediaQuery = MediaQuery.of(
       Scaffold.maybeOf(context)?.context ?? context,
     );
 
-    final position = _getMenuPosition(context);
+    final viewInsets = mediaQuery.viewInsets + const EdgeInsets.all(10);
 
-    final viewInsets = mediaQuery.viewInsets;
     final screenSize = mediaQuery.size;
 
-    return Size(
-      screenSize.width - viewInsets.right - viewInsets.left - position.dx - 20,
-      screenSize.height - viewInsets.bottom - viewInsets.top - position.dy - 20,
-    );
-  }
+    final menuWidth = menuSize.width;
+    final menuHeight = menuSize.height;
 
-  Offset _insetMenuPositionToScreen(Offset position, RenderBox menuBox) {
-    final mediaQuery =
-        MediaQuery.of(Scaffold.maybeOf(context)?.context ?? context);
+    Offset triggerOffset;
+    Size triggerSize;
 
-    final inset = mediaQuery.viewInsets;
-    final screenSize = mediaQuery.size;
-
-    return Offset(
-      position.dx.clamp(0, screenSize.width - inset.right - inset.left - 10),
-      position.dy.clamp(0, screenSize.height - inset.bottom - inset.top - 10),
-    );
-  }
-
-  Offset _getMenuPosition(BuildContext context) {
     if (_effectivePositionMode == LdContextPositionMode.relativeTrigger) {
-      // This means the menu is positioned relative to the trigger
-
-      // Try to place the menu at the bottom of the trigger
-      final triggerPosition = _triggerBox?.localToGlobal(Offset.zero);
-      if (triggerPosition != null) {
-        return Offset(
-          triggerPosition.dx,
-          triggerPosition.dy + _triggerBox!.size.height,
-        );
-      }
+      triggerSize = _triggerBox!.size;
+      triggerOffset = Offset(
+        _triggerBox!.localToGlobal(Offset.zero).dx,
+        _triggerBox!.localToGlobal(Offset.zero).dy + triggerSize.height,
+      );
+    } else {
+      triggerOffset = _cursorPosition ?? Offset.zero;
+      // Place the cursor right on the first menu item
+      triggerOffset = Offset(
+        triggerOffset.dx - LdTheme.of(context).sizingConfig.radiusM,
+        triggerOffset.dy - LdTheme.of(context).sizingConfig.radiusM,
+      );
+      triggerSize = Size.zero;
     }
 
-    if (_effectivePositionMode == LdContextPositionMode.relativeCursor) {
-      // This means the menu is positioned relative to the cursor
+    final overflowX = min(
+      0,
+      screenSize.width - viewInsets.right - (triggerOffset.dx) - menuWidth,
+    );
 
-      return _cursorPosition ?? Offset.zero;
-    }
+    final overflowY = min(
+      0,
+      screenSize.height -
+          viewInsets.bottom -
+          (triggerOffset.dy + triggerSize.height) -
+          menuHeight,
+    );
 
-    return Offset.zero;
+    final baseRect = Rect.fromLTWH(
+      triggerOffset.dx + overflowX,
+      triggerOffset.dy + overflowY,
+      screenSize.width - viewInsets.right - (triggerOffset.dx) - overflowX,
+      screenSize.height -
+          viewInsets.bottom -
+          (triggerOffset.dy + triggerSize.height) -
+          overflowY,
+    );
+
+    return (baseRect, Alignment.topLeft);
   }
 
   void _open({Offset? globalPosition}) async {
@@ -209,7 +217,23 @@ class _LdContextMenuState extends State<LdContextMenu> {
         HapticFeedback.heavyImpact();
         _open(globalPosition: details.globalPosition);
       },
-      child: widget.builder(context, false, _open),
+      child: widget.builder(context, false, ({Offset? position}) {
+        if (position == null) {
+          if (_triggerBox != null) {
+            _open(
+              globalPosition: Offset(
+                _triggerBox!.localToGlobal(Offset.zero).dx,
+                _triggerBox!.localToGlobal(Offset.zero).dy +
+                    _triggerBox!.size.height,
+              ),
+            );
+          } else {
+            _open();
+          }
+        } else {
+          _open(globalPosition: position);
+        }
+      }),
     );
   }
 
@@ -229,105 +253,146 @@ class _LdContextMenuState extends State<LdContextMenu> {
     return child;
   }
 
+  Widget _buildBlur(BuildContext context, Widget child) {
+    if (!_shouldBlur) {
+      return const SizedBox.shrink();
+    }
+    return LdSpring(
+      initialPosition: 0,
+      position: _visible ? 1 : 0,
+      builder: (context, state) {
+        return BackdropFilter(
+          filter: ImageFilter.blur(
+            sigmaX: 10 * state.position.clamp(0, 1),
+            sigmaY: 10 * state.position.clamp(0, 1),
+          ),
+          child: child,
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
 
-    final menu = LdSpring(
-      initialPosition: 0,
-      mass: 8,
-      springConstant: 15,
-      dampingCoefficient: 15,
-      position: _visible ? 1 : 0,
-      builder: (context, state) {
-        final triggerBox =
-            _triggerKey.currentContext?.findRenderObject() as RenderBox?;
+    return OverlayPortal.targetsRootOverlay(
+      overlayChildBuilder: (context) =>
+          LayoutBuilder(builder: (context, constraints) {
+        final menu = LdSpring(
+          initialPosition: 0,
+          mass: 8,
+          springConstant: 15,
+          dampingCoefficient: 15,
+          position: _visible ? 1 : 0,
+          onAnimationEnd: (context, state) {
+            if (state.position == 0) {
+              _overlayPortalController.hide();
+            }
+          },
+          builder: (context, state) {
+            final triggerBox =
+                _triggerKey.currentContext?.findRenderObject() as RenderBox?;
+            final menuBox =
+                _menuKey.currentContext?.findRenderObject() as RenderBox?;
 
-        if (triggerBox == null) {
-          return const SizedBox.shrink();
-        }
+            if (triggerBox == null ||
+                menuBox == null ||
+                !menuBox.hasSize ||
+                !triggerBox.hasSize) {
+              return const SizedBox.shrink();
+            }
 
-        final menuPosition = _insetMenuPositionToScreen(
-          _getMenuPosition(context),
-          triggerBox,
-        );
+            final (rect, alignment) = _resizeMenuToScreen(
+              context,
+              menuBox.size,
+            );
 
-        final size = _resizeMenuToScreen(context, triggerBox);
-
-        return Positioned(
-          left: menuPosition.dx,
-          top: menuPosition.dy,
-          child: Opacity(
-            opacity: state.position.clamp(0, 1),
-            child: Container(
-              constraints: BoxConstraints(
-                maxWidth: size.width,
-                maxHeight: size.height,
-              ),
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              clipBehavior: Clip.hardEdge,
-              decoration: BoxDecoration(
-                color: theme.surface,
-                border: Border.all(
-                  color: theme.border,
-                  strokeAlign: BorderSide.strokeAlignOutside,
-                  width: theme.borderWidth,
-                ),
-                borderRadius: theme.radius(LdSize.m),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.palette.neutral.shades.last.withAlpha(51),
-                    blurRadius: 10,
-                    offset: const Offset(0, 0),
-                  )
-                ],
-              ),
-              child: ClipRRect(
+            return Positioned.fromRect(
+              rect: rect,
+              child: Opacity(
+                opacity: state.position.clamp(0, 1),
                 child: Align(
-                  alignment: Alignment.topLeft,
-                  widthFactor: state.position.clamp(0, double.infinity),
-                  heightFactor: state.position.clamp(0, double.infinity),
-                  child: KeyedSubtree(
-                    key: _menuKey,
-                    child: widget.menuBuilder(context, _dismiss),
+                  alignment: alignment,
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth: rect.width,
+                      maxHeight: rect.height,
+                    ),
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    clipBehavior: Clip.hardEdge,
+                    decoration: BoxDecoration(
+                      color: theme.surface,
+                      border: Border.all(
+                        color: theme.border,
+                        strokeAlign: BorderSide.strokeAlignOutside,
+                        width: theme.borderWidth,
+                      ),
+                      borderRadius: theme.radius(LdSize.m),
+                      boxShadow: [
+                        BoxShadow(
+                          color:
+                              theme.palette.neutral.shades.last.withAlpha(51),
+                          blurRadius: 10,
+                          offset: const Offset(0, 0),
+                        )
+                      ],
+                    ),
+                    child: ClipRRect(
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        widthFactor: 1,
+                        heightFactor: state.position.clamp(0, double.infinity),
+                        child: ScrollConfiguration(
+                          behavior: ScrollConfiguration.of(context).copyWith(
+                            scrollbars: true,
+                          ),
+                          child: widget.menuBuilder(context, _dismiss),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         );
-      },
-    );
-
-    return OverlayPortal.targetsRootOverlay(
-      overlayChildBuilder: (context) => Stack(
-        fit: StackFit.expand,
-        children: [
-          if (_shouldBlur) ...[
-            BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(
-                color: Colors.black.withAlpha(51),
-              ),
-            ).animate().fadeIn(duration: 100.ms),
-            if (_triggerBox != null)
-              Positioned(
-                left: _triggerBox!.localToGlobal(Offset.zero).dx,
-                top: _triggerBox!.localToGlobal(Offset.zero).dy,
-                width: _triggerBox!.size.width,
-                height: _triggerBox!.size.height,
-                child: _buildZoom(
-                  context,
-                  widget.builder(context, true, _open),
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            Offstage(
+              child: Center(
+                  child: KeyedSubtree(
+                key: _menuKey,
+                child: widget.menuBuilder(context, _dismiss),
+              )),
+            ),
+            if (_shouldBlur) ...[
+              _buildBlur(
+                context,
+                Container(
+                  color: Colors.black.withAlpha(51),
                 ),
               ),
+              if (_triggerBox != null)
+                Positioned(
+                  left: _triggerBox!.localToGlobal(Offset.zero).dx,
+                  top: _triggerBox!.localToGlobal(Offset.zero).dy,
+                  width: _triggerBox!.size.width,
+                  height: _triggerBox!.size.height,
+                  child: _buildZoom(
+                    context,
+                    widget.builder(context, true, _open),
+                  ),
+                ),
+            ],
+            ModalBarrier(
+              onDismiss: _dismiss,
+            ),
+            menu,
           ],
-          ModalBarrier(
-            onDismiss: _dismiss,
-          ),
-          menu,
-        ],
-      ),
+        );
+      }),
       controller: _overlayPortalController,
       child: _buildZoom(
         context,

@@ -14,7 +14,7 @@ class ContextMenuDemo extends StatefulWidget {
 class _ContextMenuDemoState extends State<ContextMenuDemo> {
   LdContextMenuBlurMode _blurMode = LdContextMenuBlurMode.mobileOnly;
   LdContextZoomMode _zoomMode = LdContextZoomMode.mobileOnly;
-  LdContextPositionMode _positionMode = LdContextPositionMode.relativeTrigger;
+  LdContextPositionMode _positionMode = LdContextPositionMode.auto;
 
   _buildMenu(BuildContext context, VoidCallback onDismiss) =>
       SingleChildScrollView(
@@ -24,28 +24,72 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
             children: [
               LdListItem(
                 width: double.infinity,
-                trailing: const Icon(LucideIcons.arrowRight),
-                onTap: () {
-                  onDismiss();
-                },
-                title: const Text("Button 1"),
+                leading: const Icon(LucideIcons.pen),
+                subContent: Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: LdSwitch(
+                      value: false,
+                      onChanged: (p0) {},
+                      children: const {
+                        true: Text("On"),
+                        false: Text("Off"),
+                      },
+                    ),
+                  ),
+                ),
+                title: const Text("Turbo mode"),
               ),
               LdListItem(
                 width: double.infinity,
-                trailing: const Icon(LucideIcons.arrowRight),
-                onTap: () async {
-                  await Future.delayed(const Duration(seconds: 1));
-                  onDismiss();
-                },
-                title: const Text("Button 2"),
-              ),
-              LdListItem(
-                width: double.infinity,
-                trailing: const Icon(LucideIcons.trash),
+                leading: const Icon(LucideIcons.pen),
                 onTap: () {
                   onDismiss();
                 },
-                title: const Text("Button 2"),
+                title: const Text("Edit"),
+              ),
+              LdListItem(
+                width: double.infinity,
+                leading: const Icon(LucideIcons.copy),
+                onTap: () {
+                  onDismiss();
+                },
+                title: const Text("Copy"),
+              ),
+              LdListItem(
+                width: double.infinity,
+                leading: const Icon(LucideIcons.share2),
+                onTap: () {
+                  onDismiss();
+                },
+                title: const Text("Share"),
+              ),
+              LdListItem(
+                width: double.infinity,
+                leading: const Icon(LucideIcons.star),
+                onTap: () {
+                  onDismiss();
+                },
+                title: const Text("Favorite"),
+              ),
+              LdListItem(
+                width: double.infinity,
+                leading: const Icon(LucideIcons.archive),
+                onTap: () {
+                  onDismiss();
+                },
+                title: const Text("Archive"),
+              ),
+              const LdDivider(),
+              LdListItem(
+                width: double.infinity,
+                leading: const Icon(LucideIcons.trash2, color: Colors.red),
+                onTap: () {
+                  onDismiss();
+                },
+                title:
+                    const Text("Delete", style: TextStyle(color: Colors.red)),
               ),
             ]),
       );
