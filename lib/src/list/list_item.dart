@@ -75,7 +75,7 @@ class LdListItem extends StatelessWidget {
         }
       },
       active: active || (showSelectionControls && isSelected),
-      disabled: disabled,
+      disabled: disabled || (!showSelectionControls && onTap == null),
       color: theme.palette.primary,
       builder: (contxt, colors, status) {
         return IconTheme(
@@ -91,7 +91,9 @@ class LdListItem extends StatelessWidget {
               borderRadius: borderRadius,
             ),
             child: Row(
-                mainAxisSize: effectiveWidth != double.infinity ? MainAxisSize.min : MainAxisSize.max,
+                mainAxisSize: effectiveWidth != double.infinity
+                    ? MainAxisSize.min
+                    : MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   LdReveal.quick(
@@ -131,12 +133,16 @@ class LdListItem extends StatelessWidget {
                           ],
                         ),
                         //axis: Axis.horizontal,
-                        revealed: !(showSelectionControls && tradeLeadingForSelectionControl),
-                        initialRevealed: !(showSelectionControls && tradeLeadingForSelectionControl),
+                        revealed: !(showSelectionControls &&
+                            tradeLeadingForSelectionControl),
+                        initialRevealed: !(showSelectionControls &&
+                            tradeLeadingForSelectionControl),
                       ),
                     ),
                   Flexible(
-                    fit: effectiveWidth == double.infinity ? FlexFit.tight : FlexFit.loose,
+                    fit: effectiveWidth == double.infinity
+                        ? FlexFit.tight
+                        : FlexFit.loose,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
