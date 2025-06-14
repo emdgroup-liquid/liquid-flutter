@@ -51,6 +51,7 @@ import 'components/form_elements/reactive_form.dart';
 import 'components/data_display/table.dart';
 import 'components/data_display/tag.dart';
 import 'window/app_scaffold.dart';
+import 'components/interaction/appbar.dart';
 
 class AppRouter {
   AppRouter();
@@ -71,11 +72,6 @@ class AppRouter {
             path: "/chemical",
             pageBuilder: (context, state) => NoTransitionPage<void>(
                 key: state.pageKey, child: const ChemicalScreen()),
-          ),
-          GoRoute(
-            path: "/task-demo",
-            pageBuilder: (context, state) => NoTransitionPage<void>(
-                key: state.pageKey, child: const TaskDemo()),
           ),
           GoRoute(
             path: "/theme",
@@ -101,6 +97,13 @@ class AppRouter {
             path: "/material",
             pageBuilder: (context, state) => NoTransitionPage<void>(
                 key: state.pageKey, child: const MaterialDocumentation()),
+          ),
+          GoRoute(
+            path: "/task-demo",
+            pageBuilder: (context, state) => MaterialPage<void>(
+              key: state.pageKey,
+              child: const TaskDemo(),
+            ),
           ),
 
           /*GoRoute(
@@ -327,6 +330,11 @@ class AppRouter {
                 return NoTransitionPage<void>(
                     key: state.pageKey, child: const ReactiveFormDemo());
               }),
+          GoRoute(
+            path: "/components/appbar",
+            pageBuilder: (context, state) => NoTransitionPage<void>(
+                key: state.pageKey, child: const AppBarDemo()),
+          ),
         ]),
   ]);
 }
