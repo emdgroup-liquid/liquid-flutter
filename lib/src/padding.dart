@@ -85,6 +85,188 @@ extension LsPaddings on Widget {
   }
 }
 
+extension RowSpacing on Row {
+  Widget spaceXS() {
+    return Builder(builder: (context) {
+      return Row(
+        mainAxisAlignment: mainAxisAlignment,
+        crossAxisAlignment: crossAxisAlignment,
+        mainAxisSize: mainAxisSize,
+        textBaseline: textBaseline,
+        textDirection: textDirection,
+        verticalDirection: verticalDirection,
+        key: key,
+        spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
+        children: children,
+      );
+    });
+  }
+
+  Widget spaceS() {
+    return Builder(builder: (context) {
+      return Row(
+        mainAxisAlignment: mainAxisAlignment,
+        crossAxisAlignment: crossAxisAlignment,
+        mainAxisSize: mainAxisSize,
+        textBaseline: textBaseline,
+        textDirection: textDirection,
+        verticalDirection: verticalDirection,
+        key: key,
+        spacing: LdTheme.of(context).paddingSize(size: LdSize.s),
+        children: children,
+      );
+    });
+  }
+
+  Widget spaceM() {
+    return Builder(builder: (context) {
+      return Row(
+        mainAxisAlignment: mainAxisAlignment,
+        crossAxisAlignment: crossAxisAlignment,
+        mainAxisSize: mainAxisSize,
+        textBaseline: textBaseline,
+        textDirection: textDirection,
+        verticalDirection: verticalDirection,
+        key: key,
+        spacing: LdTheme.of(context).paddingSize(size: LdSize.m),
+        children: children,
+      );
+    });
+  }
+
+  Widget spaceL() {
+    return Builder(builder: (context) {
+      return Row(
+        mainAxisAlignment: mainAxisAlignment,
+        crossAxisAlignment: crossAxisAlignment,
+        mainAxisSize: mainAxisSize,
+        textBaseline: textBaseline,
+        textDirection: textDirection,
+        verticalDirection: verticalDirection,
+        key: key,
+        spacing: LdTheme.of(context).paddingSize(size: LdSize.l),
+        children: children,
+      );
+    });
+  }
+}
+
+extension WrapSpacing on Wrap {
+  Widget spaceXS() {
+    return Builder(builder: (context) {
+      return Wrap(
+        direction: direction,
+        alignment: alignment,
+        spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
+        runSpacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
+        crossAxisAlignment: crossAxisAlignment,
+        textDirection: textDirection,
+        verticalDirection: verticalDirection,
+        key: key,
+        children: children,
+      );
+    });
+  }
+
+  Widget spaceS() {
+    return Builder(builder: (context) {
+      return Wrap(
+        direction: direction,
+        alignment: alignment,
+        spacing: LdTheme.of(context).paddingSize(size: LdSize.s),
+        runSpacing: LdTheme.of(context).paddingSize(size: LdSize.s),
+        crossAxisAlignment: crossAxisAlignment,
+        textDirection: textDirection,
+        verticalDirection: verticalDirection,
+        key: key,
+        children: children,
+      );
+    });
+  }
+
+  Widget spaceM() {
+    return Builder(builder: (context) {
+      return Wrap(
+        direction: direction,
+        alignment: alignment,
+        spacing: LdTheme.of(context).paddingSize(size: LdSize.m),
+        runSpacing: LdTheme.of(context).paddingSize(size: LdSize.m),
+        crossAxisAlignment: crossAxisAlignment,
+        textDirection: textDirection,
+        verticalDirection: verticalDirection,
+        key: key,
+        children: children,
+      );
+    });
+  }
+
+  Widget spaceL() {
+    return Builder(builder: (context) {
+      return Wrap(
+        direction: direction,
+        alignment: alignment,
+        spacing: LdTheme.of(context).paddingSize(size: LdSize.l),
+        runSpacing: LdTheme.of(context).paddingSize(size: LdSize.l),
+        crossAxisAlignment: crossAxisAlignment,
+        textDirection: textDirection,
+        verticalDirection: verticalDirection,
+        key: key,
+        children: children,
+      );
+    });
+  }
+}
+
+extension ColumnSpacing on Column {
+  Widget spaceS() {
+    return Builder(builder: (context) {
+      return Column(
+        mainAxisAlignment: mainAxisAlignment,
+        crossAxisAlignment: crossAxisAlignment,
+        mainAxisSize: mainAxisSize,
+        textBaseline: textBaseline,
+        textDirection: textDirection,
+        verticalDirection: verticalDirection,
+        key: key,
+        spacing: LdTheme.of(context).paddingSize(size: LdSize.s),
+        children: children,
+      );
+    });
+  }
+
+  Widget spaceM() {
+    return Builder(builder: (context) {
+      return Column(
+        mainAxisAlignment: mainAxisAlignment,
+        crossAxisAlignment: crossAxisAlignment,
+        mainAxisSize: mainAxisSize,
+        textBaseline: textBaseline,
+        textDirection: textDirection,
+        verticalDirection: verticalDirection,
+        key: key,
+        spacing: LdTheme.of(context).paddingSize(size: LdSize.m),
+        children: children,
+      );
+    });
+  }
+
+  Widget spaceL() {
+    return Builder(builder: (context) {
+      return Column(
+        mainAxisAlignment: mainAxisAlignment,
+        crossAxisAlignment: crossAxisAlignment,
+        mainAxisSize: mainAxisSize,
+        textBaseline: textBaseline,
+        textDirection: textDirection,
+        verticalDirection: verticalDirection,
+        key: key,
+        spacing: LdTheme.of(context).paddingSize(size: LdSize.l),
+        children: children,
+      );
+    });
+  }
+}
+
 class _LdPadding extends StatelessWidget {
   final LdSize size;
   final Widget child;
