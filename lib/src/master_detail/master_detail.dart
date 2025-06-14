@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/master_detail/crud_item_mixin.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -33,8 +34,7 @@ class LdMasterDetailBuilders<T> {
   final LdMasterBuilder<T, Widget> buildMaster;
   final LdMasterBuilder<T, List<Widget>>? buildMasterActions;
   final LdDetailBuilder<T, List<Widget>>? buildDetailActions;
-  final bool Function(T? openItem)? isMasterAppBarLoading;
-  final bool Function(T? openItem)? isDetailAppBarLoading;
+
   final List<InheritedProvider> Function(BuildContext context)? injectables;
 
   const LdMasterDetailBuilders({
@@ -44,8 +44,6 @@ class LdMasterDetailBuilders<T> {
     required this.buildMaster,
     this.buildMasterActions,
     this.buildDetailActions,
-    this.isMasterAppBarLoading,
-    this.isDetailAppBarLoading,
     this.injectables,
   });
 }
@@ -148,8 +146,6 @@ class LdMasterDetail<T> extends StatefulWidget {
       onOpenItemChange: onOpenItemChange,
       masterDetailFlex: masterDetailFlex,
       customSplitPredicate: customSplitPredicate,
-      isMasterAppBarLoading: builders.isMasterAppBarLoading,
-      isDetailAppBarLoading: builders.isDetailAppBarLoading,
       injectables: builders.injectables,
       routeConfigId: routeConfigId,
     );

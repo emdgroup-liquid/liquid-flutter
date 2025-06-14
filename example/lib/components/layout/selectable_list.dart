@@ -109,13 +109,14 @@ class _SelectableListDemoState extends State<SelectableListDemo> {
                   required bool isMultiSelect,
                   required void Function(bool selected) onSelectionChange,
                   required VoidCallback onTap,
+                  required bool showSelectionControls,
                 }) {
                   return LdListItem(
                     active: selected,
                     leading: LdAvatar(child: Text(item.formula)),
                     isSelected: selected,
                     radioSelection: !isMultiSelect,
-                    showSelectionControls: _showSelectionControls,
+                    showSelectionControls: showSelectionControls,
                     onSelectionChange: onSelectionChange,
                     onTap: onTap,
                     subtitle: Text(item.subtitle),

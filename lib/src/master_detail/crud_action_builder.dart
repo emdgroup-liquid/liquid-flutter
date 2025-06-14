@@ -1,6 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/master_detail/crud_item_mixin.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+enum LdCrudActionVisibility {
+  standalone,
+  contextMenu,
+  appBar,
+  appBarMulti,
+  contextMenuMulti,
+  standaloneMulti,
+}
 
 typedef LdCrudActionBuilder<T extends CrudItemMixin<T>> = Widget Function(
     LdCrudMasterDetailState<T> masterDetail, VoidCallback triggerAction);
@@ -22,7 +34,7 @@ class LdContextAwareCrudActionBuilder<T extends CrudItemMixin<T>> extends Statel
   final Widget Function(BuildContext context, VoidCallback triggerAction)? defaultBuilder;
 
   /// The action to trigger when the widget is interacted with
-  final VoidCallback triggerAction;
+  final FutureOr<void> Function() triggerAction;
 
   /// The master detail state for accessing multi-select mode and other state
   final LdCrudMasterDetailState<T> masterDetail;
@@ -33,17 +45,11 @@ class LdContextAwareCrudActionBuilder<T extends CrudItemMixin<T>> extends Statel
   /// Text to display in context menu and default button
   final String? actionText;
 
-  /// Icon to use in the app bar context
-  final bool hideInAppBarInSingleSelectMode;
+  /// Determines in which scenarios the action is visible
+  final Set<LdCrudActionVisibility> visibility;
 
-  /// Whether to hide the widget in single-select mode when in context menu
-  final bool hideInContextMenuInSingleSelectMode;
-
-  /// Whether to hide the widget in single-select mode when in app bar
-  final bool? hideInAppBarInMultiSelectMode;
-
-  /// Whether to hide the widget in multi-select mode when in context menu
-  final bool? hideInContextMenuInMultiSelectMode;
+  /// The color of action
+  final LdColor? color;
 
   const LdContextAwareCrudActionBuilder({
     super.key,
@@ -54,10 +60,15 @@ class LdContextAwareCrudActionBuilder<T extends CrudItemMixin<T>> extends Statel
     this.defaultBuilder,
     this.actionIcon,
     this.actionText,
-    this.hideInAppBarInSingleSelectMode = false,
-    this.hideInContextMenuInSingleSelectMode = false,
-    this.hideInAppBarInMultiSelectMode,
-    this.hideInContextMenuInMultiSelectMode,
+    this.visibility = const {
+      LdCrudActionVisibility.standalone,
+      LdCrudActionVisibility.contextMenu,
+      LdCrudActionVisibility.appBar,
+      LdCrudActionVisibility.appBarMulti,
+      LdCrudActionVisibility.contextMenuMulti,
+      LdCrudActionVisibility.standaloneMulti,
+    },
+    this.color,
   });
 
   factory LdContextAwareCrudActionBuilder.create({
@@ -69,8 +80,11 @@ class LdContextAwareCrudActionBuilder<T extends CrudItemMixin<T>> extends Statel
       masterDetail: masterDetail,
       actionIcon: LucideIcons.circlePlus,
       actionText: LiquidLocalizations.of(masterDetail.context).createNew,
-      hideInAppBarInSingleSelectMode: false,
-      hideInContextMenuInSingleSelectMode: false,
+      visibility: const {
+        LdCrudActionVisibility.standalone,
+        LdCrudActionVisibility.appBar,
+        LdCrudActionVisibility.contextMenu,
+      },
     );
   }
 
@@ -83,7 +97,12 @@ class LdContextAwareCrudActionBuilder<T extends CrudItemMixin<T>> extends Statel
       masterDetail: masterDetail,
       actionIcon: LucideIcons.pencil,
       actionText: LiquidLocalizations.of(masterDetail.context).edit,
-      hideInContextMenuInMultiSelectMode: true,
+      visibility: const {
+        LdCrudActionVisibility.standalone,
+        LdCrudActionVisibility.appBar,
+        LdCrudActionVisibility.contextMenu,
+      },
+      color: LdTheme.of(masterDetail.context).primary,
     );
   }
 
@@ -96,7 +115,12 @@ class LdContextAwareCrudActionBuilder<T extends CrudItemMixin<T>> extends Statel
       masterDetail: masterDetail,
       actionIcon: LucideIcons.trash2,
       actionText: LiquidLocalizations.of(masterDetail.context).delete,
-      hideInContextMenuInMultiSelectMode: true,
+      visibility: const {
+        LdCrudActionVisibility.standalone,
+        LdCrudActionVisibility.appBar,
+        LdCrudActionVisibility.contextMenu,
+      },
+      color: LdTheme.of(masterDetail.context).error,
     );
   }
 
@@ -109,60 +133,68 @@ class LdContextAwareCrudActionBuilder<T extends CrudItemMixin<T>> extends Statel
       masterDetail: masterDetail,
       actionIcon: LucideIcons.listX,
       actionText: LiquidLocalizations.of(masterDetail.context).deleteSelected,
-      hideInAppBarInSingleSelectMode: true,
-      hideInContextMenuInSingleSelectMode: true,
+      visibility: const {
+        LdCrudActionVisibility.standaloneMulti,
+        LdCrudActionVisibility.appBarMulti,
+        LdCrudActionVisibility.contextMenuMulti,
+      },
+      color: LdTheme.of(masterDetail.context).error,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final isInMultiSelectMode = masterDetail.listState.isMultiSelectMode;
-
-    // Check if we're in an app bar context
-    final isInAppBar = context.findAncestorWidgetOfExactType<LdAppBar>() != null;
-    if (isInAppBar) {
-      if (appBarActionBuilder != null) {
-        return appBarActionBuilder!(context, triggerAction);
-      }
-
-      if (hideInAppBarInSingleSelectMode && !isInMultiSelectMode ||
-          ((hideInAppBarInMultiSelectMode ?? !hideInAppBarInSingleSelectMode) && isInMultiSelectMode)) {
-        return const SizedBox.shrink();
-      }
-
-      return IconButton(
-        onPressed: triggerAction,
-        icon: Icon(actionIcon),
-      );
-    }
-
-    // Check if we're in a context menu
     final isInContextMenu = context.findAncestorWidgetOfExactType<LdContextMenu>() != null;
-    if (isInContextMenu) {
-      if (contextMenuActionBuilder != null) {
-        return contextMenuActionBuilder!(context, triggerAction);
-      }
+    final isInAppBar = context.findAncestorWidgetOfExactType<LdAppBar>() != null;
 
-      if (hideInContextMenuInSingleSelectMode && !isInMultiSelectMode ||
-          ((hideInContextMenuInMultiSelectMode ?? !hideInContextMenuInSingleSelectMode) && isInMultiSelectMode)) {
-        return const SizedBox.shrink();
-      }
+    LdCrudActionVisibility applicableMode;
 
-      return LdListItem(
-        onTap: triggerAction,
-        title: Text(actionText ?? ""),
-        leading: Icon(actionIcon),
-      );
+    if (isInAppBar) {
+      if (isInMultiSelectMode) {
+        applicableMode = LdCrudActionVisibility.appBarMulti;
+      } else {
+        applicableMode = LdCrudActionVisibility.appBar;
+      }
+    } else if (isInContextMenu) {
+      if (isInMultiSelectMode) {
+        applicableMode = LdCrudActionVisibility.contextMenuMulti;
+      } else {
+        applicableMode = LdCrudActionVisibility.contextMenu;
+      }
+    } else {
+      if (isInMultiSelectMode) {
+        applicableMode = LdCrudActionVisibility.standaloneMulti;
+      } else {
+        applicableMode = LdCrudActionVisibility.standalone;
+      }
     }
 
-    // Default context
-    if (defaultBuilder != null) {
-      return defaultBuilder!(context, triggerAction);
+    if (!visibility.contains(applicableMode)) {
+      return const SizedBox.shrink();
     }
 
-    return LdButton(
-      child: Text(actionText ?? ""),
-      onPressed: triggerAction,
-    );
+    return switch (applicableMode) {
+      (LdCrudActionVisibility.appBarMulti || LdCrudActionVisibility.appBar) =>
+        appBarActionBuilder?.call(context, triggerAction) ??
+            LdButtonGhost(
+              color: color,
+              onPressed: triggerAction,
+              child: Icon(actionIcon),
+            ),
+      (LdCrudActionVisibility.contextMenuMulti || LdCrudActionVisibility.contextMenu) =>
+        contextMenuActionBuilder?.call(context, triggerAction) ??
+            LdListItem(
+              onTap: triggerAction,
+              title: Text(actionText ?? ""),
+              leading: Icon(actionIcon, color: color?.center(LdTheme.of(context).isDark)),
+            ),
+      (LdCrudActionVisibility.standaloneMulti || LdCrudActionVisibility.standalone) =>
+        defaultBuilder?.call(context, triggerAction) ??
+            LdButton(
+              child: Text(actionText ?? ""),
+              onPressed: triggerAction,
+            ),
+    };
   }
 }

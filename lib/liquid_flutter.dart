@@ -61,6 +61,7 @@ export 'src/master_detail/crud_actions_update.dart';
 export 'src/master_detail/crud_master_list.dart';
 export 'src/master_detail/master_detail.dart';
 export 'src/master_detail/master_detail_controller.dart';
+export 'src/master_detail/crud_item_mixin.dart';
 export 'src/master_detail/master_detail_route.dart';
 export 'src/modal/modal.dart';
 export 'src/modal/modal_builder.dart';

@@ -165,6 +165,9 @@ class TaskDetailPageState extends State<TaskDetailPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                LdCrudUpdateAction<Task>(
+                    getUpdatedItem: () => _editingTask,
+                    onItemUpdated: (masterDetail, item) => {}),
                 TextButton(
                   onPressed: () => context
                       .findAncestorStateOfType<TaskDemoState>()

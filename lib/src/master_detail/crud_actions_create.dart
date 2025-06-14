@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/master_detail/crud_item_mixin.dart';
 
 class LdCrudCreateAction<T extends CrudItemMixin<T>> extends LdCrudAction<T, T, T> {
   LdCrudCreateAction({
@@ -12,12 +13,20 @@ class LdCrudCreateAction<T extends CrudItemMixin<T>> extends LdCrudAction<T, T, 
   }) : super(
           builder: builder ?? _defaultBuilder,
           action: (crud, newItem) => crud.create(newItem),
-          onActionCompleted: (masterDetail, controller, arg, result) => onItemCreated?.call(masterDetail, result),
+          onActionCompleted: (masterDetail, controller, arg, result) => onItemCreated?.call(
+            masterDetail,
+            result,
+          ),
           obtainArg: (masterDetail, controller) async => getNewItem(),
         );
 
   static Widget _defaultBuilder<T extends CrudItemMixin<T>>(
-      LdCrudMasterDetailState<T> masterDetail, VoidCallback triggerAction) {
-    return LdContextAwareCrudActionBuilder.create(masterDetail: masterDetail, triggerAction: triggerAction);
+    LdCrudMasterDetailState<T> masterDetail,
+    VoidCallback triggerAction,
+  ) {
+    return LdContextAwareCrudActionBuilder.create(
+      masterDetail: masterDetail,
+      triggerAction: triggerAction,
+    );
   }
 }

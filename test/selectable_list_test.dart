@@ -21,6 +21,7 @@ void main() {
         required bool isMultiSelect,
         required void Function(bool selected) onSelectionChange,
         required VoidCallback onTap,
+        required bool showSelectionControls,
       }) {
         return ListTile(
           key: ValueKey(item),
@@ -68,8 +69,7 @@ void main() {
       expect(selected.contains('A'), isTrue);
     });
 
-    testWidgets('selects multiple items with drag rectangle',
-        (WidgetTester tester) async {
+    testWidgets('selects multiple items with drag rectangle', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget(multiSelect: true));
       await tester.pumpAndSettle();
       // Find the position of the first and last item
@@ -106,8 +106,7 @@ void main() {
       expect(selected.containsAll(['A', 'B', 'C']), isTrue);
     });
 
-    testWidgets('toggles selection with ctrl+click',
-        (WidgetTester tester) async {
+    testWidgets('toggles selection with ctrl+click', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget(multiSelect: true));
       await tester.pumpAndSettle();
       // Tap first item

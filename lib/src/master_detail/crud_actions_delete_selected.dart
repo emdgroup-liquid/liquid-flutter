@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/master_detail/crud_item_mixin.dart';
 
 class LdCrudDeleteSelectedAction<T extends CrudItemMixin<T>> extends LdCrudAction<T, List<T>, void> {
   LdCrudDeleteSelectedAction({

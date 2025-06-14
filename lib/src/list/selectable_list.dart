@@ -6,6 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
+enum LdSelectableListSelectionControlsMode {
+  none,
+  auto,
+  show,
+}
+
 class LdSelectableList<T, GroupingCriterion> extends StatefulWidget {
   final Widget Function({
     required BuildContext context,
@@ -15,6 +21,7 @@ class LdSelectableList<T, GroupingCriterion> extends StatefulWidget {
     required bool isMultiSelect,
     required void Function(bool selected) onSelectionChange,
     required VoidCallback onTap,
+    required bool showSelectionControls,
   }) itemBuilder;
 
   final LdList<T, GroupingCriterion> Function(
@@ -24,6 +31,8 @@ class LdSelectableList<T, GroupingCriterion> extends StatefulWidget {
   ) listBuilder;
 
   final bool multiSelect;
+
+  final LdSelectableListSelectionControlsMode selectionControlsMode;
 
   final LdPaginator<T> paginator;
 
@@ -36,15 +45,14 @@ class LdSelectableList<T, GroupingCriterion> extends StatefulWidget {
     this.onSelectionChange,
     this.multiSelect = false,
     required this.paginator,
+    this.selectionControlsMode = LdSelectableListSelectionControlsMode.auto,
   });
 
   @override
-  State<LdSelectableList<T, GroupingCriterion>> createState() =>
-      _LdSelectableListState<T, GroupingCriterion>();
+  State<LdSelectableList<T, GroupingCriterion>> createState() => _LdSelectableListState<T, GroupingCriterion>();
 }
 
-class _LdSelectableListState<T, GroupingCriterion>
-    extends State<LdSelectableList<T, GroupingCriterion>> {
+class _LdSelectableListState<T, GroupingCriterion> extends State<LdSelectableList<T, GroupingCriterion>> {
   late final _selectedItems = _SetNotifier<T>(
     {},
     widget.multiSelect,
@@ -66,6 +74,8 @@ class _LdSelectableListState<T, GroupingCriterion>
 
   bool _shiftPressed = false;
   bool _ctrlPressed = false;
+
+  bool _showSelectionControls = false;
 
   @override
   void initState() {
@@ -143,9 +153,7 @@ class _LdSelectableListState<T, GroupingCriterion>
     final startIndex = widget.paginator.items.indexOf(start);
     final endIndex = widget.paginator.items.indexOf(end);
 
-    for (var i = min(startIndex, endIndex);
-        i <= max(startIndex, endIndex);
-        i++) {
+    for (var i = min(startIndex, endIndex); i <= max(startIndex, endIndex); i++) {
       final item = widget.paginator.items[i];
       if (item != null) {
         _selectedItems.add(item);
@@ -248,40 +256,46 @@ class _LdSelectableListState<T, GroupingCriterion>
         onUpdateRect: _onUpdateDragRect,
         onEndDrag: _onEndDrag,
         onCancel: _onCancel,
-        child: KeyboardListener(
-            focusNode: _focusNode,
-            autofocus: true,
-            onKeyEvent: _onKeyEvent,
-            child: widget.listBuilder(context, _scrollController,
-                (context, item, index) {
-              if (!_itemKeys.containsKey(item)) {
-                _itemKeys[item] = GlobalKey();
-              }
+        child: TapRegion(
+          onTapOutside: (event) {
+            _selectedItems.clear();
 
-              return AnimatedBuilder(
-                  animation: _changeNotifier,
-                  key: _itemKeys[item],
-                  builder: (context, child) {
-                    return widget.itemBuilder(
-                      context: context,
-                      item: item,
-                      index: index,
-                      selected: isSelected(item),
-                      isMultiSelect: isMultiSelect,
-                      onSelectionChange: (selected) => onSelectionChange(
-                        item,
-                        selected,
-                      ),
-                      onTap: () => onTap(item),
-                    );
-                  });
-            })));
+            setState(() {});
+          },
+          child: KeyboardListener(
+              focusNode: _focusNode,
+              autofocus: true,
+              onKeyEvent: _onKeyEvent,
+              child: widget.listBuilder(context, _scrollController, (context, item, index) {
+                if (!_itemKeys.containsKey(item)) {
+                  _itemKeys[item] = GlobalKey();
+                }
+
+                return AnimatedBuilder(
+                    animation: _changeNotifier,
+                    key: _itemKeys[item],
+                    builder: (context, child) {
+                      return widget.itemBuilder(
+                        context: context,
+                        item: item,
+                        index: index,
+                        selected: isSelected(item),
+                        isMultiSelect: isMultiSelect,
+                        onSelectionChange: (selected) => onSelectionChange(
+                          item,
+                          selected,
+                        ),
+                        onTap: () => onTap(item),
+                        showSelectionControls: _showSelectionControls,
+                      );
+                    });
+              })),
+        ));
   }
 }
 
 class _SetNotifier<T> extends ValueNotifier<Set<T>> {
-  _SetNotifier([Set<T>? value, this.allowMultiple = false])
-      : super(value ?? {});
+  _SetNotifier([Set<T>? value, this.allowMultiple = false]) : super(value ?? {});
 
   bool allowMultiple;
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/master_detail/master_detail_loader_style.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'task_detail_page.dart';
 import 'task_model.dart';
@@ -13,12 +15,10 @@ class TaskDemo extends StatefulWidget {
 }
 
 class TaskDemoState extends State<TaskDemo> {
-  MasterDetailLayoutMode _layoutMode = MasterDetailLayoutMode.split;
-  MasterDetailPresentationMode _presentationMode =
-      MasterDetailPresentationMode.dialog;
+  var _layoutMode = MasterDetailLayoutMode.split;
+  var _presentationMode = MasterDetailPresentationMode.dialog;
+  var _loadingIndicatorStyle = MasterDetailLoaderStyle.actionBar;
 
-  final GlobalKey<State<LdCrudMasterDetail<Task>>> _masterDetailKey =
-      GlobalKey();
   final _repository = TaskRepository();
   final GlobalKey<State<TaskDetailPage>> taskDetailPageKey = GlobalKey();
   bool isEditingDetail = false;
@@ -48,184 +48,186 @@ class TaskDemoState extends State<TaskDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        LdCrudMasterDetail<Task>(
-          key: _masterDetailKey,
-          crud: _repository,
-          defaultActionSettings: const LdCrudActionSettings(
-            showLoadingDialog: false,
-            errorNotificationMessage:
-                "An error occurred while performing the action.",
-          ),
-          masterDetailBuilder: (context, builders) {
-            return LdMasterDetail.builders(
-              builders: builders,
-              masterDetailFlex: 2,
-              onOpenItemChange: (item) async {
-                setState(() => isEditingDetail = false);
-              },
-              layoutMode: _layoutMode,
-              detailPresentationMode: _presentationMode,
-            );
-          },
-          buildMasterTitle: (context, openTask, optimisticOpenTask,
-                  isSeparatePage, controller, listState) =>
-              LdAutoSpace(
-            defaultSpacing: LdSize.xs,
-            children: [
-              LdTextHxs("Tasks"),
-              LdTextL(_filterStatusText),
-            ],
-          ),
-          buildMaster: (context, openTask, optimisticOpenTask, isSeparatePage,
-              controller, listState) {
-            return LdCrudMasterList<Task>(
-              isSeparatePage: isSeparatePage,
-              listState: listState,
-              openItem: openTask,
-              controller: controller,
-              titleBuilder: (context, item, optimisticItem) =>
-                  Text(optimisticItem.task),
-              subtitleBuilder: (context, item, optimisticItem) => Row(
-                children: [
-                  Icon(
-                    Icons.fiber_manual_record,
-                    size: 12,
-                    color: TaskPriorityUIX(optimisticItem.priority).color,
-                  ),
-                  const SizedBox(width: 2),
-                  Text(item.due),
-                ],
+    return LdWindowFrame(
+      title: const Text("Tasks"),
+      frameBuilder: (context, child) => child,
+      child: LdCrudMasterDetail<Task>(
+        crud: _repository,
+        defaultActionSettings: const LdCrudActionSettings(
+          showLoadingDialog: false,
+          errorNotificationMessage:
+              "An error occurred while performing the action.",
+        ),
+        masterDetailBuilder: (context, builders) {
+          return LdMasterDetail.builders(
+            builders: builders,
+            masterDetailFlex: 2,
+            onOpenItemChange: (item) async {
+              setState(() => isEditingDetail = false);
+            },
+            layoutMode: _layoutMode,
+            detailPresentationMode: _presentationMode,
+          );
+        },
+        buildMasterTitle: (
+          context,
+          openTask,
+          optimisticOpenTask,
+          isSeparatePage,
+          controller,
+          listState,
+        ) =>
+            LdAutoSpace(
+          defaultSpacing: LdSize.xs,
+          children: [
+            LdTextHxs("Tasks"),
+            LdTextL(_filterStatusText),
+          ],
+        ),
+        buildMaster: (
+          context,
+          openTask,
+          optimisticOpenTask,
+          isSeparatePage,
+          controller,
+          listState,
+        ) {
+          return LdCrudMasterList<Task>(
+            isSeparatePage: isSeparatePage,
+            listState: listState,
+            openItem: openTask,
+            footer: LdMute(
+              child: LdTextLs(
+                "${listState.items.length} tasks",
+                textAlign: TextAlign.center,
               ),
-              trailingBuilder: (context, item, optimisticItem) {
-                return LdCrudUpdateAction<Task>(
-                  actionButtonBuilder: (context, triggerAction) =>
-                      LdButtonVague(
-                    size: LdSize.l,
-                    autoLoading: false,
-                    onPressed: triggerAction,
-                    child: Icon(
-                      optimisticItem.done ? Icons.check : null,
+            ),
+            controller: controller,
+            titleBuilder: (context, item, optimisticItem) => Text(
+              optimisticItem.task,
+            ),
+            subtitleBuilder: (context, item, optimisticItem) => Row(
+              children: [
+                Icon(
+                  Icons.fiber_manual_record,
+                  size: 12,
+                  color: TaskPriorityUIX(optimisticItem.priority).color,
+                ),
+                const SizedBox(width: 2),
+                Text(item.due),
+              ],
+            ),
+            trailingBuilder: (context, item, optimisticItem) {
+              return LdCrudUpdateAction<Task>(
+                actionButtonBuilder: (context, triggerAction) => LdCheckbox(
+                  size: LdSize.l,
+                  checked: item.done,
+                  onChanged: (value) => triggerAction(),
+                ),
+                getUpdatedItem: () => item.copyWith(done: !item.done),
+              );
+            },
+            contextActionsBuilder: (context, item, selectedItems) => [
+              if (selectedItems.length <= 1) ...[
+                LdCrudUpdateAction<Task>(
+                  actionButtonBuilder: (context, triggerAction) => LdListItem(
+                    title: Text("Mark as ${item.done ? 'Pending' : 'Done'}"),
+                    leading: Icon(
+                      item.done ? Icons.check : Icons.check_box_outline_blank,
                       color: item.done ? Colors.green : Colors.grey,
                     ),
+                    onTap: triggerAction,
                   ),
                   getUpdatedItem: () => item.copyWith(done: !item.done),
-                );
-              },
-              contextActionsBuilder: (context, item, selectedItems) => [
-                if (selectedItems.length <= 1) ...[
-                  LdCrudUpdateAction<Task>(
-                    actionButtonBuilder: (context, triggerAction) => LdListItem(
-                      title: Text("Mark as ${item.done ? 'Pending' : 'Done'}"),
-                      leading: Icon(
-                        item.done ? Icons.check : Icons.check_box_outline_blank,
-                        color: item.done ? Colors.green : Colors.grey,
-                      ),
-                      onTap: triggerAction,
-                    ),
-                    getUpdatedItem: () => item.copyWith(done: !item.done),
-                  ),
-                  LdCrudDeleteAction<Task>(item: item),
-                ],
-                LdCrudDeleteSelectedAction<Task>(),
+                ),
+                LdCrudDeleteAction<Task>(item: item),
               ],
-            );
-          },
-          buildDetail: (context, item, optimisticItem, isSeparatePage,
-                  controller, listState) =>
-              TaskDetailPage(
-            key: taskDetailPageKey,
-            task: item,
-            isEditing: isEditingDetail,
-          ),
-          buildDetailTitle: (context, item, optimisticItem, isSeparatePage,
-                  controller, listState) =>
-              Text("Task Details"),
-          buildMasterActions: (context, openItem, optimisticOpenItem,
-              isSeparatePage, controller, listState) {
-            final filterByDoneValues = {
-              null: Text("All"),
-              true: Text("Done"),
-              false: Text("Pending"),
-            };
-            return [
-              LdSwitch(
-                children: filterByDoneValues,
-                value: _filterByDone,
-                onChanged: (value) {
-                  setState(() => _filterByDone = value);
-                  _applyFilter(value, listState);
-                },
-              ),
-              LdCrudCreateAction<Task>(getNewItem: () async {
-                final createNewTaskKey = GlobalKey();
-                final newTask = await LdModal(
-                  modalContent: (context) => TaskDetailPage(
-                    task: Task(-1, "", "any time", false),
-                    isEditing: true,
-                    key: createNewTaskKey,
-                  ),
-                  title: const Text("New Task"),
-                  actionBar: (context) => Row(
-                    children: [
-                      Expanded(
-                        child: LdButtonGhost(
-                          child: const Text("Cancel"),
-                          onPressed: () => Navigator.of(context).pop(),
-                        ),
-                      ),
-                      ldSpacerL,
-                      Expanded(
-                        child: LdButton(
-                          child: const Text("Create"),
-                          onPressed: () {
-                            final state = (createNewTaskKey.currentState
-                                as TaskDetailPageState);
-                            final newTask = state.editingTask;
-                            Navigator.of(context).pop(
-                              newTask?.task.isNotEmpty == true ? newTask : null,
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ).show(context, useRootNavigator: true);
-                return newTask;
-              }),
               LdCrudDeleteSelectedAction<Task>(),
-            ];
-          },
-          buildDetailActions: (context, item, optimisticItem, isSeparatePage,
-              controller, listState) {
-            return [
-              if (!isEditingDetail)
-                IconButton(
-                  onPressed: () => setIsEditingDetail(true),
-                  icon: const Icon(Icons.edit),
-                ),
-              if (isEditingDetail) ...[
-                LdCrudUpdateAction<Task>(
-                  getUpdatedItem: () => taskDetailPageState?.editingTask,
-                  onItemUpdated: (masterDetail, item) =>
-                      setIsEditingDetail(false),
-                ),
-                LdCrudDeleteAction<Task>()
-              ]
-            ];
-          },
+            ],
+          );
+        },
+        buildDetail: (context, item, optimisticItem, isSeparatePage, controller,
+                listState) =>
+            TaskDetailPage(
+          key: taskDetailPageKey,
+          task: item,
+          isEditing: isEditingDetail,
         ),
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: LdButtonGhost(
-            onPressed: () => _showTaskDemoDisplaySettingsModal(),
-            child: const Icon(Icons.arrow_upward),
-          ),
-        ),
-      ],
+        buildDetailTitle: (context, item, optimisticItem, isSeparatePage,
+                controller, listState) =>
+            Text("Task Details"),
+        buildMasterActions: (context, openItem, optimisticOpenItem,
+            isSeparatePage, controller, listState) {
+          final filterByDoneValues = {
+            null: Text("All"),
+            true: Text("Done"),
+            false: Text("Pending"),
+          };
+          return [
+            LdSwitch(
+              children: filterByDoneValues,
+              value: _filterByDone,
+              onChanged: (value) {
+                setState(() => _filterByDone = value);
+                _applyFilter(value, listState);
+              },
+            ),
+            LdCrudCreateAction<Task>(getNewItem: () async {
+              final createNewTaskKey = GlobalKey();
+              final newTask = await LdModal(
+                modalContent: (context) => TaskDetailPage(
+                  task: Task(-1, "", "any time", false),
+                  isEditing: true,
+                  key: createNewTaskKey,
+                ),
+                title: const Text("New Task"),
+                actionBar: (context) => Row(
+                  children: [
+                    Expanded(
+                      child: LdButtonGhost(
+                        child: const Text("Cancel"),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ),
+                    ldSpacerL,
+                    Expanded(
+                      child: LdButton(
+                        child: const Text("Create"),
+                        onPressed: () {
+                          final state = (createNewTaskKey.currentState
+                              as TaskDetailPageState);
+                          final newTask = state.editingTask;
+                          Navigator.of(context).pop(
+                            newTask?.task.isNotEmpty == true ? newTask : null,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ).show(context, useRootNavigator: true);
+
+              return newTask;
+            }),
+            LdCrudDeleteSelectedAction<Task>(),
+            LdButtonGhost(
+              onPressed: () => _showTaskDemoDisplaySettingsModal(),
+              child: const Icon(LucideIcons.settings),
+            ),
+          ];
+        },
+        buildDetailActions: (context, item, optimisticItem, isSeparatePage,
+            controller, listState) {
+          return [
+            if (!isEditingDetail)
+              LdButtonGhost(
+                onPressed: () => setIsEditingDetail(true),
+                child: const Icon(Icons.edit),
+              ),
+            if (isEditingDetail) ...[LdCrudDeleteAction<Task>()]
+          ];
+        },
+      ),
     );
   }
 
@@ -261,6 +263,19 @@ class TaskDemoState extends State<TaskDemo> {
               onChange: (value) {
                 setState(() => _presentationMode = value);
                 setModalState(() => _presentationMode = value);
+              },
+            ),
+            LdSelect(
+              label: "Loading indicator style",
+              items: [
+                ...MasterDetailLoaderStyle.values.map(
+                  (e) => LdSelectItem(value: e, child: Text(e.toString())),
+                ),
+              ],
+              value: _loadingIndicatorStyle,
+              onChange: (value) {
+                setState(() => _loadingIndicatorStyle = value);
+                setModalState(() => _loadingIndicatorStyle = value);
               },
             ),
           ]),

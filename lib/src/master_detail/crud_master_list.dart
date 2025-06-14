@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 /// A wrapper around [LdSelectableList] that handles selection and item actions based
@@ -19,6 +20,8 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
   final double assumedItemHeight;
   final bool isSeparatePage;
   final bool showLoadingIndicator;
+  final Widget? header;
+  final Widget? footer;
   final List<Widget> Function(BuildContext context, T item, Set<T> selectedItems)? contextActionsBuilder;
 
   const LdCrudMasterList({
@@ -35,6 +38,8 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
     this.assumedItemHeight = 60,
     this.showLoadingIndicator = true,
     this.contextActionsBuilder,
+    this.header,
+    this.footer,
   });
 
   @override
@@ -53,6 +58,8 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
       listBuilder: (context, scrollController, itemBuilder) {
         return LdList<T, void>(
           paginator: listState,
+          header: header,
+          footer: footer,
           assumedItemHeight: assumedItemHeight,
           scrollController: scrollController,
           itemBuilder: itemBuilder,
@@ -66,11 +73,12 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
         required bool isMultiSelect,
         required void Function(bool selected) onSelectionChange,
         required VoidCallback onTap,
+        required bool showSelectionControls,
       }) {
         final isActive = (openItem?.id ?? controller.getOpenItem()?.id) == item.id;
         final optimisticItem = listState.getItemOptimistically(item);
 
-        return _wrapListItemWithContextMenu(
+        final listItem = _wrapListItemWithContextMenu(
           item,
           optimisticItem,
           LdListItem(
@@ -88,16 +96,23 @@ class LdCrudMasterList<T extends CrudItemMixin<T>> extends StatelessWidget {
             subtitle: subtitleBuilder?.call(context, item, optimisticItem),
             subContent: subContentBuilder?.call(context, item, optimisticItem),
             leading: leadingBuilder?.call(context, item, optimisticItem),
-            trailing: Row(
-              children: [
-                if (showLoadingIndicator && listState.isItemLoading(item)) const LdLoader(size: 20),
-                ldSpacerXS,
-                trailingBuilder?.call(context, item, optimisticItem) ?? const SizedBox.shrink(),
-              ],
-            ),
+            trailing: trailingBuilder?.call(context, item, optimisticItem),
             showBothTrailingAndTrailingForward: true,
           ),
         );
+
+        if (showLoadingIndicator && listState.isItemLoading(item) && !ldDisableAnimations) {
+          return listItem
+              .animate(
+                onPlay: (controller) => controller.repeat(),
+              )
+              .shimmer(
+                duration: 500.ms,
+                color: LdTheme.of(context).primary.hover(LdTheme.of(context).isDark),
+              );
+        }
+
+        return listItem;
       },
     );
   }

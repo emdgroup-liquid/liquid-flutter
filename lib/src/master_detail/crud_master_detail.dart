@@ -14,25 +14,10 @@ abstract class LdCrudOperations<T> {
     }
   }
 
-  FetchListFunction<T> get fetchAll;
-}
-
-/// A mixin to add CRUD item properties to a class.
-/// A crud item must have an [id] property to uniquely identify the item.
-mixin CrudItemMixin<T> {
-  dynamic get id;
-
-  /// By default, an item is considered new if it does not have an [id].
-  bool get isNew => id == null;
+  FetchListFunction<T> get loadItems;
 }
 
 typedef ErrorDetailPresentationMode = MasterDetailPresentationMode;
-
-enum LoadingIndicatorStyle {
-  none,
-  actionBarLoading,
-  dialogLoading,
-}
 
 typedef LdCrudDetailBuilder<T extends CrudItemMixin<T>, W> = W Function(
   BuildContext context,
@@ -87,8 +72,6 @@ class LdCrudMasterDetail<T extends CrudItemMixin<T>> extends StatefulWidget {
   final LdCrudMasterBuilder<T, Widget> buildMaster;
   final LdCrudMasterBuilder<T, List<Widget>>? buildMasterActions;
   final LdCrudDetailBuilder<T, List<Widget>>? buildDetailActions;
-  final bool Function(T? openItem, LdCrudListState<T> listState)? isMasterAppBarLoading;
-  final bool Function(T? openItem, LdCrudListState<T> listState)? isDetailAppBarLoading;
 
   final LdMasterDetail<T> Function(
     BuildContext context,
@@ -106,8 +89,6 @@ class LdCrudMasterDetail<T extends CrudItemMixin<T>> extends StatefulWidget {
     this.buildMasterActions,
     this.buildDetailActions,
     this.defaultActionSettings = const LdCrudActionSettings(),
-    this.isMasterAppBarLoading,
-    this.isDetailAppBarLoading,
   });
 
   @override
@@ -117,18 +98,9 @@ class LdCrudMasterDetail<T extends CrudItemMixin<T>> extends StatefulWidget {
 class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMasterDetail<T>> {
   late final crud = widget.crud;
   late final _listState = LdCrudListState<T>(
-    fetchListFunction: crud.fetchAll,
+    fetchListFunction: crud.loadItems,
   );
   LdCrudListState<T> get listState => _listState;
-
-  bool _isMasterAppBarLoading(T? openItem) {
-    return widget.isMasterAppBarLoading?.call(openItem, listState) ?? listState.busy;
-  }
-
-  bool _isDetailAppBarLoading(T? openItem) {
-    return widget.isDetailAppBarLoading?.call(openItem, listState) ??
-        openItem != null && listState.isItemLoading(openItem);
-  }
 
   @override
   void initState() {
@@ -146,8 +118,6 @@ class LdCrudMasterDetailState<T extends CrudItemMixin<T>> extends State<LdCrudMa
         buildMaster: _wrapCrudMasterBuilder(widget.buildMaster)!,
         buildMasterActions: _wrapBuildMasterActions(widget.buildMasterActions),
         buildDetailActions: _wrapBuildDetailActions(widget.buildDetailActions),
-        isMasterAppBarLoading: (openItem) => _isMasterAppBarLoading(openItem),
-        isDetailAppBarLoading: (openItem) => _isDetailAppBarLoading(openItem),
         injectables: (context) => [
           Provider<LdCrudMasterDetailState<T>>.value(value: this),
           ListenableProvider<LdCrudListState<T>>.value(value: listState),

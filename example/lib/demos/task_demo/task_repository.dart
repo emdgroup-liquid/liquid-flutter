@@ -43,7 +43,7 @@ class TaskRepository extends LdCrudOperations<Task> {
   }
 
   @override
-  FetchListFunction<Task> get fetchAll => ({
+  FetchListFunction<Task> get loadItems => ({
         required int offset,
         required int pageSize,
         String? pageToken,
