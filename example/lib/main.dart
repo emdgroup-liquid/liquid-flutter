@@ -28,11 +28,7 @@ void main() async {
 
   if (!kIsWeb && Platform.isMacOS) {
     doWhenWindowReady(() {
-      const initialSize = Size(1000, 800);
       appWindow.minSize = const Size(100, 100);
-      appWindow.size = initialSize;
-
-      appWindow.alignment = Alignment.center;
       appWindow.show();
     });
   }

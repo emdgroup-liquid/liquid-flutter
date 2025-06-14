@@ -59,6 +59,13 @@ class AppRouter {
 
   late final router =
       GoRouter(debugLogDiagnostics: true, initialLocation: "/", routes: [
+    GoRoute(
+      path: "/task-demo",
+      pageBuilder: (context, state) => MaterialPage<void>(
+        key: state.pageKey,
+        child: const TaskDemo(),
+      ),
+    ),
     ShellRoute(
         builder: (context, state, child) {
           return AppScaffold(title: const Text("Liquid Flutter"), child: child);
@@ -73,11 +80,6 @@ class AppRouter {
             path: "/chemical",
             pageBuilder: (context, state) => NoTransitionPage<void>(
                 key: state.pageKey, child: const ChemicalScreen()),
-          ),
-          GoRoute(
-            path: "/task-demo",
-            pageBuilder: (context, state) => NoTransitionPage<void>(
-                key: state.pageKey, child: const TaskDemo()),
           ),
           GoRoute(
             path: "/theme",

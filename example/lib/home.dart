@@ -174,7 +174,7 @@ class _HomeState extends State<Home> {
                 mode: LdButtonMode.outline,
                 trailing: const Icon(LucideIcons.arrowRight),
                 onPressed: () {
-                  context.go("/task-demo");
+                  context.push("/task-demo");
                 },
                 child: const Text("Task Demo"),
               ),
