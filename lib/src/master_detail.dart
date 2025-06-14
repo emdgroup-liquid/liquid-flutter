@@ -283,18 +283,20 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
   ) {
     return Scaffold(
       appBar: LdAppBar(
-        scrolledUnderElevation: isSeparatePage ? 4 : 0,
+        elevateOnScroll: isSeparatePage,
         title: widget.builder.buildMasterTitle(
           context,
           _onSelect,
           _selectedItem,
           true,
         ),
-        actions: widget.builder.buildMasterActions(
-          context,
-          _onSelect,
-          _selectedItem,
-          true,
+        trailing: Row(
+          children: widget.builder.buildMasterActions(
+            context,
+            _onSelect,
+            _selectedItem,
+            true,
+          ),
         ),
       ),
       backgroundColor: isSeparatePage
@@ -315,19 +317,21 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
   Widget buildDetail(BuildContext context, T item, bool isSeparatePage) {
     return Scaffold(
       appBar: LdAppBar(
-        automaticallyImplyLeading: false,
-        scrolledUnderElevation: isSeparatePage ? 4 : 0,
+        implyLeading: false,
+        elevateOnScroll: isSeparatePage,
         title: widget.builder.buildDetailTitle(
           context,
           item,
           isSeparatePage,
           _onDeselect,
         ),
-        actions: widget.builder.buildDetailActions(
-          context,
-          item,
-          isSeparatePage,
-          _onDeselect,
+        trailing: Row(
+          children: widget.builder.buildDetailActions(
+            context,
+            item,
+            isSeparatePage,
+            _onDeselect,
+          ),
         ),
       ),
       backgroundColor: LdTheme.of(context).background,
@@ -440,7 +444,9 @@ class _DetailPage<T> extends StatelessWidget {
         backgroundColor: LdTheme.of(context).background,
         appBar: LdAppBar(
           title: builder.buildDetailTitle(context, item, true, deselect),
-          actions: builder.buildDetailActions(context, item, true, deselect),
+          trailing: Row(
+            children: builder.buildDetailActions(context, item, true, deselect),
+          ),
         ),
         body: builder.buildDetail(context, item, true, deselect),
       ),
