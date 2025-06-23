@@ -49,28 +49,32 @@ class ComponentPage extends StatelessWidget {
             ],
           ),
         ),
-        body: SingleChildScrollView(
-          child: SafeArea(
-            child: LdContainer(
-              child: LdAutoSpace(
-                children: [
-                  MarkdownBody(data: text ?? ""),
-                  // Demo
+        body: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: SafeArea(
+                child: LdContainer(
+                  child: LdAutoSpace(
+                    children: [
+                      MarkdownBody(data: text ?? ""),
+                      // Demo
 
-                  demo ?? Container(),
+                      demo ?? Container(),
 
-                  const LdTextH(
-                    "API Reference",
+                      const LdTextH(
+                        "API Reference",
+                      ),
+
+                      ComponentsAccordion(
+                        components: apiComponents?.toSet() ?? {title},
+                        initialOpenIndex: {0},
+                      ),
+                    ],
                   ),
-
-                  ComponentsAccordion(
-                    components: apiComponents?.toSet() ?? {title},
-                    initialOpenIndex: {0},
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
