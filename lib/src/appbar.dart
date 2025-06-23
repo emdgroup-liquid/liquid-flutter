@@ -85,8 +85,11 @@ class _LdAppBarState extends State<LdAppBar> {
     if (widget.leading != null) return widget.leading;
     final imply = widget.implyLeading ?? true;
     if (!imply) return null;
+
     final ModalRoute<Object?>? parentRoute = ModalRoute.of(context);
+
     final bool canPop = parentRoute?.canPop ?? false;
+
     if (canPop) {
       return LdButtonGhost(
         child: const Icon(LucideIcons.chevronLeft),
@@ -158,6 +161,7 @@ class _LdAppBarState extends State<LdAppBar> {
                 children: [
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       if (leading != null) ...[
                         Flexible(child: leading),
@@ -299,6 +303,10 @@ class LdAppBarActions extends StatelessWidget {
   const LdAppBarActions({super.key, required this.actions});
 
   Widget _buildAction(BuildContext context, LdLabeledAction action, bool bigToolbar, bool inMenu) {
+    if (inMenu) {
+      print("inMenu");
+      print(action.label(context));
+    }
     switch (action.submitType) {
       case LdLabeledActionSubmitType.none:
         return _ActionTriggerButton(
@@ -360,7 +368,12 @@ class LdAppBarActions extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ...actions.sublist(actions.length - remaining).map(
-                      (e) => _buildAction(context, e, bigToolbar, true),
+                      (e) => _buildAction(
+                        context,
+                        e,
+                        bigToolbar,
+                        true,
+                      ),
                     ),
               ],
             ),
@@ -379,6 +392,7 @@ class LdBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
         color: LdTheme.of(context).surface,
         border: Border(
