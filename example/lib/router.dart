@@ -64,12 +64,12 @@ class AppRouter {
             child: const TaskDemo(),
           ),
         ), */
-    taskDemo.buildRoute(),
     ShellRoute(
       builder: (context, state, child) {
         return AppScaffold(title: const Text("Liquid Flutter"), child: child);
       },
       routes: [
+        taskDemo.buildRoute(),
         GoRoute(
           path: "/",
           pageBuilder: (context, state) =>
@@ -255,37 +255,6 @@ class AppRouter {
           pageBuilder: (context, state) =>
               NoTransitionPage<void>(key: state.pageKey, child: const Spring()),
         ),
-        /*
-              LdMasterDetail.createShellRoute(
-                basePath: "/components/master-detail",
-                pageBuilder: (context, state, child) => NoTransitionPage<void>(
-                  key: state.pageKey,
-                  child: child,
-                ),
-                child: const MasterDetailDemo(),
-                routeConfig: LdMasterDetailShellRouteConfig<ExampleItem>(
-                  detailPath: "detail/:id",
-                  pathToItem: (id) => ExampleItem(
-                    int.tryParse(id),
-                    "Item $id",
-                  ),
-                  itemToPath: (item) => item.id.toString(),
-                ),
-              ),
-              LdMasterDetail.createShellRoute(
-                basePath: "/components/crud-master-detail",
-                pageBuilder: (context, state, child) => NoTransitionPage<void>(
-                  key: state.pageKey,
-                  child: child,
-                ),
-                child: const CrudMasterDetailDemo(),
-                routeConfig: LdMasterDetailShellRouteConfig<ExampleItem>(
-                  detailPath: "detail/:id",
-                  pathToItem: (id) => ExampleRepository.instance()
-                      .getItemById(int.tryParse(id) ?? -1),
-                  itemToPath: (item) => item.id.toString(),
-                ),
-              ),*/
         GoRoute(
           path: "/components/notification",
           pageBuilder: (context, state) => NoTransitionPage<void>(
@@ -361,41 +330,4 @@ class AppRouter {
       ],
     ),
   ]);
-}
-
-class SimpleMasterDetailDemo extends StatelessWidget {
-  const SimpleMasterDetailDemo({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return LdScaffold(
-      appBar: LdAppBar(
-        title: const Text("Master"),
-      ),
-      body: Center(
-        child: LdButton(
-          onPressed: () {
-            context.push("/simple-master-detail/detail/1");
-          },
-          child: const Text("Go to detail"),
-        ),
-      ),
-    );
-  }
-}
-
-class SimpleDetailPageDemo extends StatelessWidget {
-  const SimpleDetailPageDemo({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return LdScaffold(
-      appBar: LdAppBar(
-        title: Text("Detail"),
-      ),
-      body: Center(
-        child: Text("Simple Detail Page"),
-      ),
-    );
-  }
 }
