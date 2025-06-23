@@ -281,13 +281,14 @@ final taskDemo = LdMasterDetailRoute<_Task, int, bool>(
     LdMasterDetailAction(
       visibility: {
         LdMasterDetailActionVisibility(
-            location: LdMasterDetailActionLocation.detailSecondary,
-            minSelectionCount: 1,
-            maxSelectionCount: 1),
+          location: LdMasterDetailActionLocation.detailSecondary,
+          minSelectionCount: 1,
+          maxSelectionCount: 1,
+        ),
         LdMasterDetailActionVisibility(
           location: LdMasterDetailActionLocation.context,
           minSelectionCount: 1,
-          maxSelectionCount: null,
+          maxSelectionCount: 1,
         ),
       },
       shortcutActivators: {
@@ -351,18 +352,6 @@ final taskDemo = LdMasterDetailRoute<_Task, int, bool>(
     ),
     toggleSelectionControls<_Task, int, bool>(),
   ],
-  wrapShell: (context, child) => LdWindowFrame(
-    title: const Text("Task Demo"),
-    frameBuilder: (context, child) => GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onPanStart: (details) {
-        appWindow.startDragging();
-      },
-      onDoubleTap: () => appWindow.maximizeOrRestore(),
-      child: child,
-    ),
-    child: child,
-  ),
 );
 
 class _TaskDetail extends StatefulWidget {
