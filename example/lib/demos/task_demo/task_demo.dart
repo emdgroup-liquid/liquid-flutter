@@ -1,13 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:liquid_flutter/liquid_flutter.dart';
-
-import 'package:lucide_icons_flutter/lucide_icons.dart';
-
-import 'task_detail_page.dart';
-import 'task_model.dart';
-import 'task_repository.dart';
-
-class TaskDemo extends StatefulWidget {
+/*class TaskDemo extends StatefulWidget {
   const TaskDemo({super.key});
 
   @override
@@ -15,8 +6,8 @@ class TaskDemo extends StatefulWidget {
 }
 
 class TaskDemoState extends State<TaskDemo> {
-  var _layoutMode = MasterDetailLayoutMode.split;
-  var _presentationMode = MasterDetailPresentationMode.dialog;
+  var _layoutMode = ResponsiveMode.split;
+  var _presentationMode = PresentationMode.dialog;
   var _loadingIndicatorStyle = MasterDetailLoaderStyle.actionBar;
 
   final _repository = TaskRepository();
@@ -52,7 +43,7 @@ class TaskDemoState extends State<TaskDemo> {
       title: const Text("Tasks"),
       frameBuilder: (context, child) => child,
       child: LdCrudMasterDetail<Task>(
-        crud: _repository,
+        repo: _repository,
         defaultActionSettings: const LdCrudActionSettings(
           showLoadingDialog: false,
           errorNotificationMessage:
@@ -242,7 +233,7 @@ class TaskDemoState extends State<TaskDemo> {
             LdSelect(
               label: "Layout mode",
               items: [
-                ...MasterDetailLayoutMode.values.map(
+                ...ResponsiveMode.values.map(
                   (e) => LdSelectItem(value: e, child: Text(e.toString())),
                 ),
               ],
@@ -255,7 +246,7 @@ class TaskDemoState extends State<TaskDemo> {
             LdSelect(
               label: "Presentation mode (only for compact layout)",
               items: [
-                ...MasterDetailPresentationMode.values.map(
+                ...PresentationMode.values.map(
                   (e) => LdSelectItem(value: e, child: Text(e.toString())),
                 ),
               ],
@@ -309,3 +300,4 @@ extension TaskPriorityUIX on TaskPriority {
     }
   }
 }
+*/

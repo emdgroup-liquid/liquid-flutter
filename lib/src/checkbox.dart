@@ -52,9 +52,7 @@ class _LdCheckboxState extends State<LdCheckbox> {
 
     return LdTouchableSurface(
       color: reactiveColors,
-      mode: widget.checked
-          ? LdTouchableSurfaceMode.solid
-          : LdTouchableSurfaceMode.outline,
+      mode: widget.checked ? LdTouchableSurfaceMode.solid : LdTouchableSurfaceMode.outline,
       disabled: widget.disabled,
       onTap: () {
         if (widget.onChanged != null) {
@@ -89,7 +87,7 @@ class _LdCheckboxState extends State<LdCheckbox> {
                   color: colors.border,
                   width: 2,
                 ),
-                borderRadius: theme.radius(LdSize.s),
+                borderRadius: LdTheme.of(context).radius(size.adjust(-1)),
               ),
             ),
             Flexible(child: label),

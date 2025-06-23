@@ -145,6 +145,37 @@ class _ListItemDemoState extends State<ListItemDemo> {
               ],
             ),
           ),
+          ComponentWell(
+            title: const LdTextH("LdListItemLoading"),
+            description: const LdTextP(
+              "Show some skeleton while waiting for the data to load.",
+            ),
+            onSurface: true,
+            child: LdAutoSpace(
+              children: [
+                LdTextP("With leading and subtitle"),
+                LdListItemLoading(
+                  hasLeading: true,
+                  hasSubtitle: true,
+                ),
+                LdTextP("With leading"),
+                LdListItemLoading(
+                  hasLeading: true,
+                ),
+                LdTextP("With leading and trailing"),
+                LdListItemLoading(
+                  hasLeading: true,
+                  hasTrailing: true,
+                ),
+                LdTextP("With leading and trailing and subtitle"),
+                LdListItemLoading(
+                  hasLeading: true,
+                  hasTrailing: true,
+                  hasSubtitle: true,
+                ),
+              ],
+            ),
+          )
         ],
       ),
     );

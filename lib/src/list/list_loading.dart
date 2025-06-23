@@ -12,7 +12,7 @@ class LdListItemLoading extends StatelessWidget {
     super.key,
     this.hasLeading = false,
     this.hasTrailing = false,
-    this.hasSubContent = true,
+    this.hasSubContent = false,
     this.hasSubtitle = true,
   });
 
@@ -35,17 +35,15 @@ class LdListItemLoading extends StatelessWidget {
                   height: theme.labelSize(LdSize.m),
                 ),
               ),
-              if (hasSubtitle) ldSpacerS,
+              if (hasSubtitle) SizedBox(height: theme.paragraphSize(LdSize.s) * 1.5 - theme.paragraphSize(LdSize.s)),
               if (hasSubtitle)
-                const FractionallySizedBox(
+                FractionallySizedBox(
                   widthFactor: 0.4,
-                  child: LdAnimatedLoadingGradient(height: 8),
+                  child: LdAnimatedLoadingGradient(height: theme.paragraphSize(LdSize.s)),
                 ),
               if (hasSubContent) ldSpacerS,
               if (hasSubContent)
-                const FractionallySizedBox(
-                    widthFactor: 0.3,
-                    child: LdAnimatedLoadingGradient(height: 8)),
+                const FractionallySizedBox(widthFactor: 0.3, child: LdAnimatedLoadingGradient(height: 8)),
             ],
           ),
         ),

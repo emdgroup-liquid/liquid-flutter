@@ -16,12 +16,15 @@ class LdReveal extends StatelessWidget {
   final bool? initialRevealed;
   final int? bufferSprings;
 
+  final Function(BuildContext context, List<LdSpringState> states)? onAnimationEnd;
+
   const LdReveal({
     required this.revealed,
     this.transformXOffset = 0,
     this.transformYOffset = 0,
     this.initialRevealed,
     this.mass = 5,
+    this.onAnimationEnd,
 
     /// Springs that are added as a buffer to the reveal effect effectively delaying the opacity / scale effect to prevent clipping the content visibly. Increase this value if the reveal effect is clipping the content.
     this.bufferSprings = 5,
@@ -72,43 +75,44 @@ class LdReveal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdChainedSprings(
-        count: bufferSprings ?? 10,
-        reversed: !revealed,
-        targetPosition: revealed ? 1 : 0,
-        initialPosition:
-            initialRevealed != null ? (initialRevealed! ? 1 : 0) : 0,
-        dampingCoefficient: dampingCoefficient,
-        springConstant: springConstant,
-        mass: mass,
-        builder: (context, states) {
-          final scaleValue = states.first.position.clamp(0.0, 1.0);
-          final opacityValue = states.last.position.clamp(0.0, 1.0);
+      count: bufferSprings ?? 10,
+      reversed: !revealed,
+      targetPosition: revealed ? 1 : 0,
+      onAnimationEnd: onAnimationEnd,
+      initialPosition: initialRevealed != null ? (initialRevealed! ? 1 : 0) : 0,
+      dampingCoefficient: dampingCoefficient,
+      springConstant: springConstant,
+      mass: mass,
+      builder: (context, states) {
+        final scaleValue = states.first.position.clamp(0.0, 1.0);
+        final opacityValue = states.last.position.clamp(0.0, 1.0);
 
-          double dx = 0.0, dy = 0.0, heightFactor = 1, widthFactor = 1;
+        double dx = 0.0, dy = 0.0, heightFactor = 1, widthFactor = 1;
 
-          heightFactor = scaleValue.clamp(0, 1);
-          widthFactor = scaleValue.clamp(0, 1);
+        heightFactor = scaleValue.clamp(0, 1);
+        widthFactor = scaleValue.clamp(0, 1);
 
-          dy = (1 - opacityValue) * transformYOffset;
+        dy = (1 - opacityValue) * transformYOffset;
 
-          dx = (1 - opacityValue) * transformXOffset;
+        dx = (1 - opacityValue) * transformXOffset;
 
-          return Transform.translate(
-            offset: Offset(dx, dy),
-            child: ClipRRect(
-              child: Align(
-                heightFactor: heightFactor,
-                widthFactor: widthFactor,
-                child: Transform.scale(
-                  scale: scaleValue.clamp(0, double.infinity),
-                  child: Opacity(
-                    opacity: opacityValue.clamp(0, 1),
-                    child: child,
-                  ),
+        return Transform.translate(
+          offset: Offset(dx, dy),
+          child: ClipRRect(
+            child: Align(
+              heightFactor: heightFactor,
+              widthFactor: widthFactor,
+              child: Transform.scale(
+                scale: scaleValue.clamp(0, double.infinity),
+                child: Opacity(
+                  opacity: opacityValue.clamp(0, 1),
+                  child: child,
                 ),
               ),
             ),
-          );
-        });
+          ),
+        );
+      },
+    );
   }
 }

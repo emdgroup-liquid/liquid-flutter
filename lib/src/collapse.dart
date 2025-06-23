@@ -23,8 +23,7 @@ class LdCollapse extends StatefulWidget {
   _LdCollapseState createState() => _LdCollapseState();
 }
 
-class _LdCollapseState extends State<LdCollapse>
-    with SingleTickerProviderStateMixin {
+class _LdCollapseState extends State<LdCollapse> with SingleTickerProviderStateMixin {
   AnimationController? _controller;
 
   @override
@@ -52,25 +51,22 @@ class _LdCollapseState extends State<LdCollapse>
         springConstant: 50,
         dampingCoefficient: 50,
         initialPosition: widget.collapsed ? 0 : 1,
-        builder: (context, state) {
+        child: widget.child,
+        builder: (context, state, child) {
           if (!state.isMoving) {
             if (widget.collapsed) {
               return const SizedBox.shrink();
             } else {
-              return widget.child;
+              return child!;
             }
           }
 
           return ClipRect(
             child: Align(
               alignment: alignment,
-              heightFactor: widget.axis == Axis.vertical
-                  ? max(state.position, 0.0)
-                  : null,
-              widthFactor: widget.axis == Axis.horizontal
-                  ? max(state.position, 0.0)
-                  : null,
-              child: widget.child,
+              heightFactor: widget.axis == Axis.vertical ? max(state.position, 0.0) : null,
+              widthFactor: widget.axis == Axis.horizontal ? max(state.position, 0.0) : null,
+              child: child,
             ),
           );
         });

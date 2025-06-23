@@ -3,10 +3,10 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
 /// A custom builder that allows you to build your own submit widget.
-class LdSubmitCustomBuilder<T> extends StatelessWidget {
+class LdSubmitCustomBuilder<T, Arg> extends StatelessWidget {
   final Widget Function(
     BuildContext context,
-    LdSubmitController<T> controller,
+    LdSubmitController<T, Arg> controller,
     LdSubmitStateType stateType,
   ) builder;
 
@@ -17,9 +17,10 @@ class LdSubmitCustomBuilder<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = context.read<LdSubmitController<T>>();
+    final controller = context.read<LdSubmitController<T, Arg>>();
 
     return StreamBuilder(
+      initialData: controller.state,
       stream: controller.stateStream,
       builder: (context, snapshot) {
         final state = controller.state;

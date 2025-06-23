@@ -48,6 +48,9 @@ class LdNotification {
   }) {
     if (haptics == null) {
       switch (type) {
+        case LdNotificationType.loading:
+          this.haptics = HapticsType.light;
+          break;
         case LdNotificationType.confirm:
           this.haptics = HapticsType.warning;
           break;
@@ -69,7 +72,6 @@ class LdNotification {
         case LdNotificationType.warning:
           this.haptics = HapticsType.warning;
           break;
-        default:
       }
     }
   }

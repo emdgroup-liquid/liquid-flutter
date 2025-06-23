@@ -103,6 +103,7 @@ class LdExceptionView extends StatelessWidget {
           ),
         ],
       ),
+      autoLoading: false,
       mode: LdButtonMode.outline,
       color: color(context),
       onPressed: moreInfo,
@@ -116,17 +117,29 @@ class LdExceptionView extends StatelessWidget {
   ) {
     return LdAutoSpace(
       children: [
-        LdHint(
-          child: Text(exception?.message ?? LiquidLocalizations.of(context).unknownError),
-          type: exception?.type ?? LdHintType.error,
+        LdReveal.quick(
+          revealed: true,
+          initialRevealed: false,
+          child: LdHint(
+            child: Text(exception?.message ?? LiquidLocalizations.of(context).unknownError),
+            type: exception?.type ?? LdHintType.error,
+          ),
         ),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildDialogButton(context, moreInfo),
+            LdReveal.quick(
+              revealed: true,
+              initialRevealed: false,
+              child: _buildDialogButton(context, moreInfo),
+            ),
             if (controller?.showRetryButton == true) ...[
               ldSpacerM,
-              _buildRetryButton(context, controller),
+              LdReveal.quick(
+                revealed: true,
+                initialRevealed: false,
+                child: _buildRetryButton(context, controller),
+              ),
             ],
           ],
         )

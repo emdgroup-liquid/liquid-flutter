@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/master_detail/identifiable.dart';
 
 class ListDemo extends StatefulWidget {
   const ListDemo({super.key});
@@ -18,12 +19,12 @@ class _ListDemoState extends State<ListDemo> {
   bool _simulateError = false;
   bool _bidirectionalScrolling = false;
 
-  late LdPaginator<int> _paginator = LdPaginator<int>(
+  late LdPaginator<_DemoItem, int> _paginator = LdPaginator<_DemoItem, int>(
     initialOffset: 0,
     fetchListFunction: _fetchItems,
   );
 
-  Future<LdListPage<int>> _fetchItems({
+  Future<LdListPage<_DemoItem>> _fetchItems({
     required int offset,
     required int pageSize,
     String? pageToken,
@@ -41,13 +42,10 @@ class _ListDemoState extends State<ListDemo> {
 
     // return a list of 10 items for each page, except for the last page
     // in total, there are 95 items
-    return LdListPage<int>(
-      newItems: List.generate(
-        pageSize,
-        (index) => offset + index,
-      ),
-      hasMore: offset + pageSize < 95,
-      total: 95,
+    return LdListPage<_DemoItem>(
+      newItems: _demoItems.skip(offset).take(pageSize).toList(),
+      hasMore: offset + pageSize < _demoItems.length,
+      total: _demoItems.length,
     );
   }
 
@@ -70,7 +68,7 @@ class _ListDemoState extends State<ListDemo> {
               onSurface: _onSurface,
               child: SizedBox(
                 height: 300,
-                child: LdList<int, int>(
+                child: LdList<_DemoItem, int, String>(
                   header: const LdListItem(
                     leading: LdAvatar(
                       child: Text("H"),
@@ -88,7 +86,7 @@ class _ListDemoState extends State<ListDemo> {
                   paginator: _paginator,
                   assumedItemHeight: _assumeItemHeight ? 50 : null,
                   groupingCriterion:
-                      _enableGrouping ? (item) => item ~/ 10 : null,
+                      _enableGrouping ? (item) => item.category : null,
                   groupHeaderBuilder: _enableGrouping
                       ? (context, remainder) => LdListSeperator(
                             onSurface: _onSurface,
@@ -115,11 +113,11 @@ class _ListDemoState extends State<ListDemo> {
                     return LdListItem(
                       leading: LdAvatar(
                         color: LdTheme.of(context).palette.success,
-                        child: Text(item.toString()),
+                        child: Text(item.value.name.toString().substring(0, 1)),
                       ),
                       trailingForward: true,
-                      title: const Text("This is an item in a list"),
-                      subtitle: const Text("This is a subtitle"),
+                      title: Text(item.value.name),
+                      subtitle: Text(item.value.category),
                     );
                   },
                 ),
@@ -128,7 +126,7 @@ class _ListDemoState extends State<ListDemo> {
           LdCard(
             child: LdAutoSpace(
               children: [
-                Row(
+                Wrap(
                   children: [
                     LdButton(
                       onPressed: _paginator.refreshList,
@@ -136,7 +134,6 @@ class _ListDemoState extends State<ListDemo> {
                         "Refresh list",
                       ),
                     ),
-                    ldSpacerM,
                     LdButton(
                       child: const Text(
                         "Clear list",
@@ -145,9 +142,42 @@ class _ListDemoState extends State<ListDemo> {
                         _paginator.reset();
                       },
                     ),
-                    ldSpacerM,
+                    LdButton(
+                      child: const Text(
+                        "Delete item 1",
+                      ),
+                      onPressed: () {
+                        _paginator.scheduleItemDeletion(1);
+                      },
+                    ),
+                    LdButton(
+                      child: const Text("Try to delete item 2 but fail"),
+                      onPressed: () async {
+                        _paginator.scheduleItemDeletion(2);
+                        await Future.delayed(const Duration(seconds: 1));
+                        _paginator.rollbackItemDeletion(2);
+                      },
+                    ),
+                    LdButton(
+                      child: const Text("Update item 3 to be something else"),
+                      onPressed: () async {
+                        _paginator.scheduleItemUpdate(3, _demoItems[3]);
+
+                        await Future.delayed(const Duration(seconds: 1));
+
+                        _paginator.confirmItemUpdate(3, null);
+                      },
+                    ),
+                    LdButton(
+                      child: const Text("Update item 3 but fail"),
+                      onPressed: () async {
+                        _paginator.scheduleItemUpdate(3, _demoItems[3]);
+                        await Future.delayed(const Duration(seconds: 1));
+                        _paginator.rollbackItemUpdate(3);
+                      },
+                    ),
                   ],
-                ),
+                ).spaceM(),
                 LdToggle(
                   label: "On Surface",
                   checked: _onSurface,
@@ -167,7 +197,7 @@ class _ListDemoState extends State<ListDemo> {
                     onChanged: (value) {
                       setState(() {
                         _bidirectionalScrolling = value;
-                        _paginator = LdPaginator<int>(
+                        _paginator = LdPaginator<_DemoItem, int>(
                           initialOffset: _bidirectionalScrolling ? 50 : 0,
                           fetchListFunction: _fetchItems,
                         );
@@ -218,14 +248,14 @@ class _ListDemoState extends State<ListDemo> {
           const LdTextH("LdPaginator.fromList"),
           LdList(
             shrinkWrap: true,
-            paginator: LdPaginator.fromList(["1", "2"]),
+            paginator: LdPaginator.fromList(_demoItems),
             itemBuilder: (context, item, index) {
               return LdListItem(
                 leading: LdAvatar(
-                  child: Text(item),
+                  child: Text(item.value.name),
                 ),
-                title: const Text("This is an item in a list"),
-                subtitle: const Text("This is a subtitle"),
+                title: Text(item.value.name),
+                subtitle: Text(item.value.category),
               );
             },
           ),
@@ -269,3 +299,54 @@ class _ListDemoState extends State<ListDemo> {
     );
   }
 }
+
+class _DemoItem with Identifiable<int> {
+  @override
+  int get id => _id;
+
+  final int _id;
+
+  final String name;
+
+  final String category;
+
+  _DemoItem(this._id, this.name, this.category);
+}
+
+final List<_DemoItem> _demoItems = [
+  _DemoItem(1, "Apples", "Fruits"),
+  _DemoItem(2, "Bananas", "Fruits"),
+  _DemoItem(3, "Oranges", "Fruits"),
+  _DemoItem(4, "Carrots", "Vegetables"),
+  _DemoItem(5, "Broccoli", "Vegetables"),
+  _DemoItem(6, "Spinach", "Vegetables"),
+  _DemoItem(7, "Chicken", "Meat"),
+  _DemoItem(8, "Beef", "Meat"),
+  _DemoItem(9, "Pork", "Meat"),
+  _DemoItem(10, "Milk", "Dairy"),
+  _DemoItem(11, "Cheese", "Dairy"),
+  _DemoItem(12, "Yogurt", "Dairy"),
+  _DemoItem(13, "Bread", "Bakery"),
+  _DemoItem(14, "Croissants", "Bakery"),
+  _DemoItem(15, "Bagels", "Bakery"),
+  _DemoItem(16, "Strawberries", "Fruits"),
+  _DemoItem(17, "Blueberries", "Fruits"),
+  _DemoItem(18, "Grapes", "Fruits"),
+  _DemoItem(19, "Potatoes", "Vegetables"),
+  _DemoItem(20, "Tomatoes", "Vegetables"),
+  _DemoItem(21, "Cucumber", "Vegetables"),
+  _DemoItem(22, "Turkey", "Meat"),
+  _DemoItem(23, "Lamb", "Meat"),
+  _DemoItem(24, "Salmon", "Seafood"),
+  _DemoItem(25, "Tuna", "Seafood"),
+  _DemoItem(26, "Shrimp", "Seafood"),
+  _DemoItem(27, "Butter", "Dairy"),
+  _DemoItem(28, "Cream", "Dairy"),
+  _DemoItem(29, "Sour Cream", "Dairy"),
+  _DemoItem(30, "Muffins", "Bakery"),
+  _DemoItem(31, "Donuts", "Bakery"),
+  _DemoItem(32, "Cookies", "Bakery"),
+  _DemoItem(33, "Cereal", "Breakfast"),
+  _DemoItem(34, "Oatmeal", "Breakfast"),
+  _DemoItem(35, "Granola", "Breakfast"),
+];

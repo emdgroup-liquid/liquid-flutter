@@ -1,12 +1,4 @@
-import 'dart:math';
-
-import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
-import 'package:liquid/code_block.dart';
-import 'package:liquid/components/component_page.dart';
-import 'package:liquid/components/component_well/component_well.dart';
-import 'package:liquid_flutter/liquid_flutter.dart';
-
+/*
 final exampleTitles =
     "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy "
             "eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam "
@@ -27,7 +19,7 @@ class ExampleItem with CrudItemMixin<ExampleItem> {
   }
 }
 
-class ExampleRepository extends LdCrudOperations<ExampleItem> {
+class ExampleRepository extends LdCrudRepo<ExampleItem> {
   bool simulateErrors = false;
 
   final List<ExampleItem> _items = List.generate(
@@ -129,9 +121,8 @@ class CrudMasterDetailDemo extends StatefulWidget {
 }
 
 class _CrudMasterDetailDemoState extends State<CrudMasterDetailDemo> {
-  MasterDetailLayoutMode _layoutMode = MasterDetailLayoutMode.split;
-  MasterDetailPresentationMode _presentationMode =
-      MasterDetailPresentationMode.dialog;
+  ResponsiveMode _layoutMode = ResponsiveMode.split;
+  PresentationMode _presentationMode = PresentationMode.dialog;
   bool _showLoadingDialog = false;
   bool _showNotificationOnError = false;
 
@@ -244,7 +235,7 @@ LdCrudAction<ExampleItem, ExampleItem, ExampleItem>(
           LdSelect(
             label: "Layout mode",
             items: [
-              ...MasterDetailLayoutMode.values.map(
+              ...ResponsiveMode.values.map(
                 (e) => LdSelectItem(value: e, child: Text(e.toString())),
               ),
             ],
@@ -258,7 +249,7 @@ LdCrudAction<ExampleItem, ExampleItem, ExampleItem>(
           LdSelect(
             label: "Presentation mode (only for compact layout)",
             items: [
-              ...MasterDetailPresentationMode.values.map(
+              ...PresentationMode.values.map(
                 (e) => LdSelectItem(value: e, child: Text(e.toString())),
               ),
             ],
@@ -301,7 +292,7 @@ LdCrudAction<ExampleItem, ExampleItem, ExampleItem>(
                 padding: EdgeInsets.zero,
                 expandChild: true,
                 child: LdCrudMasterDetail<ExampleItem>(
-                  crud: ExampleRepository.instance(),
+                  repo: ExampleRepository.instance(),
                   defaultActionSettings: LdCrudActionSettings(
                     showLoadingDialog: _showLoadingDialog,
                     errorNotificationMessage: _showNotificationOnError
@@ -400,3 +391,4 @@ LdCrudAction<ExampleItem, ExampleItem, ExampleItem>(
     return null;
   }
 }
+*/

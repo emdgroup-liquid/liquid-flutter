@@ -1,9 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:liquid/components/component_page.dart';
-import 'package:liquid/components/component_well/component_well.dart';
-import 'package:liquid/components/layout/crud_master_detail.dart';
-import 'package:liquid_flutter/liquid_flutter.dart';
-
+/*
 class MasterDetailDemo extends StatefulWidget {
   const MasterDetailDemo({super.key});
 
@@ -32,9 +27,8 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
   /// The paginator used for the "normal" master detail demo list.
   late final _paginator = LdPaginator(fetchListFunction: _fetchItems);
 
-  MasterDetailLayoutMode _layoutMode = MasterDetailLayoutMode.split;
-  MasterDetailPresentationMode _presentationMode =
-      MasterDetailPresentationMode.dialog;
+  ResponsiveMode _layoutMode = ResponsiveMode.split;
+  PresentationMode _presentationMode = PresentationMode.dialog;
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +45,7 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
           LdSelect(
             label: "Layout mode",
             items: [
-              ...MasterDetailLayoutMode.values.map(
+              ...ResponsiveMode.values.map(
                 (e) => LdSelectItem(value: e, child: Text(e.toString())),
               ),
             ],
@@ -65,7 +59,7 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
           LdSelect(
             label: "Presentation mode (only for compact layout)",
             items: [
-              ...MasterDetailPresentationMode.values.map(
+              ...PresentationMode.values.map(
                 (e) => LdSelectItem(value: e, child: Text(e.toString())),
               ),
             ],
@@ -130,3 +124,4 @@ class _MasterDetailDemoState extends State<MasterDetailDemo> {
     );
   }
 }
+*/

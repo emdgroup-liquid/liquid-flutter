@@ -60,8 +60,12 @@ const components = [
       ComponentCategory.layout),
   _Component("List Item", "/components/list-item", LucideIcons.listTree,
       ComponentCategory.layout),
-  _Component("List Demo", "/components/list-full-screen", LucideIcons.list,
-      ComponentCategory.layout),
+  _Component(
+    "List",
+    "/components/list",
+    LucideIcons.list,
+    ComponentCategory.layout,
+  ),
   _Component("Selectable List", "/components/selectable-list",
       LucideIcons.listCheck, ComponentCategory.layout),
 
@@ -255,17 +259,19 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                     appWindow.startDragging();
                   },
                   onDoubleTap: () => appWindow.maximizeOrRestore(),
-                  child: LdDrawerHeader(
-                    scrollController: _scrollController,
-                    showBack: !widget.persistent,
+                  child: LdAppBar(
+                    blurOnScroll: true,
                     title: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
+                          height: 32,
                           decoration: BoxDecoration(
                               borderRadius: theme.radius(LdSize.m)),
                           clipBehavior: Clip.hardEdge,
-                          child: Image.asset("liquid_flutter_icon.jpg",
-                              width: 32, height: 32),
+                          child: Image.asset(
+                            "liquid_flutter_icon.jpg",
+                          ),
                         ),
                         ldSpacerS,
                         Expanded(
@@ -275,7 +281,7 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                               Text(
                                 "Liquid Flutter",
                               ),
-                              LdTextCaption(ldVersion)
+                              LdTextLs(ldVersion)
                             ],
                           ),
                         ),
@@ -290,7 +296,7 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                       children: [
                         LdContextMenu(
                           positionMode: LdContextPositionMode.relativeTrigger,
-                          builder: (context, shuttle, trigger) => Row(
+                          builder: (context, shuttle, trigger, child) => Row(
                             children: [
                               LdButtonVague(
                                 trailing:

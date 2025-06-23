@@ -162,7 +162,7 @@ class _LdToggleState extends State<LdToggle> with SingleTickerProviderStateMixin
                       dampingCoefficient: 20,
                       position: widget.checked ? _thumbSize : 0,
                       initialPosition: widget.checked ? _thumbSize : 0,
-                      builder: (context, state) => Transform.translate(
+                      builder: (context, state, child) => Transform.translate(
                           offset: Offset(state.position, 0),
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 100),

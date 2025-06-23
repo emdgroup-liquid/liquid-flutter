@@ -89,8 +89,7 @@ class _LdButtonState extends State<LdButton> {
     if (widget.trailing == null) {
       return Container();
     }
-    return Padding(
-        padding: const EdgeInsets.only(left: 8.0), child: widget.trailing);
+    return Padding(padding: const EdgeInsets.only(left: 8.0), child: widget.trailing);
   }
 
   MainAxisAlignment get _alignment {
@@ -101,20 +100,16 @@ class _LdButtonState extends State<LdButton> {
     final hasAddons = widget.leading != null || widget.trailing != null;
 
     // Center if there are addons
-    return (hasAddons
-        ? MainAxisAlignment.spaceBetween
-        : MainAxisAlignment.center);
+    return (hasAddons ? MainAxisAlignment.spaceBetween : MainAxisAlignment.center);
   }
 
   bool get centerText {
-    return _alignment == MainAxisAlignment.center ||
-        _alignment == MainAxisAlignment.spaceBetween;
+    return _alignment == MainAxisAlignment.center || _alignment == MainAxisAlignment.spaceBetween;
   }
 
   Widget get _buttonContent {
     return Row(
-      mainAxisSize:
-          widget.width == double.infinity ? MainAxisSize.max : MainAxisSize.min,
+      mainAxisSize: widget.width == double.infinity ? MainAxisSize.max : MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: _alignment,
       children: [_leading, _child, _trailing],
@@ -125,8 +120,7 @@ class _LdButtonState extends State<LdButton> {
     if (widget.leading == null) {
       return const SizedBox();
     }
-    return Padding(
-        padding: const EdgeInsets.only(right: 8.0), child: widget.leading!);
+    return Padding(padding: const EdgeInsets.only(right: 8.0), child: widget.leading!);
   }
 
   Widget _loadingContent(LdColorBundle bundle) {
@@ -211,8 +205,7 @@ class _LdButtonState extends State<LdButton> {
   }
 
   bool get _circular {
-    return widget.circular == true ||
-        (widget.child is Icon && widget.circular == null);
+    return widget.circular == true || (widget.child is Icon && widget.circular == null);
   }
 
   @override
@@ -271,20 +264,17 @@ class _LdButtonState extends State<LdButton> {
                     LdSpring(
                       dampingCoefficient: 5,
                       position: isLoading ? 0 : 1,
-                      builder: (context, state) {
+                      child: isLoading ? _loadingContent(colors) : const SizedBox(),
+                      builder: (context, state, child) {
                         return Transform.translate(
                           offset: Offset(0, 20 * state.position),
-                          child: isLoading
-                              ? _loadingContent(
-                                  colors,
-                                )
-                              : const SizedBox(),
+                          child: child,
                         );
                       },
                     ),
                     LdSpring(
                       position: _failed ? 0 : 1,
-                      builder: (context, state) {
+                      builder: (context, state, _) {
                         if (!_failed) {
                           return const SizedBox();
                         }
@@ -295,9 +285,7 @@ class _LdButtonState extends State<LdButton> {
                           );
                         }
 
-                        final errorText = widget.errorText ??
-                            _error?.message ??
-                            LiquidLocalizations.of(context).failed;
+                        final errorText = widget.errorText ?? _error?.message ?? LiquidLocalizations.of(context).failed;
 
                         return Transform.translate(
                           offset: Offset(0, 20 * state.position),
@@ -389,8 +377,7 @@ class _ButtonShape extends StatelessWidget {
           child: child,
           data: IconThemeData(
             color: colors.text,
-            size:
-                circular ? theme.labelSize(size) * 1.5 : theme.labelSize(size),
+            size: circular ? theme.labelSize(size) * 1.5 : theme.labelSize(size),
           ),
         ),
       ),

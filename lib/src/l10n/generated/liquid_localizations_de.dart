@@ -96,4 +96,7 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
 
   @override
   String get edit => 'Edit';
+
+  @override
+  String get select => 'Select';
 }

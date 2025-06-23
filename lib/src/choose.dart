@@ -89,12 +89,9 @@ class _LdChooseState<T> extends State<LdChoose<T>> {
       result = value;
     }
 
-    final nav = widget.useRootNavigator
-        ? Navigator.of(context)
-        : Navigator.of(context, rootNavigator: true);
+    final nav = widget.useRootNavigator ? Navigator.of(context) : Navigator.of(context, rootNavigator: true);
 
-    if (widget.mode == LdChooseMode.page ||
-        (widget.mode == LdChooseMode.auto && widget.items.length > 10)) {
+    if (widget.mode == LdChooseMode.page || (widget.mode == LdChooseMode.auto && widget.items.length > 10)) {
       await nav.push(MaterialPageRoute(builder: ((context) {
         return _LdChoosePage(
           label: widget.label ?? LiquidLocalizations.of(context).choose,
@@ -122,9 +119,7 @@ class _LdChooseState<T> extends State<LdChoose<T>> {
   Widget build(BuildContext context) {
     var theme = LdTheme.of(context, listen: true);
 
-    final choices = widget.items
-        .where((element) => widget.value?.contains(element.value) == true)
-        .toList();
+    final choices = widget.items.where((element) => widget.value?.contains(element.value) == true).toList();
 
     int displayItems = choices.length;
     int left = 0;
@@ -146,8 +141,7 @@ class _LdChooseState<T> extends State<LdChoose<T>> {
             useRootNavigator: widget.useRootNavigator,
             modal: LdModal(
               key: _sheetKey,
-              title:
-                  Text(widget.label ?? LiquidLocalizations.of(context).choose),
+              title: Text(widget.label ?? LiquidLocalizations.of(context).choose),
               actions: (context) => [
                 ldSpacerM,
                 LdButtonGhost(
@@ -210,8 +204,7 @@ class _LdChooseState<T> extends State<LdChoose<T>> {
                                               style: TextStyle(
                                                 height: 1,
                                                 color: theme.palette.text,
-                                                package:
-                                                    theme.fontFamilyPackage,
+                                                package: theme.fontFamilyPackage,
                                                 fontFamily: theme.fontFamily,
                                               ),
                                             ),
@@ -225,8 +218,7 @@ class _LdChooseState<T> extends State<LdChoose<T>> {
                                     type: LdTextType.label,
                                   ),
                                 // Placeholder if empty
-                                if (choices.isEmpty &&
-                                    widget.placeholder != null)
+                                if (choices.isEmpty && widget.placeholder != null)
                                   DefaultTextStyle(
                                     style: ldBuildTextStyle(
                                       theme,
@@ -270,17 +262,14 @@ class _LdChoosePage<T> extends StatelessWidget {
   final Widget child;
   final String label;
 
-  const _LdChoosePage({required this.child, required this.label, Key? key})
-      : super(key: key);
+  const _LdChoosePage({required this.child, required this.label, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    var theme = LdTheme.of(context, listen: true);
-    return Scaffold(
+    return LdScaffold(
       appBar: LdAppBar(
         title: Text(label),
       ),
-      backgroundColor: theme.background,
       body: CustomScrollView(slivers: [child]),
     );
   }
@@ -340,12 +329,8 @@ class _LdChooseListState<T> extends State<_LdChooseList<T>> {
     _searchController = TextEditingController();
     if (widget.enableSearch) {
       _fuze = Fuzzy<LdSelectItem<T>>(widget.items.toList(),
-          options: FuzzyOptions(keys: [
-            WeightedKey(
-                name: "value",
-                getter: (e) => e.searchString ?? e.value.toString(),
-                weight: 1)
-          ]));
+          options: FuzzyOptions(
+              keys: [WeightedKey(name: "value", getter: (e) => e.searchString ?? e.value.toString(), weight: 1)]));
     }
     _value = widget.value ?? {};
     super.initState();

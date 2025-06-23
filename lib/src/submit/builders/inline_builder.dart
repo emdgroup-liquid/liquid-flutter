@@ -3,7 +3,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/submit/builders/submit_button.dart';
 import 'package:provider/provider.dart';
 
-class LdSubmitInlineBuilder<T> extends LdSubmitBuilder<T> {
+class LdSubmitInlineBuilder<T, Arg> extends LdSubmitBuilder<T, Arg> {
   const LdSubmitInlineBuilder({
     super.key,
     super.resultBuilder,
@@ -16,7 +16,7 @@ class LdSubmitInlineBuilder<T> extends LdSubmitBuilder<T> {
 
   Widget buildSubmitButton(
     BuildContext context,
-    LdSubmitController<T> controller,
+    LdSubmitController<T, Arg> controller,
   ) {
     return LdSubmitButton(
       controller: controller,
@@ -25,10 +25,11 @@ class LdSubmitInlineBuilder<T> extends LdSubmitBuilder<T> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = context.read<LdSubmitController<T>>();
+    final controller = context.read<LdSubmitController<T, Arg>>();
 
     return StreamBuilder(
       stream: controller.stateStream,
+      initialData: controller.state,
       builder: (context, snapshot) {
         final state = controller.state;
 
@@ -47,12 +48,11 @@ class LdSubmitInlineBuilder<T> extends LdSubmitBuilder<T> {
                 )
             else if (submitButtonBuilder != null)
               submitButtonBuilder!(context, controller)
-            else if (showSubmitButton == true ||
-                controller.config.autoTrigger == false)
+            else if (showSubmitButton == true || controller.config.autoTrigger == false)
               LdSubmitButton(
                 controller: controller,
               ),
-            LdReveal(
+            LdReveal.quick(
               revealed: controller.canCancel,
               child: LdButtonGhost(
                 onPressed: controller.cancel,

@@ -65,10 +65,7 @@ class LdAutoSpace extends StatelessWidget {
     int index = 0;
     for (var child in children) {
       if (animate) {
-        finalChildren.add(child
-            .animate(delay: 50.ms * finalChildren.length)
-            .fadeIn()
-            .moveY(begin: 5));
+        finalChildren.add(child.animate(delay: 50.ms * finalChildren.length).fadeIn().moveY(begin: 5));
       } else {
         finalChildren.add(child);
       }

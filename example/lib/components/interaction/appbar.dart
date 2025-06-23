@@ -44,7 +44,7 @@ class AppBarDemo extends StatelessWidget {
                         child: const Text("Item 1"),
                       ),
                     ]),
-                    builder: (context, isOpen, open) => LdButtonGhost(
+                    builder: (context, isOpen, open, child) => LdButtonGhost(
                       child: const Icon(LucideIcons.ellipsisVertical),
                       onPressed: () {
                         open();

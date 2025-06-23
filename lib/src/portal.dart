@@ -16,9 +16,7 @@ class LdPortalEntry {
 
   @override
   bool operator ==(Object other) {
-    return other is LdPortalEntry &&
-        other.key == key &&
-        other.scaleContent == scaleContent;
+    return other is LdPortalEntry && other.key == key && other.scaleContent == scaleContent;
   }
 
   @override
@@ -106,8 +104,9 @@ class LdPortal extends StatelessWidget {
                   child: LdSpring(
                     springConstant: 5,
                     initialPosition: 0,
+                    child: child,
                     position: controller.scaleContent ? 1 : 0,
-                    builder: (context, state) {
+                    builder: (context, state, child) {
                       return Transform.translate(
                         offset: Offset(0, state.position * 20),
                         child: Transform.scale(

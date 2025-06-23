@@ -1,0 +1,134 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/master_detail/app_bar_actions.dart';
+import 'package:liquid_flutter/src/master_detail/ld_master_detail_selection.dart';
+
+class LdMasterDetailActionVisibility {
+  final LdMasterDetailActionLocation location;
+  final int minSelectionCount;
+  final int? maxSelectionCount;
+  final bool visibleInSplitView;
+
+  LdMasterDetailActionVisibility({
+    required this.location,
+    this.minSelectionCount = 0,
+    this.maxSelectionCount,
+    this.visibleInSplitView = true,
+  });
+}
+
+enum LdMasterDetailActionLocation {
+  masterAppBar,
+  masterSecondary,
+  detailAppBar,
+  detailSecondary,
+  context,
+}
+
+class LdMasterDetailAction<T extends Identifiable<IdType>, IdType, GroupingCriterion> with LdLabeledAction {
+  final Set<LdMasterDetailActionVisibility> visibility;
+
+  final String Function(BuildContext context, Set<IdType> selection) buildLabel;
+  final Widget Function(BuildContext context, Set<IdType> selection)? buildIcon;
+  final FutureOr<void> Function(BuildContext context, Set<IdType> selection) action;
+  final String Function(BuildContext context, Set<IdType> selection)? buildLoadingText;
+
+  @override
+  String? loadingText(BuildContext context) {
+    final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context);
+    return buildLoadingText?.call(context, selection.items);
+  }
+
+  @override
+  String label(BuildContext context) {
+    final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context);
+    return buildLabel(context, selection.items);
+  }
+
+  @override
+  Widget? icon(BuildContext context) {
+    final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context);
+    return buildIcon?.call(context, selection.items);
+  }
+
+  @override
+  void onPressed(BuildContext context) async {
+    final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context);
+    await action(context, selection.items);
+  }
+
+  @override
+  bool isVisible(BuildContext context) {
+    final parent = context.findAncestorWidgetOfExactType<LdMasterDetailAppBarActions<T, IdType, GroupingCriterion>>();
+
+    if (parent == null) throw Exception("LdMasterDetailAction must be used within a LdMasterDetailAppBarActions");
+
+    final isSplit = LdMasterContext.of<T, IdType, GroupingCriterion>(context).isSplit;
+
+    final selectedItemCount = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context).items.length;
+
+    if (!this.visibility.any((e) => e.location == parent.location)) {
+      return false;
+    }
+
+    for (final visibility in this.visibility) {
+      if (visibility.location != parent.location) continue;
+
+      if (!isSplit && !visibility.visibleInSplitView) {
+        continue;
+      }
+
+      if ((visibility.maxSelectionCount == null || selectedItemCount <= visibility.maxSelectionCount!) &&
+          selectedItemCount >= visibility.minSelectionCount) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  final bool multiSelect;
+
+  final LdLabeledActionSubmitType _submitType;
+
+  @override
+  LdLabeledActionSubmitType get submitType => _submitType;
+
+  final LdColor? _color;
+
+  @override
+  LdColor? color(BuildContext context) {
+    return _color;
+  }
+
+  LdMasterDetailAction({
+    required this.visibility,
+    required this.buildLabel,
+    this.buildLoadingText,
+    LdColor? color,
+    this.buildIcon,
+    required this.action,
+    this.multiSelect = true,
+    LdLabeledActionSubmitType submitType = LdLabeledActionSubmitType.notification,
+    this.shortcutActivators = const {},
+  })  : _color = color,
+        _submitType = submitType;
+
+  final Set<ShortcutActivator> shortcutActivators;
+
+  LdMasterDetailAction<T, IdType, GroupingCriterion> copyWith({
+    Set<LdMasterDetailActionVisibility>? visibility,
+    String Function(BuildContext context, Set<IdType> selection)? buildLabel,
+    Widget Function(BuildContext context, Set<IdType> selection)? buildIcon,
+    Future<void> Function(BuildContext context, Set<IdType> selection)? action,
+  }) {
+    return LdMasterDetailAction(
+      visibility: visibility ?? this.visibility,
+      buildLabel: buildLabel ?? this.buildLabel,
+      buildIcon: buildIcon ?? this.buildIcon,
+      action: action ?? this.action,
+    );
+  }
+}

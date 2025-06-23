@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 /// A configuration for a submit action.
-class LdSubmitConfig<T> {
+class LdSubmitConfig<T, Arg> {
   final String? loadingText;
   final String? submitText;
   final bool? allowResubmit;
@@ -11,7 +11,7 @@ class LdSubmitConfig<T> {
   final bool autoTrigger;
   final Duration? timeout;
   final bool? allowCancel;
-  final LdSubmitCallback<T> action;
+  final LdSubmitCallback<T, Arg> action;
   final VoidCallback? onCanceled;
 
   final LdRetryConfig? retryConfig;

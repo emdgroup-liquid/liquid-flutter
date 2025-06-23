@@ -28,8 +28,7 @@ class LdNotificationProvider extends StatelessWidget {
   final Widget child;
   final LdNotificationsController? notifier;
 
-  const LdNotificationProvider({required this.child, this.notifier, Key? key})
-      : super(key: key);
+  const LdNotificationProvider({required this.child, this.notifier, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -241,8 +240,7 @@ class LdNotificationWidget extends StatelessWidget {
   Widget _buildAcknowledgeButton(BuildContext context) {
     final notification = this.notification as LdAcknowledgeNotification;
 
-    final ackText =
-        notification.acknowledgeText ?? LiquidLocalizations.of(context).ok;
+    final ackText = notification.acknowledgeText ?? LiquidLocalizations.of(context).ok;
     return LdButton(
       key: notification.dismissKey,
       autoFocus: true,
@@ -301,8 +299,7 @@ class LdNotificationWidget extends StatelessWidget {
                           ),
                           if (notification.subMessage != null)
                             LdTextPs(notification.subMessage!,
-                                overflow: TextOverflow.fade,
-                                color: _theme(context).textMuted),
+                                overflow: TextOverflow.fade, color: _theme(context).textMuted),
                         ],
                       ),
                     ),
@@ -321,10 +318,8 @@ class LdNotificationWidget extends StatelessWidget {
               ],
             ),
             // Buttons if the notification is a confirmation
-            if (notification is LdConfirmNotification)
-              _buildConfirmationButtons(context),
-            if (notification is LdAcknowledgeNotification)
-              _buildAcknowledgeButton(context),
+            if (notification is LdConfirmNotification) _buildConfirmationButtons(context),
+            if (notification is LdAcknowledgeNotification) _buildAcknowledgeButton(context),
             if (notification is LdInputNotification)
               NotificationInput(
                 notification: notification as LdInputNotification,
@@ -352,16 +347,18 @@ class LdNotificationWidget extends StatelessWidget {
     return LdSpring(
         initialPosition: 0,
         position: 1 - index * 0.1,
-        builder: (context, state) {
+        child: _buildNotificationBody(context),
+        builder: (context, state, child) {
           return LdSpring(
               initialPosition: 0,
               position: yOffset,
-              builder: (context, yOffset) {
+              child: child,
+              builder: (context, yOffset, child) {
                 return Transform.translate(
                   offset: Offset(0, yOffset.position),
                   child: Transform.scale(
                     scale: state.position,
-                    child: _buildNotificationBody(context),
+                    child: child,
                   ),
                 );
               });

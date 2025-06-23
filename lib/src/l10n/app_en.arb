@@ -27,5 +27,6 @@
   "createNew": "Create new",
   "delete": "Delete",
   "deleteSelected": "Delete selected",
-  "edit": "Edit"
+  "edit": "Edit",
+  "select": "Select"
 }

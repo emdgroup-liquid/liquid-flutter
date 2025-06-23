@@ -48,14 +48,15 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   Widget build(BuildContext context) {
     return LdSpring(
       position: _currentHeight,
-      builder: (context, state) => SizedBox(
+      builder: (context, state, child) => SizedBox(
         height: state.position.clamp(0, double.infinity),
-        child: PageView.builder(
-          controller: _pageController,
-          itemBuilder: _itemBuilder,
-          onPageChanged: widget.onPageChanged,
-          reverse: widget.reverse,
-        ),
+        child: child,
+      ),
+      child: PageView.builder(
+        controller: _pageController,
+        itemBuilder: _itemBuilder,
+        onPageChanged: widget.onPageChanged,
+        reverse: widget.reverse,
       ),
     );
   }

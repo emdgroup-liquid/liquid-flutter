@@ -6,6 +6,7 @@ enum TaskPriority {
   high,
 }
 
+/*
 class Task with CrudItemMixin<Task> {
   @override
   final int id;
@@ -72,3 +73,4 @@ class Task with CrudItemMixin<Task> {
   @override
   bool get isNew => id == -1;
 }
+*/

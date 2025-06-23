@@ -268,6 +268,12 @@ abstract class LiquidLocalizations {
   /// In en, this message translates to:
   /// **'Edit'**
   String get edit;
+
+  /// No description provided for @select.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get select;
 }
 
 class _LiquidLocalizationsDelegate extends LocalizationsDelegate<LiquidLocalizations> {

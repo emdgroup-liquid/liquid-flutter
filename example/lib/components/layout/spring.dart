@@ -38,7 +38,7 @@ class _SpringState extends State<Spring> {
               position: position,
               springConstant: springConstant,
               dampingCoefficient: dampingCoefficient,
-              builder: (context, state) => Transform.translate(
+              builder: (context, state, child) => Transform.translate(
                 offset: Offset(state.position * 50, 0),
                 child: Container(
                   height: 20,

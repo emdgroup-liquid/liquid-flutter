@@ -1,8 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:liquid_flutter/liquid_flutter.dart';
-import 'task_model.dart';
-import 'task_demo.dart';
-
+/*
 class TaskDetailPage extends StatefulWidget {
   final Task task;
   final bool isEditing;
@@ -94,8 +90,8 @@ class TaskDetailPageState extends State<TaskDetailPage> {
               children: [
                 LdTextH(currentTask.task),
                 if (currentTask.done) ...[
-                  const SizedBox(width: 8),
-                  Icon(Icons.check),
+                  ldSpacerM,
+                  const Icon(LucideIcons.check),
                 ]
               ],
             ),
@@ -109,11 +105,12 @@ class TaskDetailPageState extends State<TaskDetailPage> {
             )
           else if (currentTask.description != null) ...[
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.description),
-                const SizedBox(width: 8),
+                const Icon(LucideIcons.fileText),
+                ldSpacerM,
                 Expanded(
-                  child: LdTextL(currentTask.description!),
+                  child: LdTextP(currentTask.description!),
                 ),
               ],
             ),
@@ -128,8 +125,8 @@ class TaskDetailPageState extends State<TaskDetailPage> {
           else
             Row(
               children: [
-                const Icon(Icons.calendar_today),
-                const SizedBox(width: 8),
+                const Icon(LucideIcons.calendar),
+                ldSpacerM,
                 LdTextL(currentTask.due),
               ],
             ),
@@ -182,3 +179,4 @@ class TaskDetailPageState extends State<TaskDetailPage> {
     );
   }
 }
+*/

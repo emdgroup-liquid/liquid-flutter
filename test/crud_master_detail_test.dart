@@ -2,7 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/master_detail/crud_item_mixin.dart';
 
 import 'utils.dart';
 
@@ -19,7 +18,7 @@ class ExampleItem with CrudItemMixin<ExampleItem> {
   }
 }
 
-class ExampleRepository extends LdCrudOperations<ExampleItem> {
+class ExampleRepository extends LdCrudRepo<ExampleItem> {
   final List<ExampleItem> _items = List.generate(10, (i) => ExampleItem(i, "Item $i"));
 
   ExampleRepository._privateConstructor();
@@ -114,7 +113,7 @@ void main() {
           localizationsDelegates: LiquidLocalizations.localizationsDelegates,
           locale: const Locale('en'),
           home: LdCrudMasterDetail<ExampleItem>(
-            crud: ExampleRepository.instance(),
+            repo: ExampleRepository.instance(),
             buildMasterTitle: (context, openItem, optimisticOpenItem, isSeparatePage, controller, listState) =>
                 const Text('CRUD Master View'),
             buildMasterActions: (context, openItem, optimisticOpenItem, isSeparatePage, controller, listState) => [

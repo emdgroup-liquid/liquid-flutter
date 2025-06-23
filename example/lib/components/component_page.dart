@@ -31,34 +31,44 @@ class ComponentPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Provider<ComponentPagePath>.value(
       value: ComponentPagePath(path: path),
-      child: SingleChildScrollView(
-        child: SafeArea(
-          child: LdContainer(
-            child: LdAutoSpace(
-              children: [
-                // Breadcrumbs
-                LdBreadcrumb.fromStrings([
-                  "Components",
-                  title,
-                ]),
+      child: LdScaffold(
+        appBar: LdAppBar(
+          addContainer: true,
+          blurOnScroll: true,
+          title: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+              ),
+              LdBreadcrumb.fromStrings([
+                "Components",
+                title,
+              ]),
+            ],
+          ),
+        ),
+        body: SingleChildScrollView(
+          child: SafeArea(
+            child: LdContainer(
+              child: LdAutoSpace(
+                children: [
+                  MarkdownBody(data: text ?? ""),
+                  // Demo
 
-                LdTextHl(
-                  title,
-                ),
-                MarkdownBody(data: text ?? ""),
-                // Demo
+                  demo ?? Container(),
 
-                demo ?? Container(),
+                  const LdTextH(
+                    "API Reference",
+                  ),
 
-                const LdTextH(
-                  "API Reference",
-                ),
-
-                ComponentsAccordion(
-                  components: apiComponents?.toSet() ?? {title},
-                  initialOpenIndex: {0},
-                ),
-              ],
+                  ComponentsAccordion(
+                    components: apiComponents?.toSet() ?? {title},
+                    initialOpenIndex: {0},
+                  ),
+                ],
+              ),
             ),
           ),
         ),

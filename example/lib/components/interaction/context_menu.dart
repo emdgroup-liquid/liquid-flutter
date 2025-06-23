@@ -45,7 +45,7 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
                 width: double.infinity,
                 leading: const Icon(LucideIcons.pen),
                 onTap: () {
-                  onDismiss();
+                  LdContextMenuDissmissNotification().dispatch(context);
                 },
                 title: const Text("Edit"),
               ),
@@ -114,12 +114,7 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
                       ),
                       child: _buildMenu(context, onDismiss));
                 },
-                builder: (
-                  context,
-                  shuttle,
-                  trigger,
-                ) =>
-                    LdListItem(
+                child: LdListItem(
                   borderRadius: LdTheme.of(context).radius(LdSize.m),
                   width: double.infinity,
                   leading: const LdAvatar(
@@ -127,6 +122,13 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
                   ),
                   title: const Text("Right click me"),
                 ),
+                builder: (
+                  context,
+                  shuttle,
+                  trigger,
+                  child,
+                ) =>
+                    child!,
               ).padM(),
             ),
             ComponentWell(
@@ -146,6 +148,7 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
                       context,
                       shuttle,
                       trigger,
+                      child,
                     ) =>
                         LdButton(
                       onPressed: () {},

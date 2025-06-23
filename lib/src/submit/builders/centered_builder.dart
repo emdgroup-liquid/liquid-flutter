@@ -3,7 +3,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/submit/builders/submit_button.dart';
 import 'package:provider/provider.dart';
 
-class LdSubmitCenteredBuilder<T> extends LdSubmitBuilder<T> {
+class LdSubmitCenteredBuilder<T, Arg> extends LdSubmitBuilder<T, Arg> {
   const LdSubmitCenteredBuilder({
     super.key,
     super.resultBuilder,
@@ -14,10 +14,11 @@ class LdSubmitCenteredBuilder<T> extends LdSubmitBuilder<T> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = context.read<LdSubmitController<T>>();
+    final controller = context.read<LdSubmitController<T, Arg>>();
 
     return StreamBuilder(
       stream: controller.stateStream,
+      initialData: controller.state,
       builder: (context, snapshot) {
         final state = controller.state;
 
@@ -37,7 +38,7 @@ class LdSubmitCenteredBuilder<T> extends LdSubmitBuilder<T> {
                         direction: Axis.vertical,
                         retryController: controller.retryController,
                       )
-              else if (state.type == LdSubmitStateType.idle)
+              else if (state.type == LdSubmitStateType.idle && !controller.config.autoTrigger)
                 submitButtonBuilder != null
                     ? submitButtonBuilder!(context, controller)
                     : LdSubmitButton(
@@ -51,13 +52,11 @@ class LdSubmitCenteredBuilder<T> extends LdSubmitBuilder<T> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           const LdLoader(),
-                          if (controller.config.loadingText != null)
-                            Text(controller.config.loadingText!),
+                          if (controller.config.loadingText != null) Text(controller.config.loadingText!),
                           if (controller.canCancel)
                             LdButtonGhost(
                               onPressed: controller.cancel,
-                              child:
-                                  Text(LiquidLocalizations.of(context).cancel),
+                              child: Text(LiquidLocalizations.of(context).cancel),
                             ),
                         ],
                       ),

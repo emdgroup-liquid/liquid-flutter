@@ -64,10 +64,6 @@ abstract class LdMasterDetailBuilder<T> {
   }
 }
 
-enum MasterDetailPresentationMode { page, dialog }
-
-enum MasterDetailLayoutMode { auto, split, compact }
-
 /// A master detail view that shows a list of items on the left and a detail view on the right.
 /// The detail view is shown as a page or a dialog if the screen is small.
 class LdMasterDetail<T> extends StatefulWidget {
@@ -121,8 +117,7 @@ class LdMasterDetail<T> extends StatefulWidget {
   State<LdMasterDetail<T>> createState() => _LdMasterDetailState<T>();
 }
 
-class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
-    with SingleTickerProviderStateMixin {
+class _LdMasterDetailState<T> extends State<LdMasterDetail<T>> with SingleTickerProviderStateMixin {
   T? _selectedItem;
 
   @override
@@ -183,8 +178,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
     widget.onSelectionChange?.call(item);
     if (widget.detailsUrlBuilder != null) {
       Uri uri = GoRouter.of(context).uri;
-      GoRouter.of(context)
-          .go(widget.detailsUrlBuilder!(item: item, uri: uri).toString());
+      GoRouter.of(context).go(widget.detailsUrlBuilder!(item: item, uri: uri).toString());
     }
 
     if (!useSplitView) {
@@ -209,8 +203,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
         widget.onSelectionChange?.call(null);
       }
 
-      if (widget.detailPresentationMode ==
-          MasterDetailPresentationMode.dialog) {
+      if (widget.detailPresentationMode == MasterDetailPresentationMode.dialog) {
         _inDetailView = true;
         await LdModal(
           onDismiss: _onDialogDismiss,
@@ -281,7 +274,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
     T? selectedItem,
     bool isSeparatePage,
   ) {
-    return Scaffold(
+    return LdScaffold(
       appBar: LdAppBar(
         elevateOnScroll: isSeparatePage,
         title: widget.builder.buildMasterTitle(
@@ -299,9 +292,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
           ),
         ),
       ),
-      backgroundColor: isSeparatePage
-          ? LdTheme.of(context).background
-          : LdTheme.of(context).surface,
+      backgroundColor: isSeparatePage ? LdTheme.of(context).background : LdTheme.of(context).surface,
       body: Provider.value(
         value: LdSurfaceInfo(isSurface: !isSeparatePage),
         child: widget.builder.buildMaster(
@@ -315,7 +306,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
   }
 
   Widget buildDetail(BuildContext context, T item, bool isSeparatePage) {
-    return Scaffold(
+    return LdScaffold(
       appBar: LdAppBar(
         implyLeading: false,
         elevateOnScroll: isSeparatePage,
@@ -367,9 +358,7 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
             Area(
               flex: widget.masterDetailFlex,
               builder: (context, area) {
-                final detail = _selectedItem != null
-                    ? buildDetail(context, _selectedItem!, !isLarge)
-                    : null;
+                final detail = _selectedItem != null ? buildDetail(context, _selectedItem!, !isLarge) : null;
                 return FocusTraversalGroup(
                   child: detail ?? Container(),
                 );
@@ -401,11 +390,9 @@ class _LdMasterDetailState<T> extends State<LdMasterDetail<T>>
 
   bool _useSplitView(SizingInformation size) {
     if (widget.customSplitPredicate != null) {
-      return widget.customSplitPredicate!(size) &&
-          widget.layoutMode != MasterDetailLayoutMode.compact;
+      return widget.customSplitPredicate!(size) && widget.layoutMode != MasterDetailLayoutMode.compact;
     }
-    return ((size.isTablet && size.screenSize.width > size.screenSize.height) ||
-            size.isDesktop) &&
+    return ((size.isTablet && size.screenSize.width > size.screenSize.height) || size.isDesktop) &&
         widget.layoutMode != MasterDetailLayoutMode.compact;
   }
 
@@ -440,8 +427,8 @@ class _DetailPage<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Portal(
-      child: Scaffold(
-        backgroundColor: LdTheme.of(context).background,
+      child: LdScaffold(
+        extendBodyBehindAppBar: true,
         appBar: LdAppBar(
           title: builder.buildDetailTitle(context, item, true, deselect),
           trailing: Row(

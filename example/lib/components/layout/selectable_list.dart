@@ -13,7 +13,8 @@ class SelectableListDemo extends StatefulWidget {
 }
 
 class _SelectableListDemoState extends State<SelectableListDemo> {
-  late final LdPaginator<SampleItem> _paginator = LdPaginator<SampleItem>(
+  late final LdPaginator<SampleItem, String> _paginator =
+      LdPaginator<SampleItem, String>(
     initialOffset: 0,
     fetchListFunction: _fetchItems,
   );
@@ -21,9 +22,9 @@ class _SelectableListDemoState extends State<SelectableListDemo> {
   bool _multiSelect = true;
   bool _showSelectionControls = false;
 
-  Set<SampleItem> _selectedItems = {};
+  Set<String> _selectedItems = {};
 
-  void _onSelectionChange(Set<SampleItem> selectedItems) {
+  void _onSelectionChange(Set<String> selectedItems) {
     setState(() {
       _selectedItems = selectedItems;
     });
@@ -91,38 +92,24 @@ class _SelectableListDemoState extends State<SelectableListDemo> {
             title: const LdTextHs("Demo list"),
             child: SizedBox(
               height: 500,
-              child: LdSelectableList<SampleItem, void>(
+              child: LdSelectableList<SampleItem, String, void>(
                 multiSelect: _multiSelect,
                 paginator: _paginator,
                 onSelectionChange: _onSelectionChange,
                 listBuilder: (context, scrollController, itemBuilder) {
-                  return LdList<SampleItem, void>(
+                  return LdList<SampleItem, String, void>(
                     scrollController: scrollController,
                     paginator: _paginator,
                     itemBuilder: itemBuilder,
                   );
                 },
-                itemBuilder: ({
-                  required BuildContext context,
-                  required SampleItem item,
-                  required int index,
-                  required bool selected,
-                  required bool isMultiSelect,
-                  required void Function(bool selected) onSelectionChange,
-                  required VoidCallback onTap,
-                  required bool showSelectionControls,
-                }) {
-                  return LdListItem(
-                    active: selected,
-                    leading: LdAvatar(child: Text(item.formula)),
-                    isSelected: selected,
-                    radioSelection: !isMultiSelect,
-                    showSelectionControls: _showSelectionControls,
-                    onSelectionChange: onSelectionChange,
-                    onTap: onTap,
-                    subtitle: Text(item.subtitle),
-                    title: Text(item.title),
-                  );
+                itemBuilder:
+                    (context, item, int index, LdListItemConfig config) {
+                  return LdListItem.fromConfig(config.copyWith(
+                    leading: LdAvatar(child: Text(item.value!.formula)),
+                    subtitle: Text(item.value!.subtitle),
+                    title: Text(item.value!.title),
+                  ));
                 },
               ),
             ),
@@ -145,8 +132,18 @@ class _SelectableListDemoState extends State<SelectableListDemo> {
             },
             label: "Show selection controls",
           ),
-          LdTextP(
-              "Selected items: ${_selectedItems.map((e) => e.title).join(", ")}"),
+          LdTextP("Selected items"),
+          Wrap(
+            children: _selectedItems.map((e) => LdTag(child: Text(e))).toList(),
+          ).spaceS(),
+          LdButton(
+            child: const Text("Clear selection"),
+            onPressed: () {
+              setState(() {
+                _selectedItems.clear();
+              });
+            },
+          ),
         ],
       ),
     );

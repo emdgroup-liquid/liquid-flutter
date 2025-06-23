@@ -119,14 +119,15 @@ class _ComponentWellState extends State<ComponentWell> {
         title: const Text("Source Code"),
         size: LdSize.l,
         contentPadding: EdgeInsets.zero,
-        modalContent: (context) => LdSubmit<String>(
+        modalContent: (context) => LdSubmit<String, String>(
+          arg: sourcePath,
           config: LdSubmitConfig(
               autoTrigger: true,
-              action: () async {
+              action: (arg) async {
                 // Load the source code
-                return await rootBundle.loadString(sourcePath);
+                return await rootBundle.loadString(arg!);
               }),
-          builder: LdSubmitCenteredBuilder<String>(
+          builder: LdSubmitCenteredBuilder<String, String>(
             resultBuilder: (context, result, controller) => SourceCodeExtractor(
               options: widget.showSourceCodeOptions,
               sourceCode: result,

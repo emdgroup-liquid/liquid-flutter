@@ -8,8 +8,8 @@ import 'package:liquid_flutter/src/haptics.dart';
 /// Handles the lifecyle of a submit action. Pass a [LdSubmitConfig] to the
 /// controller to configure the submit action.
 /// Updated LdSubmitController that uses LdRetryController
-class LdSubmitController<T> {
-  final LdSubmitConfig<T> config;
+class LdSubmitController<T, Arg> {
+  final LdSubmitConfig<T, Arg> config;
   final LdExceptionMapper exceptionMapper;
   final _stateController = StreamController<LdSubmitState<T>>.broadcast();
   late final LdRetryController _retryController;
@@ -17,10 +17,9 @@ class LdSubmitController<T> {
 
   Stream<LdSubmitState<T>> get stateStream => _stateController.stream;
 
-  LdSubmitController({
-    required this.exceptionMapper,
-    required this.config,
-  }) {
+  ValueNotifier<Arg?>? arg;
+
+  LdSubmitController({required this.exceptionMapper, required this.config, this.arg}) {
     _retryController = LdRetryController(
       onRetry: _nextAttempt,
       config: config.retryConfig ?? const LdRetryConfig(),
@@ -61,9 +60,6 @@ class LdSubmitController<T> {
 
   Future<void> cancel() async {
     if (!canCancel) {
-      if (ldPrintDebugMessages) {
-        debugPrint("Cannot cancel, allowCancel is false");
-      }
       return;
     }
 
@@ -97,9 +93,9 @@ class LdSubmitController<T> {
     T res;
     try {
       if (config.timeout != null) {
-        res = await config.action().timeout(config.timeout!);
+        res = await config.action(arg?.value).timeout(config.timeout!);
       } else {
-        res = await config.action();
+        res = await config.action(arg?.value);
       }
 
       if (!_isLoading) return;
@@ -153,8 +149,7 @@ class LdSubmitController<T> {
 
   bool get canRetrigger => _isError && state.error?.canRetry == true;
 
-  bool get canTrigger =>
-      _isIdle || canRetry || (_isResult && config.allowResubmit == true);
+  bool get canTrigger => _isIdle || canRetry || (_isResult && config.allowResubmit == true);
 
   Future<void> trigger() async {
     if (!canTrigger) {

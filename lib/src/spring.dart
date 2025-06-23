@@ -24,12 +24,14 @@ class LdSpring extends StatefulWidget {
   final double initialPosition;
   final bool paused;
 
-  final void Function(BuildContext context, LdSpringState state)?
-      onAnimationEnd;
+  final Widget? child;
+
+  final void Function(BuildContext context, LdSpringState state)? onAnimationEnd;
 
   final Widget Function(
     BuildContext context,
     LdSpringState state,
+    Widget? child,
   ) builder;
 
   const LdSpring({
@@ -42,6 +44,7 @@ class LdSpring extends StatefulWidget {
     this.position = 1.0,
     this.initialPosition = 1.0,
     this.onAnimationEnd,
+    this.child,
   });
 
   @override
@@ -90,10 +93,16 @@ class _Spring {
       position = targetPosition;
     }
   }
+
+  LdSpringState get state => LdSpringState(
+        position: position,
+        force: force,
+        velocity: velocity,
+        isMoving: active,
+      );
 }
 
-class _LdSpringState extends State<LdSpring>
-    with SingleTickerProviderStateMixin {
+class _LdSpringState extends State<LdSpring> with SingleTickerProviderStateMixin {
   late final _Spring _spring = _Spring(
     springConstant: widget.springConstant,
     dampingCoefficient: widget.dampingCoefficient,
@@ -146,12 +155,7 @@ class _LdSpringState extends State<LdSpring>
       if (widget.onAnimationEnd != null) {
         widget.onAnimationEnd!(
           context,
-          LdSpringState(
-            position: _spring.position,
-            force: _spring.force,
-            velocity: _spring.velocity,
-            isMoving: false,
-          ),
+          _spring.state,
         );
       }
       _ticker!.stop();
@@ -190,17 +194,14 @@ class _LdSpringState extends State<LdSpring>
           velocity: 0,
           isMoving: false,
         ),
+        widget.child,
       );
     }
 
     return widget.builder(
       context,
-      LdSpringState(
-        position: _spring.position,
-        force: _spring.force,
-        velocity: _spring.velocity,
-        isMoving: _ticker?.isActive ?? false,
-      ),
+      _spring.state,
+      widget.child,
     );
   }
 }
@@ -213,6 +214,8 @@ class LdChainedSprings extends StatefulWidget {
   final double initialPosition;
   final double targetPosition;
   final bool reversed;
+
+  final Function(BuildContext context, List<LdSpringState> states)? onAnimationEnd;
 
   final Widget Function(
     BuildContext context,
@@ -229,14 +232,14 @@ class LdChainedSprings extends StatefulWidget {
     this.reversed = false,
     this.initialPosition = 1.0,
     this.targetPosition = 1.0,
+    this.onAnimationEnd,
   });
 
   @override
   State<LdChainedSprings> createState() => _LdChainedSpringsState();
 }
 
-class _LdChainedSpringsState extends State<LdChainedSprings>
-    with SingleTickerProviderStateMixin {
+class _LdChainedSpringsState extends State<LdChainedSprings> with SingleTickerProviderStateMixin {
   late final List<_Spring> _springs = [];
 
   Ticker? _ticker;
@@ -331,6 +334,14 @@ class _LdChainedSpringsState extends State<LdChainedSprings>
 
     if (!_springs.any((spring) => spring.active)) {
       _ticker?.stop();
+      if (widget.onAnimationEnd != null) {
+        widget.onAnimationEnd!(
+          context,
+          _springs.map((spring) {
+            return spring.state;
+          }).toList(),
+        );
+      }
     }
 
     setState(() {});

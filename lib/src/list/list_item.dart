@@ -4,6 +4,106 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 typedef OnSelectionChange = void Function(bool selected);
 
+class LdListItemConfig {
+  final bool active;
+  final bool disabled;
+  final bool isSelected;
+  final bool radioSelection;
+  final bool selectDisabled;
+  final bool showBothTrailingAndTrailingForward;
+  final bool showSelectionControls;
+  final bool tradeLeadingForSelectionControl;
+  final bool trailingForward;
+  final BorderRadius? borderRadius;
+  final double? width;
+  final EdgeInsets? padding;
+  final Key? key;
+  final OnSelectionChange? onSelectionChange;
+  final VoidCallback? onTap;
+  final Widget? leading;
+  final Widget? subContent;
+  final Widget? subtitle;
+  final Widget? title;
+  final Widget? trailing;
+  final LdColor? color;
+  final FocusNode? focusNode;
+
+  const LdListItemConfig({
+    this.active = false,
+    this.focusNode,
+    this.borderRadius,
+    this.disabled = false,
+    this.isSelected = false,
+    this.key,
+    this.leading,
+    this.onSelectionChange,
+    this.onTap,
+    this.padding,
+    this.radioSelection = false,
+    this.selectDisabled = false,
+    this.showBothTrailingAndTrailingForward = false,
+    this.showSelectionControls = false,
+    this.subContent,
+    this.subtitle,
+    this.title,
+    this.tradeLeadingForSelectionControl = false,
+    this.trailing,
+    this.trailingForward = false,
+    this.color,
+    this.width,
+  });
+
+  LdListItemConfig copyWith({
+    Widget? leading,
+    Widget? trailing,
+    EdgeInsets? padding,
+    Widget? title,
+    bool? active,
+    Widget? subtitle,
+    VoidCallback? onTap,
+    double? width,
+    bool? selectDisabled,
+    OnSelectionChange? onSelectionChange,
+    bool? radioSelection,
+    BorderRadius? borderRadius,
+    Widget? subContent,
+    bool? isSelected,
+    bool? trailingForward,
+    bool? disabled,
+    bool? tradeLeadingForSelectionControl,
+    bool? showBothTrailingAndTrailingForward,
+    bool? showSelectionControls,
+    FocusNode? focusNode,
+    LdColor? color,
+    Key? key,
+  }) {
+    return LdListItemConfig(
+      leading: leading ?? this.leading,
+      trailing: trailing ?? this.trailing,
+      padding: padding ?? this.padding,
+      focusNode: focusNode ?? this.focusNode,
+      title: title ?? this.title,
+      active: active ?? this.active,
+      subtitle: subtitle ?? this.subtitle,
+      onTap: onTap ?? this.onTap,
+      width: width ?? this.width,
+      selectDisabled: selectDisabled ?? this.selectDisabled,
+      onSelectionChange: onSelectionChange ?? this.onSelectionChange,
+      radioSelection: radioSelection ?? this.radioSelection,
+      borderRadius: borderRadius ?? this.borderRadius,
+      subContent: subContent ?? this.subContent,
+      isSelected: isSelected ?? this.isSelected,
+      trailingForward: trailingForward ?? this.trailingForward,
+      disabled: disabled ?? this.disabled,
+      color: color ?? this.color,
+      tradeLeadingForSelectionControl: tradeLeadingForSelectionControl ?? this.tradeLeadingForSelectionControl,
+      showBothTrailingAndTrailingForward: showBothTrailingAndTrailingForward ?? this.showBothTrailingAndTrailingForward,
+      showSelectionControls: showSelectionControls ?? this.showSelectionControls,
+      key: key ?? this.key,
+    );
+  }
+}
+
 class LdListItem extends StatelessWidget {
   final Widget? leading;
   final Widget? trailing;
@@ -12,45 +112,73 @@ class LdListItem extends StatelessWidget {
   final bool active;
   final Widget? subtitle;
   final VoidCallback? onTap;
-  final VoidCallback? onLongPress;
   final double? width;
   final bool selectDisabled;
   final OnSelectionChange? onSelectionChange;
   final bool radioSelection;
-
   final BorderRadius? borderRadius;
   final Widget? subContent;
   final bool isSelected;
   final bool trailingForward;
+  final FocusNode? focusNode;
   final bool disabled;
   final bool tradeLeadingForSelectionControl;
   final bool showBothTrailingAndTrailingForward;
+  final LdColor? color;
 
   final bool showSelectionControls;
 
   const LdListItem({
     super.key,
-    this.leading,
-    this.trailing,
-    this.title,
     this.active = false,
-    this.isSelected = false,
-    this.radioSelection = false,
-    this.disabled = false,
-    this.selectDisabled = false,
-    this.trailingForward = false,
     this.borderRadius,
-    this.showSelectionControls = false,
+    this.disabled = false,
+    this.isSelected = false,
+    this.leading,
     this.onSelectionChange,
-    this.tradeLeadingForSelectionControl = false,
-    this.padding,
     this.onTap,
-    this.onLongPress,
-    this.subtitle,
-    this.width,
-    this.subContent,
+    this.padding,
+    this.radioSelection = false,
+    this.selectDisabled = false,
     this.showBothTrailingAndTrailingForward = false,
+    this.showSelectionControls = false,
+    this.subContent,
+    this.subtitle,
+    this.title,
+    this.tradeLeadingForSelectionControl = false,
+    this.focusNode,
+    this.trailing,
+    this.trailingForward = false,
+    this.color,
+    this.width,
   });
+
+  factory LdListItem.fromConfig(LdListItemConfig config) {
+    return LdListItem(
+      active: config.active,
+      borderRadius: config.borderRadius,
+      disabled: config.disabled,
+      isSelected: config.isSelected,
+      key: config.key,
+      leading: config.leading,
+      onSelectionChange: config.onSelectionChange,
+      onTap: config.onTap,
+      padding: config.padding,
+      radioSelection: config.radioSelection,
+      selectDisabled: config.selectDisabled,
+      focusNode: config.focusNode,
+      showBothTrailingAndTrailingForward: config.showBothTrailingAndTrailingForward,
+      showSelectionControls: config.showSelectionControls,
+      subContent: config.subContent,
+      subtitle: config.subtitle,
+      color: config.color,
+      title: config.title,
+      tradeLeadingForSelectionControl: config.tradeLeadingForSelectionControl,
+      trailing: config.trailing,
+      trailingForward: config.trailingForward,
+      width: config.width,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +199,7 @@ class LdListItem extends StatelessWidget {
     final effectiveWidth = width ?? double.infinity;
 
     return LdTouchableSurface(
+      focusNode: focusNode,
       onTap: () {
         if (showSelectionControls) {
           onSelectionChange?.call(!isSelected);
@@ -78,10 +207,9 @@ class LdListItem extends StatelessWidget {
           onTap?.call();
         }
       },
-      onLongPress: onLongPress,
       active: active || (showSelectionControls && isSelected),
       disabled: disabled || (!showSelectionControls && onTap == null),
-      color: theme.palette.primary,
+      color: color ?? theme.palette.primary,
       builder: (contxt, colors, status) {
         return IconTheme(
           data: IconThemeData(
@@ -105,17 +233,24 @@ class LdListItem extends StatelessWidget {
                         if (radioSelection)
                           LdRadio(
                               checked: isSelected,
+                              color: color,
                               disabled: disabled,
                               onChanged: (value) {
                                 onSelectionChange?.call(value);
                               })
                         else
-                          LdCheckbox(
-                              checked: isSelected,
-                              disabled: disabled,
-                              onChanged: (value) {
-                                onSelectionChange?.call(value);
-                              }),
+                          GestureDetector(
+                            onPanUpdate: (details) {
+                              print("start $title");
+                            },
+                            child: LdCheckbox(
+                                checked: isSelected,
+                                color: color,
+                                disabled: disabled,
+                                onChanged: (value) {
+                                  onSelectionChange?.call(value);
+                                }),
+                          ),
                         ldSpacerM,
                       ],
                     ),

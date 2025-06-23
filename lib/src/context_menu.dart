@@ -5,7 +5,9 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/haptics.dart';
 
 enum LdContextMenuBlurMode {
   /// Blur on mobile
@@ -40,6 +42,8 @@ enum LdContextPositionMode {
   relativeCursor,
 }
 
+class LdContextMenuDissmissNotification extends Notification {}
+
 class LdContextMenu extends StatefulWidget {
   const LdContextMenu({
     super.key,
@@ -50,10 +54,14 @@ class LdContextMenu extends StatefulWidget {
     this.zoomMode = LdContextZoomMode.mobileOnly,
     this.listenForTaps = true,
     this.visible,
+    this.disabled = false,
     this.positionMode = LdContextPositionMode.auto,
+    this.child,
   });
 
   final bool? visible;
+
+  final bool disabled;
 
   final bool dismissOnOutsideTap;
 
@@ -63,7 +71,9 @@ class LdContextMenu extends StatefulWidget {
   final LdContextZoomMode zoomMode;
   final LdContextPositionMode positionMode;
 
-  final Widget Function(BuildContext context, bool isShuttle, VoidCallback trigger) builder;
+  final Widget? child;
+
+  final Widget Function(BuildContext context, bool isShuttle, VoidCallback trigger, Widget? child) builder;
 
   final Widget Function(
     BuildContext context,
@@ -123,11 +133,14 @@ class _LdContextMenuState extends State<LdContextMenu> {
     return widget.positionMode;
   }
 
-  void _dismiss() {
+  Future<void> _dismiss() async {
+    await Future.delayed(Duration.zero);
+    if (!mounted) {
+      return;
+    }
     setState(() {
       _visible = false;
     });
-    _overlayPortalController.hide();
   }
 
   (Rect, Alignment) _resizeMenuToScreen(
@@ -165,14 +178,16 @@ class _LdContextMenuState extends State<LdContextMenu> {
     }
 
     final overflowX = min(
-      0,
-      screenSize.width - viewInsets.right - (triggerOffset.dx) - menuWidth,
-    );
+          0,
+          screenSize.width - viewInsets.right - (triggerOffset.dx) - menuWidth,
+        ) +
+        10;
 
     final overflowY = min(
-      0,
-      screenSize.height - viewInsets.bottom - (triggerOffset.dy + triggerSize.height) - menuHeight,
-    );
+          0,
+          screenSize.height - viewInsets.bottom - (triggerOffset.dy + triggerSize.height) - menuHeight,
+        ) +
+        10;
 
     final baseRect = Rect.fromLTWH(
       triggerOffset.dx + overflowX,
@@ -185,6 +200,13 @@ class _LdContextMenuState extends State<LdContextMenu> {
   }
 
   void _open({Offset? globalPosition}) async {
+    if (widget.disabled) {
+      return;
+    }
+    await Future.delayed(Duration.zero);
+    if (!mounted) {
+      return;
+    }
     _cursorPosition = globalPosition;
 
     _triggerBox = _triggerKey.currentContext?.findRenderObject() as RenderBox?;
@@ -205,37 +227,46 @@ class _LdContextMenuState extends State<LdContextMenu> {
         if (!_mobile) {
           return;
         }
-        HapticFeedback.heavyImpact();
+        LdHaptics.vibrate(HapticsType.heavy);
         _open(globalPosition: details.globalPosition);
       },
-      child: widget.builder(context, false, ({Offset? position}) {
-        if (position == null) {
-          if (_triggerBox != null) {
-            _open(
-              globalPosition: Offset(
-                _triggerBox!.localToGlobal(Offset.zero).dx,
-                _triggerBox!.localToGlobal(Offset.zero).dy + _triggerBox!.size.height,
-              ),
-            );
+      child: widget.builder(
+        context,
+        false,
+        ({Offset? position}) {
+          if (position == null) {
+            if (_triggerBox != null) {
+              _open(
+                globalPosition: Offset(
+                  _triggerBox!.localToGlobal(Offset.zero).dx,
+                  _triggerBox!.localToGlobal(Offset.zero).dy + _triggerBox!.size.height,
+                ),
+              );
+            } else {
+              _open();
+            }
           } else {
-            _open();
+            _open(globalPosition: position);
           }
-        } else {
-          _open(globalPosition: position);
-        }
-      }),
+        },
+        widget.child,
+      ),
     );
   }
 
   Widget _buildZoom(BuildContext context, Widget child) {
     if (_shouldZoom) {
       return LdSpring(
-        initialPosition: 1,
-        position: _visible ? 1.1 : 1,
-        builder: (context, state) {
-          return Transform.scale(
-            scale: state.position,
-            child: child,
+        initialPosition: 0,
+        position: _visible ? 1 : 0,
+        child: child,
+        builder: (context, state, child) {
+          return Opacity(
+            opacity: state.position.clamp(0, 1),
+            child: Transform.scale(
+              scale: max(0, state.position * 0.01 + 1),
+              child: child,
+            ),
           );
         },
       );
@@ -250,7 +281,8 @@ class _LdContextMenuState extends State<LdContextMenu> {
     return LdSpring(
       initialPosition: 0,
       position: _visible ? 1 : 0,
-      builder: (context, state) {
+      child: child,
+      builder: (context, state, child) {
         return BackdropFilter(
           filter: ImageFilter.blur(
             sigmaX: 10 * state.position.clamp(0, 1),
@@ -261,6 +293,9 @@ class _LdContextMenuState extends State<LdContextMenu> {
       },
     );
   }
+
+  Rect? _menuRect;
+  Alignment? _menuAlignment;
 
   @override
   Widget build(BuildContext context) {
@@ -274,34 +309,27 @@ class _LdContextMenuState extends State<LdContextMenu> {
           springConstant: 15,
           dampingCoefficient: 15,
           position: _visible ? 1 : 0,
-          onAnimationEnd: (context, state) {
-            if (state.position == 0) {
+          onAnimationEnd: (context, state) async {
+            await Future.delayed(Duration.zero);
+            if (state.position == 0 && mounted) {
               _overlayPortalController.hide();
             }
           },
-          builder: (context, state) {
-            final triggerBox = _triggerKey.currentContext?.findRenderObject() as RenderBox?;
-            final menuBox = _menuKey.currentContext?.findRenderObject() as RenderBox?;
-
-            if (triggerBox == null || menuBox == null || !menuBox.hasSize || !triggerBox.hasSize) {
+          builder: (context, state, child) {
+            if (_menuRect == null || _menuAlignment == null) {
               return const SizedBox.shrink();
             }
 
-            final (rect, alignment) = _resizeMenuToScreen(
-              context,
-              menuBox.size,
-            );
-
             return Positioned.fromRect(
-              rect: rect,
+              rect: _menuRect!,
               child: Opacity(
                 opacity: state.position.clamp(0, 1),
                 child: Align(
-                  alignment: alignment,
+                  alignment: _menuAlignment!,
                   child: Container(
                     constraints: BoxConstraints(
-                      maxWidth: rect.width,
-                      maxHeight: rect.height,
+                      maxWidth: _menuRect!.width,
+                      maxHeight: _menuRect!.height,
                     ),
                     margin: const EdgeInsets.symmetric(vertical: 8),
                     clipBehavior: Clip.hardEdge,
@@ -330,7 +358,15 @@ class _LdContextMenuState extends State<LdContextMenu> {
                           behavior: ScrollConfiguration.of(context).copyWith(
                             scrollbars: true,
                           ),
-                          child: widget.menuBuilder(context, _dismiss),
+                          child: NotificationListener<LdContextMenuDissmissNotification>(
+                            onNotification: (notification) {
+                              _dismiss();
+                              return true;
+                            },
+                            child: Builder(builder: (context) {
+                              return widget.menuBuilder(context, _dismiss);
+                            }),
+                          ),
                         ),
                       ),
                     ),
@@ -344,11 +380,32 @@ class _LdContextMenuState extends State<LdContextMenu> {
           fit: StackFit.expand,
           children: [
             Offstage(
-              child: Center(
-                  child: KeyedSubtree(
-                key: _menuKey,
-                child: widget.menuBuilder(context, _dismiss),
-              )),
+              child: LayoutBuilder(builder: (context, constraints) {
+                return _PostFrameCallback(
+                  key: ValueKey("menu-${constraints.maxWidth}x${constraints.maxHeight}"),
+                  postFrameCallback: (key) {
+                    final triggerBox = _triggerKey.currentContext?.findRenderObject() as RenderBox?;
+                    final menuBox = _menuKey.currentContext?.findRenderObject() as RenderBox?;
+
+                    if (triggerBox == null || menuBox == null || !menuBox.hasSize || !triggerBox.hasSize) {
+                      return;
+                    }
+
+                    final (rect, alignment) = _resizeMenuToScreen(
+                      context,
+                      menuBox.size,
+                    );
+
+                    _menuRect = rect;
+                    _menuAlignment = alignment;
+                  },
+                  child: Center(
+                      child: KeyedSubtree(
+                    key: _menuKey,
+                    child: widget.menuBuilder(context, _dismiss),
+                  )),
+                );
+              }),
             ),
             if (_shouldBlur) ...[
               _buildBlur(
@@ -365,7 +422,7 @@ class _LdContextMenuState extends State<LdContextMenu> {
                   height: _triggerBox!.size.height,
                   child: _buildZoom(
                     context,
-                    widget.builder(context, true, _open),
+                    widget.builder(context, true, _open, widget.child),
                   ),
                 ),
             ],
@@ -377,10 +434,7 @@ class _LdContextMenuState extends State<LdContextMenu> {
         );
       }),
       controller: _overlayPortalController,
-      child: _buildZoom(
-        context,
-        _buildTriggerDetector(context),
-      ),
+      child: _buildTriggerDetector(context),
     );
   }
 }
@@ -389,6 +443,7 @@ class _PostFrameCallback extends StatefulWidget {
   const _PostFrameCallback({
     required this.child,
     required this.postFrameCallback,
+    super.key,
   });
 
   final Widget child;

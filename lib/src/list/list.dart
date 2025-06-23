@@ -1,6 +1,5 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/intersperse.dart';
 
@@ -12,10 +11,10 @@ enum _ListItemType {
   groupHeader,
 }
 
-class _ListItem<T, SeparationCriterion> {
+class _ListItem<T extends Identifiable, SeparationCriterion> {
   _ListItem({
-    this.item,
     required this.type,
+    this.item,
     this.separationCriterion,
     this.position,
   }) : assert(
@@ -23,7 +22,7 @@ class _ListItem<T, SeparationCriterion> {
           "Items must have a position",
         );
 
-  final T? item;
+  final LdPaginatorItem<T>? item;
   final _ListItemType type;
   final SeparationCriterion? separationCriterion;
 
@@ -36,11 +35,10 @@ class _ListItem<T, SeparationCriterion> {
 }
 
 /// Extension to convert [LdPaginator] data into a list of [_ListItem]s
-extension GetItemList<T> on LdPaginator<T> {
+extension GetItemList<T extends Identifiable<IdType>, IdType> on LdPaginator<T, IdType> {
   List<_ListItem<T, GroupingCriterion>> currentList<GroupingCriterion>() {
     final result = <_ListItem<T, GroupingCriterion>>[];
     if (totalItems == 0) return result;
-
     for (int i = 0; i < totalItems; i++) {
       final item = getItemAt(i);
       result.add(_ListItem<T, GroupingCriterion>(
@@ -49,14 +47,13 @@ extension GetItemList<T> on LdPaginator<T> {
         type: _ListItemType.item,
       ));
     }
-
     return result;
   }
 }
 
-typedef LdListItemBuilder<T> = Widget Function(
+typedef LdListItemBuilder<T extends Identifiable> = Widget Function(
   BuildContext context,
-  T item,
+  LdPaginatorLoadedItem<T> item,
   int index,
 );
 
@@ -67,7 +64,7 @@ typedef LdListItemBuilder<T> = Widget Function(
 /// - Error handling and retry mechanisms
 /// - Pull-to-refresh functionality
 /// - Empty state handling
-class LdList<T, GroupingCriterion> extends StatefulWidget {
+class LdList<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends StatefulWidget {
   const LdList({
     super.key,
     this.scrollController,
@@ -118,7 +115,7 @@ class LdList<T, GroupingCriterion> extends StatefulWidget {
   final Widget Function(BuildContext context)? separatorBuilder;
 
   /// The paginator to use
-  final LdPaginator<T> paginator;
+  final LdPaginator<T, IdType> paginator;
 
   /// The scroll controller to use.
   /// If not provided, the list will use the primary scroll controller if [primary] is true.
@@ -151,44 +148,29 @@ class LdList<T, GroupingCriterion> extends StatefulWidget {
   final LdRetryConfig? retryConfig;
 
   @override
-  State<LdList<T, GroupingCriterion>> createState() => _LdListState<T, GroupingCriterion>();
+  State<LdList<T, IdType, GroupingCriterion>> createState() => _LdListState<T, IdType, GroupingCriterion>();
 }
 
-class _LdListState<T, GroupingCriterion> extends State<LdList<T, GroupingCriterion>> {
+class _LdListState<T extends Identifiable<IdType>, IdType, GroupingCriterion>
+    extends State<LdList<T, IdType, GroupingCriterion>> {
   // State variables
   List<_ListItem<T, GroupingCriterion>> _groupedItems = [];
   late final ScrollController _scrollController;
 
-  GlobalKey? _assumeItemKey;
-
   late final LdRetryController _retryController;
 
-  double? get _effectiveAssumedHeight => widget.assumedItemHeight ?? calculatedItemHeight;
-
-  double? get calculatedItemHeight {
-    if (_assumeItemKey == null) return null;
-
-    return _assumeItemKey?.currentContext?.size?.height;
-  }
+  final Map<IdType, GlobalKey> _itemKeys = {};
 
   @override
   void initState() {
     super.initState();
-
-    double initialOffset = 0;
-
-    if (widget.assumedItemHeight != null && widget.paginator.initialOffset != 0) {
-      initialOffset = widget.paginator.initialOffset * widget.assumedItemHeight!;
-    }
 
     if (widget.scrollController != null) {
       _scrollController = widget.scrollController!;
     } else if (widget.primary) {
       _scrollController = PrimaryScrollController.of(context);
     } else {
-      _scrollController = ScrollController(
-        initialScrollOffset: initialOffset,
-      );
+      _scrollController = ScrollController();
     }
 
     _initializeRetryController();
@@ -208,7 +190,7 @@ class _LdListState<T, GroupingCriterion> extends State<LdList<T, GroupingCriteri
   }
 
   @override
-  void didUpdateWidget(covariant LdList<T, GroupingCriterion> oldWidget) {
+  void didUpdateWidget(covariant LdList<T, IdType, GroupingCriterion> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (_shouldRegroupItems(oldWidget)) {
@@ -229,11 +211,11 @@ class _LdListState<T, GroupingCriterion> extends State<LdList<T, GroupingCriteri
     }
   }
 
-  bool _shouldRegroupItems(LdList<T, GroupingCriterion> oldWidget) {
+  bool _shouldRegroupItems(LdList<T, IdType, GroupingCriterion> oldWidget) {
     return oldWidget.groupingCriterion != widget.groupingCriterion || widget.paginator != oldWidget.paginator;
   }
 
-  bool _shouldUpdateDataListener(LdList<T, GroupingCriterion> oldWidget) {
+  bool _shouldUpdateDataListener(LdList<T, IdType, GroupingCriterion> oldWidget) {
     return widget.paginator != oldWidget.paginator;
   }
 
@@ -264,7 +246,7 @@ class _LdListState<T, GroupingCriterion> extends State<LdList<T, GroupingCriteri
         continue;
       }
 
-      final currentCriterion = widget.groupingCriterion!(item.item!);
+      final currentCriterion = widget.groupingCriterion!(item.item!.value!);
       if (lastSeparationCriterion != currentCriterion) {
         // Group header
         groupedItems.add(
@@ -359,7 +341,6 @@ class _LdListState<T, GroupingCriterion> extends State<LdList<T, GroupingCriteri
   List<Widget> _buildSlivers(BuildContext context) {
     return [
       if (widget.header != null) SliverToBoxAdapter(child: widget.header!),
-      if (widget.paginator.currentItemCount == 0) _buildLoadMore(context, -1),
       _buildListItems(),
       if (widget.footer != null) SliverToBoxAdapter(child: widget.footer!),
     ];
@@ -406,18 +387,26 @@ class _LdListState<T, GroupingCriterion> extends State<LdList<T, GroupingCriteri
 
   Widget _buildActualItem(
     BuildContext context,
-    _ListItem<T, GroupingCriterion> item,
+    _ListItem<T, GroupingCriterion> listEntry,
     int index,
   ) {
-    if (_assumeItemKey == null) {
-      _assumeItemKey = GlobalKey();
-      return KeyedSubtree(
-        key: _assumeItemKey,
-        child: widget.itemBuilder(context, item.item!, index),
-      );
+    final item = LdPaginatorLoadedItem(value: listEntry.item!.value, state: listEntry.item!.state);
+
+    if (!_itemKeys.containsKey(item.value.id)) {
+      _itemKeys[item.value.id] = GlobalKey();
     }
 
-    return widget.itemBuilder(context, item.item!, index);
+    if (listEntry.item!.state == LdPaginatorItemState.pendingRefresh) {
+      widget.paginator.fetchPageAtOffset(listEntry.position!);
+    }
+
+    return KeyedSubtree(
+      key: _itemKeys[item.value.id],
+      child: switch (listEntry.item!.state) {
+        LdPaginatorItemState.fetching => _buildLoader(context, listEntry.position!),
+        _ => widget.itemBuilder(context, item, index),
+      },
+    );
   }
 
   Widget _buildEmpty(BuildContext context) {
@@ -441,26 +430,6 @@ class _LdListState<T, GroupingCriterion> extends State<LdList<T, GroupingCriteri
     return const LdListItemLoading();
   }
 
-  /// Builds a battery of loaders to indicate that more items are being loaded.
-  Widget _buildLoadMore(BuildContext context, int position) {
-    if (widget.loadingBuilder != null) {
-      return SliverList.builder(
-        itemCount: max(
-          widget.paginator.initialOffset + 1,
-          widget.paginator.pageSize,
-        ),
-        itemBuilder: (context, index) {
-          return _buildLoader(context, position + index);
-        },
-      );
-    }
-
-    return SliverList.builder(
-      itemCount: widget.paginator.pageSize,
-      itemBuilder: (context, index) => _buildLoader(context, position + index),
-    );
-  }
-
   Widget _buildError(Object error) {
     if (widget.errorBuilder != null) {
       return widget.errorBuilder!(context, error, _onRefresh);
@@ -477,25 +446,51 @@ class _LdListState<T, GroupingCriterion> extends State<LdList<T, GroupingCriteri
     ).padL();
   }
 
+  double _getAverageItemHeight() {
+    double totalHeight = 0;
+    double count = 0;
+    for (final item in _itemKeys.values) {
+      final height = item.currentContext?.findRenderObject()?.paintBounds.height;
+
+      if (height != null) {
+        totalHeight += height;
+        count++;
+      }
+    }
+
+    if (count == 0) {
+      return widget.assumedItemHeight ?? 0;
+    }
+
+    return totalHeight / count;
+  }
+
+  bool _performedInitialScroll = false;
+
   /// Helper method to perform the initial scroll to the correct position
   /// based on the initial offset.
-  void _maybePerformInitialScroll() {
+  Future<void> _maybePerformInitialScroll() async {
     if (!_scrollController.hasClients) return;
     if (widget.paginator.initialOffset == 0) return;
+    if (_performedInitialScroll) return;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_scrollController.hasClients) return;
+    _performedInitialScroll = true;
 
-      final effectiveAssumedHeight = _effectiveAssumedHeight;
+    // Await for the list loading to settle
+    do {
+      await Future.delayed(const Duration(milliseconds: 500));
+    } while ((widget.paginator.busy));
 
-      /// Dont scroll if the item height is not yet calculated, or we
-      /// dont have a valid assumed height
-      if (effectiveAssumedHeight == null) return;
+    if (!_scrollController.hasClients) return;
 
-      _scrollController.jumpTo(
-        widget.paginator.initialOffset * effectiveAssumedHeight,
-      );
-    });
+    final averageHeight = _getAverageItemHeight();
+
+    final offset = averageHeight * widget.paginator.initialOffset;
+
+    print("Height: $averageHeight");
+    print("Offset: $offset");
+
+    _scrollController.animateTo(offset, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
   }
 
   @override
@@ -512,5 +507,57 @@ class _LdListState<T, GroupingCriterion> extends State<LdList<T, GroupingCriteri
       onRefresh: widget.paginator.refreshList,
       child: _buildListView(context),
     );
+  }
+}
+
+class LdListItemAnimation extends StatelessWidget {
+  final LdPaginatorItemState state;
+  final Widget child;
+
+  const LdListItemAnimation({required this.state, required this.child, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return switch (state) {
+      LdPaginatorItemState.fetching || LdPaginatorItemState.pendingRefresh => child
+          .animate(
+            key: const Key('index.fetching'),
+            onPlay: (controller) => controller.repeat(),
+          )
+          .shimmer(
+            color: LdTheme.of(context).primaryColor,
+            duration: const Duration(milliseconds: 1000),
+          ),
+      LdPaginatorItemState.loaded => child,
+      LdPaginatorItemState.updating => child
+          .animate(
+            key: const Key('index.updating'),
+            onPlay: (controller) => controller.repeat(),
+          )
+          .shimmer(
+            color: LdTheme.of(context).primaryColor,
+            duration: const Duration(milliseconds: 1000),
+          ),
+      LdPaginatorItemState.rolledBackUpdate => child
+          .animate(
+            key: const Key('index.rolledBackUpdate'),
+          )
+          .shimmer(
+            color: LdTheme.of(context).warningColor,
+            duration: const Duration(milliseconds: 1000),
+          )
+          .shakeX(hz: 3),
+      LdPaginatorItemState.deleting => LdReveal.quick(
+          revealed: false,
+          initialRevealed: true,
+          child: child,
+        ),
+      LdPaginatorItemState.rolledBackDeletion => LdReveal.quick(
+          revealed: true,
+          initialRevealed: false,
+          child: child,
+        ),
+      _ => child,
+    };
   }
 }

@@ -1,64 +1,56 @@
 // ignore_for_file: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
 
+import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/master_detail/identifiable.dart';
 
-enum LdSelectableListSelectionControlsMode {
-  none,
-  auto,
-  show,
-}
+class LdSelectableList<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends StatefulWidget {
+  final Widget Function(BuildContext context, LdPaginatorItem<T> item, int index, LdListItemConfig config) itemBuilder;
 
-class LdSelectableList<T, GroupingCriterion> extends StatefulWidget {
-  final Widget Function({
-    required BuildContext context,
-    required T item,
-    required int index,
-    required bool selected,
-    required bool isMultiSelect,
-    required void Function(bool selected) onSelectionChange,
-    required VoidCallback onTap,
-    required bool showSelectionControls,
-  }) itemBuilder;
-
-  final LdList<T, GroupingCriterion> Function(
+  final LdList<T, IdType, GroupingCriterion> Function(
     BuildContext context,
     ScrollController scrollController,
     LdListItemBuilder<T> itemBuilder,
-  ) listBuilder;
+  )? listBuilder;
 
+  final Set<IdType> initialSelectedItems;
   final bool multiSelect;
 
-  final LdSelectableListSelectionControlsMode selectionControlsMode;
+  final LdPaginator<T, IdType> paginator;
 
-  final LdPaginator<T> paginator;
+  final void Function(Set<IdType> selectedItems)? onSelectionChange;
 
-  final void Function(Set<T> selectedItems)? onSelectionChange;
+  final bool showSelectionControls;
 
   const LdSelectableList({
     super.key,
     required this.itemBuilder,
-    required this.listBuilder,
+    this.listBuilder,
     this.onSelectionChange,
     this.multiSelect = false,
     required this.paginator,
-    this.selectionControlsMode = LdSelectableListSelectionControlsMode.auto,
+    this.showSelectionControls = false,
+    this.initialSelectedItems = const {},
   });
 
   @override
-  State<LdSelectableList<T, GroupingCriterion>> createState() => _LdSelectableListState<T, GroupingCriterion>();
+  State<LdSelectableList<T, IdType, GroupingCriterion>> createState() =>
+      _LdSelectableListState<T, IdType, GroupingCriterion>();
 }
 
-class _LdSelectableListState<T, GroupingCriterion> extends State<LdSelectableList<T, GroupingCriterion>> {
-  late final _selectedItems = _SetNotifier<T>(
-    {},
+class _LdSelectableListState<T extends Identifiable<IdType>, IdType, GroupingCriterion>
+    extends State<LdSelectableList<T, IdType, GroupingCriterion>> {
+  late final _selectedItems = _SetNotifier<IdType>(
+    widget.initialSelectedItems,
     widget.multiSelect,
   );
 
-  late final _dragRectItems = _SetNotifier<T>(
+  late final _dragRectItems = _SetNotifier<IdType>(
     {},
     true,
   );
@@ -68,19 +60,19 @@ class _LdSelectableListState<T, GroupingCriterion> extends State<LdSelectableLis
   final _focusNode = FocusNode();
   late final ScrollController _scrollController;
 
-  final Map<T, GlobalKey> _itemKeys = {};
+  final Map<IdType, GlobalKey> _itemKeys = {};
+  final Map<IdType, FocusNode> _itemFocusNodes = {};
 
   final GlobalKey _rootKey = GlobalKey();
 
   bool _shiftPressed = false;
   bool _ctrlPressed = false;
 
-  bool _showSelectionControls = false;
-
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+
     _selectedItems.addListener(() {
       widget.onSelectionChange?.call(_selectedItems.value);
 
@@ -88,6 +80,13 @@ class _LdSelectableListState<T, GroupingCriterion> extends State<LdSelectableLis
     });
     _dragRectItems.addListener(() {
       _changeNotifier.notifyListeners();
+    });
+
+    _focusNode.addListener(() {
+      if (!_focusNode.hasFocus) {
+        _shiftPressed = false;
+        _ctrlPressed = false;
+      }
     });
   }
 
@@ -106,17 +105,21 @@ class _LdSelectableListState<T, GroupingCriterion> extends State<LdSelectableLis
   }
 
   @override
-  void didUpdateWidget(LdSelectableList<T, GroupingCriterion> oldWidget) {
+  void didUpdateWidget(LdSelectableList<T, IdType, GroupingCriterion> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.multiSelect != widget.multiSelect) {
       _selectedItems.allowMultiple = widget.multiSelect;
+    }
+
+    if (oldWidget.initialSelectedItems != widget.initialSelectedItems) {
+      _selectedItems.setValue(widget.initialSelectedItems);
     }
   }
 
   bool get isMultiSelect => widget.multiSelect;
 
-  bool isSelected(T item) {
-    if (_ctrlPressed || _shiftPressed) {
+  bool isSelected(IdType item) {
+    if (_ctrlPressed || _shiftPressed || widget.showSelectionControls) {
       return _selectedItems.contains(item) || _dragRectItems.contains(item);
     }
     if (_dragRectItems.value.isNotEmpty) {
@@ -126,7 +129,8 @@ class _LdSelectableListState<T, GroupingCriterion> extends State<LdSelectableLis
   }
 
   // Called when the user taps an item
-  void onTap(T item) {
+  void onTap(IdType item) {
+    _focusNode.requestFocus();
     if (!isMultiSelect) {
       _selectedItems.toggle(item);
       return;
@@ -142,27 +146,39 @@ class _LdSelectableListState<T, GroupingCriterion> extends State<LdSelectableLis
       _selectedItems.toggle(item);
     } else {
       // Only select the item the user tapped
-      _selectedItems.clear();
-      _selectedItems.add(item);
+      _selectedItems.setValue({item});
     }
   }
 
   // Selects all items between the last selected item and the given item
-  void _selectRange(T end) {
+  void _selectRange(IdType end) {
+    if (_selectedItems.value.isEmpty) {
+      _selectedItems.add(end);
+      return;
+    }
+
     final start = _selectedItems.value.last;
-    final startIndex = widget.paginator.items.indexOf(start);
-    final endIndex = widget.paginator.items.indexOf(end);
+    final startIndex = widget.paginator.getItemIndexById(start);
+    final endIndex = widget.paginator.getItemIndexById(end);
+
+    if (startIndex == null || endIndex == null) {
+      return;
+    }
+
+    var added = <IdType>[];
 
     for (var i = min(startIndex, endIndex); i <= max(startIndex, endIndex); i++) {
-      final item = widget.paginator.items[i];
+      final item = widget.paginator.getItemAt(i);
       if (item != null) {
-        _selectedItems.add(item);
+        added.add(item.value!.id);
       }
     }
+
+    _selectedItems.addAll(added.toSet());
   }
 
   // Called when the user selects an item using the checkbox or radio
-  void onSelectionChange(T item, bool selected) {
+  void onSelectionChange(IdType item, bool selected) {
     if (isMultiSelect) {
       if (selected) {
         if (_shiftPressed) {
@@ -199,7 +215,7 @@ class _LdSelectableListState<T, GroupingCriterion> extends State<LdSelectableLis
 
       if (dragRect.overlaps(rect)) {
         _dragRectItems.add(item.key);
-      } else {
+      } else if (!widget.showSelectionControls) {
         _dragRectItems.remove(item.key);
       }
     }
@@ -207,11 +223,10 @@ class _LdSelectableListState<T, GroupingCriterion> extends State<LdSelectableLis
   }
 
   void _onEndDrag(Rect rect) {
-    if (_shiftPressed || _ctrlPressed) {
+    if (_shiftPressed || _ctrlPressed || widget.showSelectionControls) {
       _selectedItems.addAll(_dragRectItems.value);
     } else {
-      _selectedItems.clear();
-      _selectedItems.addAll(_dragRectItems.value);
+      _selectedItems.setValue(_dragRectItems.value);
     }
     _dragRectItems.clear();
     setState(() {});
@@ -243,54 +258,169 @@ class _LdSelectableListState<T, GroupingCriterion> extends State<LdSelectableLis
     if (isCtrl) {
       _ctrlPressed = event is KeyDownEvent;
     }
+    if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.arrowDown) {
+      // Get the item that has the focus
+      for (final item in _itemFocusNodes.entries) {
+        if (item.value.hasFocus) {
+          // Add the next item to the selection
+          final currentIndex = widget.paginator.getItemIndexById(item.key);
+
+          if (currentIndex != null) {
+            final nextIndex = currentIndex + 1;
+            final nextItem = widget.paginator.getItemAt(nextIndex);
+            if (nextItem != null && nextItem.value != null) {
+              if (_shiftPressed) {
+                _itemFocusNodes[nextItem.value!.id]?.requestFocus();
+                _selectRange(nextItem.value!.id);
+              }
+            }
+          }
+          break;
+        }
+      }
+    }
+
+    if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.arrowUp) {
+      // Get the item that has the focus
+      for (final item in _itemFocusNodes.entries) {
+        if (item.value.hasFocus) {
+          // Add the next item to the selection
+          final currentIndex = widget.paginator.getItemIndexById(item.key);
+          if (currentIndex != null) {
+            final nextIndex = currentIndex - 1;
+            final nextItem = widget.paginator.getItemAt(nextIndex);
+            if (nextItem != null && nextItem.value != null) {
+              if (_shiftPressed) {
+                _itemFocusNodes[nextItem.value!.id]?.requestFocus();
+                _selectRange(nextItem.value!.id);
+              }
+            }
+          }
+        }
+        break;
+      }
+    }
+
+    if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.keyA) {
+      _selectedItems.setValue(widget.paginator.items.map((e) => e?.id).whereType<IdType>().toSet());
+    }
+
+    if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
+      _selectedItems.clear();
+    }
 
     if (isShift || isCtrl) {
       setState(() {});
     }
   }
 
+  LdList<T, IdType, GroupingCriterion> _defaultListBuilder(
+      BuildContext context, ScrollController scrollController, LdListItemBuilder<T> itemBuilder) {
+    return LdList(
+      paginator: widget.paginator,
+      scrollController: scrollController,
+      itemBuilder: itemBuilder,
+    );
+  }
+
+  Widget _wrapListItem(BuildContext context, LdPaginatorItem<T> item, int index) {
+    if (!_itemKeys.containsKey(item.value!.id)) {
+      _itemKeys[item.value!.id] = GlobalKey();
+    }
+
+    if (!_itemFocusNodes.containsKey(item.value!.id)) {
+      _itemFocusNodes[item.value!.id] = FocusNode();
+    }
+
+    return AnimatedBuilder(
+      animation: _changeNotifier,
+      key: _itemKeys[item.value!.id],
+      builder: (context, child) {
+        return widget.itemBuilder(
+          context,
+          item,
+          index,
+          LdListItemConfig(
+            focusNode: _itemFocusNodes[item.value!.id],
+            isSelected: isSelected(item.value!.id),
+            active: isSelected(item.value!.id),
+            onSelectionChange: (selected) => onSelectionChange(
+              item.value!.id,
+              selected,
+            ),
+            onTap: () => onTap(item.value!.id),
+            showSelectionControls: widget.showSelectionControls,
+          ),
+        );
+      },
+    );
+  }
+
+  bool get isMobile => !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+
   @override
   Widget build(BuildContext context) {
+    if (widget.showSelectionControls && isMobile) {
+      return Stack(
+        children: [
+          widget.listBuilder?.call(context, _scrollController, _wrapListItem) ??
+              _defaultListBuilder(
+                context,
+                _scrollController,
+                _wrapListItem,
+              ),
+          Positioned(
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: 42,
+            child: _DragRect(
+              drawBorder: false,
+              onTapOutside: () {
+                _selectedItems.clear();
+                setState(() {});
+                widget.onSelectionChange?.call({});
+              },
+              key: _rootKey,
+              onUpdateRect: _onUpdateDragRect,
+              onEndDrag: _onEndDrag,
+              onCancel: _onCancel,
+              child: KeyboardListener(
+                focusNode: _focusNode,
+                autofocus: true,
+                onKeyEvent: _onKeyEvent,
+                child: Container(
+                  color: Colors.transparent,
+                ),
+              ),
+            ),
+          )
+        ],
+      );
+    }
+
     return _DragRect(
-        key: _rootKey,
-        onUpdateRect: _onUpdateDragRect,
-        onEndDrag: _onEndDrag,
-        onCancel: _onCancel,
-        child: TapRegion(
-          onTapOutside: (event) {
-            _selectedItems.clear();
-
-            setState(() {});
-          },
-          child: KeyboardListener(
-              focusNode: _focusNode,
-              autofocus: true,
-              onKeyEvent: _onKeyEvent,
-              child: widget.listBuilder(context, _scrollController, (context, item, index) {
-                if (!_itemKeys.containsKey(item)) {
-                  _itemKeys[item] = GlobalKey();
-                }
-
-                return AnimatedBuilder(
-                    animation: _changeNotifier,
-                    key: _itemKeys[item],
-                    builder: (context, child) {
-                      return widget.itemBuilder(
-                        context: context,
-                        item: item,
-                        index: index,
-                        selected: isSelected(item),
-                        isMultiSelect: isMultiSelect,
-                        onSelectionChange: (selected) => onSelectionChange(
-                          item,
-                          selected,
-                        ),
-                        onTap: () => onTap(item),
-                        showSelectionControls: _showSelectionControls,
-                      );
-                    });
-              })),
-        ));
+      onTapOutside: () {
+        _selectedItems.clear();
+        setState(() {});
+        widget.onSelectionChange?.call({});
+      },
+      key: _rootKey,
+      onUpdateRect: _onUpdateDragRect,
+      onEndDrag: _onEndDrag,
+      onCancel: _onCancel,
+      child: KeyboardListener(
+        focusNode: _focusNode,
+        autofocus: true,
+        onKeyEvent: _onKeyEvent,
+        child: widget.listBuilder?.call(context, _scrollController, _wrapListItem) ??
+            _defaultListBuilder(
+              context,
+              _scrollController,
+              _wrapListItem,
+            ),
+      ),
+    );
   }
 }
 
@@ -298,6 +428,10 @@ class _SetNotifier<T> extends ValueNotifier<Set<T>> {
   _SetNotifier([Set<T>? value, this.allowMultiple = false]) : super(value ?? {});
 
   bool allowMultiple;
+
+  void setValue(Set<T> value) {
+    this.value = value;
+  }
 
   void add(T item) {
     if (allowMultiple) {
@@ -338,12 +472,16 @@ class _DragRect extends StatefulWidget {
   final void Function(Rect rect) onUpdateRect;
   final void Function(Rect rect) onEndDrag;
   final void Function() onCancel;
+  final void Function() onTapOutside;
+  final bool drawBorder;
 
   final Widget child;
 
   const _DragRect({
+    required this.onTapOutside,
     required this.onUpdateRect,
     required this.onEndDrag,
+    this.drawBorder = true,
     required this.child,
     required this.onCancel,
     super.key,
@@ -389,15 +527,20 @@ class _DragRectState extends State<_DragRect> {
             width: rect.width,
             height: rect.height,
             decoration: BoxDecoration(
-              border: Border.all(
-                color: LdTheme.of(context).primaryColor,
-                width: 1,
-              ),
+              border: widget.drawBorder
+                  ? Border.all(
+                      color: LdTheme.of(context).primaryColor,
+                      width: 1,
+                    )
+                  : null,
             ),
           ),
         );
       },
       child: GestureDetector(
+        onTap: () {
+          widget.onTapOutside();
+        },
         onPanStart: (details) {
           _dragStartOffset = details.globalPosition;
           _overlayPortalController.show();
