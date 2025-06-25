@@ -4,10 +4,10 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/haptics.dart';
+import 'package:liquid_flutter/src/modal/size_notifier.dart';
 
 enum LdContextMenuBlurMode {
   /// Blur on mobile
@@ -96,7 +96,20 @@ class _LdContextMenuState extends State<LdContextMenu> {
   late bool _visible = widget.visible ?? false;
   Offset? _cursorPosition;
 
+  final _menuSizeNotifier = ValueNotifier<Size>(Size.zero);
+
   bool get _mobile => !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _menuSizeNotifier.dispose();
+    super.dispose();
+  }
 
   bool get _shouldBlur {
     return switch (widget.blurMode) {
@@ -147,9 +160,16 @@ class _LdContextMenuState extends State<LdContextMenu> {
     BuildContext context,
     Size menuSize,
   ) {
-    final mediaQuery = MediaQuery.of(
-      Scaffold.maybeOf(context)?.context ?? context,
-    );
+    if (_triggerBox == null) {
+      return (Rect.zero, Alignment.topLeft);
+    }
+    final view = WidgetsBinding.instance.platformDispatcher.implicitView;
+
+    var mediaQuery = MediaQuery.of(context);
+
+    if (view != null) {
+      mediaQuery = MediaQueryData.fromView(view);
+    }
 
     final viewInsets = mediaQuery.viewInsets + const EdgeInsets.all(10);
 
@@ -161,7 +181,7 @@ class _LdContextMenuState extends State<LdContextMenu> {
     Offset triggerOffset;
     Size triggerSize;
 
-    if (_effectivePositionMode == LdContextPositionMode.relativeTrigger) {
+    if (_effectivePositionMode == LdContextPositionMode.relativeTrigger || _cursorPosition == null) {
       triggerSize = _triggerBox!.size;
       triggerOffset = Offset(
         _triggerBox!.localToGlobal(Offset.zero).dx,
@@ -179,24 +199,32 @@ class _LdContextMenuState extends State<LdContextMenu> {
 
     final overflowX = min(
           0,
-          screenSize.width - viewInsets.right - (triggerOffset.dx) - menuWidth,
+          screenSize.width - viewInsets.right - viewInsets.left - (triggerOffset.dx) - menuWidth,
         ) +
         10;
 
     final overflowY = min(
           0,
-          screenSize.height - viewInsets.bottom - (triggerOffset.dy + triggerSize.height) - menuHeight,
+          screenSize.height - viewInsets.bottom - viewInsets.top - (triggerOffset.dy + triggerSize.height) - menuHeight,
         ) +
         10;
 
     final baseRect = Rect.fromLTWH(
       triggerOffset.dx + overflowX,
       triggerOffset.dy + overflowY,
-      screenSize.width - viewInsets.right - (triggerOffset.dx) - overflowX,
-      screenSize.height - viewInsets.bottom - (triggerOffset.dy + triggerSize.height) - overflowY,
+      menuSize.width,
+      menuSize.height,
     );
 
-    return (baseRect, Alignment.topLeft);
+    final isLeftOfTrigger = baseRect.left < triggerOffset.dx;
+    final isAboveTrigger = baseRect.top < triggerOffset.dy;
+
+    return switch ((isLeftOfTrigger, isAboveTrigger)) {
+      (true, true) => (baseRect, Alignment.bottomRight),
+      (true, false) => (baseRect, Alignment.topRight),
+      (false, true) => (baseRect, Alignment.bottomLeft),
+      (false, false) => (baseRect, Alignment.topLeft),
+    };
   }
 
   void _open({Offset? globalPosition}) async {
@@ -294,118 +322,102 @@ class _LdContextMenuState extends State<LdContextMenu> {
     );
   }
 
-  Rect? _menuRect;
-  Alignment? _menuAlignment;
-
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
 
     return OverlayPortal.targetsRootOverlay(
-      overlayChildBuilder: (context) => LayoutBuilder(builder: (context, constraints) {
-        final menu = LdSpring(
-          initialPosition: 0,
-          mass: 8,
-          springConstant: 15,
-          dampingCoefficient: 15,
-          position: _visible ? 1 : 0,
-          onAnimationEnd: (context, state) async {
-            await Future.delayed(Duration.zero);
-            if (state.position == 0 && mounted) {
-              _overlayPortalController.hide();
-            }
-          },
-          builder: (context, state, child) {
-            if (_menuRect == null || _menuAlignment == null) {
-              return const SizedBox.shrink();
-            }
+      overlayChildBuilder: (context) => Builder(builder: (context) {
+        final menu = Builder(builder: (context) {
+          return LdSpring(
+            initialPosition: 0,
+            //mass: 8,
+            //springConstant: 15,
+            //dampingCoefficient: 15,
+            position: _visible ? 1 : 0,
+            onAnimationEnd: (context, state) async {
+              await Future.delayed(Duration.zero);
+              if (state.position == 0 && mounted) {
+                _overlayPortalController.hide();
+              }
+            },
+            child: ScrollConfiguration(
+              behavior: ScrollConfiguration.of(context).copyWith(
+                scrollbars: true,
+              ),
+              child: NotificationListener<LdContextMenuDissmissNotification>(
+                onNotification: (notification) {
+                  _dismiss();
+                  return true;
+                },
+                child: Builder(builder: (context) {
+                  return widget.menuBuilder(context, _dismiss);
+                }),
+              ),
+            ),
+            builder: (context, state, child) {
+              final (rect, alignment) = _resizeMenuToScreen(
+                context,
+                _menuSizeNotifier.value,
+              );
 
-            return Positioned.fromRect(
-              rect: _menuRect!,
-              child: Opacity(
-                opacity: state.position.clamp(0, 1),
-                child: Align(
-                  alignment: _menuAlignment!,
-                  child: Container(
-                    constraints: BoxConstraints(
-                      maxWidth: _menuRect!.width,
-                      maxHeight: _menuRect!.height,
-                    ),
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    clipBehavior: Clip.hardEdge,
-                    decoration: BoxDecoration(
-                      color: theme.surface,
-                      border: Border.all(
-                        color: theme.border,
-                        strokeAlign: BorderSide.strokeAlignOutside,
-                        width: theme.borderWidth,
-                      ),
-                      borderRadius: theme.radius(LdSize.m),
-                      boxShadow: [
-                        BoxShadow(
-                          color: theme.palette.neutral.shades.last.withAlpha(51),
-                          blurRadius: 10,
-                          offset: const Offset(0, 0),
-                        )
-                      ],
-                    ),
-                    child: ClipRRect(
-                      child: Align(
-                        alignment: Alignment.topLeft,
-                        widthFactor: 1,
-                        heightFactor: state.position.clamp(0, double.infinity),
-                        child: ScrollConfiguration(
-                          behavior: ScrollConfiguration.of(context).copyWith(
-                            scrollbars: true,
+              return Positioned.fromRect(
+                rect: rect,
+                child: Opacity(
+                  opacity: state.position.clamp(0, 1),
+                  child: Align(
+                    alignment: alignment,
+                    child: Transform.scale(
+                      alignment: alignment,
+                      scale: max(0, state.position),
+                      child: Container(
+                        constraints: BoxConstraints(
+                          maxWidth: rect.width,
+                          maxHeight: max(0, rect.height),
+                        ),
+                        clipBehavior: Clip.hardEdge,
+                        decoration: BoxDecoration(
+                          color: theme.surface,
+                          border: Border.all(
+                            color: theme.border,
+                            strokeAlign: BorderSide.strokeAlignOutside,
+                            width: theme.borderWidth,
                           ),
-                          child: NotificationListener<LdContextMenuDissmissNotification>(
-                            onNotification: (notification) {
-                              _dismiss();
-                              return true;
-                            },
-                            child: Builder(builder: (context) {
-                              return widget.menuBuilder(context, _dismiss);
-                            }),
-                          ),
+                          borderRadius: theme.radius(LdSize.m),
+                          boxShadow: [
+                            BoxShadow(
+                              color: theme.palette.neutral.shades.last.withAlpha(51),
+                              blurRadius: 10,
+                              offset: const Offset(0, 0),
+                            )
+                          ],
+                        ),
+                        child: Align(
+                          alignment: Alignment.topLeft,
+                          widthFactor: 1,
+                          child: child,
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            );
-          },
-        );
+              );
+            },
+          );
+        });
         return Stack(
           fit: StackFit.expand,
           children: [
             Offstage(
-              child: LayoutBuilder(builder: (context, constraints) {
-                return _PostFrameCallback(
-                  key: ValueKey("menu-${constraints.maxWidth}x${constraints.maxHeight}"),
-                  postFrameCallback: (key) {
-                    final triggerBox = _triggerKey.currentContext?.findRenderObject() as RenderBox?;
-                    final menuBox = _menuKey.currentContext?.findRenderObject() as RenderBox?;
-
-                    if (triggerBox == null || menuBox == null || !menuBox.hasSize || !triggerBox.hasSize) {
-                      return;
-                    }
-
-                    final (rect, alignment) = _resizeMenuToScreen(
-                      context,
-                      menuBox.size,
-                    );
-
-                    _menuRect = rect;
-                    _menuAlignment = alignment;
-                  },
-                  child: Center(
-                      child: KeyedSubtree(
-                    key: _menuKey,
+              child: Center(
+                child: KeyedSubtree(
+                  key: _menuKey,
+                  child: MeasureSize(
+                    sizeNotifier: _menuSizeNotifier,
                     child: widget.menuBuilder(context, _dismiss),
-                  )),
-                );
-              }),
+                  ),
+                ),
+              ),
             ),
             if (_shouldBlur) ...[
               _buildBlur(
@@ -436,37 +448,5 @@ class _LdContextMenuState extends State<LdContextMenu> {
       controller: _overlayPortalController,
       child: _buildTriggerDetector(context),
     );
-  }
-}
-
-class _PostFrameCallback extends StatefulWidget {
-  const _PostFrameCallback({
-    required this.child,
-    required this.postFrameCallback,
-    super.key,
-  });
-
-  final Widget child;
-
-  final void Function(GlobalKey key) postFrameCallback;
-
-  @override
-  State<_PostFrameCallback> createState() => _PostFrameCallbackState();
-}
-
-class _PostFrameCallbackState extends State<_PostFrameCallback> {
-  final GlobalKey _key = GlobalKey();
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      widget.postFrameCallback(_key);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return KeyedSubtree(key: _key, child: widget.child);
   }
 }
