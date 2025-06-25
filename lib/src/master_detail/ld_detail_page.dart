@@ -56,27 +56,8 @@ class LdDetailPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
                         : null,
                   ),
               bottomNavigationBar: isSplit
-                  ? Container(
-                      padding: LdTheme.of(context).pad(size: LdSize.s),
-                      decoration: BoxDecoration(
-                        color: LdTheme.of(context).surface,
-                        border: Border(
-                          top: BorderSide(
-                            color: LdTheme.of(context).border,
-                            width: 1,
-                          ),
-                        ),
-                        boxShadow: [
-                          ldShadowDefault,
-                        ],
-                      ),
-                      child: SafeArea(
-                        minimum: LdTheme.of(context).balPad(LdSize.m),
-                        top: false,
-                        child: LdMasterDetailAppBarActions<T, IdType, GroupingCriterion>(
-                          location: LdMasterDetailActionLocation.detailSecondary,
-                        ),
-                      ),
+                  ? LdMasterDetailBottomBarActions<T, IdType, GroupingCriterion>(
+                      location: LdMasterDetailActionLocation.detailSecondary,
                     )
                   : null,
               body: LdDetailPageContent(route: route, selection: selection),
@@ -93,71 +74,79 @@ class LdDetailPageContent<T extends Identifiable<IdType>, IdType, GroupingCriter
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: selection
-          .toList()
-          .reversed
-          .mapIndexed((index, id) {
-            return Align(
-              key: ValueKey(id),
-              alignment: Alignment.center,
-              child: LdSpring(
-                position: index.toDouble(),
-                initialPosition: 0,
-                builder: (context, state, child) {
-                  final position = max(0, state.position);
-                  return Transform.scale(
-                      scale: 1 - (position * 0.02),
-                      child: Transform.rotate(
-                        angle: index % 3 * 0.02,
-                        child: Transform.translate(
-                          offset: Offset(0, position * 5),
-                          child: child,
-                        ),
-                      ));
-                },
-                child: StreamBuilder<LdPaginatorItem<T>?>(
-                  initialData: route.repository.getItemById(id),
-                  stream: route.repository.watchItem(id),
-                  builder: (context, snapshot) {
-                    if (snapshot.data == null) {
-                      return LdSubmit<T, IdType>(
-                        config: LdSubmitConfig(
-                          autoTrigger: true,
-                          action: (arg) async {
-                            final res = await route.repository.getById(id);
-                            return res;
-                          },
-                        ),
-                        builder: LdSubmitCenteredBuilder<T, IdType>(
-                          resultBuilder: (context, result, _) => route.buildDetail(
-                            context,
-                            LdPaginatorItem(value: result, state: LdPaginatorItemState.loaded),
+    return LdContainer(
+      child: Stack(
+        fit: StackFit.expand,
+        children: selection
+            .toList()
+            .reversed
+            .mapIndexed((index, id) {
+              return Align(
+                key: ValueKey(id),
+                alignment: Alignment.center,
+                child: LdSpring(
+                  position: index.toDouble(),
+                  initialPosition: 0,
+                  builder: (context, state, child) {
+                    final position = max(0, state.position);
+                    return Transform.scale(
+                        scale: 1 - (position * 0.02),
+                        child: Transform.rotate(
+                          angle: index % 3 * 0.02,
+                          child: Transform.translate(
+                            offset: Offset(0, position * 5),
+                            child: child,
                           ),
-                        ),
-                      );
-                    }
-                    if (snapshot.data?.state == LdPaginatorItemState.deleting) {
-                      return LdReveal.quick(
-                        initialRevealed: true,
-                        revealed: false,
-                        child: route.buildDetail(
-                          context,
-                          LdPaginatorItem(value: snapshot.data!.value, state: LdPaginatorItemState.deleting),
-                        ),
-                      );
-                    }
-
-                    return route.buildDetail(context, snapshot.data!);
+                        ));
                   },
+                  child: StreamBuilder<LdPaginatorItem<T>?>(
+                    initialData: route.repository.getItemById(id),
+                    stream: route.repository.watchItem(id),
+                    builder: (context, snapshot) {
+                      if (snapshot.data == null) {
+                        return LdSubmit<T, IdType>(
+                          config: LdSubmitConfig(
+                            autoTrigger: true,
+                            action: (arg) async {
+                              final res = await route.repository.getById(id);
+                              return res;
+                            },
+                          ),
+                          builder: LdSubmitCenteredBuilder<T, IdType>(
+                            resultBuilder: (context, result, _) => route.buildDetail(
+                              context,
+                              LdPaginatorItem(
+                                value: result,
+                                state: LdPaginatorItemState.loaded,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      if (snapshot.data?.state == LdPaginatorItemState.deleting) {
+                        return LdReveal.quick(
+                          initialRevealed: true,
+                          revealed: false,
+                          child: route.buildDetail(
+                            context,
+                            LdPaginatorItem(
+                              value: snapshot.data!.value,
+                              state: LdPaginatorItemState.deleting,
+                            ),
+                          ),
+                        );
+                      }
+
+                      return route.buildDetail(context, snapshot.data!);
+                    },
+                  ),
                 ),
-              ),
-            );
-          })
-          .toList()
-          .reversed
-          .toList(),
+              );
+            })
+            .toList()
+            .reversed
+            .toList(),
+      ),
     );
   }
 }

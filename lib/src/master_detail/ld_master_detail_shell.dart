@@ -78,7 +78,7 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
 
     if (selectedItems.isNotEmpty) {
       if (showingDetail) {
-        router.go(
+        router.replace(
           detailPath,
         );
       } else {
@@ -93,7 +93,7 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
       if (showingDetail) {
         router.pop();
       } else {
-        router.go(widget.route.path);
+        router.replace(widget.route.path);
       }
     }
   }

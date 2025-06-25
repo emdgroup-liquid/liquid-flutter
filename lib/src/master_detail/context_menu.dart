@@ -17,13 +17,14 @@ class LdMasterDetailContextMenu<T extends Identifiable<IdType>, IdType, Grouping
 
     final route = LdMasterDetailRoute.of<T, IdType, GroupingCriterion>(context);
 
-    final actions = route.actions.where((e) => e.visibility.contains(LdMasterDetailActionLocation.context)).toList();
+    final actions =
+        route.actions.where((e) => e.isVisible(context, location: LdMasterDetailActionLocation.context)).toList();
 
     return Provider.value(
       value: LdMasterDetailSelection<T, IdType, GroupingCriterion>(items: newSelection),
       child: LdContextMenu(
         child: child,
-        disabled: listSelection.length > 1 && !listSelection.contains(item.value!.id),
+        disabled: (listSelection.length > 1 && !listSelection.contains(item.value!.id)) || actions.isEmpty,
         builder: (context, isOpen, open, child) => child!,
         menuBuilder: (context, menuBuilder) => ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 300),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/master_detail/app_bar_actions.dart';
 import 'package:liquid_flutter/src/master_detail/ld_master_detail_selection.dart';
@@ -25,12 +26,6 @@ class LdMasterPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
               final state = asyncSnapshot.data!;
               // Provide  the state of the route to the list builder
 
-              final hasSecondaryActions = route.actions.any(
-                (e) =>
-                    e.visibility.contains(LdMasterDetailActionLocation.masterSecondary) &&
-                    (state.selectedItems.length < 2 || e.multiSelect),
-              );
-
               return Provider.value(
                 value: LdMasterDetailSelection<T, IdType, GroupingCriterion>(items: state.selectedItems),
                 child: LdMasterDetailMultiShortcuts(
@@ -48,10 +43,8 @@ class LdMasterPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
                           : null,
                     ),
                     bottomNavigationBar: isSeperate
-                        ? LdBottomBar(
-                            child: LdMasterDetailAppBarActions<T, IdType, GroupingCriterion>(
-                              location: LdMasterDetailActionLocation.masterSecondary,
-                            ),
+                        ? LdMasterDetailBottomBarActions<T, IdType, GroupingCriterion>(
+                            location: LdMasterDetailActionLocation.masterSecondary,
                           )
                         : null,
                     body: SafeArea(

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/master_detail/app_bar_actions.dart';
 import 'package:liquid_flutter/src/master_detail/ld_master_detail_selection.dart';
+import 'package:provider/provider.dart';
 
 class LdMasterDetailActionVisibility {
   final LdMasterDetailActionLocation location;
@@ -60,21 +61,19 @@ class LdMasterDetailAction<T extends Identifiable<IdType>, IdType, GroupingCrite
   }
 
   @override
-  bool isVisible(BuildContext context) {
-    final parent = context.findAncestorWidgetOfExactType<LdMasterDetailAppBarActions<T, IdType, GroupingCriterion>>();
-
-    if (parent == null) throw Exception("LdMasterDetailAction must be used within a LdMasterDetailAppBarActions");
+  bool isVisible(BuildContext context, {LdMasterDetailActionLocation? location}) {
+    location ??= context.read<LdMasterDetailActionLocation>();
 
     final isSplit = LdMasterContext.of<T, IdType, GroupingCriterion>(context).isSplit;
 
     final selectedItemCount = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context).items.length;
 
-    if (!this.visibility.any((e) => e.location == parent.location)) {
+    if (!visibility.any((e) => e.location == location)) {
       return false;
     }
 
     for (final visibility in this.visibility) {
-      if (visibility.location != parent.location) continue;
+      if (visibility.location != location) continue;
 
       if (!isSplit && !visibility.visibleInSplitView) {
         continue;

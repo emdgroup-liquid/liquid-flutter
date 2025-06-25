@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/master_detail/master_detail_route.dart';
 import 'package:liquid_flutter/src/master_detail/master_detail_route_state.dart';
 import 'package:provider/provider.dart';
 
