@@ -35,6 +35,7 @@ class _LdScaffoldState extends State<LdScaffold> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
     return Material(
       type: MaterialType.transparency,
       child: ColoredBox(
@@ -46,20 +47,17 @@ class _LdScaffoldState extends State<LdScaffold> {
                 children: [
                   if (!(widget.extendBodyBehindAppBar))
                     Positioned(
-                      top: 0,
+                      top: value.height,
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      child: Padding(
-                        padding: EdgeInsets.only(top: value.height),
-                        child: MediaQuery(
-                          data: MediaQuery.of(context).copyWith(
-                            viewPadding: const EdgeInsets.only(top: 0),
-                            viewInsets: const EdgeInsets.only(top: 0),
-                            padding: const EdgeInsets.only(top: 0),
-                          ),
-                          child: widget.body,
+                      child: MediaQuery(
+                        data: MediaQuery.of(context).copyWith(
+                          viewPadding: mediaQuery.viewPadding.copyWith(top: 0),
+                          viewInsets: mediaQuery.viewPadding.copyWith(top: 0),
+                          padding: mediaQuery.padding.copyWith(top: 0),
                         ),
+                        child: widget.body,
                       ),
                     ),
                   if (widget.appBar != null)
