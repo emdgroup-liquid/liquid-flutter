@@ -7,21 +7,16 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 /// Show a frame around the window that has a surface color. Only is shown on
 /// Windows, Linux, and MacOS.
 class LdWindowFrame extends StatelessWidget {
-  const LdWindowFrame(
-      {super.key,
-      required this.title,
-      required this.child,
-      required this.frameBuilder});
+  const LdWindowFrame({super.key, required this.title, required this.child, required this.frameBuilder});
   final Widget child;
 
   /// The frameBuilder can be used to wrap the child in a frame. This is useful
   /// for wrapping it in a [MoveWindow] widget.
   final Widget Function(BuildContext context, Widget child) frameBuilder;
-  final Text title;
+  final Widget title;
 
   bool get showWindowFrame {
-    return !kIsWeb &&
-        (Platform.isWindows || Platform.isLinux || Platform.isMacOS);
+    return !kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS);
   }
 
   @override
