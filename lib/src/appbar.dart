@@ -364,8 +364,8 @@ class LdAppBarActions extends StatelessWidget {
           ),
           menuBuilder: (context, close) => ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 200),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+            child: ListView(
+              shrinkWrap: true,
               children: [
                 ...actions.sublist(actions.length - remaining).map(
                       (e) => _buildAction(
