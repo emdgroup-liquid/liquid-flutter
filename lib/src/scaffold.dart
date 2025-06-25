@@ -26,6 +26,14 @@ class _LdScaffoldState extends State<LdScaffold> {
   final _appBarSizeNotifier = ValueNotifier<Size>(const Size(0, 0));
 
   @override
+  void didUpdateWidget(LdScaffold oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.appBar == null) {
+      _appBarSizeNotifier.value = Size.zero;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Material(
       type: MaterialType.transparency,
@@ -37,11 +45,33 @@ class _LdScaffoldState extends State<LdScaffold> {
               return Stack(
                 children: [
                   if (!(widget.extendBodyBehindAppBar))
-                    Padding(
-                      padding: EdgeInsets.only(top: value.height),
-                      child: widget.body,
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: Padding(
+                        padding: EdgeInsets.only(top: value.height),
+                        child: MediaQuery(
+                          data: MediaQuery.of(context).copyWith(
+                            viewPadding: const EdgeInsets.only(top: 0),
+                            viewInsets: const EdgeInsets.only(top: 0),
+                            padding: const EdgeInsets.only(top: 0),
+                          ),
+                          child: widget.body,
+                        ),
+                      ),
                     ),
-                  if (widget.appBar != null) MeasureSize(sizeNotifier: _appBarSizeNotifier, child: widget.appBar!),
+                  if (widget.appBar != null)
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: MeasureSize(
+                        sizeNotifier: _appBarSizeNotifier,
+                        child: widget.appBar!,
+                      ),
+                    ),
                   if (widget.bottomNavigationBar != null)
                     Positioned(
                       bottom: 0,
