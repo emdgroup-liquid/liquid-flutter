@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/master_detail/sort/ld_sort_option.dart';
@@ -117,9 +118,9 @@ var testData = [
 final taskRepository = LdRepository<_Task, int>(
   singularItemTitle: "Task",
   pluralItemTitle: "Tasks",
-  pageSize: 5,
+  pageSize: 10,
   getOffsetById: (id) async {
-    await Future.delayed(const Duration(seconds: 5));
+    await Future.delayed(const Duration(seconds: 1));
 
     return testData.indexWhere((element) => element.id == id);
   },
@@ -131,7 +132,17 @@ final taskRepository = LdRepository<_Task, int>(
       name: "done",
       label: (context) => "Done",
       icon: (context) => const Icon(LucideIcons.check),
-      optimisticFilter: (item, filterValue) => item.done == filterValue,
+      optimisticFilter: (item) {
+        return item.done;
+      },
+    ),
+    LdFilterBoolOption<_Task, int>(
+      name: "todo",
+      label: (context) => "To do",
+      icon: (context) => const Icon(LucideIcons.hourglass),
+      optimisticFilter: (item) {
+        return !item.done;
+      },
     ),
   },
   fetchListWithParameters: ({
@@ -144,12 +155,13 @@ final taskRepository = LdRepository<_Task, int>(
     debugPrint("Task repository hit");
     debugPrint("Offset: $offset, Page size: $pageSize, Page token: $pageToken");
 
-    await Future.delayed(const Duration(milliseconds: 50));
+    await Future.delayed(const Duration(milliseconds: 1000));
 
-    print("Filters: ${filters?.map((e) => "${e.name}:${e.serialize()}")}");
-
-    final filtered =
-        testData.where((element) => filters?.every((filter) => filter.optimisticFilter(element)) ?? true).toList();
+    final filtered = testData
+        .where((element) =>
+            filters?.every((filter) => filter.optimisticFilter(element)) ??
+            true)
+        .toList();
 
     return LdListPage<_Task>(
       newItems: filtered.skip(offset).take(pageSize).toList(),
@@ -206,7 +218,8 @@ final taskDemo = LdMasterDetailRoute<_Task, int, bool>(
       initialSelectedItems: route.state.selectedItems,
       multiSelect: true,
       onSelectionChange: (selected) => onSelectionChange(selected),
-      itemBuilder: (context, item, index, config) => LdMasterDetailSingleShortcuts(
+      itemBuilder: (context, item, index, config) =>
+          LdMasterDetailSingleShortcuts(
         item: item.value!.id,
         actions: route.actions,
         child: LdMasterDetailContextMenu<_Task, int, bool>(
@@ -215,14 +228,19 @@ final taskDemo = LdMasterDetailRoute<_Task, int, bool>(
             state: item.state,
             child: LdListItem.fromConfig(
               config.copyWith(
+                leading: Text("$index"),
+                trailing: Text("${item.value!.id}"),
                 title: Text(
                   item.value!.task,
                   style: TextStyle(
-                    decoration: item.value!.done ? TextDecoration.lineThrough : TextDecoration.none,
+                    decoration: item.value!.done
+                        ? TextDecoration.lineThrough
+                        : TextDecoration.none,
                   ),
                 ),
                 subtitle: Text(item.value!.due),
-                trailingForward: LdMasterContext.of<_Task, int, bool>(context).isSplit,
+                trailingForward:
+                    LdMasterContext.of<_Task, int, bool>(context).isSplit,
               ),
             ),
           ),
@@ -239,26 +257,30 @@ final taskDemo = LdMasterDetailRoute<_Task, int, bool>(
             maxSelectionCount: null,
           ),
         },
-        buildLabel: (context, selection) => "Filter done",
-        buildIcon: (context, selection) => const Icon(LucideIcons.listFilter),
+        submitType: LdLabeledActionSubmitType.none,
+        buildLabel: (context, selection) => "Filter",
+        buildIcon: (context, selection) =>
+            LdMasterDetailRoute.of<_Task, int, bool>(context)
+                    .repository
+                    .filters
+                    .where((e) => e.isOn)
+                    .isEmpty
+                ? const Icon(LucideIcons.listFilterPlus)
+                : const Icon(LucideIcons.listFilter),
         action: (context, selection) async {
           final route = LdMasterDetailRoute.of<_Task, int, bool>(context);
-          final filter = route.repository.filters.firstWhere((e) => e.name == "done");
-          route.repository.updateFilter(LdFilterBoolOption<_Task, int>(
-            name: "done",
-            label: (context) => "Done",
-            filterValue: true,
-            isOn: !filter.isOn,
-            icon: (context) => const Icon(LucideIcons.check),
-            optimisticFilter: (item, filterValue) => item.done == filterValue,
-          ));
+          context.push("${route.path}/filters");
         }),
     LdMasterDetailAction(
       visibility: {
         LdMasterDetailActionVisibility(
-            location: LdMasterDetailActionLocation.detailSecondary, minSelectionCount: 1, maxSelectionCount: null),
+            location: LdMasterDetailActionLocation.detailSecondary,
+            minSelectionCount: 1,
+            maxSelectionCount: null),
         LdMasterDetailActionVisibility(
-            location: LdMasterDetailActionLocation.context, minSelectionCount: 1, maxSelectionCount: null),
+            location: LdMasterDetailActionLocation.context,
+            minSelectionCount: 1,
+            maxSelectionCount: null),
       },
       shortcutActivators: {
         SingleActivator(LogicalKeyboardKey.keyD),
@@ -369,7 +391,8 @@ final taskDemo = LdMasterDetailRoute<_Task, int, bool>(
       },
       buildLoadingText: (context, selection) =>
           "Deleting ${selection.length} ${selection.length == 1 ? "item" : "items"}",
-      buildLabel: (context, selection) => "Delete ${selection.length} ${selection.length == 1 ? "item" : "items"}",
+      buildLabel: (context, selection) =>
+          "Delete ${selection.length} ${selection.length == 1 ? "item" : "items"}",
       buildIcon: (context, selection) => Icon(
         LucideIcons.trash2,
       ),
@@ -448,7 +471,9 @@ class _TaskDetailState extends State<_TaskDetail> {
                       widget.task.value!.done,
                       widget.task.value!.lastUpdate,
                     );
-                    final repo = LdMasterDetailRoute.of<_Task, int, bool>(context).repository;
+                    final repo =
+                        LdMasterDetailRoute.of<_Task, int, bool>(context)
+                            .repository;
                     await repo.update(
                       widget.task.value!.id,
                       newTask,

@@ -50,6 +50,7 @@ class LdContextMenu extends StatefulWidget {
     required this.builder,
     required this.menuBuilder,
     this.dismissOnOutsideTap = true,
+    this.scaleFromTrigger = false,
     this.blurMode = LdContextMenuBlurMode.mobileOnly,
     this.zoomMode = LdContextZoomMode.mobileOnly,
     this.listenForTaps = true,
@@ -57,6 +58,7 @@ class LdContextMenu extends StatefulWidget {
     this.disabled = false,
     this.positionMode = LdContextPositionMode.auto,
     this.child,
+    this.triggerColor,
   });
 
   final bool? visible;
@@ -65,7 +67,11 @@ class LdContextMenu extends StatefulWidget {
 
   final bool dismissOnOutsideTap;
 
+  final LdColor? triggerColor;
+
   final bool listenForTaps;
+
+  final bool scaleFromTrigger;
 
   final LdContextMenuBlurMode blurMode;
   final LdContextZoomMode zoomMode;
@@ -85,13 +91,13 @@ class LdContextMenu extends StatefulWidget {
 }
 
 class _LdContextMenuState extends State<LdContextMenu> {
-  final GlobalKey _triggerKey = GlobalKey();
+  final GlobalKey _triggerKey = GlobalKey(debugLabel: "Trigger Key");
 
   final _overlayPortalController = OverlayPortalController();
 
   RenderBox? _triggerBox;
 
-  final GlobalKey _menuKey = GlobalKey();
+  final GlobalKey _menuKey = GlobalKey(debugLabel: "Menu Key");
 
   late bool _visible = widget.visible ?? false;
   Offset? _cursorPosition;
@@ -331,9 +337,9 @@ class _LdContextMenuState extends State<LdContextMenu> {
         final menu = Builder(builder: (context) {
           return LdSpring(
             initialPosition: 0,
-            //mass: 8,
-            //springConstant: 15,
-            //dampingCoefficient: 15,
+            mass: 3,
+            springConstant: 20,
+            dampingCoefficient: 10,
             position: _visible ? 1 : 0,
             onAnimationEnd: (context, state) async {
               await Future.delayed(Duration.zero);
@@ -356,46 +362,80 @@ class _LdContextMenuState extends State<LdContextMenu> {
               ),
             ),
             builder: (context, state, child) {
+              final triggerOffset = _triggerBox?.localToGlobal(Offset.zero);
+              final triggerSize = _triggerBox?.size;
+
+              final triggerRect = Rect.fromLTWH(
+                triggerOffset?.dx ?? 0,
+                triggerOffset?.dy ?? 0,
+                triggerSize?.width ?? 0,
+                triggerSize?.height ?? 0,
+              );
+
               final (rect, alignment) = _resizeMenuToScreen(
                 context,
                 _menuSizeNotifier.value,
               );
 
+              late Rect scaledRect;
+
+              var color = theme.surface;
+
+              if (widget.scaleFromTrigger) {
+                color = Color.alphaBlend(
+                  color.withAlpha((255 * state.position.clamp(0, 1)).toInt()),
+                  (widget.triggerColor ?? theme.palette.primary).active(theme.isDark).withAlpha(50),
+                );
+
+                scaledRect = Rect.fromLTWH(
+                  triggerRect.left + (rect.left - triggerRect.left) * state.position,
+                  triggerRect.top + (rect.top - triggerRect.top) * state.position,
+                  triggerRect.width + (rect.width - triggerRect.width) * state.position,
+                  triggerRect.height + (rect.height - triggerRect.height) * state.position,
+                );
+              } else {
+                scaledRect = Rect.fromLTWH(
+                  rect.left,
+                  rect.top,
+                  max(0, rect.width * state.position),
+                  max(0, rect.height * state.position),
+                );
+              }
+
               return Positioned.fromRect(
-                rect: rect,
-                child: Opacity(
-                  opacity: state.position.clamp(0, 1),
-                  child: Align(
-                    alignment: alignment,
-                    child: Transform.scale(
-                      alignment: alignment,
-                      scale: max(0, state.position),
-                      child: Container(
-                        constraints: BoxConstraints(
-                          maxWidth: rect.width,
-                          maxHeight: max(0, rect.height),
+                rect: scaledRect,
+                child: TapRegion(
+                  onTapOutside: (event) {
+                    _dismiss();
+                  },
+                  child: Opacity(
+                    opacity: state.position.clamp(0, 1),
+                    child: Container(
+                      clipBehavior: Clip.hardEdge,
+                      decoration: BoxDecoration(
+                        color: color,
+                        border: Border.all(
+                          color: theme.border,
+                          strokeAlign: BorderSide.strokeAlignOutside,
+                          width: theme.borderWidth,
                         ),
-                        clipBehavior: Clip.hardEdge,
-                        decoration: BoxDecoration(
-                          color: theme.surface,
-                          border: Border.all(
-                            color: theme.border,
-                            strokeAlign: BorderSide.strokeAlignOutside,
-                            width: theme.borderWidth,
+                        borderRadius: theme.radius(LdSize.s),
+                        boxShadow: [
+                          BoxShadow(
+                            color: theme.palette.neutral.shades.last.withAlpha(51),
+                            blurRadius: 10,
+                            offset: const Offset(0, 0),
+                          )
+                        ],
+                      ),
+                      child: Opacity(
+                        opacity: state.position.clamp(0, 1),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          physics: const NeverScrollableScrollPhysics(),
+                          child: SingleChildScrollView(
+                            child: child,
                           ),
-                          borderRadius: theme.radius(LdSize.m),
-                          boxShadow: [
-                            BoxShadow(
-                              color: theme.palette.neutral.shades.last.withAlpha(51),
-                              blurRadius: 10,
-                              offset: const Offset(0, 0),
-                            )
-                          ],
-                        ),
-                        child: Align(
-                          alignment: Alignment.topLeft,
-                          widthFactor: 1,
-                          child: child,
                         ),
                       ),
                     ),
@@ -438,9 +478,6 @@ class _LdContextMenuState extends State<LdContextMenu> {
                   ),
                 ),
             ],
-            ModalBarrier(
-              onDismiss: _dismiss,
-            ),
             menu,
           ],
         );

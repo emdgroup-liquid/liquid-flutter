@@ -27,6 +27,7 @@ class LdListItemConfig {
   final Widget? trailing;
   final LdColor? color;
   final FocusNode? focusNode;
+  final bool tableRowMode;
 
   const LdListItemConfig({
     this.active = false,
@@ -51,6 +52,7 @@ class LdListItemConfig {
     this.trailingForward = false,
     this.color,
     this.width,
+    this.tableRowMode = false,
   });
 
   LdListItemConfig copyWith({
@@ -76,6 +78,7 @@ class LdListItemConfig {
     FocusNode? focusNode,
     LdColor? color,
     Key? key,
+    bool? tableRowMode,
   }) {
     return LdListItemConfig(
       leading: leading ?? this.leading,
@@ -100,6 +103,7 @@ class LdListItemConfig {
       showBothTrailingAndTrailingForward: showBothTrailingAndTrailingForward ?? this.showBothTrailingAndTrailingForward,
       showSelectionControls: showSelectionControls ?? this.showSelectionControls,
       key: key ?? this.key,
+      tableRowMode: tableRowMode ?? this.tableRowMode,
     );
   }
 }
@@ -125,6 +129,7 @@ class LdListItem extends StatelessWidget {
   final bool tradeLeadingForSelectionControl;
   final bool showBothTrailingAndTrailingForward;
   final LdColor? color;
+  final bool tableRowMode;
 
   final bool showSelectionControls;
 
@@ -151,6 +156,7 @@ class LdListItem extends StatelessWidget {
     this.trailingForward = false,
     this.color,
     this.width,
+    this.tableRowMode = false,
   });
 
   factory LdListItem.fromConfig(LdListItemConfig config) {
@@ -177,6 +183,7 @@ class LdListItem extends StatelessWidget {
       trailing: config.trailing,
       trailingForward: config.trailingForward,
       width: config.width,
+      tableRowMode: config.tableRowMode,
     );
   }
 
@@ -195,8 +202,163 @@ class LdListItem extends StatelessWidget {
     }
 
     final theme = LdTheme.of(context, listen: true);
-
     final effectiveWidth = width ?? double.infinity;
+
+    Widget _buildSelectionControls() {
+      if (!showSelectionControls) return const SizedBox.shrink();
+      return Row(
+        children: [
+          if (radioSelection)
+            LdRadio(
+              checked: isSelected,
+              color: color,
+              disabled: disabled,
+              onChanged: (value) {
+                onSelectionChange?.call(value);
+              },
+            )
+          else
+            LdCheckbox(
+              checked: isSelected,
+              color: color,
+              disabled: disabled,
+              onChanged: (value) {
+                onSelectionChange?.call(value);
+              },
+            ),
+          ldSpacerM,
+        ],
+      );
+    }
+
+    Widget _buildLeading() {
+      if (leading == null) return const SizedBox.shrink();
+      return IconTheme(
+        data: IconThemeData(
+          color: theme.text,
+          size: theme.labelSize(LdSize.l) * 1.2,
+        ),
+        child: LdReveal.quick(
+          child: Row(
+            children: [
+              leading!,
+              ldSpacerM,
+            ],
+          ),
+          revealed: !(showSelectionControls && tradeLeadingForSelectionControl),
+          initialRevealed: !(showSelectionControls && tradeLeadingForSelectionControl),
+        ),
+      );
+    }
+
+    Widget _buildTrailing() {
+      if (trailing == null) return const SizedBox.shrink();
+      return Row(
+        children: [ldSpacerM, trailing!],
+      );
+    }
+
+    Widget _buildChevron() {
+      if (!(trailingForward && (trailing == null || showBothTrailingAndTrailingForward)))
+        return const SizedBox.shrink();
+      return Row(
+        children: [
+          ldSpacerM,
+          Icon(
+            LucideIcons.chevronRight,
+            size: theme.labelSize(LdSize.l) * 1.2,
+            color: theme.textMuted,
+          ),
+        ],
+      );
+    }
+
+    Widget _buildTitle() {
+      if (title == null) return const SizedBox.shrink();
+      return DefaultTextStyle(
+        child: title!,
+        style: ldBuildTextStyle(
+          theme,
+          LdTextType.label,
+          LdSize.m,
+          color: theme.text,
+        ),
+      );
+    }
+
+    Widget _buildSubtitle() {
+      if (subtitle == null) return const SizedBox.shrink();
+      return DefaultTextStyle(
+        style: ldBuildTextStyle(
+          theme,
+          LdTextType.paragraph,
+          lineHeight: 1.5,
+          LdSize.s,
+          color: theme.textMuted,
+        ),
+        child: subtitle!,
+      );
+    }
+
+    Widget _buildSubContent() {
+      if (subContent == null) return const SizedBox.shrink();
+      return subContent!;
+    }
+
+    Widget _buildTableRowContent() {
+      return Row(
+        mainAxisSize: effectiveWidth != double.infinity ? MainAxisSize.min : MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          if (showSelectionControls) _buildSelectionControls(),
+          if (leading != null) leading!,
+          if (title != null) Expanded(flex: 2, child: title!),
+          if (subtitle != null) Expanded(flex: 2, child: subtitle!),
+          if (subContent != null) Expanded(flex: 2, child: subContent!),
+          if (trailing != null) trailing!,
+          if (trailingForward && (trailing == null || showBothTrailingAndTrailingForward))
+            Icon(
+              LucideIcons.chevronRight,
+              size: theme.labelSize(LdSize.l) * 1.2,
+              color: theme.textMuted,
+            ),
+        ],
+      ).spaceM();
+    }
+
+    if (tableRowMode) {
+      return LdTouchableSurface(
+        focusNode: focusNode,
+        onTap: () {
+          if (showSelectionControls) {
+            onSelectionChange?.call(!isSelected);
+          } else {
+            onTap?.call();
+          }
+        },
+        active: active || (showSelectionControls && isSelected),
+        disabled: disabled || (!showSelectionControls && onTap == null),
+        color: color ?? theme.palette.primary,
+        builder: (contxt, colors, status) {
+          return IconTheme(
+            data: IconThemeData(
+              color: colors.text,
+              size: theme.labelSize(LdSize.l) * 1.2,
+            ),
+            child: Container(
+              width: effectiveWidth,
+              padding: padding ?? theme.balPad(LdSize.m),
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: borderRadius,
+              ),
+              child: _buildTableRowContent(),
+            ),
+          );
+        },
+      );
+    }
 
     return LdTouchableSurface(
       focusNode: focusNode,
@@ -228,92 +390,24 @@ class LdListItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   LdReveal.quick(
-                    child: Row(
-                      children: [
-                        if (radioSelection)
-                          LdRadio(
-                              checked: isSelected,
-                              color: color,
-                              disabled: disabled,
-                              onChanged: (value) {
-                                onSelectionChange?.call(value);
-                              })
-                        else
-                          GestureDetector(
-                            onPanUpdate: (details) {
-                              print("start $title");
-                            },
-                            child: LdCheckbox(
-                                checked: isSelected,
-                                color: color,
-                                disabled: disabled,
-                                onChanged: (value) {
-                                  onSelectionChange?.call(value);
-                                }),
-                          ),
-                        ldSpacerM,
-                      ],
-                    ),
+                    child: _buildSelectionControls(),
                     revealed: showSelectionControls,
                     initialRevealed: showSelectionControls,
                   ),
-                  if (leading != null)
-                    IconTheme(
-                      data: IconThemeData(
-                        color: theme.text,
-                        size: theme.labelSize(LdSize.l) * 1.2,
-                      ),
-                      child: LdReveal.quick(
-                        child: Row(
-                          children: [
-                            leading!,
-                            ldSpacerM,
-                          ],
-                        ),
-                        //axis: Axis.horizontal,
-                        revealed: !(showSelectionControls && tradeLeadingForSelectionControl),
-                        initialRevealed: !(showSelectionControls && tradeLeadingForSelectionControl),
-                      ),
-                    ),
+                  if (leading != null) _buildLeading(),
                   Flexible(
                     fit: effectiveWidth == double.infinity ? FlexFit.tight : FlexFit.loose,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (title != null)
-                          DefaultTextStyle(
-                            child: title!,
-                            style: ldBuildTextStyle(
-                              theme,
-                              LdTextType.label,
-                              LdSize.m,
-                              color: theme.text,
-                            ),
-                          ),
-                        if (subtitle != null) ...[
-                          DefaultTextStyle(
-                              style: ldBuildTextStyle(
-                                theme,
-                                LdTextType.paragraph,
-                                lineHeight: 1.5,
-                                LdSize.s,
-                                color: theme.textMuted,
-                              ),
-                              child: subtitle!),
-                        ],
-                        if (subContent != null) subContent!,
+                        if (title != null) _buildTitle(),
+                        if (subtitle != null) _buildSubtitle(),
+                        if (subContent != null) _buildSubContent(),
                       ],
                     ),
                   ),
-                  if (trailing != null) ...[ldSpacerM, trailing!],
-                  if (trailingForward && (trailing == null || showBothTrailingAndTrailingForward)) ...[
-                    ldSpacerM,
-                    Icon(
-                      LucideIcons.chevronRight,
-                      size: theme.labelSize(LdSize.l) * 1.2,
-                      color: theme.textMuted,
-                    )
-                  ],
+                  if (trailing != null) _buildTrailing(),
+                  _buildChevron(),
                 ]),
           ),
         );

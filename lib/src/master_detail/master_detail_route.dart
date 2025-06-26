@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/conditional_parent.dart';
+import 'package:liquid_flutter/src/master_detail/filter_modal.dart';
 import 'package:liquid_flutter/src/master_detail/master_detail_route_state.dart';
 import 'package:provider/provider.dart';
 
@@ -83,62 +84,71 @@ class LdMasterDetailRoute<T extends Identifiable<IdType>, IdType, GroupingCriter
     Set<IdType> Function(String selected)? parseSelected,
   }) : _parseSelected = parseSelected;
 
-  ShellRoute buildRoute() {
-    return ShellRoute(
-      routes: [
-        GoRoute(
-            name: "master",
-            path: path,
-            pageBuilder: (context, state) => NoTransitionPage<void>(
-                  key: state.pageKey,
-                  child: LdMasterPage(
-                    route: this,
-                  ),
-                ),
-            routes: [
-              GoRoute(
-                  name: "detail",
-                  path: "/:selected",
-                  pageBuilder: (context, state) {
-                    final effectivePresentationMode = LdMasterContext.of<T, IdType, GroupingCriterion>(context);
-
-                    final page = Provider.value(
-                      value: effectivePresentationMode,
-                      child: Provider.value(
-                        value: this,
-                        child: LdDetailPage<T, IdType, GroupingCriterion>(),
-                      ),
-                    );
-
-                    if (effectivePresentationMode.isSplit) {
-                      if (effectivePresentationMode.detailInDialog) {
-                        return LdModalPage(
-                          key: state.pageKey,
-                          builder: ldDetailModal(this),
-                        );
-                      }
-                      return MaterialPage(
-                        child: page,
-                        key: state.pageKey,
-                      );
-                    }
-                    return NoTransitionPage<void>(
-                      key: state.pageKey,
-                      child: page,
-                    );
-                  }),
-            ]),
-      ],
-      builder: (context, state, child) => LdWrapConditional(
-        condition: wrapShell != null,
-        builder: (context, child) => wrapShell!.call(context, child),
-        child: LdMasterDetailShell(
-          child: child,
-          route: this,
-          routeSelection: state.pathParameters['selected'],
+  List<RouteBase> buildRoute() {
+    return [
+      GoRoute(
+        name: "$path-filters",
+        path: "$path/filters",
+        pageBuilder: (context, state) => LdModalPage(
+          key: state.pageKey,
+          builder: ldFilterModal(context, this),
         ),
       ),
-    );
+      ShellRoute(
+        routes: [
+          GoRoute(
+              name: "$path-master",
+              path: path,
+              pageBuilder: (context, state) => NoTransitionPage<void>(
+                    key: state.pageKey,
+                    child: LdMasterPage(
+                      route: this,
+                    ),
+                  ),
+              routes: [
+                GoRoute(
+                    name: "$path-detail",
+                    path: "/:selected",
+                    pageBuilder: (context, state) {
+                      final effectivePresentationMode = LdMasterContext.of<T, IdType, GroupingCriterion>(context);
+                      final page = Provider.value(
+                        value: effectivePresentationMode,
+                        child: Provider.value(
+                          value: this,
+                          child: LdDetailPage<T, IdType, GroupingCriterion>(),
+                        ),
+                      );
+
+                      if (effectivePresentationMode.isSplit) {
+                        if (effectivePresentationMode.detailInDialog) {
+                          return LdModalPage(
+                            key: state.pageKey,
+                            builder: ldDetailModal(this),
+                          );
+                        }
+                        return MaterialPage(
+                          child: page,
+                          key: state.pageKey,
+                        );
+                      }
+                      return NoTransitionPage<void>(
+                        key: state.pageKey,
+                        child: page,
+                      );
+                    }),
+              ]),
+        ],
+        builder: (context, state, child) => LdWrapConditional(
+          condition: wrapShell != null,
+          builder: (context, child) => wrapShell!.call(context, child),
+          child: LdMasterDetailShell(
+            child: child,
+            route: this,
+            routeSelection: state.pathParameters['selected'],
+          ),
+        ),
+      )
+    ];
   }
 
   Future<void> initRepository(BuildContext context, Set<IdType> initialSelection) async {

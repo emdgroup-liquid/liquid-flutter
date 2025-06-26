@@ -50,6 +50,7 @@ export 'src/list/list_page.dart';
 export 'src/list/list_paginator.dart';
 export 'src/list/list_seperator.dart';
 export 'src/list/selectable_list.dart';
+export 'src/list/ld_list_item_animation.dart';
 export 'src/loading.dart';
 export 'src/master_detail/actions.dart';
 export 'src/master_detail/identifiable.dart';
@@ -114,7 +115,10 @@ export 'src/window_frame.dart';
 export 'variants.g.dart';
 
 export 'src/master_detail/filter/ld_filter_option.dart';
-export 'src/master_detail/filter/ld_filter_bool_option.dart';
+export 'src/master_detail/filter/ld_filter_bool.dart';
+export 'src/master_detail/filter/ld_filter_range.dart';
+export 'src/master_detail/filter/ld_filter_one_of.dart';
+export 'src/master_detail/filter/ld_filter_any_of.dart';
 
 /// This variable defines whether TextStyle should use the `liquid_flutter`
 /// package prefix when defining the font family.

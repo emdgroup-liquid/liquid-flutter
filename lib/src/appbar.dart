@@ -358,6 +358,7 @@ class LdAppBarActions extends StatelessWidget {
           ),
         ],
         builder: (context, remaining) => LdContextMenu(
+          scaleFromTrigger: true,
           builder: (context, isOpen, open, child) => LdButtonGhost(
             onPressed: open,
             child: const Icon(LucideIcons.ellipsisVertical),

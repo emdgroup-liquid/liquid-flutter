@@ -30,5 +30,6 @@
   "edit": "Edit",
   "select": "Select",
   "filter": "Filter",
-  "apply": "Apply"
+  "apply": "Apply",
+  "activeFilters": "Active Filters"
 }

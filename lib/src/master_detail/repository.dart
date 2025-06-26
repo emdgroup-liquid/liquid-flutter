@@ -92,7 +92,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     _filters.remove(existingFilter);
     _filters.add(filter);
     _filterStreamController.add(_filters);
-    print("Updated filter: ${filter.name} ${filter.isOn}");
+
     applyOptimisticFilterAndSorting();
   }
 
@@ -110,33 +110,50 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     final filters = _filters.where((e) => e.isOn).toList();
     final sortOptions = _sortOptions.where((e) => e.isOn).toList();
 
-    final itemsFiltered = itemsMap.values.map((item) {
-      return LdPaginatorItem<T>(
-        value: item.value,
-        state: item.value != null && filters.every((filter) => filter.optimisticFilter(item.value!))
-            ? LdPaginatorItemState.loaded
-            : LdPaginatorItemState.deleting,
-      );
-    }).toList();
+    if (filters.isEmpty && sortOptions.isEmpty) {
+      await refreshList();
+      return;
+    }
 
-    final sortableItems = itemsFiltered.where((e) => e.value != null).toList();
+    await mutex.acquire();
+    var filteredItems = Map.fromEntries(
+      itemsMap.entries.where((item) => item.value.value != null).map((item) {
+        final filterApplies = filters.every((filter) => filter.optimisticFilter(item.value.value!));
+
+        var newState = filterApplies ? item.value.state : LdPaginatorItemState.filteredOut;
+
+        if (newState == LdPaginatorItemState.filteredOut && filterApplies) {
+          newState = LdPaginatorItemState.loaded;
+        }
+
+        return MapEntry(
+          item.key,
+          item.value.copyWith(
+            state: newState,
+          ),
+        );
+      }),
+    );
+
+    replaceItems(filteredItems);
+
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    filteredItems.removeWhere((key, value) => value.state == LdPaginatorItemState.filteredOut || value.value == null);
+
+    final sortedItems = filteredItems.values.toList();
+
+    totalItems = filteredItems.length;
 
     for (final sortOption in sortOptions) {
-      sortableItems.sort((a, b) => sortOption.optimisticSort!(a.value!, b.value!));
+      sortedItems.sort((a, b) => sortOption.optimisticSort!(a.value!, b.value!));
     }
 
     // Apply the sorting to the previous list
 
-    for (var i = 0; i < itemsFiltered.length; i++) {
-      if (itemsFiltered[i].value == null) {
-        continue;
-      }
-
-      itemsFiltered[i] = sortableItems.removeAt(0);
-    }
-
-    setItems(itemsFiltered);
-    refreshList();
+    setItems(sortedItems);
+    mutex.release();
+    await refreshList();
   }
 
   Future<void> initWithSelection(Set<IdType> selection) async {
@@ -193,6 +210,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
         }
         rethrow;
       }
+      applyOptimisticFilterAndSorting();
     } else {
       final exceptions = <dynamic>[];
       for (final item in items) {
@@ -204,6 +222,8 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
           exceptions.add(e);
         }
       }
+      print("Sorting optimistic");
+      applyOptimisticFilterAndSorting();
       if (exceptions.isNotEmpty) {
         throw Exception(exceptions);
       }
@@ -214,13 +234,14 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     if (_updateItem != null) {
       scheduleItemUpdate(id, newValue);
       try {
-        final newItem = await _updateItem!(id, newValue);
-        confirmItemUpdate(
-          id,
-          newItem ?? newValue,
-        );
+        final newItemFromServer = await _updateItem!(id, newValue);
+        final newItem = newItemFromServer ?? newValue;
+        confirmItemUpdate(id, newItem);
+
+        applyOptimisticFilterAndSorting();
       } catch (e) {
         rollbackItemUpdate(id);
+        applyOptimisticFilterAndSorting();
         rethrow;
       }
     }

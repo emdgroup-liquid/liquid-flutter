@@ -80,7 +80,7 @@ class _SpringState extends State<Spring> {
               LdChainedSprings(
                 targetPosition: position,
                 count: 5,
-                builder: (context, states) {
+                builder: (context, states, child) {
                   return Column(
                     children: [
                       for (var state in states)

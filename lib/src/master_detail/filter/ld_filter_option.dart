@@ -11,7 +11,7 @@ abstract class LdFilterOption<T extends Identifiable<IdType>, IdType> {
 
   final String name;
 
-  final bool isOn;
+  bool isOn;
 
   // Apply the filter to the LdFilterOption
   void marshalSerialized(MapEntry<String, String> entry);

@@ -1,0 +1,382 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+import 'package:jiffy/jiffy.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/master_detail/sort/ld_sort_option.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+class _Movie with Identifiable<int> {
+  @override
+  final int id;
+  final String title;
+  final String genre;
+  final int rating; // 1-10
+  final DateTime lastUpdate;
+  _Movie(this.id, this.title, this.genre, this.rating, this.lastUpdate);
+
+  _Movie copyWith({
+    int? id,
+    String? title,
+    String? genre,
+    int? rating,
+    DateTime? lastUpdate,
+  }) =>
+      _Movie(
+        id ?? this.id,
+        title ?? this.title,
+        genre ?? this.genre,
+        rating ?? this.rating,
+        lastUpdate ?? this.lastUpdate,
+      );
+}
+
+var movieData = [
+  _Movie(1, "Inception", "Sci-Fi", 9, DateTime.now()),
+  _Movie(2, "The Godfather", "Crime", 10, DateTime.now()),
+  _Movie(3, "Pulp Fiction", "Crime", 9, DateTime.now()),
+  _Movie(4, "The Dark Knight", "Action", 10, DateTime.now()),
+  _Movie(5, "Forrest Gump", "Drama", 8, DateTime.now()),
+  _Movie(6, "Interstellar", "Sci-Fi", 8, DateTime.now()),
+  _Movie(7, "The Matrix", "Sci-Fi", 9, DateTime.now()),
+  _Movie(8, "Fight Club", "Drama", 8, DateTime.now()),
+  _Movie(9, "The Shawshank Redemption", "Drama", 10, DateTime.now()),
+  _Movie(10, "Gladiator", "Action", 8, DateTime.now()),
+];
+
+final movieRepository = LdRepository<_Movie, int>(
+  singularItemTitle: "Movie",
+  pluralItemTitle: "Movies",
+  pageSize: 5,
+  getOffsetById: (id) async {
+    await Future.delayed(const Duration(seconds: 1));
+    return movieData.indexWhere((element) => element.id == id);
+  },
+  getById: (id) async {
+    return movieData.firstWhere((element) => element.id == id);
+  },
+  filters: {
+    LdFilterRange<_Movie, int>(
+      name: "rating",
+      label: (context) => "Rating",
+      icon: (context) => const Icon(LucideIcons.star),
+      min: 0,
+      max: 10,
+      optimisticFilter: (item, range) => range.inRange(item.rating),
+    ),
+    LdFilterAnyOf<_Movie, int, String>(
+      name: "genre",
+      label: (context) => "Genre",
+      icon: (context) => const Icon(LucideIcons.star),
+      allValues: {
+        "Sci-Fi": (context) => const Text("Sci-Fi"),
+        "Action": (context) => const Text("Action"),
+        "Drama": (context) => const Text("Drama"),
+        "Crime": (context) => const Text("Crime"),
+      },
+      optimisticFilter: (item, value) => value.contains(item.genre),
+    ),
+  },
+  fetchListWithParameters: ({
+    required int offset,
+    required int pageSize,
+    String? pageToken,
+    Set<LdFilterOption<_Movie, int>>? filters,
+    List<LdSortOption<_Movie, int>>? sortOptions,
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 50));
+    final filtered = movieData
+        .where((element) =>
+            filters?.every((filter) => filter.optimisticFilter(element)) ??
+            true)
+        .toList();
+    return LdListPage<_Movie>(
+      newItems: filtered.skip(offset).take(pageSize).toList(),
+      hasMore: offset + pageSize < filtered.length,
+      total: filtered.length,
+    );
+  },
+  deleteItem: (int id) async {
+    movieData.removeWhere((element) => element.id == id);
+    await Future.delayed(const Duration(milliseconds: 500));
+  },
+  deleteBatch: (ids) async {
+    for (final id in ids) {
+      movieData.removeWhere((element) => element.id == id);
+    }
+    await Future.delayed(const Duration(milliseconds: 500));
+  },
+  updateItem: (id, newItem) async {
+    final index = movieData.indexWhere((element) => element.id == id);
+    newItem = newItem.copyWith(lastUpdate: DateTime.now());
+    movieData[index] = newItem;
+    await Future.delayed(const Duration(milliseconds: 500));
+    return newItem;
+  },
+  createItem: (id, item) async {
+    movieData.add(item!);
+    return item;
+  },
+);
+
+final movieDemo = LdMasterDetailRoute<_Movie, int, bool>(
+  path: "/movie-demo",
+  allowMultipleSelection: true,
+  presentationMode: MasterDetailPresentationMode.dialog,
+  layoutMode: MasterDetailLayoutMode.compact,
+  showMultiSelectItems: true,
+  parseId: (id) => int.parse(id),
+  detailPath: (items) => "/movie-demo/${items.join(",")}",
+  buildRepository: (context) => movieRepository,
+  buildDetail: (context, item) => _MovieDetail(movie: item),
+  listBuilder: (route, initialSelection, onSelectionChange) {
+    return LdSelectableList<_Movie, int, bool>(
+      showSelectionControls: route.state.showSelectionControls,
+      listBuilder: (context, scrollController, itemBuilder) {
+        return CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: LdCard(
+                padding: EdgeInsets.zero,
+                child: LdList(
+                  shrinkWrap: true,
+                  separatorBuilder: (context) => LdDivider(),
+                  header: LdAutoBackground(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: LdTextL("Movie"),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: LdTextL("Genre"),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: LdTextL("Rating"),
+                        ),
+                      ],
+                    ).spaceM().padL(),
+                  ),
+                  paginator: route.repository,
+                  itemBuilder: itemBuilder,
+                  scrollController: scrollController,
+                  assumedItemHeight: 50,
+                ),
+              ).padL(),
+            )
+          ],
+        );
+      },
+      paginator: route.repository,
+      initialSelectedItems: route.state.selectedItems,
+      multiSelect: true,
+      onSelectionChange: (selected) => onSelectionChange(selected),
+      itemBuilder: (context, item, index, config) =>
+          LdMasterDetailSingleShortcuts(
+        item: item.value!.id,
+        actions: route.actions,
+        child: LdMasterDetailContextMenu<_Movie, int, bool>(
+          item: item,
+          child: LdListItemAnimation(
+            state: item.state,
+            child: LdListItem.fromConfig(
+              config.copyWith(
+                tableRowMode: true,
+                title: Text(
+                  item.value!.title,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(item.value!.genre),
+                subContent: Text("Rating: ${item.value!.rating}/10"),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  },
+  actions: [
+    LdMasterDetailAction(
+        visibility: {
+          LdMasterDetailActionVisibility(
+            location: LdMasterDetailActionLocation.masterAppBar,
+            minSelectionCount: 0,
+            maxSelectionCount: null,
+          ),
+        },
+        submitType: LdLabeledActionSubmitType.none,
+        buildLabel: (context, selection) => "Filter",
+        buildIcon: (context, selection) =>
+            LdMasterDetailRoute.of<_Movie, int, bool>(context)
+                    .repository
+                    .filters
+                    .where((e) => e.isOn)
+                    .isEmpty
+                ? const Icon(LucideIcons.listFilterPlus)
+                : const Icon(LucideIcons.listFilter),
+        action: (context, selection) async {
+          final route = LdMasterDetailRoute.of<_Movie, int, bool>(context);
+          context.push("${route.path}/filters");
+        }),
+    LdMasterDetailAction(
+      visibility: {
+        LdMasterDetailActionVisibility(
+          location: LdMasterDetailActionLocation.detailSecondary,
+          minSelectionCount: 1,
+          maxSelectionCount: 1,
+        ),
+        LdMasterDetailActionVisibility(
+          location: LdMasterDetailActionLocation.context,
+          minSelectionCount: 1,
+          maxSelectionCount: 1,
+        ),
+      },
+      shortcutActivators: {
+        SingleActivator(LogicalKeyboardKey.keyD, meta: true),
+      },
+      buildLoadingText: (context, selection) => "Duplicating",
+      buildLabel: (context, selection) => "Duplicate",
+      buildIcon: (context, selection) => const Icon(LucideIcons.copy),
+      multiSelect: false,
+      action: (context, selection) async {
+        final item = await movieRepository.getById(selection.first);
+
+        final newItem = item.copyWith(
+          id: movieData.length + 1,
+          title: "${item.title} (copy)",
+        );
+
+        await movieRepository.create(newItem.id, newItem);
+
+        await Future.delayed(const Duration(milliseconds: 1500));
+
+        final route = LdMasterDetailRoute.of<_Movie, int, bool>(context);
+
+        route.setSelectedItems({newItem.id});
+      },
+    ),
+    LdMasterDetailAction(
+      visibility: {
+        LdMasterDetailActionVisibility(
+          location: LdMasterDetailActionLocation.detailSecondary,
+          minSelectionCount: 1,
+          maxSelectionCount: null,
+        ),
+        LdMasterDetailActionVisibility(
+          location: LdMasterDetailActionLocation.context,
+          minSelectionCount: 1,
+          maxSelectionCount: null,
+        ),
+        LdMasterDetailActionVisibility(
+          location: LdMasterDetailActionLocation.masterSecondary,
+          minSelectionCount: 1,
+          maxSelectionCount: null,
+          visibleInSplitView: false,
+        ),
+      },
+      shortcutActivators: {
+        SingleActivator(LogicalKeyboardKey.delete),
+        SingleActivator(LogicalKeyboardKey.backspace),
+      },
+      buildLoadingText: (context, selection) =>
+          "Deleting ${selection.length} ${selection.length == 1 ? "item" : "items"}",
+      buildLabel: (context, selection) =>
+          "Delete ${selection.length} ${selection.length == 1 ? "item" : "items"}",
+      buildIcon: (context, selection) => Icon(
+        LucideIcons.trash2,
+      ),
+      color: shadRed,
+      action: (context, selection) async {
+        await movieRepository.deleteBatch(selection);
+      },
+    ),
+    toggleSelectionControls<_Movie, int, bool>(),
+  ],
+);
+
+class _MovieDetail extends StatefulWidget {
+  final LdPaginatorItem<_Movie> movie;
+  const _MovieDetail({required this.movie});
+  @override
+  State<_MovieDetail> createState() => _MovieDetailState();
+}
+
+class _MovieDetailState extends State<_MovieDetail> {
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _genreController = TextEditingController();
+  final TextEditingController _ratingController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController.text = widget.movie.value?.title ?? "";
+    _genreController.text = widget.movie.value?.genre ?? "";
+    _ratingController.text = widget.movie.value?.rating.toString() ?? "";
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _genreController.dispose();
+    _ratingController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LdCard(
+      child: LdAutoSpace(
+        children: [
+          LdInput(
+            label: "Title",
+            hint: "Movie title",
+            controller: _titleController,
+          ),
+          LdInput(
+            label: "Genre",
+            hint: "Movie genre",
+            controller: _genreController,
+          ),
+          LdInput(
+            label: "Rating",
+            hint: "1-10",
+            controller: _ratingController,
+            keyboardType: TextInputType.number,
+          ),
+          LdText(
+            "Last updated: ${Jiffy.parseFromDateTime(widget.movie.value!.lastUpdate).fromNow()}",
+          ),
+          Row(
+            children: [
+              LdSubmit<void, void>(
+                config: LdSubmitConfig<void, void>(
+                  submitText: "Save",
+                  action: (_) async {
+                    final newMovie = _Movie(
+                      widget.movie.value!.id,
+                      _titleController.text,
+                      _genreController.text,
+                      int.tryParse(_ratingController.text) ?? 1,
+                      widget.movie.value!.lastUpdate,
+                    );
+                    final repo =
+                        LdMasterDetailRoute.of<_Movie, int, bool>(context)
+                            .repository;
+                    await repo.update(
+                      widget.movie.value!.id,
+                      newMovie,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ).spaceM(),
+        ],
+      ),
+    ).padL();
+  }
+}

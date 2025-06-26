@@ -9,6 +9,7 @@
     "edit",
     "select",
     "filter",
-    "apply"
+    "apply",
+    "activeFilters"
   ]
 }

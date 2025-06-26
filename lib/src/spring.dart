@@ -137,10 +137,14 @@ class _LdSpringState extends State<LdSpring> with SingleTickerProviderStateMixin
         });
         return;
       } else {
-        if (!_ticker!.isTicking) {
-          _ticker!.start();
+        if (_ticker?.isActive != true) {
+          _ticker?.start();
         }
       }
+    }
+
+    if (oldWidget.child != widget.child) {
+      setState(() {});
     }
   }
 
@@ -158,7 +162,7 @@ class _LdSpringState extends State<LdSpring> with SingleTickerProviderStateMixin
           _spring.state,
         );
       }
-      _ticker!.stop();
+      _ticker?.stop();
     }
   }
 
@@ -170,7 +174,7 @@ class _LdSpringState extends State<LdSpring> with SingleTickerProviderStateMixin
       setState(() {});
     });
 
-    if (_ticker?.isTicking == false) {
+    if (_ticker?.isActive != true) {
       _ticker?.start();
     }
 
@@ -217,9 +221,12 @@ class LdChainedSprings extends StatefulWidget {
 
   final Function(BuildContext context, List<LdSpringState> states)? onAnimationEnd;
 
+  final Widget? child;
+
   final Widget Function(
     BuildContext context,
     List<LdSpringState> states,
+    Widget? child,
   ) builder;
 
   const LdChainedSprings({
@@ -233,6 +240,7 @@ class LdChainedSprings extends StatefulWidget {
     this.initialPosition = 1.0,
     this.targetPosition = 1.0,
     this.onAnimationEnd,
+    this.child,
   });
 
   @override
@@ -253,7 +261,7 @@ class _LdChainedSpringsState extends State<LdChainedSprings> with SingleTickerPr
       setState(() {});
     });
 
-    if (_ticker?.isTicking != true) {
+    if (_ticker?.isActive != true) {
       _ticker?.start();
     }
 
@@ -303,9 +311,13 @@ class _LdChainedSpringsState extends State<LdChainedSprings> with SingleTickerPr
     }
 
     if (oldWidget.targetPosition != widget.targetPosition) {
-      if (!_ticker!.isTicking) {
-        _ticker!.start();
+      if (_ticker?.isActive != true) {
+        _ticker?.start();
       }
+    }
+
+    if (oldWidget.child != widget.child) {
+      setState(() {});
     }
 
     super.didUpdateWidget(oldWidget);
@@ -366,6 +378,7 @@ class _LdChainedSpringsState extends State<LdChainedSprings> with SingleTickerPr
             isMoving: false,
           );
         }).toList(),
+        widget.child,
       );
     }
 
@@ -379,6 +392,7 @@ class _LdChainedSpringsState extends State<LdChainedSprings> with SingleTickerPr
           isMoving: _ticker?.isActive ?? false,
         );
       }).toList(),
+      widget.child,
     );
   }
 }

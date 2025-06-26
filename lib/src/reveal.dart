@@ -83,7 +83,8 @@ class LdReveal extends StatelessWidget {
       dampingCoefficient: dampingCoefficient,
       springConstant: springConstant,
       mass: mass,
-      builder: (context, states) {
+      child: child,
+      builder: (context, states, child) {
         final scaleValue = states.first.position.clamp(0.0, 1.0);
         final opacityValue = states.last.position.clamp(0.0, 1.0);
 

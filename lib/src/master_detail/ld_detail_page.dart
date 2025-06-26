@@ -155,7 +155,10 @@ LdModal ldDetailModal<T extends Identifiable<IdType>, IdType, GroupingCriterion>
   LdMasterDetailRoute<T, IdType, GroupingCriterion> route,
 ) {
   return LdModal(
-    modalContent: (context) => LdDetailPageContent(route: route, selection: route.state.selectedItems),
+    modalContent: (context) => SizedBox(
+      height: 300,
+      child: LdDetailPageContent(route: route, selection: route.state.selectedItems),
+    ),
     title: StreamBuilder(
       stream: route.stateStream,
       initialData: route.state,

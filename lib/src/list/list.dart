@@ -393,7 +393,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType, GroupingCriterion>
     final item = LdPaginatorLoadedItem(value: listEntry.item!.value, state: listEntry.item!.state);
 
     if (!_itemKeys.containsKey(item.value.id)) {
-      _itemKeys[item.value.id] = GlobalKey();
+      _itemKeys[item.value.id] = GlobalKey(debugLabel: "list" + item.value.id.toString());
     }
 
     if (listEntry.item!.state == LdPaginatorItemState.pendingRefresh) {
@@ -487,9 +487,6 @@ class _LdListState<T extends Identifiable<IdType>, IdType, GroupingCriterion>
 
     final offset = averageHeight * widget.paginator.initialOffset;
 
-    print("Height: $averageHeight");
-    print("Offset: $offset");
-
     _scrollController.animateTo(offset, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
   }
 
@@ -507,57 +504,5 @@ class _LdListState<T extends Identifiable<IdType>, IdType, GroupingCriterion>
       onRefresh: widget.paginator.refreshList,
       child: _buildListView(context),
     );
-  }
-}
-
-class LdListItemAnimation extends StatelessWidget {
-  final LdPaginatorItemState state;
-  final Widget child;
-
-  const LdListItemAnimation({required this.state, required this.child, super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return switch (state) {
-      LdPaginatorItemState.fetching || LdPaginatorItemState.pendingRefresh => child
-          .animate(
-            key: const Key('index.fetching'),
-            onPlay: (controller) => controller.repeat(),
-          )
-          .shimmer(
-            color: LdTheme.of(context).primaryColor,
-            duration: const Duration(milliseconds: 1000),
-          ),
-      LdPaginatorItemState.loaded => child,
-      LdPaginatorItemState.updating => child
-          .animate(
-            key: const Key('index.updating'),
-            onPlay: (controller) => controller.repeat(),
-          )
-          .shimmer(
-            color: LdTheme.of(context).primaryColor,
-            duration: const Duration(milliseconds: 1000),
-          ),
-      LdPaginatorItemState.rolledBackUpdate => child
-          .animate(
-            key: const Key('index.rolledBackUpdate'),
-          )
-          .shimmer(
-            color: LdTheme.of(context).warningColor,
-            duration: const Duration(milliseconds: 1000),
-          )
-          .shakeX(hz: 3),
-      LdPaginatorItemState.deleting => LdReveal.quick(
-          revealed: false,
-          initialRevealed: true,
-          child: child,
-        ),
-      LdPaginatorItemState.rolledBackDeletion => LdReveal.quick(
-          revealed: true,
-          initialRevealed: false,
-          child: child,
-        ),
-      _ => child,
-    };
   }
 }

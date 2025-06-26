@@ -63,7 +63,7 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
   }
 
   bool get showingDetail => GoRouter.of(context).routerDelegate.currentConfiguration.routes.any(
-        (match) => match is GoRoute && (match).name == "detail",
+        (match) => match is GoRoute && (match).name == "${widget.route.path}-detail",
       );
 
   void _updateSelection(LdMasterDetailRouteState<T, IdType, GroupingCriterion> state) async {

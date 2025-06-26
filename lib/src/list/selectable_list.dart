@@ -11,7 +11,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 class LdSelectableList<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends StatefulWidget {
   final Widget Function(BuildContext context, LdPaginatorItem<T> item, int index, LdListItemConfig config) itemBuilder;
 
-  final LdList<T, IdType, GroupingCriterion> Function(
+  final Widget Function(
     BuildContext context,
     ScrollController scrollController,
     LdListItemBuilder<T> itemBuilder,
@@ -62,7 +62,7 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType, GroupingCri
   final Map<IdType, GlobalKey> _itemKeys = {};
   final Map<IdType, FocusNode> _itemFocusNodes = {};
 
-  final GlobalKey _rootKey = GlobalKey();
+  final GlobalKey _rootKey = GlobalKey(debugLabel: "Root Key");
 
   bool _shiftPressed = false;
   bool _ctrlPressed = false;
@@ -327,7 +327,7 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType, GroupingCri
 
   Widget _wrapListItem(BuildContext context, LdPaginatorItem<T> item, int index) {
     if (!_itemKeys.containsKey(item.value!.id)) {
-      _itemKeys[item.value!.id] = GlobalKey();
+      _itemKeys[item.value!.id] = GlobalKey(debugLabel: "Selection" + item.value!.id.toString());
     }
 
     if (!_itemFocusNodes.containsKey(item.value!.id)) {
