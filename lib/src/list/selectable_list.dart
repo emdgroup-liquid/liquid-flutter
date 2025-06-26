@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/master_detail/identifiable.dart';
 
 class LdSelectableList<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends StatefulWidget {
   final Widget Function(BuildContext context, LdPaginatorItem<T> item, int index, LdListItemConfig config) itemBuilder;
@@ -113,6 +112,9 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType, GroupingCri
 
     if (oldWidget.initialSelectedItems != widget.initialSelectedItems) {
       _selectedItems.setValue(widget.initialSelectedItems);
+      if (widget.initialSelectedItems.length == 1) {
+        _itemFocusNodes[widget.initialSelectedItems.first]?.requestFocus();
+      }
     }
   }
 

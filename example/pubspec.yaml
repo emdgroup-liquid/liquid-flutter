@@ -39,7 +39,7 @@ dependencies:
   url_launcher: ^6.3.1
   fuzzy: ^0.5.1
   collection: ^1.19.0
-  liquid_flutter_reactive_forms: 0.0.3
+  #liquid_flutter_reactive_forms: 0.0.3
   lucide_icons_flutter: ^3.0.3
   shared_preferences: ^2.5.3
   jiffy: ^6.4.3
@@ -102,6 +102,6 @@ icons_launcher:
 dependency_overrides:
   liquid_flutter:
     path: ./../
-  liquid_flutter_reactive_forms:
-    path: ./../../liquid-flutter-reactive-forms
+  #liquid_flutter_reactive_forms:
+ #   path: ./../../liquid-flutter-reactive-forms
   go_router: any

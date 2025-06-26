@@ -154,11 +154,15 @@ class LdMasterDetailRoute<T extends Identifiable<IdType>, IdType, GroupingCriter
 
     repository.updatedItems.listen((item) async {
       if (item.state == LdPaginatorItemState.deleted && item.value != null) {
-        if (_state.selectedItems.contains(item.value!.id)) {
-          setSelectedItems(
-            _state.selectedItems.where((id) => id != item.value!.id).toSet(),
-          );
-        }
+        _updateState(
+          _state.copyWith(
+            deletedItems: {
+              ..._state.deletedItems,
+              item.value!.id,
+            },
+            selectedItems: _state.selectedItems.where((id) => id != item.value!.id).toSet(),
+          ),
+        );
       }
     });
   }

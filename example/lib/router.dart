@@ -46,7 +46,6 @@ import 'components/form_elements/form.dart';
 import 'components/feedback/hint.dart';
 import 'components/form_elements/input.dart';
 import 'components/feedback/notification.dart';
-import 'components/form_elements/reactive_form.dart';
 import 'components/data_display/table.dart';
 import 'components/data_display/tag.dart';
 import 'window/app_scaffold.dart';
@@ -55,8 +54,7 @@ import 'components/interaction/appbar.dart';
 class AppRouter {
   AppRouter();
 
-  late final router =
-      GoRouter(debugLogDiagnostics: true, initialLocation: "/", routes: [
+  late final router = GoRouter(debugLogDiagnostics: true, initialLocation: "/", routes: [
     /* GoRoute(
           path: "/task-demo",
           pageBuilder: (context, state) => MaterialPage<void>(
@@ -72,38 +70,35 @@ class AppRouter {
         taskDemo.buildRoute(),
         GoRoute(
           path: "/",
-          pageBuilder: (context, state) =>
-              NoTransitionPage<void>(key: state.pageKey, child: const Home()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const Home()),
         ),
         GoRoute(
           path: "/chemical",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const ChemicalScreen()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const ChemicalScreen()),
         ),
         GoRoute(
           path: "/theme",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const ThemeDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const ThemeDemo()),
         ),
         GoRoute(
           path: "/layout",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const LayoutDocumentation()),
+          pageBuilder: (context, state) =>
+              NoTransitionPage<void>(key: state.pageKey, child: const LayoutDocumentation()),
         ),
         GoRoute(
           path: "/radius",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const RadiusDocumentation()),
+          pageBuilder: (context, state) =>
+              NoTransitionPage<void>(key: state.pageKey, child: const RadiusDocumentation()),
         ),
         GoRoute(
           path: "/typography",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const TypographyDocumentation()),
+          pageBuilder: (context, state) =>
+              NoTransitionPage<void>(key: state.pageKey, child: const TypographyDocumentation()),
         ),
         GoRoute(
           path: "/material",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const MaterialDocumentation()),
+          pageBuilder: (context, state) =>
+              NoTransitionPage<void>(key: state.pageKey, child: const MaterialDocumentation()),
         ),
 
         /*GoRoute(
@@ -113,78 +108,64 @@ class AppRouter {
           ),*/
         GoRoute(
           path: "/components/button",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const ButtonDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const ButtonDemo()),
         ),
         GoRoute(
           path: "/components/card",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const CardDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const CardDemo()),
         ),
         GoRoute(
           path: "/components/action-runner",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const ActionRunnerDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const ActionRunnerDemo()),
         ),
         GoRoute(
           path: "/components/choose",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const ChooseDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const ChooseDemo()),
         ),
         GoRoute(
           path: "/components/drawer",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const DrawerDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const DrawerDemo()),
         ),
         GoRoute(
           path: "/components/toggle",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const ToggleDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const ToggleDemo()),
         ),
         GoRoute(
           path: "/components/slider",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const LdSliderDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const LdSliderDemo()),
         ),
         GoRoute(
           path: "/components/switch",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const SwitchDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const SwitchDemo()),
         ),
         GoRoute(
           path: "/components/select",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const SelectDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const SelectDemo()),
         ),
         GoRoute(
           path: "/components/badge",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const BadgeDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const BadgeDemo()),
         ),
         GoRoute(
           path: "/components/breadcrumb",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const BreadcrumbDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const BreadcrumbDemo()),
         ),
         GoRoute(
           path: "/components/checkbox",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const CheckboxDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const CheckboxDemo()),
         ),
         GoRoute(
           path: "/components/context-menu",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const ContextMenuDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const ContextMenuDemo()),
         ),
         GoRoute(
           path: "/components/date-time-picker",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const DateTimePickerDemo()),
+          pageBuilder: (context, state) =>
+              NoTransitionPage<void>(key: state.pageKey, child: const DateTimePickerDemo()),
         ),
         GoRoute(
           path: "/components/divider",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const DividerDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const DividerDemo()),
         ),
         GoRoute(
           path: "/components/exception",
@@ -197,73 +178,59 @@ class AppRouter {
         ),
         GoRoute(
           path: "/components/form",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const FormDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const FormDemo()),
         ),
         GoRoute(
           path: "/components/orb",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const OrbDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const OrbDemo()),
         ),
         GoRoute(
           path: "/components/loader",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const LoaderDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const LoaderDemo()),
         ),
         GoRoute(
           path: "/components/reveal",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const LdRevealDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const LdRevealDemo()),
         ),
         GoRoute(
           path: "/components/radio",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const RadioDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const RadioDemo()),
         ),
         GoRoute(
           path: "/components/hint",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const HintDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const HintDemo()),
         ),
         GoRoute(
           path: "/components/icon",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const IconDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const IconDemo()),
         ),
         GoRoute(
           path: "/components/indicator",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const IndicatorDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const IndicatorDemo()),
         ),
         GoRoute(
           path: "/components/accordion",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const AccordionDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const AccordionDemo()),
         ),
         GoRoute(
           path: "/components/autospace",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const AutoSpaceDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const AutoSpaceDemo()),
         ),
         GoRoute(
           path: "/components/input",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const InputDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const InputDemo()),
         ),
         GoRoute(
           path: "/components/spring",
-          pageBuilder: (context, state) =>
-              NoTransitionPage<void>(key: state.pageKey, child: const Spring()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const Spring()),
         ),
         GoRoute(
           path: "/components/notification",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const NotificationDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const NotificationDemo()),
         ),
         GoRoute(
           path: "/components/submit",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const SubmitDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const SubmitDemo()),
         ),
         GoRoute(
             path: "/components/modal",
@@ -286,40 +253,35 @@ class AppRouter {
             ]),
         GoRoute(
           path: "/components/table",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const TableDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const TableDemo()),
         ),
         GoRoute(
           path: "/components/tag",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const TagDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const TagDemo()),
         ),
         GoRoute(
           path: "/components/list",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const ListDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const ListDemo()),
         ),
         GoRoute(
           path: "/components/list-item",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const ListItemDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const ListItemDemo()),
         ),
         GoRoute(
           path: "/components/selectable-list",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const SelectableListDemo()),
+          pageBuilder: (context, state) =>
+              NoTransitionPage<void>(key: state.pageKey, child: const SelectableListDemo()),
         ),
         GoRoute(
           path: "/components/tabs",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const TabsDemo()),
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const TabsDemo()),
         ),
-        GoRoute(
+        /*GoRoute(
             path: "/components/reactive_form",
             pageBuilder: (context, state) {
               return NoTransitionPage<void>(
                   key: state.pageKey, child: const ReactiveFormDemo());
-            }),
+            }),*/
         GoRoute(
           path: "/components/appbar",
           pageBuilder: (context, state) => NoTransitionPage<void>(

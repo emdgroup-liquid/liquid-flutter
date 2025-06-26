@@ -113,6 +113,9 @@ export 'src/version.dart';
 export 'src/window_frame.dart';
 export 'variants.g.dart';
 
+export 'src/master_detail/filter/ld_filter_option.dart';
+export 'src/master_detail/filter/ld_filter_bool_option.dart';
+
 /// This variable defines whether TextStyle should use the `liquid_flutter`
 /// package prefix when defining the font family.
 ///

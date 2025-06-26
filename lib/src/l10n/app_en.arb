@@ -28,5 +28,7 @@
   "delete": "Delete",
   "deleteSelected": "Delete selected",
   "edit": "Edit",
-  "select": "Select"
+  "select": "Select",
+  "filter": "Filter",
+  "apply": "Apply"
 }

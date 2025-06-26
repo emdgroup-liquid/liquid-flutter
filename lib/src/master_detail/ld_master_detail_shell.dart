@@ -45,10 +45,12 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
   }
 
   void _updateSelectionFromRoute() async {
-    await Future.delayed(const Duration(milliseconds: 500));
     if (!mounted) return;
 
-    final newSelectedIds = widget.route.parseSelected(widget.routeSelection ?? "");
+    var newSelectedIds = widget.route.parseSelected(widget.routeSelection ?? "");
+
+    newSelectedIds = newSelectedIds.difference(widget.route.state.deletedItems);
+
     widget.route.setSelectedItems(newSelectedIds);
   }
 
@@ -68,6 +70,7 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
     if (!mounted) return;
 
     final selectedItems = state.selectedItems;
+    final deletedItems = state.deletedItems;
     final router = GoRouter.of(context);
 
     final detailPath = widget.route.detailPath(selectedItems);
@@ -76,8 +79,18 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
       return;
     }
 
+    print("selectedItems: $selectedItems");
+    print("deletedItems: $deletedItems");
+
+    print(GoRouter.of(context).routerDelegate.currentConfiguration.uri);
+
+    if (deletedItems.isNotEmpty && selectedItems.intersection(deletedItems).isNotEmpty) {
+      return;
+    }
+
     if (selectedItems.isNotEmpty) {
       if (showingDetail) {
+        print("replacing $detailPath");
         router.replace(
           detailPath,
         );
@@ -85,6 +98,7 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
         if (widget.route.state.showSelectionControls) {
           return;
         }
+        print("pushing $detailPath");
         router.push(
           detailPath,
         );
@@ -93,6 +107,7 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
       if (showingDetail) {
         router.pop();
       } else {
+        print("replacing ${widget.route.path}");
         router.replace(widget.route.path);
       }
     }

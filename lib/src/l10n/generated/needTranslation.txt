@@ -7,6 +7,8 @@
     "delete",
     "deleteSelected",
     "edit",
-    "select"
+    "select",
+    "filter",
+    "apply"
   ]
 }

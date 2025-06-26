@@ -64,7 +64,7 @@ class LdPaginatorLoadedItem<T extends Identifiable> extends LdPaginatorItem<T> {
 }
 
 class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier {
-  final FetchListFunction<T> fetchListFunction;
+  FetchListFunction<T>? fetchListFunction;
   final int pageSize;
   int initialOffset;
   final Duration debounceTime;
@@ -99,7 +99,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   }
 
   LdPaginator({
-    required this.fetchListFunction,
+    this.fetchListFunction,
 
     /// The number of items that are fetched at once.
     /// The [pageSize] will be passed to the [FetchListFunction] and used to
@@ -174,6 +174,14 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
   Timer? _debounceTimer;
 
+  void setItems(List<LdPaginatorItem<T>> items) {
+    _items.clear();
+    for (var i = 0; i < items.length; i++) {
+      _items[i] = items[i];
+    }
+    _updated(null);
+  }
+
   int get currentItemCount => _items.values
       .where(
         (item) => item.state != LdPaginatorItemState.fetching,
@@ -243,8 +251,10 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
     final List<T> loadedItems = [];
 
+    assert(fetchListFunction != null, 'fetchListFunction is not set. Can not fetch items');
+
     try {
-      final page = await fetchListFunction(
+      final page = await fetchListFunction!(
         offset: offset,
         pageSize: pageSize,
         pageToken: null,
