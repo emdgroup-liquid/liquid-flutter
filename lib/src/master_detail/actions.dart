@@ -10,12 +10,14 @@ class LdMasterDetailActionVisibility {
   final int minSelectionCount;
   final int? maxSelectionCount;
   final bool visibleInSplitView;
+  final Set<String> applyFilters;
 
   LdMasterDetailActionVisibility({
     required this.location,
     this.minSelectionCount = 0,
     this.maxSelectionCount,
     this.visibleInSplitView = true,
+    this.applyFilters = const {},
   });
 }
 
@@ -55,7 +57,7 @@ class LdMasterDetailAction<T extends Identifiable<IdType>, IdType, GroupingCrite
 
   @override
   void onPressed(BuildContext context) async {
-    final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context);
+    final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context, listen: false);
     await action(context, selection.items);
   }
 
@@ -65,17 +67,36 @@ class LdMasterDetailAction<T extends Identifiable<IdType>, IdType, GroupingCrite
 
     final isSplit = LdMasterContext.of<T, IdType, GroupingCriterion>(context).isSplit;
 
-    final selectedItemCount = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context).items.length;
+    final route = LdMasterDetailRoute.of<T, IdType, GroupingCriterion>(context);
+
+    final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context);
+
+    final selectedItemCount = selection.items.length;
 
     if (!visibility.any((e) => e.location == location)) {
       return false;
     }
+
+    final selectedItems =
+        selection.items.map((e) => route.repository.getItemById(e)).whereType<LdPaginatorItem<T>>().toList();
 
     for (final visibility in this.visibility) {
       if (visibility.location != location) continue;
 
       if (!isSplit && !visibility.visibleInSplitView) {
         continue;
+      }
+
+      if (visibility.applyFilters.isNotEmpty) {
+        final filters = visibility.applyFilters.map(
+          (filterName) => route.repository.filters.firstWhere((e) => e.name == filterName),
+        );
+
+        for (final filter in filters) {
+          if (selectedItems.any((e) => !filter.optimisticFilter(e.value!))) {
+            return false;
+          }
+        }
       }
 
       if ((visibility.maxSelectionCount == null || selectedItemCount <= visibility.maxSelectionCount!) &&

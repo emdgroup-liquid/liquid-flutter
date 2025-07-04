@@ -47,15 +47,12 @@ class LdMasterPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
                             location: LdMasterDetailActionLocation.masterSecondary,
                           )
                         : null,
-                    body: SafeArea(
-                      right: false,
-                      child: route.listBuilder(
-                        route,
-                        state,
-                        (selection) {
-                          route.setSelectedItems(selection);
-                        },
-                      ),
+                    body: route.listBuilder(
+                      route,
+                      state,
+                      (selection) {
+                        route.setSelectedItems(selection);
+                      },
                     ),
                   ),
                 ),

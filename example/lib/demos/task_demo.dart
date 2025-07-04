@@ -127,6 +127,16 @@ final taskRepository = LdRepository<_Task, int>(
   getById: (id) async {
     return testData.firstWhere((element) => element.id == id);
   },
+  sortOptions: [
+    LdSortOption<_Task, int>(
+      name: "due",
+      label: (context) => "Due",
+      icon: (context) => const Icon(LucideIcons.calendar),
+      optimisticSort: (a, b) {
+        return a.due.compareTo(b.due);
+      },
+    ),
+  ],
   filters: {
     LdFilterBoolOption<_Task, int>(
       name: "done",
@@ -157,11 +167,13 @@ final taskRepository = LdRepository<_Task, int>(
 
     await Future.delayed(const Duration(milliseconds: 1000));
 
-    final filtered = testData
-        .where((element) =>
-            filters?.every((filter) => filter.optimisticFilter(element)) ??
-            true)
-        .toList();
+    final filtered =
+        testData.where((element) => filters?.every((filter) => filter.optimisticFilter(element)) ?? true).toList();
+
+    for (final sortOption in sortOptions ?? []) {
+      print("Sorting with ${sortOption.name}");
+      filtered.sort((a, b) => sortOption.optimisticSort(a, b));
+    }
 
     return LdListPage<_Task>(
       newItems: filtered.skip(offset).take(pageSize).toList(),
@@ -218,8 +230,7 @@ final taskDemo = LdMasterDetailRoute<_Task, int, bool>(
       initialSelectedItems: route.state.selectedItems,
       multiSelect: true,
       onSelectionChange: (selected) => onSelectionChange(selected),
-      itemBuilder: (context, item, index, config) =>
-          LdMasterDetailSingleShortcuts(
+      itemBuilder: (context, item, index, config) => LdMasterDetailSingleShortcuts(
         item: item.value!.id,
         actions: route.actions,
         child: LdMasterDetailContextMenu<_Task, int, bool>(
@@ -233,14 +244,11 @@ final taskDemo = LdMasterDetailRoute<_Task, int, bool>(
                 title: Text(
                   item.value!.task,
                   style: TextStyle(
-                    decoration: item.value!.done
-                        ? TextDecoration.lineThrough
-                        : TextDecoration.none,
+                    decoration: item.value!.done ? TextDecoration.lineThrough : TextDecoration.none,
                   ),
                 ),
                 subtitle: Text(item.value!.due),
-                trailingForward:
-                    LdMasterContext.of<_Task, int, bool>(context).isSplit,
+                trailingForward: LdMasterContext.of<_Task, int, bool>(context).isSplit,
               ),
             ),
           ),
@@ -260,11 +268,7 @@ final taskDemo = LdMasterDetailRoute<_Task, int, bool>(
         submitType: LdLabeledActionSubmitType.none,
         buildLabel: (context, selection) => "Filter",
         buildIcon: (context, selection) =>
-            LdMasterDetailRoute.of<_Task, int, bool>(context)
-                    .repository
-                    .filters
-                    .where((e) => e.isOn)
-                    .isEmpty
+            LdMasterDetailRoute.of<_Task, int, bool>(context).repository.filters.where((e) => e.isOn).isEmpty
                 ? const Icon(LucideIcons.listFilterPlus)
                 : const Icon(LucideIcons.listFilter),
         action: (context, selection) async {
@@ -274,13 +278,15 @@ final taskDemo = LdMasterDetailRoute<_Task, int, bool>(
     LdMasterDetailAction(
       visibility: {
         LdMasterDetailActionVisibility(
-            location: LdMasterDetailActionLocation.detailSecondary,
+            location: LdMasterDetailActionLocation.detailAppBar,
             minSelectionCount: 1,
-            maxSelectionCount: null),
+            maxSelectionCount: null,
+            applyFilters: {"todo"}),
         LdMasterDetailActionVisibility(
             location: LdMasterDetailActionLocation.context,
             minSelectionCount: 1,
-            maxSelectionCount: null),
+            maxSelectionCount: null,
+            applyFilters: {"todo"}),
       },
       shortcutActivators: {
         SingleActivator(LogicalKeyboardKey.keyD),
@@ -302,9 +308,10 @@ final taskDemo = LdMasterDetailRoute<_Task, int, bool>(
     LdMasterDetailAction(
       visibility: {
         LdMasterDetailActionVisibility(
-          location: LdMasterDetailActionLocation.detailSecondary,
+          location: LdMasterDetailActionLocation.detailAppBar,
           minSelectionCount: 1,
           maxSelectionCount: null,
+          applyFilters: {"done"},
         ),
         LdMasterDetailActionVisibility(
           location: LdMasterDetailActionLocation.context,
@@ -332,7 +339,7 @@ final taskDemo = LdMasterDetailRoute<_Task, int, bool>(
     LdMasterDetailAction(
       visibility: {
         LdMasterDetailActionVisibility(
-          location: LdMasterDetailActionLocation.detailSecondary,
+          location: LdMasterDetailActionLocation.detailAppBar,
           minSelectionCount: 1,
           maxSelectionCount: 1,
         ),
@@ -369,7 +376,7 @@ final taskDemo = LdMasterDetailRoute<_Task, int, bool>(
     LdMasterDetailAction(
       visibility: {
         LdMasterDetailActionVisibility(
-          location: LdMasterDetailActionLocation.detailSecondary,
+          location: LdMasterDetailActionLocation.detailAppBar,
           minSelectionCount: 1,
           maxSelectionCount: null,
         ),
@@ -391,8 +398,7 @@ final taskDemo = LdMasterDetailRoute<_Task, int, bool>(
       },
       buildLoadingText: (context, selection) =>
           "Deleting ${selection.length} ${selection.length == 1 ? "item" : "items"}",
-      buildLabel: (context, selection) =>
-          "Delete ${selection.length} ${selection.length == 1 ? "item" : "items"}",
+      buildLabel: (context, selection) => "Delete ${selection.length} ${selection.length == 1 ? "item" : "items"}",
       buildIcon: (context, selection) => Icon(
         LucideIcons.trash2,
       ),
@@ -471,9 +477,7 @@ class _TaskDetailState extends State<_TaskDetail> {
                       widget.task.value!.done,
                       widget.task.value!.lastUpdate,
                     );
-                    final repo =
-                        LdMasterDetailRoute.of<_Task, int, bool>(context)
-                            .repository;
+                    final repo = LdMasterDetailRoute.of<_Task, int, bool>(context).repository;
                     await repo.update(
                       widget.task.value!.id,
                       newTask,

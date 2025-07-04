@@ -108,4 +108,7 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
 
   @override
   String get activeFilters => 'Active Filters';
+
+  @override
+  String get sort => 'Sort';
 }

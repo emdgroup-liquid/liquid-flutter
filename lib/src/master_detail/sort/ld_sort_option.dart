@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-abstract class LdSortOption<T extends Identifiable<IdType>, IdType> {
+class LdSortOption<T extends Identifiable<IdType>, IdType> {
   final String Function(BuildContext context) label;
   final Widget Function(BuildContext context) icon;
 
@@ -9,14 +9,11 @@ abstract class LdSortOption<T extends Identifiable<IdType>, IdType> {
 
   // Serialize the sort option to a string which will be used
   // to create the query string
-  String serialize();
+  String serialize() => name;
 
   final bool isOn;
 
   final String name;
-
-  // Apply the sort option to the LdSortOption
-  void marshalSerialized(MapEntry<String, String> entry);
 
   LdSortOption({
     required this.label,
@@ -25,4 +22,16 @@ abstract class LdSortOption<T extends Identifiable<IdType>, IdType> {
     required this.name,
     this.isOn = false,
   });
+
+  LdSortOption<T, IdType> copyWith({
+    bool? isOn,
+  }) {
+    return LdSortOption<T, IdType>(
+      name: name,
+      label: label,
+      icon: icon,
+      optimisticSort: optimisticSort,
+      isOn: isOn ?? this.isOn,
+    );
+  }
 }

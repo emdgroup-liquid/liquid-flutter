@@ -53,7 +53,7 @@ class LdSpring extends StatefulWidget {
 
 class _Spring {
   // Time step for the simulation
-  double timeStep = 0.1 / timeDilation;
+  double timeStep = 0.01 / timeDilation;
 
   double springConstant;
   double dampingCoefficient;
@@ -81,13 +81,24 @@ class _Spring {
 
   double get force => springForce + dampingForce;
 
-  void update() {
-    // Update acceleration
-    acceleration = force / mass;
+  // 16ms is the time for one frame
+  final oneFrameElapsed = 16;
 
-    // Update velocity and position using Euler's method
-    velocity += acceleration * timeStep;
-    position += velocity * timeStep;
+  void update([int? elapsedMs]) {
+    // Use elapsed time if provided, otherwise fall back to fixed timeStep
+
+    final elapsed = elapsedMs ?? 16;
+
+    final frames = elapsed / oneFrameElapsed;
+
+    for (var i = 0; i < frames; i++) {
+      // Update acceleration
+      acceleration = force / mass;
+
+      // Update velocity and position using Euler's method
+      velocity += acceleration * timeStep;
+      position += velocity * timeStep;
+    }
 
     if (!active) {
       position = targetPosition;
@@ -150,11 +161,11 @@ class _LdSpringState extends State<LdSpring> with SingleTickerProviderStateMixin
 
   Ticker? _ticker;
 
-  void update() {
+  void update([int? elapsedTime]) {
     if (widget.paused) {
       return;
     }
-    _spring.update();
+    _spring.update(elapsedTime);
     if (!_spring.active) {
       if (widget.onAnimationEnd != null) {
         widget.onAnimationEnd!(
@@ -169,7 +180,7 @@ class _LdSpringState extends State<LdSpring> with SingleTickerProviderStateMixin
   @override
   void initState() {
     _ticker ??= createTicker((elapsed) {
-      update();
+      update(elapsed.inMilliseconds);
 
       setState(() {});
     });
@@ -256,7 +267,7 @@ class _LdChainedSpringsState extends State<LdChainedSprings> with SingleTickerPr
   void initState() {
     _createSprings();
     _ticker ??= createTicker((elapsed) {
-      update();
+      update(elapsed.inMilliseconds);
 
       setState(() {});
     });
@@ -323,21 +334,21 @@ class _LdChainedSpringsState extends State<LdChainedSprings> with SingleTickerPr
     super.didUpdateWidget(oldWidget);
   }
 
-  void update() {
+  void update([int? elapsedMs]) {
     if (_springs.isEmpty) {
       return;
     }
 
     if (!widget.reversed) {
       for (var i = 0; i < _springs.length; i++) {
-        _springs[i].update();
+        _springs[i].update(elapsedMs);
         if (i < _springs.length - 1) {
           _springs[i + 1].targetPosition = _springs[i].position;
         }
       }
     } else {
       for (var i = _springs.length - 1; i >= 0; i--) {
-        _springs[i].update();
+        _springs[i].update(elapsedMs);
         if (i > 0) {
           _springs[i - 1].targetPosition = _springs[i].position;
         }

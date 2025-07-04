@@ -344,6 +344,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
                     focus: _hasFocus,
                     active: !widget.disabled && (_pressed || widget.active),
                     disabled: widget.disabled,
+                    pressed: _pressed,
                   ),
                 ),
               ),

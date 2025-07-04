@@ -121,71 +121,82 @@ class _LdToggleState extends State<LdToggle> with SingleTickerProviderStateMixin
     );
 
     return LdTouchableSurface(
-        color: _theme.palette.neutral,
-        mode: LdTouchableSurfaceMode.solid,
-        onTap: _onTap,
-        disabled: widget.disabled,
-        active: widget.checked,
-        builder: (contxt, colorBundle, status) {
-          final thumbColor = switch ((widget.checked, status.hovering)) {
-            (true, true) => colors.contrastingText(colors.idle(_theme.isDark)),
-            (true, false) => colors.contrastingText(colors.idle(_theme.isDark)),
-            (false, true) => _theme.neutralShade(2),
-            (false, false) => _theme.neutralShade(1),
-          };
+      color: _theme.palette.neutral,
+      mode: LdTouchableSurfaceMode.solid,
+      onTap: _onTap,
+      disabled: widget.disabled,
+      active: widget.checked,
+      builder: (contxt, colorBundle, status) {
+        final thumbColor = switch ((widget.checked, status.hovering)) {
+          (true, true) => colors.contrastingText(colors.idle(_theme.isDark)),
+          (true, false) => colors.contrastingText(colors.idle(_theme.isDark)),
+          (false, true) => _theme.neutralShade(2),
+          (false, false) => _theme.neutralShade(1),
+        };
 
-          final background = switch ((widget.checked, status.hovering)) {
-            (true, true) => colors.idle(_theme.isDark),
-            (true, false) => colors.hover(_theme.isDark),
-            (false, true) => _theme.neutralShade(5),
-            (false, false) => _theme.neutralShade(4),
-          };
+        final background = switch ((widget.checked, status.hovering)) {
+          (true, true) => colors.idle(_theme.isDark),
+          (true, false) => colors.hover(_theme.isDark),
+          (false, true) => _theme.neutralShade(5),
+          (false, false) => _theme.neutralShade(4),
+        };
 
-          return Semantics(
-            toggled: widget.checked,
-            focusable: !widget.disabled,
-            label: widget.label,
-            enabled: !widget.disabled,
-            onTap: _onTap,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(_gap),
-                  height: _thumbSize + 2 * _gap,
-                  clipBehavior: Clip.hardEdge,
-                  width: _thumbSize * 2 + 2 * _gap,
-                  child: Row(children: [
-                    LdSpring(
-                      springConstant: 20,
-                      dampingCoefficient: 20,
-                      position: widget.checked ? _thumbSize : 0,
-                      initialPosition: widget.checked ? _thumbSize : 0,
-                      builder: (context, state, child) => Transform.translate(
-                          offset: Offset(state.position, 0),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 100),
-                            decoration: BoxDecoration(
-                              color: thumbColor,
-                              shape: BoxShape.circle,
-                            ),
-                            height: _thumbSize,
-                            width: _thumbSize + (2 * state.velocity).clamp(0, _gap),
-                          )),
-                    ),
-                  ]),
-                  decoration: BoxDecoration(
-                    color: background,
-                    borderRadius: BorderRadius.circular(
-                      (_thumbSize + 2 * _gap) / 2,
+        return Semantics(
+          toggled: widget.checked,
+          focusable: !widget.disabled,
+          label: widget.label,
+          enabled: !widget.disabled,
+          onTap: _onTap,
+          child: LdSpring(
+            springConstant: 20,
+            dampingCoefficient: 5,
+            position: status.pressed ? 1 : 0,
+            builder: (context, tapState, child) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Transform.scale(
+                    scale: 1 - tapState.position * 0.1,
+                    child: Container(
+                      padding: EdgeInsets.all(_gap),
+                      height: _thumbSize + 2 * _gap,
+                      clipBehavior: Clip.hardEdge,
+                      width: _thumbSize * 2 + 2 * _gap,
+                      child: Row(children: [
+                        LdSpring(
+                          springConstant: 20,
+                          dampingCoefficient: 20,
+                          position: (widget.checked ? _thumbSize : 0) + (tapState.position * 0.1),
+                          initialPosition: widget.checked ? _thumbSize : 0,
+                          builder: (context, state, child) => Transform.translate(
+                              offset: Offset(state.position, 0),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 100),
+                                decoration: BoxDecoration(
+                                  color: thumbColor,
+                                  shape: BoxShape.circle,
+                                ),
+                                height: _thumbSize,
+                                width: _thumbSize + (2 * state.velocity).clamp(0, _gap),
+                              )),
+                        ),
+                      ]),
+                      decoration: BoxDecoration(
+                        color: background,
+                        borderRadius: BorderRadius.circular(
+                          (_thumbSize + 2 * _gap) / 2,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                Flexible(child: label),
-              ],
-            ),
-          );
-        });
+                  Flexible(child: label),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
   }
 }

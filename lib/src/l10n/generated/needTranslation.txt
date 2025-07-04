@@ -10,6 +10,7 @@
     "select",
     "filter",
     "apply",
-    "activeFilters"
+    "activeFilters",
+    "sort"
   ]
 }

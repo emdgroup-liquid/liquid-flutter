@@ -11,6 +11,10 @@ class MainFlutterWindow: BitsdojoWindow {
 
     RegisterGeneratedPlugins(registry: flutterViewController)
 
+    self.standardWindowButton(.zoomButton)?.isHidden = true
+    self.standardWindowButton(.closeButton)?.isHidden = true
+    self.standardWindowButton(.miniaturizeButton)?.isHidden = true
+
     super.awakeFromNib()
   }
   override func bitsdojo_window_configure() -> UInt {

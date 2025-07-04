@@ -7,12 +7,13 @@ import 'package:liquid_flutter/src/conditional_parent.dart';
 import 'package:liquid_flutter/src/notifications/implicit_blur.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:overflow_view/overflow_view.dart';
+import 'package:provider/provider.dart';
 
 class LdAppBar extends StatefulWidget {
   final Widget? title;
   final Widget? leading;
   final Widget? trailing;
-  final bool? centerTitle;
+
   final bool? primary;
   final Color? backgroundColor;
   final bool? implyLeading;
@@ -29,7 +30,6 @@ class LdAppBar extends StatefulWidget {
     this.height,
     this.leading,
     this.trailing,
-    this.centerTitle,
     this.primary,
     this.backgroundColor,
     this.blurOnScroll = false,
@@ -44,9 +44,7 @@ class LdAppBar extends StatefulWidget {
 }
 
 class _LdAppBarState extends State<LdAppBar> {
-  bool _scrolledUnder = false;
-
-  ScrollNotificationObserverState? _scrollNotificationObserver;
+  final GlobalKey _key = GlobalKey();
 
   bool get _isDesktop {
     final platform = defaultTargetPlatform;
@@ -56,28 +54,63 @@ class _LdAppBarState extends State<LdAppBar> {
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
-      _scrollNotificationObserver?.addListener(_handleScrollNotification);
-    });
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _scrollNotificationObserver?.removeListener(_handleScrollNotification);
-    _scrollNotificationObserver = null;
+  LdScaffoldLayoutState? get _layoutState {
+    return context.read<LdScaffoldLayoutState>();
   }
 
-  void _handleScrollNotification(ScrollNotification notification) {
-    if (notification.depth == 0) {
-      final bool scrolled = notification.metrics.extentBefore > 0;
-      if (scrolled != _scrolledUnder) {
-        setState(() {
-          _scrolledUnder = scrolled;
-        });
-      }
+  bool get _canPopParentRoute {
+    final ModalRoute<Object?>? parentRoute = ModalRoute.of(context);
+    final bool canPop = parentRoute?.canPop ?? false;
+    return canPop;
+  }
+
+  bool get _hasDrawer {
+    return _scaffold?.hasDrawer ?? false;
+  }
+
+  bool get _isDrawerOpen {
+    return _layoutState?.isDrawerOpen ?? false;
+  }
+
+  bool get _isDrawer {
+    return _layoutState?.slot == LdScaffoldSlot.drawer;
+  }
+
+  bool get _isAppBar {
+    return _layoutState?.slot == LdScaffoldSlot.appBar;
+  }
+
+  bool get _isSideBySide {
+    return _layoutState?.isSideBySide ?? false;
+  }
+
+  bool get _showOpenDrawerButton {
+    return _hasDrawer && !_isDrawerOpen && (_isAppBar);
+  }
+
+  bool get _showCloseDrawerButton {
+    return _hasDrawer && _isDrawerOpen && (_isDrawer && _isSideBySide);
+  }
+
+  bool get _showWindowControls {
+    if (kIsWeb) {
+      return false;
+    }
+
+    if (_layoutState?.level != 1) {
+      return false;
+    }
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return _isDrawerOpen && _layoutState?.slot == LdScaffoldSlot.drawer ||
+            !_isDrawerOpen && _layoutState?.slot == LdScaffoldSlot.appBar;
+      default:
+        return false;
     }
   }
 
@@ -86,26 +119,27 @@ class _LdAppBarState extends State<LdAppBar> {
     final imply = widget.implyLeading ?? true;
     if (!imply) return null;
 
-    final ModalRoute<Object?>? parentRoute = ModalRoute.of(context);
-
-    final bool canPop = parentRoute?.canPop ?? false;
-
-    if (canPop) {
+    if (_canPopParentRoute && !_isDrawerOpen) {
       return LdButtonGhost(
+        size: LdSize.s,
         child: const Icon(LucideIcons.chevronLeft),
         onPressed: () => Navigator.of(context).maybePop(),
       );
     }
 
-    final scaffold = Scaffold.maybeOf(context);
-    if (scaffold?.hasDrawer ?? false) {
-      return LdButtonGhost(
-        child: const Icon(LucideIcons.menu),
-        onPressed: () => scaffold?.openDrawer(),
-      );
-    }
-
     return null;
+  }
+
+  IconData get _openDrawerIcon {
+    final layoutState = _layoutState;
+    if (layoutState?.isSideBySide ?? false) {
+      return LucideIcons.panelLeftOpen;
+    }
+    return LucideIcons.menu;
+  }
+
+  LdScaffoldState? get _scaffold {
+    return context.findAncestorStateOfType<LdScaffoldState>();
   }
 
   @override
@@ -113,101 +147,159 @@ class _LdAppBarState extends State<LdAppBar> {
     final theme = LdTheme.of(context, listen: true);
     final backgroundColor = widget.backgroundColor ?? theme.surface;
 
+    final layoutState = context.watch<LdScaffoldLayoutState>();
+
+    final scrollListenable = switch (layoutState.slot) {
+      LdScaffoldSlot.appBar => _layoutState?.bodyScrollOffset,
+      LdScaffoldSlot.body => _layoutState?.bodyScrollOffset,
+      LdScaffoldSlot.bottomNavigationBar => _layoutState?.bodyScrollOffset,
+      LdScaffoldSlot.drawer => _layoutState?.drawerScrollOffset,
+    };
+
     final leading = _buildLeading(context);
 
-    final hasLeadingOrTrailing = leading != null || widget.trailing != null;
-
-    final isCenterTitle = widget.centerTitle ?? (!_isDesktop && !hasLeadingOrTrailing);
-
-    final appBar = AnimatedContainer(
-      duration: const Duration(milliseconds: 100),
-      decoration: BoxDecoration(boxShadow: [
-        if (!widget.blurOnScroll)
-          BoxShadow(
-            color: theme.palette.neutral.shades.last.withAlpha(_scrolledUnder ? 10 : 0),
-            blurRadius: 10,
-            spreadRadius: 10,
-          ),
-      ]),
-      child: LdWrapConditional(
-        condition: widget.blurOnScroll,
-        builder: (context, child) => ClipRect(
-          child: ImplicitBlur(
-            sigma: _scrolledUnder ? 10 : 0,
-            child: child,
-            duration: const Duration(milliseconds: 300),
-          ),
+    final headerStyle = switch (theme.themeSize) {
+      (LdThemeSize.s) => ldBuildTextStyle(
+          theme,
+          LdTextType.label,
+          LdSize.m,
+          lineHeight: 1,
         ),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          decoration: BoxDecoration(
-            color: backgroundColor.withAlpha(
-              widget.blurOnScroll ? 100 : 255,
-            ),
-          ),
-          child: SafeArea(
-            top: widget.primary ?? true,
-            bottom: false,
-            minimum: LdTheme.of(context).pad(size: LdSize.m),
+      (LdThemeSize.m || LdThemeSize.l) => ldBuildTextStyle(
+          theme,
+          LdTextType.headline,
+          LdSize.s,
+          lineHeight: 1,
+        ),
+    };
+
+    final appBar = ValueListenableBuilder(
+        valueListenable: scrollListenable ?? ValueNotifier<double>(0),
+        builder: (context, value, child) {
+          final scrolledUnder = value > 10;
+
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 100),
+            decoration: BoxDecoration(boxShadow: [
+              if (!widget.blurOnScroll)
+                BoxShadow(
+                  color: theme.palette.neutral.shades.last.withAlpha(scrolledUnder ? 10 : 0),
+                  blurRadius: 10,
+                  spreadRadius: 10,
+                ),
+            ]),
             child: LdWrapConditional(
-              condition: widget.addContainer,
-              builder: (context, child) => LdContainer(
-                padding: EdgeInsets.zero,
-                child: child,
+              condition: widget.blurOnScroll,
+              builder: (context, child) => ClipRect(
+                child: ImplicitBlur(
+                  sigma: scrolledUnder ? 10 : 0,
+                  child: child,
+                  duration: const Duration(milliseconds: 300),
+                ),
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      if (leading != null) ...[
-                        Flexible(child: leading),
-                      ],
-                      Expanded(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 500),
+                color: backgroundColor.withAlpha(widget.blurOnScroll && scrolledUnder ? 150 : 255),
+                child: SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: switch (theme.themeSize) {
+                      (LdThemeSize.s) => LdTheme.of(context).pad(size: LdSize.xs),
+                      (LdThemeSize.m || LdThemeSize.l) => LdTheme.of(context).pad(size: LdSize.m),
+                    },
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: switch (theme.themeSize) {
+                          (LdThemeSize.s) => 34,
+                          (LdThemeSize.m || LdThemeSize.l) => 56,
+                        },
+                      ),
+                      child: LdWrapConditional(
+                        condition: widget.addContainer,
+                        builder: (context, child) => LdContainer(
+                          padding: EdgeInsets.zero,
+                          child: child,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Expanded(
-                              child: Align(
-                                alignment: isCenterTitle ? Alignment.center : Alignment.centerLeft,
-                                child: DefaultTextStyle(
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: ldBuildTextStyle(
-                                    theme,
-                                    LdTextType.headline,
-                                    LdSize.s,
-                                    lineHeight: 1,
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                LdReveal(
+                                  initialRevealed: _showWindowControls,
+                                  revealed: _showWindowControls,
+                                  child: Row(
+                                    children: [
+                                      LdButtonGhost(
+                                        size: LdSize.xs,
+                                        color: LdTheme.of(context).error,
+                                        child: const Icon(Icons.circle),
+                                        onPressed: () {},
+                                      ),
+                                      LdButtonGhost(
+                                        size: LdSize.xs,
+                                        color: LdTheme.of(context).warning,
+                                        child: const Icon(Icons.circle),
+                                        onPressed: () {},
+                                      ),
+                                      LdButtonGhost(
+                                        size: LdSize.xs,
+                                        color: LdTheme.of(context).success,
+                                        child: const Icon(Icons.circle),
+                                        onPressed: () {},
+                                      ),
+                                    ],
                                   ),
-                                  child: widget.title ?? const SizedBox(),
                                 ),
-                              ),
-                            ),
-                            if (widget.trailing != null) ...[
-                              Flexible(child: widget.trailing!),
+                                if (_showOpenDrawerButton) ...[
+                                  const _OpenDrawerButton(),
+                                ],
+                                if (leading != null) ...[
+                                  leading,
+                                ],
+                                Expanded(
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Flexible(
+                                        child: DefaultTextStyle(
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: headerStyle,
+                                          child: widget.title ?? const SizedBox(),
+                                        ),
+                                      ),
+                                      if (widget.trailing != null) ...[
+                                        Flexible(child: widget.trailing!),
+                                      ],
+                                    ],
+                                  ).spaceM(),
+                                ),
+                                if (_showCloseDrawerButton) ...[
+                                  const _CloseDrawerButton(),
+                                ],
+                              ],
+                            ).spaceM(),
+                            if (widget.bottom != null) ...[
+                              widget.bottom!,
                             ],
                           ],
-                        ).spaceM(),
+                        ),
                       ),
-                    ],
-                  ).spaceM(),
-                  if (widget.bottom != null) ...[
-                    widget.bottom!,
-                  ],
-                ],
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-      ),
-    );
+          );
+        });
 
     return Column(
       mainAxisSize: MainAxisSize.min,
+      key: _key,
       children: [
         appBar,
         const LdDivider(height: 1),
@@ -303,10 +395,6 @@ class LdAppBarActions extends StatelessWidget {
   const LdAppBarActions({super.key, required this.actions});
 
   Widget _buildAction(BuildContext context, LdLabeledAction action, bool bigToolbar, bool inMenu) {
-    if (inMenu) {
-      print("inMenu");
-      print(action.label(context));
-    }
     switch (action.submitType) {
       case LdLabeledActionSubmitType.none:
         return _ActionTriggerButton(
@@ -407,6 +495,41 @@ class LdBottomBar extends StatelessWidget {
         minimum: LdTheme.of(context).pad(size: LdSize.s),
         child: child,
       ),
+    );
+  }
+}
+
+class _OpenDrawerButton extends StatelessWidget {
+  const _OpenDrawerButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final layoutState = context.watch<LdScaffoldLayoutState?>();
+
+    final icon = layoutState?.isSideBySide ?? false ? LucideIcons.panelLeftOpen : LucideIcons.menu;
+    final scaffold = context.findAncestorStateOfType<LdScaffoldState>();
+    return LdButtonGhost(
+      size: LdSize.s,
+      child: Icon(icon),
+      onPressed: () => scaffold?.openDrawer(),
+    );
+  }
+}
+
+class _CloseDrawerButton extends StatelessWidget {
+  const _CloseDrawerButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final layoutState = context.watch<LdScaffoldLayoutState?>();
+
+    final icon = layoutState?.isSideBySide ?? false ? LucideIcons.panelLeftClose : LucideIcons.chevronRight;
+    return LdButtonGhost(
+      size: LdSize.s,
+      child: Icon(icon),
+      onPressed: () {
+        Navigator.of(context).maybePop();
+      },
     );
   }
 }

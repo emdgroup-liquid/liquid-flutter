@@ -1,6 +1,4 @@
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:liquid/window/drawer.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -19,61 +17,26 @@ class AppScaffold extends StatefulWidget {
 class _AppScaffoldState extends State<AppScaffold> {
   @override
   Widget build(BuildContext context) {
-    var themeService = LdTheme.of(context, listen: true);
-
-    final drawerSize = switch (themeService.themeSize) {
-      LdThemeSize.s => 300.0,
-      LdThemeSize.m => 350.0,
-      LdThemeSize.l => 400.0,
-    };
-
     return ResponsiveBuilder(
       builder: (context, size) {
-        final split = size.screenSize.width > 900;
-        return LdWindowFrame(
-          title: const Text("Liquid Flutter"),
-          frameBuilder: (context, child) => GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onPanStart: (details) {
-              appWindow.startDragging();
-            },
-            onDoubleTap: () => appWindow.maximizeOrRestore(),
-            child: child,
-          ),
-          child: LdPortal(
-            child: LdScaffold(
-              //drawer: !split ? const MainNavigationDrawer() : null,
-
-              appBar: size.isMobile ? LdAppBar(title: widget.title) : null,
-              body: LdNotificationPortal(
-                child: (split)
-                    ? Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Positioned.fill(left: drawerSize, child: widget.child)
-                              .animate(delay: 200.ms)
-                              .fadeIn()
-                              .moveX(
-                                  begin: 100,
-                                  curve: Curves.easeOutCubic,
-                                  duration: 500.ms),
-                          Align(
-                            alignment: Alignment.topLeft,
-                            child: SizedBox(
-                              width: drawerSize,
-                              child: const MainNavigationDrawer(
-                                persistent: true,
-                              ),
-                            ).animate().fadeIn().moveX(
-                                  begin: -100,
-                                  curve: Curves.easeOutCubic,
-                                  duration: 500.ms,
-                                ),
-                          ),
-                        ],
-                      )
-                    : widget.child,
+        return LdPortal(
+          child: LdScaffold(
+            drawer: MainNavigationDrawer(),
+            autoLayoutBody: false,
+            appBar: LdAppBar(
+              blurOnScroll: true,
+              leading: Container(
+                height: 24,
+                decoration: BoxDecoration(borderRadius: LdTheme.of(context).radius(LdSize.m)),
+                clipBehavior: Clip.hardEdge,
+                child: Image.asset(
+                  "liquid_flutter_icon.jpg",
+                ),
               ),
+              title: widget.title,
+            ),
+            body: LdNotificationPortal(
+              child: widget.child,
             ),
           ),
         );

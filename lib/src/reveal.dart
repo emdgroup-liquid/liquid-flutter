@@ -47,7 +47,7 @@ class LdReveal extends StatelessWidget {
       transformYOffset: transformYOffset,
       mass: 2,
       bufferSprings: 5,
-      springConstant: 25,
+      springConstant: 20,
       dampingCoefficient: 15,
       initialRevealed: initialRevealed,
     );

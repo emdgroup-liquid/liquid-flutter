@@ -14,28 +14,24 @@ class LdMasterDetailAppBarActions<T extends Identifiable<IdType>, IdType, Groupi
   Widget build(BuildContext context) {
     final route = LdMasterDetailRoute.of<T, IdType, GroupingCriterion>(context);
 
-    final actions = route.actions.where((e) => e.visibility.any((v) => v.location == location)).toList();
+    return StreamBuilder(
+      stream: route.repository.updatedItems,
+      builder: (context, _) {
+        final actions = route.actions.where((e) => e.visibility.any((v) => v.location == location)).toList();
 
-    final hasActions = actions.any((e) => e.isVisible(context, location: location));
+        final hasActions = actions.any((e) => e.isVisible(context, location: location));
 
-    return LayoutBuilder(builder: (context, constraints) {
-      return LdReveal.quick(
-        revealed: hasActions,
-        child: Padding(
-          padding: EdgeInsets.only(
-            top: hasActions &&
-                    (location == LdMasterDetailActionLocation.masterSecondary ||
-                        location == LdMasterDetailActionLocation.detailSecondary)
-                ? 8
-                : 0,
-          ),
-          child: Provider.value(
-            value: location,
-            child: LdAppBarActions(actions: actions),
-          ),
-        ),
-      );
-    });
+        return LayoutBuilder(builder: (context, constraints) {
+          return LdReveal.quick(
+            revealed: hasActions,
+            child: Provider.value(
+              value: location,
+              child: LdAppBarActions(actions: actions),
+            ),
+          );
+        });
+      },
+    );
   }
 }
 

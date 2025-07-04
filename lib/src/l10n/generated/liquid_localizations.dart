@@ -292,6 +292,12 @@ abstract class LiquidLocalizations {
   /// In en, this message translates to:
   /// **'Active Filters'**
   String get activeFilters;
+
+  /// No description provided for @sort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get sort;
 }
 
 class _LiquidLocalizationsDelegate extends LocalizationsDelegate<LiquidLocalizations> {

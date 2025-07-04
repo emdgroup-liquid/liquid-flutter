@@ -193,6 +193,16 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     _updated(_items[index]);
   }
 
+  void _triggerFetch() async {
+    final newItems = await _fetchItems();
+    if (newItems.isNotEmpty) {
+      notifyListeners();
+    }
+    if (_offsetQueue.isNotEmpty) {
+      _triggerFetch();
+    }
+  }
+
   // Fetch items starting at a specific offset
   Future<void> fetchItemsAtOffset(int offset) async {
     if (offset < 0) offset = 0;
@@ -206,12 +216,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
       }
     }
 
-    return _debounceAndSafeExecute(() async {
-      final newItems = await _fetchItems();
-      if (newItems.isNotEmpty) {
-        notifyListeners();
-      }
-    });
+    return _triggerFetch();
   }
 
   /// Fetch items at a specific offset, normalized to the nearest page size

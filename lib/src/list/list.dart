@@ -340,9 +340,13 @@ class _LdListState<T extends Identifiable<IdType>, IdType, GroupingCriterion>
 
   List<Widget> _buildSlivers(BuildContext context) {
     return [
-      if (widget.header != null) SliverToBoxAdapter(child: widget.header!),
-      _buildListItems(),
-      if (widget.footer != null) SliverToBoxAdapter(child: widget.footer!),
+      if (widget.header != null) SliverSafeArea(sliver: SliverToBoxAdapter(child: widget.header!)),
+      SliverSafeArea(
+        top: widget.header == null,
+        bottom: widget.footer == null,
+        sliver: _buildListItems(),
+      ),
+      if (widget.footer != null) SliverSafeArea(sliver: SliverToBoxAdapter(child: widget.footer!)),
     ];
   }
 

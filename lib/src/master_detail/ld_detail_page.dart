@@ -34,33 +34,40 @@ class LdDetailPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
           return Provider.value(
             value: LdMasterDetailSelection<T, IdType, GroupingCriterion>(items: selection),
             child: LdScaffold(
-              appBar: appBarBuilder?.call(context, selection) ??
-                  LdAppBar(
-                    implyLeading: false,
-                    leading: isSplit
-                        ? LdButtonGhost(
-                            child: const Icon(LucideIcons.chevronLeft),
-                            onPressed: () => Navigator.of(context).maybePop(),
-                          )
-                        : null,
-                    title: Text(
-                      selection.length > 1 ? route.repository.pluralItemTitle : route.repository.singularItemTitle,
-                    ),
-                    trailing: LdMasterDetailAppBarActions<T, IdType, GroupingCriterion>(
-                      location: LdMasterDetailActionLocation.detailAppBar,
-                    ),
-                    bottom: !isSplit
-                        ? LdMasterDetailAppBarActions<T, IdType, GroupingCriterion>(
-                            location: LdMasterDetailActionLocation.detailSecondary,
-                          )
-                        : null,
-                  ),
+              appBar: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  appBarBuilder?.call(context, selection) ??
+                      LdAppBar(
+                        implyLeading: false,
+                        leading: isSplit
+                            ? LdButtonGhost(
+                                child: const Icon(LucideIcons.chevronLeft),
+                                onPressed: () => Navigator.of(context).maybePop(),
+                              )
+                            : null,
+                        title: Text(
+                          selection.length > 1 ? route.repository.pluralItemTitle : route.repository.singularItemTitle,
+                        ),
+                        trailing: LdMasterDetailAppBarActions<T, IdType, GroupingCriterion>(
+                          location: LdMasterDetailActionLocation.detailAppBar,
+                        ),
+                      ),
+                  if (!isSplit) ...[
+                    LdMasterDetailAppBarActions<T, IdType, GroupingCriterion>(
+                      location: LdMasterDetailActionLocation.detailSecondary,
+                    ).padM(),
+                  ],
+                ],
+              ),
               bottomNavigationBar: isSplit
                   ? LdMasterDetailBottomBarActions<T, IdType, GroupingCriterion>(
                       location: LdMasterDetailActionLocation.detailSecondary,
                     )
                   : null,
-              body: LdDetailPageContent(route: route, selection: selection),
+              body: SafeArea(
+                child: LdDetailPageContent(route: route, selection: selection),
+              ),
             ),
           );
         });

@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/master_detail/filter/ld_filter_any_of.dart';
 import 'package:liquid_flutter/src/master_detail/filter/ld_filter_any_of_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:liquid_flutter/src/master_detail/filter/ld_filter_one_of.dart';
 import 'package:liquid_flutter/src/master_detail/filter/ld_filter_one_of_widget.dart';
-import 'package:liquid_flutter/src/master_detail/filter/ld_filter_range.dart';
 
 LdModal ldFilterModal<T extends Identifiable<IdType>, IdType, GroupBy>(
     BuildContext context, LdMasterDetailRoute<T, IdType, GroupBy> route) {
@@ -60,6 +57,24 @@ class LdFilterModal<T extends Identifiable<IdType>, IdType, GroupBy> extends Sta
                 onFilterChanged: (filter) {
                   repository.updateFilter(filter);
                 })),
+            LdMute(child: LdText(LiquidLocalizations.of(context).sort)),
+            StreamBuilder(
+                stream: repository.sortStream,
+                builder: (context, asyncSnapshot) {
+                  return Wrap(
+                    children: repository.sortOptions
+                        .map(
+                          (e) => LdToggle(
+                            checked: e.isOn,
+                            label: e.label(context),
+                            onChanged: (checked) {
+                              repository.updateSortOption(e.copyWith(isOn: checked));
+                            },
+                          ),
+                        )
+                        .toList(),
+                  );
+                }),
           ]);
         });
   }

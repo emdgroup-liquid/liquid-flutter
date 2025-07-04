@@ -14,7 +14,9 @@ class LdMasterDetailSelection<T extends Identifiable<IdType>, IdType, GroupingCr
   }
 
   static LdMasterDetailSelection<T, IdType, GroupingCriterion>
-      of<T extends Identifiable<IdType>, IdType, GroupingCriterion>(BuildContext context) {
-    return context.read<LdMasterDetailSelection<T, IdType, GroupingCriterion>>();
+      of<T extends Identifiable<IdType>, IdType, GroupingCriterion>(BuildContext context, {bool listen = true}) {
+    return listen
+        ? context.watch<LdMasterDetailSelection<T, IdType, GroupingCriterion>>()
+        : context.read<LdMasterDetailSelection<T, IdType, GroupingCriterion>>();
   }
 }

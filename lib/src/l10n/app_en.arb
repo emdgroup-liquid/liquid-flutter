@@ -31,5 +31,6 @@
   "select": "Select",
   "filter": "Filter",
   "apply": "Apply",
-  "activeFilters": "Active Filters"
+  "activeFilters": "Active Filters",
+  "sort": "Sort"
 }
