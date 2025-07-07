@@ -106,6 +106,15 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     applyOptimisticFilterAndSorting();
   }
 
+  Future<void> setActiveSortOption(String name) async {
+    final newOptions = _sortOptions.map((e) => e.copyWith(isOn: e.name == name)).toList();
+
+    _sortOptions.clear();
+    _sortOptions.addAll(newOptions);
+    _sortStreamController.add(_sortOptions);
+    applyOptimisticFilterAndSorting();
+  }
+
   Future<void> applyOptimisticFilterAndSorting() async {
     final filters = _filters.where((e) => e.isOn).toList();
     final sortOptions = _sortOptions.where((e) => e.isOn).toList();

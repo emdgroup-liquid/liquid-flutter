@@ -42,6 +42,10 @@ const Map<Type, Map<Type, _LdSizeItem>> spacingMatrix = {
     LdDrawerItemSection: _LdSizeItem(LdSize.xs, 1),
     LdSectionHeader: _LdSizeItem(LdSize.l, 1)
   },
+  LdListItem: {
+    _Default: _LdSizeItem(LdSize.m, 1),
+    LdListItem: _LdSizeItem(LdSize.s, 1),
+  },
 };
 
 class LdAutoSpace extends StatelessWidget {

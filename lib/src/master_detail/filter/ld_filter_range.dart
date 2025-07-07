@@ -74,26 +74,26 @@ class LdFilterRangeWidget<T extends Identifiable<IdType>, IdType, GroupBy> exten
 
   @override
   Widget build(BuildContext context) {
-    return LdCard(
-      child: LdAutoSpace(
-        children: [
-          Row(
-            children: [
-              Expanded(child: LdTextL(filter.label(context))),
-              LdButtonVague(
-                child: const Icon(LucideIcons.x),
-                size: LdSize.s,
-                onPressed: () {
-                  filter.isOn = false;
-                  onFilterChanged(filter);
-                },
-              ),
-            ],
-          ),
-          RangeSlider(
+    return LdAutoSpace(
+      children: [
+        Row(
+          children: [
+            Expanded(child: LdTextL(filter.label(context))),
+            LdButtonVague(
+              child: const Icon(LucideIcons.x),
+              size: LdSize.s,
+              onPressed: () {
+                filter.isOn = false;
+                onFilterChanged(filter);
+              },
+            ),
+          ],
+        ),
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(showValueIndicator: ShowValueIndicator.never),
+          child: RangeSlider(
               activeColor: LdTheme.of(context).primaryColor,
               padding: EdgeInsets.zero,
-              labels: RangeLabels(filter.range.start.toString(), filter.range.end.toString()),
               min: filter.min,
               max: filter.max,
               divisions: (filter.max - filter.min) ~/ filter.step,
@@ -101,9 +101,9 @@ class LdFilterRangeWidget<T extends Identifiable<IdType>, IdType, GroupBy> exten
               onChanged: (values) {
                 filter.range = values;
                 onFilterChanged(filter);
-              })
-        ],
-      ),
-    );
+              }),
+        )
+      ],
+    ).padM();
   }
 }

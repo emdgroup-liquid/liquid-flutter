@@ -221,6 +221,7 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
             child: Column(
               children: [
                 TapRegion(
+                  consumeOutsideTaps: isOpen,
                   onTapOutside: (details) {
                     setState(() {
                       isOpen = false;
@@ -276,6 +277,7 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
                             child: ListView.separated(
                               shrinkWrap: true,
                               controller: _controller,
+                              padding: EdgeInsets.zero,
                               itemCount: widget.items.length,
                               separatorBuilder: (context, index) => const LdDivider(height: 1),
                               itemBuilder: (context, index) {

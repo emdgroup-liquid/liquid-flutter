@@ -136,37 +136,39 @@ final movieDemo = LdMasterDetailRoute<_Movie, int, bool>(
         return CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
-              child: LdCard(
-                padding: EdgeInsets.zero,
-                child: LdList(
-                  shrinkWrap: true,
-                  separatorBuilder: (context) => LdDivider(),
-                  header: LdAutoBackground(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: LdTextL("Movie"),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: LdTextL("Genre"),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: LdTextL("Rating"),
-                        ),
-                      ],
-                    ).spaceM().padL(),
+              child: SafeArea(
+                child: LdCard(
+                  padding: EdgeInsets.zero,
+                  child: LdList(
+                    shrinkWrap: true,
+                    separatorBuilder: (context) => LdDivider(),
+                    header: LdAutoBackground(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: LdTextL("Movie"),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: LdTextL("Genre"),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: LdTextL("Rating"),
+                          ),
+                        ],
+                      ).spaceM().padL(),
+                    ),
+                    paginator: route.repository,
+                    itemBuilder: itemBuilder,
+                    scrollController: scrollController,
+                    assumedItemHeight: 50,
                   ),
-                  paginator: route.repository,
-                  itemBuilder: itemBuilder,
-                  scrollController: scrollController,
-                  assumedItemHeight: 50,
-                ),
-              ).padL(),
+                ).padL(),
+              ),
             )
           ],
         );
@@ -175,53 +177,34 @@ final movieDemo = LdMasterDetailRoute<_Movie, int, bool>(
       initialSelectedItems: route.state.selectedItems,
       multiSelect: true,
       onSelectionChange: (selected) => onSelectionChange(selected),
-      itemBuilder: (context, item, index, config) =>
-          LdMasterDetailSingleShortcuts(
-        item: item.value!.id,
-        actions: route.actions,
-        child: LdMasterDetailContextMenu<_Movie, int, bool>(
-          item: item,
-          child: LdListItemAnimation(
-            state: item.state,
-            child: LdListItem.fromConfig(
-              config.copyWith(
-                tableRowMode: true,
-                title: Text(
-                  item.value!.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+      itemBuilder: (context, item, index, config) {
+        return LdMasterDetailSingleShortcuts(
+          item: item.value!.id,
+          actions: route.actions,
+          child: LdMasterDetailContextMenu<_Movie, int, bool>(
+            item: item,
+            child: LdListItemAnimation(
+              state: item.state,
+              child: LdListItem.fromConfig(
+                config.copyWith(
+                  tableRowMode: true,
+                  isOdd: index.isOdd,
+                  title: Text(
+                    item.value!.title,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(item.value!.genre),
+                  subContent: Text("Rating: ${item.value!.rating}/10"),
                 ),
-                subtitle: Text(item.value!.genre),
-                subContent: Text("Rating: ${item.value!.rating}/10"),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   },
   actions: [
-    LdMasterDetailAction(
-        visibility: {
-          LdMasterDetailActionVisibility(
-            location: LdMasterDetailActionLocation.masterAppBar,
-            minSelectionCount: 0,
-            maxSelectionCount: null,
-          ),
-        },
-        submitType: LdLabeledActionSubmitType.none,
-        buildLabel: (context, selection) => "Filter",
-        buildIcon: (context, selection) =>
-            LdMasterDetailRoute.of<_Movie, int, bool>(context)
-                    .repository
-                    .filters
-                    .where((e) => e.isOn)
-                    .isEmpty
-                ? const Icon(LucideIcons.listFilterPlus)
-                : const Icon(LucideIcons.listFilter),
-        action: (context, selection) async {
-          final route = LdMasterDetailRoute.of<_Movie, int, bool>(context);
-          context.push("${route.path}/filters");
-        }),
+    toggleFilters<_Movie, int, bool>(),
     LdMasterDetailAction(
       visibility: {
         LdMasterDetailActionVisibility(

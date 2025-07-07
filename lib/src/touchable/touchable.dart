@@ -11,14 +11,15 @@ LdColorBundle neutralGhostColor(
   bool disabled,
   bool active,
   bool focus,
-  bool hovering,
-) {
+  bool hovering, {
+  bool isOdd = false,
+}) {
   final palette = theme.palette;
   final neutral = theme.palette.neutral;
 
   if (disabled) {
     return LdColorBundle(
-      surface: theme.neutralShade(1).withAlpha(23),
+      surface: theme.neutralShade(isOdd ? 2 : 1).withAlpha(23),
       text: theme.neutralShade(5),
       border: Colors.transparent,
       icon: palette.background.withAlpha(disabledAlpha),
@@ -26,7 +27,7 @@ LdColorBundle neutralGhostColor(
   }
   if (focus) {
     return LdColorBundle(
-      surface: theme.neutralShade(3),
+      surface: theme.neutralShade(isOdd ? 4 : 3),
       text: palette.neutral.fromCenter(5, theme.isDark),
       border: Colors.transparent,
       icon: palette.neutral.focus(theme.isDark),
@@ -34,7 +35,7 @@ LdColorBundle neutralGhostColor(
   }
   if (active) {
     return LdColorBundle(
-      surface: neutral.relative(theme.isDark, 2),
+      surface: neutral.relative(theme.isDark, isOdd ? 3 : 2),
       text: neutral.contrastingText(neutral.relative(theme.isDark, 2)),
       border: Colors.transparent,
       icon: neutral.contrastingText(neutral.relative(theme.isDark, 2)),
@@ -43,7 +44,7 @@ LdColorBundle neutralGhostColor(
 
   if (hovering) {
     return LdColorBundle(
-      surface: neutral.relative(theme.isDark, 2),
+      surface: neutral.relative(theme.isDark, isOdd ? 3 : 2),
       text: neutral.contrastingText(neutral.relative(theme.isDark, 2)),
       border: Colors.transparent,
       icon: neutral.contrastingText(neutral.relative(theme.isDark, 2)),
@@ -51,7 +52,7 @@ LdColorBundle neutralGhostColor(
   }
 
   return LdColorBundle(
-    surface: theme.neutralShade(1).withAlpha(0),
+    surface: isOdd ? theme.neutralShade(2).withAlpha(100) : theme.neutralShade(1).withAlpha(0),
     text: theme.isDark ? theme.text : palette.primary.center(theme.isDark),
     border: Colors.transparent,
     icon: palette.primary.center(theme.isDark),
@@ -200,6 +201,7 @@ class LdTouchableSurface extends StatefulWidget {
   final bool active;
 
   final bool autoFocus;
+  final bool isOdd;
 
   final LdTouchableSurfaceMode mode;
 
@@ -216,6 +218,7 @@ class LdTouchableSurface extends StatefulWidget {
     this.mode = LdTouchableSurfaceMode.neutralGhost,
     this.disabled = false,
     this.autoFocus = false,
+    this.isOdd = false,
   });
 
   @override
@@ -256,6 +259,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
         active,
         _hasFocus,
         _hovering,
+        isOdd: widget.isOdd,
       );
     }
 

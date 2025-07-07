@@ -83,6 +83,30 @@ extension LsPaddings on Widget {
   Widget padBal(LdSize size) {
     return _LdPadding(size: size, child: this, balanced: true);
   }
+
+  Widget padVertical({LdSize size = LdSize.m}) {
+    return _LdPadding(size: size, child: this, sides: const {_Side.top, _Side.bottom});
+  }
+
+  Widget padHorizontal({LdSize size = LdSize.m}) {
+    return _LdPadding(size: size, child: this, sides: const {_Side.left, _Side.right});
+  }
+
+  Widget insetLeft({LdSize size = LdSize.m}) {
+    return _LdPadding(size: size, child: this, sides: const {_Side.left});
+  }
+
+  Widget insetRight({LdSize size = LdSize.m}) {
+    return _LdPadding(size: size, child: this, sides: const {_Side.right});
+  }
+
+  Widget insetTop({LdSize size = LdSize.m}) {
+    return _LdPadding(size: size, child: this, sides: const {_Side.top});
+  }
+
+  Widget insetBottom({LdSize size = LdSize.m}) {
+    return _LdPadding(size: size, child: this, sides: const {_Side.bottom});
+  }
 }
 
 extension RowSpacing on Row {
@@ -267,24 +291,41 @@ extension ColumnSpacing on Column {
   }
 }
 
+enum _Side {
+  left,
+  right,
+  top,
+  bottom,
+}
+
 class _LdPadding extends StatelessWidget {
   final LdSize size;
   final Widget child;
+
+  final Set<_Side>? sides;
+
   final bool balanced;
 
-  const _LdPadding(
-      {Key? key,
-      required this.size,
-      required this.child,
-      this.balanced = false})
+  const _LdPadding({Key? key, required this.size, required this.child, this.balanced = false, this.sides})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
 
+    var padding = theme.pad(size: size);
+
+    if (sides != null) {
+      padding = EdgeInsets.only(
+        left: sides!.contains(_Side.left) ? padding.left : 0,
+        right: sides!.contains(_Side.right) ? padding.right : 0,
+        top: sides!.contains(_Side.top) ? padding.top : 0,
+        bottom: sides!.contains(_Side.bottom) ? padding.bottom : 0,
+      );
+    }
+
     return Padding(
-      padding: theme.pad(size: size),
+      padding: padding,
       child: child,
     );
   }

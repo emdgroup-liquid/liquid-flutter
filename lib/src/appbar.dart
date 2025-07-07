@@ -8,6 +8,16 @@ import 'package:liquid_flutter/src/notifications/implicit_blur.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:overflow_view/overflow_view.dart';
 import 'package:provider/provider.dart';
+import 'package:provider/single_child_widget.dart';
+
+class LdWindowCallbacks {
+  void Function()? onClose;
+  void Function()? onMinimize;
+  void Function()? onMaximize;
+  void Function()? onMove;
+
+  LdWindowCallbacks({this.onClose, this.onMinimize, this.onMaximize, this.onMove});
+}
 
 class LdAppBar extends StatefulWidget {
   final Widget? title;
@@ -23,6 +33,8 @@ class LdAppBar extends StatefulWidget {
   final Widget? bottom;
 
   final double? height;
+
+  static LdWindowCallbacks? callbacks;
 
   const LdAppBar({
     super.key,
@@ -107,6 +119,12 @@ class _LdAppBarState extends State<LdAppBar> {
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
+        if (LdAppBar.callbacks == null) {
+          debugPrint(
+            "Warning: You have not set the window callbacks. \n"
+            "Please configure LdAppBar.callbacks in your main function.",
+          );
+        }
         return _isDrawerOpen && _layoutState?.slot == LdScaffoldSlot.drawer ||
             !_isDrawerOpen && _layoutState?.slot == LdScaffoldSlot.appBar;
       default:
@@ -205,13 +223,13 @@ class _LdAppBarState extends State<LdAppBar> {
                   child: Padding(
                     padding: switch (theme.themeSize) {
                       (LdThemeSize.s) => LdTheme.of(context).pad(size: LdSize.xs),
-                      (LdThemeSize.m || LdThemeSize.l) => LdTheme.of(context).pad(size: LdSize.m),
+                      (LdThemeSize.m || LdThemeSize.l) => LdTheme.of(context).pad(size: LdSize.xs),
                     },
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
                         minHeight: switch (theme.themeSize) {
                           (LdThemeSize.s) => 34,
-                          (LdThemeSize.m || LdThemeSize.l) => 56,
+                          (LdThemeSize.m || LdThemeSize.l) => 34,
                         },
                       ),
                       child: LdWrapConditional(
@@ -236,19 +254,25 @@ class _LdAppBarState extends State<LdAppBar> {
                                         size: LdSize.xs,
                                         color: LdTheme.of(context).error,
                                         child: const Icon(Icons.circle),
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          LdAppBar.callbacks?.onClose?.call();
+                                        },
                                       ),
                                       LdButtonGhost(
                                         size: LdSize.xs,
                                         color: LdTheme.of(context).warning,
                                         child: const Icon(Icons.circle),
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          LdAppBar.callbacks?.onMinimize?.call();
+                                        },
                                       ),
                                       LdButtonGhost(
                                         size: LdSize.xs,
                                         color: LdTheme.of(context).success,
                                         child: const Icon(Icons.circle),
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          LdAppBar.callbacks?.onMaximize?.call();
+                                        },
                                       ),
                                     ],
                                   ),
@@ -301,7 +325,12 @@ class _LdAppBarState extends State<LdAppBar> {
       mainAxisSize: MainAxisSize.min,
       key: _key,
       children: [
-        appBar,
+        GestureDetector(
+          onPanStart: (details) {
+            LdAppBar.callbacks?.onMove?.call();
+          },
+          child: appBar,
+        ),
         const LdDivider(height: 1),
       ],
     );
@@ -312,6 +341,12 @@ mixin LdLabeledAction {
   String label(BuildContext context);
   Widget? icon(BuildContext context);
   String? loadingText(BuildContext context);
+
+  Widget? contextMenu(BuildContext context);
+
+  List<SingleChildWidget>? menuProviders(BuildContext context) {
+    return null;
+  }
 
   bool isVisible(BuildContext context) {
     return true;
@@ -326,7 +361,7 @@ mixin LdLabeledAction {
   LdLabeledActionSubmitType get submitType => LdLabeledActionSubmitType.notification;
 }
 
-enum LdLabeledActionSubmitType { none, notification, dialog }
+enum LdLabeledActionSubmitType { none, notification, dialog, contextMenu }
 
 class _ActionTriggerButton extends StatelessWidget {
   final LdLabeledAction action;
@@ -396,6 +431,19 @@ class LdAppBarActions extends StatelessWidget {
 
   Widget _buildAction(BuildContext context, LdLabeledAction action, bool bigToolbar, bool inMenu) {
     switch (action.submitType) {
+      case LdLabeledActionSubmitType.contextMenu:
+        return LdContextMenu(
+          menuProviders: action.menuProviders,
+          builder: (context, isOpen, open, child) => _ActionTriggerButton(
+            action: action,
+            bigToolbar: bigToolbar,
+            loadingText: action.loadingText(context),
+            inMenu: inMenu,
+            onPressed: () => open(),
+            disabled: false,
+          ),
+          menuBuilder: (context, close) => action.contextMenu.call(context) ?? const SizedBox(),
+        );
       case LdLabeledActionSubmitType.none:
         return _ActionTriggerButton(
           action: action,

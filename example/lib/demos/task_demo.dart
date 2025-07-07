@@ -11,7 +11,7 @@ class _Task with Identifiable<int> {
   final int id;
 
   final String task;
-  final String due;
+  final DateTime due;
   final bool done;
   final DateTime lastUpdate;
   _Task(this.id, this.task, this.due, this.done, this.lastUpdate);
@@ -19,7 +19,7 @@ class _Task with Identifiable<int> {
   _Task copyWith({
     int? id,
     String? task,
-    String? due,
+    DateTime? due,
     bool? done,
     DateTime? lastUpdate,
   }) =>
@@ -33,86 +33,305 @@ class _Task with Identifiable<int> {
 }
 
 var testData = [
-  _Task(1, "Build spaceship 🚀 ", "any time", false, DateTime.now()),
-  _Task(2, "Build cool Flutter app", "any time", false, DateTime.now()),
-  _Task(3, "Prepare for team meeting", "tomorrow", false, DateTime.now()),
-  _Task(4, "Buy groceries", "today", true, DateTime.now()),
-  _Task(5, "Learn quantum computing", "next year", false, DateTime.now()),
-  _Task(6, "Fix critical bug in production", "urgent", false, DateTime.now()),
-  _Task(7, "Schedule dentist appointment", "next week", false, DateTime.now()),
-  _Task(8, "Write documentation", "this week", true, DateTime.now()),
-  _Task(9, "Review pull requests", "today", false, DateTime.now()),
-  _Task(10, "Update dependencies", "this week", false, DateTime.now()),
-  _Task(11, "Plan team offsite", "next month", false, DateTime.now()),
-  _Task(12, "Backup database", "daily", true, DateTime.now()),
-  _Task(13, "Read a new Flutter article", "this week", false, DateTime.now()),
-  _Task(14, "Refactor old codebase", "next month", false, DateTime.now()),
-  _Task(15, "Organize workspace", "today", false, DateTime.now()),
-  _Task(16, "Update project roadmap", "tomorrow", false, DateTime.now()),
-  _Task(17, "Test new features", "this week", false, DateTime.now()),
-  _Task(18, "Clean up email inbox", "today", false, DateTime.now()),
-  _Task(19, "Prepare sprint demo", "friday", false, DateTime.now()),
-  _Task(20, "Sync with design team", "next week", false, DateTime.now()),
-  _Task(21, "Walk the dog", "tonight", false, DateTime.now()),
-  _Task(22, "Call mom", "sunday", false, DateTime.now()),
-  _Task(23, "Finish reading book", "this month", false, DateTime.now()),
-  _Task(24, "Practice piano", "tomorrow", false, DateTime.now()),
-  _Task(25, "Water the plants", "today", false, DateTime.now()),
-  _Task(26, "Update LinkedIn profile", "this week", false, DateTime.now()),
-  _Task(27, "Book flight tickets", "next month", false, DateTime.now()),
-  _Task(28, "Renew gym membership", "this week", false, DateTime.now()),
-  _Task(29, "Submit expense report", "friday", false, DateTime.now()),
-  _Task(30, "Brainstorm blog ideas", "this weekend", false, DateTime.now()),
-  _Task(31, "Organize digital photos", "this weekend", false, DateTime.now()),
-  _Task(32, "Update resume", "next week", false, DateTime.now()),
-  _Task(33, "Research new technologies", "this month", false, DateTime.now()),
-  _Task(34, "Plan birthday party", "next month", false, DateTime.now()),
-  _Task(35, "Fix broken chair", "this week", false, DateTime.now()),
-  _Task(36, "Learn Spanish basics", "next year", false, DateTime.now()),
-  _Task(37, "Create workout routine", "tomorrow", false, DateTime.now()),
-  _Task(38, "Backup important files", "today", true, DateTime.now()),
-  _Task(39, "Schedule car maintenance", "next week", false, DateTime.now()),
-  _Task(40, "Write thank you notes", "this weekend", false, DateTime.now()),
-  _Task(41, "Update phone apps", "today", false, DateTime.now()),
-  _Task(42, "Plan summer vacation", "next month", false, DateTime.now()),
-  _Task(43, "Fix leaky faucet", "this week", false, DateTime.now()),
-  _Task(44, "Learn to cook pasta", "next week", false, DateTime.now()),
-  _Task(45, "Organize closet", "this weekend", false, DateTime.now()),
-  _Task(46, "Update insurance policy", "this month", false, DateTime.now()),
-  _Task(47, "Practice meditation", "daily", true, DateTime.now()),
-  _Task(48, "Fix garden fence", "next weekend", false, DateTime.now()),
-  _Task(49, "Learn guitar chords", "next month", false, DateTime.now()),
-  _Task(50, "Update emergency contacts", "this week", false, DateTime.now()),
-  _Task(51, "Plan family dinner", "next week", false, DateTime.now()),
-  _Task(52, "Fix computer issues", "urgent", false, DateTime.now()),
-  _Task(53, "Learn to swim", "next summer", false, DateTime.now()),
-  _Task(54, "Organize garage", "this month", false, DateTime.now()),
-  _Task(55, "Update will", "next year", false, DateTime.now()),
-  _Task(56, "Fix bicycle tire", "this weekend", false, DateTime.now()),
-  _Task(57, "Learn calligraphy", "next month", false, DateTime.now()),
-  _Task(58, "Update pet vaccinations", "next week", false, DateTime.now()),
-  _Task(59, "Plan retirement", "next year", false, DateTime.now()),
-  _Task(60, "Fix kitchen cabinet", "this week", false, DateTime.now()),
-  _Task(61, "Learn to dance", "next month", false, DateTime.now()),
-  _Task(62, "Organize bookshelf", "this weekend", false, DateTime.now()),
-  _Task(63, "Update passport", "next year", false, DateTime.now()),
-  _Task(64, "Fix door lock", "urgent", false, DateTime.now()),
-  _Task(65, "Learn to paint", "next month", false, DateTime.now()),
-  _Task(66, "Update home security", "this week", false, DateTime.now()),
-  _Task(67, "Plan home renovation", "next year", false, DateTime.now()),
-  _Task(68, "Fix window blinds", "this weekend", false, DateTime.now()),
-  _Task(69, "Learn to sew", "next month", false, DateTime.now()),
-  _Task(70, "Update family photos", "this month", false, DateTime.now()),
-  _Task(71, "Plan camping trip", "next summer", false, DateTime.now()),
-  _Task(72, "Fix lawn mower", "this week", false, DateTime.now()),
-  _Task(73, "Learn to fish", "next month", false, DateTime.now()),
-  _Task(74, "Organize tool shed", "this weekend", false, DateTime.now()),
-  _Task(75, "Update medical records", "this month", false, DateTime.now()),
-  _Task(76, "Fix porch steps", "urgent", false, DateTime.now()),
-  _Task(77, "Learn to knit", "next month", false, DateTime.now()),
-  _Task(78, "Update car registration", "next month", false, DateTime.now()),
-  _Task(79, "Plan road trip", "next summer", false, DateTime.now()),
-  _Task(80, "Fix shower head", "this week", false, DateTime.now()),
+  _Task(1, "Build spaceship 🚀 ", DateTime.now().add(const Duration(days: 30)),
+      false, DateTime.now()),
+  _Task(2, "Build cool Flutter app",
+      DateTime.now().add(const Duration(days: 30)), false, DateTime.now()),
+  _Task(3, "Prepare for team meeting",
+      DateTime.now().add(const Duration(days: 1)), false, DateTime.now()),
+  _Task(4, "Buy groceries", DateTime.now(), true, DateTime.now()),
+  _Task(5, "Learn quantum computing",
+      DateTime.now().add(const Duration(days: 365)), false, DateTime.now()),
+  _Task(6, "Fix critical bug in production",
+      DateTime.now().subtract(const Duration(days: 1)), false, DateTime.now()),
+  _Task(7, "Schedule dentist appointment",
+      DateTime.now().add(const Duration(days: 7)), false, DateTime.now()),
+  _Task(8, "Write documentation", DateTime.now().add(const Duration(days: 3)),
+      true, DateTime.now()),
+  _Task(9, "Review pull requests", DateTime.now(), false, DateTime.now()),
+  _Task(10, "Update dependencies", DateTime.now().add(const Duration(days: 3)),
+      false, DateTime.now()),
+  _Task(
+      11,
+      "Plan team offsite",
+      DateTime(
+          DateTime.now().year, DateTime.now().month + 1, DateTime.now().day),
+      false,
+      DateTime.now()),
+  _Task(12, "Backup database", DateTime.now(), true, DateTime.now()),
+  _Task(13, "Read a new Flutter article",
+      DateTime.now().add(const Duration(days: 3)), false, DateTime.now()),
+  _Task(
+      14,
+      "Refactor old codebase",
+      DateTime(
+          DateTime.now().year, DateTime.now().month + 1, DateTime.now().day),
+      false,
+      DateTime.now()),
+  _Task(15, "Organize workspace", DateTime.now(), false, DateTime.now()),
+  _Task(16, "Update project roadmap",
+      DateTime.now().add(const Duration(days: 1)), false, DateTime.now()),
+  _Task(17, "Test new features", DateTime.now().add(const Duration(days: 3)),
+      false, DateTime.now()),
+  _Task(18, "Clean up email inbox", DateTime.now(), false, DateTime.now()),
+  _Task(
+      19,
+      "Prepare sprint demo",
+      DateTime.now().add(Duration(days: (5 - DateTime.now().weekday) % 7)),
+      false,
+      DateTime.now()),
+  _Task(20, "Sync with design team",
+      DateTime.now().add(const Duration(days: 7)), false, DateTime.now()),
+  _Task(
+      21,
+      "Walk the dog",
+      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day,
+          23, 59),
+      false,
+      DateTime.now()),
+  _Task(
+      22,
+      "Call mom",
+      DateTime.now().add(Duration(days: (7 - DateTime.now().weekday) % 7)),
+      false,
+      DateTime.now()),
+  _Task(
+      23,
+      "Finish reading book",
+      DateTime(
+          DateTime.now().year, DateTime.now().month, DateTime.now().day + 15),
+      false,
+      DateTime.now()),
+  _Task(24, "Practice piano", DateTime.now().add(const Duration(days: 1)),
+      false, DateTime.now()),
+  _Task(25, "Water the plants", DateTime.now(), false, DateTime.now()),
+  _Task(26, "Update LinkedIn profile",
+      DateTime.now().add(const Duration(days: 3)), false, DateTime.now()),
+  _Task(
+      27,
+      "Book flight tickets",
+      DateTime(
+          DateTime.now().year, DateTime.now().month + 1, DateTime.now().day),
+      false,
+      DateTime.now()),
+  _Task(28, "Renew gym membership", DateTime.now().add(const Duration(days: 3)),
+      false, DateTime.now()),
+  _Task(
+      29,
+      "Submit expense report",
+      DateTime.now().add(Duration(days: (5 - DateTime.now().weekday) % 7)),
+      false,
+      DateTime.now()),
+  _Task(
+      30,
+      "Brainstorm blog ideas",
+      DateTime.now().add(Duration(days: (6 - DateTime.now().weekday) % 7)),
+      false,
+      DateTime.now()),
+  _Task(
+      31,
+      "Organize digital photos",
+      DateTime.now().add(Duration(days: (6 - DateTime.now().weekday) % 7)),
+      false,
+      DateTime.now()),
+  _Task(32, "Update resume", DateTime.now().add(const Duration(days: 7)), false,
+      DateTime.now()),
+  _Task(
+      33,
+      "Research new technologies",
+      DateTime(
+          DateTime.now().year, DateTime.now().month, DateTime.now().day + 15),
+      false,
+      DateTime.now()),
+  _Task(
+      34,
+      "Plan birthday party",
+      DateTime(
+          DateTime.now().year, DateTime.now().month + 1, DateTime.now().day),
+      false,
+      DateTime.now()),
+  _Task(35, "Fix broken chair", DateTime.now().add(const Duration(days: 3)),
+      false, DateTime.now()),
+  _Task(36, "Learn Spanish basics",
+      DateTime.now().add(const Duration(days: 365)), false, DateTime.now()),
+  _Task(37, "Create workout routine",
+      DateTime.now().add(const Duration(days: 1)), false, DateTime.now()),
+  _Task(38, "Backup important files", DateTime.now(), true, DateTime.now()),
+  _Task(39, "Schedule car maintenance",
+      DateTime.now().add(const Duration(days: 7)), false, DateTime.now()),
+  _Task(
+      40,
+      "Write thank you notes",
+      DateTime.now().add(Duration(days: (6 - DateTime.now().weekday) % 7)),
+      false,
+      DateTime.now()),
+  _Task(41, "Update phone apps", DateTime.now(), false, DateTime.now()),
+  _Task(
+      42,
+      "Plan summer vacation",
+      DateTime(
+          DateTime.now().year, DateTime.now().month + 1, DateTime.now().day),
+      false,
+      DateTime.now()),
+  _Task(43, "Fix leaky faucet", DateTime.now().add(const Duration(days: 3)),
+      false, DateTime.now()),
+  _Task(44, "Learn to cook pasta", DateTime.now().add(const Duration(days: 7)),
+      false, DateTime.now()),
+  _Task(
+      45,
+      "Organize closet",
+      DateTime.now().add(Duration(days: (6 - DateTime.now().weekday) % 7)),
+      false,
+      DateTime.now()),
+  _Task(
+      46,
+      "Update insurance policy",
+      DateTime(
+          DateTime.now().year, DateTime.now().month, DateTime.now().day + 15),
+      false,
+      DateTime.now()),
+  _Task(47, "Practice meditation", DateTime.now(), true, DateTime.now()),
+  _Task(
+      48,
+      "Fix garden fence",
+      DateTime.now().add(Duration(days: (6 - DateTime.now().weekday) % 7 + 7)),
+      false,
+      DateTime.now()),
+  _Task(
+      49,
+      "Learn guitar chords",
+      DateTime(
+          DateTime.now().year, DateTime.now().month + 1, DateTime.now().day),
+      false,
+      DateTime.now()),
+  _Task(50, "Update emergency contacts",
+      DateTime.now().add(const Duration(days: 3)), false, DateTime.now()),
+  _Task(51, "Plan family dinner", DateTime.now().add(const Duration(days: 7)),
+      false, DateTime.now()),
+  _Task(52, "Fix computer issues",
+      DateTime.now().subtract(const Duration(days: 1)), false, DateTime.now()),
+  _Task(53, "Learn to swim", DateTime.now().add(const Duration(days: 365)),
+      false, DateTime.now()),
+  _Task(
+      54,
+      "Organize garage",
+      DateTime(
+          DateTime.now().year, DateTime.now().month, DateTime.now().day + 15),
+      false,
+      DateTime.now()),
+  _Task(55, "Update will", DateTime.now().add(const Duration(days: 365)), false,
+      DateTime.now()),
+  _Task(
+      56,
+      "Fix bicycle tire",
+      DateTime.now().add(Duration(days: (6 - DateTime.now().weekday) % 7)),
+      false,
+      DateTime.now()),
+  _Task(
+      57,
+      "Learn calligraphy",
+      DateTime(
+          DateTime.now().year, DateTime.now().month + 1, DateTime.now().day),
+      false,
+      DateTime.now()),
+  _Task(58, "Update pet vaccinations",
+      DateTime.now().add(const Duration(days: 7)), false, DateTime.now()),
+  _Task(59, "Plan retirement", DateTime.now().add(const Duration(days: 365)),
+      false, DateTime.now()),
+  _Task(60, "Fix kitchen cabinet", DateTime.now().add(const Duration(days: 3)),
+      false, DateTime.now()),
+  _Task(
+      61,
+      "Learn to dance",
+      DateTime(
+          DateTime.now().year, DateTime.now().month + 1, DateTime.now().day),
+      false,
+      DateTime.now()),
+  _Task(
+      62,
+      "Organize bookshelf",
+      DateTime.now().add(Duration(days: (6 - DateTime.now().weekday) % 7)),
+      false,
+      DateTime.now()),
+  _Task(63, "Update passport", DateTime.now().add(const Duration(days: 365)),
+      false, DateTime.now()),
+  _Task(64, "Fix door lock", DateTime.now().subtract(const Duration(days: 1)),
+      false, DateTime.now()),
+  _Task(
+      65,
+      "Learn to paint",
+      DateTime(
+          DateTime.now().year, DateTime.now().month + 1, DateTime.now().day),
+      false,
+      DateTime.now()),
+  _Task(66, "Update home security", DateTime.now().add(const Duration(days: 3)),
+      false, DateTime.now()),
+  _Task(67, "Plan home renovation",
+      DateTime.now().add(const Duration(days: 365)), false, DateTime.now()),
+  _Task(
+      68,
+      "Fix window blinds",
+      DateTime.now().add(Duration(days: (6 - DateTime.now().weekday) % 7)),
+      false,
+      DateTime.now()),
+  _Task(
+      69,
+      "Learn to sew",
+      DateTime(
+          DateTime.now().year, DateTime.now().month + 1, DateTime.now().day),
+      false,
+      DateTime.now()),
+  _Task(
+      70,
+      "Update family photos",
+      DateTime(
+          DateTime.now().year, DateTime.now().month, DateTime.now().day + 15),
+      false,
+      DateTime.now()),
+  _Task(71, "Plan camping trip", DateTime.now().add(const Duration(days: 365)),
+      false, DateTime.now()),
+  _Task(72, "Fix lawn mower", DateTime.now().add(const Duration(days: 3)),
+      false, DateTime.now()),
+  _Task(
+      73,
+      "Learn to fish",
+      DateTime(
+          DateTime.now().year, DateTime.now().month + 1, DateTime.now().day),
+      false,
+      DateTime.now()),
+  _Task(
+      74,
+      "Organize tool shed",
+      DateTime.now().add(Duration(days: (6 - DateTime.now().weekday) % 7)),
+      false,
+      DateTime.now()),
+  _Task(
+      75,
+      "Update medical records",
+      DateTime(
+          DateTime.now().year, DateTime.now().month, DateTime.now().day + 15),
+      false,
+      DateTime.now()),
+  _Task(76, "Fix porch steps", DateTime.now().subtract(const Duration(days: 1)),
+      false, DateTime.now()),
+  _Task(
+      77,
+      "Learn to knit",
+      DateTime(
+          DateTime.now().year, DateTime.now().month + 1, DateTime.now().day),
+      false,
+      DateTime.now()),
+  _Task(
+      78,
+      "Update car registration",
+      DateTime(
+          DateTime.now().year, DateTime.now().month + 1, DateTime.now().day),
+      false,
+      DateTime.now()),
+  _Task(79, "Plan road trip", DateTime.now().add(const Duration(days: 365)),
+      false, DateTime.now()),
+  _Task(80, "Fix shower head", DateTime.now().add(const Duration(days: 3)),
+      false, DateTime.now()),
 ];
 
 final taskRepository = LdRepository<_Task, int>(
@@ -131,9 +350,18 @@ final taskRepository = LdRepository<_Task, int>(
     LdSortOption<_Task, int>(
       name: "due",
       label: (context) => "Due",
+      isOn: true,
       icon: (context) => const Icon(LucideIcons.calendar),
       optimisticSort: (a, b) {
         return a.due.compareTo(b.due);
+      },
+    ),
+    LdSortOption<_Task, int>(
+      name: "task",
+      label: (context) => "Task",
+      icon: (context) => const Icon(LucideIcons.list),
+      optimisticSort: (a, b) {
+        return a.task.compareTo(b.task);
       },
     ),
   ],
@@ -162,16 +390,15 @@ final taskRepository = LdRepository<_Task, int>(
     Set<LdFilterOption<_Task, int>>? filters,
     List<LdSortOption<_Task, int>>? sortOptions,
   }) async {
-    debugPrint("Task repository hit");
-    debugPrint("Offset: $offset, Page size: $pageSize, Page token: $pageToken");
+    await Future.delayed(const Duration(milliseconds: 200));
 
-    await Future.delayed(const Duration(milliseconds: 1000));
-
-    final filtered =
-        testData.where((element) => filters?.every((filter) => filter.optimisticFilter(element)) ?? true).toList();
+    final filtered = testData
+        .where((element) =>
+            filters?.every((filter) => filter.optimisticFilter(element)) ??
+            true)
+        .toList();
 
     for (final sortOption in sortOptions ?? []) {
-      print("Sorting with ${sortOption.name}");
       filtered.sort((a, b) => sortOption.optimisticSort(a, b));
     }
 
@@ -230,7 +457,8 @@ final taskDemo = LdMasterDetailRoute<_Task, int, bool>(
       initialSelectedItems: route.state.selectedItems,
       multiSelect: true,
       onSelectionChange: (selected) => onSelectionChange(selected),
-      itemBuilder: (context, item, index, config) => LdMasterDetailSingleShortcuts(
+      itemBuilder: (context, item, index, config) =>
+          LdMasterDetailSingleShortcuts(
         item: item.value!.id,
         actions: route.actions,
         child: LdMasterDetailContextMenu<_Task, int, bool>(
@@ -239,16 +467,19 @@ final taskDemo = LdMasterDetailRoute<_Task, int, bool>(
             state: item.state,
             child: LdListItem.fromConfig(
               config.copyWith(
-                leading: Text("$index"),
-                trailing: Text("${item.value!.id}"),
                 title: Text(
                   item.value!.task,
                   style: TextStyle(
-                    decoration: item.value!.done ? TextDecoration.lineThrough : TextDecoration.none,
+                    decoration: item.value!.done
+                        ? TextDecoration.lineThrough
+                        : TextDecoration.none,
                   ),
                 ),
-                subtitle: Text(item.value!.due),
-                trailingForward: LdMasterContext.of<_Task, int, bool>(context).isSplit,
+                subtitle: Text(
+                  "${Jiffy.parseFromDateTime(item.value!.due).fromNow()} #${item.value!.id}",
+                ),
+                trailingForward:
+                    LdMasterContext.of<_Task, int, bool>(context).isSplit,
               ),
             ),
           ),
@@ -257,24 +488,6 @@ final taskDemo = LdMasterDetailRoute<_Task, int, bool>(
     );
   },
   actions: [
-    LdMasterDetailAction(
-        visibility: {
-          LdMasterDetailActionVisibility(
-            location: LdMasterDetailActionLocation.masterAppBar,
-            minSelectionCount: 0,
-            maxSelectionCount: null,
-          ),
-        },
-        submitType: LdLabeledActionSubmitType.none,
-        buildLabel: (context, selection) => "Filter",
-        buildIcon: (context, selection) =>
-            LdMasterDetailRoute.of<_Task, int, bool>(context).repository.filters.where((e) => e.isOn).isEmpty
-                ? const Icon(LucideIcons.listFilterPlus)
-                : const Icon(LucideIcons.listFilter),
-        action: (context, selection) async {
-          final route = LdMasterDetailRoute.of<_Task, int, bool>(context);
-          context.push("${route.path}/filters");
-        }),
     LdMasterDetailAction(
       visibility: {
         LdMasterDetailActionVisibility(
@@ -398,7 +611,8 @@ final taskDemo = LdMasterDetailRoute<_Task, int, bool>(
       },
       buildLoadingText: (context, selection) =>
           "Deleting ${selection.length} ${selection.length == 1 ? "item" : "items"}",
-      buildLabel: (context, selection) => "Delete ${selection.length} ${selection.length == 1 ? "item" : "items"}",
+      buildLabel: (context, selection) =>
+          "Delete ${selection.length} ${selection.length == 1 ? "item" : "items"}",
       buildIcon: (context, selection) => Icon(
         LucideIcons.trash2,
       ),
@@ -408,6 +622,7 @@ final taskDemo = LdMasterDetailRoute<_Task, int, bool>(
       },
     ),
     toggleSelectionControls<_Task, int, bool>(),
+    toggleFilters<_Task, int, bool>(),
   ],
 );
 
@@ -423,12 +638,16 @@ class _TaskDetail extends StatefulWidget {
 class _TaskDetailState extends State<_TaskDetail> {
   final TextEditingController _taskController = TextEditingController();
   final TextEditingController _dueController = TextEditingController();
+  DateTime? _dueDate;
 
   @override
   void initState() {
     super.initState();
     _taskController.text = widget.task.value?.task ?? "";
-    _dueController.text = widget.task.value?.due ?? "";
+    _dueController.text = widget.task.value?.due != null
+        ? Jiffy.parseFromDateTime(widget.task.value!.due).yMMMd
+        : "";
+    _dueDate = widget.task.value?.due;
   }
 
   @override
@@ -456,10 +675,29 @@ class _TaskDetailState extends State<_TaskDetail> {
             hint: "What do you want to do?",
             controller: _taskController,
           ),
-          LdInput(
-            label: "Due date",
-            hint: "When do you want to do it?",
-            controller: _dueController,
+          GestureDetector(
+            onTap: () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: _dueDate ?? DateTime.now(),
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2100),
+              );
+              if (picked != null) {
+                setState(() {
+                  _dueDate = picked;
+                  _dueController.text = Jiffy.parseFromDateTime(picked).yMMMd;
+                });
+              }
+            },
+            child: AbsorbPointer(
+              child: LdInput(
+                label: "Due date",
+                hint: "When do you want to do it?",
+                controller: _dueController,
+                disabled: true,
+              ),
+            ),
           ),
           LdText(
             "Last updated: ${Jiffy.parseFromDateTime(widget.task.value!.lastUpdate).fromNow()}",
@@ -473,11 +711,13 @@ class _TaskDetailState extends State<_TaskDetail> {
                     final newTask = _Task(
                       widget.task.value!.id,
                       _taskController.text,
-                      _dueController.text,
+                      _dueDate ?? DateTime.now(),
                       widget.task.value!.done,
                       widget.task.value!.lastUpdate,
                     );
-                    final repo = LdMasterDetailRoute.of<_Task, int, bool>(context).repository;
+                    final repo =
+                        LdMasterDetailRoute.of<_Task, int, bool>(context)
+                            .repository;
                     await repo.update(
                       widget.task.value!.id,
                       newTask,

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/master_detail/ld_master_detail_selection.dart';
 import 'package:provider/provider.dart';
+import 'package:provider/single_child_widget.dart';
 
 class LdMasterDetailActionVisibility {
   final LdMasterDetailActionLocation location;
@@ -37,6 +38,16 @@ class LdMasterDetailAction<T extends Identifiable<IdType>, IdType, GroupingCrite
   final FutureOr<void> Function(BuildContext context, Set<IdType> selection) action;
   final String Function(BuildContext context, Set<IdType> selection)? buildLoadingText;
 
+  final Widget Function(BuildContext context, Set<IdType> selection)? buildContextMenu;
+
+  final List<SingleChildWidget>? Function(BuildContext context)? buildMenuProviders;
+
+  @override
+  Widget? contextMenu(BuildContext context) {
+    final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context);
+    return buildContextMenu?.call(context, selection.items);
+  }
+
   @override
   String? loadingText(BuildContext context) {
     final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context);
@@ -59,6 +70,11 @@ class LdMasterDetailAction<T extends Identifiable<IdType>, IdType, GroupingCrite
   void onPressed(BuildContext context) async {
     final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context, listen: false);
     await action(context, selection.items);
+  }
+
+  @override
+  List<SingleChildWidget>? menuProviders(BuildContext context) {
+    return buildMenuProviders?.call(context);
   }
 
   @override
@@ -126,12 +142,14 @@ class LdMasterDetailAction<T extends Identifiable<IdType>, IdType, GroupingCrite
     required this.visibility,
     required this.buildLabel,
     this.buildLoadingText,
+    this.buildContextMenu,
     LdColor? color,
     this.buildIcon,
     required this.action,
     this.multiSelect = true,
     LdLabeledActionSubmitType submitType = LdLabeledActionSubmitType.notification,
     this.shortcutActivators = const {},
+    this.buildMenuProviders,
   })  : _color = color,
         _submitType = submitType;
 
@@ -142,12 +160,14 @@ class LdMasterDetailAction<T extends Identifiable<IdType>, IdType, GroupingCrite
     String Function(BuildContext context, Set<IdType> selection)? buildLabel,
     Widget Function(BuildContext context, Set<IdType> selection)? buildIcon,
     Future<void> Function(BuildContext context, Set<IdType> selection)? action,
+    Widget Function(BuildContext context, Set<IdType> selection)? buildContextMenu,
   }) {
     return LdMasterDetailAction(
       visibility: visibility ?? this.visibility,
       buildLabel: buildLabel ?? this.buildLabel,
       buildIcon: buildIcon ?? this.buildIcon,
       action: action ?? this.action,
+      buildContextMenu: buildContextMenu ?? this.buildContextMenu,
     );
   }
 }

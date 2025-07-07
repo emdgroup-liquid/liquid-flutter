@@ -3,6 +3,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/master_detail/filter/ld_filter_any_of_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:liquid_flutter/src/master_detail/filter/ld_filter_one_of_widget.dart';
+import 'package:provider/provider.dart';
 
 LdModal ldFilterModal<T extends Identifiable<IdType>, IdType, GroupBy>(
     BuildContext context, LdMasterDetailRoute<T, IdType, GroupBy> route) {
@@ -21,6 +22,27 @@ LdModal ldFilterModal<T extends Identifiable<IdType>, IdType, GroupBy>(
   );
 }
 
+class LdFilterContext<T extends Identifiable<IdType>, IdType, GroupBy> extends StatelessWidget {
+  const LdFilterContext({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final route = context.read<LdMasterDetailRoute<T, IdType, GroupBy>>();
+    return LdContextMenu(
+      builder: (context, isOpen, open, child) => LdButtonGhost(
+        autoLoading: false,
+        child: Text(LiquidLocalizations.of(context).filter),
+        onPressed: () {
+          open();
+        },
+      ),
+      menuBuilder: (context, onDismiss) => LdFilterModal(route: route),
+    );
+  }
+}
+
 class LdFilterModal<T extends Identifiable<IdType>, IdType, GroupBy> extends StatelessWidget {
   final LdMasterDetailRoute<T, IdType, GroupBy> route;
 
@@ -35,47 +57,73 @@ class LdFilterModal<T extends Identifiable<IdType>, IdType, GroupBy> extends Sta
         stream: filter,
         initialData: repository.filters,
         builder: (context, asyncSnapshot) {
+          final filters = asyncSnapshot.data!;
+
+          final activeFilters = filters.where((e) => e.isOn).toList();
+          final inactiveFilters = filters.where((e) => !e.isOn).toList();
+
           return LdAutoSpace(children: [
-            LdMute(child: LdText(LiquidLocalizations.of(context).filter)),
-            Wrap(
-              children: asyncSnapshot.data!
-                  .where((e) => !e.isOn)
-                  .map(
-                    (e) => LdButtonOutline(
-                        leading: e.icon(context),
-                        child: Text(e.label(context)),
-                        onPressed: () {
-                          e.isOn = true;
-                          repository.updateFilter(e);
-                        }),
-                  )
-                  .toList(),
-            ).spaceS(),
-            LdMute(child: LdText(LiquidLocalizations.of(context).activeFilters)),
-            ...asyncSnapshot.data!.where((e) => e.isOn).map((e) => _Filter(
-                filter: e,
-                onFilterChanged: (filter) {
-                  repository.updateFilter(filter);
-                })),
-            LdMute(child: LdText(LiquidLocalizations.of(context).sort)),
+            LdMute(child: LdText(LiquidLocalizations.of(context).sort)).insetLeft(size: LdSize.s),
             StreamBuilder(
                 stream: repository.sortStream,
                 builder: (context, asyncSnapshot) {
-                  return Wrap(
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: repository.sortOptions
                         .map(
-                          (e) => LdToggle(
-                            checked: e.isOn,
-                            label: e.label(context),
-                            onChanged: (checked) {
-                              repository.updateSortOption(e.copyWith(isOn: checked));
+                          (e) => LdListItem(
+                            showSelectionControls: true,
+                            radioSelection: true,
+                            isSelected: e.isOn,
+                            title: Text(e.label(context)),
+                            trailing: e.icon(context),
+                            onSelectionChange: (selected) {
+                              repository.setActiveSortOption(e.name);
                             },
                           ),
                         )
                         .toList(),
                   );
                 }),
-          ]);
+            const LdDivider(),
+            if (inactiveFilters.isNotEmpty)
+              LdReveal.quick(
+                revealed: inactiveFilters.isNotEmpty,
+                child: LdMute(child: LdText(LiquidLocalizations.of(context).filter)).insetLeft(size: LdSize.s),
+              ),
+            LdReveal.quick(
+              revealed: inactiveFilters.isNotEmpty,
+              child: Wrap(
+                children: asyncSnapshot.data!
+                    .map(
+                      (e) => LdReveal.quick(
+                        revealed: !e.isOn,
+                        child: LdButtonOutline(
+                            leading: e.icon(context),
+                            child: Text(e.label(context)),
+                            onPressed: () {
+                              e.isOn = true;
+                              repository.updateFilter(e);
+                            }),
+                      ),
+                    )
+                    .toList(),
+              ).spaceS().padS(),
+            ),
+            LdReveal.quick(
+              revealed: activeFilters.isNotEmpty,
+              child: LdMute(child: LdText(LiquidLocalizations.of(context).activeFilters)).insetLeft(size: LdSize.s),
+            ),
+            ...asyncSnapshot.data!.map((e) => LdReveal.quick(
+                  revealed: e.isOn,
+                  child: _Filter(
+                    filter: e,
+                    onFilterChanged: (filter) {
+                      repository.updateFilter(filter);
+                    },
+                  ),
+                )),
+          ]).padVertical();
         });
   }
 }
@@ -93,24 +141,17 @@ class _Filter<T extends Identifiable<IdType>, IdType, GroupBy> extends Stateless
   @override
   Widget build(BuildContext context) {
     if (filter is LdFilterBoolOption) {
-      return Row(
-        children: [
-          Expanded(
-            child: LdListItem(
-              borderRadius: LdTheme.of(context).radius(LdSize.m),
-              title: Text(filter.label(context)),
-              leading: filter.icon(context),
-            ),
-          ),
-          ldSpacerM,
-          LdButtonVague(
-            child: const Icon(LucideIcons.x),
-            onPressed: () {
-              filter.isOn = false;
-              onFilterChanged(filter);
-            },
-          ),
-        ],
+      return LdListItem(
+        title: Text(filter.label(context)),
+        leading: filter.icon(context),
+        trailing: LdButtonVague(
+          child: const Icon(LucideIcons.x),
+          size: LdSize.s,
+          onPressed: () {
+            filter.isOn = false;
+            onFilterChanged(filter);
+          },
+        ),
       );
     }
     if (filter is LdFilterRange<T, IdType>) {

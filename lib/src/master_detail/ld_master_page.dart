@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/master_detail/app_bar_actions.dart';
 import 'package:liquid_flutter/src/master_detail/ld_master_detail_selection.dart';

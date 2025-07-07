@@ -63,6 +63,7 @@ export 'src/master_detail/repository.dart';
 export 'src/master_detail/keyboard_shortcuts.dart';
 export 'src/master_detail/ld_master_context.dart';
 export 'src/master_detail/toggle_selection_controls.dart';
+export 'src/master_detail/toggle_filter_action.dart';
 export 'src/modal/modal.dart';
 export 'src/modal/modal_builder.dart';
 export 'src/modal/modal_page.dart';

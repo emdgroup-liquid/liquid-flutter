@@ -388,9 +388,8 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     IdType id,
     T? newValue,
   ) {
-    print("scheduleItemUpdate: $id, $newValue.");
     final index = getItemIndexById(id);
-    print("scheduleItemUpdate: $id, $newValue. index: $index");
+
     if (index == null) throw Exception('Item with id $id not found during scheduleItemUpdate');
     final item = _items[index];
 

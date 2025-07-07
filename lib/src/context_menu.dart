@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -7,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/haptics.dart';
+import 'package:provider/provider.dart';
+import 'package:provider/single_child_widget.dart';
 import 'package:liquid_flutter/src/modal/size_notifier.dart';
 
 enum LdContextMenuBlurMode {
@@ -59,6 +60,7 @@ class LdContextMenu extends StatefulWidget {
     this.positionMode = LdContextPositionMode.auto,
     this.child,
     this.triggerColor,
+    this.menuProviders,
   });
 
   final bool? visible;
@@ -72,6 +74,8 @@ class LdContextMenu extends StatefulWidget {
   final bool listenForTaps;
 
   final bool scaleFromTrigger;
+
+  final List<SingleChildWidget>? Function(BuildContext context)? menuProviders;
 
   final LdContextMenuBlurMode blurMode;
   final LdContextZoomMode zoomMode;
@@ -93,23 +97,15 @@ class LdContextMenu extends StatefulWidget {
 class _LdContextMenuState extends State<LdContextMenu> {
   final GlobalKey _triggerKey = GlobalKey(debugLabel: "Trigger Key");
 
-  final _overlayPortalController = OverlayPortalController();
-
   RenderBox? _triggerBox;
 
   final GlobalKey _menuKey = GlobalKey(debugLabel: "Menu Key");
 
-  late bool _visible = widget.visible ?? false;
   Offset? _cursorPosition;
 
-  final _menuSizeNotifier = ValueNotifier<Size>(Size.zero);
+  final ValueNotifier<Size> _menuSizeNotifier = ValueNotifier(Size.zero);
 
   bool get _mobile => !kIsWeb && (Platform.isAndroid || Platform.isIOS);
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   void dispose() {
@@ -123,18 +119,6 @@ class _LdContextMenuState extends State<LdContextMenu> {
       (LdContextMenuBlurMode.always) => true,
       (LdContextMenuBlurMode.never) => false,
     };
-  }
-
-  @override
-  didUpdateWidget(LdContextMenu oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.visible != null && widget.visible != oldWidget.visible) {
-      if (widget.visible!) {
-        _overlayPortalController.show();
-      } else {
-        _overlayPortalController.hide();
-      }
-    }
   }
 
   bool get _shouldZoom {
@@ -152,85 +136,35 @@ class _LdContextMenuState extends State<LdContextMenu> {
     return widget.positionMode;
   }
 
-  Future<void> _dismiss() async {
-    await Future.delayed(Duration.zero);
+  void _dismiss() {
     if (!mounted) {
       return;
     }
-    setState(() {
-      _visible = false;
-    });
+    Navigator.of(context).maybePop();
   }
 
-  (Rect, Alignment) _resizeMenuToScreen(
-    BuildContext context,
-    Size menuSize,
-  ) {
-    if (_triggerBox == null) {
-      return (Rect.zero, Alignment.topLeft);
-    }
-    final view = WidgetsBinding.instance.platformDispatcher.implicitView;
+  Offset? _getTriggerPosition() {
+    _triggerBox = _triggerKey.currentContext?.findRenderObject() as RenderBox?;
+    return _triggerBox?.localToGlobal(Offset.zero);
+  }
 
-    var mediaQuery = MediaQuery.of(context);
+  Size? _getTriggerSize() {
+    _triggerBox = _triggerKey.currentContext?.findRenderObject() as RenderBox?;
+    return _triggerBox?.size;
+  }
 
-    if (view != null) {
-      mediaQuery = MediaQueryData.fromView(view);
-    }
-
-    final viewInsets = mediaQuery.viewInsets + const EdgeInsets.all(10);
-
-    final screenSize = mediaQuery.size;
-
-    final menuWidth = menuSize.width;
-    final menuHeight = menuSize.height;
-
-    Offset triggerOffset;
-    Size triggerSize;
-
+  Offset _getMenuPosition() {
+    _triggerBox = _triggerKey.currentContext?.findRenderObject() as RenderBox?;
     if (_effectivePositionMode == LdContextPositionMode.relativeTrigger || _cursorPosition == null) {
-      triggerSize = _triggerBox!.size;
-      triggerOffset = Offset(
-        _triggerBox!.localToGlobal(Offset.zero).dx,
-        _triggerBox!.localToGlobal(Offset.zero).dy + triggerSize.height,
-      );
+      if (_triggerBox != null) {
+        final triggerOffset = _getTriggerPosition() ?? Offset.zero;
+        final triggerSize = _getTriggerSize() ?? Size.zero;
+        return Offset(triggerOffset.dx, triggerOffset.dy + triggerSize.height);
+      }
+      return Offset.zero;
     } else {
-      triggerOffset = _cursorPosition ?? Offset.zero;
-      // Place the cursor right on the first menu item
-      triggerOffset = Offset(
-        triggerOffset.dx - LdTheme.of(context).sizingConfig.radiusM,
-        triggerOffset.dy - LdTheme.of(context).sizingConfig.radiusM,
-      );
-      triggerSize = Size.zero;
+      return _cursorPosition ?? Offset.zero;
     }
-
-    final overflowX = min(
-          0,
-          screenSize.width - viewInsets.right - viewInsets.left - (triggerOffset.dx) - menuWidth,
-        ) +
-        10;
-
-    final overflowY = min(
-          0,
-          screenSize.height - viewInsets.bottom - viewInsets.top - (triggerOffset.dy + triggerSize.height) - menuHeight,
-        ) +
-        10;
-
-    final baseRect = Rect.fromLTWH(
-      triggerOffset.dx + overflowX,
-      triggerOffset.dy + overflowY,
-      menuSize.width,
-      menuSize.height,
-    );
-
-    final isLeftOfTrigger = baseRect.left < triggerOffset.dx;
-    final isAboveTrigger = baseRect.top < triggerOffset.dy;
-
-    return switch ((isLeftOfTrigger, isAboveTrigger)) {
-      (true, true) => (baseRect, Alignment.bottomRight),
-      (true, false) => (baseRect, Alignment.topRight),
-      (false, true) => (baseRect, Alignment.bottomLeft),
-      (false, false) => (baseRect, Alignment.topLeft),
-    };
   }
 
   void _open({Offset? globalPosition}) async {
@@ -242,13 +176,20 @@ class _LdContextMenuState extends State<LdContextMenu> {
       return;
     }
     _cursorPosition = globalPosition;
-
-    _triggerBox = _triggerKey.currentContext?.findRenderObject() as RenderBox?;
-
-    _overlayPortalController.show();
-    setState(() {
-      _visible = true;
-    });
+    final position = _getMenuPosition();
+    Navigator.of(context).push(
+      ContextMenuRoute(
+        menuBuilder: (ctx, onDismiss) => widget.menuBuilder(ctx, onDismiss),
+        position: position,
+        triggerPosition: _getTriggerPosition() ?? Offset.zero,
+        triggerSize: _getTriggerSize() ?? Size.zero,
+        shouldBlur: _shouldBlur,
+        shouldZoom: _shouldZoom,
+        backgroundColor: null,
+        onDismiss: _dismiss,
+        providers: widget.menuProviders?.call(context),
+      ),
+    );
   }
 
   Widget _buildTriggerDetector(BuildContext context) {
@@ -267,223 +208,186 @@ class _LdContextMenuState extends State<LdContextMenu> {
       child: widget.builder(
         context,
         false,
-        ({Offset? position}) {
-          if (position == null) {
-            if (_triggerBox != null) {
-              _open(
-                globalPosition: Offset(
-                  _triggerBox!.localToGlobal(Offset.zero).dx,
-                  _triggerBox!.localToGlobal(Offset.zero).dy + _triggerBox!.size.height,
-                ),
-              );
-            } else {
-              _open();
-            }
-          } else {
-            _open(globalPosition: position);
-          }
+        () {
+          _open();
         },
         widget.child,
       ),
     );
   }
 
-  Widget _buildZoom(BuildContext context, Widget child) {
-    if (_shouldZoom) {
-      return LdSpring(
-        initialPosition: 0,
-        position: _visible ? 1 : 0,
-        child: child,
-        builder: (context, state, child) {
-          return Opacity(
-            opacity: state.position.clamp(0, 1),
-            child: Transform.scale(
-              scale: max(0, state.position * 0.01 + 1),
-              child: child,
-            ),
-          );
-        },
-      );
-    }
-    return child;
+  @override
+  Widget build(BuildContext context) {
+    return _buildTriggerDetector(context);
+  }
+}
+
+/// A modal route for displaying a context menu, supporting custom positioning, blur, and zoom.
+class ContextMenuRoute extends ModalRoute<void> {
+  final Widget Function(BuildContext, VoidCallback) menuBuilder;
+  final Offset position;
+  final Offset triggerPosition;
+  final Size triggerSize;
+  final bool shouldBlur;
+  final bool shouldZoom;
+  final Color? backgroundColor;
+  final VoidCallback? onDismiss;
+  final List<SingleChildWidget>? providers;
+
+  final ValueNotifier<Size> _menuSizeNotifier = ValueNotifier(Size.zero);
+
+  /// [providers] allows you to inject providers into the context menu route.
+  ContextMenuRoute({
+    required this.menuBuilder,
+    required this.position,
+    this.shouldBlur = false,
+    this.shouldZoom = false,
+    this.backgroundColor,
+    this.onDismiss,
+    required this.triggerPosition,
+    required this.triggerSize,
+    this.providers,
+  });
+
+  @override
+  void dispose() {
+    _menuSizeNotifier.dispose();
+    super.dispose();
   }
 
-  Widget _buildBlur(BuildContext context, Widget child) {
-    if (!_shouldBlur) {
-      return const SizedBox.shrink();
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 200);
+
+  @override
+  bool get barrierDismissible => true;
+
+  @override
+  Color get barrierColor => backgroundColor ?? Colors.transparent;
+
+  @override
+  String? get barrierLabel => 'ContextMenu';
+
+  @override
+  bool get maintainState => true;
+
+  @override
+  void didComplete(result) {
+    super.didComplete(result);
+    onDismiss?.call();
+  }
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return ValueListenableBuilder<Size>(
+        valueListenable: _menuSizeNotifier,
+        builder: (context, size, child) {
+          return Stack(
+            children: [
+              GestureDetector(
+                onTap: () => Navigator.of(context).maybePop(),
+                behavior: HitTestBehavior.opaque,
+              ),
+              if (size == Size.zero) _buildOffstageMenuForMeasurement(context),
+            ],
+          );
+        });
+  }
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (_menuSizeNotifier.value == Size.zero) {
+      return Stack(
+        children: [
+          _buildOffstageMenuForMeasurement(context),
+        ],
+      );
     }
-    return LdSpring(
-      initialPosition: 0,
-      position: _visible ? 1 : 0,
-      child: child,
-      builder: (context, state, child) {
-        return BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: 10 * state.position.clamp(0, 1),
-            sigmaY: 10 * state.position.clamp(0, 1),
-          ),
-          child: child,
-        );
-      },
+    return Stack(
+      children: [
+        _buildAnimatedMenuTransition(context, animation, _menuSizeNotifier.value),
+      ],
+    );
+  }
+
+  Widget _buildOffstageMenuForMeasurement(BuildContext context) {
+    return Offstage(
+      child: MeasureSize(
+        sizeNotifier: _menuSizeNotifier,
+        child: _buildMenuContent(context),
+      ),
+    );
+  }
+
+  Widget _buildAnimatedMenuTransition(BuildContext context, Animation<double> animation, Size menuSize) {
+    final startRect = Rect.fromLTWH(
+      triggerPosition.dx,
+      triggerPosition.dy,
+      triggerSize.width,
+      triggerSize.height,
+    );
+    final endRect = Rect.fromLTWH(
+      position.dx,
+      position.dy,
+      menuSize.width,
+      menuSize.height,
+    );
+    final rectTween = RectTween(begin: startRect, end: endRect);
+    final rect = rectTween.evaluate(animation)!;
+    return Positioned(
+      left: rect.left,
+      top: rect.top,
+      width: rect.width,
+      height: rect.height,
+      child: shouldBlur
+          ? BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10 * animation.value, sigmaY: 10 * animation.value),
+              child: _buildMenuTransitionContent(context, animation),
+            )
+          : _buildMenuTransitionContent(context, animation),
+    );
+  }
+
+  Widget _buildMenuTransitionContent(BuildContext context, Animation<double> animation) {
+    return Transform.scale(
+      scale: shouldZoom ? (0.95 + 0.05 * animation.value) : 1.0,
+      child: FadeTransition(
+        opacity: animation,
+        child: _buildMenuContent(context),
+      ),
+    );
+  }
+
+  Widget _wrapMenu(BuildContext context, Widget menu) {
+    return Container(
+      decoration: BoxDecoration(
+        color: LdTheme.of(context).surface,
+        borderRadius: LdTheme.of(context).radius(LdSize.m),
+        boxShadow: [ldShadowSticky],
+        border: Border.all(color: LdTheme.of(context).border, width: LdTheme.of(context).borderWidth),
+      ),
+      child: menu,
+    );
+  }
+
+  Widget _buildMenuContent(BuildContext context) {
+    return MeasureSize(
+      sizeNotifier: _menuSizeNotifier,
+      child: providers != null && providers!.isNotEmpty
+          ? MultiProvider(
+              providers: providers!,
+              child: Builder(builder: (context) {
+                return _wrapMenu(context, menuBuilder(context, onDismiss ?? () {}));
+              }),
+            )
+          : _wrapMenu(context, menuBuilder(context, onDismiss ?? () {})),
     );
   }
 
   @override
-  Widget build(BuildContext context) {
-    final theme = LdTheme.of(context, listen: true);
-
-    return OverlayPortal.targetsRootOverlay(
-      overlayChildBuilder: (context) => Builder(builder: (context) {
-        final menu = Builder(builder: (context) {
-          return LdSpring(
-            initialPosition: 0,
-            mass: 3,
-            springConstant: 20,
-            dampingCoefficient: 10,
-            position: _visible ? 1 : 0,
-            onAnimationEnd: (context, state) async {
-              await Future.delayed(Duration.zero);
-              if (state.position == 0 && mounted) {
-                _overlayPortalController.hide();
-              }
-            },
-            child: ScrollConfiguration(
-              behavior: ScrollConfiguration.of(context).copyWith(
-                scrollbars: true,
-              ),
-              child: NotificationListener<LdContextMenuDissmissNotification>(
-                onNotification: (notification) {
-                  _dismiss();
-                  return true;
-                },
-                child: Builder(builder: (context) {
-                  return widget.menuBuilder(context, _dismiss);
-                }),
-              ),
-            ),
-            builder: (context, state, child) {
-              final triggerOffset = _triggerBox?.localToGlobal(Offset.zero);
-              final triggerSize = _triggerBox?.size;
-
-              final triggerRect = Rect.fromLTWH(
-                triggerOffset?.dx ?? 0,
-                triggerOffset?.dy ?? 0,
-                triggerSize?.width ?? 0,
-                triggerSize?.height ?? 0,
-              );
-
-              final (rect, alignment) = _resizeMenuToScreen(
-                context,
-                _menuSizeNotifier.value,
-              );
-
-              late Rect scaledRect;
-
-              var color = theme.surface;
-
-              if (widget.scaleFromTrigger) {
-                color = Color.alphaBlend(
-                  color.withAlpha((255 * state.position.clamp(0, 1)).toInt()),
-                  (widget.triggerColor ?? theme.palette.primary).active(theme.isDark).withAlpha(50),
-                );
-
-                scaledRect = Rect.fromLTWH(
-                  triggerRect.left + (rect.left - triggerRect.left) * state.position,
-                  triggerRect.top + (rect.top - triggerRect.top) * state.position,
-                  triggerRect.width + (rect.width - triggerRect.width) * state.position,
-                  triggerRect.height + (rect.height - triggerRect.height) * state.position,
-                );
-              } else {
-                scaledRect = Rect.fromLTWH(
-                  rect.left,
-                  rect.top,
-                  max(0, rect.width * state.position),
-                  max(0, rect.height * state.position),
-                );
-              }
-
-              return Positioned.fromRect(
-                rect: scaledRect,
-                child: TapRegion(
-                  onTapOutside: (event) {
-                    _dismiss();
-                  },
-                  child: Opacity(
-                    opacity: state.position.clamp(0, 1),
-                    child: Container(
-                      clipBehavior: Clip.hardEdge,
-                      decoration: BoxDecoration(
-                        color: color,
-                        border: Border.all(
-                          color: theme.border,
-                          strokeAlign: BorderSide.strokeAlignOutside,
-                          width: theme.borderWidth,
-                        ),
-                        borderRadius: theme.radius(LdSize.s),
-                        boxShadow: [
-                          BoxShadow(
-                            color: theme.palette.neutral.shades.last.withAlpha(51),
-                            blurRadius: 10,
-                            offset: const Offset(0, 0),
-                          )
-                        ],
-                      ),
-                      child: Opacity(
-                        opacity: state.position.clamp(0, 1),
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          physics: const NeverScrollableScrollPhysics(),
-                          child: SingleChildScrollView(
-                            child: child,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
-        });
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            Offstage(
-              child: Center(
-                child: KeyedSubtree(
-                  key: _menuKey,
-                  child: MeasureSize(
-                    sizeNotifier: _menuSizeNotifier,
-                    child: widget.menuBuilder(context, _dismiss),
-                  ),
-                ),
-              ),
-            ),
-            if (_shouldBlur) ...[
-              _buildBlur(
-                context,
-                Container(
-                  color: Colors.black.withAlpha(51),
-                ),
-              ),
-              if (_triggerBox != null)
-                Positioned(
-                  left: _triggerBox!.localToGlobal(Offset.zero).dx,
-                  top: _triggerBox!.localToGlobal(Offset.zero).dy,
-                  width: _triggerBox!.size.width,
-                  height: _triggerBox!.size.height,
-                  child: _buildZoom(
-                    context,
-                    widget.builder(context, true, _open, widget.child),
-                  ),
-                ),
-            ],
-            menu,
-          ],
-        );
-      }),
-      controller: _overlayPortalController,
-      child: _buildTriggerDetector(context),
-    );
-  }
+  bool get opaque => false;
 }

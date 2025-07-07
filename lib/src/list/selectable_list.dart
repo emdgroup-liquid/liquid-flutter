@@ -80,13 +80,6 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType, GroupingCri
     _dragRectItems.addListener(() {
       _changeNotifier.notifyListeners();
     });
-
-    _focusNode.addListener(() {
-      if (!_focusNode.hasFocus) {
-        _shiftPressed = false;
-        _ctrlPressed = false;
-      }
-    });
   }
 
   @override
@@ -260,6 +253,7 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType, GroupingCri
     if (isCtrl) {
       _ctrlPressed = event is KeyDownEvent;
     }
+
     if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.arrowDown) {
       // Get the item that has the focus
       for (final item in _itemFocusNodes.entries) {

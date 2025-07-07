@@ -24,6 +24,20 @@ void main() async {
 
   await Highlighter.initialize(['dart', 'yaml', 'sql']);
 
+  LdAppBar.callbacks = LdWindowCallbacks(onClose: () {
+    appWindow.close();
+  }, onMinimize: () {
+    appWindow.minimize();
+  }, onMaximize: () {
+    if (appWindow.isMaximized) {
+      appWindow.restore();
+    } else {
+      appWindow.maximize();
+    }
+  }, onMove: () {
+    appWindow.startDragging();
+  });
+
   runApp(const LiquidExample());
 
   if (!kIsWeb && Platform.isMacOS) {
@@ -64,7 +78,8 @@ class _LiquidExampleState extends State<LiquidExample> {
                 const SingleActivator(LogicalKeyboardKey.keyK, meta: true): () {
                   searchFocusNode.requestFocus();
                 },
-                const SingleActivator(LogicalKeyboardKey.keyK, control: true): () {
+                const SingleActivator(LogicalKeyboardKey.keyK, control: true):
+                    () {
                   searchFocusNode.requestFocus();
                 },
               },
@@ -74,7 +89,8 @@ class _LiquidExampleState extends State<LiquidExample> {
                   var router = context.read<AppRouter>().router;
 
                   return MaterialApp.router(
-                    localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+                    localizationsDelegates:
+                        LiquidLocalizations.localizationsDelegates,
                     locale: const Locale('en'),
                     title: 'Liquid Design Demo',
                     debugShowCheckedModeBanner: false,

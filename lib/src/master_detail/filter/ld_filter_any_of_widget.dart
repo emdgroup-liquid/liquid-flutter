@@ -22,44 +22,42 @@ class LdFilterAnyOfWidget<T extends Identifiable<IdType>, IdType, E> extends Sta
             ))
         .toList();
 
-    return LdCard(
-      child: LdAutoSpace(
-        children: [
-          Row(
-            children: [
-              Expanded(child: LdTextL(filter.label(context))),
-              LdButtonVague(
-                child: const Icon(LucideIcons.x),
-                size: LdSize.s,
-                onPressed: () {
-                  filter.isOn = false;
-                  filter.selectedValues.clear();
-                  onFilterChanged(filter);
-                },
-              ),
-            ],
-          ),
-          if (items.isNotEmpty)
-            LdChoose<E>(
-              items: items,
-              multiple: true,
-              value: filter.selectedValues,
-              placeholder: Text(filter.label(context)),
-              onChange: (Set<E> values) {
-                if (values.isEmpty) {
-                  filter.isOn = false;
-                  onFilterChanged(filter);
-                  return;
-                }
-
-                filter.selectedValues = values;
-                filter.isOn = values.isNotEmpty;
+    return LdAutoSpace(
+      children: [
+        Row(
+          children: [
+            Expanded(child: LdTextL(filter.label(context))),
+            LdButtonVague(
+              child: const Icon(LucideIcons.x),
+              size: LdSize.s,
+              onPressed: () {
+                filter.isOn = false;
+                filter.selectedValues.clear();
                 onFilterChanged(filter);
               },
-              allowEmpty: true,
             ),
-        ],
-      ),
-    );
+          ],
+        ),
+        if (items.isNotEmpty)
+          LdChoose<E>(
+            items: items,
+            multiple: true,
+            value: filter.selectedValues,
+            placeholder: Text(filter.label(context)),
+            onChange: (Set<E> values) {
+              if (values.isEmpty) {
+                filter.isOn = false;
+                onFilterChanged(filter);
+                return;
+              }
+
+              filter.selectedValues = values;
+              filter.isOn = values.isNotEmpty;
+              onFilterChanged(filter);
+            },
+            allowEmpty: true,
+          ),
+      ],
+    ).padM();
   }
 }

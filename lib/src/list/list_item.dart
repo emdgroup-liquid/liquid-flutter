@@ -28,6 +28,7 @@ class LdListItemConfig {
   final LdColor? color;
   final FocusNode? focusNode;
   final bool tableRowMode;
+  final bool isOdd;
 
   const LdListItemConfig({
     this.active = false,
@@ -53,6 +54,7 @@ class LdListItemConfig {
     this.color,
     this.width,
     this.tableRowMode = false,
+    this.isOdd = false,
   });
 
   LdListItemConfig copyWith({
@@ -79,6 +81,7 @@ class LdListItemConfig {
     LdColor? color,
     Key? key,
     bool? tableRowMode,
+    bool? isOdd,
   }) {
     return LdListItemConfig(
       leading: leading ?? this.leading,
@@ -104,6 +107,7 @@ class LdListItemConfig {
       showSelectionControls: showSelectionControls ?? this.showSelectionControls,
       key: key ?? this.key,
       tableRowMode: tableRowMode ?? this.tableRowMode,
+      isOdd: isOdd ?? this.isOdd,
     );
   }
 }
@@ -130,7 +134,7 @@ class LdListItem extends StatelessWidget {
   final bool showBothTrailingAndTrailingForward;
   final LdColor? color;
   final bool tableRowMode;
-
+  final bool isOdd;
   final bool showSelectionControls;
 
   const LdListItem({
@@ -157,6 +161,7 @@ class LdListItem extends StatelessWidget {
     this.color,
     this.width,
     this.tableRowMode = false,
+    this.isOdd = false,
   });
 
   factory LdListItem.fromConfig(LdListItemConfig config) {
@@ -184,6 +189,7 @@ class LdListItem extends StatelessWidget {
       trailingForward: config.trailingForward,
       width: config.width,
       tableRowMode: config.tableRowMode,
+      isOdd: config.isOdd,
     );
   }
 
@@ -259,8 +265,9 @@ class LdListItem extends StatelessWidget {
     }
 
     Widget _buildChevron() {
-      if (!(trailingForward && (trailing == null || showBothTrailingAndTrailingForward)))
+      if (!(trailingForward && (trailing == null || showBothTrailingAndTrailingForward))) {
         return const SizedBox.shrink();
+      }
       return Row(
         children: [
           ldSpacerM,
@@ -330,6 +337,7 @@ class LdListItem extends StatelessWidget {
     if (tableRowMode) {
       return LdTouchableSurface(
         focusNode: focusNode,
+        isOdd: isOdd,
         onTap: () {
           if (showSelectionControls) {
             onSelectionChange?.call(!isSelected);
@@ -372,6 +380,7 @@ class LdListItem extends StatelessWidget {
       active: active || (showSelectionControls && isSelected),
       disabled: disabled || (!showSelectionControls && onTap == null),
       color: color ?? theme.palette.primary,
+      isOdd: isOdd,
       builder: (contxt, colors, status) {
         return IconTheme(
           data: IconThemeData(

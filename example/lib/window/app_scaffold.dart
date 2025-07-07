@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:liquid/window/drawer.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -6,9 +7,14 @@ import 'package:responsive_builder/responsive_builder.dart';
 // Used to theme the scaffold and make it work with the drawer
 class AppScaffold extends StatefulWidget {
   final Widget child;
+  final GoRouterState state;
   final Text title;
 
-  const AppScaffold({super.key, required this.child, required this.title});
+  const AppScaffold(
+      {super.key,
+      required this.child,
+      required this.title,
+      required this.state});
 
   @override
   State<AppScaffold> createState() => _AppScaffoldState();
@@ -27,7 +33,8 @@ class _AppScaffoldState extends State<AppScaffold> {
               blurOnScroll: true,
               leading: Container(
                 height: 24,
-                decoration: BoxDecoration(borderRadius: LdTheme.of(context).radius(LdSize.m)),
+                decoration: BoxDecoration(
+                    borderRadius: LdTheme.of(context).radius(LdSize.m)),
                 clipBehavior: Clip.hardEdge,
                 child: Image.asset(
                   "liquid_flutter_icon.jpg",

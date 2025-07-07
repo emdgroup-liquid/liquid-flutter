@@ -408,7 +408,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType, GroupingCriterion>
       key: _itemKeys[item.value.id],
       child: switch (listEntry.item!.state) {
         LdPaginatorItemState.fetching => _buildLoader(context, listEntry.position!),
-        _ => widget.itemBuilder(context, item, index),
+        _ => widget.itemBuilder(context, item, listEntry.position!),
       },
     );
   }
