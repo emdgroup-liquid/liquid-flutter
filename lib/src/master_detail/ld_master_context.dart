@@ -27,7 +27,7 @@ class LdMasterContext<T extends Identifiable<IdType>, IdType, GroupingCriterion>
 
   static LdMasterContext<T, IdType, GroupingCriterion> of<T extends Identifiable<IdType>, IdType, GroupingCriterion>(
       BuildContext context) {
-    return context.watch<LdMasterContext<T, IdType, GroupingCriterion>>();
+    return context.read<LdMasterContext<T, IdType, GroupingCriterion>>();
   }
 
   factory LdMasterContext.fromRoute(LdMasterDetailRoute<T, IdType, GroupingCriterion> route, BuildContext context) {

@@ -30,10 +30,13 @@ LdMasterDetailAction<T, IdType, GroupingCriterion>
                     const Center(child: Icon(LucideIcons.listFilter)),
                     Transform.scale(
                       alignment: Alignment.topRight,
-                      scale: 0.5,
-                      child: LdBadge(
-                        color: LdTheme.of(context).warning,
-                        child: Text(activeFilters.length.toString()),
+                      scale: 0.8,
+                      child: Transform.translate(
+                        offset: const Offset(8, -8),
+                        child: LdBadge(
+                          color: LdTheme.of(context).warning,
+                          child: Text(activeFilters.length.toString()),
+                        ),
                       ),
                     ),
                   ],
@@ -43,10 +46,6 @@ LdMasterDetailAction<T, IdType, GroupingCriterion>
             return const Icon(LucideIcons.listFilter);
           },
           submitType: LdLabeledActionSubmitType.contextMenu,
-          buildMenuProviders: (context) => [
-            Provider.value(value: context.read<LdMasterDetailRoute<T, IdType, GroupingCriterion>>()),
-            Provider.value(value: context.read<LdMasterDetailSelection<T, IdType, GroupingCriterion>>()),
-          ],
           buildContextMenu: (context, close) => ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 300),
             child: LdFilterModal(

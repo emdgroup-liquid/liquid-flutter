@@ -14,43 +14,55 @@ class LdMasterDetailContextMenu<T extends Identifiable<IdType>, IdType, Grouping
     final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context);
     final listSelection = selection.items;
 
-    final newSelection = listSelection.isEmpty ? {item.value!.id} : listSelection;
+    final newSelection = !listSelection.contains(item.value!.id) ? {item.value!.id} : listSelection;
 
     final route = LdMasterDetailRoute.of<T, IdType, GroupingCriterion>(context);
 
-    final actions =
-        route.actions.where((e) => e.isVisible(context, location: LdMasterDetailActionLocation.context)).toList();
-
     return Provider.value(
       value: LdMasterDetailSelection<T, IdType, GroupingCriterion>(items: newSelection),
-      child: LdContextMenu(
-        child: child,
-        disabled: (listSelection.length > 1 && !listSelection.contains(item.value!.id)) || actions.isEmpty,
-        builder: (context, isOpen, open, child) => child!,
-        menuProviders: (context) => [
-          Provider<LdPaginatorItem<T>>.value(value: item),
-          Provider<LdMasterDetailRoute<T, IdType, GroupingCriterion>>.value(value: route),
-          Provider<LdMasterDetailSelection<T, IdType, GroupingCriterion>>.value(value: selection),
-          Provider<List<LdMasterDetailAction<T, IdType, GroupingCriterion>>>.value(value: actions),
-        ],
-        menuBuilder: (context, menuBuilder) => ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 300),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: actions
-                .map(
-                  (action) => LdListItem(
-                    title: Text(action.label(context)),
-                    leading: action.icon(context),
-                    onTap: () {
-                      LdContextMenuDissmissNotification().dispatch(context);
-                      action.onPressed(context);
-                    },
-                  ),
-                )
-                .toList(),
-          ),
-        ),
+      child: Provider.value(
+        value: newSelection,
+        child: Builder(builder: (newContext) {
+          final actions =
+              route.actions.where((e) => e.isVisible(newContext, location: LdMasterDetailActionLocation.context));
+          return LdContextMenu(
+            child: child,
+            disabled: (listSelection.length > 1 && !listSelection.contains(item.value!.id)) || actions.isEmpty,
+            builder: (context, isOpen, open, child) => child!,
+            menuProviders: (context) => [
+              Provider<LdPaginatorItem<T>>.value(value: item),
+              Provider<LdMasterDetailRoute<T, IdType, GroupingCriterion>>.value(value: route),
+              Provider<LdMasterDetailSelection<T, IdType, GroupingCriterion>>.value(
+                value: LdMasterDetailSelection(items: newSelection),
+              ),
+              Provider<List<LdMasterDetailAction<T, IdType, GroupingCriterion>>>.value(
+                value: actions.toList(),
+              ),
+              Provider<LdMasterContext<T, IdType, GroupingCriterion>>.value(
+                value: LdMasterContext.fromRoute(route, newContext),
+              ),
+            ],
+            menuBuilder: (context, menuBuilder) => ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 300),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: actions
+                    .where((e) => e.isVisible(context, location: LdMasterDetailActionLocation.context))
+                    .map(
+                      (action) => LdListItem(
+                        title: Text(action.label(context)),
+                        leading: action.icon(context),
+                        onTap: () {
+                          LdContextMenuDissmissNotification().dispatch(context);
+                          action.onPressed(context);
+                        },
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          );
+        }),
       ),
     );
   }

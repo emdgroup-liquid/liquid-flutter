@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/master_detail/ld_master_detail_selection.dart';
 import 'package:provider/provider.dart';
-import 'package:provider/single_child_widget.dart';
 
 class LdMasterDetailActionVisibility {
   final LdMasterDetailActionLocation location;
@@ -40,8 +39,6 @@ class LdMasterDetailAction<T extends Identifiable<IdType>, IdType, GroupingCrite
 
   final Widget Function(BuildContext context, Set<IdType> selection)? buildContextMenu;
 
-  final List<SingleChildWidget>? Function(BuildContext context)? buildMenuProviders;
-
   @override
   Widget? contextMenu(BuildContext context) {
     final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context);
@@ -73,11 +70,6 @@ class LdMasterDetailAction<T extends Identifiable<IdType>, IdType, GroupingCrite
   }
 
   @override
-  List<SingleChildWidget>? menuProviders(BuildContext context) {
-    return buildMenuProviders?.call(context);
-  }
-
-  @override
   bool isVisible(BuildContext context, {LdMasterDetailActionLocation? location}) {
     location ??= context.read<LdMasterDetailActionLocation>();
 
@@ -85,7 +77,7 @@ class LdMasterDetailAction<T extends Identifiable<IdType>, IdType, GroupingCrite
 
     final route = LdMasterDetailRoute.of<T, IdType, GroupingCriterion>(context);
 
-    final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context);
+    final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context, listen: false);
 
     final selectedItemCount = selection.items.length;
 
@@ -149,7 +141,6 @@ class LdMasterDetailAction<T extends Identifiable<IdType>, IdType, GroupingCrite
     this.multiSelect = true,
     LdLabeledActionSubmitType submitType = LdLabeledActionSubmitType.notification,
     this.shortcutActivators = const {},
-    this.buildMenuProviders,
   })  : _color = color,
         _submitType = submitType;
 

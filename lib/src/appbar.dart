@@ -344,10 +344,6 @@ mixin LdLabeledAction {
 
   Widget? contextMenu(BuildContext context);
 
-  List<SingleChildWidget>? menuProviders(BuildContext context) {
-    return null;
-  }
-
   bool isVisible(BuildContext context) {
     return true;
   }
@@ -427,13 +423,15 @@ class _ActionTriggerButton extends StatelessWidget {
 class LdAppBarActions extends StatelessWidget {
   final List<LdLabeledAction> actions;
 
-  const LdAppBarActions({super.key, required this.actions});
+  final List<SingleChildWidget> Function(BuildContext context)? menuProviders;
+
+  const LdAppBarActions({super.key, required this.actions, this.menuProviders});
 
   Widget _buildAction(BuildContext context, LdLabeledAction action, bool bigToolbar, bool inMenu) {
     switch (action.submitType) {
       case LdLabeledActionSubmitType.contextMenu:
         return LdContextMenu(
-          menuProviders: action.menuProviders,
+          menuProviders: menuProviders,
           builder: (context, isOpen, open, child) => _ActionTriggerButton(
             action: action,
             bigToolbar: bigToolbar,
@@ -494,6 +492,7 @@ class LdAppBarActions extends StatelessWidget {
           ),
         ],
         builder: (context, remaining) => LdContextMenu(
+          menuProviders: menuProviders,
           scaleFromTrigger: true,
           builder: (context, isOpen, open, child) => LdButtonGhost(
             onPressed: open,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/master_detail/sort/ld_sort_option.dart';
@@ -496,10 +495,11 @@ final taskDemo = LdMasterDetailRoute<_Task, int, bool>(
             maxSelectionCount: null,
             applyFilters: {"todo"}),
         LdMasterDetailActionVisibility(
-            location: LdMasterDetailActionLocation.context,
-            minSelectionCount: 1,
-            maxSelectionCount: null,
-            applyFilters: {"todo"}),
+          location: LdMasterDetailActionLocation.context,
+          minSelectionCount: 1,
+          maxSelectionCount: null,
+          applyFilters: {"todo"},
+        ),
       },
       shortcutActivators: {
         SingleActivator(LogicalKeyboardKey.keyD),
@@ -570,6 +570,7 @@ final taskDemo = LdMasterDetailRoute<_Task, int, bool>(
       buildIcon: (context, selection) => const Icon(LucideIcons.copy),
       multiSelect: false,
       action: (context, selection) async {
+        final route = LdMasterDetailRoute.of<_Task, int, bool>(context);
         final item = await taskRepository.getById(selection.first);
 
         final newItem = item.copyWith(
@@ -580,8 +581,6 @@ final taskDemo = LdMasterDetailRoute<_Task, int, bool>(
         await taskRepository.create(newItem.id, newItem);
 
         await Future.delayed(const Duration(milliseconds: 1500));
-
-        final route = LdMasterDetailRoute.of<_Task, int, bool>(context);
 
         route.setSelectedItems({newItem.id});
       },

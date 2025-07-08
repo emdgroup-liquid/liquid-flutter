@@ -189,7 +189,7 @@ class LdScaffoldState extends State<LdScaffold> {
 
       final mediaQuery = MediaQuery.of(context);
       final drawerInset = _isSideBySide ? 5.0 : 2.0;
-      final bodyInset = _isSideBySide ? 5.0 : 0.0;
+      final bodyInset = _isSideBySide && _isDrawerOpen ? 5.0 : 0.0;
 
       Border? drawerBorder;
 
