@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -177,10 +178,11 @@ class _LdContextMenuState extends State<LdContextMenu> {
     }
     _cursorPosition = globalPosition;
     final position = _getMenuPosition();
-    Navigator.of(context).push(
+    Navigator.of(context, rootNavigator: true).push(
       ContextMenuRoute(
         menuBuilder: (ctx, onDismiss) => widget.menuBuilder(ctx, onDismiss),
         position: position,
+        triggerKey: _triggerKey,
         triggerPosition: _getTriggerPosition() ?? Offset.zero,
         triggerSize: _getTriggerSize() ?? Size.zero,
         shouldBlur: _shouldBlur,
@@ -188,6 +190,8 @@ class _LdContextMenuState extends State<LdContextMenu> {
         backgroundColor: null,
         onDismiss: _dismiss,
         providers: widget.menuProviders?.call(context),
+        triggerBuilder: (context, isShuttle, trigger, child) => widget.builder(context, isShuttle, trigger, child),
+        child: widget.child,
       ),
     );
   }
@@ -205,13 +209,16 @@ class _LdContextMenuState extends State<LdContextMenu> {
         LdHaptics.vibrate(HapticsType.heavy);
         _open(globalPosition: details.globalPosition);
       },
-      child: widget.builder(
-        context,
-        false,
-        () {
-          _open();
-        },
-        widget.child,
+      child: Hero(
+        tag: "context-menu-trigger-${_triggerKey.hashCode}",
+        child: widget.builder(
+          context,
+          false,
+          () {
+            _open();
+          },
+          widget.child,
+        ),
       ),
     );
   }
@@ -227,12 +234,15 @@ class ContextMenuRoute extends ModalRoute<void> {
   final Widget Function(BuildContext, VoidCallback) menuBuilder;
   final Offset position;
   final Offset triggerPosition;
+  final GlobalKey triggerKey;
   final Size triggerSize;
   final bool shouldBlur;
   final bool shouldZoom;
   final Color? backgroundColor;
   final VoidCallback? onDismiss;
   final List<SingleChildWidget>? providers;
+  final Widget Function(BuildContext, bool, VoidCallback, Widget?) triggerBuilder;
+  final Widget? child;
 
   final ValueNotifier<Size> _menuSizeNotifier = ValueNotifier(Size.zero);
 
@@ -247,6 +257,9 @@ class ContextMenuRoute extends ModalRoute<void> {
     required this.triggerPosition,
     required this.triggerSize,
     this.providers,
+    required this.triggerKey,
+    required this.triggerBuilder,
+    required this.child,
   });
 
   @override
@@ -256,7 +269,7 @@ class ContextMenuRoute extends ModalRoute<void> {
   }
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 200);
+  Duration get transitionDuration => const Duration(milliseconds: 100);
 
   @override
   bool get barrierDismissible => true;
@@ -276,6 +289,59 @@ class ContextMenuRoute extends ModalRoute<void> {
     onDismiss?.call();
   }
 
+  (Rect, Alignment) _resizeMenuToScreen(
+    BuildContext context,
+    Size menuSize,
+  ) {
+    final view = WidgetsBinding.instance.platformDispatcher.implicitView;
+
+    var mediaQuery = MediaQuery.of(context);
+
+    if (view != null) {
+      mediaQuery = MediaQueryData.fromView(view);
+    }
+
+    final viewInsets = mediaQuery.viewInsets + const EdgeInsets.all(10);
+
+    final screenSize = mediaQuery.size;
+
+    final menuWidth = menuSize.width;
+    final menuHeight = menuSize.height;
+
+    final overflowX = min(
+          0,
+          screenSize.width - viewInsets.right - viewInsets.left - (triggerPosition.dx) - menuWidth,
+        ) +
+        10;
+
+    final overflowY = min(
+          0,
+          screenSize.height -
+              viewInsets.bottom -
+              viewInsets.top -
+              (triggerPosition.dy + triggerSize.height) -
+              menuHeight,
+        ) +
+        10;
+
+    final baseRect = Rect.fromLTWH(
+      triggerPosition.dx + overflowX,
+      triggerPosition.dy + overflowY,
+      menuSize.width,
+      menuSize.height,
+    );
+
+    final isLeftOfTrigger = baseRect.left < triggerPosition.dx;
+    final isAboveTrigger = baseRect.top < triggerPosition.dy;
+
+    return switch ((isLeftOfTrigger, isAboveTrigger)) {
+      (true, true) => (baseRect, Alignment.bottomRight),
+      (true, false) => (baseRect, Alignment.topRight),
+      (false, true) => (baseRect, Alignment.bottomLeft),
+      (false, false) => (baseRect, Alignment.topLeft),
+    };
+  }
+
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return ValueListenableBuilder<Size>(
@@ -287,7 +353,6 @@ class ContextMenuRoute extends ModalRoute<void> {
                 onTap: () => Navigator.of(context).maybePop(),
                 behavior: HitTestBehavior.opaque,
               ),
-              if (size == Size.zero) _buildOffstageMenuForMeasurement(context),
             ],
           );
         });
@@ -307,9 +372,34 @@ class ContextMenuRoute extends ModalRoute<void> {
         ],
       );
     }
+
     return Stack(
       children: [
         _buildAnimatedMenuTransition(context, animation, _menuSizeNotifier.value),
+        if (shouldZoom)
+          Positioned(
+            left: triggerPosition.dx,
+            top: triggerPosition.dy,
+            width: triggerSize.width,
+            height: triggerSize.height,
+            child: Hero(
+              tag: "context-menu-trigger-${triggerKey.hashCode}",
+              child: Transform.scale(
+                scale: 1 + 0.05 * animation.value,
+                child: _wrapWithProviders(
+                  context,
+                  Builder(builder: (context2) {
+                    return triggerBuilder(
+                      context2,
+                      false,
+                      () {},
+                      child,
+                    );
+                  }),
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -330,31 +420,27 @@ class ContextMenuRoute extends ModalRoute<void> {
       triggerSize.width,
       triggerSize.height,
     );
-    final endRect = Rect.fromLTWH(
-      position.dx,
-      position.dy,
-      menuSize.width,
-      menuSize.height,
-    );
+
+    final (endRect, alignment) = _resizeMenuToScreen(context, menuSize);
+
     final rectTween = RectTween(begin: startRect, end: endRect);
     final rect = rectTween.evaluate(animation)!;
     return Positioned(
       left: rect.left,
       top: rect.top,
-      width: rect.width,
-      height: rect.height,
       child: shouldBlur
           ? BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10 * animation.value, sigmaY: 10 * animation.value),
-              child: _buildMenuTransitionContent(context, animation),
+              child: _buildMenuTransitionContent(context, animation, alignment: alignment),
             )
-          : _buildMenuTransitionContent(context, animation),
+          : _buildMenuTransitionContent(context, animation, alignment: alignment),
     );
   }
 
-  Widget _buildMenuTransitionContent(BuildContext context, Animation<double> animation) {
+  Widget _buildMenuTransitionContent(BuildContext context, Animation<double> animation, {Alignment? alignment}) {
     return Transform.scale(
-      scale: shouldZoom ? (0.95 + 0.05 * animation.value) : 1.0,
+      alignment: alignment,
+      scale: animation.value,
       child: FadeTransition(
         opacity: animation,
         child: _buildMenuContent(context),
@@ -363,28 +449,47 @@ class ContextMenuRoute extends ModalRoute<void> {
   }
 
   Widget _wrapMenu(BuildContext context, Widget menu) {
-    return Container(
-      decoration: BoxDecoration(
-        color: LdTheme.of(context).surface,
-        borderRadius: LdTheme.of(context).radius(LdSize.m),
-        boxShadow: [ldShadowSticky],
-        border: Border.all(color: LdTheme.of(context).border, width: LdTheme.of(context).borderWidth),
+    return NotificationListener<LdContextMenuDissmissNotification>(
+      onNotification: (notification) {
+        Navigator.of(context).maybePop();
+        return true;
+      },
+      child: Material(
+        type: MaterialType.transparency,
+        child: Container(
+          clipBehavior: Clip.hardEdge,
+          decoration: BoxDecoration(
+            color: LdTheme.of(context).surface,
+            borderRadius: LdTheme.of(context).radius(LdSize.m),
+            boxShadow: [ldShadowSticky],
+            border: Border.all(color: LdTheme.of(context).border, width: LdTheme.of(context).borderWidth),
+          ),
+          child: SingleChildScrollView(
+            child: MeasureSize(
+              sizeNotifier: _menuSizeNotifier,
+              child: menu,
+            ),
+          ),
+        ),
       ),
-      child: menu,
     );
   }
 
+  Widget _wrapWithProviders(BuildContext context, Widget child) {
+    return providers != null && providers!.isNotEmpty
+        ? MultiProvider(
+            providers: providers!,
+            child: child,
+          )
+        : child;
+  }
+
   Widget _buildMenuContent(BuildContext context) {
-    return MeasureSize(
-      sizeNotifier: _menuSizeNotifier,
-      child: providers != null && providers!.isNotEmpty
-          ? MultiProvider(
-              providers: providers!,
-              child: Builder(builder: (context) {
-                return _wrapMenu(context, menuBuilder(context, onDismiss ?? () {}));
-              }),
-            )
-          : _wrapMenu(context, menuBuilder(context, onDismiss ?? () {})),
+    return _wrapWithProviders(
+      context,
+      _wrapMenu(context, Builder(builder: (context) {
+        return menuBuilder(context, onDismiss ?? () {});
+      })),
     );
   }
 

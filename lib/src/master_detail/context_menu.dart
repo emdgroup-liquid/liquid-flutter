@@ -11,7 +11,8 @@ class LdMasterDetailContextMenu<T extends Identifiable<IdType>, IdType, Grouping
 
   @override
   Widget build(BuildContext context) {
-    final listSelection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context).items;
+    final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context);
+    final listSelection = selection.items;
 
     final newSelection = listSelection.isEmpty ? {item.value!.id} : listSelection;
 
@@ -26,6 +27,12 @@ class LdMasterDetailContextMenu<T extends Identifiable<IdType>, IdType, Grouping
         child: child,
         disabled: (listSelection.length > 1 && !listSelection.contains(item.value!.id)) || actions.isEmpty,
         builder: (context, isOpen, open, child) => child!,
+        menuProviders: (context) => [
+          Provider<LdPaginatorItem<T>>.value(value: item),
+          Provider<LdMasterDetailRoute<T, IdType, GroupingCriterion>>.value(value: route),
+          Provider<LdMasterDetailSelection<T, IdType, GroupingCriterion>>.value(value: selection),
+          Provider<List<LdMasterDetailAction<T, IdType, GroupingCriterion>>>.value(value: actions),
+        ],
         menuBuilder: (context, menuBuilder) => ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 300),
           child: Column(

@@ -24,17 +24,20 @@ LdMasterDetailAction<T, IdType, GroupingCriterion>
             final activeFilters = route.repository.filters.where((e) => e.isOn).toList();
 
             if (activeFilters.isNotEmpty) {
-              return Stack(
-                children: [
-                  const Icon(LucideIcons.listFilter),
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: LdBadge(
-                      child: Text(activeFilters.length.toString()),
+              return Center(
+                child: Stack(
+                  children: [
+                    const Center(child: Icon(LucideIcons.listFilter)),
+                    Transform.scale(
+                      alignment: Alignment.topRight,
+                      scale: 0.5,
+                      child: LdBadge(
+                        color: LdTheme.of(context).warning,
+                        child: Text(activeFilters.length.toString()),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               );
             }
             return const Icon(LucideIcons.listFilter);

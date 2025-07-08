@@ -79,7 +79,7 @@ class LdScaffold extends StatefulWidget {
     this.autoLayoutBody = true,
     this.drawer,
     this.drawerWidth = 304,
-    this.reflowBreakpoint = 1200,
+    this.reflowBreakpoint = 900,
   });
 
   @override
@@ -107,7 +107,6 @@ class LdScaffoldState extends State<LdScaffold> {
 
   double _drawerOffset = 0;
 
-  double _dragStartX = 0;
   bool _isDragging = false;
 
   bool get _isDrawerOpen => _drawerOffset > widget.drawerWidth / 2;
@@ -184,6 +183,7 @@ class LdScaffoldState extends State<LdScaffold> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = LdTheme.of(context, listen: true);
     return LayoutBuilder(builder: (context, constraints) {
       _isSideBySide = constraints.maxWidth >= widget.reflowBreakpoint! && widget.drawer != null;
 
@@ -196,9 +196,9 @@ class LdScaffoldState extends State<LdScaffold> {
       BorderRadius drawerRadius = BorderRadius.circular(0);
 
       if (_isSideBySide) {
-        drawerRadius = BorderRadius.circular(LdTheme.of(context).screenRadius - 1);
+        drawerRadius = BorderRadius.circular(theme.screenRadius - 1);
         drawerBorder = Border.all(
-          color: LdTheme.of(context).border,
+          color: theme.border,
           width: 1,
         );
       }
@@ -240,7 +240,7 @@ class LdScaffoldState extends State<LdScaffold> {
           return Material(
             type: MaterialType.transparency,
             child: ColoredBox(
-              color: widget.backgroundColor ?? LdTheme.of(context).background,
+              color: widget.backgroundColor ?? theme.background,
               child: ValueListenableBuilder(
                   valueListenable: _appBarSizeNotifier,
                   builder: (context, value, child) {
@@ -249,12 +249,11 @@ class LdScaffoldState extends State<LdScaffold> {
                       builder: (context, child) => GestureDetector(
                         onHorizontalDragStart: (details) {
                           if (widget.drawer == null) return;
-                          if ((details.localPosition.dx - _drawerOffset).abs() <= 50) {
-                            _isDragging = true;
-                            _dragStartX = details.localPosition.dx;
-                          }
                         },
                         onHorizontalDragUpdate: (details) {
+                          if (!_isDragging && (details.localPosition.dx - _drawerOffset).abs() <= 75) {
+                            _isDragging = true;
+                          }
                           if (widget.drawer == null) return;
                           if (_isDragging) {
                             setState(() {

@@ -78,49 +78,40 @@ class LdNotificationPortal extends StatelessWidget {
               duration: const Duration(milliseconds: 300),
               child: Align(
                 alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: MediaQuery.of(context).viewInsets,
-                  child: SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                        bottom: 16.0,
-                        left: 8,
-                        right: 8,
-                      ),
-                      child: Stack(
-                        children: notifier.notifications.mapIndexed((
-                          index,
-                          notification,
-                        ) {
-                          return LdNotificationWidget(
-                            key: notification.key,
-                            index: notifier.notifications.length - index - 1,
-                            notification: notification,
-                            removing: notification.removing,
-                            didConfirm: notification.didConfirm,
-                            onDismiss: () {
-                              notifier.onDismissNotification(notification);
-                            },
-                            onCancel: () {
-                              notifier.onCancelledNotification(
-                                notification as LdConfirmNotification,
-                              );
-                            },
-                            onConfirm: () {
-                              notifier.onConfirmedNotification(
-                                notification as LdConfirmNotification,
-                              );
-                            },
-                            onSubmitInput: (result) {
-                              notifier.onInputSubmitted(
-                                notification as LdInputNotification,
-                                result,
-                              );
-                            },
+                child: SafeArea(
+                  minimum: LdTheme.of(context).pad(size: LdSize.l),
+                  child: Stack(
+                    children: notifier.notifications.mapIndexed((
+                      index,
+                      notification,
+                    ) {
+                      return LdNotificationWidget(
+                        key: notification.key,
+                        index: notifier.notifications.length - index - 1,
+                        notification: notification,
+                        removing: notification.removing,
+                        didConfirm: notification.didConfirm,
+                        onDismiss: () {
+                          notifier.onDismissNotification(notification);
+                        },
+                        onCancel: () {
+                          notifier.onCancelledNotification(
+                            notification as LdConfirmNotification,
                           );
-                        }).toList(),
-                      ),
-                    ),
+                        },
+                        onConfirm: () {
+                          notifier.onConfirmedNotification(
+                            notification as LdConfirmNotification,
+                          );
+                        },
+                        onSubmitInput: (result) {
+                          notifier.onInputSubmitted(
+                            notification as LdInputNotification,
+                            result,
+                          );
+                        },
+                      );
+                    }).toList(),
                   ),
                 ),
               ),
