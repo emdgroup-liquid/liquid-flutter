@@ -43,7 +43,7 @@ class LdSelectableList<T extends Identifiable<IdType>, IdType, GroupingCriterion
 }
 
 class _LdSelectableListState<T extends Identifiable<IdType>, IdType, GroupingCriterion>
-    extends State<LdSelectableList<T, IdType, GroupingCriterion>> {
+    extends State<LdSelectableList<T, IdType, GroupingCriterion>> with WidgetsBindingObserver {
   late final _selectedItems = _SetNotifier<IdType>(
     widget.initialSelectedItems,
     widget.multiSelect,
@@ -70,6 +70,7 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType, GroupingCri
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _scrollController = ScrollController();
 
     _selectedItems.addListener(() {
@@ -90,6 +91,7 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType, GroupingCri
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _focusNode.dispose();
     _scrollController.dispose();
     _selectedItems.dispose();
@@ -109,6 +111,18 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType, GroupingCri
         _itemFocusNodes[widget.initialSelectedItems.first]?.requestFocus();
       }
     }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.detached) {
+      _shiftPressed = false;
+      _ctrlPressed = false;
+      setState(() {});
+    }
+    super.didChangeAppLifecycleState(state);
   }
 
   bool get isMultiSelect => widget.multiSelect;
