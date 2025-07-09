@@ -138,13 +138,6 @@ class _LdContextMenuState extends State<LdContextMenu> {
     return widget.positionMode;
   }
 
-  void _dismiss() {
-    if (!mounted) {
-      return;
-    }
-    Navigator.of(context).maybePop();
-  }
-
   Offset? _getTriggerPosition() {
     _triggerBox = _triggerKey.currentContext?.findRenderObject() as RenderBox?;
     return _triggerBox?.localToGlobal(Offset.zero);
@@ -176,7 +169,6 @@ class _LdContextMenuState extends State<LdContextMenu> {
         shouldBlur: _shouldBlur,
         shouldZoom: _shouldZoom,
         backgroundColor: null,
-        onDismiss: _dismiss,
         providers: widget.menuProviders?.call(context),
         triggerBuilder: (context, isShuttle, trigger, child) => widget.builder(context, isShuttle, trigger, child),
         child: widget.child,
@@ -347,7 +339,10 @@ class ContextMenuRoute extends ModalRoute<void> {
           return Stack(
             children: [
               GestureDetector(
-                onTap: () => Navigator.of(context).maybePop(),
+                onTap: () {
+                  print("dismiss");
+                  Navigator.of(context, rootNavigator: true).maybePop();
+                },
                 behavior: HitTestBehavior.opaque,
               ),
             ],
@@ -446,6 +441,7 @@ class ContextMenuRoute extends ModalRoute<void> {
   Widget _wrapMenu(BuildContext context, Widget menu) {
     return NotificationListener<LdContextMenuDissmissNotification>(
       onNotification: (notification) {
+        print("Dismiss notification");
         Navigator.of(context).maybePop();
         return true;
       },
