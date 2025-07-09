@@ -393,7 +393,10 @@ class _ActionTriggerButton extends StatelessWidget {
           disabled: disabled,
           leading: icon != null
               ? IconTheme(
-                  data: IconThemeData(color: action.color(context)?.center(LdTheme.of(context).isDark)),
+                  data: IconThemeData(
+                    color:
+                        action.color(context)?.center(LdTheme.of(context).isDark) ?? LdTheme.of(context).primaryColor,
+                  ),
                   child: icon,
                 )
               : null,
@@ -432,6 +435,8 @@ class LdAppBarActions extends StatelessWidget {
       case LdLabeledActionSubmitType.contextMenu:
         return LdContextMenu(
           menuProviders: menuProviders,
+          blurMode: LdContextMenuBlurMode.never,
+          zoomMode: LdContextZoomMode.never,
           builder: (context, isOpen, open, child) => _ActionTriggerButton(
             action: action,
             bigToolbar: bigToolbar,
