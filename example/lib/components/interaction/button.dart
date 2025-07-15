@@ -168,8 +168,9 @@ class _ButtonDemoState extends State<ButtonDemo> {
                               const Duration(seconds: 1),
                             );
 
-                            throw LdException(
+                            throw LdLocalizedException(
                               message: "Told you!",
+                              moreInfo: "Nothing actually happened",
                             );
                           },
                           child: const Text("I won't work"),

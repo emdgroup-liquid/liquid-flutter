@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:liquid/code_block.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid/components/layout/components_accordion.dart';
@@ -65,7 +64,7 @@ class _SubmitDemoState extends State<SubmitDemo> {
                           final randomNumber = random.nextInt(100);
 
                           if (randomNumber < 50) {
-                            throw LdException(
+                            throw LdLocalizedException(
                               message: "Something went wrong",
                               moreInfo: "Nothing actually happened",
                             );
@@ -112,7 +111,7 @@ class _SubmitDemoState extends State<SubmitDemo> {
                             final randomNumber = random.nextInt(100);
 
                             if (randomNumber < 50) {
-                              throw LdException(
+                              throw LdLocalizedException(
                                 message: "Something went wrong",
                                 moreInfo: "Nothing actually happened",
                               );
@@ -160,7 +159,7 @@ class _SubmitDemoState extends State<SubmitDemo> {
                           final randomNumber = random.nextInt(100);
 
                           if (randomNumber < 50) {
-                            throw LdException(
+                            throw LdLocalizedException(
                               message: "Something went wrong",
                               moreInfo: "Nothing actually happened",
                             );
@@ -213,7 +212,7 @@ class _SubmitDemoState extends State<SubmitDemo> {
                           final randomNumber = random.nextInt(100);
 
                           if (randomNumber < 50) {
-                            throw LdException(
+                            throw LdLocalizedException(
                               message: "Something went wrong",
                               moreInfo: "Nothing actually happened",
                             );
@@ -231,8 +230,7 @@ class _SubmitDemoState extends State<SubmitDemo> {
                   ],
                 ),
               ),
-              const ComponentsAccordion(
-                  components: {"LdSubmitNotificationBuilder"}),
+              const ComponentsAccordion(components: {"LdSubmitNotificationBuilder"}),
             ],
           ),
           ldSpacerL,
@@ -267,7 +265,7 @@ class _SubmitDemoState extends State<SubmitDemo> {
                       return Future.delayed(
                         const Duration(seconds: 2),
                         () {
-                          throw LdException(
+                          throw LdLocalizedException(
                             message: "Something went wrong",
                             moreInfo: "Nothing actually happened",
                           );
@@ -290,8 +288,7 @@ class _SubmitDemoState extends State<SubmitDemo> {
               LdTextP(
                 "The LdSubmitController handles the state of the LdSubmit component. It posesses a .state property of type LdSubmitState.",
               ),
-              LdTextP(
-                  "You can observe the controller through its .stateStream property."),
+              LdTextP("You can observe the controller through its .stateStream property."),
               ComponentsAccordion(components: {
                 "LdSubmitController",
                 "LdSubmitState",

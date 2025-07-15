@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 /// Renders an LdException
 class LdExceptionView extends StatelessWidget {
   /// The exception to render
-  final LdException? exception;
+  final LdLocalizedException? exception;
 
   /// The controller for managing retry operations
   final LdRetryController? retryController;

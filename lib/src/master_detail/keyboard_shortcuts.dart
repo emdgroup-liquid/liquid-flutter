@@ -19,8 +19,8 @@ class LdMasterDetailMultiShortcuts<T extends Identifiable<IdType>, IdType, Group
     for (final action in actions) {
       for (final activator in action.shortcutActivators) {
         if (bindings[activator] != null) {
-          throw LdException(
-            message: "Shortcut activator already in use: $activator",
+          throw Exception(
+            "Shortcut activator already in use: $activator",
           );
         }
 
@@ -60,8 +60,8 @@ class LdMasterDetailSingleShortcuts<T extends Identifiable<IdType>, IdType, Grou
     for (final action in actions) {
       for (final activator in action.shortcutActivators) {
         if (bindings[activator] != null) {
-          throw LdException(
-            message: "Shortcut activator already in use: $activator",
+          throw Exception(
+            "Shortcut activator already in use: $activator",
           );
         }
 

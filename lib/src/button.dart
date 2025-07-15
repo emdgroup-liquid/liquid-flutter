@@ -285,7 +285,9 @@ class _LdButtonState extends State<LdButton> {
                           );
                         }
 
-                        final errorText = widget.errorText ?? _error?.message ?? LiquidLocalizations.of(context).failed;
+                        final errorText = widget.errorText ??
+                            _error?.localize(context).message ??
+                            LiquidLocalizations.of(context).failed;
 
                         return Transform.translate(
                           offset: Offset(0, 20 * state.position),

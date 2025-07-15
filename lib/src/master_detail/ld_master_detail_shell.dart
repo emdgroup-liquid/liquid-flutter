@@ -79,18 +79,12 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
       return;
     }
 
-    print("selectedItems: $selectedItems");
-    print("deletedItems: $deletedItems");
-
-    print(GoRouter.of(context).routerDelegate.currentConfiguration.uri);
-
     if (deletedItems.isNotEmpty && selectedItems.intersection(deletedItems).isNotEmpty) {
       return;
     }
 
     if (selectedItems.isNotEmpty) {
       if (showingDetail) {
-        print("replacing $detailPath");
         router.replace(
           detailPath,
         );
@@ -98,7 +92,6 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
         if (widget.route.state.showSelectionControls) {
           return;
         }
-        print("pushing $detailPath");
         router.push(
           detailPath,
         );
@@ -107,7 +100,6 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
       if (showingDetail) {
         router.pop();
       } else {
-        print("replacing ${widget.route.path}");
         router.replace(widget.route.path);
       }
     }

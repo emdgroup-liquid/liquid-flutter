@@ -6,13 +6,6 @@ import 'package:provider/provider.dart';
 /// Can also contain a stack trace as well as the flag that the action causing
 /// the exception can be retried.
 class LdException extends Error {
-  /// The message of the exception.
-  final String message;
-
-  /// Additional information about the exception, e.g. a detailed explanation
-  /// of what went wrong.
-  final String? moreInfo;
-
   /// Whether the action causing the exception can be retried.
   final bool canRetry;
 
@@ -31,10 +24,8 @@ class LdException extends Error {
   final StackTrace? stackTrace;
 
   LdException({
-    required this.message,
     this.canRetry = true,
     this.type = LdHintType.error,
-    this.moreInfo,
     this.attempt,
     this.stackTrace,
     this.exception,
@@ -60,12 +51,45 @@ class LdException extends Error {
     StackTrace? stackTrace,
   }) {
     return LdException(
-      message: message ?? this.message,
-      moreInfo: moreInfo ?? this.moreInfo,
       canRetry: canRetry ?? this.canRetry,
       type: type ?? this.type,
       exception: exception ?? this.exception,
       stackTrace: stackTrace ?? this.stackTrace,
+    );
+  }
+
+  LdLocalizedException localize(BuildContext context) {
+    final exceptionMapper = context.read<LdExceptionMapper?>() ??
+        LdExceptionMapper(
+          localizations: LiquidLocalizations.of(context),
+        );
+    return exceptionMapper.handle(this);
+  }
+}
+
+class LdLocalizedException extends LdException {
+  final String message;
+  final String? moreInfo;
+
+  LdLocalizedException({
+    required this.message,
+    this.moreInfo,
+    super.canRetry = true,
+    super.type = LdHintType.error,
+    super.attempt,
+    super.stackTrace,
+    super.exception,
+  });
+
+  factory LdLocalizedException.fromException(LdException exception, String message, {String? moreInfo}) {
+    return LdLocalizedException(
+      message: message,
+      moreInfo: moreInfo,
+      canRetry: exception.canRetry,
+      type: exception.type,
+      attempt: exception.attempt,
+      stackTrace: exception.stackTrace,
+      exception: exception.exception,
     );
   }
 }

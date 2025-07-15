@@ -62,8 +62,10 @@ class LdMasterDetailRoute<T extends Identifiable<IdType>, IdType, GroupingCriter
   ) listBuilder;
 
   static LdMasterDetailRoute<T, IdType, GroupingCriterion>
-      of<T extends Identifiable<IdType>, IdType, GroupingCriterion>(BuildContext context) {
-    return context.read<LdMasterDetailRoute<T, IdType, GroupingCriterion>>();
+      of<T extends Identifiable<IdType>, IdType, GroupingCriterion>(BuildContext context, {bool watch = false}) {
+    return watch
+        ? context.watch<LdMasterDetailRoute<T, IdType, GroupingCriterion>>()
+        : context.read<LdMasterDetailRoute<T, IdType, GroupingCriterion>>();
   }
 
   LdMasterDetailRoute({

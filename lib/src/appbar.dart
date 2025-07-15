@@ -94,6 +94,10 @@ class _LdAppBarState extends State<LdAppBar> {
     return _layoutState?.slot == LdScaffoldSlot.appBar;
   }
 
+  bool get _isBottomNavigationBar {
+    return _layoutState?.slot == LdScaffoldSlot.bottomNavigationBar;
+  }
+
   bool get _isSideBySide {
     return _layoutState?.isSideBySide ?? false;
   }
@@ -219,7 +223,8 @@ class _LdAppBarState extends State<LdAppBar> {
                 duration: const Duration(milliseconds: 500),
                 color: backgroundColor.withAlpha(widget.blurOnScroll && scrolledUnder ? 150 : 255),
                 child: SafeArea(
-                  bottom: false,
+                  bottom: _isBottomNavigationBar,
+                  top: !_isBottomNavigationBar,
                   child: Padding(
                     padding: switch (theme.themeSize) {
                       (LdThemeSize.s) => LdTheme.of(context).pad(size: LdSize.xs),
@@ -288,14 +293,15 @@ class _LdAppBarState extends State<LdAppBar> {
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Flexible(
-                                        child: DefaultTextStyle(
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: headerStyle,
-                                          child: widget.title ?? const SizedBox(),
+                                      if (widget.title != null)
+                                        Flexible(
+                                          child: DefaultTextStyle(
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: headerStyle,
+                                            child: widget.title ?? const SizedBox(),
+                                          ),
                                         ),
-                                      ),
                                       if (widget.trailing != null) ...[
                                         Flexible(child: widget.trailing!),
                                       ],
@@ -308,7 +314,7 @@ class _LdAppBarState extends State<LdAppBar> {
                               ],
                             ).spaceM(),
                             if (widget.bottom != null) ...[
-                              widget.bottom!,
+                              widget.bottom!.padM(),
                             ],
                           ],
                         ),
@@ -331,7 +337,7 @@ class _LdAppBarState extends State<LdAppBar> {
           },
           child: appBar,
         ),
-        const LdDivider(height: 1),
+        if (!_isBottomNavigationBar) const LdDivider(height: 1),
       ],
     );
   }

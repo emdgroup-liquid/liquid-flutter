@@ -1,11 +1,13 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-class LdFilterSearchOption<T extends Identifiable<IdType>, IdType, S> extends LdFilterOption<T, IdType> {
+class LdFilterSearchOption<T extends Identifiable<IdType>, IdType, Suggestion> extends LdFilterOption<T, IdType> {
   String searchText;
   final bool Function(T item, String searchText) _optimisticFilter;
-  final Future<List<S>> Function(String)? getSuggestions;
+  final Future<List<Suggestion>> Function(String)? getSuggestions;
+  final Widget Function(BuildContext context, Suggestion suggestion)? buildSuggestion;
   final Duration debounceDelay;
+  final String? hint;
 
   LdFilterSearchOption({
     required super.name,
@@ -13,8 +15,10 @@ class LdFilterSearchOption<T extends Identifiable<IdType>, IdType, S> extends Ld
     required super.icon,
     super.isOn = false,
     this.searchText = '',
+    this.hint,
     required bool Function(T item, String searchText) optimisticFilter,
     this.getSuggestions,
+    this.buildSuggestion,
     this.debounceDelay = const Duration(milliseconds: 300),
   }) : _optimisticFilter = optimisticFilter;
 

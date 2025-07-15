@@ -1,4 +1,6 @@
+import 'package:flutter/widgets.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 LdMasterDetailAction<T, IdType, GroupingCriterion>
     toggleSelectionControls<T extends Identifiable<IdType>, IdType, GroupingCriterion>() =>
@@ -9,6 +11,13 @@ LdMasterDetailAction<T, IdType, GroupingCriterion>
               minSelectionCount: 0,
               maxSelectionCount: null,
             ),
+          },
+          buildIcon: (context, selection) {
+            final route = LdMasterDetailRoute.of<T, IdType, GroupingCriterion>(
+              context,
+              watch: true,
+            );
+            return route.state.showSelectionControls ? const Icon(LucideIcons.check) : const Icon(LucideIcons.pen);
           },
           buildLabel: (context, selection) {
             final route = LdMasterDetailRoute.of<T, IdType, GroupingCriterion>(context);

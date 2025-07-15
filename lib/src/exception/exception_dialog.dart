@@ -14,17 +14,18 @@ class LdExceptionDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizedError = error.localize(context);
     return LdAutoSpace(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         LdTextH(
-          error.message,
+          localizedError.message,
           textAlign: TextAlign.center,
         ),
-        if (error.moreInfo != null)
+        if (localizedError.moreInfo != null)
           LdMute(
             child: LdTextPs(
-              error.moreInfo!,
+              localizedError.moreInfo!,
               textAlign: TextAlign.center,
             ),
           ),

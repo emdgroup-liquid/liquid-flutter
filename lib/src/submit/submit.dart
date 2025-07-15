@@ -106,7 +106,6 @@ class _LdSubmitState<T, Arg> extends State<LdSubmit<T, Arg>> {
       create: (context) {
         final controller = LdSubmitController<T, Arg>(
           config: widget.config!,
-          exceptionMapper: LdExceptionMapper.of(context),
           arg: _argNotifier,
         );
 

@@ -60,10 +60,9 @@ class _ExceptionDemoState extends State<ExceptionDemo> {
             child: Consumer<LdRetryController>(
               builder: (context, retryController, child) {
                 return LdExceptionView(
-                  exception: LdException(
+                  exception: LdLocalizedException(
                     message: "Error message",
-                    moreInfo:
-                        "Nothing actually went wrong, this is just a demo",
+                    moreInfo: "Nothing actually went wrong, this is just a demo",
                     stackTrace: StackTrace.current,
                   ),
                   retryController: retryController,

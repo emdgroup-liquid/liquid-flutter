@@ -3,7 +3,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 /// LdExceptionMoreInfoButton is a button that will open a dialog with more info
 class LdExceptionMoreInfoButton extends StatelessWidget {
-  final LdException? error;
+  final LdLocalizedException? error;
 
   const LdExceptionMoreInfoButton({super.key, required this.error});
 

@@ -10,7 +10,7 @@ import 'package:liquid_flutter/src/haptics.dart';
 /// Updated LdSubmitController that uses LdRetryController
 class LdSubmitController<T, Arg> {
   final LdSubmitConfig<T, Arg> config;
-  final LdExceptionMapper exceptionMapper;
+
   final _stateController = StreamController<LdSubmitState<T>>.broadcast();
   late final LdRetryController _retryController;
   LdRetryController get retryController => _retryController;
@@ -19,7 +19,7 @@ class LdSubmitController<T, Arg> {
 
   ValueNotifier<Arg?>? arg;
 
-  LdSubmitController({required this.exceptionMapper, required this.config, this.arg}) {
+  LdSubmitController({required this.config, this.arg}) {
     _retryController = LdRetryController(
       onRetry: _nextAttempt,
       config: config.retryConfig ?? const LdRetryConfig(),
@@ -114,7 +114,11 @@ class LdSubmitController<T, Arg> {
       if (!_isLoading) return;
 
       // Convert the exception using the exceptionMapper
-      final exception = exceptionMapper.handle(e, stackTrace: s);
+      final exception = LdException(
+        exception: e,
+        stackTrace: s,
+        attempt: _retryController.state.attempt,
+      );
 
       if (ldPrintDebugMessages) {
         debugPrint(

@@ -61,7 +61,7 @@ class LdDetailPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
                 ],
               ),
               bottomNavigationBar: isSplit
-                  ? LdMasterDetailBottomBarActions<T, IdType, GroupingCriterion>(
+                  ? LdMasterDetailAppBarActions<T, IdType, GroupingCriterion>(
                       location: LdMasterDetailActionLocation.detailSecondary,
                     )
                   : null,

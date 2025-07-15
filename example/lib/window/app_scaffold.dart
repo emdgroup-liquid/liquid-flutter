@@ -10,11 +10,7 @@ class AppScaffold extends StatefulWidget {
   final GoRouterState state;
   final Text title;
 
-  const AppScaffold(
-      {super.key,
-      required this.child,
-      required this.title,
-      required this.state});
+  const AppScaffold({super.key, required this.child, required this.title, required this.state});
 
   @override
   State<AppScaffold> createState() => _AppScaffoldState();
@@ -33,8 +29,7 @@ class _AppScaffoldState extends State<AppScaffold> {
               blurOnScroll: true,
               leading: Container(
                 height: 24,
-                decoration: BoxDecoration(
-                    borderRadius: LdTheme.of(context).radius(LdSize.m)),
+                decoration: BoxDecoration(borderRadius: LdTheme.of(context).radius(LdSize.m)),
                 clipBehavior: Clip.hardEdge,
                 child: Image.asset(
                   "liquid_flutter_icon.jpg",

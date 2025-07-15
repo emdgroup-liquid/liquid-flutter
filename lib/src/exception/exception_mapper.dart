@@ -47,7 +47,7 @@ class LdExceptionMapper {
   /// returns a non-null LdException, it will be used instead of the default
   /// exception mapper. Otherwise, the default exception mapper will be used.
   /// This function will never be called if the exception is already an LdException.
-  final LdException? Function(dynamic e, {StackTrace? stackTrace})? onException;
+  final LdLocalizedException? Function(dynamic e, {StackTrace? stackTrace})? onException;
 
   const LdExceptionMapper({
     required this.localizations,
@@ -58,11 +58,11 @@ class LdExceptionMapper {
     return context.read<LdExceptionMapper>();
   }
 
-  LdException handle(
+  LdLocalizedException handle(
     dynamic e, {
     StackTrace? stackTrace,
   }) {
-    if (e is LdException) {
+    if (e is LdLocalizedException) {
       return e;
     }
 
@@ -73,7 +73,7 @@ class LdExceptionMapper {
       }
     }
 
-    final exception = LdException(
+    final exception = LdLocalizedException(
       message: localizations.unknownError,
       canRetry: true,
       stackTrace: stackTrace,
@@ -82,20 +82,23 @@ class LdExceptionMapper {
     );
 
     if (e is SocketException) {
-      return exception.copyWith(
-        message: localizations.networkError,
+      return LdLocalizedException.fromException(
+        exception,
+        localizations.networkError,
       );
     }
 
     if (e is TimeoutException) {
-      return exception.copyWith(
-        message: localizations.timeoutError,
+      return LdLocalizedException.fromException(
+        exception,
+        localizations.timeoutError,
       );
     }
 
     if (e is FormatException) {
-      return exception.copyWith(
-        message: localizations.formatError,
+      return LdLocalizedException.fromException(
+        exception,
+        localizations.formatError,
       );
     }
 

@@ -11,6 +11,7 @@ class LdInput extends StatefulWidget {
   final Function(String?)? onChanged;
   final Function(String?)? onBlur;
   final Function(String?)? onSubmitted;
+  final Function()? onClear;
   final TextEditingController? controller;
   final Iterable<String>? autofillHints;
   final bool obscureText;
@@ -50,6 +51,7 @@ class LdInput extends StatefulWidget {
       this.keyboardType,
       this.onChanged,
       this.trailingHint,
+      this.onClear,
       Key? key})
       : super(key: key);
 
@@ -167,6 +169,7 @@ class _LdInputState extends State<LdInput> {
         size: widget.size == LdSize.l ? LdSize.s : LdSize.xs,
         onPressed: () {
           _controller.clear();
+          widget.onClear?.call();
         });
 
     if (widget.trailingHint != null) {

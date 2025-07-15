@@ -42,8 +42,10 @@ class LdMasterPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
                           : null,
                     ),
                     bottomNavigationBar: isSeperate
-                        ? LdMasterDetailBottomBarActions<T, IdType, GroupingCriterion>(
-                            location: LdMasterDetailActionLocation.masterSecondary,
+                        ? LdAppBar(
+                            trailing: LdMasterDetailAppBarActions<T, IdType, GroupingCriterion>(
+                              location: LdMasterDetailActionLocation.masterSecondary,
+                            ),
                           )
                         : null,
                     body: route.listBuilder(
