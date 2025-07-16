@@ -86,6 +86,24 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     return context.read<LdRepository<T, IdType>>();
   }
 
+  Map<String, dynamic> get queryParameters {
+    var parameters = <String, dynamic>{};
+
+    for (final filter in _filters) {
+      if (filter.isOn) {
+        parameters[filter.name] = filter.serialize();
+      }
+    }
+
+    final sort = _sortOptions.where((e) => e.isOn).toList();
+
+    if (sort.isNotEmpty) {
+      parameters['sort'] = sort.map((e) => e.serialize()).join(',');
+    }
+
+    return parameters;
+  }
+
   Future<void> updateFilter(LdFilterOption<T, IdType> filter) async {
     final existingFilter = _filters.firstWhereOrNull((e) => e.name == filter.name);
     assert(existingFilter != null, 'Cannot update filter. Filter with name ${filter.name} does not exist');

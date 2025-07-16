@@ -24,6 +24,7 @@ class LdInput extends StatefulWidget {
   final bool showClear;
   final bool disabled;
   final bool loading;
+  final Widget? leading;
 
   final Widget? trailingHint;
 
@@ -35,6 +36,7 @@ class LdInput extends StatefulWidget {
       this.controller,
       this.label,
       this.obscureText = false,
+      this.leading,
       this.maxLines = 1,
       this.minLines,
       this.autofocus = false,
@@ -229,40 +231,56 @@ class _LdInputState extends State<LdInput> {
                           constraints: BoxConstraints(
                             minHeight: cursorHeight,
                           ),
-                          child: TextField(
-                            focusNode: _focusNode,
-                            enabled: !widget.disabled,
-                            controller: _controller,
-                            cursorColor: theme.palette.primary.idle(
-                              theme.isDark,
-                            ),
-                            cursorHeight: cursorHeight,
-                            maxLines: widget.maxLines,
-                            autofillHints: widget.autofillHints,
-                            keyboardType: widget.keyboardType,
-                            enableInteractiveSelection: true,
-                            minLines: widget.minLines,
-                            decoration: InputDecoration(
-                              hintText: widget.hint,
-                              border: InputBorder.none,
-                              hintStyle: hintStyle,
-                              isCollapsed: true,
-                              filled: false,
-                              isDense: true,
-                              suffix: suffix,
-                            ),
-                            obscureText: widget.obscureText,
-                            autofocus: widget.autofocus,
-                            textInputAction: widget.textInputAction,
-                            onSubmitted: widget.onSubmitted,
-                            cursorWidth: 1,
-                            style: TextStyle(
-                              color: textColor,
-                              package: theme.fontFamilyPackage,
-                              fontFamily: theme.fontFamily,
-                              fontSize: theme.labelSize(widget.size),
-                              height: 1,
-                            ),
+                          child: Row(
+                            children: [
+                              if (widget.leading != null) ...[
+                                IconTheme(
+                                  data: IconThemeData(
+                                    color: iconColor,
+                                    size: theme.labelSize(widget.size),
+                                  ),
+                                  child: widget.leading!,
+                                ),
+                                ldSpacerS
+                              ],
+                              Flexible(
+                                child: TextField(
+                                  focusNode: _focusNode,
+                                  enabled: !widget.disabled,
+                                  controller: _controller,
+                                  cursorColor: theme.palette.primary.idle(
+                                    theme.isDark,
+                                  ),
+                                  cursorHeight: cursorHeight,
+                                  maxLines: widget.maxLines,
+                                  autofillHints: widget.autofillHints,
+                                  keyboardType: widget.keyboardType,
+                                  enableInteractiveSelection: true,
+                                  minLines: widget.minLines,
+                                  decoration: InputDecoration(
+                                    hintText: widget.hint,
+                                    border: InputBorder.none,
+                                    hintStyle: hintStyle,
+                                    isCollapsed: true,
+                                    filled: false,
+                                    isDense: true,
+                                    suffix: suffix,
+                                  ),
+                                  obscureText: widget.obscureText,
+                                  autofocus: widget.autofocus,
+                                  textInputAction: widget.textInputAction,
+                                  onSubmitted: widget.onSubmitted,
+                                  cursorWidth: 1,
+                                  style: TextStyle(
+                                    color: textColor,
+                                    package: theme.fontFamilyPackage,
+                                    fontFamily: theme.fontFamily,
+                                    fontSize: theme.labelSize(widget.size),
+                                    height: 1,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ))),
                   if (widget.loading)
                     LinearProgressIndicator(

@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:liquid_flutter/liquid_flutter.dart';
 
@@ -37,16 +37,27 @@ class _LdFilterSearchWidgetState<T extends Identifiable<IdType>, IdType, Suggest
         setState(() {
           _disabled = true;
         });
-        await Navigator.of(context, rootNavigator: true).push(
+        final query = await Navigator.of(context, rootNavigator: true).push<String>(
           _SearchRoute(
             searchFilter: widget.filter,
+            onSearch: (value) {
+              widget.filter.searchText = value;
+              widget.filter.isOn = value.isNotEmpty;
+              widget.onFilterChanged(widget.filter);
+            },
             triggerRect: _getTriggerRect(),
           ),
         );
-        _controller.text = widget.filter.searchText;
         setState(() {
           _disabled = false;
         });
+        if (query == null) {
+          return;
+        }
+        _controller.text = query;
+        widget.filter.searchText = query;
+        widget.filter.isOn = query.isNotEmpty;
+        widget.onFilterChanged(widget.filter);
       }
     });
   }
@@ -79,22 +90,38 @@ class _LdFilterSearchWidgetState<T extends Identifiable<IdType>, IdType, Suggest
 
   @override
   Widget build(BuildContext context) {
-    return LdInput(
-      focusNode: _triggerNode,
-      key: _triggerKey,
-      disabled: _disabled,
-      hint: widget.filter.hint ?? LiquidLocalizations.of(context).search,
-      controller: _controller,
+    final isTop =
+        _getTriggerRect()?.center.dy != null && _getTriggerRect()!.center.dy < MediaQuery.sizeOf(context).height / 2;
+
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.keyF, meta: true): () {
+          _triggerNode.requestFocus();
+        },
+      },
+      child: Padding(
+        padding: !isTop ? LdTheme.of(context).pad().copyWith(left: 0, right: 0) : EdgeInsets.zero,
+        child: LdInput(
+          focusNode: _triggerNode,
+          leading: const Icon(Icons.search),
+          key: _triggerKey,
+          disabled: _disabled,
+          hint: widget.filter.hint ?? LiquidLocalizations.of(context).search,
+          controller: _controller,
+        ),
+      ),
     );
   }
 }
 
-class _SearchRoute<T extends Identifiable<IdType>, IdType, Suggestion> extends ModalRoute<void> {
+class _SearchRoute<T extends Identifiable<IdType>, IdType, Suggestion> extends ModalRoute<String> {
   final LdFilterSearchOption<T, IdType, Suggestion> searchFilter;
 
   final Rect? triggerRect;
 
-  _SearchRoute({required this.searchFilter, this.triggerRect});
+  final Function(String) onSearch;
+
+  _SearchRoute({required this.searchFilter, this.triggerRect, required this.onSearch});
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
@@ -108,11 +135,14 @@ class _SearchRoute<T extends Identifiable<IdType>, IdType, Suggestion> extends M
     final left = triggerRect?.left ?? 0;
     final width = triggerRect?.width ?? 100;
 
+    final top = isTop ? max(triggerRect!.top, viewInsets.top) : null;
+    final bottom = isTop ? null : max(size.height - triggerRect!.bottom, viewInsets.bottom);
+
     return Stack(
       children: [
         Positioned(
-          top: isTop ? max(triggerRect!.top, viewInsets.top) : null,
-          bottom: isTop ? null : min(triggerRect!.bottom, viewInsets.bottom),
+          top: top,
+          bottom: bottom,
           left: left,
           width: width,
           child: _SearchWidget(
@@ -156,7 +186,6 @@ class _SearchWidget<T extends Identifiable<IdType>, IdType, Suggestion> extends 
 
 class _SearchWidgetState<T extends Identifiable<IdType>, IdType, Suggestion>
     extends State<_SearchWidget<T, IdType, Suggestion>> {
-  Timer? _debounceTimer;
   Timer? _suggestionTimer;
   late final _controller = TextEditingController(text: widget.filter.searchText);
 
@@ -184,21 +213,7 @@ class _SearchWidgetState<T extends Identifiable<IdType>, IdType, Suggestion>
     super.initState();
   }
 
-  void _triggerSearch(String value) {
-    widget.filter.searchText = value;
-    widget.filter.isOn = widget.filter.searchText.isNotEmpty;
-
-    // Cancel previous timer
-    _debounceTimer?.cancel();
-
-    // Start new timer
-
-    _debounceTimer = Timer(widget.filter.debounceDelay, () {});
-  }
-
   void _onSearchChanged(String? value) {
-    _triggerSearch(value ?? '');
-
     _suggestionTimer?.cancel();
     _suggestionTimer = Timer(const Duration(milliseconds: 100), () {
       _suggestionController.trigger();
@@ -207,7 +222,6 @@ class _SearchWidgetState<T extends Identifiable<IdType>, IdType, Suggestion>
 
   @override
   void dispose() {
-    _debounceTimer?.cancel();
     _suggestionTimer?.cancel();
     _controller.dispose();
     super.dispose();
@@ -217,42 +231,37 @@ class _SearchWidgetState<T extends Identifiable<IdType>, IdType, Suggestion>
   Widget build(BuildContext context) {
     return Material(
       type: MaterialType.transparency,
-      child: LdSpring(
-        position: 1,
-        initialPosition: 0,
-        builder: (context, state, child) => Container(
-          padding: widget.isTop ? LdTheme.of(context).pad() * state.position.clamp(0, 2) : null,
-          clipBehavior: Clip.hardEdge,
-          decoration: BoxDecoration(
-            color: LdTheme.of(context).neutralShade(2),
-            boxShadow: [
-              ldShadowSticky,
-            ],
-            borderRadius: LdTheme.of(context).radius(LdSize.s),
-          ),
-          child: child,
-        ),
-        child: FocusTraversalGroup(
-          child: LdSubmit<List<Suggestion>, void>(
-            controller: _suggestionController,
-            builder: LdSubmitCustomBuilder<List<Suggestion>, void>(
-              builder: (context, controller, state) => FocusTraversalGroup(
+      child: FocusTraversalGroup(
+        child: LdSubmit<List<Suggestion>, void>(
+          controller: _suggestionController,
+          builder: LdSubmitCustomBuilder<List<Suggestion>, void>(
+            builder: (context, controller, state) => DecoratedBox(
+              decoration: BoxDecoration(
+                color: LdTheme.of(context).neutralShade(2),
+                borderRadius: LdTheme.of(context).radius(LdSize.s),
+                border: Border.all(
+                  color: LdTheme.of(context).border,
+                  width: 1,
+                ),
+                boxShadow: [
+                  ldShadowSticky,
+                ],
+              ),
+              child: FocusTraversalGroup(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     LdInput(
                       controller: _controller,
                       autofocus: true,
+                      leading: const Icon(Icons.search),
                       hint: widget.filter.hint ?? LiquidLocalizations.of(context).search,
                       onChanged: _onSearchChanged,
-                      showClear: true,
                       onClear: () {
-                        _triggerSearch('');
-                        Navigator.of(context).maybePop();
+                        Navigator.of(context).maybePop('');
                       },
                       onSubmitted: (value) {
-                        _triggerSearch(value ?? '');
-                        Navigator.of(context).maybePop();
+                        Navigator.of(context).maybePop(value ?? '');
                       },
                     ),
                     if (controller.state.result?.isNotEmpty ?? false)
@@ -260,26 +269,23 @@ class _SearchWidgetState<T extends Identifiable<IdType>, IdType, Suggestion>
                         constraints: const BoxConstraints(
                           maxHeight: 300,
                         ),
-                        child: ListView(
+                        child: ListView.separated(
                           padding: EdgeInsets.zero,
                           shrinkWrap: true,
-                          children: [
-                            ...controller.state.result!.mapIndexed(
-                              (index, e) =>
-                                  widget.filter.buildSuggestion?.call(context, e) ??
-                                  LdListItem(
-                                    borderRadius: LdTheme.of(context).radius(LdSize.s),
-                                    onTap: () {
-                                      _controller.text = e.toString();
-                                      _triggerSearch(e.toString());
-                                      Navigator.of(context).maybePop();
-                                    },
-                                    title: Text(
-                                      e.toString(),
-                                    ),
-                                  ),
-                            ),
-                          ],
+                          separatorBuilder: (context, index) => const LdDivider(),
+                          itemCount: controller.state.result?.length ?? 0,
+                          itemBuilder: (context, index) =>
+                              widget.filter.buildSuggestion?.call(context, controller.state.result![index]) ??
+                              LdListItem(
+                                borderRadius: LdTheme.of(context).radius(LdSize.s),
+                                onTap: () {
+                                  _controller.text = controller.state.result![index].toString();
+                                  Navigator.of(context).maybePop(controller.state.result![index].toString());
+                                },
+                                title: Text(
+                                  controller.state.result![index].toString(),
+                                ),
+                              ),
                         ),
                       ),
                   ].reverseIf(!widget.isTop),

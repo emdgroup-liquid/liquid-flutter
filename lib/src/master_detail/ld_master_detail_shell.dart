@@ -28,11 +28,20 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
     extends State<LdMasterDetailShell<T, IdType, GroupingCriterion>> {
   late final StreamSubscription<LdMasterDetailRouteState<T, IdType, GroupingCriterion>> _selectionSubscription;
 
+  late final StreamSubscription _filterSubscription;
+  late final StreamSubscription _sortSubscription;
+
   @override
   void initState() {
     super.initState();
     _selectionSubscription = widget.route.stateStream.listen(_updateSelection);
+
     _updateSelectionFromRoute();
+  }
+
+  void _setupSubscriptions() {
+    _filterSubscription = widget.route.state.repository!.filterStream.listen((_) => _updateQueryParameters());
+    _sortSubscription = widget.route.state.repository!.sortStream.listen((_) => _updateQueryParameters());
   }
 
   @override
@@ -57,6 +66,8 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
   @override
   void dispose() {
     _selectionSubscription.cancel();
+    _filterSubscription.cancel();
+    _sortSubscription.cancel();
 
     widget.route.setSelectedItems({});
     super.dispose();
@@ -66,6 +77,23 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
         (match) => match is GoRoute && (match).name == "${widget.route.path}-detail",
       );
 
+  void _updateQueryParameters() {
+    print("updating query parameters");
+    final queryParameters = widget.route.state.repository?.queryParameters;
+
+    if (queryParameters == null) {
+      return;
+    }
+
+    final uri = Uri.parse(widget.route.path);
+
+    final newUri = uri.replace(queryParameters: queryParameters);
+
+    final router = GoRouter.of(context);
+
+    router.replace(newUri.toString());
+  }
+
   void _updateSelection(LdMasterDetailRouteState<T, IdType, GroupingCriterion> state) async {
     if (!mounted) return;
 
@@ -74,6 +102,12 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
     final router = GoRouter.of(context);
 
     final detailPath = widget.route.detailPath(selectedItems);
+
+    final queryParameters = widget.route.state.repository?.queryParameters;
+
+    final uri = Uri.parse(detailPath);
+
+    final newUri = uri.replace(queryParameters: queryParameters);
 
     if (widget.route.parseSelected(widget.routeSelection ?? "") == selectedItems) {
       return;
@@ -86,14 +120,14 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
     if (selectedItems.isNotEmpty) {
       if (showingDetail) {
         router.replace(
-          detailPath,
+          newUri.toString(),
         );
       } else {
         if (widget.route.state.showSelectionControls) {
           return;
         }
         router.push(
-          detailPath,
+          newUri.toString(),
         );
       }
     } else {
@@ -200,6 +234,7 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
                     context,
                     widget.route.parseSelected(widget.routeSelection ?? ""),
                   );
+                  _setupSubscriptions();
                 }),
             builder: const LdSubmitCenteredBuilder<void, void>(),
           );

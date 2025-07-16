@@ -218,8 +218,6 @@ class LdScaffoldState extends State<LdScaffold> {
               _effectiveDrawerWidth = widget.drawerWidth + MediaQuery.of(context).padding.left;
               double drawerLeft, drawerWidth, bodyLeft;
 
-              print("viewInsets: ${mediaQuery.viewInsets}");
-
               if (_isSideBySide) {
                 drawerLeft = state.position - _effectiveDrawerWidth;
                 drawerWidth = _effectiveDrawerWidth;

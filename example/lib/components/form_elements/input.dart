@@ -154,6 +154,24 @@ class _InputDemoState extends State<InputDemo> {
               ],
             ),
           ),
+          ComponentWell(
+            title: const LdTextHs("With a leading icon"),
+            child: LdAutoSpace(
+              children: [
+                LdInput(
+                  hint: "Search...",
+                  label: "With a leading icon",
+                  leading: const Icon(Icons.search),
+                ),
+                LdInput(
+                  hint: "Search...",
+                  label: "With a leading icon",
+                  size: LdSize.l,
+                  leading: const Icon(Icons.search),
+                ),
+              ],
+            ),
+          ),
           LdToggle(
               label: "On Surface",
               checked: _onSurface,
