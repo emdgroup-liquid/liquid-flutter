@@ -198,20 +198,14 @@ class LdScaffoldState extends State<LdScaffold> {
               _isSideBySide = constraints.maxWidth >= widget.reflowBreakpoint! && widget.drawer != null;
 
               final mediaQuery = MediaQuery.of(context);
-              final drawerInset = _isSideBySide ? 5.0 : 2.0;
-              final bodyInset = _isSideBySide && _isDrawerOpen ? 5.0 : 0.0;
+              final drawerInset = 0.0;
+              final bodyInset = 0.0;
 
               Border? drawerBorder;
 
               BorderRadius drawerRadius = BorderRadius.circular(0);
 
-              if (_isSideBySide) {
-                drawerRadius = BorderRadius.circular(theme.screenRadius - 1);
-                drawerBorder = Border.all(
-                  color: theme.border,
-                  width: 1,
-                );
-              }
+              Color backgroundColor;
 
               final level = (context.read<LdScaffoldLayoutState?>()?.level ?? 0) + 1;
 
@@ -222,10 +216,16 @@ class LdScaffoldState extends State<LdScaffold> {
                 drawerLeft = state.position - _effectiveDrawerWidth;
                 drawerWidth = _effectiveDrawerWidth;
                 bodyLeft = state.position;
+                backgroundColor = theme.surface;
               } else {
                 drawerLeft = state.position - _effectiveDrawerWidth;
                 drawerWidth = widget.drawerWidth;
                 bodyLeft = 0;
+                backgroundColor = theme.background;
+              }
+
+              if (widget.backgroundColor != null) {
+                backgroundColor = widget.backgroundColor!;
               }
 
               final layoutState = LdScaffoldLayoutState(
@@ -241,7 +241,7 @@ class LdScaffoldState extends State<LdScaffold> {
               return Material(
                 type: MaterialType.transparency,
                 child: ColoredBox(
-                  color: widget.backgroundColor ?? theme.background,
+                  color: backgroundColor,
                   child: ValueListenableBuilder(
                       valueListenable: _appBarSizeNotifier,
                       builder: (context, value, child) {
@@ -277,14 +277,14 @@ class LdScaffoldState extends State<LdScaffold> {
                                 right: 0,
                                 bottom: 0,
                                 child: Container(
-                                  margin: EdgeInsets.all(bodyInset),
+                                  margin: EdgeInsets.only(
+                                    top: bodyInset,
+                                    right: bodyInset,
+                                    left: 0,
+                                    bottom: bodyInset,
+                                  ),
                                   clipBehavior: Clip.hardEdge,
                                   decoration: BoxDecoration(
-                                    borderRadius: level == 1
-                                        ? BorderRadiusGeometry.circular(
-                                            LdTheme.of(context).screenRadius - 1,
-                                          )
-                                        : null,
                                     color: LdTheme.of(context).background,
                                     border: Border.all(
                                       color: LdTheme.of(context).border,
@@ -360,7 +360,7 @@ class LdScaffoldState extends State<LdScaffold> {
                                   bottom: 0,
                                   child: Container(
                                     margin: EdgeInsets.only(
-                                      left: drawerInset,
+                                      left: 0,
                                       right: 0,
                                       top: drawerInset,
                                       bottom: drawerInset,
@@ -368,9 +368,9 @@ class LdScaffoldState extends State<LdScaffold> {
                                     clipBehavior: Clip.hardEdge,
                                     decoration: BoxDecoration(
                                       borderRadius: drawerRadius,
-                                      color: LdTheme.of(context).surface,
+                                      color: _isSideBySide ? null : LdTheme.of(context).surface,
                                       border: drawerBorder,
-                                      boxShadow: [ldShadowSticky],
+                                      boxShadow: _isSideBySide ? null : [ldShadowSticky],
                                     ),
                                     child: Provider.value(
                                       value: layoutState.copyWith(slot: LdScaffoldSlot.drawer),
@@ -392,7 +392,7 @@ class LdScaffoldState extends State<LdScaffold> {
                                     ),
                                   ),
                                 ),
-                            ],
+                            ].reverseIf(_isSideBySide),
                           ),
                         );
                       }),

@@ -12,13 +12,13 @@ class LdFilterRange<T extends Identifiable<IdType>, IdType> extends LdFilterOpti
   }
 
   @override
-  void marshalSerialized(MapEntry<String, String> entry) {
+  void marshalSerialized(String value) {
     isOn = false;
-    if (entry.value.isEmpty) {
+    if (value.isEmpty) {
       return;
     }
 
-    final values = entry.value.split(",");
+    final values = value.split(",");
 
     if (values.length != 2) {
       return;

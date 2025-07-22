@@ -7,8 +7,8 @@ class LdFilterBoolOption<T extends Identifiable<IdType>, IdType> extends LdFilte
   }
 
   @override
-  void marshalSerialized(MapEntry<String, String> entry) {
-    // No oop
+  void marshalSerialized(String value) {
+    isOn = true;
   }
 
   LdFilterBoolOption({

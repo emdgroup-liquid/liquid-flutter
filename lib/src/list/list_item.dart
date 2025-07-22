@@ -237,14 +237,20 @@ class LdListItem extends StatelessWidget {
       );
     }
 
-    Widget _buildLeading() {
-      if (leading == null) return const SizedBox.shrink();
+    Widget _buildIconTheme(Widget child) {
       return IconTheme(
         data: IconThemeData(
           color: theme.text,
-          size: theme.labelSize(LdSize.l) * 1.2,
+          size: theme.labelSize(LdSize.l),
         ),
-        child: LdReveal.quick(
+        child: child,
+      );
+    }
+
+    Widget _buildLeading() {
+      if (leading == null) return const SizedBox.shrink();
+      return _buildIconTheme(
+        LdReveal.quick(
           child: Row(
             children: [
               leading!,
@@ -259,8 +265,10 @@ class LdListItem extends StatelessWidget {
 
     Widget _buildTrailing() {
       if (trailing == null) return const SizedBox.shrink();
-      return Row(
-        children: [ldSpacerM, trailing!],
+      return _buildIconTheme(
+        Row(
+          children: [ldSpacerM, trailing!],
+        ),
       );
     }
 

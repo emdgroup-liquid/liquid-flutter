@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/master_detail/sort/ld_sort_option.dart';
@@ -42,6 +41,11 @@ var movieData = [
   _Movie(8, "Fight Club", "Drama", 8, DateTime.now()),
   _Movie(9, "The Shawshank Redemption", "Drama", 10, DateTime.now()),
   _Movie(10, "Gladiator", "Action", 8, DateTime.now()),
+  _Movie(11, "Transformers: Revenge of the Fallen", "Action", 4, DateTime.now()),
+  _Movie(12, "Cats", "Drama", 3, DateTime.now()),
+  _Movie(13, "The Room", "Drama", 2, DateTime.now()),
+  _Movie(14, "Batman & Robin", "Action", 3, DateTime.now()),
+  _Movie(15, "Battlefield Earth", "Sci-Fi", 1, DateTime.now()),
 ];
 
 final movieRepository = LdRepository<_Movie, int>(
@@ -85,11 +89,8 @@ final movieRepository = LdRepository<_Movie, int>(
     List<LdSortOption<_Movie, int>>? sortOptions,
   }) async {
     await Future.delayed(const Duration(milliseconds: 50));
-    final filtered = movieData
-        .where((element) =>
-            filters?.every((filter) => filter.optimisticFilter(element)) ??
-            true)
-        .toList();
+    final filtered =
+        movieData.where((element) => filters?.every((filter) => filter.optimisticFilter(element)) ?? true).toList();
     return LdListPage<_Movie>(
       newItems: filtered.skip(offset).take(pageSize).toList(),
       hasMore: offset + pageSize < filtered.length,
@@ -267,8 +268,7 @@ final movieDemo = LdMasterDetailRoute<_Movie, int, bool>(
       },
       buildLoadingText: (context, selection) =>
           "Deleting ${selection.length} ${selection.length == 1 ? "item" : "items"}",
-      buildLabel: (context, selection) =>
-          "Delete ${selection.length} ${selection.length == 1 ? "item" : "items"}",
+      buildLabel: (context, selection) => "Delete ${selection.length} ${selection.length == 1 ? "item" : "items"}",
       buildIcon: (context, selection) => Icon(
         LucideIcons.trash2,
       ),
@@ -346,9 +346,7 @@ class _MovieDetailState extends State<_MovieDetail> {
                       int.tryParse(_ratingController.text) ?? 1,
                       widget.movie.value!.lastUpdate,
                     );
-                    final repo =
-                        LdMasterDetailRoute.of<_Movie, int, bool>(context)
-                            .repository;
+                    final repo = LdMasterDetailRoute.of<_Movie, int, bool>(context).repository;
                     await repo.update(
                       widget.movie.value!.id,
                       newMovie,

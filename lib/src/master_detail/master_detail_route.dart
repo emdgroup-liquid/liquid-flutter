@@ -153,7 +153,8 @@ class LdMasterDetailRoute<T extends Identifiable<IdType>, IdType, GroupingCriter
     ];
   }
 
-  Future<void> initRepository(BuildContext context, Set<IdType> initialSelection) async {
+  Future<void> initRepository(
+      BuildContext context, Set<IdType> initialSelection, Map<String, String> queryParameters) async {
     _updateState(
       _state.copyWith(repository: buildRepository(context)),
     );
@@ -162,6 +163,19 @@ class LdMasterDetailRoute<T extends Identifiable<IdType>, IdType, GroupingCriter
       await repository.initWithSelection(initialSelection);
     } else {
       await repository.fetchItemsAtOffset(0);
+    }
+
+    if (queryParameters.isNotEmpty) {
+      print("queryParameters: $queryParameters");
+      repository.filters.forEach((filter) async {
+        final value = queryParameters[filter.name];
+        print("filter: ${filter.name} value: $value");
+        if (value != null) {
+          print("marshalling filter: ${filter.name} value: $value");
+          filter.marshalSerialized(value);
+          repository.updateFilter(filter);
+        }
+      });
     }
 
     repository.updatedItems.listen((item) async {

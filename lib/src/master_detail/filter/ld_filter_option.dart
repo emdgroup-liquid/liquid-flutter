@@ -14,7 +14,7 @@ abstract class LdFilterOption<T extends Identifiable<IdType>, IdType> {
   bool isOn;
 
   // Apply the filter to the LdFilterOption
-  void marshalSerialized(MapEntry<String, String> entry);
+  void marshalSerialized(String entry);
 
   /// Returns true if the item should be included in the list, is called
   /// before the list is re-fetched

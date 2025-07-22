@@ -25,6 +25,7 @@ class LdAppBar extends StatefulWidget {
   final Widget? trailing;
 
   final bool? primary;
+  final bool disableSafeArea;
   final Color? backgroundColor;
   final bool? implyLeading;
   final bool addContainer;
@@ -32,14 +33,19 @@ class LdAppBar extends StatefulWidget {
   final bool blurOnScroll;
   final Widget? bottom;
 
+  final List<LdLabeledAction> actions;
+
   final double? height;
 
   static LdWindowCallbacks? callbacks;
+
+  final List<SingleChildWidget> Function(BuildContext context)? overflowMenuProviders;
 
   const LdAppBar({
     super.key,
     this.title,
     this.height,
+    this.actions = const [],
     this.leading,
     this.trailing,
     this.primary,
@@ -48,7 +54,9 @@ class LdAppBar extends StatefulWidget {
     this.addContainer = false,
     this.implyLeading,
     this.bottom,
+    this.disableSafeArea = false,
     this.elevateOnScroll = true,
+    this.overflowMenuProviders,
   });
 
   @override
@@ -58,23 +66,20 @@ class LdAppBar extends StatefulWidget {
 class _LdAppBarState extends State<LdAppBar> {
   final GlobalKey _key = GlobalKey();
 
-  bool get _isDesktop {
-    final platform = defaultTargetPlatform;
-    return platform == TargetPlatform.macOS || platform == TargetPlatform.linux || platform == TargetPlatform.windows;
-  }
-
   @override
   void initState() {
     super.initState();
   }
 
   LdScaffoldLayoutState? get _layoutState {
-    return context.read<LdScaffoldLayoutState>();
+    return context.watch<LdScaffoldLayoutState?>();
   }
 
   bool get _canPopParentRoute {
     final ModalRoute<Object?>? parentRoute = ModalRoute.of(context);
+
     final bool canPop = parentRoute?.canPop ?? false;
+
     return canPop;
   }
 
@@ -167,9 +172,16 @@ class _LdAppBarState extends State<LdAppBar> {
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
-    final backgroundColor = widget.backgroundColor ?? theme.surface;
 
     final layoutState = context.watch<LdScaffoldLayoutState>();
+
+    Color backgroundColor;
+
+    if (widget.backgroundColor == null) {
+      backgroundColor = theme.surface;
+    } else {
+      backgroundColor = widget.backgroundColor!;
+    }
 
     final scrollListenable = switch (layoutState.slot) {
       LdScaffoldSlot.appBar => _layoutState?.bodyScrollOffset,
@@ -222,9 +234,13 @@ class _LdAppBarState extends State<LdAppBar> {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 500),
                 color: backgroundColor.withAlpha(widget.blurOnScroll && scrolledUnder ? 150 : 255),
-                child: SafeArea(
-                  bottom: _isBottomNavigationBar,
-                  top: !_isBottomNavigationBar,
+                child: LdWrapConditional(
+                  condition: !widget.disableSafeArea,
+                  builder: (context, child) => SafeArea(
+                    bottom: _isBottomNavigationBar,
+                    top: _isAppBar,
+                    child: child,
+                  ),
                   child: Padding(
                     padding: switch (theme.themeSize) {
                       (LdThemeSize.s) => LdTheme.of(context).pad(size: LdSize.xs),
@@ -240,79 +256,92 @@ class _LdAppBarState extends State<LdAppBar> {
                       child: LdWrapConditional(
                         condition: widget.addContainer,
                         builder: (context, child) => LdContainer(
-                          padding: EdgeInsets.zero,
                           child: child,
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Row(
+                            // Main row of the app bar
+
+                            OverflowView(
+                              spacing: LdTheme.of(context).paddingSize(),
+                              layoutBehavior: OverflowViewLayoutBehavior.expandFirstFlexible,
                               crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              builder: (context, remainingItemCount) {
+                                return LdAppbarActionOverflowMenu(
+                                  actions: widget.actions.sublist(widget.actions.length - remainingItemCount),
+                                  bigToolbar: true,
+                                  menuProviders: widget.overflowMenuProviders,
+                                  inMenu: true,
+                                );
+                              },
                               children: [
-                                LdReveal(
-                                  initialRevealed: _showWindowControls,
-                                  revealed: _showWindowControls,
-                                  child: Row(
-                                    children: [
-                                      LdButtonGhost(
-                                        size: LdSize.xs,
-                                        color: LdTheme.of(context).error,
-                                        child: const Icon(Icons.circle),
-                                        onPressed: () {
-                                          LdAppBar.callbacks?.onClose?.call();
-                                        },
-                                      ),
-                                      LdButtonGhost(
-                                        size: LdSize.xs,
-                                        color: LdTheme.of(context).warning,
-                                        child: const Icon(Icons.circle),
-                                        onPressed: () {
-                                          LdAppBar.callbacks?.onMinimize?.call();
-                                        },
-                                      ),
-                                      LdButtonGhost(
-                                        size: LdSize.xs,
-                                        color: LdTheme.of(context).success,
-                                        child: const Icon(Icons.circle),
-                                        onPressed: () {
-                                          LdAppBar.callbacks?.onMaximize?.call();
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                if (_showOpenDrawerButton) ...[
-                                  const _OpenDrawerButton(),
-                                ],
-                                if (leading != null) ...[
-                                  leading,
-                                ],
-                                Expanded(
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      if (widget.title != null)
-                                        Flexible(
-                                          child: DefaultTextStyle(
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: headerStyle,
-                                            child: widget.title ?? const SizedBox(),
+                                Row(
+                                  children: [
+                                    LdReveal(
+                                      initialRevealed: _showWindowControls,
+                                      revealed: _showWindowControls,
+                                      child: Row(
+                                        children: [
+                                          LdButtonGhost(
+                                            size: LdSize.xs,
+                                            color: LdTheme.of(context).error,
+                                            child: const Icon(Icons.circle),
+                                            onPressed: () {
+                                              LdAppBar.callbacks?.onClose?.call();
+                                            },
                                           ),
-                                        ),
-                                      if (widget.trailing != null) ...[
-                                        Flexible(child: widget.trailing!),
-                                      ],
+                                          LdButtonGhost(
+                                            size: LdSize.xs,
+                                            color: LdTheme.of(context).warning,
+                                            child: const Icon(Icons.circle),
+                                            onPressed: () {
+                                              LdAppBar.callbacks?.onMinimize?.call();
+                                            },
+                                          ),
+                                          LdButtonGhost(
+                                            size: LdSize.xs,
+                                            color: LdTheme.of(context).success,
+                                            child: const Icon(Icons.circle),
+                                            onPressed: () {
+                                              LdAppBar.callbacks?.onMaximize?.call();
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    if (_showOpenDrawerButton) ...[
+                                      const _OpenDrawerButton(),
                                     ],
-                                  ).spaceM(),
+                                    if (leading != null) ...[
+                                      leading,
+                                      ldSpacerM,
+                                    ],
+                                    if (widget.title != null)
+                                      DefaultTextStyle(
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: headerStyle,
+                                        child: widget.title ?? const SizedBox(),
+                                      ),
+                                    if (widget.trailing != null) ...[
+                                      widget.trailing!,
+                                    ],
+                                    if (_showCloseDrawerButton) ...[
+                                      const _CloseDrawerButton(),
+                                    ],
+                                  ],
                                 ),
-                                if (_showCloseDrawerButton) ...[
-                                  const _CloseDrawerButton(),
-                                ],
+                                ...widget.actions.where((e) => e.isVisible(context)).map(
+                                      (e) => LdAppBarAction(
+                                        action: e,
+                                        bigToolbar: true,
+                                        inMenu: false,
+                                        menuProviders: widget.overflowMenuProviders,
+                                      ),
+                                    ),
                               ],
-                            ).spaceM(),
+                            ).padHorizontal(),
                             if (widget.bottom != null) ...[
                               widget.bottom!.padM(),
                             ],
@@ -331,6 +360,7 @@ class _LdAppBarState extends State<LdAppBar> {
       mainAxisSize: MainAxisSize.min,
       key: _key,
       children: [
+        if (_isBottomNavigationBar) const LdDivider(),
         GestureDetector(
           onPanStart: (details) {
             LdAppBar.callbacks?.onMove?.call();
@@ -410,33 +440,33 @@ class _ActionTriggerButton extends StatelessWidget {
         ),
       );
     } else {
-      return LdReveal.quick(
-        revealed: action.isVisible(context),
-        child: Tooltip(
-          message: action.label(context),
-          child: LdButtonGhost(
-            color: action.color(context),
-            leading: bigToolbar ? icon : null,
-            onPressed: onPressed,
-            loadingText: loadingText,
-            loading: loading,
-            disabled: disabled,
-            child: bigToolbar || icon == null ? Text(label) : icon,
-          ),
+      return Tooltip(
+        message: action.label(context),
+        child: LdButtonGhost(
+          color: action.color(context),
+          leading: bigToolbar ? icon : null,
+          onPressed: onPressed,
+          loadingText: loadingText,
+          loading: loading,
+          disabled: disabled,
+          child: bigToolbar || icon == null ? Text(label) : icon,
         ),
       );
     }
   }
 }
 
-class LdAppBarActions extends StatelessWidget {
-  final List<LdLabeledAction> actions;
-
+class LdAppBarAction extends StatelessWidget {
+  final LdLabeledAction action;
+  final bool bigToolbar;
   final List<SingleChildWidget> Function(BuildContext context)? menuProviders;
+  final bool inMenu;
 
-  const LdAppBarActions({super.key, required this.actions, this.menuProviders});
+  const LdAppBarAction(
+      {super.key, required this.action, required this.bigToolbar, required this.inMenu, this.menuProviders});
 
-  Widget _buildAction(BuildContext context, LdLabeledAction action, bool bigToolbar, bool inMenu) {
+  @override
+  Widget build(BuildContext context) {
     switch (action.submitType) {
       case LdLabeledActionSubmitType.contextMenu:
         return LdContextMenu(
@@ -490,44 +520,49 @@ class LdAppBarActions extends StatelessWidget {
         );
     }
   }
+}
+
+class LdAppbarActionOverflowMenu extends StatelessWidget {
+  final List<LdLabeledAction> actions;
+  final bool bigToolbar;
+  final List<SingleChildWidget> Function(BuildContext context)? menuProviders;
+
+  final bool inMenu;
+
+  const LdAppbarActionOverflowMenu({
+    super.key,
+    required this.actions,
+    required this.bigToolbar,
+    required this.inMenu,
+    this.menuProviders,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      final bigToolbar = constraints.maxWidth > 200 || actions.length < 2;
-
-      return OverflowView.flexible(
-        children: [
-          ...actions.map(
-            (e) => _buildAction(context, e, bigToolbar, false),
-          ),
-        ],
-        builder: (context, remaining) => LdContextMenu(
-          menuProviders: menuProviders,
-          scaleFromTrigger: true,
-          builder: (context, isOpen, open, child) => LdButtonGhost(
-            onPressed: open,
-            child: const Icon(LucideIcons.ellipsisVertical),
-          ),
-          menuBuilder: (context, close) => ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 200),
-            child: ListView(
-              shrinkWrap: true,
-              children: [
-                ...actions.sublist(actions.length - remaining).map(
-                      (e) => _buildAction(
-                        context,
-                        e,
-                        bigToolbar,
-                        true,
-                      ),
-                    ),
-              ],
+    return LdContextMenu(
+      menuProviders: menuProviders,
+      scaleFromTrigger: true,
+      builder: (context, isOpen, open, child) => LdButtonGhost(
+        onPressed: open,
+        child: const Icon(LucideIcons.ellipsisVertical),
+      ),
+      menuBuilder: (context, close) => ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 200),
+        child: ListView(
+          shrinkWrap: true,
+          padding: EdgeInsets.zero,
+          children: [
+            ...actions.map(
+              (e) => LdAppBarAction(
+                action: e,
+                bigToolbar: bigToolbar,
+                inMenu: inMenu,
+              ),
             ),
-          ),
+          ],
         ),
-      );
-    });
+      ),
+    );
   }
 }
 

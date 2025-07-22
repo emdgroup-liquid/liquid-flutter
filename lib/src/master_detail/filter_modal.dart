@@ -114,15 +114,17 @@ class LdFilterModal<T extends Identifiable<IdType>, IdType, GroupBy> extends Sta
               revealed: activeFilters.isNotEmpty,
               child: LdMute(child: LdText(LiquidLocalizations.of(context).activeFilters)).insetLeft(size: LdSize.s),
             ),
-            ...asyncSnapshot.data!.map((e) => LdReveal.quick(
-                  revealed: e.isOn,
-                  child: _Filter(
-                    filter: e,
-                    onFilterChanged: (filter) {
-                      repository.updateFilter(filter);
-                    },
-                  ),
-                )),
+            Column(children: [
+              ...asyncSnapshot.data!.map((e) => LdReveal.quick(
+                    revealed: e.isOn,
+                    child: _Filter(
+                      filter: e,
+                      onFilterChanged: (filter) {
+                        repository.updateFilter(filter);
+                      },
+                    ),
+                  )),
+            ]),
           ]).padVertical();
         });
   }
@@ -143,7 +145,7 @@ class _Filter<T extends Identifiable<IdType>, IdType, GroupBy> extends Stateless
     if (filter is LdFilterBoolOption) {
       return LdListItem(
         title: Text(filter.label(context)),
-        leading: filter.icon(context),
+        leading: LdAvatar(child: filter.icon(context)),
         trailing: LdButtonVague(
           child: const Icon(LucideIcons.x),
           size: LdSize.s,
@@ -170,6 +172,27 @@ class _Filter<T extends Identifiable<IdType>, IdType, GroupBy> extends Stateless
         filter: selectFilter,
         onFilterChanged: (f) => onFilterChanged(f),
       );
+    }
+    if (filter is LdFilterSearchOption<T, IdType, dynamic>) {
+      final searchFilter = filter as LdFilterSearchOption<T, IdType, dynamic>;
+      return Row(
+        children: [
+          Expanded(
+            child: LdFilterSearchWidget(
+              filter: searchFilter,
+              onFilterChanged: (f) => onFilterChanged(f),
+            ),
+          ),
+          LdButtonVague(
+            child: const Icon(LucideIcons.x),
+            size: LdSize.s,
+            onPressed: () {
+              searchFilter.isOn = false;
+              onFilterChanged(searchFilter);
+            },
+          ),
+        ],
+      ).padM();
     }
     return LdText(filter.label(context));
   }

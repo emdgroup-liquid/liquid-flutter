@@ -34,14 +34,17 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
   @override
   void initState() {
     super.initState();
-    _selectionSubscription = widget.route.stateStream.listen(_updateSelection);
-
-    _updateSelectionFromRoute();
+    if (widget.route.state.repository != null) {
+      _setupSubscriptions();
+    }
   }
 
   void _setupSubscriptions() {
     _filterSubscription = widget.route.state.repository!.filterStream.listen((_) => _updateQueryParameters());
     _sortSubscription = widget.route.state.repository!.sortStream.listen((_) => _updateQueryParameters());
+    _selectionSubscription = widget.route.stateStream.listen((state) {
+      _updateSelection(state);
+    });
   }
 
   @override
@@ -78,7 +81,6 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
       );
 
   void _updateQueryParameters() {
-    print("updating query parameters");
     final queryParameters = widget.route.state.repository?.queryParameters;
 
     if (queryParameters == null) {
@@ -92,6 +94,13 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
     final router = GoRouter.of(context);
 
     router.replace(newUri.toString());
+  }
+
+  Map<String, String> _getQueryParameters() {
+    final router = GoRouter.of(context);
+    final queryParameters = router.routerDelegate.currentConfiguration.uri.queryParameters;
+
+    return queryParameters;
   }
 
   void _updateSelection(LdMasterDetailRouteState<T, IdType, GroupingCriterion> state) async {
@@ -117,6 +126,8 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
       return;
     }
 
+    // Check if the uri would actually change
+
     if (selectedItems.isNotEmpty) {
       if (showingDetail) {
         router.replace(
@@ -126,6 +137,7 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
         if (widget.route.state.showSelectionControls) {
           return;
         }
+
         router.push(
           newUri.toString(),
         );
@@ -233,8 +245,10 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
                   await widget.route.initRepository(
                     context,
                     widget.route.parseSelected(widget.routeSelection ?? ""),
+                    _getQueryParameters(),
                   );
                   _setupSubscriptions();
+                  _updateSelectionFromRoute();
                 }),
             builder: const LdSubmitCenteredBuilder<void, void>(),
           );

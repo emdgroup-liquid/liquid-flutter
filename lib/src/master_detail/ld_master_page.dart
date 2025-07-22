@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/master_detail/app_bar_actions.dart';
@@ -29,33 +30,79 @@ class LdMasterPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
                 value: LdMasterDetailSelection<T, IdType, GroupingCriterion>(items: state.selectedItems),
                 child: LdMasterDetailMultiShortcuts(
                   actions: route.actions,
-                  child: LdScaffold(
-                    appBar: LdAppBar(
-                      title: Text(route.repository.pluralItemTitle),
-                      trailing: LdMasterDetailAppBarActions<T, IdType, GroupingCriterion>(
-                        location: LdMasterDetailActionLocation.masterAppBar,
+                  child: Builder(builder: (context) {
+                    final primaryActions =
+                        LdMasterDetailAppBarActions.getActionsAndProviders<T, IdType, GroupingCriterion>(
+                      context,
+                      LdMasterDetailActionLocation.masterAppBar,
+                    );
+
+                    final secondaryActions =
+                        LdMasterDetailAppBarActions.getActionsAndProviders<T, IdType, GroupingCriterion>(
+                      context,
+                      LdMasterDetailActionLocation.masterSecondary,
+                    );
+
+                    final searchFilter =
+                        route.repository.filters.firstWhereOrNull((filter) => filter is LdFilterSearchOption);
+
+                    return LdScaffold(
+                      appBar: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Provider.value(
+                            value: LdMasterDetailActionLocation.masterAppBar,
+                            child: LdAppBar(
+                              title: Text(route.repository.pluralItemTitle),
+                              actions: primaryActions.actions,
+                              overflowMenuProviders: primaryActions.menuProviders,
+                              bottom: searchFilter != null && !isSeperate
+                                  ? LdFilterSearchWidget(
+                                      filter: searchFilter as LdFilterSearchOption<T, IdType, dynamic>,
+                                      onFilterChanged: (filter) {
+                                        route.repository.updateFilter(filter);
+                                      },
+                                    )
+                                  : null,
+                            ),
+                          ),
+                          if (!isSeperate && (secondaryActions.hasActions))
+                            Provider.value(
+                                value: LdMasterDetailActionLocation.masterSecondary,
+                                child: LdAppBar(
+                                  disableSafeArea: true,
+                                  actions: secondaryActions.actions,
+                                  overflowMenuProviders: secondaryActions.menuProviders,
+                                )),
+                        ],
                       ),
-                      bottom: !isSeperate
-                          ? LdMasterDetailAppBarActions<T, IdType, GroupingCriterion>(
-                              location: LdMasterDetailActionLocation.masterSecondary,
+                      bottomNavigationBar: isSeperate && (secondaryActions.hasActions || searchFilter != null)
+                          ? Provider.value(
+                              value: LdMasterDetailActionLocation.masterSecondary,
+                              child: LdAppBar(
+                                implyLeading: false,
+                                actions: secondaryActions.actions,
+                                overflowMenuProviders: secondaryActions.menuProviders,
+                                bottom: searchFilter != null
+                                    ? LdFilterSearchWidget(
+                                        filter: searchFilter as LdFilterSearchOption<T, IdType, dynamic>,
+                                        onFilterChanged: (filter) {
+                                          route.repository.updateFilter(filter);
+                                        },
+                                      )
+                                    : null,
+                              ),
                             )
                           : null,
-                    ),
-                    bottomNavigationBar: isSeperate
-                        ? LdAppBar(
-                            trailing: LdMasterDetailAppBarActions<T, IdType, GroupingCriterion>(
-                              location: LdMasterDetailActionLocation.masterSecondary,
-                            ),
-                          )
-                        : null,
-                    body: route.listBuilder(
-                      route,
-                      state,
-                      (selection) {
-                        route.setSelectedItems(selection);
-                      },
-                    ),
-                  ),
+                      body: route.listBuilder(
+                        route,
+                        state,
+                        (selection) {
+                          route.setSelectedItems(selection);
+                        },
+                      ),
+                    );
+                  }),
                 ),
               );
             }),

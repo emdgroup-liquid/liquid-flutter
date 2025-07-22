@@ -24,13 +24,13 @@ class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
   }
 
   @override
-  void marshalSerialized(MapEntry<String, String> entry) {
+  void marshalSerialized(String value) {
     isOn = false;
-    if (entry.value.isEmpty) {
+    if (value.isEmpty) {
       selectedValues.clear();
       return;
     }
-    selectedValues = allValues.keys.where((e) => entry.value.contains(e.toString())).cast<E>().toSet();
+    selectedValues = allValues.keys.where((e) => value.contains(e.toString())).cast<E>().toSet();
     isOn = selectedValues.isNotEmpty;
   }
 

@@ -25,7 +25,7 @@ class _LdFilterSearchWidgetState<T extends Identifiable<IdType>, IdType, Suggest
     extends State<LdFilterSearchWidget<T, IdType, Suggestion>> {
   final GlobalKey _triggerKey = GlobalKey();
   final FocusNode _triggerNode = FocusNode();
-  final TextEditingController _controller = TextEditingController();
+  late final TextEditingController _controller = TextEditingController(text: widget.filter.searchText);
   bool _disabled = false;
 
   @override
@@ -299,7 +299,7 @@ class _SearchWidgetState<T extends Identifiable<IdType>, IdType, Suggestion>
   }
 }
 
-extension _ConditionalReverse on List<Widget> {
+extension ConditionalReverse on List<Widget> {
   List<Widget> reverseIf(bool condition) {
     if (condition) {
       return reversed.toList();

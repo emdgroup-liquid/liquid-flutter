@@ -29,8 +29,8 @@ class LdFilterSearchOption<T extends Identifiable<IdType>, IdType, Suggestion> e
   }
 
   @override
-  void marshalSerialized(MapEntry<String, String> entry) {
-    searchText = entry.value;
+  void marshalSerialized(String value) {
+    searchText = value;
     isOn = searchText.isNotEmpty;
   }
 
