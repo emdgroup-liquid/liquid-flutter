@@ -430,6 +430,7 @@ class _ActionTriggerButton extends StatelessWidget {
           leading: icon != null
               ? IconTheme(
                   data: IconThemeData(
+                    size: LdTheme.of(context).labelSize(null),
                     color:
                         action.color(context)?.center(LdTheme.of(context).isDark) ?? LdTheme.of(context).primaryColor,
                   ),

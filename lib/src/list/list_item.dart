@@ -367,6 +367,10 @@ class LdListItem extends StatelessWidget {
               padding: padding ?? theme.balPad(LdSize.m),
               decoration: BoxDecoration(
                 color: colors.surface,
+                border: Border.all(
+                  color: colors.border,
+                  width: theme.borderWidth,
+                ),
                 borderRadius: borderRadius,
               ),
               child: _buildTableRowContent(),
@@ -401,6 +405,10 @@ class LdListItem extends StatelessWidget {
             decoration: BoxDecoration(
               color: colors.surface,
               borderRadius: borderRadius,
+              border: Border.all(
+                color: colors.border,
+                width: theme.borderWidth,
+              ),
             ),
             child: Row(
                 mainAxisSize: effectiveWidth != double.infinity ? MainAxisSize.min : MainAxisSize.max,
