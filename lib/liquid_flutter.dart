@@ -3,7 +3,7 @@ library liquid_flutter;
 import 'package:flutter/foundation.dart';
 
 export 'src/accordion.dart';
-export 'src/appbar.dart';
+export 'src/appbar/index.dart';
 export 'src/autospace.dart';
 export 'src/avatar.dart';
 export 'src/badge.dart';
@@ -103,6 +103,7 @@ export 'src/table.dart';
 export 'src/tabs.dart';
 export 'src/tag.dart';
 export 'src/text.dart';
+export 'src/text_list.dart';
 export 'src/theme/liquid_material_theme.dart';
 export 'src/theme/screen_radius.dart';
 export 'src/theme/theme.dart';
