@@ -277,29 +277,38 @@ class _LdAppBarState extends State<LdAppBar> {
                                       revealed: _showWindowControls,
                                       child: Row(
                                         children: [
-                                          LdButtonGhost(
-                                            size: LdSize.xs,
-                                            color: LdTheme.of(context).error,
-                                            child: const Icon(Icons.circle),
-                                            onPressed: () {
-                                              LdAppBar.callbacks?.onClose?.call();
-                                            },
+                                          Tooltip(
+                                            message: LiquidLocalizations.of(context).close,
+                                            child: LdButtonGhost(
+                                              size: LdSize.xs,
+                                              color: LdTheme.of(context).error,
+                                              child: const Icon(Icons.circle),
+                                              onPressed: () {
+                                                LdAppBar.callbacks?.onClose?.call();
+                                              },
+                                            ),
                                           ),
-                                          LdButtonGhost(
-                                            size: LdSize.xs,
-                                            color: LdTheme.of(context).warning,
-                                            child: const Icon(Icons.circle),
-                                            onPressed: () {
-                                              LdAppBar.callbacks?.onMinimize?.call();
-                                            },
+                                          Tooltip(
+                                            message: LiquidLocalizations.of(context).minimize,
+                                            child: LdButtonGhost(
+                                              size: LdSize.xs,
+                                              color: LdTheme.of(context).warning,
+                                              child: const Icon(Icons.circle),
+                                              onPressed: () {
+                                                LdAppBar.callbacks?.onMinimize?.call();
+                                              },
+                                            ),
                                           ),
-                                          LdButtonGhost(
-                                            size: LdSize.xs,
-                                            color: LdTheme.of(context).success,
-                                            child: const Icon(Icons.circle),
-                                            onPressed: () {
-                                              LdAppBar.callbacks?.onMaximize?.call();
-                                            },
+                                          Tooltip(
+                                            message: LiquidLocalizations.of(context).maximize,
+                                            child: LdButtonGhost(
+                                              size: LdSize.xs,
+                                              color: LdTheme.of(context).success,
+                                              child: const Icon(Icons.circle),
+                                              onPressed: () {
+                                                LdAppBar.callbacks?.onMaximize?.call();
+                                              },
+                                            ),
                                           ),
                                         ],
                                       ),

@@ -11,6 +11,10 @@
     "filter",
     "apply",
     "activeFilters",
-    "sort"
+    "sort",
+    "minimize",
+    "maximize",
+    "showDrawer",
+    "hideDrawer"
   ]
 }

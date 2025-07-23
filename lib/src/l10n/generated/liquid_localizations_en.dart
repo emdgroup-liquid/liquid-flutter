@@ -111,4 +111,16 @@ class LiquidLocalizationsEn extends LiquidLocalizations {
 
   @override
   String get sort => 'Sort';
+
+  @override
+  String get minimize => 'Minimize';
+
+  @override
+  String get maximize => 'Maximize';
+
+  @override
+  String get showDrawer => 'Show Sidebar';
+
+  @override
+  String get hideDrawer => 'Hide Sidebar';
 }

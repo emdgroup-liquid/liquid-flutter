@@ -32,5 +32,9 @@
   "filter": "Filter",
   "apply": "Apply",
   "activeFilters": "Active Filters",
-  "sort": "Sort"
+  "sort": "Sort",
+  "minimize": "Minimize",
+  "maximize": "Maximize",
+  "showDrawer": "Show Sidebar",
+  "hideDrawer": "Hide Sidebar"
 }

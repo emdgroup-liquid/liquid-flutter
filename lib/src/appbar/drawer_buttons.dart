@@ -12,10 +12,13 @@ class OpenDrawerButton extends StatelessWidget {
 
     final icon = layoutState?.isSideBySide ?? false ? LucideIcons.panelLeftOpen : LucideIcons.menu;
     final scaffold = context.findAncestorStateOfType<LdScaffoldState>();
-    return LdButtonGhost(
-      size: LdSize.s,
-      child: Icon(icon),
-      onPressed: () => scaffold?.openDrawer(),
+    return Tooltip(
+      message: LiquidLocalizations.of(context).showDrawer,
+      child: LdButtonGhost(
+        size: LdSize.s,
+        child: Icon(icon),
+        onPressed: () => scaffold?.openDrawer(),
+      ),
     );
   }
 }
@@ -28,12 +31,15 @@ class CloseDrawerButton extends StatelessWidget {
     final layoutState = context.watch<LdScaffoldLayoutState?>();
 
     final icon = layoutState?.isSideBySide ?? false ? LucideIcons.panelLeftClose : LucideIcons.chevronRight;
-    return LdButtonGhost(
-      size: LdSize.s,
-      child: Icon(icon),
-      onPressed: () {
-        Navigator.of(context).maybePop();
-      },
+    return Tooltip(
+      message: LiquidLocalizations.of(context).hideDrawer,
+      child: LdButtonGhost(
+        size: LdSize.s,
+        child: Icon(icon),
+        onPressed: () {
+          Navigator.of(context).maybePop();
+        },
+      ),
     );
   }
 }

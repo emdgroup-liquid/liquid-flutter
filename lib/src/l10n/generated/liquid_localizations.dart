@@ -298,6 +298,30 @@ abstract class LiquidLocalizations {
   /// In en, this message translates to:
   /// **'Sort'**
   String get sort;
+
+  /// No description provided for @minimize.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimize'**
+  String get minimize;
+
+  /// No description provided for @maximize.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximize'**
+  String get maximize;
+
+  /// No description provided for @showDrawer.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Sidebar'**
+  String get showDrawer;
+
+  /// No description provided for @hideDrawer.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide Sidebar'**
+  String get hideDrawer;
 }
 
 class _LiquidLocalizationsDelegate extends LocalizationsDelegate<LiquidLocalizations> {
