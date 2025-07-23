@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/device_info.dart';
 import 'package:liquid_flutter/src/master_detail/app_bar_actions.dart';
 import 'package:liquid_flutter/src/master_detail/ld_master_detail_selection.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +17,8 @@ class LdMasterPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
   @override
   Widget build(BuildContext context) {
     final isSeperate = LdMasterContext.of<T, IdType, GroupingCriterion>(context).isSplit;
+
+    final bigScreen = DeviceInfo.isDesktop || DeviceInfo.isTablet;
 
     return LdNotificationProvider(
       child: LdNotificationPortal(
@@ -56,7 +59,7 @@ class LdMasterPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
                               title: Text(route.repository.pluralItemTitle),
                               actions: primaryActions.actions,
                               overflowMenuProviders: primaryActions.menuProviders,
-                              bottom: searchFilter != null && !isSeperate
+                              bottom: searchFilter != null && bigScreen
                                   ? LdFilterSearchWidget(
                                       filter: searchFilter as LdFilterSearchOption<T, IdType, dynamic>,
                                       onFilterChanged: (filter) {
@@ -66,7 +69,7 @@ class LdMasterPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
                                   : null,
                             ),
                           ),
-                          if (!isSeperate && (secondaryActions.hasActions))
+                          if (bigScreen && (secondaryActions.hasActions))
                             Provider.value(
                                 value: LdMasterDetailActionLocation.masterSecondary,
                                 child: LdAppBar(
@@ -76,22 +79,29 @@ class LdMasterPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
                                 )),
                         ],
                       ),
-                      bottomNavigationBar: isSeperate && (secondaryActions.hasActions || searchFilter != null)
+                      bottomNavigationBar: !bigScreen && (secondaryActions.hasActions || searchFilter != null)
                           ? Provider.value(
                               value: LdMasterDetailActionLocation.masterSecondary,
-                              child: LdAppBar(
-                                implyLeading: false,
-                                actions: secondaryActions.actions,
-                                overflowMenuProviders: secondaryActions.menuProviders,
-                                bottom: searchFilter != null
-                                    ? LdFilterSearchWidget(
-                                        filter: searchFilter as LdFilterSearchOption<T, IdType, dynamic>,
-                                        onFilterChanged: (filter) {
-                                          route.repository.updateFilter(filter);
-                                        },
-                                      )
-                                    : null,
-                              ),
+                              child: LayoutBuilder(builder: (context, constraints) {
+                                return LdAppBar(
+                                  implyLeading: false,
+                                  actions: secondaryActions.actions,
+                                  overflowMenuProviders: secondaryActions.menuProviders,
+                                  title: searchFilter != null
+                                      ? ConstrainedBox(
+                                          constraints: BoxConstraints(
+                                            maxWidth: constraints.maxWidth * (secondaryActions.hasActions ? 0.6 : 0.9),
+                                          ),
+                                          child: LdFilterSearchWidget(
+                                            filter: searchFilter as LdFilterSearchOption<T, IdType, dynamic>,
+                                            onFilterChanged: (filter) {
+                                              route.repository.updateFilter(filter);
+                                            },
+                                          ),
+                                        )
+                                      : null,
+                                );
+                              }),
                             )
                           : null,
                       body: route.listBuilder(

@@ -90,25 +90,19 @@ class _LdFilterSearchWidgetState<T extends Identifiable<IdType>, IdType, Suggest
 
   @override
   Widget build(BuildContext context) {
-    final isTop =
-        _getTriggerRect()?.center.dy != null && _getTriggerRect()!.center.dy < MediaQuery.sizeOf(context).height / 2;
-
     return CallbackShortcuts(
       bindings: {
         const SingleActivator(LogicalKeyboardKey.keyF, meta: true): () {
           _triggerNode.requestFocus();
         },
       },
-      child: Padding(
-        padding: !isTop ? LdTheme.of(context).pad().copyWith(left: 0, right: 0) : EdgeInsets.zero,
-        child: LdInput(
-          focusNode: _triggerNode,
-          leading: const Icon(Icons.search),
-          key: _triggerKey,
-          disabled: _disabled,
-          hint: widget.filter.hint ?? LiquidLocalizations.of(context).search,
-          controller: _controller,
-        ),
+      child: LdInput(
+        focusNode: _triggerNode,
+        leading: const Icon(Icons.search),
+        key: _triggerKey,
+        disabled: _disabled,
+        hint: widget.filter.hint ?? LiquidLocalizations.of(context).search,
+        controller: _controller,
       ),
     );
   }
@@ -229,66 +223,84 @@ class _SearchWidgetState<T extends Identifiable<IdType>, IdType, Suggestion>
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      type: MaterialType.transparency,
-      child: FocusTraversalGroup(
-        child: LdSubmit<List<Suggestion>, void>(
-          controller: _suggestionController,
-          builder: LdSubmitCustomBuilder<List<Suggestion>, void>(
-            builder: (context, controller, state) => DecoratedBox(
-              decoration: BoxDecoration(
-                color: LdTheme.of(context).neutralShade(2),
-                borderRadius: LdTheme.of(context).radius(LdSize.s),
-                border: Border.all(
-                  color: LdTheme.of(context).border,
-                  width: 1,
-                ),
-                boxShadow: [
-                  ldShadowSticky,
-                ],
+    return Container(
+      padding: !widget.isTop ? LdTheme.of(context).pad() : EdgeInsets.zero,
+      margin: !widget.isTop
+          ? EdgeInsets.only(
+              bottom: LdTheme.of(context).pad().bottom,
+            )
+          : EdgeInsets.zero,
+      decoration: widget.isTop
+          ? null
+          : BoxDecoration(
+              color: LdTheme.of(context).neutralShade(2),
+              borderRadius: LdTheme.of(context).radius(LdSize.s),
+              border: Border.all(
+                color: LdTheme.of(context).border,
+                width: 1,
               ),
-              child: FocusTraversalGroup(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    LdInput(
-                      controller: _controller,
-                      autofocus: true,
-                      leading: const Icon(Icons.search),
-                      hint: widget.filter.hint ?? LiquidLocalizations.of(context).search,
-                      onChanged: _onSearchChanged,
-                      onClear: () {
-                        Navigator.of(context).maybePop('');
-                      },
-                      onSubmitted: (value) {
-                        Navigator.of(context).maybePop(value ?? '');
-                      },
-                    ),
-                    if (controller.state.result?.isNotEmpty ?? false)
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(
-                          maxHeight: 300,
-                        ),
-                        child: ListView.separated(
-                          padding: EdgeInsets.zero,
-                          shrinkWrap: true,
-                          separatorBuilder: (context, index) => const LdDivider(),
-                          itemCount: controller.state.result?.length ?? 0,
-                          itemBuilder: (context, index) =>
-                              widget.filter.buildSuggestion?.call(context, controller.state.result![index]) ??
-                              LdListItem(
-                                borderRadius: LdTheme.of(context).radius(LdSize.s),
-                                onTap: () {
-                                  _controller.text = controller.state.result![index].toString();
-                                  Navigator.of(context).maybePop(controller.state.result![index].toString());
-                                },
-                                title: Text(
-                                  controller.state.result![index].toString(),
-                                ),
-                              ),
-                        ),
+            ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: FocusTraversalGroup(
+          child: LdSubmit<List<Suggestion>, void>(
+            controller: _suggestionController,
+            builder: LdSubmitCustomBuilder<List<Suggestion>, void>(
+              builder: (context, controller, state) => DecoratedBox(
+                decoration: BoxDecoration(
+                  color: LdTheme.of(context).neutralShade(2),
+                  borderRadius: LdTheme.of(context).radius(LdSize.s),
+                  border: Border.all(
+                    color: LdTheme.of(context).border,
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    ldShadowSticky,
+                  ],
+                ),
+                child: FocusTraversalGroup(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      LdInput(
+                        controller: _controller,
+                        autofocus: true,
+                        leading: const Icon(Icons.search),
+                        hint: widget.filter.hint ?? LiquidLocalizations.of(context).search,
+                        onChanged: _onSearchChanged,
+                        onClear: () {
+                          Navigator.of(context).maybePop('');
+                        },
+                        onSubmitted: (value) {
+                          Navigator.of(context).maybePop(value ?? '');
+                        },
                       ),
-                  ].reverseIf(!widget.isTop),
+                      if (controller.state.result?.isNotEmpty ?? false)
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            maxHeight: 300,
+                          ),
+                          child: ListView.separated(
+                            padding: EdgeInsets.zero,
+                            shrinkWrap: true,
+                            separatorBuilder: (context, index) => const LdDivider(),
+                            itemCount: controller.state.result?.length ?? 0,
+                            itemBuilder: (context, index) =>
+                                widget.filter.buildSuggestion?.call(context, controller.state.result![index]) ??
+                                LdListItem(
+                                  borderRadius: LdTheme.of(context).radius(LdSize.s),
+                                  onTap: () {
+                                    _controller.text = controller.state.result![index].toString();
+                                    Navigator.of(context).maybePop(controller.state.result![index].toString());
+                                  },
+                                  title: Text(
+                                    controller.state.result![index].toString(),
+                                  ),
+                                ),
+                          ),
+                        ),
+                    ].reverseIf(!widget.isTop),
+                  ),
                 ),
               ),
             ),

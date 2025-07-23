@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -217,7 +218,7 @@ class _LdAppBarState extends State<LdAppBar> {
             decoration: BoxDecoration(boxShadow: [
               if (!widget.blurOnScroll)
                 BoxShadow(
-                  color: theme.palette.neutral.shades.last.withAlpha(scrolledUnder ? 10 : 0),
+                  color: theme.palette.neutral.shades.last.withAlpha(scrolledUnder || _isBottomNavigationBar ? 10 : 0),
                   blurRadius: 10,
                   spreadRadius: 10,
                 ),
@@ -235,17 +236,21 @@ class _LdAppBarState extends State<LdAppBar> {
                 duration: const Duration(milliseconds: 500),
                 color: backgroundColor.withAlpha(widget.blurOnScroll && scrolledUnder ? 150 : 255),
                 child: LdWrapConditional(
-                  condition: !widget.disableSafeArea,
-                  builder: (context, child) => SafeArea(
-                    bottom: _isBottomNavigationBar,
-                    top: _isAppBar,
-                    child: child,
-                  ),
-                  child: Padding(
-                    padding: switch (theme.themeSize) {
-                      (LdThemeSize.s) => LdTheme.of(context).pad(size: LdSize.xs),
-                      (LdThemeSize.m || LdThemeSize.l) => LdTheme.of(context).pad(size: LdSize.xs),
-                    },
+                  condition: widget.disableSafeArea,
+                  builder: (context, child) => child.padS(),
+                  child: LdWrapConditional(
+                    condition: !widget.disableSafeArea,
+                    builder: (context, child) => Padding(
+                      padding: EdgeInsetsGeometry.only(
+                        left: max(MediaQuery.paddingOf(context).left, LdTheme.of(context).pad(size: LdSize.s).left),
+                        right: max(MediaQuery.paddingOf(context).right, LdTheme.of(context).pad(size: LdSize.s).right),
+                        top: LdTheme.of(context).pad(size: LdSize.s).top +
+                            (_isAppBar ? MediaQuery.paddingOf(context).top : 0),
+                        bottom: max(LdTheme.of(context).pad(size: LdSize.s).bottom,
+                            (_isBottomNavigationBar ? MediaQuery.paddingOf(context).bottom : 0)),
+                      ),
+                      child: child,
+                    ),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
                         minHeight: switch (theme.themeSize) {
@@ -256,6 +261,7 @@ class _LdAppBarState extends State<LdAppBar> {
                       child: LdWrapConditional(
                         condition: widget.addContainer,
                         builder: (context, child) => LdContainer(
+                          padding: EdgeInsets.zero,
                           child: child,
                         ),
                         child: Column(
@@ -264,7 +270,7 @@ class _LdAppBarState extends State<LdAppBar> {
                             // Main row of the app bar
 
                             OverflowView(
-                              spacing: LdTheme.of(context).paddingSize(),
+                              spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
                               layoutBehavior: OverflowViewLayoutBehavior.expandFirstFlexible,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               builder: (context, remainingItemCount) {
@@ -315,7 +321,6 @@ class _LdAppBarState extends State<LdAppBar> {
                                     ],
                                     if (leading != null) ...[
                                       leading,
-                                      ldSpacerM,
                                     ],
                                     if (widget.title != null)
                                       DefaultTextStyle(
@@ -331,7 +336,7 @@ class _LdAppBarState extends State<LdAppBar> {
                                       const _CloseDrawerButton(),
                                     ],
                                   ],
-                                ),
+                                ).spaceS(),
                                 ...widget.actions.where((e) => e.isVisible(context)).map(
                                       (e) => LdAppBarAction(
                                         action: e,
@@ -341,9 +346,16 @@ class _LdAppBarState extends State<LdAppBar> {
                                       ),
                                     ),
                               ],
-                            ).padHorizontal(),
+                            ),
                             if (widget.bottom != null) ...[
-                              widget.bottom!.padM(),
+                              Padding(
+                                padding: EdgeInsets.only(
+                                  top: LdTheme.of(context).pad(size: LdSize.s).top,
+                                  left: LdTheme.of(context).pad(size: LdSize.s).left,
+                                  right: LdTheme.of(context).pad(size: LdSize.s).right,
+                                ),
+                                child: widget.bottom!,
+                              ),
                             ],
                           ],
                         ),
@@ -463,8 +475,13 @@ class LdAppBarAction extends StatelessWidget {
   final List<SingleChildWidget> Function(BuildContext context)? menuProviders;
   final bool inMenu;
 
-  const LdAppBarAction(
-      {super.key, required this.action, required this.bigToolbar, required this.inMenu, this.menuProviders});
+  const LdAppBarAction({
+    super.key,
+    required this.action,
+    required this.bigToolbar,
+    required this.inMenu,
+    this.menuProviders,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -501,6 +518,7 @@ class LdAppBarAction extends StatelessWidget {
 
         return LdSubmit<void, BuildContext>(
           arg: context,
+          key: ValueKey(action.label(context)),
           config: LdSubmitConfig(
             loadingText: action.loadingText(context),
             action: (context) async => action.onPressed(context!),
@@ -543,6 +561,8 @@ class LdAppbarActionOverflowMenu extends StatelessWidget {
     return LdContextMenu(
       menuProviders: menuProviders,
       scaleFromTrigger: true,
+      blurMode: LdContextMenuBlurMode.never,
+      zoomMode: LdContextZoomMode.never,
       builder: (context, isOpen, open, child) => LdButtonGhost(
         onPressed: open,
         child: const Icon(LucideIcons.ellipsisVertical),
@@ -555,7 +575,9 @@ class LdAppbarActionOverflowMenu extends StatelessWidget {
           children: [
             ...actions.map(
               (e) => LdAppBarAction(
+                key: ValueKey(e.label(context)),
                 action: e,
+                menuProviders: menuProviders,
                 bigToolbar: bigToolbar,
                 inMenu: inMenu,
               ),

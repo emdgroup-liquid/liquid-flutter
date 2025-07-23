@@ -13,7 +13,7 @@ class LdMasterDetailAppBarActions<T extends Identifiable<IdType>, IdType, Groupi
     BuildContext context,
     LdMasterDetailActionLocation location,
   ) {
-    final route = LdMasterDetailRoute.of<T, IdType, GroupingCriterion>(context);
+    final route = LdMasterDetailRoute.of<T, IdType, GroupingCriterion>(context, watch: true);
     final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context);
 
     final actions = route.actions.where((e) => e.visibility.any((v) => v.location == location)).toList();

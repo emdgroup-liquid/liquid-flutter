@@ -340,7 +340,6 @@ class ContextMenuRoute extends ModalRoute<void> {
             children: [
               GestureDetector(
                 onTap: () {
-                  print("dismiss");
                   Navigator.of(context, rootNavigator: true).maybePop();
                 },
                 behavior: HitTestBehavior.opaque,

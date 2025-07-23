@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/master_detail/app_bar_actions.dart';
 import 'package:liquid_flutter/src/master_detail/ld_master_detail_selection.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 /// The page rendered by [LdMasterDetailRoute] to show the detail of the selected
@@ -33,69 +32,70 @@ class LdDetailPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
 
           return Provider.value(
             value: LdMasterDetailSelection<T, IdType, GroupingCriterion>(items: selection),
-            child: Builder(builder: (context) {
-              final primaryActions = LdMasterDetailAppBarActions.getActionsAndProviders<T, IdType, GroupingCriterion>(
-                context,
-                LdMasterDetailActionLocation.detailAppBar,
-              );
+            child: StreamBuilder(
+                key: ValueKey(selection.join(',')),
+                stream: route.repository.watchItems(selection),
+                builder: (context, snapshot) {
+                  final primaryActions =
+                      LdMasterDetailAppBarActions.getActionsAndProviders<T, IdType, GroupingCriterion>(
+                    context,
+                    LdMasterDetailActionLocation.detailAppBar,
+                  );
 
-              final secondaryActions = LdMasterDetailAppBarActions.getActionsAndProviders<T, IdType, GroupingCriterion>(
-                context,
-                LdMasterDetailActionLocation.detailSecondary,
-              );
+                  final secondaryActions =
+                      LdMasterDetailAppBarActions.getActionsAndProviders<T, IdType, GroupingCriterion>(
+                    context,
+                    LdMasterDetailActionLocation.detailSecondary,
+                  );
 
-              return LdScaffold(
-                appBar: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Provider.value(
-                      value: LdMasterDetailActionLocation.detailAppBar,
-                      child: appBarBuilder?.call(context, selection) ??
-                          LdAppBar(
-                            implyLeading: false,
-                            leading: isSplit
-                                ? LdButtonGhost(
-                                    child: const Icon(LucideIcons.chevronLeft),
-                                    onPressed: () => Navigator.of(context).maybePop(),
-                                  )
-                                : null,
-                            title: Text(
-                              selection.length > 1
-                                  ? route.repository.pluralItemTitle
-                                  : route.repository.singularItemTitle,
+                  return LdScaffold(
+                    appBar: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Provider.value(
+                          value: LdMasterDetailActionLocation.detailAppBar,
+                          child: appBarBuilder?.call(context, selection) ??
+                              LdAppBar(
+                                title: Text(
+                                  selection.length > 1
+                                      ? route.repository.pluralItemTitle
+                                      : route.repository.singularItemTitle,
+                                ),
+                                actions: primaryActions.actions,
+                                overflowMenuProviders: primaryActions.menuProviders,
+                              ),
+                        ),
+                        if (!isSplit && secondaryActions.hasActions) ...[
+                          Provider.value(
+                            value: LdMasterDetailActionLocation.detailSecondary,
+                            child: LdAppBar(
+                              implyLeading: false,
+                              disableSafeArea: true,
+                              actions: secondaryActions.actions,
+                              overflowMenuProviders: secondaryActions.menuProviders,
                             ),
-                            actions: primaryActions.actions,
-                            overflowMenuProviders: primaryActions.menuProviders,
                           ),
+                        ],
+                      ],
                     ),
-                    if (!isSplit && secondaryActions.hasActions) ...[
-                      Provider.value(
-                        value: LdMasterDetailActionLocation.detailSecondary,
-                        child: LdAppBar(
-                          implyLeading: false,
-                          disableSafeArea: true,
-                          actions: secondaryActions.actions,
-                          overflowMenuProviders: secondaryActions.menuProviders,
-                        ),
+                    bottomNavigationBar: isSplit && secondaryActions.hasActions
+                        ? Provider.value(
+                            value: LdMasterDetailActionLocation.detailSecondary,
+                            child: LdAppBar(
+                              implyLeading: false,
+                              actions: secondaryActions.actions,
+                              overflowMenuProviders: secondaryActions.menuProviders,
+                            ),
+                          )
+                        : null,
+                    body: SafeArea(
+                      child: LdDetailPageContent(
+                        route: route,
+                        selection: selection,
                       ),
-                    ],
-                  ],
-                ),
-                bottomNavigationBar: isSplit && secondaryActions.hasActions
-                    ? Provider.value(
-                        value: LdMasterDetailActionLocation.detailSecondary,
-                        child: LdAppBar(
-                          implyLeading: false,
-                          actions: secondaryActions.actions,
-                          overflowMenuProviders: secondaryActions.menuProviders,
-                        ),
-                      )
-                    : null,
-                body: SafeArea(
-                  child: LdDetailPageContent(route: route, selection: selection),
-                ),
-              );
-            }),
+                    ),
+                  );
+                }),
           );
         });
   }

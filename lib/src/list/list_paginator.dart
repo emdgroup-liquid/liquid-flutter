@@ -413,6 +413,14 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     return updatedItems.where((item) => item.value?.id == id);
   }
 
+  Stream<LdPaginatorItem<T>> watchItems(Set<IdType> ids) async* {
+    await for (final update in updatedItems) {
+      if (ids.contains(update.value?.id)) {
+        yield update;
+      }
+    }
+  }
+
   void _debounce(void Function() task) {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(debounceTime, task);

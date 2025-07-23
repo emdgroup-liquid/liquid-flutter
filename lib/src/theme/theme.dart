@@ -89,7 +89,7 @@ class LdTheme extends ChangeNotifier {
         return 1;
       case LdThemeSize.m:
       case LdThemeSize.l:
-        return 2;
+        return 1;
     }
   }
 

@@ -47,7 +47,7 @@ LdMasterDetailAction<T, IdType, GroupingCriterion>
           },
           submitType: LdLabeledActionSubmitType.contextMenu,
           buildContextMenu: (context, close) => ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 300),
+            constraints: const BoxConstraints(maxWidth: 200),
             child: LdFilterModal(
               route: context.read<LdMasterDetailRoute<T, IdType, GroupingCriterion>>(),
             ),
