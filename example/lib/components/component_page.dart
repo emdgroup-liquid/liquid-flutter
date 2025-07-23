@@ -14,6 +14,7 @@ class ComponentPagePath {
 class ComponentPage extends StatelessWidget {
   final String title;
   final String path;
+  final String category;
   final List<String>? apiComponents;
 
   final String? text;
@@ -22,6 +23,7 @@ class ComponentPage extends StatelessWidget {
   const ComponentPage({
     super.key,
     required this.path,
+    this.category = "Components",
     required this.title,
     this.apiComponents,
     this.demo,
@@ -44,7 +46,7 @@ class ComponentPage extends StatelessWidget {
                 title,
               ),
               LdBreadcrumb.fromStrings([
-                "Components",
+                category,
                 title,
               ]),
             ],

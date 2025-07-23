@@ -33,7 +33,7 @@ LdColorBundle neutralGhostColor(
 
   if (active) {
     return LdColorBundle(
-      surface: neutral.relative(theme.isDark, isOdd ? 3 : 2),
+      surface: neutral.relative(theme.isDark, isOdd ? 2 : 3),
       text: neutral.contrastingText(neutral.relative(theme.isDark, 2)),
       border: border,
       icon: neutral.contrastingText(neutral.relative(theme.isDark, 2)),

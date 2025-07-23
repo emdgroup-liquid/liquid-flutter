@@ -25,7 +25,13 @@ class MainNavigationDrawer extends StatefulWidget {
   State<MainNavigationDrawer> createState() => _MainNavigationDrawerState();
 }
 
-enum ComponentCategory { layout, formElements, feedback, interaction, dataDisplay }
+enum ComponentCategory {
+  layout,
+  formElements,
+  feedback,
+  interaction,
+  dataDisplay
+}
 
 class _Component {
   final String title;
@@ -38,58 +44,94 @@ class _Component {
 
 const components = [
   // Layout
-  _Component("Accordion", "/components/accordion", LucideIcons.listCollapse, ComponentCategory.layout),
-  _Component("Autospace", "/components/autospace", LucideIcons.alignVerticalDistributeCenter, ComponentCategory.layout),
-  _Component("Card", "/components/card", LucideIcons.square, ComponentCategory.layout),
-  _Component("Divider", "/components/divider", LucideIcons.minus, ComponentCategory.layout),
-  _Component("Drawer", "/components/drawer", LucideIcons.menu, ComponentCategory.layout),
-  _Component("Master detail", "/components/master-detail", LucideIcons.list, ComponentCategory.layout),
-  _Component("Spring", "/components/spring", LucideIcons.shell, ComponentCategory.layout),
-  _Component("List Item", "/components/list-item", LucideIcons.listTree, ComponentCategory.layout),
+  _Component("Accordion", "/components/accordion", LucideIcons.listCollapse,
+      ComponentCategory.layout),
+  _Component("Autospace", "/components/autospace",
+      LucideIcons.alignVerticalDistributeCenter, ComponentCategory.layout),
+  _Component(
+      "Card", "/components/card", LucideIcons.square, ComponentCategory.layout),
+  _Component("Divider", "/components/divider", LucideIcons.minus,
+      ComponentCategory.layout),
+  _Component("Drawer", "/components/drawer", LucideIcons.menu,
+      ComponentCategory.layout),
+  _Component("Master detail", "/components/master-detail", LucideIcons.list,
+      ComponentCategory.layout),
+  _Component("Spring", "/components/spring", LucideIcons.shell,
+      ComponentCategory.layout),
+  _Component("List Item", "/components/list-item", LucideIcons.listTree,
+      ComponentCategory.layout),
   _Component(
     "List",
     "/components/list",
     LucideIcons.list,
     ComponentCategory.layout,
   ),
-  _Component("Selectable List", "/components/selectable-list", LucideIcons.listCheck, ComponentCategory.layout),
+  _Component("Selectable List", "/components/selectable-list",
+      LucideIcons.listCheck, ComponentCategory.layout),
 
   // Form Elements
-  _Component("Checkbox", "/components/checkbox", LucideIcons.circleCheck, ComponentCategory.formElements),
-  _Component("Choose", "/components/choose", LucideIcons.textSelect, ComponentCategory.formElements),
-  _Component("Date/Time Picker", "/components/date-time-picker", LucideIcons.calendar, ComponentCategory.formElements),
-  _Component("Form", "/components/form", LucideIcons.penTool, ComponentCategory.formElements),
-  _Component("Input", "/components/input", LucideIcons.textCursorInput, ComponentCategory.formElements),
-  _Component("Radio", "/components/radio", LucideIcons.circle, ComponentCategory.formElements),
+  _Component("Checkbox", "/components/checkbox", LucideIcons.circleCheck,
+      ComponentCategory.formElements),
+  _Component("Choose", "/components/choose", LucideIcons.textSelect,
+      ComponentCategory.formElements),
+  _Component("Date/Time Picker", "/components/date-time-picker",
+      LucideIcons.calendar, ComponentCategory.formElements),
+  _Component("Form", "/components/form", LucideIcons.penTool,
+      ComponentCategory.formElements),
+  _Component("Input", "/components/input", LucideIcons.textCursorInput,
+      ComponentCategory.formElements),
+  _Component("Radio", "/components/radio", LucideIcons.circle,
+      ComponentCategory.formElements),
   //_Component("Reactive Form", "/components/reactive_form",
   //    LucideIcons.signature, ComponentCategory.formElements),
-  _Component("Select", "/components/select", LucideIcons.arrowDown, ComponentCategory.formElements),
-  _Component("Slider", "/components/slider", LucideIcons.gitCommitHorizontal, ComponentCategory.formElements),
-  _Component("Submit", "/components/submit", LucideIcons.send, ComponentCategory.formElements),
-  _Component("Switch", "/components/switch", LucideIcons.betweenHorizontalStart, ComponentCategory.formElements),
-  _Component("Toggle", "/components/toggle", Icons.toggle_on, ComponentCategory.formElements),
+  _Component("Select", "/components/select", LucideIcons.arrowDown,
+      ComponentCategory.formElements),
+  _Component("Slider", "/components/slider", LucideIcons.gitCommitHorizontal,
+      ComponentCategory.formElements),
+  _Component("Submit", "/components/submit", LucideIcons.send,
+      ComponentCategory.formElements),
+  _Component("Switch", "/components/switch", LucideIcons.betweenHorizontalStart,
+      ComponentCategory.formElements),
+  _Component("Toggle", "/components/toggle", Icons.toggle_on,
+      ComponentCategory.formElements),
 
   // Feedback & Indicators
-  _Component("Badge", "/components/badge", LucideIcons.tag, ComponentCategory.feedback),
-  _Component("Exception", "/components/exception", LucideIcons.circleAlert, ComponentCategory.feedback),
-  _Component("Hint", "/components/hint", LucideIcons.info, ComponentCategory.feedback),
-  _Component("Indicator", "/components/indicator", LucideIcons.circleAlert, ComponentCategory.feedback),
-  _Component("Loader", "/components/loader", LucideIcons.loaderCircle, ComponentCategory.feedback),
-  _Component("Notification", "/components/notification", LucideIcons.bell, ComponentCategory.feedback),
-  _Component("Reveal", "/components/reveal", LucideIcons.eye, ComponentCategory.feedback),
+  _Component("Badge", "/components/badge", LucideIcons.tag,
+      ComponentCategory.feedback),
+  _Component("Exception", "/components/exception", LucideIcons.circleAlert,
+      ComponentCategory.feedback),
+  _Component(
+      "Hint", "/components/hint", LucideIcons.info, ComponentCategory.feedback),
+  _Component("Indicator", "/components/indicator", LucideIcons.circleAlert,
+      ComponentCategory.feedback),
+  _Component("Loader", "/components/loader", LucideIcons.loaderCircle,
+      ComponentCategory.feedback),
+  _Component("Notification", "/components/notification", LucideIcons.bell,
+      ComponentCategory.feedback),
+  _Component("Reveal", "/components/reveal", LucideIcons.eye,
+      ComponentCategory.feedback),
 
   // Navigation & Interaction
-  _Component("Action Runner", "/components/action-runner", LucideIcons.tableOfContents, ComponentCategory.interaction),
-  _Component("Breadcrumb", "/components/breadcrumb", LucideIcons.arrowRight, ComponentCategory.interaction),
-  _Component("Button", "/components/button", LucideIcons.pointer, ComponentCategory.interaction),
-  _Component("Context Menu", "/components/context-menu", LucideIcons.squareMousePointer, ComponentCategory.interaction),
-  _Component("Modal", "/components/modal", LucideIcons.messageSquare, ComponentCategory.interaction),
-  _Component("Orb", "/components/orb", LucideIcons.droplet, ComponentCategory.interaction),
+  _Component("Action Runner", "/components/action-runner",
+      LucideIcons.tableOfContents, ComponentCategory.interaction),
+  _Component("Breadcrumb", "/components/breadcrumb", LucideIcons.arrowRight,
+      ComponentCategory.interaction),
+  _Component("Button", "/components/button", LucideIcons.pointer,
+      ComponentCategory.interaction),
+  _Component("Context Menu", "/components/context-menu",
+      LucideIcons.squareMousePointer, ComponentCategory.interaction),
+  _Component("Modal", "/components/modal", LucideIcons.messageSquare,
+      ComponentCategory.interaction),
+  _Component("Orb", "/components/orb", LucideIcons.droplet,
+      ComponentCategory.interaction),
 
   // Data Display
-  _Component("Icon", "/components/icon", LucideIcons.image, ComponentCategory.dataDisplay),
-  _Component("Table", "/components/table", LucideIcons.grid3x3, ComponentCategory.dataDisplay),
-  _Component("Tag", "/components/tag", LucideIcons.tag, ComponentCategory.dataDisplay),
+  _Component("Icon", "/components/icon", LucideIcons.image,
+      ComponentCategory.dataDisplay),
+  _Component("Table", "/components/table", LucideIcons.grid3x3,
+      ComponentCategory.dataDisplay),
+  _Component(
+      "Tag", "/components/tag", LucideIcons.tag, ComponentCategory.dataDisplay),
 ];
 
 class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
@@ -166,7 +208,8 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
     BuildContext context,
     _Component component,
   ) {
-    final isActive = GoRouterState.of(context).uri.path.startsWith(component.route);
+    final isActive =
+        GoRouterState.of(context).uri.path.startsWith(component.route);
 
     return LdDrawerItemSection(
       active: isActive,
@@ -212,13 +255,15 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
           ),
           sliver: SliverPadding(
             padding: LdTheme.of(context).pad(),
-            sliver: SliverList.list(key: const PageStorageKey('drawer_list_key'), children: [
+            sliver: SliverList
+                .list(key: const PageStorageKey('drawer_list_key'), children: [
               Row(
                 children: [
                   LdContextMenu(
                     scaleFromTrigger: true,
                     positionMode: LdContextPositionMode.relativeTrigger,
-                    builder: (context, shuttle, trigger, child) => LdButtonVague(
+                    builder: (context, shuttle, trigger, child) =>
+                        LdButtonVague(
                       trailing: const Icon(LucideIcons.squareMousePointer),
                       onPressed: () {
                         trigger();
@@ -306,6 +351,16 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                   onTap: () => _showPage(context, "/material"),
                   child: const Text("Material"),
                 ),
+                const LdSectionHeader("Patterns"),
+                LdDrawerItemSection(
+                  active:
+                      GoRouterState.of(context).uri.path == "/patterns/monkey",
+                  leading: Text(
+                    "🐵",
+                  ),
+                  onTap: () => _showPage(context, "/patterns/monkey"),
+                  child: const Text("Monkey"),
+                ),
                 const LdSectionHeader("Components"),
                 LdInput(
                   hint: "Search... ",
@@ -313,7 +368,8 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                   focusNode: searchFocusNode,
                   showClear: true,
                   trailingHint: const LdShortcutIndicator(
-                    shortcut: SingleActivator(LogicalKeyboardKey.keyK, meta: true),
+                    shortcut:
+                        SingleActivator(LogicalKeyboardKey.keyK, meta: true),
                   ),
                   onChanged: (query) {
                     if (query != null) {
@@ -322,23 +378,28 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                   },
                 ),
                 ...ComponentCategory.values.expand((category) {
-                  final categoryComponents = _componentsFiltered.where((c) => c.category == category).toList();
+                  final categoryComponents = _componentsFiltered
+                      .where((c) => c.category == category)
+                      .toList();
                   if (categoryComponents.isEmpty) {
                     return [];
                   }
                   return [
                     LdSectionHeader(_categoryTitle(category)),
-                    ...categoryComponents.map((e) => _renderComponent(context, e)),
+                    ...categoryComponents
+                        .map((e) => _renderComponent(context, e)),
                   ];
                 }),
                 const LdDivider(),
                 LdDrawerItemSection(
-                  onTap: () => launchUrl(Uri.parse("https://emd.design/imprint")),
+                  onTap: () =>
+                      launchUrl(Uri.parse("https://emd.design/imprint")),
                   trailing: const Icon(LucideIcons.externalLink),
                   child: const Text("Imprint"),
                 ),
                 LdDrawerItemSection(
-                  onTap: () => launchUrl(Uri.parse("https://emd.design/privacy")),
+                  onTap: () =>
+                      launchUrl(Uri.parse("https://emd.design/privacy")),
                   trailing: const Icon(LucideIcons.externalLink),
                   child: const Text("Privacy"),
                 ),

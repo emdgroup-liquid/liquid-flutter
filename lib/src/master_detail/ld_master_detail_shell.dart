@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/master_detail/master_detail_route_state.dart';
@@ -232,30 +233,37 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: widget.route.stateStream,
-      initialData: widget.route.state,
-      builder: (context, snapshot) {
-        if (widget.route.state.repository == null) {
-          return LdSubmit<void, void>(
-            config: LdSubmitConfig(
-                autoTrigger: true,
-                timeout: null,
-                action: (_) async {
-                  await widget.route.initRepository(
-                    context,
-                    widget.route.parseSelected(widget.routeSelection ?? ""),
-                    _getQueryParameters(),
-                  );
-                  _setupSubscriptions();
-                  _updateSelectionFromRoute();
-                }),
-            builder: const LdSubmitCenteredBuilder<void, void>(),
-          );
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.keyR, meta: true): () {
+          widget.route.state.repository?.refreshList();
         }
-
-        return _buildInitialized(context, snapshot.data!);
       },
+      child: StreamBuilder(
+        stream: widget.route.stateStream,
+        initialData: widget.route.state,
+        builder: (context, snapshot) {
+          if (widget.route.state.repository == null) {
+            return LdSubmit<void, void>(
+              config: LdSubmitConfig(
+                  autoTrigger: true,
+                  timeout: null,
+                  action: (_) async {
+                    await widget.route.initRepository(
+                      context,
+                      widget.route.parseSelected(widget.routeSelection ?? ""),
+                      _getQueryParameters(),
+                    );
+                    _setupSubscriptions();
+                    _updateSelectionFromRoute();
+                  }),
+              builder: const LdSubmitCenteredBuilder<void, void>(),
+            );
+          }
+
+          return _buildInitialized(context, snapshot.data!);
+        },
+      ),
     );
   }
 }

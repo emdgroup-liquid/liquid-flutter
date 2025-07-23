@@ -49,7 +49,14 @@ class _LdDrawerItemSectionState extends State<LdDrawerItemSection> {
             color: color,
             size: _theme.paragraphSize(LdSize.s),
           ),
-          child: widget.leading!,
+          child: DefaultTextStyle(
+              style: ldBuildTextStyle(
+                _theme,
+                LdTextType.label,
+                LdSize.s,
+                color: color,
+              ),
+              child: widget.leading!),
         ));
   }
 

@@ -32,9 +32,6 @@ dependencies:
 
   soft_edge_blur: ^0.1.3
 
-dependency_overrides: 
-  overflow_view:
-    path: ../overflow_view
 dev_dependencies:
   flutter_test:
     sdk: flutter
