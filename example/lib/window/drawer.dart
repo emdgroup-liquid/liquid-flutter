@@ -1,7 +1,5 @@
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid/main.dart';
@@ -238,181 +236,172 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = LdTheme.of(context, listen: true);
-    return CustomScrollView(
-      controller: _scrollController,
-      slivers: [
-        SliverStickyHeader(
-          header: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onPanStart: (details) {
-              appWindow.startDragging();
+    return LdDrawer(
+      appBar: Builder(builder: (context) {
+        return LdAppBar(
+          blurOnScroll: true,
+        );
+      }),
+      bottomNavigationBar: LdAppBar(
+        blurOnScroll: true,
+        leading: LdContextMenu(
+          scaleFromTrigger: true,
+          positionMode: LdContextPositionMode.relativeTrigger,
+          builder: (context, shuttle, trigger, child) => LdButtonVague(
+            trailing: const Icon(LucideIcons.squareMousePointer),
+            onPressed: () {
+              trigger();
             },
-            onDoubleTap: () => appWindow.maximizeOrRestore(),
-            child: LdAppBar(
-              blurOnScroll: true,
+            child: const Text("Theme"),
+          ),
+          menuBuilder: (context, openMenu) => ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 300,
+            ),
+            child: SingleChildScrollView(
+              child: LdAutoSpace(
+                children: [
+                  const ThemeSelector(),
+                  ldSpacerM,
+                  const SizeSelector(),
+                  ldSpacerM,
+                  const RadiusSelector(),
+                  ldSpacerM,
+                  const FontSelector(),
+                  ldSpacerM,
+                  const HeadlineFontSelector(),
+                ],
+              ).padL(),
             ),
           ),
-          sliver: SliverPadding(
-            padding: LdTheme.of(context).pad(),
-            sliver: SliverList
-                .list(key: const PageStorageKey('drawer_list_key'), children: [
-              Row(
-                children: [
-                  LdContextMenu(
-                    scaleFromTrigger: true,
-                    positionMode: LdContextPositionMode.relativeTrigger,
-                    builder: (context, shuttle, trigger, child) =>
-                        LdButtonVague(
-                      trailing: const Icon(LucideIcons.squareMousePointer),
-                      onPressed: () {
-                        trigger();
-                      },
-                      child: const Text("Theme"),
-                    ),
-                    menuBuilder: (context, openMenu) => ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: 300,
-                      ),
-                      child: SingleChildScrollView(
-                        child: LdAutoSpace(
-                          children: [
-                            const ThemeSelector(),
-                            ldSpacerM,
-                            const SizeSelector(),
-                            ldSpacerM,
-                            const RadiusSelector(),
-                            ldSpacerM,
-                            const FontSelector(),
-                            ldSpacerM,
-                            const HeadlineFontSelector(),
-                          ],
-                        ).padL(),
-                      ),
-                    ),
+        ),
+      ),
+      body: Builder(builder: (context) {
+        return ListView(
+          padding: MediaQuery.paddingOf(context) +
+              LdTheme.of(context).pad().copyWith(
+                    top: 0,
+                    bottom: 0,
                   ),
-                ],
+          controller: _scrollController,
+          children: [
+            ldSpacerM,
+            LdAutoSpace(children: [
+              LdDrawerItemSection(
+                active: GoRouterState.of(context).uri.path == "/",
+                leading: const Icon(LucideIcons.house),
+                onTap: () => _showPage(context, "/"),
+                child: const Text("Home"),
               ),
-              ldSpacerM,
-              LdAutoSpace(children: [
-                LdDrawerItemSection(
-                  active: GoRouterState.of(context).uri.path == "/",
-                  leading: const Icon(LucideIcons.house),
-                  onTap: () => _showPage(context, "/"),
-                  child: const Text("Home"),
+              const LdSectionHeader("Demos"),
+              LdDrawerItemSection(
+                active: GoRouterState.of(context).uri.path == "/chemical",
+                leading: const Icon(LdIcons.beaker),
+                onTap: () => _showPage(context, "/chemical"),
+                child: const Text("Magic"),
+              ),
+              LdDrawerItemSection(
+                active: GoRouterState.of(context).uri.path == "/task-demo",
+                leading: const Icon(LucideIcons.check),
+                onTap: () => _showPage(context, "/task-demo"),
+                child: const Text("Task"),
+              ),
+              LdDrawerItemSection(
+                active: GoRouterState.of(context).uri.path == "/movie-demo",
+                leading: const Icon(LucideIcons.film),
+                onTap: () => _showPage(context, "/movie-demo"),
+                child: const Text("Movie"),
+              ),
+              const LdSectionHeader("Documentation"),
+              LdDrawerItemSection(
+                active: GoRouterState.of(context).uri.path == "/theme",
+                leading: const Icon(LucideIcons.paintbrush),
+                onTap: () => _showPage(context, "/theme"),
+                child: const Text("Theme"),
+              ),
+              LdDrawerItemSection(
+                active: GoRouterState.of(context).uri.path == "/layout",
+                leading: const Icon(LucideIcons.layoutDashboard),
+                onTap: () => _showPage(context, "/layout"),
+                child: const Text("Layout"),
+              ),
+              LdDrawerItemSection(
+                active: GoRouterState.of(context).uri.path == "/radius",
+                leading: const Icon(LucideIcons.radius),
+                onTap: () => _showPage(context, "/radius"),
+                child: const Text("Border Radius"),
+              ),
+              LdDrawerItemSection(
+                active: GoRouterState.of(context).uri.path == "/typography",
+                leading: const Icon(LucideIcons.text),
+                onTap: () => _showPage(context, "/typography"),
+                child: const Text("Typography"),
+              ),
+              LdDrawerItemSection(
+                active: GoRouterState.of(context).uri.path == "/material",
+                leading: const Icon(LucideIcons.sprayCan),
+                onTap: () => _showPage(context, "/material"),
+                child: const Text("Material"),
+              ),
+              const LdSectionHeader("Patterns"),
+              LdDrawerItemSection(
+                active:
+                    GoRouterState.of(context).uri.path == "/patterns/monkey",
+                leading: Text(
+                  "🐵",
                 ),
-                const LdSectionHeader("Demos"),
-                LdDrawerItemSection(
-                  active: GoRouterState.of(context).uri.path == "/chemical",
-                  leading: const Icon(LdIcons.beaker),
-                  onTap: () => _showPage(context, "/chemical"),
-                  child: const Text("Magic"),
+                onTap: () => _showPage(context, "/patterns/monkey"),
+                child: const Text("Monkey"),
+              ),
+              const LdSectionHeader("Components"),
+              LdInput(
+                hint: "Search... ",
+                controller: _search,
+                focusNode: searchFocusNode,
+                showClear: true,
+                trailingHint: const LdShortcutIndicator(
+                  shortcut:
+                      SingleActivator(LogicalKeyboardKey.keyK, meta: true),
                 ),
-                LdDrawerItemSection(
-                  active: GoRouterState.of(context).uri.path == "/task-demo",
-                  leading: const Icon(LucideIcons.check),
-                  onTap: () => _showPage(context, "/task-demo"),
-                  child: const Text("Task"),
-                ),
-                LdDrawerItemSection(
-                  active: GoRouterState.of(context).uri.path == "/movie-demo",
-                  leading: const Icon(LucideIcons.film),
-                  onTap: () => _showPage(context, "/movie-demo"),
-                  child: const Text("Movie"),
-                ),
-                const LdSectionHeader("Documentation"),
-                LdDrawerItemSection(
-                  active: GoRouterState.of(context).uri.path == "/theme",
-                  leading: const Icon(LucideIcons.paintbrush),
-                  onTap: () => _showPage(context, "/theme"),
-                  child: const Text("Theme"),
-                ),
-                LdDrawerItemSection(
-                  active: GoRouterState.of(context).uri.path == "/layout",
-                  leading: const Icon(LucideIcons.layoutDashboard),
-                  onTap: () => _showPage(context, "/layout"),
-                  child: const Text("Layout"),
-                ),
-                LdDrawerItemSection(
-                  active: GoRouterState.of(context).uri.path == "/radius",
-                  leading: const Icon(LucideIcons.radius),
-                  onTap: () => _showPage(context, "/radius"),
-                  child: const Text("Border Radius"),
-                ),
-                LdDrawerItemSection(
-                  active: GoRouterState.of(context).uri.path == "/typography",
-                  leading: const Icon(LucideIcons.text),
-                  onTap: () => _showPage(context, "/typography"),
-                  child: const Text("Typography"),
-                ),
-                LdDrawerItemSection(
-                  active: GoRouterState.of(context).uri.path == "/material",
-                  leading: const Icon(LucideIcons.sprayCan),
-                  onTap: () => _showPage(context, "/material"),
-                  child: const Text("Material"),
-                ),
-                const LdSectionHeader("Patterns"),
-                LdDrawerItemSection(
-                  active:
-                      GoRouterState.of(context).uri.path == "/patterns/monkey",
-                  leading: Text(
-                    "🐵",
-                  ),
-                  onTap: () => _showPage(context, "/patterns/monkey"),
-                  child: const Text("Monkey"),
-                ),
-                const LdSectionHeader("Components"),
-                LdInput(
-                  hint: "Search... ",
-                  controller: _search,
-                  focusNode: searchFocusNode,
-                  showClear: true,
-                  trailingHint: const LdShortcutIndicator(
-                    shortcut:
-                        SingleActivator(LogicalKeyboardKey.keyK, meta: true),
-                  ),
-                  onChanged: (query) {
-                    if (query != null) {
-                      _onQueryChanged(query);
-                    }
-                  },
-                ),
-                ...ComponentCategory.values.expand((category) {
-                  final categoryComponents = _componentsFiltered
-                      .where((c) => c.category == category)
-                      .toList();
-                  if (categoryComponents.isEmpty) {
-                    return [];
+                onChanged: (query) {
+                  if (query != null) {
+                    _onQueryChanged(query);
                   }
-                  return [
-                    LdSectionHeader(_categoryTitle(category)),
-                    ...categoryComponents
-                        .map((e) => _renderComponent(context, e)),
-                  ];
-                }),
-                const LdDivider(),
-                LdDrawerItemSection(
-                  onTap: () =>
-                      launchUrl(Uri.parse("https://emd.design/imprint")),
-                  trailing: const Icon(LucideIcons.externalLink),
-                  child: const Text("Imprint"),
-                ),
-                LdDrawerItemSection(
-                  onTap: () =>
-                      launchUrl(Uri.parse("https://emd.design/privacy")),
-                  trailing: const Icon(LucideIcons.externalLink),
-                  child: const Text("Privacy"),
-                ),
-                LdDrawerItemSection(
-                  onTap: () => launchUrl(Uri.parse("https://emd.design/terms")),
-                  trailing: const Icon(LucideIcons.externalLink),
-                  child: const Text("Terms of use"),
-                ),
-              ]),
+                },
+              ),
+              ...ComponentCategory.values.expand((category) {
+                final categoryComponents = _componentsFiltered
+                    .where((c) => c.category == category)
+                    .toList();
+                if (categoryComponents.isEmpty) {
+                  return [];
+                }
+                return [
+                  LdSectionHeader(_categoryTitle(category)),
+                  ...categoryComponents
+                      .map((e) => _renderComponent(context, e)),
+                ];
+              }),
+              const LdDivider(),
+              LdDrawerItemSection(
+                onTap: () => launchUrl(Uri.parse("https://emd.design/imprint")),
+                trailing: const Icon(LucideIcons.externalLink),
+                child: const Text("Imprint"),
+              ),
+              LdDrawerItemSection(
+                onTap: () => launchUrl(Uri.parse("https://emd.design/privacy")),
+                trailing: const Icon(LucideIcons.externalLink),
+                child: const Text("Privacy"),
+              ),
+              LdDrawerItemSection(
+                onTap: () => launchUrl(Uri.parse("https://emd.design/terms")),
+                trailing: const Icon(LucideIcons.externalLink),
+                child: const Text("Terms of use"),
+              ),
             ]),
-          ),
-        )
-      ],
+          ],
+        );
+      }),
     );
   }
 }

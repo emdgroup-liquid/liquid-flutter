@@ -4,29 +4,28 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/conditional_parent.dart';
-import 'package:liquid_flutter/src/master_detail/filter_modal.dart';
-import 'package:liquid_flutter/src/master_detail/master_detail_route_state.dart';
+
 import 'package:provider/provider.dart';
 
-enum MasterDetailPresentationMode { page, dialog }
+enum MonkeyDetailVariant { page, dialog }
 
-enum MasterDetailLayoutMode { auto, split, compact }
+enum MonkeyLayoutMode { auto, sideBySide, neverSideBySide }
 
-class LdMasterDetailRoute<T extends Identifiable<IdType>, IdType, GroupingCriterion> {
+class LdMonkey<T extends Identifiable<IdType>, IdType, GroupingCriterion> {
   LdRepository<T, IdType> get repository => _state.repository!;
 
-  var _state = LdMasterDetailRouteState<T, IdType, GroupingCriterion>(
+  var _state = LdMonkeyDetailState<T, IdType, GroupingCriterion>(
     showSelectionControls: false,
     selectedItems: {},
     repository: null,
   );
 
-  final _stateStream = StreamController<LdMasterDetailRouteState<T, IdType, GroupingCriterion>>.broadcast();
-  Stream<LdMasterDetailRouteState<T, IdType, GroupingCriterion>> get stateStream => _stateStream.stream;
+  final _stateStream = StreamController<LdMonkeyDetailState<T, IdType, GroupingCriterion>>.broadcast();
+  Stream<LdMonkeyDetailState<T, IdType, GroupingCriterion>> get stateStream => _stateStream.stream;
 
-  LdMasterDetailRouteState<T, IdType, GroupingCriterion> get state => _state;
+  LdMonkeyDetailState<T, IdType, GroupingCriterion> get state => _state;
 
-  void _updateState(LdMasterDetailRouteState<T, IdType, GroupingCriterion> state) {
+  void _updateState(LdMonkeyDetailState<T, IdType, GroupingCriterion> state) {
     _state = state;
     _stateStream.add(state);
   }
@@ -42,8 +41,8 @@ class LdMasterDetailRoute<T extends Identifiable<IdType>, IdType, GroupingCriter
   final double reflowBreakpoint;
   final int? detailFlex;
 
-  final MasterDetailPresentationMode presentationMode;
-  final MasterDetailLayoutMode layoutMode;
+  final MonkeyDetailVariant presentationMode;
+  final MonkeyLayoutMode layoutMode;
 
   final bool allowMultipleSelection;
   final bool showMultiSelectItems;
@@ -52,23 +51,24 @@ class LdMasterDetailRoute<T extends Identifiable<IdType>, IdType, GroupingCriter
   final Widget Function(BuildContext context, LdPaginatorItem<T> item) buildDetail;
 
   /// The actions that are available in the master and detail pages.
-  final List<LdMasterDetailAction<T, IdType, GroupingCriterion>> actions;
+  final List<LdMonkeyAction<T, IdType, GroupingCriterion>> actions;
 
   /// Builds the selectable list,
   final LdSelectableList<T, IdType, GroupingCriterion> Function(
-    LdMasterDetailRoute<T, IdType, GroupingCriterion> route,
-    LdMasterDetailRouteState<T, IdType, GroupingCriterion> state,
+    LdMonkey<T, IdType, GroupingCriterion> route,
+    LdMonkeyDetailState<T, IdType, GroupingCriterion> state,
     void Function(Set<IdType> selectedItems) onSelectionChange,
   ) listBuilder;
 
-  static LdMasterDetailRoute<T, IdType, GroupingCriterion>
-      of<T extends Identifiable<IdType>, IdType, GroupingCriterion>(BuildContext context, {bool watch = false}) {
+  static LdMonkey<T, IdType, GroupingCriterion> of<T extends Identifiable<IdType>, IdType, GroupingCriterion>(
+      BuildContext context,
+      {bool watch = false}) {
     return watch
-        ? context.watch<LdMasterDetailRoute<T, IdType, GroupingCriterion>>()
-        : context.read<LdMasterDetailRoute<T, IdType, GroupingCriterion>>();
+        ? context.watch<LdMonkey<T, IdType, GroupingCriterion>>()
+        : context.read<LdMonkey<T, IdType, GroupingCriterion>>();
   }
 
-  LdMasterDetailRoute({
+  LdMonkey({
     required this.path,
     required this.detailPath,
     required this.buildDetail,
@@ -81,8 +81,8 @@ class LdMasterDetailRoute<T extends Identifiable<IdType>, IdType, GroupingCriter
     this.allowMultipleSelection = true,
     this.showMultiSelectItems = false,
     this.wrapShell,
-    this.presentationMode = MasterDetailPresentationMode.page,
-    this.layoutMode = MasterDetailLayoutMode.auto,
+    this.presentationMode = MonkeyDetailVariant.page,
+    this.layoutMode = MonkeyLayoutMode.auto,
     Set<IdType> Function(String selected)? parseSelected,
   }) : _parseSelected = parseSelected;
 
@@ -103,7 +103,7 @@ class LdMasterDetailRoute<T extends Identifiable<IdType>, IdType, GroupingCriter
               path: path,
               pageBuilder: (context, state) => NoTransitionPage<void>(
                     key: state.pageKey,
-                    child: LdMasterPage(
+                    child: LdMonkeyMasterPage(
                       route: this,
                     ),
                   ),
@@ -112,20 +112,20 @@ class LdMasterDetailRoute<T extends Identifiable<IdType>, IdType, GroupingCriter
                     name: "$path-detail",
                     path: "/:selected",
                     pageBuilder: (context, state) {
-                      final effectivePresentationMode = LdMasterContext.of<T, IdType, GroupingCriterion>(context);
+                      final effectivePresentationMode = LdMonkeyContext.of<T, IdType, GroupingCriterion>(context);
                       final page = Provider.value(
                         value: effectivePresentationMode,
                         child: Provider.value(
                           value: this,
-                          child: LdDetailPage<T, IdType, GroupingCriterion>(),
+                          child: LdMonkeyDetailPage<T, IdType, GroupingCriterion>(),
                         ),
                       );
 
-                      if (effectivePresentationMode.isSplit) {
+                      if (effectivePresentationMode.isSideBySide) {
                         if (effectivePresentationMode.detailInDialog) {
                           return LdModalPage(
                             key: state.pageKey,
-                            builder: ldDetailModal(this),
+                            builder: ldMonkeyDetailModal(this),
                           );
                         }
                         return MaterialPage(
@@ -143,7 +143,7 @@ class LdMasterDetailRoute<T extends Identifiable<IdType>, IdType, GroupingCriter
         builder: (context, state, child) => LdWrapConditional(
           condition: wrapShell != null,
           builder: (context, child) => wrapShell!.call(context, child),
-          child: LdMasterDetailShell(
+          child: LdMonkeyShell(
             child: child,
             route: this,
             routeSelection: state.pathParameters['selected'],
@@ -166,12 +166,10 @@ class LdMasterDetailRoute<T extends Identifiable<IdType>, IdType, GroupingCriter
     }
 
     if (queryParameters.isNotEmpty) {
-      print("queryParameters: $queryParameters");
       repository.filters.forEach((filter) async {
         final value = queryParameters[filter.name];
-        print("filter: ${filter.name} value: $value");
+
         if (value != null) {
-          print("marshalling filter: ${filter.name} value: $value");
           filter.marshalSerialized(value);
           repository.updateFilter(filter);
         }
@@ -222,8 +220,8 @@ class LdMasterDetailRoute<T extends Identifiable<IdType>, IdType, GroupingCriter
     );
   }
 
-  bool isSplit(Size size) {
-    return (size.width < reflowBreakpoint && layoutMode == MasterDetailLayoutMode.auto) ||
-        layoutMode == MasterDetailLayoutMode.compact;
+  bool isSideBySide(Size size) {
+    return (size.width > reflowBreakpoint && layoutMode == MonkeyLayoutMode.auto) &&
+        layoutMode != MonkeyLayoutMode.neverSideBySide;
   }
 }

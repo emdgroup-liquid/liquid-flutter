@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/master_detail/sort/ld_sort_option.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class _Movie with Identifiable<int> {
@@ -41,7 +40,8 @@ var movieData = [
   _Movie(8, "Fight Club", "Drama", 8, DateTime.now()),
   _Movie(9, "The Shawshank Redemption", "Drama", 10, DateTime.now()),
   _Movie(10, "Gladiator", "Action", 8, DateTime.now()),
-  _Movie(11, "Transformers: Revenge of the Fallen", "Action", 4, DateTime.now()),
+  _Movie(
+      11, "Transformers: Revenge of the Fallen", "Action", 4, DateTime.now()),
   _Movie(12, "Cats", "Drama", 3, DateTime.now()),
   _Movie(13, "The Room", "Drama", 2, DateTime.now()),
   _Movie(14, "Batman & Robin", "Action", 3, DateTime.now()),
@@ -89,8 +89,11 @@ final movieRepository = LdRepository<_Movie, int>(
     List<LdSortOption<_Movie, int>>? sortOptions,
   }) async {
     await Future.delayed(const Duration(milliseconds: 50));
-    final filtered =
-        movieData.where((element) => filters?.every((filter) => filter.optimisticFilter(element)) ?? true).toList();
+    final filtered = movieData
+        .where((element) =>
+            filters?.every((filter) => filter.optimisticFilter(element)) ??
+            true)
+        .toList();
     return LdListPage<_Movie>(
       newItems: filtered.skip(offset).take(pageSize).toList(),
       hasMore: offset + pageSize < filtered.length,
@@ -120,11 +123,11 @@ final movieRepository = LdRepository<_Movie, int>(
   },
 );
 
-final movieDemo = LdMasterDetailRoute<_Movie, int, bool>(
+final movieDemo = LdMonkey<_Movie, int, bool>(
   path: "/movie-demo",
   allowMultipleSelection: true,
-  presentationMode: MasterDetailPresentationMode.dialog,
-  layoutMode: MasterDetailLayoutMode.compact,
+  presentationMode: MonkeyDetailVariant.dialog,
+  layoutMode: MonkeyLayoutMode.neverSideBySide,
   showMultiSelectItems: true,
   parseId: (id) => int.parse(id),
   detailPath: (items) => "/movie-demo/${items.join(",")}",
@@ -179,10 +182,10 @@ final movieDemo = LdMasterDetailRoute<_Movie, int, bool>(
       multiSelect: true,
       onSelectionChange: (selected) => onSelectionChange(selected),
       itemBuilder: (context, item, index, config) {
-        return LdMasterDetailSingleShortcuts(
+        return LdMonkeySingleShortcuts(
           item: item.value!.id,
           actions: route.actions,
-          child: LdMasterDetailContextMenu<_Movie, int, bool>(
+          child: LdMonkeyContextMenu<_Movie, int, bool>(
             item: item,
             child: LdListItemAnimation(
               state: item.state,
@@ -206,15 +209,15 @@ final movieDemo = LdMasterDetailRoute<_Movie, int, bool>(
   },
   actions: [
     toggleFilters<_Movie, int, bool>(),
-    LdMasterDetailAction(
+    LdMonkeyAction(
       visibility: {
-        LdMasterDetailActionVisibility(
-          location: LdMasterDetailActionLocation.detailSecondary,
+        LdMonkeyActionVisibility(
+          location: LdMonkeyActionLocation.detailSecondary,
           minSelectionCount: 1,
           maxSelectionCount: 1,
         ),
-        LdMasterDetailActionVisibility(
-          location: LdMasterDetailActionLocation.context,
+        LdMonkeyActionVisibility(
+          location: LdMonkeyActionLocation.context,
           minSelectionCount: 1,
           maxSelectionCount: 1,
         ),
@@ -227,6 +230,7 @@ final movieDemo = LdMasterDetailRoute<_Movie, int, bool>(
       buildIcon: (context, selection) => const Icon(LucideIcons.copy),
       multiSelect: false,
       action: (context, selection) async {
+        final route = LdMonkey.of<_Movie, int, bool>(context);
         final item = await movieRepository.getById(selection.first);
 
         final newItem = item.copyWith(
@@ -238,25 +242,23 @@ final movieDemo = LdMasterDetailRoute<_Movie, int, bool>(
 
         await Future.delayed(const Duration(milliseconds: 1500));
 
-        final route = LdMasterDetailRoute.of<_Movie, int, bool>(context);
-
         route.setSelectedItems({newItem.id});
       },
     ),
-    LdMasterDetailAction(
+    LdMonkeyAction(
       visibility: {
-        LdMasterDetailActionVisibility(
-          location: LdMasterDetailActionLocation.detailSecondary,
+        LdMonkeyActionVisibility(
+          location: LdMonkeyActionLocation.detailSecondary,
           minSelectionCount: 1,
           maxSelectionCount: null,
         ),
-        LdMasterDetailActionVisibility(
-          location: LdMasterDetailActionLocation.context,
+        LdMonkeyActionVisibility(
+          location: LdMonkeyActionLocation.context,
           minSelectionCount: 1,
           maxSelectionCount: null,
         ),
-        LdMasterDetailActionVisibility(
-          location: LdMasterDetailActionLocation.masterSecondary,
+        LdMonkeyActionVisibility(
+          location: LdMonkeyActionLocation.masterSecondary,
           minSelectionCount: 1,
           maxSelectionCount: null,
           visibleInSplitView: false,
@@ -268,7 +270,8 @@ final movieDemo = LdMasterDetailRoute<_Movie, int, bool>(
       },
       buildLoadingText: (context, selection) =>
           "Deleting ${selection.length} ${selection.length == 1 ? "item" : "items"}",
-      buildLabel: (context, selection) => "Delete ${selection.length} ${selection.length == 1 ? "item" : "items"}",
+      buildLabel: (context, selection) =>
+          "Delete ${selection.length} ${selection.length == 1 ? "item" : "items"}",
       buildIcon: (context, selection) => Icon(
         LucideIcons.trash2,
       ),
@@ -346,7 +349,8 @@ class _MovieDetailState extends State<_MovieDetail> {
                       int.tryParse(_ratingController.text) ?? 1,
                       widget.movie.value!.lastUpdate,
                     );
-                    final repo = LdMasterDetailRoute.of<_Movie, int, bool>(context).repository;
+                    final repo =
+                        LdMonkey.of<_Movie, int, bool>(context).repository;
                     await repo.update(
                       widget.movie.value!.id,
                       newMovie,

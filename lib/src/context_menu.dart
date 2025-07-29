@@ -308,10 +308,9 @@ class ContextMenuRoute extends ModalRoute<void> {
     );
 
     final overflowY = min(
-          0,
-          screenSize.height - viewInsets.bottom - viewInsets.top - (triggerPosition.dy) - menuHeight,
-        ) +
-        triggerSize.height;
+      0,
+      screenSize.height - viewInsets.bottom - viewInsets.top - (triggerPosition.dy) - menuHeight,
+    );
 
     final baseRect = Rect.fromLTWH(
       triggerPosition.dx + overflowX,
@@ -440,7 +439,6 @@ class ContextMenuRoute extends ModalRoute<void> {
   Widget _wrapMenu(BuildContext context, Widget menu) {
     return NotificationListener<LdContextMenuDissmissNotification>(
       onNotification: (notification) {
-        print("Dismiss notification");
         Navigator.of(context).maybePop();
         return true;
       },

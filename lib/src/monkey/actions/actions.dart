@@ -2,26 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/master_detail/ld_master_detail_selection.dart';
+
 import 'package:provider/provider.dart';
 
-class LdMasterDetailActionVisibility {
-  final LdMasterDetailActionLocation location;
-  final int minSelectionCount;
-  final int? maxSelectionCount;
-  final bool visibleInSplitView;
-  final Set<String> applyFilters;
-
-  LdMasterDetailActionVisibility({
-    required this.location,
-    this.minSelectionCount = 0,
-    this.maxSelectionCount,
-    this.visibleInSplitView = true,
-    this.applyFilters = const {},
-  });
-}
-
-enum LdMasterDetailActionLocation {
+enum LdMonkeyActionLocation {
   masterAppBar,
   masterSecondary,
   detailAppBar,
@@ -29,8 +13,8 @@ enum LdMasterDetailActionLocation {
   context,
 }
 
-class LdMasterDetailAction<T extends Identifiable<IdType>, IdType, GroupingCriterion> with LdLabeledAction {
-  final Set<LdMasterDetailActionVisibility> visibility;
+class LdMonkeyAction<T extends Identifiable<IdType>, IdType, GroupingCriterion> with LdLabeledAction {
+  final Set<LdMonkeyActionVisibility> visibility;
 
   final String Function(BuildContext context, Set<IdType> selection) buildLabel;
   final Widget Function(BuildContext context, Set<IdType> selection)? buildIcon;
@@ -41,43 +25,43 @@ class LdMasterDetailAction<T extends Identifiable<IdType>, IdType, GroupingCrite
 
   @override
   Widget? contextMenu(BuildContext context) {
-    final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context);
+    final selection = LdMonkeySelection.of<T, IdType, GroupingCriterion>(context);
     return buildContextMenu?.call(context, selection.items);
   }
 
   @override
   String? loadingText(BuildContext context) {
-    final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context);
+    final selection = LdMonkeySelection.of<T, IdType, GroupingCriterion>(context);
     return buildLoadingText?.call(context, selection.items);
   }
 
   @override
   String label(BuildContext context) {
-    final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context);
+    final selection = LdMonkeySelection.of<T, IdType, GroupingCriterion>(context);
     return buildLabel(context, selection.items);
   }
 
   @override
   Widget? icon(BuildContext context) {
-    final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context);
+    final selection = LdMonkeySelection.of<T, IdType, GroupingCriterion>(context);
     return buildIcon?.call(context, selection.items);
   }
 
   @override
   void onPressed(BuildContext context) async {
-    final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context, listen: false);
+    final selection = LdMonkeySelection.of<T, IdType, GroupingCriterion>(context, listen: false);
     await action(context, selection.items);
   }
 
   @override
-  bool isVisible(BuildContext context, {LdMasterDetailActionLocation? location}) {
-    location ??= context.read<LdMasterDetailActionLocation>();
+  bool isVisible(BuildContext context, {LdMonkeyActionLocation? location}) {
+    location ??= context.read<LdMonkeyActionLocation>();
 
-    final isSplit = LdMasterContext.of<T, IdType, GroupingCriterion>(context).isSplit;
+    final isSideBySide = LdMonkeyContext.of<T, IdType, GroupingCriterion>(context).isSideBySide;
 
-    final route = LdMasterDetailRoute.of<T, IdType, GroupingCriterion>(context);
+    final route = LdMonkey.of<T, IdType, GroupingCriterion>(context);
 
-    final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context, listen: false);
+    final selection = LdMonkeySelection.of<T, IdType, GroupingCriterion>(context, listen: false);
 
     final selectedItemCount = selection.items.length;
 
@@ -91,7 +75,7 @@ class LdMasterDetailAction<T extends Identifiable<IdType>, IdType, GroupingCrite
     for (final visibility in this.visibility) {
       if (visibility.location != location) continue;
 
-      if (!isSplit && !visibility.visibleInSplitView) {
+      if (isSideBySide && !visibility.visibleInSplitView) {
         continue;
       }
 
@@ -130,7 +114,7 @@ class LdMasterDetailAction<T extends Identifiable<IdType>, IdType, GroupingCrite
     return _color;
   }
 
-  LdMasterDetailAction({
+  LdMonkeyAction({
     required this.visibility,
     required this.buildLabel,
     this.buildLoadingText,
@@ -146,14 +130,14 @@ class LdMasterDetailAction<T extends Identifiable<IdType>, IdType, GroupingCrite
 
   final Set<ShortcutActivator> shortcutActivators;
 
-  LdMasterDetailAction<T, IdType, GroupingCriterion> copyWith({
-    Set<LdMasterDetailActionVisibility>? visibility,
+  LdMonkeyAction<T, IdType, GroupingCriterion> copyWith({
+    Set<LdMonkeyActionVisibility>? visibility,
     String Function(BuildContext context, Set<IdType> selection)? buildLabel,
     Widget Function(BuildContext context, Set<IdType> selection)? buildIcon,
     Future<void> Function(BuildContext context, Set<IdType> selection)? action,
     Widget Function(BuildContext context, Set<IdType> selection)? buildContextMenu,
   }) {
-    return LdMasterDetailAction(
+    return LdMonkeyAction(
       visibility: visibility ?? this.visibility,
       buildLabel: buildLabel ?? this.buildLabel,
       buildIcon: buildIcon ?? this.buildIcon,

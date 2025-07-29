@@ -2,68 +2,78 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/device_info.dart';
-import 'package:liquid_flutter/src/master_detail/app_bar_actions.dart';
-import 'package:liquid_flutter/src/master_detail/ld_master_detail_selection.dart';
+
 import 'package:provider/provider.dart';
 
-class LdMasterPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends StatelessWidget {
-  final LdMasterDetailRoute<T, IdType, GroupingCriterion> route;
+class LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends StatefulWidget {
+  final LdMonkey<T, IdType, GroupingCriterion> route;
+  final FocusNode? searchFocusNode;
 
-  const LdMasterPage({
+  const LdMonkeyMasterPage({
     super.key,
+    this.searchFocusNode,
     required this.route,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final isSeperate = LdMasterContext.of<T, IdType, GroupingCriterion>(context).isSplit;
+  State<LdMonkeyMasterPage<T, IdType, GroupingCriterion>> createState() =>
+      _LdMonkeyMasterPageState<T, IdType, GroupingCriterion>();
+}
 
+class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType, GroupingCriterion>
+    extends State<LdMonkeyMasterPage<T, IdType, GroupingCriterion>> {
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final bigScreen = DeviceInfo.isDesktop || DeviceInfo.isTablet;
 
     return LdNotificationProvider(
       child: LdNotificationPortal(
         child: StreamBuilder(
-            stream: route.stateStream,
-            initialData: route.state,
+            stream: widget.route.stateStream,
+            initialData: widget.route.state,
             builder: (context, asyncSnapshot) {
               final state = asyncSnapshot.data!;
               // Provide  the state of the route to the list builder
 
               return Provider.value(
-                value: LdMasterDetailSelection<T, IdType, GroupingCriterion>(items: state.selectedItems),
-                child: LdMasterDetailMultiShortcuts(
-                  actions: route.actions,
+                value: LdMonkeySelection<T, IdType, GroupingCriterion>(items: state.selectedItems),
+                child: LdMonkeyMultiShortcuts(
+                  actions: widget.route.actions,
                   child: Builder(builder: (context) {
-                    final primaryActions =
-                        LdMasterDetailAppBarActions.getActionsAndProviders<T, IdType, GroupingCriterion>(
+                    final primaryActions = LdMonkeyAppBarActions.getActionsAndProviders<T, IdType, GroupingCriterion>(
                       context,
-                      LdMasterDetailActionLocation.masterAppBar,
+                      LdMonkeyActionLocation.masterAppBar,
                     );
 
-                    final secondaryActions =
-                        LdMasterDetailAppBarActions.getActionsAndProviders<T, IdType, GroupingCriterion>(
+                    final secondaryActions = LdMonkeyAppBarActions.getActionsAndProviders<T, IdType, GroupingCriterion>(
                       context,
-                      LdMasterDetailActionLocation.masterSecondary,
+                      LdMonkeyActionLocation.masterSecondary,
                     );
 
                     final searchFilter =
-                        route.repository.filters.firstWhereOrNull((filter) => filter is LdFilterSearchOption);
+                        widget.route.repository.filters.firstWhereOrNull((filter) => filter is LdFilterSearchOption);
 
                     return LdScaffold(
                       appBar: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Provider.value(
-                            value: LdMasterDetailActionLocation.masterAppBar,
+                            value: LdMonkeyActionLocation.masterAppBar,
                             child: LdAppBar(
-                              title: Text(route.repository.pluralItemTitle),
+                              title: Text(widget.route.repository.pluralItemTitle),
                               actions: primaryActions.actions,
                               overflowMenuProviders: primaryActions.menuProviders,
                               bottom: searchFilter != null && bigScreen
                                   ? LdFilterSearchWidget(
+                                      searchFocusNode: widget.searchFocusNode,
                                       filter: searchFilter as LdFilterSearchOption<T, IdType, dynamic>,
                                       onFilterChanged: (filter) {
-                                        route.repository.updateFilter(filter);
+                                        widget.route.repository.updateFilter(filter);
                                       },
                                     )
                                   : null,
@@ -71,7 +81,7 @@ class LdMasterPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
                           ),
                           if (bigScreen && (secondaryActions.hasActions))
                             Provider.value(
-                                value: LdMasterDetailActionLocation.masterSecondary,
+                                value: LdMonkeyActionLocation.masterSecondary,
                                 child: LdAppBar(
                                   disableSafeArea: true,
                                   actions: secondaryActions.actions,
@@ -81,7 +91,7 @@ class LdMasterPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
                       ),
                       bottomNavigationBar: !bigScreen && (secondaryActions.hasActions || searchFilter != null)
                           ? Provider.value(
-                              value: LdMasterDetailActionLocation.masterSecondary,
+                              value: LdMonkeyActionLocation.masterSecondary,
                               child: LayoutBuilder(builder: (context, constraints) {
                                 return LdAppBar(
                                   implyLeading: false,
@@ -95,7 +105,7 @@ class LdMasterPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
                                           child: LdFilterSearchWidget(
                                             filter: searchFilter as LdFilterSearchOption<T, IdType, dynamic>,
                                             onFilterChanged: (filter) {
-                                              route.repository.updateFilter(filter);
+                                              widget.route.repository.updateFilter(filter);
                                             },
                                           ),
                                         )
@@ -104,11 +114,11 @@ class LdMasterPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
                               }),
                             )
                           : null,
-                      body: route.listBuilder(
-                        route,
+                      body: widget.route.listBuilder(
+                        widget.route,
                         state,
                         (selection) {
-                          route.setSelectedItems(selection);
+                          widget.route.setSelectedItems(selection);
                         },
                       ),
                     );

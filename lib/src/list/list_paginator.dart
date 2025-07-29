@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:mutex/mutex.dart';
 
+/// This function is used to fetch a range of items from a data source.
+/// The [offset] is the index of the first item to fetch.
+/// The [pageSize] is the number of items to fetch.
+/// The [pageToken] is a token that can be used to fetch the next page of items.
 typedef FetchListFunction<T> = Future<LdListPage<T>> Function({
   required int offset,
   required int pageSize,
@@ -17,19 +21,23 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   int initialOffset;
   final Duration debounceTime;
 
-  final StreamController<List<LdPaginatorItem<T>>> _itemsStreamController =
-      StreamController<List<LdPaginatorItem<T>>>.broadcast();
+  // Stream of all items, emits when the items have been updated.
+  final _itemsStreamController = StreamController<List<LdPaginatorItem<T>>>.broadcast();
+  // Stream of a single item, emits when the item has been updated.
+  final _itemStreamController = StreamController<LdPaginatorItem<T>>.broadcast();
 
-  final StreamController<LdPaginatorItem<T>> _itemStreamController = StreamController<LdPaginatorItem<T>>.broadcast();
-
+  // The number of pages that are queued for fetching.
   int fetchQueueSize;
 
   final Map<int, LdPaginatorItem<T>> _items = {};
+
   // Track which ranges have been requested to prevent duplicate fetches
   final Set<int> _requestedOffsets = {};
 
+  // Timer to debounce the fetching of items.
   Timer? _debounceTimer;
 
+  // Mutex to synchronize the fetching of items.
   final Mutex _mutex = Mutex();
 
   Mutex get mutex => _mutex;
@@ -319,7 +327,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     _updated(_items[index]);
   }
 
-  /// Rolls back the update of an item.
+  /// Rolls back the update of an item.x
   /// This will restore the item to its previous state.
   void rollbackItemUpdate(IdType id, {T? newValue}) {
     final index = _items.entries.firstWhereOrNull((e) => e.value.previousValue?.id == id)?.key;
@@ -419,22 +427,6 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
         yield update;
       }
     }
-  }
-
-  void _debounce(void Function() task) {
-    _debounceTimer?.cancel();
-    _debounceTimer = Timer(debounceTime, task);
-  }
-
-  Future<R?> _debounceAndSafeExecute<R>(Future<R> Function() operation) async {
-    final completer = Completer<R?>();
-
-    _debounce(() async {
-      final result = await _safeExecute(operation);
-      completer.complete(result);
-    });
-
-    return completer.future;
   }
 
   Future<List<T>> _fetchItems({

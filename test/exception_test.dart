@@ -32,26 +32,26 @@ _wrapWithMaterialApp(Widget widget) {
 void main() {
   group('LdExceptionView Tests', () {
     // Sample exceptions to use for our tests
-    final sampleErrorException = LdException(
+    final sampleErrorException = LdLocalizedException(
       message: 'Error occurred',
       type: LdHintType.error,
       moreInfo: 'Detailed error information',
     );
 
-    final sampleWarningException = LdException(
+    final sampleWarningException = LdLocalizedException(
       message: 'Warning message',
       type: LdHintType.warning,
       moreInfo: 'Detailed warning information',
     );
 
-    final sampleSuccessException = LdException(
+    final sampleSuccessException = LdLocalizedException(
       message: 'Success with notice',
       type: LdHintType.success,
       moreInfo: 'Detailed success information',
     );
 
     Widget _buildBasicExceptionView({
-      required LdException? exception,
+      required LdLocalizedException? exception,
       LdRetryController? retryController,
       VoidCallback? retry,
       Axis direction = Axis.vertical,
@@ -140,8 +140,7 @@ void main() {
       });
     });
 
-    testWidgets('LdExceptionView displays message correctly',
-        (WidgetTester tester) async {
+    testWidgets('LdExceptionView displays message correctly', (WidgetTester tester) async {
       // Build and pump the widget
       await tester.pumpWidget(
         _wrapWithMaterialApp(
@@ -156,9 +155,7 @@ void main() {
       expect(find.text('Error occurred'), findsOneWidget);
     });
 
-    testWidgets(
-        'LdExceptionView renders correct components for vertical direction',
-        (WidgetTester tester) async {
+    testWidgets('LdExceptionView renders correct components for vertical direction', (WidgetTester tester) async {
       final retryController = LdRetryController(
         onRetry: () async {},
         config: LdRetryConfig.unlimitedManualRetries(),
@@ -180,13 +177,10 @@ void main() {
       expect(find.text('Error occurred'), findsOneWidget);
       expect(find.byType(LdHint), findsOneWidget);
       expect(find.byType(LdTextP), findsOneWidget);
-      expect(find.byType(LdButton),
-          findsAtLeastNWidgets(1)); // At least More Info button
+      expect(find.byType(LdButton), findsAtLeastNWidgets(1)); // At least More Info button
     });
 
-    testWidgets(
-        'LdExceptionView renders correct components for horizontal direction',
-        (WidgetTester tester) async {
+    testWidgets('LdExceptionView renders correct components for horizontal direction', (WidgetTester tester) async {
       final retryController = LdRetryController(
         onRetry: () async {},
         config: LdRetryConfig.unlimitedManualRetries(),
@@ -211,8 +205,7 @@ void main() {
       expect(find.byType(LdButton), findsAtLeastNWidgets(1));
     });
 
-    testWidgets('LdExceptionView handles retry callback correctly',
-        (WidgetTester tester) async {
+    testWidgets('LdExceptionView handles retry callback correctly', (WidgetTester tester) async {
       bool retryWasCalled = false;
 
       // Build widget with retry callback
@@ -239,8 +232,7 @@ void main() {
       expect(retryWasCalled, true);
     });
 
-    testWidgets('LdExceptionView.fromDynamic maps errors correctly',
-        (WidgetTester tester) async {
+    testWidgets('LdExceptionView.fromDynamic maps errors correctly', (WidgetTester tester) async {
       // Build our widget using the fromDynamic constructor
       await tester.pumpWidget(
         _wrapWithMaterialApp(
@@ -270,8 +262,7 @@ void main() {
       expect(find.text(LiquidLocalizationsEn().networkError), findsOneWidget);
     });
 
-    testWidgets('LdExceptionView handles RetryController state correctly',
-        (WidgetTester tester) async {
+    testWidgets('LdExceptionView handles RetryController state correctly', (WidgetTester tester) async {
       late LdRetryController retryController;
       retryController = LdRetryController(
         onRetry: () async {
@@ -311,8 +302,7 @@ void main() {
       expect(find.text(LiquidLocalizationsEn().loading), findsNothing);
     });
 
-    testWidgets('LdExceptionView handles "more info" button correctly',
-        (WidgetTester tester) async {
+    testWidgets('LdExceptionView handles "more info" button correctly', (WidgetTester tester) async {
       // Build widget
       await tester.pumpWidget(
         _wrapWithMaterialApp(
@@ -328,8 +318,7 @@ void main() {
             widget is LdButton &&
             widget.child is LdAutoSpace &&
             (widget.child as LdAutoSpace).children.first is Text &&
-            ((widget.child as LdAutoSpace).children.first as Text).data ==
-                LiquidLocalizationsEn().moreInfo,
+            ((widget.child as LdAutoSpace).children.first as Text).data == LiquidLocalizationsEn().moreInfo,
       );
       expect(moreInfoFinder, findsOneWidget);
 
@@ -344,9 +333,7 @@ void main() {
       );
     });
 
-    testWidgets(
-        'LdExceptionView with different exception types shows correct color',
-        (WidgetTester tester) async {
+    testWidgets('LdExceptionView with different exception types shows correct color', (WidgetTester tester) async {
       // Test error type
       await tester.pumpWidget(
         _wrapWithMaterialApp(
@@ -396,8 +383,7 @@ void main() {
       expect(find.byType(LdHint), findsOneWidget);
     });
 
-    testWidgets(
-        'LdExceptionView assertion error when both retry and retryController are provided',
+    testWidgets('LdExceptionView assertion error when both retry and retryController are provided',
         (WidgetTester tester) async {
       expect(() {
         LdExceptionView(

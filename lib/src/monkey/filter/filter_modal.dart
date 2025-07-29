@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/master_detail/filter/ld_filter_any_of_widget.dart';
+
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:liquid_flutter/src/master_detail/filter/ld_filter_one_of_widget.dart';
+
 import 'package:provider/provider.dart';
 
 LdModal ldFilterModal<T extends Identifiable<IdType>, IdType, GroupBy>(
-    BuildContext context, LdMasterDetailRoute<T, IdType, GroupBy> route) {
+    BuildContext context, LdMonkey<T, IdType, GroupBy> route) {
   return LdModal(
     showDismissButton: false,
     modalContent: (context) {
@@ -29,7 +29,7 @@ class LdFilterContext<T extends Identifiable<IdType>, IdType, GroupBy> extends S
 
   @override
   Widget build(BuildContext context) {
-    final route = context.read<LdMasterDetailRoute<T, IdType, GroupBy>>();
+    final route = context.read<LdMonkey<T, IdType, GroupBy>>();
     return LdContextMenu(
       builder: (context, isOpen, open, child) => LdButtonGhost(
         autoLoading: false,
@@ -44,7 +44,7 @@ class LdFilterContext<T extends Identifiable<IdType>, IdType, GroupBy> extends S
 }
 
 class LdFilterModal<T extends Identifiable<IdType>, IdType, GroupBy> extends StatelessWidget {
-  final LdMasterDetailRoute<T, IdType, GroupBy> route;
+  final LdMonkey<T, IdType, GroupBy> route;
 
   const LdFilterModal({super.key, required this.route});
 

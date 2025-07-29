@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/master_detail/filter_modal.dart';
-import 'package:liquid_flutter/src/master_detail/ld_master_detail_selection.dart';
+
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
-LdMasterDetailAction<T, IdType, GroupingCriterion>
+LdMonkeyAction<T, IdType, GroupingCriterion>
     toggleFilters<T extends Identifiable<IdType>, IdType, GroupingCriterion>() =>
-        LdMasterDetailAction<T, IdType, GroupingCriterion>(
+        LdMonkeyAction<T, IdType, GroupingCriterion>(
           visibility: {
-            LdMasterDetailActionVisibility(
-              location: LdMasterDetailActionLocation.masterAppBar,
+            LdMonkeyActionVisibility(
+              location: LdMonkeyActionLocation.masterAppBar,
               minSelectionCount: 0,
               maxSelectionCount: null,
             ),
@@ -19,7 +18,7 @@ LdMasterDetailAction<T, IdType, GroupingCriterion>
             return LiquidLocalizations.of(context).filter;
           },
           buildIcon: (context, selection) {
-            final route = context.watch<LdMasterDetailRoute<T, IdType, GroupingCriterion>>();
+            final route = context.watch<LdMonkey<T, IdType, GroupingCriterion>>();
 
             final activeFilters = route.repository.filters.where((e) => e.isOn).toList();
 
@@ -47,9 +46,9 @@ LdMasterDetailAction<T, IdType, GroupingCriterion>
           },
           submitType: LdLabeledActionSubmitType.contextMenu,
           buildContextMenu: (context, close) => ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 200),
+            constraints: const BoxConstraints(maxWidth: 300),
             child: LdFilterModal(
-              route: context.read<LdMasterDetailRoute<T, IdType, GroupingCriterion>>(),
+              route: context.read<LdMonkey<T, IdType, GroupingCriterion>>(),
             ),
           ),
           action: (context, selection) {},

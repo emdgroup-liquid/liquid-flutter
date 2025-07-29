@@ -97,7 +97,8 @@ class _LdAppBarState extends State<LdAppBar> {
   }
 
   bool get _isBottomNavigationBar {
-    return _layoutState?.slot == LdScaffoldSlot.bottomNavigationBar;
+    return _layoutState?.slot == LdScaffoldSlot.bottomNavigationBar ||
+        _layoutState?.slot == LdScaffoldSlot.drawerBottomNavigationBar;
   }
 
   bool get _isSideBySide {
@@ -109,33 +110,37 @@ class _LdAppBarState extends State<LdAppBar> {
   }
 
   bool get _showCloseDrawerButton {
-    return _hasDrawer && _isDrawerOpen && (_isDrawer && _isSideBySide);
+    return _slot == LdScaffoldSlot.drawerAppBar && _isDrawerOpen && _isSideBySide;
   }
 
-  bool get _showWindowControls {
-    if (kIsWeb) {
+  LdScaffoldSlot? get _slot {
+    return _layoutState?.slot ?? LdScaffoldSlot.appBar;
+  }
+
+  bool get _showWindowsWindowControls {
+    return !kIsWeb && defaultTargetPlatform == TargetPlatform.windows && _slot == LdScaffoldSlot.appBar;
+  }
+
+  bool get _showMacOSWindowControls {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.macOS) {
       return false;
     }
 
-    if (_layoutState?.level != 1) {
+    final slot = _slot;
+
+    if (slot == null) {
       return false;
     }
 
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        if (LdAppBar.callbacks == null) {
-          debugPrint(
-            "Warning: You have not set the window callbacks. \n"
-            "Please configure LdAppBar.callbacks in your main function.",
-          );
-        }
-        return _isDrawerOpen && _layoutState?.slot == LdScaffoldSlot.drawer ||
-            !_isDrawerOpen && _layoutState?.slot == LdScaffoldSlot.appBar;
-      default:
-        return false;
+    if (_slot == LdScaffoldSlot.drawerAppBar && _isDrawerOpen) {
+      return true;
     }
+
+    if (_slot == LdScaffoldSlot.appBar && !_isDrawerOpen && _layoutState?.level == 1) {
+      return true;
+    }
+
+    return false;
   }
 
   Widget? _buildLeading(BuildContext context) {
@@ -177,6 +182,9 @@ class _LdAppBarState extends State<LdAppBar> {
       LdScaffoldSlot.body => _layoutState?.bodyScrollOffset,
       LdScaffoldSlot.bottomNavigationBar => _layoutState?.bodyScrollOffset,
       LdScaffoldSlot.drawer => _layoutState?.drawerScrollOffset,
+      LdScaffoldSlot.drawerAppBar => _layoutState?.drawerScrollOffset,
+      LdScaffoldSlot.drawerBottomNavigationBar => _layoutState?.drawerScrollOffset,
+      LdScaffoldSlot.drawerBody => _layoutState?.drawerScrollOffset,
     };
 
     final leading = _buildLeading(context);
@@ -255,93 +263,58 @@ class _LdAppBarState extends State<LdAppBar> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // Main row of the app bar
-
-                            OverflowView(
-                              spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
-                              layoutBehavior: OverflowViewLayoutBehavior.expandFirstFlexible,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              builder: (context, remainingItemCount) {
-                                return LdAppbarActionOverflowMenu(
-                                  actions: widget.actions.sublist(widget.actions.length - remainingItemCount),
-                                  bigToolbar: true,
-                                  menuProviders: widget.overflowMenuProviders,
-                                  inMenu: true,
-                                );
-                              },
+                            Row(
                               children: [
-                                Row(
-                                  children: [
-                                    LdReveal(
-                                      initialRevealed: _showWindowControls,
-                                      revealed: _showWindowControls,
-                                      child: Row(
-                                        children: [
-                                          Tooltip(
-                                            message: LiquidLocalizations.of(context).close,
-                                            child: LdButtonGhost(
-                                              size: LdSize.xs,
-                                              color: LdTheme.of(context).error,
-                                              child: const Icon(Icons.circle),
-                                              onPressed: () {
-                                                LdAppBar.callbacks?.onClose?.call();
-                                              },
+                                MacOSWindowControls(showWindowControls: _showMacOSWindowControls),
+                                if (_showOpenDrawerButton) ...[
+                                  const OpenDrawerButton(),
+                                  ldSpacerS,
+                                ],
+                                if (leading != null) ...[
+                                  leading,
+                                  ldSpacerS,
+                                ],
+                                if (widget.title != null || widget.actions.isNotEmpty)
+                                  Expanded(
+                                    child: OverflowView(
+                                      spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
+                                      layoutBehavior: OverflowViewLayoutBehavior.expandFirstFlexible,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      builder: (context, remainingItemCount) {
+                                        return LdAppbarActionOverflowMenu(
+                                          actions: widget.actions.sublist(widget.actions.length - remainingItemCount),
+                                          bigToolbar: true,
+                                          menuProviders: widget.overflowMenuProviders,
+                                          inMenu: true,
+                                        );
+                                      },
+                                      children: [
+                                        if (widget.title != null)
+                                          Align(
+                                            alignment: Alignment.centerLeft,
+                                            child: DefaultTextStyle(
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: headerStyle,
+                                              child: widget.title ?? const SizedBox(),
                                             ),
                                           ),
-                                          Tooltip(
-                                            message: LiquidLocalizations.of(context).minimize,
-                                            child: LdButtonGhost(
-                                              size: LdSize.xs,
-                                              color: LdTheme.of(context).warning,
-                                              child: const Icon(Icons.circle),
-                                              onPressed: () {
-                                                LdAppBar.callbacks?.onMinimize?.call();
-                                              },
+                                        ...widget.actions.where((e) => e.isVisible(context)).map(
+                                              (e) => LdAppBarAction(
+                                                action: e,
+                                                bigToolbar: true,
+                                                inMenu: false,
+                                                menuProviders: widget.overflowMenuProviders,
+                                              ),
                                             ),
-                                          ),
-                                          Tooltip(
-                                            message: LiquidLocalizations.of(context).maximize,
-                                            child: LdButtonGhost(
-                                              size: LdSize.xs,
-                                              color: LdTheme.of(context).success,
-                                              child: const Icon(Icons.circle),
-                                              onPressed: () {
-                                                LdAppBar.callbacks?.onMaximize?.call();
-                                              },
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                      ],
                                     ),
-                                    if (_showOpenDrawerButton) ...[
-                                      const OpenDrawerButton(),
-                                    ],
-                                    if (leading != null) ...[
-                                      leading,
-                                    ],
-                                    if (widget.title != null)
-                                      DefaultTextStyle(
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: headerStyle,
-                                        child: widget.title ?? const SizedBox(),
-                                      ),
-                                    if (widget.trailing != null) ...[
-                                      widget.trailing!,
-                                    ],
-                                    if (_showCloseDrawerButton) ...[
-                                      const CloseDrawerButton(),
-                                    ],
-                                  ],
-                                ).spaceS(),
-                                ...widget.actions.where((e) => e.isVisible(context)).map(
-                                      (e) => LdAppBarAction(
-                                        action: e,
-                                        bigToolbar: true,
-                                        inMenu: false,
-                                        menuProviders: widget.overflowMenuProviders,
-                                      ),
-                                    ),
+                                  )
+                                else
+                                  const Spacer(),
+                                if (_showCloseDrawerButton) const CloseDrawerButton(),
+                                if (_showWindowsWindowControls) const WindowsWindowControls(),
+                                if (widget.trailing != null) widget.trailing!,
                               ],
                             ),
                             if (widget.bottom != null) ...[
@@ -377,6 +350,93 @@ class _LdAppBarState extends State<LdAppBar> {
           child: appBar,
         ),
         if (!_isBottomNavigationBar) const LdDivider(height: 1),
+      ],
+    );
+  }
+}
+
+class MacOSWindowControls extends StatelessWidget {
+  const MacOSWindowControls({
+    super.key,
+    required bool showWindowControls,
+  }) : _showWindowControls = showWindowControls;
+
+  final bool _showWindowControls;
+
+  @override
+  Widget build(BuildContext context) {
+    return LdReveal(
+      initialRevealed: _showWindowControls,
+      revealed: _showWindowControls,
+      child: Row(
+        children: [
+          Tooltip(
+            message: LiquidLocalizations.of(context).close,
+            child: LdButtonGhost(
+              size: LdSize.xs,
+              color: LdTheme.of(context).error,
+              child: const Icon(Icons.circle),
+              onPressed: () {
+                LdAppBar.callbacks?.onClose?.call();
+              },
+            ),
+          ),
+          Tooltip(
+            message: LiquidLocalizations.of(context).minimize,
+            child: LdButtonGhost(
+              size: LdSize.xs,
+              color: LdTheme.of(context).warning,
+              child: const Icon(Icons.circle),
+              onPressed: () {
+                LdAppBar.callbacks?.onMinimize?.call();
+              },
+            ),
+          ),
+          Tooltip(
+            message: LiquidLocalizations.of(context).maximize,
+            child: LdButtonGhost(
+              size: LdSize.xs,
+              color: LdTheme.of(context).success,
+              child: const Icon(Icons.circle),
+              onPressed: () {
+                LdAppBar.callbacks?.onMaximize?.call();
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class WindowsWindowControls extends StatelessWidget {
+  const WindowsWindowControls({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        LdButtonVague(
+          size: LdSize.s,
+          child: const Icon(LucideIcons.minus),
+          onPressed: () {
+            LdAppBar.callbacks?.onMinimize?.call();
+          },
+        ),
+        LdButtonVague(
+          size: LdSize.s,
+          child: const Icon(LucideIcons.square),
+          onPressed: () {
+            LdAppBar.callbacks?.onMaximize?.call();
+          },
+        ),
+        LdButtonVague(
+          size: LdSize.s,
+          child: const Icon(LucideIcons.x),
+          onPressed: () {
+            LdAppBar.callbacks?.onClose?.call();
+          },
+        ),
       ],
     );
   }

@@ -1,5 +1,4 @@
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/master_detail/identifiable.dart';
 
 class SampleItem with Identifiable<String> {
   @override

@@ -33,7 +33,7 @@ import 'package:liquid/components/form_elements/toggle.dart';
 import 'package:liquid/demos/layout_documentation.dart';
 import 'package:liquid/demos/movie_demo.dart';
 import 'package:liquid/demos/radius_documentation.dart';
-import 'package:liquid/demos/task_demo.dart';
+import 'package:liquid/demos/task_demo/task_demo.dart';
 import 'package:liquid/demos/theme.dart';
 import 'package:liquid/demos/typography_documentation.dart';
 import 'package:liquid/home.dart';

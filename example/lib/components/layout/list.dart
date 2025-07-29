@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/master_detail/identifiable.dart';
 
 class ListDemo extends StatefulWidget {
   const ListDemo({super.key});

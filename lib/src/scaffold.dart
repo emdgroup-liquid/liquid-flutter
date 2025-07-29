@@ -13,6 +13,9 @@ enum LdScaffoldSlot {
   appBar,
   bottomNavigationBar,
   drawer,
+  drawerAppBar,
+  drawerBottomNavigationBar,
+  drawerBody,
 }
 
 class LdScaffoldLayoutState {
@@ -335,7 +338,7 @@ class LdScaffoldState extends State<LdScaffold> {
                                                     ),
                                                   ),
                                                   child: ScrollNotificationObserver(
-                                                    child: _ScrollObserver(
+                                                    child: ScrollObserver(
                                                       position: _bodyScrollOffset,
                                                       child: Provider.value(
                                                         value: layoutState.copyWith(slot: LdScaffoldSlot.body),
@@ -400,7 +403,10 @@ class LdScaffoldState extends State<LdScaffold> {
                                               boxShadow: _isSideBySide ? null : [ldShadowSticky],
                                             ),
                                             child: Provider.value(
-                                              value: layoutState.copyWith(slot: LdScaffoldSlot.drawer),
+                                              value: layoutState.copyWith(
+                                                slot: LdScaffoldSlot.drawer,
+                                                isDrawerOpen: _isDrawerOpen,
+                                              ),
                                               child: SafeArea(
                                                 top: false,
                                                 bottom: false,
@@ -408,7 +414,7 @@ class LdScaffoldState extends State<LdScaffold> {
                                                   child: FocusScope(
                                                     node: _focusScopeNode,
                                                     child: ScrollNotificationObserver(
-                                                      child: _ScrollObserver(
+                                                      child: ScrollObserver(
                                                         position: _drawerScrollOffset,
                                                         child: widget.drawer!,
                                                       ),
@@ -433,17 +439,21 @@ class LdScaffoldState extends State<LdScaffold> {
   }
 }
 
-class _ScrollObserver extends StatefulWidget {
+class ScrollObserver extends StatefulWidget {
   final ValueNotifier<double> position;
   final Widget child;
 
-  const _ScrollObserver({required this.position, required this.child});
+  const ScrollObserver({
+    super.key,
+    required this.position,
+    required this.child,
+  });
 
   @override
-  State<_ScrollObserver> createState() => _ScrollObserverState();
+  State<ScrollObserver> createState() => _ScrollObserverState();
 }
 
-class _ScrollObserverState extends State<_ScrollObserver> {
+class _ScrollObserverState extends State<ScrollObserver> {
   ScrollNotificationObserverState? _scrollNotificationObserver;
 
   @override

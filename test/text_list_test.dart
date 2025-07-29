@@ -8,7 +8,7 @@ void main() {
       const items = ['Item 1', 'Item 2', 'Item 3'];
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: LdThemeProvider(
             child: Scaffold(
               body: LdTextList(
@@ -34,7 +34,7 @@ void main() {
       const items = ['First item', 'Second item', 'Third item'];
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: LdThemeProvider(
             child: Scaffold(
               body: LdTextList(
@@ -60,7 +60,7 @@ void main() {
       const items = ['Test item'];
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: LdThemeProvider(
             child: Scaffold(
               body: LdTextList(items),
@@ -82,7 +82,7 @@ void main() {
       const items = ['Test item'];
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: LdThemeProvider(
             child: Scaffold(
               body: LdTextList(
@@ -107,7 +107,7 @@ void main() {
       const items = ['Item 1', 'Item 2', 'Item 3'];
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: LdThemeProvider(
             child: Scaffold(
               body: LdTextList(

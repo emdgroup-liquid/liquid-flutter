@@ -1,29 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/master_detail/ld_master_detail_selection.dart';
+
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
-class LdMasterDetailAppBarActions<T extends Identifiable<IdType>, IdType, GroupingCriterion> {
+class LdMonkeyAppBarActions<T extends Identifiable<IdType>, IdType, GroupingCriterion> {
   static ({
-    List<LdMasterDetailAction<T, IdType, GroupingCriterion>> actions,
+    List<LdMonkeyAction<T, IdType, GroupingCriterion>> actions,
     List<SingleChildWidget> Function(BuildContext context) menuProviders,
     bool hasActions,
   }) getActionsAndProviders<T extends Identifiable<IdType>, IdType, GroupingCriterion>(
     BuildContext context,
-    LdMasterDetailActionLocation location,
+    LdMonkeyActionLocation location,
   ) {
-    final route = LdMasterDetailRoute.of<T, IdType, GroupingCriterion>(context, watch: true);
-    final selection = LdMasterDetailSelection.of<T, IdType, GroupingCriterion>(context);
+    final route = LdMonkey.of<T, IdType, GroupingCriterion>(context, watch: true);
+    final selection = LdMonkeySelection.of<T, IdType, GroupingCriterion>(context);
 
     final actions = route.actions.where((e) => e.visibility.any((v) => v.location == location)).toList();
     final hasActions = actions.any((e) => e.isVisible(context, location: location));
 
     List<Provider<Object>> menuProviders(BuildContext context) => [
-          Provider<LdMasterDetailRoute<T, IdType, GroupingCriterion>>.value(value: route),
-          Provider<LdMasterDetailSelection<T, IdType, GroupingCriterion>>.value(value: selection),
-          Provider<LdMasterContext<T, IdType, GroupingCriterion>>.value(value: LdMasterContext.of(context)),
-          Provider<LdMasterDetailActionLocation>.value(value: location),
+          Provider<LdMonkey<T, IdType, GroupingCriterion>>.value(value: route),
+          Provider<LdMonkeySelection<T, IdType, GroupingCriterion>>.value(value: selection),
+          Provider<LdMonkeyContext<T, IdType, GroupingCriterion>>.value(value: LdMonkeyContext.of(context)),
+          Provider<LdMonkeyActionLocation>.value(value: location),
         ];
 
     return (
@@ -35,7 +35,7 @@ class LdMasterDetailAppBarActions<T extends Identifiable<IdType>, IdType, Groupi
 
   static List<Widget> buildActionWidgets<T extends Identifiable<IdType>, IdType, GroupingCriterion>(
     BuildContext context,
-    LdMasterDetailActionLocation location,
+    LdMonkeyActionLocation location,
   ) {
     final result = getActionsAndProviders<T, IdType, GroupingCriterion>(context, location);
 

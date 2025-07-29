@@ -4,42 +4,54 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/master_detail/master_detail_route_state.dart';
+
 import 'package:multi_split_view/multi_split_view.dart';
 import 'package:provider/provider.dart';
 
-class LdMasterDetailShell<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends StatefulWidget {
-  const LdMasterDetailShell({
+/// The shell route that is wrapped around the master and detail pages.
+class LdMonkeyShell<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends StatefulWidget {
+  const LdMonkeyShell({
     super.key,
     required this.child,
     required this.route,
     this.routeSelection,
   });
 
+  /// Child route provided by go_router
   final Widget child;
+
+  /// The selection part of the route path, is usually a comma separated
+  /// list of ids.
   final String? routeSelection;
-  final LdMasterDetailRoute<T, IdType, GroupingCriterion> route;
+
+  /// The route that is being wrapped.
+  final LdMonkey<T, IdType, GroupingCriterion> route;
 
   @override
-  State<LdMasterDetailShell<T, IdType, GroupingCriterion>> createState() =>
-      _LdMasterDetailShellState<T, IdType, GroupingCriterion>();
+  State<LdMonkeyShell<T, IdType, GroupingCriterion>> createState() =>
+      _LdMonkeyShellState<T, IdType, GroupingCriterion>();
 }
 
-class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, GroupingCriterion>
-    extends State<LdMasterDetailShell<T, IdType, GroupingCriterion>> {
-  late final StreamSubscription<LdMasterDetailRouteState<T, IdType, GroupingCriterion>> _selectionSubscription;
+class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType, GroupingCriterion>
+    extends State<LdMonkeyShell<T, IdType, GroupingCriterion>> {
+  late final StreamSubscription<LdMonkeyDetailState<T, IdType, GroupingCriterion>> _selectionSubscription;
 
   late final StreamSubscription _filterSubscription;
   late final StreamSubscription _sortSubscription;
 
+  final _searchFocusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
+
+    // The repository is already initialized, so we can setup the subscriptions.
     if (widget.route.state.repository != null) {
       _setupSubscriptions();
     }
   }
 
+  // Listen to updates from the repositry and route
   void _setupSubscriptions() {
     _filterSubscription = widget.route.state.repository!.filterStream.listen((_) => _updateQueryParameters());
     _sortSubscription = widget.route.state.repository!.sortStream.listen((_) => _updateQueryParameters());
@@ -49,7 +61,7 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
   }
 
   @override
-  void didUpdateWidget(LdMasterDetailShell<T, IdType, GroupingCriterion> oldWidget) {
+  void didUpdateWidget(LdMonkeyShell<T, IdType, GroupingCriterion> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.routeSelection != widget.routeSelection) {
@@ -57,6 +69,8 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
     }
   }
 
+  // The route selection changed, we parse the ids and set the selected items.
+  // This basically binds the router to the route.
   void _updateSelectionFromRoute() async {
     if (!mounted) return;
 
@@ -69,18 +83,24 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
 
   @override
   void dispose() {
+    _searchFocusNode.dispose();
     _selectionSubscription.cancel();
     _filterSubscription.cancel();
     _sortSubscription.cancel();
 
+    // When disposing we reset the selection, to avoid re-selecting when the
+    // user returns
     widget.route.setSelectedItems({});
     super.dispose();
   }
 
-  bool get showingDetail => GoRouter.of(context).routerDelegate.currentConfiguration.routes.any(
+  // Whether we are currently showing the detail page.
+  bool get _showingDetail => GoRouter.of(context).routerDelegate.currentConfiguration.routes.any(
         (match) => match is GoRoute && (match).name == "${widget.route.path}-detail",
       );
 
+  // Apply the query parameters to the route. Filters and sort options provide
+  // the query parameters.
   void _updateQueryParameters() {
     final queryParameters = widget.route.state.repository?.queryParameters;
 
@@ -89,22 +109,21 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
     }
 
     final uri = Uri.parse(widget.route.path);
-
     final newUri = uri.replace(queryParameters: queryParameters);
-
     final router = GoRouter.of(context);
 
     router.replace(newUri.toString());
   }
 
+  // Get the query parameters from the router.
   Map<String, String> _getQueryParameters() {
     final router = GoRouter.of(context);
     final queryParameters = router.routerDelegate.currentConfiguration.uri.queryParameters;
-
     return queryParameters;
   }
 
-  void _updateSelection(LdMasterDetailRouteState<T, IdType, GroupingCriterion> state) async {
+  // Update the selection in the route.
+  void _updateSelection(LdMonkeyDetailState<T, IdType, GroupingCriterion> state) async {
     if (!mounted) return;
 
     final selectedItems = state.selectedItems;
@@ -130,7 +149,7 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
     // Check if the uri would actually change
 
     if (selectedItems.isNotEmpty) {
-      if (showingDetail) {
+      if (_showingDetail) {
         router.replace(
           newUri.toString(),
         );
@@ -144,7 +163,7 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
         );
       }
     } else {
-      if (showingDetail) {
+      if (_showingDetail) {
         router.pop();
       } else {
         router.replace(widget.route.path);
@@ -154,19 +173,19 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
 
   Widget _buildInitialized(
     BuildContext context,
-    LdMasterDetailRouteState<T, IdType, GroupingCriterion> state,
+    LdMonkeyDetailState<T, IdType, GroupingCriterion> state,
   ) {
     return LayoutBuilder(builder: (context, constraints) {
-      final effectivePresentationMode = LdMasterContext.fromRoute(
+      final monkeyContext = LdMonkeyContext.fromRoute(
         widget.route,
         context,
       );
 
-      if (effectivePresentationMode.isSplit) {
-        return Provider<LdMasterDetailRoute<T, IdType, GroupingCriterion>>.value(
+      if (monkeyContext.isSideBySide) {
+        return Provider<LdMonkey<T, IdType, GroupingCriterion>>.value(
           value: widget.route,
-          child: Provider<LdMasterContext<T, IdType, GroupingCriterion>>.value(
-            value: effectivePresentationMode,
+          child: Provider<LdMonkeyContext<T, IdType, GroupingCriterion>>.value(
+            value: monkeyContext,
             child: widget.child,
           ),
         );
@@ -174,10 +193,10 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
 
       final theme = LdTheme.of(context);
 
-      return Provider<LdMasterDetailRoute<T, IdType, GroupingCriterion>>.value(
+      return Provider<LdMonkey<T, IdType, GroupingCriterion>>.value(
         value: widget.route,
-        child: Provider<LdMasterContext<T, IdType, GroupingCriterion>>.value(
-          value: effectivePresentationMode,
+        child: Provider<LdMonkeyContext<T, IdType, GroupingCriterion>>.value(
+          value: monkeyContext,
           child: ColoredBox(
             color: theme.background,
             child: MultiSplitViewTheme(
@@ -193,8 +212,9 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
                 initialAreas: [
                   Area(
                     flex: 1,
-                    builder: (context, area) => LdMasterPage(
+                    builder: (context, area) => LdMonkeyMasterPage(
                       route: widget.route,
+                      searchFocusNode: _searchFocusNode,
                     ),
                   ),
                   Area(
@@ -209,7 +229,7 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
                           builder: (context, snapshot) {
                             final state = snapshot.data!;
 
-                            if (state.selectedItems.isNotEmpty && showingDetail) {
+                            if (state.selectedItems.isNotEmpty && _showingDetail) {
                               return widget.child;
                             }
                             return const Center(
@@ -237,7 +257,10 @@ class _LdMasterDetailShellState<T extends Identifiable<IdType>, IdType, Grouping
       bindings: {
         const SingleActivator(LogicalKeyboardKey.keyR, meta: true): () {
           widget.route.state.repository?.refreshList();
-        }
+        },
+        const SingleActivator(LogicalKeyboardKey.keyF, meta: true): () {
+          _searchFocusNode.requestFocus();
+        },
       },
       child: StreamBuilder(
         stream: widget.route.stateStream,

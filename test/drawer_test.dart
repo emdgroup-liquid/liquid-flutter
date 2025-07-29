@@ -16,14 +16,9 @@ void main() {
               ),
               child: Center(
                 child: LdAutoSpace(children: [
-                  LdDrawerHeader(title: Text("Header ")),
                   LdSectionHeader("Section 1"),
-                  LdDrawerItemSection(
-                      active: true,
-                      leading: Icon(LucideIcons.circle),
-                      child: Text("Item 1")),
-                  LdDrawerItemSection(
-                      leading: Icon(LucideIcons.circle), child: Text("Item 2")),
+                  LdDrawerItemSection(active: true, leading: Icon(LucideIcons.circle), child: Text("Item 1")),
+                  LdDrawerItemSection(leading: Icon(LucideIcons.circle), child: Text("Item 2")),
                   LdDrawerItemSection(
                     leading: Icon(LucideIcons.circle),
                     initiallyExpanded: true,
@@ -42,7 +37,6 @@ void main() {
             ))));
     await test.pumpAndSettle();
 
-    expect(find.byType(LdDrawerHeader), findsOneWidget);
     expect(find.byType(LdSectionHeader), findsOneWidget);
     expect(find.byType(LdDrawerItemSection), findsNWidgets(6));
   });

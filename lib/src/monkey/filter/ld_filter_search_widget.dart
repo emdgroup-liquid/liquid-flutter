@@ -5,13 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/device_info.dart';
 
 class LdFilterSearchWidget<T extends Identifiable<IdType>, IdType, Suggestion> extends StatefulWidget {
   const LdFilterSearchWidget({
     super.key,
     required this.filter,
     required this.onFilterChanged,
+    this.searchFocusNode,
   });
+
+  final FocusNode? searchFocusNode;
 
   final LdFilterSearchOption<T, IdType, Suggestion> filter;
   final void Function(LdFilterSearchOption<T, IdType, Suggestion> filter) onFilterChanged;
@@ -24,7 +28,8 @@ class LdFilterSearchWidget<T extends Identifiable<IdType>, IdType, Suggestion> e
 class _LdFilterSearchWidgetState<T extends Identifiable<IdType>, IdType, Suggestion>
     extends State<LdFilterSearchWidget<T, IdType, Suggestion>> {
   final GlobalKey _triggerKey = GlobalKey();
-  final FocusNode _triggerNode = FocusNode();
+  late final FocusNode _triggerNode = widget.searchFocusNode ?? FocusNode();
+
   late final TextEditingController _controller = TextEditingController(text: widget.filter.searchText);
   bool _disabled = false;
 
@@ -64,7 +69,9 @@ class _LdFilterSearchWidgetState<T extends Identifiable<IdType>, IdType, Suggest
 
   @override
   void dispose() {
-    _triggerNode.dispose();
+    if (widget.searchFocusNode == null) {
+      _triggerNode.dispose();
+    }
     _controller.dispose();
     super.dispose();
   }
@@ -266,6 +273,11 @@ class _SearchWidgetState<T extends Identifiable<IdType>, IdType, Suggestion>
                         controller: _controller,
                         autofocus: true,
                         leading: const Icon(Icons.search),
+                        trailingHint: DeviceInfo.isDesktop
+                            ? const LdShortcutIndicator(
+                                shortcut: SingleActivator(LogicalKeyboardKey.keyF, meta: true),
+                              )
+                            : null,
                         hint: widget.filter.hint ?? LiquidLocalizations.of(context).search,
                         onChanged: _onSearchChanged,
                         onClear: () {

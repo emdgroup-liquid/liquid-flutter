@@ -3,25 +3,24 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/master_detail/app_bar_actions.dart';
-import 'package:liquid_flutter/src/master_detail/ld_master_detail_selection.dart';
+
 import 'package:provider/provider.dart';
 
-/// The page rendered by [LdMasterDetailRoute] to show the detail of the selected
+/// The page rendered by [LdMonkey] to show the detail of the selected
 /// items
-class LdDetailPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends StatelessWidget {
+class LdMonkeyDetailPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends StatelessWidget {
   final PreferredSizeWidget Function(BuildContext context, Set<IdType> selection)? appBarBuilder;
 
-  const LdDetailPage({
+  const LdMonkeyDetailPage({
     this.appBarBuilder,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    final route = LdMasterDetailRoute.of<T, IdType, GroupingCriterion>(context);
+    final route = LdMonkey.of<T, IdType, GroupingCriterion>(context);
 
-    final isSplit = LdMasterContext.of<T, IdType, GroupingCriterion>(context).isSplit;
+    final isSideBySide = LdMonkeyContext.of<T, IdType, GroupingCriterion>(context).isSideBySide;
 
     return StreamBuilder(
         stream: route.stateStream,
@@ -31,21 +30,19 @@ class LdDetailPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
           final selection = state.selectedItems;
 
           return Provider.value(
-            value: LdMasterDetailSelection<T, IdType, GroupingCriterion>(items: selection),
+            value: LdMonkeySelection<T, IdType, GroupingCriterion>(items: selection),
             child: StreamBuilder(
                 key: ValueKey(selection.join(',')),
                 stream: route.repository.watchItems(selection),
                 builder: (context, snapshot) {
-                  final primaryActions =
-                      LdMasterDetailAppBarActions.getActionsAndProviders<T, IdType, GroupingCriterion>(
+                  final primaryActions = LdMonkeyAppBarActions.getActionsAndProviders<T, IdType, GroupingCriterion>(
                     context,
-                    LdMasterDetailActionLocation.detailAppBar,
+                    LdMonkeyActionLocation.detailAppBar,
                   );
 
-                  final secondaryActions =
-                      LdMasterDetailAppBarActions.getActionsAndProviders<T, IdType, GroupingCriterion>(
+                  final secondaryActions = LdMonkeyAppBarActions.getActionsAndProviders<T, IdType, GroupingCriterion>(
                     context,
-                    LdMasterDetailActionLocation.detailSecondary,
+                    LdMonkeyActionLocation.detailSecondary,
                   );
 
                   return LdScaffold(
@@ -53,7 +50,7 @@ class LdDetailPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Provider.value(
-                          value: LdMasterDetailActionLocation.detailAppBar,
+                          value: LdMonkeyActionLocation.detailAppBar,
                           child: appBarBuilder?.call(context, selection) ??
                               LdAppBar(
                                 title: Text(
@@ -65,9 +62,9 @@ class LdDetailPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
                                 overflowMenuProviders: primaryActions.menuProviders,
                               ),
                         ),
-                        if (!isSplit && secondaryActions.hasActions) ...[
+                        if (isSideBySide && secondaryActions.hasActions) ...[
                           Provider.value(
-                            value: LdMasterDetailActionLocation.detailSecondary,
+                            value: LdMonkeyActionLocation.detailSecondary,
                             child: LdAppBar(
                               implyLeading: false,
                               disableSafeArea: true,
@@ -78,9 +75,9 @@ class LdDetailPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
                         ],
                       ],
                     ),
-                    bottomNavigationBar: isSplit && secondaryActions.hasActions
+                    bottomNavigationBar: !isSideBySide && secondaryActions.hasActions
                         ? Provider.value(
-                            value: LdMasterDetailActionLocation.detailSecondary,
+                            value: LdMonkeyActionLocation.detailSecondary,
                             child: LdAppBar(
                               implyLeading: false,
                               actions: secondaryActions.actions,
@@ -89,7 +86,7 @@ class LdDetailPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
                           )
                         : null,
                     body: SafeArea(
-                      child: LdDetailPageContent(
+                      child: LdMonkeyDetailPageContent(
                         route: route,
                         selection: selection,
                       ),
@@ -101,10 +98,10 @@ class LdDetailPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> ex
   }
 }
 
-class LdDetailPageContent<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends StatelessWidget {
-  final LdMasterDetailRoute<T, IdType, GroupingCriterion> route;
+class LdMonkeyDetailPageContent<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends StatelessWidget {
+  final LdMonkey<T, IdType, GroupingCriterion> route;
   final Set<IdType> selection;
-  const LdDetailPageContent({super.key, required this.route, required this.selection});
+  const LdMonkeyDetailPageContent({super.key, required this.route, required this.selection});
 
   @override
   Widget build(BuildContext context) {
@@ -183,25 +180,4 @@ class LdDetailPageContent<T extends Identifiable<IdType>, IdType, GroupingCriter
       ),
     );
   }
-}
-
-LdModal ldDetailModal<T extends Identifiable<IdType>, IdType, GroupingCriterion>(
-  LdMasterDetailRoute<T, IdType, GroupingCriterion> route,
-) {
-  return LdModal(
-    modalContent: (context) => SizedBox(
-      height: 300,
-      child: LdDetailPageContent(route: route, selection: route.state.selectedItems),
-    ),
-    title: StreamBuilder(
-      stream: route.stateStream,
-      initialData: route.state,
-      builder: (context, asyncSnapshot) {
-        final selection = asyncSnapshot.data!;
-        return Text(
-          selection.selectedItems.length > 1 ? route.repository.pluralItemTitle : route.repository.singularItemTitle,
-        );
-      },
-    ),
-  );
 }

@@ -2,7 +2,7 @@ PODS:
   - device_info_plus (0.0.1):
     - Flutter
   - Flutter (1.0.0)
-  - haptic_feedback (0.4.2):
+  - haptic_feedback (0.5.1):
     - Flutter
   - package_info_plus (0.4.5):
     - Flutter
@@ -48,10 +48,10 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  haptic_feedback: 6d9ff6a70a5ca4ef470fbc5903c9c6c8d495d861
-  package_info_plus: 580e9a5f1b6ca5594e7c9ed5f92d1dfb2a66b5e1
+  haptic_feedback: fd1d8509833f58f164fc12122c0357fa9b2750e0
+  package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
-  sensors_plus: 3c3bac724a2128c895623e03efd82cf0e94fd8e8
+  sensors_plus: 6a11ed0c2e1d0bd0b20b4029d3bad27d96e0c65b
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
 

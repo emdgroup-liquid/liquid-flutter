@@ -1,6 +1,6 @@
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-class LdMasterDetailRouteState<T extends Identifiable<IdType>, IdType, GroupingCriterion> {
+class LdMonkeyDetailState<T extends Identifiable<IdType>, IdType, GroupingCriterion> {
   final bool showSelectionControls;
 
   final LdRepository<T, IdType>? repository;
@@ -9,20 +9,20 @@ class LdMasterDetailRouteState<T extends Identifiable<IdType>, IdType, GroupingC
 
   final Set<IdType> deletedItems;
 
-  const LdMasterDetailRouteState({
+  const LdMonkeyDetailState({
     required this.showSelectionControls,
     required this.selectedItems,
     this.deletedItems = const {},
     this.repository,
   });
 
-  LdMasterDetailRouteState<T, IdType, GroupingCriterion> copyWith({
+  LdMonkeyDetailState<T, IdType, GroupingCriterion> copyWith({
     bool? showSelectionControls,
     Set<IdType>? selectedItems,
     LdRepository<T, IdType>? repository,
     Set<IdType>? deletedItems,
   }) {
-    return LdMasterDetailRouteState(
+    return LdMonkeyDetailState(
       showSelectionControls: showSelectionControls ?? this.showSelectionControls,
       selectedItems: selectedItems ?? this.selectedItems,
       repository: repository ?? this.repository,

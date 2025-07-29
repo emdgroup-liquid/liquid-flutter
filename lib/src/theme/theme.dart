@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/theme/sizing_config.dart';
 
 import 'package:provider/provider.dart';
 
@@ -236,17 +237,17 @@ class LdTheme extends ChangeNotifier {
     return _palette.background;
   }
 
-  /// Get the default text color
+  /// Get the default text color, used for the main text
   Color get text {
     return _palette.text;
   }
 
-  /// Get the muted text color
+  /// Get the muted text color, used for text that is not the main text
   Color get textMuted {
     return _palette.textMuted;
   }
 
-  /// Get the border color
+  /// Get the border color, used for borders and dividers
   Color get border {
     return _palette.border;
   }
@@ -256,49 +257,15 @@ class LdTheme extends ChangeNotifier {
     return _palette.stroke;
   }
 
-  /// Get the surface color
+  /// Get the surface color, used for backgrounds that sit above the
+  /// background elevation
   Color get surface {
     return _palette.surface;
   }
 }
 
-class LdSizingConfig {
-  double radiusXS;
-  double radiusS;
-  double radiusM;
-  double radiusL;
-
-  double themeSPaddingXS;
-  double themeSPaddingS;
-  double themeSPaddingM;
-  double themeSPaddingL;
-
-  double themeMPaddingXS;
-  double themeMPaddingS;
-  double themeMPaddingM;
-  double themeMPaddingL;
-
-  double themeLPaddingXS;
-  double themeLPaddingS;
-  double themeLPaddingM;
-  double themeLPaddingL;
-
-  LdSizingConfig({
-    this.radiusXS = 4.0,
-    this.radiusS = 8.0,
-    this.radiusM = 16.0,
-    this.radiusL = 24.0,
-    this.themeSPaddingXS = 4.0,
-    this.themeSPaddingS = 8.0,
-    this.themeSPaddingM = 10.0,
-    this.themeSPaddingL = 12.0,
-    this.themeMPaddingXS = 8.0,
-    this.themeMPaddingS = 12.0,
-    this.themeMPaddingM = 14.0,
-    this.themeMPaddingL = 24.0,
-    this.themeLPaddingXS = 8.0,
-    this.themeLPaddingS = 16.0,
-    this.themeLPaddingM = 24.0,
-    this.themeLPaddingL = 32.0,
-  });
+extension LdThemeExtension on BuildContext {
+  LdTheme get ld {
+    return LdTheme.of(this);
+  }
 }

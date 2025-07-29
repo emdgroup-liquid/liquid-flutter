@@ -12,11 +12,7 @@ void main() {
       "LdDrawer": (tester, place) async {
         await place(
           const LdAutoSpace(children: [
-            LdDrawerHeader(title: Text("Header ")),
-            LdDrawerItemSection(
-                active: true,
-                leading: Icon(LucideIcons.circle),
-                child: Text("Item 1")),
+            LdDrawerItemSection(active: true, leading: Icon(LucideIcons.circle), child: Text("Item 1")),
             LdDrawerItemSection(
               leading: Icon(LucideIcons.circle),
               child: Text("Item 3"),
