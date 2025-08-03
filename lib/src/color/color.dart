@@ -1,6 +1,9 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:liquid_flutter/src/color/tokens/absolutes.dart';
+
+final Map<String, Color> _colorCache = {};
 
 class LdColor {
   final List<Color> shades;
@@ -81,15 +84,48 @@ class LdColor {
 
   final double luminanceThreshold;
 
+  double _calcContrast(Color a, Color b) {
+    final luminanceA = a.computeLuminance();
+    final luminanceB = b.computeLuminance();
+    final darkest = min(luminanceA, luminanceB);
+    final lightest = max(luminanceA, luminanceB);
+    return (lightest + 0.05) / (darkest + 0.05);
+  }
+
   /// Get the contrasting text color for the given color
-  Color contrastingText(Color color) {
-    return color.computeLuminance() > luminanceThreshold ? ldBlk : ldWht;
+  Color contrastingText(Color color, {Color? background, bool isDark = false}) {
+    final key = "$color-$background-$isDark";
+    /*if (_colorCache.containsKey(key)) {
+      return _colorCache[key]!;
+    }*/
+
+    Color reference = color;
+    if (color.a < 255 && background != null) {
+      reference = Color.alphaBlend(color, background);
+    }
+
+    final shades = isDark ? this.shades.reversed.toList() : this.shades;
+
+    int offset = 0;
+    Color text = shades[offset];
+
+    while (_calcContrast(text, reference) < 4.5) {
+      offset++;
+      if (offset >= shades.length) {
+        break;
+      }
+      text = shades[offset];
+    }
+
+    _colorCache[key] = text;
+
+    return text;
   }
 
   final int disabledAlpha;
 
   LdColor disabled(bool isDark) => LdColor(
-        shades.map((e) => Color.alphaBlend(ldBlk.withAlpha(disabledAlpha), e)).toList(),
+        shades.map((e) => Color.alphaBlend((isDark ? ldBlk : ldWht).withAlpha(disabledAlpha), e)).toList(),
         _center,
         _darkCenter,
       );

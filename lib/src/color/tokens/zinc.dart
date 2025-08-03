@@ -20,3 +20,12 @@ const shadZinc = LdColor([
   Color.fromRGBO(24, 24, 27, 1),
   Color.fromRGBO(9, 9, 11, 1),
 ], 5, 7);
+
+const zincReduced = LdColor([
+  Color.fromRGBO(255, 255, 255, 1),
+  Color.fromRGBO(244, 244, 245, 1),
+  Color.fromRGBO(212, 212, 216, 1),
+  Color.fromRGBO(113, 113, 122, 1),
+  Color.fromRGBO(63, 63, 70, 1),
+  Color.fromRGBO(24, 24, 27, 1),
+], 3, 3);

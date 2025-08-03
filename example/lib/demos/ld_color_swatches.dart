@@ -43,11 +43,15 @@ class LdColorSwatches extends StatelessWidget {
           ),
         ),
         ldSpacerS,
-        const LdText("SF/TX:"),
+        const LdText("Text"),
+        LdMute(child: LdTextLs("WCAG AA >=4.5")),
+        ldSpacerS,
         _colorContrast(_calcContrast(a, b), context, 4.5),
-        const LdText("SF/BG: "),
+        ldSpacerM,
+        const LdText("Background"),
+        LdMute(child: LdTextLs("WCAG AA >=3.0")),
+        ldSpacerS,
         _colorContrast(_calcContrast(a, background), context, 3),
-        //Text("T/B: " + _calcContrast(b, background).toStringAsFixed(1))
       ],
     );
   }
@@ -60,24 +64,20 @@ class LdColorSwatches extends StatelessWidget {
     return (lightest + 0.05) / (darkest + 0.05);
   }
 
-  LdTag _colorContrast(
-      double contrast, BuildContext context, double threshold) {
+  LdTag _colorContrast(double contrast, BuildContext context, double threshold) {
     if (contrast >= threshold) {
       return LdTag(
-          color: LdTheme.of(context).palette.success,
-          size: LdSize.s,
-          child: Text("1:${contrast.toStringAsFixed(1)}"));
+          color: LdTheme.of(context).palette.success, size: LdSize.m, child: Text("1:${contrast.toStringAsFixed(1)}"));
     }
     return LdTag(
-        color: LdTheme.of(context).palette.error,
-        size: LdSize.s,
-        child: Text("1:${contrast.toStringAsFixed(1)}"));
+        color: LdTheme.of(context).palette.error, size: LdSize.m, child: Text("1:${contrast.toStringAsFixed(1)}"));
   }
 
   @override
   Widget build(BuildContext context) {
-    final lightBg = LdTheme.of(context).palette.neutral.shades.first;
-    final darkBg = LdTheme.of(context).palette.neutral.shades.last;
+    final background = LdTheme.of(context).background;
+    final isDark = LdTheme.of(context).isDark;
+
     final theme = LdTheme.of(context);
     return Row(
       children: [
@@ -96,12 +96,24 @@ class LdColorSwatches extends StatelessWidget {
                   children: [
                     Column(
                       children: [
+                        const LdText("Focus"),
+                        ldSpacerS,
+                        _buildSwatch(
+                          color.focus(isDark),
+                          color.contrastingText(color.focus(isDark)),
+                          background,
+                          context,
+                        ),
+                      ],
+                    ),
+                    Column(
+                      children: [
                         const LdText("Idle"),
                         ldSpacerS,
                         _buildSwatch(
-                          color.idle(false),
-                          color.contrastingText(color.idle(false)),
-                          lightBg,
+                          color.idle(isDark),
+                          color.contrastingText(color.idle(isDark)),
+                          background,
                           context,
                         ),
                       ],
@@ -111,9 +123,9 @@ class LdColorSwatches extends StatelessWidget {
                         const LdText("Hover"),
                         ldSpacerS,
                         _buildSwatch(
-                          color.hover(false),
-                          color.contrastingText(color.hover(false)),
-                          lightBg,
+                          color.hover(isDark),
+                          color.contrastingText(color.hover(isDark)),
+                          background,
                           context,
                         ),
                       ],
@@ -123,95 +135,27 @@ class LdColorSwatches extends StatelessWidget {
                         const LdText("Active"),
                         ldSpacerS,
                         _buildSwatch(
-                          color.active(false),
-                          color.contrastingText(color.active(false)),
-                          lightBg,
+                          color.active(isDark),
+                          color.contrastingText(color.active(isDark)),
+                          background,
                           context,
                         ),
                       ],
                     ),
                     Column(
                       children: [
-                        const LdText("Focus"),
+                        const LdText("Disabled"),
                         ldSpacerS,
                         _buildSwatch(
-                          color.focus(false),
-                          color.contrastingText(color.focus(false)),
-                          lightBg,
+                          color.disabled(isDark).center(isDark),
+                          color.contrastingText(color.disabled(isDark).center(isDark)),
+                          background,
                           context,
                         ),
                       ],
                     ),
                   ],
                 )),
-          ),
-        ),
-        ldSpacerM,
-        Expanded(
-          child: Container(
-            padding: LdTheme.of(context).pad(),
-            decoration: BoxDecoration(
-              border: Border.all(color: LdTheme.of(context).border, width: 2),
-              borderRadius: theme.radius(LdSize.m),
-              color: darkBg,
-            ),
-            child: DefaultTextStyle(
-              style: const TextStyle(color: Colors.white),
-              child: Wrap(
-                alignment: WrapAlignment.spaceAround,
-                spacing: 8,
-                children: [
-                  Column(
-                    children: [
-                      const Text("Idle"),
-                      ldSpacerS,
-                      _buildSwatch(
-                        color.idle(true),
-                        color.contrastingText(color.idle(true)),
-                        darkBg,
-                        context,
-                      ),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      const Text("Hover"),
-                      ldSpacerS,
-                      _buildSwatch(
-                        color.hover(true),
-                        color.contrastingText(color.hover(true)),
-                        darkBg,
-                        context,
-                      ),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      const Text("Active"),
-                      ldSpacerS,
-                      _buildSwatch(
-                        color.active(true),
-                        color.contrastingText(color.active(true)),
-                        darkBg,
-                        context,
-                      ),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      const Text("Focus"),
-                      ldSpacerS,
-                      _buildSwatch(
-                        color.focus(true),
-                        color.contrastingText(color.focus(true)),
-                        darkBg,
-                        context,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
           ),
         ),
       ],

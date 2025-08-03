@@ -33,7 +33,7 @@ LdColorBundle neutralGhostColor(
 
   if (active) {
     return LdColorBundle(
-      surface: neutral.relative(theme.isDark, isOdd ? 2 : 3),
+      surface: Color.alphaBlend(theme.primaryColor.withAlpha(20), neutral.relative(theme.isDark, isOdd ? 3 : 2)),
       text: neutral.contrastingText(neutral.relative(theme.isDark, 2)),
       border: border,
       icon: neutral.contrastingText(neutral.relative(theme.isDark, 2)),
@@ -87,7 +87,7 @@ LdColorBundle touchableColor(
         if (mode == LdTouchableSurfaceMode.vague) {
           return LdColorBundle(
             surface: foreground.withAlpha(26),
-            text: disabledColor.contrastingText(foreground),
+            text: disabledColor.contrastingText(foreground.withAlpha(26), background: theme.background),
             border: foreground,
             icon: foreground.withAlpha(153),
           );
@@ -132,9 +132,14 @@ LdColorBundle touchableColor(
     }
 
     if (mode == LdTouchableSurfaceMode.vague) {
+      final surface = color.idle(theme.isDark).withAlpha(26);
       return LdColorBundle(
-        surface: color.idle(theme.isDark).withAlpha(26),
-        text: color.idle(theme.isDark),
+        surface: surface,
+        text: color.contrastingText(
+          surface,
+          background: theme.background,
+          isDark: theme.isDark,
+        ),
         border: color.idle(theme.isDark),
       );
     }
@@ -150,13 +155,22 @@ LdColorBundle touchableColor(
     if (active) {
       return LdColorBundle(
         surface: disabledColor.active(theme.isDark),
-        text: disabledColor.contrastingText(disabledColor.active(theme.isDark)).withAlpha(disabledAlpha),
+        text: disabledColor
+            .contrastingText(
+              disabledColor.active(theme.isDark),
+              background: theme.background,
+              isDark: theme.isDark,
+            )
+            .withAlpha(disabledAlpha),
         border: Colors.transparent,
       );
     }
     return LdColorBundle(
       surface: disabledColor.idle(theme.isDark),
-      text: disabledColor.contrastingText(disabledColor.idle(theme.isDark)).withAlpha(disabledAlpha),
+      text: disabledColor.contrastingText(
+        background: theme.background,
+        disabledColor.idle(theme.isDark),
+      ),
       border: Colors.transparent,
     );
   }
@@ -164,15 +178,23 @@ LdColorBundle touchableColor(
   if (active) {
     return LdColorBundle(
       surface: color.active(theme.isDark),
-      text: color.contrastingText(color.active(theme.isDark)),
+      text: color.contrastingText(
+        color.active(theme.isDark),
+        isDark: theme.isDark,
+      ),
       border: Colors.transparent,
     );
   }
 
   if (focus) {
     return LdColorBundle(
-      surface: color.focus(theme.isDark),
-      text: color.contrastingText(color.focus(theme.isDark)),
+      surface: color.focus(
+        theme.isDark,
+      ),
+      text: color.contrastingText(
+        color.focus(theme.isDark),
+        isDark: theme.isDark,
+      ),
       border: Colors.transparent,
     );
   }
@@ -180,14 +202,22 @@ LdColorBundle touchableColor(
   if (hovering) {
     return LdColorBundle(
       surface: color.hover(theme.isDark),
-      text: color.contrastingText(color.hover(theme.isDark)),
+      text: color.contrastingText(
+        color.hover(theme.isDark),
+        isDark: theme.isDark,
+      ),
       border: Colors.transparent,
     );
   }
 
+  final surface = color.idle(theme.isDark);
+
   return LdColorBundle(
-    surface: color.idle(theme.isDark),
-    text: color.contrastingText(color.idle(theme.isDark)),
+    surface: surface,
+    text: color.contrastingText(
+      surface,
+      isDark: theme.isDark,
+    ),
     border: Colors.transparent,
   );
 }
@@ -328,26 +358,21 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
               }),
               onPointerUp: (_) => _safeSetState(() {
                 _pressed = false;
+                if (!widget.disabled) widget.onTap();
+                _focusNode?.requestFocus();
               }),
               onPointerCancel: (_) => _safeSetState(() {
                 _pressed = false;
               }),
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  if (!widget.disabled) widget.onTap();
-                  _focusNode?.requestFocus();
-                },
-                child: widget.builder(
-                  context,
-                  colors,
-                  LdTouchableStatus(
-                    hovering: _hovering && !widget.disabled,
-                    focus: _hasFocus,
-                    active: !widget.disabled && (_pressed || widget.active),
-                    disabled: widget.disabled,
-                    pressed: _pressed,
-                  ),
+              child: widget.builder(
+                context,
+                colors,
+                LdTouchableStatus(
+                  hovering: _hovering && !widget.disabled,
+                  focus: _hasFocus,
+                  active: !widget.disabled && (_pressed || widget.active),
+                  disabled: widget.disabled,
+                  pressed: _pressed,
                 ),
               ),
             ),

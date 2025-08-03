@@ -237,66 +237,63 @@ class _LdButtonState extends State<LdButton> {
       disabled: widget.disabled || isLoading,
       onTap: _onTap,
       color: colors,
-      builder: (context, colors, status) => Opacity(
-        opacity: widget.disabled ? 0.5 : 1,
-        child: Semantics(
-          button: true,
-          enabled: !widget.disabled,
-          focused: status.focus,
-          child: _ButtonShape(
-              colors: colors,
-              status: status,
-              center: centerText,
-              circular: _circular,
-              width: widget.width,
-              mode: widget.mode,
-              borderRadius: widget.borderRadius ?? _theme.radius(LdSize.s),
-              size: widget.size,
-              child: AnimatedSize(
-                  duration: 200.ms,
-                  child: Stack(alignment: Alignment.center, children: [
-                    AnimatedOpacity(
-                        duration: const Duration(
-                          milliseconds: 200,
-                        ),
-                        opacity: !isLoading && !_failed ? 1 : 0,
-                        child: _buttonContent),
-                    LdSpring(
-                      dampingCoefficient: 5,
-                      position: isLoading ? 0 : 1,
-                      child: isLoading ? _loadingContent(colors) : const SizedBox(),
-                      builder: (context, state, child) {
-                        return Transform.translate(
-                          offset: Offset(0, 20 * state.position),
-                          child: child,
+      builder: (context, colors, status) => Semantics(
+        button: true,
+        enabled: !widget.disabled,
+        focused: status.focus,
+        child: _ButtonShape(
+            colors: colors,
+            status: status,
+            center: centerText,
+            circular: _circular,
+            width: widget.width,
+            mode: widget.mode,
+            borderRadius: widget.borderRadius ?? _theme.radius(LdSize.s),
+            size: widget.size,
+            child: AnimatedSize(
+                duration: 200.ms,
+                child: Stack(alignment: Alignment.center, children: [
+                  AnimatedOpacity(
+                      duration: const Duration(
+                        milliseconds: 200,
+                      ),
+                      opacity: !isLoading && !_failed ? 1 : 0,
+                      child: _buttonContent),
+                  LdSpring(
+                    dampingCoefficient: 5,
+                    position: isLoading ? 0 : 1,
+                    child: isLoading ? _loadingContent(colors) : const SizedBox(),
+                    builder: (context, state, child) {
+                      return Transform.translate(
+                        offset: Offset(0, 20 * state.position),
+                        child: child,
+                      );
+                    },
+                  ),
+                  LdSpring(
+                    position: _failed ? 0 : 1,
+                    builder: (context, state, _) {
+                      if (!_failed) {
+                        return const SizedBox();
+                      }
+
+                      if (_circular) {
+                        return const Icon(
+                          LucideIcons.x,
                         );
-                      },
-                    ),
-                    LdSpring(
-                      position: _failed ? 0 : 1,
-                      builder: (context, state, _) {
-                        if (!_failed) {
-                          return const SizedBox();
-                        }
+                      }
 
-                        if (_circular) {
-                          return const Icon(
-                            LucideIcons.x,
-                          );
-                        }
+                      final errorText = widget.errorText ??
+                          _error?.localize(context).message ??
+                          LiquidLocalizations.of(context).failed;
 
-                        final errorText = widget.errorText ??
-                            _error?.localize(context).message ??
-                            LiquidLocalizations.of(context).failed;
-
-                        return Transform.translate(
-                          offset: Offset(0, 20 * state.position),
-                          child: Text(errorText),
-                        );
-                      },
-                    ),
-                  ]))),
-        ),
+                      return Transform.translate(
+                        offset: Offset(0, 20 * state.position),
+                        child: Text(errorText),
+                      );
+                    },
+                  ),
+                ]))),
       ),
     );
   }

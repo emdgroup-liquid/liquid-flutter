@@ -50,6 +50,7 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType, GroupingCriter
                       (action) => LdListItem(
                         title: Text(action.label(context)),
                         leading: action.icon(context),
+                        borderRadius: LdTheme.of(context).radius(LdSize.s),
                         onTap: () {
                           LdContextMenuDissmissNotification().dispatch(context);
                           action.onPressed(context);
@@ -57,7 +58,7 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType, GroupingCriter
                       ),
                     )
                     .toList(),
-              ),
+              ).padS(),
             ),
           );
         }),

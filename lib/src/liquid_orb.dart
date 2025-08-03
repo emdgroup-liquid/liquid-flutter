@@ -232,7 +232,7 @@ class _OrbPainter extends CustomPainter {
     canvas.drawPath(
         path,
         Paint()
-          ..color = theme.palette.primary.active(theme.isDark).withAlpha(100)
+          ..color = theme.palette.primary.focus(theme.isDark).withAlpha(200)
           ..style = PaintingStyle.fill);
 
     Path secondWave = Path();

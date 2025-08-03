@@ -45,13 +45,7 @@ class _ThemeDemoState extends State<ThemeDemo> {
     return ComponentPage(
       path: "lib/demos/theme.dart",
       title: "Theme & Colors",
-      apiComponents: const [
-        "LdTheme",
-        "LdThemeProvider",
-        "LdColorNames",
-        "LdReactiveColorBundle",
-        "LdReactiveColor"
-      ],
+      apiComponents: const ["LdTheme", "LdThemeProvider", "LdColorNames", "LdReactiveColorBundle", "LdReactiveColor"],
       demo: LdAutoSpace(
         children: [
           const LdBundle(
@@ -89,8 +83,7 @@ class _ThemeDemoState extends State<ThemeDemo> {
                           });
                         }),
                     const LdDivider(),
-                    const LdTextP(
-                        "EMD Brand Colors (liquid_flutter_emd_theme package (see notes on license))"),
+                    const LdTextP("EMD Brand Colors (liquid_flutter_emd_theme package (see notes on license))"),
                     ColorSelctor(
                         active: e,
                         colors: const {
@@ -118,19 +111,11 @@ class _ThemeDemoState extends State<ThemeDemo> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                SizedBox(
-                                    height: 32,
-                                    child:
-                                        Center(child: LdTextL("Dark center"))),
+                                SizedBox(height: 32, child: Center(child: LdTextL("Dark center"))),
                                 LdDivider(),
-                                SizedBox(
-                                    height: 53,
-                                    child: Center(child: LdTextL("Shades"))),
+                                SizedBox(height: 53, child: Center(child: LdTextL("Shades"))),
                                 LdDivider(),
-                                SizedBox(
-                                    height: 32,
-                                    child:
-                                        Center(child: LdTextL("Light center"))),
+                                SizedBox(height: 32, child: Center(child: LdTextL("Light center"))),
                               ],
                             ),
                           ),
@@ -139,8 +124,7 @@ class _ThemeDemoState extends State<ThemeDemo> {
                             children: [
                               LdSpring(
                                 position: e.shades.indexOf(e.center(true)) * 33,
-                                builder: (context, state, child) =>
-                                    Transform.translate(
+                                builder: (context, state, child) => Transform.translate(
                                   offset: Offset(state.position, 0),
                                   child: const SizedBox(
                                     height: 32,
@@ -150,10 +134,8 @@ class _ThemeDemoState extends State<ThemeDemo> {
                               ),
                               _buildShades(),
                               LdSpring(
-                                position:
-                                    e.shades.indexOf(e.center(false)) * 33,
-                                builder: (context, state, child) =>
-                                    Transform.translate(
+                                position: e.shades.indexOf(e.center(false)) * 33,
+                                builder: (context, state, child) => Transform.translate(
                                   offset: Offset(state.position, 0),
                                   child: const SizedBox(
                                     height: 32,
@@ -169,15 +151,13 @@ class _ThemeDemoState extends State<ThemeDemo> {
                     if (_selectedShade != null)
                       LdAutoSpace(
                         children: [
-                          LdTextHs(
-                              "Selected shade: ${e.shades.indexOf(_selectedShade!)}"),
+                          LdTextHs("Selected shade: ${e.shades.indexOf(_selectedShade!)}"),
                           CodeBlock(
                             code:
                                 "final absoluteColor = ${colorNames[e]}.shades[${e.shades.indexOf(_selectedShade!)}];",
                           ),
                           const LdTextHs("Relative colors:"),
-                          const LdTextP(
-                              "Use the relative methods to get colors depending on the brightness."),
+                          const LdTextP("Use the relative methods to get colors depending on the brightness."),
                           const LdHint(
                               type: LdHintType.warning,
                               child: Text(
@@ -356,10 +336,16 @@ class _ThemeDemoState extends State<ThemeDemo> {
                             decoration: BoxDecoration(
                               color: shade,
                               border: Border.all(
-                                color: status.active
-                                    ? theme.absolute
-                                    : theme.border,
+                                color: status.active ? theme.absolute : theme.border,
                                 width: 2,
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                "A",
+                                style: TextStyle(
+                                    color: e.contrastingText(shade, isDark: theme.isDark, background: theme.background),
+                                    height: 1),
                               ),
                             ),
                           ),
@@ -367,6 +353,15 @@ class _ThemeDemoState extends State<ThemeDemo> {
                       ),
                     ],
                   ),
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      height: 32,
+                      width: 32,
+                    ),
+                  ],
                 ),
                 const LdDivider(),
               ],

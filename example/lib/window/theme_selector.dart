@@ -18,8 +18,9 @@ class _ThemeSelectorState extends State<ThemeSelector> {
 
     final themes = {
       "Shad Default": shadDefault,
-      "EMD Light Purple": emdLightPurple,
+      "High Contrast": highContrast,
       "Shad Default Dark": shadDefaultDark,
+      "EMD Light Purple": emdLightPurple,
       "EMD Night Runner": emdNightRunner,
       "EMD Dark Blue": emdDarkBlue,
       "EMD Dark Purple": emdDarkPurple,

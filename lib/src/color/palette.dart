@@ -29,15 +29,37 @@ class LdPalette {
     required this.warning,
     required this.error,
     this.neutral = shadZinc,
+    Color? background,
+    Color? surface,
+    Color? border,
+    Color? stroke,
+    Color? text,
+    Color? textMuted,
   }) {
-    background = neutral.relative(isDark, isDark ? 0 : 1);
-    surface = neutral.relative(isDark, isDark ? 1 : 0);
-    border = neutral.relative(isDark, 3);
-    stroke = neutral.relative(isDark, 3);
-    text = neutral.relative(!isDark, 2);
-    textMuted = neutral.relative(!isDark, 5);
+    this.background = background ?? neutral.relative(isDark, isDark ? 0 : 1);
+    this.surface = surface ?? neutral.relative(isDark, isDark ? 1 : 0);
+    this.border = border ?? neutral.relative(isDark, 3);
+    this.stroke = stroke ?? neutral.relative(isDark, 3);
+    this.text = text ?? neutral.relative(!isDark, 2);
+    this.textMuted = textMuted ?? neutral.relative(!isDark, 5);
   }
 }
+
+final highContrast = LdPalette(
+  isDark: false,
+  primary: zincReduced,
+  secondary: zincReduced,
+  success: zincReduced,
+  warning: zincReduced,
+  error: zincReduced,
+  neutral: zincReduced,
+  background: zincReduced.shades[0],
+  surface: zincReduced.shades[1],
+  border: zincReduced.shades[4],
+  stroke: zincReduced.shades[4],
+  text: zincReduced.shades[5],
+  textMuted: zincReduced.shades[4],
+);
 
 final shadDefault = LdPalette(
   isDark: false,

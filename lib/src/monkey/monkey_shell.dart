@@ -181,7 +181,7 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType, GroupingCriter
         context,
       );
 
-      if (monkeyContext.isSideBySide) {
+      if (!monkeyContext.isSideBySide) {
         return Provider<LdMonkey<T, IdType, GroupingCriterion>>.value(
           value: widget.route,
           child: Provider<LdMonkeyContext<T, IdType, GroupingCriterion>>.value(

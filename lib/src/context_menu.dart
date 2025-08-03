@@ -170,7 +170,12 @@ class _LdContextMenuState extends State<LdContextMenu> {
         shouldZoom: _shouldZoom,
         backgroundColor: null,
         providers: widget.menuProviders?.call(context),
-        triggerBuilder: (context, isShuttle, trigger, child) => widget.builder(context, isShuttle, trigger, child),
+        triggerBuilder: (context, isShuttle, trigger, child) => widget.builder(
+          context,
+          isShuttle,
+          trigger,
+          child,
+        ),
         child: widget.child,
       ),
     );
@@ -377,25 +382,20 @@ class ContextMenuRoute extends ModalRoute<void> {
               top: triggerPosition.dy,
               width: triggerSize.width,
               height: triggerSize.height,
-              child: Hero(
-                tag: "context-menu-trigger-${triggerKey.hashCode}",
-                child: Transform.scale(
-                  scale: 1 + 0.05 * animation.value,
-                  child: _wrapWithProviders(
-                    context,
-                    Builder(builder: (context2) {
-                      return triggerBuilder(
-                        context2,
-                        false,
-                        () {},
-                        child,
-                      );
-                    }),
+              child: Transform.scale(
+                scale: 1 + 0.05 * animation.value,
+                child: _wrapWithProviders(
+                  context,
+                  (context2) => triggerBuilder(
+                    context2,
+                    false,
+                    () {},
+                    this.child,
                   ),
                 ),
               ),
             ),
-          _buildAnimatedMenuTransition(context, animation, _menuSizeNotifier.value),
+          _buildAnimatedMenuTransition(context, _menuSizeNotifier.value),
         ],
       ),
     );
@@ -405,53 +405,81 @@ class ContextMenuRoute extends ModalRoute<void> {
     return Offstage(
       child: MeasureSize(
         sizeNotifier: _menuSizeNotifier,
-        child: _buildMenuContent(context),
+        child: _buildAnimatedMenuTransition(context, _menuSizeNotifier.value),
       ),
     );
   }
 
-  Widget _buildAnimatedMenuTransition(BuildContext context, Animation<double> animation, Size menuSize) {
+  Widget _buildAnimatedMenuTransition(BuildContext context, Size menuSize) {
     final (endRect, alignment) = _resizeMenuToScreen(context, menuSize);
 
     return LdSpring(
-        position: animation.status == AnimationStatus.forward || animation.status == AnimationStatus.completed ? 1 : 0,
+        position: 1,
+        mass: 15,
+        springConstant: 15,
+        dampingCoefficient: 15,
         initialPosition: 0,
         builder: (context, state, child) {
           return Positioned(
-            left: endRect.left,
-            top: endRect.top,
-            child: Transform.scale(
-              scale: state.position,
-              alignment: alignment,
-              child: _buildMenuTransitionContent(context, animation, alignment: alignment),
-            ),
-          );
+              left: endRect.left,
+              top: endRect.top,
+              child: NotificationListener<LdContextMenuDissmissNotification>(
+                onNotification: (notification) {
+                  Navigator.of(context).maybePop();
+                  return true;
+                },
+                child: Transform.scale(
+                  scale: state.position,
+                  alignment: alignment,
+                  child: _wrapWithProviders(
+                    context,
+                    (context2) => _wrapMenu(
+                      context2,
+                      menuBuilder(context2, onDismiss ?? () {}),
+                      alignment,
+                    ),
+                  ),
+                ),
+              ));
         });
   }
 
-  Widget _buildMenuTransitionContent(BuildContext context, Animation<double> animation, {Alignment? alignment}) {
-    return FadeTransition(
-      opacity: animation,
-      child: _buildMenuContent(context),
-    );
+  Offset _getMenuOffset(Alignment alignment) {
+    return switch (alignment) {
+      Alignment.bottomRight => const Offset(-100, -100),
+      Alignment.topRight => const Offset(100, -100),
+      Alignment.bottomLeft => const Offset(-100, 100),
+      Alignment.topLeft => const Offset(-100, -100),
+      _ => Offset.zero,
+    };
   }
 
-  Widget _wrapMenu(BuildContext context, Widget menu) {
-    return NotificationListener<LdContextMenuDissmissNotification>(
-      onNotification: (notification) {
-        Navigator.of(context).maybePop();
-        return true;
-      },
-      child: Material(
-        type: MaterialType.transparency,
-        child: Container(
-          clipBehavior: Clip.hardEdge,
-          decoration: BoxDecoration(
-            color: LdTheme.of(context).surface,
-            borderRadius: LdTheme.of(context).radius(LdSize.m),
-            boxShadow: [ldShadowSticky],
-            border: Border.all(color: LdTheme.of(context).border, width: LdTheme.of(context).borderWidth),
-          ),
+  Widget _wrapMenu(BuildContext context, Widget menu, Alignment alignment) {
+    return Material(
+      type: MaterialType.transparency,
+      child: Container(
+        clipBehavior: Clip.hardEdge,
+        decoration: BoxDecoration(
+          color: LdTheme.of(context).surface,
+          borderRadius: LdTheme.of(context).radius(LdSize.m),
+          boxShadow: [ldShadowSticky],
+          border: Border.all(color: LdTheme.of(context).border, width: LdTheme.of(context).borderWidth),
+        ),
+        child: LdSpring(
+          mass: 15,
+          springConstant: 10,
+          dampingCoefficient: 15,
+          initialPosition: 1.0,
+          position: 0,
+          builder: (context, state, child) {
+            return Opacity(
+              opacity: (1 - state.position.clamp(0, 1)),
+              child: Transform.translate(
+                offset: _getMenuOffset(alignment) * state.position,
+                child: child,
+              ),
+            );
+          },
           child: SingleChildScrollView(
             child: MeasureSize(
               sizeNotifier: _menuSizeNotifier,
@@ -463,22 +491,13 @@ class ContextMenuRoute extends ModalRoute<void> {
     );
   }
 
-  Widget _wrapWithProviders(BuildContext context, Widget child) {
+  Widget _wrapWithProviders(BuildContext context, Widget Function(BuildContext context) builder) {
     return providers != null && providers!.isNotEmpty
         ? MultiProvider(
             providers: providers!,
-            child: child,
+            builder: (context, child) => builder(context),
           )
-        : child;
-  }
-
-  Widget _buildMenuContent(BuildContext context) {
-    return _wrapWithProviders(
-      context,
-      _wrapMenu(context, Builder(builder: (context) {
-        return menuBuilder(context, onDismiss ?? () {});
-      })),
-    );
+        : builder(context);
   }
 
   @override

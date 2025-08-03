@@ -347,6 +347,9 @@ class _LdAppBarState extends State<LdAppBar> {
           onPanStart: (details) {
             LdAppBar.callbacks?.onMove?.call();
           },
+          onDoubleTap: () {
+            LdAppBar.callbacks?.onMaximize?.call();
+          },
           child: appBar,
         ),
         if (!_isBottomNavigationBar) const LdDivider(height: 1),
