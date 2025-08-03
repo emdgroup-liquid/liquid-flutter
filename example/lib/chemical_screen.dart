@@ -9,10 +9,8 @@ class _Potion {
 }
 
 var potions = [
-  _Potion("Alihotsy Draught",
-      "A potion from the Alihotsy plant; causes hysterical laughter."),
-  _Potion("Dreamless Sleep Potion",
-      "A potion that places the taker in a sleep that is dreamless."),
+  _Potion("Alihotsy Draught", "A potion from the Alihotsy plant; causes hysterical laughter."),
+  _Potion("Dreamless Sleep Potion", "A potion that places the taker in a sleep that is dreamless."),
   _Potion("Madame Glossy's Silver Polish", "A magical cleaning solution.")
 ];
 
@@ -36,55 +34,22 @@ class _ChemicalScreenState extends State<ChemicalScreen> {
             const _Quantity(),
             const _ProductKeyInfos(),
             ldSpacerL,
-            LdAutoSpace(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      LdButton(
-                          mode: LdButtonMode.outline,
-                          leading: const Icon(LucideIcons.shoppingBag),
-                          onPressed: () {
-                            LdNotificationsController.of(context)
-                                .addNotification(LdNotification(
-                              type: LdNotificationType.info,
-                              message: "Added to cart",
-                            ));
-                          },
-                          child: const Text("Add to cart")),
-                      LdButton(
-                          mode: LdButtonMode.outline,
-                          leading: const Icon(LucideIcons.download),
-                          onPressed: () {
-                            LdNotificationsController.of(context)
-                                .addNotification(LdNotification(
-                              type: LdNotificationType.error,
-                              message: "Downloading certificate failed",
-                            ));
-                          },
-                          child: const Text(
-                            "Acces certificate",
-                          )),
-                    ],
-                  ),
-                  const LdDivider(),
-                  const LdInput(
-                    label: "Notes",
-                    hint: "Add a note....",
-                    maxLines: 3,
-                  ),
-                  LdButton(
-                      child: const Text("Save"),
-                      onPressed: () {
-                        LdNotificationsController.of(context)
-                            .addNotification(LdNotification(
-                          type: LdNotificationType.success,
-                          message: "Saved",
-                        ));
-                      })
-                ]),
+            LdAutoSpace(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const LdDivider(),
+              const LdInput(
+                label: "Notes",
+                hint: "Add a note....",
+                maxLines: 3,
+              ),
+              LdButton(
+                  child: const Text("Save"),
+                  onPressed: () {
+                    LdNotificationsController.of(context).addNotification(LdNotification(
+                      type: LdNotificationType.success,
+                      message: "Saved",
+                    ));
+                  })
+            ]),
             ldSpacerL,
             const _OtherPotions(),
             ldSpacerL,
@@ -117,8 +82,7 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
   }
 
   void _deduct(amount) {
-    _quantityController.animateTo(
-        (_quantityController.value - amount).clamp(0, 1),
+    _quantityController.animateTo((_quantityController.value - amount).clamp(0, 1),
         duration: const Duration(milliseconds: 500));
   }
 
@@ -152,61 +116,88 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
                   const LdTextL(
                     "Made with real human hair",
                   ),
-                  LdModalBuilder(
-                    builder: (context, onPress) {
-                      return LdButtonOutline(
-                        size: LdSize.s,
-                        leading: const Icon(LucideIcons.arrowDown),
-                        onPressed: onPress,
-                        child: const Text("Deduct"),
-                      );
-                    },
-                    modal: LdModal(
-                      headerPadding: LdTheme.of(context).pad(size: LdSize.m),
-                      contentPadding: EdgeInsets.zero,
-                      modalContent: (context) => Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          LdListItem(
-                              title: const Text("Deduct 0.1l"),
-                              leading: const Icon(LucideIcons.arrowDown),
-                              onTap: () {
-                                _deduct(0.1);
-                                Navigator.of(context).pop();
-                              }),
-                          LdListItem(
-                              title: const Text("Deduct 0.2l"),
-                              leading: const Icon(LucideIcons.arrowDown),
-                              onTap: () {
-                                _deduct(0.2);
-                                Navigator.of(context).pop();
-                              }),
-                          LdListItem(
-                              title: const Text("Deduct 0.5l"),
-                              leading: const Icon(LucideIcons.arrowDown),
-                              onTap: () {
-                                _deduct(0.5);
-                                Navigator.of(context).pop();
-                              }),
-                          LdListItem(
-                              title: const Text("Add 0.1l"),
-                              leading: const Icon(LucideIcons.arrowUp),
-                              onTap: () {
-                                _deduct(-0.1);
-                                Navigator.of(context).pop();
-                              }),
-                          LdDivider(),
-                          LdListItem(
-                              title: const Text("Refill entirely"),
-                              leading: const Icon(LucideIcons.arrowUp),
-                              onTap: () {
-                                _deduct(-1);
-                                Navigator.of(context).pop();
-                              })
-                        ],
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      LdModalBuilder(
+                        builder: (context, onPress) {
+                          return LdButton(
+                            leading: const Icon(LucideIcons.arrowDown),
+                            onPressed: onPress,
+                            child: const Text("Deduct"),
+                          );
+                        },
+                        modal: LdModal(
+                          headerPadding: LdTheme.of(context).pad(size: LdSize.m),
+                          contentPadding: EdgeInsets.zero,
+                          modalContent: (context) => Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              LdListItem(
+                                  title: const Text("Deduct 0.1l"),
+                                  leading: const Icon(LucideIcons.arrowDown),
+                                  onTap: () {
+                                    _deduct(0.1);
+                                    Navigator.of(context).pop();
+                                  }),
+                              LdListItem(
+                                  title: const Text("Deduct 0.2l"),
+                                  leading: const Icon(LucideIcons.arrowDown),
+                                  onTap: () {
+                                    _deduct(0.2);
+                                    Navigator.of(context).pop();
+                                  }),
+                              LdListItem(
+                                  title: const Text("Deduct 0.5l"),
+                                  leading: const Icon(LucideIcons.arrowDown),
+                                  onTap: () {
+                                    _deduct(0.5);
+                                    Navigator.of(context).pop();
+                                  }),
+                              LdListItem(
+                                  title: const Text("Add 0.1l"),
+                                  leading: const Icon(LucideIcons.arrowUp),
+                                  onTap: () {
+                                    _deduct(-0.1);
+                                    Navigator.of(context).pop();
+                                  }),
+                              LdDivider(),
+                              LdListItem(
+                                  title: const Text("Refill entirely"),
+                                  leading: const Icon(LucideIcons.arrowUp),
+                                  onTap: () {
+                                    _deduct(-1);
+                                    Navigator.of(context).pop();
+                                  })
+                            ],
+                          ),
+                          title: const Text("Deduct"),
+                        ),
                       ),
-                      title: const Text("Deduct"),
-                    ),
+                      LdButton(
+                          mode: LdButtonMode.vague,
+                          leading: const Icon(LucideIcons.shoppingBag),
+                          onPressed: () {
+                            LdNotificationsController.of(context).addNotification(LdNotification(
+                              type: LdNotificationType.info,
+                              message: "Added to cart",
+                            ));
+                          },
+                          child: const Text("Add to cart")),
+                      LdButton(
+                          mode: LdButtonMode.vague,
+                          leading: const Icon(LucideIcons.download),
+                          onPressed: () {
+                            LdNotificationsController.of(context).addNotification(LdNotification(
+                              type: LdNotificationType.error,
+                              message: "Downloading certificate failed",
+                            ));
+                          },
+                          child: const Text(
+                            "Acces certificate",
+                          )),
+                    ],
                   ),
                 ],
               ),
@@ -235,13 +226,7 @@ class _Accordion extends StatelessWidget {
             );
           }),
           headerBuilder: ((context, n) {
-            return Text([
-              "Stock",
-              "Ingredients",
-              "Preparation",
-              "Usage",
-              "Side effects"
-            ][n]);
+            return Text(["Stock", "Ingredients", "Preparation", "Usage", "Side effects"][n]);
           })),
     );
   }
@@ -292,14 +277,17 @@ class _ProductKeyInfos extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const LdCard(
+    return LdCard(
+      padding: LdTheme.of(context).pad(size: LdSize.l),
       child: Wrap(spacing: 32, children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             LdTextHs("5-4"),
-            LdTextL(
-              "pH",
+            LdMute(
+              child: LdTextL(
+                "pH",
+              ),
             )
           ],
         ),
@@ -307,17 +295,20 @@ class _ProductKeyInfos extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             LdTextHs("321°C"),
-            LdTextL(
+            LdMute(
+                child: LdTextL(
               "Boiling point",
-            )
+            )),
           ],
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             LdTextHs("3 Bar"),
-            LdTextL(
-              "Brewing pressure",
+            LdMute(
+              child: LdTextL(
+                "Brewing pressure",
+              ),
             )
           ],
         ),
@@ -327,8 +318,10 @@ class _ProductKeyInfos extends StatelessWidget {
             LdTextHs(
               "Very",
             ),
-            LdTextL(
-              "Magic",
+            LdMute(
+              child: LdTextL(
+                "Magic",
+              ),
             )
           ],
         ),
