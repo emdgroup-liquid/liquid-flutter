@@ -95,7 +95,7 @@ class LdAccordionItem {
 class _LdAccordionChild extends StatelessWidget {
   final Widget child;
   final Widget header;
-  final bool wrapActiveInCard;
+  final bool seperateItems;
   final Duration speed;
 
   final EdgeInsets headerPadding;
@@ -104,12 +104,12 @@ class _LdAccordionChild extends StatelessWidget {
   final Curve curveExpand;
   final Curve curveCollapse;
   final bool collapsed;
-  final bool flatCard;
+  final bool disableElevation;
   const _LdAccordionChild(
       {required this.collapsed,
       required this.child,
-      required this.wrapActiveInCard,
-      required this.flatCard,
+      required this.seperateItems,
+      required this.disableElevation,
       required this.onPressed,
       required this.headerPadding,
       required this.childPadding,
@@ -125,19 +125,19 @@ class _LdAccordionChild extends StatelessWidget {
     var theme = LdTheme.of(context, listen: true);
     var color = LdSurfaceInfo.of(context).isSurface ? theme.background : theme.surface;
 
-    bool hasShadow = !collapsed && wrapActiveInCard && !flatCard;
+    bool hasShadow = !collapsed && seperateItems && !disableElevation;
 
     return AnimatedContainer(
       duration: speed,
       margin: EdgeInsets.symmetric(
-        vertical: wrapActiveInCard && !collapsed ? 4 : 0,
+        vertical: seperateItems ? 4 : 0,
       ),
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
         color: !collapsed ? color : null,
-        borderRadius: wrapActiveInCard ? theme.radius(LdSize.s) : null,
+        borderRadius: seperateItems ? theme.radius(LdSize.m) : null,
         border: Border.all(
-          color: wrapActiveInCard && !collapsed ? theme.border : Colors.transparent,
+          color: seperateItems ? theme.border : Colors.transparent,
           width: theme.borderWidth,
           strokeAlign: BorderSide.strokeAlignOutside,
         ),
@@ -226,8 +226,8 @@ class _LdAccordionState extends State<LdAccordion> {
           curveExpand: widget.curveExpand,
           collapsed: !openIndex.contains(n),
           child: widget.childBuilder(context, n),
-          wrapActiveInCard: widget.wrapActiveInCard,
-          flatCard: widget.flatCard,
+          seperateItems: widget.wrapActiveInCard,
+          disableElevation: widget.flatCard,
           headerPadding: headerPadding,
           speed: widget.speed,
           childPadding: childPadding,

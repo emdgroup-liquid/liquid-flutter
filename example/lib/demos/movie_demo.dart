@@ -117,7 +117,7 @@ final movieRepository = LdRepository<_Movie, int>(
     await Future.delayed(const Duration(milliseconds: 500));
     return newItem;
   },
-  createItem: (id, item) async {
+  createItem: (item) async {
     movieData.add(item!);
     return item;
   },
@@ -238,7 +238,7 @@ final movieDemo = LdMonkey<_Movie, int, bool>(
           title: "${item.title} (copy)",
         );
 
-        await movieRepository.create(newItem.id, newItem);
+        await movieRepository.create(newItem);
 
         await Future.delayed(const Duration(milliseconds: 1500));
 

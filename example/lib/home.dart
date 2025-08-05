@@ -193,18 +193,21 @@ class _HomeState extends State<Home> {
                     version: ^$ldVersion
                 """,
                 ),
-                LdAccordion.fromList([
-                  LdAccordionItem(
-                      child: const CodeBlock(
-                        language: "yaml",
-                        code: """
+                LdAccordion.fromList(
+                  [
+                    LdAccordionItem(
+                        child: const CodeBlock(
+                          language: "yaml",
+                          code: """
                 dependencies:
                   liquid_flutter_emd_theme:
                     version: ^$ldVersion
                 """,
-                      ),
-                      header: const Text("EMD Corporate theme installation"))
-                ]),
+                        ),
+                        header: const Text("EMD Corporate theme installation"))
+                  ],
+                  wrapActiveInCard: true,
+                ),
                 const LdTextP(
                     "Setup a Liquid Theme at the top of your application. This will  be used to provide the color theme to all components via context."),
                 const CodeBlock(

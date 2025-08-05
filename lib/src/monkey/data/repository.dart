@@ -6,7 +6,8 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 import 'package:provider/provider.dart';
 
-typedef FetchListWithParameters<T extends Identifiable<IdType>, IdType> = Future<LdListPage<T>> Function({
+typedef FetchListWithParameters<T extends Identifiable<IdType>, IdType>
+    = Future<LdListPage<T>> Function({
   required int offset,
   required int pageSize,
   String? pageToken,
@@ -14,13 +15,14 @@ typedef FetchListWithParameters<T extends Identifiable<IdType>, IdType> = Future
   List<LdSortOption<T, IdType>>? sortOptions,
 });
 
-class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T, IdType> {
+class LdRepository<T extends Identifiable<IdType>, IdType>
+    extends LdPaginator<T, IdType> {
   final Future<T> Function(IdType id) _getById;
   final Future<int?> Function(IdType id)? _getOffsetById;
   final Future<void> Function(Set<T> items)? _updateBatch;
   final Future<void> Function(IdType id)? _deleteItem;
   final Future<T?> Function(IdType id, T newItem)? _updateItem;
-  final Future<T?> Function(IdType id, T? newItem)? _createItem;
+  final Future<T?> Function(T? newItem)? _createItem;
   final Future<void> Function(Set<IdType> ids)? _deleteBatch;
 
   final FetchListWithParameters<T, IdType> _fetchListWithParameters;
@@ -32,13 +34,18 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
   final List<LdSortOption<T, IdType>> _sortOptions;
 
   Set<LdFilterOption<T, IdType>> get filters => Set.unmodifiable(_filters);
-  List<LdSortOption<T, IdType>> get sortOptions => List.unmodifiable(_sortOptions);
+  List<LdSortOption<T, IdType>> get sortOptions =>
+      List.unmodifiable(_sortOptions);
 
-  final _filterStreamController = StreamController<Set<LdFilterOption<T, IdType>>>.broadcast();
-  Stream<Set<LdFilterOption<T, IdType>>> get filterStream => _filterStreamController.stream;
+  final _filterStreamController =
+      StreamController<Set<LdFilterOption<T, IdType>>>.broadcast();
+  Stream<Set<LdFilterOption<T, IdType>>> get filterStream =>
+      _filterStreamController.stream;
 
-  final _sortStreamController = StreamController<List<LdSortOption<T, IdType>>>.broadcast();
-  Stream<List<LdSortOption<T, IdType>>> get sortStream => _sortStreamController.stream;
+  final _sortStreamController =
+      StreamController<List<LdSortOption<T, IdType>>>.broadcast();
+  Stream<List<LdSortOption<T, IdType>>> get sortStream =>
+      _sortStreamController.stream;
 
   LdRepository({
     required FetchListWithParameters<T, IdType> fetchListWithParameters,
@@ -49,7 +56,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     Future<int?> Function(IdType id)? getOffsetById,
     Future<void> Function(IdType id)? deleteItem,
     Future<T?> Function(IdType id, T newItem)? updateItem,
-    Future<T?> Function(IdType id, T? newItem)? createItem,
+    Future<T?> Function(T? newItem)? createItem,
     Future<void> Function(Set<IdType> ids)? deleteBatch,
     Future<void> Function(Set<T> items)? updateBatch,
     this.singularItemTitle = "Item",
@@ -82,7 +89,8 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     );
   }
 
-  static LdRepository<T, IdType> of<T extends Identifiable<IdType>, IdType>(BuildContext context) {
+  static LdRepository<T, IdType> of<T extends Identifiable<IdType>, IdType>(
+      BuildContext context) {
     return context.read<LdRepository<T, IdType>>();
   }
 
@@ -105,8 +113,10 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
   }
 
   Future<void> updateFilter(LdFilterOption<T, IdType> filter) async {
-    final existingFilter = _filters.firstWhereOrNull((e) => e.name == filter.name);
-    assert(existingFilter != null, 'Cannot update filter. Filter with name ${filter.name} does not exist');
+    final existingFilter =
+        _filters.firstWhereOrNull((e) => e.name == filter.name);
+    assert(existingFilter != null,
+        'Cannot update filter. Filter with name ${filter.name} does not exist');
     _filters.remove(existingFilter);
     _filters.add(filter);
     _filterStreamController.add(_filters);
@@ -115,7 +125,8 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
   }
 
   Future<void> updateSortOption(LdSortOption<T, IdType> sortOption) async {
-    final existingSortOption = _sortOptions.firstWhereOrNull((e) => e.name == sortOption.name);
+    final existingSortOption =
+        _sortOptions.firstWhereOrNull((e) => e.name == sortOption.name);
     assert(existingSortOption != null,
         'Cannot update sort option. Sort option with name ${sortOption.name} does not exist');
     _sortOptions.remove(existingSortOption);
@@ -125,7 +136,8 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
   }
 
   Future<void> setActiveSortOption(String name) async {
-    final newOptions = _sortOptions.map((e) => e.copyWith(isOn: e.name == name)).toList();
+    final newOptions =
+        _sortOptions.map((e) => e.copyWith(isOn: e.name == name)).toList();
 
     _sortOptions.clear();
     _sortOptions.addAll(newOptions);
@@ -145,9 +157,11 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     await mutex.acquire();
     var filteredItems = Map.fromEntries(
       itemsMap.entries.where((item) => item.value.value != null).map((item) {
-        final filterApplies = filters.every((filter) => filter.optimisticFilter(item.value.value!));
+        final filterApplies = filters
+            .every((filter) => filter.optimisticFilter(item.value.value!));
 
-        var newState = filterApplies ? item.value.state : LdPaginatorItemState.filteredOut;
+        var newState =
+            filterApplies ? item.value.state : LdPaginatorItemState.filteredOut;
 
         if (newState == LdPaginatorItemState.filteredOut && filterApplies) {
           newState = LdPaginatorItemState.loaded;
@@ -166,14 +180,16 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
 
     await Future.delayed(const Duration(milliseconds: 500));
 
-    filteredItems.removeWhere((key, value) => value.state == LdPaginatorItemState.filteredOut || value.value == null);
+    filteredItems.removeWhere((key, value) =>
+        value.state == LdPaginatorItemState.filteredOut || value.value == null);
 
     final sortedItems = filteredItems.values.toList();
 
     totalItems = filteredItems.length;
 
     for (final sortOption in sortOptions) {
-      sortedItems.sort((a, b) => sortOption.optimisticSort!(a.value!, b.value!));
+      sortedItems
+          .sort((a, b) => sortOption.optimisticSort!(a.value!, b.value!));
     }
 
     // Apply the sorting to the previous list
@@ -274,15 +290,18 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     }
   }
 
-  Future<void> create(IdType id, T? newValue, {int? index}) async {
+  Future<void> create(T? newValue, {int? index}) async {
     if (_createItem != null) {
       final newIndex = scheduleItemCreation(newValue, index: index);
-      applyOptimisticFilterAndSorting();
+      //applyOptimisticFilterAndSorting();
       try {
-        final newItem = await _createItem!(id, newValue);
+        final newItem = await _createItem!(newValue);
         confirmItemCreation(newIndex, newValue: newItem);
-      } catch (e) {
-        rollbackItemCreation(id);
+      } catch (e, stackTrace) {
+        print("Error creating item: $e");
+        print(stackTrace);
+
+        rollbackItemCreation(newIndex);
         rethrow;
       }
       applyOptimisticFilterAndSorting();

@@ -106,6 +106,7 @@ export 'src/touchable/touchable.dart';
 export 'src/typography.dart';
 export 'src/version.dart';
 export 'src/window_frame.dart';
+export 'src/conditional_parent.dart';
 export 'variants.g.dart';
 
 /// This variable defines whether TextStyle should use the `liquid_flutter`

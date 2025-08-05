@@ -345,13 +345,42 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
               ),
               const LdSectionHeader("Patterns"),
               LdDrawerItemSection(
-                active:
-                    GoRouterState.of(context).uri.path == "/patterns/monkey",
+                active: GoRouterState.of(context)
+                    .uri
+                    .path
+                    .startsWith("/patterns/monkey"),
                 leading: Text(
                   "🐵",
                 ),
-                onTap: () => _showPage(context, "/patterns/monkey"),
                 child: const Text("Monkey"),
+                children: [
+                  LdDrawerItemSection(
+                    active: GoRouterState.of(context).uri.path ==
+                        ("/patterns/monkey"),
+                    onTap: () => _showPage(context, "/patterns/monkey"),
+                    child: const Text("Overview"),
+                  ),
+                  LdDrawerItemSection(
+                    active: GoRouterState.of(context).uri.path ==
+                        ("/patterns/monkey/repository"),
+                    onTap: () =>
+                        _showPage(context, "/patterns/monkey/repository"),
+                    child: const Text("Repository"),
+                  ),
+                  LdDrawerItemSection(
+                    active: GoRouterState.of(context).uri.path ==
+                        ("/patterns/monkey/actions"),
+                    onTap: () => _showPage(context, "/patterns/monkey/actions"),
+                    child: const Text("Actions"),
+                  ),
+                  LdDrawerItemSection(
+                    active: GoRouterState.of(context).uri.path ==
+                        ("/patterns/monkey/sorting-filtering"),
+                    onTap: () => _showPage(
+                        context, "/patterns/monkey/sorting-filtering"),
+                    child: const Text("Sorting & Filtering"),
+                  ),
+                ],
               ),
               const LdSectionHeader("Components"),
               LdInput(

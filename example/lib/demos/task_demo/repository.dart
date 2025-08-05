@@ -110,7 +110,7 @@ final taskRepository = LdRepository<Task, int>(
     await Future.delayed(const Duration(milliseconds: 500));
     return newItem;
   },
-  createItem: (id, item) async {
+  createItem: (item) async {
     testData.add(item!);
 
     return item;

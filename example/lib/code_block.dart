@@ -10,12 +10,16 @@ class CodeBlock extends StatefulWidget {
   final String code;
   final String language;
   final bool expanded;
+  final bool showCopyButton;
+  final bool wrapCard;
 
   const CodeBlock({
     super.key,
     required this.code,
     this.language = "dart",
     this.expanded = false,
+    this.showCopyButton = true,
+    this.wrapCard = true,
   });
 
   @override
@@ -44,18 +48,21 @@ class _CodeBlockState extends State<CodeBlock> {
 
   @override
   Widget build(BuildContext context) {
-    bool isDesktop = kIsWeb || Platform.isWindows || Platform.isMacOS || Platform.isLinux;
+    bool isDesktop =
+        kIsWeb || Platform.isWindows || Platform.isMacOS || Platform.isLinux;
 
     return LayoutBuilder(
-      builder: (context, _) => LdCard(
-        padding: EdgeInsets.zero,
+      builder: (context, _) => LdWrapConditional(
+        condition: widget.wrapCard,
+        builder: (context, child) => LdCard(
+          child: child,
+        ),
         child: Stack(
           children: [
             SourceCode(
               code: widget.code,
-              padding: LdTheme.of(context).pad(),
             ),
-            if (isDesktop)
+            if (isDesktop && widget.showCopyButton)
               Align(
                 alignment: Alignment.topRight,
                 child: Padding(

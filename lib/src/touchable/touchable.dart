@@ -358,21 +358,27 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
               }),
               onPointerUp: (_) => _safeSetState(() {
                 _pressed = false;
-                if (!widget.disabled) widget.onTap();
+
                 _focusNode?.requestFocus();
               }),
               onPointerCancel: (_) => _safeSetState(() {
                 _pressed = false;
               }),
-              child: widget.builder(
-                context,
-                colors,
-                LdTouchableStatus(
-                  hovering: _hovering && !widget.disabled,
-                  focus: _hasFocus,
-                  active: !widget.disabled && (_pressed || widget.active),
-                  disabled: widget.disabled,
-                  pressed: _pressed,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  if (!widget.disabled) widget.onTap();
+                },
+                child: widget.builder(
+                  context,
+                  colors,
+                  LdTouchableStatus(
+                    hovering: _hovering && !widget.disabled,
+                    focus: _hasFocus,
+                    active: !widget.disabled && (_pressed || widget.active),
+                    disabled: widget.disabled,
+                    pressed: _pressed,
+                  ),
                 ),
               ),
             ),

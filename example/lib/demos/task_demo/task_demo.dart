@@ -155,7 +155,7 @@ final taskDemo = LdMonkey<Task, int, bool>(
           task: "${item.task} (copy)",
         );
 
-        await taskRepository.create(newItem.id, newItem);
+        await taskRepository.create(newItem);
 
         await Future.delayed(const Duration(milliseconds: 1500));
 

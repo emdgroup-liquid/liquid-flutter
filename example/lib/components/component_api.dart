@@ -1,8 +1,11 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:liquid_flutter/documentation.g.dart';
-import 'package:liquid_flutter/liquid_flutter.dart';
 
-class ComponentApi extends StatelessWidget {
+import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:mtrust_api_guard/models/doc_items.dart';
+import '../code_block.dart';
+
+class ComponentApi extends StatefulWidget {
   final DocComponent component;
   const ComponentApi({
     required this.component,
@@ -10,137 +13,115 @@ class ComponentApi extends StatelessWidget {
   });
 
   @override
+  State<ComponentApi> createState() => _ComponentApiState();
+}
+
+class _ComponentApiState extends State<ComponentApi> {
+  bool _showPrivate = false;
+
+  String _generateConstructorSignature(DocConstructor constructor) {
+    var namedParameters = constructor.signature
+        .where((e) => e.named)
+        .sortedByCompare((item) => item.required, (a, b) => a ? -1 : 1);
+
+    var positionalParameters = constructor.signature.where((e) => !e.named);
+
+    StringBuffer buffer = StringBuffer();
+
+    // Constructor name
+    String constructorName =
+        constructor.name.isEmpty ? widget.component.name : constructor.name;
+    buffer.write("$constructorName(");
+
+    // Positional parameters
+    for (int i = 0; i < positionalParameters.length; i++) {
+      var parameter = positionalParameters.elementAt(i);
+      if (parameter.description.isNotEmpty) {
+        buffer.write("/// ${parameter.description}\n");
+      }
+      buffer.write("${parameter.type} ${parameter.name}");
+      if (i < positionalParameters.length - 1 || namedParameters.isNotEmpty) {
+        buffer.write(", ");
+      }
+    }
+
+    // Named parameters
+    if (namedParameters.isNotEmpty) {
+      if (positionalParameters.isNotEmpty) {
+        buffer.write("{");
+      }
+
+      for (int i = 0; i < namedParameters.length; i++) {
+        var parameter = namedParameters.elementAt(i);
+        if (parameter.description.isNotEmpty) {
+          buffer.write("\n  /// ${parameter.description}");
+        }
+        buffer.write(
+            "\n  ${parameter.required ? 'required ' : ''}${parameter.type} ${parameter.name}");
+        if (i < namedParameters.length - 1) {
+          buffer.write(",");
+        }
+      }
+
+      if (positionalParameters.isNotEmpty) {
+        buffer.write("\n}");
+      }
+    }
+
+    buffer.write("\n);");
+
+    return buffer.toString();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    List<DocProperty> sortedProperties = widget.component.properties.toList();
+
+    if (!_showPrivate) {
+      sortedProperties =
+          sortedProperties.where((e) => !e.name.startsWith('_')).toList();
+    }
+
+    sortedProperties.sort((a, b) {
+      bool aIsPrivate = a.name.startsWith('_');
+      bool bIsPrivate = b.name.startsWith('_');
+
+      if (aIsPrivate && !bIsPrivate) return 1;
+      if (!aIsPrivate && bIsPrivate) return -1;
+
+      return a.name.compareTo(b.name);
+    });
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ListView.separated(
           physics: const NeverScrollableScrollPhysics(),
           itemBuilder: ((context, index) {
-            var constructor = component.constructors[index];
-            var namedParameters = constructor.signature.where(
-              (e) => e.named,
-            );
-            var positionalParameters = constructor.signature.where(
-              (e) => !e.named,
-            );
+            var constructor = widget.component.constructors[index];
+            String constructorSignature =
+                _generateConstructorSignature(constructor);
 
-            return DefaultTextStyle(
-              style: TextStyle(
-                  fontFamily: "NotoSansMono",
-                  fontSize: 12,
-                  color: LdTheme.of(context).text),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ldSpacerM,
-                  if (positionalParameters.isEmpty)
-                    Text(
-                      "${constructor.name.isEmpty ? component.name : constructor.name}({",
-                    )
-                  else
-                    Text(
-                      "${constructor.name.isEmpty ? component.name : constructor.name}(",
-                    ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ...positionalParameters.map((parameter) => Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    if (parameter.description.isNotEmpty)
-                                      LdTextPs(parameter.description),
-                                    Text(
-                                      parameter.type,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                    ldSpacerS,
-                                    Text(
-                                      parameter.name,
-                                      style: const TextStyle(fontSize: 12),
-                                    ),
-                                    parameter == constructor.signature.last
-                                        ? Container()
-                                        : const Text(","),
-                                  ],
-                                ),
-                              ],
-                            )),
-                        namedParameters.isNotEmpty &&
-                                positionalParameters.isNotEmpty
-                            ? const LdTextL(
-                                "{",
-                              )
-                            : Container(),
-                        ...namedParameters.map((parameter) => Padding(
-                              padding: const EdgeInsets.only(bottom: 2.0),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (parameter.required)
-                                    LdTagSuccess(
-                                        context: context,
-                                        size: LdSize.s,
-                                        child: const Text("Required")),
-                                  ldSpacerXS,
-                                  Flexible(
-                                    child: Text.rich(TextSpan(children: [
-                                      TextSpan(
-                                        text: parameter.type,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: parameter.required
-                                              ? FontWeight.bold
-                                              : FontWeight.normal,
-                                        ),
-                                      ),
-                                      const TextSpan(text: " "),
-                                      TextSpan(
-                                        text: parameter.name,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: parameter.required
-                                              ? FontWeight.bold
-                                              : FontWeight.normal,
-                                        ),
-                                      ),
-                                      if (parameter ==
-                                          constructor.signature.last)
-                                        const TextSpan(text: ","),
-                                    ])),
-                                  ),
-                                  ldSpacerS,
-                                  parameter == constructor.signature.last
-                                      ? Container()
-                                      : const Text(","),
-                                ],
-                              ),
-                            )),
-                      ],
-                    ),
-                  ),
-                  namedParameters.isNotEmpty
-                      ? const Text("});")
-                      : const Text(
-                          ");",
-                          style: TextStyle(fontSize: 12),
-                        ),
-                  ldSpacerM,
-                ],
-              ),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ldSpacerM,
+                CodeBlock(
+                  showCopyButton: false,
+                  wrapCard: false,
+                  code: constructorSignature,
+                  language: "dart",
+                ),
+                ldSpacerM,
+              ],
             );
           }),
           separatorBuilder: ((context, index) => const LdDivider()),
-          itemCount: component.constructors.length,
+          itemCount: widget.component.constructors.length,
           shrinkWrap: true,
         ),
         ldSpacerM,
-        const LdTextH(
+        const LdTextHs(
           "Properties",
         ),
         ldSpacerM,
@@ -151,41 +132,37 @@ class ComponentApi extends StatelessWidget {
                 color: LdTheme.of(context).text),
             child: ListView.separated(
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: component.properties.length,
+                itemCount: sortedProperties.length,
                 shrinkWrap: true,
                 separatorBuilder: (context, index) => const LdDivider(),
                 itemBuilder: (context, index) {
-                  var e = component.properties[index];
+                  var e = sortedProperties[index];
+
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (e.description.isNotEmpty) LdTextPs(e.description),
+                      if (e.description.isNotEmpty)
+                        LdMute(
+                          child: LdTextP(
+                            e.description.replaceAll("///", ""),
+                          ),
+                        ),
                       ldSpacerS,
                       Wrap(
                         spacing: 4,
                         runSpacing: 4,
                         children: [
-                          SizedBox(
-                            child: Text(
+                          CodeBlock(
+                            wrapCard: false,
+                            showCopyButton: false,
+                            code: [
+                              if (e.features.isNotEmpty)
+                                '${e.features.join(' ')} ',
+                              e.type,
+                              ' ',
                               e.name,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
-                            ),
+                            ].join(),
                           ),
-                          Text(
-                            e.type,
-                          ),
-                          ldSpacerM,
-                          ...e.features.map(
-                            (e) => Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 4),
-                              child: LdTag(
-                                size: LdSize.s,
-                                child: Text(e),
-                              ),
-                            ),
-                          )
                         ],
                       ),
                       ldSpacerS,
@@ -193,12 +170,12 @@ class ComponentApi extends StatelessWidget {
                   );
                 })),
         ldSpacerL,
-        const LdTextH(
+        const LdTextHs(
           "Methods",
         ),
         ldSpacerM,
         Text(
-          component.methods.join("\n"),
+          widget.component.methods.join("\n"),
           style: const TextStyle(fontFamily: "NotoSansMono", fontSize: 12),
         ),
       ],

@@ -210,6 +210,7 @@ class _LdAppBarState extends State<LdAppBar> {
           final scrolledUnder = value > 10;
 
           return AnimatedContainer(
+            width: double.infinity,
             duration: const Duration(milliseconds: 100),
             decoration: BoxDecoration(boxShadow: [
               if (!widget.blurOnScroll)
@@ -274,7 +275,7 @@ class _LdAppBarState extends State<LdAppBar> {
                                   leading,
                                   ldSpacerS,
                                 ],
-                                if (widget.title != null || widget.actions.isNotEmpty)
+                                /*if (widget.title != null || widget.actions.isNotEmpty)
                                   Expanded(
                                     child: OverflowView(
                                       spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
@@ -311,7 +312,7 @@ class _LdAppBarState extends State<LdAppBar> {
                                     ),
                                   )
                                 else
-                                  const Spacer(),
+                                  const Spacer(),*/
                                 if (_showCloseDrawerButton) const CloseDrawerButton(),
                                 if (_showWindowsWindowControls) const WindowsWindowControls(),
                                 if (widget.trailing != null) widget.trailing!,
@@ -343,15 +344,7 @@ class _LdAppBarState extends State<LdAppBar> {
       key: _key,
       children: [
         if (_isBottomNavigationBar) const LdDivider(),
-        GestureDetector(
-          onPanStart: (details) {
-            LdAppBar.callbacks?.onMove?.call();
-          },
-          onDoubleTap: () {
-            LdAppBar.callbacks?.onMaximize?.call();
-          },
-          child: appBar,
-        ),
+        appBar,
         if (!_isBottomNavigationBar) const LdDivider(height: 1),
       ],
     );

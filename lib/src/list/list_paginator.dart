@@ -15,16 +15,19 @@ typedef FetchListFunction<T> = Future<LdListPage<T>> Function({
   String? pageToken,
 });
 
-class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier {
+class LdPaginator<T extends Identifiable<IdType>, IdType>
+    extends ChangeNotifier {
   FetchListFunction<T>? fetchListFunction;
   final int pageSize;
   int initialOffset;
   final Duration debounceTime;
 
   // Stream of all items, emits when the items have been updated.
-  final _itemsStreamController = StreamController<List<LdPaginatorItem<T>>>.broadcast();
+  final _itemsStreamController =
+      StreamController<List<LdPaginatorItem<T>>>.broadcast();
   // Stream of a single item, emits when the item has been updated.
-  final _itemStreamController = StreamController<LdPaginatorItem<T>>.broadcast();
+  final _itemStreamController =
+      StreamController<LdPaginatorItem<T>>.broadcast();
 
   // The number of pages that are queued for fetching.
   int fetchQueueSize;
@@ -79,7 +82,8 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   }) {
     if (initialItems != null) {
       for (var i = 0; i < initialItems.length; i++) {
-        _items[i] = LdPaginatorItem<T>(value: initialItems[i], state: LdPaginatorItemState.loaded);
+        _items[i] = LdPaginatorItem<T>(
+            value: initialItems[i], state: LdPaginatorItemState.loaded);
       }
     }
 
@@ -125,7 +129,9 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
   int get currentItemCount => _items.values
       .where(
-        (item) => item.state != LdPaginatorItemState.fetching && item.state != LdPaginatorItemState.filteredOut,
+        (item) =>
+            item.state != LdPaginatorItemState.fetching &&
+            item.state != LdPaginatorItemState.filteredOut,
       )
       .length;
 
@@ -136,7 +142,8 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   List<T?> get items => List<T?>.generate(totalItems, (i) => _items[i]?.value);
 
   Map<int, LdPaginatorItem<T>> get itemsMap => Map.unmodifiable(_items);
-  Stream<List<LdPaginatorItem<T>>> get itemsStream => _itemsStreamController.stream;
+  Stream<List<LdPaginatorItem<T>>> get itemsStream =>
+      _itemsStreamController.stream;
 
   /// Stream of items that have been updated.
   Stream<LdPaginatorItem<T>> get updatedItems => _itemStreamController.stream;
@@ -144,6 +151,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   /// Confirm the creation of an item by index,
   /// index to be provided by [scheduleItemCreation]
   void confirmItemCreation(int index, {T? newValue}) {
+    print("confirmItemCreation: $index, $_items");
     assert(
       _items[index]?.state == LdPaginatorItemState.creating,
       'Can not confirm item creation: $index, as it is not being created',
@@ -186,7 +194,9 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   /// This will apply [newValue] to the item. Otherwise the optimistic
   /// value previously set will be applied.
   void confirmItemUpdate(IdType id, T? newValue) {
-    final index = _items.entries.firstWhereOrNull((e) => e.value.previousValue?.id == id)?.key;
+    final index = _items.entries
+        .firstWhereOrNull((e) => e.value.previousValue?.id == id)
+        ?.key;
 
     if (index == null) throw Exception('Item with id $id not found');
 
@@ -239,7 +249,9 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   // Get all non-null items in order
   List<T> getAllLoadedItems() {
     return _items.entries
-        .where((e) => e.value.state == LdPaginatorItemState.loaded && e.value.value != null)
+        .where((e) =>
+            e.value.state == LdPaginatorItemState.loaded &&
+            e.value.value != null)
         .map((e) => e.value.value as T)
         .toList();
   }
@@ -250,7 +262,9 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   }
 
   LdPaginatorItem<T>? getItemById(IdType id) {
-    return _items.entries.firstWhereOrNull((e) => e.value.value?.id == id)?.value;
+    return _items.entries
+        .firstWhereOrNull((e) => e.value.value?.id == id)
+        ?.value;
   }
 
   int? getItemIndexById(IdType id) {
@@ -266,7 +280,8 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   Future<void> refreshList() async {
     for (final item in _items.entries) {
       if (item.value.value != null) {
-        _items[item.key] = item.value.copyWith(state: LdPaginatorItemState.pendingRefresh);
+        _items[item.key] =
+            item.value.copyWith(state: LdPaginatorItemState.pendingRefresh);
       }
     }
     _updated(null);
@@ -296,12 +311,11 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     });
   }
 
-  void rollbackItemCreation(IdType id) {
-    final index = getItemIndexById(id);
+  void rollbackItemCreation(int index) {
     final item = _items[index];
     assert(
       item?.state == LdPaginatorItemState.creating,
-      'Can not rollback item creation: $id, as it is not being created',
+      'Can not rollback item creation: $index, as it is not being created',
     );
     _items[index!] = LdPaginatorItem<T>(
       value: item!.value,
@@ -317,8 +331,8 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     if (index == null) throw Exception('Item with id $id not found');
     final item = _items[index]!;
 
-    assert(
-        item.state == LdPaginatorItemState.deleting, 'Can not rollback item deletion: $id, as it is not being deleted');
+    assert(item.state == LdPaginatorItemState.deleting,
+        'Can not rollback item deletion: $id, as it is not being deleted');
 
     _items[index] = LdPaginatorItem<T>(
       value: item.value,
@@ -330,13 +344,16 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   /// Rolls back the update of an item.x
   /// This will restore the item to its previous state.
   void rollbackItemUpdate(IdType id, {T? newValue}) {
-    final index = _items.entries.firstWhereOrNull((e) => e.value.previousValue?.id == id)?.key;
+    final index = _items.entries
+        .firstWhereOrNull((e) => e.value.previousValue?.id == id)
+        ?.key;
 
-    if (index == null) throw Exception('Unable to roll back. Item with id $id not found');
+    if (index == null)
+      throw Exception('Unable to roll back. Item with id $id not found');
     final item = _items[index]!;
 
-    assert(
-        item.state == LdPaginatorItemState.updating, 'Can not rollback item update: $id, as it is not being updated');
+    assert(item.state == LdPaginatorItemState.updating,
+        'Can not rollback item update: $id, as it is not being updated');
 
     _items[index] = LdPaginatorItem<T>(
       value: newValue ?? item.previousValue,
@@ -380,6 +397,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   /// to make an api call, or show an exit animation
   void scheduleItemDeletion(IdType id) {
     final index = getItemIndexById(id);
+    print(index);
     if (index == null) throw Exception('Item with id $id not found');
     final item = _items[index]!;
     _items[index] = LdPaginatorItem<T>(
@@ -398,7 +416,8 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   ) {
     final index = getItemIndexById(id);
 
-    if (index == null) throw Exception('Item with id $id not found during scheduleItemUpdate');
+    if (index == null)
+      throw Exception('Item with id $id not found during scheduleItemUpdate');
     final item = _items[index];
 
     _items[index] = LdPaginatorItem<T>(
@@ -460,7 +479,8 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
     final List<T> loadedItems = [];
 
-    assert(fetchListFunction != null, 'fetchListFunction is not set. Can not fetch items');
+    assert(fetchListFunction != null,
+        'fetchListFunction is not set. Can not fetch items');
 
     try {
       final page = await fetchListFunction!(
@@ -500,7 +520,8 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
           final idx = offset + i;
 
-          _items[idx] = LdPaginatorItem<T>(value: item, state: LdPaginatorItemState.loaded);
+          _items[idx] = LdPaginatorItem<T>(
+              value: item, state: LdPaginatorItemState.loaded);
           loadedItems.add(item);
         }
 

@@ -16,6 +16,7 @@ import 'package:liquid/components/layout/list.dart';
 import 'package:liquid/components/feedback/loader.dart';
 import 'package:liquid/components/layout/list_item.dart';
 import 'package:liquid/patterns/monkey.dart';
+import 'package:liquid/patterns/monkey_repository.dart';
 import 'package:liquid/components/layout/selectable_list.dart';
 import 'package:liquid/components/material.dart';
 import 'package:liquid/components/interaction/modal.dart';
@@ -115,6 +116,13 @@ class AppRouter {
           pageBuilder: (context, state) => NoTransitionPage<void>(
             key: state.pageKey,
             child: MonkeyDemo(),
+          ),
+        ),
+        GoRoute(
+          path: "/patterns/monkey/repository",
+          pageBuilder: (context, state) => NoTransitionPage<void>(
+            key: state.pageKey,
+            child: const MonkeyRepositoryDemo(),
           ),
         ),
         GoRoute(
