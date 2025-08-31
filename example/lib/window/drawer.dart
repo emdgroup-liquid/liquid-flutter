@@ -345,6 +345,7 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
               ),
               const LdSectionHeader("Patterns"),
               LdDrawerItemSection(
+                onTap: () => _showPage(context, "/patterns/monkey"),
                 active: GoRouterState.of(context)
                     .uri
                     .path

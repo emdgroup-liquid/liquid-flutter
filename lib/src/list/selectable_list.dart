@@ -324,7 +324,7 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType, GroupingCri
     }
   }
 
-  LdList<T, IdType, GroupingCriterion> _defaultListBuilder(
+  LdList<T, IdType> _defaultListBuilder(
       BuildContext context, ScrollController scrollController, LdListItemBuilder<T> itemBuilder) {
     return LdList(
       paginator: widget.paginator,

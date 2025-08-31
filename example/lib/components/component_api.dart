@@ -7,8 +7,10 @@ import '../code_block.dart';
 
 class ComponentApi extends StatefulWidget {
   final DocComponent component;
+  final bool showPrivate;
   const ComponentApi({
     required this.component,
+    this.showPrivate = false,
     super.key,
   });
 
@@ -17,7 +19,7 @@ class ComponentApi extends StatefulWidget {
 }
 
 class _ComponentApiState extends State<ComponentApi> {
-  bool _showPrivate = false;
+  late final bool _showPrivate = widget.showPrivate;
 
   String _generateConstructorSignature(DocConstructor constructor) {
     var namedParameters = constructor.signature

@@ -84,6 +84,7 @@ class _TaskDetailState extends State<TaskDetail> {
               LdSubmit<void, void>(
                 config: LdSubmitConfig<void, void>(
                   submitText: "Save",
+                  debugLabel: "Save Task",
                   action: (_) async {
                     final newTask = Task(
                       widget.task.value!.id,

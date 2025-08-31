@@ -40,7 +40,7 @@ class LdRadio extends StatelessWidget {
 
     final size = this.size.clamp(LdSize.s, LdSize.l);
 
-    final radioSize = theme.paddingSize(size: size) * 2;
+    final radioSize = theme.paddingSize(size: size) * 1.5;
 
     final label = LdFormLabel(
       label: this.label,

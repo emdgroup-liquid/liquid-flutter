@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:liquid_flutter/liquid_flutter.dart' hide LdLabeledAction, LdLabeledActionSubmitType, LdAppBarAction;
+import 'package:liquid_flutter/liquid_flutter.dart'
+    hide LdLabeledAction, LdLabeledActionSubmitType, LdAppBarActionWidget;
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/single_child_widget.dart';
 import 'app_bar_action.dart';
@@ -38,7 +39,7 @@ class LdAppbarActionOverflowMenu extends StatelessWidget {
           padding: EdgeInsets.zero,
           children: [
             ...actions.map(
-              (e) => LdAppBarAction(
+              (e) => LdAppBarActionWidget(
                 key: ValueKey(e.label(context)),
                 action: e,
                 menuProviders: menuProviders,

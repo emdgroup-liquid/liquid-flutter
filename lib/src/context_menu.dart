@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/conditional_parent.dart';
 import 'package:liquid_flutter/src/haptics.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
@@ -100,8 +99,6 @@ class _LdContextMenuState extends State<LdContextMenu> {
   final GlobalKey _triggerKey = GlobalKey(debugLabel: "Trigger Key");
 
   RenderBox? _triggerBox;
-
-  final GlobalKey _menuKey = GlobalKey(debugLabel: "Menu Key");
 
   Offset? _cursorPosition;
 

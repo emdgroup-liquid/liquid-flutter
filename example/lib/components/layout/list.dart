@@ -67,7 +67,7 @@ class _ListDemoState extends State<ListDemo> {
               onSurface: _onSurface,
               child: SizedBox(
                 height: 300,
-                child: LdList<_DemoItem, int, String>(
+                child: LdList<_DemoItem, int>(
                   header: const LdListItem(
                     leading: LdAvatar(
                       child: Text("H"),

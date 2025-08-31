@@ -38,9 +38,7 @@ class LdRetryState {
   }) {
     return LdRetryState(
       attempt: attempt ?? this.attempt,
-      remainingRetryTime: remainingRetryTime == Duration.zero
-          ? null
-          : remainingRetryTime ?? this.remainingRetryTime,
+      remainingRetryTime: remainingRetryTime == Duration.zero ? null : remainingRetryTime ?? this.remainingRetryTime,
       isRetrying: isRetrying ?? this.isRetrying,
       canRetry: canRetry ?? this.canRetry,
       totalRetryDelay: totalRetryDelay ?? this.totalRetryDelay,
@@ -80,8 +78,7 @@ class LdRetryController {
   void _setState(LdRetryState newState) {
     _state = newState;
 
-    if (newState.remainingRetryTime != null &&
-        (_retryTimer == null || !_retryTimer!.isActive)) {
+    if (newState.remainingRetryTime != null && (_retryTimer == null || !_retryTimer!.isActive)) {
       _setupRetryTimer();
     } else if (newState.remainingRetryTime == null) {
       _retryTimer?.cancel();
@@ -111,13 +108,11 @@ class LdRetryController {
   /// Handles the timer tick for updating remaining time
   void _retryTimerTick() {
     if (_state.remainingRetryTime != null) {
-      final remaining =
-          _state.remainingRetryTime! - const Duration(milliseconds: 100);
+      final remaining = _state.remainingRetryTime! - const Duration(milliseconds: 100);
 
       _setState(
         _state.copyWith(
-          remainingRetryTime:
-              remaining > Duration.zero ? remaining : Duration.zero,
+          remainingRetryTime: remaining > Duration.zero ? remaining : Duration.zero,
         ),
       );
 
@@ -148,8 +143,7 @@ class LdRetryController {
     final exhaustedRetries = attempt >= config.maxAttempts;
 
     if (config.enableAutomaticRetries && canRetry && !exhaustedRetries) {
-      final retryDelay =
-          _getRetryDelay(_state.attempt); // use old attempt count for delay
+      final retryDelay = _getRetryDelay(_state.attempt); // use old attempt count for delay
 
       _setState(
         LdRetryState(
@@ -204,5 +198,14 @@ class LdRetryController {
   void dispose() {
     _retryTimer?.cancel();
     _stateController.close();
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      "attempt": _state.attempt,
+      "remainingRetryTime": _state.remainingRetryTime,
+      "isRetrying": _state.isRetrying,
+      "canRetry": _state.canRetry,
+    };
   }
 }

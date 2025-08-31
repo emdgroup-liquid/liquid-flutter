@@ -1,10 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/conditional_parent.dart';
 import 'package:liquid_flutter/src/modal/size_notifier.dart';
 import 'package:provider/provider.dart';
 
@@ -67,11 +68,13 @@ class LdScaffold extends StatefulWidget {
   final Widget body;
   final Widget? appBar;
   final Widget? bottomNavigationBar;
-  final bool extendBodyBehindAppBar;
+
   final Color? backgroundColor;
   final Widget? drawer;
+  final bool? resizeToAvoidBottomInset;
+  final bool extendBodyBehindAppBar;
   final double drawerWidth;
-  final bool? autoLayoutBody;
+
   final double? reflowBreakpoint;
   final SingleActivator? toggleDrawerShortcut;
 
@@ -83,10 +86,10 @@ class LdScaffold extends StatefulWidget {
     this.bottomNavigationBar,
     this.extendBodyBehindAppBar = false,
     this.backgroundColor,
-    this.autoLayoutBody = true,
     this.drawer,
     this.drawerWidth = 304,
     this.reflowBreakpoint = 900,
+    this.resizeToAvoidBottomInset,
   });
 
   @override
@@ -220,221 +223,250 @@ class LdScaffoldState extends State<LdScaffold> {
         },
       },
       child: LdSpring(
-          mass: 1,
-          springConstant: 12,
-          dampingCoefficient: 5,
-          initialPosition: _drawerOffset,
-          position: _drawerOffset,
-          child: widget.body,
-          builder: (context, state, body) {
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                _isSideBySide = constraints.maxWidth >= widget.reflowBreakpoint! && widget.drawer != null;
+        mass: 1,
+        springConstant: 12,
+        dampingCoefficient: 5,
+        initialPosition: _drawerOffset,
+        position: _drawerOffset,
+        child: widget.body,
+        builder: (context, state, body) {
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              _isSideBySide = constraints.maxWidth >= widget.reflowBreakpoint! && widget.drawer != null;
 
-                final mediaQuery = MediaQuery.of(context);
+              final mediaQuery = MediaQuery.of(context);
 
-                Border? drawerBorder;
+              Border? drawerBorder;
 
-                BorderRadius drawerRadius = BorderRadius.circular(0);
+              BorderRadius drawerRadius = BorderRadius.circular(0);
 
-                Color backgroundColor;
+              Color backgroundColor;
 
-                final level = (context.read<LdScaffoldLayoutState?>()?.level ?? 0) + 1;
+              final level = (context.read<LdScaffoldLayoutState?>()?.level ?? 0) + 1;
 
-                _effectiveDrawerWidth = widget.drawerWidth + MediaQuery.of(context).padding.left;
-                double drawerLeft, drawerWidth, bodyLeft;
+              _effectiveDrawerWidth = widget.drawerWidth + MediaQuery.of(context).padding.left;
+              double drawerLeft, drawerWidth, bodyLeft;
 
-                if (_isSideBySide) {
-                  drawerLeft = state.position - _effectiveDrawerWidth;
-                  drawerWidth = _effectiveDrawerWidth;
-                  bodyLeft = state.position;
-                  backgroundColor = theme.surface;
-                } else {
-                  drawerLeft = state.position - _effectiveDrawerWidth;
-                  drawerWidth = widget.drawerWidth;
-                  bodyLeft = 0;
-                  backgroundColor = theme.background;
-                }
-
-                if (widget.backgroundColor != null) {
-                  backgroundColor = widget.backgroundColor!;
-                }
-
-                final layoutState = LdScaffoldLayoutState(
-                  level: level,
-                  hasDrawer: hasDrawer,
-                  isDrawerOpen: _isDrawerOpen,
-                  isSideBySide: _isSideBySide,
-                  slot: LdScaffoldSlot.body,
-                  bodyScrollOffset: _bodyScrollOffset,
-                  drawerScrollOffset: _drawerScrollOffset,
+              if (_isSideBySide) {
+                drawerLeft = state.position - _effectiveDrawerWidth;
+                drawerWidth = _effectiveDrawerWidth;
+                bodyLeft = state.position;
+                backgroundColor = theme.surface;
+              } else {
+                drawerLeft = state.position - _effectiveDrawerWidth;
+                drawerWidth = widget.drawerWidth;
+                bodyLeft = 0;
+                backgroundColor = theme.background;
+                drawerBorder = Border(
+                  right: BorderSide(
+                    color: theme.border,
+                    width: 1,
+                  ),
                 );
+              }
 
-                return Material(
-                  type: MaterialType.transparency,
-                  child: ColoredBox(
-                    color: backgroundColor,
-                    child: ValueListenableBuilder(
-                        valueListenable: _bottomNavigationBarSizeNotifier,
-                        builder: (context, bottomNavigationBarSize, child) {
-                          return ValueListenableBuilder(
-                              valueListenable: _appBarSizeNotifier,
-                              builder: (context, appBarSize, child) {
-                                return LdWrapConditional(
-                                  condition: widget.drawer != null,
-                                  builder: (context, child) => GestureDetector(
-                                    onHorizontalDragStart: (details) {
-                                      if (widget.drawer == null) return;
-                                    },
-                                    onHorizontalDragUpdate: (details) {
-                                      if (!_isDragging && (details.localPosition.dx - _drawerOffset).abs() <= 75) {
-                                        _isDragging = true;
-                                      }
-                                      if (widget.drawer == null) return;
-                                      if (_isDragging) {
-                                        setState(() {
-                                          _drawerOffset = details.localPosition.dx;
-                                          _drawerOffset = _drawerOffset.clamp(0, _effectiveDrawerWidth);
-                                        });
-                                      }
-                                    },
-                                    onHorizontalDragEnd: (details) {
-                                      if (widget.drawer == null) return;
-                                      _onDragEnd();
-                                    },
-                                    child: child,
-                                  ),
-                                  child: Stack(
-                                    children: [
-                                      Positioned(
-                                        top: 0,
-                                        left: bodyLeft,
-                                        right: 0,
-                                        bottom: 0,
-                                        child: Container(
-                                          clipBehavior: Clip.hardEdge,
-                                          decoration: BoxDecoration(
-                                            color: LdTheme.of(context).background,
-                                            border: Border.all(
-                                              color: LdTheme.of(context).border,
-                                              strokeAlign: BorderSide.strokeAlignOutside,
-                                              width: 1,
+              if (widget.backgroundColor != null) {
+                backgroundColor = widget.backgroundColor!;
+              }
+
+              final layoutState = LdScaffoldLayoutState(
+                level: level,
+                hasDrawer: hasDrawer,
+                isDrawerOpen: _isDrawerOpen,
+                isSideBySide: _isSideBySide,
+                slot: LdScaffoldSlot.body,
+                bodyScrollOffset: _bodyScrollOffset,
+                drawerScrollOffset: _drawerScrollOffset,
+              );
+
+              var scaffoldDecoration = BoxDecoration(
+                color: backgroundColor,
+              );
+
+              if (!kIsWeb && Platform.isMacOS && layoutState.level == 1) {
+                scaffoldDecoration = BoxDecoration(
+                  color: backgroundColor,
+                  border: Border.all(
+                    color: LdTheme.of(context).border,
+                    width: 1,
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                );
+              }
+
+              final resizeToAvoidBottomInset = widget.resizeToAvoidBottomInset ?? level == 1;
+
+              return Material(
+                type: MaterialType.transparency,
+                child: Container(
+                  clipBehavior: Clip.hardEdge,
+                  decoration: scaffoldDecoration,
+                  child: ValueListenableBuilder(
+                    valueListenable: _bottomNavigationBarSizeNotifier,
+                    builder: (context, bottomNavigationBarSize, child) {
+                      return ValueListenableBuilder(
+                        valueListenable: _appBarSizeNotifier,
+                        builder: (context, appBarSize, child) {
+                          return LdWrapConditional(
+                            condition: widget.drawer != null,
+                            builder: (context, child) => GestureDetector(
+                              onHorizontalDragStart: (details) {
+                                if (widget.drawer == null) return;
+                              },
+                              onHorizontalDragUpdate: (details) {
+                                if (!_isDragging && (details.localPosition.dx - _drawerOffset).abs() <= 75) {
+                                  _isDragging = true;
+                                }
+                                if (widget.drawer == null) return;
+                                if (_isDragging) {
+                                  setState(() {
+                                    _drawerOffset = details.localPosition.dx;
+                                    _drawerOffset = _drawerOffset.clamp(0, _effectiveDrawerWidth);
+                                  });
+                                }
+                              },
+                              onHorizontalDragEnd: (details) {
+                                if (widget.drawer == null) return;
+                                _onDragEnd();
+                              },
+                              child: child,
+                            ),
+                            child: Stack(
+                              children: [
+                                Positioned(
+                                  top: 0,
+                                  left: bodyLeft,
+                                  right: 0,
+                                  bottom: 0,
+                                  child: Container(
+                                    clipBehavior: Clip.hardEdge,
+                                    decoration: BoxDecoration(
+                                      color: LdTheme.of(context).background,
+                                      border: Border.all(
+                                        color: LdTheme.of(context).border,
+                                        strokeAlign: BorderSide.strokeAlignOutside,
+                                        width: 1,
+                                      ),
+                                      boxShadow: [ldShadowSticky],
+                                    ),
+                                    child: Stack(
+                                      children: [
+                                        // Body
+                                        Positioned(
+                                          top: widget.extendBodyBehindAppBar ? 0 : appBarSize.height,
+                                          left: 0,
+                                          right: 0,
+                                          bottom: resizeToAvoidBottomInset ? mediaQuery.viewInsets.bottom : 0,
+                                          child: MediaQuery(
+                                            data: MediaQuery.of(context).copyWith(
+                                              viewPadding: mediaQuery.viewPadding.copyWith(top: 0),
+                                              viewInsets: mediaQuery.viewInsets.copyWith(top: 0),
+                                              padding: mediaQuery.padding.copyWith(
+                                                top: widget.extendBodyBehindAppBar
+                                                    ? mediaQuery.padding.top
+                                                    : max(mediaQuery.padding.top - appBarSize.height, 0),
+                                                bottom: max(bottomNavigationBarSize.height, mediaQuery.padding.bottom),
+                                              ),
                                             ),
-                                            boxShadow: [ldShadowSticky],
-                                          ),
-                                          child: Stack(
-                                            children: [
-                                              // Body
-                                              Align(
-                                                alignment: Alignment.topLeft,
-                                                child: MediaQuery(
-                                                  data: MediaQuery.of(context).copyWith(
-                                                    viewPadding: mediaQuery.viewPadding.copyWith(top: 0),
-                                                    viewInsets: mediaQuery.viewPadding.copyWith(top: 0),
-                                                    padding: mediaQuery.padding.copyWith(
-                                                      top: appBarSize.height,
-                                                      bottom: max(
-                                                          bottomNavigationBarSize.height, mediaQuery.padding.bottom),
-                                                    ),
-                                                  ),
-                                                  child: ScrollNotificationObserver(
-                                                    child: ScrollObserver(
-                                                      position: _bodyScrollOffset,
-                                                      child: Provider.value(
-                                                        value: layoutState.copyWith(slot: LdScaffoldSlot.body),
-                                                        child: body!,
-                                                      ),
-                                                    ),
-                                                  ),
+                                            child: ScrollNotificationObserver(
+                                              child: ScrollObserver(
+                                                position: _bodyScrollOffset,
+                                                child: Provider.value(
+                                                  value: layoutState.copyWith(slot: LdScaffoldSlot.body),
+                                                  child: body!,
                                                 ),
                                               ),
-                                              // AppBar
-                                              if (widget.appBar != null)
-                                                Align(
-                                                  alignment: Alignment.topLeft,
-                                                  child: MeasureSize(
-                                                    sizeNotifier: _appBarSizeNotifier,
-                                                    child: Provider.value(
-                                                      value: layoutState.copyWith(slot: LdScaffoldSlot.appBar),
-                                                      child: widget.appBar!,
-                                                    ),
-                                                  ),
+                                            ),
+                                          ),
+                                        ),
+                                        // AppBar
+                                        if (widget.appBar != null)
+                                          Align(
+                                            alignment: Alignment.topLeft,
+                                            child: MeasureSize(
+                                              sizeNotifier: _appBarSizeNotifier,
+                                              child: Provider.value(
+                                                value: layoutState.copyWith(slot: LdScaffoldSlot.appBar),
+                                                child: widget.appBar!,
+                                              ),
+                                            ),
+                                          ),
+                                        // Bottom Navigation Bar
+                                        if (widget.bottomNavigationBar != null)
+                                          Align(
+                                            alignment: Alignment.bottomLeft,
+                                            child: MeasureSize(
+                                              sizeNotifier: _bottomNavigationBarSizeNotifier,
+                                              child: Provider.value(
+                                                value: layoutState.copyWith(
+                                                  slot: LdScaffoldSlot.bottomNavigationBar,
                                                 ),
-                                              // Bottom Navigation Bar
-                                              if (widget.bottomNavigationBar != null)
-                                                Align(
-                                                  alignment: Alignment.bottomLeft,
-                                                  child: MeasureSize(
-                                                    sizeNotifier: _bottomNavigationBarSizeNotifier,
-                                                    child: Provider.value(
-                                                      value: layoutState.copyWith(
-                                                        slot: LdScaffoldSlot.bottomNavigationBar,
-                                                      ),
-                                                      child: widget.bottomNavigationBar!,
-                                                    ),
-                                                  ),
+                                                child: widget.bottomNavigationBar!,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                // Drawer backdrop
+                                if (_isDrawerOpen && !_isSideBySide)
+                                  ModalBarrier(
+                                    color: Colors.black.withValues(alpha: 0.5),
+                                    onDismiss: () {
+                                      closeDrawer();
+                                    },
+                                  ),
+                                // Drawer
+                                if (widget.drawer != null)
+                                  Positioned(
+                                    top: 0,
+                                    left: drawerLeft,
+                                    width: drawerWidth,
+                                    bottom: 0,
+                                    child: Container(
+                                      clipBehavior: Clip.hardEdge,
+                                      decoration: BoxDecoration(
+                                        borderRadius: drawerRadius,
+                                        color: _isSideBySide ? null : LdTheme.of(context).surface,
+                                        border: drawerBorder,
+                                        boxShadow: _isSideBySide ? null : [ldShadowSticky],
+                                      ),
+                                      child: Provider.value(
+                                        value: layoutState.copyWith(
+                                          slot: LdScaffoldSlot.drawer,
+                                          isDrawerOpen: _isDrawerOpen,
+                                        ),
+                                        child: SafeArea(
+                                          child: RepaintBoundary(
+                                            child: FocusScope(
+                                              node: _focusScopeNode,
+                                              child: ScrollNotificationObserver(
+                                                child: ScrollObserver(
+                                                  position: _drawerScrollOffset,
+                                                  child: widget.drawer!,
                                                 ),
-                                            ],
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       ),
-
-                                      // Drawer backdrop
-                                      if (_isDrawerOpen && !_isSideBySide)
-                                        ModalBarrier(
-                                          color: Colors.black.withValues(alpha: 0.5),
-                                          onDismiss: () {
-                                            closeDrawer();
-                                          },
-                                        ),
-                                      // Drawer
-                                      if (widget.drawer != null)
-                                        Positioned(
-                                          top: 0,
-                                          left: drawerLeft,
-                                          width: drawerWidth,
-                                          bottom: 0,
-                                          child: Container(
-                                            clipBehavior: Clip.hardEdge,
-                                            decoration: BoxDecoration(
-                                              borderRadius: drawerRadius,
-                                              color: _isSideBySide ? null : LdTheme.of(context).surface,
-                                              border: drawerBorder,
-                                              boxShadow: _isSideBySide ? null : [ldShadowSticky],
-                                            ),
-                                            child: Provider.value(
-                                              value: layoutState.copyWith(
-                                                slot: LdScaffoldSlot.drawer,
-                                                isDrawerOpen: _isDrawerOpen,
-                                              ),
-                                              child: SafeArea(
-                                                top: false,
-                                                bottom: false,
-                                                child: RepaintBoundary(
-                                                  child: FocusScope(
-                                                    node: _focusScopeNode,
-                                                    child: ScrollNotificationObserver(
-                                                      child: ScrollObserver(
-                                                        position: _drawerScrollOffset,
-                                                        child: widget.drawer!,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                    ].reverseIf(_isSideBySide),
+                                    ),
                                   ),
-                                );
-                              });
-                        }),
+                              ].reverseIf(_isSideBySide),
+                            ),
+                          );
+                        },
+                      );
+                    },
                   ),
-                );
-              },
-            );
-          }),
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

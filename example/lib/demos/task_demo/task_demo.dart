@@ -67,6 +67,49 @@ final taskDemo = LdMonkey<Task, int, bool>(
     LdMonkeyAction(
       visibility: {
         LdMonkeyActionVisibility(
+          location: LdMonkeyActionLocation.masterAppBar,
+        ),
+      },
+      shortcutActivators: {
+        SingleActivator(LogicalKeyboardKey.keyN, meta: true),
+      },
+      buildLoadingText: (context, selection) => "Creating new task",
+      submitType: LdLabeledActionSubmitType.none,
+      buildLabel: (context, selection) => "New Task",
+      buildIcon: (context, selection) => const Icon(LucideIcons.plus),
+      action: (context, selection) async {
+        final route = LdMonkey.of<Task, int, bool>(context);
+
+        final newTaskNotification = LdNotificationsController.of(context)
+            .enterText(
+                message: "New tasks",
+                inputHint: "New Task",
+                inputLabel: "Task");
+
+        final newTaskText = await newTaskNotification.inputCompleter.future;
+
+        if (newTaskText == null) {
+          return;
+        }
+
+        final newTask = Task(
+          testData.length + 1,
+          newTaskText,
+          DateTime.now().add(const Duration(days: 1)),
+          false,
+          DateTime.now(),
+        );
+
+        await taskRepository.create(newTask);
+
+        await Future.delayed(const Duration(milliseconds: 1500));
+
+        route.setSelectedItems({newTask.id});
+      },
+    ),
+    LdMonkeyAction(
+      visibility: {
+        LdMonkeyActionVisibility(
             location: LdMonkeyActionLocation.detailAppBar,
             minSelectionCount: 1,
             maxSelectionCount: null,

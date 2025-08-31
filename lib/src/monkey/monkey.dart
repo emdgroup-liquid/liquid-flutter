@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/conditional_parent.dart';
 
 import 'package:provider/provider.dart';
 
@@ -113,6 +112,7 @@ class LdMonkey<T extends Identifiable<IdType>, IdType, GroupingCriterion> {
                     path: "/:selected",
                     pageBuilder: (context, state) {
                       final effectivePresentationMode = LdMonkeyContext.of<T, IdType, GroupingCriterion>(context);
+
                       final page = Provider.value(
                         value: effectivePresentationMode,
                         child: Provider.value(
@@ -121,13 +121,14 @@ class LdMonkey<T extends Identifiable<IdType>, IdType, GroupingCriterion> {
                         ),
                       );
 
-                      if (effectivePresentationMode.isSideBySide) {
+                      if (!effectivePresentationMode.isSideBySide) {
                         if (effectivePresentationMode.detailInDialog) {
                           return LdModalPage(
                             key: state.pageKey,
                             builder: ldMonkeyDetailModal(this),
                           );
                         }
+
                         return MaterialPage(
                           child: page,
                           key: state.pageKey,
@@ -166,14 +167,14 @@ class LdMonkey<T extends Identifiable<IdType>, IdType, GroupingCriterion> {
     }
 
     if (queryParameters.isNotEmpty) {
-      repository.filters.forEach((filter) async {
+      for (final filter in repository.filters) {
         final value = queryParameters[filter.name];
 
         if (value != null) {
           filter.marshalSerialized(value);
           repository.updateFilter(filter);
         }
-      });
+      }
     }
 
     repository.updatedItems.listen((item) async {

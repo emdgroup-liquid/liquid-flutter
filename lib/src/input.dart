@@ -269,6 +269,7 @@ class _LdInputState extends State<LdInput> {
                                   obscureText: widget.obscureText,
                                   autofocus: widget.autofocus,
                                   textInputAction: widget.textInputAction,
+                                  scrollPadding: theme.pad(),
                                   onSubmitted: widget.onSubmitted,
                                   cursorWidth: 1,
                                   style: TextStyle(

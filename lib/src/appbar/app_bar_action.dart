@@ -4,13 +4,13 @@ import 'package:provider/single_child_widget.dart';
 import 'action_trigger_button.dart';
 import 'labeled_action.dart';
 
-class LdAppBarAction extends StatelessWidget {
+class LdAppBarActionWidget extends StatelessWidget {
   final LdLabeledAction action;
   final bool bigToolbar;
   final List<SingleChildWidget> Function(BuildContext context)? menuProviders;
   final bool inMenu;
 
-  const LdAppBarAction({
+  const LdAppBarActionWidget({
     super.key,
     required this.action,
     required this.bigToolbar,
@@ -56,6 +56,7 @@ class LdAppBarAction extends StatelessWidget {
           key: ValueKey(action.label(context)),
           config: LdSubmitConfig(
             loadingText: action.loadingText(context),
+            debugLabel: "AppBar: ${action.label(context)}",
             action: (context) async => action.onPressed(context!),
           ),
           builder: builder(

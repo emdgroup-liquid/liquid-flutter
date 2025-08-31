@@ -45,7 +45,7 @@ class _HomeState extends State<Home> {
                                 transform: Matrix4.identity()
                                   ..rotateX(-0.8)
                                   ..rotateZ(-0.4)
-                                  ..translate(-80.0, 200.0, 1.0),
+                                  ..translateByDouble(-80.0, 200.0, 1.0, 1.0),
                                 child: Transform.scale(
                                   alignment: Alignment.topLeft,
                                   scale: 0.8,

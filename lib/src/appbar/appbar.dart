@@ -2,9 +2,14 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart'
-    hide LdLabeledAction, LdLabeledActionSubmitType, LdAppBarAction, LdWindowCallbacks, LdAppbarActionOverflowMenu;
-import 'package:liquid_flutter/src/conditional_parent.dart';
+    hide
+        LdLabeledAction,
+        LdLabeledActionSubmitType,
+        LdAppBarActionWidget,
+        LdWindowCallbacks,
+        LdAppbarActionOverflowMenu;
 import 'package:liquid_flutter/src/notifications/implicit_blur.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:overflow_view/overflow_view.dart';
@@ -204,149 +209,163 @@ class _LdAppBarState extends State<LdAppBar> {
         ),
     };
 
-    final appBar = ValueListenableBuilder(
-        valueListenable: scrollListenable ?? ValueNotifier<double>(0),
-        builder: (context, value, child) {
-          final scrolledUnder = value > 10;
+    final appBar = AnnotatedRegion<SystemUiOverlayStyle>(
+      value: LdTheme.of(context).isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+      child: ValueListenableBuilder(
+          valueListenable: scrollListenable ?? ValueNotifier<double>(0),
+          builder: (context, value, child) {
+            final scrolledUnder = value > 10;
 
-          return AnimatedContainer(
-            width: double.infinity,
-            duration: const Duration(milliseconds: 100),
-            decoration: BoxDecoration(boxShadow: [
-              if (!widget.blurOnScroll)
-                BoxShadow(
-                  color: theme.palette.neutral.shades.last.withAlpha(scrolledUnder || _isBottomNavigationBar ? 10 : 0),
-                  blurRadius: 10,
-                  spreadRadius: 10,
+            return AnimatedContainer(
+              width: double.infinity,
+              duration: const Duration(milliseconds: 100),
+              decoration: BoxDecoration(boxShadow: [
+                if (!widget.blurOnScroll)
+                  BoxShadow(
+                    color:
+                        theme.palette.neutral.shades.last.withAlpha(scrolledUnder || _isBottomNavigationBar ? 10 : 0),
+                    blurRadius: 10,
+                    spreadRadius: 10,
+                  ),
+              ]),
+              child: LdWrapConditional(
+                condition: widget.blurOnScroll,
+                builder: (context, child) => ClipRect(
+                  child: ImplicitBlur(
+                    sigma: scrolledUnder ? 10 : 0,
+                    child: child,
+                    duration: const Duration(milliseconds: 300),
+                  ),
                 ),
-            ]),
-            child: LdWrapConditional(
-              condition: widget.blurOnScroll,
-              builder: (context, child) => ClipRect(
-                child: ImplicitBlur(
-                  sigma: scrolledUnder ? 10 : 0,
-                  child: child,
-                  duration: const Duration(milliseconds: 300),
-                ),
-              ),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 500),
-                color: backgroundColor.withAlpha(widget.blurOnScroll && scrolledUnder ? 150 : 255),
-                child: LdWrapConditional(
-                  condition: widget.disableSafeArea,
-                  builder: (context, child) => child.padS(),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 500),
+                  color: backgroundColor.withAlpha(widget.blurOnScroll && scrolledUnder ? 150 : 255),
                   child: LdWrapConditional(
-                    condition: !widget.disableSafeArea,
-                    builder: (context, child) => Padding(
-                      padding: EdgeInsetsGeometry.only(
-                        left: max(MediaQuery.paddingOf(context).left, LdTheme.of(context).pad(size: LdSize.s).left),
-                        right: max(MediaQuery.paddingOf(context).right, LdTheme.of(context).pad(size: LdSize.s).right),
-                        top: LdTheme.of(context).pad(size: LdSize.s).top +
-                            (_isAppBar ? MediaQuery.paddingOf(context).top : 0),
-                        bottom: max(LdTheme.of(context).pad(size: LdSize.s).bottom,
-                            (_isBottomNavigationBar ? MediaQuery.paddingOf(context).bottom : 0)),
-                      ),
-                      child: child,
-                    ),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight: switch (theme.themeSize) {
-                          (LdThemeSize.s) => 34,
-                          (LdThemeSize.m || LdThemeSize.l) => 34,
-                        },
-                      ),
-                      child: LdWrapConditional(
-                        condition: widget.addContainer,
-                        builder: (context, child) => LdContainer(
-                          padding: EdgeInsets.zero,
-                          child: child,
+                    condition: widget.disableSafeArea,
+                    builder: (context, child) => child.padS(),
+                    child: LdWrapConditional(
+                      condition: !widget.disableSafeArea,
+                      builder: (context, child) => Padding(
+                        padding: EdgeInsetsGeometry.only(
+                          left: max(MediaQuery.paddingOf(context).left, LdTheme.of(context).pad(size: LdSize.s).left),
+                          right:
+                              max(MediaQuery.paddingOf(context).right, LdTheme.of(context).pad(size: LdSize.s).right),
+                          top: LdTheme.of(context).pad(size: LdSize.s).top +
+                              (_isAppBar ? MediaQuery.paddingOf(context).top : 0),
+                          bottom: max(LdTheme.of(context).pad(size: LdSize.s).bottom,
+                              (_isBottomNavigationBar ? MediaQuery.paddingOf(context).bottom : 0)),
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Row(
-                              children: [
-                                MacOSWindowControls(showWindowControls: _showMacOSWindowControls),
-                                if (_showOpenDrawerButton) ...[
-                                  const OpenDrawerButton(),
-                                  ldSpacerS,
-                                ],
-                                if (leading != null) ...[
-                                  leading,
-                                  ldSpacerS,
-                                ],
-                                /*if (widget.title != null || widget.actions.isNotEmpty)
-                                  Expanded(
-                                    child: OverflowView(
-                                      spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
-                                      layoutBehavior: OverflowViewLayoutBehavior.expandFirstFlexible,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      builder: (context, remainingItemCount) {
-                                        return LdAppbarActionOverflowMenu(
-                                          actions: widget.actions.sublist(widget.actions.length - remainingItemCount),
-                                          bigToolbar: true,
-                                          menuProviders: widget.overflowMenuProviders,
-                                          inMenu: true,
-                                        );
-                                      },
-                                      children: [
-                                        if (widget.title != null)
-                                          Align(
-                                            alignment: Alignment.centerLeft,
-                                            child: DefaultTextStyle(
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: headerStyle,
-                                              child: widget.title ?? const SizedBox(),
-                                            ),
-                                          ),
-                                        ...widget.actions.where((e) => e.isVisible(context)).map(
-                                              (e) => LdAppBarAction(
-                                                action: e,
-                                                bigToolbar: true,
-                                                inMenu: false,
-                                                menuProviders: widget.overflowMenuProviders,
+                        child: child,
+                      ),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: switch (theme.themeSize) {
+                            (LdThemeSize.s) => 34,
+                            (LdThemeSize.m || LdThemeSize.l) => 34,
+                          },
+                        ),
+                        child: LdWrapConditional(
+                          condition: widget.addContainer,
+                          builder: (context, child) => LdContainer(
+                            padding: EdgeInsets.zero,
+                            child: child,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Row(
+                                children: [
+                                  MacOSWindowControls(showWindowControls: _showMacOSWindowControls),
+                                  if (_showOpenDrawerButton) ...[
+                                    const OpenDrawerButton(),
+                                    ldSpacerS,
+                                  ],
+                                  if (leading != null) ...[
+                                    leading,
+                                    ldSpacerS,
+                                  ],
+                                  if (widget.title != null || widget.actions.isNotEmpty)
+                                    Expanded(
+                                      child: OverflowView(
+                                        spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
+                                        layoutBehavior: OverflowViewLayoutBehavior.expandFirstFlexible,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        builder: (context, remainingItemCount) {
+                                          return LdAppbarActionOverflowMenu(
+                                            actions: widget.actions.sublist(widget.actions.length - remainingItemCount),
+                                            bigToolbar: true,
+                                            menuProviders: widget.overflowMenuProviders,
+                                            inMenu: true,
+                                          );
+                                        },
+                                        children: [
+                                          if (widget.title != null)
+                                            Align(
+                                              alignment: Alignment.centerLeft,
+                                              child: DefaultTextStyle(
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: headerStyle,
+                                                child: widget.title ?? const SizedBox(),
                                               ),
                                             ),
-                                      ],
-                                    ),
-                                  )
-                                else
-                                  const Spacer(),*/
-                                if (_showCloseDrawerButton) const CloseDrawerButton(),
-                                if (_showWindowsWindowControls) const WindowsWindowControls(),
-                                if (widget.trailing != null) widget.trailing!,
-                              ],
-                            ),
-                            if (widget.bottom != null) ...[
-                              Padding(
-                                padding: EdgeInsets.only(
-                                  top: LdTheme.of(context).pad(size: LdSize.s).top,
-                                  left: LdTheme.of(context).pad(size: LdSize.s).left,
-                                  right: LdTheme.of(context).pad(size: LdSize.s).right,
-                                ),
-                                child: widget.bottom!,
+                                          ...widget.actions.where((e) => e.isVisible(context)).map(
+                                                (e) => LdAppBarActionWidget(
+                                                  action: e,
+                                                  bigToolbar: true,
+                                                  inMenu: false,
+                                                  menuProviders: widget.overflowMenuProviders,
+                                                ),
+                                              ),
+                                        ],
+                                      ),
+                                    )
+                                  else
+                                    const Spacer(),
+                                  if (_showCloseDrawerButton) const CloseDrawerButton(),
+                                  if (_showWindowsWindowControls) const WindowsWindowControls(),
+                                  if (widget.trailing != null) widget.trailing!,
+                                ],
                               ),
+                              if (widget.bottom != null) ...[
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    top: LdTheme.of(context).pad(size: LdSize.s).top,
+                                    left: LdTheme.of(context).pad(size: LdSize.s).left,
+                                    right: LdTheme.of(context).pad(size: LdSize.s).right,
+                                  ),
+                                  child: widget.bottom!,
+                                ),
+                              ],
                             ],
-                          ],
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-          );
-        });
+            );
+          }),
+    );
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      key: _key,
-      children: [
-        if (_isBottomNavigationBar) const LdDivider(),
-        appBar,
-        if (!_isBottomNavigationBar) const LdDivider(height: 1),
-      ],
+    return LdWrapConditional(
+      condition: _isAppBar || _isDrawer,
+      builder: (context, child) => GestureDetector(
+        onPanStart: (details) {
+          LdAppBar.callbacks?.onMove?.call();
+        },
+        child: child,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        key: _key,
+        children: [
+          if (_isBottomNavigationBar) const LdDivider(),
+          appBar,
+          if (!_isBottomNavigationBar) const LdDivider(height: 1),
+        ],
+      ),
     );
   }
 }

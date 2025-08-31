@@ -103,10 +103,9 @@ class MonkeyDemo extends StatelessWidget {
           "The LdRepository class is an extension of the LdPaginator. It is responsible for fetching the data from a data source like a backend. "
           "It also manages the state of the data, like loading, errors, updates etc.",
         ),
-        LdCard(
-            child: LdAutoSpace(children: [
+        LdAutoSpace(children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: Column(
@@ -118,7 +117,6 @@ class MonkeyDemo extends StatelessWidget {
                         "Main wrapper, configures pattern, tracks selection, provides actions",
                       )),
                     ),
-                    Icon(LucideIcons.arrowDown),
                   ],
                 ).spaceM(),
               ),
@@ -134,6 +132,7 @@ class MonkeyDemo extends StatelessWidget {
               ),
             ],
           ).spaceM(),
+          Icon(LucideIcons.arrowDown).padL(),
           LdCard(
             header: Text("GoRouter"),
             child: LdMute(
@@ -261,7 +260,7 @@ class MonkeyDemo extends StatelessWidget {
               ],
             ),
           ),
-        ])),
+        ]),
         LdDivider(),
         LdTextHs("Functionality"),
         LdTextP(

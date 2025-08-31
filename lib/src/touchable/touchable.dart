@@ -318,6 +318,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
       autofocus: widget.autoFocus,
       canRequestFocus: !widget.disabled,
       onFocusChange: (value) {
+        print("Focus change: $value");
         setState(() {
           _hasFocus = value;
         });
@@ -336,6 +337,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
           _safeSetState(() {
             _hovering = false;
             _pressed = false;
+
             _focusNode?.unfocus();
           });
         },
@@ -358,8 +360,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
               }),
               onPointerUp: (_) => _safeSetState(() {
                 _pressed = false;
-
-                _focusNode?.requestFocus();
+                _focusNode?.unfocus();
               }),
               onPointerCancel: (_) => _safeSetState(() {
                 _pressed = false;
@@ -368,6 +369,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
                   if (!widget.disabled) widget.onTap();
+                  _focusNode?.unfocus();
                 },
                 child: widget.builder(
                   context,

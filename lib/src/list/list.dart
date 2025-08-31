@@ -10,7 +10,7 @@ enum _ListItemType {
   groupHeader,
 }
 
-class _ListItem<T extends Identifiable, SeparationCriterion> {
+class _ListItem<T extends Identifiable> {
   _ListItem({
     required this.type,
     this.item,
@@ -23,7 +23,7 @@ class _ListItem<T extends Identifiable, SeparationCriterion> {
 
   final LdPaginatorItem<T>? item;
   final _ListItemType type;
-  final SeparationCriterion? separationCriterion;
+  final dynamic separationCriterion;
 
   /// The position that this item belongs to.
   /// Can be null for separator items.
@@ -35,12 +35,12 @@ class _ListItem<T extends Identifiable, SeparationCriterion> {
 
 /// Extension to convert [LdPaginator] data into a list of [_ListItem]s
 extension GetItemList<T extends Identifiable<IdType>, IdType> on LdPaginator<T, IdType> {
-  List<_ListItem<T, GroupingCriterion>> currentList<GroupingCriterion>() {
-    final result = <_ListItem<T, GroupingCriterion>>[];
+  List<_ListItem<T>> currentList() {
+    final result = <_ListItem<T>>[];
     if (totalItems == 0) return result;
     for (int i = 0; i < totalItems; i++) {
       final item = getItemAt(i);
-      result.add(_ListItem<T, GroupingCriterion>(
+      result.add(_ListItem<T>(
         item: item,
         position: i,
         type: _ListItemType.item,
@@ -63,7 +63,7 @@ typedef LdListItemBuilder<T extends Identifiable> = Widget Function(
 /// - Error handling and retry mechanisms
 /// - Pull-to-refresh functionality
 /// - Empty state handling
-class LdList<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends StatefulWidget {
+class LdList<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   const LdList({
     super.key,
     this.scrollController,
@@ -107,8 +107,8 @@ class LdList<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends 
   final Widget Function(BuildContext context, int position, int totalItems)? loadingBuilder;
 
   // Grouping configuration
-  final GroupingCriterion Function(T item)? groupingCriterion;
-  final Widget Function(BuildContext context, GroupingCriterion criterion)? groupHeaderBuilder;
+  final dynamic Function(T item)? groupingCriterion;
+  final Widget Function(BuildContext context, dynamic criterion)? groupHeaderBuilder;
 
   /// Built between items. Not called between items and group headers.
   final Widget Function(BuildContext context)? separatorBuilder;
@@ -147,13 +147,12 @@ class LdList<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends 
   final LdRetryConfig? retryConfig;
 
   @override
-  State<LdList<T, IdType, GroupingCriterion>> createState() => _LdListState<T, IdType, GroupingCriterion>();
+  State<LdList<T, IdType>> createState() => _LdListState<T, IdType>();
 }
 
-class _LdListState<T extends Identifiable<IdType>, IdType, GroupingCriterion>
-    extends State<LdList<T, IdType, GroupingCriterion>> {
+class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdList<T, IdType>> {
   // State variables
-  List<_ListItem<T, GroupingCriterion>> _groupedItems = [];
+  List<_ListItem<T>> _groupedItems = [];
   late final ScrollController _scrollController;
 
   late final LdRetryController _retryController;
@@ -189,7 +188,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType, GroupingCriterion>
   }
 
   @override
-  void didUpdateWidget(covariant LdList<T, IdType, GroupingCriterion> oldWidget) {
+  void didUpdateWidget(covariant LdList<T, IdType> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (_shouldRegroupItems(oldWidget)) {
@@ -210,11 +209,11 @@ class _LdListState<T extends Identifiable<IdType>, IdType, GroupingCriterion>
     }
   }
 
-  bool _shouldRegroupItems(LdList<T, IdType, GroupingCriterion> oldWidget) {
+  bool _shouldRegroupItems(LdList<T, IdType> oldWidget) {
     return oldWidget.groupingCriterion != widget.groupingCriterion || widget.paginator != oldWidget.paginator;
   }
 
-  bool _shouldUpdateDataListener(LdList<T, IdType, GroupingCriterion> oldWidget) {
+  bool _shouldUpdateDataListener(LdList<T, IdType> oldWidget) {
     return widget.paginator != oldWidget.paginator;
   }
 
@@ -229,15 +228,15 @@ class _LdListState<T extends Identifiable<IdType>, IdType, GroupingCriterion>
   }
 
   /// Groups items sequentially based on the grouping criterion
-  List<_ListItem<T, GroupingCriterion>> _groupItems() {
-    final groupedItems = <_ListItem<T, GroupingCriterion>>[];
-    GroupingCriterion? lastSeparationCriterion;
+  List<_ListItem<T>> _groupItems() {
+    final groupedItems = <_ListItem<T>>[];
+    dynamic lastSeparationCriterion;
 
-    for (final item in widget.paginator.currentList<GroupingCriterion>()) {
+    for (final item in widget.paginator.currentList()) {
       if (item.item == null) {
         // Loader
         groupedItems.add(
-          _ListItem<T, GroupingCriterion>(
+          _ListItem<T>(
             position: item.position,
             type: _ListItemType.item,
           ),
@@ -308,18 +307,18 @@ class _LdListState<T extends Identifiable<IdType>, IdType, GroupingCriterion>
         _groupedItems = _createInterspersedList();
       } else {
         /// No grouping is provided.. we just use the items as is
-        _groupedItems = widget.paginator.currentList<GroupingCriterion>();
+        _groupedItems = widget.paginator.currentList();
       }
     });
   }
 
   // Alternate between a separator and an item
-  List<_ListItem<T, GroupingCriterion>> _createInterspersedList() {
+  List<_ListItem<T>> _createInterspersedList() {
     return intersperse(
-      _ListItem<T, GroupingCriterion>(
+      _ListItem<T>(
         type: _ListItemType.separator,
       ),
-      widget.paginator.currentList<GroupingCriterion>().map((item) => item),
+      widget.paginator.currentList().map((item) => item),
     ).toList(growable: false);
   }
 
@@ -362,7 +361,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType, GroupingCriterion>
     if (item.type == _ListItemType.groupHeader) {
       return widget.groupHeaderBuilder!(
         context,
-        item.separationCriterion as GroupingCriterion,
+        item.separationCriterion,
       );
     }
 
@@ -390,7 +389,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType, GroupingCriterion>
 
   Widget _buildActualItem(
     BuildContext context,
-    _ListItem<T, GroupingCriterion> listEntry,
+    _ListItem<T> listEntry,
     int index,
   ) {
     final item = LdPaginatorLoadedItem(value: listEntry.item!.value, state: listEntry.item!.state);

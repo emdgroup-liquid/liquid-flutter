@@ -38,9 +38,13 @@ abstract class LdSubmitBuilder<T, Arg> extends StatelessWidget {
   final LdSubmitLoadingBuilder<T, Arg>? loadingBuilder;
   final LdSubmitErrorBuilder<T, Arg>? errorBuilder;
 
-  const LdSubmitBuilder(
-      {Key? key, this.resultBuilder, this.submitButtonBuilder, this.loadingBuilder, this.errorBuilder})
-      : super(key: key);
+  const LdSubmitBuilder({
+    Key? key,
+    this.resultBuilder,
+    this.submitButtonBuilder,
+    this.loadingBuilder,
+    this.errorBuilder,
+  }) : super(key: key);
 }
 
 /// A component that handles making requests and displaying errors.

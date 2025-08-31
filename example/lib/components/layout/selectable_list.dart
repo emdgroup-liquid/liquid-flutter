@@ -97,7 +97,7 @@ class _SelectableListDemoState extends State<SelectableListDemo> {
                 paginator: _paginator,
                 onSelectionChange: _onSelectionChange,
                 listBuilder: (context, scrollController, itemBuilder) {
-                  return LdList<SampleItem, String, void>(
+                  return LdList<SampleItem, String>(
                     scrollController: scrollController,
                     paginator: _paginator,
                     itemBuilder: itemBuilder,

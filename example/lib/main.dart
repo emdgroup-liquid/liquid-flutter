@@ -1,7 +1,3 @@
-import 'dart:io';
-
-import 'package:bitsdojo_window/bitsdojo_window.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:liquid/router.dart';
 
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter_window_utils/liquid_flutter_window_utils.dart';
 
 import 'package:provider/provider.dart';
 import 'package:syntax_highlight/syntax_highlight.dart';
@@ -24,29 +21,17 @@ void main() async {
 
   await Highlighter.initialize(['dart', 'yaml', 'sql']);
 
-  LdAppBar.callbacks = LdWindowCallbacks(onClose: () {
-    appWindow.close();
-  }, onMinimize: () {
-    appWindow.minimize();
-  }, onMaximize: () {
-    if (appWindow.isMaximized) {
-      appWindow.restore();
-    } else {
-      appWindow.maximize();
-    }
-  }, onMove: () {
-    appWindow.startDragging();
-  });
+  LdAppBar.callbacks = LdWindowCallbacks(
+      onClose: () {},
+      onMinimize: () {},
+      onMaximize: () {},
+      onMove: () {
+        LiquidFlutterWindowUtils.instance.startDragging();
+      });
+
+  LiquidFlutterWindowUtils.instance.configureWindow();
 
   runApp(const LiquidExample());
-
-  if (!kIsWeb && Platform.isMacOS) {
-    doWhenWindowReady(() {
-      appWindow.minSize = const Size(100, 100);
-
-      appWindow.show();
-    });
-  }
 }
 
 class LiquidExample extends StatefulWidget {

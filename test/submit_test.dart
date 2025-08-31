@@ -6,16 +6,37 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/l10n/generated/liquid_localizations_en.dart';
 
+class CounterProvider extends StatefulWidget {
+  final Widget Function(BuildContext context, int counter) builder;
+  const CounterProvider({super.key, required this.builder});
+  @override
+  State<CounterProvider> createState() => _CounterProviderState();
+}
+
+class _CounterProviderState extends State<CounterProvider> {
+  int counter = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    print("CounterProvider build $counter");
+    return Column(
+      children: [
+        LdButton(onPressed: () => setState(() => counter++), child: const Text("Increment")),
+        widget.builder(context, counter),
+      ],
+    );
+  }
+}
+
 void main() {
+  ldDisableAnimations = true;
+
   test('LdSubmitController', () async {
     var completer = Completer<int>();
 
-    final controller = LdSubmitController<int>(
-      exceptionMapper: LdExceptionMapper(
-        localizations: LiquidLocalizationsEn(),
-      ),
+    final controller = LdSubmitController<int, void>(
       config: LdSubmitConfig(
-        action: () async {
+        action: (arg) async {
           return await completer.future;
         },
       ),
@@ -69,8 +90,8 @@ void main() {
       MaterialApp(
         localizationsDelegates: const [LiquidLocalizations.delegate],
         home: LdThemeProvider(
-          child: LdSubmit<int>(
-            config: LdSubmitConfig(action: () async {
+          child: LdSubmit<int, void>(
+            config: LdSubmitConfig(action: (_) async {
               return await completer.future;
             }),
           ),
@@ -80,7 +101,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.byType(LdSubmit<int>), findsOneWidget);
+    expect(find.byType(LdSubmit<int, void>), findsOneWidget);
     expect(find.byType(LdButton), findsOneWidget);
     expect(find.text("Submit"), findsOneWidget);
 
@@ -113,11 +134,11 @@ void main() {
           child: LdPortal(
             child: Scaffold(
               body: Portal(
-                child: LdSubmit<int>(
-                  config: LdSubmitConfig(action: () async {
+                child: LdSubmit<int, void>(
+                  config: LdSubmitConfig(action: (arg) async {
                     return await completer.future;
                   }),
-                  builder: LdSubmitDialogBuilder<int>(),
+                  builder: const LdSubmitDialogBuilder<int, void>(),
                 ),
               ),
             ),
@@ -128,7 +149,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.byType(LdSubmit<int>), findsOneWidget);
+    expect(find.byType(LdSubmit<int, void>), findsOneWidget);
     expect(find.byType(LdButton), findsOneWidget);
     expect(find.text("Submit"), findsOneWidget);
 
@@ -151,12 +172,11 @@ void main() {
     expect(find.text("Submit"), findsOneWidget);
   });
 
-  testWidgets("LdSubmit with custom exception mapper",
-      (WidgetTester tester) async {
+  testWidgets("LdSubmit with custom exception mapper", (WidgetTester tester) async {
     final customMapper = LdExceptionMapper(
       localizations: LiquidLocalizationsEn(),
       onException: (e, {stackTrace}) {
-        return LdException(
+        return LdLocalizedException(
           message: "Custom exception",
           type: LdHintType.error,
         );
@@ -173,8 +193,8 @@ void main() {
             child: Scaffold(
               body: LdExceptionMapperProvider(
                 exceptionMapper: customMapper,
-                child: LdSubmit<int>(
-                  config: LdSubmitConfig(action: () async {
+                child: LdSubmit<int, void>(
+                  config: LdSubmitConfig(action: (arg) async {
                     await completer.future;
                     throw TimeoutException('Timeout');
                   }),
@@ -189,7 +209,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify initial state
-    expect(find.byType(LdSubmit<int>), findsOneWidget);
+    expect(find.byType(LdSubmit<int, void>), findsOneWidget);
     expect(find.byType(LdButton), findsOneWidget);
 
     // Trigger action that will fail
@@ -216,12 +236,9 @@ void main() {
 
     var completer = Completer<void>();
 
-    final controller = LdSubmitController(
-      exceptionMapper: LdExceptionMapper(
-        localizations: LiquidLocalizationsEn(),
-      ),
+    final controller = LdSubmitController<int, void>(
       config: LdSubmitConfig(
-        action: () async {
+        action: (arg) async {
           calls++;
 
           await completer.future;
@@ -243,7 +260,7 @@ void main() {
         home: LdThemeProvider(
           child: LdPortal(
             child: Scaffold(
-              body: LdSubmit<int>(
+              body: LdSubmit<int, void>(
                 controller: controller,
               ),
             ),
@@ -255,7 +272,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify initial state
-    expect(find.byType(LdSubmit<int>), findsOneWidget);
+    expect(find.byType(LdSubmit<int, void>), findsOneWidget);
     expect(find.byType(LdButton), findsOneWidget);
 
     // Trigger action that will fail
@@ -302,5 +319,82 @@ void main() {
 
     // There should now be no retry indicator, because we exceeded the max attempts
     expect(find.byType(LdExceptionRetryIndicator), findsNothing);
+  });
+
+  testWidgets("LdSubmit with arg", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      LdThemeProvider(
+        child: LdThemedAppBuilder(
+          appBuilder: (context, theme) => MaterialApp(
+            theme: theme,
+            localizationsDelegates: const [LiquidLocalizations.delegate],
+            home: CounterProvider(builder: (context, counter) {
+              return LdSubmit<int, int>(
+                arg: counter,
+                config: LdSubmitConfig(action: (arg) async {
+                  return arg! + 2;
+                }),
+                builder: LdSubmitInlineBuilder<int, int>(
+                  resultBuilder: (context, result, controller) {
+                    return Text("The result is $result");
+                  },
+                ),
+              );
+            }),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text("Submit"));
+
+    await tester.pumpAndSettle();
+
+    expect(find.text("The result is 2"), findsOneWidget);
+
+    await tester.tap(find.text("Increment"));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text("Submit"));
+
+    await tester.pumpAndSettle();
+
+    expect(find.text("The result is 3"), findsOneWidget);
+  });
+
+  testWidgets("LdSubmit with arg and auto submit re-submits when arg changes", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      LdThemeProvider(
+        child: LdThemedAppBuilder(
+          appBuilder: (context, theme) => MaterialApp(
+            theme: theme,
+            localizationsDelegates: const [LiquidLocalizations.delegate],
+            home: CounterProvider(builder: (context, counter) {
+              return LdSubmit<int, int>(
+                arg: counter,
+                config: LdSubmitConfig(
+                    autoTrigger: true,
+                    action: (arg) async {
+                      return arg! + 2;
+                    }),
+                builder: LdSubmitInlineBuilder<int, int>(
+                  resultBuilder: (context, result, controller) {
+                    return Text("The result is $result");
+                  },
+                ),
+              );
+            }),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text("The result is 2"), findsOneWidget);
+
+    await tester.tap(find.text("Increment"));
+
+    await tester.pumpAndSettle();
+
+    expect(find.text("The result is 3"), findsOneWidget);
   });
 }

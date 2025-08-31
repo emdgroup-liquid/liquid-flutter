@@ -1,15 +1,20 @@
 import 'dart:async';
+import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/haptics.dart';
+import 'package:liquid_flutter/src/submit/model/devtools.dart';
 
 /// Handles the lifecyle of a submit action. Pass a [LdSubmitConfig] to the
 /// controller to configure the submit action.
 /// Updated LdSubmitController that uses LdRetryController
 class LdSubmitController<T, Arg> {
   final LdSubmitConfig<T, Arg> config;
+
+  late final String id;
 
   final _stateController = StreamController<LdSubmitState<T>>.broadcast();
   late final LdRetryController _retryController;
@@ -25,6 +30,8 @@ class LdSubmitController<T, Arg> {
       config: config.retryConfig ?? const LdRetryConfig(),
     );
 
+    id = Random().nextInt(1000000).toString();
+
     // Listen to retry state changes to update submit state
     _retryController.stateStream.listen((retryState) {
       if (state.type == LdSubmitStateType.error) {
@@ -38,6 +45,14 @@ class LdSubmitController<T, Arg> {
         );
       }
     });
+
+    arg?.addListener(_onArgChanged);
+  }
+
+  void _onArgChanged() {
+    if (config.autoTrigger && canTrigger) {
+      _trigger();
+    }
   }
 
   LdSubmitState<T> state = LdSubmitState<T>(type: LdSubmitStateType.idle);
@@ -46,6 +61,7 @@ class LdSubmitController<T, Arg> {
     if (config.autoTrigger) {
       Future.delayed(Duration.zero, _trigger);
     }
+    SubmitDevTools.instance.registerController(this);
     _stateController.add(state);
   }
 
@@ -144,6 +160,16 @@ class LdSubmitController<T, Arg> {
     }
   }
 
+  void debugForceError() {
+    if (!canTrigger) {
+      return;
+    }
+
+    _setState(
+      LdSubmitState<T>(type: LdSubmitStateType.error, error: LdException(exception: Exception("Debug error"))),
+    );
+  }
+
   bool get _isError => state.type == LdSubmitStateType.error;
   bool get _isLoading => state.type == LdSubmitStateType.loading;
   bool get _isResult => state.type == LdSubmitStateType.result;
@@ -188,7 +214,26 @@ class LdSubmitController<T, Arg> {
       cancel();
     }
     _retryController.dispose();
+    arg?.removeListener(_onArgChanged);
     _disposed = true;
     _stateController.close();
+    SubmitDevTools.instance.unregisterController(this);
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      "id": id,
+      "type": state.type.toString(),
+      "retryController": _retryController.toMap(),
+      "canRetry": canRetry,
+      "canRetrigger": canRetrigger,
+      "canTrigger": canTrigger,
+      "isError": _isError,
+      "isLoading": _isLoading,
+      "isResult": _isResult,
+      "isIdle": _isIdle,
+      "error": state.error?.toString(),
+      "result": state.result?.toString(),
+    };
   }
 }

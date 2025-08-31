@@ -44,7 +44,7 @@ class LdMonkeyAppBarActions<T extends Identifiable<IdType>, IdType, GroupingCrit
     }
 
     return result.actions
-        .map((action) => LdAppBarAction(
+        .map((action) => LdAppBarActionWidget(
               action: action,
               bigToolbar: true,
               inMenu: false,

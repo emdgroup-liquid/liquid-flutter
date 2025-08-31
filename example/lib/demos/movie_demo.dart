@@ -341,6 +341,7 @@ class _MovieDetailState extends State<_MovieDetail> {
               LdSubmit<void, void>(
                 config: LdSubmitConfig<void, void>(
                   submitText: "Save",
+                  debugLabel: "Save Movie",
                   action: (_) async {
                     final newMovie = _Movie(
                       widget.movie.value!.id,
