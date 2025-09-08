@@ -52,9 +52,21 @@ final movieRepository = LdRepository<_Movie, int>(
   singularItemTitle: "Movie",
   pluralItemTitle: "Movies",
   pageSize: 5,
-  getOffsetById: (id) async {
+  getOffsetById: (id, {filters, sortOptions}) async {
     await Future.delayed(const Duration(seconds: 1));
-    return movieData.indexWhere((element) => element.id == id);
+
+    // Apply the same filtering and sorting logic as fetchListWithParameters
+    final filtered = movieData
+        .where((element) =>
+            filters?.every((filter) => filter.optimisticFilter(element)) ??
+            true)
+        .toList();
+
+    for (final sortOption in sortOptions ?? []) {
+      filtered.sort((a, b) => sortOption.optimisticSort(a, b));
+    }
+
+    return filtered.indexWhere((element) => element.id == id);
   },
   getById: (id) async {
     return movieData.firstWhere((element) => element.id == id);

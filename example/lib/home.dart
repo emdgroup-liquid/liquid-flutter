@@ -179,6 +179,14 @@ class _HomeState extends State<Home> {
                     },
                     child: const Text("Task Demo"),
                   ),
+                  LdButton(
+                    mode: LdButtonMode.outline,
+                    trailing: const Icon(LucideIcons.arrowRight),
+                    onPressed: () {
+                      context.go("/components/bento-gallery");
+                    },
+                    child: const Text("Bento Gallery"),
+                  ),
                 ]),
                 const LdDivider(),
                 const LdTextH("Getting Started"),

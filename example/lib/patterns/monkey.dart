@@ -300,6 +300,36 @@ class MonkeyDemo extends StatelessWidget {
               context.push("/patterns/monkey/repository");
             },
           ),
+          LdSpacer(size: LdSize.m),
+          LdTextHs("Pattern Configuration"),
+          LdTextP(
+              "Learn how to configure the LdMonkey pattern, including routing, selection behavior, and layout options."),
+          LdButton(
+            child: const Text("View Pattern Documentation"),
+            onPressed: () {
+              context.push("/patterns/monkey/pattern");
+            },
+          ),
+          LdSpacer(size: LdSize.m),
+          LdTextHs("Actions"),
+          LdTextP(
+              "Learn how to create and configure actions that users can perform on items, including visibility conditions and keyboard shortcuts."),
+          LdButton(
+            child: const Text("View Actions Documentation"),
+            onPressed: () {
+              context.push("/patterns/monkey/actions");
+            },
+          ),
+          LdSpacer(size: LdSize.m),
+          LdTextHs("Sorting & Filtering"),
+          LdTextP(
+              "Learn how to implement advanced sorting and filtering capabilities with optimistic updates and URL state management."),
+          LdButton(
+            child: const Text("View Sorting & Filtering Documentation"),
+            onPressed: () {
+              context.push("/patterns/monkey/sorting-filtering");
+            },
+          ),
         ]),
       ]),
     );

@@ -17,6 +17,9 @@ import 'package:liquid/components/feedback/loader.dart';
 import 'package:liquid/components/layout/list_item.dart';
 import 'package:liquid/patterns/monkey.dart';
 import 'package:liquid/patterns/monkey_repository.dart';
+import 'package:liquid/patterns/monkey_pattern.dart';
+import 'package:liquid/patterns/monkey_actions.dart';
+import 'package:liquid/patterns/monkey_sorting_filtering.dart';
 import 'package:liquid/components/layout/selectable_list.dart';
 import 'package:liquid/components/material.dart';
 import 'package:liquid/components/interaction/modal.dart';
@@ -53,6 +56,7 @@ import 'components/data_display/table.dart';
 import 'components/data_display/tag.dart';
 import 'window/app_scaffold.dart';
 import 'components/interaction/appbar.dart';
+import 'components/bento_gallery.dart';
 
 class AppRouter {
   AppRouter();
@@ -123,6 +127,27 @@ class AppRouter {
           pageBuilder: (context, state) => NoTransitionPage<void>(
             key: state.pageKey,
             child: const MonkeyRepositoryDemo(),
+          ),
+        ),
+        GoRoute(
+          path: "/patterns/monkey/pattern",
+          pageBuilder: (context, state) => NoTransitionPage<void>(
+            key: state.pageKey,
+            child: const MonkeyPatternDemo(),
+          ),
+        ),
+        GoRoute(
+          path: "/patterns/monkey/actions",
+          pageBuilder: (context, state) => NoTransitionPage<void>(
+            key: state.pageKey,
+            child: const MonkeyActionsDemo(),
+          ),
+        ),
+        GoRoute(
+          path: "/patterns/monkey/sorting-filtering",
+          pageBuilder: (context, state) => NoTransitionPage<void>(
+            key: state.pageKey,
+            child: const MonkeySortingFilteringDemo(),
           ),
         ),
         GoRoute(
@@ -339,6 +364,13 @@ class AppRouter {
           pageBuilder: (context, state) => NoTransitionPage<void>(
             key: state.pageKey,
             child: const AppBarDemo(),
+          ),
+        ),
+        GoRoute(
+          path: "/components/bento-gallery",
+          pageBuilder: (context, state) => NoTransitionPage<void>(
+            key: state.pageKey,
+            child: const BentoGallery(),
           ),
         ),
       ],

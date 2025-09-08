@@ -16,7 +16,8 @@ typedef FetchListWithParameters<T extends Identifiable<IdType>, IdType> = Future
 
 class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T, IdType> {
   final Future<T> Function(IdType id) _getById;
-  final Future<int?> Function(IdType id)? _getOffsetById;
+  final Future<int?> Function(IdType id,
+      {Set<LdFilterOption<T, IdType>>? filters, List<LdSortOption<T, IdType>>? sortOptions})? _getOffsetById;
   final Future<void> Function(Set<T> items)? _updateBatch;
   final Future<void> Function(IdType id)? _deleteItem;
   final Future<T?> Function(IdType id, T newItem)? _updateItem;
@@ -46,7 +47,9 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     required Future<T> Function(IdType id) getById,
     Set<LdFilterOption<T, IdType>>? filters,
     List<LdSortOption<T, IdType>>? sortOptions,
-    Future<int?> Function(IdType id)? getOffsetById,
+    Future<int?> Function(IdType id,
+            {Set<LdFilterOption<T, IdType>>? filters, List<LdSortOption<T, IdType>>? sortOptions})?
+        getOffsetById,
     Future<void> Function(IdType id)? deleteItem,
     Future<T?> Function(IdType id, T newItem)? updateItem,
     Future<T?> Function(T? newItem)? createItem,
@@ -187,7 +190,14 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     if (_getOffsetById == null) {
       return;
     }
-    final firstOffset = await _getOffsetById!(selection.first);
+    final currentFilters = _filters.where((e) => e.isOn).toSet();
+    final currentSortOptions = _sortOptions.where((e) => e.isOn).toList();
+
+    final firstOffset = await _getOffsetById!(
+      selection.first,
+      filters: currentFilters,
+      sortOptions: currentSortOptions,
+    );
 
     initialOffset = firstOffset ?? 0;
 
@@ -293,6 +303,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
         rethrow;
       }
     }
+    return null;
   }
 
   Future<void> deleteBatch(Set<IdType> ids) async {

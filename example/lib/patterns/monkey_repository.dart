@@ -45,9 +45,21 @@ class MonkeyRepositoryDemo extends StatelessWidget {
   },
   
   // Optional: Get the offset of an item for deep linking
-  getOffsetById: (id) async {
+  getOffsetById: (id, {filters, sortOptions}) async {
     await Future.delayed(const Duration(seconds: 1));
-    return testData.indexWhere((element) => element.id == id);
+    
+    // Apply the same filtering and sorting logic as fetchListWithParameters
+    final filtered = testData
+        .where((element) =>
+            filters?.every((filter) => filter.optimisticFilter(element)) ??
+            true)
+        .toList();
+
+    for (final sortOption in sortOptions ?? []) {
+      filtered.sort((a, b) => sortOption.optimisticSort(a, b));
+    }
+
+    return filtered.indexWhere((element) => element.id == id);
   },
   
   // Required: Fetch paginated list with filters and sorting

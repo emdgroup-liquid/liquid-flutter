@@ -478,13 +478,6 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdList<
 
     _performedInitialScroll = true;
 
-    // Await for the list loading to settle
-    do {
-      await Future.delayed(const Duration(milliseconds: 500));
-    } while ((widget.paginator.busy));
-
-    if (!_scrollController.hasClients) return;
-
     final averageHeight = _getAverageItemHeight();
 
     final offset = averageHeight * widget.paginator.initialOffset;

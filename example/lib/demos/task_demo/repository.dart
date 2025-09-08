@@ -7,11 +7,20 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 final taskRepository = LdRepository<Task, int>(
   singularItemTitle: "Task",
   pluralItemTitle: "Tasks",
-  pageSize: 10,
-  getOffsetById: (id) async {
-    await Future.delayed(const Duration(seconds: 1));
+  pageSize: 5,
+  getOffsetById: (id, {filters, sortOptions}) async {
+    // Apply the same filtering and sorting logic as fetchListWithParameters
+    final filtered = testData
+        .where((element) =>
+            filters?.every((filter) => filter.optimisticFilter(element)) ??
+            true)
+        .toList();
 
-    return testData.indexWhere((element) => element.id == id);
+    for (final sortOption in sortOptions ?? []) {
+      filtered.sort((a, b) => sortOption.optimisticSort(a, b));
+    }
+
+    return filtered.indexWhere((element) => element.id == id);
   },
   getById: (id) async {
     return testData.firstWhere((element) => element.id == id);

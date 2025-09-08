@@ -42,6 +42,8 @@ class _Component {
 
 const components = [
   // Layout
+  _Component("Bento Gallery", "/components/bento-gallery", LucideIcons.grid3x3,
+      ComponentCategory.layout),
   _Component("Accordion", "/components/accordion", LucideIcons.listCollapse,
       ComponentCategory.layout),
   _Component("Autospace", "/components/autospace",
@@ -367,6 +369,12 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                     onTap: () =>
                         _showPage(context, "/patterns/monkey/repository"),
                     child: const Text("Repository"),
+                  ),
+                  LdDrawerItemSection(
+                    active: GoRouterState.of(context).uri.path ==
+                        ("/patterns/monkey/pattern"),
+                    onTap: () => _showPage(context, "/patterns/monkey/pattern"),
+                    child: const Text("Pattern Configuration"),
                   ),
                   LdDrawerItemSection(
                     active: GoRouterState.of(context).uri.path ==
