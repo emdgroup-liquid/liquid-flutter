@@ -28,7 +28,7 @@ final taskRepository = LdRepository<Task, int>(
   sortOptions: [
     LdSortOption<Task, int>(
       name: "due",
-      label: (context) => "Due",
+      label: (context) => "Due date",
       isOn: true,
       icon: (context) => const Icon(LucideIcons.calendar),
       optimisticSort: (a, b) {
@@ -37,8 +37,8 @@ final taskRepository = LdRepository<Task, int>(
     ),
     LdSortOption<Task, int>(
       name: "task",
-      label: (context) => "Task",
-      icon: (context) => const Icon(LucideIcons.list),
+      label: (context) => "Task name",
+      icon: (context) => const Icon(LucideIcons.arrowUpZA),
       optimisticSort: (a, b) {
         return a.task.compareTo(b.task);
       },

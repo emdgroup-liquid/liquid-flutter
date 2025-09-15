@@ -50,6 +50,9 @@ TextStyle ldBuildTextStyle(LdTheme theme, LdTextType type, LdSize size,
       case LdTextType.caption:
         color = theme.textMuted;
         break;
+      case LdTextType.paragraph:
+        color = theme.neutralShade(8);
+        break;
       default:
         color = theme.text;
         break;
@@ -112,8 +115,7 @@ class LdText extends StatelessWidget {
     final LdMute? ldMute = context.findAncestorWidgetOfExactType<LdMute>();
     final theme = LdTheme.of(context, listen: true);
 
-    final text =
-        type == LdTextType.caption ? this.text.toUpperCase() : this.text;
+    final text = type == LdTextType.caption ? this.text.toUpperCase() : this.text;
 
     final style = ldBuildTextStyle(
       LdTheme.of(context, listen: true),

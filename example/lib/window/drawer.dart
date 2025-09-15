@@ -240,12 +240,9 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
   Widget build(BuildContext context) {
     return LdDrawer(
       appBar: Builder(builder: (context) {
-        return LdAppBar(
-          blurOnScroll: true,
-        );
+        return LdAppBar();
       }),
       bottomNavigationBar: LdAppBar(
-        blurOnScroll: true,
         leading: LdContextMenu(
           scaleFromTrigger: true,
           positionMode: LdContextPositionMode.relativeTrigger,

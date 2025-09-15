@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -242,6 +244,7 @@ class _LdButtonState extends State<LdButton> {
         enabled: !widget.disabled,
         focused: status.focus,
         child: _ButtonShape(
+            panOffset: status.panOffset,
             colors: colors,
             status: status,
             center: centerText,
@@ -314,16 +317,20 @@ class _ButtonShape extends StatelessWidget {
 
   final LdTouchableStatus status;
 
-  const _ButtonShape(
-      {required this.mode,
-      required this.size,
-      required this.colors,
-      required this.child,
-      this.width,
-      required this.status,
-      required this.circular,
-      required this.center,
-      this.borderRadius});
+  final Offset? panOffset;
+
+  const _ButtonShape({
+    required this.mode,
+    required this.size,
+    required this.colors,
+    required this.child,
+    this.width,
+    required this.status,
+    required this.circular,
+    required this.center,
+    this.borderRadius,
+    this.panOffset,
+  });
 
   Border? _border(context) {
     switch (mode) {
@@ -352,33 +359,83 @@ class _ButtonShape extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
-    return Container(
-      clipBehavior: Clip.hardEdge,
-      width: width,
-      padding: _padding(context),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        border: _border(context),
-        borderRadius: circular ? null : borderRadius,
-        shape: circular ? BoxShape.circle : BoxShape.rectangle,
-      ),
-      child: DefaultTextStyle(
-        textAlign: center ? TextAlign.center : null,
-        style: TextStyle(
-          color: colors.text,
-          package: theme.fontFamilyPackage,
-          fontFamily: theme.fontFamily,
-          fontSize: theme.labelSize(size),
-          height: 1,
-          fontWeight: FontWeight.bold,
-        ),
-        child: IconTheme(
-          child: child,
-          data: IconThemeData(
-            color: colors.text,
-            size: circular ? theme.labelSize(size) * 1.5 : theme.labelSize(size),
+    return LdSpring(
+      position: status.pressed ? 1 : 0,
+      initialPosition: status.pressed ? 1 : 0,
+      builder: (context, state, child) {
+        return Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.identity()
+            ..scaleByDouble(
+              state.position * 0.05 + 1 + min(0.2, (status.panOffset?.dx.abs() ?? 0) * 0.001 * state.position),
+              state.position * 0.05 + 1 + min(0.2, (status.panOffset?.dy.abs() ?? 0) * 0.001 * state.position),
+              1.0,
+              1.0,
+            ),
+          child: Container(
+            clipBehavior: Clip.hardEdge,
+            width: width,
+            decoration: BoxDecoration(
+              color: colors.surface,
+              border: _border(context),
+              borderRadius: circular ? null : borderRadius,
+              boxShadow: [
+                if (status.pressed)
+                  BoxShadow(
+                    color: colors.surface.withAlpha(100),
+                    blurRadius: max(0, state.position * 10),
+                    offset: const Offset(0, 0),
+                  ),
+              ],
+              shape: circular ? BoxShape.circle : BoxShape.rectangle,
+            ),
+            child: child,
           ),
-        ),
+        );
+      },
+      child: Stack(
+        children: [
+          Padding(
+            padding: _padding(context),
+            child: DefaultTextStyle(
+              textAlign: center ? TextAlign.center : null,
+              style: TextStyle(
+                color: colors.text,
+                package: theme.fontFamilyPackage,
+                fontFamily: theme.fontFamily,
+                fontSize: theme.labelSize(size),
+                height: 1,
+                fontWeight: FontWeight.bold,
+              ),
+              child: IconTheme(
+                child: child,
+                data: IconThemeData(
+                  color: colors.text,
+                  size: circular ? theme.labelSize(size) * 1.2 : theme.labelSize(size),
+                ),
+              ),
+            ),
+          ),
+          if (panOffset != null && status.pressed)
+            Positioned(
+              left: panOffset!.dx - 64,
+              top: panOffset!.dy - 64,
+              child: Container(
+                width: 128,
+                height: 128,
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    radius: 0.5,
+                    colors: [
+                      Colors.white.withAlpha(150),
+                      Colors.white.withAlpha(0),
+                    ],
+                    stops: const [0, 1],
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

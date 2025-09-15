@@ -100,36 +100,43 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
         title: "LdContextMenu",
         demo: LdAutoSpace(
           children: [
-            ComponentWell(
-              onSurface: true,
-              padding: EdgeInsets.zero,
-              child: LdContextMenu(
-                zoomMode: _zoomMode,
-                blurMode: _blurMode,
-                positionMode: _positionMode,
-                menuBuilder: (context, onDismiss) {
-                  return ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        maxWidth: 150,
-                      ),
-                      child: _buildMenu(context, onDismiss));
-                },
-                child: LdListItem(
+            LdContextMenu(
+              zoomMode: _zoomMode,
+              blurMode: _blurMode,
+              positionMode: _positionMode,
+              menuBuilder: (context, onDismiss) {
+                return ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: 300,
+                    ),
+                    child: _buildMenu(context, onDismiss));
+              },
+              child: Container(
+                decoration: BoxDecoration(
                   borderRadius: LdTheme.of(context).radius(LdSize.m),
+                  color: LdTheme.of(context).surface,
+                  border: Border.all(
+                    color: LdTheme.of(context).border,
+                    width: LdTheme.of(context).borderWidth,
+                  ),
+                ),
+                child: LdListItem(
                   width: double.infinity,
                   leading: const LdAvatar(
                     child: Text("C"),
                   ),
                   title: const Text("Right click me"),
+                  subtitle: const Text(
+                      "If you are using a touch screen, long press instead"),
                 ),
-                builder: (
-                  context,
-                  shuttle,
-                  trigger,
-                  child,
-                ) =>
-                    child!,
-              ).padM(),
+              ),
+              builder: (
+                context,
+                shuttle,
+                trigger,
+                child,
+              ) =>
+                  child!,
             ),
             ComponentWell(
               child: Row(
@@ -140,7 +147,9 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
                     positionMode: _positionMode,
                     menuBuilder: (context, onDismiss) {
                       return ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 150),
+                        constraints: BoxConstraints(
+                          maxWidth: 300,
+                        ),
                         child: _buildMenu(context, onDismiss),
                       );
                     },

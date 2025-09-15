@@ -225,7 +225,7 @@ class LdScaffoldState extends State<LdScaffold> {
       child: LdSpring(
         mass: 1,
         springConstant: 12,
-        dampingCoefficient: 5,
+        dampingCoefficient: 9,
         initialPosition: _drawerOffset,
         position: _drawerOffset,
         child: widget.body,
@@ -289,6 +289,7 @@ class LdScaffoldState extends State<LdScaffold> {
                   border: Border.all(
                     color: LdTheme.of(context).border,
                     width: 1,
+                    strokeAlign: BorderSide.strokeAlignCenter,
                   ),
                   borderRadius: BorderRadius.circular(14),
                 );

@@ -32,24 +32,4 @@ class LdMonkeyAppBarActions<T extends Identifiable<IdType>, IdType, GroupingCrit
       hasActions: hasActions,
     );
   }
-
-  static List<Widget> buildActionWidgets<T extends Identifiable<IdType>, IdType, GroupingCriterion>(
-    BuildContext context,
-    LdMonkeyActionLocation location,
-  ) {
-    final result = getActionsAndProviders<T, IdType, GroupingCriterion>(context, location);
-
-    if (!result.hasActions) {
-      return [];
-    }
-
-    return result.actions
-        .map((action) => LdAppBarActionWidget(
-              action: action,
-              bigToolbar: true,
-              inMenu: false,
-              menuProviders: result.menuProviders,
-            ))
-        .toList();
-  }
 }

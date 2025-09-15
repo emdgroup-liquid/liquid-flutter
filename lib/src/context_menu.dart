@@ -254,7 +254,7 @@ class ContextMenuRoute extends ModalRoute<void> {
   }
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 100);
+  Duration get transitionDuration => const Duration(milliseconds: 200);
 
   @override
   bool get barrierDismissible => true;
@@ -291,32 +291,35 @@ class ContextMenuRoute extends ModalRoute<void> {
 
     if (effectivePositionMode == LdContextPositionMode.relativeTrigger || cursorPosition == null) {
       triggerPosition = this.triggerPosition;
-      triggerSize = this.triggerSize;
+      triggerSize = Size(this.triggerSize.width + 10, this.triggerSize.height + 10);
     } else {
       triggerPosition = cursorPosition ?? Offset.zero;
-      triggerSize = const Size(0, 10);
+      triggerSize = const Size(10, 10);
     }
 
-    final viewInsets = mediaQuery.viewInsets + const EdgeInsets.all(10);
+    final viewInsets = mediaQuery.viewInsets + LdTheme.of(context).pad(size: LdSize.m);
 
     final screenSize = mediaQuery.size;
 
     final menuWidth = menuSize.width;
     final menuHeight = menuSize.height;
 
+    final availableWidth = screenSize.width - viewInsets.right - viewInsets.left;
+    final availableHeight = screenSize.height - viewInsets.bottom - viewInsets.top;
+
     final overflowX = min(
       0,
-      screenSize.width - viewInsets.right - viewInsets.left - (triggerPosition.dx) - menuWidth,
+      availableWidth - (triggerPosition.dx) - menuWidth,
     );
 
     final overflowY = min(
       0,
-      screenSize.height - viewInsets.bottom - viewInsets.top - (triggerPosition.dy) - menuHeight,
+      availableHeight - (triggerPosition.dy) - menuHeight - triggerSize.height,
     );
 
     final baseRect = Rect.fromLTWH(
       triggerPosition.dx + overflowX,
-      triggerPosition.dy + overflowY,
+      triggerPosition.dy + overflowY + triggerSize.height,
       menuSize.width,
       menuSize.height,
     );
@@ -392,7 +395,7 @@ class ContextMenuRoute extends ModalRoute<void> {
                 ),
               ),
             ),
-          _buildAnimatedMenuTransition(context, _menuSizeNotifier.value),
+          _buildAnimatedMenuTransition(context, _menuSizeNotifier.value, animation),
         ],
       ),
     );
@@ -402,43 +405,47 @@ class ContextMenuRoute extends ModalRoute<void> {
     return Offstage(
       child: MeasureSize(
         sizeNotifier: _menuSizeNotifier,
-        child: _buildAnimatedMenuTransition(context, _menuSizeNotifier.value),
+        child: Stack(
+          children: [
+            _buildAnimatedMenuTransition(context, _menuSizeNotifier.value, null),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildAnimatedMenuTransition(BuildContext context, Size menuSize) {
+  Widget _buildAnimatedMenuTransition(BuildContext context, Size menuSize, Animation<double>? animation) {
     final (endRect, alignment) = _resizeMenuToScreen(context, menuSize);
 
-    return LdSpring(
-        position: 1,
-        mass: 15,
-        springConstant: 15,
-        dampingCoefficient: 15,
-        initialPosition: 0,
-        builder: (context, state, child) {
-          return Positioned(
-              left: endRect.left,
-              top: endRect.top,
-              child: NotificationListener<LdContextMenuDissmissNotification>(
-                onNotification: (notification) {
-                  Navigator.of(context).maybePop();
-                  return true;
-                },
-                child: Transform.scale(
-                  scale: state.position,
-                  alignment: alignment,
-                  child: _wrapWithProviders(
-                    context,
-                    (context2) => _wrapMenu(
-                      context2,
-                      menuBuilder(context2, onDismiss ?? () {}),
-                      alignment,
-                    ),
-                  ),
-                ),
-              ));
-        });
+    return Positioned(
+      left: endRect.left,
+      top: endRect.top,
+      child: NotificationListener<LdContextMenuDissmissNotification>(
+        onNotification: (notification) {
+          Navigator.of(context).maybePop();
+          return true;
+        },
+        child: LdWrapConditional(
+          condition: animation != null,
+          builder: (context, child) => FadeTransition(
+            opacity: animation!,
+            child: ScaleTransition(
+              alignment: alignment,
+              scale: animation,
+              child: child,
+            ),
+          ),
+          child: _wrapWithProviders(
+            context,
+            (context2) => _wrapMenu(
+              context2,
+              menuBuilder(context2, onDismiss ?? () {}),
+              alignment,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Offset _getMenuOffset(Alignment alignment) {
@@ -459,7 +466,7 @@ class ContextMenuRoute extends ModalRoute<void> {
         decoration: BoxDecoration(
           color: LdTheme.of(context).surface,
           borderRadius: LdTheme.of(context).radius(LdSize.m),
-          boxShadow: [ldShadowSticky],
+          boxShadow: [BoxShadow(color: Colors.black.withAlpha(50), blurRadius: 12)],
           border: Border.all(color: LdTheme.of(context).border, width: LdTheme.of(context).borderWidth),
         ),
         child: LdSpring(

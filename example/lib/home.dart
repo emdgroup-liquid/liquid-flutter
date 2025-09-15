@@ -18,92 +18,12 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
 
-    final background = theme.background;
-
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
           child: LdContainer(
             child: LdAutoSpace(
               children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: background,
-                  ),
-                  padding: EdgeInsets.zero,
-                  child: AspectRatio(
-                    aspectRatio: 4 / 2,
-                    child: SingleChildScrollView(
-                      physics: const NeverScrollableScrollPhysics(),
-                      child: ClipRect(
-                        child: AspectRatio(
-                          aspectRatio: 4 / 3,
-                          child: Stack(
-                            children: [
-                              Transform(
-                                filterQuality: FilterQuality.high,
-                                transform: Matrix4.identity()
-                                  ..rotateX(-0.8)
-                                  ..rotateZ(-0.4)
-                                  ..translateByDouble(-80.0, 200.0, 1.0, 1.0),
-                                child: Transform.scale(
-                                  alignment: Alignment.topLeft,
-                                  scale: 0.8,
-                                  child: const LdCard(
-                                    expandChild: true,
-                                    child: Stack(
-                                      children: [
-                                        Align(
-                                          alignment: Alignment.topLeft,
-                                          child: FocusScope(
-                                            canRequestFocus: false,
-                                            child: SingleChildScrollView(
-                                              scrollDirection: Axis.horizontal,
-                                              child: SizedBox(
-                                                height: 1000,
-                                                width: 2000,
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Expanded(
-                                                        child:
-                                                            ChemicalScreen()),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Positioned.fill(
-                                  child: DecoratedBox(
-                                      decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.bottomLeft,
-                                  end: Alignment.topRight,
-                                  colors: [
-                                    background.withAlpha(0),
-                                    background.withAlpha(200),
-                                    background
-                                  ],
-                                  stops: const [0, 0.8, 0.85],
-                                ),
-                              )))
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                ldSpacerL,
-                const LdDivider(),
-                ldSpacerL,
                 Row(
                   children: [
                     Container(
@@ -185,7 +105,7 @@ class _HomeState extends State<Home> {
                     onPressed: () {
                       context.go("/components/bento-gallery");
                     },
-                    child: const Text("Bento Gallery"),
+                    child: const Text("Widget Gallery"),
                   ),
                 ]),
                 const LdDivider(),
@@ -194,22 +114,16 @@ class _HomeState extends State<Home> {
                   "To get started using liquid flutter please add it as a dependency to your project:",
                 ),
                 const CodeBlock(
-                  language: "yaml",
-                  code: """
-                dependencies:
-                  liquid_flutter:
-                    version: ^$ldVersion
-                """,
+                  language: "sh",
+                  code: """flutter pub add liquid_flutter""",
                 ),
                 LdAccordion.fromList(
                   [
                     LdAccordionItem(
                         child: const CodeBlock(
-                          language: "yaml",
+                          language: "sh",
                           code: """
-                dependencies:
-                  liquid_flutter_emd_theme:
-                    version: ^$ldVersion
+                flutter pub add liquid_flutter_emd_theme
                 """,
                         ),
                         header: const Text("EMD Corporate theme installation"))
@@ -221,7 +135,7 @@ class _HomeState extends State<Home> {
                 const CodeBlock(
                   code: """
                 LdThemeProvider(
-                  theme: [provide a custom theme here or leave out use the default]
+                  theme: // Optionally provide an instance of LdTheme(),
                   child: ...
                 )""",
                 ),
@@ -244,10 +158,6 @@ class _HomeState extends State<Home> {
                   code: """var theme = LdTheme.of(context);""",
                 ),
                 const LdTextP(
-                  "Some components will require a portal to work. Please add a Portal to your app/screen at the top level.",
-                ),
-                const CodeBlock(code: "LdPortal(child: Scaffold(...),))"),
-                const LdTextP(
                   "You can now use the components in your app. Please refer to the documentation for more information.",
                 ),
                 const LdTextHl("Changing the theme size"),
@@ -261,7 +171,7 @@ class _HomeState extends State<Home> {
               ],
             ),
           ),
-        ),
+        )
       ],
     );
   }

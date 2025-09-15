@@ -29,7 +29,7 @@ void main() async {
         LiquidFlutterWindowUtils.instance.startDragging();
       });
 
-  LiquidFlutterWindowUtils.instance.configureWindow();
+  await LiquidFlutterWindowUtils.instance.configureWindow();
 
   runApp(const LiquidExample());
 }

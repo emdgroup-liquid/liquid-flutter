@@ -277,6 +277,8 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
     }
   }
 
+  Offset? _panOffset;
+
   bool get active => !widget.disabled && (_pressed || widget.active);
 
   LdColorBundle get _colorBundle {
@@ -318,7 +320,6 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
       autofocus: widget.autoFocus,
       canRequestFocus: !widget.disabled,
       onFocusChange: (value) {
-        print("Focus change: $value");
         setState(() {
           _hasFocus = value;
         });
@@ -362,6 +363,11 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
                 _pressed = false;
                 _focusNode?.unfocus();
               }),
+              onPointerMove: (event) {
+                _safeSetState(() {
+                  _panOffset = event.localPosition;
+                });
+              },
               onPointerCancel: (_) => _safeSetState(() {
                 _pressed = false;
               }),
@@ -380,6 +386,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
                     active: !widget.disabled && (_pressed || widget.active),
                     disabled: widget.disabled,
                     pressed: _pressed,
+                    panOffset: _panOffset,
                   ),
                 ),
               ),

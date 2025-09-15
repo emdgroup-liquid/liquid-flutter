@@ -63,7 +63,7 @@ class BentoGallery extends StatelessWidget {
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
-            childAspectRatio: 1.2,
+            childAspectRatio: 1,
           ),
           itemCount: _bentoItems.length,
           itemBuilder: (context, index) {
@@ -108,14 +108,7 @@ class BentoGallery extends StatelessWidget {
       category: "Layout",
       colorIndex: 2,
     ),
-    _BentoItem(
-      title: "Drawer",
-      description: "Side navigation panel",
-      icon: LucideIcons.menu,
-      route: "/components/drawer",
-      category: "Layout",
-      colorIndex: 3,
-    ),
+
     _BentoItem(
       title: "List",
       description: "Organized collection of items",
@@ -233,15 +226,6 @@ class BentoGallery extends StatelessWidget {
       colorIndex: 1,
     ),
 
-    // Navigation & Interaction
-    _BentoItem(
-      title: "Modal",
-      description: "Overlay dialogs and popups",
-      icon: LucideIcons.messageSquare,
-      route: "/components/modal",
-      category: "Interaction",
-      colorIndex: 2,
-    ),
     _BentoItem(
       title: "Context Menu",
       description: "Right-click context actions",
@@ -275,15 +259,6 @@ class BentoGallery extends StatelessWidget {
       colorIndex: 2,
     ),
 
-    // Data Display
-    _BentoItem(
-      title: "Table",
-      description: "Structured data presentation",
-      icon: LucideIcons.grid3x3,
-      route: "/components/table",
-      category: "Data Display",
-      colorIndex: 3,
-    ),
     _BentoItem(
       title: "Tag",
       description: "Label and categorization",
@@ -338,6 +313,263 @@ class _BentoCard extends StatelessWidget {
     required this.colorIndex,
   });
 
+  Widget _buildPreview(BuildContext context) {
+    final theme = LdTheme.of(context, listen: true);
+
+    switch (title) {
+      case "Button":
+        return Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            ...LdButtonMode.values.map((e) => LdButton(
+                  mode: e,
+                  onPressed: () async {
+                    await Future.delayed(const Duration(seconds: 1));
+                  },
+                  child: Text("Press me"),
+                )),
+          ],
+        );
+
+      case "Card":
+        return LdCard(
+          child: LdAutoSpace(
+            children: [
+              const LdText("Card Preview"),
+              const LdTextCaption("Sample content"),
+            ],
+          ),
+        );
+
+      case "Input":
+        return LdInput(
+          hint: "Preview input",
+        );
+
+      case "Select":
+        return LdSelect<String>(
+          placeholder: "Preview select",
+          items: const [
+            LdSelectItem(value: "option1", child: LdText("Option 1")),
+            LdSelectItem(value: "option2", child: LdText("Option 2")),
+          ],
+          value: "option1",
+          onChange: (_) {},
+        );
+
+      case "Checkbox":
+        return LdAutoSpace(
+          children: [
+            LdCheckbox(
+              checked: true,
+              label: "Preview",
+            ),
+            LdCheckbox(
+              checked: false,
+              label: "Preview",
+            ),
+          ],
+        );
+
+      case "Radio":
+        return LdAutoSpace(
+          children: [
+            LdRadio(
+              checked: true,
+              label: "Preview",
+            ),
+            LdRadio(
+              checked: false,
+              label: "Preview",
+            ),
+          ],
+        );
+
+      case "List":
+        return LdCard(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              LdListItem(
+                leading: LdAvatar(child: Icon(LucideIcons.list)),
+                title: Text("Preview"),
+                subtitle: Text("Preview"),
+                onTap: () {},
+              ),
+              LdDivider(),
+              LdListItem(
+                leading: LdAvatar(child: Icon(LucideIcons.list)),
+                title: Text("Preview"),
+                subtitle: Text("Preview"),
+                tradeLeadingForSelectionControl: true,
+                showSelectionControls: true,
+                onTap: () {},
+              ),
+              LdDivider(),
+              LdListItem(
+                leading: LdAvatar(child: Icon(LucideIcons.list)),
+                title: Text("Preview"),
+                subtitle: Text("Preview"),
+                trailing: Icon(LucideIcons.trash),
+                onTap: () {},
+              ),
+            ],
+          ),
+        );
+
+      case "Switch":
+        return LdSwitch<String>(
+          children: const {"on": Text("On"), "off": Text("Off")},
+          value: "on",
+          onChanged: (_) {},
+        );
+
+      case "Badge":
+        return LdBadge(
+          child: const Text("Preview"),
+        );
+
+      case "Loader":
+        return const LdLoader(size: 32);
+
+      case "Accordion":
+        return LdAccordion.fromList(
+          [
+            LdAccordionItem(
+              header: const Text("Preview"),
+              child: const LdText("Content"),
+            ),
+          ],
+          wrapActiveInCard: true,
+        );
+
+      case "Tag":
+        return LdTag(
+          child: const Text("Preview"),
+        );
+
+      case "Modal":
+        return LdButton(
+          onPressed: () async {
+            await LdModal(
+              title: const Text("Modal"),
+              modalContent: (context) => const Text("Modal content"),
+            ).show(context);
+          },
+          child: const Text("Open Modal"),
+        );
+
+      case "Breadcrumb":
+        return LdBreadcrumb.fromStrings(["Home", "Preview"]);
+
+      case "Orb":
+        return LdOrb(0.5, size: 140);
+
+      case "Notification":
+        return LdNotificationWidget(
+          notification: LdNotification(
+              message: "Notification", type: LdNotificationType.info),
+          onConfirm: () {},
+          onSubmitInput: (_) {},
+          onCancel: () {},
+          onDismiss: () {},
+        );
+
+      case "Exception":
+        return LdExceptionView(
+          exception: LdLocalizedException(
+            message: "Preview Error",
+            type: LdHintType.error,
+          ),
+        );
+
+      case "Hint":
+        return LdHint(
+          type: LdHintType.info,
+          child: const Text("Preview hint text"),
+        );
+
+      case "Indicator":
+        return Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            ...LdIndicatorType.values
+                .map((e) => LdIndicator(type: e, size: LdSize.s)),
+          ],
+        );
+
+      case "Icon":
+        return Icon(
+          LucideIcons.star,
+          size: theme.labelSize(LdSize.s),
+        );
+
+      case "Autospace":
+        return LdAutoSpace(
+          children: const [
+            LdBadge(child: Text("Wow")),
+            LdTextH("This is magic"),
+            LdText("Automatically spacing"),
+            LdText("Vertically"),
+          ],
+        );
+
+      case "Slider":
+        return LdSlider(
+          onSlideComplete: () {},
+          hint: "Slide to complete",
+        );
+
+      case "Context Menu":
+        return LdContextMenu(
+          builder: (context, isOpen, open, child) => child!,
+          menuBuilder: (context, onDismiss) => SizedBox(
+            width: 150,
+            height: 150,
+            child: Center(
+              child: Text("Im a context menu"),
+            ),
+          ),
+          child: LdButton(
+            size: LdSize.l,
+            onPressed: () {},
+            child: const Text("Right Click"),
+          ),
+        );
+
+      case "Action Runner":
+        return Column(
+          children: [
+            LdRunnerStep(
+              title: Text("Demo"),
+              status: LdIndicatorType.success,
+            ),
+            LdRunnerStep(
+              title: Text("Demo"),
+              status: LdIndicatorType.loading,
+            ),
+          ],
+        );
+
+      default:
+        return Container(
+          height: 20,
+          width: 60,
+          decoration: BoxDecoration(
+            color: theme.neutralShade(3),
+            borderRadius: theme.radius(LdSize.xs),
+          ),
+          child: const Center(
+            child: Text(
+              "Preview under construction",
+            ),
+          ),
+        );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
@@ -355,9 +587,11 @@ class _BentoCard extends StatelessWidget {
     return GestureDetector(
       onTap: () => context.go(route),
       child: LdCard(
-        child: LdAutoSpace(
+        expandChild: true,
+        footer: LdAutoSpace(
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
@@ -371,19 +605,17 @@ class _BentoCard extends StatelessWidget {
                     size: 20,
                   ),
                 ),
-                ldSpacerS,
+                ldSpacerM,
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      LdText(
+                      LdTextP(
                         title,
-                        type: LdTextType.paragraph,
                         fontWeight: FontWeight.bold,
                       ),
-                      LdText(
+                      LdTextCaption(
                         category,
-                        type: LdTextType.caption,
                         color: color,
                       ),
                     ],
@@ -399,7 +631,28 @@ class _BentoCard extends StatelessWidget {
             ),
           ],
         ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildPreview(context),
+            ],
+          ),
+        ).padL(),
       ),
     );
   }
+}
+
+class _PreviewItem implements Identifiable<String> {
+  final String _id;
+  final String name;
+
+  _PreviewItem(this._id, this.name);
+
+  @override
+  String get id => _id;
+
+  @override
+  String get idString => _id;
 }

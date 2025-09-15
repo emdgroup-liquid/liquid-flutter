@@ -95,7 +95,7 @@ class LdRunnerStep extends StatelessWidget {
   final bool isExpanded;
   final VoidCallback? onPress;
 
-  final List<Widget> children;
+  final List<Widget>? children;
 
   const LdRunnerStep(
       {Key? key,
@@ -105,7 +105,7 @@ class LdRunnerStep extends StatelessWidget {
       this.trailing,
       this.isExpanded = false,
       this.onPress,
-      required this.children})
+      this.children})
       : super(key: key);
 
   @override
@@ -126,11 +126,11 @@ class LdRunnerStep extends StatelessWidget {
               padding: theme.balPad(LdSize.s),
               decoration: BoxDecoration(
                 borderRadius: theme.radius(LdSize.s),
-                color: children.isNotEmpty ? colors.surface : null,
+                color: (children?.isNotEmpty ?? false) ? colors.surface : null,
               ),
               child: Row(
                 children: [
-                  if (children.isNotEmpty)
+                  if (children?.isNotEmpty ?? false)
                     SizedBox(
                       width: 32,
                       child: AnimatedRotation(
@@ -170,16 +170,17 @@ class LdRunnerStep extends StatelessWidget {
               ),
             );
           }),
-      LdReveal.quick(
-        transformYOffset: 20,
-        child: Padding(
-          padding: theme.pad().copyWith(left: 32),
-          child: LdAutoSpace(
-            children: children,
+      if (children != null)
+        LdReveal.quick(
+          transformYOffset: 20,
+          child: Padding(
+            padding: theme.pad().copyWith(left: 32),
+            child: LdAutoSpace(
+              children: children!,
+            ),
           ),
-        ),
-        revealed: isExpanded,
-      )
+          revealed: isExpanded,
+        )
     ]);
   }
 }

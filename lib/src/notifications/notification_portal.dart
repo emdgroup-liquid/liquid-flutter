@@ -17,6 +17,7 @@ import 'package:liquid_flutter/src/notifications/notification_input.dart';
 import 'package:liquid_flutter/src/notifications/notifications_controller.dart';
 import 'package:liquid_flutter/src/notifications/notification.dart';
 import 'package:liquid_flutter/src/notifications/notification_type.dart';
+import 'package:liquid_flutter/src/notifications/radius_aware_padding.dart';
 import 'package:liquid_flutter/src/spring.dart';
 import 'package:liquid_flutter/src/theme/theme.dart';
 import 'package:liquid_flutter/src/tokens.dart';
@@ -79,6 +80,7 @@ class LdNotificationPortal extends StatelessWidget {
               child: Align(
                 alignment: Alignment.bottomCenter,
                 child: SafeArea(
+                  bottom: false,
                   minimum: LdTheme.of(context).pad(size: LdSize.l),
                   child: Stack(
                     children: notifier.notifications.mapIndexed((
@@ -247,84 +249,76 @@ class LdNotificationWidget extends StatelessWidget {
         notification is! LdInputNotification;
 
     final theme = _theme(context);
-    return Container(
+
+    return RadiusAwarePadding(
+      insetFromEdge: theme.pad(size: LdSize.l).top,
+      fallbackSize: LdSize.l,
+      innerRadiusSize: isTextOnly ? LdSize.m : LdSize.s,
       decoration: BoxDecoration(
+        color: _theme(context).background,
         boxShadow: [ldShadowSticky],
+        border: Border.all(
+          color: LdTheme.of(context).border,
+          width: LdTheme.of(context).borderWidth,
+        ),
       ),
-      child: Container(
-        width: min(
-          400,
-          MediaQuery.of(context).size.width * 0.9,
-        ),
-        clipBehavior: Clip.hardEdge,
-        padding: _theme(context).pad(size: LdSize.m),
-        decoration: BoxDecoration(
-            color: _theme(context).background,
-            borderRadius: theme.screenRadius == 0 || !isTextOnly
-                ? theme.radius(LdSize.l)
-                : BorderRadius.circular(theme.screenRadius),
-            border: Border.all(
-              color: LdTheme.of(context).border,
-              width: LdTheme.of(context).borderWidth,
-            )),
-        child: LdAutoSpace(
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  padding: _theme(context).pad(size: LdSize.xs),
-                  child: _icon(context),
-                ).animate().fade(delay: 200.ms),
-                ldSpacerM,
-                Expanded(
-                    child: Row(
-                  children: [
-                    Expanded(
-                      child: LdAutoSpace(
-                        children: [
-                          // Text of the notification
-                          LdTextP(
-                            notification.message,
-                            overflow: TextOverflow.fade,
-                          ),
-                          if (notification.subMessage != null)
-                            LdTextPs(notification.subMessage!,
-                                overflow: TextOverflow.fade, color: _theme(context).textMuted),
-                        ],
-                      ),
+      child: LdAutoSpace(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                padding: _theme(context).pad(size: LdSize.xs),
+                child: _icon(context),
+              ).animate().fade(delay: 200.ms),
+              ldSpacerM,
+              Expanded(
+                  child: Row(
+                children: [
+                  Expanded(
+                    child: LdAutoSpace(
+                      children: [
+                        // Text of the notification
+                        LdTextP(
+                          notification.message,
+                          overflow: TextOverflow.fade,
+                        ),
+                        if (notification.subMessage != null)
+                          LdTextPs(notification.subMessage!,
+                              overflow: TextOverflow.fade, color: _theme(context).textMuted),
+                      ],
                     ),
-                    ldSpacerM,
-                    if (notification.canDismiss &&
-                        notification is! LdAcknowledgeNotification &&
-                        notification is! LdConfirmNotification)
-                      // Dismiss button
-                      LdButtonGhost(
-                        color: _colorBundle(context),
-                        onPressed: onDismiss,
-                        child: const Icon(LucideIcons.x),
-                      ).animate().fade(delay: 400.ms)
-                  ],
-                )),
-              ],
-            ),
-            // Buttons if the notification is a confirmation
-            if (notification is LdConfirmNotification) _buildConfirmationButtons(context),
-            if (notification is LdAcknowledgeNotification) _buildAcknowledgeButton(context),
-            if (notification is LdInputNotification)
-              NotificationInput(
-                notification: notification as LdInputNotification,
-                onSubmitted: (result) {
-                  onSubmitInput(result);
-                },
-              )
-          ],
-        ),
-      ).animate().shimmer(
-            duration: 500.ms,
-            color: _colorBundle(context).hover(theme.isDark),
+                  ),
+                  ldSpacerM,
+                  if (notification.canDismiss &&
+                      notification is! LdAcknowledgeNotification &&
+                      notification is! LdConfirmNotification)
+                    // Dismiss button
+                    LdButtonGhost(
+                      color: _colorBundle(context),
+                      onPressed: onDismiss,
+                      child: const Icon(LucideIcons.x),
+                    ).animate().fade(delay: 400.ms)
+                ],
+              )),
+            ],
           ),
-    );
+          // Buttons if the notification is a confirmation
+          if (notification is LdConfirmNotification) _buildConfirmationButtons(context),
+          if (notification is LdAcknowledgeNotification) _buildAcknowledgeButton(context),
+          if (notification is LdInputNotification)
+            NotificationInput(
+              notification: notification as LdInputNotification,
+              onSubmitted: (result) {
+                onSubmitInput(result);
+              },
+            )
+        ],
+      ),
+    ).animate().shimmer(
+          duration: 500.ms,
+          color: _colorBundle(context).hover(theme.isDark),
+        );
   }
 
   @override

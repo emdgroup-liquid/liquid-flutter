@@ -10,6 +10,7 @@ public class LiquidFlutterWindowUtilsPlugin: NSObject, FlutterPlugin, WindowUtil
     WindowUtilsApiSetup.setUp(binaryMessenger: registrar.messenger, api: instance)
 
     guard let window = LiquidFlutterWindowUtilsPlugin.getCurrentWindow() else {
+      print("Error getting current window")
       return
     }
   }
@@ -21,8 +22,13 @@ public class LiquidFlutterWindowUtilsPlugin: NSObject, FlutterPlugin, WindowUtil
 
   public func configureWindow() throws {
     guard let window = LiquidFlutterWindowUtilsPlugin.getCurrentWindow() else {
+      print("Error getting current window")
       return
     }
+
+    try setWindowSize(width: 500, height: 500)
+
+    
     
     // Remove the window frame by making the window borderless
     window.styleMask.remove(.titled)
@@ -41,7 +47,7 @@ public class LiquidFlutterWindowUtilsPlugin: NSObject, FlutterPlugin, WindowUtil
     window.isMovableByWindowBackground = true
     
     // Set the window level to floating to ensure proper transparency
-    window.level = .floating
+    
     
     // Force the window to update its appearance
     window.invalidateShadow()

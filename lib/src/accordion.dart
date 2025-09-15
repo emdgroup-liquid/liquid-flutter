@@ -95,7 +95,7 @@ class LdAccordionItem {
 class _LdAccordionChild extends StatelessWidget {
   final Widget child;
   final Widget header;
-  final bool seperateItems;
+  final bool wrapActiveInCard;
   final Duration speed;
 
   final EdgeInsets headerPadding;
@@ -108,7 +108,7 @@ class _LdAccordionChild extends StatelessWidget {
   const _LdAccordionChild(
       {required this.collapsed,
       required this.child,
-      required this.seperateItems,
+      required this.wrapActiveInCard,
       required this.disableElevation,
       required this.onPressed,
       required this.headerPadding,
@@ -125,19 +125,19 @@ class _LdAccordionChild extends StatelessWidget {
     var theme = LdTheme.of(context, listen: true);
     var color = LdSurfaceInfo.of(context).isSurface ? theme.background : theme.surface;
 
-    bool hasShadow = !collapsed && seperateItems && !disableElevation;
+    bool hasShadow = !collapsed && wrapActiveInCard && !disableElevation;
 
     return AnimatedContainer(
       duration: speed,
       margin: EdgeInsets.symmetric(
-        vertical: seperateItems ? 4 : 0,
+        vertical: wrapActiveInCard ? 4 : 0,
       ),
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
         color: !collapsed ? color : null,
-        borderRadius: seperateItems ? theme.radius(LdSize.m) : null,
+        borderRadius: wrapActiveInCard ? theme.radius(LdSize.m) : null,
         border: Border.all(
-          color: seperateItems ? theme.border : Colors.transparent,
+          color: wrapActiveInCard && !collapsed ? theme.border : Colors.transparent,
           width: theme.borderWidth,
           strokeAlign: BorderSide.strokeAlignOutside,
         ),
@@ -226,7 +226,7 @@ class _LdAccordionState extends State<LdAccordion> {
           curveExpand: widget.curveExpand,
           collapsed: !openIndex.contains(n),
           child: widget.childBuilder(context, n),
-          seperateItems: widget.wrapActiveInCard,
+          wrapActiveInCard: widget.wrapActiveInCard,
           disableElevation: widget.flatCard,
           headerPadding: headerPadding,
           speed: widget.speed,

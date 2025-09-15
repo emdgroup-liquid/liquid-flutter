@@ -74,6 +74,7 @@ class LdFilterModal<T extends Identifiable<IdType>, IdType, GroupBy> extends Sta
                           (e) => LdListItem(
                             showSelectionControls: true,
                             radioSelection: true,
+                            borderRadius: LdTheme.of(context).radius(LdSize.s),
                             isSelected: e.isOn,
                             title: Text(e.label(context)),
                             trailing: e.icon(context),
@@ -83,7 +84,7 @@ class LdFilterModal<T extends Identifiable<IdType>, IdType, GroupBy> extends Sta
                           ),
                         )
                         .toList(),
-                  );
+                  ).spaceS().padS();
                 }),
             const LdDivider(),
             if (inactiveFilters.isNotEmpty)

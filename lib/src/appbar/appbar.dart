@@ -10,6 +10,8 @@ import 'package:liquid_flutter/liquid_flutter.dart'
         LdAppBarActionWidget,
         LdWindowCallbacks,
         LdAppbarActionOverflowMenu;
+import 'package:liquid_flutter/src/appbar/macos_window_controls.dart';
+import 'package:liquid_flutter/src/appbar/windows_window_controls.dart';
 import 'package:liquid_flutter/src/notifications/implicit_blur.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:overflow_view/overflow_view.dart';
@@ -232,14 +234,14 @@ class _LdAppBarState extends State<LdAppBar> {
                 condition: widget.blurOnScroll,
                 builder: (context, child) => ClipRect(
                   child: ImplicitBlur(
-                    sigma: scrolledUnder ? 10 : 0,
+                    sigma: scrolledUnder ? 5 : 0,
                     child: child,
                     duration: const Duration(milliseconds: 300),
                   ),
                 ),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 500),
-                  color: backgroundColor.withAlpha(widget.blurOnScroll && scrolledUnder ? 150 : 255),
+                  color: backgroundColor.withAlpha(widget.blurOnScroll && scrolledUnder ? 100 : 255),
                   child: LdWrapConditional(
                     condition: widget.disableSafeArea,
                     builder: (context, child) => child.padS(),
@@ -291,8 +293,15 @@ class _LdAppBarState extends State<LdAppBar> {
                                         layoutBehavior: OverflowViewLayoutBehavior.expandFirstFlexible,
                                         crossAxisAlignment: CrossAxisAlignment.center,
                                         builder: (context, remainingItemCount) {
+                                          if (remainingItemCount > widget.actions.length) {
+                                            return const SizedBox();
+                                          }
                                           return LdAppbarActionOverflowMenu(
-                                            actions: widget.actions.sublist(widget.actions.length - remainingItemCount),
+                                            actions: [
+                                              ...widget.actions.sublist(widget.actions.length +
+                                                  (widget.title != null ? 1 : 0) -
+                                                  remainingItemCount)
+                                            ],
                                             bigToolbar: true,
                                             menuProviders: widget.overflowMenuProviders,
                                             inMenu: true,
@@ -312,7 +321,7 @@ class _LdAppBarState extends State<LdAppBar> {
                                           ...widget.actions.where((e) => e.isVisible(context)).map(
                                                 (e) => LdAppBarActionWidget(
                                                   action: e,
-                                                  bigToolbar: true,
+                                                  bigToolbar: false,
                                                   inMenu: false,
                                                   menuProviders: widget.overflowMenuProviders,
                                                 ),
@@ -331,8 +340,6 @@ class _LdAppBarState extends State<LdAppBar> {
                                 Padding(
                                   padding: EdgeInsets.only(
                                     top: LdTheme.of(context).pad(size: LdSize.s).top,
-                                    left: LdTheme.of(context).pad(size: LdSize.s).left,
-                                    right: LdTheme.of(context).pad(size: LdSize.s).right,
                                   ),
                                   child: widget.bottom!,
                                 ),
@@ -366,93 +373,6 @@ class _LdAppBarState extends State<LdAppBar> {
           if (!_isBottomNavigationBar) const LdDivider(height: 1),
         ],
       ),
-    );
-  }
-}
-
-class MacOSWindowControls extends StatelessWidget {
-  const MacOSWindowControls({
-    super.key,
-    required bool showWindowControls,
-  }) : _showWindowControls = showWindowControls;
-
-  final bool _showWindowControls;
-
-  @override
-  Widget build(BuildContext context) {
-    return LdReveal(
-      initialRevealed: _showWindowControls,
-      revealed: _showWindowControls,
-      child: Row(
-        children: [
-          Tooltip(
-            message: LiquidLocalizations.of(context).close,
-            child: LdButtonGhost(
-              size: LdSize.xs,
-              color: LdTheme.of(context).error,
-              child: const Icon(Icons.circle),
-              onPressed: () {
-                LdAppBar.callbacks?.onClose?.call();
-              },
-            ),
-          ),
-          Tooltip(
-            message: LiquidLocalizations.of(context).minimize,
-            child: LdButtonGhost(
-              size: LdSize.xs,
-              color: LdTheme.of(context).warning,
-              child: const Icon(Icons.circle),
-              onPressed: () {
-                LdAppBar.callbacks?.onMinimize?.call();
-              },
-            ),
-          ),
-          Tooltip(
-            message: LiquidLocalizations.of(context).maximize,
-            child: LdButtonGhost(
-              size: LdSize.xs,
-              color: LdTheme.of(context).success,
-              child: const Icon(Icons.circle),
-              onPressed: () {
-                LdAppBar.callbacks?.onMaximize?.call();
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class WindowsWindowControls extends StatelessWidget {
-  const WindowsWindowControls({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        LdButtonVague(
-          size: LdSize.s,
-          child: const Icon(LucideIcons.minus),
-          onPressed: () {
-            LdAppBar.callbacks?.onMinimize?.call();
-          },
-        ),
-        LdButtonVague(
-          size: LdSize.s,
-          child: const Icon(LucideIcons.square),
-          onPressed: () {
-            LdAppBar.callbacks?.onMaximize?.call();
-          },
-        ),
-        LdButtonVague(
-          size: LdSize.s,
-          child: const Icon(LucideIcons.x),
-          onPressed: () {
-            LdAppBar.callbacks?.onClose?.call();
-          },
-        ),
-      ],
     );
   }
 }

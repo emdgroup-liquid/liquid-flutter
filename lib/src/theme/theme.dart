@@ -29,6 +29,15 @@ class LdTheme extends ChangeNotifier {
     });
   }
 
+  double radiusSize(LdSize size) {
+    return switch (size) {
+      (LdSize.xs) => _sizingConfig.radiusXS,
+      (LdSize.s) => _sizingConfig.radiusS,
+      (LdSize.m) => _sizingConfig.radiusM,
+      (LdSize.l) => _sizingConfig.radiusL,
+    };
+  }
+
   double _screenRadius = 0;
 
   double get screenRadius => _screenRadius;
