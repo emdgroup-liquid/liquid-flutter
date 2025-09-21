@@ -33,11 +33,11 @@ class LdSelect<T> extends StatefulWidget {
   final T? value;
   final FocusNode? focusNode;
   final bool valid;
-  final Function(T)? onChange;
+  final Function(T)? onChanged;
   const LdSelect({
     required this.items,
     this.label,
-    this.onChange,
+    this.onChanged,
     this.size = LdSize.m,
     this.placeholder,
     this.disabled = false,
@@ -146,14 +146,14 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
       active: isActive,
       autoFocus: autoFocus,
       mode: LdTouchableSurfaceMode.neutralGhost,
-      onTap: () async {
+      onPressed: () async {
         setState(() {
           isOpen = false;
         });
         _overlayController.hide();
         LdHaptics.vibrate(HapticsType.selection);
         _focusNode?.requestFocus();
-        widget.onChange?.call(item.value);
+        widget.onChanged?.call(item.value);
       },
       builder: (contxt, colorBundle, status) {
         return Container(
@@ -324,7 +324,7 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
       child: LdTouchableSurface(
         disabled: widget.disabled,
         focusNode: _focusNode,
-        onTap: () async {
+        onPressed: () async {
           setState(() {
             isOpen = true;
           });

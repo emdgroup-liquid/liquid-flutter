@@ -23,7 +23,7 @@ class LdTable<T> extends StatefulWidget {
   final List<T> rows;
   final List<Widget> Function(T row) buildRow;
 
-  final Function(T item, bool selected)? onSelectChange;
+  final Function(T item, bool selected)? onSelectionChanged;
   final Set<T> selectedRows;
   final bool allowSort;
   final Widget? header;
@@ -36,7 +36,7 @@ class LdTable<T> extends StatefulWidget {
       required this.columns,
       required this.rows,
       required this.buildRow,
-      this.onSelectChange,
+      this.onSelectionChanged,
       this.selectedRows = const {},
       this.header,
       this.allowSort = true,
@@ -100,7 +100,7 @@ class _LdTableState<T> extends State<LdTable<T>> {
     }
   }
 
-  bool get selectable => widget.onSelectChange != null;
+  bool get selectable => widget.onSelectionChanged != null;
 
   double _colWidth(int index) {
     var availableWidth = selectable ? width - 48 : width;
@@ -123,16 +123,11 @@ class _LdTableState<T> extends State<LdTable<T>> {
           if (widget.header != null)
             Container(
                 decoration: BoxDecoration(
-                    color: theme.surface,
-                    border: Border(
-                        bottom: BorderSide(color: theme.border, width: 1.5))),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    color: theme.surface, border: Border(bottom: BorderSide(color: theme.border, width: 1.5))),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 child: widget.header),
           Container(
-            decoration: BoxDecoration(
-                border: Border(
-                    bottom: BorderSide(color: theme.border, width: 1.5))),
+            decoration: BoxDecoration(border: Border(bottom: BorderSide(color: theme.border, width: 1.5))),
             child: Row(
               children: [
                 SizedBox(
@@ -142,8 +137,7 @@ class _LdTableState<T> extends State<LdTable<T>> {
                   children: widget.columns.mapIndexed((index, e) {
                     return Container(
                       width: _colWidth((index)),
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 12, vertical: _rowPadding),
+                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: _rowPadding),
                       child: Row(
                         children: [
                           Expanded(
@@ -188,16 +182,13 @@ class _LdTableState<T> extends State<LdTable<T>> {
             },
             physics: const NeverScrollableScrollPhysics(),
             itemBuilder: (context, index) {
-              var row = _sortDir
-                  ? _sortedRows[index]
-                  : _sortedRows.reversed.elementAt(index);
+              var row = _sortDir ? _sortedRows[index] : _sortedRows.reversed.elementAt(index);
               return Row(
                   key: ValueKey("row-$index"),
                   children: widget
                       .buildRow(row)
                       .map<Widget>((e) => Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 12, vertical: _rowPadding),
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: _rowPadding),
                           width: _colWidth(index),
                           child: e))
                       .toList()
@@ -211,7 +202,7 @@ class _LdTableState<T> extends State<LdTable<T>> {
                                   key: ValueKey("select-$index"),
                                   size: _checkboxSize,
                                   onChanged: (p0) {
-                                    widget.onSelectChange!(row, p0);
+                                    widget.onSelectionChanged!(row, p0);
                                   },
                                   checked: widget.selectedRows.contains(row),
                                 ),

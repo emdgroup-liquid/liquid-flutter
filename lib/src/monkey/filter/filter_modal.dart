@@ -78,7 +78,7 @@ class LdFilterModal<T extends Identifiable<IdType>, IdType, GroupBy> extends Sta
                             isSelected: e.isOn,
                             title: Text(e.label(context)),
                             trailing: e.icon(context),
-                            onSelectionChange: (selected) {
+                            onSelectionChanged: (selected) {
                               repository.setActiveSortOption(e.name);
                             },
                           ),

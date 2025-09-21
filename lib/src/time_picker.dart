@@ -33,8 +33,7 @@ class LdTimePicker extends StatelessWidget {
     var initialTimeString = locale.selectTime;
 
     if (value != null) {
-      initialTimeString =
-          '${value!.hour}:${value!.minute.toString().padLeft(2, '0')}';
+      initialTimeString = '${value!.hour}:${value!.minute.toString().padLeft(2, '0')}';
     }
 
     return LdModalBuilder(
@@ -162,9 +161,7 @@ class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
     if (minute != null && minute >= 0 && minute <= 59) {
       _time = TimeOfDay(
         hour: _time?.hour ?? 0,
-        minute:
-            ((minute / widget.minutePrecision).round() * widget.minutePrecision)
-                .clamp(0, 59),
+        minute: ((minute / widget.minutePrecision).round() * widget.minutePrecision).clamp(0, 59),
       );
       _applyWheels();
     }
@@ -256,8 +253,7 @@ class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
                     _applyText();
                     _applyWheels();
                   },
-                  children:
-                      List.generate(60 ~/ widget.minutePrecision, (index) {
+                  children: List.generate(60 ~/ widget.minutePrecision, (index) {
                     return Container(
                       height: 32,
                       padding: const EdgeInsets.all(4),
@@ -281,19 +277,16 @@ class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
             Expanded(
               child: LdInput(
                 hint: 'HH',
-                autofocus: kIsWeb ||
-                    Platform.isMacOS ||
-                    Platform.isLinux ||
-                    Platform.isWindows,
+                autofocus: kIsWeb || Platform.isMacOS || Platform.isLinux || Platform.isWindows,
                 focusNode: _hourFocusNode,
                 controller: _hourControllerText,
                 size: LdSize.l,
                 keyboardType: TextInputType.number,
                 onSubmitted: (p0) {
-                  _hourTextChanged(p0!);
+                  _hourTextChanged(p0);
                   _submit();
                 },
-                onBlur: (p0) => _hourTextChanged(p0!),
+                onBlurred: (p0) => _hourTextChanged(p0),
               ),
             ),
             ldSpacerM,
@@ -304,11 +297,11 @@ class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
                 hint: 'MM',
                 controller: _minuteControllerText,
                 keyboardType: TextInputType.number,
-                onBlur: (p0) {
-                  _minuteTextChanged(p0!);
+                onBlurred: (p0) {
+                  _minuteTextChanged(p0);
                 },
                 onSubmitted: (p0) {
-                  _minuteTextChanged(p0!);
+                  _minuteTextChanged(p0);
                   _submit();
                 },
                 size: LdSize.l,

@@ -54,7 +54,7 @@ class _LdCheckboxState extends State<LdCheckbox> {
       color: reactiveColors,
       mode: widget.checked ? LdTouchableSurfaceMode.solid : LdTouchableSurfaceMode.outline,
       disabled: widget.disabled,
-      onTap: () {
+      onPressed: () {
         if (widget.onChanged != null) {
           widget.onChanged!(!widget.checked);
         }

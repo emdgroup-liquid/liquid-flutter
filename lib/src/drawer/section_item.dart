@@ -12,13 +12,13 @@ class LdDrawerItemSection extends StatefulWidget {
   final bool? active;
   final bool initiallyExpanded;
   final List<Widget>? children;
-  final Function()? onTap;
+  final Function()? onPressed;
   const LdDrawerItemSection(
       {this.leading,
       required this.child,
       this.trailing,
       this.initiallyExpanded = false,
-      this.onTap,
+      this.onPressed,
       this.active,
       this.disabled = false,
       this.children,
@@ -80,8 +80,8 @@ class _LdDrawerItemSectionState extends State<LdDrawerItemSection> {
     if (widget.disabled) {
       return;
     }
-    if (widget.onTap != null) {
-      widget.onTap!();
+    if (widget.onPressed != null) {
+      widget.onPressed!();
     }
 
     setState(() {
@@ -92,7 +92,7 @@ class _LdDrawerItemSectionState extends State<LdDrawerItemSection> {
   Widget buildItem(BuildContext context) {
     return LdTouchableSurface(
       active: widget.active == true,
-      onTap: _onTap,
+      onPressed: _onTap,
       color: _theme.palette.primary,
       builder: (context, colorBundle, status) => Container(
           padding: _theme.pad(size: LdSize.s),

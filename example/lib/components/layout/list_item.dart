@@ -56,7 +56,7 @@ class _ListItemDemoState extends State<ListItemDemo> {
                   showSelectionControls: _showSelectionControls,
                   trailingForward: true,
                   isSelected: _selectedItems.contains(0),
-                  onSelectionChange: (selected) => _selectItem(0),
+                  onSelectionChanged: (selected) => _selectItem(0),
                   leading: LdAvatar(
                     child: Text("A"),
                   ),
@@ -70,7 +70,7 @@ class _ListItemDemoState extends State<ListItemDemo> {
                   leading: LdAvatar(
                     child: Text("B"),
                   ),
-                  onTap: () {
+                  onPressed: () {
                     LdNotificationsController.of(context).addNotification(
                       LdNotification(
                           message: "You pressed the list item",
@@ -90,7 +90,7 @@ class _ListItemDemoState extends State<ListItemDemo> {
                   trailing: LdTag(
                     child: Text("Hyper hyper"),
                   ),
-                  onSelectionChange: (selected) => _selectItem(2),
+                  onSelectionChanged: (selected) => _selectItem(2),
                   leading: LdAvatar(
                     child: Text("C"),
                   ),
@@ -104,7 +104,7 @@ class _ListItemDemoState extends State<ListItemDemo> {
                   showSelectionControls: _showSelectionControls,
                   radioSelection: true,
                   isSelected: _selectedItems.contains(3),
-                  onSelectionChange: (selected) => _selectItem(3),
+                  onSelectionChanged: (selected) => _selectItem(3),
                   title: Text("Very Good Option"),
                   subtitle: Text("This is another subtitle"),
                 )

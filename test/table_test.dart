@@ -39,7 +39,7 @@ void main() {
                 LdCol(title: "Age")
               ],
               rows: rows,
-              onSelectChange: onSelectChange,
+              onSelectionChanged: onSelectChange,
               rowCount: rows.length,
               buildRow: (row) {
                 return [Text(row.name), Text(row.age.toString())];
@@ -65,8 +65,7 @@ void main() {
 
     await test.pumpAndSettle();
 
-    var firstRow = find.descendant(
-        of: find.byKey(const ValueKey("row-0")), matching: find.byType(Text));
+    var firstRow = find.descendant(of: find.byKey(const ValueKey("row-0")), matching: find.byType(Text));
 
     expect((test.firstWidget(firstRow) as Text).data, "Jack");
 

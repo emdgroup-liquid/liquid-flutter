@@ -4,11 +4,6 @@ import 'package:fuzzy/fuzzy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid/main.dart';
 import 'package:liquid/router.dart';
-import 'package:liquid/window/font_selector.dart';
-import 'package:liquid/window/headline_font_selector.dart';
-import 'package:liquid/window/radius_selector.dart';
-import 'package:liquid/window/size_selector.dart';
-import 'package:liquid/window/theme_selector.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_emd_theme/liquid_flutter_emd_theme.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -213,7 +208,7 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
     return LdDrawerItemSection(
       active: isActive,
       leading: Icon(component.icon),
-      onTap: () {
+      onPressed: () {
         _showPage(context, component.route);
       },
       child: Text(component.title),
@@ -255,62 +250,62 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
               LdDrawerItemSection(
                 active: GoRouterState.of(context).uri.path == "/",
                 leading: const Icon(LucideIcons.house),
-                onTap: () => _showPage(context, "/"),
+                onPressed: () => _showPage(context, "/"),
                 child: const Text("Home"),
               ),
               const LdSectionHeader("Demos"),
               LdDrawerItemSection(
                 active: GoRouterState.of(context).uri.path == "/chemical",
                 leading: const Icon(LdIcons.beaker),
-                onTap: () => _showPage(context, "/chemical"),
+                onPressed: () => _showPage(context, "/chemical"),
                 child: const Text("Magic"),
               ),
               LdDrawerItemSection(
                 active: GoRouterState.of(context).uri.path == "/task-demo",
                 leading: const Icon(LucideIcons.check),
-                onTap: () => _showPage(context, "/task-demo"),
+                onPressed: () => _showPage(context, "/task-demo"),
                 child: const Text("Task"),
               ),
               LdDrawerItemSection(
                 active: GoRouterState.of(context).uri.path == "/movie-demo",
                 leading: const Icon(LucideIcons.film),
-                onTap: () => _showPage(context, "/movie-demo"),
+                onPressed: () => _showPage(context, "/movie-demo"),
                 child: const Text("Movie"),
               ),
               const LdSectionHeader("Documentation"),
               LdDrawerItemSection(
                 active: GoRouterState.of(context).uri.path == "/theme",
                 leading: const Icon(LucideIcons.paintbrush),
-                onTap: () => _showPage(context, "/theme"),
+                onPressed: () => _showPage(context, "/theme"),
                 child: const Text("Theme"),
               ),
               LdDrawerItemSection(
                 active: GoRouterState.of(context).uri.path == "/layout",
                 leading: const Icon(LucideIcons.layoutDashboard),
-                onTap: () => _showPage(context, "/layout"),
+                onPressed: () => _showPage(context, "/layout"),
                 child: const Text("Layout"),
               ),
               LdDrawerItemSection(
                 active: GoRouterState.of(context).uri.path == "/radius",
                 leading: const Icon(LucideIcons.radius),
-                onTap: () => _showPage(context, "/radius"),
+                onPressed: () => _showPage(context, "/radius"),
                 child: const Text("Border Radius"),
               ),
               LdDrawerItemSection(
                 active: GoRouterState.of(context).uri.path == "/typography",
                 leading: const Icon(LucideIcons.text),
-                onTap: () => _showPage(context, "/typography"),
+                onPressed: () => _showPage(context, "/typography"),
                 child: const Text("Typography"),
               ),
               LdDrawerItemSection(
                 active: GoRouterState.of(context).uri.path == "/material",
                 leading: const Icon(LucideIcons.sprayCan),
-                onTap: () => _showPage(context, "/material"),
+                onPressed: () => _showPage(context, "/material"),
                 child: const Text("Material"),
               ),
               const LdSectionHeader("Patterns"),
               LdDrawerItemSection(
-                onTap: () => _showPage(context, "/patterns/monkey"),
+                onPressed: () => _showPage(context, "/patterns/monkey"),
                 active: GoRouterState.of(context)
                     .uri
                     .path
@@ -323,32 +318,34 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                   LdDrawerItemSection(
                     active: GoRouterState.of(context).uri.path ==
                         ("/patterns/monkey"),
-                    onTap: () => _showPage(context, "/patterns/monkey"),
+                    onPressed: () => _showPage(context, "/patterns/monkey"),
                     child: const Text("Overview"),
                   ),
                   LdDrawerItemSection(
                     active: GoRouterState.of(context).uri.path ==
                         ("/patterns/monkey/repository"),
-                    onTap: () =>
+                    onPressed: () =>
                         _showPage(context, "/patterns/monkey/repository"),
                     child: const Text("Repository"),
                   ),
                   LdDrawerItemSection(
                     active: GoRouterState.of(context).uri.path ==
                         ("/patterns/monkey/pattern"),
-                    onTap: () => _showPage(context, "/patterns/monkey/pattern"),
+                    onPressed: () =>
+                        _showPage(context, "/patterns/monkey/pattern"),
                     child: const Text("Pattern Configuration"),
                   ),
                   LdDrawerItemSection(
                     active: GoRouterState.of(context).uri.path ==
                         ("/patterns/monkey/actions"),
-                    onTap: () => _showPage(context, "/patterns/monkey/actions"),
+                    onPressed: () =>
+                        _showPage(context, "/patterns/monkey/actions"),
                     child: const Text("Actions"),
                   ),
                   LdDrawerItemSection(
                     active: GoRouterState.of(context).uri.path ==
                         ("/patterns/monkey/sorting-filtering"),
-                    onTap: () => _showPage(
+                    onPressed: () => _showPage(
                         context, "/patterns/monkey/sorting-filtering"),
                     child: const Text("Sorting & Filtering"),
                   ),
@@ -365,9 +362,7 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                       SingleActivator(LogicalKeyboardKey.keyK, meta: true),
                 ),
                 onChanged: (query) {
-                  if (query != null) {
-                    _onQueryChanged(query);
-                  }
+                  _onQueryChanged(query);
                 },
               ),
               ...ComponentCategory.values.expand((category) {
@@ -385,17 +380,20 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
               }),
               const LdDivider(),
               LdDrawerItemSection(
-                onTap: () => launchUrl(Uri.parse("https://emd.design/imprint")),
+                onPressed: () =>
+                    launchUrl(Uri.parse("https://emd.design/imprint")),
                 trailing: const Icon(LucideIcons.externalLink),
                 child: const Text("Imprint"),
               ),
               LdDrawerItemSection(
-                onTap: () => launchUrl(Uri.parse("https://emd.design/privacy")),
+                onPressed: () =>
+                    launchUrl(Uri.parse("https://emd.design/privacy")),
                 trailing: const Icon(LucideIcons.externalLink),
                 child: const Text("Privacy"),
               ),
               LdDrawerItemSection(
-                onTap: () => launchUrl(Uri.parse("https://emd.design/terms")),
+                onPressed: () =>
+                    launchUrl(Uri.parse("https://emd.design/terms")),
                 trailing: const Icon(LucideIcons.externalLink),
                 child: const Text("Terms of use"),
               ),

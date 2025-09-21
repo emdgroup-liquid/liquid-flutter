@@ -123,7 +123,7 @@ class _LdToggleState extends State<LdToggle> with SingleTickerProviderStateMixin
     return LdTouchableSurface(
       color: _theme.palette.neutral,
       mode: LdTouchableSurfaceMode.solid,
-      onTap: _onTap,
+      onPressed: _onTap,
       disabled: widget.disabled,
       active: widget.checked,
       builder: (contxt, colorBundle, status) {

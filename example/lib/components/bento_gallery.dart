@@ -355,7 +355,7 @@ class _BentoCard extends StatelessWidget {
             LdSelectItem(value: "option2", child: LdText("Option 2")),
           ],
           value: "option1",
-          onChange: (_) {},
+          onChanged: (_) {},
         );
 
       case "Checkbox":
@@ -395,7 +395,7 @@ class _BentoCard extends StatelessWidget {
                 leading: LdAvatar(child: Icon(LucideIcons.list)),
                 title: Text("Preview"),
                 subtitle: Text("Preview"),
-                onTap: () {},
+                onPressed: () {},
               ),
               LdDivider(),
               LdListItem(
@@ -404,7 +404,7 @@ class _BentoCard extends StatelessWidget {
                 subtitle: Text("Preview"),
                 tradeLeadingForSelectionControl: true,
                 showSelectionControls: true,
-                onTap: () {},
+                onPressed: () {},
               ),
               LdDivider(),
               LdListItem(
@@ -412,7 +412,7 @@ class _BentoCard extends StatelessWidget {
                 title: Text("Preview"),
                 subtitle: Text("Preview"),
                 trailing: Icon(LucideIcons.trash),
-                onTap: () {},
+                onPressed: () {},
               ),
             ],
           ),

@@ -35,7 +35,7 @@ class _PlatformSelectorState extends State<PlatformSelector> {
             ),
           )
           .toList(),
-      onChange: (value) {
+      onChanged: (value) {
         themeService.platform = value;
       },
     );

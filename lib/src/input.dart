@@ -8,10 +8,10 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 class LdInput extends StatefulWidget {
   final String? label;
   final String hint;
-  final Function(String?)? onChanged;
-  final Function(String?)? onBlur;
-  final Function(String?)? onSubmitted;
-  final Function()? onClear;
+  final Function(String)? onChanged;
+  final Function(String)? onBlurred;
+  final Function(String)? onSubmitted;
+  final Function()? onCleared;
   final TextEditingController? controller;
   final Iterable<String>? autofillHints;
   final bool obscureText;
@@ -42,7 +42,7 @@ class LdInput extends StatefulWidget {
       this.autofocus = false,
       this.showClear = false,
       this.size = LdSize.m,
-      this.onBlur,
+      this.onBlurred,
       this.valid = true,
       this.loading = false,
       this.focusNode,
@@ -53,7 +53,7 @@ class LdInput extends StatefulWidget {
       this.keyboardType,
       this.onChanged,
       this.trailingHint,
-      this.onClear,
+      this.onCleared,
       Key? key})
       : super(key: key);
 
@@ -102,9 +102,8 @@ class _LdInputState extends State<LdInput> {
 
   void _onFocusChange() {
     if (!_focusNode.hasFocus) {
-      widget.onBlur?.call(widget.controller?.text);
-    } else {}
-
+      widget.onBlurred?.call(widget.controller?.text ?? '');
+    }
     setState(() {});
   }
 
@@ -171,7 +170,7 @@ class _LdInputState extends State<LdInput> {
         size: widget.size == LdSize.l ? LdSize.s : LdSize.xs,
         onPressed: () {
           _controller.clear();
-          widget.onClear?.call();
+          widget.onCleared?.call();
         });
 
     if (widget.trailingHint != null) {
@@ -226,63 +225,65 @@ class _LdInputState extends State<LdInput> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Padding(
-                      padding: contentPadding,
-                      child: Container(
-                          constraints: BoxConstraints(
-                            minHeight: cursorHeight,
-                          ),
-                          child: Row(
-                            children: [
-                              if (widget.leading != null) ...[
-                                IconTheme(
-                                  data: IconThemeData(
-                                    color: iconColor,
-                                    size: theme.labelSize(widget.size),
-                                  ),
-                                  child: widget.leading!,
-                                ),
-                                ldSpacerS
-                              ],
-                              Flexible(
-                                child: TextField(
-                                  focusNode: _focusNode,
-                                  enabled: !widget.disabled,
-                                  controller: _controller,
-                                  cursorColor: theme.palette.primary.idle(
-                                    theme.isDark,
-                                  ),
-                                  cursorHeight: cursorHeight,
-                                  maxLines: widget.maxLines,
-                                  autofillHints: widget.autofillHints,
-                                  keyboardType: widget.keyboardType,
-                                  enableInteractiveSelection: true,
-                                  minLines: widget.minLines,
-                                  decoration: InputDecoration(
-                                    hintText: widget.hint,
-                                    border: InputBorder.none,
-                                    hintStyle: hintStyle,
-                                    isCollapsed: true,
-                                    filled: false,
-                                    isDense: true,
-                                    suffix: suffix,
-                                  ),
-                                  obscureText: widget.obscureText,
-                                  autofocus: widget.autofocus,
-                                  textInputAction: widget.textInputAction,
-                                  scrollPadding: theme.pad(),
-                                  onSubmitted: widget.onSubmitted,
-                                  cursorWidth: 1,
-                                  style: TextStyle(
-                                    color: textColor,
-                                    package: theme.fontFamilyPackage,
-                                    fontFamily: theme.fontFamily,
-                                    fontSize: theme.labelSize(widget.size),
-                                    height: 1,
-                                  ),
-                                ),
+                    padding: contentPadding,
+                    child: Container(
+                      constraints: BoxConstraints(
+                        minHeight: cursorHeight,
+                      ),
+                      child: Row(
+                        children: [
+                          if (widget.leading != null) ...[
+                            IconTheme(
+                              data: IconThemeData(
+                                color: iconColor,
+                                size: theme.labelSize(widget.size),
                               ),
-                            ],
-                          ))),
+                              child: widget.leading!,
+                            ),
+                            ldSpacerS
+                          ],
+                          Flexible(
+                            child: TextField(
+                              focusNode: _focusNode,
+                              enabled: !widget.disabled,
+                              controller: _controller,
+                              cursorColor: theme.palette.primary.idle(
+                                theme.isDark,
+                              ),
+                              cursorHeight: cursorHeight,
+                              maxLines: widget.maxLines,
+                              autofillHints: widget.autofillHints,
+                              keyboardType: widget.keyboardType,
+                              enableInteractiveSelection: true,
+                              minLines: widget.minLines,
+                              decoration: InputDecoration(
+                                hintText: widget.hint,
+                                border: InputBorder.none,
+                                hintStyle: hintStyle,
+                                isCollapsed: true,
+                                filled: false,
+                                isDense: true,
+                                suffix: suffix,
+                              ),
+                              obscureText: widget.obscureText,
+                              autofocus: widget.autofocus,
+                              textInputAction: widget.textInputAction,
+                              scrollPadding: theme.pad(),
+                              onSubmitted: widget.onSubmitted,
+                              cursorWidth: 1,
+                              style: TextStyle(
+                                color: textColor,
+                                package: theme.fontFamilyPackage,
+                                fontFamily: theme.fontFamily,
+                                fontSize: theme.labelSize(widget.size),
+                                height: 1,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   if (widget.loading)
                     LinearProgressIndicator(
                       minHeight: theme.borderWidth,

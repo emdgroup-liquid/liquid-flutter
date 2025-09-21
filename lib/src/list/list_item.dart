@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-typedef OnSelectionChange = void Function(bool selected);
+typedef OnSelectionChanged = void Function(bool selected);
 
 class LdListItemConfig {
   final bool active;
@@ -18,8 +18,8 @@ class LdListItemConfig {
   final double? width;
   final EdgeInsets? padding;
   final Key? key;
-  final OnSelectionChange? onSelectionChange;
-  final VoidCallback? onTap;
+  final OnSelectionChanged? onSelectionChanged;
+  final VoidCallback? onPressed;
   final Widget? leading;
   final Widget? subContent;
   final Widget? subtitle;
@@ -38,8 +38,8 @@ class LdListItemConfig {
     this.isSelected = false,
     this.key,
     this.leading,
-    this.onSelectionChange,
-    this.onTap,
+    this.onSelectionChanged,
+    this.onPressed,
     this.padding,
     this.radioSelection = false,
     this.selectDisabled = false,
@@ -64,10 +64,10 @@ class LdListItemConfig {
     Widget? title,
     bool? active,
     Widget? subtitle,
-    VoidCallback? onTap,
+    VoidCallback? onPressed,
     double? width,
     bool? selectDisabled,
-    OnSelectionChange? onSelectionChange,
+    OnSelectionChanged? onSelectionChanged,
     bool? radioSelection,
     BorderRadius? borderRadius,
     Widget? subContent,
@@ -91,10 +91,10 @@ class LdListItemConfig {
       title: title ?? this.title,
       active: active ?? this.active,
       subtitle: subtitle ?? this.subtitle,
-      onTap: onTap ?? this.onTap,
+      onPressed: onPressed ?? this.onPressed,
       width: width ?? this.width,
       selectDisabled: selectDisabled ?? this.selectDisabled,
-      onSelectionChange: onSelectionChange ?? this.onSelectionChange,
+      onSelectionChanged: onSelectionChanged ?? onSelectionChanged,
       radioSelection: radioSelection ?? this.radioSelection,
       borderRadius: borderRadius ?? this.borderRadius,
       subContent: subContent ?? this.subContent,
@@ -119,10 +119,10 @@ class LdListItem extends StatelessWidget {
   final Widget? title;
   final bool active;
   final Widget? subtitle;
-  final VoidCallback? onTap;
+  final VoidCallback? onPressed;
   final double? width;
   final bool selectDisabled;
-  final OnSelectionChange? onSelectionChange;
+  final OnSelectionChanged? onSelectionChanged;
   final bool radioSelection;
   final BorderRadius? borderRadius;
   final Widget? subContent;
@@ -144,8 +144,8 @@ class LdListItem extends StatelessWidget {
     this.disabled = false,
     this.isSelected = false,
     this.leading,
-    this.onSelectionChange,
-    this.onTap,
+    this.onSelectionChanged,
+    this.onPressed,
     this.padding,
     this.radioSelection = false,
     this.selectDisabled = false,
@@ -172,8 +172,8 @@ class LdListItem extends StatelessWidget {
       isSelected: config.isSelected,
       key: config.key,
       leading: config.leading,
-      onSelectionChange: config.onSelectionChange,
-      onTap: config.onTap,
+      onSelectionChanged: config.onSelectionChanged,
+      onPressed: config.onPressed,
       padding: config.padding,
       radioSelection: config.radioSelection,
       selectDisabled: config.selectDisabled,
@@ -220,7 +220,7 @@ class LdListItem extends StatelessWidget {
               color: color,
               disabled: disabled,
               onChanged: (value) {
-                onSelectionChange?.call(value);
+                onSelectionChanged?.call(value);
               },
             )
           else
@@ -229,7 +229,7 @@ class LdListItem extends StatelessWidget {
               color: color,
               disabled: disabled,
               onChanged: (value) {
-                onSelectionChange?.call(value);
+                onSelectionChanged?.call(value);
               },
             ),
           ldSpacerM,
@@ -346,15 +346,15 @@ class LdListItem extends StatelessWidget {
       return LdTouchableSurface(
         focusNode: focusNode,
         isOdd: isOdd,
-        onTap: () {
+        onPressed: () {
           if (showSelectionControls) {
-            onSelectionChange?.call(!isSelected);
+            onSelectionChanged?.call(!isSelected);
           } else {
-            onTap?.call();
+            onPressed?.call();
           }
         },
         active: active || (showSelectionControls && isSelected),
-        disabled: disabled || (!showSelectionControls && onTap == null),
+        disabled: disabled || (!showSelectionControls && onPressed == null),
         color: color ?? theme.palette.primary,
         builder: (contxt, colors, status) {
           return IconTheme(
@@ -382,15 +382,15 @@ class LdListItem extends StatelessWidget {
 
     return LdTouchableSurface(
       focusNode: focusNode,
-      onTap: () {
+      onPressed: () {
         if (showSelectionControls) {
-          onSelectionChange?.call(!isSelected);
+          onSelectionChanged?.call(!isSelected);
         } else {
-          onTap?.call();
+          onPressed?.call();
         }
       },
       active: active || (showSelectionControls && isSelected),
-      disabled: disabled || (!showSelectionControls && onTap == null),
+      disabled: disabled || (!showSelectionControls && onPressed == null),
       color: color ?? theme.palette.primary,
       isOdd: isOdd,
       builder: (contxt, colors, status) {

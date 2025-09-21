@@ -38,7 +38,7 @@ class _ThemeSelectorState extends State<ThemeSelector> {
             ),
           )
           .toList(),
-      onChange: (value) {
+      onChanged: (value) {
         themeService.setPalette(value);
       },
     );

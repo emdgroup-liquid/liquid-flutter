@@ -147,7 +147,7 @@ class _LdAccordionChild extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           LdTouchableSurface(
-            onTap: onPressed,
+            onPressed: onPressed,
             active: !collapsed,
             mode: LdTouchableSurfaceMode.neutralGhost,
             color: theme.palette.primary,

@@ -49,7 +49,7 @@ class LdRadio extends StatelessWidget {
     );
 
     return LdTouchableSurface(
-        onTap: _onTap,
+        onPressed: _onTap,
         mode: LdTouchableSurfaceMode.outline,
         active: checked,
         disabled: disabled,

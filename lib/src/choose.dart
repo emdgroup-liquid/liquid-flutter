@@ -25,7 +25,7 @@ class LdChoose<T> extends StatefulWidget {
 
   final bool multiple;
   final Set<T>? value;
-  final Function(Set<T>) onChange;
+  final Function(Set<T>) onChanged;
   final int? truncateDisplay;
   final LdSize size;
   final String? label;
@@ -40,7 +40,7 @@ class LdChoose<T> extends StatefulWidget {
     this.label,
     this.multiple = false,
     this.mode = LdChooseMode.auto,
-    required this.onChange,
+    required this.onChanged,
     this.placeholder,
     this.size = LdSize.m,
     this.truncateDisplay,
@@ -108,7 +108,7 @@ class _LdChooseState<T> extends State<LdChoose<T>> {
           ),
         );
       })));
-      widget.onChange(result);
+      widget.onChanged(result);
     } else {
       openDialog();
       //LdPortalController.of(context).openEntry(_sheetKey);
@@ -156,7 +156,7 @@ class _LdChooseState<T> extends State<LdChoose<T>> {
               contentSlivers: (context) {
                 return [
                   _LdChooseList<T>(
-                    onChange: widget.onChange,
+                    onChange: widget.onChanged,
                     items: widget.items,
                     value: widget.value,
                     onDismiss: () => Navigator.of(context).pop(),
@@ -173,7 +173,7 @@ class _LdChooseState<T> extends State<LdChoose<T>> {
             builder: (context, open) {
               return LdTouchableSurface(
                 disabled: widget.disabled,
-                onTap: () => _onTap(context, open),
+                onPressed: () => _onTap(context, open),
                 mode: LdTouchableSurfaceMode.neutralGhost,
                 color: theme.palette.primary,
                 builder: (contxt, _, status) {
@@ -398,7 +398,7 @@ class _LdChooseListState<T> extends State<_LdChooseList<T>> {
           isSelected: _value.contains(item.value),
           radioSelection: !widget.multiple,
           showSelectionControls: true,
-          onSelectionChange: (_) => _onTap(context, item),
+          onSelectionChanged: (_) => _onTap(context, item),
         );
       },
     );

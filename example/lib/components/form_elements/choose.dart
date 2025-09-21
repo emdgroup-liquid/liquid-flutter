@@ -53,7 +53,7 @@ class _ChooseDemoState extends State<ChooseDemo> {
                   value: _value,
                   truncateDisplay: 3,
                   mode: _mode,
-                  onChange: _onChange,
+                  onChanged: _onChange,
                   items: const [
                     LdSelectItem(
                       child: Text("Raspberry pie"),
@@ -110,7 +110,7 @@ class _ChooseDemoState extends State<ChooseDemo> {
             children: [
               LdSelect<LdChooseMode>(
                   value: _mode,
-                  onChange: (p0) {
+                  onChanged: (p0) {
                     setState(() {
                       _mode = p0;
                     });

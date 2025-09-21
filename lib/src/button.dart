@@ -237,7 +237,7 @@ class _LdButtonState extends State<LdButton> {
       },
       active: widget.active ?? false,
       disabled: widget.disabled || isLoading,
-      onTap: _onTap,
+      onPressed: _onTap,
       color: colors,
       builder: (context, colors, status) => Semantics(
         button: true,

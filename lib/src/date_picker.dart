@@ -83,7 +83,7 @@ class LdDatePicker extends StatelessWidget {
             );
           },
           label: label ?? LiquidLocalizations.of(context).selectDate,
-          dismiss: () => Navigator.of(context).pop(),
+          onDismissed: () => Navigator.of(context).pop(),
           minDate: minDate,
           maxDate: maxDate,
         ),
@@ -99,12 +99,12 @@ class _DatePickerSheet extends StatefulWidget {
   final DateTime? minDate;
   final DateTime? maxDate;
 
-  final void Function() dismiss;
+  final void Function() onDismissed;
   const _DatePickerSheet({
     required this.value,
     required this.label,
     required this.onChanged,
-    required this.dismiss,
+    required this.onDismissed,
     this.minDate,
     this.maxDate,
   });
@@ -120,18 +120,15 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
     initialPage: monthSince0(widget.value),
   );
 
-  int monthSince0(DateTime other) => Jiffy.parseFromDateTime(other)
-      .diff(Jiffy.parseFromDateTime(DateTime(0)), unit: Unit.month)
-      .toInt();
+  int monthSince0(DateTime other) =>
+      Jiffy.parseFromDateTime(other).diff(Jiffy.parseFromDateTime(DateTime(0)), unit: Unit.month).toInt();
 
   bool get _pageControllerIsValid => (_pageController?.positions.length == 1);
 
-  int get _currentPage => _pageControllerIsValid
-      ? _pageController!.page?.toInt() ?? monthSince0(widget.value)
-      : monthSince0(widget.value);
+  int get _currentPage =>
+      _pageControllerIsValid ? _pageController!.page?.toInt() ?? monthSince0(widget.value) : monthSince0(widget.value);
 
-  DateTime get _viewDate =>
-      Jiffy.parseFromDateTime(DateTime(0)).add(months: _currentPage).dateTime;
+  DateTime get _viewDate => Jiffy.parseFromDateTime(DateTime(0)).add(months: _currentPage).dateTime;
 
   @override
   initState() {
@@ -178,7 +175,7 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
   LdSelect _buildMonthSelect() {
     return LdSelect(
       value: _viewDate.month - 1,
-      onChange: (p0) {
+      onChanged: (p0) {
         viewDate(DateTime(_viewDate.year, p0 + 1, _viewDate.day));
       },
       items: List.generate(
@@ -209,7 +206,7 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
 
     return LdSelect(
       value: _viewDate.year,
-      onChange: (p0) {
+      onChanged: (p0) {
         viewDate(DateTime(p0, _viewDate.month, _viewDate.day));
       },
       items: List.generate(
@@ -228,9 +225,7 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
   }
 
   bool isSelected(DateTime date) {
-    return date.year == _selectedDate.year &&
-        date.month == _selectedDate.month &&
-        date.day == _selectedDate.day;
+    return date.year == _selectedDate.year && date.month == _selectedDate.month && date.day == _selectedDate.day;
   }
 
   bool get showTodayButton {
@@ -372,9 +367,7 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
           itemBuilder: (context, index) {
             return _MonthView(
               key: Key("month_view_$index"),
-              viewDate: Jiffy.parseFromDateTime(DateTime(0))
-                  .add(months: index)
-                  .dateTime,
+              viewDate: Jiffy.parseFromDateTime(DateTime(0)).add(months: index).dateTime,
               selectedDate: _selectedDate,
               minDate: widget.minDate,
               maxDate: widget.maxDate,
@@ -445,7 +438,7 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
             size: LdSize.l,
             onPressed: () {
               widget.onChanged(_selectedDate);
-              widget.dismiss();
+              widget.onDismissed();
             }),
         ldSpacerL,
       ],
@@ -470,9 +463,7 @@ class _MonthView extends StatelessWidget {
   });
 
   bool isSameDay(DateTime date1, DateTime date2) {
-    return date1.year == date2.year &&
-        date1.month == date2.month &&
-        date1.day == date2.day;
+    return date1.year == date2.year && date1.month == date2.month && date1.day == date2.day;
   }
 
   bool isToday(DateTime date) {
@@ -523,8 +514,7 @@ class _MonthView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ResponsiveBuilder(builder: (context, size) {
       // Find the weekday of the first day of the month
-      final firstDayWeekday =
-          DateTime(viewDate.year, viewDate.month, 1).weekday;
+      final firstDayWeekday = DateTime(viewDate.year, viewDate.month, 1).weekday;
 
       final aspectRatio = size.isDesktop || size.isTablet ? 2.0 : 1.0;
 
@@ -533,8 +523,7 @@ class _MonthView extends StatelessWidget {
       final monthDays = List.generate(
         firstDayWeekday - 1,
         (index) {
-          final day = DateTime(viewDate.year, viewDate.month, 1)
-              .subtract(Duration(days: firstDayWeekday - index));
+          final day = DateTime(viewDate.year, viewDate.month, 1).subtract(Duration(days: firstDayWeekday - index));
           return Expanded(
             child: Center(
               child: AspectRatio(
@@ -586,8 +575,7 @@ class _MonthView extends StatelessWidget {
       if (nextMonthDays > 0 && nextMonthDays < 7) {
         monthDays.addAll(
           List.generate(nextMonthDays, (index) {
-            final day = DateTime(
-                viewDate.year, viewDate.month, monthLength + index + 1);
+            final day = DateTime(viewDate.year, viewDate.month, monthLength + index + 1);
             return Expanded(
               child: AspectRatio(
                 aspectRatio: aspectRatio,
@@ -614,10 +602,7 @@ class _MonthView extends StatelessWidget {
 
       for (var i = 0; i < monthDays.length; i += 7) {
         weeks.add(Row(
-          children: monthDays
-              .sublist(i, min(i + 7, monthDays.length))
-              .intersperse<Widget>(ldSpacerS)
-              .toList(),
+          children: monthDays.sublist(i, min(i + 7, monthDays.length)).intersperse<Widget>(ldSpacerS).toList(),
         ));
       }
 

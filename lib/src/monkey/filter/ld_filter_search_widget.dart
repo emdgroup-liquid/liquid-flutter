@@ -280,11 +280,11 @@ class _SearchWidgetState<T extends Identifiable<IdType>, IdType, Suggestion>
                             : null,
                         hint: widget.filter.hint ?? LiquidLocalizations.of(context).search,
                         onChanged: _onSearchChanged,
-                        onClear: () {
+                        onCleared: () {
                           Navigator.of(context).maybePop('');
                         },
                         onSubmitted: (value) {
-                          Navigator.of(context).maybePop(value ?? '');
+                          Navigator.of(context).maybePop(value);
                         },
                       ),
                       if (controller.state.result?.isNotEmpty ?? false)
@@ -301,7 +301,7 @@ class _SearchWidgetState<T extends Identifiable<IdType>, IdType, Suggestion>
                                 widget.filter.buildSuggestion?.call(context, controller.state.result![index]) ??
                                 LdListItem(
                                   borderRadius: LdTheme.of(context).radius(LdSize.s),
-                                  onTap: () {
+                                  onPressed: () {
                                     _controller.text = controller.state.result![index].toString();
                                     Navigator.of(context).maybePop(controller.state.result![index].toString());
                                   },

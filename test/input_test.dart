@@ -24,7 +24,7 @@ void main() {
             hint: "Foo",
             label: "Test",
             focusNode: focus,
-            onBlur: (_) => onBlur(),
+            onBlurred: (_) => onBlur(),
           ),
         ))));
 

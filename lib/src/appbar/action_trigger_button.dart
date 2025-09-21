@@ -30,7 +30,7 @@ class ActionTriggerButton extends StatelessWidget {
       return LdReveal.quick(
         revealed: action.isVisible(context),
         child: LdListItem(
-          onTap: () {
+          onPressed: () {
             LdContextMenuDissmissNotification().dispatch(context);
             onPressed();
           },

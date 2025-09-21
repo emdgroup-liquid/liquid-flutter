@@ -43,7 +43,7 @@ class LdFilterAnyOfWidget<T extends Identifiable<IdType>, IdType, E> extends Sta
             multiple: true,
             value: filter.selectedValues,
             placeholder: Text(filter.label(context)),
-            onChange: (Set<E> values) {
+            onChanged: (Set<E> values) {
               if (values.isEmpty) {
                 filter.isOn = false;
                 onFilterChanged(filter);

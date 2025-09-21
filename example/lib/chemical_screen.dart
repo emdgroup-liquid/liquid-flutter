@@ -144,28 +144,28 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
                               LdListItem(
                                   title: const Text("Deduct 0.1l"),
                                   leading: const Icon(LucideIcons.arrowDown),
-                                  onTap: () {
+                                  onPressed: () {
                                     _deduct(0.1);
                                     Navigator.of(context).pop();
                                   }),
                               LdListItem(
                                   title: const Text("Deduct 0.2l"),
                                   leading: const Icon(LucideIcons.arrowDown),
-                                  onTap: () {
+                                  onPressed: () {
                                     _deduct(0.2);
                                     Navigator.of(context).pop();
                                   }),
                               LdListItem(
                                   title: const Text("Deduct 0.5l"),
                                   leading: const Icon(LucideIcons.arrowDown),
-                                  onTap: () {
+                                  onPressed: () {
                                     _deduct(0.5);
                                     Navigator.of(context).pop();
                                   }),
                               LdListItem(
                                   title: const Text("Add 0.1l"),
                                   leading: const Icon(LucideIcons.arrowUp),
-                                  onTap: () {
+                                  onPressed: () {
                                     _deduct(-0.1);
                                     Navigator.of(context).pop();
                                   }),
@@ -173,7 +173,7 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
                               LdListItem(
                                   title: const Text("Refill entirely"),
                                   leading: const Icon(LucideIcons.arrowUp),
-                                  onTap: () {
+                                  onPressed: () {
                                     _deduct(-1);
                                     Navigator.of(context).pop();
                                   })

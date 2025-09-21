@@ -44,7 +44,7 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
               LdListItem(
                 width: double.infinity,
                 leading: const Icon(LucideIcons.pen),
-                onTap: () {
+                onPressed: () {
                   LdContextMenuDissmissNotification().dispatch(context);
                 },
                 title: const Text("Edit"),
@@ -52,7 +52,7 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
               LdListItem(
                 width: double.infinity,
                 leading: const Icon(LucideIcons.copy),
-                onTap: () {
+                onPressed: () {
                   onDismiss();
                 },
                 title: const Text("Copy"),
@@ -60,7 +60,7 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
               LdListItem(
                 width: double.infinity,
                 leading: const Icon(LucideIcons.share2),
-                onTap: () {
+                onPressed: () {
                   onDismiss();
                 },
                 title: const Text("Share"),
@@ -68,7 +68,7 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
               LdListItem(
                 width: double.infinity,
                 leading: const Icon(LucideIcons.star),
-                onTap: () {
+                onPressed: () {
                   onDismiss();
                 },
                 title: const Text("Favorite"),
@@ -76,7 +76,7 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
               LdListItem(
                 width: double.infinity,
                 leading: const Icon(LucideIcons.archive),
-                onTap: () {
+                onPressed: () {
                   onDismiss();
                 },
                 title: const Text("Archive"),
@@ -85,7 +85,7 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
               LdListItem(
                 width: double.infinity,
                 leading: const Icon(LucideIcons.trash2, color: Colors.red),
-                onTap: () {
+                onPressed: () {
                   onDismiss();
                 },
                 title:

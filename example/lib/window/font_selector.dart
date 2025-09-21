@@ -24,7 +24,7 @@ class _FontSelectorState extends State<FontSelector> {
               child: Text(font),
             ),
           ),
-      onChange: (p0) async {
+      onChanged: (p0) async {
         final font = GoogleFonts.getFont(p0.first);
 
         await GoogleFonts.pendingFonts();

@@ -22,14 +22,10 @@ void main() {
           child: MaterialApp(
               home: Portal(
             child: Scaffold(
-              body: LdSelect<String>(
-                  key: const ValueKey("select"),
-                  onChange: onChange,
-                  value: value,
-                  items: const [
-                    LdSelectItem(child: Text("test1"), value: "test1"),
-                    LdSelectItem(child: Text("test2"), value: "test2"),
-                  ]),
+              body: LdSelect<String>(key: const ValueKey("select"), onChanged: onChange, value: value, items: const [
+                LdSelectItem(child: Text("test1"), value: "test1"),
+                LdSelectItem(child: Text("test2"), value: "test2"),
+              ]),
             ),
           ))),
     ));

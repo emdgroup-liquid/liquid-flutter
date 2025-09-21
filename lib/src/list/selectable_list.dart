@@ -354,11 +354,11 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType, GroupingCri
             focusNode: _itemFocusNodes[item.value!.id],
             isSelected: isSelected(item.value!.id),
             active: isSelected(item.value!.id),
-            onSelectionChange: (selected) => onSelectionChange(
+            onSelectionChanged: (selected) => onSelectionChange(
               item.value!.id,
               selected,
             ),
-            onTap: () => onTap(item.value!.id),
+            onPressed: () => onTap(item.value!.id),
             showSelectionControls: widget.showSelectionControls,
           ),
         );

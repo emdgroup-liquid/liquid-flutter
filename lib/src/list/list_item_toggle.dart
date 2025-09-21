@@ -36,7 +36,7 @@ class LdListItemToggle extends StatelessWidget {
       borderRadius: borderRadius,
       disabled: disabled,
       padding: padding,
-      onTap: onChanged != null ? () => onChanged!(!checked) : null,
+      onPressed: onChanged != null ? () => onChanged!(!checked) : null,
       trailing: LdToggle(
         checked: checked,
         onChanged: onChanged,

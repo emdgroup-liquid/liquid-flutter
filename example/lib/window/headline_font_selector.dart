@@ -24,7 +24,7 @@ class _HeadlineFontSelectorState extends State<HeadlineFontSelector> {
               child: Text(entry.key),
             ),
           ),
-      onChange: (p0) async {
+      onChanged: (p0) async {
         final font = GoogleFonts.getFont(p0.first);
 
         await GoogleFonts.pendingFonts();

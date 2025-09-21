@@ -20,7 +20,7 @@ class _LdRunnerLogState extends State<LdRunnerLog> {
 
   Widget buildLine(int index, LdTheme theme) {
     return LdTouchableSurface(
-        onTap: () {},
+        onPressed: () {},
         color: LdTheme.of(context).palette.neutral,
         builder: (context, colors, status) {
           return Container(
@@ -115,7 +115,7 @@ class LdRunnerStep extends StatelessWidget {
       LdTouchableSurface(
           active: isExpanded,
           disabled: disabled,
-          onTap: () {
+          onPressed: () {
             if (onPress != null) {
               onPress!();
             }

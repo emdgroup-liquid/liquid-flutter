@@ -60,7 +60,7 @@ class _TableDemoState extends State<TableDemo> {
                     title: "Email", sort: (a, b) => a.email.compareTo(b.email))
               ],
               rowCount: 3,
-              onSelectChange: (item, selected) {
+              onSelectionChanged: (item, selected) {
                 setState(() {
                   if (selected) {
                     _selectedRows.add(item);

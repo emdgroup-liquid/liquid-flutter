@@ -81,7 +81,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
                   LdSelectItem(child: Text("Large"), value: LdSize.l),
                   LdSelectItem(child: Text("Small"), value: LdSize.s),
                 ],
-                onChange: _changeSize),
+                onChanged: _changeSize),
             ldSpacerL,
             LdToggle(
               label: "On Surface",

@@ -32,7 +32,7 @@ class _SelectDemoState extends State<SelectDemo> {
                   onSurface: _onSurface,
                   value: _value,
                   disabled: _disabled,
-                  onChange: (p0) {
+                  onChanged: (p0) {
                     setState(() {
                       _value = p0;
                     });
@@ -47,7 +47,7 @@ class _SelectDemoState extends State<SelectDemo> {
                   onSurface: _onSurface,
                   value: _value,
                   disabled: _disabled,
-                  onChange: (p0) {
+                  onChanged: (p0) {
                     setState(() {
                       _value = p0;
                     });

@@ -51,7 +51,7 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType, GroupingCriter
                         title: Text(action.label(context)),
                         leading: action.icon(context),
                         borderRadius: LdTheme.of(context).radius(LdSize.s),
-                        onTap: () {
+                        onPressed: () {
                           LdContextMenuDissmissNotification().dispatch(context);
                           action.onPressed(context);
                         },

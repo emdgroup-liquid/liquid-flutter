@@ -234,11 +234,11 @@ class LdTouchableSurface extends StatefulWidget {
   final LdTouchableSurfaceMode mode;
 
   final FocusNode? focusNode;
-  final Function() onTap;
+  final Function() onPressed;
   final Widget Function(BuildContext contxt, LdColorBundle colorBundle, LdTouchableStatus status) builder;
   const LdTouchableSurface({
     super.key,
-    required this.onTap,
+    required this.onPressed,
     this.color,
     required this.builder,
     this.focusNode,
@@ -327,7 +327,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
       onKeyEvent: (node, event) {
         if (event is KeyDownEvent && widget.disabled == false) {
           if (event.logicalKey == LogicalKeyboardKey.enter || event.logicalKey == LogicalKeyboardKey.space) {
-            widget.onTap();
+            widget.onPressed();
             return KeyEventResult.handled;
           }
         }
@@ -374,7 +374,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
-                  if (!widget.disabled) widget.onTap();
+                  if (!widget.disabled) widget.onPressed();
                   _focusNode?.unfocus();
                 },
                 child: widget.builder(

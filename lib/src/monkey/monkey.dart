@@ -56,7 +56,7 @@ class LdMonkey<T extends Identifiable<IdType>, IdType, GroupingCriterion> {
   final LdSelectableList<T, IdType, GroupingCriterion> Function(
     LdMonkey<T, IdType, GroupingCriterion> route,
     LdMonkeyDetailState<T, IdType, GroupingCriterion> state,
-    void Function(Set<IdType> selectedItems) onSelectionChange,
+    void Function(Set<IdType> selectedItems) onSelectionChanged,
   ) listBuilder;
 
   static LdMonkey<T, IdType, GroupingCriterion> of<T extends Identifiable<IdType>, IdType, GroupingCriterion>(
