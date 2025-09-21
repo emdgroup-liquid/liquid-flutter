@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:liquid/window/drawer.dart';
 import 'package:liquid/window/font_selector.dart';
 import 'package:liquid/window/headline_font_selector.dart';
+import 'package:liquid/window/platform_selector.dart';
 import 'package:liquid/window/radius_selector.dart';
 import 'package:liquid/window/size_selector.dart';
 import 'package:liquid/window/theme_selector.dart';
@@ -65,6 +66,8 @@ class _AppScaffoldState extends State<AppScaffold> {
                   child: SingleChildScrollView(
                     child: LdAutoSpace(
                       children: [
+                        const PlatformSelector(),
+                        ldSpacerM,
                         const ThemeSelector(),
                         ldSpacerM,
                         const SizeSelector(),

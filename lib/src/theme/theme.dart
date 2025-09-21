@@ -1,7 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 import 'package:provider/provider.dart';
+
+enum LdPlatform { macos, ios, android, linux, windows, web }
 
 /// Provides a theme to all the components in the widget tree
 /// Theme can be accessed using LdTheme.of(context)
@@ -14,6 +17,27 @@ class LdTheme extends ChangeNotifier {
   LdSizingConfig _sizingConfig = LdSizingConfig();
 
   LdSizingConfig get sizingConfig => _sizingConfig;
+
+  LdTheme() {
+    _platform = switch ((kIsWeb, defaultTargetPlatform)) {
+      (false, TargetPlatform.android) => LdPlatform.android,
+      (false, TargetPlatform.iOS) => LdPlatform.ios,
+      (false, TargetPlatform.macOS) => LdPlatform.macos,
+      (false, TargetPlatform.linux) => LdPlatform.linux,
+      (false, TargetPlatform.windows) => LdPlatform.windows,
+      (true, _) => LdPlatform.web,
+      _ => LdPlatform.web,
+    };
+  }
+
+  late LdPlatform _platform;
+
+  LdPlatform get platform => _platform;
+
+  set platform(LdPlatform platform) {
+    _platform = platform;
+    notifyListeners();
+  }
 
   set sizingConfig(LdSizingConfig config) {
     _sizingConfig = config;

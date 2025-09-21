@@ -1,15 +1,8 @@
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:liquid_flutter/liquid_flutter.dart'
-    hide
-        LdLabeledAction,
-        LdLabeledActionSubmitType,
-        LdAppBarActionWidget,
-        LdWindowCallbacks,
-        LdAppbarActionOverflowMenu;
+import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/macos_window_controls.dart';
 import 'package:liquid_flutter/src/appbar/windows_window_controls.dart';
 import 'package:liquid_flutter/src/notifications/implicit_blur.dart';
@@ -17,11 +10,6 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:overflow_view/overflow_view.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
-
-import 'app_bar_action.dart';
-import 'appbar_action_overflow_menu.dart';
-import 'labeled_action.dart';
-import 'window_callbacks.dart';
 
 class LdAppBar extends StatefulWidget {
   final Widget? title;
@@ -125,11 +113,11 @@ class _LdAppBarState extends State<LdAppBar> {
   }
 
   bool get _showWindowsWindowControls {
-    return !kIsWeb && defaultTargetPlatform == TargetPlatform.windows && _slot == LdScaffoldSlot.appBar;
+    return LdTheme.of(context).platform == LdPlatform.windows && _slot == LdScaffoldSlot.appBar;
   }
 
   bool get _showMacOSWindowControls {
-    if (kIsWeb || defaultTargetPlatform != TargetPlatform.macOS) {
+    if (LdTheme.of(context).platform != LdPlatform.macos) {
       return false;
     }
 
@@ -168,6 +156,52 @@ class _LdAppBarState extends State<LdAppBar> {
 
   LdScaffoldState? get _scaffold {
     return context.findAncestorStateOfType<LdScaffoldState>();
+  }
+
+  EdgeInsets _padding(BuildContext context) {
+    final theme = LdTheme.of(context);
+    final basePadding = theme.paddingSize(size: LdSize.s);
+    final mediaPadding = MediaQuery.paddingOf(context);
+
+    return EdgeInsets.only(
+      left: max(
+        mediaPadding.left,
+        basePadding,
+      ),
+      right: max(
+        mediaPadding.right,
+        basePadding,
+      ),
+      top: basePadding + (_isAppBar ? mediaPadding.top : 0),
+      bottom: max(basePadding, (_isBottomNavigationBar ? mediaPadding.bottom : 0)),
+    );
+  }
+
+  Widget _decorateBorder(BuildContext context, Widget child) {
+    final theme = LdTheme.of(context, listen: true);
+
+    final border = Border(
+      bottom: !_isBottomNavigationBar
+          ? BorderSide(
+              color: theme.border,
+              width: theme.borderWidth,
+            )
+          : BorderSide.none,
+      top: _isBottomNavigationBar
+          ? BorderSide(
+              color: theme.border,
+              width: theme.borderWidth,
+            )
+          : BorderSide.none,
+    );
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: border,
+      ),
+      position: DecorationPosition.foreground,
+      child: child,
+    );
   }
 
   @override
@@ -212,7 +246,7 @@ class _LdAppBarState extends State<LdAppBar> {
     };
 
     final appBar = AnnotatedRegion<SystemUiOverlayStyle>(
-      value: LdTheme.of(context).isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+      value: theme.isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       child: ValueListenableBuilder(
           valueListenable: scrollListenable ?? ValueNotifier<double>(0),
           builder: (context, value, child) {
@@ -221,15 +255,18 @@ class _LdAppBarState extends State<LdAppBar> {
             return AnimatedContainer(
               width: double.infinity,
               duration: const Duration(milliseconds: 100),
-              decoration: BoxDecoration(boxShadow: [
-                if (!widget.blurOnScroll)
-                  BoxShadow(
-                    color:
-                        theme.palette.neutral.shades.last.withAlpha(scrolledUnder || _isBottomNavigationBar ? 10 : 0),
-                    blurRadius: 10,
-                    spreadRadius: 10,
-                  ),
-              ]),
+              decoration: BoxDecoration(
+                boxShadow: [
+                  if (!widget.blurOnScroll)
+                    BoxShadow(
+                      color: theme.palette.neutral.shades.last.withAlpha(
+                        scrolledUnder || _isBottomNavigationBar ? 10 : 0,
+                      ),
+                      blurRadius: 10,
+                      spreadRadius: 10,
+                    ),
+                ],
+              ),
               child: LdWrapConditional(
                 condition: widget.blurOnScroll,
                 builder: (context, child) => ClipRect(
@@ -248,15 +285,7 @@ class _LdAppBarState extends State<LdAppBar> {
                     child: LdWrapConditional(
                       condition: !widget.disableSafeArea,
                       builder: (context, child) => Padding(
-                        padding: EdgeInsetsGeometry.only(
-                          left: max(MediaQuery.paddingOf(context).left, LdTheme.of(context).pad(size: LdSize.s).left),
-                          right:
-                              max(MediaQuery.paddingOf(context).right, LdTheme.of(context).pad(size: LdSize.s).right),
-                          top: LdTheme.of(context).pad(size: LdSize.s).top +
-                              (_isAppBar ? MediaQuery.paddingOf(context).top : 0),
-                          bottom: max(LdTheme.of(context).pad(size: LdSize.s).bottom,
-                              (_isBottomNavigationBar ? MediaQuery.paddingOf(context).bottom : 0)),
-                        ),
+                        padding: _padding(context),
                         child: child,
                       ),
                       child: ConstrainedBox(
@@ -274,6 +303,7 @@ class _LdAppBarState extends State<LdAppBar> {
                           ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Row(
                                 children: [
@@ -332,8 +362,8 @@ class _LdAppBarState extends State<LdAppBar> {
                                   else
                                     const Spacer(),
                                   if (_showCloseDrawerButton) const CloseDrawerButton(),
-                                  if (_showWindowsWindowControls) const WindowsWindowControls(),
                                   if (widget.trailing != null) widget.trailing!,
+                                  if (_showWindowsWindowControls) const WindowsWindowControls(),
                                 ],
                               ),
                               if (widget.bottom != null) ...[
@@ -364,14 +394,9 @@ class _LdAppBarState extends State<LdAppBar> {
         },
         child: child,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: KeyedSubtree(
         key: _key,
-        children: [
-          if (_isBottomNavigationBar) const LdDivider(),
-          appBar,
-          if (!_isBottomNavigationBar) const LdDivider(height: 1),
-        ],
+        child: _decorateBorder(context, appBar),
       ),
     );
   }

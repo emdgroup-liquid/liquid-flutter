@@ -54,8 +54,7 @@ const components = [
       ComponentCategory.layout),
   _Component("Drawer", "/components/drawer", LucideIcons.menu,
       ComponentCategory.layout),
-  _Component("Master detail", "/components/master-detail", LucideIcons.list,
-      ComponentCategory.layout),
+
   _Component("Spring", "/components/spring", LucideIcons.shell,
       ComponentCategory.layout),
   _Component("List Item", "/components/list-item", LucideIcons.listTree,
@@ -242,39 +241,6 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
       appBar: Builder(builder: (context) {
         return LdAppBar();
       }),
-      bottomNavigationBar: LdAppBar(
-        leading: LdContextMenu(
-          scaleFromTrigger: true,
-          positionMode: LdContextPositionMode.relativeTrigger,
-          builder: (context, shuttle, trigger, child) => LdButtonVague(
-            trailing: const Icon(LucideIcons.squareMousePointer),
-            onPressed: () {
-              trigger();
-            },
-            child: const Text("Theme"),
-          ),
-          menuBuilder: (context, openMenu) => ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: 300,
-            ),
-            child: SingleChildScrollView(
-              child: LdAutoSpace(
-                children: [
-                  const ThemeSelector(),
-                  ldSpacerM,
-                  const SizeSelector(),
-                  ldSpacerM,
-                  const RadiusSelector(),
-                  ldSpacerM,
-                  const FontSelector(),
-                  ldSpacerM,
-                  const HeadlineFontSelector(),
-                ],
-              ).padL(),
-            ),
-          ),
-        ),
-      ),
       body: Builder(builder: (context) {
         return ListView(
           padding: MediaQuery.paddingOf(context) +
