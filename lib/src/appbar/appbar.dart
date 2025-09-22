@@ -83,8 +83,8 @@ class _LdAppBarState extends State<LdAppBar> {
     return _layoutState?.isDrawerOpen ?? false;
   }
 
-  bool get _isDrawer {
-    return _layoutState?.slot == LdScaffoldSlot.drawer;
+  bool get _isDrawerAppBar {
+    return _layoutState?.slot == LdScaffoldSlot.drawerAppBar;
   }
 
   bool get _isAppBar {
@@ -307,11 +307,13 @@ class _LdAppBarState extends State<LdAppBar> {
                             children: [
                               Row(
                                 children: [
-                                  MacOSWindowControls(showWindowControls: _showMacOSWindowControls),
-                                  if (_showOpenDrawerButton) ...[
-                                    const OpenDrawerButton(),
-                                    ldSpacerS,
-                                  ],
+                                  MacOSWindowControls(
+                                    showWindowControls: _showMacOSWindowControls,
+                                  ),
+                                  LdReveal(
+                                    revealed: _showOpenDrawerButton,
+                                    child: const OpenDrawerButton(),
+                                  ),
                                   if (leading != null) ...[
                                     leading,
                                     ldSpacerS,
@@ -361,9 +363,9 @@ class _LdAppBarState extends State<LdAppBar> {
                                     )
                                   else
                                     const Spacer(),
-                                  if (_showCloseDrawerButton) const CloseDrawerButton(),
+                                  LdReveal(revealed: _showCloseDrawerButton, child: const CloseDrawerButton()),
                                   if (widget.trailing != null) widget.trailing!,
-                                  if (_showWindowsWindowControls) const WindowsWindowControls(),
+                                  LdReveal(revealed: _showWindowsWindowControls, child: const WindowsWindowControls()),
                                 ],
                               ),
                               if (widget.bottom != null) ...[
@@ -387,7 +389,7 @@ class _LdAppBarState extends State<LdAppBar> {
     );
 
     return LdWrapConditional(
-      condition: _isAppBar || _isDrawer,
+      condition: _isAppBar || _isDrawerAppBar,
       builder: (context, child) => GestureDetector(
         onPanStart: (details) {
           LdAppBar.callbacks?.onMove?.call();
