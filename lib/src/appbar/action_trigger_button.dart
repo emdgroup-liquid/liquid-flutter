@@ -53,6 +53,7 @@ class ActionTriggerButton extends StatelessWidget {
         message: action.label(context),
         child: LdButtonGhost(
           color: action.color(context),
+          active: action.isActive(context),
           leading: bigToolbar ? icon : null,
           onPressed: onPressed,
           loadingText: loadingText,

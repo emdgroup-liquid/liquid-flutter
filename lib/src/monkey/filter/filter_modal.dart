@@ -5,8 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:provider/provider.dart';
 
-LdModal ldFilterModal<T extends Identifiable<IdType>, IdType, GroupBy>(
-    BuildContext context, LdMonkey<T, IdType, GroupBy> route) {
+LdModal ldFilterModal<T extends Identifiable<IdType>, IdType>(BuildContext context, LdMonkey<T, IdType> route) {
   return LdModal(
     showDismissButton: false,
     modalContent: (context) {
@@ -22,14 +21,14 @@ LdModal ldFilterModal<T extends Identifiable<IdType>, IdType, GroupBy>(
   );
 }
 
-class LdFilterContext<T extends Identifiable<IdType>, IdType, GroupBy> extends StatelessWidget {
+class LdFilterContext<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
   const LdFilterContext({
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    final route = context.read<LdMonkey<T, IdType, GroupBy>>();
+    final route = context.read<LdMonkey<T, IdType>>();
     return LdContextMenu(
       builder: (context, isOpen, open, child) => LdButtonGhost(
         autoLoading: false,
@@ -43,8 +42,8 @@ class LdFilterContext<T extends Identifiable<IdType>, IdType, GroupBy> extends S
   }
 }
 
-class LdFilterModal<T extends Identifiable<IdType>, IdType, GroupBy> extends StatelessWidget {
-  final LdMonkey<T, IdType, GroupBy> route;
+class LdFilterModal<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
+  final LdMonkey<T, IdType> route;
 
   const LdFilterModal({super.key, required this.route});
 

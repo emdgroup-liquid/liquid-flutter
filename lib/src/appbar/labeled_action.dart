@@ -2,66 +2,80 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
+/// Defines the behaviour of a [LdLabeledAction] when it is pressed
+enum LdLabeledActionType { none, notification, dialog, contextMenu }
+
+// A class that represents an action that can be displayed in toolbars and menus
 mixin LdLabeledAction {
   String label(BuildContext context);
   Widget? icon(BuildContext context);
   String? loadingText(BuildContext context);
+  bool isActive(BuildContext context) => false;
 
-  Widget? contextMenu(BuildContext context);
+  Widget? buildContextMenu(BuildContext context, VoidCallback close) => null;
 
-  bool isVisible(BuildContext context) {
-    return true;
-  }
+  bool isVisible(BuildContext context) => true;
 
   FutureOr<void> onPressed(BuildContext context);
 
-  LdColor? color(BuildContext context) {
-    return null;
-  }
+  LdColor? color(BuildContext context) => null;
 
-  LdLabeledActionSubmitType get submitType => LdLabeledActionSubmitType.notification;
+  LdLabeledActionType get type => LdLabeledActionType.notification;
 }
 
-enum LdLabeledActionSubmitType { none, notification, dialog, contextMenu }
+typedef LdLabeledActionActiveFunction = bool Function(BuildContext context);
 
-class LdAppBarAction with LdLabeledAction {
-  final String _label;
-  final Widget? _icon;
-  final FutureOr<void> Function(BuildContext context) _onPressed;
-  final String? _loadingText;
-  final LdLabeledActionSubmitType _submitType;
+typedef LdLabeledActionContextMenuFunction = Widget Function(BuildContext context, VoidCallback close);
+
+typedef LdBoolPredicate = bool Function(BuildContext context);
+typedef StringBuilder = String Function(BuildContext context);
+
+class LdLabeledActionBuilder with LdLabeledAction {
+  final StringBuilder _buildLabel;
+  final WidgetBuilder? _buildIcon;
+  final FutureOr<void> Function(BuildContext context) _action;
+  final StringBuilder? _buildLoadingText;
+  final LdLabeledActionType _submitType;
   final LdColor? _color;
-  final Widget Function(BuildContext context)? _contextMenu;
+  final LdLabeledActionContextMenuFunction? _buildContextMenu;
+  final LdBoolPredicate? _isActive;
 
-  LdAppBarAction({
-    required String label,
-    required FutureOr<void> Function(BuildContext context) onPressed,
-    Widget? icon,
-    required LdLabeledActionSubmitType submitType,
-    Widget Function(BuildContext context)? contextMenu,
-    String? loadingText,
+  LdLabeledActionBuilder({
+    required StringBuilder buildLabel,
+    required FutureOr<void> Function(BuildContext context) action,
+    required LdLabeledActionType submitType,
+    WidgetBuilder? buildIcon,
+    LdLabeledActionContextMenuFunction? buildContextMenu,
+    StringBuilder? buildLoadingText,
+    LdBoolPredicate? isActive,
     LdColor? color,
-  })  : _label = label,
-        _icon = icon,
+  })  : _buildLabel = buildLabel,
+        _buildIcon = buildIcon,
         _color = color,
-        _contextMenu = contextMenu,
-        _onPressed = onPressed,
-        _loadingText = loadingText,
-        _submitType = submitType;
+        _buildContextMenu = buildContextMenu,
+        _action = action,
+        _buildLoadingText = buildLoadingText,
+        _submitType = submitType,
+        _isActive = isActive;
+
+  @override
+  bool isActive(BuildContext context) {
+    return _isActive?.call(context) ?? false;
+  }
 
   @override
   String label(BuildContext context) {
-    return _label;
+    return _buildLabel.call(context);
   }
 
   @override
   Widget? icon(BuildContext context) {
-    return _icon;
+    return _buildIcon?.call(context);
   }
 
   @override
   String? loadingText(BuildContext context) {
-    return _loadingText;
+    return _buildLoadingText?.call(context);
   }
 
   @override
@@ -70,15 +84,15 @@ class LdAppBarAction with LdLabeledAction {
   }
 
   @override
-  LdLabeledActionSubmitType get submitType => _submitType;
+  LdLabeledActionType get type => _submitType;
 
   @override
   FutureOr<void> onPressed(BuildContext context) {
-    return _onPressed.call(context);
+    return _action.call(context);
   }
 
   @override
-  Widget? contextMenu(BuildContext context) {
-    return _contextMenu?.call(context);
+  Widget? buildContextMenu(BuildContext context, VoidCallback close) {
+    return _buildContextMenu?.call(context, close);
   }
 }

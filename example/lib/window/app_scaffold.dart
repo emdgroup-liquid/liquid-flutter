@@ -83,11 +83,11 @@ class _AppScaffoldState extends State<AppScaffold> {
                 ),
               ),
               actions: [
-                LdAppBarAction(
-                  icon: const Icon(LucideIcons.github),
-                  label: "GitHub",
-                  submitType: LdLabeledActionSubmitType.none,
-                  onPressed: (context) {
+                LdLabeledActionBuilder(
+                  buildIcon: (context) => const Icon(LucideIcons.github),
+                  buildLabel: (context) => "GitHub",
+                  submitType: LdLabeledActionType.none,
+                  action: (context) {
                     launchUrl(
                       Uri.parse(
                         "https://github.com/emdgroup-liquid/liquid-flutter",

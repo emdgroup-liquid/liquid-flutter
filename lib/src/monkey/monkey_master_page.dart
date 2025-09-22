@@ -5,8 +5,8 @@ import 'package:liquid_flutter/src/device_info.dart';
 
 import 'package:provider/provider.dart';
 
-class LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends StatefulWidget {
-  final LdMonkey<T, IdType, GroupingCriterion> route;
+class LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
+  final LdMonkey<T, IdType> route;
   final FocusNode? searchFocusNode;
 
   const LdMonkeyMasterPage({
@@ -16,12 +16,10 @@ class LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType, GroupingCriteri
   });
 
   @override
-  State<LdMonkeyMasterPage<T, IdType, GroupingCriterion>> createState() =>
-      _LdMonkeyMasterPageState<T, IdType, GroupingCriterion>();
+  State<LdMonkeyMasterPage<T, IdType>> createState() => _LdMonkeyMasterPageState<T, IdType>();
 }
 
-class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType, GroupingCriterion>
-    extends State<LdMonkeyMasterPage<T, IdType, GroupingCriterion>> {
+class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends State<LdMonkeyMasterPage<T, IdType>> {
   @override
   void dispose() {
     super.dispose();
@@ -41,16 +39,16 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType, GroupingC
               // Provide  the state of the route to the list builder
 
               return Provider.value(
-                value: LdMonkeySelection<T, IdType, GroupingCriterion>(items: state.selectedItems),
+                value: LdMonkeySelection<T, IdType>(items: state.selectedItems),
                 child: LdMonkeyMultiShortcuts(
                   actions: widget.route.actions,
                   child: Builder(builder: (context) {
-                    final primaryActions = LdMonkeyAppBarActions.getActionsAndProviders<T, IdType, GroupingCriterion>(
+                    final primaryActions = LdMonkeyAppBarActions.getActionsAndProviders<T, IdType>(
                       context,
                       LdMonkeyActionLocation.masterAppBar,
                     );
 
-                    final secondaryActions = LdMonkeyAppBarActions.getActionsAndProviders<T, IdType, GroupingCriterion>(
+                    final secondaryActions = LdMonkeyAppBarActions.getActionsAndProviders<T, IdType>(
                       context,
                       LdMonkeyActionLocation.masterSecondary,
                     );

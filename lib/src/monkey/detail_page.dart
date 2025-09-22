@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 
 /// The page rendered by [LdMonkey] to show the detail of the selected
 /// items
-class LdMonkeyDetailPage<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends StatelessWidget {
+class LdMonkeyDetailPage<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
   final PreferredSizeWidget Function(BuildContext context, Set<IdType> selection)? appBarBuilder;
 
   const LdMonkeyDetailPage({
@@ -18,9 +18,9 @@ class LdMonkeyDetailPage<T extends Identifiable<IdType>, IdType, GroupingCriteri
 
   @override
   Widget build(BuildContext context) {
-    final route = LdMonkey.of<T, IdType, GroupingCriterion>(context);
+    final route = LdMonkey.of<T, IdType>(context);
 
-    final isSideBySide = LdMonkeyContext.of<T, IdType, GroupingCriterion>(context).isSideBySide;
+    final isSideBySide = LdMonkeyContext.of<T, IdType>(context).isSideBySide;
 
     return StreamBuilder(
         stream: route.stateStream,
@@ -30,17 +30,17 @@ class LdMonkeyDetailPage<T extends Identifiable<IdType>, IdType, GroupingCriteri
           final selection = state.selectedItems;
 
           return Provider.value(
-            value: LdMonkeySelection<T, IdType, GroupingCriterion>(items: selection),
+            value: LdMonkeySelection<T, IdType>(items: selection),
             child: StreamBuilder(
                 key: ValueKey(selection.join(',')),
                 stream: route.repository.watchItems(selection),
                 builder: (context, snapshot) {
-                  final primaryActions = LdMonkeyAppBarActions.getActionsAndProviders<T, IdType, GroupingCriterion>(
+                  final primaryActions = LdMonkeyAppBarActions.getActionsAndProviders<T, IdType>(
                     context,
                     LdMonkeyActionLocation.detailAppBar,
                   );
 
-                  final secondaryActions = LdMonkeyAppBarActions.getActionsAndProviders<T, IdType, GroupingCriterion>(
+                  final secondaryActions = LdMonkeyAppBarActions.getActionsAndProviders<T, IdType>(
                     context,
                     LdMonkeyActionLocation.detailSecondary,
                   );
@@ -98,8 +98,8 @@ class LdMonkeyDetailPage<T extends Identifiable<IdType>, IdType, GroupingCriteri
   }
 }
 
-class LdMonkeyDetailPageContent<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends StatelessWidget {
-  final LdMonkey<T, IdType, GroupingCriterion> route;
+class LdMonkeyDetailPageContent<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
+  final LdMonkey<T, IdType> route;
   final Set<IdType> selection;
   const LdMonkeyDetailPageContent({super.key, required this.route, required this.selection});
 

@@ -135,7 +135,7 @@ final movieRepository = LdRepository<_Movie, int>(
   },
 );
 
-final movieDemo = LdMonkey<_Movie, int, bool>(
+final movieDemo = LdMonkey<_Movie, int>(
   path: "/movie-demo",
   allowMultipleSelection: true,
   presentationMode: MonkeyDetailVariant.dialog,
@@ -146,7 +146,7 @@ final movieDemo = LdMonkey<_Movie, int, bool>(
   buildRepository: (context) => movieRepository,
   buildDetail: (context, item) => _MovieDetail(movie: item),
   listBuilder: (route, initialSelection, onSelectionChange) {
-    return LdSelectableList<_Movie, int, bool>(
+    return LdSelectableList<_Movie, int>(
       showSelectionControls: route.state.showSelectionControls,
       listBuilder: (context, scrollController, itemBuilder) {
         return CustomScrollView(
@@ -197,7 +197,7 @@ final movieDemo = LdMonkey<_Movie, int, bool>(
         return LdMonkeySingleShortcuts(
           item: item.value!.id,
           actions: route.actions,
-          child: LdMonkeyContextMenu<_Movie, int, bool>(
+          child: LdMonkeyContextMenu<_Movie, int>(
             item: item,
             child: LdListItemAnimation(
               state: item.state,
@@ -220,7 +220,7 @@ final movieDemo = LdMonkey<_Movie, int, bool>(
     );
   },
   actions: [
-    toggleFilters<_Movie, int, bool>(),
+    toggleFilters<_Movie, int>(),
     LdMonkeyAction(
       visibility: {
         LdMonkeyActionVisibility(
@@ -237,13 +237,19 @@ final movieDemo = LdMonkey<_Movie, int, bool>(
       shortcutActivators: {
         SingleActivator(LogicalKeyboardKey.keyD, meta: true),
       },
-      buildLoadingText: (context, selection) => "Duplicating",
-      buildLabel: (context, selection) => "Duplicate",
-      buildIcon: (context, selection) => const Icon(LucideIcons.copy),
+      buildLoadingText: (context) => "Duplicating",
+      buildLabel: (context) => "Duplicate",
+      buildIcon: (
+        context,
+      ) =>
+          const Icon(LucideIcons.copy),
       multiSelect: false,
-      action: (context, selection) async {
-        final route = LdMonkey.of<_Movie, int, bool>(context);
-        final item = await movieRepository.getById(selection.first);
+      action: (
+        context,
+      ) async {
+        final selectionItems = LdMonkeySelection.of<_Movie, int>(context).items;
+        final route = LdMonkey.of<_Movie, int>(context);
+        final item = await movieRepository.getById(selectionItems.first);
 
         final newItem = item.copyWith(
           id: movieData.length + 1,
@@ -280,19 +286,22 @@ final movieDemo = LdMonkey<_Movie, int, bool>(
         SingleActivator(LogicalKeyboardKey.delete),
         SingleActivator(LogicalKeyboardKey.backspace),
       },
-      buildLoadingText: (context, selection) =>
-          "Deleting ${selection.length} ${selection.length == 1 ? "item" : "items"}",
-      buildLabel: (context, selection) =>
-          "Delete ${selection.length} ${selection.length == 1 ? "item" : "items"}",
-      buildIcon: (context, selection) => Icon(
-        LucideIcons.trash2,
-      ),
+      buildLoadingText: (context) {
+        final selection = LdMonkeySelection.of<_Movie, int>(context);
+        return "Deleting ${selection.items.length} ${selection.items.length == 1 ? "item" : "items"}";
+      },
+      buildLabel: (context) {
+        final selection = LdMonkeySelection.of<_Movie, int>(context);
+        return "Delete ${selection.items.length} ${selection.items.length == 1 ? "item" : "items"}";
+      },
+      buildIcon: (context) => Icon(LucideIcons.trash2),
       color: shadRed,
-      action: (context, selection) async {
-        await movieRepository.deleteBatch(selection);
+      action: (context) async {
+        final selection = LdMonkeySelection.of<_Movie, int>(context);
+        await movieRepository.deleteBatch(selection.items);
       },
     ),
-    toggleSelectionControls<_Movie, int, bool>(),
+    toggleSelectionControls<_Movie, int>(),
   ],
 );
 
@@ -362,8 +371,7 @@ class _MovieDetailState extends State<_MovieDetail> {
                       int.tryParse(_ratingController.text) ?? 1,
                       widget.movie.value!.lastUpdate,
                     );
-                    final repo =
-                        LdMonkey.of<_Movie, int, bool>(context).repository;
+                    final repo = LdMonkey.of<_Movie, int>(context).repository;
                     await repo.update(
                       widget.movie.value!.id,
                       newMovie,

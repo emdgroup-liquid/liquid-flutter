@@ -18,10 +18,6 @@ LdColorBundle neutralGhostColor(
   final neutral = theme.palette.neutral;
   Color border = Colors.transparent;
 
-  if (focus) {
-    border = palette.primary.center(theme.isDark);
-  }
-
   if (disabled) {
     return LdColorBundle(
       surface: theme.neutralShade(isOdd ? 2 : 1).withAlpha(23),
@@ -46,6 +42,15 @@ LdColorBundle neutralGhostColor(
       text: neutral.contrastingText(neutral.relative(theme.isDark, 2)),
       border: border,
       icon: neutral.contrastingText(neutral.relative(theme.isDark, 2)),
+    );
+  }
+
+  if (focus) {
+    return LdColorBundle(
+      surface: isOdd ? theme.neutralShade(3) : theme.neutralShade(3),
+      text: theme.isDark ? theme.text : palette.primary.center(theme.isDark),
+      border: border,
+      icon: palette.primary.center(theme.isDark),
     );
   }
 

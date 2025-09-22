@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
@@ -13,55 +11,22 @@ enum LdMonkeyActionLocation {
   context,
 }
 
-class LdMonkeyAction<T extends Identifiable<IdType>, IdType, GroupingCriterion> with LdLabeledAction {
+class LdMonkeyAction<T extends Identifiable<IdType>, IdType> extends LdLabeledActionBuilder {
   final Set<LdMonkeyActionVisibility> visibility;
 
-  final String Function(BuildContext context, Set<IdType> selection) buildLabel;
-  final Widget Function(BuildContext context, Set<IdType> selection)? buildIcon;
-  final FutureOr<void> Function(BuildContext context, Set<IdType> selection) action;
-  final String Function(BuildContext context, Set<IdType> selection)? buildLoadingText;
-
-  final Widget Function(BuildContext context, Set<IdType> selection)? buildContextMenu;
-
-  @override
-  Widget? contextMenu(BuildContext context) {
-    final selection = LdMonkeySelection.of<T, IdType, GroupingCriterion>(context);
-    return buildContextMenu?.call(context, selection.items);
-  }
-
-  @override
-  String? loadingText(BuildContext context) {
-    final selection = LdMonkeySelection.of<T, IdType, GroupingCriterion>(context);
-    return buildLoadingText?.call(context, selection.items);
-  }
-
-  @override
-  String label(BuildContext context) {
-    final selection = LdMonkeySelection.of<T, IdType, GroupingCriterion>(context);
-    return buildLabel(context, selection.items);
-  }
-
-  @override
-  Widget? icon(BuildContext context) {
-    final selection = LdMonkeySelection.of<T, IdType, GroupingCriterion>(context);
-    return buildIcon?.call(context, selection.items);
-  }
-
-  @override
-  void onPressed(BuildContext context) async {
-    final selection = LdMonkeySelection.of<T, IdType, GroupingCriterion>(context, listen: false);
-    await action(context, selection.items);
+  LdMonkeySelection<T, IdType> selection(BuildContext context) {
+    return LdMonkeySelection.of<T, IdType>(context);
   }
 
   @override
   bool isVisible(BuildContext context, {LdMonkeyActionLocation? location}) {
     location ??= context.read<LdMonkeyActionLocation>();
 
-    final isSideBySide = LdMonkeyContext.of<T, IdType, GroupingCriterion>(context).isSideBySide;
+    final isSideBySide = LdMonkeyContext.of<T, IdType>(context).isSideBySide;
 
-    final route = LdMonkey.of<T, IdType, GroupingCriterion>(context);
+    final route = LdMonkey.of<T, IdType>(context);
 
-    final selection = LdMonkeySelection.of<T, IdType, GroupingCriterion>(context, listen: false);
+    final selection = LdMonkeySelection.of<T, IdType>(context, listen: false);
 
     final selectedItemCount = selection.items.length;
 
@@ -102,47 +67,19 @@ class LdMonkeyAction<T extends Identifiable<IdType>, IdType, GroupingCriterion> 
 
   final bool multiSelect;
 
-  final LdLabeledActionSubmitType _submitType;
-
-  @override
-  LdLabeledActionSubmitType get submitType => _submitType;
-
-  final LdColor? _color;
-
-  @override
-  LdColor? color(BuildContext context) {
-    return _color;
-  }
-
   LdMonkeyAction({
     required this.visibility,
-    required this.buildLabel,
-    this.buildLoadingText,
-    this.buildContextMenu,
-    LdColor? color,
-    this.buildIcon,
-    required this.action,
+    required super.buildLabel,
+    required super.buildIcon,
+    required super.action,
+    super.buildLoadingText,
+    super.buildContextMenu,
+    super.color,
+    super.isActive,
+    super.submitType = LdLabeledActionType.notification,
     this.multiSelect = true,
-    LdLabeledActionSubmitType submitType = LdLabeledActionSubmitType.notification,
     this.shortcutActivators = const {},
-  })  : _color = color,
-        _submitType = submitType;
+  });
 
   final Set<ShortcutActivator> shortcutActivators;
-
-  LdMonkeyAction<T, IdType, GroupingCriterion> copyWith({
-    Set<LdMonkeyActionVisibility>? visibility,
-    String Function(BuildContext context, Set<IdType> selection)? buildLabel,
-    Widget Function(BuildContext context, Set<IdType> selection)? buildIcon,
-    Future<void> Function(BuildContext context, Set<IdType> selection)? action,
-    Widget Function(BuildContext context, Set<IdType> selection)? buildContextMenu,
-  }) {
-    return LdMonkeyAction(
-      visibility: visibility ?? this.visibility,
-      buildLabel: buildLabel ?? this.buildLabel,
-      buildIcon: buildIcon ?? this.buildIcon,
-      action: action ?? this.action,
-      buildContextMenu: buildContextMenu ?? this.buildContextMenu,
-    );
-  }
 }

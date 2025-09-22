@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:liquid_flutter/liquid_flutter.dart' hide LdLabeledAction, LdLabeledActionSubmitType;
+import 'package:liquid_flutter/liquid_flutter.dart' hide LdLabeledAction, LdLabeledActionType;
 import 'package:provider/single_child_widget.dart';
 import 'action_trigger_button.dart';
 import 'labeled_action.dart';
@@ -20,8 +20,8 @@ class LdAppBarActionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    switch (action.submitType) {
-      case LdLabeledActionSubmitType.contextMenu:
+    switch (action.type) {
+      case LdLabeledActionType.contextMenu:
         return LdContextMenu(
           menuProviders: menuProviders,
           blurMode: LdContextMenuBlurMode.never,
@@ -34,9 +34,9 @@ class LdAppBarActionWidget extends StatelessWidget {
             onPressed: () => open(),
             disabled: false,
           ),
-          menuBuilder: (context, close) => action.contextMenu.call(context) ?? const SizedBox(),
+          menuBuilder: (context, close) => action.buildContextMenu.call(context, close) ?? const SizedBox(),
         );
-      case LdLabeledActionSubmitType.none:
+      case LdLabeledActionType.none:
         return ActionTriggerButton(
           action: action,
           bigToolbar: bigToolbar,
@@ -45,9 +45,9 @@ class LdAppBarActionWidget extends StatelessWidget {
           onPressed: () => action.onPressed(context),
           disabled: false,
         );
-      case LdLabeledActionSubmitType.notification:
-      case LdLabeledActionSubmitType.dialog:
-        final builder = action.submitType == LdLabeledActionSubmitType.notification
+      case LdLabeledActionType.notification:
+      case LdLabeledActionType.dialog:
+        final builder = action.type == LdLabeledActionType.notification
             ? LdSubmitNotificationBuilder<void, BuildContext>.new
             : LdSubmitDialogBuilder<void, BuildContext>.new;
 

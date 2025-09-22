@@ -93,8 +93,7 @@ class _TaskDetailState extends State<TaskDetail> {
                       widget.task.value!.done,
                       widget.task.value!.lastUpdate,
                     );
-                    final repo =
-                        LdMonkey.of<Task, int, bool>(context).repository;
+                    final repo = LdMonkey.of<Task, int>(context).repository;
                     await repo.update(
                       widget.task.value!.id,
                       newTask,

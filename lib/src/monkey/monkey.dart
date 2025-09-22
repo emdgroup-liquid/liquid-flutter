@@ -10,21 +10,21 @@ enum MonkeyDetailVariant { page, dialog }
 
 enum MonkeyLayoutMode { auto, sideBySide, neverSideBySide }
 
-class LdMonkey<T extends Identifiable<IdType>, IdType, GroupingCriterion> {
+class LdMonkey<T extends Identifiable<IdType>, IdType> {
   LdRepository<T, IdType> get repository => _state.repository!;
 
-  var _state = LdMonkeyDetailState<T, IdType, GroupingCriterion>(
+  var _state = LdMonkeyDetailState<T, IdType>(
     showSelectionControls: false,
     selectedItems: {},
     repository: null,
   );
 
-  final _stateStream = StreamController<LdMonkeyDetailState<T, IdType, GroupingCriterion>>.broadcast();
-  Stream<LdMonkeyDetailState<T, IdType, GroupingCriterion>> get stateStream => _stateStream.stream;
+  final _stateStream = StreamController<LdMonkeyDetailState<T, IdType>>.broadcast();
+  Stream<LdMonkeyDetailState<T, IdType>> get stateStream => _stateStream.stream;
 
-  LdMonkeyDetailState<T, IdType, GroupingCriterion> get state => _state;
+  LdMonkeyDetailState<T, IdType> get state => _state;
 
-  void _updateState(LdMonkeyDetailState<T, IdType, GroupingCriterion> state) {
+  void _updateState(LdMonkeyDetailState<T, IdType> state) {
     _state = state;
     _stateStream.add(state);
   }
@@ -50,21 +50,17 @@ class LdMonkey<T extends Identifiable<IdType>, IdType, GroupingCriterion> {
   final Widget Function(BuildContext context, LdPaginatorItem<T> item) buildDetail;
 
   /// The actions that are available in the master and detail pages.
-  final List<LdMonkeyAction<T, IdType, GroupingCriterion>> actions;
+  final List<LdMonkeyAction<T, IdType>> actions;
 
   /// Builds the selectable list,
-  final LdSelectableList<T, IdType, GroupingCriterion> Function(
-    LdMonkey<T, IdType, GroupingCriterion> route,
-    LdMonkeyDetailState<T, IdType, GroupingCriterion> state,
+  final LdSelectableList<T, IdType> Function(
+    LdMonkey<T, IdType> route,
+    LdMonkeyDetailState<T, IdType> state,
     void Function(Set<IdType> selectedItems) onSelectionChanged,
   ) listBuilder;
 
-  static LdMonkey<T, IdType, GroupingCriterion> of<T extends Identifiable<IdType>, IdType, GroupingCriterion>(
-      BuildContext context,
-      {bool watch = false}) {
-    return watch
-        ? context.watch<LdMonkey<T, IdType, GroupingCriterion>>()
-        : context.read<LdMonkey<T, IdType, GroupingCriterion>>();
+  static LdMonkey<T, IdType> of<T extends Identifiable<IdType>, IdType>(BuildContext context, {bool watch = false}) {
+    return watch ? context.watch<LdMonkey<T, IdType>>() : context.read<LdMonkey<T, IdType>>();
   }
 
   LdMonkey({
@@ -111,13 +107,13 @@ class LdMonkey<T extends Identifiable<IdType>, IdType, GroupingCriterion> {
                     name: "$path-detail",
                     path: "/:selected",
                     pageBuilder: (context, state) {
-                      final effectivePresentationMode = LdMonkeyContext.of<T, IdType, GroupingCriterion>(context);
+                      final effectivePresentationMode = LdMonkeyContext.of<T, IdType>(context);
 
                       final page = Provider.value(
                         value: effectivePresentationMode,
                         child: Provider.value(
                           value: this,
-                          child: LdMonkeyDetailPage<T, IdType, GroupingCriterion>(),
+                          child: LdMonkeyDetailPage<T, IdType>(),
                         ),
                       );
 

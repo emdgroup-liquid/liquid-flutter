@@ -9,7 +9,7 @@ import 'package:multi_split_view/multi_split_view.dart';
 import 'package:provider/provider.dart';
 
 /// The shell route that is wrapped around the master and detail pages.
-class LdMonkeyShell<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends StatefulWidget {
+class LdMonkeyShell<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   const LdMonkeyShell({
     super.key,
     required this.child,
@@ -25,16 +25,14 @@ class LdMonkeyShell<T extends Identifiable<IdType>, IdType, GroupingCriterion> e
   final String? routeSelection;
 
   /// The route that is being wrapped.
-  final LdMonkey<T, IdType, GroupingCriterion> route;
+  final LdMonkey<T, IdType> route;
 
   @override
-  State<LdMonkeyShell<T, IdType, GroupingCriterion>> createState() =>
-      _LdMonkeyShellState<T, IdType, GroupingCriterion>();
+  State<LdMonkeyShell<T, IdType>> createState() => _LdMonkeyShellState<T, IdType>();
 }
 
-class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType, GroupingCriterion>
-    extends State<LdMonkeyShell<T, IdType, GroupingCriterion>> {
-  late final StreamSubscription<LdMonkeyDetailState<T, IdType, GroupingCriterion>> _selectionSubscription;
+class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<LdMonkeyShell<T, IdType>> {
+  late final StreamSubscription<LdMonkeyDetailState<T, IdType>> _selectionSubscription;
 
   late final StreamSubscription _filterSubscription;
   late final StreamSubscription _sortSubscription;
@@ -61,7 +59,7 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType, GroupingCriter
   }
 
   @override
-  void didUpdateWidget(LdMonkeyShell<T, IdType, GroupingCriterion> oldWidget) {
+  void didUpdateWidget(LdMonkeyShell<T, IdType> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.routeSelection != widget.routeSelection) {
@@ -123,7 +121,7 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType, GroupingCriter
   }
 
   // Update the selection in the route.
-  void _updateSelection(LdMonkeyDetailState<T, IdType, GroupingCriterion> state) async {
+  void _updateSelection(LdMonkeyDetailState<T, IdType> state) async {
     if (!mounted) return;
 
     final selectedItems = state.selectedItems;
@@ -173,7 +171,7 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType, GroupingCriter
 
   Widget _buildInitialized(
     BuildContext context,
-    LdMonkeyDetailState<T, IdType, GroupingCriterion> state,
+    LdMonkeyDetailState<T, IdType> state,
   ) {
     return LayoutBuilder(builder: (context, constraints) {
       final monkeyContext = LdMonkeyContext.fromRoute(
@@ -182,9 +180,9 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType, GroupingCriter
       );
 
       if (!monkeyContext.isSideBySide) {
-        return Provider<LdMonkey<T, IdType, GroupingCriterion>>.value(
+        return Provider<LdMonkey<T, IdType>>.value(
           value: widget.route,
-          child: Provider<LdMonkeyContext<T, IdType, GroupingCriterion>>.value(
+          child: Provider<LdMonkeyContext<T, IdType>>.value(
             value: monkeyContext,
             child: widget.child,
           ),
@@ -193,9 +191,9 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType, GroupingCriter
 
       final theme = LdTheme.of(context);
 
-      return Provider<LdMonkey<T, IdType, GroupingCriterion>>.value(
+      return Provider<LdMonkey<T, IdType>>.value(
         value: widget.route,
-        child: Provider<LdMonkeyContext<T, IdType, GroupingCriterion>>.value(
+        child: Provider<LdMonkeyContext<T, IdType>>.value(
           value: monkeyContext,
           child: ColoredBox(
             color: theme.background,

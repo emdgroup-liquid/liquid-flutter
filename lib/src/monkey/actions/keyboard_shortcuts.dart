@@ -3,8 +3,8 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 /// The shortcuts for multiple items. Will only apply the shortcuts if the user
 /// is currently selecting multiple items.
-class LdMonkeyMultiShortcuts<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends StatelessWidget {
-  final List<LdMonkeyAction<T, IdType, GroupingCriterion>> actions;
+class LdMonkeyMultiShortcuts<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
+  final List<LdMonkeyAction<T, IdType>> actions;
   final Widget child;
 
   const LdMonkeyMultiShortcuts({super.key, required this.actions, required this.child});
@@ -13,7 +13,7 @@ class LdMonkeyMultiShortcuts<T extends Identifiable<IdType>, IdType, GroupingCri
   Widget build(BuildContext context) {
     final bindings = <ShortcutActivator, VoidCallback>{};
 
-    final selection = LdMonkeySelection.of<T, IdType, GroupingCriterion>(context);
+    final selection = LdMonkeySelection.of<T, IdType>(context);
 
     for (final action in actions) {
       for (final activator in action.shortcutActivators) {
@@ -25,7 +25,7 @@ class LdMonkeyMultiShortcuts<T extends Identifiable<IdType>, IdType, GroupingCri
 
         if (selection.items.length > 1 && action.multiSelect) {
           bindings[activator] = () {
-            action.action(context, selection.items);
+            action.onPressed(context);
           };
         }
       }
@@ -40,8 +40,8 @@ class LdMonkeyMultiShortcuts<T extends Identifiable<IdType>, IdType, GroupingCri
 
 /// The shortcuts for a single item. Will only apply the shortcuts if the user
 /// is currently not selecting multiple items.
-class LdMonkeySingleShortcuts<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends StatelessWidget {
-  final List<LdMonkeyAction<T, IdType, GroupingCriterion>> actions;
+class LdMonkeySingleShortcuts<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
+  final List<LdMonkeyAction<T, IdType>> actions;
   final Widget child;
   final IdType item;
 
@@ -50,7 +50,7 @@ class LdMonkeySingleShortcuts<T extends Identifiable<IdType>, IdType, GroupingCr
   @override
   Widget build(BuildContext context) {
     final bindings = <ShortcutActivator, VoidCallback>{};
-    final selection = LdMonkeySelection.of<T, IdType, GroupingCriterion>(context);
+    final selection = LdMonkeySelection.of<T, IdType>(context);
 
     if (selection.items.length > 1) {
       return child;
@@ -65,7 +65,7 @@ class LdMonkeySingleShortcuts<T extends Identifiable<IdType>, IdType, GroupingCr
         }
 
         bindings[activator] = () {
-          action.action(context, {item});
+          action.onPressed(context);
         };
       }
     }

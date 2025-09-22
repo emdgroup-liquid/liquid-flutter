@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-class LdSelectableList<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends StatefulWidget {
+class LdSelectableList<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   final Widget Function(BuildContext context, LdPaginatorItem<T> item, int index, LdListItemConfig config) itemBuilder;
 
   final Widget Function(
@@ -38,12 +38,11 @@ class LdSelectableList<T extends Identifiable<IdType>, IdType, GroupingCriterion
   });
 
   @override
-  State<LdSelectableList<T, IdType, GroupingCriterion>> createState() =>
-      _LdSelectableListState<T, IdType, GroupingCriterion>();
+  State<LdSelectableList<T, IdType>> createState() => _LdSelectableListState<T, IdType>();
 }
 
-class _LdSelectableListState<T extends Identifiable<IdType>, IdType, GroupingCriterion>
-    extends State<LdSelectableList<T, IdType, GroupingCriterion>> with WidgetsBindingObserver {
+class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends State<LdSelectableList<T, IdType>>
+    with WidgetsBindingObserver {
   late final _selectedItems = _SetNotifier<IdType>(
     widget.initialSelectedItems,
     widget.multiSelect,
@@ -99,7 +98,7 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType, GroupingCri
   }
 
   @override
-  void didUpdateWidget(LdSelectableList<T, IdType, GroupingCriterion> oldWidget) {
+  void didUpdateWidget(LdSelectableList<T, IdType> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.multiSelect != widget.multiSelect) {
       _selectedItems.allowMultiple = widget.multiSelect;

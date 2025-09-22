@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
-class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType, GroupingCriterion> extends StatelessWidget {
+class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
   final Widget child;
   final LdPaginatorItem<T> item;
 
@@ -10,15 +10,15 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType, GroupingCriter
 
   @override
   Widget build(BuildContext context) {
-    final selection = LdMonkeySelection.of<T, IdType, GroupingCriterion>(context);
+    final selection = LdMonkeySelection.of<T, IdType>(context);
     final listSelection = selection.items;
 
     final newSelection = !listSelection.contains(item.value!.id) ? {item.value!.id} : listSelection;
 
-    final route = LdMonkey.of<T, IdType, GroupingCriterion>(context);
+    final route = LdMonkey.of<T, IdType>(context);
 
     return Provider.value(
-      value: LdMonkeySelection<T, IdType, GroupingCriterion>(items: newSelection),
+      value: LdMonkeySelection<T, IdType>(items: newSelection),
       child: Provider.value(
         value: newSelection,
         child: Builder(builder: (newContext) {
@@ -29,14 +29,14 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType, GroupingCriter
             builder: (context, isOpen, open, child) => child!,
             menuProviders: (context) => [
               Provider<LdPaginatorItem<T>>.value(value: item),
-              Provider<LdMonkey<T, IdType, GroupingCriterion>>.value(value: route),
-              Provider<LdMonkeySelection<T, IdType, GroupingCriterion>>.value(
+              Provider<LdMonkey<T, IdType>>.value(value: route),
+              Provider<LdMonkeySelection<T, IdType>>.value(
                 value: LdMonkeySelection(items: newSelection),
               ),
-              Provider<List<LdMonkeyAction<T, IdType, GroupingCriterion>>>.value(
+              Provider<List<LdMonkeyAction<T, IdType>>>.value(
                 value: actions.toList(),
               ),
-              Provider<LdMonkeyContext<T, IdType, GroupingCriterion>>.value(
+              Provider<LdMonkeyContext<T, IdType>>.value(
                 value: LdMonkeyContext.fromRoute(route, newContext),
               ),
             ],

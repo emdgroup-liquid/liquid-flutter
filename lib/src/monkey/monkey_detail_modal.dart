@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-LdModal ldMonkeyDetailModal<T extends Identifiable<IdType>, IdType, GroupingCriterion>(
-  LdMonkey<T, IdType, GroupingCriterion> route,
+LdModal ldMonkeyDetailModal<T extends Identifiable<IdType>, IdType>(
+  LdMonkey<T, IdType> route,
 ) {
   return LdModal(
     modalContent: (context) => SizedBox(

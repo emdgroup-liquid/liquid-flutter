@@ -9,7 +9,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-final taskDemo = LdMonkey<Task, int, bool>(
+final taskDemo = LdMonkey<Task, int>(
   path: "/task-demo",
   allowMultipleSelection: true,
   presentationMode: MonkeyDetailVariant.page,
@@ -20,7 +20,7 @@ final taskDemo = LdMonkey<Task, int, bool>(
   buildRepository: (context) => taskRepository,
   buildDetail: (context, item) => TaskDetail(task: item),
   listBuilder: (route, initialSelection, onSelectionChange) {
-    return LdSelectableList<Task, int, bool>(
+    return LdSelectableList<Task, int>(
       showSelectionControls: route.state.showSelectionControls,
       listBuilder: (context, scrollController, itemBuilder) {
         return LdList(
@@ -37,7 +37,7 @@ final taskDemo = LdMonkey<Task, int, bool>(
       itemBuilder: (context, item, index, config) => LdMonkeySingleShortcuts(
         item: item.value!.id,
         actions: route.actions,
-        child: LdMonkeyContextMenu<Task, int, bool>(
+        child: LdMonkeyContextMenu<Task, int>(
           item: item,
           child: LdListItemAnimation(
             state: item.state,
@@ -55,7 +55,7 @@ final taskDemo = LdMonkey<Task, int, bool>(
                   "${Jiffy.parseFromDateTime(item.value!.due).fromNow()} #${item.value!.id}",
                 ),
                 trailingForward:
-                    LdMonkeyContext.of<Task, int, bool>(context).isSideBySide,
+                    LdMonkeyContext.of<Task, int>(context).isSideBySide,
               ),
             ),
           ),
@@ -73,12 +73,12 @@ final taskDemo = LdMonkey<Task, int, bool>(
       shortcutActivators: {
         SingleActivator(LogicalKeyboardKey.keyN, meta: true),
       },
-      buildLoadingText: (context, selection) => "Creating new task",
-      submitType: LdLabeledActionSubmitType.none,
-      buildLabel: (context, selection) => "New Task",
-      buildIcon: (context, selection) => const Icon(LucideIcons.plus),
-      action: (context, selection) async {
-        final route = LdMonkey.of<Task, int, bool>(context);
+      buildLoadingText: (context) => "Creating new task",
+      submitType: LdLabeledActionType.none,
+      buildLabel: (context) => "New Task",
+      buildIcon: (context) => const Icon(LucideIcons.plus),
+      action: (context) async {
+        final route = LdMonkey.of<Task, int>(context);
 
         final newTaskNotification = LdNotificationsController.of(context)
             .enterText(
@@ -124,13 +124,14 @@ final taskDemo = LdMonkey<Task, int, bool>(
       shortcutActivators: {
         SingleActivator(LogicalKeyboardKey.keyD),
       },
-      buildLoadingText: (context, selection) => "Marking as done",
-      buildLabel: (context, selection) => "Done",
-      buildIcon: (context, selection) => const Icon(LucideIcons.check),
-      action: (context, selection) async {
+      buildLoadingText: (context) => "Marking as done",
+      buildLabel: (context) => "Done",
+      buildIcon: (context) => const Icon(LucideIcons.check),
+      action: (context) async {
         final updatedItems = <Task>{};
 
-        for (final id in selection) {
+        final selection = LdMonkeySelection.of<Task, int>(context);
+        for (final id in selection.items) {
           final item = await taskRepository.getById(id);
           updatedItems.add(item.copyWith(done: true));
         }
@@ -155,13 +156,14 @@ final taskDemo = LdMonkey<Task, int, bool>(
       shortcutActivators: {
         SingleActivator(LogicalKeyboardKey.keyU),
       },
-      buildLoadingText: (context, selection) => "Marking as undone",
-      buildLabel: (context, selection) => "To do",
-      buildIcon: (context, selection) => const Icon(LucideIcons.hourglass),
-      action: (context, selection) async {
+      buildLoadingText: (context) => "Marking as undone",
+      buildLabel: (context) => "To do",
+      buildIcon: (context) => const Icon(LucideIcons.hourglass),
+      action: (context) async {
         final updatedItems = <Task>{};
 
-        for (final id in selection) {
+        final selection = LdMonkeySelection.of<Task, int>(context);
+        for (final id in selection.items) {
           final item = await taskRepository.getById(id);
           updatedItems.add(item.copyWith(done: false));
         }
@@ -185,13 +187,16 @@ final taskDemo = LdMonkey<Task, int, bool>(
       shortcutActivators: {
         SingleActivator(LogicalKeyboardKey.keyD, meta: true),
       },
-      buildLoadingText: (context, selection) => "Duplicating",
-      buildLabel: (context, selection) => "Duplicate",
-      buildIcon: (context, selection) => const Icon(LucideIcons.copy),
+      buildLoadingText: (context) => "Duplicating",
+      buildLabel: (context) => "Duplicate",
+      buildIcon: (context) => const Icon(LucideIcons.copy),
       multiSelect: false,
-      action: (context, selection) async {
-        final route = LdMonkey.of<Task, int, bool>(context);
-        final item = await taskRepository.getById(selection.first);
+      action: (
+        context,
+      ) async {
+        final route = LdMonkey.of<Task, int>(context);
+        final selection = LdMonkeySelection.of<Task, int>(context);
+        final item = await taskRepository.getById(selection.items.first);
 
         final newItem = item.copyWith(
           id: testData.length + 1,
@@ -228,19 +233,24 @@ final taskDemo = LdMonkey<Task, int, bool>(
         SingleActivator(LogicalKeyboardKey.delete),
         SingleActivator(LogicalKeyboardKey.backspace),
       },
-      buildLoadingText: (context, selection) =>
-          "Deleting ${selection.length} ${selection.length == 1 ? "item" : "items"}",
-      buildLabel: (context, selection) =>
-          "Delete ${selection.length} ${selection.length == 1 ? "item" : "items"}",
-      buildIcon: (context, selection) => Icon(
+      buildLoadingText: (context) {
+        final selection = LdMonkeySelection.of<Task, int>(context);
+        return "Deleting ${selection.items.length} ${selection.items.length == 1 ? "item" : "items"}";
+      },
+      buildLabel: (context) {
+        final selection = LdMonkeySelection.of<Task, int>(context);
+        return "Delete ${selection.items.length} ${selection.items.length == 1 ? "item" : "items"}";
+      },
+      buildIcon: (context) => Icon(
         LucideIcons.trash2,
       ),
       color: shadRed,
-      action: (context, selection) async {
-        await taskRepository.deleteBatch(selection);
+      action: (context) async {
+        final selection = LdMonkeySelection.of<Task, int>(context);
+        await taskRepository.deleteBatch(selection.items);
       },
     ),
-    toggleSelectionControls<Task, int, bool>(),
-    toggleFilters<Task, int, bool>(),
+    toggleSelectionControls<Task, int>(),
+    toggleFilters<Task, int>(),
   ],
 );

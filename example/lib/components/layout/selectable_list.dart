@@ -92,7 +92,7 @@ class _SelectableListDemoState extends State<SelectableListDemo> {
             title: const LdTextHs("Demo list"),
             child: SizedBox(
               height: 500,
-              child: LdSelectableList<SampleItem, String, void>(
+              child: LdSelectableList<SampleItem, String>(
                 multiSelect: _multiSelect,
                 paginator: _paginator,
                 onSelectionChange: _onSelectionChange,

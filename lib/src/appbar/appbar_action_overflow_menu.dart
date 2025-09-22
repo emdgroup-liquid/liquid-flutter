@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:liquid_flutter/liquid_flutter.dart'
-    hide LdLabeledAction, LdLabeledActionSubmitType, LdAppBarActionWidget;
+import 'package:liquid_flutter/liquid_flutter.dart' hide LdLabeledAction, LdLabeledActionType, LdAppBarActionWidget;
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/single_child_widget.dart';
 import 'app_bar_action.dart';
