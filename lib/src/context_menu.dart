@@ -291,10 +291,10 @@ class ContextMenuRoute extends ModalRoute<void> {
 
     if (effectivePositionMode == LdContextPositionMode.relativeTrigger || cursorPosition == null) {
       triggerPosition = this.triggerPosition;
-      triggerSize = Size(this.triggerSize.width + 10, this.triggerSize.height + 10);
+      triggerSize = Size(this.triggerSize.width + 5, this.triggerSize.height + 5);
     } else {
       triggerPosition = cursorPosition ?? Offset.zero;
-      triggerSize = const Size(10, 10);
+      triggerSize = const Size(5, 5);
     }
 
     final viewInsets = mediaQuery.viewInsets + LdTheme.of(context).pad(size: LdSize.m);
@@ -450,10 +450,10 @@ class ContextMenuRoute extends ModalRoute<void> {
 
   Offset _getMenuOffset(Alignment alignment) {
     return switch (alignment) {
-      Alignment.bottomRight => const Offset(-100, -100),
-      Alignment.topRight => const Offset(100, -100),
-      Alignment.bottomLeft => const Offset(-100, 100),
-      Alignment.topLeft => const Offset(-100, -100),
+      Alignment.bottomRight => const Offset(-20, -20),
+      Alignment.topRight => const Offset(20, -20),
+      Alignment.bottomLeft => const Offset(-20, 20),
+      Alignment.topLeft => const Offset(-20, -20),
       _ => Offset.zero,
     };
   }
