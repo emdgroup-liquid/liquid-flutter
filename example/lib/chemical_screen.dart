@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -56,8 +59,11 @@ class _ChemicalScreenState extends State<ChemicalScreen> {
                       })
                 ]),
             ldSpacerL,
+            LdTextHs("Other potions"),
+            ldSpacerM,
             const _OtherPotions(),
             ldSpacerL,
+            LdTextHs("Stock"),
             const _Accordion(),
           ]),
         ]),
@@ -227,11 +233,10 @@ class _Accordion extends StatelessWidget {
       padding: EdgeInsets.zero,
       child: LdAccordion(
           itemCount: 5,
-          initialOpenIndex: const {1},
           childBuilder: ((context, n) {
             return Container(
               padding: const EdgeInsets.all(16),
-              child: Text("Accordion content $n"),
+              child: LdTextPs("Accordion content $n"),
             );
           }),
           headerBuilder: ((context, n) {
@@ -280,15 +285,41 @@ class _OtherPotions extends StatelessWidget {
         rows: potions,
         rowCount: potions.length,
         buildRow: (potion) {
-          return [Text(potion.name), Text(potion.description)];
+          return [LdTextPs(potion.name), LdTextPs(potion.description)];
         },
       ),
     );
   }
 }
 
-class _ProductKeyInfos extends StatelessWidget {
+class _ProductKeyInfos extends StatefulWidget {
   const _ProductKeyInfos();
+
+  @override
+  State<_ProductKeyInfos> createState() => _ProductKeyInfosState();
+}
+
+class _ProductKeyInfosState extends State<_ProductKeyInfos> {
+  double _boilingPoint = 321;
+  Timer? _timer;
+  double _brewingPressure = 3;
+  @override
+  void initState() {
+    super.initState();
+
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      setState(() {
+        _boilingPoint = Random().nextDouble() * 1000;
+        _brewingPressure = Random().nextDouble() * 10;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -298,7 +329,7 @@ class _ProductKeyInfos extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            LdTextHs("5-4"),
+            LdTextH("5-4"),
             LdMute(
               child: LdTextL(
                 "pH",
@@ -309,7 +340,7 @@ class _ProductKeyInfos extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            LdTextHs("321°C"),
+            LdCounter(value: _boilingPoint),
             LdMute(
                 child: LdTextL(
               "Boiling point",
@@ -319,7 +350,10 @@ class _ProductKeyInfos extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            LdTextHs("3 Bar"),
+            LdCounter(
+              value: _brewingPressure,
+              precision: 2,
+            ),
             LdMute(
               child: LdTextL(
                 "Brewing pressure",
@@ -330,7 +364,7 @@ class _ProductKeyInfos extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            LdTextHs(
+            LdTextH(
               "Very",
             ),
             LdMute(

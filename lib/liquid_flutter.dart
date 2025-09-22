@@ -14,6 +14,7 @@ export 'src/card.dart';
 export 'src/checkbox.dart';
 export 'src/choose.dart';
 export 'src/collapse.dart';
+export 'src/counter.dart';
 export 'src/color/color.dart';
 export 'src/color/palette.dart';
 export 'src/color/tokens/amber.dart';
