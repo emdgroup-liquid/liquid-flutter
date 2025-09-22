@@ -65,7 +65,7 @@ class LdInputColorBundle {
 
     return LdInputColorBundle(
       backgroundIdle: surface,
-      backgroundHover: surface,
+      backgroundHover: theme.palette.neutral.relative(theme.isDark, theme.isDark ? 2 : 1),
       backgroundFocus: surface,
       backgroundDisabled: theme.isDark ? theme.neutralShade(2) : theme.neutralShade(1),
       borderIdle: isValid ? border : borderInvalid.fromCenter(1, theme.isDark),
