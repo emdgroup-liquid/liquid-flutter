@@ -9,7 +9,7 @@ import 'package:liquid_flutter/src/shrinkwrap_pageview.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
-class LdDatePicker extends StatelessWidget {
+class LdDatePicker extends StatefulWidget {
   final String? label;
   final DateTime? minDate;
   final DateTime? maxDate;
@@ -33,27 +33,76 @@ class LdDatePicker extends StatelessWidget {
     this.useRootNavigator = false,
   });
 
-  DateTime get _initialDate => value ?? DateTime.now();
+  @override
+  State<LdDatePicker> createState() => _LdDatePickerState();
+}
+
+class _LdDatePickerState extends State<LdDatePicker> {
+  late ValueNotifier<DateTime> _selectedDateNotifier;
+  late DateTime _selectedDate;
+
+  DateTime get _initialDate => widget.value ?? DateTime.now();
 
   Jiffy get initialDateJiffy => Jiffy.parseFromDateTime(_initialDate);
 
   String get initialDateString => initialDateJiffy.format(
-        pattern: displayFormat,
+        pattern: widget.displayFormat,
       );
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = _initialDate;
+    _selectedDateNotifier = ValueNotifier<DateTime>(_selectedDate);
+  }
+
+  @override
+  void dispose() {
+    _selectedDateNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant LdDatePicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value != widget.value) {
+      _selectedDate = widget.value ?? DateTime.now();
+      _selectedDateNotifier.value = _selectedDate;
+    }
+  }
+
+  bool _isValidDate(DateTime date) {
+    if (widget.minDate != null) {
+      if (date.isBefore(widget.minDate!)) {
+        return false;
+      }
+    }
+
+    if (widget.maxDate != null) {
+      if (date.isAfter(widget.maxDate!)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool _isSelected(DateTime date) {
+    return date.year == _selectedDate.year && date.month == _selectedDate.month && date.day == _selectedDate.day;
+  }
 
   @override
   Widget build(BuildContext context) {
     return LdModalBuilder(
-      useRootNavigator: useRootNavigator,
+      useRootNavigator: widget.useRootNavigator,
       builder: (context, open) => LdBundle(
         children: [
-          if (label != null) LdTextL(label!),
+          if (widget.label != null) LdTextL(widget.label!),
           LdButton(
             child: Text(initialDateString),
             key: const Key("date_picker_button"),
             onPressed: open,
-            mode: buttonMode,
-            disabled: disabled,
+            mode: widget.buttonMode,
+            disabled: widget.disabled,
           )
         ],
       ),
@@ -61,31 +110,97 @@ class LdDatePicker extends StatelessWidget {
         key: const Key('date_picker_sheet'),
         size: LdSize.m,
         contentPadding: LdTheme.of(context).pad(size: LdSize.s),
-        title: Text(label ?? LiquidLocalizations.of(context).selectDate),
+        title: Text(widget.label ?? LiquidLocalizations.of(context).selectDate),
+        actionBar: (context) {
+          return ValueListenableBuilder<DateTime>(
+            valueListenable: _selectedDateNotifier,
+            builder: (context, selectedDate, child) {
+              final today = DateTime.now();
+              final in7Days = selectedDate.add(const Duration(days: 7));
+              final in30Days = selectedDate.add(const Duration(days: 30));
+              final in90Days = selectedDate.add(const Duration(days: 90));
+
+              final todayValid = _isValidDate(today);
+              final in7DaysValid = _isValidDate(in7Days);
+              final in30DaysValid = _isValidDate(in30Days);
+              final in90DaysValid = _isValidDate(in90Days);
+
+              final todayIsSelected = _isSelected(today);
+              final in7DaysSelected = _isSelected(in7Days);
+              final in30DaysSelected = _isSelected(in30Days);
+              final in90DaysSelected = _isSelected(in90Days);
+
+              return Column(
+                children: [
+                  Wrap(
+                    spacing: LdTheme.of(context).paddingSize(size: LdSize.s),
+                    runSpacing: LdTheme.of(context).paddingSize(size: LdSize.s),
+                    children: [
+                      LdButtonOutline(
+                        child: const Text("Today"),
+                        key: const Key("today"),
+                        active: todayIsSelected,
+                        disabled: !todayValid,
+                        onPressed: () {
+                          _selectedDate = today;
+                          _selectedDateNotifier.value = today;
+                        },
+                      ),
+                      LdButtonOutline(
+                        child: const Text("+7d"),
+                        key: const Key("in7d"),
+                        active: in7DaysSelected,
+                        disabled: !in7DaysValid,
+                        onPressed: () {
+                          _selectedDate = in7Days;
+                          _selectedDateNotifier.value = in7Days;
+                        },
+                      ),
+                      LdButtonOutline(
+                        child: const Text("+30d"),
+                        key: const Key("in30d"),
+                        active: in30DaysSelected,
+                        disabled: !in30DaysValid,
+                        onPressed: () {
+                          _selectedDate = in30Days;
+                          _selectedDateNotifier.value = in30Days;
+                        },
+                      ),
+                      LdButtonOutline(
+                        child: const Text("+90d"),
+                        key: const Key("in90d"),
+                        active: in90DaysSelected,
+                        disabled: !in90DaysValid,
+                        onPressed: () {
+                          _selectedDate = in90Days;
+                          _selectedDateNotifier.value = in90Days;
+                        },
+                      ),
+                    ],
+                  ),
+                  ldSpacerM,
+                  LdButton(
+                    key: const Key("done"),
+                    width: double.infinity,
+                    child: Text(LiquidLocalizations.of(context).done),
+                    onPressed: () {
+                      widget.onChanged(_selectedDate);
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        },
         modalContent: (
           context,
         ) =>
             _DatePickerSheet(
-          value: _initialDate,
-          onChanged: (date) {
-            // Set the time to the initial time
-            onChanged(
-              DateTime(
-                date.year,
-                date.month,
-                date.day,
-                _initialDate.hour,
-                _initialDate.minute,
-                _initialDate.second,
-                _initialDate.millisecond,
-                _initialDate.microsecond,
-              ),
-            );
-          },
-          label: label ?? LiquidLocalizations.of(context).selectDate,
-          onDismissed: () => Navigator.of(context).pop(),
-          minDate: minDate,
-          maxDate: maxDate,
+          selectedDateNotifier: _selectedDateNotifier,
+          label: widget.label ?? LiquidLocalizations.of(context).selectDate,
+          minDate: widget.minDate,
+          maxDate: widget.maxDate,
         ),
       ),
     );
@@ -93,18 +208,14 @@ class LdDatePicker extends StatelessWidget {
 }
 
 class _DatePickerSheet extends StatefulWidget {
-  final DateTime value;
-  final void Function(DateTime) onChanged;
+  final ValueNotifier<DateTime> selectedDateNotifier;
   final String label;
   final DateTime? minDate;
   final DateTime? maxDate;
 
-  final void Function() onDismissed;
   const _DatePickerSheet({
-    required this.value,
+    required this.selectedDateNotifier,
     required this.label,
-    required this.onChanged,
-    required this.onDismissed,
     this.minDate,
     this.maxDate,
   });
@@ -114,10 +225,8 @@ class _DatePickerSheet extends StatefulWidget {
 }
 
 class _DatePickerSheetState extends State<_DatePickerSheet> {
-  late DateTime _selectedDate = widget.value;
-
   late PageController? _pageController = PageController(
-    initialPage: monthSince0(widget.value),
+    initialPage: monthSince0(widget.selectedDateNotifier.value),
   );
 
   int monthSince0(DateTime other) =>
@@ -125,8 +234,9 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
 
   bool get _pageControllerIsValid => (_pageController?.positions.length == 1);
 
-  int get _currentPage =>
-      _pageControllerIsValid ? _pageController!.page?.toInt() ?? monthSince0(widget.value) : monthSince0(widget.value);
+  int get _currentPage => _pageControllerIsValid
+      ? _pageController!.page?.toInt() ?? monthSince0(widget.selectedDateNotifier.value)
+      : monthSince0(widget.selectedDateNotifier.value);
 
   DateTime get _viewDate => Jiffy.parseFromDateTime(DateTime(0)).add(months: _currentPage).dateTime;
 
@@ -142,9 +252,8 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
 
   @override
   void didUpdateWidget(covariant _DatePickerSheet oldWidget) {
-    if (oldWidget.value != widget.value) {
-      _selectedDate = widget.value;
-      viewDate(widget.value);
+    if (oldWidget.selectedDateNotifier != widget.selectedDateNotifier) {
+      viewDate(widget.selectedDateNotifier.value);
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -225,7 +334,8 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
   }
 
   bool isSelected(DateTime date) {
-    return date.year == _selectedDate.year && date.month == _selectedDate.month && date.day == _selectedDate.day;
+    final selectedDate = widget.selectedDateNotifier.value;
+    return date.year == selectedDate.year && date.month == selectedDate.month && date.day == selectedDate.day;
   }
 
   bool get showTodayButton {
@@ -310,24 +420,6 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
       },
     );
 
-    final today = DateTime.now();
-
-    final in7Days = _selectedDate.add(const Duration(days: 7));
-
-    final in30Days = _selectedDate.add(const Duration(days: 30));
-
-    final in90Days = _selectedDate.add(const Duration(days: 90));
-
-    final todayValid = isValidDate(today);
-    final in7DaysValid = isValidDate(in7Days);
-    final in30DaysValid = isValidDate(in30Days);
-    final in90DaysValid = isValidDate(in90Days);
-
-    final todayIsSelected = isSelected(today);
-    final in7DaysSelected = isSelected(in7Days);
-    final in30DaysSelected = isSelected(in30Days);
-    final in90DaysSelected = isSelected(in90Days);
-
     return LdAutoSpace(
       children: [
         ResponsiveBuilder(
@@ -365,82 +457,23 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
         ExpandablePageView(
           controller: _pageController,
           itemBuilder: (context, index) {
-            return _MonthView(
-              key: Key("month_view_$index"),
-              viewDate: Jiffy.parseFromDateTime(DateTime(0)).add(months: index).dateTime,
-              selectedDate: _selectedDate,
-              minDate: widget.minDate,
-              maxDate: widget.maxDate,
-              onSelected: (date) {
-                setState(
-                  () {
-                    _selectedDate = date;
+            return ValueListenableBuilder<DateTime>(
+              valueListenable: widget.selectedDateNotifier,
+              builder: (context, selectedDate, child) {
+                return _MonthView(
+                  key: Key("month_view_$index"),
+                  viewDate: Jiffy.parseFromDateTime(DateTime(0)).add(months: index).dateTime,
+                  selectedDate: selectedDate,
+                  minDate: widget.minDate,
+                  maxDate: widget.maxDate,
+                  onSelected: (date) {
+                    widget.selectedDateNotifier.value = date;
                   },
                 );
               },
             );
           },
         ),
-        const LdDivider(),
-        Wrap(
-            spacing: LdTheme.of(context).paddingSize(size: LdSize.s),
-            runSpacing: LdTheme.of(context).paddingSize(size: LdSize.s),
-            children: [
-              LdButtonOutline(
-                  child: const Text("Today"),
-                  key: const Key("today"),
-                  active: todayIsSelected,
-                  disabled: !todayValid,
-                  onPressed: () {
-                    setState(() {
-                      _selectedDate = today;
-                      viewDate(today);
-                    });
-                  }),
-              LdButtonOutline(
-                  child: const Text("+7d"),
-                  key: const Key("in7d"),
-                  active: in7DaysSelected,
-                  disabled: !in7DaysValid,
-                  onPressed: () {
-                    setState(() {
-                      _selectedDate = in7Days;
-                      viewDate(in7Days);
-                    });
-                  }),
-              LdButtonOutline(
-                  child: const Text("+30d"),
-                  key: const Key("in30d"),
-                  active: in30DaysSelected,
-                  disabled: !in30DaysValid,
-                  onPressed: () {
-                    setState(() {
-                      _selectedDate = in30Days;
-                      viewDate(in30Days);
-                    });
-                  }),
-              LdButtonOutline(
-                  child: const Text("+90d"),
-                  key: const Key("in90d"),
-                  active: in90DaysSelected,
-                  disabled: !in90DaysValid,
-                  onPressed: () {
-                    setState(() {
-                      _selectedDate = in90Days;
-                      viewDate(in90Days);
-                    });
-                  }),
-            ]),
-        LdButton(
-            width: double.infinity,
-            key: const Key("done"),
-            child: Text(LiquidLocalizations.of(context).done),
-            size: LdSize.l,
-            onPressed: () {
-              widget.onChanged(_selectedDate);
-              widget.onDismissed();
-            }),
-        ldSpacerL,
       ],
     );
   }
@@ -529,10 +562,10 @@ class _MonthView extends StatelessWidget {
               child: AspectRatio(
                 aspectRatio: aspectRatio,
                 child: LdButton(
-                  circular: true,
                   mode: _buttonMode(day),
                   key: Key("day_${day.year}_${day.month}_${day.day}"),
                   size: LdSize.s,
+                  width: double.infinity,
                   disabled: !isValidDate(day),
                   color: theme.palette.neutral,
                   child: Text(day.day.toString()),
@@ -556,7 +589,7 @@ class _MonthView extends StatelessWidget {
               aspectRatio: aspectRatio,
               child: LdButton(
                 size: LdSize.s,
-                circular: true,
+                width: double.infinity,
                 key: Key("day_${day.year}_${day.month}_${day.day}"),
                 mode: _buttonMode(day),
                 disabled: !isValidDate(day),
@@ -580,11 +613,9 @@ class _MonthView extends StatelessWidget {
               child: AspectRatio(
                 aspectRatio: aspectRatio,
                 child: LdButtonGhost(
-                  circular: true,
                   mode: _buttonMode(day),
                   key: Key("day_${day.year}_${day.month}_${day.day}"),
                   active: isSelected(day),
-                  size: LdSize.s,
                   color: theme.palette.neutral,
                   disabled: !isValidDate(day),
                   child: Text(day.day.toString()),
