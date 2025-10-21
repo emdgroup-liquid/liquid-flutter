@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:liquid_flutter/src/form_label.dart';
-import 'package:liquid_flutter/src/input_color_bundle.dart';
+import 'package:liquid_flutter/src/touchable/input_color.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../liquid_flutter.dart';
@@ -177,10 +177,12 @@ class _LdChooseState<T> extends State<LdChoose<T>> {
                 mode: LdTouchableSurfaceMode.neutralGhost,
                 color: theme.palette.primary,
                 builder: (contxt, _, status) {
-                  final colorBundle = LdInputColorBundle.fromTheme(
+                  final colorBundle = inputColor(
                     theme,
+                    status,
+                    isValid: true,
                     onSurface: LdSurfaceInfo.of(context).isSurface,
-                  ).fromTouchableStatus(status);
+                  );
 
                   return Container(
                     child: Row(
@@ -270,7 +272,7 @@ class _LdChoosePage<T> extends StatelessWidget {
       appBar: LdAppBar(
         title: Text(label),
       ),
-      body: CustomScrollView(slivers: [child]),
+      body: LdScaffoldBody(slivers: [child]),
     );
   }
 }

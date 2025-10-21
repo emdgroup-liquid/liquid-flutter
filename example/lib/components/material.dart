@@ -59,9 +59,13 @@ class MaterialDocumentation extends StatelessWidget {
             Checkbox(value: false, onChanged: (v) {}),
             Checkbox(value: true, onChanged: (v) {}),
             Radio(
+              groupValue: true,
+              onChanged: (v) {},
               value: true,
             ),
             Radio(
+              groupValue: false,
+              onChanged: (v) {},
               value: false,
             ),
             Switch(value: true, onChanged: (v) {}),

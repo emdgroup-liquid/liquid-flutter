@@ -7,11 +7,9 @@ import 'package:provider/provider.dart';
 
 class LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   final LdMonkey<T, IdType> route;
-  final FocusNode? searchFocusNode;
 
   const LdMonkeyMasterPage({
     super.key,
-    this.searchFocusNode,
     required this.route,
   });
 
@@ -25,10 +23,33 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
     super.dispose();
   }
 
+  LdSearchConfig? searchConfig;
+
+  @override
+  void initState() {
+    super.initState();
+    final searchFilter = widget.route.repository.filters.values
+        .firstWhereOrNull((filter) => filter is LdFilterSearchOption) as LdFilterSearchOption<T, IdType, dynamic>?;
+
+    if (searchFilter != null) {
+      searchConfig = LdSearchConfig(
+        getSuggestions: searchFilter.getSuggestions,
+        buildSuggestion: searchFilter.buildSuggestion,
+        onSearch: (query) {
+          widget.route.repository.updateFilter(searchFilter.name, (filter) {
+            filter as LdFilterSearchOption<T, IdType, dynamic>;
+            return filter.copyWith(
+              isOn: query.isNotEmpty,
+              searchText: query,
+            );
+          });
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final bigScreen = DeviceInfo.isDesktop || DeviceInfo.isTablet;
-
     return LdNotificationProvider(
       child: LdNotificationPortal(
         child: StreamBuilder(
@@ -53,9 +74,6 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
                       LdMonkeyActionLocation.masterSecondary,
                     );
 
-                    final searchFilter =
-                        widget.route.repository.filters.firstWhereOrNull((filter) => filter is LdFilterSearchOption);
-
                     return LdScaffold(
                       appBar: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -66,28 +84,11 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
                               title: Text(widget.route.repository.pluralItemTitle),
                               actions: primaryActions.actions,
                               overflowMenuProviders: primaryActions.menuProviders,
-                              bottom: searchFilter != null && bigScreen
-                                  ? LdFilterSearchWidget(
-                                      searchFocusNode: widget.searchFocusNode,
-                                      filter: searchFilter as LdFilterSearchOption<T, IdType, dynamic>,
-                                      onFilterChanged: (filter) {
-                                        widget.route.repository.updateFilter(filter);
-                                      },
-                                    )
-                                  : null,
                             ),
                           ),
-                          if (bigScreen && (secondaryActions.hasActions))
-                            Provider.value(
-                                value: LdMonkeyActionLocation.masterSecondary,
-                                child: LdAppBar(
-                                  disableSafeArea: true,
-                                  actions: secondaryActions.actions,
-                                  overflowMenuProviders: secondaryActions.menuProviders,
-                                )),
                         ],
                       ),
-                      bottomNavigationBar: !bigScreen && (secondaryActions.hasActions || searchFilter != null)
+                      secondaryNavigationBar: (secondaryActions.hasActions || searchConfig != null)
                           ? Provider.value(
                               value: LdMonkeyActionLocation.masterSecondary,
                               child: LayoutBuilder(builder: (context, constraints) {
@@ -95,19 +96,7 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
                                   implyLeading: false,
                                   actions: secondaryActions.actions,
                                   overflowMenuProviders: secondaryActions.menuProviders,
-                                  title: searchFilter != null
-                                      ? ConstrainedBox(
-                                          constraints: BoxConstraints(
-                                            maxWidth: constraints.maxWidth * (secondaryActions.hasActions ? 0.6 : 0.9),
-                                          ),
-                                          child: LdFilterSearchWidget(
-                                            filter: searchFilter as LdFilterSearchOption<T, IdType, dynamic>,
-                                            onFilterChanged: (filter) {
-                                              widget.route.repository.updateFilter(filter);
-                                            },
-                                          ),
-                                        )
-                                      : null,
+                                  searchConfig: searchConfig,
                                 );
                               }),
                             )

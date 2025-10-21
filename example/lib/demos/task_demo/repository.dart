@@ -68,7 +68,16 @@ final taskRepository = LdRepository<Task, int>(
       optimisticFilter: (item, searchText) {
         return item.task.toLowerCase().contains(searchText.toLowerCase());
       },
+      buildSuggestion: (context, suggestion) {
+        return LdListItem(
+          title: Text(suggestion),
+          onPressed: () {
+            LdSearchAcceptSuggestion(suggestion: suggestion).dispatch(context);
+          },
+        );
+      },
       getSuggestions: (searchText) async {
+        print("Retrieving suggestion $searchText");
         return testData
             .where((element) =>
                 element.task.toLowerCase().startsWith(searchText.toLowerCase()))

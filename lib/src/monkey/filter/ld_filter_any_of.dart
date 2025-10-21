@@ -3,7 +3,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterOption<T, IdType> {
   final Map<E, Widget Function(BuildContext)> allValues;
-  Set<E> selectedValues;
+  final Set<E> selectedValues;
   final bool Function(T item, List<E> selected) _optimisticFilter;
 
   LdFilterAnyOf({
@@ -24,18 +24,42 @@ class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
   }
 
   @override
-  void marshalSerialized(String value) {
-    isOn = false;
+  LdFilterAnyOf<T, IdType, E> marshalSerialized(String value) {
     if (value.isEmpty) {
-      selectedValues.clear();
-      return;
+      return copyWith(isOn: false, selectedValues: {});
     }
-    selectedValues = allValues.keys.where((e) => value.contains(e.toString())).cast<E>().toSet();
-    isOn = selectedValues.isNotEmpty;
+
+    final selectedValues = allValues.keys.where((e) => value.contains(e.toString())).cast<E>().toSet();
+
+    return copyWith(
+      selectedValues: selectedValues,
+      isOn: selectedValues.isNotEmpty,
+    );
   }
 
   @override
   bool optimisticFilter(T item) {
     return _optimisticFilter(item, selectedValues.toList());
+  }
+
+  @override
+  LdFilterAnyOf<T, IdType, E> copyWith({
+    String Function(BuildContext context)? label,
+    Widget Function(BuildContext context)? icon,
+    String? name,
+    bool? isOn,
+    Map<E, Widget Function(BuildContext)>? allValues,
+    Set<E>? selectedValues,
+    bool Function(T item, List<E> selected)? optimisticFilter,
+  }) {
+    return LdFilterAnyOf<T, IdType, E>(
+      name: name ?? this.name,
+      label: label ?? this.label,
+      icon: icon ?? this.icon,
+      isOn: isOn ?? this.isOn,
+      allValues: allValues ?? this.allValues,
+      initialSelected: selectedValues ?? this.selectedValues,
+      optimisticFilter: optimisticFilter ?? _optimisticFilter,
+    );
   }
 }

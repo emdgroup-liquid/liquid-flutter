@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:provider/provider.dart';
 
 class LdFilterOneOfWidget<T extends Identifiable<IdType>, IdType, E> extends StatelessWidget {
   final LdFilterOneOf<T, IdType, E> filter;
-  final void Function(LdFilterOneOf<T, IdType, E> filter) onFilterChanged;
 
   const LdFilterOneOfWidget({
     super.key,
     required this.filter,
-    required this.onFilterChanged,
   });
 
   @override
   Widget build(BuildContext context) {
+    final repository = context.read<LdMonkey<T, IdType>>().repository;
     return LdCard(
       child: LdAutoSpace(
         children: [
@@ -24,9 +24,10 @@ class LdFilterOneOfWidget<T extends Identifiable<IdType>, IdType, E> extends Sta
                 child: const Icon(LucideIcons.x),
                 size: LdSize.s,
                 onPressed: () {
-                  filter.isOn = false;
-                  filter.selectedValue = null;
-                  onFilterChanged(filter);
+                  repository.updateFilter<LdFilterOneOf<T, IdType, E>>(
+                    filter.name,
+                    (filter) => filter.copyWith(isOn: false),
+                  );
                 },
               ),
             ],
@@ -40,9 +41,10 @@ class LdFilterOneOfWidget<T extends Identifiable<IdType>, IdType, E> extends Sta
               ),
               value: filter.selectedValue ?? filter.allValues.keys.first,
               onChanged: (E value) {
-                filter.selectedValue = value;
-                filter.isOn = true;
-                onFilterChanged(filter);
+                repository.updateFilter<LdFilterOneOf<T, IdType, E>>(
+                  filter.name,
+                  (filter) => filter.copyWith(selectedValue: value, isOn: true),
+                );
               },
             ),
         ],

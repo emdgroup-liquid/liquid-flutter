@@ -4,7 +4,7 @@ import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/haptics.dart';
-import 'package:liquid_flutter/src/input_color_bundle.dart';
+import 'package:liquid_flutter/src/touchable/input_color.dart';
 
 class LdSelectItem<T> {
   final T value;
@@ -344,11 +344,12 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
         },
         color: theme.palette.primary,
         builder: (context, _, status) {
-          final colors = LdInputColorBundle.fromTheme(
+          final colors = inputColor(
             theme,
-            onSurface: widget.onSurface,
+            status,
             isValid: widget.valid,
-          ).fromTouchableStatus(status);
+            onSurface: widget.onSurface,
+          );
           final initialItem = DefaultTextStyle(
             child: _buildInitialItem(
               activeItem,

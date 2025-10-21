@@ -3,7 +3,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterOption<T, IdType> {
   final Map<E, Widget Function(BuildContext)> allValues;
-  E? selectedValue;
+  final E? selectedValue;
   final bool Function(T item, E? selected) _optimisticFilter;
 
   LdFilterOneOf({
@@ -12,8 +12,8 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
     required super.icon,
     super.isOn = false,
     required this.allValues,
-    dynamic initialSelected,
-    required bool Function(T item, dynamic selected) optimisticFilter,
+    E? initialSelected,
+    required bool Function(T item, E? selected) optimisticFilter,
   })  : _optimisticFilter = optimisticFilter,
         selectedValue = initialSelected;
 
@@ -24,22 +24,46 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
   }
 
   @override
-  void marshalSerialized(String value) {
-    isOn = false;
+  LdFilterOneOf<T, IdType, E> marshalSerialized(String value) {
     if (value.isEmpty) {
-      selectedValue = null;
-      return;
+      return copyWith(isOn: false, selectedValue: null);
     }
+
     final values = value.split(',');
-    selectedValue = allValues.keys
+    final selectedValue = allValues.keys
         .where((e) => values.contains(e.toString()))
         .cast<E?>()
         .firstWhere((e) => e != null, orElse: () => null);
-    isOn = selectedValue != null;
+
+    return copyWith(
+      selectedValue: selectedValue,
+      isOn: selectedValue != null,
+    );
   }
 
   @override
   bool optimisticFilter(T item) {
     return _optimisticFilter(item, selectedValue);
+  }
+
+  @override
+  LdFilterOneOf<T, IdType, E> copyWith({
+    String Function(BuildContext context)? label,
+    Widget Function(BuildContext context)? icon,
+    String? name,
+    bool? isOn,
+    Map<E, Widget Function(BuildContext)>? allValues,
+    E? selectedValue,
+    bool Function(T item, E? selected)? optimisticFilter,
+  }) {
+    return LdFilterOneOf<T, IdType, E>(
+      name: name ?? this.name,
+      label: label ?? this.label,
+      icon: icon ?? this.icon,
+      isOn: isOn ?? this.isOn,
+      allValues: allValues ?? this.allValues,
+      initialSelected: selectedValue ?? this.selectedValue,
+      optimisticFilter: optimisticFilter ?? _optimisticFilter,
+    );
   }
 }

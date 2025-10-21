@@ -4,9 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/monkey/intents.dart';
 
 import 'package:multi_split_view/multi_split_view.dart';
 import 'package:provider/provider.dart';
+
+const monkeyShortcuts = {
+  SingleActivator(LogicalKeyboardKey.keyF, meta: true): SearchIntent(),
+  SingleActivator(LogicalKeyboardKey.keyR, meta: true): RefreshIntent(),
+  SingleActivator(LogicalKeyboardKey.keyA, meta: true): SelectAllIntent(),
+};
 
 /// The shell route that is wrapped around the master and detail pages.
 class LdMonkeyShell<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
@@ -36,8 +43,6 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
 
   late final StreamSubscription _filterSubscription;
   late final StreamSubscription _sortSubscription;
-
-  final _searchFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -81,7 +86,6 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
 
   @override
   void dispose() {
-    _searchFocusNode.dispose();
     _selectionSubscription.cancel();
     _filterSubscription.cancel();
     _sortSubscription.cancel();
@@ -191,56 +195,57 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
 
       final theme = LdTheme.of(context);
 
-      return Provider<LdMonkey<T, IdType>>.value(
-        value: widget.route,
-        child: Provider<LdMonkeyContext<T, IdType>>.value(
-          value: monkeyContext,
-          child: ColoredBox(
-            color: theme.background,
-            child: MultiSplitViewTheme(
-              data: MultiSplitViewThemeData(
-                dividerThickness: 2,
-              ),
-              child: MultiSplitView(
-                dividerBuilder: (context, index, resizable, dragging, highlighted, themeData) => VerticalDivider(
-                  color: theme.border,
-                  thickness: 1,
-                  width: 1,
+      return LdScaffold(
+        body: Provider<LdMonkey<T, IdType>>.value(
+          value: widget.route,
+          child: Provider<LdMonkeyContext<T, IdType>>.value(
+            value: monkeyContext,
+            child: ColoredBox(
+              color: theme.background,
+              child: MultiSplitViewTheme(
+                data: MultiSplitViewThemeData(
+                  dividerThickness: 2,
                 ),
-                initialAreas: [
-                  Area(
-                    flex: 1,
-                    builder: (context, area) => LdMonkeyMasterPage(
-                      route: widget.route,
-                      searchFocusNode: _searchFocusNode,
+                child: MultiSplitView(
+                  dividerBuilder: (context, index, resizable, dragging, highlighted, themeData) => VerticalDivider(
+                    color: theme.border,
+                    thickness: 1,
+                    width: 1,
+                  ),
+                  initialAreas: [
+                    Area(
+                      flex: 1,
+                      builder: (context, area) => LdMonkeyMasterPage(
+                        route: widget.route,
+                      ),
                     ),
-                  ),
-                  Area(
-                    flex: widget.route.detailFlex?.toDouble() ?? 2.0,
-                    builder: (context, area) {
-                      // We need to wrap the child in a stream builder to ensure
-                      // that the child is rebuilt when the state changes as the
-                      // Area will not rebuild.
-                      return StreamBuilder(
-                          stream: widget.route.stateStream,
-                          initialData: widget.route.state,
-                          builder: (context, snapshot) {
-                            final state = snapshot.data!;
+                    Area(
+                      flex: widget.route.detailFlex?.toDouble() ?? 2.0,
+                      builder: (context, area) {
+                        // We need to wrap the child in a stream builder to ensure
+                        // that the child is rebuilt when the state changes as the
+                        // Area will not rebuild.
+                        return StreamBuilder(
+                            stream: widget.route.stateStream,
+                            initialData: widget.route.state,
+                            builder: (context, snapshot) {
+                              final state = snapshot.data!;
 
-                            if (state.selectedItems.isNotEmpty && _showingDetail) {
-                              return widget.child;
-                            }
-                            return const Center(
-                              child: LdMute(
-                                child: LdTextL(
-                                  "Select something",
+                              if (state.selectedItems.isNotEmpty && _showingDetail) {
+                                return widget.child;
+                              }
+                              return const Center(
+                                child: LdMute(
+                                  child: LdTextL(
+                                    "Select something",
+                                  ),
                                 ),
-                              ),
-                            );
-                          });
-                    },
-                  ),
-                ],
+                              );
+                            });
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -251,40 +256,51 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
 
   @override
   Widget build(BuildContext context) {
-    return CallbackShortcuts(
-      bindings: {
-        const SingleActivator(LogicalKeyboardKey.keyR, meta: true): () {
-          widget.route.state.repository?.refreshList();
-        },
-        const SingleActivator(LogicalKeyboardKey.keyF, meta: true): () {
-          _searchFocusNode.requestFocus();
-        },
-      },
-      child: StreamBuilder(
-        stream: widget.route.stateStream,
-        initialData: widget.route.state,
-        builder: (context, snapshot) {
-          if (widget.route.state.repository == null) {
-            return LdSubmit<void, void>(
-              config: LdSubmitConfig(
-                  autoTrigger: true,
-                  timeout: null,
-                  action: (_) async {
-                    await widget.route.initRepository(
-                      context,
-                      widget.route.parseSelected(widget.routeSelection ?? ""),
-                      _getQueryParameters(),
-                    );
-                    _setupSubscriptions();
-                    _updateSelectionFromRoute();
-                  }),
-              builder: const LdSubmitCenteredBuilder<void, void>(),
-            );
-          }
+    return Shortcuts.manager(
+      manager: LoggingShortcutManager(),
+      child: FocusScope(
+          autofocus: true,
+          child: StreamBuilder(
+            stream: widget.route.stateStream,
+            initialData: widget.route.state,
+            builder: (context, snapshot) {
+              if (widget.route.state.repository == null) {
+                return LdSubmit<void, void>(
+                  config: LdSubmitConfig(
+                      autoTrigger: true,
+                      timeout: null,
+                      action: (_) async {
+                        await widget.route.initRepository(
+                          context,
+                          widget.route.parseSelected(widget.routeSelection ?? ""),
+                          _getQueryParameters(),
+                        );
+                        _setupSubscriptions();
+                        _updateSelectionFromRoute();
+                      }),
+                  builder: const LdSubmitCenteredBuilder<void, void>(),
+                );
+              }
 
-          return _buildInitialized(context, snapshot.data!);
-        },
-      ),
+              return _buildInitialized(context, snapshot.data!);
+            },
+          )),
     );
+  }
+}
+
+/// A ShortcutManager that logs all keys that it handles.
+class LoggingShortcutManager extends ShortcutManager {
+  LoggingShortcutManager() {
+    shortcuts = monkeyShortcuts;
+  }
+  @override
+  KeyEventResult handleKeypress(BuildContext context, KeyEvent event) {
+    final KeyEventResult result = super.handleKeypress(context, event);
+    print('Handling shortcut $event: $result');
+    if (result == KeyEventResult.handled) {
+      print('Handled shortcut $event in $context');
+    }
+    return result;
   }
 }

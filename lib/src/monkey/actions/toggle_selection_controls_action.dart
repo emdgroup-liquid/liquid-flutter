@@ -13,11 +13,7 @@ LdMonkeyAction<T, IdType> toggleSelectionControls<T extends Identifiable<IdType>
         ),
       },
       buildIcon: (context) {
-        final route = LdMonkey.of<T, IdType>(
-          context,
-          watch: true,
-        );
-        return route.state.showSelectionControls ? const Icon(LucideIcons.check) : const Icon(LucideIcons.pen);
+        return const Icon(LucideIcons.pen);
       },
       buildLabel: (
         context,
@@ -26,6 +22,10 @@ LdMonkeyAction<T, IdType> toggleSelectionControls<T extends Identifiable<IdType>
         return route.state.showSelectionControls
             ? LiquidLocalizations.of(context).done
             : LiquidLocalizations.of(context).select;
+      },
+      isActive: (context) {
+        final route = LdMonkey.of<T, IdType>(context);
+        return route.state.showSelectionControls;
       },
       submitType: LdLabeledActionType.none,
       action: (context) {

@@ -7,17 +7,18 @@ import 'labeled_action.dart';
 
 class LdAppbarActionOverflowMenu extends StatelessWidget {
   final List<LdLabeledAction> actions;
-  final bool bigToolbar;
+
   final List<SingleChildWidget> Function(BuildContext context)? menuProviders;
 
   final bool inMenu;
+  final LdScaffoldLayoutState layoutState;
 
   const LdAppbarActionOverflowMenu({
     super.key,
     required this.actions,
-    required this.bigToolbar,
     required this.inMenu,
     this.menuProviders,
+    required this.layoutState,
   });
 
   @override
@@ -41,8 +42,8 @@ class LdAppbarActionOverflowMenu extends StatelessWidget {
               (e) => LdAppBarActionWidget(
                 key: ValueKey(e.label(context)),
                 action: e,
+                layoutState: layoutState,
                 menuProviders: menuProviders,
-                bigToolbar: bigToolbar,
                 inMenu: inMenu,
               ),
             ),

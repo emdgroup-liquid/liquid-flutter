@@ -4,4 +4,7 @@ export 'appbar_action_overflow_menu.dart';
 export 'bottom_bar.dart';
 export 'drawer_buttons.dart';
 export 'labeled_action.dart';
+export 'search_components.dart';
+export 'search_config.dart';
+export 'tab_navigation.dart';
 export 'window_callbacks.dart';

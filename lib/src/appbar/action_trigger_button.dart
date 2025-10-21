@@ -4,19 +4,20 @@ import 'labeled_action.dart';
 
 class ActionTriggerButton extends StatelessWidget {
   final LdLabeledAction action;
-  final bool bigToolbar;
+
   final bool inMenu;
   final VoidCallback onPressed;
   final bool loading;
   final String? loadingText;
   final bool disabled;
+  final LdScaffoldLayoutState layoutState;
 
   const ActionTriggerButton({
     super.key,
     required this.action,
-    required this.bigToolbar,
     required this.inMenu,
     required this.onPressed,
+    required this.layoutState,
     this.loading = false,
     this.loadingText,
     this.disabled = false,
@@ -49,17 +50,30 @@ class ActionTriggerButton extends StatelessWidget {
         ),
       );
     } else {
+      late Widget child;
+
+      if (icon == null) {
+        child = Text(label);
+      } else {
+        if (layoutState.slot == LdScaffoldSlot.secondaryNavigationBarBottom && action.alwaysShowLabel) {
+          child = Column(
+            children: [icon, ldSpacerXS, Text(label)],
+          );
+        } else {
+          child = icon;
+        }
+      }
+
       return Tooltip(
         message: action.label(context),
         child: LdButtonGhost(
           color: action.color(context),
           active: action.isActive(context),
-          leading: bigToolbar ? icon : null,
           onPressed: onPressed,
           loadingText: loadingText,
           loading: loading,
           disabled: disabled,
-          child: bigToolbar || icon == null ? Text(label) : icon,
+          child: child,
         ),
       );
     }

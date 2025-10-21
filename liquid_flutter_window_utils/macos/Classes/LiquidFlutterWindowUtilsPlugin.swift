@@ -10,7 +10,6 @@ public class LiquidFlutterWindowUtilsPlugin: NSObject, FlutterPlugin, WindowUtil
     WindowUtilsApiSetup.setUp(binaryMessenger: registrar.messenger, api: instance)
 
     guard let window = LiquidFlutterWindowUtilsPlugin.getCurrentWindow() else {
-      print("Error getting current window")
       return
     }
   }
@@ -22,7 +21,6 @@ public class LiquidFlutterWindowUtilsPlugin: NSObject, FlutterPlugin, WindowUtil
 
   public func configureWindow() throws {
     guard let window = LiquidFlutterWindowUtilsPlugin.getCurrentWindow() else {
-      print("Error getting current window")
       return
     }
 
@@ -43,7 +41,7 @@ public class LiquidFlutterWindowUtilsPlugin: NSObject, FlutterPlugin, WindowUtil
     window.backgroundColor = NSColor.clear
     
     // Additional transparency settings
-    window.hasShadow = false
+    //window.hasShadow = false
     window.isMovableByWindowBackground = true
     
     // Set the window level to floating to ensure proper transparency

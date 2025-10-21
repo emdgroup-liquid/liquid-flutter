@@ -6,6 +6,12 @@ import 'package:provider/provider.dart';
 
 enum LdPlatform { macos, ios, android, linux, windows, web }
 
+extension LdPlatformExtension on LdPlatform {
+  bool get isDesktop => this == LdPlatform.macos || this == LdPlatform.windows || this == LdPlatform.linux;
+  bool get isMobile => this == LdPlatform.ios || this == LdPlatform.android;
+  bool get isWeb => this == LdPlatform.web;
+}
+
 /// Provides a theme to all the components in the widget tree
 /// Theme can be accessed using LdTheme.of(context)
 class LdTheme extends ChangeNotifier {

@@ -6,14 +6,15 @@ import 'labeled_action.dart';
 
 class LdAppBarActionWidget extends StatelessWidget {
   final LdLabeledAction action;
-  final bool bigToolbar;
+
   final List<SingleChildWidget> Function(BuildContext context)? menuProviders;
   final bool inMenu;
+  final LdScaffoldLayoutState layoutState;
 
   const LdAppBarActionWidget({
     super.key,
     required this.action,
-    required this.bigToolbar,
+    required this.layoutState,
     required this.inMenu,
     this.menuProviders,
   });
@@ -28,8 +29,8 @@ class LdAppBarActionWidget extends StatelessWidget {
           zoomMode: LdContextZoomMode.never,
           builder: (context, isOpen, open, child) => ActionTriggerButton(
             action: action,
-            bigToolbar: bigToolbar,
             loadingText: action.loadingText(context),
+            layoutState: layoutState,
             inMenu: inMenu,
             onPressed: () => open(),
             disabled: false,
@@ -39,7 +40,7 @@ class LdAppBarActionWidget extends StatelessWidget {
       case LdLabeledActionType.none:
         return ActionTriggerButton(
           action: action,
-          bigToolbar: bigToolbar,
+          layoutState: layoutState,
           loadingText: action.loadingText(context),
           inMenu: inMenu,
           onPressed: () => action.onPressed(context),
@@ -63,7 +64,7 @@ class LdAppBarActionWidget extends StatelessWidget {
             submitButtonBuilder: (submitButtonBuilder, controller) {
               return ActionTriggerButton(
                 action: action,
-                bigToolbar: bigToolbar,
+                layoutState: layoutState,
                 inMenu: inMenu,
                 onPressed: controller.trigger,
                 loading: controller.state.type == LdSubmitStateType.loading,

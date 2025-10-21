@@ -52,6 +52,7 @@ class LdContextMenu extends StatefulWidget {
     required this.builder,
     required this.menuBuilder,
     this.dismissOnOutsideTap = true,
+    this.placeAboveTrigger = false,
     this.scaleFromTrigger = false,
     this.blurMode = LdContextMenuBlurMode.mobileOnly,
     this.zoomMode = LdContextZoomMode.mobileOnly,
@@ -65,6 +66,8 @@ class LdContextMenu extends StatefulWidget {
   });
 
   final bool? visible;
+
+  final bool placeAboveTrigger;
 
   final bool disabled;
 
@@ -157,6 +160,7 @@ class _LdContextMenuState extends State<LdContextMenu> {
 
     Navigator.of(context, rootNavigator: true).push(
       ContextMenuRoute(
+        placeAboveTrigger: widget.placeAboveTrigger,
         menuBuilder: (ctx, onDismiss) => widget.menuBuilder(ctx, onDismiss),
         effectivePositionMode: _effectivePositionMode,
         triggerKey: _triggerKey,
@@ -227,6 +231,7 @@ class ContextMenuRoute extends ModalRoute<void> {
   final List<SingleChildWidget>? providers;
   final Widget Function(BuildContext, bool, VoidCallback, Widget?) triggerBuilder;
   final Widget? child;
+  final bool placeAboveTrigger;
 
   final ValueNotifier<Size> _menuSizeNotifier = ValueNotifier(Size.zero);
 
@@ -235,6 +240,7 @@ class ContextMenuRoute extends ModalRoute<void> {
     required this.menuBuilder,
     required this.effectivePositionMode,
     this.cursorPosition,
+    this.placeAboveTrigger = false,
     this.shouldBlur = false,
     this.shouldZoom = false,
     this.backgroundColor,
@@ -314,12 +320,12 @@ class ContextMenuRoute extends ModalRoute<void> {
 
     final overflowY = min(
       0,
-      availableHeight - (triggerPosition.dy) - menuHeight - triggerSize.height,
+      availableHeight - (triggerPosition.dy) - menuHeight - (placeAboveTrigger ? 0 : triggerSize.height),
     );
 
     final baseRect = Rect.fromLTWH(
       triggerPosition.dx + overflowX,
-      triggerPosition.dy + overflowY + triggerSize.height,
+      triggerPosition.dy + overflowY + (placeAboveTrigger ? 0 : triggerSize.height),
       menuSize.width,
       menuSize.height,
     );

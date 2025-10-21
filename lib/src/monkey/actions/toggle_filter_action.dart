@@ -18,7 +18,7 @@ LdMonkeyAction<T, IdType> toggleFilters<T extends Identifiable<IdType>, IdType>(
       buildIcon: (context) {
         final route = context.watch<LdMonkey<T, IdType>>();
 
-        final activeFilters = route.repository.filters.where((e) => e.isOn).toList();
+        final activeFilters = route.repository.activeFilters;
 
         if (activeFilters.isNotEmpty) {
           return Center(

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/form_label.dart';
-import 'package:liquid_flutter/src/input_color_bundle.dart';
+import 'package:liquid_flutter/src/touchable/input_color.dart';
+import 'package:liquid_flutter/src/touchable/touchable_status.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// An input field
@@ -115,48 +117,8 @@ class _LdInputState extends State<LdInput> {
 
     final cursorHeight = theme.labelSize(widget.size);
 
-    final inputColors = LdInputColorBundle.fromTheme(
-      theme,
-      onSurface: LdSurfaceInfo.of(context, listen: true).isSurface,
-      isValid: widget.valid,
-    );
-
-    late final Color fillColor;
-    late final Color borderColor;
-    late final Color textColor;
-    late final Color placeholderColor;
-    late final Color iconColor;
-
-    if (widget.disabled) {
-      fillColor = inputColors.backgroundDisabled;
-      borderColor = inputColors.borderDisabled;
-      textColor = inputColors.textDisabled;
-      placeholderColor = inputColors.placeholderDisabled;
-      iconColor = inputColors.iconDisabled;
-    } else {
-      if (_focusNode.hasFocus) {
-        fillColor = inputColors.backgroundFocus;
-        borderColor = inputColors.borderFocus;
-        textColor = inputColors.textFocus;
-        placeholderColor = inputColors.placeholderFocus;
-        iconColor = inputColors.iconFocus;
-      } else if (_hovering) {
-        fillColor = inputColors.backgroundHover;
-        borderColor = inputColors.borderHover;
-        textColor = inputColors.textHover;
-        placeholderColor = inputColors.placeholderHover;
-        iconColor = inputColors.iconHover;
-      } else {
-        fillColor = inputColors.backgroundIdle;
-        borderColor = inputColors.borderIdle;
-        textColor = inputColors.textIdle;
-        placeholderColor = inputColors.placeholderIdle;
-        iconColor = inputColors.iconIdle;
-      }
-    }
-
     var hintStyle = TextStyle(
-      color: placeholderColor,
+      color: theme.textMuted,
       package: theme.fontFamilyPackage,
       fontFamily: theme.fontFamily,
       fontSize: theme.labelSize(widget.size),
@@ -191,109 +153,117 @@ class _LdInputState extends State<LdInput> {
       suffix = clearButton;
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        LdFormLabel(
-          label: widget.label,
-          size: widget.size,
-          disabled: widget.disabled,
-        ),
-        MouseRegion(
-            onEnter: (event) {
-              setState(() {
-                _hovering = true;
-              });
-            },
-            onExit: (event) {
-              setState(() {
-                _hovering = false;
-              });
-            },
-            child: Container(
-              clipBehavior: Clip.hardEdge,
-              decoration: BoxDecoration(
-                color: fillColor,
-                borderRadius: theme.radius(LdSize.s),
-                border: Border.all(
-                  color: borderColor,
-                  width: theme.borderWidth,
-                ),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: contentPadding,
-                    child: Container(
-                      constraints: BoxConstraints(
-                        minHeight: cursorHeight,
-                      ),
-                      child: Row(
-                        children: [
-                          if (widget.leading != null) ...[
-                            IconTheme(
-                              data: IconThemeData(
-                                color: iconColor,
-                                size: theme.labelSize(widget.size),
-                              ),
-                              child: widget.leading!,
-                            ),
-                            ldSpacerS
-                          ],
-                          Flexible(
-                            child: TextField(
-                              focusNode: _focusNode,
-                              enabled: !widget.disabled,
-                              controller: _controller,
-                              cursorColor: theme.palette.primary.idle(
-                                theme.isDark,
-                              ),
-                              cursorHeight: cursorHeight,
-                              maxLines: widget.maxLines,
-                              autofillHints: widget.autofillHints,
-                              keyboardType: widget.keyboardType,
-                              enableInteractiveSelection: true,
-                              minLines: widget.minLines,
-                              decoration: InputDecoration(
-                                hintText: widget.hint,
-                                border: InputBorder.none,
-                                hintStyle: hintStyle,
-                                isCollapsed: true,
-                                filled: false,
-                                isDense: true,
-                                suffix: suffix,
-                              ),
-                              obscureText: widget.obscureText,
-                              autofocus: widget.autofocus,
-                              textInputAction: widget.textInputAction,
-                              scrollPadding: theme.pad(),
-                              onSubmitted: widget.onSubmitted,
-                              cursorWidth: 1,
-                              style: TextStyle(
-                                color: textColor,
-                                package: theme.fontFamilyPackage,
-                                fontFamily: theme.fontFamily,
-                                fontSize: theme.labelSize(widget.size),
-                                height: 1,
-                              ),
-                            ),
-                          ),
-                        ],
+    return Material(
+      type: MaterialType.transparency,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          LdFormLabel(
+            label: widget.label,
+            size: widget.size,
+            disabled: widget.disabled,
+          ),
+          LdTouchableSurface(
+              allowTapOutside: true,
+              mode: LdTouchableSurfaceMode.input,
+              isInput: true,
+              onPressed: () {
+                _focusNode.requestFocus();
+              },
+              active: _focusNode.hasFocus,
+              disabled: widget.disabled,
+              builder: (context, colors, status) => Container(
+                    clipBehavior: Clip.hardEdge,
+                    decoration: BoxDecoration(
+                      color: colors.surface,
+                      borderRadius: theme.radius(LdSize.s),
+                      border: Border.all(
+                        color: colors.border,
+                        width: theme.borderWidth,
                       ),
                     ),
-                  ),
-                  if (widget.loading)
-                    LinearProgressIndicator(
-                      minHeight: theme.borderWidth,
-                      color: iconColor,
-                      backgroundColor: Colors.transparent,
-                    )
-                ],
-              ),
-            )),
-      ],
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Padding(
+                          padding: contentPadding,
+                          child: Container(
+                            constraints: BoxConstraints(
+                              minHeight: cursorHeight,
+                            ),
+                            child: Row(
+                              children: [
+                                if (widget.leading != null) ...[
+                                  IconTheme(
+                                    data: IconThemeData(
+                                      color: colors.icon,
+                                      size: theme.labelSize(widget.size),
+                                    ),
+                                    child: widget.leading!,
+                                  ),
+                                  ldSpacerS
+                                ],
+                                Flexible(
+                                  child: CallbackShortcuts(
+                                    bindings: {
+                                      const SingleActivator(LogicalKeyboardKey.escape): () {
+                                        _focusNode.unfocus();
+                                      },
+                                    },
+                                    child: TextField(
+                                      focusNode: _focusNode,
+                                      enabled: !widget.disabled,
+                                      controller: _controller,
+                                      cursorColor: theme.palette.primary.idle(
+                                        theme.isDark,
+                                      ),
+                                      cursorHeight: cursorHeight,
+                                      maxLines: widget.maxLines,
+                                      autofillHints: widget.autofillHints,
+                                      keyboardType: widget.keyboardType,
+                                      enableInteractiveSelection: true,
+                                      minLines: widget.minLines,
+                                      decoration: InputDecoration(
+                                        hintText: widget.hint,
+                                        border: InputBorder.none,
+                                        hintStyle: hintStyle,
+                                        isCollapsed: true,
+                                        filled: false,
+                                        isDense: true,
+                                        suffix: suffix,
+                                      ),
+                                      obscureText: widget.obscureText,
+                                      autofocus: widget.autofocus,
+                                      textInputAction: widget.textInputAction,
+                                      scrollPadding: theme.pad(),
+                                      onSubmitted: widget.onSubmitted,
+                                      cursorWidth: 1,
+                                      style: TextStyle(
+                                        color: colors.text,
+                                        package: theme.fontFamilyPackage,
+                                        fontFamily: theme.fontFamily,
+                                        fontSize: theme.labelSize(widget.size),
+                                        height: 1,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        if (widget.loading)
+                          LinearProgressIndicator(
+                            minHeight: theme.borderWidth,
+                            color: colors.icon,
+                            backgroundColor: Colors.transparent,
+                          )
+                      ],
+                    ),
+                  )),
+        ],
+      ),
     );
   }
 }

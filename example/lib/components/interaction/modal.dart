@@ -81,7 +81,8 @@ class _DemoSheet extends StatelessWidget {
               : (context) => Row(
                     children: [
                       Expanded(
-                        child: LdButtonGhost(
+                        child: LdButtonVague(
+                          width: double.infinity,
                           child: const Text("Cancel"),
                           onPressed: () {
                             Navigator.of(context).pop();
@@ -91,6 +92,7 @@ class _DemoSheet extends StatelessWidget {
                       ldSpacerL,
                       Expanded(
                         child: LdButton(
+                          width: double.infinity,
                           child: const Text("Confirm"),
                           onPressed: () {
                             Navigator.of(context).pop("Hello world");

@@ -1,10 +1,9 @@
 name: liquid_flutter_window_utils
 description: "A new Flutter plugin project."
 version: 0.0.1
-homepage:
 
 environment:
-  sdk: ^3.9.0-262.0.dev
+  sdk: ">=3.0.0 <4.0.0"
   flutter: ">=3.3.0"
 
 dependencies:

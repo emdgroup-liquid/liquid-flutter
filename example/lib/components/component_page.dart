@@ -34,6 +34,7 @@ class ComponentPage extends StatelessWidget {
     return Provider<ComponentPagePath>.value(
       value: ComponentPagePath(path: path),
       child: LdScaffold(
+        appBarScrollBehavior: LdAppBarScrollBehavior.static,
         appBar: LdAppBar(
           addContainer: true,
           blurOnScroll: true,

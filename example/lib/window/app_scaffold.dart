@@ -37,6 +37,7 @@ class _AppScaffoldState extends State<AppScaffold> {
         return LdPortal(
           child: LdScaffold(
             drawer: MainNavigationDrawer(),
+            appBarScrollBehavior: LdAppBarScrollBehavior.always,
             appBar: LdAppBar(
               leading: Container(
                 height: 24,
@@ -49,39 +50,6 @@ class _AppScaffoldState extends State<AppScaffold> {
                 ),
               ),
               title: widget.title,
-              trailing: LdContextMenu(
-                scaleFromTrigger: true,
-                positionMode: LdContextPositionMode.relativeTrigger,
-                builder: (context, shuttle, trigger, child) => LdButtonVague(
-                  trailing: const Icon(LucideIcons.squareMousePointer),
-                  onPressed: () {
-                    trigger();
-                  },
-                  child: const Text("Theme"),
-                ),
-                menuBuilder: (context, openMenu) => ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: 300,
-                  ),
-                  child: SingleChildScrollView(
-                    child: LdAutoSpace(
-                      children: [
-                        const PlatformSelector(),
-                        ldSpacerM,
-                        const ThemeSelector(),
-                        ldSpacerM,
-                        const SizeSelector(),
-                        ldSpacerM,
-                        const RadiusSelector(),
-                        ldSpacerM,
-                        const FontSelector(),
-                        ldSpacerM,
-                        const HeadlineFontSelector(),
-                      ],
-                    ).padL(),
-                  ),
-                ),
-              ),
               actions: [
                 LdLabeledActionBuilder(
                   buildIcon: (context) => const Icon(LucideIcons.github),
@@ -94,6 +62,34 @@ class _AppScaffoldState extends State<AppScaffold> {
                       ),
                     );
                   },
+                ),
+                LdLabeledActionBuilder(
+                  action: (context) {},
+                  buildIcon: (context) => const Icon(LucideIcons.paintBucket),
+                  buildLabel: (context) => "Theme",
+                  submitType: LdLabeledActionType.contextMenu,
+                  buildContextMenu: (context, close) => ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: 300,
+                    ),
+                    child: SingleChildScrollView(
+                      child: LdAutoSpace(
+                        children: [
+                          const PlatformSelector(),
+                          ldSpacerM,
+                          const ThemeSelector(),
+                          ldSpacerM,
+                          const SizeSelector(),
+                          ldSpacerM,
+                          const RadiusSelector(),
+                          ldSpacerM,
+                          const FontSelector(),
+                          ldSpacerM,
+                          const HeadlineFontSelector(),
+                        ],
+                      ).padL(),
+                    ),
+                  ),
                 ),
               ],
             ),

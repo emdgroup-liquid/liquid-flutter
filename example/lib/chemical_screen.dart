@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -16,7 +17,21 @@ var potions = [
       "A potion from the Alihotsy plant; causes hysterical laughter."),
   _Potion("Dreamless Sleep Potion",
       "A potion that places the taker in a sleep that is dreamless."),
-  _Potion("Madame Glossy's Silver Polish", "A magical cleaning solution.")
+  _Potion("Madame Glossy's Silver Polish", "A magical cleaning solution."),
+  _Potion("Pepperup Potion",
+      "Cures the common cold and produces steam coming out of the drinker's ears."),
+  _Potion("Polyjuice Potion",
+      "Allows the drinker to assume the form of someone else."),
+  _Potion("Amortentia", "The most powerful love potion in existence."),
+  _Potion("Felix Felicis",
+      "Also called Liquid Luck, makes the drinker lucky for a period of time."),
+  _Potion("Skele-Gro", "Potion for regrowing bones."),
+  _Potion("Wolfsbane Potion", "Alleviates the symptoms of lycanthropy."),
+  _Potion("Veritaserum", "A powerful truth serum."),
+  _Potion("Draught of Peace", "Relieves anxiety and soothes agitation."),
+  _Potion("Confusing Concoction", "Causes confusion in the drinker."),
+  _Potion("Invisibility Potion",
+      "Renders the drinker invisible for a short period of time."),
 ];
 
 class ChemicalScreen extends StatefulWidget {
@@ -27,48 +42,92 @@ class ChemicalScreen extends StatefulWidget {
 }
 
 class _ChemicalScreenState extends State<ChemicalScreen> {
+  final searchConfig = LdSearchConfig(
+      onSearch: (query) {
+        print("🔍 Search query: $query");
+      },
+      getSuggestions: (query) =>
+          Future.value(potions.where((p) => p.name.contains(query)).toList()),
+      buildSuggestion: (context, suggestion) {
+        final potion = suggestion as _Potion;
+        return LdListItem(
+            title: Text(potion.name),
+            onPressed: () {
+              LdSearchAcceptSuggestion(suggestion: potion.name)
+                  .dispatch(context);
+            });
+      });
+
+  @override
+  void dispose() {
+    super.dispose();
+    searchConfig.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListView(children: [
-      LdContainer(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          LdAutoSpace(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            LdBreadcrumb.fromStrings(
-              const ["Home", "Chemicals", "Polyjuice potion"],
-            ),
-            const _Quantity(),
-            const _ProductKeyInfos(),
-            ldSpacerL,
-            LdAutoSpace(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const LdDivider(),
-                  const LdInput(
-                    label: "Notes",
-                    hint: "Add a note....",
-                    maxLines: 3,
-                  ),
-                  LdButton(
-                      child: const Text("Save"),
-                      onPressed: () {
-                        LdNotificationsController.of(context)
-                            .addNotification(LdNotification(
-                          type: LdNotificationType.success,
-                          message: "Saved",
-                        ));
-                      })
-                ]),
-            ldSpacerL,
-            LdTextHs("Other potions"),
-            ldSpacerM,
-            const _OtherPotions(),
-            ldSpacerL,
-            LdTextHs("Stock"),
-            const _Accordion(),
-          ]),
-        ]),
+    return LdScaffold(
+      secondaryNavigationBar: LdAppBar(
+        actions: [
+          LdLabeledActionBuilder(
+            buildIcon: (context) => const Icon(LucideIcons.shoppingBag),
+            buildLabel: (context) => "Add to cart",
+            action: (context) {
+              LdNotificationsController.of(context).addNotification(
+                LdNotification(
+                    type: LdNotificationType.success, message: "Added to cart"),
+              );
+            },
+            submitType: LdLabeledActionType.none,
+          ),
+          LdLabeledActionBuilder(
+            buildIcon: (context) => const Icon(LucideIcons.download),
+            buildLabel: (context) => "Download certificate",
+            action: (context) {
+              LdNotificationsController.of(context).addNotification(
+                LdNotification(
+                    type: LdNotificationType.success,
+                    message: "Downloading certificate"),
+              );
+            },
+            submitType: LdLabeledActionType.none,
+          ),
+        ],
+        searchConfig: searchConfig,
       ),
-    ]);
+      appBar: LdAppBar(
+        title: const Text("Chemical"),
+      ),
+      body: LdScaffoldBody(
+        children: [
+          LdBreadcrumb.fromStrings(
+            const ["Chemicals", "Polyjuice potion"],
+          ),
+          const _Quantity(),
+          const _ProductKeyInfos(),
+          ldSpacerL,
+          LdAutoSpace(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const LdDivider(),
+            LdButton(
+                child: const Text("Save"),
+                onPressed: () {
+                  LdNotificationsController.of(context)
+                      .addNotification(LdNotification(
+                    type: LdNotificationType.success,
+                    message: "Saved",
+                  ));
+                })
+          ]),
+          ldSpacerL,
+          LdTextHs("Other potions"),
+          ldSpacerM,
+          const _OtherPotions(),
+          ldSpacerL,
+          LdTextHs("Stock"),
+          const _Accordion(),
+        ].autoSpace(context, animate: true),
+      ),
+    );
   }
 }
 
@@ -128,95 +187,94 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
                   const LdTextL(
                     "Made with real human hair",
                   ),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      LdModalBuilder(
-                        builder: (context, onPress) {
-                          return LdButton(
-                            leading: const Icon(LucideIcons.arrowDown),
-                            onPressed: onPress,
-                            child: const Text("Deduct"),
-                          );
-                        },
-                        modal: LdModal(
-                          headerPadding:
-                              LdTheme.of(context).pad(size: LdSize.m),
-                          contentPadding: EdgeInsets.zero,
-                          modalContent: (context) => Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              LdListItem(
-                                  title: const Text("Deduct 0.1l"),
-                                  leading: const Icon(LucideIcons.arrowDown),
-                                  onPressed: () {
-                                    _deduct(0.1);
-                                    Navigator.of(context).pop();
-                                  }),
-                              LdListItem(
-                                  title: const Text("Deduct 0.2l"),
-                                  leading: const Icon(LucideIcons.arrowDown),
-                                  onPressed: () {
-                                    _deduct(0.2);
-                                    Navigator.of(context).pop();
-                                  }),
-                              LdListItem(
-                                  title: const Text("Deduct 0.5l"),
-                                  leading: const Icon(LucideIcons.arrowDown),
-                                  onPressed: () {
-                                    _deduct(0.5);
-                                    Navigator.of(context).pop();
-                                  }),
-                              LdListItem(
-                                  title: const Text("Add 0.1l"),
-                                  leading: const Icon(LucideIcons.arrowUp),
-                                  onPressed: () {
-                                    _deduct(-0.1);
-                                    Navigator.of(context).pop();
-                                  }),
-                              LdDivider(),
-                              LdListItem(
-                                  title: const Text("Refill entirely"),
-                                  leading: const Icon(LucideIcons.arrowUp),
-                                  onPressed: () {
-                                    _deduct(-1);
-                                    Navigator.of(context).pop();
-                                  })
-                            ],
-                          ),
-                          title: const Text("Deduct"),
-                        ),
-                      ),
-                      LdButton(
-                          mode: LdButtonMode.vague,
-                          leading: const Icon(LucideIcons.shoppingBag),
-                          onPressed: () {
-                            LdNotificationsController.of(context)
-                                .addNotification(LdNotification(
-                              type: LdNotificationType.info,
-                              message: "Added to cart",
-                            ));
-                          },
-                          child: const Text("Add to cart")),
-                      LdButton(
-                          mode: LdButtonMode.vague,
-                          leading: const Icon(LucideIcons.download),
-                          onPressed: () {
-                            LdNotificationsController.of(context)
-                                .addNotification(LdNotification(
-                              type: LdNotificationType.error,
-                              message: "Downloading certificate failed",
-                            ));
-                          },
-                          child: const Text(
-                            "Acces certificate",
-                          )),
-                    ],
-                  ),
                 ],
               ),
             )
+          ],
+        ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            LdModalBuilder(
+              builder: (context, onPress) {
+                return LdButton(
+                  leading: const Icon(LucideIcons.arrowDown),
+                  onPressed: onPress,
+                  child: const Text("Deduct"),
+                );
+              },
+              modal: LdModal(
+                headerPadding: LdTheme.of(context).pad(size: LdSize.m),
+                contentPadding: EdgeInsets.zero,
+                modalContent: (context) => Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    LdListItem(
+                        title: const Text("Deduct 0.1l"),
+                        leading: const Icon(LucideIcons.arrowDown),
+                        onPressed: () {
+                          _deduct(0.1);
+                          Navigator.of(context).pop();
+                        }),
+                    LdListItem(
+                        title: const Text("Deduct 0.2l"),
+                        leading: const Icon(LucideIcons.arrowDown),
+                        onPressed: () {
+                          _deduct(0.2);
+                          Navigator.of(context).pop();
+                        }),
+                    LdListItem(
+                        title: const Text("Deduct 0.5l"),
+                        leading: const Icon(LucideIcons.arrowDown),
+                        onPressed: () {
+                          _deduct(0.5);
+                          Navigator.of(context).pop();
+                        }),
+                    LdListItem(
+                        title: const Text("Add 0.1l"),
+                        leading: const Icon(LucideIcons.arrowUp),
+                        onPressed: () {
+                          _deduct(-0.1);
+                          Navigator.of(context).pop();
+                        }),
+                    LdDivider(),
+                    LdListItem(
+                        title: const Text("Refill entirely"),
+                        leading: const Icon(LucideIcons.arrowUp),
+                        onPressed: () {
+                          _deduct(-1);
+                          Navigator.of(context).pop();
+                        })
+                  ],
+                ),
+                title: const Text("Deduct"),
+              ),
+            ),
+            LdButton(
+                mode: LdButtonMode.vague,
+                leading: const Icon(LucideIcons.shoppingBag),
+                onPressed: () {
+                  LdNotificationsController.of(context)
+                      .addNotification(LdNotification(
+                    type: LdNotificationType.info,
+                    message: "Added to cart",
+                  ));
+                },
+                child: const Text("Add to cart")),
+            LdButton(
+                mode: LdButtonMode.vague,
+                leading: const Icon(LucideIcons.download),
+                onPressed: () {
+                  LdNotificationsController.of(context)
+                      .addNotification(LdNotification(
+                    type: LdNotificationType.error,
+                    message: "Downloading certificate failed",
+                  ));
+                },
+                child: const Text(
+                  "Acces certificate",
+                )),
           ],
         ),
       ],
@@ -375,6 +433,40 @@ class _ProductKeyInfosState extends State<_ProductKeyInfos> {
           ],
         ),
       ]),
+    );
+  }
+}
+
+class ChemicalShell extends StatelessWidget {
+  final Widget child;
+  const ChemicalShell({super.key, required this.child});
+  @override
+  Widget build(BuildContext context) {
+    return LdScaffold(
+      resizeToAvoidBottomInset: false,
+      secondaryNavigationBar: TabNavigation(
+        activeRoute: GoRouterState.of(context).uri.path,
+        tabs: [
+          LdNavigationTab(
+              label: "Chemical",
+              icon: const Icon(LucideIcons.beaker),
+              route: "/chemical"),
+          LdNavigationTab(
+              label: "Details",
+              icon: const Icon(LucideIcons.book),
+              route: "/chemical-detail"),
+          LdNavigationTab(
+              label: "Usage",
+              icon: const Icon(LucideIcons.book),
+              route: "/chemical-usage"),
+          LdNavigationTab(
+              label: "Exit", icon: const Icon(LucideIcons.x), route: "/"),
+        ],
+        onTabPressed: (route) {
+          context.replace(route);
+        },
+      ),
+      body: child,
     );
   }
 }

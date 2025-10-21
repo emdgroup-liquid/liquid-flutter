@@ -40,6 +40,7 @@ import 'package:liquid/demos/radius_documentation.dart';
 import 'package:liquid/demos/task_demo/task_demo.dart';
 import 'package:liquid/demos/theme.dart';
 import 'package:liquid/demos/typography_documentation.dart';
+import 'package:liquid/demos/demo_shell.dart';
 import 'package:liquid/home.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
@@ -64,6 +65,47 @@ class AppRouter {
   late final router =
       GoRouter(debugLogDiagnostics: true, initialLocation: "/", routes: [
     ShellRoute(
+      routes: [
+        GoRoute(
+          path: "/chemical",
+          pageBuilder: (context, state) => NoTransitionPage<void>(
+              key: state.pageKey, child: const ChemicalScreen()),
+        ),
+        GoRoute(
+          path: "/chemical-detail",
+          pageBuilder: (context, state) => NoTransitionPage<void>(
+              key: state.pageKey, child: const ThemeDemo()),
+        ),
+        GoRoute(
+          path: "/chemical-usage",
+          pageBuilder: (context, state) => NoTransitionPage<void>(
+              key: state.pageKey, child: const ThemeDemo()),
+        ),
+      ],
+      builder: (context, state, child) => ChemicalShell(
+        child: child,
+      ),
+    ),
+    StatefulShellRoute.indexedStack(
+      branches: [
+        StatefulShellBranch(
+          initialLocation: "/task-demo",
+          routes: [
+            ...taskDemo.buildRoute(),
+          ],
+        ),
+        StatefulShellBranch(
+          initialLocation: "/movie-demo",
+          routes: [
+            ...movieDemo.buildRoute(),
+          ],
+        ),
+      ],
+      builder: (context, state, navigationShell) => DemoShell(
+        child: navigationShell,
+      ),
+    ),
+    ShellRoute(
       builder: (context, state, child) {
         return AppScaffold(
           title: const Text("Liquid Flutter"),
@@ -72,17 +114,10 @@ class AppRouter {
         );
       },
       routes: [
-        ...taskDemo.buildRoute(),
-        ...movieDemo.buildRoute(),
         GoRoute(
           path: "/",
           pageBuilder: (context, state) =>
               NoTransitionPage<void>(key: state.pageKey, child: const Home()),
-        ),
-        GoRoute(
-          path: "/chemical",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-              key: state.pageKey, child: const ChemicalScreen()),
         ),
         GoRoute(
           path: "/theme",

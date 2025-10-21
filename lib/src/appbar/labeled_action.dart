@@ -20,6 +20,8 @@ mixin LdLabeledAction {
 
   LdColor? color(BuildContext context) => null;
 
+  bool get alwaysShowLabel => false;
+
   LdLabeledActionType get type => LdLabeledActionType.notification;
 }
 
@@ -40,6 +42,8 @@ class LdLabeledActionBuilder with LdLabeledAction {
   final LdLabeledActionContextMenuFunction? _buildContextMenu;
   final LdBoolPredicate? _isActive;
 
+  final bool _alwaysShowLabel;
+
   LdLabeledActionBuilder({
     required StringBuilder buildLabel,
     required FutureOr<void> Function(BuildContext context) action,
@@ -47,6 +51,7 @@ class LdLabeledActionBuilder with LdLabeledAction {
     WidgetBuilder? buildIcon,
     LdLabeledActionContextMenuFunction? buildContextMenu,
     StringBuilder? buildLoadingText,
+    bool alwaysShowLabel = false,
     LdBoolPredicate? isActive,
     LdColor? color,
   })  : _buildLabel = buildLabel,
@@ -55,6 +60,7 @@ class LdLabeledActionBuilder with LdLabeledAction {
         _buildContextMenu = buildContextMenu,
         _action = action,
         _buildLoadingText = buildLoadingText,
+        _alwaysShowLabel = alwaysShowLabel,
         _submitType = submitType,
         _isActive = isActive;
 
@@ -67,6 +73,9 @@ class LdLabeledActionBuilder with LdLabeledAction {
   String label(BuildContext context) {
     return _buildLabel.call(context);
   }
+
+  @override
+  bool get alwaysShowLabel => _alwaysShowLabel;
 
   @override
   Widget? icon(BuildContext context) {

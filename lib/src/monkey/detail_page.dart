@@ -75,7 +75,7 @@ class LdMonkeyDetailPage<T extends Identifiable<IdType>, IdType> extends Statele
                         ],
                       ],
                     ),
-                    bottomNavigationBar: !isSideBySide && secondaryActions.hasActions
+                    secondaryNavigationBar: !isSideBySide && secondaryActions.hasActions
                         ? Provider.value(
                             value: LdMonkeyActionLocation.detailSecondary,
                             child: LdAppBar(

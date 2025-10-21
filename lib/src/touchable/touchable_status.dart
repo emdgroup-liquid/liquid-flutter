@@ -7,6 +7,8 @@ class LdTouchableStatus {
   bool disabled;
   bool pressed;
   Offset? panOffset;
+  bool isOdd;
+  bool onSurface;
   LdTouchableStatus({
     this.hovering = false,
     this.focus = false,
@@ -14,5 +16,7 @@ class LdTouchableStatus {
     this.disabled = false,
     this.pressed = false,
     this.panOffset,
+    this.isOdd = false,
+    this.onSurface = false,
   });
 }

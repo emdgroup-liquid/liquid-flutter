@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:haptic_feedback/haptic_feedback.dart';
+export 'package:haptic_feedback/haptic_feedback.dart' show HapticsType;
 
 class LdHaptics {
   static Future<void> vibrate(HapticsType type) async {

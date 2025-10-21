@@ -54,7 +54,7 @@ class LdFilterModal<T extends Identifiable<IdType>, IdType> extends StatelessWid
 
     return StreamBuilder(
         stream: filter,
-        initialData: repository.filters,
+        initialData: repository.filters.values.toList(),
         builder: (context, asyncSnapshot) {
           final filters = asyncSnapshot.data!;
 
@@ -102,8 +102,10 @@ class LdFilterModal<T extends Identifiable<IdType>, IdType> extends StatelessWid
                             leading: e.icon(context),
                             child: Text(e.label(context)),
                             onPressed: () {
-                              e.isOn = true;
-                              repository.updateFilter(e);
+                              repository.updateFilter<LdFilterOption<T, IdType>>(
+                                e.name,
+                                (filter) => filter.copyWith(isOn: true),
+                              );
                             }),
                       ),
                     )
@@ -119,9 +121,6 @@ class LdFilterModal<T extends Identifiable<IdType>, IdType> extends StatelessWid
                     revealed: e.isOn,
                     child: _Filter(
                       filter: e,
-                      onFilterChanged: (filter) {
-                        repository.updateFilter(filter);
-                      },
                     ),
                   )),
             ]),
@@ -132,16 +131,15 @@ class LdFilterModal<T extends Identifiable<IdType>, IdType> extends StatelessWid
 
 class _Filter<T extends Identifiable<IdType>, IdType, GroupBy> extends StatelessWidget {
   final LdFilterOption<T, IdType> filter;
-  final void Function(LdFilterOption<T, IdType>) onFilterChanged;
 
   const _Filter({
     super.key,
     required this.filter,
-    required this.onFilterChanged,
   });
 
   @override
   Widget build(BuildContext context) {
+    final repository = context.read<LdMonkey<T, IdType>>().repository;
     if (filter is LdFilterBoolOption) {
       return LdListItem(
         title: Text(filter.label(context)),
@@ -150,27 +148,29 @@ class _Filter<T extends Identifiable<IdType>, IdType, GroupBy> extends Stateless
           child: const Icon(LucideIcons.x),
           size: LdSize.s,
           onPressed: () {
-            filter.isOn = false;
-            onFilterChanged(filter);
+            repository.updateFilter<LdFilterBoolOption<T, IdType>>(
+              filter.name,
+              (filter) => filter.copyWith(isOn: false),
+            );
           },
         ),
       );
     }
     if (filter is LdFilterRange<T, IdType>) {
-      return LdFilterRangeWidget(filter: filter as LdFilterRange<T, IdType>, onFilterChanged: onFilterChanged);
+      return LdFilterRangeWidget(
+        filter: filter as LdFilterRange<T, IdType>,
+      );
     }
     if (filter is LdFilterOneOf<T, IdType, dynamic>) {
       final selectFilter = filter as LdFilterOneOf<T, IdType, dynamic>;
       return LdFilterOneOfWidget<T, IdType, dynamic>(
         filter: selectFilter,
-        onFilterChanged: (f) => onFilterChanged(f),
       );
     }
     if (filter is LdFilterAnyOf<T, IdType, dynamic>) {
       final selectFilter = filter as LdFilterAnyOf<T, IdType, dynamic>;
       return LdFilterAnyOfWidget<T, IdType, dynamic>(
         filter: selectFilter,
-        onFilterChanged: (f) => onFilterChanged(f),
       );
     }
     if (filter is LdFilterSearchOption<T, IdType, dynamic>) {
@@ -178,17 +178,16 @@ class _Filter<T extends Identifiable<IdType>, IdType, GroupBy> extends Stateless
       return Row(
         children: [
           Expanded(
-            child: LdFilterSearchWidget(
-              filter: searchFilter,
-              onFilterChanged: (f) => onFilterChanged(f),
-            ),
+            child: Text(searchFilter.searchText),
           ),
           LdButtonVague(
             child: const Icon(LucideIcons.x),
             size: LdSize.s,
             onPressed: () {
-              searchFilter.isOn = false;
-              onFilterChanged(searchFilter);
+              repository.updateFilter<LdFilterSearchOption<T, IdType, dynamic>>(
+                filter.name,
+                (filter) => filter.copyWith(isOn: false),
+              );
             },
           ),
         ],

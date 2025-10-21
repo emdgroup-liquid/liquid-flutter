@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:liquid/demos/task_demo/demo_data.dart';
 import 'package:liquid/demos/task_demo/detail.dart';
@@ -252,5 +253,17 @@ final taskDemo = LdMonkey<Task, int>(
     ),
     toggleSelectionControls<Task, int>(),
     toggleFilters<Task, int>(),
+    LdMonkeyAction(
+      visibility: {
+        LdMonkeyActionVisibility(
+          location: LdMonkeyActionLocation.masterAppBar,
+        ),
+      },
+      buildLabel: (context) => "Leave demo",
+      buildIcon: (context) => Icon(LucideIcons.arrowLeft),
+      action: (context) async {
+        context.go("/");
+      },
+    ),
   ],
 );

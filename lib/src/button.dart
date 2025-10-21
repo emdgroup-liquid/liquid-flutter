@@ -366,10 +366,9 @@ class _ButtonShape extends StatelessWidget {
         return Transform(
           alignment: Alignment.center,
           transform: Matrix4.identity()
-            ..scaleByDouble(
+            ..scale(
               state.position * 0.05 + 1 + min(0.2, (status.panOffset?.dx.abs() ?? 0) * 0.001 * state.position),
               state.position * 0.05 + 1 + min(0.2, (status.panOffset?.dy.abs() ?? 0) * 0.001 * state.position),
-              1.0,
               1.0,
             ),
           child: Container(

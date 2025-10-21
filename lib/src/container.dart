@@ -30,8 +30,9 @@ class LdContainer extends StatelessWidget {
         // If the screen is larger than the max width, center the content
         if (constraints.maxWidth > maxWidth) {
           finalPadding = EdgeInsets.symmetric(
-              horizontal: max((constraints.maxWidth - maxWidth) / 2, finalPadding.horizontal),
-              vertical: finalPadding.vertical);
+            horizontal: max((constraints.maxWidth - maxWidth) / 2, finalPadding.horizontal),
+            vertical: finalPadding.vertical,
+          );
         }
         return Padding(
           padding: finalPadding,

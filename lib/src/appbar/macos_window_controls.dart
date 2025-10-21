@@ -1,19 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:provider/provider.dart';
 
 class MacOSWindowControls extends StatelessWidget {
   const MacOSWindowControls({
     super.key,
-    required bool showWindowControls,
-  }) : _showWindowControls = showWindowControls;
-
-  final bool _showWindowControls;
+  });
 
   @override
   Widget build(BuildContext context) {
+    if (LdTheme.of(context).platform != LdPlatform.macos) {
+      return const SizedBox.shrink();
+    }
+
+    final layoutState = context.watch<LdScaffoldLayoutState?>();
+    final isTopLevel = layoutState?.level == 1;
+    final isAppBar = layoutState?.slot == LdScaffoldSlot.appBar;
+    final isDrawerAppBar = layoutState?.slot == LdScaffoldSlot.drawerAppBar;
+    final isDrawerOpen = layoutState?.isDrawerOpen ?? false;
+
+    final showWindowControls = isTopLevel && (isAppBar && !isDrawerOpen || isDrawerAppBar && isDrawerOpen);
+
     return LdReveal(
-      initialRevealed: _showWindowControls,
-      revealed: _showWindowControls,
+      initialRevealed: showWindowControls,
+      revealed: showWindowControls,
       child: Row(
         children: [
           Tooltip(

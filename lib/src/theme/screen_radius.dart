@@ -9,7 +9,7 @@ Future<double> getScreenRadius() async {
   }
 
   if (Platform.isMacOS) {
-    return 10;
+    return 26;
   }
 
   if (Platform.isIOS) {

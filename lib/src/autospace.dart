@@ -3,6 +3,125 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:liquid_flutter/liquid_flutter.dart';
 
+/// Generates auto-spaced widgets from a list of children based on spacing rules.
+///
+/// This function applies automatic spacing between widgets based on their types,
+/// following the spacing matrix rules and special handling for text widgets.
+///
+/// Parameters:
+/// - [children]: The list of widgets to be spaced
+/// - [context]: The build context for theme access
+/// - [defaultSpacing]: The default spacing to use when no specific rule applies
+/// - [animate]: Whether to apply animation to the widgets
+///
+/// Returns a list of widgets with appropriate spacing inserted between them.
+List<Widget> generateAutoSpacings({
+  required List<Widget> children,
+  required BuildContext context,
+  LdSize defaultSpacing = LdSize.m,
+  bool animate = false,
+}) {
+  final theme = LdTheme.of(context, listen: true);
+
+  List<Widget> finalChildren = [];
+  int index = 0;
+  for (var child in children) {
+    if (animate) {
+      finalChildren.add(child.animate(delay: 50.ms * finalChildren.length).fadeIn().moveY(begin: 5));
+    } else {
+      finalChildren.add(child);
+    }
+
+    if (index == children.length - 1) {
+      break;
+    }
+
+    if (child is LdReveal) {
+      child = child.child;
+    }
+
+    if (child is LdCollapse) {
+      child = child.child;
+    }
+
+    if (child is LdMute) {
+      child = child.child;
+    }
+
+    final element = spacingMatrix[child.runtimeType];
+
+    var next = children[index + 1];
+
+    if (next is LdMute) {
+      next = next.child;
+    }
+
+    index++;
+
+    if (child is LdSpacer || next is LdSpacer) {
+      continue;
+    }
+
+    if (child is LdText && next is LdText) {
+      final types = (child.type, next.type);
+
+      final (LdSize spacerSize, double multiplier) = switch (types) {
+        (LdTextType.headline, LdTextType.headline) => (LdSize.l, 2),
+        (LdTextType.headline, LdTextType.paragraph) => (LdSize.l, 1),
+        (LdTextType.paragraph, LdTextType.headline) => (LdSize.l, 2),
+        (LdTextType.paragraph, LdTextType.paragraph) => (LdSize.xs, 0.5),
+        (_, LdTextType.label) => (LdSize.s, 1),
+        (LdTextType.label, _) => (LdSize.s, 1),
+        (_, _) => (LdSize.m, 1),
+      };
+
+      finalChildren.add(SizedBox(
+        height: theme.paddingSize(size: spacerSize) * multiplier * 0.5,
+      ));
+
+      continue;
+    }
+
+    // Add an automatic spacer if the next widget is a reveal widget
+    if (next is LdReveal) {
+      finalChildren.add(
+        LdCollapse(
+          child: LdSpacer(size: defaultSpacing),
+          collapsed: !next.revealed,
+        ),
+      );
+      continue;
+    }
+
+    if (element != null) {
+      if (element[next.runtimeType] != null) {
+        for (int i = 0; i < element[next.runtimeType]!.multiplier; i++) {
+          finalChildren.add(
+            LdSpacer(size: element[next.runtimeType]!.size),
+          );
+        }
+
+        continue;
+      }
+
+      if (element[_Default] != null) {
+        for (int i = 0; i < element[_Default]!.multiplier; i++) {
+          finalChildren.add(
+            LdSpacer(size: element[_Default]!.size),
+          );
+        }
+        continue;
+      }
+    }
+
+    finalChildren.add(
+      LdSpacer(size: defaultSpacing),
+    );
+  }
+
+  return finalChildren;
+}
+
 abstract class _Default extends StatelessWidget {}
 
 class _LdSizeItem {
@@ -48,6 +167,17 @@ const Map<Type, Map<Type, _LdSizeItem>> spacingMatrix = {
   },
 };
 
+extension LdAutoSpaceExt on List<Widget> {
+  List<Widget> autoSpace(BuildContext context, {LdSize defaultSpacing = LdSize.m, bool animate = false}) {
+    return generateAutoSpacings(
+      children: this,
+      context: context,
+      defaultSpacing: defaultSpacing,
+      animate: animate,
+    );
+  }
+}
+
 class LdAutoSpace extends StatelessWidget {
   final List<Widget> children;
   final LdSize defaultSpacing;
@@ -63,105 +193,12 @@ class LdAutoSpace extends StatelessWidget {
   });
 
   List<Widget> _generateSpacings(BuildContext context) {
-    final theme = LdTheme.of(context, listen: true);
-
-    List<Widget> finalChildren = [];
-    int index = 0;
-    for (var child in children) {
-      if (animate) {
-        finalChildren.add(child.animate(delay: 50.ms * finalChildren.length).fadeIn().moveY(begin: 5));
-      } else {
-        finalChildren.add(child);
-      }
-
-      if (index == children.length - 1) {
-        break;
-      }
-
-      if (child is LdReveal) {
-        child = child.child;
-      }
-
-      if (child is LdCollapse) {
-        child = child.child;
-      }
-
-      if (child is LdMute) {
-        child = child.child;
-      }
-
-      final element = spacingMatrix[child.runtimeType];
-
-      var next = children[index + 1];
-
-      if (next is LdMute) {
-        next = next.child;
-      }
-
-      index++;
-
-      if (child is LdSpacer || next is LdSpacer) {
-        continue;
-      }
-
-      if (child is LdText && next is LdText) {
-        final types = (child.type, next.type);
-
-        final (LdSize spacerSize, double multiplier) = switch (types) {
-          (LdTextType.headline, LdTextType.headline) => (LdSize.l, 2),
-          (LdTextType.headline, LdTextType.paragraph) => (LdSize.l, 1),
-          (LdTextType.paragraph, LdTextType.headline) => (LdSize.l, 2),
-          (LdTextType.paragraph, LdTextType.paragraph) => (LdSize.xs, 0.5),
-          (_, LdTextType.label) => (LdSize.s, 1),
-          (LdTextType.label, _) => (LdSize.s, 1),
-          (_, _) => (LdSize.m, 1),
-        };
-
-        finalChildren.add(SizedBox(
-          height: theme.paddingSize(size: spacerSize) * multiplier * 0.5,
-        ));
-
-        continue;
-      }
-
-      // Add an automatic spacer if the next widget is a reveal widget
-      if (next is LdReveal) {
-        finalChildren.add(
-          LdCollapse(
-            child: LdSpacer(size: defaultSpacing),
-            collapsed: !next.revealed,
-          ),
-        );
-        continue;
-      }
-
-      if (element != null) {
-        if (element[next.runtimeType] != null) {
-          for (int i = 0; i < element[next.runtimeType]!.multiplier; i++) {
-            finalChildren.add(
-              LdSpacer(size: element[next.runtimeType]!.size),
-            );
-          }
-
-          continue;
-        }
-
-        if (element[_Default] != null) {
-          for (int i = 0; i < element[_Default]!.multiplier; i++) {
-            finalChildren.add(
-              LdSpacer(size: element[_Default]!.size),
-            );
-          }
-          continue;
-        }
-      }
-
-      finalChildren.add(
-        LdSpacer(size: defaultSpacing),
-      );
-    }
-
-    return finalChildren;
+    return generateAutoSpacings(
+      children: children,
+      context: context,
+      defaultSpacing: defaultSpacing,
+      animate: animate,
+    );
   }
 
   @override

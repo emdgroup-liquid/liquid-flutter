@@ -73,7 +73,7 @@ class _FormDemoState extends State<FormDemo> {
                             placeholder: const Text("Select an option"),
                             multiple: true,
                             onChanged: (value) {
-                              //print(value);
+                              // Handle value change
                             },
                             items: const [
                               LdSelectItem(

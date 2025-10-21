@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/monkey/intents.dart';
 
 import 'package:provider/provider.dart';
 
@@ -46,7 +47,7 @@ class LdMonkeyAction<T extends Identifiable<IdType>, IdType> extends LdLabeledAc
 
       if (visibility.applyFilters.isNotEmpty) {
         final filters = visibility.applyFilters.map(
-          (filterName) => route.repository.filters.firstWhere((e) => e.name == filterName),
+          (filterName) => route.repository.filters[filterName]!,
         );
 
         for (final filter in filters) {
@@ -82,4 +83,44 @@ class LdMonkeyAction<T extends Identifiable<IdType>, IdType> extends LdLabeledAc
   });
 
   final Set<ShortcutActivator> shortcutActivators;
+}
+
+class OpenDrawerAction extends Action<OpenDrawerIntent> {
+  final VoidCallback onOpenDrawer;
+
+  OpenDrawerAction({required this.onOpenDrawer});
+
+  @override
+  void invoke(OpenDrawerIntent intent) {
+    onOpenDrawer();
+  }
+}
+
+class CloseDrawerAction extends Action<CloseDrawerIntent> {
+  final VoidCallback onCloseDrawer;
+
+  CloseDrawerAction({required this.onCloseDrawer});
+
+  @override
+  void invoke(CloseDrawerIntent intent) {
+    onCloseDrawer();
+  }
+}
+
+class ToggleDrawerAction extends Action<ToggleDrawerIntent> {
+  final VoidCallback onToggleDrawer;
+
+  final bool _isActionEnabled;
+
+  ToggleDrawerAction({required this.onToggleDrawer, bool isActionEnabled = true}) : _isActionEnabled = isActionEnabled;
+
+  @override
+  bool get isActionEnabled {
+    return _isActionEnabled;
+  }
+
+  @override
+  void invoke(ToggleDrawerIntent intent) {
+    onToggleDrawer();
+  }
 }

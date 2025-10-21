@@ -21,6 +21,7 @@ void main() async {
 
   await Highlighter.initialize(['dart', 'yaml', 'sql']);
 
+  // TODO: Re implement the window callbacks for macos
   LdAppBar.callbacks = LdWindowCallbacks(
       onClose: () {},
       onMinimize: () {},
@@ -56,34 +57,42 @@ class _LiquidExampleState extends State<LiquidExample> {
   @override
   Widget build(BuildContext context) {
     return Provider<AppRouter>(
-        create: (context) => AppRouter(),
-        child: Builder(builder: (BuildContext context) {
+      create: (context) => AppRouter(),
+      child: Builder(
+        builder: (BuildContext context) {
           return CallbackShortcuts(
-              bindings: {
-                const SingleActivator(LogicalKeyboardKey.keyK, meta: true): () {
-                  searchFocusNode.requestFocus();
-                },
-                const SingleActivator(LogicalKeyboardKey.keyK, control: true):
-                    () {
-                  searchFocusNode.requestFocus();
-                },
+            bindings: {
+              const SingleActivator(LogicalKeyboardKey.keyK, meta: true): () {
+                searchFocusNode.requestFocus();
               },
-              child: LdNotificationProvider(child: LdThemeProvider(
-                child: LdThemedAppBuilder(appBuilder: (context, theme) {
-                  // We use a root navigator because else our nested navigation will not work
-                  var router = context.read<AppRouter>().router;
+              const SingleActivator(LogicalKeyboardKey.keyK, control: true):
+                  () {
+                searchFocusNode.requestFocus();
+              },
+            },
+            child: LdNotificationProvider(
+              child: LdThemeProvider(
+                child: LdThemedAppBuilder(
+                  appBuilder: (context, theme) {
+                    // We use a root navigator because else our nested navigation will not work
+                    var router = context.read<AppRouter>().router;
 
-                  return MaterialApp.router(
-                    localizationsDelegates:
-                        LiquidLocalizations.localizationsDelegates,
-                    locale: const Locale('en'),
-                    title: 'Liquid Design Demo',
-                    debugShowCheckedModeBanner: false,
-                    theme: theme,
-                    routerConfig: router,
-                  );
-                }),
-              )));
-        }));
+                    return MaterialApp.router(
+                      localizationsDelegates:
+                          LiquidLocalizations.localizationsDelegates,
+                      locale: const Locale('en'),
+                      title: 'Liquid Design Demo',
+                      debugShowCheckedModeBanner: false,
+                      theme: theme,
+                      routerConfig: router,
+                    );
+                  },
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 }

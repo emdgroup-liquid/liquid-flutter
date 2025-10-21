@@ -35,51 +35,93 @@ class _LdCounterState extends State<LdCounter> {
   }
 }
 
-class _LdCounterDigit extends StatelessWidget {
+class _LdCounterDigit extends StatefulWidget {
   final String digit;
   final LdSize size;
   const _LdCounterDigit({required this.digit, required this.size});
 
   @override
+  State<_LdCounterDigit> createState() => _LdCounterDigitState();
+}
+
+class _LdCounterDigitState extends State<_LdCounterDigit> {
+  double calculateTextWidth(String text, TextStyle style) {
+    final TextPainter textPainter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      maxLines: 1,
+      textDirection: TextDirection.ltr,
+    )..layout(minWidth: 0, maxWidth: double.infinity);
+
+    return textPainter.size.width;
+  }
+
+  double _maxWidth = 10;
+
+  @override
+  void initState() {
+    super.initState();
+    _maxWidth = getMaxWidth(context);
+  }
+
+  @override
+  void didUpdateWidget(oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.size != widget.size) {
+      _maxWidth = getMaxWidth(context);
+    }
+  }
+
+  double getMaxWidth(BuildContext context) {
+    final theme = LdTheme.of(context);
+    return List.generate(10,
+            (index) => calculateTextWidth(index.toString(), ldBuildTextStyle(theme, LdTextType.headline, widget.size)))
+        .reduce((a, b) => a > b ? a : b);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final offset = switch (digit) {
+    final offset = switch (widget.digit) {
       "." => 10,
       "-" => 11,
-      _ => int.parse(digit),
+      _ => int.parse(widget.digit),
     };
     final theme = LdTheme.of(context);
 
-    final fontSize = theme.headlineSize(size);
+    final fontSize = theme.headlineSize(widget.size);
 
     final height = fontSize * 1.5;
 
     return SizedBox(
       height: height,
+      width: _maxWidth,
       child: LdSpring(
         mass: 30,
         springConstant: 8,
         dampingCoefficient: 20,
         position: offset.toDouble(),
         builder: (context, state, child) {
-          return SingleChildScrollView(
-            physics: const NeverScrollableScrollPhysics(),
-            child: Transform.translate(
-              offset: Offset(0, -state.position * height),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ...List.generate(
-                    10,
-                    (index) => SizedBox(
-                      height: height,
-                      child: LdTextH(index.toString(), size: size),
-                    ),
-                  ),
-                  SizedBox(height: height, child: LdTextH(".", size: size)),
-                  SizedBox(height: height, child: LdTextH("-", size: size)),
-                ],
+          return Stack(
+            fit: StackFit.loose,
+            children: [
+              ...List.generate(
+                  10,
+                  (index) => Positioned(
+                        top: index * height - state.position * height,
+                        child: SizedBox(
+                          height: height,
+                          child: LdTextH(index.toString(), size: widget.size),
+                        ),
+                      )),
+              Positioned(
+                top: 10 * height - state.position * height,
+                child: SizedBox(height: height, child: LdTextH(".", size: widget.size)),
               ),
-            ),
+              Positioned(
+                top: 11 * height - state.position * height,
+                child: SizedBox(height: height, child: LdTextH("-", size: widget.size)),
+              ),
+            ],
           );
         },
       ),

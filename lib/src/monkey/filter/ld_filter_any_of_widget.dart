@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:provider/provider.dart';
 
 class LdFilterAnyOfWidget<T extends Identifiable<IdType>, IdType, E> extends StatelessWidget {
   final LdFilterAnyOf<T, IdType, E> filter;
-  final void Function(LdFilterAnyOf<T, IdType, E> filter) onFilterChanged;
 
   const LdFilterAnyOfWidget({
     super.key,
     required this.filter,
-    required this.onFilterChanged,
   });
 
   @override
   Widget build(BuildContext context) {
+    final repository = context.read<LdMonkey<T, IdType>>().repository;
     final items = filter.allValues.entries
         .map((e) => LdSelectItem<E>(
               value: e.key,
@@ -30,9 +30,10 @@ class LdFilterAnyOfWidget<T extends Identifiable<IdType>, IdType, E> extends Sta
               child: const Icon(LucideIcons.x),
               size: LdSize.s,
               onPressed: () {
-                filter.isOn = false;
-                filter.selectedValues.clear();
-                onFilterChanged(filter);
+                repository.updateFilter<LdFilterAnyOf<T, IdType, E>>(
+                  filter.name,
+                  (filter) => filter.copyWith(isOn: false, selectedValues: {}),
+                );
               },
             ),
           ],
@@ -44,15 +45,13 @@ class LdFilterAnyOfWidget<T extends Identifiable<IdType>, IdType, E> extends Sta
             value: filter.selectedValues,
             placeholder: Text(filter.label(context)),
             onChanged: (Set<E> values) {
-              if (values.isEmpty) {
-                filter.isOn = false;
-                onFilterChanged(filter);
-                return;
-              }
-
-              filter.selectedValues = values;
-              filter.isOn = values.isNotEmpty;
-              onFilterChanged(filter);
+              repository.updateFilter<LdFilterAnyOf<T, IdType, E>>(
+                filter.name,
+                (filter) => filter.copyWith(
+                  selectedValues: values,
+                  isOn: values.isNotEmpty,
+                ),
+              );
             },
             allowEmpty: true,
           ),

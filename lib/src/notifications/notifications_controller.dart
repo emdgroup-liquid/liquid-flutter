@@ -8,6 +8,14 @@ import 'package:provider/provider.dart';
 class LdNotificationsController extends ChangeNotifier {
   final List<LdNotification> _notifications = [];
 
+  bool _disposed = false;
+
+  void _safeNotifyListeners() {
+    if (!_disposed) {
+      notifyListeners();
+    }
+  }
+
   List<LdNotification> get notifications => _notifications;
 
   Future<LdNotification> error(
@@ -99,7 +107,7 @@ class LdNotificationsController extends ChangeNotifier {
 
   Future<LdNotification> addNotification(LdNotification notification) async {
     _notifications.add(notification);
-    notifyListeners();
+    _safeNotifyListeners();
     if (notification.haptics != null) {
       LdHaptics.vibrate(notification.haptics!);
     }
@@ -107,7 +115,7 @@ class LdNotificationsController extends ChangeNotifier {
 
     if (notification.duration != null) {
       Future.delayed(notification.duration!, () {
-        onDismissNotification(notification);
+        _safeNotifyListeners();
       });
     }
     return notification;
@@ -117,17 +125,17 @@ class LdNotificationsController extends ChangeNotifier {
     LdConfirmNotification notification,
   ) async {
     notification.didConfirm = true;
-    notifyListeners();
+    _safeNotifyListeners();
     await Future.delayed(const Duration(milliseconds: 300));
 
     notification.removing = true;
-    notifyListeners();
+    _safeNotifyListeners();
     await Future.delayed(const Duration(milliseconds: 500));
 
     notification.confirmationCompleter.complete(true);
     _notifications.remove(notification);
 
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   Future<void> onInputSubmitted(
@@ -135,16 +143,17 @@ class LdNotificationsController extends ChangeNotifier {
     String result,
   ) async {
     notification.removing = true;
-    notifyListeners();
+    _safeNotifyListeners();
     await Future.delayed(const Duration(milliseconds: 300));
     _notifications.remove(notification);
     notification.inputCompleter.complete(result);
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   Future<void> onDismissNotification(LdNotification notification) async {
     notification.removing = true;
-    notifyListeners();
+
+    _safeNotifyListeners();
     await Future.delayed(const Duration(milliseconds: 300));
     _notifications.remove(notification);
 
@@ -156,24 +165,29 @@ class LdNotificationsController extends ChangeNotifier {
       notification.confirmationCompleter.complete(null);
     }
 
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
-  Future<void> onCancelledNotification(
-      LdConfirmNotification notification) async {
+  Future<void> onCancelledNotification(LdConfirmNotification notification) async {
     notification.removing = true;
     notifyListeners();
     await Future.delayed(const Duration(milliseconds: 300));
     _notifications.remove(notification);
     notification.confirmationCompleter.complete(false);
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   void clearNotifications() {
     for (final notification in _notifications) {
       onDismissNotification(notification);
     }
-    notifyListeners();
+    _safeNotifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 
   static LdNotificationsController of(BuildContext context) {

@@ -29,10 +29,10 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
   String singularItemTitle;
   String pluralItemTitle;
 
-  final Set<LdFilterOption<T, IdType>> _filters;
+  final Map<String, LdFilterOption<T, IdType>> _filters;
   final List<LdSortOption<T, IdType>> _sortOptions;
 
-  Set<LdFilterOption<T, IdType>> get filters => Set.unmodifiable(_filters);
+  Map<String, LdFilterOption<T, IdType>> get filters => Map.unmodifiable(_filters);
   List<LdSortOption<T, IdType>> get sortOptions => List.unmodifiable(_sortOptions);
 
   final _filterStreamController = StreamController<Set<LdFilterOption<T, IdType>>>.broadcast();
@@ -62,7 +62,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
         _getOffsetById = getOffsetById,
         _deleteItem = deleteItem,
         _updateItem = updateItem,
-        _filters = filters ?? {},
+        _filters = Map.fromEntries(filters?.map((e) => MapEntry(e.name, e)) ?? []),
         _createItem = createItem,
         _sortOptions = sortOptions ?? [],
         _deleteBatch = deleteBatch,
@@ -80,7 +80,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
       offset: offset,
       pageSize: pageSize,
       pageToken: pageToken,
-      filters: _filters.where((e) => e.isOn).toSet(),
+      filters: activeFilters.toSet(),
       sortOptions: _sortOptions.where((e) => e.isOn).toList(),
     );
   }
@@ -92,7 +92,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
   Map<String, dynamic> get queryParameters {
     var parameters = <String, dynamic>{};
 
-    for (final filter in _filters) {
+    for (final filter in _filters.values) {
       if (filter.isOn) {
         parameters[filter.name] = filter.serialize();
       }
@@ -107,13 +107,11 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     return parameters;
   }
 
-  Future<void> updateFilter(LdFilterOption<T, IdType> filter) async {
-    final existingFilter = _filters.firstWhereOrNull((e) => e.name == filter.name);
-    assert(existingFilter != null, 'Cannot update filter. Filter with name ${filter.name} does not exist');
-    _filters.remove(existingFilter);
-    _filters.add(filter);
-    _filterStreamController.add(_filters);
-
+  Future<void> updateFilter<F extends LdFilterOption<T, IdType>>(String name, F Function(F filter) updater) async {
+    final existingFilter = _filters[name];
+    assert(existingFilter != null, 'Cannot update filter. Filter with name ${name} does not exist');
+    _filters[name] = updater(existingFilter as F);
+    _filterStreamController.add(_filters.values.toSet());
     applyOptimisticFilterAndSorting();
   }
 
@@ -137,7 +135,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
   }
 
   Future<void> applyOptimisticFilterAndSorting() async {
-    final filters = _filters.where((e) => e.isOn).toList();
+    final filters = activeFilters.toList();
     final sortOptions = _sortOptions.where((e) => e.isOn).toList();
 
     if (filters.isEmpty && sortOptions.isEmpty) {
@@ -186,11 +184,13 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     await refreshList();
   }
 
+  Iterable<LdFilterOption<T, IdType>> get activeFilters => _filters.values.where((e) => e.isOn);
+
   Future<void> initWithSelection(Set<IdType> selection) async {
     if (_getOffsetById == null) {
       return;
     }
-    final currentFilters = _filters.where((e) => e.isOn).toSet();
+    final currentFilters = activeFilters.toSet();
     final currentSortOptions = _sortOptions.where((e) => e.isOn).toList();
 
     final firstOffset = await _getOffsetById!(

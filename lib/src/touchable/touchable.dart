@@ -1,230 +1,36 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/touchable/ghost_color.dart';
+import 'package:liquid_flutter/src/touchable/input_color.dart';
+import 'package:liquid_flutter/src/touchable/neutral_ghost_color.dart';
+import 'package:liquid_flutter/src/touchable/outline_color.dart';
+import 'package:liquid_flutter/src/touchable/solid_color.dart';
 import 'package:liquid_flutter/src/touchable/touchable_colors.dart';
 import 'package:liquid_flutter/src/touchable/touchable_status.dart';
+import 'package:liquid_flutter/src/touchable/vague_color.dart';
 
 const disabledAlpha = 200;
 
-LdColorBundle neutralGhostColor(
-  LdTheme theme,
-  bool disabled,
-  bool active,
-  bool focus,
-  bool hovering, {
-  bool isOdd = false,
-}) {
-  final palette = theme.palette;
-  final neutral = theme.palette.neutral;
-  Color border = Colors.transparent;
-
-  if (disabled) {
-    return LdColorBundle(
-      surface: theme.neutralShade(isOdd ? 2 : 1).withAlpha(23),
-      text: theme.neutralShade(5),
-      border: border,
-      icon: palette.background.withAlpha(disabledAlpha),
-    );
-  }
-
-  if (active) {
-    return LdColorBundle(
-      surface: Color.alphaBlend(theme.primaryColor.withAlpha(20), neutral.relative(theme.isDark, isOdd ? 3 : 2)),
-      text: neutral.contrastingText(neutral.relative(theme.isDark, 2)),
-      border: border,
-      icon: neutral.contrastingText(neutral.relative(theme.isDark, 2)),
-    );
-  }
-
-  if (hovering) {
-    return LdColorBundle(
-      surface: neutral.relative(theme.isDark, isOdd ? 3 : 2),
-      text: neutral.contrastingText(neutral.relative(theme.isDark, 2)),
-      border: border,
-      icon: neutral.contrastingText(neutral.relative(theme.isDark, 2)),
-    );
-  }
-
-  if (focus) {
-    return LdColorBundle(
-      surface: isOdd ? theme.neutralShade(3) : theme.neutralShade(3),
-      text: theme.isDark ? theme.text : palette.primary.center(theme.isDark),
-      border: border,
-      icon: palette.primary.center(theme.isDark),
-    );
-  }
-
-  return LdColorBundle(
-    surface: isOdd ? theme.neutralShade(2).withAlpha(100) : theme.neutralShade(1).withAlpha(0),
-    text: theme.isDark ? theme.text : palette.primary.center(theme.isDark),
-    border: border,
-    icon: palette.primary.center(theme.isDark),
-  );
-}
-
-enum LdTouchableSurfaceMode { ghost, outline, solid, neutralGhost, vague }
+enum LdTouchableSurfaceMode { ghost, outline, solid, neutralGhost, vague, input }
 
 /// Select the appropriate color for a touchable surface
 LdColorBundle touchableColor(
-  LdColor color, {
-  required LdTheme theme,
+  LdColor color,
+  LdTheme theme,
+  LdTouchableStatus status, {
   LdTouchableSurfaceMode mode = LdTouchableSurfaceMode.solid,
-  bool hovering = false,
-  bool disabled = false,
-  bool active = false,
-  bool focus = false,
 }) {
-  if (mode == LdTouchableSurfaceMode.ghost ||
-      mode == LdTouchableSurfaceMode.outline ||
-      mode == LdTouchableSurfaceMode.vague) {
-    if (disabled) {
-      final disabledColor = color.disabled(theme.isDark);
-      if (active) {
-        final foreground = disabledColor.active(theme.isDark);
-        return LdColorBundle(
-          surface: Colors.transparent,
-          text: disabledColor.contrastingText(foreground),
-          border: Colors.transparent,
-          icon: disabledColor.contrastingText(foreground),
-        );
-      } else {
-        final foreground = disabledColor.idle(theme.isDark);
-        if (mode == LdTouchableSurfaceMode.vague) {
-          return LdColorBundle(
-            surface: foreground.withAlpha(26),
-            text: disabledColor.contrastingText(foreground.withAlpha(26), background: theme.background),
-            border: foreground,
-            icon: foreground.withAlpha(153),
-          );
-        }
-
-        return LdColorBundle(
-          surface: Colors.transparent,
-          text: foreground,
-          border: foreground,
-        );
-      }
-    }
-
-    if (active) {
-      return LdColorBundle(
-        surface: color.idle(theme.isDark).withAlpha(51),
-        text: color.moveRelative(
-          color.active(theme.isDark),
-          theme.isDark ? -2 : 2,
-        ),
-        border: color.active(theme.isDark),
-      );
-    }
-
-    if (hovering) {
-      return LdColorBundle(
-        surface: color.hover(theme.isDark).withAlpha(51),
-        text: color.moveRelative(
-          color.hover(theme.isDark),
-          theme.isDark ? -2 : 2,
-        ),
-        border: color.hover(theme.isDark),
-      );
-    }
-
-    if (focus) {
-      return LdColorBundle(
-        surface: color.focus(theme.isDark).withAlpha(51),
-        text: color.focus(theme.isDark),
-        border: color.focus(theme.isDark),
-      );
-    }
-
-    if (mode == LdTouchableSurfaceMode.vague) {
-      final surface = color.idle(theme.isDark).withAlpha(26);
-      return LdColorBundle(
-        surface: surface,
-        text: color.contrastingText(
-          surface,
-          background: theme.background,
-          isDark: theme.isDark,
-        ),
-        border: color.idle(theme.isDark),
-      );
-    }
-    return LdColorBundle(
-      surface: color.idle(theme.isDark).withAlpha(0),
-      text: color.idle(theme.isDark),
-      border: color.idle(theme.isDark),
-    );
-  }
-
-  if (disabled) {
-    final disabledColor = color.disabled(theme.isDark);
-    if (active) {
-      return LdColorBundle(
-        surface: disabledColor.active(theme.isDark),
-        text: disabledColor
-            .contrastingText(
-              disabledColor.active(theme.isDark),
-              background: theme.background,
-              isDark: theme.isDark,
-            )
-            .withAlpha(disabledAlpha),
-        border: Colors.transparent,
-      );
-    }
-    return LdColorBundle(
-      surface: disabledColor.idle(theme.isDark),
-      text: disabledColor.contrastingText(
-        background: theme.background,
-        disabledColor.idle(theme.isDark),
-      ),
-      border: Colors.transparent,
-    );
-  }
-
-  if (active) {
-    return LdColorBundle(
-      surface: color.active(theme.isDark),
-      text: color.contrastingText(
-        color.active(theme.isDark),
-        isDark: theme.isDark,
-      ),
-      border: Colors.transparent,
-    );
-  }
-
-  if (focus) {
-    return LdColorBundle(
-      surface: color.focus(
-        theme.isDark,
-      ),
-      text: color.contrastingText(
-        color.focus(theme.isDark),
-        isDark: theme.isDark,
-      ),
-      border: Colors.transparent,
-    );
-  }
-
-  if (hovering) {
-    return LdColorBundle(
-      surface: color.hover(theme.isDark),
-      text: color.contrastingText(
-        color.hover(theme.isDark),
-        isDark: theme.isDark,
-      ),
-      border: Colors.transparent,
-    );
-  }
-
-  final surface = color.idle(theme.isDark);
-
-  return LdColorBundle(
-    surface: surface,
-    text: color.contrastingText(
-      surface,
-      isDark: theme.isDark,
-    ),
-    border: Colors.transparent,
-  );
+  return switch (mode) {
+    LdTouchableSurfaceMode.ghost => ghostColor(color, theme, status),
+    LdTouchableSurfaceMode.outline => outlineColor(color, theme, status),
+    LdTouchableSurfaceMode.vague => vagueColor(color, theme, status),
+    LdTouchableSurfaceMode.solid => solidColor(color, theme, status),
+    LdTouchableSurfaceMode.input => inputColor(theme, status, isValid: true),
+    LdTouchableSurfaceMode.neutralGhost => neutralGhostColor(theme, status),
+  };
 }
 
 class LdTouchableSurface extends StatefulWidget {
@@ -240,14 +46,19 @@ class LdTouchableSurface extends StatefulWidget {
 
   final FocusNode? focusNode;
   final Function() onPressed;
+  final bool isInput;
+  final bool allowTapOutside;
+
   final Widget Function(BuildContext contxt, LdColorBundle colorBundle, LdTouchableStatus status) builder;
   const LdTouchableSurface({
     super.key,
     required this.onPressed,
     this.color,
     required this.builder,
+    this.allowTapOutside = false,
     this.focusNode,
     this.active = false,
+    this.isInput = false,
     this.mode = LdTouchableSurfaceMode.neutralGhost,
     this.disabled = false,
     this.autoFocus = false,
@@ -269,7 +80,9 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
 
   @override
   void initState() {
-    assert(widget.color != null || widget.mode == LdTouchableSurfaceMode.neutralGhost);
+    assert(widget.color != null ||
+        widget.mode == LdTouchableSurfaceMode.neutralGhost ||
+        widget.mode == LdTouchableSurfaceMode.input);
     _hasFocus = widget.focusNode?.hasFocus ?? false;
     _focusNode = widget.focusNode ?? FocusNode();
     _createdFocusNode = widget.focusNode == null;
@@ -286,26 +99,28 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
 
   bool get active => !widget.disabled && (_pressed || widget.active);
 
-  LdColorBundle get _colorBundle {
+  LdColorBundle _colorBundle(LdTouchableStatus status) {
     if (widget.mode == LdTouchableSurfaceMode.neutralGhost) {
       return neutralGhostColor(
         LdTheme.of(context),
-        widget.disabled,
-        active,
-        _hasFocus,
-        _hovering,
-        isOdd: widget.isOdd,
+        status,
+      );
+    }
+
+    if (widget.mode == LdTouchableSurfaceMode.input) {
+      return inputColor(
+        LdTheme.of(context),
+        status,
+        isValid: true, // This could be made configurable if needed
+        onSurface: false, // This could be made configurable if needed
       );
     }
 
     return touchableColor(
       widget.color!,
-      hovering: _hovering,
-      active: active,
-      disabled: widget.disabled,
+      LdTheme.of(context),
+      status,
       mode: widget.mode,
-      focus: _hasFocus,
-      theme: LdTheme.of(context),
     );
   }
 
@@ -319,7 +134,19 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
 
   @override
   Widget build(BuildContext context) {
-    var colors = _colorBundle;
+    final status = LdTouchableStatus(
+      hovering: _hovering && !widget.disabled,
+      focus: _hasFocus,
+      active: !widget.disabled && (_pressed || widget.active),
+      disabled: widget.disabled,
+      pressed: _pressed,
+      isOdd: widget.isOdd,
+      onSurface: LdSurfaceInfo.of(context).isSurface,
+      panOffset: _panOffset,
+    );
+
+    var colors = _colorBundle(status);
+
     return Focus(
       focusNode: _focusNode,
       autofocus: widget.autoFocus,
@@ -330,7 +157,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
         });
       },
       onKeyEvent: (node, event) {
-        if (event is KeyDownEvent && widget.disabled == false) {
+        if (event is KeyDownEvent && widget.disabled == false && !widget.isInput) {
           if (event.logicalKey == LogicalKeyboardKey.enter || event.logicalKey == LogicalKeyboardKey.space) {
             widget.onPressed();
             return KeyEventResult.handled;
@@ -340,6 +167,9 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
       },
       child: TapRegion(
         onTapOutside: (details) {
+          if (widget.allowTapOutside) {
+            return;
+          }
           _safeSetState(() {
             _hovering = false;
             _pressed = false;
@@ -366,7 +196,6 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
               }),
               onPointerUp: (_) => _safeSetState(() {
                 _pressed = false;
-                _focusNode?.unfocus();
               }),
               onPointerMove: (event) {
                 _safeSetState(() {
@@ -385,20 +214,41 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
                 child: widget.builder(
                   context,
                   colors,
-                  LdTouchableStatus(
-                    hovering: _hovering && !widget.disabled,
-                    focus: _hasFocus,
-                    active: !widget.disabled && (_pressed || widget.active),
-                    disabled: widget.disabled,
-                    pressed: _pressed,
-                    panOffset: _panOffset,
-                  ),
+                  status,
                 ),
               ),
             ),
           );
         }),
       ),
+    );
+  }
+}
+
+class LdTouchableTouchFeedback extends StatelessWidget {
+  final Widget child;
+  final LdTouchableStatus status;
+  const LdTouchableTouchFeedback({super.key, required this.child, required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    return LdSpring(
+      springConstant: 20,
+      dampingCoefficient: 5,
+      initialPosition: status.pressed ? 0.1 : 0,
+      position: status.pressed ? 0.1 : 0,
+      builder: (context, state, child) {
+        return Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.identity()
+              ..scale(
+                state.position * 0.01 + 1 + min(0.2, (status.panOffset?.dx.abs() ?? 0) * 0.001 * state.position),
+                state.position * 0.01 + 1 + min(0.2, (status.panOffset?.dy.abs() ?? 0) * 0.001 * state.position),
+                1.0,
+              ),
+            child: child);
+      },
+      child: child,
     );
   }
 }
