@@ -17,6 +17,7 @@ class LdPalette {
   late final Color background;
   late final Color surface;
   late final Color border;
+  late final Color floatingBorder;
   late final Color stroke;
   late final Color text;
   late final Color textMuted;
@@ -35,6 +36,7 @@ class LdPalette {
     Color? stroke,
     Color? text,
     Color? textMuted,
+    Color? floatingBorder,
   }) {
     this.background = background ?? neutral.relative(isDark, isDark ? 0 : 1);
     this.surface = surface ?? neutral.relative(isDark, isDark ? 1 : 0);
@@ -42,6 +44,7 @@ class LdPalette {
     this.stroke = stroke ?? neutral.relative(isDark, 3);
     this.text = text ?? neutral.relative(!isDark, 2);
     this.textMuted = textMuted ?? neutral.relative(!isDark, 5);
+    this.floatingBorder = floatingBorder ?? neutral.relative(isDark, 4);
   }
 }
 

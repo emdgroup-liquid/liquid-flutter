@@ -12,6 +12,9 @@ class DemoShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return LdScaffold(
       resizeToAvoidBottomInset: false,
+      appBar: LdAppBar(
+        title: Text("Demo Shell"),
+      ),
       secondaryNavigationBar: TabNavigation(
         activeRoute: GoRouterState.of(context).uri.path,
         tabs: [

@@ -85,11 +85,9 @@ class LdMonkeyDetailPage<T extends Identifiable<IdType>, IdType> extends Statele
                             ),
                           )
                         : null,
-                    body: SafeArea(
-                      child: LdMonkeyDetailPageContent(
-                        route: route,
-                        selection: selection,
-                      ),
+                    body: LdMonkeyDetailPageContent(
+                      route: route,
+                      selection: selection,
                     ),
                   );
                 }),
@@ -107,7 +105,6 @@ class LdMonkeyDetailPageContent<T extends Identifiable<IdType>, IdType> extends 
   Widget build(BuildContext context) {
     return LdContainer(
       child: Stack(
-        fit: StackFit.expand,
         children: selection
             .toList()
             .reversed

@@ -5,10 +5,7 @@ LdModal ldMonkeyDetailModal<T extends Identifiable<IdType>, IdType>(
   LdMonkey<T, IdType> route,
 ) {
   return LdModal(
-    modalContent: (context) => SizedBox(
-      height: 300,
-      child: LdMonkeyDetailPageContent(route: route, selection: route.state.selectedItems),
-    ),
+    modalContent: (context) => LdMonkeyDetailPageContent(route: route, selection: route.state.selectedItems),
     title: StreamBuilder(
       stream: route.stateStream,
       initialData: route.state,

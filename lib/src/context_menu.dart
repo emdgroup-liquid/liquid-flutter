@@ -473,7 +473,7 @@ class ContextMenuRoute extends ModalRoute<void> {
           color: LdTheme.of(context).surface,
           borderRadius: LdTheme.of(context).radius(LdSize.m),
           boxShadow: [BoxShadow(color: Colors.black.withAlpha(50), blurRadius: 12)],
-          border: Border.all(color: LdTheme.of(context).border, width: LdTheme.of(context).borderWidth),
+          border: Border.all(color: LdTheme.of(context).floatingBorder, width: LdTheme.of(context).borderWidth),
         ),
         child: LdSpring(
           mass: 15,

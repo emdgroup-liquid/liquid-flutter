@@ -233,7 +233,9 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
   @override
   Widget build(BuildContext context) {
     return LdScaffold(
-      appBar: LdAppBar(),
+      appBar: LdAppBar(
+        title: Text("Navigation"),
+      ),
       body: Builder(builder: (context) {
         return ListView(
           padding: MediaQuery.paddingOf(context) +

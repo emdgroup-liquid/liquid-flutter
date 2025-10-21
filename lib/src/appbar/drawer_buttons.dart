@@ -27,7 +27,8 @@ class CloseDrawerButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final layoutState = context.watch<LdScaffoldLayoutState?>();
 
-    final icon = layoutState?.isSideBySide ?? false ? LucideIcons.panelLeftClose : LucideIcons.chevronRight;
+    final icon =
+        layoutState?.parentLayoutState?.isSideBySide ?? false ? LucideIcons.panelLeftClose : LucideIcons.chevronRight;
 
     return LdButtonGhost(
       child: Icon(icon),

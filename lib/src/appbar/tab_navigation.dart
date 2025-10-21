@@ -40,7 +40,7 @@ class _TabNavigationState extends State<TabNavigation> {
         .atLeast(EdgeInsets.all(theme.screenRadius / 4));
 
     if (_layoutState.slot == LdScaffoldSlot.secondaryNavigationBarTop) {
-      return padding.copyWith(bottom: 0);
+      return EdgeInsets.zero;
     }
 
     return padding.copyWith(top: 0);
@@ -63,6 +63,10 @@ class _TabNavigationState extends State<TabNavigation> {
 
   double _borderRadius(BuildContext context) {
     final theme = LdTheme.of(context);
+
+    if (_layoutState.slot == LdScaffoldSlot.secondaryNavigationBarTop) {
+      return 0;
+    }
 
     final radius = theme.screenRadius - _margin(context).bottom;
     return radius < 1 ? theme.radiusSize(LdSize.m) : radius;
@@ -128,6 +132,14 @@ class _TabNavigationState extends State<TabNavigation> {
     LdHaptics.vibrate(HapticsType.light);
   }
 
+  Border? get _border {
+    final theme = LdTheme.of(context, listen: true);
+    if (_layoutState.slot == LdScaffoldSlot.secondaryNavigationBarTop) {
+      return Border(bottom: BorderSide(color: theme.border, width: theme.borderWidth));
+    }
+    return Border.all(color: theme.border, width: theme.borderWidth);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
@@ -142,8 +154,8 @@ class _TabNavigationState extends State<TabNavigation> {
               decoration: BoxDecoration(
                 color: LdTheme.of(context).surface,
                 borderRadius: BorderRadius.circular(_borderRadius(context)),
-                boxShadow: [ldShadowSticky],
-                border: Border.all(color: theme.border, width: theme.borderWidth),
+                boxShadow: _layoutState.slot == LdScaffoldSlot.secondaryNavigationBarTop ? null : [ldShadowSticky],
+                border: _border,
               ),
               child: LayoutBuilder(builder: (context, constraints) {
                 if (constraints.maxWidth != _navWidth) {

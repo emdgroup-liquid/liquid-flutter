@@ -20,128 +20,127 @@ class _HomeState extends State<Home> {
 
     return LdScaffoldBody(
       children: [
-        LdContainer(
-          child: LdAutoSpace(
-            children: [
-              Row(
-                children: [
-                  Container(
-                    decoration:
-                        BoxDecoration(borderRadius: theme.radius(LdSize.m)),
-                    clipBehavior: Clip.hardEdge,
-                    child: Image.asset("liquid_flutter_icon.jpg",
-                        width: 48, height: 48),
+        LdAutoSpace(
+          children: [
+            Row(
+              children: [
+                Container(
+                  decoration:
+                      BoxDecoration(borderRadius: theme.radius(LdSize.m)),
+                  clipBehavior: Clip.hardEdge,
+                  child: Image.asset("liquid_flutter_icon.jpg",
+                      width: 48, height: 48),
+                ),
+                ldSpacerM,
+                const Flexible(
+                  child: LdAutoSpace(
+                    children: [
+                      LdTextHl(
+                        "Liquid Flutter",
+                      ),
+                      LdTextL(
+                        "Cross platform design system for Flutter.",
+                      ),
+                    ],
                   ),
-                  ldSpacerM,
-                  const Flexible(
-                    child: LdAutoSpace(
-                      children: [
-                        LdTextHl(
-                          "Liquid Flutter",
-                        ),
-                        LdTextL(
-                          "Cross platform design system for Flutter.",
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  LdTag(
-                    child: Text("Web"),
-                  ),
-                  LdTag(
-                    child: Text("MacOS"),
-                  ),
-                  LdTag(
-                    child: Text("Windows"),
-                  ),
-                  LdTag(
-                    child: Text("Linux"),
-                  ),
-                  LdTag(
-                    child: Text("Android"),
-                  ),
-                  LdTag(
-                    child: Text("iOS"),
-                  ),
-                ],
-              ),
-              const LdTextP(
-                "Liquid Flutter is a Flutter implementation of the liquid "
-                "design system used at EMD. "
-                "It is designed to be used in desktop and mobile applications."
-                " While the design system is licensed under Apache 2.0 please "
-                "note that EMD Branding elements are provided with a"
-                "proprietary license.",
-              ),
-              const LdDivider(),
-              ldSpacerL,
-              const LdTextHs("Demos"),
-              Wrap(spacing: 8, runSpacing: 8, children: [
-                LdButton(
-                    mode: LdButtonMode.outline,
-                    trailing: const Icon(LucideIcons.arrowRight),
-                    onPressed: () {
-                      context.go("/chemical");
-                    },
-                    child: const Text("Chemical Inventory")),
-                LdButton(
+                ),
+              ],
+            ),
+            const Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                LdTag(
+                  child: Text("Web"),
+                ),
+                LdTag(
+                  child: Text("MacOS"),
+                ),
+                LdTag(
+                  child: Text("Windows"),
+                ),
+                LdTag(
+                  child: Text("Linux"),
+                ),
+                LdTag(
+                  child: Text("Android"),
+                ),
+                LdTag(
+                  child: Text("iOS"),
+                ),
+              ],
+            ),
+            const LdTextP(
+              "Liquid Flutter is a Flutter implementation of the liquid "
+              "design system used at EMD. "
+              "It is designed to be used in desktop and mobile applications."
+              " While the design system is licensed under Apache 2.0 please "
+              "note that EMD Branding elements are provided with a"
+              "proprietary license.",
+            ),
+            const LdDivider(),
+            ldSpacerL,
+            const LdTextHs("Demos"),
+            Wrap(spacing: 8, runSpacing: 8, children: [
+              LdButton(
                   mode: LdButtonMode.outline,
                   trailing: const Icon(LucideIcons.arrowRight),
                   onPressed: () {
-                    context.go("/task-demo");
+                    context.go("/chemical");
                   },
-                  child: const Text("Task Demo"),
-                ),
-                LdButton(
-                  mode: LdButtonMode.outline,
-                  trailing: const Icon(LucideIcons.arrowRight),
-                  onPressed: () {
-                    context.go("/components/bento-gallery");
-                  },
-                  child: const Text("Widget Gallery"),
-                ),
-              ]),
-              const LdDivider(),
-              const LdTextH("Getting Started"),
-              const LdTextP(
-                "To get started using liquid flutter please add it as a dependency to your project:",
+                  child: const Text("Chemical Inventory")),
+              LdButton(
+                mode: LdButtonMode.outline,
+                trailing: const Icon(LucideIcons.arrowRight),
+                onPressed: () {
+                  context.go("/task-demo");
+                },
+                child: const Text("Task Demo"),
               ),
-              const CodeBlock(
-                language: "sh",
-                code: """flutter pub add liquid_flutter""",
+              LdButton(
+                mode: LdButtonMode.outline,
+                trailing: const Icon(LucideIcons.arrowRight),
+                onPressed: () {
+                  context.go("/components/bento-gallery");
+                },
+                child: const Text("Widget Gallery"),
               ),
-              LdAccordion.fromList(
-                [
-                  LdAccordionItem(
-                      child: const CodeBlock(
-                        language: "sh",
-                        code: """
+            ]),
+            const LdDivider(),
+            const LdTextH("Getting Started"),
+            const LdTextP(
+              "To get started using liquid flutter please add it as a dependency to your project:",
+            ),
+            const CodeBlock(
+              language: "sh",
+              code: """flutter pub add liquid_flutter""",
+            ),
+            LdAccordion.fromList(
+              [
+                LdAccordionItem(
+                    child: const CodeBlock(
+                      language: "sh",
+                      code: """
                 flutter pub add liquid_flutter_emd_theme
                 """,
-                      ),
-                      header: const Text("EMD Corporate theme installation"))
-                ],
-                wrapActiveInCard: true,
-              ),
-              const LdTextP(
-                  "Setup a Liquid Theme at the top of your application. This will  be used to provide the color theme to all components via context."),
-              const CodeBlock(
-                code: """
+                    ),
+                    header: const Text("EMD Corporate theme installation"))
+              ],
+              wrapActiveInCard: true,
+            ),
+            const LdTextP(
+                "Setup a Liquid Theme at the top of your application. This will  be used to provide the color theme to all components via context."),
+            const CodeBlock(
+              code: """
                 LdThemeProvider(
                   theme: // Optionally provide an instance of LdTheme(),
                   child: ...
                 )""",
-              ),
-              const LdTextP(
-                  "To automatically keep the material theme in sync with the Liquid theme use the LdThemedAppBuilder. This will also rebuild the entire app in case you change the liquid theme at runtime."),
-              const CodeBlock(
-                code: """
+            ),
+            const LdTextP(
+                "To automatically keep the material theme in sync with the Liquid theme use the LdThemedAppBuilder. This will also rebuild the entire app in case you change the liquid theme at runtime."),
+            const CodeBlock(
+              code: """
                 LdThemeProvider(
                   child: LdThemedAppBuilder(appBuilder: (context, theme) {
                     return MaterialApp(
@@ -150,25 +149,23 @@ class _HomeState extends State<Home> {
                     );
                   })
                 )""",
-              ),
-              const LdTextP(
-                  "You can now also access the Liquid theme via the LdTheme.of(context) method. This will return the LdTheme object which contains all the colors and other theme related properties."),
-              const CodeBlock(
-                code: """var theme = LdTheme.of(context);""",
-              ),
-              const LdTextP(
-                "You can now use the components in your app. Please refer to the documentation for more information.",
-              ),
-              const LdTextHl("Changing the theme size"),
-              const LdTextP(
-                  "Liquid Flutter supports three different base sizes that try to make it suitable for desktop and mobile use cases. The default size is not the LdSize passed to components directly, rather it scales the entire user interface."
-                  " This is done to preserve the visual hierarchy of the components. On Desktop LdThemeSize.s is reccomended, on mobile LdThemeSize.m is reccomended."),
-              const CodeBlock(
-                code:
-                    """LdTheme.of(context).setThemeSize(LdThemeSize.s/m/l);""",
-              ),
-            ],
-          ),
+            ),
+            const LdTextP(
+                "You can now also access the Liquid theme via the LdTheme.of(context) method. This will return the LdTheme object which contains all the colors and other theme related properties."),
+            const CodeBlock(
+              code: """var theme = LdTheme.of(context);""",
+            ),
+            const LdTextP(
+              "You can now use the components in your app. Please refer to the documentation for more information.",
+            ),
+            const LdTextHl("Changing the theme size"),
+            const LdTextP(
+                "Liquid Flutter supports three different base sizes that try to make it suitable for desktop and mobile use cases. The default size is not the LdSize passed to components directly, rather it scales the entire user interface."
+                " This is done to preserve the visual hierarchy of the components. On Desktop LdThemeSize.s is reccomended, on mobile LdThemeSize.m is reccomended."),
+            const CodeBlock(
+              code: """LdTheme.of(context).setThemeSize(LdThemeSize.s/m/l);""",
+            ),
+          ],
         )
       ],
     );

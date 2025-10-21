@@ -91,8 +91,12 @@ class _LdAppBarState extends State<LdAppBar> {
     return _layoutState?.isDrawerOpen ?? false;
   }
 
+  bool get _isDrawer {
+    return _layoutState?.parentLayoutState?.slot == LdScaffoldSlot.drawer;
+  }
+
   bool get _isDrawerAppBar {
-    return _layoutState?.slot == LdScaffoldSlot.drawerAppBar;
+    return _layoutState?.slot == LdScaffoldSlot.appBar && _isDrawer;
   }
 
   bool get _isAppBar {
@@ -100,12 +104,11 @@ class _LdAppBarState extends State<LdAppBar> {
   }
 
   bool get _isBottomNavigationBar {
-    return _layoutState?.slot == LdScaffoldSlot.secondaryNavigationBarBottom ||
-        _layoutState?.slot == LdScaffoldSlot.drawerBottomNavigationBar;
+    return _layoutState?.slot == LdScaffoldSlot.secondaryNavigationBarBottom;
   }
 
   bool get _isSideBySide {
-    return _layoutState?.isSideBySide ?? false;
+    return _layoutState?.parentLayoutState?.isSideBySide ?? false;
   }
 
   bool get _showOpenDrawerButton {
@@ -113,7 +116,7 @@ class _LdAppBarState extends State<LdAppBar> {
   }
 
   bool get _showCloseDrawerButton {
-    return _slot == LdScaffoldSlot.drawerAppBar && _isDrawerOpen && _isSideBySide;
+    return _isDrawerAppBar && (_layoutState?.parentLayoutState?.isDrawerOpen ?? false) && _isSideBySide;
   }
 
   LdScaffoldSlot? get _slot {
@@ -129,7 +132,7 @@ class _LdAppBarState extends State<LdAppBar> {
     final imply = widget.implyLeading ?? true;
     if (!imply) return null;
 
-    if (_canPopParentRoute && !_isDrawerOpen) {
+    if (_canPopParentRoute && !_isDrawer) {
       return LdButtonGhost(
         child: const Icon(LucideIcons.chevronLeft),
         onPressed: () => Navigator.of(context).maybePop(),
@@ -168,12 +171,22 @@ class _LdAppBarState extends State<LdAppBar> {
   }
 
   EdgeInsets get _outsideContainerPadding {
+    final EdgeInsets verticalSpace = EdgeInsets.only(
+      bottom: LdTheme.of(context).paddingSize(size: LdSize.s),
+    );
     if (_isBottomNavigationBar) {
-      return MediaQuery.of(context)
-          .padding
-          .atLeast(MediaQuery.of(context).viewInsets)
-          .atLeast(LdTheme.of(context).pad(size: LdSize.s))
+      final mediaPadding = MediaQuery.of(context).padding;
+      final viewInsets = MediaQuery.of(context).viewInsets;
+      final pad = LdTheme.of(context).pad(size: LdSize.s);
+      final radiusPadding = EdgeInsets.all(LdTheme.of(context).screenRadius / 4);
+
+      final result = (mediaPadding + verticalSpace)
+          .atLeast(viewInsets + verticalSpace)
+          .atLeast(pad + verticalSpace)
+          .atLeast(radiusPadding + verticalSpace)
           .remove(top: true);
+
+      return result;
     }
 
     return MediaQuery.of(context).padding.remove(top: _isBottomNavigationBar, bottom: !_isBottomNavigationBar);
@@ -182,7 +195,6 @@ class _LdAppBarState extends State<LdAppBar> {
   bool get _attached {
     return switch (_slot) {
       LdScaffoldSlot.appBar => true,
-      LdScaffoldSlot.drawerAppBar => true,
       LdScaffoldSlot.secondaryNavigationBarTop => true,
       _ => false,
     };
@@ -224,19 +236,29 @@ class _LdAppBarState extends State<LdAppBar> {
     return (widget.backgroundColor ?? LdTheme.of(context).surface).withAlpha(_fillOpacity(isScrolledUnder));
   }
 
+  double _borderRadius(BuildContext context) {
+    final theme = LdTheme.of(context);
+
+    if (_slot == LdScaffoldSlot.secondaryNavigationBarTop) {
+      return 0;
+    }
+
+    final radius = theme.screenRadius - _outsideContainerPadding.bottom;
+    return radius < 1 ? theme.radiusSize(LdSize.m) : radius;
+  }
+
   Widget _buildInsideContainer(BuildContext context, bool isScrolledUnder, Widget child) {
     late BoxDecoration decoration;
 
     if (!_attached) {
       decoration = BoxDecoration(
-        borderRadius:
-            BorderRadius.circular(LdTheme.of(context).screenRadius / 3).atLeast(LdTheme.of(context).radius(LdSize.m)),
+        borderRadius: BorderRadius.circular(_borderRadius(context)),
         color: _fillColor(isScrolledUnder),
         boxShadow: [
           ldShadowSticky,
         ],
         border: Border.all(
-          color: LdTheme.of(context).border,
+          color: LdTheme.of(context).floatingBorder,
           width: LdTheme.of(context).borderWidth,
         ),
       );
@@ -255,7 +277,6 @@ class _LdAppBarState extends State<LdAppBar> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 100),
       padding: _padding(context),
-      margin: !_attached ? LdTheme.of(context).pad(size: LdSize.s) : null,
       decoration: decoration,
       child: child,
     );
@@ -273,9 +294,6 @@ class _LdAppBarState extends State<LdAppBar> {
       LdScaffoldSlot.secondaryNavigationBarBottom => _layoutState?.bodyScrollOffset,
       LdScaffoldSlot.secondaryNavigationBarTop => _layoutState?.bodyScrollOffset,
       LdScaffoldSlot.drawer => _layoutState?.drawerScrollOffset,
-      LdScaffoldSlot.drawerAppBar => _layoutState?.drawerScrollOffset,
-      LdScaffoldSlot.drawerBottomNavigationBar => _layoutState?.drawerScrollOffset,
-      LdScaffoldSlot.drawerBody => _layoutState?.drawerScrollOffset,
     };
 
     final leading = _buildLeading(context);
@@ -320,14 +338,14 @@ class _LdAppBarState extends State<LdAppBar> {
                           return Row(
                             children: [
                               const MacOSWindowControls(),
-                              if (_hasDrawer)
+                              if (_hasDrawer) ...[
                                 LdReveal(
                                   revealed: _showOpenDrawerButton,
                                   child: const OpenDrawerButton(),
                                 ),
-                              if (leading != null) ...[
-                                leading,
+                                ldSpacerS,
                               ],
+                              if (leading != null) ...[leading, ldSpacerS],
                               if (widget.title != null || visibleActions.isNotEmpty || hasSearch)
                                 Expanded(
                                     child: LdOverflowView(

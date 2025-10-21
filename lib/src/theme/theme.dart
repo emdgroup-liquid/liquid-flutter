@@ -290,6 +290,10 @@ class LdTheme extends ChangeNotifier {
     return _palette.border;
   }
 
+  Color get floatingBorder {
+    return _palette.floatingBorder;
+  }
+
   /// Get the stroke color
   Color get stroke {
     return _palette.stroke;

@@ -152,40 +152,34 @@ final movieDemo = LdMonkey<_Movie, int>(
         return CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
-              child: SafeArea(
-                child: LdCard(
-                  padding: EdgeInsets.zero,
-                  child: LdList(
-                    shrinkWrap: true,
-                    separatorBuilder: (context) => LdDivider(),
-                    header: LdAutoBackground(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: LdTextL("Movie"),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: LdTextL("Genre"),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: LdTextL("Rating"),
-                          ),
-                        ],
-                      ).spaceM().padL(),
+                child: LdList(
+              shrinkWrap: true,
+              separatorBuilder: (context) => LdDivider(),
+              header: LdAutoBackground(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: LdTextL("Movie"),
                     ),
-                    paginator: route.repository,
-                    itemBuilder: itemBuilder,
-                    scrollController: scrollController,
-                    assumedItemHeight: 50,
-                  ),
-                ).padL(),
+                    Expanded(
+                      flex: 2,
+                      child: LdTextL("Genre"),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: LdTextL("Rating"),
+                    ),
+                  ],
+                ).spaceM().padL(),
               ),
-            )
+              paginator: route.repository,
+              itemBuilder: itemBuilder,
+              scrollController: scrollController,
+              assumedItemHeight: 50,
+            ))
           ],
         );
       },

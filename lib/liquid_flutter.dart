@@ -74,7 +74,6 @@ export 'src/reveal.dart';
 export 'src/runner.dart';
 export 'src/scaffold.dart';
 export 'src/scaffold_body.dart';
-export 'src/drawer.dart';
 export 'src/select.dart';
 export 'src/slider.dart';
 export 'src/spacer.dart';

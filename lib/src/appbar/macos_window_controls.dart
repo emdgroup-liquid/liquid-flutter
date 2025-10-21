@@ -14,12 +14,21 @@ class MacOSWindowControls extends StatelessWidget {
     }
 
     final layoutState = context.watch<LdScaffoldLayoutState?>();
-    final isTopLevel = layoutState?.level == 1;
+    final level = layoutState?.level;
     final isAppBar = layoutState?.slot == LdScaffoldSlot.appBar;
-    final isDrawerAppBar = layoutState?.slot == LdScaffoldSlot.drawerAppBar;
+    final isDrawer = layoutState?.parentLayoutState?.slot == LdScaffoldSlot.drawer;
+    print("layoutState: ${layoutState?.parentLayoutState?.slot}");
     final isDrawerOpen = layoutState?.isDrawerOpen ?? false;
+    final isParentDrawerOpen = layoutState?.parentLayoutState?.isDrawerOpen ?? false;
 
-    final showWindowControls = isTopLevel && (isAppBar && !isDrawerOpen || isDrawerAppBar && isDrawerOpen);
+    print("level: $level");
+    print("isAppBar: $isAppBar");
+    print("isDrawer: $isDrawer");
+    print("isDrawerOpen: $isDrawerOpen");
+    print("isParentDrawerOpen: $isParentDrawerOpen");
+
+    final showWindowControls =
+        isAppBar && (isDrawer && isParentDrawerOpen && level == 1 || !isDrawer && !isDrawerOpen && level == 0);
 
     return LdReveal(
       initialRevealed: showWindowControls,

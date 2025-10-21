@@ -53,8 +53,8 @@ class BentoGallery extends StatelessWidget {
         final crossAxisCount = constraints.maxWidth > 1200
             ? 4
             : constraints.maxWidth > 800
-                ? 3
-                : 2;
+                ? 2
+                : 1;
 
         return GridView.builder(
           shrinkWrap: true,
