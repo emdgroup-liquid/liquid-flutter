@@ -57,6 +57,18 @@ class AppBarDemo extends StatelessWidget {
             LdAppBar(
               title: const Text("AppBar with Leading"),
             ),
+            LdAppBar(
+              implyLeading: false,
+              title: const Text("Always Visible Shadow & Border"),
+              shadowMode: LdAppBarShadowMode.visible,
+              borderMode: LdAppBarBorderMode.visible,
+            ),
+            LdAppBar(
+              implyLeading: false,
+              title: const Text("Hidden Shadow & Border"),
+              shadowMode: LdAppBarShadowMode.hidden,
+              borderMode: LdAppBarBorderMode.hidden,
+            ),
           ],
         ),
       ),

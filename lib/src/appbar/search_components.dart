@@ -125,7 +125,6 @@ class _LdSearchInputState extends State<LdSearchInput> {
   }
 
   void _closeOverlay() {
-    print("🔍 Closing overlay");
     _overlayEntry?.remove();
     _overlayEntry = null;
     widget.searchConfig.inputFocusNode.unfocus();
@@ -156,10 +155,8 @@ class _LdSearchInputState extends State<LdSearchInput> {
         _updateInputRect();
       }
     });
-    print("🔍 Building search input");
     return Actions(
       actions: <Type, Action<Intent>>{SearchIntent: SearchAction(searchFocusNode: widget.searchConfig.inputFocusNode)},
-      dispatcher: LoggerDispatcher(),
       child: LdWrapConditional(
         condition: !widget.fullWidth,
         builder: (context, child) => ConstrainedBox(
@@ -442,28 +439,4 @@ class LdSearchAcceptSuggestion extends Notification {
   const LdSearchAcceptSuggestion({required this.suggestion});
 
   final dynamic suggestion;
-}
-
-class LoggerDispatcher extends ActionDispatcher {
-  @override
-  Object? invokeAction(
-    covariant Action<Intent> action,
-    covariant Intent intent, [
-    BuildContext? context,
-  ]) {
-    print('Action invoked: $action($intent) from $context');
-    super.invokeAction(action, intent, context);
-
-    return null;
-  }
-
-  @override
-  (bool, Object?) invokeActionIfEnabled(
-    covariant Action<Intent> action,
-    covariant Intent intent, [
-    BuildContext? context,
-  ]) {
-    print('Action invoked: $action($intent) from $context');
-    return super.invokeActionIfEnabled(action, intent, context);
-  }
 }

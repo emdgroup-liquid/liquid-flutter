@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/appbar/tab_navigation.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class DemoShell extends StatelessWidget {
@@ -11,10 +10,8 @@ class DemoShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdScaffold(
+      debugName: "Demo Shell Scaffold",
       resizeToAvoidBottomInset: false,
-      appBar: LdAppBar(
-        title: Text("Demo Shell"),
-      ),
       secondaryNavigationBar: TabNavigation(
         activeRoute: GoRouterState.of(context).uri.path,
         tabs: [

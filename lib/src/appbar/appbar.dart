@@ -11,6 +11,18 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
+enum LdAppBarShadowMode {
+  visible,
+  whenScrolled,
+  hidden,
+}
+
+enum LdAppBarBorderMode {
+  visible,
+  whenScrolled,
+  hidden,
+}
+
 class LdAppBar extends StatefulWidget {
   final Widget? title;
   final Widget? leading;
@@ -24,6 +36,8 @@ class LdAppBar extends StatefulWidget {
   final bool elevateOnScroll;
   final bool blurOnScroll;
   final Widget? bottom;
+  final LdAppBarShadowMode shadowMode;
+  final LdAppBarBorderMode borderMode;
 
   final List<LdLabeledAction> actions;
 
@@ -34,6 +48,8 @@ class LdAppBar extends StatefulWidget {
   final List<SingleChildWidget> Function(BuildContext context)? overflowMenuProviders;
 
   final LdSearchConfig? searchConfig;
+
+  final String? debugName;
 
   const LdAppBar({
     super.key,
@@ -51,7 +67,10 @@ class LdAppBar extends StatefulWidget {
     this.bottom,
     this.disableSafeArea = false,
     this.elevateOnScroll = true,
+    this.shadowMode = LdAppBarShadowMode.whenScrolled,
+    this.borderMode = LdAppBarBorderMode.whenScrolled,
     this.overflowMenuProviders,
+    this.debugName,
   });
 
   @override
@@ -174,11 +193,11 @@ class _LdAppBarState extends State<LdAppBar> {
     final EdgeInsets verticalSpace = EdgeInsets.only(
       bottom: LdTheme.of(context).paddingSize(size: LdSize.s),
     );
+    final radiusPadding = EdgeInsets.all(LdTheme.of(context).screenRadius / 4);
     if (_isBottomNavigationBar) {
       final mediaPadding = MediaQuery.of(context).padding;
       final viewInsets = MediaQuery.of(context).viewInsets;
       final pad = LdTheme.of(context).pad(size: LdSize.s);
-      final radiusPadding = EdgeInsets.all(LdTheme.of(context).screenRadius / 4);
 
       final result = (mediaPadding + verticalSpace)
           .atLeast(viewInsets + verticalSpace)
@@ -189,7 +208,9 @@ class _LdAppBarState extends State<LdAppBar> {
       return result;
     }
 
-    return MediaQuery.of(context).padding.remove(top: _isBottomNavigationBar, bottom: !_isBottomNavigationBar);
+    return MediaQuery.of(context).padding.atLeast(radiusPadding).remove(
+          bottom: true,
+        );
   }
 
   bool get _attached {
@@ -200,6 +221,22 @@ class _LdAppBarState extends State<LdAppBar> {
     };
   }
 
+  bool _shouldShowShadow(bool isScrolledUnder) {
+    return switch (widget.shadowMode) {
+      LdAppBarShadowMode.visible => true,
+      LdAppBarShadowMode.whenScrolled => isScrolledUnder,
+      LdAppBarShadowMode.hidden => false,
+    };
+  }
+
+  bool _shouldShowBorder(bool isScrolledUnder) {
+    return switch (widget.borderMode) {
+      LdAppBarBorderMode.visible => true,
+      LdAppBarBorderMode.whenScrolled => isScrolledUnder,
+      LdAppBarBorderMode.hidden => false,
+    };
+  }
+
   /// Wraps the app bar in a container that applies the correct padding to make sure
   /// the app bar is not covered by the system UI or parent app bars.
   Widget _buildOutsideContainer(BuildContext context, bool isScrolledUnder, Widget child) {
@@ -207,13 +244,25 @@ class _LdAppBarState extends State<LdAppBar> {
       duration: const Duration(milliseconds: 100),
       padding: _outsideContainerPadding,
       decoration: BoxDecoration(
-        color: _attached ? _fillColor(isScrolledUnder) : Colors.transparent,
+        color: _attached ? _fillColor(isScrolledUnder).withAlpha(_fillOpacity(isScrolledUnder)) : null,
         boxShadow: [
-          if (!widget.blurOnScroll && _attached)
+          if (_attached)
             ldShadowSticky.copyWith(
-              color: ldShadowSticky.color.withAlpha(isScrolledUnder ? 50 : 0),
+              color: _shouldShowShadow(isScrolledUnder)
+                  ? ldShadowSticky.color.withAlpha(isScrolledUnder ? 50 : 0)
+                  : Colors.transparent,
             ),
         ],
+        border: _attached
+            ? Border(
+                bottom: BorderSide(
+                  color: _shouldShowBorder(isScrolledUnder)
+                      ? LdTheme.of(context).border.withAlpha(_fillOpacity(isScrolledUnder))
+                      : Colors.transparent,
+                  width: LdTheme.of(context).borderWidth,
+                ),
+              )
+            : null,
       ),
       child: child,
     );
@@ -233,7 +282,9 @@ class _LdAppBarState extends State<LdAppBar> {
   }
 
   Color _fillColor(bool isScrolledUnder) {
-    return (widget.backgroundColor ?? LdTheme.of(context).surface).withAlpha(_fillOpacity(isScrolledUnder));
+    return Color.alphaBlend(
+        (widget.backgroundColor ?? LdTheme.of(context).surface).withAlpha(_fillOpacity(isScrolledUnder)),
+        LdTheme.of(context).background);
   }
 
   double _borderRadius(BuildContext context) {
@@ -247,6 +298,10 @@ class _LdAppBarState extends State<LdAppBar> {
     return radius < 1 ? theme.radiusSize(LdSize.m) : radius;
   }
 
+  bool get _hasTopContent {
+    return widget.title != null || widget.actions.isNotEmpty || widget.searchConfig != null;
+  }
+
   Widget _buildInsideContainer(BuildContext context, bool isScrolledUnder, Widget child) {
     late BoxDecoration decoration;
 
@@ -255,23 +310,20 @@ class _LdAppBarState extends State<LdAppBar> {
         borderRadius: BorderRadius.circular(_borderRadius(context)),
         color: _fillColor(isScrolledUnder),
         boxShadow: [
-          ldShadowSticky,
+          ldShadowSticky.copyWith(
+            color: _shouldShowShadow(isScrolledUnder) ? ldShadowSticky.color : Colors.transparent,
+          ),
         ],
         border: Border.all(
-          color: LdTheme.of(context).floatingBorder,
+          color: _shouldShowBorder(isScrolledUnder) ? LdTheme.of(context).floatingBorder : Colors.transparent,
           width: LdTheme.of(context).borderWidth,
         ),
       );
     } else {
-      decoration = BoxDecoration(
-        //color: _fillColor(isScrolledUnder),
-        border: Border(
-          bottom: BorderSide(
-            color: LdTheme.of(context).border.withAlpha(_fillOpacity(isScrolledUnder)),
-            width: LdTheme.of(context).borderWidth,
-          ),
-        ),
-      );
+      decoration = const BoxDecoration(
+          //color: _fillColor(isScrolledUnder),
+
+          );
     }
 
     return AnimatedContainer(
@@ -279,6 +331,30 @@ class _LdAppBarState extends State<LdAppBar> {
       padding: _padding(context),
       decoration: decoration,
       child: child,
+    );
+  }
+
+  SystemUiOverlayStyle get _systemUiOverlayStyle {
+    final theme = LdTheme.of(context, listen: true);
+    if (theme.isDark) {
+      return SystemUiOverlayStyle(
+        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.light,
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: theme.background.withAlpha(150),
+        systemNavigationBarDividerColor: Colors.transparent,
+        systemNavigationBarIconBrightness: Brightness.light,
+        systemNavigationBarContrastEnforced: false,
+      );
+    }
+    return SystemUiOverlayStyle(
+      statusBarBrightness: Brightness.dark,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarColor: Colors.transparent,
+      systemNavigationBarColor: theme.background.withAlpha(150),
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarIconBrightness: Brightness.dark,
+      systemNavigationBarContrastEnforced: false,
     );
   }
 
@@ -306,7 +382,7 @@ class _LdAppBarState extends State<LdAppBar> {
           final visibleActions = widget.actions.where((e) => e.isVisible(context)).toList();
 
           final appBar = AnnotatedRegion<SystemUiOverlayStyle>(
-            value: theme.isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+            value: _systemUiOverlayStyle,
             child: _buildOutsideContainer(
               context,
               scrolledUnder,
@@ -404,9 +480,13 @@ class _LdAppBarState extends State<LdAppBar> {
                           );
                         }),
                         if (widget.bottom != null) ...[
-                          Padding(
-                            padding: EdgeInsets.only(
-                              top: LdTheme.of(context).pad(size: LdSize.s).top,
+                          LdWrapConditional(
+                            condition: _hasTopContent,
+                            builder: (context, child) => Padding(
+                              padding: EdgeInsets.only(
+                                top: LdTheme.of(context).pad(size: LdSize.s).top,
+                              ),
+                              child: child,
                             ),
                             child: widget.bottom!,
                           ),
@@ -424,6 +504,9 @@ class _LdAppBarState extends State<LdAppBar> {
             builder: (context, child) => GestureDetector(
               onPanStart: (details) {
                 LdAppBar.callbacks?.onMove?.call();
+              },
+              onDoubleTap: () {
+                LdScaffoldState.of(context).scrollToTop();
               },
               child: child,
             ),

@@ -5,11 +5,15 @@ class LdScaffoldBody extends StatelessWidget {
   final List<Widget> children;
   final List<Widget> slivers;
   final LdSize minimumPadding;
+  final ScrollController? scrollController;
+  final bool autoSpaceChildren;
   const LdScaffoldBody({
     super.key,
     this.children = const [],
     this.minimumPadding = LdSize.m,
     this.slivers = const [],
+    this.scrollController,
+    this.autoSpaceChildren = true,
   });
 
   @override
@@ -17,14 +21,21 @@ class LdScaffoldBody extends StatelessWidget {
     final padding = MediaQuery.paddingOf(context);
     final themePadding = LdTheme.of(context).pad(size: minimumPadding);
 
+    final effectiveChildren = autoSpaceChildren ? children.autoSpace(context) : children;
+
+    // Get the scroll controller from the scaffold if none provided
+    final effectiveController =
+        scrollController ?? (context.findAncestorStateOfType<LdScaffoldState>()?.effectiveScrollController);
+
     return CustomScrollView(
+      controller: effectiveController,
       slivers: [
-        if (children.isNotEmpty)
+        if (effectiveChildren.isNotEmpty)
           SliverPadding(
             padding: padding + themePadding,
             sliver: SliverList.builder(
-              itemCount: children.length,
-              itemBuilder: (context, index) => children[index],
+              itemCount: effectiveChildren.length,
+              itemBuilder: (context, index) => effectiveChildren[index],
             ),
           ),
         if (slivers.isNotEmpty)

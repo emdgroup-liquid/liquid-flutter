@@ -40,7 +40,7 @@ class _TabNavigationState extends State<TabNavigation> {
         .atLeast(EdgeInsets.all(theme.screenRadius / 4));
 
     if (_layoutState.slot == LdScaffoldSlot.secondaryNavigationBarTop) {
-      return EdgeInsets.zero;
+      return padding.copyWith(left: 0, right: 0);
     }
 
     return padding.copyWith(top: 0);
@@ -48,6 +48,12 @@ class _TabNavigationState extends State<TabNavigation> {
 
   EdgeInsets _padding(BuildContext context) {
     final theme = LdTheme.of(context);
+
+    if (_layoutState.slot == LdScaffoldSlot.secondaryNavigationBarTop) {
+      return theme.pad(size: LdSize.s).copyWith(
+            top: 0,
+          );
+    }
 
     return theme.pad(size: LdSize.xs);
   }
