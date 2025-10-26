@@ -29,6 +29,10 @@ private func wrapError(_ error: Any) -> [Any?] {
   ]
 }
 
+private func createConnectionError(withChannelName channelName: String) -> FlutterError {
+  return FlutterError(code: "channel-error", message: "Unable to establish connection on channel: '\(channelName)'.", details: "")
+}
+
 private func isNullish(_ value: Any?) -> Bool {
   return value is NSNull || value == nil
 }
@@ -37,6 +41,80 @@ private func nilOrValue<T>(_ value: Any?) -> T? {
   if value is NSNull { return nil }
   return value as! T?
 }
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct WindowState {
+  var x: Int64
+  var y: Int64
+  var width: Int64
+  var height: Int64
+  var isMaximized: Bool
+  var isMinimized: Bool
+
+  static func fromList(_ list: [Any?]) -> WindowState? {
+    let x = list[0] is Int64 ? list[0] as! Int64 : Int64(list[0] as! Int32)
+    let y = list[1] is Int64 ? list[1] as! Int64 : Int64(list[1] as! Int32)
+    let width = list[2] is Int64 ? list[2] as! Int64 : Int64(list[2] as! Int32)
+    let height = list[3] is Int64 ? list[3] as! Int64 : Int64(list[3] as! Int32)
+    let isMaximized = list[4] as! Bool
+    let isMinimized = list[5] as! Bool
+
+    return WindowState(
+      x: x,
+      y: y,
+      width: width,
+      height: height,
+      isMaximized: isMaximized,
+      isMinimized: isMinimized
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      x,
+      y,
+      width,
+      height,
+      isMaximized,
+      isMinimized,
+    ]
+  }
+}
+private class WindowUtilsApiCodecReader: FlutterStandardReader {
+  override func readValue(ofType type: UInt8) -> Any? {
+    switch type {
+      case 128:
+        return WindowState.fromList(self.readValue() as! [Any?])
+      default:
+        return super.readValue(ofType: type)
+    }
+  }
+}
+
+private class WindowUtilsApiCodecWriter: FlutterStandardWriter {
+  override func writeValue(_ value: Any) {
+    if let value = value as? WindowState {
+      super.writeByte(128)
+      super.writeValue(value.toList())
+    } else {
+      super.writeValue(value)
+    }
+  }
+}
+
+private class WindowUtilsApiCodecReaderWriter: FlutterStandardReaderWriter {
+  override func reader(with data: Data) -> FlutterStandardReader {
+    return WindowUtilsApiCodecReader(data: data)
+  }
+
+  override func writer(with data: NSMutableData) -> FlutterStandardWriter {
+    return WindowUtilsApiCodecWriter(data: data)
+  }
+}
+
+class WindowUtilsApiCodec: FlutterStandardMessageCodec {
+  static let shared = WindowUtilsApiCodec(readerWriter: WindowUtilsApiCodecReaderWriter())
+}
+
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol WindowUtilsApi {
   func setWindowSize(width: Int64, height: Int64) throws -> Bool
@@ -44,14 +122,20 @@ protocol WindowUtilsApi {
   func setWindowPosition(x: Int64, y: Int64) throws -> Bool
   func startDragging() throws
   func configureWindow() throws
+  func closeWindow() throws
+  func minimizeWindow() throws
+  func maximizeWindow() throws
+  func isWindowMaximized() throws -> Bool
+  func getWindowState() throws -> WindowState
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
 class WindowUtilsApiSetup {
   /// The codec used by WindowUtilsApi.
+  static var codec: FlutterStandardMessageCodec { WindowUtilsApiCodec.shared }
   /// Sets up an instance of `WindowUtilsApi` to handle messages through the `binaryMessenger`.
   static func setUp(binaryMessenger: FlutterBinaryMessenger, api: WindowUtilsApi?) {
-    let setWindowSizeChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.setWindowSize", binaryMessenger: binaryMessenger)
+    let setWindowSizeChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.setWindowSize", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       setWindowSizeChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
@@ -67,7 +151,7 @@ class WindowUtilsApiSetup {
     } else {
       setWindowSizeChannel.setMessageHandler(nil)
     }
-    let setWindowTitleChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.setWindowTitle", binaryMessenger: binaryMessenger)
+    let setWindowTitleChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.setWindowTitle", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       setWindowTitleChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
@@ -82,7 +166,7 @@ class WindowUtilsApiSetup {
     } else {
       setWindowTitleChannel.setMessageHandler(nil)
     }
-    let setWindowPositionChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.setWindowPosition", binaryMessenger: binaryMessenger)
+    let setWindowPositionChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.setWindowPosition", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       setWindowPositionChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
@@ -98,7 +182,7 @@ class WindowUtilsApiSetup {
     } else {
       setWindowPositionChannel.setMessageHandler(nil)
     }
-    let startDraggingChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.startDragging", binaryMessenger: binaryMessenger)
+    let startDraggingChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.startDragging", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       startDraggingChannel.setMessageHandler { _, reply in
         do {
@@ -111,7 +195,7 @@ class WindowUtilsApiSetup {
     } else {
       startDraggingChannel.setMessageHandler(nil)
     }
-    let configureWindowChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.configureWindow", binaryMessenger: binaryMessenger)
+    let configureWindowChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.configureWindow", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       configureWindowChannel.setMessageHandler { _, reply in
         do {
@@ -123,6 +207,157 @@ class WindowUtilsApiSetup {
       }
     } else {
       configureWindowChannel.setMessageHandler(nil)
+    }
+    let closeWindowChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.closeWindow", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      closeWindowChannel.setMessageHandler { _, reply in
+        do {
+          try api.closeWindow()
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      closeWindowChannel.setMessageHandler(nil)
+    }
+    let minimizeWindowChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.minimizeWindow", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      minimizeWindowChannel.setMessageHandler { _, reply in
+        do {
+          try api.minimizeWindow()
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      minimizeWindowChannel.setMessageHandler(nil)
+    }
+    let maximizeWindowChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.maximizeWindow", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      maximizeWindowChannel.setMessageHandler { _, reply in
+        do {
+          try api.maximizeWindow()
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      maximizeWindowChannel.setMessageHandler(nil)
+    }
+    let isWindowMaximizedChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.isWindowMaximized", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      isWindowMaximizedChannel.setMessageHandler { _, reply in
+        do {
+          let result = try api.isWindowMaximized()
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      isWindowMaximizedChannel.setMessageHandler(nil)
+    }
+    let getWindowStateChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.getWindowState", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      getWindowStateChannel.setMessageHandler { _, reply in
+        do {
+          let result = try api.getWindowState()
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      getWindowStateChannel.setMessageHandler(nil)
+    }
+  }
+}
+private class WindowStateEventApiCodecReader: FlutterStandardReader {
+  override func readValue(ofType type: UInt8) -> Any? {
+    switch type {
+      case 128:
+        return WindowState.fromList(self.readValue() as! [Any?])
+      default:
+        return super.readValue(ofType: type)
+    }
+  }
+}
+
+private class WindowStateEventApiCodecWriter: FlutterStandardWriter {
+  override func writeValue(_ value: Any) {
+    if let value = value as? WindowState {
+      super.writeByte(128)
+      super.writeValue(value.toList())
+    } else {
+      super.writeValue(value)
+    }
+  }
+}
+
+private class WindowStateEventApiCodecReaderWriter: FlutterStandardReaderWriter {
+  override func reader(with data: Data) -> FlutterStandardReader {
+    return WindowStateEventApiCodecReader(data: data)
+  }
+
+  override func writer(with data: NSMutableData) -> FlutterStandardWriter {
+    return WindowStateEventApiCodecWriter(data: data)
+  }
+}
+
+class WindowStateEventApiCodec: FlutterStandardMessageCodec {
+  static let shared = WindowStateEventApiCodec(readerWriter: WindowStateEventApiCodecReaderWriter())
+}
+
+/// Generated protocol from Pigeon that represents Flutter messages that can be called from Swift.
+protocol WindowStateEventApiProtocol {
+  func onWindowStateChanged(state stateArg: WindowState, completion: @escaping (Result<Void, FlutterError>) -> Void)
+  func onWindowReady(completion: @escaping (Result<Void, FlutterError>) -> Void)
+}
+class WindowStateEventApi: WindowStateEventApiProtocol {
+  private let binaryMessenger: FlutterBinaryMessenger
+  init(binaryMessenger: FlutterBinaryMessenger){
+    self.binaryMessenger = binaryMessenger
+  }
+  var codec: FlutterStandardMessageCodec {
+    return WindowStateEventApiCodec.shared
+  }
+  func onWindowStateChanged(state stateArg: WindowState, completion: @escaping (Result<Void, FlutterError>) -> Void) {
+    let channelName: String = "dev.flutter.pigeon.liquid_flutter_window_utils.WindowStateEventApi.onWindowStateChanged"
+    let channel = FlutterBasicMessageChannel(name: channelName, binaryMessenger: binaryMessenger, codec: codec)
+    channel.sendMessage([stateArg] as [Any?]) { response in
+      guard let listResponse = response as? [Any?] else {
+        completion(.failure(createConnectionError(withChannelName:channelName)))
+        return
+      }
+      if (listResponse.count > 1) {
+        let code: String = listResponse[0] as! String
+        let message: String? = nilOrValue(listResponse[1])
+        let details: String? = nilOrValue(listResponse[2])
+        completion(.failure(FlutterError(code: code, message: message, details: details)));
+      } else {
+        completion(.success(Void()))
+      }
+    }
+  }
+  func onWindowReady(completion: @escaping (Result<Void, FlutterError>) -> Void) {
+    let channelName: String = "dev.flutter.pigeon.liquid_flutter_window_utils.WindowStateEventApi.onWindowReady"
+    let channel = FlutterBasicMessageChannel(name: channelName, binaryMessenger: binaryMessenger, codec: codec)
+    channel.sendMessage(nil) { response in
+      guard let listResponse = response as? [Any?] else {
+        completion(.failure(createConnectionError(withChannelName:channelName)))
+        return
+      }
+      if (listResponse.count > 1) {
+        let code: String = listResponse[0] as! String
+        let message: String? = nilOrValue(listResponse[1])
+        let details: String? = nilOrValue(listResponse[2])
+        completion(.failure(FlutterError(code: code, message: message, details: details)));
+      } else {
+        completion(.success(Void()))
+      }
     }
   }
 }

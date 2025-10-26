@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter_window_utils/messages.g.dart';
 import 'package:provider/provider.dart';
 
 enum LdThemeBrightnessMode {
@@ -30,6 +31,8 @@ class LdThemeProvider extends StatefulWidget {
   /// will use LdThemeSize.m on mobile and LdThemeSize.s on desktop
   final bool autoSize;
 
+  final Stream<double>? screenRadiusStream;
+
   const LdThemeProvider({
     required this.child,
     Key? key,
@@ -38,14 +41,14 @@ class LdThemeProvider extends StatefulWidget {
     this.autoSize = true,
     this.darkPalette,
     this.lightPalette,
+    this.screenRadiusStream,
   }) : super(key: key);
 
   @override
   State<LdThemeProvider> createState() => _LdThemeProviderState();
 }
 
-class _LdThemeProviderState extends State<LdThemeProvider>
-    with WidgetsBindingObserver {
+class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingObserver {
   LdPalette? _palette;
 
   LdThemeSize? _themeSize;
@@ -55,6 +58,9 @@ class _LdThemeProviderState extends State<LdThemeProvider>
   LdPalette get _lightPalette => widget.lightPalette ?? shadDefault;
   LdTheme get _theme => widget.theme ?? _createdTheme!;
 
+  StreamSubscription<WindowState>? _windowStateSubscription;
+  StreamSubscription<double>? _screenRadiusSubscription;
+
   @override
   void initState() {
     if (widget.theme == null) {
@@ -63,18 +69,15 @@ class _LdThemeProviderState extends State<LdThemeProvider>
 
     _applyBrightness();
 
+    _listenToScreenRadiusStream();
+
     _palette = _theme.palette;
     _themeSize = _theme.themeSize;
     _theme.addListener(themeChanged);
     WidgetsBinding.instance.addObserver(this);
 
-    unawaited(_getScreenRadius());
-
     if (widget.autoSize) {
-      if (kIsWeb ||
-          Platform.isMacOS ||
-          Platform.isWindows ||
-          Platform.isLinux) {
+      if (kIsWeb || Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
         _theme.setThemeSize(LdThemeSize.s);
       } else {
         _theme.setThemeSize(LdThemeSize.m);
@@ -84,8 +87,10 @@ class _LdThemeProviderState extends State<LdThemeProvider>
     super.initState();
   }
 
-  Future<void> _getScreenRadius() async {
-    _theme.screenRadius = await getScreenRadius();
+  void _listenToScreenRadiusStream() {
+    _screenRadiusSubscription = widget.screenRadiusStream?.listen((radius) {
+      _theme.screenRadius = radius;
+    });
   }
 
   @override
@@ -97,8 +102,7 @@ class _LdThemeProviderState extends State<LdThemeProvider>
   void _applyBrightness() {
     switch (widget.brightnessMode) {
       case LdThemeBrightnessMode.auto:
-        var brightness =
-            WidgetsBinding.instance.platformDispatcher.platformBrightness;
+        var brightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
 
         if (brightness == Brightness.dark && _theme.palette != _darkPalette) {
           _theme.setPalette(_darkPalette);
@@ -133,6 +137,8 @@ class _LdThemeProviderState extends State<LdThemeProvider>
   dispose() {
     _createdTheme?.dispose();
     WidgetsBinding.instance.removeObserver(this);
+    _windowStateSubscription?.cancel();
+    _screenRadiusSubscription?.cancel();
     super.dispose();
   }
 

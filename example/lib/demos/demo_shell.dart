@@ -12,7 +12,9 @@ class DemoShell extends StatelessWidget {
     return LdScaffold(
       debugName: "Demo Shell Scaffold",
       resizeToAvoidBottomInset: false,
-      secondaryNavigationBar: TabNavigation(
+      appBarScrollBehavior: LdAppBarScrollBehavior.mobileOnly,
+      appBarPlacement: LdScaffoldAppBarPlacement.bottom,
+      appBar: TabNavigation(
         activeRoute: GoRouterState.of(context).uri.path,
         tabs: [
           LdNavigationTab(

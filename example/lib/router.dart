@@ -58,6 +58,7 @@ import 'components/data_display/tag.dart';
 import 'window/app_scaffold.dart';
 import 'components/interaction/appbar.dart';
 import 'components/bento_gallery.dart';
+import 'experiment_page.dart';
 
 class AppRouter {
   AppRouter();

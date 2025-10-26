@@ -37,7 +37,6 @@ class _AppScaffoldState extends State<AppScaffold> {
         return LdPortal(
           child: LdScaffold(
             drawer: MainNavigationDrawer(),
-            appBarScrollBehavior: LdAppBarScrollBehavior.always,
             appBar: LdAppBar(
               leading: Container(
                 height: 24,

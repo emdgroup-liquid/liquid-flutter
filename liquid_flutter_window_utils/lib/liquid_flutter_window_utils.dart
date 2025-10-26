@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:liquid_flutter_window_utils/messages.g.dart';
+import 'package:liquid_flutter_window_utils/screen_radius_defaults.dart';
 
 /// An implementation of [LiquidFlutterWindowUtilsPlatform] that uses Pigeon.
-class LiquidFlutterWindowUtils {
+class LiquidFlutterWindowUtils implements WindowStateEventApi {
   late final WindowUtilsApi? _api;
 
   static final LiquidFlutterWindowUtils _instance =
@@ -11,10 +14,31 @@ class LiquidFlutterWindowUtils {
   LiquidFlutterWindowUtils._() {
     if (defaultTargetPlatform == TargetPlatform.macOS) {
       _api = WindowUtilsApi();
+      _setupFlutterApi();
     } else {
       _api = null;
     }
   }
+
+  void _setupFlutterApi() {
+    // Set up the FlutterApi to receive window state changes from Swift
+    WindowStateEventApi.setup(
+      this,
+      binaryMessenger: ServicesBinding.instance.defaultBinaryMessenger,
+    );
+  }
+
+  Stream<double> get screenRadiusStream {
+    return _screenRadiusController.stream;
+  }
+
+  late final StreamController<double> _screenRadiusController =
+      StreamController<double>.broadcast(
+    onListen: () async {
+      print('onListen');
+      _screenRadiusController.add(await getScreenRadius());
+    },
+  );
 
   static LiquidFlutterWindowUtils get instance => _instance;
 
@@ -37,4 +61,65 @@ class LiquidFlutterWindowUtils {
   Future<void> configureWindow() async {
     return await _api?.configureWindow();
   }
+
+  Future<void> closeWindow() async {
+    return await _api?.closeWindow();
+  }
+
+  Future<void> minimizeWindow() async {
+    return await _api?.minimizeWindow();
+  }
+
+  Future<void> maximizeWindow() async {
+    return await _api?.maximizeWindow();
+  }
+
+  Future<bool> isWindowMaximized() async {
+    return await _api?.isWindowMaximized() ?? false;
+  }
+
+  Future<WindowState> getWindowState() async {
+    return await _api?.getWindowState() ??
+        WindowState(
+          x: 0,
+          y: 0,
+          width: 0,
+          height: 0,
+          isMaximized: false,
+          isMinimized: false,
+        );
+  }
+
+  /// Stream of window state changes
+  Stream<WindowState> get windowStateStream {
+    return _windowStateController.stream;
+  }
+
+  static final StreamController<WindowState> _windowStateController =
+      StreamController<WindowState>.broadcast();
+
+  // MARK: - WindowStateEventApi Implementation
+
+  @override
+  void onWindowStateChanged(WindowState state) async {
+    _windowStateController.add(state);
+    if (state.isMaximized) {
+      _screenRadiusController.add(0);
+    } else {
+      _screenRadiusController.add(await getScreenRadius());
+    }
+  }
+
+  @override
+  void onWindowReady() {
+    _windowReadyController.add(true);
+  }
+
+  /// Stream for window ready events
+  Stream<bool> get windowReadyStream {
+    return _windowReadyController.stream;
+  }
+
+  static final StreamController<bool> _windowReadyController =
+      StreamController<bool>.broadcast();
 }

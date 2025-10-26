@@ -378,7 +378,7 @@ class LdModal {
       context,
       (context) => LdAutoBackground(
         child: MeasureSize(
-          sizeNotifier: sizeNotifier,
+          onSizeChange: (size) => sizeNotifier.value = size,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,

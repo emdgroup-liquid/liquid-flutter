@@ -74,6 +74,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
   bool _pressed = false;
   bool _hasFocus = false;
 
+  GlobalKey _listenerKey = GlobalKey();
   FocusNode? _focusNode;
 
   bool _createdFocusNode = false;
@@ -191,11 +192,22 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
               });
             },
             child: Listener(
+              key: _listenerKey,
               onPointerDown: (_) => _safeSetState(() {
                 _pressed = true;
               }),
-              onPointerUp: (_) => _safeSetState(() {
+              onPointerUp: (details) => _safeSetState(() {
                 _pressed = false;
+
+                final listenerBox = _listenerKey.currentContext?.findRenderObject() as RenderBox?;
+                final size = listenerBox?.size ?? Size.zero;
+                if (details.localPosition.dx > 0 &&
+                    details.localPosition.dx < size.width &&
+                    details.localPosition.dy > 0 &&
+                    details.localPosition.dy < size.height) {
+                  if (!widget.disabled) widget.onPressed();
+                  _focusNode?.unfocus();
+                }
               }),
               onPointerMove: (event) {
                 _safeSetState(() {
@@ -205,17 +217,10 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
               onPointerCancel: (_) => _safeSetState(() {
                 _pressed = false;
               }),
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  if (!widget.disabled) widget.onPressed();
-                  _focusNode?.unfocus();
-                },
-                child: widget.builder(
-                  context,
-                  colors,
-                  status,
-                ),
+              child: widget.builder(
+                context,
+                colors,
+                status,
               ),
             ),
           );

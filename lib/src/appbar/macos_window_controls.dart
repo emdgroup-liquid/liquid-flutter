@@ -16,7 +16,7 @@ class MacOSWindowControls extends StatelessWidget {
     final layoutState = context.watch<LdScaffoldLayoutState?>();
     final level = layoutState?.level;
 
-    final isAppBar = layoutState?.slot == LdScaffoldSlot.appBar;
+    final isAppBar = layoutState?.slot == LdScaffoldSlot.appBarTop;
     final isDrawer = layoutState?.parentLayoutState?.slot == LdScaffoldSlot.drawer;
 
     final isDrawerOpen = layoutState?.isDrawerOpen ?? false;

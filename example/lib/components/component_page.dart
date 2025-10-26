@@ -34,7 +34,8 @@ class ComponentPage extends StatelessWidget {
     return Provider<ComponentPagePath>.value(
       value: ComponentPagePath(path: path),
       child: LdScaffold(
-        appBarScrollBehavior: LdAppBarScrollBehavior.static,
+        appBarScrollBehavior: LdAppBarScrollBehavior.mobileOnly,
+        appBarPlacement: LdScaffoldAppBarPlacement.mobileBottomDesktopTop,
         appBar: LdAppBar(
           addContainer: true,
           blurOnScroll: true,
@@ -52,30 +53,20 @@ class ComponentPage extends StatelessWidget {
             ],
           ),
         ),
-        body: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: SafeArea(
-                child: LdContainer(
-                  child: LdAutoSpace(
-                    children: [
-                      MarkdownBody(data: text ?? ""),
-                      // Demo
+        body: LdScaffoldBody(
+          children: [
+            MarkdownBody(data: text ?? ""),
+            // Demo
 
-                      demo ?? Container(),
+            demo ?? Container(),
 
-                      const LdTextH(
-                        "API Reference",
-                      ),
+            const LdTextH(
+              "API Reference",
+            ),
 
-                      ComponentsAccordion(
-                        components: apiComponents?.toSet() ?? {title},
-                        initialOpenIndex: {0},
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+            ComponentsAccordion(
+              components: apiComponents?.toSet() ?? {title},
+              initialOpenIndex: {0},
             ),
           ],
         ),

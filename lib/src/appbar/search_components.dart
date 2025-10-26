@@ -32,13 +32,14 @@ class _LdSearchInputState extends State<LdSearchInput> {
   OverlayEntry? _overlayEntry;
   late final ValueNotifier<Rect?> _inputRectNotifier;
 
-  late final StreamSubscription<Intent> _intentSubscription;
+  StreamSubscription<Intent>? _intentSubscription;
 
   @override
   void initState() {
     super.initState();
     _inputRectNotifier = ValueNotifier<Rect?>(null);
-    _intentSubscription = LdScaffoldState.of(context).intentRouter.listen(_onScaffoldIntent);
+    _intentSubscription = LdScaffoldState.maybeOf(context)?.intentRouter.listen(_onScaffoldIntent);
+
     widget.searchConfig.inputFocusNode.addListener(_onFocusChanged);
   }
 
@@ -51,7 +52,7 @@ class _LdSearchInputState extends State<LdSearchInput> {
   @override
   void dispose() {
     widget.searchConfig.inputFocusNode.removeListener(_onFocusChanged);
-    _intentSubscription.cancel();
+    _intentSubscription?.cancel();
     _inputWrapperFocusNode.dispose();
     _suggestionsFocusNode.dispose();
 

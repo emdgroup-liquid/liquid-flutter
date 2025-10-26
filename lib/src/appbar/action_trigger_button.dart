@@ -55,7 +55,7 @@ class ActionTriggerButton extends StatelessWidget {
       if (icon == null) {
         child = Text(label);
       } else {
-        if (layoutState.slot == LdScaffoldSlot.secondaryNavigationBarBottom && action.alwaysShowLabel) {
+        if (layoutState.slot == LdScaffoldSlot.secondaryAppBarBottom && action.alwaysShowLabel) {
           child = Column(
             children: [icon, ldSpacerXS, Text(label)],
           );

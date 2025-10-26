@@ -3,9 +3,9 @@ import 'package:flutter/rendering.dart';
 
 class MeasureSizeRenderObject extends RenderProxyBox {
   Size? oldSize;
-  ValueNotifier<Size> sizeNotifier;
+  void Function(Size) onSizeChange;
 
-  MeasureSizeRenderObject(this.sizeNotifier);
+  MeasureSizeRenderObject(this.onSizeChange);
 
   @override
   void performLayout() {
@@ -16,27 +16,27 @@ class MeasureSizeRenderObject extends RenderProxyBox {
 
     oldSize = newSize;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      sizeNotifier.value = newSize;
+      onSizeChange(newSize);
     });
   }
 }
 
 class MeasureSize extends SingleChildRenderObjectWidget {
-  final ValueNotifier<Size> sizeNotifier;
+  final Function(Size) onSizeChange;
 
   const MeasureSize({
     Key? key,
-    required this.sizeNotifier,
+    required this.onSizeChange,
     required Widget child,
-  }) : super(key: key, child: child);
+  }) : super(child: child, key: key);
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return MeasureSizeRenderObject(sizeNotifier);
+    return MeasureSizeRenderObject(onSizeChange);
   }
 
   @override
   void updateRenderObject(BuildContext context, covariant MeasureSizeRenderObject renderObject) {
-    renderObject.sizeNotifier = sizeNotifier;
+    renderObject.onSizeChange = onSizeChange;
   }
 }

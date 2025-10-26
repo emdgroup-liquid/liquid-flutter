@@ -21,16 +21,25 @@ void main() async {
 
   await Highlighter.initialize(['dart', 'yaml', 'sql']);
 
-  // TODO: Re implement the window callbacks for macos
-  LdAppBar.callbacks = LdWindowCallbacks(
-      onClose: () {},
-      onMinimize: () {},
-      onMaximize: () {},
-      onMove: () {
-        LiquidFlutterWindowUtils.instance.startDragging();
-      });
+  // Window callbacks for macOS
+  LdAppBar.callbacks = LdWindowCallbacks(onClose: () {
+    LiquidFlutterWindowUtils.instance.closeWindow();
+  }, onMinimize: () {
+    LiquidFlutterWindowUtils.instance.minimizeWindow();
+  }, onMaximize: () {
+    LiquidFlutterWindowUtils.instance.maximizeWindow();
+  }, onMove: () {
+    LiquidFlutterWindowUtils.instance.startDragging();
+  });
 
-  await LiquidFlutterWindowUtils.instance.configureWindow();
+  // Listen for window ready events
+  LiquidFlutterWindowUtils.instance.windowReadyStream.listen((isReady) async {
+    if (isReady) {
+      print('Window is ready!');
+      // You can perform any initialization here that requires the window to be ready
+      await LiquidFlutterWindowUtils.instance.configureWindow();
+    }
+  });
 
   runApp(const LiquidExample());
 }
@@ -72,6 +81,8 @@ class _LiquidExampleState extends State<LiquidExample> {
             },
             child: LdNotificationProvider(
               child: LdThemeProvider(
+                screenRadiusStream:
+                    LiquidFlutterWindowUtils.instance.screenRadiusStream,
                 child: LdThemedAppBuilder(
                   appBuilder: (context, theme) {
                     // We use a root navigator because else our nested navigation will not work

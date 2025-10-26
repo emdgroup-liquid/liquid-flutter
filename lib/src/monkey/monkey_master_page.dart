@@ -88,7 +88,7 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
                           ),
                         ],
                       ),
-                      secondaryNavigationBar: (secondaryActions.hasActions || searchConfig != null)
+                      secondaryAppBar: (secondaryActions.hasActions || searchConfig != null)
                           ? Provider.value(
                               value: LdMonkeyActionLocation.masterSecondary,
                               child: LayoutBuilder(builder: (context, constraints) {

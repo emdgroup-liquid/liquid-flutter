@@ -67,7 +67,10 @@ class _ChemicalScreenState extends State<ChemicalScreen> {
   @override
   Widget build(BuildContext context) {
     return LdScaffold(
-      secondaryNavigationBar: LdAppBar(
+      debugName: "Chemical screen",
+      appBarScrollBehavior: LdAppBarScrollBehavior.mobileOnly,
+      secondaryAppBar: LdAppBar(
+        debugName: "Secondary app bar",
         actions: [
           LdLabeledActionBuilder(
             buildIcon: (context) => const Icon(LucideIcons.shoppingBag),
@@ -96,6 +99,7 @@ class _ChemicalScreenState extends State<ChemicalScreen> {
         searchConfig: searchConfig,
       ),
       appBar: LdAppBar(
+        debugName: "Primary app bar ",
         title: const Text("Chemical"),
       ),
       body: LdScaffoldBody(
@@ -444,7 +448,10 @@ class ChemicalShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return LdScaffold(
       resizeToAvoidBottomInset: false,
-      secondaryNavigationBar: TabNavigation(
+      debugName: "Chemical shell",
+      appBarScrollBehavior: LdAppBarScrollBehavior.mobileOnly,
+      appBarPlacement: LdScaffoldAppBarPlacement.mobileBottomDesktopTop,
+      appBar: TabNavigation(
         activeRoute: GoRouterState.of(context).uri.path,
         tabs: [
           LdNavigationTab(

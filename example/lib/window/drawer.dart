@@ -366,11 +366,6 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
               ...categoryComponents.map((e) => _renderComponent(context, e)),
             ];
           }),
-        ]);
-      }),
-      secondaryNavPlacement: LdScaffoldSecondaryNavPlacement.bottom,
-      secondaryNavigationBar: LdAppBar(
-        bottom: LdAutoSpace(children: [
           LdDrawerItemSection(
             onPressed: () => launchUrl(Uri.parse("https://emd.design/imprint")),
             trailing: const Icon(LucideIcons.externalLink),
@@ -386,8 +381,8 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
             trailing: const Icon(LucideIcons.externalLink),
             child: const Text("Terms of use"),
           ),
-        ]),
-      ),
+        ]);
+      }),
     );
   }
 }

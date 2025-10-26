@@ -410,7 +410,7 @@ class ContextMenuRoute extends ModalRoute<void> {
   Widget _buildOffstageMenuForMeasurement(BuildContext context) {
     return Offstage(
       child: MeasureSize(
-        sizeNotifier: _menuSizeNotifier,
+        onSizeChange: (size) => _menuSizeNotifier.value = size,
         child: Stack(
           children: [
             _buildAnimatedMenuTransition(context, _menuSizeNotifier.value, null),
@@ -492,7 +492,7 @@ class ContextMenuRoute extends ModalRoute<void> {
           },
           child: SingleChildScrollView(
             child: MeasureSize(
-              sizeNotifier: _menuSizeNotifier,
+              onSizeChange: (size) => _menuSizeNotifier.value = size,
               child: menu,
             ),
           ),
