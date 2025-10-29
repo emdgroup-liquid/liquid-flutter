@@ -6,8 +6,7 @@ class LdListSeperator extends StatelessWidget {
   final Widget child;
   final bool onSurface;
 
-  const LdListSeperator({required this.child, this.onSurface = false, Key? key})
-      : super(key: key);
+  const LdListSeperator({required this.child, this.onSurface = false, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

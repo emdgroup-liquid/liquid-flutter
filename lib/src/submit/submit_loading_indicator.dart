@@ -7,10 +7,7 @@ class LdSubmitLoadingIndicator extends StatelessWidget {
   final Axis direction;
 
   const LdSubmitLoadingIndicator(
-      {super.key,
-      required this.loading,
-      this.loadingText,
-      this.direction = Axis.horizontal});
+      {super.key, required this.loading, this.loadingText, this.direction = Axis.horizontal});
 
   @override
   Widget build(BuildContext context) {

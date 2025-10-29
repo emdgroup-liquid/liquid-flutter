@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/autospace.dart';
-import 'package:liquid_flutter/src/button.dart';
-import 'package:liquid_flutter/src/input.dart';
-import 'package:liquid_flutter/src/l10n/generated/liquid_localizations.dart';
-import 'package:liquid_flutter/src/notifications/notification.dart';
 
 class NotificationInput extends StatefulWidget {
   final LdInputNotification notification;

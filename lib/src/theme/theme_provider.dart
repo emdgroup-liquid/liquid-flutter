@@ -119,6 +119,22 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
     }
   }
 
+  BoxDecoration? get _windowDecoration {
+    if (_theme.platform == LdPlatform.macos) {
+      final screenRadius = _theme.screenRadius;
+
+      return BoxDecoration(
+        color: _theme.background,
+        border: Border.all(
+          color: _theme.border,
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(_theme.screenRadius),
+      );
+    }
+    return null;
+  }
+
   @override
   void didUpdateWidget(covariant LdThemeProvider oldWidget) {
     if (oldWidget.theme != widget.theme) {
@@ -153,25 +169,30 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
 
   @override
   Widget build(BuildContext context) {
-    return Provider.value(
-      value: LdSurfaceInfo(isSurface: false),
-      child: ChangeNotifierProvider.value(
-        value: _theme,
-        builder: (context, child) {
-          return Directionality(
-            textDirection: TextDirection.ltr,
-            child: DefaultTextStyle(
-              style: TextStyle(
-                color: _theme.text,
-                fontFamily: _theme.fontFamily,
-                package: _theme.fontFamilyPackage,
-                decoration: TextDecoration.none,
+    final windowDecoration = _windowDecoration;
+    return Container(
+      decoration: windowDecoration,
+      clipBehavior: windowDecoration != null ? Clip.hardEdge : Clip.none,
+      child: Provider.value(
+        value: LdSurfaceInfo(isSurface: false),
+        child: ChangeNotifierProvider.value(
+          value: _theme,
+          builder: (context, child) {
+            return Directionality(
+              textDirection: TextDirection.ltr,
+              child: DefaultTextStyle(
+                style: TextStyle(
+                  color: _theme.text,
+                  fontFamily: _theme.fontFamily,
+                  package: _theme.fontFamilyPackage,
+                  decoration: TextDecoration.none,
+                ),
+                child: child!,
               ),
-              child: child!,
-            ),
-          );
-        },
-        child: widget.child,
+            );
+          },
+          child: widget.child,
+        ),
       ),
     );
   }

@@ -19,7 +19,8 @@ class _SwitchDemoState extends State<SwitchDemo> {
     return ComponentPage(
         path: "lib/components/form_elements/switch.dart",
         title: "LdSwitch",
-        text: "A component that allows the user to switch between several options",
+        text:
+            "A component that allows the user to switch between several options",
         demo: ComponentWell(
             child: Padding(
           padding: const EdgeInsets.all(32.0),

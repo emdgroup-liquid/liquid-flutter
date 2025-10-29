@@ -18,8 +18,7 @@ class ImplicitBlur extends StatefulWidget {
   State<ImplicitBlur> createState() => _ImplicitBlurState();
 }
 
-class _ImplicitBlurState extends State<ImplicitBlur>
-    with SingleTickerProviderStateMixin {
+class _ImplicitBlurState extends State<ImplicitBlur> with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 300),

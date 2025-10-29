@@ -109,7 +109,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
 
   Future<void> updateFilter<F extends LdFilterOption<T, IdType>>(String name, F Function(F filter) updater) async {
     final existingFilter = _filters[name];
-    assert(existingFilter != null, 'Cannot update filter. Filter with name ${name} does not exist');
+    assert(existingFilter != null, 'Cannot update filter. Filter with name $name does not exist');
     _filters[name] = updater(existingFilter as F);
     _filterStreamController.add(_filters.values.toSet());
     applyOptimisticFilterAndSorting();

@@ -70,10 +70,7 @@ void main() {
 
     expect(find.byType(LdCheckbox), findsOneWidget);
 
-    expect(
-        ((test.firstWidget(find.byKey(const ValueKey("frame"))) as Container)
-                .decoration as BoxDecoration)
-            .color,
+    expect(((test.firstWidget(find.byKey(const ValueKey("frame"))) as Container).decoration as BoxDecoration).color,
         shadAmber.idle(false));
     // check if color is correct by finding the box decoration
   });

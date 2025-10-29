@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/haptics.dart';
@@ -15,13 +14,7 @@ class LdSlider extends StatefulWidget {
   final String? label;
   final bool disabled;
 
-  const LdSlider(
-      {super.key,
-      required this.onSlideComplete,
-      this.hint,
-      this.color,
-      this.label,
-      this.disabled = false});
+  const LdSlider({super.key, required this.onSlideComplete, this.hint, this.color, this.label, this.disabled = false});
 
   @override
   State<LdSlider> createState() => _LdSliderState();
@@ -93,8 +86,7 @@ class _LdSliderState extends State<LdSlider> with TickerProviderStateMixin {
 
       await _controller?.animateTo(1);
       await Future.delayed(const Duration(milliseconds: 300));
-      await _opacityController?.animateTo(0,
-          duration: const Duration(milliseconds: 300));
+      await _opacityController?.animateTo(0, duration: const Duration(milliseconds: 300));
 
       _controller?.value = 0.0;
       _opacityController?.animateTo(1);
@@ -115,8 +107,7 @@ class _LdSliderState extends State<LdSlider> with TickerProviderStateMixin {
   double get _thumbSize => 40;
   double get _thumbPadding => 4;
 
-  Color _activeColor(LdTheme theme) =>
-      (widget.color ?? theme.palette.primary).active(
+  Color _activeColor(LdTheme theme) => (widget.color ?? theme.palette.primary).active(
         theme.isDark,
       );
 
@@ -129,8 +120,7 @@ class _LdSliderState extends State<LdSlider> with TickerProviderStateMixin {
   }
 
   Widget _buildThumb(LdTheme theme, BoxConstraints constraints) {
-    Color iconColor =
-        (widget.color ?? theme.palette.primary).idle(theme.isDark);
+    Color iconColor = (widget.color ?? theme.palette.primary).idle(theme.isDark);
     Color borderColor = theme.border;
     Color thumbColor = theme.neutralShade(2);
 
@@ -149,10 +139,7 @@ class _LdSliderState extends State<LdSlider> with TickerProviderStateMixin {
     final slideValue = _controller?.value ?? 0;
     final opacityValue = _opacityController?.value ?? 1;
 
-    final availableWidth = constraints.maxWidth -
-        _thumbSize -
-        _thumbPadding * 2 -
-        theme.borderWidth * 2;
+    final availableWidth = constraints.maxWidth - _thumbSize - _thumbPadding * 2 - theme.borderWidth * 2;
 
     return Positioned(
       left: slideValue * availableWidth + _thumbPadding,
@@ -207,8 +194,7 @@ class _LdSliderState extends State<LdSlider> with TickerProviderStateMixin {
             child: LdAutoBackground(
                 borderRadius: theme.radius(LdSize.m),
                 child: GestureDetector(
-                  onHorizontalDragStart: (details) =>
-                      _onDragStart(details, constraints),
+                  onHorizontalDragStart: (details) => _onDragStart(details, constraints),
                   onHorizontalDragUpdate: _onDragUpdate,
                   onHorizontalDragEnd: _onDragEnd,
                   child: AnimatedBuilder(
@@ -223,9 +209,7 @@ class _LdSliderState extends State<LdSlider> with TickerProviderStateMixin {
                                 Center(
                                   child: Opacity(
                                     child: LdMute(child: LdTextL(widget.hint!)),
-                                    opacity: widget.disabled
-                                        ? 0.2
-                                        : 1 - _controller!.value,
+                                    opacity: widget.disabled ? 0.2 : 1 - _controller!.value,
                                   ),
                                 ),
                               _buildThumb(theme, constraints)

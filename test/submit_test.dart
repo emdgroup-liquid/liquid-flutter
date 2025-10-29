@@ -18,7 +18,6 @@ class _CounterProviderState extends State<CounterProvider> {
 
   @override
   Widget build(BuildContext context) {
-    print("CounterProvider build $counter");
     return Column(
       children: [
         LdButton(onPressed: () => setState(() => counter++), child: const Text("Increment")),

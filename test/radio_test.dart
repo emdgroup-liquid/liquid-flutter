@@ -67,9 +67,7 @@ void main() {
 
     expect(find.byType(LdRadio), findsOneWidget);
 
-    final radio =
-        ((test.firstWidget(find.byKey(const ValueKey("frame"))) as Container)
-            .decoration as BoxDecoration);
+    final radio = ((test.firstWidget(find.byKey(const ValueKey("frame"))) as Container).decoration as BoxDecoration);
 
     expect(
       radio.border?.top.color,

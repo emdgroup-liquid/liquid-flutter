@@ -69,10 +69,7 @@ void main() {
       expect(find.text("Hello"), findsOneWidget);
       expect(find.byType(LdBadge), findsOneWidget);
       expect(
-          ((test.firstWidget(find.byType(Container)) as Container).decoration
-                  as BoxDecoration)
-              .color,
-          expectedColor);
+          ((test.firstWidget(find.byType(Container)) as Container).decoration as BoxDecoration).color, expectedColor);
     }
 
     testBadgeVariant(

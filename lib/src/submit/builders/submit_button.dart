@@ -10,12 +10,7 @@ class LdSubmitButton extends StatelessWidget {
   final LdColor? color;
 
   const LdSubmitButton(
-      {super.key,
-      required this.controller,
-      this.leading,
-      this.trailing,
-      this.size = LdSize.m,
-      this.color});
+      {super.key, required this.controller, this.leading, this.trailing, this.size = LdSize.m, this.color});
 
   @override
   Widget build(BuildContext context) {

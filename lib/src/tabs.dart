@@ -5,8 +5,7 @@ class LdTabs extends StatelessWidget {
   final List<Widget> children;
   final TabController? controller;
 
-  const LdTabs({Key? key, required this.children, this.controller})
-      : super(key: key);
+  const LdTabs({Key? key, required this.children, this.controller}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -28,9 +27,7 @@ class LdTabs extends StatelessWidget {
                     padding: theme.balPad(LdSize.s),
                     child: LdButton(
                         child: child,
-                        mode: tabController.index == children.indexOf(child)
-                            ? LdButtonMode.filled
-                            : LdButtonMode.ghost,
+                        mode: tabController.index == children.indexOf(child) ? LdButtonMode.filled : LdButtonMode.ghost,
                         onPressed: () {
                           tabController.animateTo(children.indexOf(child));
                         }),

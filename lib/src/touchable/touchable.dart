@@ -74,7 +74,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
   bool _pressed = false;
   bool _hasFocus = false;
 
-  GlobalKey _listenerKey = GlobalKey();
+  final _listenerKey = GlobalKey();
   FocusNode? _focusNode;
 
   bool _createdFocusNode = false;

@@ -8,19 +8,14 @@ class LdLoader extends StatefulWidget {
   final double size;
   final Duration speed;
   final bool neutral;
-  const LdLoader(
-      {Key? key,
-      this.size = 32,
-      this.neutral = false,
-      this.speed = const Duration(seconds: 3)})
+  const LdLoader({Key? key, this.size = 32, this.neutral = false, this.speed = const Duration(seconds: 3)})
       : super(key: key);
 
   @override
   State<LdLoader> createState() => _LdLoaderState();
 }
 
-class _LdLoaderState extends State<LdLoader>
-    with SingleTickerProviderStateMixin {
+class _LdLoaderState extends State<LdLoader> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
 
   @override
@@ -47,10 +42,8 @@ class _LdLoaderState extends State<LdLoader>
     final theme = LdTheme.of(context, listen: true);
 
     final baseColor = theme.neutralShade(3).withAlpha(100);
-    final accentColor =
-        widget.neutral ? theme.neutralShade(4) : theme.primaryColor;
-    final accentColor2 =
-        widget.neutral ? theme.neutralShade(2) : theme.secondaryColor;
+    final accentColor = widget.neutral ? theme.neutralShade(4) : theme.primaryColor;
+    final accentColor2 = widget.neutral ? theme.neutralShade(2) : theme.secondaryColor;
 
     return SizedBox(
         height: widget.size,
@@ -61,12 +54,8 @@ class _LdLoaderState extends State<LdLoader>
                   angle: _animationController.value * 4 * pi,
                   child: CustomPaint(
                     painter: _LoadingPainter(
-                        CurvedAnimation(
-                            curve: Curves.linear, parent: _animationController),
-                        widget.size,
-                        baseColor: baseColor,
-                        accentColor: accentColor,
-                        accentColor2: accentColor2),
+                        CurvedAnimation(curve: Curves.linear, parent: _animationController), widget.size,
+                        baseColor: baseColor, accentColor: accentColor, accentColor2: accentColor2),
                   ),
                 )));
   }
@@ -108,21 +97,14 @@ class _LoadingPainter extends CustomPainter {
     canvas.saveLayer(Offset.zero & size, Paint());
 
     canvas.clipRRect(RRect.fromRectAndRadius(
-        Rect.fromCenter(center: middle, width: loaderSize, height: loaderSize),
-        Radius.circular(loaderSize / 2)));
+        Rect.fromCenter(center: middle, width: loaderSize, height: loaderSize), Radius.circular(loaderSize / 2)));
 
     canvas.drawArc(
-        Rect.fromCenter(center: middle, width: loaderSize, height: loaderSize),
-        startAngle,
-        2 * pi,
-        false,
-        paint);
+        Rect.fromCenter(center: middle, width: loaderSize, height: loaderSize), startAngle, 2 * pi, false, paint);
 
     canvas.drawArc(
         Rect.fromCenter(
-            center: middle,
-            width: loaderSize / 2 + (loaderSize / 4),
-            height: loaderSize / 2 + (loaderSize / 4)),
+            center: middle, width: loaderSize / 2 + (loaderSize / 4), height: loaderSize / 2 + (loaderSize / 4)),
         oscilatorB,
         oscilatorB,
         false,
@@ -130,16 +112,13 @@ class _LoadingPainter extends CustomPainter {
 
     canvas.drawArc(
         Rect.fromCenter(
-            center: middle,
-            width: loaderSize / 2 + (loaderSize / 4),
-            height: loaderSize / 2 + (loaderSize / 4)),
+            center: middle, width: loaderSize / 2 + (loaderSize / 4), height: loaderSize / 2 + (loaderSize / 4)),
         pow(oscilatorB, 4) + pi,
         oscilatorB + 0.8 * pi,
         false,
         accent3);
 
-    canvas.drawCircle(
-        middle, loaderSize / 4, Paint()..blendMode = BlendMode.clear);
+    canvas.drawCircle(middle, loaderSize / 4, Paint()..blendMode = BlendMode.clear);
 
     canvas.restore();
   }

@@ -15,8 +15,7 @@ void main() {
         child: Directionality(
             textDirection: TextDirection.ltr,
             child: MaterialApp(
-              localizationsDelegates:
-                  LiquidLocalizations.localizationsDelegates,
+              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
               locale: const Locale('en'),
               home: Scaffold(
                 body: LdForm(

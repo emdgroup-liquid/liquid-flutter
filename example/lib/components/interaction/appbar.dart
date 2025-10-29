@@ -4,8 +4,8 @@ import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class AppBarDemo extends StatelessWidget {
-  const AppBarDemo({super.key});
+class AppBarApi extends StatelessWidget {
+  const AppBarApi({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/src/modal/modal.dart';
 
 class LdModalPage extends Page {
-  final LdModal builder;
+  final LdModal modal;
 
   const LdModalPage({
     super.key,
     super.name,
-    required this.builder,
+    required this.modal,
   });
 
   @override
   Route<void> createRoute(BuildContext context) {
-    return builder.asRoute(this, context);
+    return modal.asRoute(this, context);
   }
 }

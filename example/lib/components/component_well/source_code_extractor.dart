@@ -34,8 +34,13 @@ class SourceCodeExtractor extends StatelessWidget {
 }
 
 String? extractFromTag(String dartCode, String tag) {
-  final regex =
-      RegExp(r'/\*\s*begin demo:\s*' + tag + r'\s*\*/(.*)\/\*\s*end demo:\s*' + tag + r'\s*\*/', dotAll: true);
+  final regex = RegExp(
+      r'/\*\s*begin demo:\s*' +
+          tag +
+          r'\s*\*/(.*)\/\*\s*end demo:\s*' +
+          tag +
+          r'\s*\*/',
+      dotAll: true);
   final match = regex.firstMatch(dartCode);
   return match?.group(1);
 }
@@ -77,6 +82,7 @@ String? extractFromChild(String dartCode, {int index = 0}) {
   String extractedChild = dartCode.substring(match.end, i + 1);
 
   // Take the last line indentation to apply it to the extracted child
-  final lastLineIndentation = extractedChild.split('\n').last.replaceAll(RegExp(r'\S.*'), '');
+  final lastLineIndentation =
+      extractedChild.split('\n').last.replaceAll(RegExp(r'\S.*'), '');
   return lastLineIndentation + extractedChild;
 }

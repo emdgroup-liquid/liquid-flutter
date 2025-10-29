@@ -43,9 +43,7 @@ class ChemicalScreen extends StatefulWidget {
 
 class _ChemicalScreenState extends State<ChemicalScreen> {
   final searchConfig = LdSearchConfig(
-      onSearch: (query) {
-        print("🔍 Search query: $query");
-      },
+      onSearch: (query) {},
       getSuggestions: (query) =>
           Future.value(potions.where((p) => p.name.contains(query)).toList()),
       buildSuggestion: (context, suggestion) {

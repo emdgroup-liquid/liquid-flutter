@@ -79,7 +79,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'archive',
-    description: 'Provides encoders and decoders for various archive and compression formats such as zip, tar, bzip2, gzip, and zlib.',
+    description:
+        'Provides encoders and decoders for various archive and compression formats such as zip, tar, bzip2, gzip, and zlib.',
     repository: 'https://github.com/brendan-duncan/archive',
     authors: [],
     version: '3.6.1',
@@ -111,7 +112,8 @@ THE SOFTWARE.''',
   ),
   Package(
     name: 'args',
-    description: 'Library for defining parsers for parsing raw command-line arguments into a set of options and values using GNU and POSIX style options.',
+    description:
+        'Library for defining parsers for parsing raw command-line arguments into a set of options and values using GNU and POSIX style options.',
     repository: 'https://github.com/dart-lang/args',
     authors: [],
     version: '2.5.0',
@@ -185,7 +187,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'boolean_selector',
-    description: "A flexible syntax for boolean expressions, based on a simplified version of Dart's expression syntax.",
+    description:
+        "A flexible syntax for boolean expressions, based on a simplified version of Dart's expression syntax.",
     repository: 'https://github.com/dart-lang/boolean_selector',
     authors: [],
     version: '2.1.1',
@@ -444,7 +447,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'built_collection',
-    description: '''Immutable collections based on the SDK collections. Each SDK collection class is split into a new immutable collection class and a corresponding mutable builder class.
+    description:
+        '''Immutable collections based on the SDK collections. Each SDK collection class is split into a new immutable collection class and a corresponding mutable builder class.
 ''',
     homepage: 'https://github.com/google/built_collection.dart',
     authors: [],
@@ -483,7 +487,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'built_value',
-    description: '''Value types with builders, Dart classes as enums, and serialization. This library is the runtime dependency.
+    description:
+        '''Value types with builders, Dart classes as enums, and serialization. This library is the runtime dependency.
 ''',
     repository: 'https://github.com/google/built_value.dart/tree/master/built_value',
     authors: [],
@@ -559,7 +564,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'checked_yaml',
-    description: 'Generate more helpful exceptions when decoding YAML documents using package:json_serializable and package:yaml.',
+    description:
+        'Generate more helpful exceptions when decoding YAML documents using package:json_serializable and package:yaml.',
     repository: 'https://github.com/google/json_serializable.dart/tree/master/checked_yaml',
     authors: [],
     version: '2.0.3',
@@ -880,7 +886,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'convert',
-    description: 'Utilities for converting between data representations. Provides a number of Sink, Codec, Decoder, and Encoder types.',
+    description:
+        'Utilities for converting between data representations. Provides a number of Sink, Codec, Decoder, and Encoder types.',
     repository: 'https://github.com/dart-lang/convert',
     authors: [],
     version: '3.1.1',
@@ -1234,7 +1241,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'file',
-    description: 'A pluggable, mockable file system abstraction for Dart. Supports local file system access, as well as in-memory file systems, record-replay file systems, and chroot file systems.',
+    description:
+        'A pluggable, mockable file system abstraction for Dart. Supports local file system access, as well as in-memory file systems, record-replay file systems, and chroot file systems.',
     repository: 'https://github.com/google/file.dart/tree/master/packages/file',
     authors: [],
     version: '7.0.0',
@@ -1270,7 +1278,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'fixnum',
-    description: 'Library for 32- and 64-bit signed fixed-width integers with consistent behavior between native and JS runtimes.',
+    description:
+        'Library for 32- and 64-bit signed fixed-width integers with consistent behavior between native and JS runtimes.',
     repository: 'https://github.com/dart-lang/fixnum',
     authors: [],
     version: '1.1.0',
@@ -1625,7 +1634,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'haptic_feedback',
-    description: 'A Flutter plugin for haptic feedback. While it utilizes standard iOS haptics, it aims to emulate these same haptic patterns on Android for a consistent experience across platforms.',
+    description:
+        'A Flutter plugin for haptic feedback. While it utilizes standard iOS haptics, it aims to emulate these same haptic patterns on Android for a consistent experience across platforms.',
     repository: 'https://github.com/nohli/haptic_feedback',
     authors: [],
     version: '0.4.2',
@@ -1737,7 +1747,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'intl',
-    description: 'Contains code to deal with internationalized/localized messages, date and number formatting and parsing, bi-directional text, and other internationalization issues.',
+    description:
+        'Contains code to deal with internationalized/localized messages, date and number formatting and parsing, bi-directional text, and other internationalization issues.',
     repository: 'https://github.com/dart-lang/i18n/tree/main/pkgs/intl',
     authors: [],
     version: '0.19.0',
@@ -1774,7 +1785,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'io',
-    description: 'Utilities for the Dart VM Runtime including support for ANSI colors, file copying, and standard exit code values.',
+    description:
+        'Utilities for the Dart VM Runtime including support for ANSI colors, file copying, and standard exit code values.',
     repository: 'https://github.com/dart-lang/io',
     authors: [],
     version: '1.0.4',
@@ -1995,7 +2007,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'lints',
-    description: "Official Dart lint rules. Defines the 'core' and 'recommended' set of lints suggested by the Dart team.",
+    description:
+        "Official Dart lint rules. Defines the 'core' and 'recommended' set of lints suggested by the Dart team.",
     homepage: 'https://github.com/dart-lang/lints',
     repository: 'https://github.com/dart-lang/lints',
     authors: [],
@@ -2042,7 +2055,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'logging',
-    description: 'Provides APIs for debugging and error logging, similar to loggers in other languages, such as the Closure JS Logger and java.util.logging.Logger.',
+    description:
+        'Provides APIs for debugging and error logging, similar to loggers in other languages, such as the Closure JS Logger and java.util.logging.Logger.',
     repository: 'https://github.com/dart-lang/logging',
     authors: [],
     version: '1.2.0',
@@ -2079,7 +2093,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'lottie',
-    description: 'Render After Effects animations natively on Flutter. This package is a pure Dart implementation of a Lottie player.',
+    description:
+        'Render After Effects animations natively on Flutter. This package is a pure Dart implementation of a Lottie player.',
     repository: 'https://github.com/xvrh/lottie-flutter',
     authors: [],
     version: '2.7.0',
@@ -2110,7 +2125,8 @@ SOFTWARE.''',
   ),
   Package(
     name: 'matcher',
-    description: 'Support for specifying test expectations via an extensible Matcher class. Also includes a number of built-in Matcher implementations for common cases.',
+    description:
+        'Support for specifying test expectations via an extensible Matcher class. Also includes a number of built-in Matcher implementations for common cases.',
     repository: 'https://github.com/dart-lang/matcher',
     authors: [],
     version: '0.12.16+1',
@@ -2147,7 +2163,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'material_color_utilities',
-    description: 'Algorithms and utilities that power the Material Design 3 color system, including choosing theme colors from images and creating tones of colors; all in a new color space.',
+    description:
+        'Algorithms and utilities that power the Material Design 3 color system, including choosing theme colors from images and creating tones of colors; all in a new color space.',
     repository: 'https://github.com/material-foundation/material-color-utilities/tree/main/dart',
     authors: [],
     version: '0.8.0',
@@ -2347,7 +2364,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'meta',
-    description: "Annotations used to express developer intentions that can't otherwise be deduced by statically analyzing source code.",
+    description:
+        "Annotations used to express developer intentions that can't otherwise be deduced by statically analyzing source code.",
     repository: 'https://github.com/dart-lang/sdk/tree/main/pkg/meta',
     authors: [],
     version: '1.12.0',
@@ -2384,7 +2402,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'mime',
-    description: 'Utilities for handling media (MIME) types, including determining a type from a file extension and file contents.',
+    description:
+        'Utilities for handling media (MIME) types, including determining a type from a file extension and file contents.',
     repository: 'https://github.com/dart-lang/mime',
     authors: [],
     version: '1.0.5',
@@ -2520,7 +2539,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'path',
-    description: 'A string-based path manipulation library. All of the path operations you know and love, with solid support for Windows, POSIX (Linux and Mac OS X), and the web.',
+    description:
+        'A string-based path manipulation library. All of the path operations you know and love, with solid support for Windows, POSIX (Linux and Mac OS X), and the web.',
     repository: 'https://github.com/dart-lang/path',
     authors: [],
     version: '1.9.0',
@@ -2557,7 +2577,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'plugin_platform_interface',
-    description: 'Reusable base class for platform interfaces of Flutter federated plugins, to help enforce best practices.',
+    description:
+        'Reusable base class for platform interfaces of Flutter federated plugins, to help enforce best practices.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/plugin_platform_interface',
     authors: [],
     version: '2.1.8',
@@ -2592,7 +2613,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'pool',
-    description: 'Manage a finite pool of resources. Useful for controlling concurrent file system or network requests.',
+    description:
+        'Manage a finite pool of resources. Useful for controlling concurrent file system or network requests.',
     repository: 'https://github.com/dart-lang/pool',
     authors: [],
     version: '1.5.1',
@@ -2660,7 +2682,8 @@ SOFTWARE.''',
   ),
   Package(
     name: 'pub_semver',
-    description: "Versions and version constraints implementing pub's versioning policy. This is very similar to vanilla semver, with a few corner cases.",
+    description:
+        "Versions and version constraints implementing pub's versioning policy. This is very similar to vanilla semver, with a few corner cases.",
     repository: 'https://github.com/dart-lang/pub_semver',
     authors: [],
     version: '2.1.4',
@@ -3380,7 +3403,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'watcher',
-    description: 'A file system watcher. It monitors changes to contents of directories and sends notifications when files have been added, removed, or modified.',
+    description:
+        'A file system watcher. It monitors changes to contents of directories and sends notifications when files have been added, removed, or modified.',
     repository: 'https://github.com/dart-lang/watcher',
     authors: [],
     version: '1.1.0',
@@ -3490,7 +3514,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'web_socket_channel',
-    description: 'StreamChannel wrappers for WebSockets. Provides a cross-platform WebSocketChannel API, a cross-platform implementation of that API that communicates over an underlying StreamChannel.',
+    description:
+        'StreamChannel wrappers for WebSockets. Provides a cross-platform WebSocketChannel API, a cross-platform implementation of that API that communicates over an underlying StreamChannel.',
     repository: 'https://github.com/dart-lang/web_socket_channel',
     authors: [],
     version: '3.0.0',
@@ -3555,29 +3580,37 @@ SOFTWARE.''',
     isSdk: false,
     isDirectDependency: false,
   ),
-
 ];
 
 /// Package license definition.
 class Package {
   /// Package name
   final String name;
+
   /// Description
   final String description;
+
   /// Website URL
   final String? homepage;
+
   /// Repository URL
   final String? repository;
+
   /// Authors
   final List<String> authors;
+
   /// Version
   final String version;
+
   /// License
   final String? license;
+
   /// Whether the license is in markdown format or not (plain text).
   final bool isMarkdown;
+
   /// Whether the package is included in the SDK or not.
   final bool isSdk;
+
   /// Whether the package is direct dependency or not.
   final bool isDirectDependency;
 

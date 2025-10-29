@@ -228,7 +228,11 @@ class _TabNavigationState extends State<TabNavigation> {
                                             }
                                             return Row(
                                               mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [icon, ldSpacerS, LdTextL(tab.label, color: textColor)],
+                                              children: [
+                                                icon,
+                                                ldSpacerS,
+                                                Flexible(child: LdTextL(tab.label, color: textColor)),
+                                              ],
                                             ).padXS();
                                           },
                                         ),

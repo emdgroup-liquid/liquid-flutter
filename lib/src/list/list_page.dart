@@ -36,8 +36,7 @@ class LdListPage<T> {
     int pageSize = 10,
   }) {
     final endIndex = min(offset + pageSize, items.length);
-    final pageItems =
-        offset >= items.length ? <T>[] : items.sublist(offset, endIndex);
+    final pageItems = offset >= items.length ? <T>[] : items.sublist(offset, endIndex);
     final hasMore = endIndex < items.length;
     return LdListPage<T>(
       newItems: pageItems,

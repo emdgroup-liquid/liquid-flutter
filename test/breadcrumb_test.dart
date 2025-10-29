@@ -59,9 +59,7 @@ void main() {
       theme: theme,
       child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Center(
-              child: LdBreadcrumb.fromStrings(
-                  const ["Home", "About", "Contact"]))),
+          child: Center(child: LdBreadcrumb.fromStrings(const ["Home", "About", "Contact"]))),
     ));
 
     await test.pumpAndSettle();

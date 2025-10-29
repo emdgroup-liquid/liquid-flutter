@@ -77,7 +77,6 @@ final taskRepository = LdRepository<Task, int>(
         );
       },
       getSuggestions: (searchText) async {
-        print("Retrieving suggestion $searchText");
         return testData
             .where((element) =>
                 element.task.toLowerCase().startsWith(searchText.toLowerCase()))

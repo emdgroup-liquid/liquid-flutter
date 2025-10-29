@@ -62,7 +62,8 @@ class _ExceptionDemoState extends State<ExceptionDemo> {
                 return LdExceptionView(
                   exception: LdLocalizedException(
                     message: "Error message",
-                    moreInfo: "Nothing actually went wrong, this is just a demo",
+                    moreInfo:
+                        "Nothing actually went wrong, this is just a demo",
                     stackTrace: StackTrace.current,
                   ),
                   retryController: retryController,

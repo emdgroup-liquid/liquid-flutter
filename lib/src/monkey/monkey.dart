@@ -210,7 +210,7 @@ class LdMonkey<T extends Identifiable<IdType>, IdType> {
         path: "$path/filters",
         pageBuilder: (context, state) => LdModalPage(
           key: state.pageKey,
-          builder: ldFilterModal(context, this),
+          modal: ldFilterModal(context, this),
         ),
       ),
       ShellRoute(
@@ -243,7 +243,7 @@ class LdMonkey<T extends Identifiable<IdType>, IdType> {
                         if (effectivePresentationMode.detailInDialog) {
                           return LdModalPage(
                             key: state.pageKey,
-                            builder: ldMonkeyDetailModal(this),
+                            modal: ldMonkeyDetailModal(this),
                           );
                         }
 

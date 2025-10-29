@@ -35,7 +35,6 @@ class LiquidFlutterWindowUtils implements WindowStateEventApi {
   late final StreamController<double> _screenRadiusController =
       StreamController<double>.broadcast(
     onListen: () async {
-      print('onListen');
       _screenRadiusController.add(await getScreenRadius());
     },
   );

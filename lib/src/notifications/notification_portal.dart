@@ -78,10 +78,7 @@ class LdNotificationPortal extends StatelessWidget {
               child: Align(
                 alignment: Alignment.bottomCenter,
                 child: SafeArea(
-                  minimum: LdTheme.of(context).pad(size: LdSize.l) +
-                      EdgeInsets.only(
-                        bottom: MediaQuery.of(context).viewInsets.bottom,
-                      ),
+                  minimum: MediaQuery.of(context).padding,
                   child: Stack(
                     children: notifier.notifications.mapIndexed((
                       index,

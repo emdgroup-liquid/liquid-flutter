@@ -64,13 +64,18 @@ class LdColorSwatches extends StatelessWidget {
     return (lightest + 0.05) / (darkest + 0.05);
   }
 
-  LdTag _colorContrast(double contrast, BuildContext context, double threshold) {
+  LdTag _colorContrast(
+      double contrast, BuildContext context, double threshold) {
     if (contrast >= threshold) {
       return LdTag(
-          color: LdTheme.of(context).palette.success, size: LdSize.m, child: Text("1:${contrast.toStringAsFixed(1)}"));
+          color: LdTheme.of(context).palette.success,
+          size: LdSize.m,
+          child: Text("1:${contrast.toStringAsFixed(1)}"));
     }
     return LdTag(
-        color: LdTheme.of(context).palette.error, size: LdSize.m, child: Text("1:${contrast.toStringAsFixed(1)}"));
+        color: LdTheme.of(context).palette.error,
+        size: LdSize.m,
+        child: Text("1:${contrast.toStringAsFixed(1)}"));
   }
 
   @override
@@ -148,7 +153,8 @@ class LdColorSwatches extends StatelessWidget {
                         ldSpacerS,
                         _buildSwatch(
                           color.disabled(isDark).center(isDark),
-                          color.contrastingText(color.disabled(isDark).center(isDark)),
+                          color.contrastingText(
+                              color.disabled(isDark).center(isDark)),
                           background,
                           context,
                         ),

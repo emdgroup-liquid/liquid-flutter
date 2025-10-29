@@ -16,10 +16,8 @@ class LdDivider extends StatelessWidget {
     var theme = LdTheme.of(context, listen: true);
     final divider = Container(
       height: height ?? theme.borderWidth,
-      decoration: BoxDecoration(
-          color: theme.border,
-          borderRadius:
-              height == null ? null : BorderRadius.circular(height! / 2)),
+      decoration:
+          BoxDecoration(color: theme.border, borderRadius: height == null ? null : BorderRadius.circular(height! / 2)),
     );
     if (insetForLeading) {
       return Padding(

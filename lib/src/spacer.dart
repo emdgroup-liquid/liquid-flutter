@@ -7,8 +7,7 @@ class LdSpacer extends StatelessWidget {
   final LdSize size;
   final Axis? direction;
 
-  const LdSpacer({Key? key, required this.size, this.direction})
-      : super(key: key);
+  const LdSpacer({Key? key, required this.size, this.direction}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

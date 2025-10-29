@@ -15,7 +15,8 @@ PlatformException _createConnectionError(String channelName) {
   );
 }
 
-List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty = false}) {
+List<Object?> wrapResponse(
+    {Object? result, PlatformException? error, bool empty = false}) {
   if (empty) {
     return <Object?>[];
   }
@@ -86,7 +87,7 @@ class _WindowUtilsApiCodec extends StandardMessageCodec {
   @override
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
-      case 128: 
+      case 128:
         return WindowState.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -105,7 +106,8 @@ class WindowUtilsApi {
   static const MessageCodec<Object?> codec = _WindowUtilsApiCodec();
 
   Future<bool> setWindowSize(int arg_width, int arg_height) async {
-    const String channelName = 'dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.setWindowSize';
+    const String channelName =
+        'dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.setWindowSize';
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
       channelName,
       codec,
@@ -132,7 +134,8 @@ class WindowUtilsApi {
   }
 
   Future<void> setWindowTitle(String arg_title) async {
-    const String channelName = 'dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.setWindowTitle';
+    const String channelName =
+        'dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.setWindowTitle';
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
       channelName,
       codec,
@@ -154,7 +157,8 @@ class WindowUtilsApi {
   }
 
   Future<bool> setWindowPosition(int arg_x, int arg_y) async {
-    const String channelName = 'dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.setWindowPosition';
+    const String channelName =
+        'dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.setWindowPosition';
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
       channelName,
       codec,
@@ -181,14 +185,14 @@ class WindowUtilsApi {
   }
 
   Future<void> startDragging() async {
-    const String channelName = 'dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.startDragging';
+    const String channelName =
+        'dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.startDragging';
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
       channelName,
       codec,
       binaryMessenger: _binaryMessenger,
     );
-    final List<Object?>? replyList =
-        await channel.send(null) as List<Object?>?;
+    final List<Object?>? replyList = await channel.send(null) as List<Object?>?;
     if (replyList == null) {
       throw _createConnectionError(channelName);
     } else if (replyList.length > 1) {
@@ -203,14 +207,14 @@ class WindowUtilsApi {
   }
 
   Future<void> configureWindow() async {
-    const String channelName = 'dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.configureWindow';
+    const String channelName =
+        'dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.configureWindow';
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
       channelName,
       codec,
       binaryMessenger: _binaryMessenger,
     );
-    final List<Object?>? replyList =
-        await channel.send(null) as List<Object?>?;
+    final List<Object?>? replyList = await channel.send(null) as List<Object?>?;
     if (replyList == null) {
       throw _createConnectionError(channelName);
     } else if (replyList.length > 1) {
@@ -225,14 +229,14 @@ class WindowUtilsApi {
   }
 
   Future<void> closeWindow() async {
-    const String channelName = 'dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.closeWindow';
+    const String channelName =
+        'dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.closeWindow';
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
       channelName,
       codec,
       binaryMessenger: _binaryMessenger,
     );
-    final List<Object?>? replyList =
-        await channel.send(null) as List<Object?>?;
+    final List<Object?>? replyList = await channel.send(null) as List<Object?>?;
     if (replyList == null) {
       throw _createConnectionError(channelName);
     } else if (replyList.length > 1) {
@@ -247,14 +251,14 @@ class WindowUtilsApi {
   }
 
   Future<void> minimizeWindow() async {
-    const String channelName = 'dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.minimizeWindow';
+    const String channelName =
+        'dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.minimizeWindow';
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
       channelName,
       codec,
       binaryMessenger: _binaryMessenger,
     );
-    final List<Object?>? replyList =
-        await channel.send(null) as List<Object?>?;
+    final List<Object?>? replyList = await channel.send(null) as List<Object?>?;
     if (replyList == null) {
       throw _createConnectionError(channelName);
     } else if (replyList.length > 1) {
@@ -269,14 +273,14 @@ class WindowUtilsApi {
   }
 
   Future<void> maximizeWindow() async {
-    const String channelName = 'dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.maximizeWindow';
+    const String channelName =
+        'dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.maximizeWindow';
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
       channelName,
       codec,
       binaryMessenger: _binaryMessenger,
     );
-    final List<Object?>? replyList =
-        await channel.send(null) as List<Object?>?;
+    final List<Object?>? replyList = await channel.send(null) as List<Object?>?;
     if (replyList == null) {
       throw _createConnectionError(channelName);
     } else if (replyList.length > 1) {
@@ -291,14 +295,14 @@ class WindowUtilsApi {
   }
 
   Future<bool> isWindowMaximized() async {
-    const String channelName = 'dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.isWindowMaximized';
+    const String channelName =
+        'dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.isWindowMaximized';
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
       channelName,
       codec,
       binaryMessenger: _binaryMessenger,
     );
-    final List<Object?>? replyList =
-        await channel.send(null) as List<Object?>?;
+    final List<Object?>? replyList = await channel.send(null) as List<Object?>?;
     if (replyList == null) {
       throw _createConnectionError(channelName);
     } else if (replyList.length > 1) {
@@ -318,14 +322,14 @@ class WindowUtilsApi {
   }
 
   Future<WindowState> getWindowState() async {
-    const String channelName = 'dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.getWindowState';
+    const String channelName =
+        'dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.getWindowState';
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
       channelName,
       codec,
       binaryMessenger: _binaryMessenger,
     );
-    final List<Object?>? replyList =
-        await channel.send(null) as List<Object?>?;
+    final List<Object?>? replyList = await channel.send(null) as List<Object?>?;
     if (replyList == null) {
       throw _createConnectionError(channelName);
     } else if (replyList.length > 1) {
@@ -360,7 +364,7 @@ class _WindowStateEventApiCodec extends StandardMessageCodec {
   @override
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
-      case 128: 
+      case 128:
         return WindowState.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -375,17 +379,19 @@ abstract class WindowStateEventApi {
 
   void onWindowReady();
 
-  static void setup(WindowStateEventApi? api, {BinaryMessenger? binaryMessenger}) {
+  static void setup(WindowStateEventApi? api,
+      {BinaryMessenger? binaryMessenger}) {
     {
       final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.liquid_flutter_window_utils.WindowStateEventApi.onWindowStateChanged', codec,
+          'dev.flutter.pigeon.liquid_flutter_window_utils.WindowStateEventApi.onWindowStateChanged',
+          codec,
           binaryMessenger: binaryMessenger);
       if (api == null) {
         channel.setMessageHandler(null);
       } else {
         channel.setMessageHandler((Object? message) async {
           assert(message != null,
-          'Argument for dev.flutter.pigeon.liquid_flutter_window_utils.WindowStateEventApi.onWindowStateChanged was null.');
+              'Argument for dev.flutter.pigeon.liquid_flutter_window_utils.WindowStateEventApi.onWindowStateChanged was null.');
           final List<Object?> args = (message as List<Object?>?)!;
           final WindowState? arg_state = (args[0] as WindowState?);
           assert(arg_state != null,
@@ -395,15 +401,17 @@ abstract class WindowStateEventApi {
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+                error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
     }
     {
       final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.liquid_flutter_window_utils.WindowStateEventApi.onWindowReady', codec,
+          'dev.flutter.pigeon.liquid_flutter_window_utils.WindowStateEventApi.onWindowReady',
+          codec,
           binaryMessenger: binaryMessenger);
       if (api == null) {
         channel.setMessageHandler(null);
@@ -414,8 +422,9 @@ abstract class WindowStateEventApi {
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+                error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }

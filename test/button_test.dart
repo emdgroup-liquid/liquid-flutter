@@ -13,9 +13,7 @@ void main() {
 
     // Called for all button types
     testButton(
-        WidgetTester test,
-        Widget Function(Function() onPress, Widget child) buttonBuilder,
-        LdColor color) async {
+        WidgetTester test, Widget Function(Function() onPress, Widget child) buttonBuilder, LdColor color) async {
       var pressed = false;
 
       void _onPress() {
@@ -41,8 +39,7 @@ void main() {
 
       expect(find.text("Test button"), findsOneWidget);
 
-      final gestureHover =
-          await test.createGesture(kind: PointerDeviceKind.mouse);
+      final gestureHover = await test.createGesture(kind: PointerDeviceKind.mouse);
 
       await gestureHover.addPointer(location: Offset.zero);
 
@@ -53,10 +50,7 @@ void main() {
       await test.pumpAndSettle();
 
       expect(pressed, isFalse);
-      expect(
-          ((test.firstWidget(find.byType(Container)) as Container).decoration
-                  as BoxDecoration)
-              .color,
+      expect(((test.firstWidget(find.byType(Container)) as Container).decoration as BoxDecoration).color,
           color.hover(false));
 
       expect(

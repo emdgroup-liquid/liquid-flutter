@@ -30,7 +30,9 @@ class _LdSliderDemoState extends State<LdSliderDemo> {
                   disabled: _disabled,
                   onSlideComplete: () {
                     LdNotificationsController.of(context).addNotification(
-                      LdNotification(message: "You slid the slider!", type: LdNotificationType.info),
+                      LdNotification(
+                          message: "You slid the slider!",
+                          type: LdNotificationType.info),
                     );
                   },
                 ),
@@ -42,7 +44,9 @@ class _LdSliderDemoState extends State<LdSliderDemo> {
                   color: LdTheme.of(context).palette.error,
                   onSlideComplete: () {
                     LdNotificationsController.of(context).addNotification(
-                      LdNotification(message: "You slid the slider!", type: LdNotificationType.info),
+                      LdNotification(
+                          message: "You slid the slider!",
+                          type: LdNotificationType.info),
                     );
                   },
                 ),

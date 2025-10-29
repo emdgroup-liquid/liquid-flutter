@@ -20,10 +20,7 @@ void main() {
                   data: const MediaQueryData(size: Size(1300, 800)),
                   child: LdContainer(
                     padding: EdgeInsets.zero,
-                    child: SizedBox(
-                        key: containerKey,
-                        width: double.infinity,
-                        child: const Text("Hello")),
+                    child: SizedBox(key: containerKey, width: double.infinity, child: const Text("Hello")),
                   ),
                 )),
           ),

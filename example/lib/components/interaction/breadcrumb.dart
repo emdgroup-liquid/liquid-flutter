@@ -15,7 +15,8 @@ class BreadcrumbDemo extends StatelessWidget {
       demo: ComponentWell(
         child: Column(
           children: [
-            LdBreadcrumb.fromStrings(const ["Hello", "World", "Cookie", "Menu"]),
+            LdBreadcrumb.fromStrings(
+                const ["Hello", "World", "Cookie", "Menu"]),
             ldSpacerM,
             const LdBreadcrumb(
               children: [

@@ -240,7 +240,7 @@ class LdScaffoldLayoutState {
 
     if (role == AppBarRole.secondary) {
       if (appBarState?.effectivePosition == effectivePosition) {
-        total += appBarState?.innerHeight ?? 0 - (appBarState?.offset ?? 0);
+        total += (appBarState?.innerHeight ?? 0) - (appBarState?.offset ?? 0);
         if (level == 0) {
           total += appBarState?.verticalMargin ?? 0;
         }
@@ -404,7 +404,6 @@ class LdScaffoldState extends State<LdScaffold> {
   }
 
   void onAppBarSizeChange(LdScaffoldSlot slot, Size size) {
-    print('onAppBarSizeChange: $slot, $size');
     if (slot.role == AppBarRole.primary) {
       if (_appBarState?.innerHeight == size.height) {
         return;
@@ -436,16 +435,6 @@ class LdScaffoldState extends State<LdScaffold> {
     final theme = LdTheme.of(context, listen: true);
     Color backgroundColor = widget.backgroundColor ?? theme.background;
 
-    if (theme.platform == LdPlatform.macos && _layoutState(context).level == 0) {
-      return BoxDecoration(
-        color: backgroundColor,
-        border: Border.all(
-          color: theme.border,
-          width: 1,
-        ),
-        borderRadius: BorderRadius.circular(LdTheme.of(context).screenRadius),
-      );
-    }
     return BoxDecoration(
       color: backgroundColor,
     );
@@ -614,8 +603,9 @@ class LdScaffoldState extends State<LdScaffold> {
                 onStateChange: _onDrawerStateChange,
                 drawer: Provider.value(
                   value: LdScaffoldLayoutState(
+                    debugName: 'drawer',
                     isSideBySide: _drawerState?.isSideBySide ?? false,
-                    parentLayoutState: layoutState,
+                    parentLayoutState: null,
                     slot: LdScaffoldSlot.drawer,
                     isDrawerOpen: _drawerState?.isOpen ?? false,
                     appBarState: null,
@@ -789,10 +779,10 @@ class LdScaffoldState extends State<LdScaffold> {
   Widget _placeAppBar(BuildContext context, Widget appBar) {
     final effectivePosition = _effectiveAppBarPosition;
 
-    _appBarState ??= LdScaffoldAppBarState(
-      verticalMargin: 0,
-      innerHeight: 0,
-      offset: 0,
+    _appBarState = LdScaffoldAppBarState(
+      verticalMargin: _appBarState?.verticalMargin ?? 0,
+      innerHeight: _appBarState?.innerHeight ?? 0,
+      offset: _appBarState?.offset ?? 0,
       effectivePosition: effectivePosition,
     );
 
@@ -825,9 +815,9 @@ class LdScaffoldState extends State<LdScaffold> {
     final effectivePosition = _effectiveSecondaryAppBarPosition;
 
     _secondaryAppBarState ??= LdScaffoldAppBarState(
-      verticalMargin: 0,
-      innerHeight: 0,
-      offset: 0,
+      verticalMargin: _secondaryAppBarState?.verticalMargin ?? 0,
+      innerHeight: _secondaryAppBarState?.innerHeight ?? 0,
+      offset: _secondaryAppBarState?.offset ?? 0,
       effectivePosition: effectivePosition,
     );
 
@@ -837,7 +827,7 @@ class LdScaffoldState extends State<LdScaffold> {
         left: 0,
         right: 0,
         child: Transform.translate(
-          offset: Offset(0, _secondaryAppBarState?.offset ?? 0),
+          offset: Offset(0, -(_secondaryAppBarState?.offset ?? 0)),
           child: secondaryNavigationBar,
         ),
       );
@@ -924,7 +914,9 @@ class ScrollObserver extends StatelessWidget {
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
         if (notification.depth == 0) {
-          position.value = notification.metrics.pixels;
+          if (notification.metrics.axis == Axis.vertical) {
+            position.value = notification.metrics.pixels;
+          }
         }
         return false;
         //return true;
@@ -1100,113 +1092,116 @@ class _LdDrawerLayoutState extends State<_LdDrawerLayout> {
 
   @override
   Widget build(BuildContext context) {
-    return Actions(
-      actions: {
-        ToggleDrawerIntent: ToggleDrawerAction(
-          onToggleDrawer: () {
-            if (_isDrawerOpen) {
-              _hideDrawer();
-            } else {
+    return Material(
+      type: MaterialType.transparency,
+      child: Actions(
+        actions: {
+          ToggleDrawerIntent: ToggleDrawerAction(
+            onToggleDrawer: () {
+              if (_isDrawerOpen) {
+                _hideDrawer();
+              } else {
+                _showDrawer();
+              }
+            },
+          ),
+          OpenDrawerIntent: CallbackAction(
+            onInvoke: (intent) {
               _showDrawer();
-            }
-          },
-        ),
-        OpenDrawerIntent: CallbackAction(
-          onInvoke: (intent) {
-            _showDrawer();
-            return null;
-          },
-        ),
-        CloseDrawerIntent: CallbackAction(
-          onInvoke: (intent) {
-            _hideDrawer();
-            return null;
-          },
-        ),
-      },
-      child: GestureDetector(
-        onHorizontalDragUpdate: _onDragUpdate,
-        onHorizontalDragEnd: _onDragEnd,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            _isSideBySide = constraints.maxWidth >= widget.reflowBreakpoint;
-            _effectiveDrawerWidth = min(constraints.maxWidth * 0.75, widget.drawerWidth);
+              return null;
+            },
+          ),
+          CloseDrawerIntent: CallbackAction(
+            onInvoke: (intent) {
+              _hideDrawer();
+              return null;
+            },
+          ),
+        },
+        child: GestureDetector(
+          onHorizontalDragUpdate: _onDragUpdate,
+          onHorizontalDragEnd: _onDragEnd,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              _isSideBySide = constraints.maxWidth >= widget.reflowBreakpoint;
+              _effectiveDrawerWidth = min(constraints.maxWidth * 0.75, widget.drawerWidth);
 
-            return Stack(
-              children: [
-                LdSpring(
-                  mass: 1,
-                  springConstant: 12,
-                  dampingCoefficient: 9,
-                  initialPosition: 0,
-                  position: _drawerOffset,
-                  builder: (context, state, child) {
-                    double bodyLeft, bodyWidth;
-                    if (_isSideBySide) {
-                      bodyLeft = state.position;
-                      bodyWidth = constraints.maxWidth - state.position;
-                    } else {
-                      bodyLeft = 0;
-                      bodyWidth = constraints.maxWidth;
-                    }
+              return Stack(
+                children: [
+                  LdSpring(
+                    mass: 1,
+                    springConstant: 12,
+                    dampingCoefficient: 9,
+                    initialPosition: 0,
+                    position: _drawerOffset,
+                    builder: (context, state, child) {
+                      double bodyLeft, bodyWidth;
+                      if (_isSideBySide) {
+                        bodyLeft = state.position;
+                        bodyWidth = constraints.maxWidth - state.position;
+                      } else {
+                        bodyLeft = 0;
+                        bodyWidth = constraints.maxWidth;
+                      }
 
-                    return Positioned(
-                      top: 0,
-                      width: bodyWidth,
-                      bottom: 0,
-                      left: bodyLeft,
-                      child: DecoratedBox(
+                      return Positioned(
+                        top: 0,
+                        width: bodyWidth,
+                        bottom: 0,
+                        left: bodyLeft,
+                        child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              boxShadow: [ldShadowSticky],
+                              color: LdTheme.of(context).background,
+                            ),
+                            child: child!),
+                      );
+                    },
+                    child: widget.body,
+                  ),
+                  if (_isDrawerOpen && !_isSideBySide)
+                    ModalBarrier(
+                      color: Colors.black.withValues(alpha: 0.5),
+                      onDismiss: () {
+                        _hideDrawer();
+                      },
+                    ),
+                  LdSpring(
+                    mass: 1,
+                    springConstant: 12,
+                    dampingCoefficient: 9,
+                    initialPosition: 0,
+                    position: _drawerOffset,
+                    builder: (context, state, child) {
+                      double drawerLeft, drawerWidth;
+                      if (_isSideBySide) {
+                        drawerLeft = state.position - _effectiveDrawerWidth;
+                        drawerWidth = _effectiveDrawerWidth;
+                      } else {
+                        drawerLeft = state.position - _effectiveDrawerWidth;
+                        drawerWidth = _effectiveDrawerWidth;
+                      }
+
+                      return Positioned(
+                        top: 0,
+                        bottom: 0,
+                        width: drawerWidth,
+                        left: drawerLeft,
+                        child: Container(
                           decoration: BoxDecoration(
-                            boxShadow: [ldShadowSticky],
+                            border: _drawerBorder,
                             color: LdTheme.of(context).background,
                           ),
-                          child: child!),
-                    );
-                  },
-                  child: widget.body,
-                ),
-                if (_isDrawerOpen && !_isSideBySide)
-                  ModalBarrier(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    onDismiss: () {
-                      _hideDrawer();
-                    },
-                  ),
-                LdSpring(
-                  mass: 1,
-                  springConstant: 12,
-                  dampingCoefficient: 9,
-                  initialPosition: 0,
-                  position: _drawerOffset,
-                  builder: (context, state, child) {
-                    double drawerLeft, drawerWidth;
-                    if (_isSideBySide) {
-                      drawerLeft = state.position - _effectiveDrawerWidth;
-                      drawerWidth = _effectiveDrawerWidth;
-                    } else {
-                      drawerLeft = state.position - _effectiveDrawerWidth;
-                      drawerWidth = _effectiveDrawerWidth;
-                    }
-
-                    return Positioned(
-                      top: 0,
-                      bottom: 0,
-                      width: drawerWidth,
-                      left: drawerLeft,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: _drawerBorder,
-                          color: LdTheme.of(context).background,
+                          child: child!,
                         ),
-                        child: child!,
-                      ),
-                    );
-                  },
-                  child: widget.drawer,
-                )
-              ].reverseIf(_isSideBySide),
-            );
-          },
+                      );
+                    },
+                    child: widget.drawer,
+                  )
+                ].reverseIf(_isSideBySide),
+              );
+            },
+          ),
         ),
       ),
     );

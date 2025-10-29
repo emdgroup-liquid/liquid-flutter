@@ -25,8 +25,7 @@ void main() {
     expect(find.text('1/1/2023'), findsOneWidget);
   });
 
-  testWidgets('opens date picker when button is pressed',
-      (WidgetTester tester) async {
+  testWidgets('opens date picker when button is pressed', (WidgetTester tester) async {
     await tester.pumpWidget(
       withLiquidTheme(
         LdDatePicker(
@@ -75,8 +74,7 @@ void main() {
     expect(selectedDate, DateTime(2023, 1, 15));
   });
 
-  testWidgets('disables dates outside the min and max range',
-      (WidgetTester tester) async {
+  testWidgets('disables dates outside the min and max range', (WidgetTester tester) async {
     final minDate = DateTime(2023, 10, 15);
     final maxDate = DateTime(2023, 10, 22);
 
@@ -115,9 +113,7 @@ void main() {
     );
   });
 
-  testWidgets(
-      'shows Today, +7d, +30d, and +90d buttons and updates date correctly',
-      (WidgetTester tester) async {
+  testWidgets('shows Today, +7d, +30d, and +90d buttons and updates date correctly', (WidgetTester tester) async {
     DateTime? selectedDate;
 
     final initialDate = DateTime.now();

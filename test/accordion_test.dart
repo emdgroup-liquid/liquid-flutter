@@ -44,8 +44,7 @@ void main() {
     await test.pumpAndSettle();
 
     // Accordion should be smaller than the expanded size
-    expect(test.getSize(find.byType(LdAccordion)).height,
-        lessThan(expandedSize.height));
+    expect(test.getSize(find.byType(LdAccordion)).height, lessThan(expandedSize.height));
   });
 
   testWidgets('LdAccordion fromList', (WidgetTester test) async {
@@ -117,9 +116,7 @@ void main() {
     await test.pumpAndSettle();
 
     List<bool> getCollapsed() {
-      return List<LdCollapse>.from(test.widgetList(find.byType(LdCollapse)))
-          .map((e) => e.collapsed)
-          .toList();
+      return List<LdCollapse>.from(test.widgetList(find.byType(LdCollapse))).map((e) => e.collapsed).toList();
     }
 
     expect(getCollapsed(), [false, false, true]);

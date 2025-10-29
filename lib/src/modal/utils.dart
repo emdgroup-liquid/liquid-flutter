@@ -34,8 +34,7 @@ Future<bool> ldConfirmModal(
     ),
     actionBar: (context) => CallbackShortcuts(
       bindings: {
-        LogicalKeySet(LogicalKeyboardKey.escape): () =>
-            Navigator.of(context).pop(false),
+        LogicalKeySet(LogicalKeyboardKey.escape): () => Navigator.of(context).pop(false),
       },
       child: ResponsiveBuilder(builder: (context, constraints) {
         if (constraints.isMobile) {

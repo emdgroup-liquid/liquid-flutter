@@ -3,8 +3,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 class LdExceptionRetryIndicator extends StatelessWidget {
   final LdRetryState retryState;
-  Duration get remainingRetryTime =>
-      retryState.remainingRetryTime ?? Duration.zero;
+  Duration get remainingRetryTime => retryState.remainingRetryTime ?? Duration.zero;
   Duration get totalRetryDelay => retryState.totalRetryDelay ?? Duration.zero;
 
   const LdExceptionRetryIndicator({
@@ -12,9 +11,7 @@ class LdExceptionRetryIndicator extends StatelessWidget {
     required this.retryState,
   });
 
-  double get progress =>
-      (remainingRetryTime.inMilliseconds / totalRetryDelay.inMilliseconds)
-          .clamp(0, 1);
+  double get progress => (remainingRetryTime.inMilliseconds / totalRetryDelay.inMilliseconds).clamp(0, 1);
 
   @override
   Widget build(BuildContext context) {

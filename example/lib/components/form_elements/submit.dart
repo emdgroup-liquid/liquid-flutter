@@ -230,7 +230,8 @@ class _SubmitDemoState extends State<SubmitDemo> {
                   ],
                 ),
               ),
-              const ComponentsAccordion(components: {"LdSubmitNotificationBuilder"}),
+              const ComponentsAccordion(
+                  components: {"LdSubmitNotificationBuilder"}),
             ],
           ),
           ldSpacerL,
@@ -288,7 +289,8 @@ class _SubmitDemoState extends State<SubmitDemo> {
               LdTextP(
                 "The LdSubmitController handles the state of the LdSubmit component. It posesses a .state property of type LdSubmitState.",
               ),
-              LdTextP("You can observe the controller through its .stateStream property."),
+              LdTextP(
+                  "You can observe the controller through its .stateStream property."),
               ComponentsAccordion(components: {
                 "LdSubmitController",
                 "LdSubmitState",

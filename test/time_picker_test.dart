@@ -25,8 +25,7 @@ void main() {
     expect(find.text('14:30'), findsOneWidget);
   });
 
-  testWidgets('opens time picker when button is pressed',
-      (WidgetTester tester) async {
+  testWidgets('opens time picker when button is pressed', (WidgetTester tester) async {
     await tester.pumpWidget(
       withLiquidTheme(
         LdTimePicker(

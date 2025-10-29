@@ -50,8 +50,7 @@ class _LdFormState extends State<LdForm> {
 
   Widget _buildHint(String key) {
     if (widget.hints.containsKey(key)) {
-      return LdHint(
-          child: Text(widget.hints[key]!.hint), type: widget.hints[key]!.type);
+      return LdHint(child: Text(widget.hints[key]!.hint), type: widget.hints[key]!.type);
     }
     return Container(
       height: 28,
@@ -61,12 +60,9 @@ class _LdFormState extends State<LdForm> {
   Widget _buildField(LdFormItem field) {
     return Padding(
       padding: const EdgeInsets.only(top: 16),
-      child:
-          LdAutoSpace(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      child: LdAutoSpace(crossAxisAlignment: CrossAxisAlignment.start, children: [
         field.child,
-        LdCollapse(
-            collapsed: !widget.hints.containsKey(field.key),
-            child: _buildHint(field.key)),
+        LdCollapse(collapsed: !widget.hints.containsKey(field.key), child: _buildHint(field.key)),
       ]),
     );
   }
@@ -87,8 +83,7 @@ class _LdFormState extends State<LdForm> {
     return _buildField(LdFormItem(
         "submit",
         LdButton(
-          child: Text(
-              widget.submitString ?? LiquidLocalizations.of(context).submit),
+          child: Text(widget.submitString ?? LiquidLocalizations.of(context).submit),
           mode: widget.submitButtonMode,
           loading: widget.loading || _loading,
           onPressed: () async {
@@ -114,10 +109,7 @@ class _LdFormState extends State<LdForm> {
           child: Form(
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                ...widget.fields.map(_buildField).toList(),
-                _buildSubmit(context)
-              ])),
+                  children: [...widget.fields.map(_buildField).toList(), _buildSubmit(context)])),
         ));
   }
 }

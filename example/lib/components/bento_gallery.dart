@@ -643,16 +643,3 @@ class _BentoCard extends StatelessWidget {
     );
   }
 }
-
-class _PreviewItem implements Identifiable<String> {
-  final String _id;
-  final String name;
-
-  _PreviewItem(this._id, this.name);
-
-  @override
-  String get id => _id;
-
-  @override
-  String get idString => _id;
-}

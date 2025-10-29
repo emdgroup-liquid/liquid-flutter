@@ -29,7 +29,9 @@ class ColorSelctor extends StatelessWidget {
                 child: LdButton(
                   color: e.value,
                   active: e.value == active,
-                  child: e.value == active ? const Icon(LucideIcons.check) : const Icon(LucideIcons.circle),
+                  child: e.value == active
+                      ? const Icon(LucideIcons.check)
+                      : const Icon(LucideIcons.circle),
                   onPressed: () => onChanged(e.value),
                 ),
               ),

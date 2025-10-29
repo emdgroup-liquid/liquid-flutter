@@ -905,12 +905,7 @@ class LdTagSuccess extends LdTag {
     Function? onDismiss,
     LdSize size = LdSize.m,
     required BuildContext context,
-  }) : super(
-            key: key,
-            child: child,
-            color: LdTheme.of(context).success,
-            onDismiss: onDismiss,
-            size: size);
+  }) : super(key: key, child: child, color: LdTheme.of(context).success, onDismiss: onDismiss, size: size);
 }
 
 class LdTagWarning extends LdTag {
@@ -921,12 +916,7 @@ class LdTagWarning extends LdTag {
     Function? onDismiss,
     LdSize size = LdSize.m,
     required BuildContext context,
-  }) : super(
-            key: key,
-            child: child,
-            color: LdTheme.of(context).warning,
-            onDismiss: onDismiss,
-            size: size);
+  }) : super(key: key, child: child, color: LdTheme.of(context).warning, onDismiss: onDismiss, size: size);
 }
 
 class LdTagError extends LdTag {
@@ -937,10 +927,5 @@ class LdTagError extends LdTag {
     Function? onDismiss,
     LdSize size = LdSize.m,
     required BuildContext context,
-  }) : super(
-            key: key,
-            child: child,
-            color: LdTheme.of(context).error,
-            onDismiss: onDismiss,
-            size: size);
+  }) : super(key: key, child: child, color: LdTheme.of(context).error, onDismiss: onDismiss, size: size);
 }

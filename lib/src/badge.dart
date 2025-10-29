@@ -27,8 +27,7 @@ class LdBadge extends StatelessWidget {
 
     final contentSize = theme.labelSize(size);
 
-    EdgeInsets padding = EdgeInsets.symmetric(
-        vertical: contentSize / 3, horizontal: contentSize / 2);
+    EdgeInsets padding = EdgeInsets.symmetric(vertical: contentSize / 3, horizontal: contentSize / 2);
 
     if (symmetric) {
       padding = EdgeInsets.all(contentSize / 3);

@@ -23,8 +23,7 @@ void main() {
             body: Center(
               child: LdModalBuilder(
                 builder: (context, open) {
-                  return LdButton(
-                      child: const Text("Open dialog"), onPressed: open);
+                  return LdButton(child: const Text("Open dialog"), onPressed: open);
                 },
                 modal: LdModal(
                   title: const Text("Dialog title"),
@@ -66,8 +65,7 @@ void main() {
             body: Center(
               child: LdModalBuilder(
                 builder: (context, open) {
-                  return LdButton(
-                      child: const Text("Open dialog"), onPressed: open);
+                  return LdButton(child: const Text("Open dialog"), onPressed: open);
                 },
                 modal: LdModal(
                   injectables: (context) => [

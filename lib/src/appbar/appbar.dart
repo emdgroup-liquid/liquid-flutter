@@ -25,6 +25,12 @@ enum LdAppBarBorderMode {
   hidden,
 }
 
+enum LdAppBarBackgroundMode {
+  visible,
+  whenScrolled,
+  hidden,
+}
+
 class LdAppBar extends StatefulWidget {
   final Widget? title;
   final Widget? leading;
@@ -40,6 +46,7 @@ class LdAppBar extends StatefulWidget {
   final Widget? bottom;
   final LdAppBarShadowMode shadowMode;
   final LdAppBarBorderMode borderMode;
+  final LdAppBarBackgroundMode backgroundMode;
 
   final List<LdLabeledAction> actions;
 
@@ -93,6 +100,7 @@ class LdAppBar extends StatefulWidget {
     this.elevateOnScroll = true,
     this.shadowMode = LdAppBarShadowMode.whenScrolled,
     this.borderMode = LdAppBarBorderMode.whenScrolled,
+    this.backgroundMode = LdAppBarBackgroundMode.whenScrolled,
     this.overflowMenuProviders,
     this.debugName,
   });
@@ -280,9 +288,7 @@ class _LdAppBarState extends State<LdAppBar> {
         border: _isInTopSlot
             ? Border(
                 bottom: BorderSide(
-                  color: _shouldShowBorder(isScrolledUnder)
-                      ? LdTheme.of(context).border.withAlpha(_fillOpacity(isScrolledUnder))
-                      : Colors.transparent,
+                  color: _shouldShowBorder(isScrolledUnder) ? LdTheme.of(context).border : Colors.transparent,
                   width: LdTheme.of(context).borderWidth,
                 ),
               )
@@ -303,10 +309,15 @@ class _LdAppBarState extends State<LdAppBar> {
   }
 
   Color _fillColor(bool isScrolledUnder) {
-    return Color.alphaBlend(
-      (widget.backgroundColor ?? LdTheme.of(context).surface).withAlpha(_fillOpacity(isScrolledUnder)),
-      LdTheme.of(context).background,
-    );
+    final color = widget.backgroundColor ?? LdTheme.of(context).surface;
+    return switch (widget.backgroundMode) {
+      LdAppBarBackgroundMode.hidden => Colors.transparent,
+      LdAppBarBackgroundMode.visible => color,
+      LdAppBarBackgroundMode.whenScrolled => Color.alphaBlend(
+          color.withAlpha(_fillOpacity(isScrolledUnder)),
+          LdTheme.of(context).background,
+        ),
+    };
   }
 
   double _borderRadius(BuildContext context) {

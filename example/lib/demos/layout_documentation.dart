@@ -24,7 +24,8 @@ class LayoutDocumentation extends StatelessWidget {
         demo: LdAutoSpace(children: [
           LdBundle(
             children: [
-              LdTextP("To create consistent layouts, Liquid provides a set of predefined components."),
+              LdTextP(
+                  "To create consistent layouts, Liquid provides a set of predefined components."),
               LdTextHs("🦄 LdAutoSpace"),
               ComponentsAccordion(components: {"LdAutoSpace", "LdBundle"}),
               MarkdownBody(

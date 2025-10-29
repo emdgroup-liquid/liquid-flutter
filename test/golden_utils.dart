@@ -21,8 +21,7 @@ Widget liquidFrame({
   return LdThemeProvider(
     theme: theme,
     autoSize: false,
-    brightnessMode:
-        isDark ? LdThemeBrightnessMode.dark : LdThemeBrightnessMode.light,
+    brightnessMode: isDark ? LdThemeBrightnessMode.dark : LdThemeBrightnessMode.light,
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: getMaterialTheme(theme),
@@ -104,8 +103,7 @@ Future<void> multiGolden(
   ) as List<dynamic>;
 
   for (final font in fontManifest) {
-    final fontLoader =
-        FontLoader(derivedFontFamily(font as Map<String, dynamic>));
+    final fontLoader = FontLoader(derivedFontFamily(font as Map<String, dynamic>));
     final fonts = font['fonts'] as List<dynamic>;
     for (final fontType in fonts) {
       fontLoader.addFont(
@@ -137,8 +135,7 @@ Future<void> multiGolden(
             ),
           );
         });
-        final size =
-            find.byKey(ValueKey(slug)).evaluate().single.size ?? Size.zero;
+        final size = find.byKey(ValueKey(slug)).evaluate().single.size ?? Size.zero;
         if (height == null) {
           await tester.binding.setSurfaceSize(
             Size(width.toDouble(), size.height + 64),

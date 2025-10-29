@@ -256,8 +256,8 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
 
   @override
   Widget build(BuildContext context) {
-    return Shortcuts.manager(
-      manager: LoggingShortcutManager(),
+    return Shortcuts(
+      shortcuts: monkeyShortcuts,
       child: FocusScope(
           autofocus: true,
           child: StreamBuilder(
@@ -286,21 +286,5 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
             },
           )),
     );
-  }
-}
-
-/// A ShortcutManager that logs all keys that it handles.
-class LoggingShortcutManager extends ShortcutManager {
-  LoggingShortcutManager() {
-    shortcuts = monkeyShortcuts;
-  }
-  @override
-  KeyEventResult handleKeypress(BuildContext context, KeyEvent event) {
-    final KeyEventResult result = super.handleKeypress(context, event);
-    print('Handling shortcut $event: $result');
-    if (result == KeyEventResult.handled) {
-      print('Handled shortcut $event in $context');
-    }
-    return result;
   }
 }

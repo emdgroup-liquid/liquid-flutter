@@ -11,7 +11,6 @@ class SearchAction extends Action<SearchIntent> {
 
   @override
   void invoke(SearchIntent intent) {
-    print("SearchIntent invoked");
     searchFocusNode.requestFocus();
   }
 }

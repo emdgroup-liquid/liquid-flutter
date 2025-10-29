@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/haptics.dart';
@@ -12,6 +11,7 @@ class LdSwitch<T> extends StatelessWidget {
   final LdColor? color;
   final bool disabled;
   final T value;
+  final bool expand;
 
   const LdSwitch({
     Key? key,
@@ -22,6 +22,7 @@ class LdSwitch<T> extends StatelessWidget {
     this.size = LdSize.m,
     this.color,
     this.onChanged,
+    this.expand = false,
   }) : super(key: key);
 
   @override
@@ -40,9 +41,7 @@ class LdSwitch<T> extends StatelessWidget {
           child: IntrinsicHeight(
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              children: children.entries
-                  .map((e) => _buildItem(theme, e.key, e.value))
-                  .toList(),
+              children: children.entries.map((e) => _buildItem(theme, e.key, e.value)).toList(),
             ),
           ),
         ),
@@ -70,12 +69,14 @@ class LdSwitch<T> extends StatelessWidget {
     }
 
     return Flexible(
+      fit: expand ? FlexFit.tight : FlexFit.loose,
       child: LdButton(
         circular: false,
         child: child,
         color: color,
         size: size,
         disabled: disabled,
+        width: expand ? double.infinity : null,
         onPressed: () {
           LdHaptics.vibrate(HapticsType.selection);
           _onTap(key);
