@@ -7,7 +7,6 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/macos_window_controls.dart';
 import 'package:liquid_flutter/src/appbar/windows_window_controls.dart';
 import 'package:liquid_flutter/src/modal/size_notifier.dart';
-import 'package:liquid_flutter/src/notifications/implicit_blur.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:provider/provider.dart';
@@ -36,21 +35,15 @@ class LdAppBar extends StatefulWidget {
   final Widget? leading;
   final Widget? trailing;
 
-  final bool? primary;
-  final bool disableSafeArea;
   final Color? backgroundColor;
   final bool? implyLeading;
   final bool addContainer;
-  final bool elevateOnScroll;
-  final bool blurOnScroll;
   final Widget? bottom;
   final LdAppBarShadowMode shadowMode;
   final LdAppBarBorderMode borderMode;
   final LdAppBarBackgroundMode backgroundMode;
 
   final List<LdLabeledAction> actions;
-
-  final double? height;
 
   static LdWindowCallbacks? callbacks;
 
@@ -66,14 +59,9 @@ class LdAppBar extends StatefulWidget {
     properties.add(StringProperty('debugName', debugName));
     properties.add(EnumProperty<LdAppBarShadowMode>('shadowMode', shadowMode));
     properties.add(EnumProperty<LdAppBarBorderMode>('borderMode', borderMode));
-    properties.add(FlagProperty('disableSafeArea', value: disableSafeArea, ifTrue: 'disabled'));
     properties.add(FlagProperty('addContainer', value: addContainer, ifTrue: 'enabled'));
-    properties.add(FlagProperty('elevateOnScroll', value: elevateOnScroll, ifTrue: 'enabled'));
-    properties.add(FlagProperty('blurOnScroll', value: blurOnScroll, ifTrue: 'enabled'));
     properties.add(ColorProperty('backgroundColor', backgroundColor));
-    properties.add(DoubleProperty('height', height));
     properties.add(IntProperty('actionsCount', actions.length));
-    properties.add(DiagnosticsProperty<bool?>('primary', primary));
     properties.add(DiagnosticsProperty<bool?>('implyLeading', implyLeading));
     properties.add(DiagnosticsProperty<Widget?>('title', title));
     properties.add(DiagnosticsProperty<Widget?>('leading', leading));
@@ -85,19 +73,14 @@ class LdAppBar extends StatefulWidget {
   const LdAppBar({
     super.key,
     this.title,
-    this.height,
     this.actions = const [],
     this.leading,
     this.trailing,
-    this.primary,
     this.backgroundColor,
-    this.blurOnScroll = false,
     this.searchConfig,
     this.addContainer = false,
     this.implyLeading,
     this.bottom,
-    this.disableSafeArea = false,
-    this.elevateOnScroll = true,
     this.shadowMode = LdAppBarShadowMode.whenScrolled,
     this.borderMode = LdAppBarBorderMode.whenScrolled,
     this.backgroundMode = LdAppBarBackgroundMode.whenScrolled,
@@ -433,115 +416,103 @@ class _LdAppBarState extends State<LdAppBar> {
               child: _buildOutsideContainer(
                 context,
                 scrolledUnder,
-                LdWrapConditional(
-                  condition: widget.blurOnScroll,
-                  builder: (context, child) => ClipRect(
-                    child: ImplicitBlur(
-                      sigma: scrolledUnder ? 5 : 0,
+                _buildInsideContainer(
+                  context,
+                  scrolledUnder,
+                  LdWrapConditional(
+                    condition: widget.addContainer,
+                    builder: (context, child) => LdContainer(
+                      padding: EdgeInsets.zero,
                       child: child,
-                      duration: const Duration(milliseconds: 300),
                     ),
-                  ),
-                  child: _buildInsideContainer(
-                    context,
-                    scrolledUnder,
-                    LdWrapConditional(
-                      condition: widget.addContainer,
-                      builder: (context, child) => LdContainer(
-                        padding: EdgeInsets.zero,
-                        child: child,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          LayoutBuilder(builder: (context, constraints) {
-                            final hasSearch = widget.searchConfig != null;
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        LayoutBuilder(builder: (context, constraints) {
+                          final hasSearch = widget.searchConfig != null;
 
-                            return Row(
-                              children: [
-                                const MacOSWindowControls(),
-                                if (_hasDrawer) ...[
-                                  LdReveal(
-                                    revealed: _showOpenDrawerButton,
-                                    child: const OpenDrawerButton(),
-                                  ),
-                                  ldSpacerS,
-                                ],
-                                if (leading != null) ...[leading, ldSpacerS],
-                                if (widget.title != null || visibleActions.isNotEmpty || hasSearch)
-                                  Expanded(
-                                      child: LdOverflowView(
-                                    spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    mainAxisAlignment:
-                                        widget.title == null ? MainAxisAlignment.start : MainAxisAlignment.center,
-                                    builder: (context, remainingItemCount) {
-                                      if (remainingItemCount > visibleActions.length) {
-                                        return const SizedBox();
-                                      }
-                                      return LdAppbarActionOverflowMenu(
-                                        layoutState: layoutState,
-                                        actions: [
-                                          ...visibleActions.sublist(visibleActions.length - remainingItemCount)
-                                        ],
-                                        menuProviders: widget.overflowMenuProviders,
-                                        inMenu: true,
-                                      );
-                                    },
-                                    children: [
-                                      if (widget.title != null)
-                                        LdFlexibleChild(
-                                          child: Align(
-                                            alignment: Alignment.centerLeft,
-                                            child: DefaultTextStyle(
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: _headerStyle,
-                                              child: widget.title ?? const SizedBox(),
-                                            ),
+                          return Row(
+                            children: [
+                              const MacOSWindowControls(),
+                              if (_hasDrawer) ...[
+                                LdReveal(
+                                  revealed: _showOpenDrawerButton,
+                                  child: const OpenDrawerButton(),
+                                ),
+                                ldSpacerS,
+                              ],
+                              if (leading != null) ...[leading, ldSpacerS],
+                              if (widget.title != null || visibleActions.isNotEmpty || hasSearch)
+                                Expanded(
+                                    child: LdOverflowView(
+                                  spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment:
+                                      widget.title == null ? MainAxisAlignment.start : MainAxisAlignment.center,
+                                  builder: (context, remainingItemCount) {
+                                    if (remainingItemCount > visibleActions.length) {
+                                      return const SizedBox();
+                                    }
+                                    return LdAppbarActionOverflowMenu(
+                                      layoutState: layoutState,
+                                      actions: [...visibleActions.sublist(visibleActions.length - remainingItemCount)],
+                                      menuProviders: widget.overflowMenuProviders,
+                                      inMenu: true,
+                                    );
+                                  },
+                                  children: [
+                                    if (widget.title != null)
+                                      LdFlexibleChild(
+                                        child: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: DefaultTextStyle(
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: _headerStyle,
+                                            child: widget.title ?? const SizedBox(),
                                           ),
-                                        ),
-                                      if (hasSearch)
-                                        LdFlexibleChild(
-                                          child: LdSearchInput(
-                                            searchConfig: widget.searchConfig!,
-                                            isBottomNavigationBar: _isInBottomSlot,
-                                            fullWidth: false,
-                                          ),
-                                        ),
-                                      ...visibleActions.map(
-                                        (e) => LdAppBarActionWidget(
-                                          action: e,
-                                          layoutState: layoutState,
-                                          inMenu: false,
-                                          menuProviders: widget.overflowMenuProviders,
                                         ),
                                       ),
-                                    ],
-                                  ))
-                                else
-                                  const SizedBox.shrink(),
-                                LdReveal(revealed: _showCloseDrawerButton, child: const CloseDrawerButton()),
-                                if (widget.trailing != null) widget.trailing!,
-                                LdReveal(revealed: _showWindowsWindowControls, child: const WindowsWindowControls()),
-                              ],
-                            );
-                          }),
-                          if (widget.bottom != null) ...[
-                            LdWrapConditional(
-                              condition: _hasTopContent,
-                              builder: (context, child) => Padding(
-                                padding: EdgeInsets.only(
-                                  top: LdTheme.of(context).pad(size: LdSize.s).top,
-                                ),
-                                child: child,
+                                    if (hasSearch)
+                                      LdFlexibleChild(
+                                        child: LdSearchInput(
+                                          searchConfig: widget.searchConfig!,
+                                          isBottomNavigationBar: _isInBottomSlot,
+                                          fullWidth: false,
+                                        ),
+                                      ),
+                                    ...visibleActions.map(
+                                      (e) => LdAppBarActionWidget(
+                                        action: e,
+                                        layoutState: layoutState,
+                                        inMenu: false,
+                                        menuProviders: widget.overflowMenuProviders,
+                                      ),
+                                    ),
+                                  ],
+                                ))
+                              else
+                                const SizedBox.shrink(),
+                              LdReveal(revealed: _showCloseDrawerButton, child: const CloseDrawerButton()),
+                              if (widget.trailing != null) widget.trailing!,
+                              LdReveal(revealed: _showWindowsWindowControls, child: const WindowsWindowControls()),
+                            ],
+                          );
+                        }),
+                        if (widget.bottom != null) ...[
+                          LdWrapConditional(
+                            condition: _hasTopContent,
+                            builder: (context, child) => Padding(
+                              padding: EdgeInsets.only(
+                                top: LdTheme.of(context).pad(size: LdSize.s).top,
                               ),
-                              child: widget.bottom!,
+                              child: child,
                             ),
-                          ],
+                            child: widget.bottom!,
+                          ),
                         ],
-                      ),
+                      ],
                     ),
                   ),
                 ),

@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter_window_utils/messages.g.dart';
 import 'package:provider/provider.dart';
 
 enum LdThemeBrightnessMode {
@@ -58,7 +57,6 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
   LdPalette get _lightPalette => widget.lightPalette ?? shadDefault;
   LdTheme get _theme => widget.theme ?? _createdTheme!;
 
-  StreamSubscription<WindowState>? _windowStateSubscription;
   StreamSubscription<double>? _screenRadiusSubscription;
 
   @override
@@ -153,7 +151,7 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
   dispose() {
     _createdTheme?.dispose();
     WidgetsBinding.instance.removeObserver(this);
-    _windowStateSubscription?.cancel();
+
     _screenRadiusSubscription?.cancel();
     super.dispose();
   }

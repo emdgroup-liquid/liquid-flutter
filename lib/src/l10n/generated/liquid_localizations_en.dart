@@ -77,8 +77,7 @@ class LiquidLocalizationsEn extends LiquidLocalizations {
   String get loading => 'Loading...';
 
   @override
-  String get networkError =>
-      'A network error occurred. Please make sure you are connected to the internet and try again.';
+  String get networkError => 'A network error occurred. Please make sure you are connected to the internet and try again.';
 
   @override
   String get timeoutError => 'The request timed out. Please try again.';

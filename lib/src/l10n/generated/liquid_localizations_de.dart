@@ -77,8 +77,7 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
   String get loading => 'Laden...';
 
   @override
-  String get networkError =>
-      'Netzwerkfehler. Bitte stellen Sie sicher, dass Sie mit dem Internet verbunden sind und versuchen Sie es erneut.';
+  String get networkError => 'Netzwerkfehler. Bitte stellen Sie sicher, dass Sie mit dem Internet verbunden sind und versuchen Sie es erneut.';
 
   @override
   String get timeoutError => 'Zeitüberschreitung der Anfrage. Bitte versuchen Sie es erneut.';

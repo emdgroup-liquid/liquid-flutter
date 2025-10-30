@@ -67,7 +67,6 @@ class LdMonkeyDetailPage<T extends Identifiable<IdType>, IdType> extends Statele
                             value: LdMonkeyActionLocation.detailSecondary,
                             child: LdAppBar(
                               implyLeading: false,
-                              disableSafeArea: true,
                               actions: secondaryActions.actions,
                               overflowMenuProviders: secondaryActions.menuProviders,
                             ),

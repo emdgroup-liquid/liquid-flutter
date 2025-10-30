@@ -11,7 +11,6 @@ class BentoGallery extends StatelessWidget {
     return LdScaffold(
       appBar: LdAppBar(
         addContainer: true,
-        blurOnScroll: true,
         title: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,

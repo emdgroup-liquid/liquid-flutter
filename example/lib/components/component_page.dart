@@ -38,7 +38,6 @@ class ComponentPage extends StatelessWidget {
         appBarPlacement: LdScaffoldAppBarPlacement.mobileBottomDesktopTop,
         appBar: LdAppBar(
           addContainer: true,
-          blurOnScroll: true,
           title: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,

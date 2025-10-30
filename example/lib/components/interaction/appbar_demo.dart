@@ -29,10 +29,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
   LdAppBarBackgroundMode _backgroundMode = LdAppBarBackgroundMode.whenScrolled;
 
   final ScrollController _scrollController = ScrollController();
-  final TextEditingController _primarySearchController =
-      TextEditingController();
-  final TextEditingController _secondarySearchController =
-      TextEditingController();
+
   LdSearchConfig? _primarySearchConfig;
   LdSearchConfig? _secondarySearchConfig;
 
@@ -46,8 +43,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
   @override
   void dispose() {
     _scrollController.dispose();
-    _primarySearchController.dispose();
-    _secondarySearchController.dispose();
+
     _primarySearchConfig?.dispose();
     _secondarySearchConfig?.dispose();
     super.dispose();
@@ -58,7 +54,6 @@ class _AppBarDemoState extends State<AppBarDemo> {
     _primarySearchConfig = null;
     if (_hasPrimarySearchConfig) {
       _primarySearchConfig = LdSearchConfig(
-        inputController: _primarySearchController,
         onSearch: (query) {
           // Handle primary search
           print('Primary search query: $query');
@@ -87,7 +82,6 @@ class _AppBarDemoState extends State<AppBarDemo> {
     _secondarySearchConfig = null;
     if (_hasSecondarySearchConfig) {
       _secondarySearchConfig = LdSearchConfig(
-        inputController: _secondarySearchController,
         onSearch: (query) {
           // Handle secondary search
           print('Secondary search query: $query');
