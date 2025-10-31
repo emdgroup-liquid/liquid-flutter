@@ -162,15 +162,15 @@ final movieDemo = LdMonkey<_Movie, int>(
                   children: [
                     Expanded(
                       flex: 2,
-                      child: LdTextL("Movie"),
+                      child: LdText.l("Movie"),
                     ),
                     Expanded(
                       flex: 2,
-                      child: LdTextL("Genre"),
+                      child: LdText.l("Genre"),
                     ),
                     Expanded(
                       flex: 2,
-                      child: LdTextL("Rating"),
+                      child: LdText.l("Rating"),
                     ),
                   ],
                 ).spaceM().padL(),

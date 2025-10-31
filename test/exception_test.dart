@@ -176,7 +176,7 @@ void main() {
       // Verify components are displayed
       expect(find.text('Error occurred'), findsOneWidget);
       expect(find.byType(LdHint), findsOneWidget);
-      expect(find.byType(LdTextP), findsOneWidget);
+      expect(find.byType(LdText.p), findsOneWidget);
       expect(find.byType(LdButton), findsAtLeastNWidgets(1)); // At least More Info button
     });
 

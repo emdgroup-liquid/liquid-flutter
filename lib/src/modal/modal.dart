@@ -200,7 +200,7 @@ class LdModal {
 
     if (userCanDismiss && showDismissButton) {
       final dismissButton = Builder(builder: (context) {
-        return LdButtonVague(
+        return LdButton.vague(
           mode: title != null ? LdButtonMode.ghost : LdButtonMode.vague,
           child: const Icon(LucideIcons.x),
           onPressed: () {

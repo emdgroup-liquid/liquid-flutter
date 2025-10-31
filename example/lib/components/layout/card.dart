@@ -20,19 +20,19 @@ class _CardDemoState extends State<CardDemo> {
       title: "LdCard",
       demo: LdAutoSpace(
         children: [
-          const LdTextP(
+          LdText.p(
             "Cards are versatile containers that group related content and actions. They can include headers, footers, and various interactive elements. Cards provide a consistent way to present information while maintaining visual hierarchy and organization.",
           ),
-          const LdTextP(
+          LdText.p(
             "Cards can be styled with or without elevation (flat), and can be placed on different background surfaces. They automatically adapt their appearance based on the theme and surface they're placed on.",
           ),
-          const LdTextH("Flat Card with child only"),
+          LdText.h("Flat Card with child only"),
           ComponentWell(
             child: LdCard(
-              child: LdTextL("Hello world"),
+              child: LdText.l("Hello world"),
             ),
           ),
-          const LdTextH("Flat Card with header and footer"),
+          LdText.h("Flat Card with header and footer"),
           ComponentWell(
             child: Column(
               children: [
@@ -40,7 +40,7 @@ class _CardDemoState extends State<CardDemo> {
                   child: LdAutoSpace(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const LdTextH(
+                      LdText.h(
                         "Hello World!",
                       ),
                       // lorem ipsum text
@@ -67,7 +67,7 @@ class _CardDemoState extends State<CardDemo> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const LdTextH(
+                      LdText.h(
                         "Hello footer",
                       ),
                       ldSpacerM,
@@ -79,30 +79,30 @@ class _CardDemoState extends State<CardDemo> {
               ],
             ),
           ),
-          const LdTextH("Card on surface"),
+          LdText.h("Card on surface"),
           ComponentWell(
             onSurface: true,
             child: LdCard(
               child: LdAutoSpace(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  LdTextH("Card on surface"),
-                  LdTextL(
+                  LdText.h("Card on surface"),
+                  LdText.l(
                     "This card is placed on a surface background. Notice how it adapts its appearance automatically.",
                   ),
                 ],
               ),
             ),
           ),
-          const LdTextH("Elevated Card"),
+          LdText.h("Elevated Card"),
           ComponentWell(
             child: LdCard(
               flat: false,
               child: LdAutoSpace(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  LdTextH("Elevated Card"),
-                  LdTextL(
+                  LdText.h("Elevated Card"),
+                  LdText.l(
                     "This card has elevation applied to make it stand out from the background.",
                   ),
                 ],

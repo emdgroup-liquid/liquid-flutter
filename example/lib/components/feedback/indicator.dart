@@ -15,7 +15,11 @@ class IndicatorDemo extends StatelessWidget {
           LdAutoSpace(crossAxisAlignment: CrossAxisAlignment.center, children: [
         ...LdIndicatorType.values.map(
           (e) => Row(
-            children: [LdIndicator(type: e), ldSpacerM, LdTextPs(e.toString())],
+            children: [
+              LdIndicator(type: e),
+              ldSpacerM,
+              LdText.ps(e.toString())
+            ],
           ),
         )
       ]),

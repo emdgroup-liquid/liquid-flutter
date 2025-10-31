@@ -108,7 +108,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                 ),
                 LdBundle(
                   children: [
-                    const LdTextL("Color"),
+                    LdText.l("Color"),
                     ColorSelctor(
                         active: _color,
                         colors: {
@@ -158,11 +158,11 @@ class _ButtonDemoState extends State<ButtonDemo> {
             ),
             LdBundle(
               children: [
-                const LdTextH("Variants"),
-                const LdTextHs(
+                LdText.h("Variants"),
+                LdText.hs(
                   "Producing error",
                 ),
-                const LdTextP(
+                LdText.p(
                   "An exception thrown in  the onPressed callback will "
                   "automatically produce an error indication by turning the button red",
                 ),
@@ -195,10 +195,10 @@ class _ButtonDemoState extends State<ButtonDemo> {
             ),
             LdBundle(
               children: [
-                const LdTextHs(
+                LdText.hs(
                   "Leading and trailing widgets",
                 ),
-                const LdTextP(
+                LdText.p(
                   "You can add a leading or trailing widget to a button",
                 ),
                 ComponentWell(
@@ -244,7 +244,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
             ),
             LdBundle(
               children: [
-                const LdTextH(
+                LdText.h(
                   "Disabled",
                 ),
                 const LdText(
@@ -264,7 +264,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
             ),
             LdBundle(
               children: [
-                const LdTextH(
+                LdText.h(
                   "Circular button",
                 ),
                 const LdText(
@@ -309,7 +309,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
             ),
             LdBundle(
               children: [
-                const LdTextH(
+                LdText.h(
                   "Full width",
                 ),
                 const LdText(

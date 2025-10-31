@@ -54,12 +54,12 @@ class _SelectableListDemoState extends State<SelectableListDemo> {
       demo: LdAutoSpace(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const LdTextP(
+          LdText.p(
             'LdSelectableList is a list component that supports item selection in both single and multi-select modes. '
             'It integrates with LdPaginator for pagination and allows customization of item rendering through builder functions. '
             'The component handles selection state management internally and provides callbacks for selection changes.',
           ),
-          LdTextP(
+          LdText.p(
               "You can simply wrap an existing LdList with LdSelectableList to make it selectable."),
           CodeBlock(
             code: """
@@ -89,7 +89,7 @@ class _SelectableListDemoState extends State<SelectableListDemo> {
           ),
           ComponentWell(
             padding: EdgeInsets.zero,
-            title: const LdTextHs("Demo list"),
+            title: LdText.hs("Demo list"),
             child: SizedBox(
               height: 500,
               child: LdSelectableList<SampleItem, String>(
@@ -132,7 +132,7 @@ class _SelectableListDemoState extends State<SelectableListDemo> {
             },
             label: "Show selection controls",
           ),
-          LdTextP("Selected items"),
+          LdText.p("Selected items"),
           Wrap(
             children: _selectedItems.map((e) => LdTag(child: Text(e))).toList(),
           ).spaceS(),

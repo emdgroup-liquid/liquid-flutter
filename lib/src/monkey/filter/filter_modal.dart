@@ -11,7 +11,7 @@ LdModal ldFilterModal<T extends Identifiable<IdType>, IdType>(BuildContext conte
     modalContent: (context) {
       return LdFilterModal(route: route);
     },
-    actionBar: (context) => LdButtonVague(
+    actionBar: (context) => LdButton.vague(
       child: Text(LiquidLocalizations.of(context).apply),
       size: LdSize.l,
       onPressed: () {
@@ -30,7 +30,7 @@ class LdFilterContext<T extends Identifiable<IdType>, IdType> extends StatelessW
   Widget build(BuildContext context) {
     final route = context.read<LdMonkey<T, IdType>>();
     return LdContextMenu(
-      builder: (context, isOpen, open, child) => LdButtonGhost(
+      builder: (context, isOpen, open, child) => LdButton.ghost(
         autoLoading: false,
         child: Text(LiquidLocalizations.of(context).filter),
         onPressed: () {
@@ -98,7 +98,7 @@ class LdFilterModal<T extends Identifiable<IdType>, IdType> extends StatelessWid
                     .map(
                       (e) => LdReveal.quick(
                         revealed: !e.isOn,
-                        child: LdButtonOutline(
+                        child: LdButton.outline(
                             leading: e.icon(context),
                             child: Text(e.label(context)),
                             onPressed: () {
@@ -144,7 +144,7 @@ class _Filter<T extends Identifiable<IdType>, IdType, GroupBy> extends Stateless
       return LdListItem(
         title: Text(filter.label(context)),
         leading: LdAvatar(child: filter.icon(context)),
-        trailing: LdButtonVague(
+        trailing: LdButton.vague(
           child: const Icon(LucideIcons.x),
           size: LdSize.s,
           onPressed: () {
@@ -180,7 +180,7 @@ class _Filter<T extends Identifiable<IdType>, IdType, GroupBy> extends Stateless
           Expanded(
             child: Text(searchFilter.searchText),
           ),
-          LdButtonVague(
+          LdButton.vague(
             child: const Icon(LucideIcons.x),
             size: LdSize.s,
             onPressed: () {

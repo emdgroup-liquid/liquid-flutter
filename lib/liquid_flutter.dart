@@ -3,6 +3,7 @@ library liquid_flutter;
 import 'package:flutter/foundation.dart';
 
 export 'src/accordion.dart';
+export 'src/annotations.dart';
 export 'src/appbar/index.dart';
 export 'src/autospace.dart';
 export 'src/avatar.dart';
@@ -109,7 +110,6 @@ export 'src/typography.dart';
 export 'src/version.dart';
 export 'src/window_frame.dart';
 export 'src/conditional_parent.dart';
-export 'variants.g.dart';
 
 /// This variable defines whether TextStyle should use the `liquid_flutter`
 /// package prefix when defining the font family.

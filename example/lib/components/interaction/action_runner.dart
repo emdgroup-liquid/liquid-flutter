@@ -39,7 +39,7 @@ class _ActionRunnerDemoState extends State<ActionRunnerDemo> {
                   children: [
                     LdButton(child: const Text("Copy logs"), onPressed: () {}),
                     ldSpacerS,
-                    LdButtonOutline(
+                    LdButton.outline(
                         child: const Text("Cancel"), onPressed: () {}),
                   ],
                 ),

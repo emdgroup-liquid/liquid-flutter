@@ -40,7 +40,7 @@ class LdTimePicker extends StatelessWidget {
       useRootNavigator: useRootNavigator,
       builder: (context, open) => LdBundle(
         children: [
-          if (label != null) LdTextL(label!),
+          if (label != null) LdText.l(label!),
           LdButton(
             child: Text(initialTimeString),
             key: const Key("time_picker_button"),
@@ -54,7 +54,7 @@ class LdTimePicker extends StatelessWidget {
         key: const Key('time_picker_sheet'),
         size: LdSize.m,
         fixedDialogSize: const Size(300, 300),
-        title: label != null ? LdTextL(label!) : null,
+        title: label != null ? LdText.l(label!) : null,
         contentPadding: LdTheme.of(context).pad(size: LdSize.s),
         modalContent: (
           context,
@@ -226,7 +226,7 @@ class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
               ),
             ),
             ldSpacerM,
-            const LdTextL(':'),
+            LdText.l(':'),
             ldSpacerM,
             Expanded(
               child: Container(
@@ -290,7 +290,7 @@ class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
               ),
             ),
             ldSpacerM,
-            const LdTextL(':'),
+            LdText.l(':'),
             ldSpacerM,
             Expanded(
               child: LdInput(

@@ -137,7 +137,7 @@ class _ComponentWellState extends State<ComponentWell> {
         ),
       ),
       builder: (context, showModal) {
-        return LdButtonGhost(
+        return LdButton.ghost(
           autoLoading: false,
           onPressed: showModal,
           child: const Icon(LucideIcons.code),

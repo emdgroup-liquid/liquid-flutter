@@ -174,8 +174,8 @@ class NotificationDemo extends StatelessWidget {
                   }),
             ],
           )),
-          const LdTextH("Complex interactions"),
-          const LdTextP(
+          LdText.h("Complex interactions"),
+          LdText.p(
             "Notifications can also be interactive, requiring user input or confirmation. The following examples demonstrate different types of interactive notifications.",
           ),
           ComponentWell(
@@ -193,7 +193,7 @@ class NotificationDemo extends StatelessWidget {
               ),
             ),
           ),
-          const LdTextP(
+          LdText.p(
             "To indefinitely display a notification you can use the `LdNotificationType.acknowledge` type.",
           ),
           ComponentWell(
@@ -211,7 +211,7 @@ class NotificationDemo extends StatelessWidget {
               ),
             ),
           ),
-          const LdTextP(
+          LdText.p(
             "To prompt some simple text you can use the `LdNotificationType.enterText` type.",
           ),
           ComponentWell(

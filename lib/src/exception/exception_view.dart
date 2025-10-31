@@ -159,7 +159,7 @@ class LdExceptionView extends StatelessWidget {
           type: exception?.type ?? LdHintType.error,
           size: LdSize.l,
         ),
-        LdTextP(
+        LdText.p(
           exception?.message ?? LiquidLocalizations.of(context).unknownError,
           textAlign: TextAlign.center,
         ),

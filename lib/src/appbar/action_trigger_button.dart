@@ -66,7 +66,7 @@ class ActionTriggerButton extends StatelessWidget {
 
       return Tooltip(
         message: action.label(context),
-        child: LdButtonGhost(
+        child: LdButton.ghost(
           color: action.color(context),
           active: action.isActive(context),
           onPressed: onPressed,

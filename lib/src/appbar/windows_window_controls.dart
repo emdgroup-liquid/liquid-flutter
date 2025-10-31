@@ -9,21 +9,21 @@ class WindowsWindowControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        LdButtonVague(
+        LdButton.vague(
           size: LdSize.s,
           child: const Icon(LucideIcons.minus),
           onPressed: () {
             LdAppBar.callbacks?.onMinimize?.call();
           },
         ),
-        LdButtonVague(
+        LdButton.vague(
           size: LdSize.s,
           child: const Icon(LucideIcons.square),
           onPressed: () {
             LdAppBar.callbacks?.onMaximize?.call();
           },
         ),
-        LdButtonVague(
+        LdButton.vague(
           size: LdSize.s,
           child: const Icon(LucideIcons.x),
           onPressed: () {

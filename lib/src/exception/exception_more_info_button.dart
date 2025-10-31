@@ -29,7 +29,7 @@ class LdExceptionMoreInfoButton extends StatelessWidget {
           error: error!,
         ),
         actions: (context) => [
-          LdButtonGhost(
+          LdButton.ghost(
             onPressed: () => Navigator.of(context).pop(),
             child: Text(LiquidLocalizations.of(context).close),
           ),

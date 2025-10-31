@@ -123,7 +123,7 @@ class _ComponentApiState extends State<ComponentApi> {
           shrinkWrap: true,
         ),
         ldSpacerM,
-        const LdTextHs(
+        LdText.hs(
           "Properties",
         ),
         ldSpacerM,
@@ -145,7 +145,7 @@ class _ComponentApiState extends State<ComponentApi> {
                     children: [
                       if (e.description.isNotEmpty)
                         LdMute(
-                          child: LdTextP(
+                          child: LdText.p(
                             e.description.replaceAll("///", ""),
                           ),
                         ),
@@ -172,7 +172,7 @@ class _ComponentApiState extends State<ComponentApi> {
                   );
                 })),
         ldSpacerL,
-        const LdTextHs(
+        LdText.hs(
           "Methods",
         ),
         ldSpacerM,

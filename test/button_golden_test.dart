@@ -17,14 +17,14 @@ void main() {
         return null;
       },
       "LdButtonOutline": (tester, place) async {
-        await place(LdButtonOutline(
+        await place(LdButton.outline(
           child: const Text("Hello"),
           onPressed: () {},
         ));
         return null;
       },
       "LdButtonGhost": (tester, place) async {
-        await place(LdButtonGhost(
+        await place(LdButton.ghost(
           child: const Text("Hello"),
           onPressed: () {},
         ));

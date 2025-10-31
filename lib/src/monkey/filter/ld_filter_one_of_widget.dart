@@ -19,8 +19,8 @@ class LdFilterOneOfWidget<T extends Identifiable<IdType>, IdType, E> extends Sta
         children: [
           Row(
             children: [
-              Expanded(child: LdTextL(filter.label(context))),
-              LdButtonVague(
+              Expanded(child: LdText.l(filter.label(context))),
+              LdButton.vague(
                 child: const Icon(LucideIcons.x),
                 size: LdSize.s,
                 onPressed: () {

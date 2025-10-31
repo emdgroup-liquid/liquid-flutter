@@ -161,7 +161,7 @@ class _LdAppBarState extends State<LdAppBar> {
     if (!imply) return null;
 
     if (_canPopParentRoute && !_isDrawer) {
-      return LdButtonGhost(
+      return LdButton.ghost(
         child: const Icon(LucideIcons.chevronLeft),
         onPressed: () => Navigator.of(context).maybePop(),
       );
@@ -438,11 +438,15 @@ class _LdAppBarState extends State<LdAppBar> {
                               if (_hasDrawer) ...[
                                 LdReveal(
                                   revealed: _showOpenDrawerButton,
-                                  child: const OpenDrawerButton(),
+                                  child: const Row(
+                                    children: [
+                                      OpenDrawerButton(),
+                                      ldSpacerM,
+                                    ],
+                                  ),
                                 ),
-                                ldSpacerS,
                               ],
-                              if (leading != null) ...[leading, ldSpacerS],
+                              if (leading != null) ...[leading],
                               if (widget.title != null || visibleActions.isNotEmpty || hasSearch)
                                 Expanded(
                                     child: LdOverflowView(

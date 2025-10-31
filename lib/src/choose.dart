@@ -144,7 +144,7 @@ class _LdChooseState<T> extends State<LdChoose<T>> {
               title: Text(widget.label ?? LiquidLocalizations.of(context).choose),
               actions: (context) => [
                 ldSpacerM,
-                LdButtonGhost(
+                LdButton.ghost(
                   child: Text(
                     LiquidLocalizations.of(context).done,
                   ),

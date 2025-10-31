@@ -10,11 +10,22 @@ import 'package:provider/provider.dart';
 import 'touchable/touchable_colors.dart';
 import 'touchable/touchable_status.dart';
 
+part 'button.variants.g.dart';
+
 /// Determines the mode of the button
 enum LdButtonMode { filled, outline, ghost, vague }
 
 /// A pressable button
-class LdButton extends StatefulWidget {
+@Variants([
+  Variant('ghost', defaults: {'mode': 'LdButtonMode.ghost'}),
+  Variant('vague', defaults: {'mode': 'LdButtonMode.vague'}),
+  Variant('outline', defaults: {'mode': 'LdButtonMode.outline'}),
+  Variant('filled', defaults: {'mode': 'LdButtonMode.filled'}),
+  Variant('warning', defaults: {'color': 'LdTheme.of(context).warning'}),
+  Variant('error', defaults: {'color': 'LdTheme.of(context).error'}),
+  Variant('success', defaults: {'color': 'LdTheme.of(context).success'}),
+])
+class LdButtonWidget extends StatefulWidget {
   final Widget child;
   final Function onPressed;
   final bool disabled;
@@ -38,7 +49,7 @@ class LdButton extends StatefulWidget {
   final String? loadingText;
   final String? errorText;
 
-  const LdButton({
+  const LdButtonWidget({
     required this.child,
     required this.onPressed,
     this.autoLoading = true,
@@ -63,10 +74,10 @@ class LdButton extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<LdButton> createState() => _LdButtonState();
+  State<LdButtonWidget> createState() => _LdButtonState();
 }
 
-class _LdButtonState extends State<LdButton> {
+class _LdButtonState extends State<LdButtonWidget> {
   bool _loading = false;
 
   bool _failed = false;
@@ -195,7 +206,7 @@ class _LdButtonState extends State<LdButton> {
   }
 
   @override
-  void didUpdateWidget(covariant LdButton oldWidget) {
+  void didUpdateWidget(covariant LdButtonWidget oldWidget) {
     if (oldWidget.loading != widget.loading) {
       setState(() {
         _loading = widget.loading;

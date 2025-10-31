@@ -69,7 +69,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
               .toList();
         },
         buildSuggestion: (context, suggestion) {
-          return LdTextP(suggestion.toString());
+          return LdText.p(suggestion.toString());
         },
       );
     } else {
@@ -97,7 +97,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
               .toList();
         },
         buildSuggestion: (context, suggestion) {
-          return LdTextP(suggestion.toString());
+          return LdText.p(suggestion.toString());
         },
       );
     } else {
@@ -124,9 +124,8 @@ class _AppBarDemoState extends State<AppBarDemo> {
           action: (context) async {
             // Show settings dialog
             await LdModal(
-              title: const LdTextL('Settings'),
-              modalContent: (context) =>
-                  const LdTextP('Settings dialog content'),
+              title: LdText.l('Settings'),
+              modalContent: (context) => LdText.p('Settings dialog content'),
             ).show(context);
           },
           submitType: LdLabeledActionType.none,
@@ -141,29 +140,29 @@ class _AppBarDemoState extends State<AppBarDemo> {
           buildContextMenu: (context, close) => Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              LdButtonGhost(
+              LdButton.ghost(
                 width: 200,
                 onPressed: () {
                   close();
                   // Action 1
                 },
-                child: const LdTextP('Action 1'),
+                child: LdText.p('Action 1'),
               ),
-              LdButtonGhost(
+              LdButton.ghost(
                 width: 200,
                 onPressed: () {
                   close();
                   // Action 2
                 },
-                child: const LdTextP('Action 2'),
+                child: LdText.p('Action 2'),
               ),
-              LdButtonGhost(
+              LdButton.ghost(
                 width: 200,
                 onPressed: () {
                   close();
                   // Action 3
                 },
-                child: const LdTextP('Action 3'),
+                child: LdText.p('Action 3'),
               ),
             ],
           ),
@@ -194,7 +193,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
     return LdScaffold(
       appBar: _hasPrimary
           ? LdAppBar(
-              title: const LdTextL('Primary AppBar'),
+              title: LdText.l('Primary AppBar'),
               actions: _actions,
               searchConfig: _primarySearchConfig,
               shadowMode: _shadowMode,
@@ -204,7 +203,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
           : null,
       secondaryAppBar: _hasSecondary
           ? LdAppBar(
-              title: const LdTextL('Secondary AppBar'),
+              title: LdText.l('Secondary AppBar'),
               actions: _actions.take(3).toList(), // Fewer actions for secondary
               searchConfig: _secondarySearchConfig,
               shadowMode: _shadowMode,
@@ -222,11 +221,12 @@ class _AppBarDemoState extends State<AppBarDemo> {
           LdCard(
             child: LdAutoSpace(
               children: [
-                const LdTextL('LdAppBar Demo Controls'),
-                LdTextP('Use the controls below to explore LdAppBar features:'),
+                LdText.l('LdAppBar Demo Controls'),
+                LdText.p(
+                    'Use the controls below to explore LdAppBar features:'),
 
                 // Primary AppBar Controls
-                LdTextL('Primary AppBar'),
+                LdText.l('Primary AppBar'),
                 Row(
                   children: [
                     LdToggle(
@@ -234,7 +234,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
                       onChanged: (value) => setState(() => _hasPrimary = value),
                     ),
                     ldHSpacerS,
-                    const LdTextP('Show Primary AppBar'),
+                    LdText.p('Show Primary AppBar'),
                   ],
                 ),
                 Row(
@@ -249,38 +249,37 @@ class _AppBarDemoState extends State<AppBarDemo> {
                       },
                     ),
                     ldHSpacerS,
-                    const LdTextP('Enable Search'),
+                    LdText.p('Enable Search'),
                   ],
                 ),
-                LdTextP('Position:'),
+                LdText.p('Position:'),
                 LdSwitch<LdScaffoldAppBarPlacement>(
                   value: _primaryAppBarPlacement,
                   onChanged: (value) =>
                       setState(() => _primaryAppBarPlacement = value),
                   children: {
-                    LdScaffoldAppBarPlacement.top: const LdTextP('Top'),
-                    LdScaffoldAppBarPlacement.bottom: const LdTextP('Bottom'),
+                    LdScaffoldAppBarPlacement.top: LdText.p('Top'),
+                    LdScaffoldAppBarPlacement.bottom: LdText.p('Bottom'),
                     LdScaffoldAppBarPlacement.mobileTopDesktopBottom:
-                        const LdTextP('Mobile Top, Desktop Bottom'),
+                        LdText.p('Mobile Top, Desktop Bottom'),
                     LdScaffoldAppBarPlacement.mobileBottomDesktopTop:
-                        const LdTextP('Mobile Bottom, Desktop Top'),
+                        LdText.p('Mobile Bottom, Desktop Top'),
                   },
                 ),
-                LdTextP('Scroll Behavior:'),
+                LdText.p('Scroll Behavior:'),
                 LdSwitch<LdAppBarScrollBehavior>(
                   value: _primaryScrollBehavior,
                   onChanged: (value) =>
                       setState(() => _primaryScrollBehavior = value),
                   children: {
-                    LdAppBarScrollBehavior.static: const LdTextP('Static'),
-                    LdAppBarScrollBehavior.mobileOnly:
-                        const LdTextP('Mobile Only'),
-                    LdAppBarScrollBehavior.always: const LdTextP('Always'),
+                    LdAppBarScrollBehavior.static: LdText.p('Static'),
+                    LdAppBarScrollBehavior.mobileOnly: LdText.p('Mobile Only'),
+                    LdAppBarScrollBehavior.always: LdText.p('Always'),
                   },
                 ),
 
                 // Secondary AppBar Controls
-                LdTextL('Secondary AppBar'),
+                LdText.l('Secondary AppBar'),
                 Row(
                   children: [
                     LdToggle(
@@ -289,7 +288,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
                           setState(() => _hasSecondary = value),
                     ),
                     ldHSpacerS,
-                    const LdTextP('Show Secondary AppBar'),
+                    LdText.p('Show Secondary AppBar'),
                   ],
                 ),
                 Row(
@@ -304,69 +303,66 @@ class _AppBarDemoState extends State<AppBarDemo> {
                       },
                     ),
                     ldHSpacerS,
-                    const LdTextP('Enable Search'),
+                    LdText.p('Enable Search'),
                   ],
                 ),
-                LdTextP('Position:'),
+                LdText.p('Position:'),
                 LdSwitch<LdScaffoldAppBarPlacement>(
                   value: _secondaryAppBarPlacement,
                   onChanged: (value) =>
                       setState(() => _secondaryAppBarPlacement = value),
                   children: {
-                    LdScaffoldAppBarPlacement.top: const LdTextP('Top'),
-                    LdScaffoldAppBarPlacement.bottom: const LdTextP('Bottom'),
+                    LdScaffoldAppBarPlacement.top: LdText.p('Top'),
+                    LdScaffoldAppBarPlacement.bottom: LdText.p('Bottom'),
                     LdScaffoldAppBarPlacement.mobileTopDesktopBottom:
-                        const LdTextP('Mobile Top, Desktop Bottom'),
+                        LdText.p('Mobile Top, Desktop Bottom'),
                     LdScaffoldAppBarPlacement.mobileBottomDesktopTop:
-                        const LdTextP('Mobile Bottom, Desktop Top'),
+                        LdText.p('Mobile Bottom, Desktop Top'),
                   },
                 ),
-                LdTextP('Scroll Behavior:'),
+                LdText.p('Scroll Behavior:'),
                 LdSwitch<LdAppBarScrollBehavior>(
                   value: _secondaryScrollBehavior,
                   onChanged: (value) =>
                       setState(() => _secondaryScrollBehavior = value),
                   children: {
-                    LdAppBarScrollBehavior.static: const LdTextP('Static'),
-                    LdAppBarScrollBehavior.mobileOnly:
-                        const LdTextP('Mobile Only'),
-                    LdAppBarScrollBehavior.always: const LdTextP('Always'),
+                    LdAppBarScrollBehavior.static: LdText.p('Static'),
+                    LdAppBarScrollBehavior.mobileOnly: LdText.p('Mobile Only'),
+                    LdAppBarScrollBehavior.always: LdText.p('Always'),
                   },
                 ),
 
                 // Shared Visual Controls
-                LdTextL('Visual Appearance (Applied to Both AppBars)'),
-                LdTextP('Shadow Mode:'),
+                LdText.l('Visual Appearance (Applied to Both AppBars)'),
+                LdText.p('Shadow Mode:'),
                 LdSwitch<LdAppBarShadowMode>(
                   value: _shadowMode,
                   onChanged: (value) => setState(() => _shadowMode = value),
                   children: {
-                    LdAppBarShadowMode.visible: const LdTextP('Visible'),
-                    LdAppBarShadowMode.whenScrolled:
-                        const LdTextP('When Scrolled'),
-                    LdAppBarShadowMode.hidden: const LdTextP('Hidden'),
+                    LdAppBarShadowMode.visible: LdText.p('Visible'),
+                    LdAppBarShadowMode.whenScrolled: LdText.p('When Scrolled'),
+                    LdAppBarShadowMode.hidden: LdText.p('Hidden'),
                   },
                 ),
-                LdTextP('Border Mode:'),
+                LdText.p('Border Mode:'),
                 LdSwitch<LdAppBarBorderMode>(
                   value: _borderMode,
                   onChanged: (value) => setState(() => _borderMode = value),
                   children: {
-                    LdAppBarBorderMode.visible: const LdTextP('Visible'),
-                    LdAppBarBorderMode.whenScrolled:
-                        const LdTextP('When Scrolled'),
-                    LdAppBarBorderMode.hidden: const LdTextP('Hidden'),
+                    LdAppBarBorderMode.visible: LdText.p('Visible'),
+                    LdAppBarBorderMode.whenScrolled: LdText.p('When Scrolled'),
+                    LdAppBarBorderMode.hidden: LdText.p('Hidden'),
                   },
                 ),
-                LdTextP('Background Mode:'),
+                LdText.p('Background Mode:'),
                 LdSwitch<LdAppBarBackgroundMode>(
                   value: _backgroundMode,
                   onChanged: (value) => setState(() => _backgroundMode = value),
                   children: {
-                    LdAppBarBackgroundMode.visible: const LdTextP('Visible'),
+                    LdAppBarBackgroundMode.visible: LdText.p('Visible'),
                     LdAppBarBackgroundMode.whenScrolled:
-                        const LdTextP('When Scrolled'),
-                    LdAppBarBackgroundMode.hidden: const LdTextP('Hidden'),
+                        LdText.p('When Scrolled'),
+                    LdAppBarBackgroundMode.hidden: LdText.p('Hidden'),
                   },
                 ),
               ],
@@ -377,11 +373,11 @@ class _AppBarDemoState extends State<AppBarDemo> {
           LdCard(
             child: LdAutoSpace(
               children: [
-                const LdTextL('Scrollable Content'),
-                LdTextP(
+                LdText.l('Scrollable Content'),
+                LdText.p(
                     'Scroll down to see the app bar scroll behaviors in action:'),
                 ...List.generate(
-                    50, (index) => LdTextP('Content item ${index + 1}')),
+                    50, (index) => LdText.p('Content item ${index + 1}')),
               ],
             ),
           ),

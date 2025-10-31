@@ -55,7 +55,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
               ),
             ),
             ldVSpacerM,
-            const LdTextH(
+            LdText.h(
               "Color",
             ),
             ldSpacerM,
@@ -72,7 +72,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
                       _color = p0;
                     })),
             ldVSpacerM,
-            const LdTextH("Size"),
+            LdText.h("Size"),
             ldSpacerM,
             LdSelect<LdSize>(
                 value: _size,

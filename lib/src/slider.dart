@@ -208,7 +208,7 @@ class _LdSliderState extends State<LdSlider> with TickerProviderStateMixin {
                               if (widget.hint != null)
                                 Center(
                                   child: Opacity(
-                                    child: LdMute(child: LdTextL(widget.hint!)),
+                                    child: LdMute(child: LdText.l(widget.hint!)),
                                     opacity: widget.disabled ? 0.2 : 1 - _controller!.value,
                                   ),
                                 ),

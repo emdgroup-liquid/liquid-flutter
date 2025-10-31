@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'annotations.dart';
+
+part 'badge.variants.g.dart';
 
 /// A rounded fully opaque label with a background [color].
 /// Can be used to display a small amount of information.
 ///
-class LdBadge extends StatelessWidget {
+@Variants([
+  Variant('success', defaults: {'color': 'LdTheme.of(context).success'}),
+  Variant('warning', defaults: {'color': 'LdTheme.of(context).warning'}),
+  Variant('error', defaults: {'color': 'LdTheme.of(context).error'}),
+])
+class LdBadgeWidget extends StatelessWidget {
   final Widget child;
   final LdColor? color;
 
@@ -12,7 +20,7 @@ class LdBadge extends StatelessWidget {
   final int? maxLines;
   final LdSize size;
 
-  const LdBadge({
+  const LdBadgeWidget({
     required this.child,
     this.color,
     this.size = LdSize.m,

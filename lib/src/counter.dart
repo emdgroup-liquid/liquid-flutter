@@ -110,16 +110,16 @@ class _LdCounterDigitState extends State<_LdCounterDigit> {
                         top: index * height - state.position * height,
                         child: SizedBox(
                           height: height,
-                          child: LdTextH(index.toString(), size: widget.size),
+                          child: LdText.h(index.toString(), size: widget.size),
                         ),
                       )),
               Positioned(
                 top: 10 * height - state.position * height,
-                child: SizedBox(height: height, child: LdTextH(".", size: widget.size)),
+                child: SizedBox(height: height, child: LdText.h(".", size: widget.size)),
               ),
               Positioned(
                 top: 11 * height - state.position * height,
-                child: SizedBox(height: height, child: LdTextH("-", size: widget.size)),
+                child: SizedBox(height: height, child: LdText.h("-", size: widget.size)),
               ),
             ],
           );

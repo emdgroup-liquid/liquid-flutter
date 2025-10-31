@@ -11,7 +11,7 @@ class TypographyDocumentation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ComponentPage(
+    return ComponentPage(
       path: "lib/demos/typography_documentation.dart",
       title: "Typography",
       apiComponents: [
@@ -35,41 +35,41 @@ class TypographyDocumentation extends StatelessWidget {
         LdCard(
           child: LdAutoSpace(
             children: [
-              LdTextHl("Headline Large"),
-              LdTextH("Headline Medium"),
-              LdTextHs("Headline Small"),
-              LdTextHxs("Headline Extra Small"),
+              LdText.hl("Headline Large"),
+              LdText.h("Headline Medium"),
+              LdText.hs("Headline Small"),
+              LdText.hxs("Headline Extra Small"),
             ],
           ),
         ),
         LdCard(
           child: LdAutoSpace(
             children: [
-              LdTextPl("Paragraph Large"),
-              LdTextP("Paragraph Medium"),
-              LdTextPs("Paragraph Small"),
-              LdTextPxs("Paragraph Extra Small"),
+              LdText.pl("Paragraph Large"),
+              LdText.p("Paragraph Medium"),
+              LdText.ps("Paragraph Small"),
+              LdText.pxs("Paragraph Extra Small"),
             ],
           ),
         ),
         LdCard(
           child: LdAutoSpace(
             children: [
-              LdTextLl("Label Large"),
-              LdTextL("Label Medium"),
-              LdTextLs("Label Small"),
-              LdTextLxs("Label Extra Small"),
+              LdText.ll("Label Large"),
+              LdText.l("Label Medium"),
+              LdText.ls("Label Small"),
+              LdText.lxs("Label Extra Small"),
             ],
           ),
         ),
         LdCard(
           child: LdAutoSpace(
             children: [
-              LdTextCaption("Caption"),
+              LdText.caption("Caption"),
             ],
           ),
         ),
-        LdTextP("You can also use the LdMute widget to create a muted text."),
+        LdText.p("You can also use the LdMute widget to create a muted text."),
         CodeBlock(
           code: """
             LdMute(
@@ -77,31 +77,31 @@ class TypographyDocumentation extends StatelessWidget {
             );
           """,
         ),
-        LdTextP(
+        LdText.p(
             "There are also utility constructors for creating text with a specific size and type."),
         CodeBlock(code: """
-          LdTextHl("LdTextHl L Headline"),
-          LdTextH("LdTextHm M Headline"),
-          LdTextHs("LdTextHs S Headline"),
-          LdTextHxs("LdTextHxs XS Headline"),
+          LdText.hl("LdText.hl L Headline"),
+          LdText.h("LdText.hm M Headline"),
+          LdText.hs("LdText.hs S Headline"),
+          LdText.hxs("LdText.hxs XS Headline"),
           
-          LdTextPl("LdTextPl Paragraph Large"),
-          LdTextP("LdTextP Paragraph Medium"),
-          LdTextPs("LdTextPs Paragraph Small"),
-          LdTextPxs("LdTextPxs Paragraph Extra Small"),
+          LdText.pl("LdText.pl Paragraph Large"),
+          LdText.p("LdText.p Paragraph Medium"),
+          LdText.ps("LdText.ps Paragraph Small"),
+          LdText.pxs("LdText.pxs Paragraph Extra Small"),
 
-          LdTextLl("LdTextLl L Label"),
-          LdTextL("LdTextL M Label"),
-          LdTextLs("LdTextLs S Label"),
-          LdTextLxs("LdTextLxs XS Label"),
+          LdText.ll("LdText.ll L Label"),
+          LdText.l("LdText.l M Label"),
+          LdText.ls("LdText.ls S Label"),
+          LdText.lxs("LdText.lxs XS Label"),
 """),
         LdCard(
           child: LdAutoSpace(
             children: [
-              LdTextCaption("This is the caption"),
-              LdTextHl("The big headline is very big"),
-              LdTextHs("Make sure you read this story \nto the end"),
-              LdTextP(
+              LdText.caption("This is the caption"),
+              LdText.hl("The big headline is very big"),
+              LdText.hs("Make sure you read this story \nto the end"),
+              LdText.p(
                   "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.")
             ],
           ),

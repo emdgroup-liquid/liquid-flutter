@@ -31,13 +31,13 @@ class _HomeState extends State<Home> {
                       width: 48, height: 48),
                 ),
                 ldSpacerM,
-                const Flexible(
+                Flexible(
                   child: LdAutoSpace(
                     children: [
-                      LdTextHl(
+                      LdText.hl(
                         "Liquid Flutter",
                       ),
-                      LdTextL(
+                      LdText.l(
                         "Cross platform design system for Flutter.",
                       ),
                     ],
@@ -69,7 +69,7 @@ class _HomeState extends State<Home> {
                 ),
               ],
             ),
-            const LdTextP(
+            LdText.p(
               "Liquid Flutter is a Flutter implementation of the liquid "
               "design system used at EMD. "
               "It is designed to be used in desktop and mobile applications."
@@ -79,7 +79,7 @@ class _HomeState extends State<Home> {
             ),
             const LdDivider(),
             ldSpacerL,
-            const LdTextHs("Demos"),
+            LdText.hs("Demos"),
             Wrap(spacing: 8, runSpacing: 8, children: [
               LdButton(
                   mode: LdButtonMode.outline,
@@ -106,8 +106,8 @@ class _HomeState extends State<Home> {
               ),
             ]),
             const LdDivider(),
-            const LdTextH("Getting Started"),
-            const LdTextP(
+            LdText.h("Getting Started"),
+            LdText.p(
               "To get started using liquid flutter please add it as a dependency to your project:",
             ),
             const CodeBlock(
@@ -127,7 +127,7 @@ class _HomeState extends State<Home> {
               ],
               wrapActiveInCard: true,
             ),
-            const LdTextP(
+            LdText.p(
                 "Setup a Liquid Theme at the top of your application. This will  be used to provide the color theme to all components via context."),
             const CodeBlock(
               code: """
@@ -136,7 +136,7 @@ class _HomeState extends State<Home> {
                   child: ...
                 )""",
             ),
-            const LdTextP(
+            LdText.p(
                 "To automatically keep the material theme in sync with the Liquid theme use the LdThemedAppBuilder. This will also rebuild the entire app in case you change the liquid theme at runtime."),
             const CodeBlock(
               code: """
@@ -149,16 +149,16 @@ class _HomeState extends State<Home> {
                   })
                 )""",
             ),
-            const LdTextP(
+            LdText.p(
                 "You can now also access the Liquid theme via the LdTheme.of(context) method. This will return the LdTheme object which contains all the colors and other theme related properties."),
             const CodeBlock(
               code: """var theme = LdTheme.of(context);""",
             ),
-            const LdTextP(
+            LdText.p(
               "You can now use the components in your app. Please refer to the documentation for more information.",
             ),
-            const LdTextHl("Changing the theme size"),
-            const LdTextP(
+            LdText.hl("Changing the theme size"),
+            LdText.p(
                 "Liquid Flutter supports three different base sizes that try to make it suitable for desktop and mobile use cases. The default size is not the LdSize passed to components directly, rather it scales the entire user interface."
                 " This is done to preserve the visual hierarchy of the components. On Desktop LdThemeSize.s is reccomended, on mobile LdThemeSize.m is reccomended."),
             const CodeBlock(

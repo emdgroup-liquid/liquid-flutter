@@ -104,17 +104,17 @@ class _LdSubmitDialogState<T, Arg> extends State<_LdSubmitDialog<T, Arg>> {
                 size: 48,
               ),
               if (controller.config.loadingText != null)
-                LdTextP(
+                LdText.p(
                   controller.config.loadingText!,
                   textAlign: TextAlign.center,
                 )
               else
-                LdTextP(
+                LdText.p(
                   LiquidLocalizations.of(context).loading,
                   textAlign: TextAlign.center,
                 ),
               if (controller.canCancel)
-                LdButtonGhost(
+                LdButton.ghost(
                   onPressed: controller.cancel,
                   child: Text(LiquidLocalizations.of(context).cancel),
                 ),

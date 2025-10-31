@@ -234,9 +234,9 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
                               if (state.selectedItems.isNotEmpty && _showingDetail) {
                                 return widget.child;
                               }
-                              return const Center(
+                              return Center(
                                 child: LdMute(
-                                  child: LdTextL(
+                                  child: LdText.l(
                                     "Select something",
                                   ),
                                 ),

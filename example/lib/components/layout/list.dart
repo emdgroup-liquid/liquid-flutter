@@ -218,7 +218,7 @@ class _ListDemoState extends State<ListDemo> {
                         _assumeItemHeight = value;
                       });
                     }),
-                const LdTextP(
+                LdText.p(
                     "This will make the scrollbar the correct size and allow flinging, but might result in more data being loaded."),
               ],
             ),
@@ -244,7 +244,7 @@ class _ListDemoState extends State<ListDemo> {
           ldSpacerM,
           const LdDivider(),
           ldSpacerM,
-          const LdTextH("LdPaginator.fromList"),
+          LdText.h("LdPaginator.fromList"),
           LdList(
             shrinkWrap: true,
             paginator: LdPaginator.fromList(_demoItems),
@@ -258,7 +258,7 @@ class _ListDemoState extends State<ListDemo> {
               );
             },
           ),
-          const LdTextH(
+          LdText.h(
             "Empty state LdListEmpty()",
           ),
           ldSpacerM,
@@ -276,7 +276,7 @@ class _ListDemoState extends State<ListDemo> {
                     },
                   ))),
           ldSpacerM,
-          const LdTextH(
+          LdText.h(
             "LdListSeperator()",
           ),
           ldSpacerM,

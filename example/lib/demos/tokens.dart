@@ -74,7 +74,7 @@ class SpacerVisualizer extends StatelessWidget {
               ],
             )),
         child,
-        LdTextPs(
+        LdText.ps(
           "Size: $size",
         ),
       ],

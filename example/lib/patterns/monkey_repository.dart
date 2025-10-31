@@ -14,12 +14,12 @@ class MonkeyRepositoryDemo extends StatelessWidget {
       category: "Patterns",
       title: "LdMonkey - Repository",
       demo: LdAutoSpace(children: [
-        LdTextH("Data Repository"),
-        LdTextP(
+        LdText.h("Data Repository"),
+        LdText.p(
             "The data repository is a class that is responsible for fetching and caching data using the provided data source."),
         ComponentsAccordion(components: {"LdRepository"}),
-        LdTextHs("1. Define your data model"),
-        LdTextP(
+        LdText.hs("1. Define your data model"),
+        LdText.p(
             "First, create a data model that implements the Identifiable interface. This interface requires an id property that uniquely identifies each item."),
         CodeBlock(
           language: "dart",
@@ -29,8 +29,8 @@ class MonkeyRepositoryDemo extends StatelessWidget {
   ...
 }''',
         ),
-        LdTextHs("2. Create the repository"),
-        LdTextP(
+        LdText.hs("2. Create the repository"),
+        LdText.p(
             "Create an LdRepository instance that handles all data operations. The repository manages pagination, filtering, sorting, and CRUD operations."),
         CodeBlock(
           language: "dart",
@@ -100,10 +100,10 @@ class MonkeyRepositoryDemo extends StatelessWidget {
   },
 );''',
         ),
-        LdTextHs("3. Define sort options"),
-        LdTextP(
+        LdText.hs("3. Define sort options"),
+        LdText.p(
             "Sort options allow users to order items by different criteria. Each sort option includes a name, label, icon, and sorting function."),
-        LdTextP(
+        LdText.p(
             "You can also pass an optimistic sort function to the sort option. This function is used to sort the items immediately on the client side, without waiting for a server response. This provides instant feedback to the user, making the UI feel faster and more responsive."),
         CodeBlock(
           language: "dart",
@@ -127,8 +127,8 @@ class MonkeyRepositoryDemo extends StatelessWidget {
   ),
 ],''',
         ),
-        LdTextHs("4. Define filter options"),
-        LdTextP(
+        LdText.hs("4. Define filter options"),
+        LdText.p(
             "Filter options allow users to filter items based on different criteria. You can create boolean filters, search filters, and custom filters."),
         ComponentsAccordion(components: {
           "LdFilterBoolOption",
@@ -171,8 +171,8 @@ class MonkeyRepositoryDemo extends StatelessWidget {
   ),
 },''',
         ),
-        LdTextHs("5. Use the repository in LdMonkey"),
-        LdTextP(
+        LdText.hs("5. Use the repository in LdMonkey"),
+        LdText.p(
             "The repository is used within the LdMonkey pattern to provide all CRUD functionality. The repository handles all data operations automatically."),
         CodeBlock(
           language: "dart",

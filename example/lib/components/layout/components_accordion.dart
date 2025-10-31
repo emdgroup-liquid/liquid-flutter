@@ -86,7 +86,7 @@ class _ComponentsAccordionState extends State<ComponentsAccordion> {
             ldSpacerL,
             Expanded(
                 child: LdMute(
-                    child: LdTextLs(
+                    child: LdText.ls(
               component.description.isNotEmpty
                   ? component.description.replaceAll("///", "")
                   : "",

@@ -54,10 +54,10 @@ class _ThemeDemoState extends State<ThemeDemo> {
       ],
       demo: LdAutoSpace(
         children: [
-          const LdBundle(
+          LdBundle(
             children: [
-              LdTextHs("LdTheme"),
-              LdTextP(
+              LdText.hs("LdTheme"),
+              LdText.p(
                 "Some more underlying contexts are explained below. For simple usage you can use the LdTheme to handle most of the coloring for you.",
               ),
               ComponentsAccordion(components: {"LdTheme"}),
@@ -65,11 +65,11 @@ class _ThemeDemoState extends State<ThemeDemo> {
           ),
           LdBundle(
             children: [
-              const LdTextHs("Color names"),
-              const LdTextP(
+              LdText.hs("Color names"),
+              LdText.p(
                 "Liquid comes with several predefined colors from the popular ShadCN color palette.",
               ),
-              const LdTextP(
+              LdText.p(
                   "For each color there are different shades available. There is a center color (which is  main shade) for each brightness (dark and light)."),
               LdCard(
                 child: LdAutoSpace(
@@ -89,7 +89,7 @@ class _ThemeDemoState extends State<ThemeDemo> {
                           });
                         }),
                     const LdDivider(),
-                    const LdTextP(
+                    LdText.p(
                         "EMD Brand Colors (liquid_flutter_emd_theme package (see notes on license))"),
                     ColorSelctor(
                         active: e,
@@ -113,7 +113,7 @@ class _ThemeDemoState extends State<ThemeDemo> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const SizedBox(
+                          SizedBox(
                             width: 100,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
@@ -121,16 +121,16 @@ class _ThemeDemoState extends State<ThemeDemo> {
                                 SizedBox(
                                     height: 32,
                                     child:
-                                        Center(child: LdTextL("Dark center"))),
+                                        Center(child: LdText.l("Dark center"))),
                                 LdDivider(),
                                 SizedBox(
                                     height: 53,
-                                    child: Center(child: LdTextL("Shades"))),
+                                    child: Center(child: LdText.l("Shades"))),
                                 LdDivider(),
                                 SizedBox(
                                     height: 32,
-                                    child:
-                                        Center(child: LdTextL("Light center"))),
+                                    child: Center(
+                                        child: LdText.l("Light center"))),
                               ],
                             ),
                           ),
@@ -169,14 +169,14 @@ class _ThemeDemoState extends State<ThemeDemo> {
                     if (_selectedShade != null)
                       LdAutoSpace(
                         children: [
-                          LdTextHs(
+                          LdText.hs(
                               "Selected shade: ${e.shades.indexOf(_selectedShade!)}"),
                           CodeBlock(
                             code:
                                 "final absoluteColor = ${colorNames[e]}.shades[${e.shades.indexOf(_selectedShade!)}];",
                           ),
-                          const LdTextHs("Relative colors:"),
-                          const LdTextP(
+                          LdText.hs("Relative colors:"),
+                          LdText.p(
                               "Use the relative methods to get colors depending on the brightness."),
                           const LdHint(
                               type: LdHintType.warning,
@@ -209,10 +209,10 @@ class _ThemeDemoState extends State<ThemeDemo> {
               ),
             ],
           ),
-          const LdBundle(
+          LdBundle(
             children: [
-              LdTextH("Reactive values"),
-              LdTextP(
+              LdText.h("Reactive values"),
+              LdText.p(
                 "For common interaction patterns, you can use the "
                 "reactive values for each color.",
               ),
@@ -226,10 +226,10 @@ class _ThemeDemoState extends State<ThemeDemo> {
               """),
             ],
           ),
-          const LdBundle(
+          LdBundle(
             children: [
-              LdTextH("Global Configuration Flags"),
-              LdTextP(
+              LdText.h("Global Configuration Flags"),
+              LdText.p(
                 "Liquid provides several global configuration flags that can be used to customize the behavior of the framework.",
               ),
               CodeBlock(
@@ -270,7 +270,7 @@ class _ThemeDemoState extends State<ThemeDemo> {
                   "These flags should be set early in your application's lifecycle, ideally before any widgets are built.",
                 ),
               ),
-              LdTextP(
+              LdText.p(
                 "Example usage in your main.dart file:",
               ),
               CodeBlock(code: """
@@ -288,10 +288,10 @@ class _ThemeDemoState extends State<ThemeDemo> {
               """),
             ],
           ),
-          const LdBundle(
+          LdBundle(
             children: [
-              LdTextH("Building interactive components"),
-              LdTextP(
+              LdText.h("Building interactive components"),
+              LdText.p(
                 "To build custom interactive components, you can use the `LdTouchableSurface`. This handles the different states of the component and will automatically change the color based on the theme.",
               ),
               ComponentsAccordion(components: {"LdTouchableSurface"}),

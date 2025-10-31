@@ -186,7 +186,7 @@ class _LdSearchInputState extends State<LdSearchInput> {
                   widget.searchConfig.inputController.text.isNotEmpty,
               child: Padding(
                 padding: const EdgeInsets.only(left: 8.0),
-                child: LdButtonVague(
+                child: LdButton.vague(
                   child: const Icon(LucideIcons.x),
                   onPressed: () {
                     widget.searchConfig.inputController.clear();

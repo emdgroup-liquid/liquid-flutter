@@ -15,7 +15,7 @@ class RadiusDocumentation extends StatelessWidget {
       path: "lib/demos/radius_documentation.dart",
       title: "Border Radius",
       demo: LdAutoSpace(children: [
-        const LdTextP(
+        LdText.p(
           "Predefined border radii that can be used to create rounded corners. In general liquid does not contain sharp corners.",
         ),
         LdCard(
@@ -77,7 +77,7 @@ class BorderRadiusVisualizer extends StatelessWidget {
               borderRadius: radius,
               color: LdTheme.of(context).background),
         ),
-        LdTextPs(radius.topLeft.toString()),
+        LdText.ps(radius.topLeft.toString()),
         ldSpacerS,
         DefaultTextStyle(
           style: ldBuildTextStyle(

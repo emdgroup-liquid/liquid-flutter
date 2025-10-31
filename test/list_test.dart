@@ -84,7 +84,7 @@ void main() {
                 return LdAutoSpace(
                   children: [
                     const LdDivider(),
-                    LdTextCaption(criterion!),
+                    LdText.caption(criterion!),
                     const LdDivider(),
                   ],
                 );

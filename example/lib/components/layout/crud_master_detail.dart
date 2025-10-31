@@ -142,13 +142,13 @@ class _CrudMasterDetailDemoState extends State<CrudMasterDetailDemo> {
       ],
       demo: LdAutoSpace(
         children: [
-          const LdTextP(
+          LdText.p(
             "LdCrudMasterDetail wraps around the LdMasterDetail widget to provide CRUD functionality for a list of items of type T. "
             "It handles various CRUD operations like create, update, delete, and fetchAll, and performs the usual UI operations "
             "like selecting and deselecting items or updating the UI based on the state and result of a CRUD operation.",
           ),
           ldSpacerM,
-          LdTextP(
+          LdText.p(
               "The recommended way to use LdCrudMasterDetail is to wrap it around the LdMasterDetail widget using the .builders constructor. This allows you to provide all master/detail UI and action builders in a single place, and ensures that CRUD state and actions are properly wired up."),
           ldSpacerS,
           CodeBlock(code: '''
@@ -175,8 +175,8 @@ LdCrudMasterDetail<ExampleItem>(
   buildDetail: (context, item, optimisticItem, isSeparatePage, controller, listState) {
     return LdAutoSpace(
       children: [
-        const LdTextHl("Detail"),
-        LdTextL("Item \${item.id}: \${item.name}"),
+        LdText.hl("Detail"),
+        LdText.l("Item \${item.id}: \${item.name}"),
         LdButton(
           onPressed: controller.closeItem,
           child: const Text("Go back"),
@@ -187,11 +187,11 @@ LdCrudMasterDetail<ExampleItem>(
   // ...other builders and settings...
 )'''),
           ldSpacerS,
-          LdTextP(
+          LdText.p(
               "The builders parameter is an instance of LdCrudMasterDetailBuilders, which provides all the necessary "
               "builder functions for master/detail UI and actions."),
           ldSpacerL,
-          LdTextP(
+          LdText.p(
               "LdCrudAction is the base widget for all CRUD actions (create, update, delete, etc). It handles argument "
               "acquisition, action execution, and result handling. For context-aware action buttons (e.g. showing as "
               "an icon in the app bar, a menu item in a context menu, or a button elsewhere), the built-in actions "
@@ -226,11 +226,11 @@ LdCrudAction<ExampleItem, ExampleItem, ExampleItem>(
   },
 )'''),
           ldSpacerS,
-          LdTextP(
+          LdText.p(
               "For many cases, you can use built-in actions directly. They will adapt to the UI context automatically "
               "and perform argument acquisition, action execution, and result handling for you."),
           ldSpacerL,
-          const LdTextH("Demo"),
+          LdText.h("Demo"),
           ldSpacerS,
           LdSelect(
             label: "Layout mode",
@@ -320,8 +320,8 @@ LdCrudAction<ExampleItem, ExampleItem, ExampleItem>(
                       controller, listState) {
                     return LdAutoSpace(
                       children: [
-                        const LdTextHl("Detail"),
-                        LdTextL("Item ${item.id}: ${item.name}"),
+                        LdText.hl("Detail"),
+                        LdText.l("Item ${item.id}: ${item.name}"),
                         LdButton(
                           onPressed: controller.closeItem,
                           child: const Text("Go back"),

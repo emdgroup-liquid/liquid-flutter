@@ -14,7 +14,7 @@ class LdListEmpty extends StatelessWidget {
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         const LdAvatar(child: Icon(LucideIcons.searchSlash)),
         ldSpacerM,
-        LdTextP(text ?? LiquidLocalizations.of(context).noItemsFound),
+        LdText.p(text ?? LiquidLocalizations.of(context).noItemsFound),
         ldSpacerM,
         if (onRefresh != null)
           LdButton(

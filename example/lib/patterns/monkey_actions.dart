@@ -14,13 +14,13 @@ class MonkeyActionsDemo extends StatelessWidget {
       category: "Patterns",
       title: "LdMonkey - Actions",
       demo: LdAutoSpace(children: [
-        LdTextH("LdMonkey Actions"),
-        LdTextP(
+        LdText.h("LdMonkey Actions"),
+        LdText.p(
             "Actions in the monkey pattern allow users to perform operations on selected items. Actions can appear in different locations throughout the interface and have various visibility conditions."),
         ComponentsAccordion(
             components: {"LdMonkeyAction", "LdMonkeyActionVisibility"}),
-        LdTextHs("1. Basic Action Structure"),
-        LdTextP(
+        LdText.hs("1. Basic Action Structure"),
+        LdText.p(
             "Every action is defined using the LdMonkeyAction class with visibility conditions, labels, icons, and the action logic."),
         CodeBlock(
           language: "dart",
@@ -47,38 +47,38 @@ class MonkeyActionsDemo extends StatelessWidget {
   },
 )''',
         ),
-        LdTextHs("2. Action Locations"),
-        LdTextP(
+        LdText.hs("2. Action Locations"),
+        LdText.p(
             "Actions can be placed in different locations throughout the monkey pattern interface:"),
         LdAutoSpace(children: [
           LdCard(
             header: Text("LdMonkeyActionLocation.masterAppBar"),
-            child: LdTextP(
+            child: LdText.p(
                 "Primary app bar in the master view - typically for create actions"),
           ),
           LdCard(
             header: Text("LdMonkeyActionLocation.masterSecondary"),
-            child: LdTextP(
+            child: LdText.p(
                 "Secondary app bar in the master view - for search, filters, and bulk operations"),
           ),
           LdCard(
             header: Text("LdMonkeyActionLocation.detailAppBar"),
-            child: LdTextP(
+            child: LdText.p(
                 "Primary app bar in the detail view - for item-specific actions"),
           ),
           LdCard(
             header: Text("LdMonkeyActionLocation.detailSecondary"),
-            child: LdTextP(
+            child: LdText.p(
                 "Secondary app bar in the detail view - for additional item actions"),
           ),
           LdCard(
             header: Text("LdMonkeyActionLocation.context"),
-            child: LdTextP(
+            child: LdText.p(
                 "Context menu when right-clicking on items - for quick actions"),
           ),
         ]),
-        LdTextHs("3. Action Visibility Conditions"),
-        LdTextP("Control when actions are visible using various conditions:"),
+        LdText.hs("3. Action Visibility Conditions"),
+        LdText.p("Control when actions are visible using various conditions:"),
         CodeBlock(
           language: "dart",
           code: '''LdMonkeyActionVisibility(
@@ -100,8 +100,8 @@ class MonkeyActionsDemo extends StatelessWidget {
   },
 )''',
         ),
-        LdTextHs("4. Create Action Example"),
-        LdTextP("A typical create action that appears in the master app bar:"),
+        LdText.hs("4. Create Action Example"),
+        LdText.p("A typical create action that appears in the master app bar:"),
         CodeBlock(
           language: "dart",
           code: '''LdMonkeyAction(
@@ -146,8 +146,8 @@ class MonkeyActionsDemo extends StatelessWidget {
   },
 )''',
         ),
-        LdTextHs("5. Delete Action Example"),
-        LdTextP(
+        LdText.hs("5. Delete Action Example"),
+        LdText.p(
             "A delete action that appears in multiple locations with different conditions:"),
         CodeBlock(
           language: "dart",
@@ -188,8 +188,8 @@ class MonkeyActionsDemo extends StatelessWidget {
   },
 )''',
         ),
-        LdTextHs("6. Conditional Actions"),
-        LdTextP(
+        LdText.hs("6. Conditional Actions"),
+        LdText.p(
             "Actions that only appear under certain conditions, like when specific filters are active:"),
         CodeBlock(
           language: "dart",
@@ -227,8 +227,8 @@ class MonkeyActionsDemo extends StatelessWidget {
   },
 )''',
         ),
-        LdTextHs("7. Single Item Actions"),
-        LdTextP("Actions that work on exactly one item at a time:"),
+        LdText.hs("7. Single Item Actions"),
+        LdText.p("Actions that work on exactly one item at a time:"),
         CodeBlock(
           language: "dart",
           code: '''LdMonkeyAction(
@@ -265,8 +265,8 @@ class MonkeyActionsDemo extends StatelessWidget {
   },
 )''',
         ),
-        LdTextHs("8. Built-in Actions"),
-        LdTextP(
+        LdText.hs("8. Built-in Actions"),
+        LdText.p(
             "The monkey pattern provides some built-in actions for common operations:"),
         CodeBlock(
           language: "dart",
@@ -280,31 +280,31 @@ class MonkeyActionsDemo extends StatelessWidget {
   toggleFilters<Task, int, bool>(),
 ],''',
         ),
-        LdTextHs("9. Action Properties"),
-        LdTextP("Additional properties you can configure on actions:"),
+        LdText.hs("9. Action Properties"),
+        LdText.p("Additional properties you can configure on actions:"),
         LdAutoSpace(children: [
           LdCard(
             header: Text("buildLoadingText"),
-            child: LdTextP("Text shown while the action is executing"),
+            child: LdText.p("Text shown while the action is executing"),
           ),
           LdCard(
             header: Text("color"),
-            child: LdTextP(
+            child: LdText.p(
                 "Color for the action button (useful for destructive actions)"),
           ),
           LdCard(
             header: Text("multiSelect"),
-            child: LdTextP(
+            child: LdText.p(
                 "Whether the action supports multiple selection (default: true)"),
           ),
           LdCard(
             header: Text("submitType"),
-            child: LdTextP(
+            child: LdText.p(
                 "How the action should be submitted (none, primary, etc.)"),
           ),
         ]),
-        LdTextHs("10. Keyboard Shortcuts"),
-        LdTextP(
+        LdText.hs("10. Keyboard Shortcuts"),
+        LdText.p(
             "Actions can have keyboard shortcuts using Flutter's ShortcutActivator system:"),
         CodeBlock(
           language: "dart",
@@ -320,8 +320,8 @@ class MonkeyActionsDemo extends StatelessWidget {
   SingleActivator(LogicalKeyboardKey.backspace),
 },''',
         ),
-        LdTextHs("11. Complete Actions Example"),
-        LdTextP(
+        LdText.hs("11. Complete Actions Example"),
+        LdText.p(
             "Here's a complete set of actions for a task management system:"),
         CodeBlock(
           language: "dart",

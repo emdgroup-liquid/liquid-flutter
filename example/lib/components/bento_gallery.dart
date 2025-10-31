@@ -30,7 +30,7 @@ class BentoGallery extends StatelessWidget {
               child: LdContainer(
                 child: LdAutoSpace(
                   children: [
-                    const LdTextP(
+                    LdText.p(
                       "Explore all available components in an organized gallery view. "
                       "Click on any component to view its documentation and examples.",
                     ),
@@ -336,7 +336,7 @@ class _BentoCard extends StatelessWidget {
           child: LdAutoSpace(
             children: [
               const LdText("Card Preview"),
-              const LdTextCaption("Sample content"),
+              LdText.caption("Sample content"),
             ],
           ),
         );
@@ -507,9 +507,9 @@ class _BentoCard extends StatelessWidget {
 
       case "Autospace":
         return LdAutoSpace(
-          children: const [
+          children: [
             LdBadge(child: Text("Wow")),
-            LdTextH("This is magic"),
+            LdText.h("This is magic"),
             LdText("Automatically spacing"),
             LdText("Vertically"),
           ],
@@ -609,11 +609,11 @@ class _BentoCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      LdTextP(
+                      LdText.p(
                         title,
                         fontWeight: FontWeight.bold,
                       ),
-                      LdTextCaption(
+                      LdText.caption(
                         category,
                         color: color,
                       ),

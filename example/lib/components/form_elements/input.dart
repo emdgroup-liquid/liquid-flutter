@@ -31,7 +31,7 @@ class _InputDemoState extends State<InputDemo> {
         children: [
           ComponentWell(
             onSurface: true,
-            title: const LdTextHs("Different sizes"),
+            title: LdText.hs("Different sizes"),
             child: LdAutoSpace(
               children: [
                 LdInput(
@@ -60,7 +60,7 @@ class _InputDemoState extends State<InputDemo> {
           ),
           ComponentWell(
             onSurface: true,
-            title: const LdTextHs("Invalid input"),
+            title: LdText.hs("Invalid input"),
             description: const LdText(
               "Use the valid property set to false to indicate that an input has invalid data.",
             ),
@@ -76,7 +76,7 @@ class _InputDemoState extends State<InputDemo> {
           ),
           ComponentWell(
             onSurface: true,
-            title: const LdTextHs("Loading input"),
+            title: LdText.hs("Loading input"),
             description: const LdText(
               "Use the loading property to indicate that the input is waiting for data or processing a request.",
             ),
@@ -92,7 +92,7 @@ class _InputDemoState extends State<InputDemo> {
           ),
           ComponentWell(
             onSurface: true,
-            title: const LdTextHs("Disabled input"),
+            title: LdText.hs("Disabled input"),
             description: const LdText(
               "Use the disabled property to indicate that an input is not interactive.",
             ),
@@ -108,7 +108,7 @@ class _InputDemoState extends State<InputDemo> {
           ),
           ComponentWell(
             onSurface: true,
-            title: const LdTextHs("With a button"),
+            title: LdText.hs("With a button"),
             description: const LdText(
               "LdInput is designed to work well with buttons. Use the same size for the input and the button to make it fit.",
             ),
@@ -122,7 +122,7 @@ class _InputDemoState extends State<InputDemo> {
                   ),
                 ),
                 ldSpacerM,
-                LdButtonOutline(
+                LdButton.outline(
                   onPressed: () {},
                   child: const Text("Fitting button"),
                 ),
@@ -136,7 +136,7 @@ class _InputDemoState extends State<InputDemo> {
           ),
           ComponentWell(
             onSurface: true,
-            title: LdTextHs("With a shortcut hint"),
+            title: LdText.hs("With a shortcut hint"),
             description: const LdText(
               "The shortcut is displayed when the input is focused. Use an LdShortcutIndicator to display the shortcut. Use a widget like CallbackShortcuts to handle the shortcut itself.",
             ),
@@ -158,7 +158,7 @@ class _InputDemoState extends State<InputDemo> {
           ),
           ComponentWell(
             onSurface: true,
-            title: const LdTextHs("With a leading icon"),
+            title: LdText.hs("With a leading icon"),
             child: LdAutoSpace(
               children: [
                 LdInput(

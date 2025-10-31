@@ -127,7 +127,7 @@ class _LdInputState extends State<LdInput> {
 
     Widget? suffix;
 
-    var clearButton = LdButtonVague(
+    var clearButton = LdButton.vague(
         child: const Icon(LucideIcons.x),
         size: widget.size == LdSize.l ? LdSize.s : LdSize.xs,
         onPressed: () {

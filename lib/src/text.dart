@@ -2,6 +2,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
+part 'text.variants.g.dart';
+
 enum LdTextType {
   headline,
   paragraph,
@@ -76,7 +78,22 @@ TextStyle ldBuildTextStyle(LdTheme theme, LdTextType type, LdSize size,
   );
 }
 
-class LdText extends StatelessWidget {
+@Variants([
+  Variant('p', defaults: {'type': 'LdTextType.paragraph'}),
+  Variant('pl', defaults: {'type': 'LdTextType.paragraph', 'size': 'LdSize.l'}),
+  Variant('ps', defaults: {'type': 'LdTextType.paragraph', 'size': 'LdSize.s'}),
+  Variant('pxs', defaults: {'type': 'LdTextType.paragraph', 'size': 'LdSize.xs'}),
+  Variant('hl', defaults: {'type': 'LdTextType.headline', 'size': 'LdSize.l'}),
+  Variant('h', defaults: {'type': 'LdTextType.headline', 'size': 'LdSize.m'}),
+  Variant('hs', defaults: {'type': 'LdTextType.headline', 'size': 'LdSize.s'}),
+  Variant('hxs', defaults: {'type': 'LdTextType.headline', 'size': 'LdSize.xs'}),
+  Variant('l', defaults: {'type': 'LdTextType.label'}),
+  Variant('ls', defaults: {'type': 'LdTextType.label', 'size': 'LdSize.s'}),
+  Variant('ll', defaults: {'type': 'LdTextType.label', 'size': 'LdSize.l'}),
+  Variant('lxs', defaults: {'type': 'LdTextType.label', 'size': 'LdSize.xs'}),
+  Variant('caption', defaults: {'type': 'LdTextType.caption'}),
+])
+class LdTextWidget extends StatelessWidget {
   final String text;
   final TextAlign? textAlign;
   final int? maxLines;
@@ -94,8 +111,8 @@ class LdText extends StatelessWidget {
 
   final void Function(String)? onLinkTap;
 
-  const LdText(this.text,
-      {Key? key,
+  const LdTextWidget(this.text,
+      {super.key,
       this.textAlign,
       this.maxLines,
       this.overflow,
@@ -106,8 +123,7 @@ class LdText extends StatelessWidget {
       this.fontWeight,
       this.lineHeight,
       this.processLinks = false,
-      this.color})
-      : super(key: key);
+      this.color});
 
   @override
   Widget build(BuildContext context) {

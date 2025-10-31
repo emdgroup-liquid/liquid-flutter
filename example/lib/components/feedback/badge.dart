@@ -14,7 +14,7 @@ class BadgeDemo extends StatelessWidget {
       title: "LdBadge",
       demo: LdAutoSpace(
         children: [
-          const LdTextP(
+          LdText.p(
             "A badge is a small visual indicator that can be used to highlight information, show a count, or draw attention to a specific element. Badges can be customized with different colors and sizes to match your design needs.",
           ),
           ComponentWell(
@@ -25,7 +25,7 @@ class BadgeDemo extends StatelessWidget {
                     runSpacing: 8,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      LdTextL(e.toString()),
+                      LdText.l(e.toString()),
                       LdBadge(
                         color: theme.primary,
                         size: e,
@@ -55,7 +55,7 @@ class BadgeDemo extends StatelessWidget {
               ),
             ]),
           ),
-          const LdTextP("symmetric = true, causes the badge to be a circle"),
+          LdText.p("symmetric = true, causes the badge to be a circle"),
           ComponentWell(
             child: Center(
               child: LdBadge(

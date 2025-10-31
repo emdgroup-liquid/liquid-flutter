@@ -28,7 +28,7 @@ Future<bool> ldConfirmModal(
             type: indicatorType,
             customSize: 24,
           ),
-        if (description != null) LdTextP(description),
+        if (description != null) LdText.p(description),
         if (additionalContent != null) additionalContent,
       ],
     ),
@@ -41,7 +41,7 @@ Future<bool> ldConfirmModal(
           return Row(
             children: [
               Expanded(
-                child: LdButtonGhost(
+                child: LdButton.ghost(
                   color: cancelColor,
                   child: negative ?? Text(locale.cancel),
                   onPressed: () => Navigator.of(context).pop(false),
@@ -63,7 +63,7 @@ Future<bool> ldConfirmModal(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Flexible(
-                child: LdButtonGhost(
+                child: LdButton.ghost(
                   color: cancelColor,
                   child: negative ?? Text(locale.cancel),
                   onPressed: () => Navigator.of(context).pop(false),

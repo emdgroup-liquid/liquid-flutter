@@ -24,7 +24,7 @@ class MonkeyDemo extends StatelessWidget {
               children: [
                 Expanded(
                   child: Column(children: [
-                    LdCard(child: LdTextP("")),
+                    LdCard(child: LdText.p("")),
                     ...List.generate(
                       5,
                       (index) => LdCard(
@@ -56,8 +56,8 @@ class MonkeyDemo extends StatelessWidget {
             ).spaceM()),
           ),
         ),
-        LdTextH("🐵 LdMonkey"),
-        LdTextP(
+        LdText.h("🐵 LdMonkey"),
+        LdText.p(
             "The Monkey name is reference to a Podcast between Lex Fridman and David Heinemeier Hansson where David describes the 'crud monkey' a developer that implements a timeless pattern in Software Engineering."),
         Row(
           children: [
@@ -78,11 +78,11 @@ class MonkeyDemo extends StatelessWidget {
         LdCard(
           child: LdAutoSpace(
             children: [
-              LdTextP(
+              LdText.p(
                   "It sometimes feels like we’re barely better off. Web pages aren’t that different from what they were in the late ’90s, early 2000s. They’re still just forms. They still just write to databases. A lot of people, I think, are very uncomfortable with the fact that they are essentially crud monkeys."),
-              LdTextPs(
+              LdText.ps(
                   "David Heinemeier Hansson, Lex Fridman Podcast, July 12th 2025"),
-              LdButtonGhost(
+              LdButton.ghost(
                 leading: const Icon(LucideIcons.play),
                 child: Text("Listen to the podcast"),
                 onPressed: () {
@@ -95,8 +95,8 @@ class MonkeyDemo extends StatelessWidget {
             ],
           ),
         ),
-        LdTextH("Overview"),
-        LdTextP(
+        LdText.h("Overview"),
+        LdText.p(
           "It consists of the following core components:\n\n"
           "The LdMonkey class is the main wrapper around all functionality, it is used to configure the pattern. "
           "It is responsible for configuring the routes, the naming, the selection behaviour, as well as the actions the user can perform on the items.\n\n"
@@ -113,7 +113,7 @@ class MonkeyDemo extends StatelessWidget {
                     LdCard(
                       header: Text("LdMonkey"),
                       child: LdMute(
-                          child: LdTextP(
+                          child: LdText.p(
                         "Main wrapper, configures pattern, tracks selection, provides actions",
                       )),
                     ),
@@ -125,7 +125,7 @@ class MonkeyDemo extends StatelessWidget {
                 child: LdCard(
                   header: Text("LdRepository"),
                   child: LdMute(
-                      child: LdTextP(
+                      child: LdText.p(
                     "Handles data fetching, filtering, sorting, pagination, and state management.",
                   )),
                 ),
@@ -136,7 +136,7 @@ class MonkeyDemo extends StatelessWidget {
           LdCard(
             header: Text("GoRouter"),
             child: LdMute(
-                child: LdTextP(
+                child: LdText.p(
               "Mount the Monkey pattern in a go router config by calling the buildRoute() method.",
             )),
           ),
@@ -146,7 +146,7 @@ class MonkeyDemo extends StatelessWidget {
               children: [
                 Text("LdMonkeyShell"),
                 LdMute(
-                  child: LdTextP(
+                  child: LdText.p(
                     "The shell route that wraps the master and detail pages. Decides on the responsive layout, Keeps the url state in sync with the Monkey pattern.",
                   ),
                 ),
@@ -165,7 +165,7 @@ class MonkeyDemo extends StatelessWidget {
                               children: [
                                 Text("LdMonkeyMasterPage"),
                                 LdMute(
-                                  child: LdTextP(
+                                  child: LdText.p(
                                     "The master page is the main page that displays the list of items.",
                                   ),
                                 ),
@@ -179,7 +179,7 @@ class MonkeyDemo extends StatelessWidget {
                                       Text(
                                           "LdMonkeyActionLocation.masterAppBar"),
                                       LdMute(
-                                        child: LdTextP(
+                                        child: LdText.p(
                                           "Primary AppBar for actions.",
                                         ),
                                       ),
@@ -192,7 +192,7 @@ class MonkeyDemo extends StatelessWidget {
                                       Text(
                                           "LdMonkeyActionLocation.masterSecondary AppBar"),
                                       LdMute(
-                                        child: LdTextP(
+                                        child: LdText.p(
                                           "Secondary AppBar for actions and search.",
                                         ),
                                       ),
@@ -204,7 +204,7 @@ class MonkeyDemo extends StatelessWidget {
                                     children: [
                                       Text("LdMonkeyMultiShortcuts"),
                                       LdMute(
-                                        child: LdTextP(
+                                        child: LdText.p(
                                           "Provides keyboard shortcuts for the actions.",
                                         ),
                                       ),
@@ -216,7 +216,7 @@ class MonkeyDemo extends StatelessWidget {
                                     children: [
                                       Text("LdSelectableList"),
                                       LdMute(
-                                        child: LdTextP(
+                                        child: LdText.p(
                                           "The list that displays the list of items.",
                                         ),
                                       ),
@@ -235,7 +235,7 @@ class MonkeyDemo extends StatelessWidget {
                           children: [
                             Text("LdMonkeyDetailPage"),
                             LdMute(
-                              child: LdTextP(
+                              child: LdText.p(
                                 "The detail page is the page that displays the details of an item.",
                               ),
                             ),
@@ -262,8 +262,8 @@ class MonkeyDemo extends StatelessWidget {
           ),
         ]),
         LdDivider(),
-        LdTextHs("Functionality"),
-        LdTextP(
+        LdText.hs("Functionality"),
+        LdText.p(
             "The goal of the monkey pattern is to provide as many of the core CRUD features needed in common apps. This currently includes:"),
         Wrap(
           spacing: LdTheme.of(context).pad(size: LdSize.s).left,
@@ -287,12 +287,12 @@ class MonkeyDemo extends StatelessWidget {
             "Optimistic updates",
           ].map((e) => LdTag(child: Text(e))).toList(),
         ),
-        LdTextH("Step by step guide"),
-        LdTextP(
+        LdText.h("Step by step guide"),
+        LdText.p(
             "The Monkey pattern is organized into several sub-pages that cover different aspects of implementation:"),
         LdAutoSpace(children: [
-          LdTextHs("Repository"),
-          LdTextP(
+          LdText.hs("Repository"),
+          LdText.p(
               "Learn how to set up the data repository that handles all CRUD operations, pagination, filtering, and sorting."),
           LdButton(
             child: const Text("View Repository Documentation"),
@@ -301,8 +301,8 @@ class MonkeyDemo extends StatelessWidget {
             },
           ),
           LdSpacer(size: LdSize.m),
-          LdTextHs("Pattern Configuration"),
-          LdTextP(
+          LdText.hs("Pattern Configuration"),
+          LdText.p(
               "Learn how to configure the LdMonkey pattern, including routing, selection behavior, and layout options."),
           LdButton(
             child: const Text("View Pattern Documentation"),
@@ -311,8 +311,8 @@ class MonkeyDemo extends StatelessWidget {
             },
           ),
           LdSpacer(size: LdSize.m),
-          LdTextHs("Actions"),
-          LdTextP(
+          LdText.hs("Actions"),
+          LdText.p(
               "Learn how to create and configure actions that users can perform on items, including visibility conditions and keyboard shortcuts."),
           LdButton(
             child: const Text("View Actions Documentation"),
@@ -321,8 +321,8 @@ class MonkeyDemo extends StatelessWidget {
             },
           ),
           LdSpacer(size: LdSize.m),
-          LdTextHs("Sorting & Filtering"),
-          LdTextP(
+          LdText.hs("Sorting & Filtering"),
+          LdText.p(
               "Learn how to implement advanced sorting and filtering capabilities with optimistic updates and URL state management."),
           LdButton(
             child: const Text("View Sorting & Filtering Documentation"),

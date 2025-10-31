@@ -16,8 +16,8 @@ class DrawerDemo extends StatelessWidget {
         demo: LdAutoSpace(
           children: [
             ComponentWell(
-              title: const LdTextHs("Standard drawer"),
-              description: const LdTextP(
+              title: LdText.hs("Standard drawer"),
+              description: LdText.p(
                 "Liquid Flutter provides two components for making navigation drawers."
                 " The LdDrawerHeader and LdDrawerItemSection."
                 " They can ble placed in a Scaffolds drawer, or simply in a ListView for desktop use.",
@@ -66,7 +66,7 @@ class DrawerDemo extends StatelessWidget {
                 ),
               ),
             ),
-            LdTextP(
+            LdText.p(
               "The LdDrawerItemSection component can be used to indicate a navigation item or a group of items. You can simply pass a list of LdDrawerItemSection to the children property to create a nested list.",
             ),
           ],

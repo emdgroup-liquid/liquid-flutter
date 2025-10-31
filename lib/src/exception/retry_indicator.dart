@@ -29,7 +29,7 @@ class LdExceptionRetryIndicator extends StatelessWidget {
           ),
         ),
         ldSpacerS,
-        LdTextLs(
+        LdText.ls(
           LiquidLocalizations.of(context).retryIn(
             remainingRetryTime.inSeconds,
           ),

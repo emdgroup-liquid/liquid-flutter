@@ -81,7 +81,7 @@ class _DemoSheet extends StatelessWidget {
               : (context) => Row(
                     children: [
                       Expanded(
-                        child: LdButtonVague(
+                        child: LdButton.vague(
                           width: double.infinity,
                           child: const Text("Cancel"),
                           onPressed: () {
@@ -108,13 +108,12 @@ class _DemoSheet extends StatelessWidget {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(right: 32.0),
-                    child: const LdTextP(
+                    child: LdText.p(
                         "It's about managing expectations tiger team it is all exactly as i said, but i don't like it. Let's unpack that later we should leverage existing asserts that ladder up to the message. We need to socialize the comms with the wider stakeholder community we're building the plane while we're flying it, but if you want to motivate these clowns, try less carrot and more stick, race without a finish line performance review, so what do you feel you would bring to the table if you were hired for this position."),
                   ),
-                  const LdTextP(
+                  LdText.p(
                       "It's about managing expectations tiger team it is all exactly as i said, but i don't like it. Let's unpack that later we should leverage existing asserts that ladder up to the message. We need to socialize the comms with the wider stakeholder community we're building the plane while we're flying it, but if you want to motivate these clowns, try less carrot and more stick, race without a finish line performance review, so what do you feel you would bring to the table if you were hired for this position."),
-                  const LdTextPs(
-                      "Filler text by http://officeipsum.com/index.php"),
+                  LdText.ps("Filler text by http://officeipsum.com/index.php"),
                   Row(
                     children: [
                       _DemoSheet(
@@ -175,7 +174,7 @@ class _ModalDemoState extends State<ModalDemo> {
                 launchUrl(Uri.parse(link));
               },
             ),
-            const LdTextH("LdModalBuilder"),
+            LdText.h("LdModalBuilder"),
             const LdText(
               "The LdModalBuilder is a utility widget that displays a modal when a button is pressed. Attention: This requries a LdPortal at the root of your application if you want to enable the scaling effect.",
             ),
@@ -291,10 +290,10 @@ class _ModalDemoState extends State<ModalDemo> {
                 );
               },
             ),
-            const LdTextH("LdModalPage"),
-            const LdTextP(
+            LdText.h("LdModalPage"),
+            LdText.p(
                 "If your application uses GoRouter, you can use the LdModalPage to open a modal when a route is visited."),
-            const LdTextP(
+            LdText.p(
               "This has the advantage that the modal is automatically in sync with the current navigation path.",
             ),
             const CodeBlock(code: """
@@ -327,7 +326,7 @@ class _ModalDemoState extends State<ModalDemo> {
               child: const Text("Open route example"),
             ),
             const LdDivider(),
-            const LdTextH("Confirm modal"),
+            LdText.h("Confirm modal"),
             LdButton(
               child: const Text("Open confirm modal"),
               onPressed: () async {
@@ -348,7 +347,7 @@ class _ModalDemoState extends State<ModalDemo> {
                 }
               },
             ),
-            const LdTextH("Modal with screen radius"),
+            LdText.h("Modal with screen radius"),
             LdModalBuilder(
               useRootNavigator: true,
               builder: (context, openModal) {
@@ -370,7 +369,7 @@ class _ModalDemoState extends State<ModalDemo> {
                                 "This is a modal with screen radius"),
                           ),
                         ),
-                        LdButtonVague(
+                        LdButton.vague(
                           size: LdSize.l,
                           onPressed: () {
                             Navigator.of(context).pop();
@@ -385,7 +384,7 @@ class _ModalDemoState extends State<ModalDemo> {
                 bottomRadius: LdTheme.of(context).screenRadius,
               ),
             ),
-            const LdTextH("Modal with action button"),
+            LdText.h("Modal with action button"),
             LdModalBuilder(
               useRootNavigator: true,
               builder: (context, openModal) {
@@ -409,7 +408,7 @@ class _ModalDemoState extends State<ModalDemo> {
                 },
               ),
             ),
-            const LdTextH("Modal with list items"),
+            LdText.h("Modal with list items"),
             LdModalBuilder(
               useRootNavigator: true,
               builder: (context, openModal) {

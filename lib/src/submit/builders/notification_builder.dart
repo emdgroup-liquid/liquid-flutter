@@ -130,7 +130,7 @@ class _LdSubmitNotificationState<T, Arg> extends State<_LdSubmitNotification<T, 
               ),
             LdReveal.quick(
               revealed: controller.canCancel,
-              child: LdButtonGhost(
+              child: LdButton.ghost(
                 onPressed: controller.cancel,
                 child: Text(LiquidLocalizations.of(context).cancel),
               ),

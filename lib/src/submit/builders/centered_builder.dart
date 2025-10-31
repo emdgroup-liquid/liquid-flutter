@@ -54,7 +54,7 @@ class LdSubmitCenteredBuilder<T, Arg> extends LdSubmitBuilder<T, Arg> {
                           const LdLoader(),
                           if (controller.config.loadingText != null) Text(controller.config.loadingText!),
                           if (controller.canCancel)
-                            LdButtonGhost(
+                            LdButton.ghost(
                               onPressed: controller.cancel,
                               child: Text(LiquidLocalizations.of(context).cancel),
                             ),

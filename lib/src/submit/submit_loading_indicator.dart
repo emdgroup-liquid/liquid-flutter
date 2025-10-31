@@ -20,7 +20,7 @@ class LdSubmitLoadingIndicator extends StatelessWidget {
           children: [
             const LdLoader(),
             ldSpacerS,
-            LdTextL(
+            LdText.l(
               loadingText ?? LiquidLocalizations.of(context).loading,
             ),
           ],
@@ -29,7 +29,7 @@ class LdSubmitLoadingIndicator extends StatelessWidget {
           children: [
             const LdLoader(),
             ldSpacerS,
-            LdTextL(
+            LdText.l(
               loadingText ?? LiquidLocalizations.of(context).loading,
             ),
           ],

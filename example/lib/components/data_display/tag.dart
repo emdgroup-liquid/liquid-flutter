@@ -21,7 +21,7 @@ class _TagDemoState extends State<TagDemo> {
       title: "LdTag",
       demo: LdAutoSpace(
         children: [
-          const LdTextP(
+          LdText.p(
               "Tags are used to highlight or categorize content. They will slightly adapt to the surface in dark mode."),
           LdBundle(
             children: [

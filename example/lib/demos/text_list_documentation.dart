@@ -10,29 +10,29 @@ class TextListDocumentation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ComponentPage(
+    return ComponentPage(
       path: "lib/demos/text_list_documentation.dart",
       title: "Text Lists",
       apiComponents: [
-        "LdTextList",
+        "LdText.list",
       ],
       demo: LdAutoSpace(
         children: [
-          LdTextP(
-            "LdTextList allows you to create bulleted or enumerated lists using paragraph text typography.",
+          LdText.p(
+            "LdText.list allows you to create bulleted or enumerated lists using paragraph text typography.",
           ),
           CodeBlock(
             code: """
-LdTextList(
+LdText.list(
   ['Item 1', 'Item 2', 'Item 3'],
-  type: LdTextListType.bulleted,
+  type: LdText.listType.bulleted,
 );
 """,
           ),
           LdCard(
             child: LdAutoSpace(
               children: [
-                LdTextL("Bulleted List"),
+                LdText.l("Bulleted List"),
                 LdTextList(
                   [
                     "First bullet point with some longer text to demonstrate wrapping",
@@ -46,16 +46,16 @@ LdTextList(
           ),
           CodeBlock(
             code: """
-LdTextList(
+LdText.list(
   ['First item', 'Second item', 'Third item'],
-  type: LdTextListType.enumerated,
+  type: LdText.listType.enumerated,
 );
 """,
           ),
           LdCard(
             child: LdAutoSpace(
               children: [
-                LdTextL("Enumerated List"),
+                LdText.l("Enumerated List"),
                 LdTextList(
                   [
                     "First numbered item",
@@ -67,11 +67,11 @@ LdTextList(
               ],
             ),
           ),
-          LdTextP(
+          LdText.p(
               "You can customize the size, color, and other text properties:"),
           CodeBlock(
             code: """
-LdTextList(
+LdText.list(
   ['Custom styled item'],
   size: LdSize.l,
   color: Colors.blue,
@@ -82,7 +82,7 @@ LdTextList(
           LdCard(
             child: LdAutoSpace(
               children: [
-                LdTextL("Different Sizes"),
+                LdText.l("Different Sizes"),
                 LdTextList(
                   ["Small size item"],
                   size: LdSize.s,
@@ -98,14 +98,14 @@ LdTextList(
               ],
             ),
           ),
-          LdTextP(
+          LdText.p(
               "The widget also supports muted text when wrapped in LdMute:"),
           CodeBlock(
             code: """
 LdMute(
-  child: LdTextList(
+  child: LdText.list(
     ['Muted bullet point', 'Another muted item'],
-    type: LdTextListType.bulleted,
+    type: LdText.listType.bulleted,
   ),
 );
 """,
@@ -113,7 +113,7 @@ LdMute(
           LdCard(
             child: LdAutoSpace(
               children: [
-                LdTextL("Muted List"),
+                LdText.l("Muted List"),
                 LdMute(
                   child: LdTextList(
                     [

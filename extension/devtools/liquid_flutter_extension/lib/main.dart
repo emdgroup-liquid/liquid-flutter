@@ -126,7 +126,7 @@ class _LiquidFlutterExtensionState extends State<LiquidFlutterExtension> {
       children: [
         ...controllers.values.map(
           (item) => LdCard(
-            header: LdTextL(
+            header: LdText.l(
               "${item.id} ${item.debugLabel != null ? " - ${item.debugLabel}" : ""} - ${item.type}",
             ),
             child: LdAutoSpace(
@@ -151,7 +151,7 @@ class _LiquidFlutterExtensionState extends State<LiquidFlutterExtension> {
                             ),
                           ),
                           ldSpacerM,
-                          LdTextL(switch (item.state.type) {
+                          LdText.l(switch (item.state.type) {
                             LdSubmitStateType.idle => "Idle",
                             LdSubmitStateType.loading => "Loading",
                             LdSubmitStateType.error => "Error",
@@ -200,12 +200,12 @@ class _LiquidFlutterExtensionState extends State<LiquidFlutterExtension> {
                 ),
 
                 if (item.state.error != null) ...[
-                  LdTextL("Error:"),
-                  LdTextPs(item.state.error!),
+                  LdText.l("Error:"),
+                  LdText.ps(item.state.error!),
                 ],
                 if (item.state.result != null) ...[
-                  LdTextL("Result:"),
-                  LdTextPs(item.state.result!),
+                  LdText.l("Result:"),
+                  LdText.ps(item.state.result!),
                 ],
 
                 //Text(item["state"]),
@@ -218,14 +218,13 @@ class _LiquidFlutterExtensionState extends State<LiquidFlutterExtension> {
                       onPressed: () => _triggerController(item.id),
                       child: Text("Trigger"),
                     ),
-                    LdButtonError(
-                      context: context,
+                    LdButton.error(
                       mode: LdButtonMode.outline,
                       size: LdSize.m,
                       onPressed: () => _forceErrorController(item.id),
                       child: Text("Force Error"),
                     ),
-                    LdButtonVague(
+                    LdButton.vague(
                       size: LdSize.m,
                       onPressed: () => _resetController(item.id),
                       child: Text("Reset"),

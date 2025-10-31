@@ -96,7 +96,7 @@ class _LdDatePickerState extends State<LdDatePicker> {
       useRootNavigator: widget.useRootNavigator,
       builder: (context, open) => LdBundle(
         children: [
-          if (widget.label != null) LdTextL(widget.label!),
+          if (widget.label != null) LdText.l(widget.label!),
           LdButton(
             child: Text(initialDateString),
             key: const Key("date_picker_button"),
@@ -136,7 +136,7 @@ class _LdDatePickerState extends State<LdDatePicker> {
                     spacing: LdTheme.of(context).paddingSize(size: LdSize.s),
                     runSpacing: LdTheme.of(context).paddingSize(size: LdSize.s),
                     children: [
-                      LdButtonOutline(
+                      LdButton.outline(
                         child: const Text("Today"),
                         key: const Key("today"),
                         active: todayIsSelected,
@@ -146,7 +146,7 @@ class _LdDatePickerState extends State<LdDatePicker> {
                           _selectedDateNotifier.value = today;
                         },
                       ),
-                      LdButtonOutline(
+                      LdButton.outline(
                         child: const Text("+7d"),
                         key: const Key("in7d"),
                         active: in7DaysSelected,
@@ -156,7 +156,7 @@ class _LdDatePickerState extends State<LdDatePicker> {
                           _selectedDateNotifier.value = in7Days;
                         },
                       ),
-                      LdButtonOutline(
+                      LdButton.outline(
                         child: const Text("+30d"),
                         key: const Key("in30d"),
                         active: in30DaysSelected,
@@ -166,7 +166,7 @@ class _LdDatePickerState extends State<LdDatePicker> {
                           _selectedDateNotifier.value = in30Days;
                         },
                       ),
-                      LdButtonOutline(
+                      LdButton.outline(
                         child: const Text("+90d"),
                         key: const Key("in90d"),
                         active: in90DaysSelected,
@@ -394,7 +394,7 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final previousMonth = LdButtonGhost(
+    final previousMonth = LdButton.ghost(
       child: const Icon(LucideIcons.arrowLeft),
       disabled: !previousMonthIsValid,
       onPressed: () {
@@ -408,7 +408,7 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
       },
     );
 
-    final nextMonth = LdButtonGhost(
+    final nextMonth = LdButton.ghost(
       child: const Icon(LucideIcons.arrowRight),
       disabled: !nextMonthIsValid,
       onPressed: () {
@@ -525,7 +525,7 @@ class _MonthView extends StatelessWidget {
   List<Widget> _buildWeekDayHeaders() {
     return List.generate(7, (index) {
       return Expanded(
-        child: LdTextL(
+        child: LdText.l(
           DateFormat.E().format(DateTime(2000, 1, index + 3)),
           textAlign: TextAlign.center,
         ),
@@ -612,7 +612,7 @@ class _MonthView extends StatelessWidget {
             return Expanded(
               child: AspectRatio(
                 aspectRatio: aspectRatio,
-                child: LdButtonGhost(
+                child: LdButton.ghost(
                   mode: _buttonMode(day),
                   key: Key("day_${day.year}_${day.month}_${day.day}"),
                   active: isSelected(day),

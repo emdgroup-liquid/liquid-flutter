@@ -28,7 +28,7 @@ class LdAppbarActionOverflowMenu extends StatelessWidget {
       scaleFromTrigger: true,
       blurMode: LdContextMenuBlurMode.never,
       zoomMode: LdContextZoomMode.never,
-      builder: (context, isOpen, open, child) => LdButtonGhost(
+      builder: (context, isOpen, open, child) => LdButton.ghost(
         onPressed: open,
         child: const Icon(LucideIcons.ellipsisVertical),
       ),

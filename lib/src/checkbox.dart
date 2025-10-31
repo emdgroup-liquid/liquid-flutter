@@ -8,9 +8,17 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'tokens.dart';
 
 import 'theme/theme.dart';
+import 'annotations.dart';
+
+part 'checkbox.variants.g.dart';
 
 /// A checkbox control.
-class LdCheckbox extends StatefulWidget {
+@Variants([
+  Variant('success', defaults: {'color': 'LdTheme.of(context).success'}),
+  Variant('warning', defaults: {'color': 'LdTheme.of(context).warning'}),
+  Variant('error', defaults: {'color': 'LdTheme.of(context).error'}),
+])
+class LdCheckboxWidget extends StatefulWidget {
   final String? label;
   final bool checked;
   final bool disabled;
@@ -18,7 +26,7 @@ class LdCheckbox extends StatefulWidget {
   final LdSize size;
   final Function(bool)? onChanged;
   final LdColor? color;
-  const LdCheckbox(
+  const LdCheckboxWidget(
       {this.label,
       required this.checked,
       this.onChanged,
@@ -29,10 +37,10 @@ class LdCheckbox extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<LdCheckbox> createState() => _LdCheckboxState();
+  State<LdCheckboxWidget> createState() => _LdCheckboxState();
 }
 
-class _LdCheckboxState extends State<LdCheckbox> {
+class _LdCheckboxState extends State<LdCheckboxWidget> {
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);

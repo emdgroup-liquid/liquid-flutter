@@ -8,7 +8,7 @@ class LdSectionHeader extends StatelessWidget {
   const LdSectionHeader(this.text, {Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return LdTextL(
+    return LdText.l(
       text.toUpperCase(),
       size: LdSize.s,
       color: LdTheme.of(context, listen: true).textMuted,

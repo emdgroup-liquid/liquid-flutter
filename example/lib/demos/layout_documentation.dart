@@ -13,7 +13,7 @@ class LayoutDocumentation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ComponentPage(
+    return ComponentPage(
         path: "lib/demos/layout_documentation.dart",
         apiComponents: [
           "LdAutoSpace",
@@ -24,9 +24,9 @@ class LayoutDocumentation extends StatelessWidget {
         demo: LdAutoSpace(children: [
           LdBundle(
             children: [
-              LdTextP(
+              LdText.p(
                   "To create consistent layouts, Liquid provides a set of predefined components."),
-              LdTextHs("🦄 LdAutoSpace"),
+              LdText.hs("🦄 LdAutoSpace"),
               ComponentsAccordion(components: {"LdAutoSpace", "LdBundle"}),
               MarkdownBody(
                 data:
@@ -35,12 +35,12 @@ class LayoutDocumentation extends StatelessWidget {
               CodeBlock(code: """
                     LdAutoSpace(
                       children: [
-                        LdTextHm("Hello World"),
-                        LdTextP("This is a paragraph"),
+                        LdText.hm("Hello World"),
+                        LdText.p("This is a paragraph"),
                         LdBundle(
                           children: [
-                            LdTextP("This is a bundle"),
-                            LdTextP("It will auto space its children and create more space around itself"),
+                            LdText.p("This is a bundle"),
+                            LdText.p("It will auto space its children and create more space around itself"),
                           ],
                         )
                       ],
@@ -50,7 +50,7 @@ class LayoutDocumentation extends StatelessWidget {
           ),
           LdBundle(
             children: [
-              LdTextHs("🖥️ LdContainer"),
+              LdText.hs("🖥️ LdContainer"),
               ComponentsAccordion(components: {"LdContainer"}),
               MarkdownBody(
                   data:

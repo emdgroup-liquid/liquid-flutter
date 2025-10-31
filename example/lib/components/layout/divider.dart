@@ -15,13 +15,13 @@ class DividerDemo extends StatelessWidget {
       title: "LdDivider",
       demo: LdAutoSpace(
         children: [
-          LdTextP(
+          LdText.p(
               "The LdDivider component provides a simple horizontal line to visually separate content sections. "
               "It helps create clear visual hierarchy and improve readability by organizing content into distinct groups."),
-          LdTextP(
+          LdText.p(
               "Dividers can be customized with different heights and can be inset to align with content that has leading elements."),
           ComponentWell(
-            title: const LdTextHs("Standard divider"),
+            title: LdText.hs("Standard divider"),
             child: Column(
               children: [
                 LdDivider(),
@@ -35,8 +35,8 @@ class DividerDemo extends StatelessWidget {
             ),
           ),
           ComponentWell(
-            title: const LdTextHs("Inset for leading"),
-            description: const LdTextP(
+            title: LdText.hs("Inset for leading"),
+            description: LdText.p(
               "The insetForLeading property can be used to inset the divider to align with content that has leading elements.",
             ),
             child: Column(

@@ -6,16 +6,16 @@ class TextListDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const LdAutoSpace(
+    return LdAutoSpace(
       children: [
-        LdTextH("Text Lists"),
-        LdTextP(
-          "LdTextList allows you to create bulleted or enumerated lists using paragraph text typography.",
+        LdText.h("Text Lists"),
+        LdText.p(
+          "LdText.list allows you to create bulleted or enumerated lists using paragraph text typography.",
         ),
         LdCard(
           child: LdAutoSpace(
             children: [
-              LdTextL("Bulleted List"),
+              LdText.l("Bulleted List"),
               LdTextList(
                 [
                   "First bullet point with some longer text to demonstrate wrapping",
@@ -30,7 +30,7 @@ class TextListDemo extends StatelessWidget {
         LdCard(
           child: LdAutoSpace(
             children: [
-              LdTextL("Enumerated List"),
+              LdText.l("Enumerated List"),
               LdTextList(
                 [
                   "First numbered item",
@@ -45,7 +45,7 @@ class TextListDemo extends StatelessWidget {
         LdCard(
           child: LdAutoSpace(
             children: [
-              LdTextL("Different Sizes"),
+              LdText.l("Different Sizes"),
               LdTextList(
                 ["Small size item"],
                 size: LdSize.s,
@@ -64,7 +64,7 @@ class TextListDemo extends StatelessWidget {
         LdCard(
           child: LdAutoSpace(
             children: [
-              LdTextL("Muted List"),
+              LdText.l("Muted List"),
               LdMute(
                 child: LdTextList(
                   [

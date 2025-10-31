@@ -223,7 +223,7 @@ class _TabNavigationState extends State<TabNavigation> {
                                             if (constraints.maxWidth < 500) {
                                               return Column(
                                                 crossAxisAlignment: CrossAxisAlignment.center,
-                                                children: [icon, ldSpacerXS, LdTextLs(tab.label, color: textColor)],
+                                                children: [icon, ldSpacerXS, LdText.ls(tab.label, color: textColor)],
                                               ).padXS();
                                             }
                                             return Row(
@@ -231,7 +231,7 @@ class _TabNavigationState extends State<TabNavigation> {
                                               children: [
                                                 icon,
                                                 ldSpacerS,
-                                                Flexible(child: LdTextL(tab.label, color: textColor)),
+                                                Flexible(child: LdText.l(tab.label, color: textColor)),
                                               ],
                                             ).padXS();
                                           },

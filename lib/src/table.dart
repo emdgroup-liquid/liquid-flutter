@@ -141,7 +141,7 @@ class _LdTableState<T> extends State<LdTable<T>> {
                       child: Row(
                         children: [
                           Expanded(
-                            child: LdTextL(
+                            child: LdText.l(
                               e.title,
                             ),
                           ),

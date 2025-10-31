@@ -2,24 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:collection/collection.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
 
-import 'package:liquid_flutter/src/autospace.dart';
-import 'package:liquid_flutter/src/button.dart';
-import 'package:liquid_flutter/src/color/color.dart';
-
-import 'package:liquid_flutter/src/indicators.dart';
-import 'package:liquid_flutter/src/l10n/generated/liquid_localizations.dart';
-import 'package:liquid_flutter/src/loading.dart';
 import 'package:liquid_flutter/src/notifications/implicit_blur.dart';
 import 'package:liquid_flutter/src/notifications/notification_input.dart';
-import 'package:liquid_flutter/src/notifications/notifications_controller.dart';
-import 'package:liquid_flutter/src/notifications/notification.dart';
-import 'package:liquid_flutter/src/notifications/notification_type.dart';
 import 'package:liquid_flutter/src/notifications/radius_aware_padding.dart';
-import 'package:liquid_flutter/src/spring.dart';
-import 'package:liquid_flutter/src/theme/theme.dart';
-import 'package:liquid_flutter/src/tokens.dart';
-import 'package:liquid_flutter/variants.g.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
@@ -207,7 +194,7 @@ class LdNotificationWidget extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: LdButtonOutline(
+          child: LdButton.outline(
             disabled: didConfirm,
             key: notification.cancelKey,
             child: Text(cancelText),
@@ -276,12 +263,12 @@ class LdNotificationWidget extends StatelessWidget {
                     child: LdAutoSpace(
                       children: [
                         // Text of the notification
-                        LdTextP(
+                        LdText.p(
                           notification.message,
                           overflow: TextOverflow.fade,
                         ),
                         if (notification.subMessage != null)
-                          LdTextPs(notification.subMessage!,
+                          LdText.ps(notification.subMessage!,
                               overflow: TextOverflow.fade, color: _theme(context).textMuted),
                       ],
                     ),
@@ -291,7 +278,7 @@ class LdNotificationWidget extends StatelessWidget {
                       notification is! LdAcknowledgeNotification &&
                       notification is! LdConfirmNotification)
                     // Dismiss button
-                    LdButtonGhost(
+                    LdButton.ghost(
                       color: _colorBundle(context),
                       onPressed: onDismiss,
                       child: const Icon(LucideIcons.x),

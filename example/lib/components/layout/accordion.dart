@@ -49,7 +49,7 @@ class _AccordionDemoState extends State<AccordionDemo> {
       allowMultipleOpen: _allowMultiple,
       childBuilder: (context, n) => LdAutoSpace(
         children: [
-          LdTextH("Content $n"),
+          LdText.h("Content $n"),
           const FlutterLogo(),
         ],
       ),
@@ -61,23 +61,23 @@ class _AccordionDemoState extends State<AccordionDemo> {
         title: "LdAccordion",
         demo: LdAutoSpace(
           children: [
-            LdTextP(
+            LdText.p(
               "The LdAccordion component provides a way to organize content into collapsible sections. "
               "It's useful for presenting information in a compact format where users can expand sections they're interested in.",
             ),
-            LdTextP(
+            LdText.p(
               "You can create an accordion either by using the standard constructor with builders for headers and content, "
               "or by using the convenient LdAccordion.fromList constructor with predefined LdAccordionItem objects.",
             ),
             ComponentWell(
               onSurface: _onSurface,
-              title: const LdTextHs("Demo"),
+              title: LdText.hs("Demo"),
               child: LdAutoSpace(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (!_wrapActiveInCard) ...[
                     LdCard(padding: EdgeInsets.zero, child: accordion),
-                    const LdTextL(
+                    LdText.l(
                         "Accordion is placed inside an LdCard with no padding")
                   ] else
                     accordion
@@ -106,7 +106,7 @@ class _AccordionDemoState extends State<AccordionDemo> {
                 onChanged: _toggleOnSurface),
             LdDivider(),
             ComponentWell(
-                title: const LdTextHs(".fromList constructor"),
+                title: LdText.hs(".fromList constructor"),
                 child: Column(
                   children: [
                     LdAccordion.fromList(

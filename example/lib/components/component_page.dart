@@ -59,7 +59,7 @@ class ComponentPage extends StatelessWidget {
 
             demo ?? Container(),
 
-            const LdTextH(
+            LdText.h(
               "API Reference",
             ),
 

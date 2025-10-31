@@ -13,7 +13,7 @@ class OpenDrawerButton extends StatelessWidget {
     final icon = layoutState?.isSideBySide ?? false ? LucideIcons.panelLeftOpen : LucideIcons.menu;
     final scaffold = context.findAncestorStateOfType<LdScaffoldState>();
 
-    return LdButtonGhost(child: Icon(icon), onPressed: () => scaffold?.openDrawer());
+    return LdButton.ghost(child: Icon(icon), onPressed: () => scaffold?.openDrawer());
   }
 }
 
@@ -28,7 +28,7 @@ class CloseDrawerButton extends StatelessWidget {
         layoutState?.parentLayoutState?.isSideBySide ?? false ? LucideIcons.panelLeftClose : LucideIcons.chevronRight;
 
     final scaffold = context.findAncestorStateOfType<LdScaffoldState>();
-    return LdButtonGhost(
+    return LdButton.ghost(
       child: Icon(icon),
       onPressed: () {
         scaffold?.closeDrawer();

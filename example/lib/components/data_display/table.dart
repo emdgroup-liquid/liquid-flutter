@@ -79,7 +79,7 @@ class _TableDemoState extends State<TableDemo> {
             ),
           ),
           ldSpacerL,
-          const LdTextH(
+          LdText.h(
             "Visual density",
           ),
           ldSpacerM,
@@ -98,7 +98,7 @@ class _TableDemoState extends State<TableDemo> {
             },
           ),
           ldSpacerM,
-          const LdTextH(
+          LdText.h(
             "Selected items:",
           ),
           ldSpacerM,

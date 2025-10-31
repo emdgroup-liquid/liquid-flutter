@@ -25,13 +25,13 @@ class _AutoSpaceDemoState extends State<AutoSpaceDemo> {
           child: LdAutoSpace(
             animate: _animate,
             children: [
-              const LdTextHl(
+              LdText.hl(
                 "Autospace Demo Form",
               ),
-              const LdTextL(
+              LdText.l(
                 "This is a demo form to show how autospace works",
               ),
-              const LdTextP(
+              LdText.p(
                 "It will automatically space out elements based on their type",
               ),
               LdButton(
@@ -45,7 +45,7 @@ class _AutoSpaceDemoState extends State<AutoSpaceDemo> {
                 label: "With label",
               ),
               const LdDivider(),
-              const LdTextHs(
+              LdText.hs(
                 "Second section",
               ),
               const LdRadio(
@@ -63,8 +63,8 @@ class _AutoSpaceDemoState extends State<AutoSpaceDemo> {
               const LdCheckbox(checked: true, label: "Agree to the ToS"),
               LdButton(child: const Text("Button"), onPressed: () {}),
               const LdDivider(),
-              const LdTextP("This is a paragraph. It should be spaced out."),
-              const LdTextL("This is a label.")
+              LdText.p("This is a paragraph. It should be spaced out."),
+              LdText.l("This is a label.")
             ],
           ),
         ),

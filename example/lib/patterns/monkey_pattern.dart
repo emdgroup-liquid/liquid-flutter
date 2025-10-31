@@ -14,12 +14,12 @@ class MonkeyPatternDemo extends StatelessWidget {
       category: "Patterns",
       title: "LdMonkey - Pattern Configuration",
       demo: LdAutoSpace(children: [
-        LdTextH("LdMonkey Pattern Configuration"),
-        LdTextP(
+        LdText.h("LdMonkey Pattern Configuration"),
+        LdText.p(
             "The LdMonkey class is the main configuration class for the monkey pattern. It defines how your master-detail interface behaves, including routing, selection, actions, and layout."),
         ComponentsAccordion(components: {"LdMonkey"}),
-        LdTextHs("1. Basic Configuration"),
-        LdTextP(
+        LdText.hs("1. Basic Configuration"),
+        LdText.p(
             "Start by creating an LdMonkey instance with the required parameters. This defines the core behavior of your pattern."),
         CodeBlock(
           language: "dart",
@@ -47,8 +47,8 @@ class MonkeyPatternDemo extends StatelessWidget {
   },
 );''',
         ),
-        LdTextHs("2. Selection Configuration"),
-        LdTextP(
+        LdText.hs("2. Selection Configuration"),
+        LdText.p(
             "Configure how selection works in your monkey pattern. This includes multi-selection, selection controls, and selection persistence."),
         CodeBlock(
           language: "dart",
@@ -67,8 +67,8 @@ class MonkeyPatternDemo extends StatelessWidget {
   // ... other configuration
 );''',
         ),
-        LdTextHs("3. Layout Configuration"),
-        LdTextP(
+        LdText.hs("3. Layout Configuration"),
+        LdText.p(
             "Control how your monkey pattern responds to different screen sizes and layouts."),
         CodeBlock(
           language: "dart",
@@ -88,8 +88,8 @@ class MonkeyPatternDemo extends StatelessWidget {
   // ... other configuration
 );''',
         ),
-        LdTextHs("4. Actions Configuration"),
-        LdTextP(
+        LdText.hs("4. Actions Configuration"),
+        LdText.p(
             "Define actions that users can perform on items. Actions can appear in different locations and have various visibility conditions. See the Actions documentation for detailed examples."),
         CodeBlock(
           language: "dart",
@@ -102,8 +102,8 @@ class MonkeyPatternDemo extends StatelessWidget {
   // ... other configuration
 );''',
         ),
-        LdTextHs("5. List Builder Configuration"),
-        LdTextP(
+        LdText.hs("5. List Builder Configuration"),
+        LdText.p(
             "The listBuilder function is where you define how your selectable list behaves. This includes the list widget, item builder, and selection handling."),
         CodeBlock(
           language: "dart",
@@ -159,8 +159,8 @@ class MonkeyPatternDemo extends StatelessWidget {
   // ... other configuration
 );''',
         ),
-        LdTextHs("6. Shell Wrapper"),
-        LdTextP(
+        LdText.hs("6. Shell Wrapper"),
+        LdText.p(
             "Optionally wrap your monkey pattern with a custom shell widget for additional functionality like navigation, headers, or sidebars."),
         CodeBlock(
           language: "dart",
@@ -175,8 +175,8 @@ class MonkeyPatternDemo extends StatelessWidget {
   // ... other configuration
 );''',
         ),
-        LdTextHs("7. Integration with GoRouter"),
-        LdTextP(
+        LdText.hs("7. Integration with GoRouter"),
+        LdText.p(
             "Finally, integrate your monkey pattern with GoRouter by calling the buildRoute() method."),
         CodeBlock(
           language: "dart",
@@ -195,8 +195,8 @@ class MonkeyPatternDemo extends StatelessWidget {
   ],
 );''',
         ),
-        LdTextHs("8. Complete Example"),
-        LdTextP(
+        LdText.hs("8. Complete Example"),
+        LdText.p(
             "Here's a complete example of a task management monkey pattern:"),
         CodeBlock(
           language: "dart",
@@ -249,23 +249,23 @@ class MonkeyPatternDemo extends StatelessWidget {
   ],
 );''',
         ),
-        LdTextHs("9. Related Documentation"),
-        LdTextP(
+        LdText.hs("9. Related Documentation"),
+        LdText.p(
             "For more detailed information on specific aspects of the monkey pattern:"),
         LdAutoSpace(children: [
           LdCard(
             header: Text("Repository"),
-            child: LdTextP(
+            child: LdText.p(
                 "Learn how to set up the data repository with sorting and filtering"),
           ),
           LdCard(
             header: Text("Actions"),
             child:
-                LdTextP("Detailed guide to creating and configuring actions"),
+                LdText.p("Detailed guide to creating and configuring actions"),
           ),
           LdCard(
             header: Text("Sorting & Filtering"),
-            child: LdTextP("Advanced sorting and filtering configuration"),
+            child: LdText.p("Advanced sorting and filtering configuration"),
           ),
         ]),
       ]),

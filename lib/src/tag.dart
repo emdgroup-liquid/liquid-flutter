@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'annotations.dart';
+
+part 'tag.variants.g.dart';
 
 // a small tag with colored background and text
-class LdTag extends StatelessWidget {
+@Variants([
+  Variant('success', defaults: {'color': 'LdTheme.of(context).success'}),
+  Variant('warning', defaults: {'color': 'LdTheme.of(context).warning'}),
+  Variant('error', defaults: {'color': 'LdTheme.of(context).error'}),
+])
+class LdTagWidget extends StatelessWidget {
   final Widget child;
 
   final Function? onDismiss;
   final LdSize size;
 
   final LdColor? color;
-  const LdTag({Key? key, required this.child, this.color, this.onDismiss, this.size = LdSize.m}) : super(key: key);
+  const LdTagWidget({Key? key, required this.child, this.color, this.onDismiss, this.size = LdSize.m})
+      : super(key: key);
 
   double _padding(LdTheme theme) {
     return theme.paddingSize(size: size);

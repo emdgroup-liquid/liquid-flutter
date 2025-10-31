@@ -4,9 +4,18 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/haptics.dart';
 
+import 'annotations.dart';
+
+part 'radio.variants.g.dart';
+
 enum LdRadioMode { primary, warning, error }
 
 /// a radio box
+@Variants([
+  Variant('success', defaults: {'color': 'LdTheme.of(context).success'}),
+  Variant('warning', defaults: {'color': 'LdTheme.of(context).warning'}),
+  Variant('error', defaults: {'color': 'LdTheme.of(context).error'}),
+])
 class LdRadio extends StatelessWidget {
   final String? label;
   final bool checked;

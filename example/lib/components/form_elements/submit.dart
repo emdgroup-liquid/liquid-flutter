@@ -30,7 +30,7 @@ class _SubmitDemoState extends State<SubmitDemo> {
       apiComponents: const ["LdSubmit"],
       demo: LdAutoSpace(
         children: [
-          const LdTextP(
+          LdText.p(
             "LdSubmit is a helper that makes asynchronous work easier. "
             "It handles common use cases where a function is dispatched by "
             "a button or on mount and the result is displayed.\n"
@@ -44,8 +44,8 @@ class _SubmitDemoState extends State<SubmitDemo> {
           LdBundle(
             children: [
               ComponentWell(
-                title: const LdTextH("Inline builder"),
-                description: const LdTextP(
+                title: LdText.h("Inline builder"),
+                description: LdText.p(
                   "The LdSubmitInlineBuilder will display the loading and error states inline. It is perfect for forms or other inline components.",
                 ),
                 child: Column(
@@ -89,8 +89,8 @@ class _SubmitDemoState extends State<SubmitDemo> {
           LdBundle(
             children: [
               ComponentWell(
-                title: const LdTextH("Centered builder"),
-                description: const LdTextP(
+                title: LdText.h("Centered builder"),
+                description: LdText.p(
                   "The LdSubmitCenteredBuilder will center the loading and error states. It is perfect for loading a new page (e.g. a detail view). ",
                 ),
                 child: Column(
@@ -139,8 +139,8 @@ class _SubmitDemoState extends State<SubmitDemo> {
           LdBundle(
             children: [
               ComponentWell(
-                title: const LdTextH("Dialog builder"),
-                description: const LdTextP(
+                title: LdText.h("Dialog builder"),
+                description: LdText.p(
                   "The LdSubmitDialogBuilder will display the loading and error states in a dialog. It is usefull to prevent the user from interacting with the rest of the app while the action is being processed.",
                 ),
                 child: Column(
@@ -192,8 +192,8 @@ class _SubmitDemoState extends State<SubmitDemo> {
           LdBundle(
             children: [
               ComponentWell(
-                title: const LdTextH("Notification builder"),
-                description: const LdTextP(
+                title: LdText.h("Notification builder"),
+                description: LdText.p(
                   "The LdSubmitNotificationBuilder will display the loading and error states in a notification. It is usefull to display a loading or error state without blocking the user from interacting with the rest of the app.",
                 ),
                 child: Column(
@@ -238,7 +238,7 @@ class _SubmitDemoState extends State<SubmitDemo> {
           ldSpacerL,
           LdBundle(
             children: [
-              const LdTextH("Auto trigger"),
+              LdText.h("Auto trigger"),
               LdSubmit<void, void>(
                 config: LdSubmitConfig<void, void>(
                     autoTrigger: true,
@@ -253,13 +253,13 @@ class _SubmitDemoState extends State<SubmitDemo> {
           ),
           LdBundle(
             children: [
-              const LdTextH("(Automatic) Retries"),
-              const LdTextP(
+              LdText.h("(Automatic) Retries"),
+              LdText.p(
                 "You can pass an LdSubmitRetryConfig to the LdSubmitConfig to enable (automatic) retries, or to block the retry button for a certain amount of time before allowing the user to trigger it again. The delay between retries will increase exponentially.",
               ),
               ComponentWell(
                 child: LdSubmit<void, void>(
-                  builder: const LdSubmitCenteredBuilder<void, void>(),
+                  builder: LdSubmitCenteredBuilder<void, void>(),
                   config: LdSubmitConfig<void, void>(
                     retryConfig: LdRetryConfig.defaultAutomaticRetries(),
                     action: (_) {
@@ -278,18 +278,18 @@ class _SubmitDemoState extends State<SubmitDemo> {
               )
             ],
           ),
-          const LdBundle(
+          LdBundle(
             children: [
-              LdTextH("LdSubmitConfig"),
-              LdTextP(
+              LdText.h("LdSubmitConfig"),
+              LdText.p(
                 "The LdSubmitConfig is used to configure the LdSubmit widget.",
               ),
               ComponentsAccordion(components: {"LdSubmitConfig"}),
-              LdTextH("LdSubmitController"),
-              LdTextP(
+              LdText.h("LdSubmitController"),
+              LdText.p(
                 "The LdSubmitController handles the state of the LdSubmit component. It posesses a .state property of type LdSubmitState.",
               ),
-              LdTextP(
+              LdText.p(
                   "You can observe the controller through its .stateStream property."),
               ComponentsAccordion(components: {
                 "LdSubmitController",
@@ -298,7 +298,7 @@ class _SubmitDemoState extends State<SubmitDemo> {
             ],
           ),
           ComponentWell(
-              title: LdTextH("Passing an arg"),
+              title: LdText.h("Passing an arg"),
               description: Text(
                 "You can pass an arg to the LdSubmit widget to be used in the action.",
               ),
@@ -316,10 +316,10 @@ class _SubmitDemoState extends State<SubmitDemo> {
                 ),
               )),
           Slider(value: _arg, onChanged: setArg, min: 0, max: 42),
-          const LdBundle(
+          LdBundle(
             children: [
-              LdTextH("Exception Handling"),
-              LdTextP(
+              LdText.h("Exception Handling"),
+              LdText.p(
                 "Exceptions are caught, handled by an LdExceptionMapper and displayed in an LdExceptionView. The Exception mapper can be used to configure how a specific exception is displayed. To add a custom exception you can either throw an LdException directly or provide a custom LdExceptionMapper to the LdSubmitConfig.",
               ),
               ComponentsAccordion(components: {

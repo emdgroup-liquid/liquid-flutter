@@ -14,7 +14,7 @@ class HintDemo extends StatelessWidget {
       apiComponents: const ["LdHint", "LdHintType"],
       demo: ComponentWell(
         onSurface: true,
-        description: const LdTextP(
+        description: LdText.p(
           "The LdHint component is a visual indicator paired with a text message. The status of the hint is an LdIndicator.",
         ),
         child: LdAutoSpace(

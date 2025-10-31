@@ -33,7 +33,7 @@ class MacOSWindowControls extends StatelessWidget {
       children: [
         Tooltip(
           message: LiquidLocalizations.of(context).close,
-          child: LdButtonGhost(
+          child: LdButton.ghost(
             size: LdSize.xs,
             color: LdTheme.of(context).error,
             child: const Icon(Icons.circle, size: 14),
@@ -44,7 +44,7 @@ class MacOSWindowControls extends StatelessWidget {
         ),
         Tooltip(
           message: LiquidLocalizations.of(context).minimize,
-          child: LdButtonGhost(
+          child: LdButton.ghost(
             size: LdSize.xs,
             color: LdTheme.of(context).warning,
             child: const Icon(Icons.circle, size: 14),
@@ -55,7 +55,7 @@ class MacOSWindowControls extends StatelessWidget {
         ),
         Tooltip(
           message: LiquidLocalizations.of(context).maximize,
-          child: LdButtonGhost(
+          child: LdButton.ghost(
             size: LdSize.xs,
             color: LdTheme.of(context).success,
             child: const Icon(Icons.circle, size: 14),
@@ -64,6 +64,7 @@ class MacOSWindowControls extends StatelessWidget {
             },
           ),
         ),
+        ldSpacerL,
       ],
     );
   }

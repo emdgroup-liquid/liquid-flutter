@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 void main() {
-  group('LdTextList', () {
+  group('LdText.list', () {
     testWidgets('renders bulleted list correctly', (WidgetTester tester) async {
       const items = ['Item 1', 'Item 2', 'Item 3'];
 
@@ -11,9 +11,9 @@ void main() {
         const MaterialApp(
           home: LdThemeProvider(
             child: Scaffold(
-              body: LdTextList(
+              body: LdText.list(
                 items,
-                type: LdTextListType.bulleted,
+                type: LdText.listType.bulleted,
               ),
             ),
           ),
@@ -37,9 +37,9 @@ void main() {
         const MaterialApp(
           home: LdThemeProvider(
             child: Scaffold(
-              body: LdTextList(
+              body: LdText.list(
                 items,
-                type: LdTextListType.enumerated,
+                type: LdText.listType.enumerated,
               ),
             ),
           ),
@@ -63,7 +63,7 @@ void main() {
         const MaterialApp(
           home: LdThemeProvider(
             child: Scaffold(
-              body: LdTextList(items),
+              body: LdText.list(items),
             ),
           ),
         ),
@@ -85,7 +85,7 @@ void main() {
         const MaterialApp(
           home: LdThemeProvider(
             child: Scaffold(
-              body: LdTextList(
+              body: LdText.list(
                 items,
                 size: LdSize.l,
               ),
@@ -110,9 +110,9 @@ void main() {
         const MaterialApp(
           home: LdThemeProvider(
             child: Scaffold(
-              body: LdTextList(
+              body: LdText.list(
                 items,
-                type: LdTextListType.bulleted,
+                type: LdText.listType.bulleted,
               ),
             ),
           ),

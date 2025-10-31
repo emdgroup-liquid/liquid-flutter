@@ -18,19 +18,19 @@ class LdExceptionDialog extends StatelessWidget {
     return LdAutoSpace(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        LdTextH(
+        LdText.h(
           localizedError.message,
           textAlign: TextAlign.center,
         ),
         if (localizedError.moreInfo != null)
           LdMute(
-            child: LdTextPs(
+            child: LdText.ps(
               localizedError.moreInfo!,
               textAlign: TextAlign.center,
             ),
           ),
         primaryButton ??
-            LdButtonGhost(
+            LdButton.ghost(
               width: double.infinity,
               child: Text(LiquidLocalizations.of(context).close),
               onPressed: () {

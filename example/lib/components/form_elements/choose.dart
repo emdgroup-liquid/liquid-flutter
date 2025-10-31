@@ -33,10 +33,10 @@ class _ChooseDemoState extends State<ChooseDemo> {
       title: "LdChoose",
       demo: LdAutoSpace(
         children: [
-          const LdTextP(
+          LdText.p(
             "LdChoose is a versatile dropdown selection component that allows users to select one or multiple items from a list of options. It supports both single and multiple selection modes, can be configured to require a selection or allow empty values, and adapts its appearance based on the platform and context.",
           ),
-          const LdTextP(
+          LdText.p(
             "The component provides a searchable interface on desktop and a bottom sheet selector on mobile devices. It handles keyboard navigation, supports disabled items, and can truncate long selections for better display. Use LdChoose when you need a rich selection interface with built-in platform-specific behaviors.",
           ),
           ComponentWell(

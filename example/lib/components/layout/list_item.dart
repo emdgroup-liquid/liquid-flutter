@@ -33,11 +33,11 @@ class _ListItemDemoState extends State<ListItemDemo> {
       title: "LdListItem",
       demo: LdAutoSpace(
         children: [
-          LdTextP(
+          LdText.p(
               "The LdListItem can be used to display information in a list format. It supports:"),
           Padding(
             padding: const EdgeInsets.only(left: 8.0),
-            child: LdTextP(
+            child: LdText.p(
               "• Leading and trailing widgets\n"
               "• Selection controls (checkbox/radio)\n"
               "• Disabled state\n"
@@ -124,8 +124,8 @@ class _ListItemDemoState extends State<ListItemDemo> {
             ],
           ),
           ComponentWell(
-            title: const LdTextH("LdListItemToggle"),
-            description: const LdTextP(
+            title: LdText.h("LdListItemToggle"),
+            description: LdText.p(
               "The LdListItemToggle is a convenient wrapper around LdListItem and LdToggle. It is used to toggle the value of a boolean variable.",
             ),
             onSurface: true,
@@ -146,28 +146,28 @@ class _ListItemDemoState extends State<ListItemDemo> {
             ),
           ),
           ComponentWell(
-            title: const LdTextH("LdListItemLoading"),
-            description: const LdTextP(
+            title: LdText.h("LdListItemLoading"),
+            description: LdText.p(
               "Show some skeleton while waiting for the data to load.",
             ),
             onSurface: true,
             child: LdAutoSpace(
               children: [
-                LdTextP("With leading and subtitle"),
+                LdText.p("With leading and subtitle"),
                 LdListItemLoading(
                   hasLeading: true,
                   hasSubtitle: true,
                 ),
-                LdTextP("With leading"),
+                LdText.p("With leading"),
                 LdListItemLoading(
                   hasLeading: true,
                 ),
-                LdTextP("With leading and trailing"),
+                LdText.p("With leading and trailing"),
                 LdListItemLoading(
                   hasLeading: true,
                   hasTrailing: true,
                 ),
-                LdTextP("With leading and trailing and subtitle"),
+                LdText.p("With leading and trailing and subtitle"),
                 LdListItemLoading(
                   hasLeading: true,
                   hasTrailing: true,

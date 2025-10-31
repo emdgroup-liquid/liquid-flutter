@@ -15,7 +15,7 @@ class AppBarApi extends StatelessWidget {
       apiComponents: const ["LdAppBar"],
       demo: ComponentWell(
         onSurface: false,
-        description: const LdTextP(
+        description: LdText.p(
           "The LdAppBar component is a customizable app bar for navigation and actions, supporting theming and platform adaptation.",
         ),
         child: LdAutoSpace(
@@ -29,14 +29,14 @@ class AppBarApi extends StatelessWidget {
               title: const Text("AppBar with Actions"),
               trailing: Row(
                 children: [
-                  LdButtonGhost(
+                  LdButton.ghost(
                     child: const Icon(LucideIcons.search),
                     onPressed: () {},
                   ),
                   LdContextMenu(
                     menuBuilder: (context, onDismiss) =>
                         Column(mainAxisSize: MainAxisSize.min, children: [
-                      LdButtonGhost(
+                      LdButton.ghost(
                         width: 300,
                         onPressed: () {
                           onDismiss();
@@ -44,7 +44,7 @@ class AppBarApi extends StatelessWidget {
                         child: const Text("Item 1"),
                       ),
                     ]),
-                    builder: (context, isOpen, open, child) => LdButtonGhost(
+                    builder: (context, isOpen, open, child) => LdButton.ghost(
                       child: const Icon(LucideIcons.ellipsisVertical),
                       onPressed: () {
                         open();

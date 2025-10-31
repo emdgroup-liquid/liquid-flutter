@@ -14,8 +14,8 @@ class MonkeySortingFilteringDemo extends StatelessWidget {
       category: "Patterns",
       title: "LdMonkey - Sorting & Filtering",
       demo: LdAutoSpace(children: [
-        LdTextH("Sorting & Filtering"),
-        LdTextP(
+        LdText.h("Sorting & Filtering"),
+        LdText.p(
             "The monkey pattern provides powerful sorting and filtering capabilities through the LdRepository. These features work together to help users find and organize their data efficiently."),
         ComponentsAccordion(components: {
           "LdSortOption",
@@ -23,8 +23,8 @@ class MonkeySortingFilteringDemo extends StatelessWidget {
           "LdFilterBoolOption",
           "LdFilterSearchOption"
         }),
-        LdTextHs("1. Sort Options"),
-        LdTextP(
+        LdText.hs("1. Sort Options"),
+        LdText.p(
             "Sort options allow users to order items by different criteria. Each sort option includes a name, label, icon, and sorting function."),
         CodeBlock(
           language: "dart",
@@ -56,8 +56,8 @@ class MonkeySortingFilteringDemo extends StatelessWidget {
   ),
 ],''',
         ),
-        LdTextHs("2. Optimistic Sorting"),
-        LdTextP(
+        LdText.hs("2. Optimistic Sorting"),
+        LdText.p(
             "Optimistic sorting provides instant feedback by sorting items on the client side before the server responds. This makes the UI feel faster and more responsive."),
         CodeBlock(
           language: "dart",
@@ -74,11 +74,11 @@ class MonkeySortingFilteringDemo extends StatelessWidget {
   },
 ),''',
         ),
-        LdTextHs("3. Filter Options"),
-        LdTextP(
+        LdText.hs("3. Filter Options"),
+        LdText.p(
             "Filter options allow users to filter items based on different criteria. The monkey pattern supports several types of filters:"),
-        LdTextHs("Boolean Filters"),
-        LdTextP("Simple on/off filters for boolean properties:"),
+        LdText.hs("Boolean Filters"),
+        LdText.p("Simple on/off filters for boolean properties:"),
         CodeBlock(
           language: "dart",
           code: '''filters: {
@@ -100,8 +100,8 @@ class MonkeySortingFilteringDemo extends StatelessWidget {
   ),
 },''',
         ),
-        LdTextHs("Search Filters"),
-        LdTextP("Text-based search filters with suggestions:"),
+        LdText.hs("Search Filters"),
+        LdText.p("Text-based search filters with suggestions:"),
         CodeBlock(
           language: "dart",
           code: '''LdFilterSearchOption<Task, int, String>(
@@ -120,8 +120,8 @@ class MonkeySortingFilteringDemo extends StatelessWidget {
   },
 ),''',
         ),
-        LdTextHs("Custom Filters"),
-        LdTextP("Advanced filters with custom logic and UI:"),
+        LdText.hs("Custom Filters"),
+        LdText.p("Advanced filters with custom logic and UI:"),
         CodeBlock(
           language: "dart",
           code: '''LdFilterOption<Task, int>(
@@ -146,8 +146,8 @@ class MonkeySortingFilteringDemo extends StatelessWidget {
   },
 ),''',
         ),
-        LdTextHs("4. Filter Combinations"),
-        LdTextP(
+        LdText.hs("4. Filter Combinations"),
+        LdText.p(
             "Multiple filters can be combined using AND logic. Users can activate multiple filters simultaneously:"),
         CodeBlock(
           language: "dart",
@@ -188,8 +188,8 @@ class MonkeySortingFilteringDemo extends StatelessWidget {
   ),
 },''',
         ),
-        LdTextHs("5. Repository Integration"),
-        LdTextP(
+        LdText.hs("5. Repository Integration"),
+        LdText.p(
             "Filters and sorting are integrated into the repository's fetchListWithParameters method:"),
         CodeBlock(
           language: "dart",
@@ -228,8 +228,8 @@ class MonkeySortingFilteringDemo extends StatelessWidget {
   // ... other configuration
 );''',
         ),
-        LdTextHs("6. URL State Management"),
-        LdTextP(
+        LdText.hs("6. URL State Management"),
+        LdText.p(
             "Filter and sort states are automatically managed in the URL, allowing users to bookmark and share filtered views:"),
         CodeBlock(
           language: "dart",
@@ -242,32 +242,32 @@ class MonkeySortingFilteringDemo extends StatelessWidget {
 // 3. Updates URL when filters/sorts change
 // 4. Restores state when navigating back''',
         ),
-        LdTextHs("7. Filter UI Components"),
-        LdTextP(
+        LdText.hs("7. Filter UI Components"),
+        LdText.p(
             "The monkey pattern provides built-in UI components for managing filters:"),
         LdAutoSpace(children: [
           LdCard(
             header: Text("Filter Panel"),
-            child: LdTextP("Toggleable panel showing all available filters"),
+            child: LdText.p("Toggleable panel showing all available filters"),
           ),
           LdCard(
             header: Text("Filter Chips"),
-            child: LdTextP(
+            child: LdText.p(
                 "Visual indicators of active filters with remove buttons"),
           ),
           LdCard(
             header: Text("Search Bar"),
             child:
-                LdTextP("Integrated search with suggestions and autocomplete"),
+                LdText.p("Integrated search with suggestions and autocomplete"),
           ),
           LdCard(
             header: Text("Sort Dropdown"),
-            child: LdTextP("Dropdown for selecting sort options"),
+            child: LdText.p("Dropdown for selecting sort options"),
           ),
         ]),
-        LdTextHs("8. Advanced Filter Examples"),
-        LdTextP("More complex filter scenarios:"),
-        LdTextHs("Date Range Filter"),
+        LdText.hs("8. Advanced Filter Examples"),
+        LdText.p("More complex filter scenarios:"),
+        LdText.hs("Date Range Filter"),
         CodeBlock(
           language: "dart",
           code: '''LdFilterOption<Task, int>(
@@ -288,7 +288,7 @@ class MonkeySortingFilteringDemo extends StatelessWidget {
   },
 ),''',
         ),
-        LdTextHs("Multi-Select Filter"),
+        LdText.hs("Multi-Select Filter"),
         CodeBlock(
           language: "dart",
           code: '''LdFilterOption<Task, int>(
@@ -312,31 +312,32 @@ class MonkeySortingFilteringDemo extends StatelessWidget {
   },
 ),''',
         ),
-        LdTextHs("9. Performance Considerations"),
-        LdTextP("Tips for optimal performance with large datasets:"),
+        LdText.hs("9. Performance Considerations"),
+        LdText.p("Tips for optimal performance with large datasets:"),
         LdAutoSpace(children: [
           LdCard(
             header: Text("Optimistic Updates"),
-            child: LdTextP(
+            child: LdText.p(
                 "Use optimistic filtering and sorting for immediate UI feedback"),
           ),
           LdCard(
             header: Text("Debounced Search"),
-            child: LdTextP(
+            child: LdText.p(
                 "Implement debouncing for search filters to avoid excessive API calls"),
           ),
           LdCard(
             header: Text("Indexed Queries"),
-            child: LdTextP("Use database indexes for commonly filtered fields"),
+            child:
+                LdText.p("Use database indexes for commonly filtered fields"),
           ),
           LdCard(
             header: Text("Pagination"),
-            child: LdTextP(
+            child: LdText.p(
                 "Always combine filtering with pagination for large datasets"),
           ),
         ]),
-        LdTextHs("10. Complete Example"),
-        LdTextP(
+        LdText.hs("10. Complete Example"),
+        LdText.p(
             "Here's a complete example of sorting and filtering configuration:"),
         CodeBlock(
           language: "dart",

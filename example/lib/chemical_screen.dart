@@ -121,11 +121,11 @@ class _ChemicalScreenState extends State<ChemicalScreen> {
                 })
           ]),
           ldSpacerL,
-          LdTextHs("Other potions"),
+          LdText.hs("Other potions"),
           ldSpacerM,
           const _OtherPotions(),
           ldSpacerL,
-          LdTextHs("Stock"),
+          LdText.hs("Stock"),
           const _Accordion(),
         ].autoSpace(context, animate: true),
       ),
@@ -183,10 +183,10 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
               child: LdAutoSpace(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const LdTextHl(
+                  LdText.hl(
                     "Polyjuice potion",
                   ),
-                  const LdTextL(
+                  LdText.l(
                     "Made with real human hair",
                   ),
                 ],
@@ -296,7 +296,7 @@ class _Accordion extends StatelessWidget {
           childBuilder: ((context, n) {
             return Container(
               padding: const EdgeInsets.all(16),
-              child: LdTextPs("Accordion content $n"),
+              child: LdText.ps("Accordion content $n"),
             );
           }),
           headerBuilder: ((context, n) {
@@ -322,8 +322,8 @@ class _OtherPotions extends StatelessWidget {
       child: LdTable<_Potion>(
         header: Row(
           children: [
-            const Flexible(
-              child: LdTextL(
+            Flexible(
+              child: LdText.l(
                 "Other potions",
               ),
             ),
@@ -345,7 +345,7 @@ class _OtherPotions extends StatelessWidget {
         rows: potions,
         rowCount: potions.length,
         buildRow: (potion) {
-          return [LdTextPs(potion.name), LdTextPs(potion.description)];
+          return [LdText.ps(potion.name), LdText.ps(potion.description)];
         },
       ),
     );
@@ -389,9 +389,9 @@ class _ProductKeyInfosState extends State<_ProductKeyInfos> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            LdTextH("5-4"),
+            LdText.h("5-4"),
             LdMute(
-              child: LdTextL(
+              child: LdText.l(
                 "pH",
               ),
             )
@@ -402,7 +402,7 @@ class _ProductKeyInfosState extends State<_ProductKeyInfos> {
           children: [
             LdCounter(value: _boilingPoint),
             LdMute(
-                child: LdTextL(
+                child: LdText.l(
               "Boiling point",
             )),
           ],
@@ -415,7 +415,7 @@ class _ProductKeyInfosState extends State<_ProductKeyInfos> {
               precision: 2,
             ),
             LdMute(
-              child: LdTextL(
+              child: LdText.l(
                 "Brewing pressure",
               ),
             )
@@ -424,11 +424,11 @@ class _ProductKeyInfosState extends State<_ProductKeyInfos> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            LdTextH(
+            LdText.h(
               "Very",
             ),
             LdMute(
-              child: LdTextL(
+              child: LdText.l(
                 "Magic",
               ),
             )

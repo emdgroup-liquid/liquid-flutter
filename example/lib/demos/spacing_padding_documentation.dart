@@ -11,14 +11,14 @@ class SpacingPaddingDocumentation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const LdBundle(
+    return LdBundle(
       children: [
         LdBundle(
           children: [
-            LdTextH(
+            LdText.h(
               "💢 Symmetric Padding",
             ),
-            LdTextP(
+            LdText.p(
               "You can get a symmetric padding (same padding on all sides) using the `pad` function of the LdTheme.",
             ),
             CodeBlock(
@@ -30,16 +30,16 @@ class SpacingPaddingDocumentation extends StatelessWidget {
         ),
         LdBundle(
           children: [
-            LdTextHs(
+            LdText.hs(
               "⚖️ Balanced Padding",
             ),
-            LdTextP(
+            LdText.p(
               "You can get a balanced padding (horizontally stronger padded than vertical) using the `balPad` function of the LdTheme.",
             ),
             CodeBlock(code: "LdTheme.of(context).balPad(LdSize.m),"),
             LdHint(
               type: LdHintType.info,
-              child: LdTextP(
+              child: LdText.p(
                 ".pad and .balPad will respect the Theme Size and change accordingly",
               ),
             ),
@@ -47,7 +47,7 @@ class SpacingPaddingDocumentation extends StatelessWidget {
         ),
         LdBundle(
           children: [
-            LdTextH(
+            LdText.h(
               "Spacing",
             ),
             ComponentsAccordion(components: {"LdSpacer"}),
@@ -61,7 +61,7 @@ class SpacingPaddingDocumentation extends StatelessWidget {
               direction: Axis.horizontal,
             );
                   """),
-            LdTextP(
+            LdText.p(
               "for convenience, there are also preconfigured spacers:",
             ),
             CodeBlock(code: """
@@ -82,7 +82,7 @@ class SpacingPaddingDocumentation extends StatelessWidget {
                   """),
             LdHint(
               type: LdHintType.info,
-              child: LdTextP(
+              child: LdText.p(
                 "LdSpacer will respect the Theme Size and change accordingly",
               ),
             ),

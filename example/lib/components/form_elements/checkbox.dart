@@ -18,10 +18,10 @@ class _CheckboxDemoState extends State<CheckboxDemo> {
       title: "LdCheckbox",
       demo: LdAutoSpace(
         children: [
-          const LdTextP(
+          LdText.p(
             "Checkboxes allow users to select one or more options from a set. They are commonly used for multiple-choice selections, task lists, and form submissions where multiple selections are allowed.",
           ),
-          const LdTextP(
+          LdText.p(
             "Use a checkbox when the user needs to make multiple independent selections. For binary (on/off) choices where only one selection is possible, consider using a toggle switch instead. Toggles are better suited for immediate actions like enabling/disabling a setting, while checkboxes are ideal for selecting items that will be acted upon later, such as in a form submission.",
           ),
           ComponentWell(
