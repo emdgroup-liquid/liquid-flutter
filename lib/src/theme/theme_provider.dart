@@ -88,6 +88,7 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
   void _listenToScreenRadiusStream() {
     _screenRadiusSubscription = widget.screenRadiusStream?.listen((radius) {
       _theme.screenRadius = radius;
+      setState(() {});
     });
   }
 
@@ -119,14 +120,13 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
 
   BoxDecoration? get _windowDecoration {
     if (_theme.platform == LdPlatform.macos) {
-      final screenRadius = _theme.screenRadius;
-
       return BoxDecoration(
         color: _theme.background,
-        border: Border.all(
+        /* border: Border.all(
           color: _theme.border,
           width: 1,
-        ),
+          strokeAlign: BorderSide.strokeAlignOutside,
+        ), */
         borderRadius: BorderRadius.circular(_theme.screenRadius),
       );
     }
