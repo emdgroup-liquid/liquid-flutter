@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -98,7 +99,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
   factory LdPaginator.fromList(List<T> list) {
     return LdPaginator<T, IdType>(
-      pageSize: list.length,
+      pageSize: max(list.length, 1),
       debounceTime: const Duration(milliseconds: 0),
       fetchListFunction: ({
         required int offset,
@@ -573,6 +574,21 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
       }
     }
     notifyListeners();
+  }
+
+  @override
+  String toString() {
+    return 'LdPaginator('
+        'totalItems: $totalItems, '
+        'busy: $_busy, '
+        'error: $_error, '
+        'pageSize: $pageSize, '
+        'initialOffset: $initialOffset, '
+        'debounceTime: $debounceTime, '
+        'items: ${_items.length}, '
+        'fetchQueueSize: $fetchQueueSize, '
+        'requestedOffsets: $_requestedOffsets'
+        ')';
   }
 }
 

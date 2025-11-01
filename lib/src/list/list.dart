@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/intersperse.dart';
@@ -145,6 +146,30 @@ class LdList<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
 
   // Error handling
   final LdRetryConfig? retryConfig;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<bool>('primary', primary));
+    properties.add(DiagnosticsProperty<bool>('shrinkWrap', shrinkWrap));
+    properties.add(DoubleProperty('assumedItemHeight', assumedItemHeight));
+    properties.add(DiagnosticsProperty<ScrollPhysics?>('physics', physics));
+    properties.add(DiagnosticsProperty<Widget?>('header', header));
+    properties.add(DiagnosticsProperty<Widget?>('footer', footer));
+    properties.add(FlagProperty(
+      'hasGrouping',
+      value: groupingCriterion != null && groupHeaderBuilder != null,
+      ifTrue: 'enabled',
+    ));
+    properties.add(FlagProperty(
+      'hasSeparator',
+      value: separatorBuilder != null,
+      ifTrue: 'enabled',
+    ));
+    properties.add(DiagnosticsProperty<LdRetryConfig?>('retryConfig', retryConfig));
+    properties.add(DiagnosticsProperty<ScrollController?>('scrollController', scrollController));
+    properties.add(DiagnosticsProperty("paginator", paginator));
+  }
 
   @override
   State<LdList<T, IdType>> createState() => _LdListState<T, IdType>();

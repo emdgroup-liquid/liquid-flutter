@@ -21,18 +21,36 @@ _wrapWithMaterialApp(Widget widget) {
   );
 }
 
+class _SampleItem with Identifiable<int> {
+  int nr;
+
+  _SampleItem(this.nr);
+
+  @override
+  get id => nr;
+}
+
+class _SampleStringItem with Identifiable<String> {
+  String title;
+
+  _SampleStringItem(this.title);
+
+  @override
+  get id => title;
+}
+
 void main() {
   group('LdList Tests', () {
     // Sample data to use for our tests
     final sampleItems = List.generate(
       20,
-      (index) => 'Item ${index + 1}',
+      (index) => _SampleItem(index + 1),
     );
 
     Widget _buildBasicListWidget({
-      required LdPaginator<String> data,
-      String Function(String item)? grouping,
-      Widget Function(BuildContext context, String? criterion)? groupingBuilder,
+      required LdPaginator<_SampleItem, int> data,
+      String Function(_SampleItem item)? grouping,
+      Widget Function(BuildContext context, dynamic criterion)? groupingBuilder,
       Widget Function(BuildContext context)? seperatorBuilder,
       Widget? header,
       Widget? footer,
@@ -40,7 +58,7 @@ void main() {
       return SizedBox(
         width: 500,
         height: 500,
-        child: LdList<String, String?>(
+        child: LdList<_SampleItem, int?>(
           paginator: data,
           assumedItemHeight: 60,
           groupingCriterion: grouping,
@@ -52,7 +70,7 @@ void main() {
               },
           itemBuilder: (context, item, index) {
             return LdListItem(
-              title: Text(item),
+              title: Text("Item " + item.value.nr.toString()),
               trailingForward: true,
             );
           },
@@ -68,7 +86,7 @@ void main() {
         "Basic List": (tester, place) async {
           await place(
             _buildBasicListWidget(
-              data: LdPaginator<String>.fromList(sampleItems.sublist(0, 5)),
+              data: LdPaginator<_SampleItem, int>.fromList(sampleItems.sublist(0, 5)),
             ),
           );
           await tester.pumpAndSettle();
@@ -77,9 +95,9 @@ void main() {
         "List With Grouping, Header, Footer": (tester, place) async {
           await place(
             _buildBasicListWidget(
-              data: LdPaginator<String>.fromList(sampleItems.sublist(0, 10)),
+              data: LdPaginator<_SampleItem, int>.fromList(sampleItems.sublist(0, 10)),
               // build two groups, items 1-5 and 6-10
-              grouping: (item) => int.parse(item.split(' ')[1]) <= 5 ? 'Group 1-5' : 'Group 6-10',
+              grouping: (item) => item.nr <= 5 ? 'Group 1-5' : 'Group 6-10',
               groupingBuilder: (context, criterion) {
                 return LdAutoSpace(
                   children: [
@@ -109,12 +127,12 @@ void main() {
           return null;
         },
         "Empty State": (tester, place) async {
-          final paginator = LdPaginator<String>.fromList([]);
+          final paginator = LdPaginator<_SampleItem, int>.fromList([]);
           await place(
             SizedBox(
               width: 500,
               height: 500,
-              child: LdList<String, String>(
+              child: LdList<_SampleItem, int>(
                 paginator: paginator,
                 itemBuilder: (context, item, index) {
                   return const SizedBox.shrink();
@@ -126,13 +144,13 @@ void main() {
           return null;
         },
         "Error State": (tester, place) async {
-          final errorProducingPaginator = LdPaginator<String>(
+          final errorProducingPaginator = LdPaginator<_SampleItem, int>(
             fetchListFunction: ({
               required offset,
               required pageSize,
               pageToken,
             }) {
-              throw LdException(message: "Intentional error");
+              throw Exception('Foo');
             },
             debounceTime: const Duration(milliseconds: 0),
           );
@@ -140,7 +158,7 @@ void main() {
             SizedBox(
               width: 500,
               height: 500,
-              child: LdList<String, String>(
+              child: LdList<_SampleItem, int>(
                 paginator: errorProducingPaginator,
                 itemBuilder: (context, item, index) => const SizedBox.shrink(),
               ),
@@ -157,7 +175,7 @@ void main() {
       await tester.pumpWidget(
         _wrapWithMaterialApp(
           _buildBasicListWidget(
-            data: LdPaginator<String>.fromList(
+            data: LdPaginator<_SampleItem, int>.fromList(
               sampleItems.sublist(0, 5),
             ),
             header: const Text("Header"),
@@ -192,16 +210,18 @@ void main() {
       ];
 
       // Create a paginator with grouped data
-      final paginator = LdPaginator<String>.fromList(groupedItems);
+      final paginator = LdPaginator<_SampleStringItem, String>.fromList(
+        groupedItems.map((e) => _SampleStringItem(e)).toList(),
+      );
 
       // Build our widget with grouping
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          LdList<String, String>(
+          LdList<_SampleStringItem, String>(
             paginator: paginator,
-            groupingCriterion: (item) => item.split(':')[0].trim(),
+            groupingCriterion: (item) => item.title.split(':')[0].trim(),
             groupHeaderBuilder: (context, criterion) => Text(criterion),
-            itemBuilder: (context, item, index) => Text(item),
+            itemBuilder: (context, item, index) => Text(item.value.title),
           ),
         ),
       );
@@ -222,15 +242,15 @@ void main() {
 
     testWidgets('LdList handles empty state', (WidgetTester tester) async {
       // Create an empty paginator
-      final paginator = LdPaginator<String>.fromList([]);
+      final paginator = LdPaginator<_SampleStringItem, String>.fromList([]);
 
       // Build our widget
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          LdList<String, String>(
+          LdList<_SampleStringItem, String>(
             paginator: paginator,
             emptyBuilder: (context, refresh) => const Text('No items found'),
-            itemBuilder: (context, item, index) => Text(item),
+            itemBuilder: (context, item, index) => Text(item.value.title),
           ),
         ),
       );
@@ -244,7 +264,7 @@ void main() {
 
     testWidgets('LdList handles pagination', (WidgetTester tester) async {
       // Create a custom paginator with multiple pages
-      final fiveItemsPerPagePaginator = LdPaginator<String>(
+      final fiveItemsPerPagePaginator = LdPaginator<_SampleItem, int>(
         pageSize: 5,
         fetchListFunction: ({required offset, required pageSize, pageToken}) async {
           // Simulate a delay for network request
@@ -259,7 +279,7 @@ void main() {
 
           // Return results if valid range
           if (startIndex < totalItems) {
-            return LdListPage<String>(
+            return LdListPage<_SampleItem>(
               newItems: sampleItems.sublist(startIndex, endIndex),
               hasMore: endIndex < totalItems,
               total: totalItems,
@@ -267,7 +287,7 @@ void main() {
           }
 
           // Empty result for invalid range
-          return LdListPage<String>(
+          return LdListPage<_SampleItem>(
             newItems: [],
             hasMore: false,
             total: totalItems,
@@ -302,7 +322,7 @@ void main() {
     });
 
     testWidgets('LdList handles reset and refresh', (WidgetTester tester) async {
-      final paginator = LdPaginator<String>.fromList(
+      final paginator = LdPaginator<_SampleItem, int>.fromList(
         sampleItems.sublist(0, 5),
       );
 
