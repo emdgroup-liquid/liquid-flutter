@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
+part 'hint.variants.g.dart';
+
 enum LdHintType {
   info,
   warning,
@@ -15,13 +17,23 @@ enum LdHintType {
 }
 
 /// A colored badge with an icon and a text
-class LdHint extends StatelessWidget {
+@Variants([
+  Variant('info', defaults: {'type': 'LdHintType.info'}),
+  Variant('warning', defaults: {'type': 'LdHintType.warning'}),
+  Variant('success', defaults: {'type': 'LdHintType.success'}),
+  Variant('error', defaults: {'type': 'LdHintType.error'}),
+  Variant('canceled', defaults: {'type': 'LdHintType.canceled'}),
+  Variant('loading', defaults: {'type': 'LdHintType.loading'}),
+  Variant('pending', defaults: {'type': 'LdHintType.pending'}),
+  Variant('ongoing', defaults: {'type': 'LdHintType.ongoing'}),
+])
+class LdHintWidget extends StatelessWidget {
   final Widget? child;
   final LdHintType type;
   final LdSize size;
   final CrossAxisAlignment crossAxisAlignment;
 
-  const LdHint({
+  const LdHintWidget({
     this.child,
     required this.type,
     this.size = LdSize.m,

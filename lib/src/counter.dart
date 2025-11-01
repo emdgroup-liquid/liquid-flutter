@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-class LdCounter extends StatefulWidget {
+part 'counter.variants.g.dart';
+
+@Variants([
+  Variant('s', defaults: {'size': 'LdSize.s'}),
+  Variant('l', defaults: {'size': 'LdSize.l'}),
+  Variant('xs', defaults: {'size': 'LdSize.xs'}),
+])
+class LdCounterWidget extends StatefulWidget {
   final double value;
 
   final LdSize size;
   final int precision;
 
-  const LdCounter({super.key, required this.value, this.precision = 0, this.size = LdSize.m});
+  const LdCounterWidget({super.key, required this.value, this.precision = 0, this.size = LdSize.m});
 
   @override
-  State<LdCounter> createState() => _LdCounterState();
+  State<LdCounterWidget> createState() => _LdCounterState();
 }
 
-class _LdCounterState extends State<LdCounter> {
+class _LdCounterState extends State<LdCounterWidget> {
   @override
   void initState() {
     super.initState();

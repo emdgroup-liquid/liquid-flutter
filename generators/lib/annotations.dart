@@ -11,3 +11,6 @@ class Variant {
   const Variant(this.name, {required this.defaults});
 }
 
+class ContextConfigurable {
+  const ContextConfigurable();
+}

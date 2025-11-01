@@ -74,6 +74,33 @@ class VariantBuilder implements Builder {
     return null;
   }
 
+  bool _hasContextConfigurableAnnotation(ParameterElement parameter) {
+    for (final annotation in parameter.metadata) {
+      try {
+        final reader = ConstantReader(annotation.computeConstantValue());
+        if (reader.objectValue.type?.element?.name == 'ContextConfigurable') {
+          return true;
+        }
+      } catch (e) {
+        // Ignore errors when reading annotation
+      }
+    }
+    return false;
+  }
+
+  /// Checks if a type string represents a nullable type
+  bool _isNullableType(String typeString) {
+    return typeString.trim().endsWith('?');
+  }
+
+  /// Makes a type string nullable by appending '?' if not already nullable
+  String _makeNullableType(String typeString) {
+    if (_isNullableType(typeString)) {
+      return typeString;
+    }
+    return '$typeString?';
+  }
+
   List<_VariantData> _parseVariants(ConstantReader annotation) {
     final List<_VariantData> variants = [];
 
@@ -126,9 +153,29 @@ class VariantBuilder implements Builder {
     final optionalParams =
         constructor.parameters.where((p) => !p.isPositional).toList();
 
+    // Detect context-configurable parameters
+    final contextConfigurableParams = <ParameterElement>[];
+    for (final param in optionalParams) {
+      if (_hasContextConfigurableAnnotation(param)) {
+        contextConfigurableParams.add(param);
+      }
+    }
+
     // Get all fields from the class (excluding inherited fields from StatelessWidget/StatefulWidget)
     final fields =
         classItem.fields.where((f) => !f.isStatic && f.isFinal).toList();
+
+    final generatedItems = <Spec>[];
+
+    // Generate config class and provider if there are context-configurable parameters
+    if (contextConfigurableParams.isNotEmpty) {
+      final configClassName = '${publicClassName}Config';
+      final configClass = _generateConfigClass(
+          configClassName, contextConfigurableParams, optionalParams);
+      final providerClass =
+          _generateProviderClass(configClassName, publicClassName);
+      generatedItems.addAll([configClass, providerClass]);
+    }
 
     final componentClass = Class((builder) {
       builder.name = publicClassName;
@@ -136,9 +183,32 @@ class VariantBuilder implements Builder {
 
       // 1. Generate final fields
       for (final field in fields) {
+        // Find matching parameter to check if it's context-configurable
+        ParameterElement? matchingParam;
+        try {
+          matchingParam =
+              optionalParams.firstWhere((p) => p.name == field.name);
+        } catch (_) {
+          try {
+            matchingParam =
+                positionalParams.firstWhere((p) => p.name == field.name);
+          } catch (_) {
+            matchingParam = null;
+          }
+        }
+
+        final isContextConfigurable = matchingParam != null &&
+            _hasContextConfigurableAnnotation(matchingParam);
+        final hasDefaultValue = matchingParam?.defaultValueCode != null;
+
+        // Make field nullable if it's context-configurable with a default value
+        final fieldType = isContextConfigurable && hasDefaultValue
+            ? _makeNullableType(field.type.toString())
+            : field.type.toString();
+
         builder.fields.add(Field((fb) => fb
           ..name = field.name
-          ..type = refer(field.type.toString())
+          ..type = refer(fieldType)
           ..modifier = FieldModifier.final$));
       }
 
@@ -155,14 +225,30 @@ class VariantBuilder implements Builder {
 
         // Add optional parameters (named) using this.fieldName syntax
         cb.optionalParameters.addAll(
-          optionalParams.map((p) => Parameter((pb) => pb
-            ..name = p.name
-            ..toThis = p.name != "key"
-            ..toSuper = p.name == "key"
-            ..named = p.isNamed
-            ..required = p.isRequired
-            ..defaultTo =
-                p.defaultValueCode != null ? Code(p.defaultValueCode!) : null)),
+          optionalParams.map((p) {
+            final isContextConfigurable = contextConfigurableParams.contains(p);
+            final hasDefaultValue = p.defaultValueCode != null;
+
+            // For context-configurable params with defaults, skip the default
+            // and make the type nullable so context config can be checked
+            final shouldSkipDefault = isContextConfigurable && hasDefaultValue;
+            final paramType = shouldSkipDefault
+                ? _makeNullableType(p.type.toString())
+                : p.type.toString();
+
+            return Parameter((pb) => pb
+              ..name = p.name
+              ..toThis = p.name != "key"
+              ..toSuper = p.name == "key"
+              ..named = p.isNamed
+              ..required = p.isRequired
+              //..type = refer(paramType)
+              ..defaultTo = shouldSkipDefault
+                  ? null
+                  : (p.defaultValueCode != null
+                      ? Code(p.defaultValueCode!)
+                      : null));
+          }),
         );
       }));
 
@@ -188,14 +274,30 @@ class VariantBuilder implements Builder {
             );
 
             mb.optionalParameters.addAll(
-              optionalParams.map((p) => Parameter((pb) => pb
-                ..name = p.name
-                ..named = p.isNamed
-                ..required = p.isRequired
-                ..type = refer(p.type.toString())
-                ..defaultTo = p.defaultValueCode != null
-                    ? Code(p.defaultValueCode!)
-                    : null)),
+              optionalParams.map((p) {
+                final isContextConfigurable =
+                    contextConfigurableParams.contains(p);
+                final hasDefaultValue = p.defaultValueCode != null;
+
+                // For context-configurable params with defaults, skip the default
+                // and make the type nullable so context config can be checked
+                final shouldSkipDefault =
+                    isContextConfigurable && hasDefaultValue;
+                final paramType = shouldSkipDefault
+                    ? _makeNullableType(p.type.toString())
+                    : p.type.toString();
+
+                return Parameter((pb) => pb
+                  ..name = p.name
+                  ..named = p.isNamed
+                  ..required = p.isRequired
+                  ..type = refer(paramType)
+                  ..defaultTo = shouldSkipDefault
+                      ? null
+                      : (p.defaultValueCode != null
+                          ? Code(p.defaultValueCode!)
+                          : null));
+              }),
             );
 
             if (!hasKeyParam) {
@@ -266,14 +368,30 @@ class VariantBuilder implements Builder {
             );
 
             cb.optionalParameters.addAll(
-              optionalParams.map((p) => Parameter((pb) => pb
-                ..name = p.name
-                ..named = p.isNamed
-                ..required = p.isRequired
-                ..type = refer(p.type.toString())
-                ..defaultTo = p.defaultValueCode != null
-                    ? Code(p.defaultValueCode!)
-                    : null)),
+              optionalParams.map((p) {
+                final isContextConfigurable =
+                    contextConfigurableParams.contains(p);
+                final hasDefaultValue = p.defaultValueCode != null;
+
+                // For context-configurable params with defaults, skip the default
+                // and make the type nullable so context config can be checked
+                final shouldSkipDefault =
+                    isContextConfigurable && hasDefaultValue;
+                final paramType = shouldSkipDefault
+                    ? _makeNullableType(p.type.toString())
+                    : p.type.toString();
+
+                return Parameter((pb) => pb
+                  ..name = p.name
+                  ..named = p.isNamed
+                  ..required = p.isRequired
+                  ..type = refer(paramType)
+                  ..defaultTo = shouldSkipDefault
+                      ? null
+                      : (p.defaultValueCode != null
+                          ? Code(p.defaultValueCode!)
+                          : null));
+              }),
             );
 
             if (!hasKeyParam) {
@@ -330,8 +448,40 @@ class VariantBuilder implements Builder {
             positionalParams.map((p) => refer(p.name)).toList();
         final namedArgs = <String, Expression>{};
 
+        // Get config class name if there are context-configurable parameters
+        final configClassName = contextConfigurableParams.isNotEmpty
+            ? '${publicClassName}Config'
+            : null;
+
+        // Build the method body as a block of statements
+        final bodyStatements = <Code>[];
+
+        // If there are context-configurable parameters, read the provider once
+        if (configClassName != null) {
+          bodyStatements.add(
+            Code(
+                'final config = Provider.of<$configClassName?>(context, listen: false);'),
+          );
+        }
+
         for (final param in optionalParams) {
-          namedArgs[param.name] = refer(param.name);
+          final isContextConfigurable =
+              contextConfigurableParams.contains(param);
+          if (isContextConfigurable && configClassName != null) {
+            // Generate: param ?? config?.param ?? default
+            final providerAccess = refer('config').nullSafeProperty(param.name);
+
+            if (param.defaultValueCode != null) {
+              namedArgs[param.name] = refer(param.name)
+                  .ifNullThen(providerAccess)
+                  .ifNullThen(CodeExpression(Code(param.defaultValueCode!)));
+            } else {
+              namedArgs[param.name] =
+                  refer(param.name).ifNullThen(providerAccess);
+            }
+          } else {
+            namedArgs[param.name] = refer(param.name);
+          }
         }
 
         // Add key if present
@@ -351,14 +501,104 @@ class VariantBuilder implements Builder {
           namedArgs['key'] = refer('key');
         }
 
-        mb.body = refer(privateWidgetName)
-            .newInstance(positionalArgs, namedArgs)
-            .returned
-            .statement;
+        // Add the return statement
+        bodyStatements.add(
+          refer(privateWidgetName)
+              .newInstance(positionalArgs, namedArgs)
+              .returned
+              .statement,
+        );
+
+        mb.body = Block.of(bodyStatements);
       }));
     });
 
-    return [componentClass];
+    generatedItems.add(componentClass);
+    return generatedItems;
+  }
+
+  Class _generateConfigClass(
+    String configClassName,
+    List<ParameterElement> contextConfigurableParams,
+    List<ParameterElement> allOptionalParams,
+  ) {
+    return Class((builder) {
+      builder.name = configClassName;
+
+      // Generate fields for each context-configurable parameter
+      for (final param in contextConfigurableParams) {
+        builder.fields.add(Field((fb) => fb
+          ..name = param.name
+          ..type = refer(param.type.toString())
+          ..modifier = FieldModifier.final$));
+      }
+
+      // Generate constructor
+      builder.constructors.add(Constructor((cb) {
+        cb.constant = true;
+        for (final param in contextConfigurableParams) {
+          cb.optionalParameters.add(Parameter((pb) => pb
+            ..name = param.name
+            ..named = true
+            ..required = false
+            ..toThis = true
+            ..defaultTo = param.defaultValueCode != null
+                ? Code(param.defaultValueCode!)
+                : null));
+        }
+      }));
+    });
+  }
+
+  Class _generateProviderClass(String configClassName, String publicClassName) {
+    return Class((builder) {
+      builder.name = '${publicClassName}ConfigProvider';
+      builder.extend = const Reference('StatelessWidget');
+
+      // Field for config
+      builder.fields.add(Field((fb) => fb
+        ..name = 'config'
+        ..type = refer(configClassName)
+        ..modifier = FieldModifier.final$));
+
+      // Field for child
+      builder.fields.add(Field((fb) => fb
+        ..name = 'child'
+        ..type = const Reference('Widget')
+        ..modifier = FieldModifier.final$));
+
+      // Constructor
+      builder.constructors.add(Constructor((cb) {
+        cb.constant = true;
+        cb.requiredParameters.add(Parameter((pb) => pb
+          ..name = 'config'
+          ..toThis = true));
+        cb.requiredParameters.add(Parameter((pb) => pb
+          ..name = 'child'
+          ..toThis = true));
+        cb.optionalParameters.add(Parameter((pb) => pb
+          ..name = 'key'
+          ..named = true
+          ..toSuper = true
+          ..required = false));
+      }));
+
+      // Build method
+      builder.methods.add(Method((mb) {
+        mb.annotations.add(refer('override'));
+        mb.name = 'build';
+        mb.returns = const Reference('Widget');
+        mb.requiredParameters.add(Parameter((pb) => pb
+          ..name = 'context'
+          ..type = const Reference('BuildContext')));
+
+        // Generate: Provider<ConfigClassName>.value(value: config, child: child)
+        mb.body = Code('return Provider<$configClassName>.value('
+            'value: config, '
+            'child: child,'
+            ');');
+      }));
+    });
   }
 }
 

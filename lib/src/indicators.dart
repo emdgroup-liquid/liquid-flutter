@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
+part 'indicators.variants.g.dart';
+
 enum LdIndicatorType {
   info,
   warning,
@@ -13,12 +15,22 @@ enum LdIndicatorType {
   ongoing,
 }
 
-class LdIndicator extends StatelessWidget {
+@Variants([
+  Variant('info', defaults: {'type': 'LdIndicatorType.info'}),
+  Variant('warning', defaults: {'type': 'LdIndicatorType.warning'}),
+  Variant('canceled', defaults: {'type': 'LdIndicatorType.canceled'}),
+  Variant('error', defaults: {'type': 'LdIndicatorType.error'}),
+  Variant('success', defaults: {'type': 'LdIndicatorType.success'}),
+  Variant('loading', defaults: {'type': 'LdIndicatorType.loading'}),
+  Variant('pending', defaults: {'type': 'LdIndicatorType.pending'}),
+  Variant('ongoing', defaults: {'type': 'LdIndicatorType.ongoing'}),
+])
+class LdIndicatorWidget extends StatelessWidget {
   final LdIndicatorType type;
   final LdSize size;
   final double? customSize;
 
-  const LdIndicator({
+  const LdIndicatorWidget({
     super.key,
     required this.type,
     this.size = LdSize.m,

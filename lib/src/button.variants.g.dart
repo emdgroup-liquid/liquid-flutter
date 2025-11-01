@@ -1,5 +1,42 @@
 part of 'button.dart';
 
+class LdButtonConfig {
+  const LdButtonConfig({
+    this.disabled = false,
+    this.circular,
+    this.mode = LdButtonMode.filled,
+    this.size = LdSize.m,
+  });
+
+  final bool disabled;
+
+  final bool? circular;
+
+  final LdButtonMode mode;
+
+  final LdSize size;
+}
+
+class LdButtonConfigProvider extends StatelessWidget {
+  const LdButtonConfigProvider(
+    this.config,
+    this.child, {
+    super.key,
+  });
+
+  final LdButtonConfig config;
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Provider<LdButtonConfig>.value(
+      value: config,
+      child: child,
+    );
+  }
+}
+
 class LdButton extends StatelessWidget {
   const LdButton({
     required this.child,
@@ -9,7 +46,7 @@ class LdButton extends StatelessWidget {
     this.color,
     this.active,
     this.width,
-    this.disabled = false,
+    this.disabled,
     this.focusNode,
     this.autoFocus = false,
     this.alignment,
@@ -18,9 +55,9 @@ class LdButton extends StatelessWidget {
     this.loading = false,
     this.loadingText,
     this.errorText,
-    this.mode = LdButtonMode.filled,
+    this.mode,
     this.progress,
-    this.size = LdSize.m,
+    this.size,
     this.trailing,
     super.key,
   });
@@ -33,7 +70,7 @@ class LdButton extends StatelessWidget {
     LdColor? color,
     bool? active,
     double? width,
-    bool disabled = false,
+    bool? disabled,
     FocusNode? focusNode,
     bool autoFocus = false,
     MainAxisAlignment? alignment,
@@ -42,9 +79,9 @@ class LdButton extends StatelessWidget {
     bool loading = false,
     String? loadingText,
     String? errorText,
-    LdButtonMode mode = LdButtonMode.filled,
+    LdButtonMode? mode,
     double? progress,
-    LdSize size = LdSize.m,
+    LdSize? size,
     Widget? trailing,
     Key? key,
   }) {
@@ -81,7 +118,7 @@ class LdButton extends StatelessWidget {
     LdColor? color,
     bool? active,
     double? width,
-    bool disabled = false,
+    bool? disabled,
     FocusNode? focusNode,
     bool autoFocus = false,
     MainAxisAlignment? alignment,
@@ -90,9 +127,9 @@ class LdButton extends StatelessWidget {
     bool loading = false,
     String? loadingText,
     String? errorText,
-    LdButtonMode mode = LdButtonMode.filled,
+    LdButtonMode? mode,
     double? progress,
-    LdSize size = LdSize.m,
+    LdSize? size,
     Widget? trailing,
     Key? key,
   }) {
@@ -129,7 +166,7 @@ class LdButton extends StatelessWidget {
     LdColor? color,
     bool? active,
     double? width,
-    bool disabled = false,
+    bool? disabled,
     FocusNode? focusNode,
     bool autoFocus = false,
     MainAxisAlignment? alignment,
@@ -138,9 +175,9 @@ class LdButton extends StatelessWidget {
     bool loading = false,
     String? loadingText,
     String? errorText,
-    LdButtonMode mode = LdButtonMode.filled,
+    LdButtonMode? mode,
     double? progress,
-    LdSize size = LdSize.m,
+    LdSize? size,
     Widget? trailing,
     Key? key,
   }) {
@@ -177,7 +214,7 @@ class LdButton extends StatelessWidget {
     LdColor? color,
     bool? active,
     double? width,
-    bool disabled = false,
+    bool? disabled,
     FocusNode? focusNode,
     bool autoFocus = false,
     MainAxisAlignment? alignment,
@@ -186,9 +223,9 @@ class LdButton extends StatelessWidget {
     bool loading = false,
     String? loadingText,
     String? errorText,
-    LdButtonMode mode = LdButtonMode.filled,
+    LdButtonMode? mode,
     double? progress,
-    LdSize size = LdSize.m,
+    LdSize? size,
     Widget? trailing,
     Key? key,
   }) {
@@ -221,7 +258,7 @@ class LdButton extends StatelessWidget {
 
   final Function onPressed;
 
-  final bool disabled;
+  final bool? disabled;
 
   final FocusNode? focusNode;
 
@@ -241,11 +278,11 @@ class LdButton extends StatelessWidget {
 
   final bool autoFocus;
 
-  final LdButtonMode mode;
+  final LdButtonMode? mode;
 
   final MainAxisAlignment? alignment;
 
-  final LdSize size;
+  final LdSize? size;
 
   final bool? active;
 
@@ -265,7 +302,7 @@ class LdButton extends StatelessWidget {
     LdColor? color,
     bool? active,
     double? width,
-    bool disabled = false,
+    bool? disabled,
     FocusNode? focusNode,
     bool autoFocus = false,
     MainAxisAlignment? alignment,
@@ -274,9 +311,9 @@ class LdButton extends StatelessWidget {
     bool loading = false,
     String? loadingText,
     String? errorText,
-    LdButtonMode mode = LdButtonMode.filled,
+    LdButtonMode? mode,
     double? progress,
-    LdSize size = LdSize.m,
+    LdSize? size,
     Widget? trailing,
     Key? key,
   }) {
@@ -315,7 +352,7 @@ class LdButton extends StatelessWidget {
     LdColor? color,
     bool? active,
     double? width,
-    bool disabled = false,
+    bool? disabled,
     FocusNode? focusNode,
     bool autoFocus = false,
     MainAxisAlignment? alignment,
@@ -324,9 +361,9 @@ class LdButton extends StatelessWidget {
     bool loading = false,
     String? loadingText,
     String? errorText,
-    LdButtonMode mode = LdButtonMode.filled,
+    LdButtonMode? mode,
     double? progress,
-    LdSize size = LdSize.m,
+    LdSize? size,
     Widget? trailing,
     Key? key,
   }) {
@@ -365,7 +402,7 @@ class LdButton extends StatelessWidget {
     LdColor? color,
     bool? active,
     double? width,
-    bool disabled = false,
+    bool? disabled,
     FocusNode? focusNode,
     bool autoFocus = false,
     MainAxisAlignment? alignment,
@@ -374,9 +411,9 @@ class LdButton extends StatelessWidget {
     bool loading = false,
     String? loadingText,
     String? errorText,
-    LdButtonMode mode = LdButtonMode.filled,
+    LdButtonMode? mode,
     double? progress,
-    LdSize size = LdSize.m,
+    LdSize? size,
     Widget? trailing,
     Key? key,
   }) {
@@ -409,6 +446,7 @@ class LdButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final config = Provider.of<LdButtonConfig?>(context, listen: false);
     return LdButtonWidget(
       child: child,
       onPressed: onPressed,
@@ -417,18 +455,18 @@ class LdButton extends StatelessWidget {
       color: color,
       active: active,
       width: width,
-      disabled: disabled,
+      disabled: disabled ?? config?.disabled ?? false,
       focusNode: focusNode,
       autoFocus: autoFocus,
       alignment: alignment,
       leading: leading,
-      circular: circular,
+      circular: circular ?? config?.circular,
       loading: loading,
       loadingText: loadingText,
       errorText: errorText,
-      mode: mode,
+      mode: mode ?? config?.mode ?? LdButtonMode.filled,
       progress: progress,
-      size: size,
+      size: size ?? config?.size ?? LdSize.m,
       trailing: trailing,
       key: key,
     );

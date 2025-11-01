@@ -58,6 +58,8 @@ class _ButtonDemoState extends State<ButtonDemo> {
         apiComponents: const [
           "LdButton",
           "LdButtonGhost",
+          "LdButtonConfig",
+          "LdButtonConfigProvider",
         ],
         demo: LdAutoSpace(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -331,6 +333,75 @@ class _ButtonDemoState extends State<ButtonDemo> {
                         width: double.infinity,
                         child: const Text("Full width"),
                       ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            LdBundle(
+              children: [
+                LdText.h(
+                  "Button configuration",
+                ),
+                LdText.p(
+                  "You can use LdButtonConfigProvider to set default values for all buttons within a widget subtree. This is useful when you want to apply consistent styling to multiple buttons without passing the same properties to each one.",
+                ),
+                ComponentWell(
+                  child: Column(
+                    children: [
+                      /*begin demo:LdButtonConfig*/
+                      LdButtonConfigProvider(
+                        const LdButtonConfig(
+                          mode: LdButtonMode.outline,
+                          size: LdSize.s,
+                          disabled: false,
+                        ),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            LdButton(
+                              onPressed: () {
+                                LdNotificationsController.of(context)
+                                    .addNotification(
+                                  LdNotification(
+                                    message: "Button 1",
+                                    type: LdNotificationType.success,
+                                  ),
+                                );
+                              },
+                              child: const Text("Button 1"),
+                            ),
+                            LdButton(
+                              onPressed: () {
+                                LdNotificationsController.of(context)
+                                    .addNotification(
+                                  LdNotification(
+                                    message: "Button 2",
+                                    type: LdNotificationType.success,
+                                  ),
+                                );
+                              },
+                              child: const Text("Button 2"),
+                            ),
+                            LdButton(
+                              mode: LdButtonMode.filled,
+                              size: LdSize.m,
+                              onPressed: () {
+                                LdNotificationsController.of(context)
+                                    .addNotification(
+                                  LdNotification(
+                                    message: "Button 3 (overrides config)",
+                                    type: LdNotificationType.success,
+                                  ),
+                                );
+                              },
+                              child: const Text("Button 3"),
+                            ),
+                          ],
+                        ),
+                      ),
+                      /*end demo:LdButtonConfig*/
                     ],
                   ),
                 ),
