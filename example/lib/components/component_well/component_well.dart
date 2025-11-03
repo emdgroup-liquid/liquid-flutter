@@ -115,26 +115,29 @@ class _ComponentWellState extends State<ComponentWell> {
   /// Builds the child with a button to toggle between the demo and the source code.
   Widget buildSourceCodeModal(BuildContext context, String sourcePath) {
     return LdModalBuilder(
-      modal: LdModal(
-        title: const Text("Source Code"),
-        size: LdSize.l,
-        contentPadding: EdgeInsets.zero,
-        modalContent: (context) => LdSubmit<String, String>(
-          arg: sourcePath,
-          config: LdSubmitConfig(
-              autoTrigger: true,
-              action: (arg) async {
-                // Load the source code
-                return await rootBundle.loadString(arg!);
-              }),
-          builder: LdSubmitCenteredBuilder<String, String>(
-            resultBuilder: (context, result, controller) => SourceCodeExtractor(
-              options: widget.showSourceCodeOptions,
-              sourceCode: result,
-              index: instanceIndex,
+      modal: LdModalRoute(
+        context: context,
+        dialogSize: LdSize.l,
+        pageBuilder: (context) => LdScaffold(
+            body: LdScaffoldBody(children: [
+          LdSubmit<String, String>(
+            arg: sourcePath,
+            config: LdSubmitConfig(
+                autoTrigger: true,
+                action: (arg) async {
+                  // Load the source code
+                  return await rootBundle.loadString(arg!);
+                }),
+            builder: LdSubmitCenteredBuilder<String, String>(
+              resultBuilder: (context, result, controller) =>
+                  SourceCodeExtractor(
+                options: widget.showSourceCodeOptions,
+                sourceCode: result,
+                index: instanceIndex,
+              ),
             ),
           ),
-        ),
+        ])),
       ),
       builder: (context, showModal) {
         return LdButton.ghost(

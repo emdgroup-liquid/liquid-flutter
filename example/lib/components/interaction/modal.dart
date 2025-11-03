@@ -40,104 +40,86 @@ class _DemoSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdModalBuilder(
-      useRootNavigator: true,
-      builder: (context, openSheet) {
-        return LdButton(
-          onPressed: () async {
-            final result = (await openSheet()) as String?;
-            if (!context.mounted) return;
-            LdNotificationsController.of(context).success(result.toString());
-          },
-          child: const Text("Open modal"),
-        );
-      },
-      modal: LdModal(
-          mode: mode,
-          enableScaling: enableScaling,
-          userCanDismiss: userDismissable,
-          showDismissButton: userDismissable,
-          fixedDialogSize: fixedDialogSize ? const Size(400, 400) : null,
-          title: !enableHeader ? null : const Text("Title"),
-          insets: useScreenRadius
-              ? EdgeInsets.only(
-                  left: 0,
-                  right: 5,
-                  bottom: MediaQuery.paddingOf(
-                              Scaffold.maybeOf(context)?.context ?? context)
-                          .bottom /
-                      2,
-                )
-              : (enableInsets
-                  ? const EdgeInsets.symmetric(horizontal: 32)
-                  : EdgeInsets.zero),
-          topRadius: useScreenRadius
-              ? max(0, LdTheme.of(context).screenRadius - 2.5)
-              : null,
-          bottomRadius: useScreenRadius
-              ? max(0, LdTheme.of(context).screenRadius - 2.5)
-              : null,
-          actionBar: !enableFooter
-              ? null
-              : (context) => Row(
+        useRootNavigator: true,
+        builder: (context, openSheet) {
+          return LdButton(
+            onPressed: () async {
+              final result = (await openSheet()) as String?;
+              if (!context.mounted) return;
+              LdNotificationsController.of(context).success(result.toString());
+            },
+            child: const Text("Open modal"),
+          );
+        },
+        modal: LdModalRoute(
+            context: context,
+            modalTypeMode: mode,
+            barrierDismissible: userDismissable,
+            fixedDialogSize: fixedDialogSize ? const Size(400, 400) : null,
+            pageBuilder: (context) => LdScaffold(
+                  appBar: LdAppBar(
+                    title: const Text("Modal"),
+                  ),
+                  body: LdScaffoldBody(
                     children: [
-                      Expanded(
+                      LdText.p(
+                          "It's about managing expectations tiger team it is all exactly as i said, but i don't like it. Let's unpack that later we should leverage existing asserts that ladder up to the message. We need to socialize the comms with the wider stakeholder community we're building the plane while we're flying it, but if you want to motivate these clowns, try less carrot and more stick, race without a finish line performance review, so what do you feel you would bring to the table if you were hired for this position."),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 32.0),
+                        child: LdText.p(
+                            "It's about managing expectations tiger team it is all exactly as i said, but i don't like it. Let's unpack that later we should leverage existing asserts that ladder up to the message. We need to socialize the comms with the wider stakeholder community we're building the plane while we're flying it, but if you want to motivate these clowns, try less carrot and more stick, race without a finish line performance review, so what do you feel you would bring to the table if you were hired for this position."),
+                      ),
+                      LdText.p(
+                          "It's about managing expectations tiger team it is all exactly as i said, but i don't like it. Let's unpack that later we should leverage existing asserts that ladder up to the message. We need to socialize the comms with the wider stakeholder community we're building the plane while we're flying it, but if you want to motivate these clowns, try less carrot and more stick, race without a finish line performance review, so what do you feel you would bring to the table if you were hired for this position."),
+                      LdText.ps("Filler text by http://officeipsum.com/index.php"),
+                      Row(
+                        children: [
+                          _DemoSheet(
+                            enableHeader: enableHeader,
+                            enableInsets: enableInsets,
+                            enableScaling: enableScaling,
+                            fixedDialogSize: fixedDialogSize,
+                            enableFooter: enableFooter,
+                            mode: mode,
+                            useScreenRadius: useScreenRadius,
+                            userDismissable: userDismissable,
+                          ),
+                          ldSpacerM,
+                          LdButton(
+                            child: const Text("Return a result"),
+                            onPressed: () {
+                              Navigator.of(context).pop("Hello world");
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  secondaryAppBarPlacement: LdScaffoldAppBarPlacement.bottom,
+                  secondaryAppBar: LdAppBar(
+                    actions: [
+                      LdFlexibleChild(
                         child: LdButton.vague(
                           width: double.infinity,
-                          child: const Text("Cancel"),
+                          color: LdTheme.of(context).error,
                           onPressed: () {
                             Navigator.of(context).pop();
                           },
+                          child: const Text("Cancel"),
                         ),
                       ),
-                      ldSpacerL,
-                      Expanded(
-                        child: LdButton(
+                      LdFlexibleChild(
+                        child: LdButton.vague(
                           width: double.infinity,
-                          child: const Text("Confirm"),
                           onPressed: () {
                             Navigator.of(context).pop("Hello world");
                           },
+                          child: const Text("Confirm"),
                         ),
                       ),
                     ],
                   ),
-          modalContent: (
-            context,
-          ) =>
-              LdAutoSpace(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 32.0),
-                    child: LdText.p(
-                        "It's about managing expectations tiger team it is all exactly as i said, but i don't like it. Let's unpack that later we should leverage existing asserts that ladder up to the message. We need to socialize the comms with the wider stakeholder community we're building the plane while we're flying it, but if you want to motivate these clowns, try less carrot and more stick, race without a finish line performance review, so what do you feel you would bring to the table if you were hired for this position."),
-                  ),
-                  LdText.p(
-                      "It's about managing expectations tiger team it is all exactly as i said, but i don't like it. Let's unpack that later we should leverage existing asserts that ladder up to the message. We need to socialize the comms with the wider stakeholder community we're building the plane while we're flying it, but if you want to motivate these clowns, try less carrot and more stick, race without a finish line performance review, so what do you feel you would bring to the table if you were hired for this position."),
-                  LdText.ps("Filler text by http://officeipsum.com/index.php"),
-                  Row(
-                    children: [
-                      _DemoSheet(
-                        enableHeader: enableHeader,
-                        enableInsets: enableInsets,
-                        enableScaling: enableScaling,
-                        fixedDialogSize: fixedDialogSize,
-                        enableFooter: enableFooter,
-                        mode: mode,
-                        useScreenRadius: useScreenRadius,
-                        userDismissable: userDismissable,
-                      ),
-                      ldSpacerM,
-                      LdButton(
-                        child: const Text("Return a result"),
-                        onPressed: () {
-                          Navigator.of(context).pop("Hello world");
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              )),
-    );
+                )));
   }
 }
 
@@ -334,6 +316,7 @@ class _ModalDemoState extends State<ModalDemo> {
                   context: context,
                   description: "Are you sure you want to delete this item?",
                   confirmColor: LdTheme.of(context).error,
+                  cancelColor: LdTheme.of(context).primary,
                   positive: const Text("Delete"),
                   negative: const Text("Cancel"),
                   useRootNavigator: true,
@@ -347,7 +330,7 @@ class _ModalDemoState extends State<ModalDemo> {
                 }
               },
             ),
-            LdText.h("Modal with screen radius"),
+            LdText.h("Modal with aspect ratio"),
             LdModalBuilder(
               useRootNavigator: true,
               builder: (context, openModal) {
@@ -356,32 +339,17 @@ class _ModalDemoState extends State<ModalDemo> {
                   child: const Text("Open modal"),
                 );
               },
-              modal: LdModal(
-                mode: LdModalTypeMode.sheet,
-                modalContent: (context) {
-                  return AspectRatio(
-                    aspectRatio: 1,
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: Center(
-                            child: const LdText(
-                                "This is a modal with screen radius"),
-                          ),
-                        ),
-                        LdButton.vague(
-                          size: LdSize.l,
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text("Done"),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                topRadius: LdTheme.of(context).screenRadius,
-                bottomRadius: LdTheme.of(context).screenRadius,
+              modal: LdModalRoute(
+                context: context,
+                scaleParent: false,
+                sheetAspectRatio: 1.1,
+                sheetInsets: const EdgeInsets.all(10),
+                sheetBorderRadius: BorderRadius.circular(LdTheme.of(context).screenRadius - 5),
+                pageBuilder: (context2) => LdScaffold(
+                  body: Center(
+                    child: LdText("This is a modal with screen radius"),
+                  ),
+                ),
               ),
             ),
             LdText.h("Modal with action button"),
@@ -393,19 +361,24 @@ class _ModalDemoState extends State<ModalDemo> {
                   child: const Text("Open modal"),
                 );
               },
-              modal: LdModal(
-                actionBar: (context) {
-                  return LdButton(
-                    width: double.infinity,
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text("Action"),
-                  );
-                },
-                modalContent: (context) {
-                  return const LdText("This is a modal with screen radius");
-                },
+              modal: LdModalRoute(
+                context: context,
+                pageBuilder: (context) => LdScaffold(
+                  appBar: LdAppBar(
+                    title: const Text("This is a modal with action button"),
+                  ),
+                  body: LdScaffoldBody(
+                    children: [
+                      LdText("This is a modal with action button"),
+                      LdButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text("Done"),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
             LdText.h("Modal with list items"),
@@ -417,31 +390,15 @@ class _ModalDemoState extends State<ModalDemo> {
                   child: const Text("Open modal"),
                 );
               },
-              modal: LdModal(
-                contentPadding: const EdgeInsets.all(0),
-                title: const Text(
-                    "Modal with list items and long title for the header"),
-                actionBar: (context) {
-                  return LdButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text("Done"),
-                  );
-                },
-                actions: (context) {
-                  return [
-                    LdButton(
-                      child: const Text("Done"),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ];
-                },
-                modalContent: (context) {
-                  return Column(
+              modal: LdModalRoute(
+                context: context,
+                pageBuilder: (context) => LdScaffold(
+                  appBar: LdAppBar(
+                    title: const Text("Modal with list items"),
+                  ),
+                  body: LdScaffoldBody(
                     children: [
+                      LdText("Modal with list items"),
                       LdListItem(
                         title: const Text("Item 1"),
                         subtitle: const Text("Subtitle"),
@@ -450,13 +407,9 @@ class _ModalDemoState extends State<ModalDemo> {
                         title: const Text("Item 2"),
                         subtitle: const Text("Subtitle"),
                       ),
-                      LdListItem(
-                        title: const Text("Item 3"),
-                        subtitle: const Text("Subtitle"),
-                      )
                     ],
-                  );
-                },
+                  ),
+                ),
               ),
             ),
           ],

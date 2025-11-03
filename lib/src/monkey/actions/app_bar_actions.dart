@@ -8,7 +8,6 @@ class LdMonkeyAppBarActions<T extends Identifiable<IdType>, IdType> {
   static ({
     List<LdMonkeyAction<T, IdType>> actions,
     List<SingleChildWidget> Function(BuildContext context) menuProviders,
-    bool hasActions,
   }) getActionsAndProviders<T extends Identifiable<IdType>, IdType>(
     BuildContext context,
     LdMonkeyActionLocation location,
@@ -16,8 +15,7 @@ class LdMonkeyAppBarActions<T extends Identifiable<IdType>, IdType> {
     final route = LdMonkey.of<T, IdType>(context, watch: true);
     final selection = LdMonkeySelection.of<T, IdType>(context, listen: true);
 
-    final actions = route.actions.where((e) => e.visibility.any((v) => v.location == location)).toList();
-    final hasActions = actions.any((e) => e.isVisible(context, location: location));
+    final actions = route.actions.where((e) => e.isVisible(context, location: location)).toList();
 
     List<Provider<Object>> menuProviders(BuildContext context) => [
           Provider<LdMonkey<T, IdType>>.value(value: route),
@@ -29,7 +27,6 @@ class LdMonkeyAppBarActions<T extends Identifiable<IdType>, IdType> {
     return (
       actions: actions,
       menuProviders: menuProviders,
-      hasActions: hasActions,
     );
   }
 }

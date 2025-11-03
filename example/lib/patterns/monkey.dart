@@ -80,8 +80,7 @@ class MonkeyDemo extends StatelessWidget {
             children: [
               LdText.p(
                   "It sometimes feels like we’re barely better off. Web pages aren’t that different from what they were in the late ’90s, early 2000s. They’re still just forms. They still just write to databases. A lot of people, I think, are very uncomfortable with the fact that they are essentially crud monkeys."),
-              LdText.ps(
-                  "David Heinemeier Hansson, Lex Fridman Podcast, July 12th 2025"),
+              LdText.ps("David Heinemeier Hansson, Lex Fridman Podcast, July 12th 2025"),
               LdButton.ghost(
                 leading: const Icon(LucideIcons.play),
                 child: Text("Listen to the podcast"),
@@ -176,8 +175,7 @@ class MonkeyDemo extends StatelessWidget {
                                 LdCard(
                                   child: Column(
                                     children: [
-                                      Text(
-                                          "LdMonkeyActionLocation.masterAppBar"),
+                                      Text("LdMonkeyActionLocation.masterAppBar"),
                                       LdMute(
                                         child: LdText.p(
                                           "Primary AppBar for actions.",
@@ -189,8 +187,7 @@ class MonkeyDemo extends StatelessWidget {
                                 LdCard(
                                   child: Column(
                                     children: [
-                                      Text(
-                                          "LdMonkeyActionLocation.masterSecondary AppBar"),
+                                      Text("LdMonkeyActionLocation.masterSecondary AppBar"),
                                       LdMute(
                                         child: LdText.p(
                                           "Secondary AppBar for actions and search.",
@@ -244,12 +241,10 @@ class MonkeyDemo extends StatelessWidget {
                         child: Column(
                           children: [
                             LdCard(
-                              child: Text(
-                                  "LdMonkeyActionLocation.detailAppBar AppBar"),
+                              child: Text("LdMonkeyActionLocation.detailAppBar AppBar"),
                             ),
                             LdCard(
-                              child: Text(
-                                  "LdMonkeyActionLocation.detailSecondary AppBar"),
+                              child: Text("LdMonkeyActionLocation.detailSecondary AppBar"),
                             ),
                           ],
                         ).spaceS(),

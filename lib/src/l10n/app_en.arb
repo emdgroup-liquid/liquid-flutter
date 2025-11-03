@@ -36,5 +36,9 @@
   "minimize": "Minimize",
   "maximize": "Maximize",
   "showDrawer": "Show Sidebar",
-  "hideDrawer": "Hide Sidebar"
+  "hideDrawer": "Hide Sidebar", 
+  "clearSelection": "Clear selection?", 
+  "clearSelectionBody": "Are you sure you want to discard your selection of {n} items?",
+  "openDrawer": "Open Sidebar",
+  "closeDrawer": "Close Sidebar"
 }

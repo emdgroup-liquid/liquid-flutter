@@ -5,24 +5,20 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:provider/provider.dart';
 
-LdModal ldFilterModal<T extends Identifiable<IdType>, IdType>(BuildContext context, LdMonkey<T, IdType> route) {
-  return LdModal(
-    showDismissButton: false,
-    modalContent: (context) {
-      return LdFilterModal(route: route);
-    },
-    actionBar: (context) => LdButton.vague(
-      child: Text(LiquidLocalizations.of(context).apply),
-      size: LdSize.l,
-      onPressed: () {
-        Navigator.of(context).pop();
-      },
+LdModalRoute ldFilterModal<T extends Identifiable<IdType>, IdType>(BuildContext context, LdMonkey<T, IdType> route) {
+  return LdModalRoute(
+    context: context,
+    pageBuilder: (context) => LdScaffold(
+      appBar: LdAppBar(
+        title: Text(LiquidLocalizations.of(context).filter),
+      ),
+      body: LdScaffoldBody(children: [LdFilterModal(route: route)]),
     ),
   );
 }
 
-class LdFilterContext<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
-  const LdFilterContext({
+class LdFilterContextMenu<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
+  const LdFilterContextMenu({
     super.key,
   });
 
@@ -71,8 +67,6 @@ class LdFilterModal<T extends Identifiable<IdType>, IdType> extends StatelessWid
                     children: repository.sortOptions
                         .map(
                           (e) => LdListItem(
-                            showSelectionControls: true,
-                            radioSelection: true,
                             borderRadius: LdTheme.of(context).radius(LdSize.s),
                             isSelected: e.isOn,
                             title: Text(e.label(context)),
@@ -102,9 +96,9 @@ class LdFilterModal<T extends Identifiable<IdType>, IdType> extends StatelessWid
                             leading: e.icon(context),
                             child: Text(e.label(context)),
                             onPressed: () {
-                              repository.updateFilter<LdFilterOption<T, IdType>>(
+                              repository.updateFilter(
                                 e.name,
-                                (filter) => filter.copyWith(isOn: true),
+                                (filter) => filter!.copyWith(isOn: true),
                               );
                             }),
                       ),
@@ -148,9 +142,9 @@ class _Filter<T extends Identifiable<IdType>, IdType, GroupBy> extends Stateless
           child: const Icon(LucideIcons.x),
           size: LdSize.s,
           onPressed: () {
-            repository.updateFilter<LdFilterBoolOption<T, IdType>>(
+            repository.updateFilter(
               filter.name,
-              (filter) => filter.copyWith(isOn: false),
+              (filter) => filter!.copyWith(isOn: false),
             );
           },
         ),
@@ -184,9 +178,9 @@ class _Filter<T extends Identifiable<IdType>, IdType, GroupBy> extends Stateless
             child: const Icon(LucideIcons.x),
             size: LdSize.s,
             onPressed: () {
-              repository.updateFilter<LdFilterSearchOption<T, IdType, dynamic>>(
+              repository.updateFilter(
                 filter.name,
-                (filter) => filter.copyWith(isOn: false),
+                (filter) => filter!.copyWith(isOn: false),
               );
             },
           ),

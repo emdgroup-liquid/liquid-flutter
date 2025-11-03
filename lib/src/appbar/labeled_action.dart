@@ -41,6 +41,7 @@ class LdLabeledActionBuilder with LdLabeledAction {
   final LdColor? _color;
   final LdLabeledActionContextMenuFunction? _buildContextMenu;
   final LdBoolPredicate? _isActive;
+  final int? flex;
 
   final bool _alwaysShowLabel;
 
@@ -53,6 +54,7 @@ class LdLabeledActionBuilder with LdLabeledAction {
     StringBuilder? buildLoadingText,
     bool alwaysShowLabel = false,
     LdBoolPredicate? isActive,
+    this.flex,
     LdColor? color,
   })  : _buildLabel = buildLabel,
         _buildIcon = buildIcon,

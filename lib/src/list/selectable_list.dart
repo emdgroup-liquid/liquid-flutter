@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class LdSelectableList<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
-  final Widget Function(BuildContext context, LdPaginatorItem<T> item, int index, LdListItemConfig config) itemBuilder;
+  final Widget Function(BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder;
 
   final Widget Function(
     BuildContext context,
@@ -206,7 +206,10 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
     }
   }
 
+  bool _isDragging = false;
+
   void _onUpdateDragRect(Rect dragRect) {
+    _isDragging = true;
     for (final item in _itemKeys.entries) {
       final box = item.value.currentContext?.findRenderObject() as RenderBox?;
 
@@ -231,6 +234,7 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
   }
 
   void _onEndDrag(Rect rect) {
+    _isDragging = false;
     if (_shiftPressed || _ctrlPressed || widget.showSelectionControls) {
       _selectedItems.addAll(_dragRectItems.value);
     } else {
@@ -241,6 +245,7 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
   }
 
   void _onCancel() {
+    _isDragging = false;
     _dragRectItems.clear();
     setState(() {});
   }
@@ -345,21 +350,26 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
       animation: _changeNotifier,
       key: _itemKeys[item.value!.id],
       builder: (context, child) {
-        return widget.itemBuilder(
-          context,
-          item,
-          index,
-          LdListItemConfig(
-            focusNode: _itemFocusNodes[item.value!.id],
-            isSelected: isSelected(item.value!.id),
-            active: isSelected(item.value!.id),
-            onSelectionChanged: (selected) => onSelectionChange(
-              item.value!.id,
-              selected,
-            ),
-            onPressed: () => onTap(item.value!.id),
-            showSelectionControls: widget.showSelectionControls,
+        final config = LdListItemConfig(
+          focusNode: _itemFocusNodes[item.value!.id],
+          isSelected: isSelected(item.value!.id),
+          selectionControl: switch (widget.showSelectionControls) {
+            true => switch (widget.multiSelect) {
+                true => LdSelectionControl.checkbox,
+                false => LdSelectionControl.radio,
+              },
+            false => LdSelectionControl.none,
+          },
+          active: isSelected(item.value!.id),
+          onSelectionChanged: (selected) => onSelectionChange(
+            item.value!.id,
+            selected,
           ),
+          onPressed: () => onTap(item.value!.id),
+        );
+        return LdListItemConfigProvider(
+          config,
+          widget.itemBuilder(context, item, index),
         );
       },
     );
@@ -386,6 +396,10 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
             child: _DragRect(
               drawBorder: false,
               onTapOutside: () {
+                if (!_isDragging) {
+                  return;
+                }
+
                 _selectedItems.clear();
                 setState(() {});
                 widget.onSelectionChange?.call({});
@@ -410,6 +424,9 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
 
     return _DragRect(
       onTapOutside: () {
+        if (!_isDragging) {
+          return;
+        }
         _selectedItems.clear();
         setState(() {});
         widget.onSelectionChange?.call({});

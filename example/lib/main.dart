@@ -74,23 +74,20 @@ class _LiquidExampleState extends State<LiquidExample> {
               const SingleActivator(LogicalKeyboardKey.keyK, meta: true): () {
                 searchFocusNode.requestFocus();
               },
-              const SingleActivator(LogicalKeyboardKey.keyK, control: true):
-                  () {
+              const SingleActivator(LogicalKeyboardKey.keyK, control: true): () {
                 searchFocusNode.requestFocus();
               },
             },
             child: LdNotificationProvider(
               child: LdThemeProvider(
-                screenRadiusStream:
-                    LiquidFlutterWindowUtils.instance.screenRadiusStream,
+                screenRadiusStream: LiquidFlutterWindowUtils.instance.screenRadiusStream,
                 child: LdThemedAppBuilder(
                   appBuilder: (context, theme) {
                     // We use a root navigator because else our nested navigation will not work
                     var router = context.read<AppRouter>().router;
 
                     return MaterialApp.router(
-                      localizationsDelegates:
-                          LiquidLocalizations.localizationsDelegates,
+                      localizationsDelegates: LiquidLocalizations.localizationsDelegates,
                       locale: const Locale('en'),
                       title: 'Liquid Design Demo',
                       debugShowCheckedModeBanner: false,

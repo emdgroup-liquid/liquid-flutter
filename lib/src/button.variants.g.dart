@@ -2,19 +2,43 @@ part of 'button.dart';
 
 class LdButtonConfig {
   const LdButtonConfig({
-    this.disabled = false,
+    this.autoLoading,
+    this.borderRadius,
+    this.color,
+    this.active,
+    this.width,
+    this.disabled,
+    this.focusNode,
+    this.alignment,
     this.circular,
-    this.mode = LdButtonMode.filled,
-    this.size = LdSize.m,
+    this.mode,
+    this.size,
+    this.disableSqueeze,
   });
 
-  final bool disabled;
+  final bool? autoLoading;
+
+  final BorderRadius? borderRadius;
+
+  final LdColor? color;
+
+  final bool? active;
+
+  final double? width;
+
+  final bool? disabled;
+
+  final FocusNode? focusNode;
+
+  final MainAxisAlignment? alignment;
 
   final bool? circular;
 
-  final LdButtonMode mode;
+  final LdButtonMode? mode;
 
-  final LdSize size;
+  final LdSize? size;
+
+  final bool? disableSqueeze;
 }
 
 class LdButtonConfigProvider extends StatelessWidget {
@@ -30,8 +54,25 @@ class LdButtonConfigProvider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final parentConfig = Provider.of<LdButtonConfig?>(context, listen: false);
+    final mergedConfig = parentConfig != null
+        ? LdButtonConfig(
+            autoLoading: config.autoLoading ?? parentConfig.autoLoading,
+            borderRadius: config.borderRadius ?? parentConfig.borderRadius,
+            color: config.color ?? parentConfig.color,
+            active: config.active ?? parentConfig.active,
+            width: config.width ?? parentConfig.width,
+            disabled: config.disabled ?? parentConfig.disabled,
+            focusNode: config.focusNode ?? parentConfig.focusNode,
+            alignment: config.alignment ?? parentConfig.alignment,
+            circular: config.circular ?? parentConfig.circular,
+            mode: config.mode ?? parentConfig.mode,
+            size: config.size ?? parentConfig.size,
+            disableSqueeze:
+                config.disableSqueeze ?? parentConfig.disableSqueeze)
+        : config;
     return Provider<LdButtonConfig>.value(
-      value: config,
+      value: mergedConfig,
       child: child,
     );
   }
@@ -41,7 +82,7 @@ class LdButton extends StatelessWidget {
   const LdButton({
     required this.child,
     required this.onPressed,
-    this.autoLoading = true,
+    this.autoLoading,
     this.borderRadius,
     this.color,
     this.active,
@@ -59,13 +100,14 @@ class LdButton extends StatelessWidget {
     this.progress,
     this.size,
     this.trailing,
+    this.disableSqueeze,
     super.key,
   });
 
   factory LdButton.ghost({
     required Widget child,
-    required Function onPressed,
-    bool autoLoading = true,
+    required FutureOr<void> Function() onPressed,
+    bool? autoLoading,
     BorderRadius? borderRadius,
     LdColor? color,
     bool? active,
@@ -83,6 +125,7 @@ class LdButton extends StatelessWidget {
     double? progress,
     LdSize? size,
     Widget? trailing,
+    bool? disableSqueeze,
     Key? key,
   }) {
     return LdButton(
@@ -106,14 +149,15 @@ class LdButton extends StatelessWidget {
       progress: progress,
       size: size,
       trailing: trailing,
+      disableSqueeze: disableSqueeze,
       key: key,
     );
   }
 
   factory LdButton.vague({
     required Widget child,
-    required Function onPressed,
-    bool autoLoading = true,
+    required FutureOr<void> Function() onPressed,
+    bool? autoLoading,
     BorderRadius? borderRadius,
     LdColor? color,
     bool? active,
@@ -131,6 +175,7 @@ class LdButton extends StatelessWidget {
     double? progress,
     LdSize? size,
     Widget? trailing,
+    bool? disableSqueeze,
     Key? key,
   }) {
     return LdButton(
@@ -154,14 +199,15 @@ class LdButton extends StatelessWidget {
       progress: progress,
       size: size,
       trailing: trailing,
+      disableSqueeze: disableSqueeze,
       key: key,
     );
   }
 
   factory LdButton.outline({
     required Widget child,
-    required Function onPressed,
-    bool autoLoading = true,
+    required FutureOr<void> Function() onPressed,
+    bool? autoLoading,
     BorderRadius? borderRadius,
     LdColor? color,
     bool? active,
@@ -179,6 +225,7 @@ class LdButton extends StatelessWidget {
     double? progress,
     LdSize? size,
     Widget? trailing,
+    bool? disableSqueeze,
     Key? key,
   }) {
     return LdButton(
@@ -202,14 +249,15 @@ class LdButton extends StatelessWidget {
       progress: progress,
       size: size,
       trailing: trailing,
+      disableSqueeze: disableSqueeze,
       key: key,
     );
   }
 
   factory LdButton.filled({
     required Widget child,
-    required Function onPressed,
-    bool autoLoading = true,
+    required FutureOr<void> Function() onPressed,
+    bool? autoLoading,
     BorderRadius? borderRadius,
     LdColor? color,
     bool? active,
@@ -227,6 +275,7 @@ class LdButton extends StatelessWidget {
     double? progress,
     LdSize? size,
     Widget? trailing,
+    bool? disableSqueeze,
     Key? key,
   }) {
     return LdButton(
@@ -250,13 +299,14 @@ class LdButton extends StatelessWidget {
       progress: progress,
       size: size,
       trailing: trailing,
+      disableSqueeze: disableSqueeze,
       key: key,
     );
   }
 
   final Widget child;
 
-  final Function onPressed;
+  final FutureOr<void> Function() onPressed;
 
   final bool? disabled;
 
@@ -272,11 +322,13 @@ class LdButton extends StatelessWidget {
 
   final double? width;
 
-  final bool autoLoading;
+  final bool? autoLoading;
 
   final double? progress;
 
   final bool autoFocus;
+
+  final bool? disableSqueeze;
 
   final LdButtonMode? mode;
 
@@ -296,8 +348,8 @@ class LdButton extends StatelessWidget {
 
   static Widget warning({
     required Widget child,
-    required Function onPressed,
-    bool autoLoading = true,
+    required FutureOr<void> Function() onPressed,
+    bool? autoLoading,
     BorderRadius? borderRadius,
     LdColor? color,
     bool? active,
@@ -315,6 +367,7 @@ class LdButton extends StatelessWidget {
     double? progress,
     LdSize? size,
     Widget? trailing,
+    bool? disableSqueeze,
     Key? key,
   }) {
     return Builder(
@@ -339,6 +392,7 @@ class LdButton extends StatelessWidget {
         progress: progress,
         size: size,
         trailing: trailing,
+        disableSqueeze: disableSqueeze,
         key: key,
       ),
     );
@@ -346,8 +400,8 @@ class LdButton extends StatelessWidget {
 
   static Widget error({
     required Widget child,
-    required Function onPressed,
-    bool autoLoading = true,
+    required FutureOr<void> Function() onPressed,
+    bool? autoLoading,
     BorderRadius? borderRadius,
     LdColor? color,
     bool? active,
@@ -365,6 +419,7 @@ class LdButton extends StatelessWidget {
     double? progress,
     LdSize? size,
     Widget? trailing,
+    bool? disableSqueeze,
     Key? key,
   }) {
     return Builder(
@@ -389,6 +444,7 @@ class LdButton extends StatelessWidget {
         progress: progress,
         size: size,
         trailing: trailing,
+        disableSqueeze: disableSqueeze,
         key: key,
       ),
     );
@@ -396,8 +452,8 @@ class LdButton extends StatelessWidget {
 
   static Widget success({
     required Widget child,
-    required Function onPressed,
-    bool autoLoading = true,
+    required FutureOr<void> Function() onPressed,
+    bool? autoLoading,
     BorderRadius? borderRadius,
     LdColor? color,
     bool? active,
@@ -415,6 +471,7 @@ class LdButton extends StatelessWidget {
     double? progress,
     LdSize? size,
     Widget? trailing,
+    bool? disableSqueeze,
     Key? key,
   }) {
     return Builder(
@@ -439,6 +496,7 @@ class LdButton extends StatelessWidget {
         progress: progress,
         size: size,
         trailing: trailing,
+        disableSqueeze: disableSqueeze,
         key: key,
       ),
     );
@@ -450,15 +508,15 @@ class LdButton extends StatelessWidget {
     return LdButtonWidget(
       child: child,
       onPressed: onPressed,
-      autoLoading: autoLoading,
-      borderRadius: borderRadius,
-      color: color,
-      active: active,
-      width: width,
+      autoLoading: autoLoading ?? config?.autoLoading ?? true,
+      borderRadius: borderRadius ?? config?.borderRadius,
+      color: color ?? config?.color,
+      active: active ?? config?.active,
+      width: width ?? config?.width,
       disabled: disabled ?? config?.disabled ?? false,
-      focusNode: focusNode,
+      focusNode: focusNode ?? config?.focusNode,
       autoFocus: autoFocus,
-      alignment: alignment,
+      alignment: alignment ?? config?.alignment,
       leading: leading,
       circular: circular ?? config?.circular,
       loading: loading,
@@ -468,7 +526,7 @@ class LdButton extends StatelessWidget {
       progress: progress,
       size: size ?? config?.size ?? LdSize.m,
       trailing: trailing,
-      key: key,
+      disableSqueeze: disableSqueeze ?? config?.disableSqueeze ?? false,
     );
   }
 }

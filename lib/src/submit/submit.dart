@@ -78,12 +78,40 @@ class _LdSubmitState<T, Arg> extends State<LdSubmit<T, Arg>> {
 
   late final _argNotifier = ValueNotifier<Arg?>(widget.arg);
 
+  LdSubmitController<T, Arg>? _controller;
+  bool _createdController = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.controller != null) {
+      _controller = widget.controller;
+    } else {
+      _controller = LdSubmitController<T, Arg>(config: widget.config!, arg: _argNotifier);
+      _createdController = true;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _controller?.init();
+    });
+  }
+
   @override
   void didUpdateWidget(covariant LdSubmit<T, Arg> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.arg != widget.arg) {
+    if (_argNotifier.value != widget.arg || oldWidget.arg != widget.arg) {
       _argNotifier.value = widget.arg;
+    }
+    if (widget.config != oldWidget.config) {
+      if (_createdController) {
+        _controller?.dispose();
+        _createdController = false;
+      }
+      _controller = LdSubmitController<T, Arg>(config: widget.config!, arg: _argNotifier);
+      _createdController = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _controller?.init();
+      });
     }
   }
 
@@ -94,33 +122,8 @@ class _LdSubmitState<T, Arg> extends State<LdSubmit<T, Arg>> {
   }
 
   Widget _buildProvider(BuildContext context) {
-    if (widget.controller != null) {
-      return Provider.value(
-        value: widget.controller,
-        child: FutureBuilder(
-          future: widget.controller!.init(),
-          builder: (context, snapshot) {
-            return submitBuilder;
-          },
-        ),
-      );
-    }
-
-    return Provider<LdSubmitController<T, Arg>>(
-      create: (context) {
-        final controller = LdSubmitController<T, Arg>(
-          config: widget.config!,
-          arg: _argNotifier,
-        );
-
-        // Add post frame callback to trigger the action
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          controller.init();
-        });
-
-        return controller;
-      },
-      dispose: (context, controller) => controller.dispose(),
+    return Provider.value(
+      value: _controller,
       child: submitBuilder,
     );
   }

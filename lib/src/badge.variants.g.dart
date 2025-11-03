@@ -88,7 +88,6 @@ class LdBadge extends StatelessWidget {
       size: size,
       symmetric: symmetric,
       maxLines: maxLines,
-      key: key,
     );
   }
 }

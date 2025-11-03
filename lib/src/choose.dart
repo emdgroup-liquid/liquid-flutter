@@ -1,8 +1,7 @@
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sticky_header/flutter_sticky_header.dart';
-import 'package:fuzzy/fuzzy.dart';
 import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/touchable/input_color.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -16,24 +15,29 @@ enum LdChooseMode {
 }
 
 /// A widget that presents a dropdown in a seperate page.
-class LdChoose<T> extends StatefulWidget {
-  final Iterable<LdSelectItem<T>> items;
+class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
+  final LdRepository<T, IdType>? repository;
+  final List<T>? items;
+  final Widget Function(BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder;
+  final Widget Function(BuildContext context, T item) selectedItemBuilder;
   final bool disabled;
   final bool allowEmpty;
   final LdChooseMode mode;
   final bool useRootNavigator;
 
   final bool multiple;
-  final Set<T>? value;
-  final Function(Set<T>) onChanged;
+  final Set<IdType>? value;
+  final Function(Set<IdType>) onChanged;
   final int? truncateDisplay;
   final LdSize size;
   final String? label;
   final Text? placeholder;
 
-  final bool? enableSearch;
   const LdChoose({
-    required this.items,
+    this.repository,
+    this.items,
+    required this.itemBuilder,
+    required this.selectedItemBuilder,
     this.allowEmpty = false,
     this.useRootNavigator = true,
     this.disabled = false,
@@ -44,89 +48,203 @@ class LdChoose<T> extends StatefulWidget {
     this.placeholder,
     this.size = LdSize.m,
     this.truncateDisplay,
-    this.enableSearch,
     this.value,
     super.key,
-  });
+  })  : assert(items != null || repository != null, 'Either items or repository must be provided'),
+        assert(items == null || repository == null, 'Cannot provide both items and repository');
 
-  @override
-  State<LdChoose<T>> createState() => _LdChooseState<T>();
-}
+  /// Convenience constructor that creates an LdChoose from a list of LdSelectItem.
+  ///
+  /// This constructor automatically creates a repository from the items and
+  /// uses the child widget from each LdSelectItem for rendering.
+  static fromList<T extends Identifiable<IdType>, IdType>({
+    required List<T> items,
+    required Function(Set<IdType>) onChanged,
+    required Widget Function(BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder,
+    required Widget Function(BuildContext context, T item) selectedItemBuilder,
+    Set<IdType>? value,
+    bool allowEmpty = false,
+    bool useRootNavigator = true,
+    bool disabled = false,
+    String? label,
+    bool multiple = false,
+    LdChooseMode mode = LdChooseMode.auto,
+    Text? placeholder,
+    LdSize size = LdSize.m,
+    int? truncateDisplay,
+    Key? key,
+  }) {
+    return LdChoose<T, IdType>(
+      items: items,
+      itemBuilder: (context, item, index) {
+        return itemBuilder(context, item, index);
+      },
+      selectedItemBuilder: selectedItemBuilder,
+      allowEmpty: allowEmpty,
+      useRootNavigator: useRootNavigator,
+      disabled: disabled,
+      label: label,
+      multiple: multiple,
+      mode: mode,
+      onChanged: onChanged,
+      placeholder: placeholder,
+      size: size,
+      truncateDisplay: truncateDisplay,
+      value: value,
+      key: key,
+    );
+  }
 
-class _LdChooseState<T> extends State<LdChoose<T>> {
-  late final Key _sheetKey = UniqueKey();
-
-  late bool _enableSearch;
-
-  @override
-  initState() {
-    if (widget.enableSearch != null) {
-      _enableSearch = widget.enableSearch!;
-    } else {
-      _enableSearch = widget.items.length > 10;
-    }
-
-    super.initState();
+  static fromSelectItems<T>({
+    required List<LdSelectItem<T>> items,
+    required Function(Set<T>) onChanged,
+    Set<T>? value,
+    bool allowEmpty = false,
+    bool useRootNavigator = true,
+    bool disabled = false,
+    String? label,
+    bool multiple = false,
+    LdChooseMode mode = LdChooseMode.auto,
+    Text? placeholder,
+    LdSize size = LdSize.m,
+    int? truncateDisplay,
+    Key? key,
+  }) {
+    return fromList(
+      items: items,
+      onChanged: onChanged,
+      itemBuilder: (context, item, index) {
+        return LdListItem(
+          title: item.value?.child,
+          disabled: !(item.value?.enabled ?? true),
+        );
+      },
+      selectedItemBuilder: (context, item) {
+        return LdTag(child: item.child);
+      },
+      value: value,
+      allowEmpty: allowEmpty,
+      useRootNavigator: useRootNavigator,
+      disabled: disabled,
+      label: label,
+      multiple: multiple,
+      mode: mode,
+      placeholder: placeholder,
+      size: size,
+      truncateDisplay: truncateDisplay,
+      key: key,
+    );
   }
 
   @override
-  void didUpdateWidget(LdChoose<T> oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.enableSearch != null) {
-      _enableSearch = widget.enableSearch!;
+  State<LdChoose<T, IdType>> createState() => _LdChooseState<T, IdType>();
+}
+
+class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdChoose<T, IdType>> {
+  late LdRepository<T, IdType> _repository;
+  bool _ownsRepository = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.items != null && widget.repository == null) {
+      _repository = LdRepository.fromList<T, IdType>(
+        list: widget.items!,
+        filters: {
+          LdFilterSearchOption<T, IdType, dynamic>(
+            name: 'search',
+            label: (context) => 'Search',
+            icon: (context) => const Icon(Icons.search),
+            optimisticFilter: (item, searchText) {
+              if (item is LdSelectItem<dynamic>) {
+                return (item as LdSelectItem<dynamic>).searchString?.contains(searchText) ?? false;
+              }
+
+              return item.toString().contains(searchText);
+            },
+          ),
+        },
+      );
+      _repository.initialOffset = 0;
+      _repository.fetchItemsAtOffset(0);
+      _ownsRepository = true;
+    } else {
+      _repository = widget.repository!;
+      _ownsRepository = false;
     }
+  }
+
+  Future<List<T>> _fetchSelectedItems(List<IdType> ids) async {
+    return Future.wait(ids.map((id) => _repository.getById(id)));
   }
 
   @override
   void dispose() {
+    if (_ownsRepository) {
+      _repository.dispose();
+    }
     super.dispose();
   }
 
-  void _onTap(BuildContext context, VoidCallback openDialog) async {
-    Set<T> result = widget.value ?? {};
+  Future<void> _onTap(BuildContext context) async {
+    final nav = widget.useRootNavigator ? Navigator.of(context, rootNavigator: true) : Navigator.of(context);
 
-    onChange(Set<T> value) {
-      result = value;
-    }
+    final shouldUsePage =
+        widget.mode == LdChooseMode.page || (widget.mode == LdChooseMode.auto && _repository.totalItems > 10);
 
-    final nav = widget.useRootNavigator ? Navigator.of(context) : Navigator.of(context, rootNavigator: true);
+    final result = await (shouldUsePage
+        ? nav.push<Set<IdType>>(
+            MaterialPageRoute(
+              builder: ((context) => _LdChoosePage<T, IdType>(
+                    repository: _repository,
+                    itemBuilder: widget.itemBuilder,
+                    initialSelectedItems: widget.value ?? <IdType>{},
+                    multiple: widget.multiple,
+                    allowEmpty: widget.allowEmpty,
+                    label: widget.label ?? LiquidLocalizations.of(context).choose,
+                  )),
+            ),
+          )
+        : nav.push<Set<IdType>>(
+            LdModalRoute(
+              context: context,
+              pageBuilder: (context) => _LdChoosePage<T, IdType>(
+                repository: _repository,
+                itemBuilder: widget.itemBuilder,
+                initialSelectedItems: widget.value ?? <IdType>{},
+                multiple: widget.multiple,
+                allowEmpty: widget.allowEmpty,
+                label: widget.label ?? LiquidLocalizations.of(context).choose,
+              ),
+            ),
+          ));
 
-    if (widget.mode == LdChooseMode.page || (widget.mode == LdChooseMode.auto && widget.items.length > 10)) {
-      await nav.push(MaterialPageRoute(builder: ((context) {
-        return _LdChoosePage(
-          label: widget.label ?? LiquidLocalizations.of(context).choose,
-          child: _LdChooseList(
-            onChange: onChange,
-            items: widget.items,
-            enableSearch: _enableSearch,
-            value: widget.value,
-            onDismiss: () {
-              nav.pop();
-            },
-            multiple: widget.multiple,
-            allowEmpty: widget.allowEmpty,
-          ),
-        );
-      })));
+    if (result != null) {
       widget.onChanged(result);
-    } else {
-      openDialog();
-      //LdPortalController.of(context).openEntry(_sheetKey);
     }
+  }
+
+  Widget _buildSelectedItem(BuildContext context, T item) {
+    return widget.selectedItemBuilder(context, item);
+  }
+
+  int _getDisplayItems(List<IdType> ids) {
+    return min(ids.length, widget.truncateDisplay ?? ids.length);
   }
 
   @override
   Widget build(BuildContext context) {
     var theme = LdTheme.of(context, listen: true);
 
-    final choices = widget.items.where((element) => widget.value?.contains(element.value) == true).toList();
+    final selectedIds = widget.value?.toList() ?? <IdType>[];
+    final selectedItems = selectedIds.length;
 
-    int displayItems = choices.length;
+    int displayItems = selectedItems;
     int left = 0;
 
     if (widget.truncateDisplay != null) {
       displayItems = min(displayItems, widget.truncateDisplay!);
-      left = choices.length - displayItems;
+      left = selectedItems - displayItems;
     }
 
     return Column(
@@ -137,288 +255,191 @@ class _LdChooseState<T> extends State<LdChoose<T>> {
           label: widget.label,
           size: widget.size,
         ),
-        LdModalBuilder(
-            useRootNavigator: widget.useRootNavigator,
-            modal: LdModal(
-              key: _sheetKey,
-              title: Text(widget.label ?? LiquidLocalizations.of(context).choose),
-              actions: (context) => [
-                ldSpacerM,
-                LdButton.ghost(
-                  child: Text(
-                    LiquidLocalizations.of(context).done,
-                  ),
-                  onPressed: Navigator.of(context).pop,
-                ),
-              ],
-              contentPadding: EdgeInsets.zero,
-              headerPadding: LdTheme.of(context).pad(),
-              contentSlivers: (context) {
-                return [
-                  _LdChooseList<T>(
-                    onChange: widget.onChanged,
-                    items: widget.items,
-                    value: widget.value,
-                    onDismiss: () => Navigator.of(context).pop(),
-                    enableSearch: _enableSearch,
-                    multiple: widget.multiple,
-                    allowEmpty: widget.allowEmpty,
-                  ),
-                  const SliverToBoxAdapter(
-                    child: ldSpacerL,
-                  )
-                ];
-              },
-            ),
-            builder: (context, open) {
-              return LdTouchableSurface(
-                disabled: widget.disabled,
-                onPressed: () => _onTap(context, open),
-                mode: LdTouchableSurfaceMode.neutralGhost,
-                color: theme.palette.primary,
-                builder: (contxt, _, status) {
-                  final colorBundle = inputColor(
-                    theme,
-                    status,
-                    isValid: true,
-                    onSurface: LdSurfaceInfo.of(context).isSurface,
-                  );
+        LdTouchableSurface(
+          disabled: widget.disabled,
+          key: const Key("ldChoose_trigger"),
+          onPressed: () => _onTap(context),
+          mode: LdTouchableSurfaceMode.neutralGhost,
+          child: Row(
+            children: [
+              Expanded(
+                child: Opacity(
+                  opacity: widget.disabled ? 0.5 : 1,
+                  child: LdSubmit(
+                    arg: widget.value?.toSet(),
+                    config: LdSubmitConfig<List<T>, Set<IdType>>(
+                      autoTrigger: true,
+                      action: (ids) async {
+                        final allItems = await _fetchSelectedItems(
+                          ids!.toList().sublist(0, _getDisplayItems(ids.toList())),
+                        );
 
-                  return Container(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Opacity(
-                            opacity: widget.disabled ? 0.5 : 1,
-                            child: Wrap(
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: [
-                                // Selected items
-                                ...choices
-                                    .sublist(0, displayItems)
-                                    .map(
-                                      (e) => widget.multiple
-                                          ? LdTag(child: e.child)
-                                          : DefaultTextStyle(
-                                              child: e.child,
-                                              style: TextStyle(
-                                                height: 1,
-                                                color: theme.palette.text,
-                                                package: theme.fontFamilyPackage,
-                                                fontFamily: theme.fontFamily,
-                                              ),
-                                            ),
-                                    )
-                                    .toList(),
-                                // Show a +n indicator
-                                if (left != 0)
-                                  LdText(
-                                    "+$left",
-                                    color: colorBundle.text,
-                                    type: LdTextType.label,
-                                  ),
-                                // Placeholder if empty
-                                if (choices.isEmpty && widget.placeholder != null)
-                                  DefaultTextStyle(
-                                    style: ldBuildTextStyle(
-                                      theme,
-                                      LdTextType.label,
-                                      widget.size,
-                                      color: colorBundle.placeholder,
-                                    ),
-                                    child: widget.placeholder!,
-                                  )
-                              ],
-                            ),
-                          ),
-                        ),
-                        Icon(
-                          LucideIcons.chevronRight,
-                          size: theme.labelSize(widget.size),
-                          color: theme.primaryColor,
-                        )
-                      ],
+                        return allItems;
+                      },
                     ),
-                    padding: theme.balPad(widget.size),
-                    clipBehavior: Clip.hardEdge,
-                    decoration: BoxDecoration(
-                      borderRadius: theme.radius(LdSize.s),
-                      color: colorBundle.surface,
-                      border: Border.all(
-                        color: colorBundle.border,
-                        width: theme.borderWidth,
-                      ),
-                    ),
-                  );
-                },
-              );
-            }),
+                    builder: LdSubmitCustomBuilder<List<T>, Set<IdType>>(builder: (context, controller, stateType) {
+                      if (stateType == LdSubmitStateType.result) {
+                        return Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            ...controller.state.result!.map((item) => _buildSelectedItem(context, item)).toList(),
+                            if (left > 0)
+                              LdText(
+                                "+$left",
+                                type: LdTextType.label,
+                              )
+                          ],
+                        );
+                      }
+                      if (stateType == LdSubmitStateType.error) {
+                        return LdExceptionView(
+                          exception: controller.state.error!.localize(context),
+                          direction: Axis.horizontal,
+                          retryController: controller.retryController,
+                        );
+                      }
+                      return const Center(child: LdLoader(size: 12));
+                    }),
+                  ),
+                ),
+              ),
+              Icon(
+                LucideIcons.chevronRight,
+                size: theme.labelSize(widget.size),
+                color: theme.primaryColor,
+              ),
+            ],
+          ),
+          color: theme.palette.primary,
+          builder: (contxt, _, status, child) {
+            final colorBundle = inputColor(
+              theme,
+              status,
+              isValid: true,
+              onSurface: LdSurfaceInfo.of(context).isSurface,
+            );
+
+            return Container(
+              child: child!,
+              padding: theme.balPad(widget.size),
+              clipBehavior: Clip.hardEdge,
+              decoration: BoxDecoration(
+                borderRadius: theme.radius(LdSize.s),
+                color: colorBundle.surface,
+                border: Border.all(
+                  color: colorBundle.border,
+                  width: theme.borderWidth,
+                ),
+              ),
+            );
+          },
+        ),
       ],
     );
   }
 }
 
-class _LdChoosePage<T> extends StatelessWidget {
-  final Widget child;
+class _LdChoosePage<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
+  final LdRepository<T, IdType> repository;
+  final Widget Function(BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder;
+  final Set<IdType> initialSelectedItems;
+  final bool multiple;
+  final bool allowEmpty;
   final String label;
 
-  const _LdChoosePage({required this.child, required this.label, Key? key}) : super(key: key);
+  const _LdChoosePage({
+    required this.repository,
+    required this.itemBuilder,
+    required this.initialSelectedItems,
+    required this.multiple,
+    required this.allowEmpty,
+    required this.label,
+    super.key,
+  });
 
   @override
-  Widget build(BuildContext context) {
-    return LdScaffold(
-      appBar: LdAppBar(
-        title: Text(label),
-      ),
-      body: LdScaffoldBody(slivers: [child]),
-    );
-  }
+  State<_LdChoosePage<T, IdType>> createState() => _LdChoosePageState<T, IdType>();
 }
 
-class _LdChooseList<T> extends StatefulWidget {
-  final Iterable<LdSelectItem<T>> items;
-  final Set<T>? value;
-  final bool multiple;
-  final bool shrinkWrap;
-  final VoidCallback onDismiss;
-
-  final Function(Set<T>)? onChange;
-
-  final bool enableSearch;
-  final bool allowEmpty;
-
-  const _LdChooseList(
-      {required this.items,
-      required this.value,
-      required this.multiple,
-      required this.onChange,
-      required this.allowEmpty,
-      required this.onDismiss,
-      this.shrinkWrap = false,
-      this.enableSearch = true,
-      Key? key})
-      : super(key: key);
-
-  @override
-  State<_LdChooseList<T>> createState() => _LdChooseListState();
-}
-
-class _LdChooseListState<T> extends State<_LdChooseList<T>> {
-  Set<T> _value = {};
-  late TextEditingController _searchController;
-
-  List<LdSelectItem<T>>? _searchResults;
-
-  late final Fuzzy<LdSelectItem<T>> _fuze;
-
-  void _onSearchQueryChanged(String? query) {
-    if (query == null || query.isEmpty) {
-      setState(() {
-        _searchResults = null;
-      });
-      return;
-    }
-
-    setState(() {
-      _searchResults = _fuze.search(query).map((e) => e.item).toList();
-    });
-  }
+class _LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<_LdChoosePage<T, IdType>> {
+  late Set<IdType> _selectedItems;
 
   @override
   void initState() {
-    _searchController = TextEditingController();
-    if (widget.enableSearch) {
-      _fuze = Fuzzy<LdSelectItem<T>>(widget.items.toList(),
-          options: FuzzyOptions(
-              keys: [WeightedKey(name: "value", getter: (e) => e.searchString ?? e.value.toString(), weight: 1)]));
-    }
-    _value = widget.value ?? {};
     super.initState();
+    _selectedItems = Set.from(widget.initialSelectedItems);
   }
 
-  @override
-  dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  void _onTap(BuildContext context, LdSelectItem<T> item) {
-    if (item.value == null) {
-      return;
+  void _handleSelectionChange(Set<IdType> selectedItems) {
+    // Enforce allowEmpty constraint
+    if (!widget.allowEmpty && selectedItems.isEmpty && _selectedItems.isNotEmpty) {
+      return; // Prevent clearing selection if allowEmpty is false
     }
 
-    if (widget.multiple == true) {
-      if (_value.contains(item.value)) {
-        // Prevent deselecting last item
-        if (_value.length == 1 && !widget.allowEmpty) {
-          return;
-        }
-        _value.remove(item.value);
-      } else {
-        _value.add(item.value!);
-      }
-    } else {
-      if (_value.contains(item.value) == true) {
-        // Prevent deselecting last item
+    setState(() {
+      _selectedItems = selectedItems;
+    });
 
-        if (!widget.allowEmpty) {
-          return;
-        }
-        _value.clear();
-      } else {
-        _value = {item.value!};
-      }
-    }
-
-    widget.onChange!(_value);
-
-    setState(() {});
-
-    if (widget.multiple == false) {
-      widget.onDismiss();
-    }
+    // // For single select, dismiss immediately when selection changes
+    // if (!widget.multiple && selectedItems.length == 1) {
+    //   Navigator.of(context).pop(selectedItems);
+    // }
   }
 
   @override
   Widget build(BuildContext context) {
-    final items = _searchResults ?? widget.items;
-
-    final list = SliverList.separated(
-      separatorBuilder: (context, index) => const LdDivider(
-        height: 1,
+    final searchConfig = widget.repository.getSearchConfig();
+    return LdScaffold(
+      debugName: "LdChoosePage",
+      appBar: LdAppBar(
+        debugName: "LdChoosePageAppBar",
+        title: Text(widget.label),
+        implyCloseModalButton: false,
+        actions: [
+          LdButton.ghost(
+            disabled: _selectedItems.isEmpty,
+            onPressed: () {
+              setState(() {
+                _selectedItems = {};
+              });
+            },
+            child: const Text("Clear"),
+          ),
+          LdButton(
+            disabled: _selectedItems.isEmpty && !widget.allowEmpty,
+            onPressed: () {
+              maybePopContextMenu(context);
+              Navigator.of(context).pop(_selectedItems);
+            },
+            child: const Text("Done"),
+          ),
+        ],
       ),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        var item = items.elementAt(index);
-
-        return LdListItem(
-          key: item.key ?? ValueKey(item.value),
-          title: item.child,
-          disabled: !item.enabled,
-          isSelected: _value.contains(item.value),
-          radioSelection: !widget.multiple,
+      secondaryAppBar: searchConfig != null
+          ? LdAppBar(
+              searchConfig: searchConfig,
+            )
+          : null,
+      body: Builder(builder: (context) {
+        return LdSelectableList<T, IdType>(
+          paginator: widget.repository,
+          itemBuilder: widget.itemBuilder,
+          initialSelectedItems: _selectedItems,
+          multiSelect: widget.multiple,
           showSelectionControls: true,
-          onSelectionChanged: (_) => _onTap(context, item),
+          onSelectionChange: _handleSelectionChange,
+          listBuilder: (context, scrollController, itemBuilder) {
+            return LdList<T, IdType>(
+              paginator: widget.repository,
+              padding: MediaQuery.paddingOf(context),
+              scrollController: scrollController,
+              itemBuilder: itemBuilder,
+            );
+          },
         );
-      },
+      }),
     );
-
-    if (widget.enableSearch) {
-      return SliverStickyHeader(
-        header: ColoredBox(
-          color: LdTheme.of(context).surface,
-          child: LdInput(
-            autofocus: true,
-            hint: LiquidLocalizations.of(context).search,
-            onChanged: _onSearchQueryChanged,
-          ).padM(),
-        ),
-        sliver: list,
-      );
-    }
-
-    return list;
   }
 }

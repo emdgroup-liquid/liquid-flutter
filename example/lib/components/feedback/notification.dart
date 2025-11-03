@@ -11,11 +11,7 @@ class NotificationDemo extends StatelessWidget {
     return ComponentPage(
       path: "lib/components/feedback/notification.dart",
       title: "LdNotification",
-      apiComponents: const [
-        "LdNotifier",
-        "LdNotifcationPortal",
-        "LdNotification"
-      ],
+      apiComponents: const ["LdNotifier", "LdNotifcationPortal", "LdNotification"],
       text: """
   Allows you to display notifications in a "toast" style. 
   
@@ -139,18 +135,13 @@ class NotificationDemo extends StatelessWidget {
               LdButton(
                   child: const Text("Big info"),
                   onPressed: () {
-                    LdNotificationsController.of(context).addNotification(
-                        LdNotification(
-                            type: LdNotificationType.info,
-                            message: "Hello World",
-                            subMessage: "This is a submessage"));
+                    LdNotificationsController.of(context).addNotification(LdNotification(
+                        type: LdNotificationType.info, message: "Hello World", subMessage: "This is a submessage"));
                   }),
               LdButton(
                   child: const Text("Loading"),
                   onPressed: () async {
-                    final notification =
-                        await LdNotificationsController.of(context)
-                            .addNotification(
+                    final notification = await LdNotificationsController.of(context).addNotification(
                       LdNotification(
                         type: LdNotificationType.loading,
                         canDismiss: false,
@@ -174,25 +165,6 @@ class NotificationDemo extends StatelessWidget {
                   }),
             ],
           )),
-          LdText.h("Complex interactions"),
-          LdText.p(
-            "Notifications can also be interactive, requiring user input or confirmation. The following examples demonstrate different types of interactive notifications.",
-          ),
-          ComponentWell(
-            child: Center(
-              child: LdButton(
-                child: const Text("Confirm"),
-                onPressed: () {
-                  LdNotificationsController.of(context).addNotification(
-                    LdConfirmNotification(
-                        type: LdNotificationType.confirm,
-                        message: "Hello World",
-                        subMessage: "This is a submessage"),
-                  );
-                },
-              ),
-            ),
-          ),
           LdText.p(
             "To indefinitely display a notification you can use the `LdNotificationType.acknowledge` type.",
           ),
@@ -206,36 +178,6 @@ class NotificationDemo extends StatelessWidget {
                         type: LdNotificationType.acknowledge,
                         message: "Hello World",
                         subMessage: "This is a submessage"),
-                  );
-                },
-              ),
-            ),
-          ),
-          LdText.p(
-            "To prompt some simple text you can use the `LdNotificationType.enterText` type.",
-          ),
-          ComponentWell(
-            child: Center(
-              child: LdButton(
-                child: const Text("Enter text"),
-                onPressed: () async {
-                  final notification =
-                      (await LdNotificationsController.of(context)
-                          .addNotification(
-                    LdInputNotification(
-                      inputHint: "John Doe",
-                      inputLabel: "Your name",
-                      type: LdNotificationType.enterText,
-                      message: "Some input is required...",
-                    ),
-                  )) as LdInputNotification;
-                  final result = await notification.inputCompleter.future;
-                  if (!context.mounted) return;
-                  LdNotificationsController.of(context).addNotification(
-                    LdNotification(
-                      message: "You entered: $result",
-                      type: LdNotificationType.success,
-                    ),
                   );
                 },
               ),

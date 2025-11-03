@@ -58,28 +58,28 @@ class LdMonkeyDetailPage<T extends Identifiable<IdType>, IdType> extends Statele
                                       ? route.repository.pluralItemTitle
                                       : route.repository.singularItemTitle,
                                 ),
-                                actions: primaryActions.actions,
+                                actions: primaryActions.actions.map((e) => e.build(context)).toList(),
                                 overflowMenuProviders: primaryActions.menuProviders,
                               ),
                         ),
-                        if (isSideBySide && secondaryActions.hasActions) ...[
+                        if (isSideBySide && secondaryActions.actions.isNotEmpty) ...[
                           Provider.value(
                             value: LdMonkeyActionLocation.detailSecondary,
                             child: LdAppBar(
                               implyLeading: false,
-                              actions: secondaryActions.actions,
+                              actions: secondaryActions.actions.map((e) => e.build(context)).toList(),
                               overflowMenuProviders: secondaryActions.menuProviders,
                             ),
                           ),
                         ],
                       ],
                     ),
-                    secondaryAppBar: !isSideBySide && secondaryActions.hasActions
+                    secondaryAppBar: !isSideBySide && secondaryActions.actions.isNotEmpty
                         ? Provider.value(
                             value: LdMonkeyActionLocation.detailSecondary,
                             child: LdAppBar(
                               implyLeading: false,
-                              actions: secondaryActions.actions,
+                              actions: secondaryActions.actions.map((e) => e.build(context)).toList(),
                               overflowMenuProviders: secondaryActions.menuProviders,
                             ),
                           )

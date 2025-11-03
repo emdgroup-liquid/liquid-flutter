@@ -11,7 +11,7 @@ class ChooseDemo extends StatefulWidget {
 }
 
 class _ChooseDemoState extends State<ChooseDemo> {
-  Set<String> _value = {"test"};
+  Set<String> _value = {"strawberry"};
 
   bool _onSurface = false;
   bool _allowEmpty = false;
@@ -43,13 +43,12 @@ class _ChooseDemoState extends State<ChooseDemo> {
             onSurface: _onSurface,
             child: Column(
               children: [
-                LdChoose<String>(
+                LdChoose.fromSelectItems(
                   label: "Your pie choice",
                   allowEmpty: _allowEmpty,
                   disabled: _disabled,
                   multiple: _multiple,
                   placeholder: const Text("Choose a pie"),
-                  enableSearch: _enableSearch,
                   value: _value,
                   truncateDisplay: 3,
                   mode: _mode,
@@ -58,43 +57,53 @@ class _ChooseDemoState extends State<ChooseDemo> {
                     LdSelectItem(
                       child: Text("Raspberry pie"),
                       value: "raspberry",
+                      searchString: "Raspberry pie",
                     ),
                     LdSelectItem(
                       child: Text("Strawberry pie"),
                       value: "strawberry",
+                      searchString: "Strawberry pie",
                     ),
                     LdSelectItem(
                       child: Text("Apple pie"),
                       enabled: false,
                       value: "apple",
+                      searchString: "Apple pie",
                     ),
                     LdSelectItem(
                       child: Text("Blueberry pie"),
                       value: "blueberry",
+                      searchString: "Blueberry pie",
                     ),
                     LdSelectItem(
                       child: Text("Cherry pie"),
                       value: "cherry",
+                      searchString: "Cherry pie",
                     ),
                     LdSelectItem(
                       child: Text("Peach pie"),
                       value: "peach",
+                      searchString: "Peach pie",
                     ),
                     LdSelectItem(
                       child: Text("Chocolate pie"),
                       value: "chocolate",
+                      searchString: "Chocolate pie",
                     ),
                     LdSelectItem(
                       child: Text("Banana bread"),
                       value: "banana",
+                      searchString: "Banana bread",
                     ),
                     LdSelectItem(
                       child: Text("Pumpkin pie"),
                       value: "pumpkin",
+                      searchString: "Pumpkin pie",
                     ),
                     LdSelectItem(
                       child: Text("Lemon pie"),
                       value: "lemon",
+                      searchString: "Lemon pie",
                     ),
                   ],
                 ),

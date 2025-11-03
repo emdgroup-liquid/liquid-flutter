@@ -322,6 +322,30 @@ abstract class LiquidLocalizations {
   /// In en, this message translates to:
   /// **'Hide Sidebar'**
   String get hideDrawer;
+
+  /// No description provided for @clearSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection?'**
+  String get clearSelection;
+
+  /// No description provided for @clearSelectionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to discard your selection of {n} items?'**
+  String clearSelectionBody(Object n);
+
+  /// No description provided for @openDrawer.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Sidebar'**
+  String get openDrawer;
+
+  /// No description provided for @closeDrawer.
+  ///
+  /// In en, this message translates to:
+  /// **'Close Sidebar'**
+  String get closeDrawer;
 }
 
 class _LiquidLocalizationsDelegate extends LocalizationsDelegate<LiquidLocalizations> {

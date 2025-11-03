@@ -59,7 +59,6 @@ class LdCounter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdCounterWidget(
-      key: key,
       value: value,
       precision: precision,
       size: size,

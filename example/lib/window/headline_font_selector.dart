@@ -15,15 +15,18 @@ class _HeadlineFontSelectorState extends State<HeadlineFontSelector> {
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context);
-    return LdChoose<String>(
+    return LdChoose.fromSelectItems(
       mode: LdChooseMode.modal,
       label: "Headline font family",
-      items: GoogleFonts.asMap().entries.map(
+      items: GoogleFonts.asMap()
+          .entries
+          .map(
             (entry) => LdSelectItem(
               value: entry.key,
               child: Text(entry.key),
             ),
-          ),
+          )
+          .toList(),
       onChanged: (p0) async {
         final font = GoogleFonts.getFont(p0.first);
 

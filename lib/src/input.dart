@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/form_label.dart';
-import 'package:liquid_flutter/src/touchable/input_color.dart';
-import 'package:liquid_flutter/src/touchable/touchable_status.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// An input field
@@ -64,34 +62,35 @@ class LdInput extends StatefulWidget {
 }
 
 class _LdInputState extends State<LdInput> {
+  final FocusScopeNode _focusScopeNode = FocusScopeNode();
   late final FocusNode _focusNode;
   bool _createdFocusNode = false;
 
   late final TextEditingController _controller;
   bool _createdController = false;
 
-  bool _hovering = false;
-
   @override
   void initState() {
-    _createdFocusNode = widget.focusNode == null;
     _createdController = widget.controller == null;
-    _focusNode = widget.focusNode ?? FocusNode();
+
     _controller = widget.controller ?? TextEditingController();
-    _focusNode.addListener(_onFocusChange);
+    _focusNode = widget.focusNode ?? FocusNode();
+    _createdFocusNode = widget.focusNode == null;
+    _focusScopeNode.addListener(_onFocusChange);
     _controller.addListener(_onTextChange);
     super.initState();
   }
 
   @override
   void dispose() {
-    _focusNode.removeListener(_onFocusChange);
+    _focusScopeNode.removeListener(_onFocusChange);
+    _focusScopeNode.dispose();
     _controller.removeListener(_onTextChange);
-    if (_createdController) {
-      _controller.dispose();
-    }
     if (_createdFocusNode) {
       _focusNode.dispose();
+    }
+    if (_createdController) {
+      _controller.dispose();
     }
 
     super.dispose();
@@ -103,7 +102,7 @@ class _LdInputState extends State<LdInput> {
   }
 
   void _onFocusChange() {
-    if (!_focusNode.hasFocus) {
+    if (!_focusScopeNode.hasFocus) {
       widget.onBlurred?.call(widget.controller?.text ?? '');
     }
     setState(() {});
@@ -164,104 +163,105 @@ class _LdInputState extends State<LdInput> {
             size: widget.size,
             disabled: widget.disabled,
           ),
-          LdTouchableSurface(
-              allowTapOutside: true,
-              mode: LdTouchableSurfaceMode.input,
-              isInput: true,
-              onPressed: () {
-                _focusNode.requestFocus();
+          CallbackShortcuts(
+              bindings: {
+                const SingleActivator(LogicalKeyboardKey.escape): () {
+                  _focusScopeNode.unfocus();
+                },
               },
-              active: _focusNode.hasFocus,
-              disabled: widget.disabled,
-              builder: (context, colors, status) => Container(
-                    clipBehavior: Clip.hardEdge,
-                    decoration: BoxDecoration(
-                      color: colors.surface,
-                      borderRadius: theme.radius(LdSize.s),
-                      border: Border.all(
-                        color: colors.border,
-                        width: theme.borderWidth,
-                      ),
+              child: LdTouchableSurface(
+                allowTapOutside: true,
+                mode: LdTouchableSurfaceMode.input,
+                isInput: true,
+                focusNode: _focusScopeNode,
+                onPressed: () {
+                  _focusNode.requestFocus();
+                },
+                active: _focusScopeNode.hasFocus,
+                disabled: widget.disabled,
+                builder: (context, colors, status, _) => Container(
+                  clipBehavior: Clip.hardEdge,
+                  decoration: BoxDecoration(
+                    color: colors.surface,
+                    borderRadius: theme.radius(LdSize.s),
+                    border: Border.all(
+                      color: colors.border,
+                      width: theme.borderWidth,
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Padding(
-                          padding: contentPadding,
-                          child: Container(
-                            constraints: BoxConstraints(
-                              minHeight: cursorHeight,
-                            ),
-                            child: Row(
-                              children: [
-                                if (widget.leading != null) ...[
-                                  IconTheme(
-                                    data: IconThemeData(
-                                      color: colors.icon,
-                                      size: theme.labelSize(widget.size),
-                                    ),
-                                    child: widget.leading!,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: contentPadding,
+                        child: Container(
+                          constraints: BoxConstraints(
+                            minHeight: cursorHeight,
+                          ),
+                          child: Row(
+                            children: [
+                              if (widget.leading != null) ...[
+                                IconTheme(
+                                  data: IconThemeData(
+                                    color: colors.icon,
+                                    size: theme.labelSize(widget.size),
                                   ),
-                                  ldSpacerS
-                                ],
-                                Flexible(
-                                  child: CallbackShortcuts(
-                                    bindings: {
-                                      const SingleActivator(LogicalKeyboardKey.escape): () {
-                                        _focusNode.unfocus();
-                                      },
-                                    },
-                                    child: TextField(
-                                      focusNode: _focusNode,
-                                      enabled: !widget.disabled,
-                                      controller: _controller,
-                                      cursorColor: theme.palette.primary.idle(
-                                        theme.isDark,
-                                      ),
-                                      cursorHeight: cursorHeight,
-                                      maxLines: widget.maxLines,
-                                      autofillHints: widget.autofillHints,
-                                      keyboardType: widget.keyboardType,
-                                      enableInteractiveSelection: true,
-                                      minLines: widget.minLines,
-                                      decoration: InputDecoration(
-                                        hintText: widget.hint,
-                                        border: InputBorder.none,
-                                        hintStyle: hintStyle,
-                                        isCollapsed: true,
-                                        filled: false,
-                                        isDense: true,
-                                        suffix: suffix,
-                                      ),
-                                      obscureText: widget.obscureText,
-                                      autofocus: widget.autofocus,
-                                      textInputAction: widget.textInputAction,
-                                      scrollPadding: theme.pad(),
-                                      onSubmitted: widget.onSubmitted,
-                                      cursorWidth: 1,
-                                      style: TextStyle(
-                                        color: colors.text,
-                                        package: theme.fontFamilyPackage,
-                                        fontFamily: theme.fontFamily,
-                                        fontSize: theme.labelSize(widget.size),
-                                        height: 1,
-                                      ),
-                                    ),
+                                  child: widget.leading!,
+                                ),
+                                ldSpacerS
+                              ],
+                              Flexible(
+                                child: TextField(
+                                  focusNode: _focusNode,
+                                  enabled: !widget.disabled,
+                                  controller: _controller,
+                                  cursorColor: theme.palette.primary.idle(
+                                    theme.isDark,
+                                  ),
+                                  cursorHeight: cursorHeight,
+                                  maxLines: widget.maxLines,
+                                  autofillHints: widget.autofillHints,
+                                  keyboardType: widget.keyboardType,
+                                  enableInteractiveSelection: true,
+                                  minLines: widget.minLines,
+                                  decoration: InputDecoration(
+                                    hintText: widget.hint,
+                                    border: InputBorder.none,
+                                    hintStyle: hintStyle,
+                                    isCollapsed: true,
+                                    filled: false,
+                                    isDense: true,
+                                    suffix: suffix,
+                                  ),
+                                  obscureText: widget.obscureText,
+                                  autofocus: widget.autofocus,
+                                  textInputAction: widget.textInputAction,
+                                  scrollPadding: theme.pad(),
+                                  onSubmitted: widget.onSubmitted,
+                                  cursorWidth: 1,
+                                  style: TextStyle(
+                                    color: colors.text,
+                                    package: theme.fontFamilyPackage,
+                                    fontFamily: theme.fontFamily,
+                                    fontSize: theme.labelSize(widget.size),
+                                    height: 1,
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
-                        if (widget.loading)
-                          LinearProgressIndicator(
-                            minHeight: theme.borderWidth,
-                            color: colors.icon,
-                            backgroundColor: Colors.transparent,
-                          )
-                      ],
-                    ),
-                  )),
+                      ),
+                      if (widget.loading)
+                        LinearProgressIndicator(
+                          minHeight: theme.borderWidth,
+                          color: colors.icon,
+                          backgroundColor: Colors.transparent,
+                        )
+                    ],
+                  ),
+                ),
+              )),
         ],
       ),
     );

@@ -60,7 +60,7 @@ class LdTextList extends StatelessWidget {
       // Add space after bullet/number
       spans.add(
         TextSpan(
-          text: '  ',
+          text: ' ',
           style: textStyle,
         ),
       );

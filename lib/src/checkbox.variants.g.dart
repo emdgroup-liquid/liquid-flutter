@@ -1,23 +1,79 @@
 part of 'checkbox.dart';
 
+class LdCheckboxConfig {
+  const LdCheckboxConfig({
+    this.checked,
+    this.onChanged,
+    this.color,
+    this.focusNode,
+    this.size,
+    this.disabled,
+  });
+
+  final bool? checked;
+
+  final dynamic Function(bool)? onChanged;
+
+  final LdColor? color;
+
+  final FocusNode? focusNode;
+
+  final LdSize? size;
+
+  final bool? disabled;
+}
+
+class LdCheckboxConfigProvider extends StatelessWidget {
+  const LdCheckboxConfigProvider(
+    this.config,
+    this.child, {
+    super.key,
+  });
+
+  final LdCheckboxConfig config;
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final parentConfig = Provider.of<LdCheckboxConfig?>(context, listen: false);
+    final mergedConfig = parentConfig != null
+        ? LdCheckboxConfig(
+            checked: config.checked ?? parentConfig.checked,
+            onChanged: config.onChanged ?? parentConfig.onChanged,
+            color: config.color ?? parentConfig.color,
+            focusNode: config.focusNode ?? parentConfig.focusNode,
+            size: config.size ?? parentConfig.size,
+            disabled: config.disabled ?? parentConfig.disabled)
+        : config;
+    return Provider<LdCheckboxConfig>.value(
+      value: mergedConfig,
+      child: child,
+    );
+  }
+}
+
 class LdCheckbox extends StatelessWidget {
   const LdCheckbox({
     this.label,
-    required this.checked,
+    this.checked,
     this.onChanged,
     this.color,
-    this.size = LdSize.s,
-    this.disabled = false,
+    this.focusNode,
+    this.size,
+    this.disabled,
     super.key,
   });
 
   final String? label;
 
-  final bool checked;
+  final bool? checked;
 
-  final bool disabled;
+  final bool? disabled;
 
-  final LdSize size;
+  final FocusNode? focusNode;
+
+  final LdSize? size;
 
   final dynamic Function(bool)? onChanged;
 
@@ -25,11 +81,12 @@ class LdCheckbox extends StatelessWidget {
 
   static Widget success({
     String? label,
-    required bool checked,
+    bool? checked,
     dynamic Function(bool)? onChanged,
     LdColor? color,
-    LdSize size = LdSize.s,
-    bool disabled = false,
+    FocusNode? focusNode,
+    LdSize? size,
+    bool? disabled,
     Key? key,
   }) {
     return Builder(
@@ -38,6 +95,7 @@ class LdCheckbox extends StatelessWidget {
         checked: checked,
         onChanged: onChanged,
         color: LdTheme.of(context).success,
+        focusNode: focusNode,
         size: size,
         disabled: disabled,
         key: key,
@@ -47,11 +105,12 @@ class LdCheckbox extends StatelessWidget {
 
   static Widget warning({
     String? label,
-    required bool checked,
+    bool? checked,
     dynamic Function(bool)? onChanged,
     LdColor? color,
-    LdSize size = LdSize.s,
-    bool disabled = false,
+    FocusNode? focusNode,
+    LdSize? size,
+    bool? disabled,
     Key? key,
   }) {
     return Builder(
@@ -60,6 +119,7 @@ class LdCheckbox extends StatelessWidget {
         checked: checked,
         onChanged: onChanged,
         color: LdTheme.of(context).warning,
+        focusNode: focusNode,
         size: size,
         disabled: disabled,
         key: key,
@@ -69,11 +129,12 @@ class LdCheckbox extends StatelessWidget {
 
   static Widget error({
     String? label,
-    required bool checked,
+    bool? checked,
     dynamic Function(bool)? onChanged,
     LdColor? color,
-    LdSize size = LdSize.s,
-    bool disabled = false,
+    FocusNode? focusNode,
+    LdSize? size,
+    bool? disabled,
     Key? key,
   }) {
     return Builder(
@@ -82,6 +143,7 @@ class LdCheckbox extends StatelessWidget {
         checked: checked,
         onChanged: onChanged,
         color: LdTheme.of(context).error,
+        focusNode: focusNode,
         size: size,
         disabled: disabled,
         key: key,
@@ -91,14 +153,15 @@ class LdCheckbox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final config = Provider.of<LdCheckboxConfig?>(context, listen: false);
     return LdCheckboxWidget(
       label: label,
-      checked: checked,
-      onChanged: onChanged,
-      color: color,
-      size: size,
-      disabled: disabled,
-      key: key,
+      checked: checked ?? config?.checked ?? false,
+      onChanged: onChanged ?? config?.onChanged,
+      color: color ?? config?.color,
+      focusNode: focusNode ?? config?.focusNode,
+      size: size ?? config?.size ?? LdSize.s,
+      disabled: disabled ?? config?.disabled ?? false,
     );
   }
 }

@@ -22,7 +22,7 @@ class _LdRunnerLogState extends State<LdRunnerLog> {
     return LdTouchableSurface(
         onPressed: () {},
         color: LdTheme.of(context).palette.neutral,
-        builder: (context, colors, status) {
+        builder: (context, colors, status, _) {
           return Container(
             decoration: BoxDecoration(
               color: colors.surface,
@@ -121,7 +121,7 @@ class LdRunnerStep extends StatelessWidget {
             }
           },
           color: theme.primary,
-          builder: (context, colors, status) {
+          builder: (context, colors, status, _) {
             return Container(
               padding: theme.balPad(LdSize.s),
               decoration: BoxDecoration(

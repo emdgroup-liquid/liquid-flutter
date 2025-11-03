@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/device_info.dart';
 
 import 'package:provider/provider.dart';
 
@@ -82,19 +81,19 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
                             value: LdMonkeyActionLocation.masterAppBar,
                             child: LdAppBar(
                               title: Text(widget.route.repository.pluralItemTitle),
-                              actions: primaryActions.actions,
+                              actions: primaryActions.actions.map((e) => e.build(context)).toList(),
                               overflowMenuProviders: primaryActions.menuProviders,
                             ),
                           ),
                         ],
                       ),
-                      secondaryAppBar: (secondaryActions.hasActions || searchConfig != null)
+                      secondaryAppBar: (secondaryActions.actions.isNotEmpty || searchConfig != null)
                           ? Provider.value(
                               value: LdMonkeyActionLocation.masterSecondary,
                               child: LayoutBuilder(builder: (context, constraints) {
                                 return LdAppBar(
                                   implyLeading: false,
-                                  actions: secondaryActions.actions,
+                                  actions: secondaryActions.actions.map((e) => e.build(context)).toList(),
                                   overflowMenuProviders: secondaryActions.menuProviders,
                                   searchConfig: searchConfig,
                                 );

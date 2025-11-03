@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -36,6 +34,7 @@ LdColorBundle touchableColor(
 class LdTouchableSurface extends StatefulWidget {
   final LdColor? color;
   final bool disabled;
+  final HitTestBehavior hitTestBehavior;
 
   final bool active;
 
@@ -48,11 +47,14 @@ class LdTouchableSurface extends StatefulWidget {
   final Function() onPressed;
   final bool isInput;
   final bool allowTapOutside;
+  final Widget? child;
 
-  final Widget Function(BuildContext contxt, LdColorBundle colorBundle, LdTouchableStatus status) builder;
+  final Widget Function(BuildContext contxt, LdColorBundle colorBundle, LdTouchableStatus status, Widget? child)
+      builder;
   const LdTouchableSurface({
     super.key,
     required this.onPressed,
+    this.hitTestBehavior = HitTestBehavior.opaque,
     this.color,
     required this.builder,
     this.allowTapOutside = false,
@@ -63,6 +65,7 @@ class LdTouchableSurface extends StatefulWidget {
     this.disabled = false,
     this.autoFocus = false,
     this.isOdd = false,
+    this.child,
   });
 
   @override
@@ -164,6 +167,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
             return KeyEventResult.handled;
           }
         }
+
         return KeyEventResult.ignored;
       },
       child: TapRegion(
@@ -193,7 +197,8 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
             },
             child: Listener(
               key: _listenerKey,
-              onPointerDown: (_) => _safeSetState(() {
+              behavior: widget.hitTestBehavior,
+              onPointerDown: (d) => _safeSetState(() {
                 _pressed = true;
               }),
               onPointerUp: (details) => _safeSetState(() {
@@ -206,8 +211,10 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
                     details.localPosition.dy > 0 &&
                     details.localPosition.dy < size.height) {
                   if (!widget.disabled) widget.onPressed();
-                  _focusNode?.unfocus();
-                }
+                  if (!widget.isInput) {
+                    _focusNode?.unfocus();
+                  }
+                } else {}
               }),
               onPointerMove: (event) {
                 _safeSetState(() {
@@ -217,11 +224,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
               onPointerCancel: (_) => _safeSetState(() {
                 _pressed = false;
               }),
-              child: widget.builder(
-                context,
-                colors,
-                status,
-              ),
+              child: widget.builder(context, colors, status, widget.child),
             ),
           );
         }),
@@ -238,17 +241,22 @@ class LdTouchableTouchFeedback extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdSpring(
-      springConstant: 20,
+      springConstant: 10,
       dampingCoefficient: 5,
-      initialPosition: status.pressed ? 0.1 : 0,
-      position: status.pressed ? 0.1 : 0,
+      initialPosition: status.pressed ? 1 : 0,
+      position: status.pressed ? 1 : 0,
       builder: (context, state, child) {
+        double squeezeFactor = (status.panOffset?.dx.abs() ?? 0) * 0.0001 * state.position;
+
+        final scale = state.position * 0.01 + 1 + squeezeFactor;
+
         return Transform(
             alignment: Alignment.center,
             transform: Matrix4.identity()
-              ..scale(
-                state.position * 0.01 + 1 + min(0.2, (status.panOffset?.dx.abs() ?? 0) * 0.001 * state.position),
-                state.position * 0.01 + 1 + min(0.2, (status.panOffset?.dy.abs() ?? 0) * 0.001 * state.position),
+              ..scaleByDouble(
+                scale,
+                scale,
+                1.0,
                 1.0,
               ),
             child: child);

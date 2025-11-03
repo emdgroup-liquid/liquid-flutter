@@ -70,6 +70,30 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     fetchListFunction = _fetchListPaginator;
   }
 
+  static LdRepository<L, IdType> fromList<L extends Identifiable<IdType>, IdType>({
+    required List<L> list,
+    Set<LdFilterOption<L, IdType>>? filters,
+    List<LdSortOption<L, IdType>>? sortOptions,
+  }) {
+    return LdRepository<L, IdType>(
+      filters: filters,
+      sortOptions: sortOptions,
+      fetchListWithParameters: ({required offset, required pageSize, pageToken, filters, sortOptions}) async {
+        final filtered =
+            list.where((item) => filters?.every((filter) => filter.optimisticFilter(item)) ?? true).toList();
+        for (final sortOption in sortOptions ?? []) {
+          filtered.sort((a, b) => sortOption.optimisticSort(a, b));
+        }
+        return LdListPage<L>(
+          newItems: filtered.skip(offset).take(pageSize).toList(),
+          hasMore: offset + pageSize < filtered.length,
+          total: filtered.length,
+        );
+      },
+      getById: (id) async => list.firstWhere((item) => item.id == id),
+    );
+  }
+
   // Adapter for the LdPaginator
   Future<LdListPage<T>> _fetchListPaginator({
     required int offset,
@@ -107,12 +131,13 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     return parameters;
   }
 
-  Future<void> updateFilter<F extends LdFilterOption<T, IdType>>(String name, F Function(F filter) updater) async {
+  Future<void> updateFilter(
+      String name, LdFilterOption<T, IdType> Function(LdFilterOption<T, IdType>? filter) updater) async {
     final existingFilter = _filters[name];
     assert(existingFilter != null, 'Cannot update filter. Filter with name $name does not exist');
-    _filters[name] = updater(existingFilter as F);
+    _filters[name] = updater(existingFilter);
     _filterStreamController.add(_filters.values.toSet());
-    applyOptimisticFilterAndSorting();
+    await applyOptimisticFilterAndSorting();
   }
 
   Future<void> updateSortOption(LdSortOption<T, IdType> sortOption) async {
@@ -122,7 +147,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     _sortOptions.remove(existingSortOption);
     _sortOptions.add(sortOption);
     _sortStreamController.add(_sortOptions);
-    applyOptimisticFilterAndSorting();
+    await applyOptimisticFilterAndSorting();
   }
 
   Future<void> setActiveSortOption(String name) async {
@@ -131,7 +156,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     _sortOptions.clear();
     _sortOptions.addAll(newOptions);
     _sortStreamController.add(_sortOptions);
-    applyOptimisticFilterAndSorting();
+    await applyOptimisticFilterAndSorting();
   }
 
   Future<void> applyOptimisticFilterAndSorting() async {
@@ -174,7 +199,9 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     totalItems = filteredItems.length;
 
     for (final sortOption in sortOptions) {
-      sortedItems.sort((a, b) => sortOption.optimisticSort!(a.value!, b.value!));
+      if (sortOption.optimisticSort != null) {
+        sortedItems.sort((a, b) => sortOption.optimisticSort!(a.value!, b.value!));
+      }
     }
 
     // Apply the sorting to the previous list
@@ -209,6 +236,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
   }
 
   Future<T> getById(IdType id, {bool skipCache = false}) async {
+    await Future.delayed(const Duration(milliseconds: 400));
     if (!skipCache) {
       final item = getItemById(id);
       if (item != null) {
@@ -243,11 +271,11 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
         }
       } catch (e) {
         for (final item in items) {
-          rollbackItemUpdate(item.id);
+          await rollbackItemUpdate(item.id);
         }
         rethrow;
       }
-      applyOptimisticFilterAndSorting();
+      await applyOptimisticFilterAndSorting();
     } else {
       final exceptions = <dynamic>[];
       for (final item in items) {
@@ -255,12 +283,12 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
           final newItem = await _updateItem!(item.id, item);
           confirmItemUpdate(item.id, newItem ?? item);
         } catch (e) {
-          rollbackItemUpdate(item.id);
+          await rollbackItemUpdate(item.id);
           exceptions.add(e);
         }
       }
 
-      applyOptimisticFilterAndSorting();
+      await applyOptimisticFilterAndSorting();
       if (exceptions.isNotEmpty) {
         throw Exception(exceptions);
       }
@@ -275,10 +303,10 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
         final newItem = newItemFromServer ?? newValue;
         confirmItemUpdate(id, newItem);
 
-        applyOptimisticFilterAndSorting();
+        await applyOptimisticFilterAndSorting();
       } catch (e) {
-        rollbackItemUpdate(id);
-        applyOptimisticFilterAndSorting();
+        await rollbackItemUpdate(id);
+        //await applyOptimisticFilterAndSorting();
         rethrow;
       }
     }
@@ -333,5 +361,29 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
         throw Exception(exceptions);
       }
     }
+  }
+
+  LdSearchConfig? getSearchConfig() {
+    final searchFilter = filters.values.firstWhereOrNull((filter) => filter is LdFilterSearchOption)
+        as LdFilterSearchOption<T, IdType, dynamic>?;
+    if (searchFilter != null) {
+      return searchFilter.searchConfig((query) {
+        updateFilter(searchFilter.name, (filter) {
+          filter as LdFilterSearchOption<T, IdType, dynamic>;
+          return filter.copyWith(
+            isOn: query.isNotEmpty,
+            searchText: query,
+          );
+        });
+      });
+    }
+    return null;
+  }
+
+  @override
+  void dispose() {
+    _filterStreamController.close();
+    _sortStreamController.close();
+    super.dispose();
   }
 }

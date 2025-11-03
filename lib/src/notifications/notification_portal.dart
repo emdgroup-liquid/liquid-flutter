@@ -5,7 +5,6 @@ import 'package:collection/collection.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 import 'package:liquid_flutter/src/notifications/implicit_blur.dart';
-import 'package:liquid_flutter/src/notifications/notification_input.dart';
 import 'package:liquid_flutter/src/notifications/radius_aware_padding.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
@@ -64,8 +63,12 @@ class LdNotificationPortal extends StatelessWidget {
               duration: const Duration(milliseconds: 300),
               child: Align(
                 alignment: Alignment.bottomCenter,
-                child: SafeArea(
-                  minimum: MediaQuery.of(context).padding,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: MediaQuery.paddingOf(context).left + theme.pad(size: LdSize.m).left,
+                    right: MediaQuery.paddingOf(context).right + theme.pad(size: LdSize.m).right,
+                    bottom: MediaQuery.paddingOf(context).bottom + theme.pad(size: LdSize.m).bottom,
+                  ),
                   child: Stack(
                     children: notifier.notifications.mapIndexed((
                       index,
@@ -79,22 +82,6 @@ class LdNotificationPortal extends StatelessWidget {
                         didConfirm: notification.didConfirm,
                         onDismiss: () {
                           notifier.onDismissNotification(notification);
-                        },
-                        onCancel: () {
-                          notifier.onCancelledNotification(
-                            notification as LdConfirmNotification,
-                          );
-                        },
-                        onConfirm: () {
-                          notifier.onConfirmedNotification(
-                            notification as LdConfirmNotification,
-                          );
-                        },
-                        onSubmitInput: (result) {
-                          notifier.onInputSubmitted(
-                            notification as LdInputNotification,
-                            result,
-                          );
                         },
                       );
                     }).toList(),
@@ -115,18 +102,12 @@ class LdNotificationWidget extends StatelessWidget {
   final bool removing;
   final bool didConfirm;
   final VoidCallback onDismiss;
-  final VoidCallback onConfirm;
-  final VoidCallback onCancel;
-  final Function(String) onSubmitInput;
 
   const LdNotificationWidget({
     super.key,
     required this.notification,
     this.removing = false,
     this.didConfirm = false,
-    required this.onConfirm,
-    required this.onSubmitInput,
-    required this.onCancel,
     this.index = 0,
     required this.onDismiss,
   });
@@ -142,11 +123,9 @@ class LdNotificationWidget extends StatelessWidget {
     }
 
     switch (notification.type) {
-      case LdNotificationType.enterText:
       case LdNotificationType.loading:
       case LdNotificationType.acknowledge:
       case LdNotificationType.info:
-      case LdNotificationType.confirm:
         return theme.palette.primary;
       case LdNotificationType.success:
         return theme.palette.success;
@@ -180,40 +159,6 @@ class LdNotificationWidget extends StatelessWidget {
     });
   }
 
-  Widget _buildConfirmationButtons(BuildContext context) {
-    final notification = this.notification as LdConfirmNotification;
-
-    final cancelText = notification.cancelText ??
-        LiquidLocalizations.of(
-          context,
-        ).cancel;
-    final confirmText = notification.confirmText ??
-        LiquidLocalizations.of(
-          context,
-        ).confirm;
-    return Row(
-      children: [
-        Expanded(
-          child: LdButton.outline(
-            disabled: didConfirm,
-            key: notification.cancelKey,
-            child: Text(cancelText),
-            onPressed: onCancel,
-          ).animate().fadeIn(delay: 100.ms),
-        ),
-        ldSpacerS,
-        Expanded(
-          child: LdButton(
-            disabled: didConfirm,
-            key: notification.confirmKey,
-            child: Text(confirmText),
-            onPressed: onConfirm,
-          ).animate().fadeIn(delay: 150.ms),
-        ),
-      ],
-    );
-  }
-
   Widget _buildAcknowledgeButton(BuildContext context) {
     final notification = this.notification as LdAcknowledgeNotification;
 
@@ -228,14 +173,11 @@ class LdNotificationWidget extends StatelessWidget {
   }
 
   Widget _buildNotificationBody(BuildContext context) {
-    final isTextOnly = notification is! LdConfirmNotification &&
-        notification is! LdAcknowledgeNotification &&
-        notification is! LdInputNotification;
+    final isTextOnly = notification is! LdAcknowledgeNotification;
 
     final theme = _theme(context);
 
     return RadiusAwarePadding(
-      insetFromEdge: theme.pad(size: LdSize.l).top,
       fallbackSize: LdSize.l,
       innerRadiusSize: isTextOnly ? LdSize.m : LdSize.s,
       decoration: BoxDecoration(
@@ -274,9 +216,7 @@ class LdNotificationWidget extends StatelessWidget {
                     ),
                   ),
                   ldSpacerM,
-                  if (notification.canDismiss &&
-                      notification is! LdAcknowledgeNotification &&
-                      notification is! LdConfirmNotification)
+                  if (notification.canDismiss && notification is! LdAcknowledgeNotification)
                     // Dismiss button
                     LdButton.ghost(
                       color: _colorBundle(context),
@@ -287,16 +227,7 @@ class LdNotificationWidget extends StatelessWidget {
               )),
             ],
           ),
-          // Buttons if the notification is a confirmation
-          if (notification is LdConfirmNotification) _buildConfirmationButtons(context),
           if (notification is LdAcknowledgeNotification) _buildAcknowledgeButton(context),
-          if (notification is LdInputNotification)
-            NotificationInput(
-              notification: notification as LdInputNotification,
-              onSubmitted: (result) {
-                onSubmitInput(result);
-              },
-            )
         ],
       ),
     ).animate().shimmer(

@@ -4,7 +4,8 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
-LdMonkeyAction<T, IdType> toggleFilters<T extends Identifiable<IdType>, IdType>() => LdMonkeyAction<T, IdType>(
+LdMonkeyAction<T, IdType> toggleFilters<T extends Identifiable<IdType>, IdType>() => LdMonkeyBareChildAction<T, IdType>(
+      onShortcutTrigger: (context) {},
       visibility: {
         LdMonkeyActionVisibility(
           location: LdMonkeyActionLocation.masterAppBar,
@@ -12,16 +13,15 @@ LdMonkeyAction<T, IdType> toggleFilters<T extends Identifiable<IdType>, IdType>(
           maxSelectionCount: null,
         ),
       },
-      buildLabel: (context) {
-        return LiquidLocalizations.of(context).filter;
-      },
-      buildIcon: (context) {
+      builder: (context) {
         final route = context.watch<LdMonkey<T, IdType>>();
 
         final activeFilters = route.repository.activeFilters;
 
+        Widget icon;
+
         if (activeFilters.isNotEmpty) {
-          return Center(
+          icon = Center(
             child: Stack(
               children: [
                 const Center(child: Icon(LucideIcons.listFilter)),
@@ -39,15 +39,20 @@ LdMonkeyAction<T, IdType> toggleFilters<T extends Identifiable<IdType>, IdType>(
               ],
             ),
           );
+        } else {
+          icon = const Icon(LucideIcons.listFilter);
         }
-        return const Icon(LucideIcons.listFilter);
+        return LdContextMenu(
+          menuProviders: (context) {
+            return [
+              Provider<LdMonkey<T, IdType>>.value(value: route),
+            ];
+          },
+          builder: (context, isOpen, open, child) => LdButton(child: icon, onPressed: open),
+          menuBuilder: (context, onDismiss) => ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 300),
+            child: LdFilterModal(route: route),
+          ),
+        );
       },
-      submitType: LdLabeledActionType.contextMenu,
-      buildContextMenu: (context, close) => ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 300),
-        child: LdFilterModal(
-          route: context.read<LdMonkey<T, IdType>>(),
-        ),
-      ),
-      action: (context) {},
     );

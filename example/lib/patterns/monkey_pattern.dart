@@ -136,20 +136,24 @@ class MonkeyPatternDemo extends StatelessWidget {
       onSelectionChange: (selected) => onSelectionChange(selected),
       
       // Individual item builder
-      itemBuilder: (context, item, index, config) => LdMonkeySingleShortcuts(
+      itemBuilder: (context, item, index) => LdMonkeySingleShortcuts(
         item: item.value!.id,
         actions: route.actions,
         child: LdMonkeyContextMenu<Task, int, bool>(
           item: item,
           child: LdListItemAnimation(
             state: item.state,
-            child: LdListItem.fromConfig(
-              config.copyWith(
-                title: Text(item.value!.task),
-                subtitle: Text("Due: \${item.value!.due}"),
-                trailingForward: LdMonkeyContext.of<Task, int, bool>(context).isSideBySide,
-              ),
-            ),
+            child: LdMonkeyContext.of<Task, int, bool>(context).isSideBySide
+                ? LdListItem.trailingForward(
+                    title: Text(item.value!.task),
+                    subtitle: Text("Due: \${item.value!.due}"),
+                    
+                  )
+                : LdListItem(
+                    title: Text(item.value!.task),
+                    subtitle: Text("Due: \${item.value!.due}"),
+                   
+                  ),
           ),
         ),
       ),
@@ -225,20 +229,22 @@ class MonkeyPatternDemo extends StatelessWidget {
       initialSelectedItems: route.state.selectedItems,
       multiSelect: true,
       onSelectionChange: (selected) => onSelectionChange(selected),
-      itemBuilder: (context, item, index, config) => LdMonkeySingleShortcuts(
+      itemBuilder: (context, item, index) => LdMonkeySingleShortcuts(
         item: item.value!.id,
         actions: route.actions,
         child: LdMonkeyContextMenu<Task, int, bool>(
           item: item,
           child: LdListItemAnimation(
             state: item.state,
-            child: LdListItem.fromConfig(
-              config.copyWith(
-                title: Text(item.value!.task),
-                subtitle: Text("Due: \${item.value!.due}"),
-                trailingForward: LdMonkeyContext.of<Task, int, bool>(context).isSideBySide,
-              ),
-            ),
+            child: LdMonkeyContext.of<Task, int, bool>(context).isSideBySide
+                ? LdListItem.trailingForward(
+                    title: Text(item.value!.task),
+                    subtitle: Text("Due: \${item.value!.due}"),                    
+                  )
+                : LdListItem(
+                    title: Text(item.value!.task),
+                    subtitle: Text("Due: \${item.value!.due}"),
+                  ),
           ),
         ),
       ),

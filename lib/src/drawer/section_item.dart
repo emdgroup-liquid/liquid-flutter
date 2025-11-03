@@ -94,7 +94,7 @@ class _LdDrawerItemSectionState extends State<LdDrawerItemSection> {
       active: widget.active == true,
       onPressed: _onTap,
       color: _theme.palette.primary,
-      builder: (context, colorBundle, status) => Container(
+      builder: (context, colorBundle, status, _) => Container(
           padding: _theme.pad(size: LdSize.s),
           decoration: BoxDecoration(
             color: colorBundle.surface,

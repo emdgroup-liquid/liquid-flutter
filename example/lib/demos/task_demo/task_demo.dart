@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:liquid/demos/task_demo/demo_data.dart';
 import 'package:liquid/demos/task_demo/detail.dart';
@@ -35,28 +34,22 @@ final taskDemo = LdMonkey<Task, int>(
       initialSelectedItems: route.state.selectedItems,
       multiSelect: true,
       onSelectionChange: (selected) => onSelectionChange(selected),
-      itemBuilder: (context, item, index, config) => LdMonkeySingleShortcuts(
+      itemBuilder: (context, item, index) => LdMonkeySingleShortcuts(
         item: item.value!.id,
         actions: route.actions,
         child: LdMonkeyContextMenu<Task, int>(
           item: item,
           child: LdListItemAnimation(
             state: item.state,
-            child: LdListItem.fromConfig(
-              config.copyWith(
-                title: Text(
-                  item.value!.task,
-                  style: TextStyle(
-                    decoration: item.value!.done
-                        ? TextDecoration.lineThrough
-                        : TextDecoration.none,
-                  ),
+            child: LdListItem(
+              title: Text(
+                item.value!.task,
+                style: TextStyle(
+                  decoration: item.value!.done ? TextDecoration.lineThrough : TextDecoration.none,
                 ),
-                subtitle: Text(
-                  "${Jiffy.parseFromDateTime(item.value!.due).fromNow()} #${item.value!.id}",
-                ),
-                trailingForward:
-                    LdMonkeyContext.of<Task, int>(context).isSideBySide,
+              ),
+              subtitle: Text(
+                "${Jiffy.parseFromDateTime(item.value!.due).fromNow()} #${item.value!.id}",
               ),
             ),
           ),
@@ -65,7 +58,7 @@ final taskDemo = LdMonkey<Task, int>(
     );
   },
   actions: [
-    LdMonkeyAction(
+    LdMonkeySubmitAction(
       visibility: {
         LdMonkeyActionVisibility(
           location: LdMonkeyActionLocation.masterAppBar,
@@ -74,41 +67,42 @@ final taskDemo = LdMonkey<Task, int>(
       shortcutActivators: {
         SingleActivator(LogicalKeyboardKey.keyN, meta: true),
       },
-      buildLoadingText: (context) => "Creating new task",
-      submitType: LdLabeledActionType.none,
-      buildLabel: (context) => "New Task",
-      buildIcon: (context) => const Icon(LucideIcons.plus),
-      action: (context) async {
-        final route = LdMonkey.of<Task, int>(context);
+      config: (context) => LdSubmitConfig(
+        loadingText: "Creating new task",
+        action: (_) async {
+          final route = LdMonkey.of<Task, int>(context);
 
-        final newTaskNotification = LdNotificationsController.of(context)
-            .enterText(
-                message: "New tasks",
-                inputHint: "New Task",
-                inputLabel: "Task");
+          final newTaskText = await ldEnterTextModal(
+            context: context,
+            initialValue: "New tasks",
+            inputHint: "New Task",
+            inputLabel: "Task",
+            useRootNavigator: true,
+          );
 
-        final newTaskText = await newTaskNotification.inputCompleter.future;
+          if (newTaskText == null) {
+            return;
+          }
 
-        if (newTaskText == null) {
-          return;
-        }
+          final newTask = Task(
+            testData.length + 1,
+            newTaskText,
+            DateTime.now().add(const Duration(days: 1)),
+            false,
+            DateTime.now(),
+          );
 
-        final newTask = Task(
-          testData.length + 1,
-          newTaskText,
-          DateTime.now().add(const Duration(days: 1)),
-          false,
-          DateTime.now(),
-        );
+          await taskRepository.create(newTask);
 
-        await taskRepository.create(newTask);
+          await Future.delayed(const Duration(milliseconds: 1500));
 
-        await Future.delayed(const Duration(milliseconds: 1500));
-
-        route.setSelectedItems({newTask.id});
-      },
+          route.setSelectedItems({newTask.id});
+        },
+      ),
+      child: Text("New Task"),
+      icon: Icon(LucideIcons.plus),
     ),
-    LdMonkeyAction(
+    LdMonkeySubmitAction(
       visibility: {
         LdMonkeyActionVisibility(
             location: LdMonkeyActionLocation.detailAppBar,
@@ -125,22 +119,23 @@ final taskDemo = LdMonkey<Task, int>(
       shortcutActivators: {
         SingleActivator(LogicalKeyboardKey.keyD),
       },
-      buildLoadingText: (context) => "Marking as done",
-      buildLabel: (context) => "Done",
-      buildIcon: (context) => const Icon(LucideIcons.check),
-      action: (context) async {
-        final updatedItems = <Task>{};
-
-        final selection = LdMonkeySelection.of<Task, int>(context);
-        for (final id in selection.items) {
-          final item = await taskRepository.getById(id);
-          updatedItems.add(item.copyWith(done: true));
-        }
-
-        await taskRepository.updateBatch(updatedItems);
-      },
+      config: (context) => LdSubmitConfig(
+        loadingText: "Marking as done",
+        allowResubmit: true,
+        action: (_) async {
+          final updatedItems = <Task>{};
+          final selection = LdMonkeySelection.of<Task, int>(context);
+          for (final id in selection.items) {
+            final item = await taskRepository.getById(id);
+            updatedItems.add(item.copyWith(done: true));
+          }
+          await taskRepository.updateBatch(updatedItems);
+        },
+      ),
+      child: Text("Done"),
+      icon: Icon(LucideIcons.check),
     ),
-    LdMonkeyAction(
+    LdMonkeySubmitAction(
       visibility: {
         LdMonkeyActionVisibility(
           location: LdMonkeyActionLocation.detailAppBar,
@@ -157,22 +152,24 @@ final taskDemo = LdMonkey<Task, int>(
       shortcutActivators: {
         SingleActivator(LogicalKeyboardKey.keyU),
       },
-      buildLoadingText: (context) => "Marking as undone",
-      buildLabel: (context) => "To do",
-      buildIcon: (context) => const Icon(LucideIcons.hourglass),
-      action: (context) async {
-        final updatedItems = <Task>{};
+      config: (context) => LdSubmitConfig(
+        loadingText: "Marking as undone",
+        allowResubmit: true,
+        action: (_) async {
+          final updatedItems = <Task>{};
+          final selection = LdMonkeySelection.of<Task, int>(context);
 
-        final selection = LdMonkeySelection.of<Task, int>(context);
-        for (final id in selection.items) {
-          final item = await taskRepository.getById(id);
-          updatedItems.add(item.copyWith(done: false));
-        }
-
-        await taskRepository.updateBatch(updatedItems);
-      },
+          for (final id in selection.items) {
+            final item = await taskRepository.getById(id);
+            updatedItems.add(item.copyWith(done: false));
+          }
+          await taskRepository.updateBatch(updatedItems);
+        },
+      ),
+      child: Text("To do"),
+      icon: Icon(LucideIcons.hourglass),
     ),
-    LdMonkeyAction(
+    LdMonkeySubmitAction(
       visibility: {
         LdMonkeyActionVisibility(
           location: LdMonkeyActionLocation.detailAppBar,
@@ -188,30 +185,29 @@ final taskDemo = LdMonkey<Task, int>(
       shortcutActivators: {
         SingleActivator(LogicalKeyboardKey.keyD, meta: true),
       },
-      buildLoadingText: (context) => "Duplicating",
-      buildLabel: (context) => "Duplicate",
-      buildIcon: (context) => const Icon(LucideIcons.copy),
-      multiSelect: false,
-      action: (
-        context,
-      ) async {
-        final route = LdMonkey.of<Task, int>(context);
-        final selection = LdMonkeySelection.of<Task, int>(context);
-        final item = await taskRepository.getById(selection.items.first);
+      config: (context) => LdSubmitConfig(
+        loadingText: "Duplicating",
+        action: (_) async {
+          final route = LdMonkey.of<Task, int>(context);
+          final selection = LdMonkeySelection.of<Task, int>(context);
+          final item = await taskRepository.getById(selection.items.first);
 
-        final newItem = item.copyWith(
-          id: testData.length + 1,
-          task: "${item.task} (copy)",
-        );
+          final newItem = item.copyWith(
+            id: testData.length + 1,
+            task: "${item.task} (copy)",
+          );
 
-        await taskRepository.create(newItem);
+          await taskRepository.create(newItem);
 
-        await Future.delayed(const Duration(milliseconds: 1500));
+          await Future.delayed(const Duration(milliseconds: 1500));
 
-        route.setSelectedItems({newItem.id});
-      },
+          route.setSelectedItems({newItem.id});
+        },
+      ),
+      child: Text("Duplicate"),
+      icon: Icon(LucideIcons.copy),
     ),
-    LdMonkeyAction(
+    LdMonkeySubmitAction(
       visibility: {
         LdMonkeyActionVisibility(
           location: LdMonkeyActionLocation.detailAppBar,
@@ -234,36 +230,17 @@ final taskDemo = LdMonkey<Task, int>(
         SingleActivator(LogicalKeyboardKey.delete),
         SingleActivator(LogicalKeyboardKey.backspace),
       },
-      buildLoadingText: (context) {
-        final selection = LdMonkeySelection.of<Task, int>(context);
-        return "Deleting ${selection.items.length} ${selection.items.length == 1 ? "item" : "items"}";
-      },
-      buildLabel: (context) {
-        final selection = LdMonkeySelection.of<Task, int>(context);
-        return "Delete ${selection.items.length} ${selection.items.length == 1 ? "item" : "items"}";
-      },
-      buildIcon: (context) => Icon(
-        LucideIcons.trash2,
+      config: (context) => LdSubmitConfig(
+        loadingText: "Deleting",
+        action: (_) async {
+          final selection = LdMonkeySelection.of<Task, int>(context);
+          await taskRepository.deleteBatch(selection.items);
+        },
       ),
-      color: shadRed,
-      action: (context) async {
-        final selection = LdMonkeySelection.of<Task, int>(context);
-        await taskRepository.deleteBatch(selection.items);
-      },
+      child: Text("Delete"),
+      icon: Icon(LucideIcons.trash2),
     ),
     toggleSelectionControls<Task, int>(),
     toggleFilters<Task, int>(),
-    LdMonkeyAction(
-      visibility: {
-        LdMonkeyActionVisibility(
-          location: LdMonkeyActionLocation.masterAppBar,
-        ),
-      },
-      buildLabel: (context) => "Leave demo",
-      buildIcon: (context) => Icon(LucideIcons.arrowLeft),
-      action: (context) async {
-        context.go("/");
-      },
-    ),
   ],
 );

@@ -168,7 +168,7 @@ class _TabNavigationState extends State<TabNavigation> {
     return LdTouchableSurface(
         focusNode: _focusNode,
         onPressed: () {},
-        builder: (context, colors, status) {
+        builder: (context, colors, status, _) {
           _updateMargin();
           return LdTouchableTouchFeedback(
             status: status,
@@ -204,7 +204,7 @@ class _TabNavigationState extends State<TabNavigation> {
                                   child: LdTouchableSurface(
                                     mode: LdTouchableSurfaceMode.neutralGhost,
                                     onPressed: () => _onTabTap(tab.route),
-                                    builder: (context, colors, status) {
+                                    builder: (context, colors, status, _) {
                                       return Container(
                                         decoration: BoxDecoration(
                                           color: colors.surface,

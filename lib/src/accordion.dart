@@ -150,7 +150,7 @@ class _LdAccordionChild extends StatelessWidget {
             active: !collapsed,
             mode: LdTouchableSurfaceMode.neutralGhost,
             color: theme.palette.primary,
-            builder: (contxt, colorBundle, status) => Container(
+            builder: (contxt, colorBundle, status, _) => Container(
               padding: headerPadding,
               decoration: BoxDecoration(
                 color: colorBundle.surface,

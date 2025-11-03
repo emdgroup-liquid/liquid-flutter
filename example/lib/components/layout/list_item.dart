@@ -11,10 +11,10 @@ class ListItemDemo extends StatefulWidget {
 }
 
 class _ListItemDemoState extends State<ListItemDemo> {
-  bool _showSelectionControls = false;
+  LdSelectionControl _showSelectionControls = LdSelectionControl.none;
   final Set<int> _selectedItems = {};
   bool _toggleValue = false;
-  void _setSelectionControls(bool value) {
+  void _setSelectionControls(LdSelectionControl value) {
     setState(() {
       _showSelectionControls = value;
     });
@@ -53,8 +53,7 @@ class _ListItemDemoState extends State<ListItemDemo> {
             child: Column(
               children: [
                 LdListItem(
-                  showSelectionControls: _showSelectionControls,
-                  trailingForward: true,
+                  selectionControl: _showSelectionControls,
                   isSelected: _selectedItems.contains(0),
                   onSelectionChanged: (selected) => _selectItem(0),
                   leading: LdAvatar(
@@ -85,7 +84,7 @@ class _ListItemDemoState extends State<ListItemDemo> {
                 ),
                 LdListItem(
                   disabled: true,
-                  showSelectionControls: _showSelectionControls,
+                  selectionControl: _showSelectionControls,
                   isSelected: _selectedItems.contains(2),
                   trailing: LdTag(
                     child: Text("Hyper hyper"),
@@ -101,8 +100,7 @@ class _ListItemDemoState extends State<ListItemDemo> {
                   leading: LdAvatar(
                     child: Text("D"),
                   ),
-                  showSelectionControls: _showSelectionControls,
-                  radioSelection: true,
+                  selectionControl: _showSelectionControls,
                   isSelected: _selectedItems.contains(3),
                   onSelectionChanged: (selected) => _selectItem(3),
                   title: Text("Very Good Option"),
@@ -112,16 +110,14 @@ class _ListItemDemoState extends State<ListItemDemo> {
             ),
           ),
           ldSpacerM,
-          Row(
-            children: [
-              Expanded(
-                child: LdToggle(
-                  label: "Show selection controls",
-                  checked: _showSelectionControls,
-                  onChanged: _setSelectionControls,
-                ),
-              ),
-            ],
+          LdSwitch<LdSelectionControl>(
+            children: const {
+              LdSelectionControl.none: Text("None"),
+              LdSelectionControl.checkbox: Text("Checkbox"),
+              LdSelectionControl.radio: Text("Radio")
+            },
+            value: _showSelectionControls,
+            onChanged: _setSelectionControls,
           ),
           ComponentWell(
             title: LdText.h("LdListItemToggle"),

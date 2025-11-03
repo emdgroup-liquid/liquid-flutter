@@ -24,9 +24,9 @@ class LdFilterOneOfWidget<T extends Identifiable<IdType>, IdType, E> extends Sta
                 child: const Icon(LucideIcons.x),
                 size: LdSize.s,
                 onPressed: () {
-                  repository.updateFilter<LdFilterOneOf<T, IdType, E>>(
+                  repository.updateFilter(
                     filter.name,
-                    (filter) => filter.copyWith(isOn: false),
+                    (filter) => (filter as LdFilterOneOf<T, IdType, E>).copyWith(isOn: false),
                   );
                 },
               ),
@@ -41,9 +41,9 @@ class LdFilterOneOfWidget<T extends Identifiable<IdType>, IdType, E> extends Sta
               ),
               value: filter.selectedValue ?? filter.allValues.keys.first,
               onChanged: (E value) {
-                repository.updateFilter<LdFilterOneOf<T, IdType, E>>(
+                repository.updateFilter(
                   filter.name,
-                  (filter) => filter.copyWith(selectedValue: value, isOn: true),
+                  (filter) => (filter as LdFilterOneOf<T, IdType, E>).copyWith(selectedValue: value, isOn: true),
                 );
               },
             ),

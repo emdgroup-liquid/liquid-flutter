@@ -63,48 +63,6 @@ class LdNotificationsController extends ChangeNotifier {
     ));
   }
 
-  Future<bool?> confirm(
-    String message, {
-    Duration? duration,
-    bool canDismiss = true,
-    String? subMessage,
-    String? confirmText,
-  }) {
-    final notification = LdConfirmNotification(
-      message: message,
-      confirmText: confirmText,
-      duration: duration,
-      type: LdNotificationType.confirm,
-      canDismiss: canDismiss,
-      subMessage: subMessage,
-    );
-    addNotification(notification);
-    return notification.confirmationCompleter.future;
-  }
-
-  LdInputNotification enterText({
-    Duration? duration,
-    required String message,
-    required String inputHint,
-    required String inputLabel,
-    String? submitText,
-    bool canDismiss = true,
-    String? subMessage,
-  }) {
-    final notification = LdInputNotification(
-      message: message,
-      duration: duration,
-      type: LdNotificationType.enterText,
-      inputHint: inputHint,
-      inputLabel: inputLabel,
-      submitText: submitText,
-      canDismiss: canDismiss,
-      subMessage: subMessage,
-    );
-    addNotification(notification);
-    return notification;
-  }
-
   Future<LdNotification> addNotification(LdNotification notification) async {
     _notifications.add(notification);
     _safeNotifyListeners();
@@ -121,59 +79,15 @@ class LdNotificationsController extends ChangeNotifier {
     return notification;
   }
 
-  Future<void> onConfirmedNotification(
-    LdConfirmNotification notification,
-  ) async {
-    notification.didConfirm = true;
-    _safeNotifyListeners();
-    await Future.delayed(const Duration(milliseconds: 300));
-
-    notification.removing = true;
-    _safeNotifyListeners();
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    notification.confirmationCompleter.complete(true);
-    _notifications.remove(notification);
-
-    _safeNotifyListeners();
-  }
-
-  Future<void> onInputSubmitted(
-    LdInputNotification notification,
-    String result,
-  ) async {
-    notification.removing = true;
-    _safeNotifyListeners();
-    await Future.delayed(const Duration(milliseconds: 300));
-    _notifications.remove(notification);
-    notification.inputCompleter.complete(result);
-    _safeNotifyListeners();
-  }
-
   Future<void> onDismissNotification(LdNotification notification) async {
     notification.removing = true;
 
+    await Future.delayed(const Duration(milliseconds: 0));
+
     _safeNotifyListeners();
     await Future.delayed(const Duration(milliseconds: 300));
     _notifications.remove(notification);
 
-    if (notification is LdInputNotification) {
-      notification.inputCompleter.complete(null);
-    }
-
-    if (notification is LdConfirmNotification) {
-      notification.confirmationCompleter.complete(null);
-    }
-
-    _safeNotifyListeners();
-  }
-
-  Future<void> onCancelledNotification(LdConfirmNotification notification) async {
-    notification.removing = true;
-    notifyListeners();
-    await Future.delayed(const Duration(milliseconds: 300));
-    _notifications.remove(notification);
-    notification.confirmationCompleter.complete(false);
     _safeNotifyListeners();
   }
 

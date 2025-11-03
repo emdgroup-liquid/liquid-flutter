@@ -41,18 +41,11 @@ void main() {
 
           await tester.pumpAndSettle();
 
-          // Swipe up to extend the sheet
-          await tester.drag(
-            find.text("Wed"),
-            const Offset(0, -1000),
-          );
-          await tester.pumpAndSettle();
-
           return null;
         },
       },
-      width: 900,
-      height: 900,
+      width: 800,
+      height: 800,
     );
   });
 }

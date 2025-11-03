@@ -42,11 +42,9 @@ class LdExceptionDialog extends StatelessWidget {
   }
 
   Future<dynamic> show(BuildContext context) async {
-    return LdModal(
-      noHeader: true,
-      modalContent: (context) => this,
-      userCanDismiss: true,
-      title: Text(LiquidLocalizations.of(context).errorOccurred),
-    ).show(context);
+    return LdModalRoute(
+      context: context,
+      pageBuilder: (context) => this,
+    ).show(context, useRootNavigator: true);
   }
 }

@@ -5,38 +5,28 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart'; // Adjust if needed
 
+class _SampleStringItem with Identifiable<String> {
+  final String value;
+  _SampleStringItem(this.value);
+
+  @override
+  get id => value;
+}
+
 void main() {
   group('LdSelectableList', () {
     late Set<String> selected;
-    final items = ['A', 'B', 'C', 'D'];
+    final items = [_SampleStringItem('A'), _SampleStringItem('B'), _SampleStringItem('C'), _SampleStringItem('D')];
 
     Widget buildTestWidget({bool multiSelect = false}) {
-      final paginator = LdPaginator.fromList(items);
+      final paginator = LdPaginator<_SampleStringItem, String>.fromList(items);
 
-      Widget itemBuilder({
-        required BuildContext context,
-        required String item,
-        required int index,
-        required bool selected,
-        required bool isMultiSelect,
-        required void Function(bool selected) onSelectionChange,
-        required VoidCallback onTap,
-        required bool showSelectionControls,
-      }) {
-        return ListTile(
-          key: ValueKey(item),
-          title: Text(item),
-          selected: selected,
-          onTap: onTap,
-        );
-      }
-
-      LdList<String, void> listBuilder(
+      LdList<_SampleStringItem, String> listBuilder(
         BuildContext context,
         ScrollController controller,
-        LdListItemBuilder<String> itemBuilder,
+        LdListItemBuilder<_SampleStringItem> itemBuilder,
       ) {
-        return LdList<String, void>(
+        return LdList<_SampleStringItem, String>(
           paginator: paginator,
           itemBuilder: itemBuilder,
         );
@@ -45,12 +35,18 @@ void main() {
       return LdThemeProvider(
         child: MaterialApp(
           home: Scaffold(
-            body: LdSelectableList<String, void>(
-              itemBuilder: itemBuilder,
+            body: LdSelectableList<_SampleStringItem, String>(
+              itemBuilder: (context, item, index) {
+                return LdListItem(
+                  title: Text(item.value?.value ?? ''),
+                );
+              },
               listBuilder: listBuilder,
               paginator: paginator,
               multiSelect: multiSelect,
-              onSelectionChange: (s) => selected = Set.from(s),
+              onSelectionChange: (s) {
+                selected = Set.from(s);
+              },
             ),
           ),
         ),
@@ -64,20 +60,28 @@ void main() {
     testWidgets('selects an item on tap', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('A')));
+
+      await tester.tap(find.text("A"));
       await tester.pumpAndSettle();
+
       expect(selected.contains('A'), isTrue);
     });
 
     testWidgets('selects multiple items with drag rectangle', (WidgetTester tester) async {
-      final first = tester.getCenter(find.byKey(const ValueKey('A')));
-      final last = tester.getCenter(find.byKey(const ValueKey('C')));
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pumpAndSettle();
+
+      final first = tester.getCenter(find.text('A'));
+
+      final last = tester.getCenter(find.text('C'));
 
       // Start drag gesture (simulate drag rectangle)
       await tester.dragFrom(
         first,
-        last,
+        Offset(last.dx - first.dx + 10, last.dy - first.dy),
         kind: PointerDeviceKind.mouse,
+        touchSlopX: 2,
+        touchSlopY: 2,
       );
 
       await tester.pumpAndSettle();
@@ -90,12 +94,12 @@ void main() {
       await tester.pumpWidget(buildTestWidget(multiSelect: true));
       await tester.pumpAndSettle();
       // Tap first item
-      await tester.tap(find.byKey(const ValueKey('A')));
+      await tester.tap(find.text('A'));
       await tester.pumpAndSettle();
 
       // Hold shift and tap last item
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
-      await tester.tap(find.byKey(const ValueKey('C')));
+      await tester.tap(find.text('C'));
       await tester.pumpAndSettle();
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
 
@@ -104,12 +108,15 @@ void main() {
     });
 
     testWidgets('toggles selection with ctrl+click', (WidgetTester tester) async {
-      await tester.tap(find.byKey(const ValueKey('A')));
+      await tester.pumpWidget(buildTestWidget(multiSelect: true));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('A'));
       await tester.pumpAndSettle();
 
       // Hold ctrl and tap second item
       await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
-      await tester.tap(find.byKey(const ValueKey('B')));
+      await tester.tap(find.text('B'));
       await tester.pumpAndSettle();
       await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
 
@@ -118,7 +125,7 @@ void main() {
 
       // Hold ctrl and tap A again to deselect
       await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
-      await tester.tap(find.byKey(const ValueKey('A')));
+      await tester.tap(find.text('A'));
       await tester.pumpAndSettle();
       await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
 

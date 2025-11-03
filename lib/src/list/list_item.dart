@@ -1,121 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:provider/provider.dart';
+
+part 'list_item.variants.g.dart';
 
 typedef OnSelectionChanged = void Function(bool selected);
 
-class LdListItemConfig {
-  final bool active;
-  final bool disabled;
-  final bool isSelected;
-  final bool radioSelection;
-  final bool selectDisabled;
-  final bool showBothTrailingAndTrailingForward;
-  final bool showSelectionControls;
-  final bool tradeLeadingForSelectionControl;
-  final bool trailingForward;
-  final BorderRadius? borderRadius;
-  final double? width;
-  final EdgeInsets? padding;
-  final Key? key;
-  final OnSelectionChanged? onSelectionChanged;
-  final VoidCallback? onPressed;
-  final Widget? leading;
-  final Widget? subContent;
-  final Widget? subtitle;
-  final Widget? title;
-  final Widget? trailing;
-  final LdColor? color;
-  final FocusNode? focusNode;
-  final bool tableRowMode;
-  final bool isOdd;
+enum LdSelectionControl { none, radio, checkbox }
 
-  const LdListItemConfig({
-    this.active = false,
-    this.focusNode,
-    this.borderRadius,
-    this.disabled = false,
-    this.isSelected = false,
-    this.key,
-    this.leading,
-    this.onSelectionChanged,
-    this.onPressed,
-    this.padding,
-    this.radioSelection = false,
-    this.selectDisabled = false,
-    this.showBothTrailingAndTrailingForward = false,
-    this.showSelectionControls = false,
-    this.subContent,
-    this.subtitle,
-    this.title,
-    this.tradeLeadingForSelectionControl = false,
-    this.trailing,
-    this.trailingForward = false,
-    this.color,
-    this.width,
-    this.tableRowMode = false,
-    this.isOdd = false,
-  });
-
-  LdListItemConfig copyWith({
-    Widget? leading,
-    Widget? trailing,
-    EdgeInsets? padding,
-    Widget? title,
-    bool? active,
-    Widget? subtitle,
-    VoidCallback? onPressed,
-    double? width,
-    bool? selectDisabled,
-    OnSelectionChanged? onSelectionChanged,
-    bool? radioSelection,
-    BorderRadius? borderRadius,
-    Widget? subContent,
-    bool? isSelected,
-    bool? trailingForward,
-    bool? disabled,
-    bool? tradeLeadingForSelectionControl,
-    bool? showBothTrailingAndTrailingForward,
-    bool? showSelectionControls,
-    FocusNode? focusNode,
-    LdColor? color,
-    Key? key,
-    bool? tableRowMode,
-    bool? isOdd,
-  }) {
-    return LdListItemConfig(
-      leading: leading ?? this.leading,
-      trailing: trailing ?? this.trailing,
-      padding: padding ?? this.padding,
-      focusNode: focusNode ?? this.focusNode,
-      title: title ?? this.title,
-      active: active ?? this.active,
-      subtitle: subtitle ?? this.subtitle,
-      onPressed: onPressed ?? this.onPressed,
-      width: width ?? this.width,
-      selectDisabled: selectDisabled ?? this.selectDisabled,
-      onSelectionChanged: onSelectionChanged ?? onSelectionChanged,
-      radioSelection: radioSelection ?? this.radioSelection,
-      borderRadius: borderRadius ?? this.borderRadius,
-      subContent: subContent ?? this.subContent,
-      isSelected: isSelected ?? this.isSelected,
-      trailingForward: trailingForward ?? this.trailingForward,
-      disabled: disabled ?? this.disabled,
-      color: color ?? this.color,
-      tradeLeadingForSelectionControl: tradeLeadingForSelectionControl ?? this.tradeLeadingForSelectionControl,
-      showBothTrailingAndTrailingForward: showBothTrailingAndTrailingForward ?? this.showBothTrailingAndTrailingForward,
-      showSelectionControls: showSelectionControls ?? this.showSelectionControls,
-      key: key ?? this.key,
-      tableRowMode: tableRowMode ?? this.tableRowMode,
-      isOdd: isOdd ?? this.isOdd,
-    );
-  }
-}
-
-class LdListItem extends StatelessWidget {
+@Variants([
+  Variant('trailingForward', defaults: {'trailing': 'const LdListDefaultTrailingForward()'}),
+])
+class LdListItemWidget extends StatelessWidget {
   final Widget? leading;
   final Widget? trailing;
-  final EdgeInsets? padding;
   final Widget? title;
   final bool active;
   final Widget? subtitle;
@@ -123,115 +22,78 @@ class LdListItem extends StatelessWidget {
   final double? width;
   final bool selectDisabled;
   final OnSelectionChanged? onSelectionChanged;
-  final bool radioSelection;
-  final BorderRadius? borderRadius;
+  final LdSelectionControl selectionControl;
   final Widget? subContent;
   final bool isSelected;
-  final bool trailingForward;
   final FocusNode? focusNode;
   final bool disabled;
   final bool tradeLeadingForSelectionControl;
-  final bool showBothTrailingAndTrailingForward;
   final LdColor? color;
-  final bool tableRowMode;
-  final bool isOdd;
-  final bool showSelectionControls;
+  final EdgeInsets? padding;
+  final BorderRadius? borderRadius;
 
-  const LdListItem({
+  const LdListItemWidget({
     super.key,
-    this.active = false,
-    this.borderRadius,
-    this.disabled = false,
-    this.isSelected = false,
+    @ContextConfigurable() this.active = false,
+    @ContextConfigurable() this.borderRadius,
+    @ContextConfigurable() this.disabled = false,
+    @ContextConfigurable() this.isSelected = false,
     this.leading,
-    this.onSelectionChanged,
-    this.onPressed,
-    this.padding,
-    this.radioSelection = false,
+    @ContextConfigurable() this.onSelectionChanged,
+    @ContextConfigurable() this.onPressed,
+    @ContextConfigurable() this.padding,
     this.selectDisabled = false,
-    this.showBothTrailingAndTrailingForward = false,
-    this.showSelectionControls = false,
     this.subContent,
     this.subtitle,
     this.title,
     this.tradeLeadingForSelectionControl = false,
-    this.focusNode,
-    this.trailing,
-    this.trailingForward = false,
-    this.color,
+    @ContextConfigurable() this.focusNode,
+    @ContextConfigurable() this.trailing,
+    @ContextConfigurable() this.color,
     this.width,
-    this.tableRowMode = false,
-    this.isOdd = false,
+    @ContextConfigurable() this.selectionControl = LdSelectionControl.none,
   });
-
-  factory LdListItem.fromConfig(LdListItemConfig config) {
-    return LdListItem(
-      active: config.active,
-      borderRadius: config.borderRadius,
-      disabled: config.disabled,
-      isSelected: config.isSelected,
-      key: config.key,
-      leading: config.leading,
-      onSelectionChanged: config.onSelectionChanged,
-      onPressed: config.onPressed,
-      padding: config.padding,
-      radioSelection: config.radioSelection,
-      selectDisabled: config.selectDisabled,
-      focusNode: config.focusNode,
-      showBothTrailingAndTrailingForward: config.showBothTrailingAndTrailingForward,
-      showSelectionControls: config.showSelectionControls,
-      subContent: config.subContent,
-      subtitle: config.subtitle,
-      color: config.color,
-      title: config.title,
-      tradeLeadingForSelectionControl: config.tradeLeadingForSelectionControl,
-      trailing: config.trailing,
-      trailingForward: config.trailingForward,
-      width: config.width,
-      tableRowMode: config.tableRowMode,
-      isOdd: config.isOdd,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
-    bool disabled;
+    bool disabledState;
 
-    if (showSelectionControls) {
+    if (selectionControl != LdSelectionControl.none) {
       if (selectDisabled) {
-        disabled = false;
+        disabledState = false;
       } else {
-        disabled = this.disabled;
+        disabledState = disabled;
       }
     } else {
-      disabled = this.disabled;
+      disabledState = disabled;
     }
 
     final theme = LdTheme.of(context, listen: true);
     final effectiveWidth = width ?? double.infinity;
 
     Widget _buildSelectionControls() {
-      if (!showSelectionControls) return const SizedBox.shrink();
+      if (selectionControl == LdSelectionControl.none) return const SizedBox.shrink();
       return Row(
         children: [
-          if (radioSelection)
-            LdRadio(
-              checked: isSelected,
-              color: color,
-              disabled: disabled,
-              onChanged: (value) {
-                onSelectionChanged?.call(value);
-              },
-            )
-          else
-            LdCheckbox(
-              checked: isSelected,
-              color: color,
-              disabled: disabled,
-              onChanged: (value) {
-                onSelectionChanged?.call(value);
-              },
-            ),
+          switch (selectionControl) {
+            LdSelectionControl.radio => LdRadio(
+                checked: isSelected,
+                color: color,
+                disabled: disabledState,
+                onChanged: (value) {
+                  onSelectionChanged?.call(value);
+                },
+              ),
+            LdSelectionControl.checkbox => LdCheckbox(
+                checked: isSelected,
+                color: color,
+                disabled: disabledState,
+                onChanged: (value) {
+                  onSelectionChanged?.call(value);
+                },
+              ),
+            LdSelectionControl.none => const SizedBox.shrink(),
+          },
           ldSpacerM,
         ],
       );
@@ -257,8 +119,8 @@ class LdListItem extends StatelessWidget {
               ldSpacerM,
             ],
           ),
-          revealed: !(showSelectionControls && tradeLeadingForSelectionControl),
-          initialRevealed: !(showSelectionControls && tradeLeadingForSelectionControl),
+          revealed: !(selectionControl != LdSelectionControl.none && tradeLeadingForSelectionControl),
+          initialRevealed: !(selectionControl != LdSelectionControl.none && tradeLeadingForSelectionControl),
         ),
       );
     }
@@ -269,22 +131,6 @@ class LdListItem extends StatelessWidget {
         Row(
           children: [ldSpacerM, trailing!],
         ),
-      );
-    }
-
-    Widget _buildChevron() {
-      if (!(trailingForward && (trailing == null || showBothTrailingAndTrailingForward))) {
-        return const SizedBox.shrink();
-      }
-      return Row(
-        children: [
-          ldSpacerM,
-          Icon(
-            LucideIcons.chevronRight,
-            size: theme.labelSize(LdSize.l) * 1.2,
-            color: theme.textMuted,
-          ),
-        ],
       );
     }
 
@@ -320,80 +166,19 @@ class LdListItem extends StatelessWidget {
       return subContent!;
     }
 
-    Widget _buildTableRowContent() {
-      return Row(
-        mainAxisSize: effectiveWidth != double.infinity ? MainAxisSize.min : MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          if (showSelectionControls) _buildSelectionControls(),
-          if (leading != null) leading!,
-          if (title != null) Expanded(flex: 2, child: title!),
-          if (subtitle != null) Expanded(flex: 2, child: subtitle!),
-          if (subContent != null) Expanded(flex: 2, child: subContent!),
-          if (trailing != null) trailing!,
-          if (trailingForward && (trailing == null || showBothTrailingAndTrailingForward))
-            Icon(
-              LucideIcons.chevronRight,
-              size: theme.labelSize(LdSize.l) * 1.2,
-              color: theme.textMuted,
-            ),
-        ],
-      ).spaceM();
-    }
-
-    if (tableRowMode) {
-      return LdTouchableSurface(
-        focusNode: focusNode,
-        isOdd: isOdd,
-        onPressed: () {
-          if (showSelectionControls) {
-            onSelectionChanged?.call(!isSelected);
-          } else {
-            onPressed?.call();
-          }
-        },
-        active: active || (showSelectionControls && isSelected),
-        disabled: disabled || (!showSelectionControls && onPressed == null),
-        color: color ?? theme.palette.primary,
-        builder: (contxt, colors, status) {
-          return IconTheme(
-            data: IconThemeData(
-              color: colors.text,
-              size: theme.labelSize(LdSize.l) * 1.2,
-            ),
-            child: Container(
-              width: effectiveWidth,
-              padding: padding ?? theme.balPad(LdSize.m),
-              decoration: BoxDecoration(
-                color: colors.surface,
-                border: Border.all(
-                  color: colors.border,
-                  width: theme.borderWidth,
-                ),
-                borderRadius: borderRadius,
-              ),
-              child: _buildTableRowContent(),
-            ),
-          );
-        },
-      );
-    }
-
     return LdTouchableSurface(
       focusNode: focusNode,
       onPressed: () {
-        if (showSelectionControls) {
+        if (selectionControl != LdSelectionControl.none) {
           onSelectionChanged?.call(!isSelected);
         } else {
           onPressed?.call();
         }
       },
-      active: active || (showSelectionControls && isSelected),
-      disabled: disabled || (!showSelectionControls && onPressed == null),
+      active: active || (selectionControl != LdSelectionControl.none && isSelected),
+      disabled: disabledState || (selectionControl == LdSelectionControl.none && onPressed == null),
       color: color ?? theme.palette.primary,
-      isOdd: isOdd,
-      builder: (contxt, colors, status) {
+      builder: (contxt, colors, status, _) {
         return IconTheme(
           data: IconThemeData(
             color: colors.text,
@@ -411,32 +196,46 @@ class LdListItem extends StatelessWidget {
               ),
             ),
             child: Row(
-                mainAxisSize: effectiveWidth != double.infinity ? MainAxisSize.min : MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  LdReveal.quick(
-                    child: _buildSelectionControls(),
-                    revealed: showSelectionControls,
-                    initialRevealed: showSelectionControls,
+              mainAxisSize: effectiveWidth != double.infinity ? MainAxisSize.min : MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                LdReveal.quick(
+                  child: _buildSelectionControls(),
+                  revealed: selectionControl != LdSelectionControl.none,
+                  initialRevealed: selectionControl != LdSelectionControl.none,
+                ),
+                if (leading != null) _buildLeading(),
+                Flexible(
+                  fit: effectiveWidth == double.infinity ? FlexFit.tight : FlexFit.loose,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (title != null) _buildTitle(),
+                      if (subtitle != null) _buildSubtitle(),
+                      if (subContent != null) _buildSubContent(),
+                    ],
                   ),
-                  if (leading != null) _buildLeading(),
-                  Flexible(
-                    fit: effectiveWidth == double.infinity ? FlexFit.tight : FlexFit.loose,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (title != null) _buildTitle(),
-                        if (subtitle != null) _buildSubtitle(),
-                        if (subContent != null) _buildSubContent(),
-                      ],
-                    ),
-                  ),
-                  if (trailing != null) _buildTrailing(),
-                  _buildChevron(),
-                ]),
+                ),
+                if (trailing != null) _buildTrailing(),
+              ],
+            ),
           ),
         );
       },
+    );
+  }
+}
+
+class LdListDefaultTrailingForward extends StatelessWidget {
+  const LdListDefaultTrailingForward({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = LdTheme.of(context, listen: true);
+    return Icon(
+      LucideIcons.chevronRight,
+      size: theme.labelSize(LdSize.l) * 1.2,
+      color: theme.textMuted,
     );
   }
 }

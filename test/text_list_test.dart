@@ -11,9 +11,9 @@ void main() {
         const MaterialApp(
           home: LdThemeProvider(
             child: Scaffold(
-              body: LdText.list(
+              body: LdTextList(
                 items,
-                type: LdText.listType.bulleted,
+                type: LdTextListType.bulleted,
               ),
             ),
           ),
@@ -37,9 +37,9 @@ void main() {
         const MaterialApp(
           home: LdThemeProvider(
             child: Scaffold(
-              body: LdText.list(
+              body: LdTextList(
                 items,
-                type: LdText.listType.enumerated,
+                type: LdTextListType.enumerated,
               ),
             ),
           ),
@@ -63,7 +63,7 @@ void main() {
         const MaterialApp(
           home: LdThemeProvider(
             child: Scaffold(
-              body: LdText.list(items),
+              body: LdTextList(items),
             ),
           ),
         ),
@@ -85,7 +85,7 @@ void main() {
         const MaterialApp(
           home: LdThemeProvider(
             child: Scaffold(
-              body: LdText.list(
+              body: LdTextList(
                 items,
                 size: LdSize.l,
               ),
@@ -110,9 +110,9 @@ void main() {
         const MaterialApp(
           home: LdThemeProvider(
             child: Scaffold(
-              body: LdText.list(
+              body: LdTextList(
                 items,
-                type: LdText.listType.bulleted,
+                type: LdTextListType.bulleted,
               ),
             ),
           ),

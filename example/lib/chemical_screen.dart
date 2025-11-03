@@ -70,28 +70,28 @@ class _ChemicalScreenState extends State<ChemicalScreen> {
       secondaryAppBar: LdAppBar(
         debugName: "Secondary app bar",
         actions: [
-          LdLabeledActionBuilder(
-            buildIcon: (context) => const Icon(LucideIcons.shoppingBag),
-            buildLabel: (context) => "Add to cart",
-            action: (context) {
+          LdButton(
+            leading: const Icon(LucideIcons.shoppingBag),
+            onPressed: () {
               LdNotificationsController.of(context).addNotification(
                 LdNotification(
-                    type: LdNotificationType.success, message: "Added to cart"),
+                  type: LdNotificationType.success,
+                  message: "Added to cart",
+                ),
               );
             },
-            submitType: LdLabeledActionType.none,
+            child: const Text("Add to cart"),
           ),
-          LdLabeledActionBuilder(
-            buildIcon: (context) => const Icon(LucideIcons.download),
-            buildLabel: (context) => "Download certificate",
-            action: (context) {
+          LdButton(
+            leading: const Icon(LucideIcons.download),
+            onPressed: () {
               LdNotificationsController.of(context).addNotification(
                 LdNotification(
                     type: LdNotificationType.success,
                     message: "Downloading certificate"),
               );
             },
-            submitType: LdLabeledActionType.none,
+            child: const Text("Download certificate"),
           ),
         ],
         searchConfig: searchConfig,
@@ -206,51 +206,53 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
                   child: const Text("Deduct"),
                 );
               },
-              modal: LdModal(
-                headerPadding: LdTheme.of(context).pad(size: LdSize.m),
-                contentPadding: EdgeInsets.zero,
-                modalContent: (context) => Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    LdListItem(
-                        title: const Text("Deduct 0.1l"),
-                        leading: const Icon(LucideIcons.arrowDown),
-                        onPressed: () {
-                          _deduct(0.1);
-                          Navigator.of(context).pop();
-                        }),
-                    LdListItem(
-                        title: const Text("Deduct 0.2l"),
-                        leading: const Icon(LucideIcons.arrowDown),
-                        onPressed: () {
-                          _deduct(0.2);
-                          Navigator.of(context).pop();
-                        }),
-                    LdListItem(
-                        title: const Text("Deduct 0.5l"),
-                        leading: const Icon(LucideIcons.arrowDown),
-                        onPressed: () {
-                          _deduct(0.5);
-                          Navigator.of(context).pop();
-                        }),
-                    LdListItem(
-                        title: const Text("Add 0.1l"),
-                        leading: const Icon(LucideIcons.arrowUp),
-                        onPressed: () {
-                          _deduct(-0.1);
-                          Navigator.of(context).pop();
-                        }),
-                    LdDivider(),
-                    LdListItem(
-                        title: const Text("Refill entirely"),
-                        leading: const Icon(LucideIcons.arrowUp),
-                        onPressed: () {
-                          _deduct(-1);
-                          Navigator.of(context).pop();
-                        })
-                  ],
+              modal: LdModalRoute(
+                context: context,
+                pageBuilder: (context) => LdScaffold(
+                  appBar: LdAppBar(
+                    title: const Text("Deduct"),
+                  ),
+                  body: LdScaffoldBody(
+                    children: [
+                      LdListItem(
+                          title: const Text("Deduct 0.1l"),
+                          leading: const Icon(LucideIcons.arrowDown),
+                          onPressed: () {
+                            _deduct(0.1);
+                            Navigator.of(context).pop();
+                          }),
+                      LdListItem(
+                          title: const Text("Deduct 0.2l"),
+                          leading: const Icon(LucideIcons.arrowDown),
+                          onPressed: () {
+                            _deduct(0.2);
+                            Navigator.of(context).pop();
+                          }),
+                      LdListItem(
+                          title: const Text("Deduct 0.5l"),
+                          leading: const Icon(LucideIcons.arrowDown),
+                          onPressed: () {
+                            _deduct(0.5);
+                            Navigator.of(context).pop();
+                          }),
+                      LdListItem(
+                          title: const Text("Add 0.1l"),
+                          leading: const Icon(LucideIcons.arrowUp),
+                          onPressed: () {
+                            _deduct(-0.1);
+                            Navigator.of(context).pop();
+                          }),
+                      LdDivider(),
+                      LdListItem(
+                          title: const Text("Refill entirely"),
+                          leading: const Icon(LucideIcons.arrowUp),
+                          onPressed: () {
+                            _deduct(-1);
+                            Navigator.of(context).pop();
+                          }),
+                    ],
+                  ),
                 ),
-                title: const Text("Deduct"),
               ),
             ),
             LdButton(

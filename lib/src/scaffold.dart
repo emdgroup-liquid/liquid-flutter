@@ -144,8 +144,6 @@ class LdScaffoldAppBarState {
 }
 
 class LdScaffoldLayoutState {
-  final bool isDrawerOpen;
-  final bool isSideBySide;
   final ValueNotifier<double> bodyScrollOffset;
   final ValueNotifier<double> drawerScrollOffset;
   final LdScaffoldSlot slot;
@@ -156,8 +154,6 @@ class LdScaffoldLayoutState {
   final LdScaffoldAppBarState? secondaryAppBarState;
 
   const LdScaffoldLayoutState({
-    required this.isDrawerOpen,
-    required this.isSideBySide,
     required this.slot,
     required this.bodyScrollOffset,
     required this.drawerScrollOffset,
@@ -185,23 +181,32 @@ class LdScaffoldLayoutState {
 
     if (appBarState?.effectivePosition == EffectivePosition.top) {
       top += primaryAppHeight;
-      top += appBarState?.verticalMargin ?? 0;
+      if (level == 0) {
+        top += appBarState?.verticalMargin ?? 0;
+      }
     } else {
       bottom += primaryAppHeight;
-      bottom += appBarState?.verticalMargin ?? 0;
+      if (level == 0) {
+        bottom += appBarState?.verticalMargin ?? 0;
+      }
     }
 
     if (secondaryAppBarState?.effectivePosition == EffectivePosition.top) {
       top += secondaryAppHeight;
       if (secondaryAppBarState!.effectivePosition != appBarState?.effectivePosition) {
-        top += secondaryAppBarState?.verticalMargin ?? 0;
+        if (level == 0) {
+          top += secondaryAppBarState?.verticalMargin ?? 0;
+        }
       }
     } else if (secondaryAppBarState?.effectivePosition == EffectivePosition.bottom) {
       bottom += secondaryAppHeight;
       if (secondaryAppBarState!.effectivePosition != appBarState?.effectivePosition) {
-        bottom += secondaryAppBarState?.verticalMargin ?? 0;
+        if (level == 0) {
+          bottom += secondaryAppBarState?.verticalMargin ?? 0;
+        }
       }
     }
+    //print('effectiveInsets $debugName $level: $top $bottom');
 
     return EdgeInsets.only(top: top, bottom: bottom) + (parentLayoutState?.effectiveInsets ?? EdgeInsets.zero);
   }
@@ -251,10 +256,8 @@ class LdScaffoldLayoutState {
   }
 
   LdScaffoldLayoutState copyWith({
-    bool? isDrawerOpen,
     ValueNotifier<double>? bodyScrollOffset,
     ValueNotifier<double>? drawerScrollOffset,
-    bool? isSideBySide,
     LdScaffoldSlot? slot,
     LdScaffoldLayoutState? parentLayoutState,
     String? debugName,
@@ -265,9 +268,7 @@ class LdScaffoldLayoutState {
       debugName: debugName ?? this.debugName,
       bodyScrollOffset: bodyScrollOffset ?? this.bodyScrollOffset,
       drawerScrollOffset: drawerScrollOffset ?? this.drawerScrollOffset,
-      isDrawerOpen: isDrawerOpen ?? this.isDrawerOpen,
       parentLayoutState: parentLayoutState ?? this.parentLayoutState,
-      isSideBySide: isSideBySide ?? this.isSideBySide,
       slot: slot ?? this.slot,
       appBarState: appBarState ?? this.appBarState,
       secondaryAppBarState: secondaryAppBarState ?? this.secondaryAppBarState,
@@ -277,8 +278,6 @@ class LdScaffoldLayoutState {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     properties.add(StringProperty('debugName', debugName));
     properties.add(IntProperty('level', level));
-    properties.add(FlagProperty('isDrawerOpen', value: isDrawerOpen, ifTrue: 'open'));
-    properties.add(FlagProperty('isSideBySide', value: isSideBySide, ifTrue: 'enabled'));
     properties.add(EnumProperty<LdScaffoldSlot>('slot', slot));
     properties.add(DoubleProperty('bodyScrollOffset', bodyScrollOffset.value));
     properties.add(DoubleProperty('drawerScrollOffset', drawerScrollOffset.value));
@@ -293,8 +292,6 @@ class LdScaffoldLayoutState {
     return '''LdScaffoldLayoutState(
     level: $level, 
     parentLayoutState: ${parentLayoutState?.toString().split('\n').join('\n    ')}, 
-    isDrawerOpen: $isDrawerOpen, 
-    isSideBySide: $isSideBySide, 
     slot: $slot,
     bodyScrollOffset: $bodyScrollOffset,
     drawerScrollOffset: $drawerScrollOffset,
@@ -313,7 +310,6 @@ enum LdScaffoldAppBarPlacement {
 
 enum LdScaffoldSlot {
   body,
-  drawer,
   appBarTop,
   appBarBottom,
   secondaryAppBarTop,
@@ -477,8 +473,6 @@ class LdScaffoldState extends State<LdScaffold> {
     return LdScaffoldLayoutState(
       debugName: widget.debugName,
       parentLayoutState: _parentLayoutState(context),
-      isDrawerOpen: _drawerState?.isOpen ?? false,
-      isSideBySide: _drawerState?.isSideBySide ?? false,
       slot: LdScaffoldSlot.body,
       appBarState: _appBarState,
       secondaryAppBarState: _secondaryAppBarState,
@@ -601,25 +595,12 @@ class LdScaffoldState extends State<LdScaffold> {
                 intents: intentRouter,
                 drawerWidth: widget.drawerWidth,
                 onStateChange: _onDrawerStateChange,
-                drawer: Provider.value(
-                  value: LdScaffoldLayoutState(
-                    debugName: 'drawer',
-                    isSideBySide: _drawerState?.isSideBySide ?? false,
-                    parentLayoutState: null,
-                    slot: LdScaffoldSlot.drawer,
-                    isDrawerOpen: _drawerState?.isOpen ?? false,
-                    appBarState: null,
-                    secondaryAppBarState: null,
-                    bodyScrollOffset: ValueNotifier<double>(0),
-                    drawerScrollOffset: ValueNotifier<double>(0),
-                  ),
-                  child: RepaintBoundary(
-                    child: FocusScope(
-                      node: _focusScopeNode,
-                      child: ScrollObserver(
-                        position: _drawerScrollOffset,
-                        child: widget.drawer!,
-                      ),
+                drawer: RepaintBoundary(
+                  child: FocusScope(
+                    node: _focusScopeNode,
+                    child: ScrollObserver(
+                      position: _drawerScrollOffset,
+                      child: widget.drawer!,
                     ),
                   ),
                 ),
@@ -666,6 +647,12 @@ class LdScaffoldState extends State<LdScaffold> {
       _secondaryAppBarState = _secondaryAppBarState?.copyWith(
         offset: 0.0,
       );
+    }
+    if (oldWidget.appBarPlacement != widget.appBarPlacement) {
+      _appBarState = null;
+    }
+    if (oldWidget.secondaryAppBarPlacement != widget.secondaryAppBarPlacement) {
+      _secondaryAppBarState = null;
     }
   }
 
@@ -720,9 +707,6 @@ class LdScaffoldState extends State<LdScaffold> {
       final bool isScrollingUp = scrollDelta < 0;
 
       double maxOffset = appBarState.innerHeight + appBarState.verticalMargin;
-
-      final effectivePosition =
-          role == AppBarRole.primary ? _effectiveAppBarPosition : _effectiveSecondaryAppBarPosition;
 
       // Bottom appBar: hide downward (positive offset) down means delta is positive.
       if (isScrollingDown) {
@@ -946,6 +930,11 @@ extension AtLeastEdgeInsets on EdgeInsets {
   }
 }
 
+enum LdDrawerSlot {
+  drawer,
+  body,
+}
+
 class LdDrawerState {
   final bool isOpen;
   final bool isSideBySide;
@@ -993,6 +982,11 @@ class _LdDrawerLayoutState extends State<_LdDrawerLayout> {
   initState() {
     super.initState();
     _intentSubscription = widget.intents.listen(_handleIntent);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      if (_isSideBySide) {
+        _showDrawer();
+      }
+    });
   }
 
   void _handleIntent(Intent intent) {
@@ -1157,7 +1151,13 @@ class _LdDrawerLayoutState extends State<_LdDrawerLayout> {
                             child: child!),
                       );
                     },
-                    child: widget.body,
+                    child: Provider.value(
+                      value: LdDrawerSlot.body,
+                      child: Provider.value(
+                        value: LdDrawerState(isOpen: _isDrawerOpen, isSideBySide: _isSideBySide),
+                        child: widget.body,
+                      ),
+                    ),
                   ),
                   if (_isDrawerOpen && !_isSideBySide)
                     ModalBarrier(
@@ -1178,7 +1178,7 @@ class _LdDrawerLayoutState extends State<_LdDrawerLayout> {
                         drawerLeft = state.position - _effectiveDrawerWidth;
                         drawerWidth = _effectiveDrawerWidth;
                       } else {
-                        drawerLeft = state.position - _effectiveDrawerWidth;
+                        drawerLeft = min(0, state.position - _effectiveDrawerWidth);
                         drawerWidth = _effectiveDrawerWidth;
                       }
 
@@ -1196,7 +1196,13 @@ class _LdDrawerLayoutState extends State<_LdDrawerLayout> {
                         ),
                       );
                     },
-                    child: widget.drawer,
+                    child: Provider.value(
+                      value: LdDrawerSlot.drawer,
+                      child: Provider.value(
+                        value: LdDrawerState(isOpen: _isDrawerOpen, isSideBySide: _isSideBySide),
+                        child: widget.drawer,
+                      ),
+                    ),
                   )
                 ].reverseIf(_isSideBySide),
               );

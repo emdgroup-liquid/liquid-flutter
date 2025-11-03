@@ -4,8 +4,6 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/haptics.dart';
 
-import 'annotations.dart';
-
 part 'radio.variants.g.dart';
 
 enum LdRadioMode { primary, warning, error }
@@ -59,10 +57,11 @@ class LdRadio extends StatelessWidget {
     return LdTouchableSurface(
         onPressed: _onTap,
         mode: LdTouchableSurfaceMode.outline,
+        hitTestBehavior: HitTestBehavior.opaque,
         active: checked,
         disabled: disabled,
         color: color ?? theme.palette.primary,
-        builder: (contxt, colorBundle, status) {
+        builder: (contxt, colorBundle, status, _) {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [

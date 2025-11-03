@@ -187,9 +187,9 @@ class LdExceptionView extends StatelessWidget {
           return LdAutoSpace(crossAxisAlignment: CrossAxisAlignment.center, children: [
             LdModalBuilder(
               useRootNavigator: true,
-              modal: LdModal(
-                size: LdSize.xs,
-                modalContent: (context) => LdExceptionDialog(
+              modal: LdModalRoute(
+                context: context,
+                pageBuilder: (context) => LdExceptionDialog(
                   error: exception!,
                 ),
               ),

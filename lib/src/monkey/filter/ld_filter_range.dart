@@ -110,9 +110,9 @@ class LdFilterRangeWidget<T extends Identifiable<IdType>, IdType, GroupBy> exten
               child: const Icon(LucideIcons.x),
               size: LdSize.s,
               onPressed: () {
-                repository.updateFilter<LdFilterRange<T, IdType>>(
+                repository.updateFilter(
                   filter.name,
-                  (filter) => filter.copyWith(isOn: false),
+                  (filter) => (filter as LdFilterRange<T, IdType>).copyWith(isOn: false),
                 );
               },
             ),
@@ -128,9 +128,9 @@ class LdFilterRangeWidget<T extends Identifiable<IdType>, IdType, GroupBy> exten
               divisions: (filter.max - filter.min) ~/ filter.step,
               values: filter.range,
               onChanged: (values) {
-                repository.updateFilter<LdFilterRange<T, IdType>>(
+                repository.updateFilter(
                   filter.name,
-                  (filter) => filter.copyWith(range: values),
+                  (filter) => (filter as LdFilterRange<T, IdType>).copyWith(range: values),
                 );
               }),
         )

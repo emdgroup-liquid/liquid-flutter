@@ -123,4 +123,18 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
 
   @override
   String get hideDrawer => 'Hide Sidebar';
+
+  @override
+  String get clearSelection => 'Clear selection?';
+
+  @override
+  String clearSelectionBody(Object n) {
+    return 'Are you sure you want to discard your selection of $n items?';
+  }
+
+  @override
+  String get openDrawer => 'Open Sidebar';
+
+  @override
+  String get closeDrawer => 'Close Sidebar';
 }

@@ -62,6 +62,10 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   }
 
   void _onSizeChange(int index, double height) {
+    if (_heights[index] == height) {
+      return;
+    }
+
     setState(() {
       _heights[index] = height;
     });

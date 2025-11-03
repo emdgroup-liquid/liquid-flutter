@@ -50,26 +50,22 @@ class LdTimePicker extends StatelessWidget {
           )
         ],
       ),
-      modal: LdModal(
-        key: const Key('time_picker_sheet'),
-        size: LdSize.m,
+      modal: LdModalRoute(
+        context: context,
         fixedDialogSize: const Size(300, 300),
-        title: label != null ? LdText.l(label!) : null,
-        contentPadding: LdTheme.of(context).pad(size: LdSize.s),
-        modalContent: (
-          context,
-        ) =>
-            LdAutoSpace(
-          children: [
-            LdTimePickerWidget(
-              initialTime: value,
-              onTimeSelected: (time) {
-                Navigator.pop(context);
-                onChanged(time);
-              },
-              minutePrecision: minutePrecision,
-            ),
-          ],
+        pageBuilder: (context) => LdScaffold(
+          body: LdScaffoldBody(
+            children: [
+              LdTimePickerWidget(
+                initialTime: value,
+                onTimeSelected: (time) {
+                  Navigator.pop(context);
+                  onChanged(time);
+                },
+                minutePrecision: minutePrecision,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -95,7 +91,7 @@ class LdTimePickerWidget extends StatefulWidget {
 class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
   final _hourController = FixedExtentScrollController();
   final _minuteController = FixedExtentScrollController();
-  final _hourFocusNode = FocusNode();
+  final _hourFocusNode = FocusScopeNode();
 
   final _hourControllerText = TextEditingController();
   final _minuteControllerText = TextEditingController();

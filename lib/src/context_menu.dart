@@ -259,6 +259,8 @@ class ContextMenuRoute extends ModalRoute<void> {
   }
 
   @override
+  RouteSettings get settings => const RouteSettings(name: "ContextMenu");
+  @override
   Duration get transitionDuration => const Duration(milliseconds: 200);
 
   @override
@@ -428,6 +430,7 @@ class ContextMenuRoute extends ModalRoute<void> {
       child: NotificationListener<LdContextMenuDissmissNotification>(
         onNotification: (notification) {
           Navigator.of(context).maybePop();
+
           return true;
         },
         child: LdWrapConditional(
@@ -511,4 +514,11 @@ class ContextMenuRoute extends ModalRoute<void> {
 
   @override
   bool get opaque => false;
+}
+
+Future<bool> maybePopContextMenu(BuildContext context) async {
+  final rootNavigatorContext = Navigator.of(context, rootNavigator: true);
+
+  rootNavigatorContext.popUntil((route) => route.settings.name != "ContextMenu");
+  return true;
 }

@@ -8,12 +8,14 @@ class OpenDrawerButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final layoutState = context.watch<LdScaffoldLayoutState?>();
+    final drawerState = context.watch<LdDrawerState?>();
 
-    final icon = layoutState?.isSideBySide ?? false ? LucideIcons.panelLeftOpen : LucideIcons.menu;
+    final icon = drawerState?.isSideBySide ?? false ? LucideIcons.panelLeftOpen : LucideIcons.menu;
     final scaffold = context.findAncestorStateOfType<LdScaffoldState>();
 
-    return LdButton.ghost(child: Icon(icon), onPressed: () => scaffold?.openDrawer());
+    return Tooltip(
+        message: LiquidLocalizations.of(context).openDrawer,
+        child: LdButton.ghost(child: Icon(icon), onPressed: () => scaffold?.openDrawer()));
   }
 }
 
@@ -22,17 +24,19 @@ class CloseDrawerButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final layoutState = context.watch<LdScaffoldLayoutState?>();
+    final drawerState = context.watch<LdDrawerState?>();
 
-    final icon =
-        layoutState?.parentLayoutState?.isSideBySide ?? false ? LucideIcons.panelLeftClose : LucideIcons.chevronRight;
+    final icon = drawerState?.isSideBySide ?? false ? LucideIcons.panelLeftClose : LucideIcons.chevronRight;
 
     final scaffold = context.findAncestorStateOfType<LdScaffoldState>();
-    return LdButton.ghost(
-      child: Icon(icon),
-      onPressed: () {
-        scaffold?.closeDrawer();
-      },
+    return Tooltip(
+      message: LiquidLocalizations.of(context).closeDrawer,
+      child: LdButton.ghost(
+        child: Icon(icon),
+        onPressed: () {
+          scaffold?.closeDrawer();
+        },
+      ),
     );
   }
 }

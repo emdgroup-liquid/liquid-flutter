@@ -131,13 +131,9 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
     final selectedItems = state.selectedItems;
     final deletedItems = state.deletedItems;
     final router = GoRouter.of(context);
-
     final detailPath = widget.route.detailPath(selectedItems);
-
     final queryParameters = widget.route.state.repository?.queryParameters;
-
     final uri = Uri.parse(detailPath);
-
     final newUri = uri.replace(queryParameters: queryParameters);
 
     if (widget.route.parseSelected(widget.routeSelection ?? "") == selectedItems) {
@@ -188,7 +184,12 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
           value: widget.route,
           child: Provider<LdMonkeyContext<T, IdType>>.value(
             value: monkeyContext,
-            child: widget.child,
+            child: LdListItemConfigProvider(
+              const LdListItemConfig(
+                trailing: LdListDefaultTrailingForward(),
+              ),
+              widget.child,
+            ),
           ),
         );
       }

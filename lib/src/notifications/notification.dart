@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -25,10 +23,7 @@ class LdNotification {
   bool didConfirm;
 
   bool get showBackdrop {
-    return type == LdNotificationType.confirm ||
-        type == LdNotificationType.enterText ||
-        type == LdNotificationType.confirm ||
-        type == LdNotificationType.acknowledge;
+    return type == LdNotificationType.acknowledge;
   }
 
   final Key key = UniqueKey();
@@ -51,13 +46,7 @@ class LdNotification {
         case LdNotificationType.loading:
           this.haptics = HapticsType.light;
           break;
-        case LdNotificationType.confirm:
-          this.haptics = HapticsType.warning;
-          break;
         case LdNotificationType.acknowledge:
-          this.haptics = HapticsType.warning;
-          break;
-        case LdNotificationType.enterText:
           this.haptics = HapticsType.warning;
           break;
         case LdNotificationType.info:
@@ -75,51 +64,6 @@ class LdNotification {
       }
     }
   }
-}
-
-class LdInputNotification extends LdNotification {
-  final Key inputKey = UniqueKey();
-  final String? inputHint;
-  final String? inputLabel;
-  final TextInputType inputType;
-  final String? submitText;
-
-  /// Completer that gets resolved when the user entered something in the input field
-  final Completer<String?> inputCompleter = Completer<String?>();
-
-  LdInputNotification({
-    required super.message,
-    required super.type,
-    required this.inputHint,
-    required this.inputLabel,
-    this.submitText,
-    this.inputType = TextInputType.text,
-    super.subMessage,
-    super.color,
-    super.canDismiss = true,
-    super.duration = null,
-  });
-}
-
-class LdConfirmNotification extends LdNotification {
-  final Key cancelKey = UniqueKey();
-  final Key confirmKey = UniqueKey();
-  final String? confirmText;
-  final String? cancelText;
-
-  /// Completer that gets resolved when the user confirms the notification or it is dismissed
-  final Completer<bool?> confirmationCompleter = Completer<bool?>();
-
-  LdConfirmNotification({
-    required super.message,
-    required super.type,
-    super.subMessage,
-    super.color,
-    super.canDismiss = true,
-    super.duration = null,
-    this.confirmText,
-    this.cancelText,
-  });
 }
 
 class LdAcknowledgeNotification extends LdNotification {

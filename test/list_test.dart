@@ -69,9 +69,8 @@ void main() {
                 return Text("Group $criterion").padS();
               },
           itemBuilder: (context, item, index) {
-            return LdListItem(
+            return LdListItem.trailingForward(
               title: Text("Item " + item.value.nr.toString()),
-              trailingForward: true,
             );
           },
           header: header,

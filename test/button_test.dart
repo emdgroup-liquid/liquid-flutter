@@ -50,7 +50,8 @@ void main() {
       await test.pumpAndSettle();
 
       expect(pressed, isFalse);
-      expect(((test.firstWidget(find.byType(Container)) as Container).decoration as BoxDecoration).color,
+      expect(
+          ((test.firstWidget(find.byKey(const Key('ldButton_shape'))) as Container).decoration as BoxDecoration).color,
           color.hover(false));
 
       expect(

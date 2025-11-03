@@ -47,18 +47,21 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
                 children: actions
                     .where((e) => e.isVisible(context, location: LdMonkeyActionLocation.context))
                     .map(
-                      (action) => LdListItem(
-                        title: Text(action.label(context)),
-                        leading: action.icon(context),
-                        borderRadius: LdTheme.of(context).radius(LdSize.s),
-                        onPressed: () {
-                          LdContextMenuDissmissNotification().dispatch(context);
-                          action.onPressed(context);
-                        },
-                      ),
+                      (action) => LdButtonConfigProvider(
+                          const LdButtonConfig(
+                            borderRadius: BorderRadius.zero,
+                            disableSqueeze: true,
+                            alignment: MainAxisAlignment.start,
+                            autoLoading: false,
+
+                            //color: LdTheme.of(context).palette.neutral,
+                            width: double.infinity,
+                            mode: LdButtonMode.ghost,
+                          ),
+                          action.build(context)),
                     )
                     .toList(),
-              ).padS(),
+              ),
             ),
           );
         }),

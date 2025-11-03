@@ -42,8 +42,10 @@ class LdAppBar extends StatefulWidget {
   final LdAppBarShadowMode shadowMode;
   final LdAppBarBorderMode borderMode;
   final LdAppBarBackgroundMode backgroundMode;
+  final bool showWindowControls;
+  final bool implyCloseModalButton;
 
-  final List<LdLabeledAction> actions;
+  final List<Widget> actions;
 
   static LdWindowCallbacks? callbacks;
 
@@ -76,9 +78,11 @@ class LdAppBar extends StatefulWidget {
     this.actions = const [],
     this.leading,
     this.trailing,
+    this.showWindowControls = true,
     this.backgroundColor,
     this.searchConfig,
     this.addContainer = false,
+    this.implyCloseModalButton = true,
     this.implyLeading,
     this.bottom,
     this.shadowMode = LdAppBarShadowMode.whenScrolled,
@@ -111,6 +115,27 @@ class _LdAppBarState extends State<LdAppBar> {
     return context.read<LdScaffoldLayoutState?>();
   }
 
+  bool get _isModal {
+    final ModalRoute<Object?>? parentRoute = ModalRoute.of(context);
+    return parentRoute is LdModalRoute;
+  }
+
+  Widget? get _closeModalButton {
+    if (!widget.implyCloseModalButton) return null;
+    if (!_isModal) return null;
+    if (!_canDismissModal) return null;
+    if (!_isInTopSlot) return null;
+    return LdButton.ghost(
+      child: const Icon(LucideIcons.x),
+      onPressed: () => Navigator.of(context).maybePop(),
+    );
+  }
+
+  bool get _canDismissModal {
+    final ModalRoute<Object?>? parentRoute = ModalRoute.of(context);
+    return parentRoute is LdModalRoute && parentRoute.barrierDismissible;
+  }
+
   bool get _canPopParentRoute {
     final ModalRoute<Object?>? parentRoute = ModalRoute.of(context);
 
@@ -123,12 +148,20 @@ class _LdAppBarState extends State<LdAppBar> {
     return _scaffold?.hasDrawer ?? false;
   }
 
+  LdDrawerState? get _drawerState {
+    return context.watch<LdDrawerState?>();
+  }
+
+  LdDrawerSlot? get _drawerSlot {
+    return context.watch<LdDrawerSlot?>();
+  }
+
   bool get _isDrawerOpen {
-    return _layoutState?.isDrawerOpen ?? false;
+    return _drawerState?.isOpen ?? false;
   }
 
   bool get _isDrawer {
-    return _layoutState?.parentLayoutState?.slot == LdScaffoldSlot.drawer;
+    return _drawerSlot == LdDrawerSlot.drawer;
   }
 
   bool get _isDrawerAppBar {
@@ -136,19 +169,28 @@ class _LdAppBarState extends State<LdAppBar> {
   }
 
   bool get _isSideBySide {
-    return _layoutState?.parentLayoutState?.isSideBySide ?? false;
+    return _drawerState?.isSideBySide ?? false;
   }
 
   bool get _showOpenDrawerButton {
-    return _hasDrawer && !_isDrawerOpen && (_slot == LdScaffoldSlot.appBarTop);
+    if (!_hasDrawer) return false;
+    if (_slot != LdScaffoldSlot.appBarTop) return false;
+    if (_isSideBySide) {
+      return !_isDrawerOpen;
+    }
+
+    return true;
   }
 
   bool get _showWindowsWindowControls {
-    return LdTheme.of(context).platform == LdPlatform.windows && _slot == LdScaffoldSlot.appBarTop;
+    return LdTheme.of(context).platform == LdPlatform.windows &&
+        _slot == LdScaffoldSlot.appBarTop &&
+        _layoutState?.level == 0 &&
+        !_isDrawer;
   }
 
   bool get _showCloseDrawerButton {
-    return _isDrawerAppBar && (_layoutState?.parentLayoutState?.isDrawerOpen ?? false) && _isSideBySide;
+    return _isDrawerAppBar && _isSideBySide;
   }
 
   LdScaffoldSlot? get _slot {
@@ -160,7 +202,7 @@ class _LdAppBarState extends State<LdAppBar> {
     final imply = widget.implyLeading ?? true;
     if (!imply) return null;
 
-    if (_canPopParentRoute && !_isDrawer) {
+    if (_canPopParentRoute && !_isDrawer && !_isModal) {
       return LdButton.ghost(
         child: const Icon(LucideIcons.chevronLeft),
         onPressed: () => Navigator.of(context).maybePop(),
@@ -176,8 +218,11 @@ class _LdAppBarState extends State<LdAppBar> {
 
   EdgeInsets _padding(BuildContext context) {
     final theme = LdTheme.of(context);
-    final basePadding = theme.paddingSize(size: LdSize.s);
-    return EdgeInsets.all(basePadding);
+    final basePadding = theme.pad(size: LdSize.s);
+    if (_slot?.effectivePosition == EffectivePosition.top) {
+      return basePadding.copyWith(left: 0, right: 0);
+    }
+    return basePadding;
   }
 
   TextStyle get _headerStyle {
@@ -390,11 +435,10 @@ class _LdAppBarState extends State<LdAppBar> {
   @override
   Widget build(BuildContext context) {
     final layoutState = context.watch<LdScaffoldLayoutState>();
+    final drawerSlot = context.watch<LdDrawerSlot?>();
 
-    final scrollListenable = switch (layoutState.slot) {
-      LdScaffoldSlot.drawer => _layoutState?.drawerScrollOffset,
-      _ => _layoutState?.bodyScrollOffset,
-    };
+    final scrollListenable =
+        drawerSlot == LdDrawerSlot.drawer ? _layoutState?.drawerScrollOffset : _layoutState?.bodyScrollOffset;
 
     final leading = _buildLeading(context);
 
@@ -408,8 +452,6 @@ class _LdAppBarState extends State<LdAppBar> {
             WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
               _reportMargin();
             });
-
-            final visibleActions = widget.actions.where((e) => e.isVisible(context)).toList();
 
             final appBar = AnnotatedRegion<SystemUiOverlayStyle>(
               value: _systemUiOverlayStyle,
@@ -425,98 +467,99 @@ class _LdAppBarState extends State<LdAppBar> {
                       padding: EdgeInsets.zero,
                       child: child,
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        LayoutBuilder(builder: (context, constraints) {
-                          final hasSearch = widget.searchConfig != null;
+                    child: LdButtonConfigProvider(
+                      const LdButtonConfig(
+                        mode: LdButtonMode.ghost,
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          LayoutBuilder(builder: (context, constraints) {
+                            final hasSearch = widget.searchConfig != null;
 
-                          return Row(
-                            children: [
-                              const MacOSWindowControls(),
-                              if (_hasDrawer) ...[
-                                LdReveal(
-                                  revealed: _showOpenDrawerButton,
-                                  child: const Row(
-                                    children: [
-                                      OpenDrawerButton(),
-                                      ldSpacerM,
-                                    ],
+                            return Row(
+                              children: [
+                                if (widget.showWindowControls && !_isModal) const MacOSWindowControls(),
+                                if (_hasDrawer) ...[
+                                  LdReveal(
+                                    revealed: _showOpenDrawerButton,
+                                    child: const Row(
+                                      children: [
+                                        OpenDrawerButton(),
+                                        ldSpacerM,
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
-                              if (leading != null) ...[leading],
-                              if (widget.title != null || visibleActions.isNotEmpty || hasSearch)
-                                Expanded(
-                                    child: LdOverflowView(
-                                  spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment:
-                                      widget.title == null ? MainAxisAlignment.start : MainAxisAlignment.center,
-                                  builder: (context, remainingItemCount) {
-                                    if (remainingItemCount > visibleActions.length) {
-                                      return const SizedBox();
-                                    }
-                                    return LdAppbarActionOverflowMenu(
-                                      layoutState: layoutState,
-                                      actions: [...visibleActions.sublist(visibleActions.length - remainingItemCount)],
-                                      menuProviders: widget.overflowMenuProviders,
-                                      inMenu: true,
-                                    );
-                                  },
-                                  children: [
-                                    if (widget.title != null)
-                                      LdFlexibleChild(
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: DefaultTextStyle(
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: _headerStyle,
-                                            child: widget.title ?? const SizedBox(),
+                                ],
+                                if (leading != null) ...[leading, ldSpacerM],
+                                if (widget.title != null || widget.actions.isNotEmpty || hasSearch)
+                                  Expanded(
+                                      child: LdOverflowView(
+                                    spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    mainAxisAlignment:
+                                        widget.title == null ? MainAxisAlignment.start : MainAxisAlignment.center,
+                                    builder: (context, remainingItemCount) {
+                                      if (remainingItemCount > widget.actions.length) {
+                                        // Todo: not even the title fits.
+                                        return const SizedBox();
+                                      }
+                                      return LdAppbarActionOverflowMenu(
+                                        layoutState: layoutState,
+                                        actions: widget.actions.sublist(widget.actions.length - remainingItemCount),
+                                        menuProviders: widget.overflowMenuProviders,
+                                        inMenu: true,
+                                      );
+                                    },
+                                    children: [
+                                      if (widget.title != null)
+                                        LdFlexibleChild(
+                                          child: Align(
+                                            alignment: Alignment.centerLeft,
+                                            child: DefaultTextStyle(
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: _headerStyle,
+                                              child: widget.title ?? const SizedBox(),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    if (hasSearch)
-                                      LdFlexibleChild(
-                                        child: LdSearchInput(
-                                          searchConfig: widget.searchConfig!,
-                                          isBottomNavigationBar: _isInBottomSlot,
-                                          fullWidth: false,
+                                      if (hasSearch)
+                                        LdFlexibleChild(
+                                          child: LdSearchInput(
+                                            searchConfig: widget.searchConfig!,
+                                            isBottomNavigationBar: _isInBottomSlot,
+                                            fullWidth: false,
+                                          ),
                                         ),
-                                      ),
-                                    ...visibleActions.map(
-                                      (e) => LdAppBarActionWidget(
-                                        action: e,
-                                        layoutState: layoutState,
-                                        inMenu: false,
-                                        menuProviders: widget.overflowMenuProviders,
-                                      ),
-                                    ),
-                                  ],
-                                ))
-                              else
-                                const SizedBox.shrink(),
-                              LdReveal(revealed: _showCloseDrawerButton, child: const CloseDrawerButton()),
-                              if (widget.trailing != null) widget.trailing!,
-                              LdReveal(revealed: _showWindowsWindowControls, child: const WindowsWindowControls()),
-                            ],
-                          );
-                        }),
-                        if (widget.bottom != null) ...[
-                          LdWrapConditional(
-                            condition: _hasTopContent,
-                            builder: (context, child) => Padding(
-                              padding: EdgeInsets.only(
-                                top: LdTheme.of(context).pad(size: LdSize.s).top,
+                                      ...widget.actions
+                                    ],
+                                  ))
+                                else
+                                  const SizedBox.shrink(),
+                                LdReveal(revealed: _showCloseDrawerButton, child: const CloseDrawerButton()),
+                                if (widget.trailing != null) widget.trailing!,
+                                if (_closeModalButton != null) ...[_closeModalButton!],
+                                if (widget.showWindowControls && !_isModal)
+                                  LdReveal(revealed: _showWindowsWindowControls, child: const WindowsWindowControls()),
+                              ],
+                            );
+                          }),
+                          if (widget.bottom != null) ...[
+                            LdWrapConditional(
+                              condition: _hasTopContent,
+                              builder: (context, child) => Padding(
+                                padding: EdgeInsets.only(
+                                  top: LdTheme.of(context).pad(size: LdSize.s).top,
+                                ),
+                                child: child,
                               ),
-                              child: child,
+                              child: widget.bottom!,
                             ),
-                            child: widget.bottom!,
-                          ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -524,7 +567,7 @@ class _LdAppBarState extends State<LdAppBar> {
             );
 
             return LdWrapConditional(
-              condition: _slot == LdScaffoldSlot.appBarTop,
+              condition: _slot == LdScaffoldSlot.appBarTop && !_isModal,
               builder: (context, child) => GestureDetector(
                 onPanStart: (details) {
                   LdAppBar.callbacks?.onMove?.call();

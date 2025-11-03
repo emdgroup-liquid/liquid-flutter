@@ -9,4 +9,4 @@ analyzer:
     - build/**
 
 formatter:
-  lineLength: 120
+  page_width: 120

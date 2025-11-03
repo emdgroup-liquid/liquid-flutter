@@ -329,7 +329,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
   /// Rolls back the update of an item.x
   /// This will restore the item to its previous state.
-  void rollbackItemUpdate(IdType id, {T? newValue}) {
+  Future<void> rollbackItemUpdate(IdType id, {T? newValue}) async {
     final index = _items.entries.firstWhereOrNull((e) => e.value.previousValue?.id == id)?.key;
 
     if (index == null) {
@@ -344,7 +344,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
       value: newValue ?? item.previousValue,
       state: LdPaginatorItemState.rolledBackUpdate,
     );
-    _updated(_items[index]);
+    await _updated(_items[index]);
   }
 
   /// Adds an item to the paginator at the specified index,
@@ -574,6 +574,14 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
       }
     }
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    _itemsStreamController.close();
+    _itemStreamController.close();
+    super.dispose();
   }
 
   @override

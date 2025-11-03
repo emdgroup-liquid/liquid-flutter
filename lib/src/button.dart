@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -27,7 +28,7 @@ enum LdButtonMode { filled, outline, ghost, vague }
 ])
 class LdButtonWidget extends StatefulWidget {
   final Widget child;
-  final Function onPressed;
+  final FutureOr<void> Function() onPressed;
   final bool disabled;
   final FocusNode? focusNode;
   final Widget? trailing;
@@ -38,6 +39,7 @@ class LdButtonWidget extends StatefulWidget {
   final bool autoLoading;
   final double? progress;
   final bool autoFocus;
+  final bool disableSqueeze;
 
   final LdButtonMode mode;
   final MainAxisAlignment? alignment;
@@ -52,15 +54,15 @@ class LdButtonWidget extends StatefulWidget {
   const LdButtonWidget({
     required this.child,
     required this.onPressed,
-    this.autoLoading = true,
-    this.borderRadius,
-    this.color,
-    this.active,
-    this.width,
+    @ContextConfigurable() this.autoLoading = true,
+    @ContextConfigurable() this.borderRadius,
+    @ContextConfigurable() this.color,
+    @ContextConfigurable() this.active,
+    @ContextConfigurable() this.width,
     @ContextConfigurable() this.disabled = false,
-    this.focusNode,
+    @ContextConfigurable() this.focusNode,
     this.autoFocus = false,
-    this.alignment,
+    @ContextConfigurable() this.alignment,
     this.leading,
     @ContextConfigurable() this.circular,
     this.loading = false,
@@ -70,6 +72,7 @@ class LdButtonWidget extends StatefulWidget {
     this.progress,
     @ContextConfigurable() this.size = LdSize.m,
     this.trailing,
+    @ContextConfigurable() this.disableSqueeze = false,
     Key? key,
   }) : super(key: key);
 
@@ -239,6 +242,7 @@ class _LdButtonState extends State<LdButtonWidget> {
 
     return LdTouchableSurface(
       focusNode: widget.focusNode,
+      hitTestBehavior: HitTestBehavior.opaque,
       autoFocus: widget.autoFocus,
       mode: switch (widget.mode) {
         (LdButtonMode.filled) => LdTouchableSurfaceMode.solid,
@@ -250,7 +254,7 @@ class _LdButtonState extends State<LdButtonWidget> {
       disabled: widget.disabled || isLoading,
       onPressed: _onTap,
       color: colors,
-      builder: (context, colors, status) => Semantics(
+      builder: (context, colors, status, _) => Semantics(
         button: true,
         enabled: !widget.disabled,
         focused: status.focus,
@@ -261,6 +265,7 @@ class _LdButtonState extends State<LdButtonWidget> {
             center: centerText,
             circular: _circular,
             width: widget.width,
+            disableSqueeze: widget.disableSqueeze,
             mode: widget.mode,
             borderRadius: widget.borderRadius ?? _theme.radius(LdSize.s),
             size: widget.size,
@@ -321,7 +326,7 @@ class _ButtonShape extends StatelessWidget {
   final bool center;
   final LdSize size;
   final double? width;
-
+  final bool disableSqueeze;
   final bool circular;
 
   final Widget child;
@@ -341,6 +346,7 @@ class _ButtonShape extends StatelessWidget {
     required this.center,
     this.borderRadius,
     this.panOffset,
+    required this.disableSqueeze,
   });
 
   Border? _border(context) {
@@ -370,20 +376,23 @@ class _ButtonShape extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
+    double squeezeFactor = disableSqueeze ? 0 : (status.panOffset?.dx.abs() ?? 0);
     return LdSpring(
-      position: status.pressed ? 1 : 0,
-      initialPosition: status.pressed ? 1 : 0,
+      position: status.pressed && !disableSqueeze ? 1 : 0,
+      initialPosition: status.pressed && !disableSqueeze ? 1 : 0,
       builder: (context, state, child) {
         return Transform(
           alignment: Alignment.center,
           transform: Matrix4.identity()
-            ..scale(
-              state.position * 0.05 + 1 + min(0.2, (status.panOffset?.dx.abs() ?? 0) * 0.001 * state.position),
-              state.position * 0.05 + 1 + min(0.2, (status.panOffset?.dy.abs() ?? 0) * 0.001 * state.position),
+            ..scaleByDouble(
+              state.position * 0.05 + 1 + min(0.2, (squeezeFactor) * 0.001 * state.position),
+              state.position * 0.05 + 1 + min(0.2, (squeezeFactor) * 0.001 * state.position),
+              1.0,
               1.0,
             ),
           child: Container(
             clipBehavior: Clip.hardEdge,
+            key: const Key('ldButton_shape'),
             width: width,
             decoration: BoxDecoration(
               color: colors.surface,
@@ -431,6 +440,7 @@ class _ButtonShape extends StatelessWidget {
               left: panOffset!.dx - 64,
               top: panOffset!.dy - 64,
               child: Container(
+                key: const Key('ldButton_ripple'),
                 width: 128,
                 height: 128,
                 decoration: BoxDecoration(

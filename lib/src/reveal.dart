@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:liquid_flutter/src/spring.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
 
 /// A utility to reveal some content, with a fade in and collapse effect
 class LdReveal extends StatelessWidget {
@@ -99,18 +99,22 @@ class LdReveal extends StatelessWidget {
 
         return Transform.translate(
           offset: Offset(dx, dy),
-          child: ClipRRect(
-            child: Align(
-              heightFactor: heightFactor,
-              widthFactor: widthFactor,
-              child: Transform.scale(
-                scale: scaleValue.clamp(0, double.infinity),
-                child: Opacity(
-                  opacity: opacityValue.clamp(0, 1),
-                  child: child,
+          child: LdWrapConditional(
+            condition: heightFactor != 1 || widthFactor != 1,
+            builder: (context, child) => ClipRRect(
+              child: Align(
+                heightFactor: heightFactor,
+                widthFactor: widthFactor,
+                child: Transform.scale(
+                  scale: scaleValue.clamp(0, double.infinity),
+                  child: Opacity(
+                    opacity: opacityValue.clamp(0, 1),
+                    child: child,
+                  ),
                 ),
               ),
             ),
+            child: child!,
           ),
         );
       },

@@ -9,12 +9,11 @@ class LdFilterSearchOption<T extends Identifiable<IdType>, IdType, Suggestion> e
   final Duration debounceDelay;
   final String? hint;
 
-  LdSearchConfig? get searchConfig => LdSearchConfig(
+  LdSearchConfig? searchConfig(Function(String query) onSearch) => LdSearchConfig(
         getSuggestions: getSuggestions,
         buildSuggestion: buildSuggestion,
-        onSearch: (query) {
-          // This will be handled by the parent component using copyWith
-        },
+        inputController: TextEditingController(text: searchText),
+        onSearch: onSearch,
       );
 
   LdFilterSearchOption({

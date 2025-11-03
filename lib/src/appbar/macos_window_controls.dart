@@ -14,18 +14,25 @@ class MacOSWindowControls extends StatelessWidget {
     }
 
     final layoutState = context.watch<LdScaffoldLayoutState?>();
-    final level = layoutState?.level;
+    final drawerSlot = context.watch<LdDrawerSlot?>();
+    final drawerState = context.watch<LdDrawerState?>();
 
-    final isAppBar = layoutState?.slot == LdScaffoldSlot.appBarTop;
-    final isDrawer = layoutState?.parentLayoutState?.slot == LdScaffoldSlot.drawer;
+    bool show = false;
 
-    final isDrawerOpen = layoutState?.isDrawerOpen ?? false;
-    final isParentDrawerOpen = layoutState?.parentLayoutState?.isDrawerOpen ?? false;
+    if (layoutState?.level == 0) {
+      if (drawerSlot == LdDrawerSlot.body) {
+        if (!(drawerState?.isOpen ?? false)) {
+          show = true;
+        }
+      }
+      if (drawerSlot == LdDrawerSlot.drawer) {
+        if (drawerState?.isOpen ?? false) {
+          show = true;
+        }
+      }
+    }
 
-    final showWindowControls =
-        isAppBar && (isDrawer && isParentDrawerOpen && level == 1 || !isDrawer && !isDrawerOpen && level == 0);
-
-    if (!showWindowControls) {
+    if (!show) {
       return const SizedBox.shrink();
     }
 

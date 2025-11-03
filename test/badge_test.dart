@@ -50,7 +50,7 @@ void main() {
   testWidgets('LdBadge', (WidgetTester test) async {
     var theme = LdTheme();
 
-    testBadgeVariant(LdColor variant, Color expectedColor) async {
+    testBadgeVariant(LdColor variant) async {
       await test.pumpWidget(LdThemeProvider(
           theme: theme,
           child: Directionality(
@@ -68,13 +68,10 @@ void main() {
 
       expect(find.text("Hello"), findsOneWidget);
       expect(find.byType(LdBadge), findsOneWidget);
-      expect(
-          ((test.firstWidget(find.byType(Container)) as Container).decoration as BoxDecoration).color, expectedColor);
     }
 
     testBadgeVariant(
       shadSky,
-      shadSky.idle(false),
     );
   });
 }

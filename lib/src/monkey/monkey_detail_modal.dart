@@ -1,20 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-LdModal ldMonkeyDetailModal<T extends Identifiable<IdType>, IdType>(
+LdModalRoute ldMonkeyDetailModal<T extends Identifiable<IdType>, IdType>(
+  BuildContext context,
   LdMonkey<T, IdType> route,
 ) {
-  return LdModal(
-    modalContent: (context) => LdMonkeyDetailPageContent(route: route, selection: route.state.selectedItems),
-    title: StreamBuilder(
-      stream: route.stateStream,
-      initialData: route.state,
-      builder: (context, asyncSnapshot) {
-        final selection = asyncSnapshot.data!;
-        return Text(
-          selection.selectedItems.length > 1 ? route.repository.pluralItemTitle : route.repository.singularItemTitle,
-        );
-      },
-    ),
+  return LdModalRoute(
+    context: context,
+    pageBuilder: (context) => LdMonkeyDetailPageContent(route: route, selection: route.state.selectedItems),
   );
 }

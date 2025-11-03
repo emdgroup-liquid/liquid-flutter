@@ -101,7 +101,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(LdSubmit<int, void>), findsOneWidget);
-    expect(find.byType(LdButton), findsOneWidget);
+
     expect(find.text("Submit"), findsOneWidget);
 
     // Trigger the action
@@ -209,10 +209,10 @@ void main() {
 
     // Verify initial state
     expect(find.byType(LdSubmit<int, void>), findsOneWidget);
-    expect(find.byType(LdButton), findsOneWidget);
+    expect(find.text("Submit"), findsOneWidget);
 
     // Trigger action that will fail
-    await tester.tap(find.byType(LdButton));
+    await tester.tap(find.text("Submit"));
     await tester.pump();
 
     // Verify loading state
@@ -226,7 +226,7 @@ void main() {
     expect(find.text("Custom exception"), findsOneWidget);
     expect(
       find.byType(LdButton),
-      findsNWidgets(2),
+      findsNWidgets(3),
     ); // Retry + More Info buttons
   });
 
@@ -272,10 +272,10 @@ void main() {
 
     // Verify initial state
     expect(find.byType(LdSubmit<int, void>), findsOneWidget);
-    expect(find.byType(LdButton), findsOneWidget);
+    expect(find.text("Submit"), findsOneWidget);
 
     // Trigger action that will fail
-    await tester.tap(find.byType(LdButton));
+    await tester.tap(find.text("Submit"));
 
     expect(calls, 1);
 

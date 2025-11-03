@@ -5,7 +5,10 @@ import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/haptics.dart';
 import 'package:liquid_flutter/src/touchable/input_color.dart';
 
-class LdSelectItem<T> {
+class LdSelectItem<T> with Identifiable<T> {
+  @override
+  T get id => value;
+
   final T value;
   final Key? key;
   final Widget child;
@@ -154,7 +157,7 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
         _focusNode?.requestFocus();
         widget.onChanged?.call(item.value);
       },
-      builder: (contxt, colorBundle, status) {
+      builder: (contxt, colorBundle, status, _) {
         return Container(
           padding: theme.balPad(widget.size),
           width: double.infinity,
@@ -342,7 +345,7 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
           _focusNodeChildren?.requestFocus();
         },
         color: theme.palette.primary,
-        builder: (context, _, status) {
+        builder: (context, _, status, __) {
           final colors = inputColor(
             theme,
             status,

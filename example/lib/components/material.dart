@@ -17,13 +17,10 @@ class MaterialDocumentation extends StatelessWidget {
           children: [
             const Text("Material Components"),
             ldSpacerM,
-            ElevatedButton(
-                onPressed: () {}, child: const Text("Elevated Button")),
+            ElevatedButton(onPressed: () {}, child: const Text("Elevated Button")),
             TextButton(onPressed: () {}, child: const Text("Text Button")),
-            OutlinedButton(
-                onPressed: () {}, child: const Text("Outlined Button")),
-            FloatingActionButton(
-                onPressed: () {}, child: const Icon(LucideIcons.plus)),
+            OutlinedButton(onPressed: () {}, child: const Text("Outlined Button")),
+            FloatingActionButton(onPressed: () {}, child: const Icon(LucideIcons.plus)),
             IconButton(onPressed: () {}, icon: const Icon(LucideIcons.plus)),
             const TextField(
               decoration: InputDecoration(
@@ -58,16 +55,6 @@ class MaterialDocumentation extends StatelessWidget {
             ),
             Checkbox(value: false, onChanged: (v) {}),
             Checkbox(value: true, onChanged: (v) {}),
-            Radio(
-              groupValue: true,
-              onChanged: (v) {},
-              value: true,
-            ),
-            Radio(
-              groupValue: false,
-              onChanged: (v) {},
-              value: false,
-            ),
             Switch(value: true, onChanged: (v) {}),
             Switch(value: false, onChanged: (v) {}),
           ],

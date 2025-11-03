@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/list/table_row.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class _Movie with Identifiable<int> {
@@ -40,8 +41,7 @@ var movieData = [
   _Movie(8, "Fight Club", "Drama", 8, DateTime.now()),
   _Movie(9, "The Shawshank Redemption", "Drama", 10, DateTime.now()),
   _Movie(10, "Gladiator", "Action", 8, DateTime.now()),
-  _Movie(
-      11, "Transformers: Revenge of the Fallen", "Action", 4, DateTime.now()),
+  _Movie(11, "Transformers: Revenge of the Fallen", "Action", 4, DateTime.now()),
   _Movie(12, "Cats", "Drama", 3, DateTime.now()),
   _Movie(13, "The Room", "Drama", 2, DateTime.now()),
   _Movie(14, "Batman & Robin", "Action", 3, DateTime.now()),
@@ -56,11 +56,8 @@ final movieRepository = LdRepository<_Movie, int>(
     await Future.delayed(const Duration(seconds: 1));
 
     // Apply the same filtering and sorting logic as fetchListWithParameters
-    final filtered = movieData
-        .where((element) =>
-            filters?.every((filter) => filter.optimisticFilter(element)) ??
-            true)
-        .toList();
+    final filtered =
+        movieData.where((element) => filters?.every((filter) => filter.optimisticFilter(element)) ?? true).toList();
 
     for (final sortOption in sortOptions ?? []) {
       filtered.sort((a, b) => sortOption.optimisticSort(a, b));
@@ -101,11 +98,8 @@ final movieRepository = LdRepository<_Movie, int>(
     List<LdSortOption<_Movie, int>>? sortOptions,
   }) async {
     await Future.delayed(const Duration(milliseconds: 50));
-    final filtered = movieData
-        .where((element) =>
-            filters?.every((filter) => filter.optimisticFilter(element)) ??
-            true)
-        .toList();
+    final filtered =
+        movieData.where((element) => filters?.every((filter) => filter.optimisticFilter(element)) ?? true).toList();
     return LdListPage<_Movie>(
       newItems: filtered.skip(offset).take(pageSize).toList(),
       hasMore: offset + pageSize < filtered.length,
@@ -187,7 +181,7 @@ final movieDemo = LdMonkey<_Movie, int>(
       initialSelectedItems: route.state.selectedItems,
       multiSelect: true,
       onSelectionChange: (selected) => onSelectionChange(selected),
-      itemBuilder: (context, item, index, config) {
+      itemBuilder: (context, item, index) {
         return LdMonkeySingleShortcuts(
           item: item.value!.id,
           actions: route.actions,
@@ -195,17 +189,14 @@ final movieDemo = LdMonkey<_Movie, int>(
             item: item,
             child: LdListItemAnimation(
               state: item.state,
-              child: LdListItem.fromConfig(
-                config.copyWith(
-                  tableRowMode: true,
-                  isOdd: index.isOdd,
-                  title: Text(
-                    item.value!.title,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Text(item.value!.genre),
-                  subContent: Text("Rating: ${item.value!.rating}/10"),
+              child: LdTableRow(
+                isOdd: index.isOdd,
+                title: Text(
+                  item.value!.title,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
+                subtitle: Text(item.value!.genre),
+                subContent: Text("Rating: ${item.value!.rating}/10"),
               ),
             ),
           ),
@@ -215,7 +206,7 @@ final movieDemo = LdMonkey<_Movie, int>(
   },
   actions: [
     toggleFilters<_Movie, int>(),
-    LdMonkeyAction(
+    LdMonkeySubmitAction(
       visibility: {
         LdMonkeyActionVisibility(
           location: LdMonkeyActionLocation.detailSecondary,
@@ -231,33 +222,28 @@ final movieDemo = LdMonkey<_Movie, int>(
       shortcutActivators: {
         SingleActivator(LogicalKeyboardKey.keyD, meta: true),
       },
-      buildLoadingText: (context) => "Duplicating",
-      buildLabel: (context) => "Duplicate",
-      buildIcon: (
-        context,
-      ) =>
-          const Icon(LucideIcons.copy),
-      multiSelect: false,
-      action: (
-        context,
-      ) async {
-        final selectionItems = LdMonkeySelection.of<_Movie, int>(context).items;
-        final route = LdMonkey.of<_Movie, int>(context);
-        final item = await movieRepository.getById(selectionItems.first);
+      config: (context) => LdSubmitConfig(
+        action: (_) async {
+          final selectionItems = LdMonkeySelection.of<_Movie, int>(context).items;
+          final route = LdMonkey.of<_Movie, int>(context);
+          final item = await movieRepository.getById(selectionItems.first);
 
-        final newItem = item.copyWith(
-          id: movieData.length + 1,
-          title: "${item.title} (copy)",
-        );
+          final newItem = item.copyWith(
+            id: movieData.length + 1,
+            title: "${item.title} (copy)",
+          );
 
-        await movieRepository.create(newItem);
+          await movieRepository.create(newItem);
 
-        await Future.delayed(const Duration(milliseconds: 1500));
+          await Future.delayed(const Duration(milliseconds: 1500));
 
-        route.setSelectedItems({newItem.id});
-      },
+          route.setSelectedItems({newItem.id});
+        },
+      ),
+      child: Text("Duplicate"),
+      icon: Icon(LucideIcons.copy),
     ),
-    LdMonkeyAction(
+    LdMonkeySubmitAction(
       visibility: {
         LdMonkeyActionVisibility(
           location: LdMonkeyActionLocation.detailSecondary,
@@ -280,20 +266,14 @@ final movieDemo = LdMonkey<_Movie, int>(
         SingleActivator(LogicalKeyboardKey.delete),
         SingleActivator(LogicalKeyboardKey.backspace),
       },
-      buildLoadingText: (context) {
-        final selection = LdMonkeySelection.of<_Movie, int>(context);
-        return "Deleting ${selection.items.length} ${selection.items.length == 1 ? "item" : "items"}";
-      },
-      buildLabel: (context) {
-        final selection = LdMonkeySelection.of<_Movie, int>(context);
-        return "Delete ${selection.items.length} ${selection.items.length == 1 ? "item" : "items"}";
-      },
-      buildIcon: (context) => Icon(LucideIcons.trash2),
-      color: shadRed,
-      action: (context) async {
-        final selection = LdMonkeySelection.of<_Movie, int>(context);
-        await movieRepository.deleteBatch(selection.items);
-      },
+      config: (context) => LdSubmitConfig(
+        action: (_) async {
+          final selection = LdMonkeySelection.of<_Movie, int>(context);
+          await movieRepository.deleteBatch(selection.items);
+        },
+      ),
+      child: Text("Delete"),
+      icon: Icon(LucideIcons.trash2),
     ),
     toggleSelectionControls<_Movie, int>(),
   ],

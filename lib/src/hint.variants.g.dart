@@ -152,7 +152,6 @@ class LdHint extends StatelessWidget {
       type: type,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
-      key: key,
     );
   }
 }

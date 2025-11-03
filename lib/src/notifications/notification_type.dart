@@ -5,6 +5,4 @@ enum LdNotificationType {
   error,
   loading,
   acknowledge,
-  confirm,
-  enterText,
 }

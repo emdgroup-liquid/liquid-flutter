@@ -27,7 +27,7 @@ void main() {
       subscription.cancel();
 
       // The test passes if no exceptions are thrown
-      expect(true, isTrue);
+      expect(receivedEvent, isTrue);
     });
   });
 }

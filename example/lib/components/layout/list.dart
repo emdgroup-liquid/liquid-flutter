@@ -114,7 +114,6 @@ class _ListDemoState extends State<ListDemo> {
                         color: LdTheme.of(context).palette.success,
                         child: Text(item.value.name.toString().substring(0, 1)),
                       ),
-                      trailingForward: true,
                       title: Text(item.value.name),
                       subtitle: Text(item.value.category),
                     );

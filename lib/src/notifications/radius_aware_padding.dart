@@ -8,19 +8,17 @@ class RadiusAwarePadding extends StatelessWidget {
   final LdSize innerRadiusSize;
   final EdgeInsets? minPadding;
 
-  final double? insetFromEdge;
-
   final BoxDecoration? decoration;
   final Widget child;
 
-  const RadiusAwarePadding(
-      {super.key,
-      required this.fallbackSize,
-      this.innerRadiusSize = LdSize.s,
-      required this.child,
-      this.decoration,
-      this.insetFromEdge,
-      this.minPadding});
+  const RadiusAwarePadding({
+    super.key,
+    required this.fallbackSize,
+    this.innerRadiusSize = LdSize.s,
+    required this.child,
+    this.decoration,
+    this.minPadding,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,13 +26,8 @@ class RadiusAwarePadding extends StatelessWidget {
 
     final innerRadius = theme.radiusSize(innerRadiusSize);
 
-    double screenRadius = theme.screenRadius;
-
-    if (insetFromEdge != null) {
-      screenRadius = screenRadius - insetFromEdge!;
-    }
-
-    final radius = screenRadius < 1 ? theme.radiusSize(fallbackSize) : screenRadius;
+    // Use fixed radius matching app bar (LdSize.m)
+    final radius = theme.radiusSize(LdSize.m);
 
     final paddingAmount = max(0.0, radius - innerRadius);
 

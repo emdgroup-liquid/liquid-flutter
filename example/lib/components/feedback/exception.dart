@@ -22,9 +22,8 @@ class _ExceptionDemoState extends State<ExceptionDemo> {
     super.initState();
     retryController = LdRetryController(
       onRetry: () async {
-        final retry = await LdNotificationsController.of(context).confirm(
-          "Fire another automatic retry?",
-        );
+        final retry = await ldConfirmModal(context: context, description: "Fire another automatic retry?");
+
         if (retry == true) {
           retryController.handleError(canRetry: true);
           return;
@@ -62,8 +61,7 @@ class _ExceptionDemoState extends State<ExceptionDemo> {
                 return LdExceptionView(
                   exception: LdLocalizedException(
                     message: "Error message",
-                    moreInfo:
-                        "Nothing actually went wrong, this is just a demo",
+                    moreInfo: "Nothing actually went wrong, this is just a demo",
                     stackTrace: StackTrace.current,
                   ),
                   retryController: retryController,

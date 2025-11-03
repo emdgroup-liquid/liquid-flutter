@@ -402,7 +402,7 @@ class _BentoCard extends StatelessWidget {
                 title: Text("Preview"),
                 subtitle: Text("Preview"),
                 tradeLeadingForSelectionControl: true,
-                showSelectionControls: true,
+                selectionControl: LdSelectionControl.checkbox,
                 onPressed: () {},
               ),
               LdDivider(),
@@ -451,10 +451,10 @@ class _BentoCard extends StatelessWidget {
       case "Modal":
         return LdButton(
           onPressed: () async {
-            await LdModal(
-              title: const Text("Modal"),
-              modalContent: (context) => const Text("Modal content"),
-            ).show(context);
+            await LdModalRoute(
+              context: context,
+              pageBuilder: (context) => const Text("Modal content"),
+            ).show(context, useRootNavigator: true);
           },
           child: const Text("Open Modal"),
         );
@@ -467,11 +467,7 @@ class _BentoCard extends StatelessWidget {
 
       case "Notification":
         return LdNotificationWidget(
-          notification: LdNotification(
-              message: "Notification", type: LdNotificationType.info),
-          onConfirm: () {},
-          onSubmitInput: (_) {},
-          onCancel: () {},
+          notification: LdNotification(message: "Notification", type: LdNotificationType.info),
           onDismiss: () {},
         );
 
@@ -494,8 +490,7 @@ class _BentoCard extends StatelessWidget {
           spacing: 8,
           runSpacing: 8,
           children: [
-            ...LdIndicatorType.values
-                .map((e) => LdIndicator(type: e, size: LdSize.s)),
+            ...LdIndicatorType.values.map((e) => LdIndicator(type: e, size: LdSize.s)),
           ],
         );
 

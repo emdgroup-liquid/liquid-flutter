@@ -172,8 +172,8 @@ class VariantBuilder implements Builder {
       final configClassName = '${publicClassName}Config';
       final configClass = _generateConfigClass(
           configClassName, contextConfigurableParams, optionalParams);
-      final providerClass =
-          _generateProviderClass(configClassName, publicClassName);
+      final providerClass = _generateProviderClass(
+          configClassName, publicClassName, contextConfigurableParams);
       generatedItems.addAll([configClass, providerClass]);
     }
 
@@ -464,7 +464,7 @@ class VariantBuilder implements Builder {
           );
         }
 
-        for (final param in optionalParams) {
+        for (final param in optionalParams.where((p) => p.name != 'key')) {
           final isContextConfigurable =
               contextConfigurableParams.contains(param);
           if (isContextConfigurable && configClassName != null) {
@@ -482,23 +482,6 @@ class VariantBuilder implements Builder {
           } else {
             namedArgs[param.name] = refer(param.name);
           }
-        }
-
-        // Add key if present
-        final hasKeyParam = optionalParams.any((p) => p.name == 'key') ||
-            positionalParams.any((p) => p.name == 'key');
-        if (hasKeyParam) {
-          ParameterElement keyParam;
-          final keyInOptional =
-              optionalParams.where((p) => p.name == 'key').toList();
-          if (keyInOptional.isNotEmpty) {
-            keyParam = keyInOptional.first;
-          } else {
-            keyParam = positionalParams.where((p) => p.name == 'key').first;
-          }
-          namedArgs['key'] = refer(keyParam.name);
-        } else {
-          namedArgs['key'] = refer('key');
         }
 
         // Add the return statement
@@ -526,10 +509,12 @@ class VariantBuilder implements Builder {
       builder.name = configClassName;
 
       // Generate fields for each context-configurable parameter
+      // All fields must be nullable so we can detect when they weren't provided
       for (final param in contextConfigurableParams) {
+        final nullableType = _makeNullableType(param.type.toString());
         builder.fields.add(Field((fb) => fb
           ..name = param.name
-          ..type = refer(param.type.toString())
+          ..type = refer(nullableType)
           ..modifier = FieldModifier.final$));
       }
 
@@ -542,15 +527,18 @@ class VariantBuilder implements Builder {
             ..named = true
             ..required = false
             ..toThis = true
-            ..defaultTo = param.defaultValueCode != null
-                ? Code(param.defaultValueCode!)
-                : null));
+            // No defaults - fields should be null if not provided
+            ..defaultTo = null));
         }
       }));
     });
   }
 
-  Class _generateProviderClass(String configClassName, String publicClassName) {
+  Class _generateProviderClass(
+    String configClassName,
+    String publicClassName,
+    List<ParameterElement> contextConfigurableParams,
+  ) {
     return Class((builder) {
       builder.name = '${publicClassName}ConfigProvider';
       builder.extend = const Reference('StatelessWidget');
@@ -592,11 +580,44 @@ class VariantBuilder implements Builder {
           ..name = 'context'
           ..type = const Reference('BuildContext')));
 
-        // Generate: Provider<ConfigClassName>.value(value: config, child: child)
-        mb.body = Code('return Provider<$configClassName>.value('
-            'value: config, '
-            'child: child,'
-            ');');
+        // Build method body: check for parent config and merge
+        final bodyStatements = <Code>[];
+
+        // Read parent config
+        bodyStatements.add(
+          Code(
+              'final parentConfig = Provider.of<$configClassName?>(context, listen: false);'),
+        );
+
+        // Generate merge arguments for each context-configurable parameter
+        final mergeArgs = <String>[];
+        for (final param in contextConfigurableParams) {
+          mergeArgs.add(
+              '${param.name}: config.${param.name} ?? parentConfig.${param.name}');
+        }
+
+        // Determine merged config
+        if (mergeArgs.isNotEmpty) {
+          bodyStatements.add(
+            Code('final mergedConfig = parentConfig != null ? $configClassName('
+                '${mergeArgs.join(',\n        ')}'
+                ') : config;'),
+          );
+        } else {
+          bodyStatements.add(
+            Code('final mergedConfig = config;'),
+          );
+        }
+
+        // Provide merged config
+        bodyStatements.add(
+          Code('return Provider<$configClassName>.value('
+              'value: mergedConfig, '
+              'child: child,'
+              ');'),
+        );
+
+        mb.body = Block.of(bodyStatements);
       }));
     });
   }

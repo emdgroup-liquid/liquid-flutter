@@ -4,6 +4,7 @@ import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/haptics.dart';
 import 'package:liquid_flutter/src/touchable/touchable.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:provider/provider.dart';
 
 import 'tokens.dart';
 
@@ -22,17 +23,19 @@ class LdCheckboxWidget extends StatefulWidget {
   final String? label;
   final bool checked;
   final bool disabled;
+  final FocusNode? focusNode;
 
   final LdSize size;
   final Function(bool)? onChanged;
   final LdColor? color;
   const LdCheckboxWidget(
       {this.label,
-      required this.checked,
-      this.onChanged,
-      this.color,
-      this.size = LdSize.s,
-      this.disabled = false,
+      @ContextConfigurable() this.checked = false,
+      @ContextConfigurable() this.onChanged,
+      @ContextConfigurable() this.color,
+      @ContextConfigurable() this.focusNode,
+      @ContextConfigurable() this.size = LdSize.s,
+      @ContextConfigurable() this.disabled = false,
       Key? key})
       : super(key: key);
 
@@ -58,16 +61,19 @@ class _LdCheckboxState extends State<LdCheckboxWidget> {
     );
 
     return LdTouchableSurface(
+      key: const Key('ldCheckbox_touchable'),
+      hitTestBehavior: HitTestBehavior.opaque,
       color: reactiveColors,
       mode: widget.checked ? LdTouchableSurfaceMode.solid : LdTouchableSurfaceMode.outline,
       disabled: widget.disabled,
+      focusNode: widget.focusNode,
       onPressed: () {
         if (widget.onChanged != null) {
           widget.onChanged!(!widget.checked);
         }
         LdHaptics.vibrate(HapticsType.selection);
       },
-      builder: (context, colors, status) => Semantics(
+      builder: (context, colors, status, _) => Semantics(
         checked: widget.checked,
         enabled: !widget.disabled,
         label: widget.label,

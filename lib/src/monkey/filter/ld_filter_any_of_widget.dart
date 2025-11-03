@@ -30,24 +30,26 @@ class LdFilterAnyOfWidget<T extends Identifiable<IdType>, IdType, E> extends Sta
               child: const Icon(LucideIcons.x),
               size: LdSize.s,
               onPressed: () {
-                repository.updateFilter<LdFilterAnyOf<T, IdType, E>>(
+                repository.updateFilter(
                   filter.name,
-                  (filter) => filter.copyWith(isOn: false, selectedValues: {}),
+                  (filter) => (filter as LdFilterAnyOf<T, IdType, E>).copyWith(
+                    isOn: false,
+                  ),
                 );
               },
             ),
           ],
         ),
         if (items.isNotEmpty)
-          LdChoose<E>(
+          LdChoose.fromSelectItems(
             items: items,
             multiple: true,
             value: filter.selectedValues,
             placeholder: Text(filter.label(context)),
             onChanged: (Set<E> values) {
-              repository.updateFilter<LdFilterAnyOf<T, IdType, E>>(
+              repository.updateFilter(
                 filter.name,
-                (filter) => filter.copyWith(
+                (filter) => (filter as LdFilterAnyOf<T, IdType, E>).copyWith(
                   selectedValues: values,
                   isOn: values.isNotEmpty,
                 ),

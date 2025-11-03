@@ -50,25 +50,25 @@ class _AppScaffoldState extends State<AppScaffold> {
               ),
               title: widget.title,
               actions: [
-                LdLabeledActionBuilder(
-                  buildIcon: (context) => const Icon(LucideIcons.github),
-                  buildLabel: (context) => "GitHub",
-                  submitType: LdLabeledActionType.none,
-                  action: (context) {
+                LdButton(
+                  leading: const Icon(LucideIcons.github),
+                  onPressed: () {
                     launchUrl(
                       Uri.parse(
                         "https://github.com/emdgroup-liquid/liquid-flutter",
                       ),
                     );
                   },
+                  child: const Text("GitHub"),
                 ),
-                LdLabeledActionBuilder(
-                  action: (context) {},
-                  buildIcon: (context) => const Icon(LucideIcons.paintBucket),
-                  buildLabel: (context) => "Theme",
-                  submitType: LdLabeledActionType.contextMenu,
-                  buildContextMenu: (context, close) => ConstrainedBox(
-                    constraints: BoxConstraints(
+                LdContextMenu(
+                  builder: (context, isOpen, open, child) => LdButton(
+                    leading: const Icon(LucideIcons.paintBucket),
+                    onPressed: open,
+                    child: const Text("Theme"),
+                  ),
+                  menuBuilder: (context, close) => ConstrainedBox(
+                    constraints: const BoxConstraints(
                       maxWidth: 300,
                     ),
                     child: SingleChildScrollView(

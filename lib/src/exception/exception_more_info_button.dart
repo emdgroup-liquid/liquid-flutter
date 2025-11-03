@@ -22,19 +22,11 @@ class LdExceptionMoreInfoButton extends StatelessWidget {
         color: theme.error,
         onPressed: open,
       ),
-      modal: LdModal(
-        noHeader: true,
-        showDismissButton: false,
-        modalContent: (context) => LdExceptionDialog(
+      modal: LdModalRoute(
+        context: context,
+        pageBuilder: (context) => LdExceptionDialog(
           error: error!,
         ),
-        actions: (context) => [
-          LdButton.ghost(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(LiquidLocalizations.of(context).close),
-          ),
-        ],
-        title: Text(LiquidLocalizations.of(context).errorOccurred),
       ),
     );
   }

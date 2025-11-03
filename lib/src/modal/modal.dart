@@ -1,515 +1,580 @@
-import 'dart:io' if (dart.library.io) 'dart:io';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/modal/size_notifier.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:provider/provider.dart';
-import 'package:responsive_builder/responsive_builder.dart';
-import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
-class LdModal {
-  /// The content of the sheet.
-  final Widget Function(BuildContext context)? modalContent;
+/// A Page implementation for use with GoRouter that displays an LdModal.
+///
+/// This replaces the deprecated LdModalPage class.
+class LdModalPage<T> extends Page<T> {
+  final LdModalRoute<T> Function(BuildContext context) builder;
 
-  /// The slivers to be added to the sheet. Used instead of [modalContent] if provided.
-  final List<Widget> Function(BuildContext context)? contentSlivers;
+  const LdModalPage({
+    required this.builder,
+  });
 
-  /// Whether the sheet should scale the content behind when opened. Defaults to true on iOS mobile devices.
-  final bool? enableScaling;
+  @override
+  Route<T> createRoute(BuildContext context) {
+    return builder(context);
+  }
+}
 
-  /// Whether the sheet can be dismissed
-  final bool userCanDismiss;
+class LdModalRoute<T> extends PageRoute<T> {
+  final BuildContext context;
 
-  /// Whether to show the dismiss button
-  final bool showDismissButton;
+  final String? _barrierLabel;
 
-  /// Callback for when the sheet is dismissed.
-  final VoidCallback? onDismiss;
+  final LdModalTypeMode modalTypeMode;
 
-  /// Whether the sheet should disable scrolling. Defaults to false.
-  final bool disableScrolling;
+  final LdSize? dialogSize;
 
-  /// The actions to be added to the sheet.
-  final List<Widget> Function(BuildContext context)? actions;
-
-  /// The mode of the modal.
-  final LdModalTypeMode? mode;
-
-  /// Override the modal index. By default the LdPortalController will increment the index for each modal.
-  final int? index;
-
-  final Key? key;
-
-  @Deprecated(
-    "No longer used. Widget will build header if [title] is provided.",
-  )
-  final bool noHeader;
-
-  final EdgeInsets? contentPadding;
-
-  final EdgeInsets? headerPadding;
-
-  final EdgeInsets? actionBarPadding;
-
-  /// The title of the modal.
-  final Widget? title;
-
-  /// A list of listenables to be injected into the modal. That can be read
-  /// from the various builder contexts, useful for updating the modal content
-  /// based on external state like a viewmodel.
-  final List<InheritedProvider> Function(BuildContext dialogContext)? injectables;
-
-  /// The size of the modal.
-  final LdSize? size;
-
-  /// Fixed dialog size
   final Size? fixedDialogSize;
 
-  /// The radius for the top of the modal.
-  final double? topRadius;
+  final double? sheetAspectRatio;
 
-  /// The radius for the bottom of the modal.
-  final double? bottomRadius;
+  final double? sheetBreakpoint;
 
-  /// The inset for the modal from the edges of the screen.
-  final EdgeInsets? insets;
+  final bool? scaleParent;
 
-  /// Whether the modal should use safe area. Defaults to true.
-  final bool useSafeArea;
+  final BorderRadius? sheetBorderRadius;
+  final BorderRadius? dialogBorderRadius;
+  final EdgeInsets? sheetInsets;
 
-  /// Whether to show the drag handle. Defaults to true.
-  @Deprecated("No longer an option. Will not render drag handle.")
-  final bool? showDragHandle;
+  @override
+  final bool maintainState;
 
-  final Widget Function(BuildContext context)? actionBar;
+  final Widget Function(BuildContext context) pageBuilder;
 
-  LdModal({
-    this.enableScaling,
-    this.modalContent,
-    this.key,
-    this.userCanDismiss = true,
-    this.disableScrolling = false,
-    this.noHeader = false,
-    this.showDragHandle,
-    this.contentPadding,
-    this.headerPadding,
-    this.title,
-    this.actions,
-    this.contentSlivers,
-    this.mode = LdModalTypeMode.auto,
-    this.showDismissButton = true,
-    this.injectables,
-    this.onDismiss,
-    this.size,
-    this.actionBar,
-    this.actionBarPadding,
-    this.topRadius,
-    this.bottomRadius,
-    this.insets,
-    this.useSafeArea = false,
+  LdModalRoute({
+    required this.context,
+    super.barrierDismissible = true,
+    required this.pageBuilder,
+    this.modalTypeMode = LdModalTypeMode.auto,
+    this.scaleParent = true,
+    this.maintainState = true,
+    this.dialogSize,
+    this.sheetBorderRadius,
     this.fixedDialogSize,
-    this.index,
-  }) {
-    assert(!(userCanDismiss == false && showDismissButton), "showDismissButton is true but userCanDismiss is false");
-  }
+    this.sheetAspectRatio,
+    this.dialogBorderRadius,
+    this.sheetBreakpoint,
+    this.sheetInsets,
+    String? barrierLabel,
+  }) : _barrierLabel = barrierLabel;
 
-  bool get shouldScale {
-    return enableScaling == true || (!kIsWeb && Platform.isIOS && mode != LdModalTypeMode.dialog);
-  }
-
-  bool get _enableDrag => userCanDismiss;
-
-  /// Whether the modal in auto mode should show a sheet based on the
-  /// device type.
-  bool _autoShowsSheet(BuildContext context) {
-    if (!context.mounted) return false;
-    final mediaQuery = MediaQuery.maybeOf(context);
-    if (mediaQuery == null) return false;
-
-    final deviceType = getDeviceType(mediaQuery.size);
-    return deviceType == DeviceScreenType.watch || deviceType == DeviceScreenType.mobile;
-  }
-
-  /// Returns whether [mode] or screen size of [context] will
-  /// result in  a sheet being shown
-  bool _isSheet(BuildContext context) =>
-      mode == LdModalTypeMode.sheet || (mode == LdModalTypeMode.auto && _autoShowsSheet(context));
-
-  bool _hasSabGradient(BuildContext context) => actionBar != null && _isSheet(context);
-
-  /// Returns the correct [WoltModalType] based on the [mode] and [context].
-  WoltModalType _getSheetType(BuildContext context, {int index = 0}) {
-    final theme = LdTheme.of(context);
-
-    if (_isSheet(context)) {
-      return LdSheetType(
-        theme: theme,
-        topRadius: topRadius,
-        bottomRadius: bottomRadius,
-        index: this.index ?? index,
-      );
-    }
-    return LdDialogType(
-      theme: theme,
-      size: size ?? LdSize.m,
-      fixedSize: fixedDialogSize,
-      index: this.index ?? index,
-    );
-  }
-
-  Widget _getInjectables(
-    BuildContext context,
-    Widget Function(BuildContext context) builder,
-  ) {
-    final _controller = LdPortalController.maybeOf(context);
-
-    if (injectables == null && _controller == null) {
-      return builder(context);
-    }
-
-    return MultiProvider(
-      providers: [
-        ...(injectables != null ? injectables!(context) : []),
-        if (_controller != null) ListenableProvider.value(value: _controller),
-      ],
-      builder: (ctx, _) => builder(ctx),
-    );
-  }
-
-  Widget? _getTrailingNavBarWidget(BuildContext context) {
-    if (actions != null) {
-      return _getInjectables(
-        context,
-        (context) => Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ...actions!(context),
-              ],
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (userCanDismiss && showDismissButton) {
-      final dismissButton = Builder(builder: (context) {
-        return LdButton.vague(
-          mode: title != null ? LdButtonMode.ghost : LdButtonMode.vague,
-          child: const Icon(LucideIcons.x),
-          onPressed: () {
-            onDismiss?.call();
-            Navigator.of(context).pop();
-          },
-        );
-      });
-
-      if (topRadius != null && title == null) {
-        return _getInjectables(
-          context,
-          (context) => Column(
-            children: [dismissButton],
-          ),
-        );
-      }
-
-      return _getInjectables(
-        context,
-        (context) => Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            dismissButton,
-          ],
-        ),
-      );
-    }
-
-    return null;
-  }
-
-  EdgeInsets _navigationBarPadding(BuildContext context) {
-    if (headerPadding != null) {
-      return headerPadding!;
-    }
-
-    if (topRadius != null) {
-      return EdgeInsets.only(
-        top: topRadius! / 2,
-        left: topRadius! / 2,
-        right: topRadius! / 2,
-        bottom: topRadius! / 2,
-      );
-    }
-
-    return LdTheme.of(context).pad(size: LdSize.m);
-  }
-
-  EdgeInsets _contentPadding(BuildContext context) {
-    final theme = LdTheme.of(context);
-
-    if (contentPadding != null) {
-      return contentPadding!;
-    }
-
-    EdgeInsets defaultContentPadding = EdgeInsets.zero;
-
-    if (topRadius != null) {
-      defaultContentPadding = EdgeInsets.only(
-        top: topRadius! / 2,
-        left: topRadius! / 2,
-        right: topRadius! / 2,
-        bottom: topRadius! / 2,
-      );
-    } else {
-      defaultContentPadding = theme.pad(size: LdSize.l);
-    }
-
-    if (_hasSabGradient(context)) {
-      defaultContentPadding += EdgeInsets.only(
-        bottom: theme.paddingSize(size: LdSize.m),
-      );
-    }
-
-    return defaultContentPadding;
-  }
-
-  EdgeInsets _sabPadding(BuildContext context) {
-    final theme = LdTheme.of(context, listen: true);
-    if (actionBarPadding != null) {
-      return actionBarPadding!;
-    } else {
-      EdgeInsets sabPadding = LdTheme.of(context).pad(size: LdSize.l);
-      // Add some more padding for sheets
-      if (_isSheet(context)) {
-        if (theme.screenRadius != 0) {
-          if (theme.screenRadius / 2 > sabPadding.left) {
-            sabPadding = EdgeInsets.all(
-              theme.screenRadius / 2,
-            );
-          }
-        }
-      }
-      return sabPadding;
-    }
-  }
-
-  List<SliverWoltModalSheetPage> _getPageList(BuildContext context) {
-    final theme = LdTheme.of(context, listen: true);
-
-    final sizeNotifier = ValueNotifier<Size>(Size.zero);
-
-    return [
-      SliverWoltModalSheetPage(
-        backgroundColor: theme.surface,
-        hasSabGradient: false,
-        surfaceTintColor: theme.surface,
-        stickyActionBar: _getStickyActionBar(context, sizeNotifier),
-        mainContentSliversBuilder: (context) => [
-          SliverStickyHeader.builder(
-              overlapsContent: title == null,
-              builder: (context, state) => Container(
-                    padding: _navigationBarPadding(context),
-                    decoration: BoxDecoration(
-                      color: title != null ? theme.surface : null,
-                      border: title != null
-                          ? Border(
-                              bottom: BorderSide(
-                                color: theme.border,
-                                width: 1,
-                              ),
-                            )
-                          : null,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        if (title != null)
-                          Expanded(
-                            child: DefaultTextStyle(
-                              style: ldBuildTextStyle(
-                                theme,
-                                LdTextType.label,
-                                LdSize.m,
-                              ),
-                              child: title!,
-                            ),
-                          ),
-                        _getTrailingNavBarWidget(context) ?? const SizedBox.shrink(),
-                      ],
-                    ),
-                  ),
-              sliver: SliverToBoxAdapter(
-                child: LdAutoBackground(
-                    isSurface: false,
-                    child: _getInjectables(
-                      context,
-                      (context) => ValueListenableBuilder<Size>(
-                        valueListenable: sizeNotifier,
-                        builder: (context, size, child) {
-                          return Padding(
-                            padding: _contentPadding(context) + EdgeInsets.only(bottom: size.height),
-                            child: modalContent != null ? modalContent!(context) : const SizedBox.shrink(),
-                          );
-                        },
-                      ),
-                    )),
-              )),
-          if (contentSlivers != null) ...contentSlivers!(context),
-        ],
-        hasTopBarLayer: false,
-      ),
-    ];
-  }
-
-  Widget? _getStickyActionBar(BuildContext context, ValueNotifier<Size> sizeNotifier) {
-    if (actionBar == null) {
-      return null;
-    }
-
-    final sabPadding = _sabPadding(context);
-
-    return _getInjectables(
-      context,
-      (context) => LdAutoBackground(
-        child: MeasureSize(
-          onSizeChange: (size) => sizeNotifier.value = size,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (!_hasSabGradient(context)) ...[
-                const LdDivider(
-                  height: 1,
-                ),
-                Padding(
-                  padding: sabPadding,
-                  child: actionBar!(context),
-                )
-              ] else
-                _LdActionBarGradient(
-                  child: Padding(
-                    padding: sabPadding,
-                    child: actionBar!(context),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  WoltModalSheetRoute asRoute(RouteSettings settings, BuildContext context) {
-    return WoltModalSheetRoute(
-      useSafeArea: useSafeArea,
-      barrierDismissible: userCanDismiss,
-      enableDrag: _enableDrag,
-      showDragHandle: false,
-      modalBarrierColor: _getModalBarrierColor(context),
-      settings: settings,
-      pageContentDecorator: _getContentDecorator,
-      modalTypeBuilder: (context) => _getSheetType(
-        context,
-        index: index ?? 0,
-      ),
-      pageListBuilderNotifier: ValueNotifier(
-        (context) => _getPageList(context),
-      ),
-      onModalDismissedWithBarrierTap: onDismiss,
-      onModalDismissedWithDrag: onDismiss,
-    );
-  }
-
-  Widget _getContentDecorator(Widget child) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      // add this
-      sized: false, // important
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent, // set color to transparent
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.dark,
-      ),
-      child: PopScope(
-        canPop: userCanDismiss,
-        onPopInvokedWithResult: (didPop, result) {
-          if (didPop) {
-            onDismiss?.call();
-          }
-        },
-        child: Builder(builder: (context) {
-          return CallbackShortcuts(
-            bindings: {
-              const SingleActivator(LogicalKeyboardKey.escape): () {
-                Navigator.of(context).maybePop();
-              },
-            },
-            child: LdPortal(child: child),
-          );
-        }),
-      ),
-    );
-  }
-
-  Color _getModalBarrierColor(BuildContext context) {
+  @override
+  Color? get barrierColor {
     final theme = LdTheme.of(context);
     return theme.palette.neutral.shades[8].withAlpha(150);
   }
 
-  /// Show the modal.
-  Future<dynamic> show(
-    BuildContext context, {
-    bool useRootNavigator = false,
-  }) async {
-    final res = await WoltModalSheet.show(
-      modalDecorator: (child) => KeyedSubtree(
+  @override
+  String? get barrierLabel {
+    return _barrierLabel ?? LiquidLocalizations.of(context).close;
+  }
+
+  Future<T?> show(BuildContext context, {bool useRootNavigator = false}) {
+    final safeContext = useRootNavigator ? Navigator.of(context, rootNavigator: true) : Navigator.of(context);
+    return safeContext.push<T>(this);
+  }
+
+  /// Determines if this route should behave as a sheet based on modalTypeMode and screen size.
+  bool _shouldBeSheet(BoxConstraints constraints) {
+    return switch (modalTypeMode) {
+      LdModalTypeMode.sheet => true,
+      LdModalTypeMode.dialog => false,
+      LdModalTypeMode.auto => _autoShowsSheet(constraints),
+    };
+  }
+
+  bool _autoShowsSheet(BoxConstraints constraints) {
+    final breakpoint = sheetBreakpoint ?? 900;
+    return constraints.maxWidth < breakpoint;
+  }
+
+  /// Builds content for sheet mode with top gap and rounded corners.
+  Widget _buildSheetContent(BuildContext context, Widget child) {
+    // Top gap ratio matching CupertinoSheetRoute (_kTopGapRatio = 0.08)
+    const double topGapRatio = 0.08;
+    double topPadding = MediaQuery.heightOf(context) * topGapRatio;
+    final screenSize = MediaQuery.sizeOf(context);
+    final availableHeight = screenSize.height - topPadding;
+
+    Widget content = Container(
+      clipBehavior: Clip.hardEdge,
+      decoration: BoxDecoration(
+        borderRadius: sheetBorderRadius ??
+            LdTheme.of(context).radius(LdSize.l).copyWith(bottomLeft: Radius.zero, bottomRight: Radius.zero),
+        border: Border.all(
+          color: LdTheme.of(context).border,
+          width: LdTheme.of(context).borderWidth,
+          strokeAlign: BorderSide.strokeAlignOutside,
+        ),
+      ),
+      child: CupertinoUserInterfaceLevel(
+        data: CupertinoUserInterfaceLevelData.elevated,
         child: child,
-        key: key,
       ),
-      barrierDismissible: userCanDismiss,
-      context: context,
-      useSafeArea: useSafeArea,
-      useRootNavigator: useRootNavigator,
-      showDragHandle: false,
-      modalBarrierColor: _getModalBarrierColor(context),
-      enableDrag: userCanDismiss,
-      pageContentDecorator: _getContentDecorator,
-      modalTypeBuilder: (_) => _getSheetType(
-        context,
-        index: 0,
-      ),
-      pageListBuilder: (_) => _getPageList(context),
     );
 
-    return res;
+    // Apply aspect ratio constraint if provided
+    if (sheetAspectRatio != null) {
+      final maxWidth = screenSize.width;
+      final maxHeight = availableHeight;
+
+      final desiredHeight = maxWidth / sheetAspectRatio!;
+      final finalHeight = desiredHeight.clamp(0, maxHeight);
+
+      topPadding = availableHeight - finalHeight;
+    }
+
+    return MediaQuery.removePadding(
+      context: context,
+      removeTop: true,
+      child: Container(
+        margin: sheetInsets,
+        padding: EdgeInsets.only(top: topPadding),
+        child: content,
+      ),
+    );
+  }
+
+  /// Builds content for dialog mode with centered positioning.
+  Widget _buildDialogContent(BuildContext context, Widget child) {
+    final theme = LdTheme.of(context);
+    final availableSize = MediaQuery.sizeOf(context);
+    late Size configuredSize;
+
+    // Determine size based on dialogSize parameter or default to medium
+    final size = dialogSize ?? LdSize.m;
+    switch (size) {
+      case LdSize.xs:
+        configuredSize = const Size(400, 300);
+        break;
+      case LdSize.s:
+        configuredSize = const Size(500, 400);
+        break;
+      case LdSize.m:
+        configuredSize = const Size(600, 500);
+        break;
+      case LdSize.l:
+        configuredSize = const Size(900, 700);
+        break;
+    }
+
+    // Override with fixedDialogSize if provided
+    if (fixedDialogSize != null) {
+      configuredSize = fixedDialogSize!;
+    }
+
+    final minPadding = theme.pad(size: LdSize.l);
+
+    double maxWidth = configuredSize.width.clamp(
+      0.0,
+      availableSize.width - minPadding.horizontal,
+    );
+    double maxHeight = configuredSize.height.clamp(
+      0.0,
+      availableSize.height - minPadding.vertical,
+    );
+
+    return MediaQuery.removePadding(
+      context: context,
+      removeTop: true,
+      removeBottom: true,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minWidth: 0,
+            maxWidth: maxWidth,
+            minHeight: 0,
+            maxHeight: maxHeight,
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: dialogBorderRadius ?? theme.radius(LdSize.m),
+              border: Border.all(
+                color: theme.stroke,
+                width: LdTheme.of(context).borderWidth,
+                strokeAlign: BorderSide.strokeAlignOutside,
+              ),
+            ),
+            clipBehavior: Clip.hardEdge,
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _wrapContent(BuildContext context) {
+    return pageBuilder(context);
+  }
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    return LayoutBuilder(builder: (context, constraints) {
+      final bool isSheet = _shouldBeSheet(constraints);
+      final Widget content = _wrapContent(context);
+
+      if (isSheet) {
+        return _buildSheetContent(context, content);
+      } else {
+        return _buildDialogContent(context, content);
+      }
+    });
+  }
+
+  /// Builds transitions for sheet mode using CupertinoSheetTransition.
+  Widget _buildSheetTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final bool linearTransition = popGestureInProgress;
+    // Drag is enabled only if barrierDismissible is true
+    final bool enableDrag = barrierDismissible;
+
+    return CupertinoSheetTransition(
+      primaryRouteAnimation: animation,
+      secondaryRouteAnimation: secondaryAnimation,
+      linearTransition: linearTransition,
+      child: enableDrag
+          ? _LdSheetDragGestureDetector<T>(
+              route: this,
+              controller: controller!, // protected access
+              child: child,
+            )
+          : child,
+    );
+  }
+
+  /// Builds transitions for dialog mode using fade and scale.
+  Widget _buildDialogTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final CurvedAnimation curvedAnimation = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOut,
+      reverseCurve: Curves.easeIn,
+    );
+
+    return FadeTransition(
+      opacity: curvedAnimation,
+      child: ScaleTransition(
+        scale: Tween<double>(begin: 0.8, end: 1.0).animate(curvedAnimation),
+        child: child,
+      ),
+    );
+  }
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return LayoutBuilder(builder: (context, constraints) {
+      final bool isSheet = _shouldBeSheet(constraints);
+
+      if (isSheet) {
+        return _buildSheetTransitions(context, animation, secondaryAnimation, child);
+      } else {
+        return _buildDialogTransitions(context, animation, secondaryAnimation, child);
+      }
+    });
+  }
+
+  @override
+  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
+    // Allow transitions to other modal routes (CupertinoSheetRoute or LdModalRoute in sheet/dialog mode)
+    // The delegated transition will handle the actual transition coordination
+    return nextRoute is CupertinoSheetRoute || nextRoute is LdModalRoute;
+  }
+
+  // Constants for dialog stacking behavior (matching sheet behavior)
+  static const double _kDialogScaleFactor = 0.0835;
+  static final Animatable<double> _kDialogScaleTween = Tween<double>(
+    begin: 1.0,
+    end: 1.0 - _kDialogScaleFactor,
+  );
+  static final Animatable<Offset> _kDialogMidUpTween = Tween<Offset>(
+    begin: Offset.zero,
+    end: const Offset(0.0, -0.1),
+  );
+
+  /// Delegated transition for dialog mode that scales down and moves up when covered.
+  static Widget _delegatedDialogSecondaryTransition(
+    Animation<double> secondaryAnimation,
+    Widget? child,
+  ) {
+    const Curve curve = Curves.linearToEaseOut;
+    const Curve reverseCurve = Curves.easeInToLinear;
+    final CurvedAnimation curvedAnimation = CurvedAnimation(
+      curve: curve,
+      reverseCurve: reverseCurve,
+      parent: secondaryAnimation,
+    );
+
+    final Animation<Offset> slideAnimation = curvedAnimation.drive(_kDialogMidUpTween);
+    final Animation<double> scaleAnimation = curvedAnimation.drive(_kDialogScaleTween);
+    curvedAnimation.dispose();
+
+    return SlideTransition(
+      position: slideAnimation,
+      transformHitTests: false,
+      child: ScaleTransition(
+        scale: scaleAnimation,
+        filterQuality: FilterQuality.medium,
+        alignment: Alignment.topCenter,
+        child: child,
+      ),
+    );
+  }
+
+  /// Creates a delegated transition builder that checks if this route is a dialog.
+  DelegatedTransitionBuilder _createDelegatedTransition() {
+    final LdModalRoute route = this;
+    return (
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+      bool allowSnapshotting,
+      Widget? child,
+    ) {
+      // Check if this route is in dialog mode
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final bool isDialog = !route._shouldBeSheet(constraints);
+          final modalRoute = ModalRoute.of(context);
+          final parentIsModal = modalRoute is LdModalRoute;
+
+          if (route.scaleParent == false) {
+            return child ?? const SizedBox.shrink();
+          }
+
+          if (isDialog && !secondaryAnimation.isDismissed) {
+            if (!parentIsModal) {
+              return child ?? const SizedBox.shrink();
+            }
+            // Apply dialog stacking transition
+            return _delegatedDialogSecondaryTransition(secondaryAnimation, child);
+          }
+
+          // For sheets or when dismissed, fall back to sheet transition
+          return CupertinoSheetTransition.delegateTransition(
+            context,
+            animation,
+            secondaryAnimation,
+            allowSnapshotting,
+            child,
+          );
+        },
+      );
+    };
+  }
+
+  @override
+  DelegatedTransitionBuilder? get delegatedTransition {
+    // Provide delegated transition for both sheet and dialog modes
+    return _createDelegatedTransition();
+  }
+
+  @override
+  bool get opaque => false;
+
+  @override
+  Duration get transitionDuration {
+    // Match CupertinoSheetRoute duration for sheet mode
+    // Default to dialog duration, will be effectively longer for sheets due to transition
+    return const Duration(milliseconds: 500);
   }
 }
 
-class _LdActionBarGradient extends StatelessWidget {
-  const _LdActionBarGradient({required this.child});
+/// Gesture detector for drag-to-dismiss on sheet routes.
+class _LdSheetDragGestureDetector<T> extends StatefulWidget {
+  const _LdSheetDragGestureDetector({
+    required this.route,
+    required this.controller,
+    required this.child,
+  });
 
+  final LdModalRoute<T> route;
+  final AnimationController controller;
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    final theme = LdTheme.of(context, listen: true);
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.background,
-        boxShadow: [
-          BoxShadow(
-            color: theme.background.withAlpha(100),
-            blurRadius: 10,
-            offset: const Offset(0, -10),
-          ),
-        ],
-      ),
-      child: child,
+  State<_LdSheetDragGestureDetector<T>> createState() => _LdSheetDragGestureDetectorState<T>();
+}
+
+class _LdSheetDragGestureDetectorState<T> extends State<_LdSheetDragGestureDetector<T>> {
+  _LdSheetDragController<T>? _dragController;
+  late VerticalDragGestureRecognizer _recognizer;
+
+  // Constants from CupertinoSheetRoute
+  static const double _kTopGapRatio = 0.08;
+
+  @override
+  void initState() {
+    super.initState();
+    _recognizer = VerticalDragGestureRecognizer(debugOwner: this)
+      ..onStart = _handleDragStart
+      ..onUpdate = _handleDragUpdate
+      ..onEnd = _handleDragEnd
+      ..onCancel = _handleDragCancel;
+  }
+
+  @override
+  void dispose() {
+    _recognizer.dispose();
+    if (_dragController != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_dragController?.navigator.mounted ?? false) {
+          _dragController?.navigator.didStopUserGesture();
+        }
+        _dragController = null;
+      });
+    }
+    super.dispose();
+  }
+
+  void _handleDragStart(DragStartDetails details) {
+    assert(mounted);
+    assert(_dragController == null);
+    _dragController = _LdSheetDragController<T>(
+      navigator: widget.route.navigator!,
+      controller: widget.controller,
+      getIsCurrent: () => widget.route.isCurrent,
+      getIsActive: () => widget.route.isActive,
     );
+  }
+
+  void _handleDragUpdate(DragUpdateDetails details) {
+    assert(mounted);
+    assert(_dragController != null);
+    if (context.size == null) return;
+
+    final double screenHeight = context.size!.height;
+    final double sheetHeight = screenHeight - (screenHeight * _kTopGapRatio);
+    _dragController!.dragUpdate(details.primaryDelta! / sheetHeight);
+  }
+
+  void _handleDragEnd(DragEndDetails details) {
+    assert(mounted);
+    assert(_dragController != null);
+    if (context.size == null) {
+      _dragController = null;
+      return;
+    }
+
+    final double velocity = details.velocity.pixelsPerSecond.dy / context.size!.height;
+    _dragController!.dragEnd(velocity);
+    _dragController = null;
+  }
+
+  void _handleDragCancel() {
+    assert(mounted);
+    _dragController?.dragEnd(0.0);
+    _dragController = null;
+  }
+
+  void _handlePointerDown(PointerDownEvent event) {
+    // Only enable drag if barrierDismissible is true (defaults to true)
+    final bool canDismiss = widget.route.barrierDismissible;
+    if (canDismiss) {
+      _recognizer.addPointer(event);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      onPointerDown: _handlePointerDown,
+      behavior: HitTestBehavior.translucent,
+      child: widget.child,
+    );
+  }
+}
+
+/// Controller for managing drag gestures on sheet routes.
+class _LdSheetDragController<T> {
+  _LdSheetDragController({
+    required this.navigator,
+    required this.controller,
+    required this.getIsActive,
+    required this.getIsCurrent,
+  }) {
+    navigator.didStartUserGesture();
+  }
+
+  final AnimationController controller;
+  final NavigatorState navigator;
+  final ValueGetter<bool> getIsActive;
+  final ValueGetter<bool> getIsCurrent;
+
+  // Constants from CupertinoSheetRoute
+  static const double _kMinFlingVelocity = 2.0;
+  static const Duration _kDroppedSheetDragAnimationDuration = Duration(milliseconds: 300);
+
+  void dragUpdate(double delta) {
+    controller.value -= delta;
+  }
+
+  void dragEnd(double velocity) {
+    const Curve animationCurve = Curves.easeOut;
+    final bool isCurrent = getIsCurrent();
+    final bool animateForward;
+
+    if (!isCurrent) {
+      // If the route has been navigated away from, animate direction depends on
+      // whether it's still active in the navigation stack.
+      animateForward = getIsActive();
+    } else if (velocity.abs() >= _kMinFlingVelocity) {
+      // If sufficient velocity, animate based on velocity direction.
+      animateForward = velocity <= 0;
+    } else {
+      // If low velocity, pop if dragged past halfway point.
+      animateForward = controller.value > 0.52;
+    }
+
+    if (animateForward) {
+      controller.animateTo(
+        1.0,
+        duration: _kDroppedSheetDragAnimationDuration,
+        curve: animationCurve,
+      );
+    } else {
+      if (isCurrent) {
+        final NavigatorState rootNavigator = Navigator.of(navigator.context, rootNavigator: true);
+        rootNavigator.pop();
+      }
+
+      if (controller.isAnimating) {
+        controller.animateBack(
+          0.0,
+          duration: _kDroppedSheetDragAnimationDuration,
+          curve: animationCurve,
+        );
+      }
+    }
+
+    if (controller.isAnimating) {
+      void animationStatusCallback(AnimationStatus status) {
+        navigator.didStopUserGesture();
+        controller.removeStatusListener(animationStatusCallback);
+      }
+
+      controller.addStatusListener(animationStatusCallback);
+    } else {
+      navigator.didStopUserGesture();
+    }
   }
 }

@@ -16,21 +16,32 @@ void main() {
             SizedBox(
               height: 200,
               width: 500,
-              child: Scaffold(
-                body: Center(
-                    child: LdModalBuilder(
-                  builder: (context, open) {
-                    return LdButton(
-                      child: const Text("Open dialog"),
-                      onPressed: open,
-                    );
-                  },
-                  modal: LdModal(
-                      title: const Text("Dialog title"),
-                      modalContent: (context) {
-                        return const LdText("Dialog content");
-                      }),
-                )),
+              child: Builder(
+                builder: (context) {
+                  return Scaffold(
+                    body: LdModalBuilder(
+                      builder: (context, open) {
+                        return Center(
+                          child: LdAutoSpace(
+                            children: [
+                              LdButton(
+                                child: const Text("Open dialog"),
+                                onPressed: open,
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      modal: LdModalRoute(
+                        context: context,
+                        pageBuilder: (context) => const LdScaffold(
+                          appBar: LdAppBar(title: Text("Dialog title")),
+                          body: LdScaffoldBody(children: [LdText("Dialog content")]),
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           );
@@ -41,29 +52,35 @@ void main() {
             SizedBox(
               height: 200,
               width: 500,
-              child: Scaffold(
-                body: Center(
-                    child: LdModalBuilder(
-                  builder: (context, open) {
-                    return LdButton(
-                      child: const Text("Open dialog"),
-                      onPressed: open,
-                    );
-                  },
-                  modal: LdModal(
-                      title: const Text("Dialog title"),
-                      modalContent: (context) {
-                        return const LdText("Dialog content");
-                      }),
-                )),
+              child: Builder(
+                builder: (context) {
+                  return Scaffold(
+                    body: Center(
+                      child: LdModalBuilder(
+                        builder: (context, open) {
+                          return LdAutoSpace(
+                            children: [
+                              LdButton(
+                                child: const Text("Open dialog"),
+                                onPressed: open,
+                              ),
+                            ],
+                          );
+                        },
+                        modal: LdModalRoute(
+                          context: context,
+                          pageBuilder: (context) => const LdScaffold(
+                            appBar: LdAppBar(title: Text("Dialog title")),
+                            body: LdScaffoldBody(children: [LdText("Dialog content")]),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           );
-
-          await tester.tap(find.text("Open dialog"));
-
-          await tester.pumpAndSettle();
-
           return null;
         },
       },

@@ -83,6 +83,7 @@ class LdList<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
     this.primary = false,
     this.footer,
     this.shrinkWrap = false,
+    this.padding = EdgeInsets.zero,
     this.retryConfig,
   });
 
@@ -146,6 +147,9 @@ class LdList<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
 
   // Error handling
   final LdRetryConfig? retryConfig;
+
+  /// The padding of the list.
+  final EdgeInsets padding;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -363,13 +367,25 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdList<
 
   List<Widget> _buildSlivers(BuildContext context) {
     return [
-      if (widget.header != null) SliverSafeArea(sliver: SliverToBoxAdapter(child: widget.header!)),
+      if (widget.header != null)
+        SliverSafeArea(
+            minimum: widget.padding.copyWith(bottom: 00),
+            sliver: SliverToBoxAdapter(
+              child: widget.header!,
+            )),
       SliverSafeArea(
         top: widget.header == null,
         bottom: widget.footer == null,
+        minimum: widget.padding,
         sliver: _buildListItems(),
       ),
-      if (widget.footer != null) SliverSafeArea(sliver: SliverToBoxAdapter(child: widget.footer!)),
+      if (widget.footer != null)
+        SliverSafeArea(
+          minimum: widget.padding.copyWith(top: 0),
+          sliver: SliverToBoxAdapter(
+            child: widget.footer!,
+          ),
+        ),
     ];
   }
 

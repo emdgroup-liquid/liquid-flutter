@@ -49,21 +49,30 @@ class _DemoCodeDialogState extends State<DemoCodeDialog> {
         onPressed: onPress,
         child: const Text("Show Code"),
       ),
-      modal: LdModal(
-        title: const Text("Code Example"),
-        modalContent: (context) => SelectableRegion(
-          focusNode: FocusNode(),
-          selectionControls: MaterialTextSelectionControls(),
-          child: Container(
-            color: shadZinc.shades.last,
-            child: SingleChildScrollView(
-                child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text.rich(
-                highlightedCode,
-                style: TextStyle(color: Colors.white),
+      modal: LdModalRoute(
+        context: context,
+        pageBuilder: (context) => LdScaffold(
+          appBar: LdAppBar(
+            title: const Text("Code Example"),
+          ),
+          body: LdScaffoldBody(
+            children: [
+              SelectableRegion(
+                focusNode: FocusNode(),
+                selectionControls: MaterialTextSelectionControls(),
+                child: Container(
+                  color: shadZinc.shades.last,
+                  child: SingleChildScrollView(
+                      child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text.rich(
+                      highlightedCode,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  )),
+                ),
               ),
-            )),
+            ],
           ),
         ),
       ),

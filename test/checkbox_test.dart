@@ -9,22 +9,9 @@ void main() {
   testWidgets('LdCheckbox ', (WidgetTester test) async {
     var theme = LdTheme();
 
-    await test.pumpWidget(LdThemeProvider(
-      theme: theme,
-      child: const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Center(
-              child: LdCheckbox(
-            checked: true,
-          ))),
-    ));
-
-    await test.pumpAndSettle();
-
-    expect(find.byType(LdCheckbox), findsOneWidget);
-
     var onCheckedCalled = false;
     onChecked(bool checked) {
+      debugPrint('onCheckedCalled: $checked');
       onCheckedCalled = true;
     }
 
@@ -44,9 +31,13 @@ void main() {
     await test.pumpAndSettle();
 
     expect(find.byType(LdCheckbox), findsOneWidget);
+
+    expect(find.byType(LdCheckbox), findsOneWidget);
     expect(find.text("Hello"), findsOneWidget);
 
-    await test.tap(find.byType(LdCheckbox));
+    await test.tap(find.byKey(const Key('ldCheckbox_touchable')));
+
+    await test.pumpAndSettle();
 
     expect(onCheckedCalled, true);
   });

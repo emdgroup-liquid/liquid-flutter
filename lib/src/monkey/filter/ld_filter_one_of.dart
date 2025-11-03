@@ -26,7 +26,7 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
   @override
   LdFilterOneOf<T, IdType, E> marshalSerialized(String value) {
     if (value.isEmpty) {
-      return copyWith(isOn: false, selectedValue: null);
+      return copyWith(isOn: false);
     }
 
     final values = value.split(',');

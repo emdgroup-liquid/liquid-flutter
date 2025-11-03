@@ -25,7 +25,7 @@ class LdMonkeyMultiShortcuts<T extends Identifiable<IdType>, IdType> extends Sta
 
         if (selection.items.length > 1 && action.multiSelect) {
           bindings[activator] = () {
-            action.onPressed(context);
+            action.onShortcutPressed(context);
           };
         }
       }
@@ -65,7 +65,7 @@ class LdMonkeySingleShortcuts<T extends Identifiable<IdType>, IdType> extends St
         }
 
         bindings[activator] = () {
-          action.onPressed(context);
+          action.onShortcutPressed(context);
         };
       }
     }

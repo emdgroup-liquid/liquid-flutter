@@ -9,7 +9,7 @@ class LdModalBuilder extends StatefulWidget {
     Future<dynamic> Function() onPress,
   ) builder;
 
-  final LdModal modal;
+  final LdModalRoute modal;
 
   final bool useRootNavigator;
 
@@ -35,10 +35,7 @@ class LdModalBuilderState extends State<LdModalBuilder> {
   Future<dynamic> open(BuildContext context) async {
     final safeContext = widget.useRootNavigator ? Navigator.of(context, rootNavigator: true) : Navigator.of(context);
 
-    return await widget.modal.show(
-      safeContext.context,
-      useRootNavigator: widget.useRootNavigator,
-    );
+    await safeContext.push(widget.modal);
   }
 
   @override

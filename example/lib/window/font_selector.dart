@@ -15,15 +15,18 @@ class _FontSelectorState extends State<FontSelector> {
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context);
-    return LdChoose<String>(
+    return LdChoose.fromSelectItems(
       label: "Font family",
       mode: LdChooseMode.modal,
-      items: GoogleFonts.asMap().keys.map(
+      items: GoogleFonts.asMap()
+          .keys
+          .map(
             (font) => LdSelectItem(
               value: font,
               child: Text(font),
             ),
-          ),
+          )
+          .toList(),
       onChanged: (p0) async {
         final font = GoogleFonts.getFont(p0.first);
 

@@ -103,13 +103,12 @@ class _SelectableListDemoState extends State<SelectableListDemo> {
                     itemBuilder: itemBuilder,
                   );
                 },
-                itemBuilder:
-                    (context, item, int index, LdListItemConfig config) {
-                  return LdListItem.fromConfig(config.copyWith(
+                itemBuilder: (context, item, int index) {
+                  return LdListItem(
                     leading: LdAvatar(child: Text(item.value!.formula)),
                     subtitle: Text(item.value!.subtitle),
                     title: Text(item.value!.title),
-                  ));
+                  );
                 },
               ),
             ),

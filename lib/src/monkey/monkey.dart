@@ -209,8 +209,7 @@ class LdMonkey<T extends Identifiable<IdType>, IdType> {
         name: "$path-filters",
         path: "$path/filters",
         pageBuilder: (context, state) => LdModalPage(
-          key: state.pageKey,
-          modal: ldFilterModal(context, this),
+          builder: (context) => ldFilterModal(context, this),
         ),
       ),
       ShellRoute(
@@ -242,8 +241,7 @@ class LdMonkey<T extends Identifiable<IdType>, IdType> {
                       if (!effectivePresentationMode.isSideBySide) {
                         if (effectivePresentationMode.detailInDialog) {
                           return LdModalPage(
-                            key: state.pageKey,
-                            modal: ldMonkeyDetailModal(this),
+                            builder: (context) => ldMonkeyDetailModal(context, this),
                           );
                         }
 
@@ -309,7 +307,8 @@ class LdMonkey<T extends Identifiable<IdType>, IdType> {
         final value = queryParameters[filter.name];
 
         if (value != null) {
-          repository.updateFilter<LdFilterOption<T, IdType>>(filter.name, (filter) => filter.marshalSerialized(value));
+          repository.updateFilter(
+              filter.name, (filter) => (filter as LdFilterOption<T, IdType>).marshalSerialized(value));
         }
       }
     }
@@ -344,8 +343,14 @@ class LdMonkey<T extends Identifiable<IdType>, IdType> {
   /// - [layoutMode] being [MonkeyLayoutMode.auto] or [MonkeyLayoutMode.sideBySide]
   /// - [layoutMode] not being [MonkeyLayoutMode.neverSideBySide]
   bool isSideBySide(Size size) {
-    return (size.width > reflowBreakpoint && layoutMode == MonkeyLayoutMode.auto) &&
-        layoutMode != MonkeyLayoutMode.neverSideBySide;
+    switch (layoutMode) {
+      case MonkeyLayoutMode.auto:
+        return size.width > reflowBreakpoint;
+      case MonkeyLayoutMode.sideBySide:
+        return true;
+      case MonkeyLayoutMode.neverSideBySide:
+        return false;
+    }
   }
 
   /// Parses a string representation of selected items into a set of IDs.
