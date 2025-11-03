@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class LdSelectableList<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   final Widget Function(BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder;
@@ -126,12 +127,16 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
 
   bool get isMultiSelect => widget.multiSelect;
 
+  bool _dragIsAdditive = true;
+
   bool isSelected(IdType item) {
-    if (_ctrlPressed || _shiftPressed || widget.showSelectionControls) {
-      return _selectedItems.contains(item) || _dragRectItems.contains(item);
-    }
     if (_dragRectItems.value.isNotEmpty) {
-      return _dragRectItems.contains(item);
+      final contains = _dragRectItems.contains(item);
+      if (contains && !_dragIsAdditive) {
+        return false;
+      } else if (contains && _dragIsAdditive) {
+        return true;
+      }
     }
     return _selectedItems.contains(item);
   }
@@ -208,7 +213,12 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
 
   bool _isDragging = false;
 
-  void _onUpdateDragRect(Rect dragRect) {
+  void _onUpdateDragRect(Rect dragRect, bool directionIsDownRight) {
+    if (!_isDragging && !isMobile) {
+      if (!_ctrlPressed && !_shiftPressed) {
+        _selectedItems.clear();
+      }
+    }
     _isDragging = true;
     for (final item in _itemKeys.entries) {
       final box = item.value.currentContext?.findRenderObject() as RenderBox?;
@@ -230,18 +240,31 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
         _dragRectItems.remove(item.key);
       }
     }
+
+    if (isMobile) {
+      if (_dragRectItems.value.length == 1) {
+        _dragIsAdditive = !_selectedItems.contains(_dragRectItems.value.first);
+      }
+    } else {
+      _dragIsAdditive = directionIsDownRight || _selectedItems.value.isEmpty;
+    }
+
     setState(() {});
   }
 
-  void _onEndDrag(Rect rect) {
+  Future<void> _onEndDrag(Rect rect) async {
     _isDragging = false;
-    if (_shiftPressed || _ctrlPressed || widget.showSelectionControls) {
+
+    if (_dragIsAdditive) {
       _selectedItems.addAll(_dragRectItems.value);
     } else {
-      _selectedItems.setValue(_dragRectItems.value);
+      _selectedItems.removeAll(_dragRectItems.value);
     }
+
     _dragRectItems.clear();
     setState(() {});
+    await Future.delayed(const Duration(milliseconds: 100));
+    _focusNode.requestFocus();
   }
 
   void _onCancel() {
@@ -250,7 +273,9 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
     setState(() {});
   }
 
-  void _onKeyEvent(KeyEvent event) {
+  void _onFocusChange(bool hasFocus) {}
+
+  KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
     bool isShift = {
       LogicalKeyboardKey.shiftLeft,
       LogicalKeyboardKey.shiftRight,
@@ -289,7 +314,7 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
               }
             }
           }
-          break;
+          return KeyEventResult.handled;
         }
       }
     }
@@ -311,21 +336,26 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
             }
           }
         }
-        break;
+        return KeyEventResult.handled;
       }
     }
 
     if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.keyA) {
       _selectedItems.setValue(widget.paginator.items.map((e) => e?.id).whereType<IdType>().toSet());
+      return KeyEventResult.handled;
     }
 
     if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
       _selectedItems.clear();
+      return KeyEventResult.handled;
     }
 
     if (isShift || isCtrl) {
       setState(() {});
+      return KeyEventResult.handled;
     }
+
+    return KeyEventResult.ignored;
   }
 
   LdList<T, IdType> _defaultListBuilder(
@@ -375,11 +405,11 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
     );
   }
 
-  bool get isMobile => !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+  bool get isMobile => LdTheme.of(context).platform.isMobile;
 
   @override
   Widget build(BuildContext context) {
-    if (widget.showSelectionControls && isMobile) {
+    if (isMobile) {
       return Stack(
         children: [
           widget.listBuilder?.call(context, _scrollController, _wrapListItem) ??
@@ -394,7 +424,7 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
             bottom: 0,
             width: 42,
             child: _DragRect(
-              drawBorder: false,
+              mobile: true,
               onTapOutside: () {
                 if (!_isDragging) {
                   return;
@@ -408,14 +438,12 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
               onUpdateRect: _onUpdateDragRect,
               onEndDrag: _onEndDrag,
               onCancel: _onCancel,
-              child: KeyboardListener(
-                focusNode: _focusNode,
-                autofocus: true,
-                onKeyEvent: _onKeyEvent,
-                child: Container(
-                  color: Colors.transparent,
-                ),
-              ),
+              child: Focus(
+                  focusNode: _focusNode,
+                  autofocus: true,
+                  onFocusChange: _onFocusChange,
+                  onKeyEvent: _onKeyEvent,
+                  child: Container()),
             ),
           )
         ],
@@ -434,10 +462,12 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
       key: _rootKey,
       onUpdateRect: _onUpdateDragRect,
       onEndDrag: _onEndDrag,
+      isAdditive: _dragIsAdditive,
       onCancel: _onCancel,
-      child: KeyboardListener(
+      child: Focus(
         focusNode: _focusNode,
         autofocus: true,
+        onFocusChange: _onFocusChange,
         onKeyEvent: _onKeyEvent,
         child: widget.listBuilder?.call(context, _scrollController, _wrapListItem) ??
             _defaultListBuilder(
@@ -491,15 +521,20 @@ class _SetNotifier<T> extends ValueNotifier<Set<T>> {
     }
   }
 
+  void removeAll(Set<T> items) {
+    value = {...value}..removeAll(items);
+  }
+
   bool contains(T item) => value.contains(item);
 }
 
 class _DragRect extends StatefulWidget {
-  final void Function(Rect rect) onUpdateRect;
+  final void Function(Rect rect, bool directionIsDownRight) onUpdateRect;
   final void Function(Rect rect) onEndDrag;
   final void Function() onCancel;
   final void Function() onTapOutside;
-  final bool drawBorder;
+  final bool isAdditive;
+  final bool mobile;
 
   final Widget child;
 
@@ -507,9 +542,10 @@ class _DragRect extends StatefulWidget {
     required this.onTapOutside,
     required this.onUpdateRect,
     required this.onEndDrag,
-    this.drawBorder = true,
+    this.mobile = false,
     required this.child,
     required this.onCancel,
+    this.isAdditive = true,
     super.key,
   });
 
@@ -536,6 +572,127 @@ class _DragRectState extends State<_DragRect> {
     return Rect.fromLTWH(minX, minY, (maxX - minX).abs(), (maxY - minY).abs());
   }
 
+  Widget _buildMobileGestureDetector(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onVerticalDragStart: (details) {
+        _dragStartOffset = details.globalPosition;
+        _overlayPortalController.show();
+
+        _dragEndOffset = null;
+      },
+      onVerticalDragUpdate: (details) {
+        _dragEndOffset = details.globalPosition;
+        final rect = _dragRect;
+        if (rect == null) {
+          return;
+        }
+        widget.onUpdateRect(rect, false);
+      },
+      onVerticalDragEnd: (details) {
+        final rect = _dragRect;
+        if (rect == null) {
+          return;
+        }
+        _dragEndOffset = null;
+        _dragStartOffset = null;
+        _overlayPortalController.hide();
+        setState(() {});
+        widget.onEndDrag(rect);
+      },
+      onVerticalDragCancel: () {
+        if (_dragStartOffset != null) {
+          _dragEndOffset = null;
+          _overlayPortalController.hide();
+          _dragStartOffset = null;
+          widget.onCancel();
+        }
+      },
+      child: widget.child,
+    );
+  }
+
+  Widget _buildDesktopGestureDetector(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        widget.onTapOutside();
+      },
+      child: widget.child,
+      onPanStart: (details) {
+        _dragStartOffset = details.globalPosition;
+        _overlayPortalController.show();
+
+        _dragEndOffset = null;
+      },
+      onPanUpdate: (details) {
+        _dragEndOffset = details.globalPosition;
+
+        final rect = _dragRect;
+        if (rect == null) {
+          return;
+        }
+
+        final directionIsDownRight =
+            _dragEndOffset!.dy > _dragStartOffset!.dy && _dragEndOffset!.dx > _dragStartOffset!.dx;
+
+        widget.onUpdateRect(rect, directionIsDownRight);
+      },
+      onPanEnd: (details) {
+        final rect = _dragRect;
+        if (rect == null) {
+          return;
+        }
+        setState(() {});
+        _dragEndOffset = null;
+        _dragStartOffset = null;
+        _overlayPortalController.hide();
+        setState(() {});
+        widget.onEndDrag(rect);
+      },
+      onPanCancel: () {
+        if (_dragStartOffset != null) {
+          _dragEndOffset = null;
+          _overlayPortalController.hide();
+          _dragStartOffset = null;
+          widget.onCancel();
+        }
+        setState(() {});
+      },
+    );
+  }
+
+  Widget _buildDesktopDragRect(BuildContext context, Rect rect) {
+    return Container(
+      width: rect.width,
+      height: rect.height,
+      decoration: BoxDecoration(
+        color: widget.isAdditive
+            ? LdTheme.of(context).primaryColor.withAlpha(50)
+            : LdTheme.of(context).errorColor.withAlpha(50),
+        border: !widget.mobile
+            ? Border.all(
+                color: widget.isAdditive ? LdTheme.of(context).primaryColor : LdTheme.of(context).errorColor,
+                width: 1,
+              )
+            : null,
+      ),
+      child: Center(
+        child: Icon(
+          widget.isAdditive ? LucideIcons.plus : LucideIcons.minus,
+          size: 12,
+          color: LdTheme.of(context).text,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDragRect(BuildContext context, Rect rect) {
+    return switch (widget.mobile) {
+      true => Container(),
+      false => _buildDesktopDragRect(context, rect),
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return OverlayPortal.targetsRootOverlay(
@@ -546,62 +703,27 @@ class _DragRectState extends State<_DragRect> {
           return const SizedBox.shrink();
         }
 
-        return Positioned(
-          left: rect.left,
-          top: rect.top,
-          child: Container(
-            width: rect.width,
-            height: rect.height,
-            decoration: BoxDecoration(
-              border: widget.drawBorder
-                  ? Border.all(
-                      color: LdTheme.of(context).primaryColor,
-                      width: 1,
-                    )
-                  : null,
+        return Stack(
+          children: [
+            ModalBarrier(
+              dismissible: true,
+              color: Colors.transparent,
+              onDismiss: () {
+                widget.onCancel();
+              },
             ),
-          ),
+            Positioned(
+              left: rect.left,
+              top: rect.top,
+              child: _buildDragRect(context, rect),
+            ),
+          ],
         );
       },
-      child: GestureDetector(
-        onTap: () {
-          widget.onTapOutside();
-        },
-        onPanStart: (details) {
-          _dragStartOffset = details.globalPosition;
-          _overlayPortalController.show();
-
-          _dragEndOffset = null;
-        },
-        onPanUpdate: (details) {
-          _dragEndOffset = details.globalPosition;
-          final rect = _dragRect;
-          if (rect == null) {
-            return;
-          }
-          widget.onUpdateRect(rect);
-        },
-        onPanCancel: () {
-          if (_dragStartOffset != null) {
-            _dragEndOffset = null;
-            _overlayPortalController.hide();
-            _dragStartOffset = null;
-            widget.onCancel();
-          }
-        },
-        onPanEnd: (details) {
-          final rect = _dragRect;
-          if (rect == null) {
-            return;
-          }
-
-          _dragEndOffset = null;
-          _overlayPortalController.hide();
-          _dragStartOffset = null;
-          widget.onEndDrag(rect);
-        },
-        child: widget.child,
-      ),
+      child: switch (widget.mobile) {
+        true => _buildMobileGestureDetector(context),
+        false => _buildDesktopGestureDetector(context),
+      },
     );
   }
 }

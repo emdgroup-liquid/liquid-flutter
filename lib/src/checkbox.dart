@@ -100,7 +100,7 @@ class _LdCheckboxState extends State<LdCheckboxWidget> {
                   color: colors.border,
                   width: 2,
                 ),
-                borderRadius: LdTheme.of(context).radius(size.adjust(-1)),
+                borderRadius: LdTheme.of(context).radius(size.adjust(-2)),
               ),
             ),
             Flexible(child: label),
