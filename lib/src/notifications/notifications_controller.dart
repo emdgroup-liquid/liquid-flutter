@@ -6,7 +6,15 @@ import 'package:liquid_flutter/src/notifications/notification_type.dart';
 import 'package:provider/provider.dart';
 
 class LdNotificationsController extends ChangeNotifier {
+  final String? debugLabel;
   final List<LdNotification> _notifications = [];
+
+  LdNotificationsController({this.debugLabel});
+
+  @override
+  String toString() {
+    return "LdNotificationsController(debugLabel: $debugLabel, notifications: $_notifications)";
+  }
 
   bool _disposed = false;
 

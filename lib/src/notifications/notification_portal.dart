@@ -4,16 +4,14 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:collection/collection.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-import 'package:liquid_flutter/src/notifications/implicit_blur.dart';
-import 'package:liquid_flutter/src/notifications/radius_aware_padding.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class LdNotificationProvider extends StatelessWidget {
   final Widget child;
   final LdNotificationsController? notifier;
-
-  const LdNotificationProvider({required this.child, this.notifier, Key? key}) : super(key: key);
+  final String? debugLabel;
+  const LdNotificationProvider({required this.child, this.notifier, this.debugLabel, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -21,14 +19,15 @@ class LdNotificationProvider extends StatelessWidget {
       return ChangeNotifierProvider.value(value: notifier, child: child);
     }
     return ChangeNotifierProvider<LdNotificationsController>(
-      create: (_) => LdNotificationsController(),
+      create: (_) => LdNotificationsController(debugLabel: debugLabel),
       child: child,
     );
   }
 }
 
 class LdNotificationPortal extends StatelessWidget {
-  const LdNotificationPortal({super.key, required this.child});
+  final String? debugLabel;
+  const LdNotificationPortal({super.key, required this.child, this.debugLabel});
   final Widget child;
 
   @override
@@ -36,56 +35,34 @@ class LdNotificationPortal extends StatelessWidget {
     return Consumer<LdNotificationsController>(
       child: child,
       builder: (context, notifier, child) {
-        final hasBigNotification = notifier.notifications.any(
-          (e) => e.showBackdrop,
-        );
         final theme = LdTheme.of(context, listen: true);
         return Stack(
           children: [
             child!,
-            if (hasBigNotification) ...[
-              Positioned.fill(
-                  child: Container(
-                color: theme.palette.neutral.shades.last.withAlpha(50),
-              )),
-              ModalBarrier(
-                dismissible: true,
-                onDismiss: () => notifier.onDismissNotification(
-                  notifier.notifications.lastWhere(
-                    (element) => element.showBackdrop,
-                  ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: MediaQuery.paddingOf(context).left + theme.pad(size: LdSize.m).left,
+                  right: MediaQuery.paddingOf(context).right + theme.pad(size: LdSize.m).right,
+                  bottom: MediaQuery.paddingOf(context).bottom + theme.pad(size: LdSize.m).bottom,
                 ),
-              ),
-            ],
-            ImplicitBlur(
-              key: const ValueKey("notification-portal"),
-              sigma: hasBigNotification ? 10 : 0,
-              duration: const Duration(milliseconds: 300),
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    left: MediaQuery.paddingOf(context).left + theme.pad(size: LdSize.m).left,
-                    right: MediaQuery.paddingOf(context).right + theme.pad(size: LdSize.m).right,
-                    bottom: MediaQuery.paddingOf(context).bottom + theme.pad(size: LdSize.m).bottom,
-                  ),
-                  child: Stack(
-                    children: notifier.notifications.mapIndexed((
-                      index,
-                      notification,
-                    ) {
-                      return LdNotificationWidget(
-                        key: notification.key,
-                        index: notifier.notifications.length - index - 1,
-                        notification: notification,
-                        removing: notification.removing,
-                        didConfirm: notification.didConfirm,
-                        onDismiss: () {
-                          notifier.onDismissNotification(notification);
-                        },
-                      );
-                    }).toList(),
-                  ),
+                child: Stack(
+                  children: notifier.notifications.mapIndexed((
+                    index,
+                    notification,
+                  ) {
+                    return LdNotificationWidget(
+                      key: notification.key,
+                      index: notifier.notifications.length - index - 1,
+                      notification: notification,
+                      removing: notification.removing,
+                      didConfirm: notification.didConfirm,
+                      onDismiss: () {
+                        notifier.onDismissNotification(notification);
+                      },
+                    );
+                  }).toList(),
                 ),
               ),
             )
@@ -177,16 +154,16 @@ class LdNotificationWidget extends StatelessWidget {
 
     final theme = _theme(context);
 
-    return RadiusAwarePadding(
-      fallbackSize: LdSize.l,
-      innerRadiusSize: isTextOnly ? LdSize.m : LdSize.s,
+    return Container(
+      padding: theme.pad(size: LdSize.m),
       decoration: BoxDecoration(
-        color: _theme(context).background,
+        color: _theme(context).surface,
         boxShadow: [ldShadowSticky],
         border: Border.all(
           color: LdTheme.of(context).border,
           width: LdTheme.of(context).borderWidth,
         ),
+        borderRadius: theme.radius(LdSize.l),
       ),
       child: LdAutoSpace(
         children: [
@@ -202,19 +179,18 @@ class LdNotificationWidget extends StatelessWidget {
                   child: Row(
                 children: [
                   Expanded(
-                    child: LdAutoSpace(
-                      children: [
-                        // Text of the notification
-                        LdText.p(
-                          notification.message,
-                          overflow: TextOverflow.fade,
-                        ),
-                        if (notification.subMessage != null)
-                          LdText.ps(notification.subMessage!,
-                              overflow: TextOverflow.fade, color: _theme(context).textMuted),
-                      ],
-                    ),
-                  ),
+                      child: LdAutoSpace(
+                    children: [
+                      // Text of the notification
+                      LdText.p(
+                        notification.message,
+                        overflow: TextOverflow.fade,
+                      ),
+                      if (notification.subMessage != null)
+                        LdText.ps(notification.subMessage!,
+                            overflow: TextOverflow.fade, color: _theme(context).textMuted),
+                    ],
+                  )),
                   ldSpacerM,
                   if (notification.canDismiss && notification is! LdAcknowledgeNotification)
                     // Dismiss button
@@ -224,7 +200,7 @@ class LdNotificationWidget extends StatelessWidget {
                       child: const Icon(LucideIcons.x),
                     ).animate().fade(delay: 400.ms)
                 ],
-              )),
+              )).animate().fade(delay: 300.ms),
             ],
           ),
           if (notification is LdAcknowledgeNotification) _buildAcknowledgeButton(context),

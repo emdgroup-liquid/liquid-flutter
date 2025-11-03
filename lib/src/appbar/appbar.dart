@@ -244,11 +244,11 @@ class _LdAppBarState extends State<LdAppBar> {
   }
 
   EdgeInsets get _outsideContainerPadding {
-    final viewPadding = MediaQuery.of(context).viewPadding;
     final pad = LdTheme.of(context).pad(size: LdSize.s);
+    final viewPadding = MediaQuery.of(context).viewPadding;
 
     final minimumPadding =
-        ((viewPadding).atLeast(pad)).trimToEffectivePosition(_slot?.effectivePosition ?? EffectivePosition.top);
+        (viewPadding.atLeast(pad)).trimToEffectivePosition(_slot?.effectivePosition ?? EffectivePosition.top);
 
     // Now we need to add the padding for the other app bars, that are either in the same scaffold or in the parent scaffold.
 
@@ -256,11 +256,12 @@ class _LdAppBarState extends State<LdAppBar> {
 
     final viewInsets = _focusScopeNode.hasFocus ? MediaQuery.of(context).viewInsets : EdgeInsets.zero;
 
-    return (minimumPadding +
-            EdgeInsets.only(
+    return (minimumPadding)
+        .atLeast(EdgeInsets.only(
               top: _slot?.effectivePosition == EffectivePosition.top ? otherAppBarHeight : 0,
               bottom: _slot?.effectivePosition == EffectivePosition.bottom ? otherAppBarHeight : 0,
-            ))
+            ) +
+            pad)
         .atLeast(viewInsets + pad)
         .trimToEffectivePosition(_slot?.effectivePosition ?? EffectivePosition.top);
   }
@@ -305,6 +306,17 @@ class _LdAppBarState extends State<LdAppBar> {
       padding: _outsideContainerPadding,
       decoration: BoxDecoration(
         color: _isInTopSlot ? _fillColor(isScrolledUnder) : null,
+        gradient: !_isInTopSlot
+            ? LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0, 0.3],
+                colors: [
+                  LdTheme.of(context).absolute.withAlpha(0),
+                  LdTheme.of(context).absolute.withAlpha(200),
+                ],
+              )
+            : null,
         boxShadow: [
           if (_isInTopSlot)
             ldShadowSticky.copyWith(

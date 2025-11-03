@@ -124,6 +124,10 @@ class LdScaffoldAppBarState {
     return verticalMargin + innerHeight - offset;
   }
 
+  double get effectiveInnerHeight {
+    return max(0, innerHeight - offset);
+  }
+
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     properties.add(DoubleProperty('verticalMargin', verticalMargin));
     properties.add(DoubleProperty('innerHeight', innerHeight));
@@ -170,64 +174,49 @@ class LdScaffoldLayoutState {
     return parentLayoutState!.level + 1;
   }
 
-  /// Returns the effective (scroll effect applied) insets
-  /// that the [appbar] and [secondaryAppbar] occupy.
-  EdgeInsets get effectiveInsets {
+  /// Returns the total height of the app bars in the tree. Does not take into account the scroll effect.
+  EdgeInsets get totalInsets {
+    List<LdScaffoldAppBarState> topAppBars = [];
+    List<LdScaffoldAppBarState> bottomAppBars = [];
+
+    // Walk up the tree and collect the app bars
+    LdScaffoldLayoutState? currentLayoutState = this;
+    while (currentLayoutState != null) {
+      final appBarState = currentLayoutState.appBarState;
+      final secondaryAppBarState = currentLayoutState.secondaryAppBarState;
+      if (appBarState?.effectivePosition == EffectivePosition.top) {
+        topAppBars.add(appBarState!);
+      } else if (appBarState?.effectivePosition == EffectivePosition.bottom) {
+        bottomAppBars.add(appBarState!);
+      }
+      if (secondaryAppBarState?.effectivePosition == EffectivePosition.top) {
+        topAppBars.add(secondaryAppBarState!);
+      } else if (secondaryAppBarState?.effectivePosition == EffectivePosition.bottom) {
+        bottomAppBars.add(secondaryAppBarState!);
+      }
+      currentLayoutState = currentLayoutState.parentLayoutState;
+    }
+
+    // Sort the app bars by height
+
     double top = 0;
     double bottom = 0;
 
-    final primaryAppHeight = (appBarState?.innerHeight ?? 0);
-    final secondaryAppHeight = (secondaryAppBarState?.innerHeight ?? 0);
-
-    if (appBarState?.effectivePosition == EffectivePosition.top) {
-      top += primaryAppHeight;
-      if (level == 0) {
-        top += appBarState?.verticalMargin ?? 0;
-      }
-    } else {
-      bottom += primaryAppHeight;
-      if (level == 0) {
-        bottom += appBarState?.verticalMargin ?? 0;
-      }
+    for (var appBar in topAppBars) {
+      top += appBar.innerHeight;
+    }
+    for (var appBar in bottomAppBars) {
+      bottom += appBar.innerHeight;
     }
 
-    if (secondaryAppBarState?.effectivePosition == EffectivePosition.top) {
-      top += secondaryAppHeight;
-      if (secondaryAppBarState!.effectivePosition != appBarState?.effectivePosition) {
-        if (level == 0) {
-          top += secondaryAppBarState?.verticalMargin ?? 0;
-        }
-      }
-    } else if (secondaryAppBarState?.effectivePosition == EffectivePosition.bottom) {
-      bottom += secondaryAppHeight;
-      if (secondaryAppBarState!.effectivePosition != appBarState?.effectivePosition) {
-        if (level == 0) {
-          bottom += secondaryAppBarState?.verticalMargin ?? 0;
-        }
-      }
+    if (topAppBars.isNotEmpty) {
+      top += topAppBars.first.verticalMargin;
     }
-    //print('effectiveInsets $debugName $level: $top $bottom');
-
-    return EdgeInsets.only(top: top, bottom: bottom) + (parentLayoutState?.effectiveInsets ?? EdgeInsets.zero);
-  }
-
-  double effectiveHeightOnSide(EffectivePosition position) {
-    double total = 0;
-
-    if (appBarState?.effectivePosition == position) {
-      total += (appBarState?.innerHeight ?? 0) - (appBarState?.offset ?? 0);
-      if (level == 0) {
-        total += appBarState?.verticalMargin ?? 0;
-      }
-    }
-    if (secondaryAppBarState?.effectivePosition == position) {
-      total += (secondaryAppBarState?.innerHeight ?? 0) - (secondaryAppBarState?.offset ?? 0);
-      if (level == 0) {
-        total += secondaryAppBarState?.verticalMargin ?? 0;
-      }
+    if (bottomAppBars.isNotEmpty) {
+      bottom += bottomAppBars.first.verticalMargin;
     }
 
-    return total + (parentLayoutState?.effectiveHeightOnSide(position) ?? 0);
+    return EdgeInsets.only(top: top, bottom: bottom);
   }
 
   String toDebugString() {
@@ -239,17 +228,30 @@ class LdScaffoldLayoutState {
     if (effectivePosition == null) {
       return 0;
     }
-    final role = slot.role;
+    List<LdScaffoldAppBarState> appBars = [];
 
-    double total = parentLayoutState?.effectiveHeightOnSide(effectivePosition) ?? 0;
-
-    if (role == AppBarRole.secondary) {
+    // Walk up the tree and collect the app bars
+    LdScaffoldLayoutState? currentLayoutState = parentLayoutState;
+    while (currentLayoutState != null) {
+      final appBarState = currentLayoutState.appBarState;
+      final secondaryAppBarState = currentLayoutState.secondaryAppBarState;
       if (appBarState?.effectivePosition == effectivePosition) {
-        total += (appBarState?.innerHeight ?? 0) - (appBarState?.offset ?? 0);
-        if (level == 0) {
-          total += appBarState?.verticalMargin ?? 0;
-        }
+        appBars.add(appBarState!);
       }
+      if (secondaryAppBarState?.effectivePosition == effectivePosition) {
+        appBars.add(secondaryAppBarState!);
+      }
+      currentLayoutState = currentLayoutState.parentLayoutState;
+    }
+
+    double total = 0;
+
+    for (var appBar in appBars) {
+      total += appBar.effectiveHeight;
+    }
+
+    if (slot.role == AppBarRole.secondary && appBarState?.effectivePosition == effectivePosition) {
+      total += appBarState?.effectiveInnerHeight ?? 0;
     }
 
     return total;
@@ -281,7 +283,7 @@ class LdScaffoldLayoutState {
     properties.add(EnumProperty<LdScaffoldSlot>('slot', slot));
     properties.add(DoubleProperty('bodyScrollOffset', bodyScrollOffset.value));
     properties.add(DoubleProperty('drawerScrollOffset', drawerScrollOffset.value));
-    properties.add(DiagnosticsProperty<EdgeInsets>('effectiveInsets', effectiveInsets));
+    properties.add(DiagnosticsProperty<EdgeInsets>('effectiveInsets', totalInsets));
     properties.add(DiagnosticsProperty<LdScaffoldAppBarState?>('appBarState', appBarState));
     properties.add(DiagnosticsProperty<LdScaffoldAppBarState?>('secondaryAppBarState', secondaryAppBarState));
     properties.add(DiagnosticsProperty<LdScaffoldLayoutState?>('parentLayoutState', parentLayoutState));
@@ -500,7 +502,7 @@ class LdScaffoldState extends State<LdScaffold> {
   }
 
   EdgeInsets _bodyPadding(BuildContext context) {
-    return _layoutState(context).effectiveInsets;
+    return _layoutState(context).totalInsets;
   }
 
   @override
@@ -550,7 +552,13 @@ class LdScaffoldState extends State<LdScaffold> {
                               value: layoutState.copyWith(slot: LdScaffoldSlot.body),
                               child: PrimaryScrollController(
                                 controller: effectiveScrollController,
-                                child: widget.body,
+                                child: LdNotificationProvider(
+                                  debugLabel: "Scaffold Body Provider ${widget.debugName}",
+                                  child: LdNotificationPortal(
+                                    debugLabel: "Scaffold Body ${widget.debugName}",
+                                    child: widget.body,
+                                  ),
+                                ),
                               ),
                             ),
                           ),

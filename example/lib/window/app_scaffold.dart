@@ -92,9 +92,7 @@ class _AppScaffoldState extends State<AppScaffold> {
                 ),
               ],
             ),
-            body: LdNotificationPortal(
-              child: widget.child,
-            ),
+            body: widget.child,
           ),
         );
       },
