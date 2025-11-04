@@ -150,8 +150,6 @@ class LdNotificationWidget extends StatelessWidget {
   }
 
   Widget _buildNotificationBody(BuildContext context) {
-    final isTextOnly = notification is! LdAcknowledgeNotification;
-
     final theme = _theme(context);
 
     return Container(

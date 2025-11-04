@@ -232,9 +232,6 @@ class VariantBuilder implements Builder {
             // For context-configurable params with defaults, skip the default
             // and make the type nullable so context config can be checked
             final shouldSkipDefault = isContextConfigurable && hasDefaultValue;
-            final paramType = shouldSkipDefault
-                ? _makeNullableType(p.type.toString())
-                : p.type.toString();
 
             return Parameter((pb) => pb
               ..name = p.name
@@ -605,7 +602,7 @@ class VariantBuilder implements Builder {
           );
         } else {
           bodyStatements.add(
-            Code('final mergedConfig = config;'),
+            const Code('final mergedConfig = config;'),
           );
         }
 

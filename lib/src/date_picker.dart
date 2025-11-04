@@ -71,25 +71,6 @@ class _LdDatePickerState extends State<LdDatePicker> {
     }
   }
 
-  bool _isValidDate(DateTime date) {
-    if (widget.minDate != null) {
-      if (date.isBefore(widget.minDate!)) {
-        return false;
-      }
-    }
-
-    if (widget.maxDate != null) {
-      if (date.isAfter(widget.maxDate!)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  bool _isSelected(DateTime date) {
-    return date.year == _selectedDate.year && date.month == _selectedDate.month && date.day == _selectedDate.day;
-  }
-
   @override
   Widget build(BuildContext context) {
     return LdModalBuilder(

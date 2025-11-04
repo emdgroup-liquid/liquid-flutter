@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/touchable/input_color.dart';

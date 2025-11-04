@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
@@ -21,21 +22,62 @@ class LdCounterWidget extends StatefulWidget {
 }
 
 class _LdCounterState extends State<LdCounterWidget> {
+  final List<(bool, String)> _digits = [];
   @override
   void initState() {
     super.initState();
+    _generateDigits();
+  }
+
+  @override
+  void didUpdateWidget(oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value != widget.value) {
+      _generateDigits();
+      setState(() {});
+    }
+  }
+
+  void _generateDigits() {
+    final str = widget.value.toStringAsFixed(widget.precision).split("");
+
+    for (var i = 0; i < str.length; i++) {
+      if (_digits.length > i) {
+        _digits[i] = (true, str[i]);
+      } else {
+        _digits.add((true, str[i]));
+      }
+    }
+
+    for (var i = str.length; i < _digits.length; i++) {
+      _digits[i] = (false, _digits[i].$2);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final str = widget.value.toStringAsFixed(widget.precision);
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        ...str
-            .split("")
-            .map((e) => LdReveal.quick(revealed: true, child: _LdCounterDigit(digit: e, size: widget.size)))
+        ..._digits
+            .mapIndexed((
+              index,
+              e,
+            ) =>
+                LdReveal(
+                  revealed: e.$1,
+                  onAnimationEnd: (context, states) {
+                    if (e.$1 == false) {
+                      if (index >= _digits.length) {
+                        return;
+                      }
+                      setState(() {
+                        _digits.removeAt(index);
+                      });
+                    }
+                  },
+                  child: _LdCounterDigit(digit: e.$2, size: widget.size),
+                ))
             .toList(),
       ],
     );
@@ -45,6 +87,7 @@ class _LdCounterState extends State<LdCounterWidget> {
 class _LdCounterDigit extends StatefulWidget {
   final String digit;
   final LdSize size;
+
   const _LdCounterDigit({required this.digit, required this.size});
 
   @override
@@ -52,6 +95,10 @@ class _LdCounterDigit extends StatefulWidget {
 }
 
 class _LdCounterDigitState extends State<_LdCounterDigit> {
+  List<double> _textWidths = [];
+
+  static const chars = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "-"];
+
   double calculateTextWidth(String text, TextStyle style) {
     final TextPainter textPainter = TextPainter(
       text: TextSpan(text: text, style: style),
@@ -62,12 +109,17 @@ class _LdCounterDigitState extends State<_LdCounterDigit> {
     return textPainter.size.width;
   }
 
-  double _maxWidth = 10;
-
   @override
   void initState() {
     super.initState();
-    _maxWidth = getMaxWidth(context);
+
+    _generateTextWidths();
+  }
+
+  void _generateTextWidths() {
+    final theme = LdTheme.of(context);
+    _textWidths =
+        chars.map((e) => calculateTextWidth(e, ldBuildTextStyle(theme, LdTextType.headline, widget.size))).toList();
   }
 
   @override
@@ -75,24 +127,13 @@ class _LdCounterDigitState extends State<_LdCounterDigit> {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.size != widget.size) {
-      _maxWidth = getMaxWidth(context);
+      _generateTextWidths();
     }
-  }
-
-  double getMaxWidth(BuildContext context) {
-    final theme = LdTheme.of(context);
-    return List.generate(10,
-            (index) => calculateTextWidth(index.toString(), ldBuildTextStyle(theme, LdTextType.headline, widget.size)))
-        .reduce((a, b) => a > b ? a : b);
   }
 
   @override
   Widget build(BuildContext context) {
-    final offset = switch (widget.digit) {
-      "." => 10,
-      "-" => 11,
-      _ => int.parse(widget.digit),
-    };
+    final offset = chars.indexOf(widget.digit);
     final theme = LdTheme.of(context);
 
     final fontSize = theme.headlineSize(widget.size);
@@ -101,7 +142,7 @@ class _LdCounterDigitState extends State<_LdCounterDigit> {
 
     return SizedBox(
       height: height,
-      width: _maxWidth,
+      width: _textWidths[offset],
       child: LdSpring(
         mass: 30,
         springConstant: 8,

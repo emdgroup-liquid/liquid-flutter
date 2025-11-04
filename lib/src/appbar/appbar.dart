@@ -125,6 +125,7 @@ class _LdAppBarState extends State<LdAppBar> {
     if (!_isModal) return null;
     if (!_canDismissModal) return null;
     if (!_isInTopSlot) return null;
+
     return LdButton.ghost(
       child: const Icon(LucideIcons.x),
       onPressed: () => Navigator.of(context).maybePop(),
@@ -447,10 +448,8 @@ class _LdAppBarState extends State<LdAppBar> {
   @override
   Widget build(BuildContext context) {
     final layoutState = context.watch<LdScaffoldLayoutState>();
-    final drawerSlot = context.watch<LdDrawerSlot?>();
 
-    final scrollListenable =
-        drawerSlot == LdDrawerSlot.drawer ? _layoutState?.drawerScrollOffset : _layoutState?.bodyScrollOffset;
+    final scrollListenable = _layoutState?.bodyScrollOffset;
 
     final leading = _buildLeading(context);
 
@@ -595,17 +594,6 @@ class _LdAppBarState extends State<LdAppBar> {
               ),
             );
           }),
-    );
-  }
-}
-
-extension _WithoutPadding on EdgeInsets {
-  EdgeInsets remove({bool bottom = false, bool top = false, bool left = false, bool right = false}) {
-    return copyWith(
-      bottom: bottom ? 0 : this.bottom,
-      top: top ? 0 : this.top,
-      left: left ? 0 : this.left,
-      right: right ? 0 : this.right,
     );
   }
 }

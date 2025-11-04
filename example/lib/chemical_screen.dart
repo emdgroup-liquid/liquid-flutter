@@ -13,25 +13,19 @@ class _Potion {
 }
 
 var potions = [
-  _Potion("Alihotsy Draught",
-      "A potion from the Alihotsy plant; causes hysterical laughter."),
-  _Potion("Dreamless Sleep Potion",
-      "A potion that places the taker in a sleep that is dreamless."),
+  _Potion("Alihotsy Draught", "A potion from the Alihotsy plant; causes hysterical laughter."),
+  _Potion("Dreamless Sleep Potion", "A potion that places the taker in a sleep that is dreamless."),
   _Potion("Madame Glossy's Silver Polish", "A magical cleaning solution."),
-  _Potion("Pepperup Potion",
-      "Cures the common cold and produces steam coming out of the drinker's ears."),
-  _Potion("Polyjuice Potion",
-      "Allows the drinker to assume the form of someone else."),
+  _Potion("Pepperup Potion", "Cures the common cold and produces steam coming out of the drinker's ears."),
+  _Potion("Polyjuice Potion", "Allows the drinker to assume the form of someone else."),
   _Potion("Amortentia", "The most powerful love potion in existence."),
-  _Potion("Felix Felicis",
-      "Also called Liquid Luck, makes the drinker lucky for a period of time."),
+  _Potion("Felix Felicis", "Also called Liquid Luck, makes the drinker lucky for a period of time."),
   _Potion("Skele-Gro", "Potion for regrowing bones."),
   _Potion("Wolfsbane Potion", "Alleviates the symptoms of lycanthropy."),
   _Potion("Veritaserum", "A powerful truth serum."),
   _Potion("Draught of Peace", "Relieves anxiety and soothes agitation."),
   _Potion("Confusing Concoction", "Causes confusion in the drinker."),
-  _Potion("Invisibility Potion",
-      "Renders the drinker invisible for a short period of time."),
+  _Potion("Invisibility Potion", "Renders the drinker invisible for a short period of time."),
 ];
 
 class ChemicalScreen extends StatefulWidget {
@@ -44,15 +38,13 @@ class ChemicalScreen extends StatefulWidget {
 class _ChemicalScreenState extends State<ChemicalScreen> {
   final searchConfig = LdSearchConfig(
       onSearch: (query) {},
-      getSuggestions: (query) =>
-          Future.value(potions.where((p) => p.name.contains(query)).toList()),
+      getSuggestions: (query) => Future.value(potions.where((p) => p.name.contains(query)).toList()),
       buildSuggestion: (context, suggestion) {
         final potion = suggestion as _Potion;
         return LdListItem(
             title: Text(potion.name),
             onPressed: () {
-              LdSearchAcceptSuggestion(suggestion: potion.name)
-                  .dispatch(context);
+              LdSearchAcceptSuggestion(suggestion: potion.name).dispatch(context);
             });
       });
 
@@ -86,9 +78,7 @@ class _ChemicalScreenState extends State<ChemicalScreen> {
             leading: const Icon(LucideIcons.download),
             onPressed: () {
               LdNotificationsController.of(context).addNotification(
-                LdNotification(
-                    type: LdNotificationType.success,
-                    message: "Downloading certificate"),
+                LdNotification(type: LdNotificationType.success, message: "Downloading certificate"),
               );
             },
             child: const Text("Download certificate"),
@@ -113,8 +103,7 @@ class _ChemicalScreenState extends State<ChemicalScreen> {
             LdButton(
                 child: const Text("Save"),
                 onPressed: () {
-                  LdNotificationsController.of(context)
-                      .addNotification(LdNotification(
+                  LdNotificationsController.of(context).addNotification(LdNotification(
                     type: LdNotificationType.success,
                     message: "Saved",
                   ));
@@ -154,8 +143,7 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
   }
 
   void _deduct(amount) {
-    _quantityController.animateTo(
-        (_quantityController.value - amount).clamp(0, 1),
+    _quantityController.animateTo((_quantityController.value - amount).clamp(0, 1),
         duration: const Duration(milliseconds: 500));
   }
 
@@ -259,8 +247,7 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
                 mode: LdButtonMode.vague,
                 leading: const Icon(LucideIcons.shoppingBag),
                 onPressed: () {
-                  LdNotificationsController.of(context)
-                      .addNotification(LdNotification(
+                  LdNotificationsController.of(context).addNotification(LdNotification(
                     type: LdNotificationType.info,
                     message: "Added to cart",
                   ));
@@ -270,8 +257,7 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
                 mode: LdButtonMode.vague,
                 leading: const Icon(LucideIcons.download),
                 onPressed: () {
-                  LdNotificationsController.of(context)
-                      .addNotification(LdNotification(
+                  LdNotificationsController.of(context).addNotification(LdNotification(
                     type: LdNotificationType.error,
                     message: "Downloading certificate failed",
                   ));
@@ -302,13 +288,7 @@ class _Accordion extends StatelessWidget {
             );
           }),
           headerBuilder: ((context, n) {
-            return Text([
-              "Stock",
-              "Ingredients",
-              "Preparation",
-              "Usage",
-              "Side effects"
-            ][n]);
+            return Text(["Stock", "Ingredients", "Preparation", "Usage", "Side effects"][n]);
           })),
     );
   }
@@ -372,7 +352,7 @@ class _ProductKeyInfosState extends State<_ProductKeyInfos> {
     _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
       setState(() {
         _boilingPoint = Random().nextDouble() * 1000;
-        _brewingPressure = Random().nextDouble() * 10;
+        _brewingPressure = _brewingPressure == 4 ? 100 : 4;
       });
     });
   }
@@ -454,20 +434,10 @@ class ChemicalShell extends StatelessWidget {
       appBar: TabNavigation(
         activeRoute: GoRouterState.of(context).uri.path,
         tabs: [
-          LdNavigationTab(
-              label: "Chemical",
-              icon: const Icon(LucideIcons.beaker),
-              route: "/chemical"),
-          LdNavigationTab(
-              label: "Details",
-              icon: const Icon(LucideIcons.book),
-              route: "/chemical-detail"),
-          LdNavigationTab(
-              label: "Usage",
-              icon: const Icon(LucideIcons.book),
-              route: "/chemical-usage"),
-          LdNavigationTab(
-              label: "Exit", icon: const Icon(LucideIcons.x), route: "/"),
+          LdNavigationTab(label: "Chemical", icon: const Icon(LucideIcons.beaker), route: "/chemical"),
+          LdNavigationTab(label: "Details", icon: const Icon(LucideIcons.book), route: "/chemical-detail"),
+          LdNavigationTab(label: "Usage", icon: const Icon(LucideIcons.book), route: "/chemical-usage"),
+          LdNavigationTab(label: "Exit", icon: const Icon(LucideIcons.x), route: "/"),
         ],
         onTabPressed: (route) {
           context.replace(route);

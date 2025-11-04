@@ -55,7 +55,7 @@ class _TabNavigationState extends State<TabNavigation> {
 
     // Now we need to add the padding for the other app bars, that are either in the same scaffold or in the parent scaffold.
 
-    final otherAppBarHeight = _layoutState.effectiveHeightOfOthers(_slot) ?? 0;
+    final otherAppBarHeight = _layoutState.effectiveHeightOfOthers(_slot);
 
     return (minimumPadding)
         .atLeast(EdgeInsets.only(

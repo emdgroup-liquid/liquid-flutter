@@ -91,6 +91,7 @@ export 'src/submit/submit_loading_indicator.dart';
 export 'src/surface.dart';
 export 'src/switch.dart';
 export 'src/table.dart';
+export 'src/list/table_row.dart';
 export 'src/tabs.dart';
 export 'src/tag.dart';
 export 'src/text.dart';

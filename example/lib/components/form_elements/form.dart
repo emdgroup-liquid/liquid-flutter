@@ -74,7 +74,7 @@ class _FormDemoState extends State<FormDemo> {
                           );
                         },
                         selectedItemBuilder: (context, item) {
-                          return Text(item.value?.toString() ?? "No selection");
+                          return Text(item.value.toString());
                         },
                         items: const [
                           LdSelectItem(value: "1", child: Text("First choice")),

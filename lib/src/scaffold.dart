@@ -836,44 +836,6 @@ class LdScaffoldState extends State<LdScaffold> {
     );
   }
 
-  Widget _buildAppBarGradient(bool top, double height) {
-    final theme = LdTheme.of(context);
-    final surfaceColor = theme.surface;
-
-    // For top gradient: only show if app bars are moved out of screen
-    if (top) {
-      return Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            stops: const [0.5, 1],
-            colors: [
-              surfaceColor.withAlpha(200),
-              surfaceColor.withAlpha(0),
-            ],
-          ),
-        ),
-        height: height,
-      );
-    }
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          stops: const [0, 0.4],
-          colors: [
-            surfaceColor.withAlpha(0),
-            surfaceColor.withAlpha(200),
-          ],
-        ),
-      ),
-      height: height,
-    );
-  }
-
   bool _shouldHideAppBar(AppBarRole role) {
     final isMobile = LdTheme.of(context).platform.isMobile;
     return switch (role) {
