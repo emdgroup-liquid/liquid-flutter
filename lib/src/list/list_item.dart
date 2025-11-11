@@ -46,7 +46,7 @@ class LdListItemWidget extends StatelessWidget {
     this.subContent,
     this.subtitle,
     this.title,
-    this.tradeLeadingForSelectionControl = false,
+    this.tradeLeadingForSelectionControl = true,
     @ContextConfigurable() this.focusNode,
     @ContextConfigurable() this.trailing,
     @ContextConfigurable() this.color,

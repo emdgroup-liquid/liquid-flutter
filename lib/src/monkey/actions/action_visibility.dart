@@ -4,14 +4,21 @@ class LdMonkeyActionVisibility {
   final LdMonkeyActionLocation location;
   final int minSelectionCount;
   final int? maxSelectionCount;
-  final bool visibleInSplitView;
+  final bool? visibleWhenShowingSelectionControls;
+  final Set<LdMonkeyEffectiveLayoutMode> layoutModes;
+
   final Set<String> applyFilters;
 
   LdMonkeyActionVisibility({
     required this.location,
     this.minSelectionCount = 0,
     this.maxSelectionCount,
-    this.visibleInSplitView = true,
     this.applyFilters = const {},
+    this.layoutModes = const {
+      LdMonkeyEffectiveLayoutMode.master,
+      LdMonkeyEffectiveLayoutMode.detail,
+      LdMonkeyEffectiveLayoutMode.sideBySide,
+    },
+    this.visibleWhenShowingSelectionControls,
   });
 }

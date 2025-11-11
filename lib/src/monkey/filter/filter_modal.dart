@@ -3,16 +3,14 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import 'package:provider/provider.dart';
-
-LdModalRoute ldFilterModal<T extends Identifiable<IdType>, IdType>(BuildContext context, LdMonkey<T, IdType> route) {
+LdModalRoute ldFilterModal<T extends Identifiable<IdType>, IdType>(BuildContext context) {
   return LdModalRoute(
     context: context,
     pageBuilder: (context) => LdScaffold(
       appBar: LdAppBar(
         title: Text(LiquidLocalizations.of(context).filter),
       ),
-      body: LdScaffoldBody(children: [LdFilterModal(route: route)]),
+      body: LdScaffoldBody(children: [LdFilterModal<T, IdType>()]),
     ),
   );
 }
@@ -24,7 +22,6 @@ class LdFilterContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
 
   @override
   Widget build(BuildContext context) {
-    final route = context.read<LdMonkey<T, IdType>>();
     return LdContextMenu(
       builder: (context, isOpen, open, child) => LdButton.ghost(
         autoLoading: false,
@@ -33,19 +30,19 @@ class LdFilterContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
           open();
         },
       ),
-      menuBuilder: (context, onDismiss) => LdFilterModal(route: route),
+      menuBuilder: (context, onDismiss) => const LdFilterModal(),
     );
   }
 }
 
 class LdFilterModal<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
-  final LdMonkey<T, IdType> route;
-
-  const LdFilterModal({super.key, required this.route});
+  const LdFilterModal({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final repository = route.repository;
+    final repository = LdRepository.of<T, IdType>(context);
     final filter = repository.filterStream;
 
     return StreamBuilder(
@@ -92,6 +89,7 @@ class LdFilterModal<T extends Identifiable<IdType>, IdType> extends StatelessWid
                     .map(
                       (e) => LdReveal.quick(
                         revealed: !e.isOn,
+                        initialRevealed: !e.isOn,
                         child: LdButton.outline(
                             leading: e.icon(context),
                             child: Text(e.label(context)),
@@ -113,6 +111,7 @@ class LdFilterModal<T extends Identifiable<IdType>, IdType> extends StatelessWid
             Column(children: [
               ...asyncSnapshot.data!.map((e) => LdReveal.quick(
                     revealed: e.isOn,
+                    initialRevealed: e.isOn,
                     child: _Filter(
                       filter: e,
                     ),
@@ -133,7 +132,7 @@ class _Filter<T extends Identifiable<IdType>, IdType, GroupBy> extends Stateless
 
   @override
   Widget build(BuildContext context) {
-    final repository = context.read<LdMonkey<T, IdType>>().repository;
+    final repository = LdRepository.of<T, IdType>(context);
     if (filter is LdFilterBoolOption) {
       return LdListItem(
         title: Text(filter.label(context)),

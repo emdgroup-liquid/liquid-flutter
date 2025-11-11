@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:provider/provider.dart';
 
 class LdFilterOneOfWidget<T extends Identifiable<IdType>, IdType, E> extends StatelessWidget {
   final LdFilterOneOf<T, IdType, E> filter;
@@ -13,7 +12,7 @@ class LdFilterOneOfWidget<T extends Identifiable<IdType>, IdType, E> extends Sta
 
   @override
   Widget build(BuildContext context) {
-    final repository = context.read<LdMonkey<T, IdType>>().repository;
+    final repository = LdRepository.of<T, IdType>(context);
     return LdCard(
       child: LdAutoSpace(
         children: [

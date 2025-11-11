@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
@@ -34,9 +35,6 @@ class VariantBuilder implements Builder {
 
         // Parse variants from annotation
         final variants = _parseVariants(variantsAnnotation);
-        if (variants.isEmpty) {
-          continue;
-        }
 
         // Generate private helpers and public redirects (freezed pattern)
         final generatedItems = _generateExtension(classItem, variants);
@@ -101,6 +99,79 @@ class VariantBuilder implements Builder {
     return '$typeString?';
   }
 
+  /// Extracts type parameters from a class element and converts them to TypeReference objects
+  List<TypeReference> _extractTypeParameters(ClassElement classElement) {
+    final typeParams = <TypeReference>[];
+    for (final typeParam in classElement.typeParameters) {
+      final typeRef = TypeReference((tr) {
+        tr.symbol = typeParam.name;
+        if (typeParam.bound != null) {
+          // Convert the bound type to a TypeReference
+          final boundType = typeParam.bound!;
+          tr.bound = _convertDartTypeToReference(boundType);
+        }
+      });
+      typeParams.add(typeRef);
+    }
+    return typeParams;
+  }
+
+  /// Converts a DartType to a TypeReference for code_builder
+  Reference _convertDartTypeToReference(DartType dartType) {
+    if (dartType is TypeParameterType) {
+      // It's a type parameter reference
+      return refer(dartType.element.name);
+    } else if (dartType is InterfaceType) {
+      // It's a concrete type, possibly with type arguments
+      final typeArgs = dartType.typeArguments;
+      if (typeArgs.isEmpty) {
+        return refer(dartType.element.name);
+      } else {
+        // Handle generic types like Identifiable<IdType>
+        final typeRef = TypeReference((tr) {
+          tr.symbol = dartType.element.name;
+          tr.types.addAll(
+            typeArgs.map((arg) => _convertDartTypeToReference(arg)),
+          );
+        });
+        return typeRef;
+      }
+    } else {
+      // Fallback: use toString representation
+      return refer(dartType.toString());
+    }
+  }
+
+  /// Checks if the config class needs type parameters by checking if any
+  /// context-configurable parameter types reference generic type parameters
+  bool _configNeedsTypeParameters(
+    List<ParameterElement> contextConfigurableParams,
+    List<TypeReference> typeParameters,
+  ) {
+    if (typeParameters.isEmpty) {
+      return false;
+    }
+
+    // Get the names of all type parameters
+    final typeParamNames = typeParameters.map((tp) => tp.symbol).toSet();
+
+    // Check if any parameter type references a generic type parameter
+    for (final param in contextConfigurableParams) {
+      final typeString = param.type.toString();
+      // Check if the type string contains any of the type parameter names
+      // This is a simple check - we look for the type parameter name as a word
+      for (final typeParamName in typeParamNames) {
+        // Use regex to match whole words to avoid false positives
+        final regex = RegExp(r'\b' + RegExp.escape(typeParamName) + r'\b');
+        if (regex.hasMatch(typeString)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   List<_VariantData> _parseVariants(ConstantReader annotation) {
     final List<_VariantData> variants = [];
 
@@ -146,6 +217,9 @@ class VariantBuilder implements Builder {
         classItem.name.substring(0, classItem.name.length - "Widget".length);
     final privateWidgetName = classItem.name;
 
+    // Extract type parameters from the class
+    final typeParameters = _extractTypeParameters(classItem);
+
     // Get constructor and fields from private widget
     final constructor = classItem.constructors.first;
     final positionalParams =
@@ -170,16 +244,33 @@ class VariantBuilder implements Builder {
     // Generate config class and provider if there are context-configurable parameters
     if (contextConfigurableParams.isNotEmpty) {
       final configClassName = '${publicClassName}Config';
+      // Check if config class needs type parameters
+      final configNeedsTypeParams = _configNeedsTypeParameters(
+        contextConfigurableParams,
+        typeParameters,
+      );
       final configClass = _generateConfigClass(
-          configClassName, contextConfigurableParams, optionalParams);
+        configClassName,
+        contextConfigurableParams,
+        optionalParams,
+        configNeedsTypeParams ? typeParameters : [],
+      );
       final providerClass = _generateProviderClass(
-          configClassName, publicClassName, contextConfigurableParams);
+        configClassName,
+        publicClassName,
+        contextConfigurableParams,
+        configNeedsTypeParams ? typeParameters : [],
+      );
       generatedItems.addAll([configClass, providerClass]);
     }
 
     final componentClass = Class((builder) {
       builder.name = publicClassName;
       builder.extend = const Reference("StatelessWidget");
+      // Add type parameters if the class has them
+      if (typeParameters.isNotEmpty) {
+        builder.types.addAll(typeParameters);
+      }
 
       // 1. Generate final fields
       for (final field in fields) {
@@ -201,10 +292,13 @@ class VariantBuilder implements Builder {
             _hasContextConfigurableAnnotation(matchingParam);
         final hasDefaultValue = matchingParam?.defaultValueCode != null;
 
-        // Make field nullable if it's context-configurable with a default value
-        final fieldType = isContextConfigurable && hasDefaultValue
-            ? _makeNullableType(field.type.toString())
-            : field.type.toString();
+        String fieldType;
+
+        if (isContextConfigurable) {
+          fieldType = _makeNullableType(field.type.toString());
+        } else {
+          fieldType = field.type.toString();
+        }
 
         builder.fields.add(Field((fb) => fb
           ..name = field.name
@@ -238,7 +332,7 @@ class VariantBuilder implements Builder {
               ..toThis = p.name != "key"
               ..toSuper = p.name == "key"
               ..named = p.isNamed
-              ..required = p.isRequired
+              ..required = !isContextConfigurable && p.isRequired
               //..type = refer(paramType)
               ..defaultTo = shouldSkipDefault
                   ? null
@@ -261,6 +355,10 @@ class VariantBuilder implements Builder {
             mb.name = variant.name;
             mb.static = true;
             mb.returns = refer('Widget');
+            // Add type parameters if the class has them
+            if (typeParameters.isNotEmpty) {
+              mb.types.addAll(typeParameters);
+            }
 
             // Add all parameters (same as regular constructor)
             mb.requiredParameters.addAll(
@@ -327,9 +425,14 @@ class VariantBuilder implements Builder {
             }
 
             // Create the Builder that wraps the public class instantiation
+            // Build type arguments string if needed
+            final typeArgsString = typeParameters.isNotEmpty
+                ? '<${typeParameters.map((tp) => tp.symbol).join(', ')}>'
+                : '';
             final bodyLines = <Code>[
               const Code('return Builder('),
-              Code('  builder: (BuildContext context) => $publicClassName('),
+              Code(
+                  '  builder: (BuildContext context) => $publicClassName$typeArgsString('),
             ];
 
             // Add positional arguments first
@@ -353,6 +456,8 @@ class VariantBuilder implements Builder {
           builder.methods.add(staticMethod);
         } else {
           // Generate factory constructor for non-context variants
+          // Note: Type parameters belong to the class, not the constructor
+          // The class reference will include them when instantiating
           final factoryConstructor = Constructor((cb) {
             cb.factory = true;
             cb.name = variant.name;
@@ -419,7 +524,19 @@ class VariantBuilder implements Builder {
               namedArgs['key'] = refer('key');
             }
 
-            cb.body = refer(publicClassName)
+            // Create reference with type parameters if needed
+            // When using type parameters as type arguments, we only use the names, not the bounds
+            final classReference = typeParameters.isNotEmpty
+                ? TypeReference((tr) {
+                    tr.symbol = publicClassName;
+                    // Add just the type parameter names as type arguments (bounds are only in declarations)
+                    tr.types.addAll(
+                      typeParameters.map((tp) => refer(tp.symbol)),
+                    );
+                  })
+                : refer(publicClassName);
+
+            cb.body = classReference
                 .newInstance(positionalArgs, namedArgs)
                 .returned
                 .statement;
@@ -455,9 +572,18 @@ class VariantBuilder implements Builder {
 
         // If there are context-configurable parameters, read the provider once
         if (configClassName != null) {
+          // Check if config needs type parameters
+          final configNeedsTypeParams = _configNeedsTypeParameters(
+            contextConfigurableParams,
+            typeParameters,
+          );
+          final typeArgsString =
+              configNeedsTypeParams && typeParameters.isNotEmpty
+                  ? '<${typeParameters.map((tp) => tp.symbol).join(', ')}>'
+                  : '';
           bodyStatements.add(
             Code(
-                'final config = Provider.of<$configClassName?>(context, listen: false);'),
+                'final config = Provider.of<$configClassName$typeArgsString?>(context, listen: false);'),
           );
         }
 
@@ -466,13 +592,31 @@ class VariantBuilder implements Builder {
               contextConfigurableParams.contains(param);
           if (isContextConfigurable && configClassName != null) {
             // Generate: param ?? config?.param ?? default
-            final providerAccess = refer('config').nullSafeProperty(param.name);
+
+            if (param.defaultValueCode == null && param.isRequired) {
+              if (param.defaultValueCode == null) {
+                bodyStatements.add(Code(
+                    'assert(config?.${param.name} != null || ${param.name} != null, "Parameter ${param.name} is required and it was neither provided nor directly passed");'));
+              }
+            }
 
             if (param.defaultValueCode != null) {
+              final providerAccessSafe =
+                  refer('config').nullSafeProperty(param.name);
+
               namedArgs[param.name] = refer(param.name)
-                  .ifNullThen(providerAccess)
+                  .ifNullThen(providerAccessSafe)
                   .ifNullThen(CodeExpression(Code(param.defaultValueCode!)));
             } else {
+              late Expression providerAccess;
+              if (param.isRequired) {
+                providerAccess = refer('config')
+                    .nullChecked
+                    .property(param.name)
+                    .nullChecked;
+              } else {
+                providerAccess = refer('config').nullSafeProperty(param.name);
+              }
               namedArgs[param.name] =
                   refer(param.name).ifNullThen(providerAccess);
             }
@@ -501,9 +645,14 @@ class VariantBuilder implements Builder {
     String configClassName,
     List<ParameterElement> contextConfigurableParams,
     List<ParameterElement> allOptionalParams,
+    List<TypeReference> typeParameters,
   ) {
     return Class((builder) {
       builder.name = configClassName;
+      // Add type parameters if needed
+      if (typeParameters.isNotEmpty) {
+        builder.types.addAll(typeParameters);
+      }
 
       // Generate fields for each context-configurable parameter
       // All fields must be nullable so we can detect when they weren't provided
@@ -535,15 +684,30 @@ class VariantBuilder implements Builder {
     String configClassName,
     String publicClassName,
     List<ParameterElement> contextConfigurableParams,
+    List<TypeReference> typeParameters,
   ) {
     return Class((builder) {
       builder.name = '${publicClassName}ConfigProvider';
       builder.extend = const Reference('StatelessWidget');
+      // Add type parameters if needed
+      if (typeParameters.isNotEmpty) {
+        builder.types.addAll(typeParameters);
+      }
 
       // Field for config
+      // When using type parameters as type arguments, we only use the names, not the bounds
+      final configType = typeParameters.isNotEmpty
+          ? TypeReference((tr) {
+              tr.symbol = configClassName;
+              // Add just the type parameter names as type arguments (bounds are only in declarations)
+              tr.types.addAll(
+                typeParameters.map((tp) => refer(tp.symbol)),
+              );
+            })
+          : refer(configClassName);
       builder.fields.add(Field((fb) => fb
         ..name = 'config'
-        ..type = refer(configClassName)
+        ..type = configType
         ..modifier = FieldModifier.final$));
 
       // Field for child
@@ -580,10 +744,15 @@ class VariantBuilder implements Builder {
         // Build method body: check for parent config and merge
         final bodyStatements = <Code>[];
 
+        // Build type arguments string if needed
+        final typeArgsString = typeParameters.isNotEmpty
+            ? '<${typeParameters.map((tp) => tp.symbol).join(', ')}>'
+            : '';
+
         // Read parent config
         bodyStatements.add(
           Code(
-              'final parentConfig = Provider.of<$configClassName?>(context, listen: false);'),
+              'final parentConfig = Provider.of<$configClassName$typeArgsString?>(context, listen: false);'),
         );
 
         // Generate merge arguments for each context-configurable parameter
@@ -596,7 +765,8 @@ class VariantBuilder implements Builder {
         // Determine merged config
         if (mergeArgs.isNotEmpty) {
           bodyStatements.add(
-            Code('final mergedConfig = parentConfig != null ? $configClassName('
+            Code(
+                'final mergedConfig = parentConfig != null ? $configClassName$typeArgsString('
                 '${mergeArgs.join(',\n        ')}'
                 ') : config;'),
           );
@@ -608,7 +778,7 @@ class VariantBuilder implements Builder {
 
         // Provide merged config
         bodyStatements.add(
-          Code('return Provider<$configClassName>.value('
+          Code('return Provider<$configClassName$typeArgsString>.value('
               'value: mergedConfig, '
               'child: child,'
               ');'),

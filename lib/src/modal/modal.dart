@@ -14,7 +14,25 @@ class LdModalPage<T> extends Page<T> {
 
   @override
   Route<T> createRoute(BuildContext context) {
-    return builder(context);
+    final route = builder(context);
+    // Ensure the route's settings is set to this Page for page-based navigation
+    return LdModalRoute<T>(
+      context: route.context,
+      barrierDismissible: route.barrierDismissible,
+      pageBuilder: route.pageBuilder,
+      modalTypeMode: route.modalTypeMode,
+      scaleParent: route.scaleParent,
+      maintainState: route.maintainState,
+      dialogSize: route.dialogSize,
+      sheetBorderRadius: route.sheetBorderRadius,
+      fixedDialogSize: route.fixedDialogSize,
+      sheetAspectRatio: route.sheetAspectRatio,
+      dialogBorderRadius: route.dialogBorderRadius,
+      sheetBreakpoint: route.sheetBreakpoint,
+      sheetInsets: route.sheetInsets,
+      barrierLabel: route.barrierLabel,
+      settings: this,
+    );
   }
 }
 
@@ -59,6 +77,7 @@ class LdModalRoute<T> extends PageRoute<T> {
     this.sheetBreakpoint,
     this.sheetInsets,
     String? barrierLabel,
+    super.settings,
   }) : _barrierLabel = barrierLabel;
 
   @override

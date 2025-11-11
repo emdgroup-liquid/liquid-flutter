@@ -100,7 +100,7 @@ class LdFilterRangeWidget<T extends Identifiable<IdType>, IdType, GroupBy> exten
 
   @override
   Widget build(BuildContext context) {
-    final repository = context.read<LdMonkey<T, IdType>>().repository;
+    final repository = LdRepository.of<T, IdType>(context);
     return LdAutoSpace(
       children: [
         Row(

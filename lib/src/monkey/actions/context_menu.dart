@@ -15,29 +15,32 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
 
     final newSelection = !listSelection.contains(item.value!.id) ? {item.value!.id} : listSelection;
 
-    final route = LdMonkey.of<T, IdType>(context);
+    final shell = LdMonkeyShellState.of<T, IdType>(context);
 
     return Provider.value(
-      value: LdMonkeySelection<T, IdType>(items: newSelection),
+      value: LdMonkeySelection<IdType>(items: newSelection),
       child: Provider.value(
         value: newSelection,
         child: Builder(builder: (newContext) {
-          final actions = route.actions.where((e) => e.isVisible(newContext, location: LdMonkeyActionLocation.context));
+          final actions = shell.actions.where((e) => e.isVisible(newContext, location: LdMonkeyActionLocation.context));
           return LdContextMenu(
             child: child,
             disabled: (listSelection.length > 1 && !listSelection.contains(item.value!.id)) || actions.isEmpty,
             builder: (context, isOpen, open, child) => child!,
             menuProviders: (context) => [
               Provider<LdPaginatorItem<T>>.value(value: item),
-              Provider<LdMonkey<T, IdType>>.value(value: route),
-              Provider<LdMonkeySelection<T, IdType>>.value(
+              ChangeNotifierProvider<LdMonkeyShellState<T, IdType>>.value(value: shell),
+              Provider.value(
+                value: context.read<LdMonkeyEffectiveLayoutMode>(),
+              ),
+              Provider<LdMonkeySelection<IdType>>.value(
                 value: LdMonkeySelection(items: newSelection),
+              ),
+              ListenableProvider.value(
+                value: LdRepository.of<T, IdType>(context),
               ),
               Provider<List<LdMonkeyAction<T, IdType>>>.value(
                 value: actions.toList(),
-              ),
-              Provider<LdMonkeyContext<T, IdType>>.value(
-                value: LdMonkeyContext.fromRoute(route, newContext),
               ),
             ],
             menuBuilder: (context, menuBuilder) => ConstrainedBox(

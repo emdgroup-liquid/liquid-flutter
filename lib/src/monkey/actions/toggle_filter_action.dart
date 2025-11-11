@@ -14,9 +14,9 @@ LdMonkeyAction<T, IdType> toggleFilters<T extends Identifiable<IdType>, IdType>(
         ),
       },
       builder: (context) {
-        final route = context.watch<LdMonkey<T, IdType>>();
-
-        final activeFilters = route.repository.activeFilters;
+        final shell = LdMonkeyShellState.of<T, IdType>(context);
+        final repository = LdRepository.of<T, IdType>(context);
+        final activeFilters = repository.activeFilters;
 
         Widget icon;
 
@@ -45,13 +45,14 @@ LdMonkeyAction<T, IdType> toggleFilters<T extends Identifiable<IdType>, IdType>(
         return LdContextMenu(
           menuProviders: (context) {
             return [
-              Provider<LdMonkey<T, IdType>>.value(value: route),
+              ChangeNotifierProvider.value(value: shell),
+              ListenableProvider<LdRepository<T, IdType>>.value(value: repository),
             ];
           },
           builder: (context, isOpen, open, child) => LdButton(child: icon, onPressed: open),
           menuBuilder: (context, onDismiss) => ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 300),
-            child: LdFilterModal(route: route),
+            child: LdFilterModal<T, IdType>(),
           ),
         );
       },

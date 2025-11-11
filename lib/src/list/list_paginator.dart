@@ -434,6 +434,15 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     }
   }
 
+  Stream<List<LdPaginatorItem<T>>> watchListOfItems(Set<IdType> ids) async* {
+    yield ids.map((id) => getItemById(id)).nonNulls.toList();
+    await for (final update in updatedItems) {
+      if (ids.contains(update.value?.id)) {
+        yield ids.map((id) => getItemById(id)).nonNulls.toList();
+      }
+    }
+  }
+
   Future<List<T>> _fetchItems({
     bool refresh = false,
   }) async {

@@ -13,8 +13,7 @@ class SelectableListDemo extends StatefulWidget {
 }
 
 class _SelectableListDemoState extends State<SelectableListDemo> {
-  late final LdPaginator<SampleItem, String> _paginator =
-      LdPaginator<SampleItem, String>(
+  late final LdPaginator<SampleItem, String> _paginator = LdPaginator<SampleItem, String>(
     initialOffset: 0,
     fetchListFunction: _fetchItems,
   );
@@ -59,8 +58,7 @@ class _SelectableListDemoState extends State<SelectableListDemo> {
             'It integrates with LdPaginator for pagination and allows customization of item rendering through builder functions. '
             'The component handles selection state management internally and provides callbacks for selection changes.',
           ),
-          LdText.p(
-              "You can simply wrap an existing LdList with LdSelectableList to make it selectable."),
+          LdText.p("You can simply wrap an existing LdList with LdSelectableList to make it selectable."),
           CodeBlock(
             code: """
             LdSelectableList<int, void>(
@@ -96,13 +94,6 @@ class _SelectableListDemoState extends State<SelectableListDemo> {
                 multiSelect: _multiSelect,
                 paginator: _paginator,
                 onSelectionChange: _onSelectionChange,
-                listBuilder: (context, scrollController, itemBuilder) {
-                  return LdList<SampleItem, String>(
-                    scrollController: scrollController,
-                    paginator: _paginator,
-                    itemBuilder: itemBuilder,
-                  );
-                },
                 itemBuilder: (context, item, int index) {
                   return LdListItem(
                     leading: LdAvatar(child: Text(item.value!.formula)),

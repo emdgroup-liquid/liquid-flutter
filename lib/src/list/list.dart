@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/intersperse.dart';
+import 'package:provider/provider.dart';
+
+part 'list.variants.g.dart';
 
 /// A model class representing an item in the list.
 
@@ -64,27 +67,29 @@ typedef LdListItemBuilder<T extends Identifiable> = Widget Function(
 /// - Error handling and retry mechanisms
 /// - Pull-to-refresh functionality
 /// - Empty state handling
-class LdList<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
-  const LdList({
+
+@Variants([])
+class LdListWidget<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
+  const LdListWidget({
     super.key,
-    this.scrollController,
-    this.areEqual,
-    this.emptyBuilder,
-    this.errorBuilder,
-    this.header,
-    this.loadingBuilder,
-    this.assumedItemHeight,
-    this.physics,
-    required this.itemBuilder,
-    required this.paginator,
-    this.groupHeaderBuilder,
-    this.groupingCriterion,
-    this.separatorBuilder,
-    this.primary = false,
-    this.footer,
-    this.shrinkWrap = false,
-    this.padding = EdgeInsets.zero,
-    this.retryConfig,
+    @ContextConfigurable() required this.itemBuilder,
+    @ContextConfigurable() required this.paginator,
+    @ContextConfigurable() this.areEqual,
+    @ContextConfigurable() this.assumedItemHeight,
+    @ContextConfigurable() this.emptyBuilder,
+    @ContextConfigurable() this.errorBuilder,
+    @ContextConfigurable() this.footer,
+    @ContextConfigurable() this.groupHeaderBuilder,
+    @ContextConfigurable() this.groupingCriterion,
+    @ContextConfigurable() this.header,
+    @ContextConfigurable() this.loadingBuilder,
+    @ContextConfigurable() this.padding = EdgeInsets.zero,
+    @ContextConfigurable() this.physics,
+    @ContextConfigurable() this.primary = false,
+    @ContextConfigurable() this.retryConfig,
+    @ContextConfigurable() this.scrollController,
+    @ContextConfigurable() this.separatorBuilder,
+    @ContextConfigurable() this.shrinkWrap = false,
   });
 
   /// Function that builds a [T] in the list.
@@ -176,10 +181,10 @@ class LdList<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   }
 
   @override
-  State<LdList<T, IdType>> createState() => _LdListState<T, IdType>();
+  State<LdListWidget<T, IdType>> createState() => _LdListState<T, IdType>();
 }
 
-class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdList<T, IdType>> {
+class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListWidget<T, IdType>> {
   // State variables
   List<_ListItem<T>> _groupedItems = [];
   late final ScrollController _scrollController;
@@ -217,7 +222,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdList<
   }
 
   @override
-  void didUpdateWidget(covariant LdList<T, IdType> oldWidget) {
+  void didUpdateWidget(covariant LdListWidget<T, IdType> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (_shouldRegroupItems(oldWidget)) {
@@ -238,11 +243,11 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdList<
     }
   }
 
-  bool _shouldRegroupItems(LdList<T, IdType> oldWidget) {
+  bool _shouldRegroupItems(LdListWidget<T, IdType> oldWidget) {
     return oldWidget.groupingCriterion != widget.groupingCriterion || widget.paginator != oldWidget.paginator;
   }
 
-  bool _shouldUpdateDataListener(LdList<T, IdType> oldWidget) {
+  bool _shouldUpdateDataListener(LdListWidget<T, IdType> oldWidget) {
     return widget.paginator != oldWidget.paginator;
   }
 

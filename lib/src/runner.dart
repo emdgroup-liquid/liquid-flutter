@@ -72,6 +72,7 @@ class _LdRunnerLogState extends State<LdRunnerLog> {
         child: SizedBox(
           height: widget.messages.length < 50 ? null : 300,
           child: ListView.builder(
+            padding: EdgeInsets.zero,
             shrinkWrap: widget.messages.length < 50,
             itemCount: widget.messages.length,
             physics: widget.messages.length < 50

@@ -23,7 +23,7 @@ class MonkeyPatternDemo extends StatelessWidget {
             "Start by creating an LdMonkey instance with the required parameters. This defines the core behavior of your pattern."),
         CodeBlock(
           language: "dart",
-          code: '''final taskDemo = LdMonkey<Task, int, bool>(
+          code: '''final taskDemo = LdMonkey<Task, int>(
   // Required: Base path for your monkey pattern
   path: "/task-demo",
   
@@ -33,15 +33,15 @@ class MonkeyPatternDemo extends StatelessWidget {
   // Required: How to build detail path from selected items
   detailPath: (items) => "/task-demo/\${items.join(",")}",
   
-  // Required: Repository builder function
-  buildRepository: (context) => taskRepository,
-  
   // Required: Detail widget builder
   buildDetail: (context, item) => TaskDetail(task: item),
   
   // Required: List builder function
-  listBuilder: (route, initialSelection, onSelectionChange) {
-    return LdSelectableList<Task, int, bool>(
+  listBuilder: (context, route, state, onSelectionChange) {
+    final shellState = LdMonkeyShellState.of<Task, int>(context);
+    return LdSelectableList<Task, int>(
+      showSelectionControls: shellState.showSelectionControls,
+      initialSelectedItems: shellState.selectedItems,
       // ... list configuration
     );
   },
@@ -188,13 +188,23 @@ class MonkeyPatternDemo extends StatelessWidget {
   routes: [
     // Your other routes...
     
-    // Add monkey pattern routes
-    ...taskDemo.buildRoute(),
+    // Add monkey pattern routes using buildMonkeyRoutes
+    ...buildMonkeyRoutes<Task, int>(
+      basePath: "/task-demo",
+      route: taskDemo,
+      repositoryBuilder: (context) async => taskRepository,
+      layoutMode: MonkeyLayoutMode.auto,
+    ),
     
     // Or mount at a specific path
     GoRoute(
       path: "/tasks",
-      routes: taskDemo.buildRoute(),
+      routes: buildMonkeyRoutes<Task, int>(
+        basePath: "/tasks",
+        route: taskDemo,
+        repositoryBuilder: (context) async => taskRepository,
+        layoutMode: MonkeyLayoutMode.auto,
+      ),
     ),
   ],
 );''',
@@ -204,7 +214,7 @@ class MonkeyPatternDemo extends StatelessWidget {
             "Here's a complete example of a task management monkey pattern:"),
         CodeBlock(
           language: "dart",
-          code: '''final taskDemo = LdMonkey<Task, int, bool>(
+          code: '''final taskDemo = LdMonkey<Task, int>(
   path: "/task-demo",
   allowMultipleSelection: true,
   presentationMode: MonkeyDetailVariant.page,
@@ -212,11 +222,11 @@ class MonkeyPatternDemo extends StatelessWidget {
   showMultiSelectItems: true,
   parseId: (id) => int.parse(id),
   detailPath: (items) => "/task-demo/\${items.join(",")}",
-  buildRepository: (context) => taskRepository,
   buildDetail: (context, item) => TaskDetail(task: item),
-  listBuilder: (route, initialSelection, onSelectionChange) {
-    return LdSelectableList<Task, int, bool>(
-      showSelectionControls: route.state.showSelectionControls,
+  listBuilder: (context, route, state, onSelectionChange) {
+    final shellState = LdMonkeyShellState.of<Task, int>(context);
+    return LdSelectableList<Task, int>(
+      showSelectionControls: shellState.showSelectionControls,
       listBuilder: (context, scrollController, itemBuilder) {
         return LdList(
           paginator: route.repository,
@@ -226,7 +236,7 @@ class MonkeyPatternDemo extends StatelessWidget {
         );
       },
       paginator: route.repository,
-      initialSelectedItems: route.state.selectedItems,
+      initialSelectedItems: shellState.selectedItems,
       multiSelect: true,
       onSelectionChange: (selected) => onSelectionChange(selected),
       itemBuilder: (context, item, index) => LdMonkeySingleShortcuts(

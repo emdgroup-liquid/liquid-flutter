@@ -32,11 +32,9 @@ abstract class LdMonkeyAction<T extends Identifiable<IdType>, IdType> {
   bool isVisible(BuildContext context, {LdMonkeyActionLocation? location}) {
     location ??= context.read<LdMonkeyActionLocation>();
 
-    final isSideBySide = LdMonkeyContext.of<T, IdType>(context).isSideBySide;
-
-    final route = LdMonkey.of<T, IdType>(context);
-
+    final repository = LdRepository.of<T, IdType>(context);
     final selection = LdMonkeySelection.of<T, IdType>(context, listen: false);
+    final effectiveLayoutMode = context.read<LdMonkeyEffectiveLayoutMode>();
 
     final selectedItemCount = selection.items.length;
 
@@ -45,18 +43,18 @@ abstract class LdMonkeyAction<T extends Identifiable<IdType>, IdType> {
     }
 
     final selectedItems =
-        selection.items.map((e) => route.repository.getItemById(e)).whereType<LdPaginatorItem<T>>().toList();
+        selection.items.map((e) => repository.getItemById(e)).whereType<LdPaginatorItem<T>>().toList();
 
     for (final visibility in this.visibility) {
       if (visibility.location != location) continue;
 
-      if (isSideBySide && !visibility.visibleInSplitView) {
+      if (!visibility.layoutModes.contains(effectiveLayoutMode)) {
         continue;
       }
 
       if (visibility.applyFilters.isNotEmpty) {
         final filters = visibility.applyFilters.map(
-          (filterName) => route.repository.filters[filterName]!,
+          (filterName) => repository.filters[filterName]!,
         );
 
         for (final filter in filters) {

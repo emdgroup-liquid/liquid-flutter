@@ -10,7 +10,7 @@ class _Movie with Identifiable<int> {
   final int id;
   final String title;
   final String genre;
-  final int rating; // 1-10
+  final int rating; // 1-5
   final DateTime lastUpdate;
   _Movie(this.id, this.title, this.genre, this.rating, this.lastUpdate);
 
@@ -31,20 +31,20 @@ class _Movie with Identifiable<int> {
 }
 
 var movieData = [
-  _Movie(1, "Inception", "Sci-Fi", 9, DateTime.now()),
-  _Movie(2, "The Godfather", "Crime", 10, DateTime.now()),
-  _Movie(3, "Pulp Fiction", "Crime", 9, DateTime.now()),
-  _Movie(4, "The Dark Knight", "Action", 10, DateTime.now()),
-  _Movie(5, "Forrest Gump", "Drama", 8, DateTime.now()),
-  _Movie(6, "Interstellar", "Sci-Fi", 8, DateTime.now()),
-  _Movie(7, "The Matrix", "Sci-Fi", 9, DateTime.now()),
-  _Movie(8, "Fight Club", "Drama", 8, DateTime.now()),
-  _Movie(9, "The Shawshank Redemption", "Drama", 10, DateTime.now()),
-  _Movie(10, "Gladiator", "Action", 8, DateTime.now()),
-  _Movie(11, "Transformers: Revenge of the Fallen", "Action", 4, DateTime.now()),
-  _Movie(12, "Cats", "Drama", 3, DateTime.now()),
-  _Movie(13, "The Room", "Drama", 2, DateTime.now()),
-  _Movie(14, "Batman & Robin", "Action", 3, DateTime.now()),
+  _Movie(1, "Inception", "Sci-Fi", 5, DateTime.now()),
+  _Movie(2, "The Godfather", "Crime", 5, DateTime.now()),
+  _Movie(3, "Pulp Fiction", "Crime", 5, DateTime.now()),
+  _Movie(4, "The Dark Knight", "Action", 5, DateTime.now()),
+  _Movie(5, "Forrest Gump", "Drama", 4, DateTime.now()),
+  _Movie(6, "Interstellar", "Sci-Fi", 4, DateTime.now()),
+  _Movie(7, "The Matrix", "Sci-Fi", 5, DateTime.now()),
+  _Movie(8, "Fight Club", "Drama", 4, DateTime.now()),
+  _Movie(9, "The Shawshank Redemption", "Drama", 5, DateTime.now()),
+  _Movie(10, "Gladiator", "Action", 4, DateTime.now()),
+  _Movie(11, "Transformers: Revenge of the Fallen", "Action", 2, DateTime.now()),
+  _Movie(12, "Cats", "Drama", 2, DateTime.now()),
+  _Movie(13, "The Room", "Drama", 1, DateTime.now()),
+  _Movie(14, "Batman & Robin", "Action", 2, DateTime.now()),
   _Movie(15, "Battlefield Earth", "Sci-Fi", 1, DateTime.now()),
 ];
 
@@ -74,7 +74,7 @@ final movieRepository = LdRepository<_Movie, int>(
       label: (context) => "Rating",
       icon: (context) => const Icon(LucideIcons.star),
       min: 0,
-      max: 10,
+      max: 5,
       optimisticFilter: (item, range) => range.inRange(item.rating),
     ),
     LdFilterAnyOf<_Movie, int, String>(
@@ -129,19 +129,19 @@ final movieRepository = LdRepository<_Movie, int>(
   },
 );
 
+/*
 final movieDemo = LdMonkey<_Movie, int>(
   path: "/movie-demo",
   allowMultipleSelection: true,
-  presentationMode: MonkeyDetailVariant.dialog,
-  layoutMode: MonkeyLayoutMode.neverSideBySide,
+  layoutMode: LdMonkeyLayoutMode.neverSideBySide,
   showMultiSelectItems: true,
   parseId: (id) => int.parse(id),
   detailPath: (items) => "/movie-demo/${items.join(",")}",
-  buildRepository: (context) => movieRepository,
   buildDetail: (context, item) => _MovieDetail(movie: item),
-  listBuilder: (route, initialSelection, onSelectionChange) {
+  listBuilder: (context, route, state, onSelectionChange) {
+    final shellState = LdMonkeyShellState.of<_Movie, int>(context);
     return LdSelectableList<_Movie, int>(
-      showSelectionControls: route.state.showSelectionControls,
+      showSelectionControls: shellState.showSelectionControls,
       listBuilder: (context, scrollController, itemBuilder) {
         return CustomScrollView(
           slivers: [
@@ -178,13 +178,13 @@ final movieDemo = LdMonkey<_Movie, int>(
         );
       },
       paginator: route.repository,
-      initialSelectedItems: route.state.selectedItems,
+      initialSelectedItems: shellState.selectedItems,
       multiSelect: true,
       onSelectionChange: (selected) => onSelectionChange(selected),
       itemBuilder: (context, item, index) {
         return LdMonkeySingleShortcuts(
           item: item.value!.id,
-          actions: route.actions,
+          actions: shellState.actions,
           child: LdMonkeyContextMenu<_Movie, int>(
             item: item,
             child: LdListItemAnimation(
@@ -196,7 +196,7 @@ final movieDemo = LdMonkey<_Movie, int>(
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text(item.value!.genre),
-                subContent: Text("Rating: ${item.value!.rating}/10"),
+                subContent: Text("Rating: ${item.value!.rating}/5"),
               ),
             ),
           ),
@@ -204,80 +204,7 @@ final movieDemo = LdMonkey<_Movie, int>(
       },
     );
   },
-  actions: [
-    toggleFilters<_Movie, int>(),
-    LdMonkeySubmitAction(
-      visibility: {
-        LdMonkeyActionVisibility(
-          location: LdMonkeyActionLocation.detailSecondary,
-          minSelectionCount: 1,
-          maxSelectionCount: 1,
-        ),
-        LdMonkeyActionVisibility(
-          location: LdMonkeyActionLocation.context,
-          minSelectionCount: 1,
-          maxSelectionCount: 1,
-        ),
-      },
-      shortcutActivators: {
-        SingleActivator(LogicalKeyboardKey.keyD, meta: true),
-      },
-      config: (context) => LdSubmitConfig(
-        action: (_) async {
-          final selectionItems = LdMonkeySelection.of<_Movie, int>(context).items;
-          final route = LdMonkey.of<_Movie, int>(context);
-          final item = await movieRepository.getById(selectionItems.first);
-
-          final newItem = item.copyWith(
-            id: movieData.length + 1,
-            title: "${item.title} (copy)",
-          );
-
-          await movieRepository.create(newItem);
-
-          await Future.delayed(const Duration(milliseconds: 1500));
-
-          route.setSelectedItems({newItem.id});
-        },
-      ),
-      child: Text("Duplicate"),
-      icon: Icon(LucideIcons.copy),
-    ),
-    LdMonkeySubmitAction(
-      visibility: {
-        LdMonkeyActionVisibility(
-          location: LdMonkeyActionLocation.detailSecondary,
-          minSelectionCount: 1,
-          maxSelectionCount: null,
-        ),
-        LdMonkeyActionVisibility(
-          location: LdMonkeyActionLocation.context,
-          minSelectionCount: 1,
-          maxSelectionCount: null,
-        ),
-        LdMonkeyActionVisibility(
-          location: LdMonkeyActionLocation.masterSecondary,
-          minSelectionCount: 1,
-          maxSelectionCount: null,
-          visibleInSplitView: false,
-        ),
-      },
-      shortcutActivators: {
-        SingleActivator(LogicalKeyboardKey.delete),
-        SingleActivator(LogicalKeyboardKey.backspace),
-      },
-      config: (context) => LdSubmitConfig(
-        action: (_) async {
-          final selection = LdMonkeySelection.of<_Movie, int>(context);
-          await movieRepository.deleteBatch(selection.items);
-        },
-      ),
-      child: Text("Delete"),
-      icon: Icon(LucideIcons.trash2),
-    ),
-    toggleSelectionControls<_Movie, int>(),
-  ],
-);
+);*/
 
 class _MovieDetail extends StatefulWidget {
   final LdPaginatorItem<_Movie> movie;
@@ -309,6 +236,9 @@ class _MovieDetailState extends State<_MovieDetail> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.movie.value == null) {
+      return LdCard(child: Center(child: LdLoader()));
+    }
     return LdCard(
       child: LdAutoSpace(
         children: [
@@ -324,7 +254,7 @@ class _MovieDetailState extends State<_MovieDetail> {
           ),
           LdInput(
             label: "Rating",
-            hint: "1-10",
+            hint: "1-5",
             controller: _ratingController,
             keyboardType: TextInputType.number,
           ),
@@ -345,7 +275,7 @@ class _MovieDetailState extends State<_MovieDetail> {
                       int.tryParse(_ratingController.text) ?? 1,
                       widget.movie.value!.lastUpdate,
                     );
-                    final repo = LdMonkey.of<_Movie, int>(context).repository;
+                    final repo = LdRepository.of<_Movie, int>(context);
                     await repo.update(
                       widget.movie.value!.id,
                       newMovie,
@@ -358,5 +288,125 @@ class _MovieDetailState extends State<_MovieDetail> {
         ],
       ),
     ).padL();
+  }
+}
+
+class MovieShell extends StatelessWidget {
+  final Widget child;
+  final Widget masterPage;
+  const MovieShell({super.key, required this.child, required this.masterPage});
+  @override
+  Widget build(BuildContext context) {
+    return LdMonkeyShell<_Movie, int>(
+      masterPage: masterPage,
+      parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
+      layoutMode: LdMonkeyLayoutMode.neverSideBySide,
+      basePath: "/movie-demo",
+      repositoryBuilder: (context) async => movieRepository,
+      actions: [
+        toggleFilters<_Movie, int>(),
+        LdMonkeySubmitAction(
+          visibility: {
+            LdMonkeyActionVisibility(
+              location: LdMonkeyActionLocation.detailSecondary,
+              minSelectionCount: 1,
+              maxSelectionCount: 1,
+            ),
+            LdMonkeyActionVisibility(
+              location: LdMonkeyActionLocation.context,
+              minSelectionCount: 1,
+              maxSelectionCount: 1,
+            ),
+          },
+          shortcutActivators: {
+            SingleActivator(LogicalKeyboardKey.keyD, meta: true),
+          },
+          config: (context) => LdSubmitConfig(
+            action: (_) async {
+              final selectionItems = LdMonkeySelection.of<_Movie, int>(context).items;
+              final shellState = LdMonkeyShellState.of<_Movie, int>(context);
+              final item = await movieRepository.getById(selectionItems.first);
+
+              final newItem = item.copyWith(
+                id: movieData.length + 1,
+                title: "${item.title} (copy)",
+              );
+
+              await movieRepository.create(newItem);
+
+              await Future.delayed(const Duration(milliseconds: 1500));
+
+              shellState.setSelectedItems({newItem.id});
+            },
+          ),
+          child: Text("Duplicate"),
+          icon: Icon(LucideIcons.copy),
+        ),
+        LdMonkeySubmitAction(
+          visibility: {
+            LdMonkeyActionVisibility(
+              location: LdMonkeyActionLocation.detailSecondary,
+              minSelectionCount: 1,
+              maxSelectionCount: null,
+            ),
+            LdMonkeyActionVisibility(
+              location: LdMonkeyActionLocation.context,
+              minSelectionCount: 1,
+              maxSelectionCount: null,
+            ),
+            LdMonkeyActionVisibility(
+              location: LdMonkeyActionLocation.masterSecondary,
+              minSelectionCount: 1,
+              maxSelectionCount: null,
+              layoutModes: {LdMonkeyEffectiveLayoutMode.sideBySide},
+            ),
+          },
+          shortcutActivators: {
+            SingleActivator(LogicalKeyboardKey.delete),
+            SingleActivator(LogicalKeyboardKey.backspace),
+          },
+          config: (context) => LdSubmitConfig(
+            action: (_) async {
+              final selection = LdMonkeySelection.of<_Movie, int>(context);
+              await movieRepository.deleteBatch(selection.items);
+            },
+          ),
+          child: Text("Delete"),
+          icon: Icon(LucideIcons.trash2),
+        ),
+        toggleSelectionControls<_Movie, int>(),
+      ],
+      child: child,
+    );
+  }
+}
+
+class MovieDetailPage extends StatelessWidget {
+  const MovieDetailPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return LdMonkeyDetailPage<_Movie, int>(
+      primaryAppBar: LdMonkeyAppBar<_Movie, int>(location: LdMonkeyActionLocation.detailAppBar, title: Text("Movie")),
+      buildDetail: (context, item) => _MovieDetail(movie: item),
+    );
+  }
+}
+
+class MovieMasterPage extends StatelessWidget {
+  const MovieMasterPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return LdMonkeyMasterPage<_Movie, int>(
+      appBar: LdMonkeyAppBar<_Movie, int>(location: LdMonkeyActionLocation.masterAppBar, title: Text("Movies")),
+      buildItem: (context, item) => LdListItem(
+        title: Text(item.value!.title),
+        subtitle: Text(item.value!.genre),
+        trailing: Row(children: [
+          for (var i = 0; i < item.value!.rating; i++) Icon(LucideIcons.star),
+        ]),
+      ),
+    );
   }
 }

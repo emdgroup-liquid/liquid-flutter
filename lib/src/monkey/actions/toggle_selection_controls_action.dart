@@ -13,17 +13,17 @@ LdMonkeyAction<T, IdType> toggleSelectionControls<T extends Identifiable<IdType>
         ),
       },
       onShortcutTrigger: (context) async {
-        final route = LdMonkey.of<T, IdType>(context);
-        route.setShowSelectionControls(!route.state.showSelectionControls);
+        final shellState = LdMonkeyShellState.of<T, IdType>(context);
+        shellState.setShowSelectionControls(!shellState.showSelectionControls);
       },
       builder: (context) {
-        final route = LdMonkey.of<T, IdType>(context);
+        final shellState = LdMonkeyShellState.of<T, IdType>(context);
         return LdButton(
           child: const Icon(LucideIcons.pen),
-          active: route.state.showSelectionControls,
+          active: shellState.showSelectionControls,
           onPressed: () async {
-            final currentlyShowing = route.state.showSelectionControls;
-            final selectedItemCount = route.state.selectedItems.length;
+            final currentlyShowing = shellState.showSelectionControls;
+            final selectedItemCount = shellState.selectedItems.length;
 
             if (currentlyShowing && selectedItemCount > 1) {
               if (await ldConfirmModal(
@@ -34,11 +34,11 @@ LdMonkeyAction<T, IdType> toggleSelectionControls<T extends Identifiable<IdType>
                 negative: Text(LiquidLocalizations.of(context).cancel),
                 useRootNavigator: true,
               )) {
-                route.setShowSelectionControls(false);
+                shellState.setShowSelectionControls(false);
               }
               return;
             }
-            route.setShowSelectionControls(!route.state.showSelectionControls);
+            shellState.setShowSelectionControls(!shellState.showSelectionControls);
           },
         );
       },

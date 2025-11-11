@@ -184,7 +184,7 @@ class MonkeyRepositoryDemo extends StatelessWidget {
   showMultiSelectItems: true,
   parseId: (id) => int.parse(id),
   detailPath: (items) => "/task-demo/\${items.join(",")}",
-  buildRepository: (context) => taskRepository, // Your repository here
+  // Note: Repository is now built in buildMonkeyRoutes using repositoryBuilder
   buildDetail: (context, item) => TaskDetail(task: item),
   // ... rest of configuration
 );''',

@@ -423,21 +423,19 @@ class _LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<_
           : null,
       body: Builder(builder: (context) {
         return LdSelectableList<T, IdType>(
-          paginator: widget.repository,
-          itemBuilder: widget.itemBuilder,
-          initialSelectedItems: _selectedItems,
-          multiSelect: widget.multiple,
-          showSelectionControls: true,
-          onSelectionChange: _handleSelectionChange,
-          listBuilder: (context, scrollController, itemBuilder) {
-            return LdList<T, IdType>(
-              paginator: widget.repository,
-              padding: MediaQuery.paddingOf(context),
-              scrollController: scrollController,
-              itemBuilder: itemBuilder,
-            );
-          },
-        );
+            paginator: widget.repository,
+            itemBuilder: widget.itemBuilder,
+            initialSelectedItems: _selectedItems,
+            multiSelect: widget.multiple,
+            showSelectionControls: true,
+            onSelectionChange: _handleSelectionChange,
+            listBuilder: (context, itemBuilder) {
+              return LdList(
+                paginator: widget.repository,
+                padding: MediaQuery.paddingOf(context),
+                itemBuilder: itemBuilder,
+              );
+            });
       }),
     );
   }

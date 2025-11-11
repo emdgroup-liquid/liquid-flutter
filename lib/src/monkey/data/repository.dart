@@ -113,6 +113,10 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     return context.read<LdRepository<T, IdType>>();
   }
 
+  static LdRepository<T, IdType>? maybeOf<T extends Identifiable<IdType>, IdType>(BuildContext context) {
+    return context.read<LdRepository<T, IdType>?>();
+  }
+
   Map<String, dynamic> get queryParameters {
     var parameters = <String, dynamic>{};
 

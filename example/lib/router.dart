@@ -37,8 +37,10 @@ import 'package:liquid/components/tab.dart';
 import 'package:liquid/components/form_elements/toggle.dart';
 import 'package:liquid/demos/layout_documentation.dart';
 import 'package:liquid/demos/movie_demo.dart';
-import 'package:liquid/demos/radius_documentation.dart';
 import 'package:liquid/demos/task_demo/task_demo.dart';
+import 'package:liquid/demos/task_demo/repository.dart';
+import 'package:liquid/demos/task_demo/task.dart';
+import 'package:liquid/demos/radius_documentation.dart';
 import 'package:liquid/demos/theme.dart';
 import 'package:liquid/demos/typography_documentation.dart';
 import 'package:liquid/demos/demo_shell.dart';
@@ -94,13 +96,29 @@ class AppRouter {
         StatefulShellBranch(
           initialLocation: "/task-demo",
           routes: [
-            ...taskDemo.buildRoute(),
+            ...buildMonkeyRoutes<Task, int>(
+              basePath: "/task-demo",
+              parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
+              detailPage: TaskDetailPage(),
+              masterPage: TaskMasterPage(),
+              repositoryBuilder: (context) async => taskRepository,
+              layoutMode: LdMonkeyLayoutMode.auto,
+              shellBuilder: (context, child) => TaskShell(child: child),
+            ),
           ],
         ),
         StatefulShellBranch(
           initialLocation: "/movie-demo",
           routes: [
-            ...movieDemo.buildRoute(),
+            ...buildMonkeyRoutes(
+              basePath: "/movie-demo",
+              parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
+              detailPage: MovieDetailPage(),
+              detailInDialog: true,
+              masterPage: MovieMasterPage(),
+              repositoryBuilder: (context) async => movieRepository,
+              layoutMode: LdMonkeyLayoutMode.neverSideBySide,
+            ),
           ],
         ),
       ],

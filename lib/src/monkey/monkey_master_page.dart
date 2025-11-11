@@ -2,15 +2,19 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-import 'package:provider/provider.dart';
-
 class LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
-  final LdMonkey<T, IdType> route;
-
   const LdMonkeyMasterPage({
     super.key,
-    required this.route,
-  });
+    this.buildItem,
+    this.appBar,
+    this.secondaryAppBar,
+    this.buildList,
+  }) : assert(buildList != null || buildItem != null, "Either buildList or buildItem must be provided");
+
+  final Widget Function(BuildContext context, LdRepository<T, IdType> repository)? buildList;
+  final Widget Function(BuildContext context, LdPaginatorItem<T> item)? buildItem;
+  final Widget? appBar;
+  final Widget? secondaryAppBar;
 
   @override
   State<LdMonkeyMasterPage<T, IdType>> createState() => _LdMonkeyMasterPageState<T, IdType>();
@@ -27,15 +31,16 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
   @override
   void initState() {
     super.initState();
-    final searchFilter = widget.route.repository.filters.values
-        .firstWhereOrNull((filter) => filter is LdFilterSearchOption) as LdFilterSearchOption<T, IdType, dynamic>?;
+    final repository = LdRepository.of<T, IdType>(context);
+    final searchFilter = repository.filters.values.firstWhereOrNull((filter) => filter is LdFilterSearchOption)
+        as LdFilterSearchOption<T, IdType, dynamic>?;
 
     if (searchFilter != null) {
       searchConfig = LdSearchConfig(
         getSuggestions: searchFilter.getSuggestions,
         buildSuggestion: searchFilter.buildSuggestion,
         onSearch: (query) {
-          widget.route.repository.updateFilter(searchFilter.name, (filter) {
+          repository.updateFilter(searchFilter.name, (filter) {
             filter as LdFilterSearchOption<T, IdType, dynamic>;
             return filter.copyWith(
               isOn: query.isNotEmpty,
@@ -47,71 +52,63 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
     }
   }
 
+  Widget _buildList(
+    BuildContext context,
+    LdRepository<T, IdType> repository,
+    LdMonkeyShellState<T, IdType> shellState,
+  ) {
+    if (widget.buildList != null) {
+      return widget.buildList!(context, repository);
+    }
+    return LdSelectableList<T, IdType>(
+      showSelectionControls: shellState.showSelectionControls,
+      paginator: repository,
+      initialSelectedItems: shellState.selectedItems,
+      multiSelect: true,
+      onSelectionChange: (selected) => shellState.setSelectedItems(selected),
+      itemBuilder: (context, item, index) => LdMonkeySingleShortcuts(
+        item: item.value!.id,
+        actions: shellState.actions,
+        child: LdMonkeyContextMenu<T, IdType>(
+          item: item,
+          child: LdListItemAnimation(
+            state: item.state,
+            child: widget.buildItem?.call(context, item) ??
+                LdListItem(
+                  title: Text(item.value!.toString()),
+                ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final shellState = LdMonkeyShellState.of<T, IdType>(context, watch: true);
+    final repository = LdRepository.of<T, IdType>(context);
+
     return LdNotificationProvider(
       child: LdNotificationPortal(
-        child: StreamBuilder(
-            stream: widget.route.stateStream,
-            initialData: widget.route.state,
-            builder: (context, asyncSnapshot) {
-              final state = asyncSnapshot.data!;
-              // Provide  the state of the route to the list builder
-
-              return Provider.value(
-                value: LdMonkeySelection<T, IdType>(items: state.selectedItems),
-                child: LdMonkeyMultiShortcuts(
-                  actions: widget.route.actions,
-                  child: Builder(builder: (context) {
-                    final primaryActions = LdMonkeyAppBarActions.getActionsAndProviders<T, IdType>(
-                      context,
-                      LdMonkeyActionLocation.masterAppBar,
-                    );
-
-                    final secondaryActions = LdMonkeyAppBarActions.getActionsAndProviders<T, IdType>(
-                      context,
-                      LdMonkeyActionLocation.masterSecondary,
-                    );
-
-                    return LdScaffold(
-                      appBar: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Provider.value(
-                            value: LdMonkeyActionLocation.masterAppBar,
-                            child: LdAppBar(
-                              title: Text(widget.route.repository.pluralItemTitle),
-                              actions: primaryActions.actions.map((e) => e.build(context)).toList(),
-                              overflowMenuProviders: primaryActions.menuProviders,
-                            ),
-                          ),
-                        ],
-                      ),
-                      secondaryAppBar: (secondaryActions.actions.isNotEmpty || searchConfig != null)
-                          ? Provider.value(
-                              value: LdMonkeyActionLocation.masterSecondary,
-                              child: LayoutBuilder(builder: (context, constraints) {
-                                return LdAppBar(
-                                  implyLeading: false,
-                                  actions: secondaryActions.actions.map((e) => e.build(context)).toList(),
-                                  overflowMenuProviders: secondaryActions.menuProviders,
-                                  searchConfig: searchConfig,
-                                );
-                              }),
-                            )
-                          : null,
-                      body: widget.route.listBuilder(
-                        widget.route,
-                        state,
-                        (selection) {
-                          widget.route.setSelectedItems(selection);
-                        },
-                      ),
-                    );
-                  }),
-                ),
-              );
-            }),
+        child: StreamBuilder<Set<IdType>>(
+          stream: shellState.selectedItemsStream,
+          initialData: shellState.selectedItems,
+          builder: (context, selectionSnapshot) {
+            return LdMonkeyMultiShortcuts(
+              actions: shellState.actions,
+              child: Builder(
+                builder: (context) {
+                  return LdScaffold(
+                    appBar: widget.appBar ?? LdMonkeyAppBar<T, IdType>(location: LdMonkeyActionLocation.masterAppBar),
+                    secondaryAppBar: widget.secondaryAppBar ??
+                        LdMonkeyAppBar<T, IdType>(location: LdMonkeyActionLocation.masterSecondary),
+                    body: _buildList(context, repository, shellState),
+                  );
+                },
+              ),
+            );
+          },
+        ),
       ),
     );
   }

@@ -21,9 +21,7 @@ class _TaskDetailState extends State<TaskDetail> {
   void initState() {
     super.initState();
     _taskController.text = widget.task.value?.task ?? "";
-    _dueController.text = widget.task.value?.due != null
-        ? Jiffy.parseFromDateTime(widget.task.value!.due).yMMMd
-        : "";
+    _dueController.text = widget.task.value?.due != null ? Jiffy.parseFromDateTime(widget.task.value!.due).yMMMd : "";
     _dueDate = widget.task.value?.due;
   }
 
@@ -36,17 +34,12 @@ class _TaskDetailState extends State<TaskDetail> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.task.value == null) {
+      return LdCard(child: Center(child: LdLoader()));
+    }
     return LdCard(
       child: LdAutoSpace(
         children: [
-          LdReveal(
-            revealed: widget.task.value?.done ?? false,
-            child: LdBadge(
-              size: LdSize.l,
-              color: shadGreen,
-              child: const Text("Done"),
-            ),
-          ),
           LdInput(
             label: "Task",
             hint: "What do you want to do?",
@@ -93,7 +86,7 @@ class _TaskDetailState extends State<TaskDetail> {
                       widget.task.value!.done,
                       widget.task.value!.lastUpdate,
                     );
-                    final repo = LdMonkey.of<Task, int>(context).repository;
+                    final repo = LdRepository.of<Task, int>(context);
                     await repo.update(
                       widget.task.value!.id,
                       newTask,

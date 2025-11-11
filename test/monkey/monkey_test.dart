@@ -47,7 +47,7 @@ void main() {
       )? listBuilder,
       Set<int> Function(String selected)? parseSelected,
       double reflowBreakpoint = 600,
-      MonkeyLayoutMode layoutMode = MonkeyLayoutMode.auto,
+      LdMonkeyLayoutMode layoutMode = LdMonkeyLayoutMode.auto,
     }) {
       return LdMonkey<_TestItem, int>(
         path: path ?? '/test',
@@ -436,7 +436,7 @@ void main() {
 
         final monkey = createMonkey(
           buildRepository: (context) => repository,
-          layoutMode: MonkeyLayoutMode.auto,
+          layoutMode: LdMonkeyLayoutMode.auto,
           reflowBreakpoint: 600,
         );
 
@@ -454,7 +454,7 @@ void main() {
 
         final monkey = createMonkey(
           buildRepository: (context) => repository,
-          layoutMode: MonkeyLayoutMode.auto,
+          layoutMode: LdMonkeyLayoutMode.auto,
           reflowBreakpoint: 600,
         );
 
@@ -472,7 +472,7 @@ void main() {
 
         final monkey = createMonkey(
           buildRepository: (context) => repository,
-          layoutMode: MonkeyLayoutMode.sideBySide,
+          layoutMode: LdMonkeyLayoutMode.sideBySide,
         );
 
         const size = Size(400, 600);
@@ -489,7 +489,7 @@ void main() {
 
         final monkey = createMonkey(
           buildRepository: (context) => repository,
-          layoutMode: MonkeyLayoutMode.neverSideBySide,
+          layoutMode: LdMonkeyLayoutMode.neverSideBySide,
         );
 
         const size = Size(800, 600);

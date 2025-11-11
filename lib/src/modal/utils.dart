@@ -24,6 +24,7 @@ Future<bool> ldConfirmModal(
           appBar: LdAppBar(
             title: title ?? Text(locale.confirm),
           ),
+          secondaryAppBarPlacement: LdScaffoldAppBarPlacement.bottom,
           secondaryAppBar: LdAppBar(
             actions: [
               LdFlexibleChild(

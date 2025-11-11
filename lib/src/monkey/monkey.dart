@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
-
+/*
 /// A master-detail navigation component that provides a responsive layout for managing
 /// lists of items with detailed views.
 ///
@@ -29,19 +29,11 @@ import 'package:provider/provider.dart';
 class LdMonkey<T extends Identifiable<IdType>, IdType> {
   /// Internal state management for the monkey component.
   var _state = LdMonkeyDetailState<T, IdType>(
-    showSelectionControls: false,
-    selectedItems: {},
     repository: null,
   );
 
   /// Stream controller for broadcasting state changes to subscribers.
   final _stateStream = StreamController<LdMonkeyDetailState<T, IdType>>.broadcast();
-
-  /// Factory function that creates a repository instance for the given context.
-  ///
-  /// The repository handles data fetching, pagination, filtering, and CRUD operations
-  /// for the items displayed in the monkey component.
-  final LdRepository<T, IdType> Function(BuildContext context) buildRepository;
 
   /// Optional wrapper widget that can be used to wrap the entire monkey shell.
   ///
@@ -75,7 +67,7 @@ class LdMonkey<T extends Identifiable<IdType>, IdType> {
 
   /// Breakpoint width in pixels for responsive layout switching.
   ///
-  /// When the screen width is above this value and [layoutMode] is [MonkeyLayoutMode.auto],
+  /// When the screen width is above this value and [layoutMode] is [LdMonkeyLayoutMode.auto],
   /// the component will display in side-by-side mode. Defaults to 600 pixels.
   final double reflowBreakpoint;
 
@@ -84,18 +76,12 @@ class LdMonkey<T extends Identifiable<IdType>, IdType> {
   /// Higher values give more space to the detail view. Defaults to 2.
   final int? detailFlex;
 
-  /// Determines how detail content is presented.
-  ///
-  /// - [MonkeyDetailVariant.page]: Full page navigation
-  /// - [MonkeyDetailVariant.dialog]: Modal dialog presentation
-  final MonkeyDetailVariant presentationMode;
-
   /// Controls the layout behavior of the master-detail interface.
   ///
-  /// - [MonkeyLayoutMode.auto]: Automatically switch based on screen size
-  /// - [MonkeyLayoutMode.sideBySide]: Always use side-by-side layout
-  /// - [MonkeyLayoutMode.neverSideBySide]: Always use stacked layout
-  final MonkeyLayoutMode layoutMode;
+  /// - [LdMonkeyLayoutMode.auto]: Automatically switch based on screen size
+  /// - [LdMonkeyLayoutMode.sideBySide]: Always use side-by-side layout
+  /// - [LdMonkeyLayoutMode.neverSideBySide]: Always use stacked layout
+  final LdMonkeyLayoutMode layoutMode;
 
   /// Whether multiple items can be selected simultaneously.
   ///
@@ -121,14 +107,14 @@ class LdMonkey<T extends Identifiable<IdType>, IdType> {
   /// Actions can be placed in different locations (app bar, context menu, etc.)
   /// and have configurable visibility rules based on selection state, filters,
   /// and layout mode.
-  final List<LdMonkeyAction<T, IdType>> actions;
 
   /// Builds the selectable list widget for the master view.
   ///
-  /// This function receives the current route, state, and selection change
+  /// This function receives the build context, current route, state, and selection change
   /// callback, allowing for custom list implementations while maintaining
   /// integration with the monkey's selection and state management.
   final LdSelectableList<T, IdType> Function(
+    BuildContext context,
     LdMonkey<T, IdType> route,
     LdMonkeyDetailState<T, IdType> state,
     void Function(Set<IdType> selectedItems) onSelectionChanged,
@@ -136,7 +122,7 @@ class LdMonkey<T extends Identifiable<IdType>, IdType> {
 
   /// Creates a new [LdMonkey] instance.
   ///
-  /// The [path], [detailPath], [buildDetail], [buildRepository], [parseId], and
+  /// The [path], [detailPath], [buildDetail], [parseId], and
   /// [listBuilder] parameters are required for basic functionality.
   ///
   /// ## Parameters
@@ -144,7 +130,6 @@ class LdMonkey<T extends Identifiable<IdType>, IdType> {
   /// - [path]: The base route path for the master view
   /// - [detailPath]: Function to generate detail paths from selected IDs
   /// - [buildDetail]: Builder for detail content widgets
-  /// - [buildRepository]: Factory for creating data repositories
   /// - [parseId]: Function to convert string IDs to typed IDs
   /// - [listBuilder]: Builder for the selectable list widget
   /// - [reflowBreakpoint]: Screen width breakpoint for responsive layout (default: 600)
@@ -160,30 +145,33 @@ class LdMonkey<T extends Identifiable<IdType>, IdType> {
     required this.path,
     required this.detailPath,
     required this.buildDetail,
-    required this.buildRepository,
     required this.parseId,
     required this.listBuilder,
     this.reflowBreakpoint = 600,
     this.detailFlex = 2,
-    this.actions = const [],
     this.allowMultipleSelection = true,
     this.showMultiSelectItems = false,
     this.wrapShell,
-    this.presentationMode = MonkeyDetailVariant.page,
-    this.layoutMode = MonkeyLayoutMode.auto,
+    this.layoutMode = LdMonkeyLayoutMode.auto,
     Set<IdType> Function(String selected)? parseSelected,
   }) : _parseSelected = parseSelected;
 
   /// The current repository instance for data operations.
   ///
   /// Throws an exception if the repository has not been initialized yet.
-  /// Use [initRepository] to initialize the repository before accessing this getter.
+  /// The repository should be set by the shell using [setRepository].
   LdRepository<T, IdType> get repository => _state.repository!;
+
+  /// Sets the repository instance.
+  ///
+  /// This method should be called by the shell when initializing the repository.
+  void setRepository(LdRepository<T, IdType> repository) {
+    _updateState(_state.copyWith(repository: repository));
+  }
 
   /// The current state of the monkey component.
   ///
-  /// Contains information about selected items, selection controls visibility,
-  /// and the repository instance.
+  /// Contains information about the repository instance and deleted items.
   LdMonkeyDetailState<T, IdType> get state => _state;
 
   /// Stream of state changes for reactive UI updates.
@@ -192,140 +180,18 @@ class LdMonkey<T extends Identifiable<IdType>, IdType> {
   /// state changes (selection, repository updates, etc.).
   Stream<LdMonkeyDetailState<T, IdType>> get stateStream => _stateStream.stream;
 
-  /// Builds the routing configuration for the monkey component.
+  /// Updates the state when items are deleted.
   ///
-  /// Creates a set of [GoRoute] instances that handle:
-  /// - Master list view at the base [path]
-  /// - Detail view at [path]/:selected
-  /// - Filter modal at [path]/filters
-  ///
-  /// The routes are wrapped in a [ShellRoute] that provides the master-detail
-  /// layout and handles responsive behavior.
-  ///
-  /// Returns a list of routes that can be added to a [GoRouter] configuration.
-  List<RouteBase> buildRoute() {
-    return [
-      GoRoute(
-        name: "$path-filters",
-        path: "$path/filters",
-        pageBuilder: (context, state) => LdModalPage(
-          builder: (context) => ldFilterModal(context, this),
-        ),
-      ),
-      ShellRoute(
-        routes: [
-          GoRoute(
-              name: "$path-master",
-              path: path,
-              pageBuilder: (context, state) => NoTransitionPage<void>(
-                    key: state.pageKey,
-                    child: LdMonkeyMasterPage(
-                      route: this,
-                    ),
-                  ),
-              routes: [
-                GoRoute(
-                    name: "$path-detail",
-                    path: "/:selected",
-                    pageBuilder: (context, state) {
-                      final effectivePresentationMode = LdMonkeyContext.of<T, IdType>(context);
-
-                      final page = Provider.value(
-                        value: effectivePresentationMode,
-                        child: Provider.value(
-                          value: this,
-                          child: LdMonkeyDetailPage<T, IdType>(),
-                        ),
-                      );
-
-                      if (!effectivePresentationMode.isSideBySide) {
-                        if (effectivePresentationMode.detailInDialog) {
-                          return LdModalPage(
-                            builder: (context) => ldMonkeyDetailModal(context, this),
-                          );
-                        }
-
-                        return MaterialPage(
-                          child: page,
-                          key: state.pageKey,
-                        );
-                      }
-                      return NoTransitionPage<void>(
-                        key: state.pageKey,
-                        child: page,
-                      );
-                    }),
-              ]),
-        ],
-        builder: (context, state, child) => LdWrapConditional(
-          condition: wrapShell != null,
-          builder: (context, child) => wrapShell!.call(context, child),
-          child: LdMonkeyShell(
-            child: child,
-            route: this,
-            routeSelection: state.pathParameters['selected'],
-          ),
-        ),
-      )
-    ];
-  }
-
-  /// Initializes the repository and sets up initial data loading.
-  ///
-  /// This method gets called by the monkey shell.
-  ///
-  /// ## Parameters
-  ///
-  /// - [context]: The build context for creating the repository
-  /// - [initialSelection]: Set of item IDs to pre-select
-  /// - [queryParameters]: URL query parameters to apply as filters
-  ///
-  /// ## Behavior
-  ///
-  /// 1. Creates a repository instance using [buildRepository]
-  /// 2. If [initialSelection] is provided, initializes with those items
-  /// 3. Otherwise, fetches items starting from offset 0
-  /// 4. Applies any filter values from [queryParameters]
-  /// 5. Sets up listeners for item updates and deletions
-  Future<void> initRepository(
-    BuildContext context,
-    Set<IdType> initialSelection,
-    Map<String, String> queryParameters,
-  ) async {
+  /// This method should be called by the shell when items are deleted.
+  void markItemDeleted(IdType id) {
     _updateState(
-      _state.copyWith(repository: buildRepository(context)),
+      _state.copyWith(
+        deletedItems: {
+          ..._state.deletedItems,
+          id,
+        },
+      ),
     );
-
-    if (initialSelection.isNotEmpty) {
-      await repository.initWithSelection(initialSelection);
-    } else {
-      await repository.fetchItemsAtOffset(0);
-    }
-
-    if (queryParameters.isNotEmpty) {
-      for (final filter in repository.filters.values) {
-        final value = queryParameters[filter.name];
-
-        if (value != null) {
-          repository.updateFilter(
-              filter.name, (filter) => (filter as LdFilterOption<T, IdType>).marshalSerialized(value));
-        }
-      }
-    }
-
-    repository.updatedItems.listen((item) async {
-      if (item.state == LdPaginatorItemState.deleted && item.value != null) {
-        _updateState(
-          _state.copyWith(
-            deletedItems: {
-              ..._state.deletedItems,
-              item.value!.id,
-            },
-            selectedItems: _state.selectedItems.where((id) => id != item.value!.id).toSet(),
-          ),
-        );
-      }
-    });
   }
 
   /// Determines if the component should display in side-by-side layout.
@@ -340,15 +206,15 @@ class LdMonkey<T extends Identifiable<IdType>, IdType> {
   ///
   /// The decision is based on:
   /// - Screen width being greater than [reflowBreakpoint]
-  /// - [layoutMode] being [MonkeyLayoutMode.auto] or [MonkeyLayoutMode.sideBySide]
-  /// - [layoutMode] not being [MonkeyLayoutMode.neverSideBySide]
+  /// - [layoutMode] being [LdMonkeyLayoutMode.auto] or [LdMonkeyLayoutMode.sideBySide]
+  /// - [layoutMode] not being [LdMonkeyLayoutMode.neverSideBySide]
   bool isSideBySide(Size size) {
     switch (layoutMode) {
-      case MonkeyLayoutMode.auto:
+      case LdMonkeyLayoutMode.auto:
         return size.width > reflowBreakpoint;
-      case MonkeyLayoutMode.sideBySide:
+      case LdMonkeyLayoutMode.sideBySide:
         return true;
-      case MonkeyLayoutMode.neverSideBySide:
+      case LdMonkeyLayoutMode.neverSideBySide:
         return false;
     }
   }
@@ -376,47 +242,6 @@ class LdMonkey<T extends Identifiable<IdType>, IdType> {
       return {};
     }
     return selected.split(",").map(parseId).toSet();
-  }
-
-  /// Updates the set of currently selected items.
-  ///
-  /// ## Parameters
-  ///
-  /// - [selectedItems]: The new set of selected item IDs
-  ///
-  /// ## Behavior
-  ///
-  /// - Compares the new selection with the current selection to avoid unnecessary updates
-  /// - Updates the internal state and notifies listeners via [stateStream]
-  /// - Triggers UI updates for selection-dependent components
-  void setSelectedItems(Set<IdType> selectedItems) {
-    if (selectedItems.join(",") == _state.selectedItems.join(",")) {
-      return;
-    }
-
-    _updateState(
-      _state.copyWith(selectedItems: selectedItems),
-    );
-  }
-
-  /// Controls the visibility of selection controls (checkboxes, etc.).
-  ///
-  /// ## Parameters
-  ///
-  /// - [showSelectionControls]: Whether to show selection UI elements
-  ///
-  /// ## Behavior
-  ///
-  /// - When `true`, shows selection controls and maintains current selection
-  /// - When `false`, hides selection controls and clears all selections
-  /// - Updates the internal state and notifies listeners
-  void setShowSelectionControls(bool showSelectionControls) {
-    _updateState(
-      _state.copyWith(
-        showSelectionControls: showSelectionControls,
-        selectedItems: showSelectionControls ? _state.selectedItems : {},
-      ),
-    );
   }
 
   /// Internal method to update the component state and notify listeners.
@@ -453,19 +278,106 @@ class LdMonkey<T extends Identifiable<IdType>, IdType> {
   static LdMonkey<T, IdType> of<T extends Identifiable<IdType>, IdType>(BuildContext context, {bool watch = false}) {
     return watch ? context.watch<LdMonkey<T, IdType>>() : context.read<LdMonkey<T, IdType>>();
   }
-}
+}*/
 
-/// Defines how detail content is presented to the user.
-enum MonkeyDetailVariant {
-  /// Detail content is shown as a full page with navigation.
-  page,
+/// Builds the routing configuration for a monkey component.
+///
+/// Creates a set of [GoRoute] instances that handle:
+/// - Master list view at the base [basePath]
+/// - Detail view at [basePath]/:selected
+/// - Filter modal at [basePath]/filters
+///
+/// The routes are wrapped in a [ShellRoute] that provides the master-detail
+/// layout and handles responsive behavior.
+///
+/// ## Parameters
+///
+/// - [basePath]: The base route path for the master view
+/// - [route]: The [LdMonkey] instance containing configuration
+/// - [repositoryBuilder]: Builder function that creates a repository instance asynchronously
+/// - [layoutMode]: Controls the layout behavior of the master-detail interface
+/// - [shellBuilder]: Optional wrapper widget that can be used to wrap the entire monkey shell
+/// - [masterPageBuilder]: Optional builder for the master page (defaults to [LdMonkeyMasterPage])
+/// - [detailPageBuilder]: Optional builder for the detail page (defaults to [LdMonkeyDetailPage])
+/// - [filterModalBuilder]: Optional builder for the filter modal (defaults to [ldFilterModal])
+///
+/// Returns a list of routes that can be added to a [GoRouter] configuration.
+List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
+  required String basePath,
+  required Widget detailPage,
+  required Widget masterPage,
+  required Future<LdRepository<T, IdType>> Function(BuildContext context) repositoryBuilder,
+  required LdMonkeyLayoutMode layoutMode,
+  required Set<IdType> Function(String selected) parseSelected,
+  Widget Function(BuildContext context, Widget child)? shellBuilder,
+  LdModalRoute Function(BuildContext context)? filterModalBuilder,
+  bool detailInDialog = false,
+}) {
+  return [
+    GoRoute(
+      name: "$basePath-filters",
+      path: "$basePath/filters",
+      pageBuilder: (context, state) => LdModalPage(
+        builder: (context) => filterModalBuilder?.call(context) ?? ldFilterModal(context),
+      ),
+    ),
+    ShellRoute(
+      routes: [
+        GoRoute(
+          name: "$basePath-master",
+          path: basePath,
+          pageBuilder: (context, state) => NoTransitionPage<void>(
+            key: state.pageKey,
+            child: masterPage,
+          ),
+          routes: [
+            GoRoute(
+              name: "$basePath-detail",
+              path: "/:selected",
+              pageBuilder: (context, goState) {
+                final shellState = LdMonkeyShellState.of<T, IdType>(context);
+                final effectiveLayout = context.read<LdMonkeyEffectiveLayoutMode>();
 
-  /// Detail content is shown in a modal dialog.
-  dialog,
+                final page = detailPage;
+
+                if (effectiveLayout == LdMonkeyEffectiveLayoutMode.detail) {
+                  if (detailInDialog) {
+                    return LdModalPage(
+                      builder: (context) => LdModalRoute(context: context, pageBuilder: (context) => page),
+                    );
+                  }
+
+                  return MaterialPage(
+                    child: page,
+                    key: goState.pageKey,
+                  );
+                }
+                return NoTransitionPage<void>(
+                  key: goState.pageKey,
+                  child: page,
+                );
+              },
+            ),
+          ],
+        ),
+      ],
+      builder: (context, state, child) => shellBuilder != null
+          ? shellBuilder(context, child)
+          : LdMonkeyShell(
+              child: child,
+              basePath: basePath,
+              parseSelected: parseSelected,
+              masterPage: masterPage,
+              repositoryBuilder: repositoryBuilder,
+              layoutMode: layoutMode,
+              routeSelection: state.pathParameters['selected'],
+            ),
+    )
+  ];
 }
 
 /// Defines the layout behavior of the master-detail interface.
-enum MonkeyLayoutMode {
+enum LdMonkeyLayoutMode {
   /// Automatically switch between side-by-side and stacked layouts based on screen size.
   auto,
 
@@ -474,4 +386,10 @@ enum MonkeyLayoutMode {
 
   /// Always display in stacked layout regardless of screen size.
   neverSideBySide,
+}
+
+enum LdMonkeyEffectiveLayoutMode {
+  master,
+  detail,
+  sideBySide,
 }

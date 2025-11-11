@@ -12,7 +12,6 @@ class LdSelectableList<T extends Identifiable<IdType>, IdType> extends StatefulW
 
   final Widget Function(
     BuildContext context,
-    ScrollController scrollController,
     LdListItemBuilder<T> itemBuilder,
   )? listBuilder;
 
@@ -356,11 +355,9 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
     return KeyEventResult.ignored;
   }
 
-  LdList<T, IdType> _defaultListBuilder(
-      BuildContext context, ScrollController scrollController, LdListItemBuilder<T> itemBuilder) {
+  LdList<T, IdType> _defaultListBuilder(BuildContext context, LdListItemBuilder<T> itemBuilder) {
     return LdList(
       paginator: widget.paginator,
-      scrollController: scrollController,
       itemBuilder: itemBuilder,
     );
   }
@@ -407,15 +404,18 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
 
   @override
   Widget build(BuildContext context) {
+    final list = LdListConfigProvider(
+      LdListConfig(
+        paginator: widget.paginator,
+        scrollController: _scrollController,
+      ),
+      widget.listBuilder?.call(context, _wrapListItem) ?? _defaultListBuilder(context, _wrapListItem),
+    );
+
     if (isMobile) {
       return Stack(
         children: [
-          widget.listBuilder?.call(context, _scrollController, _wrapListItem) ??
-              _defaultListBuilder(
-                context,
-                _scrollController,
-                _wrapListItem,
-              ),
+          list,
           Positioned(
             left: 0,
             top: 0,
@@ -467,12 +467,7 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
         autofocus: true,
         onFocusChange: _onFocusChange,
         onKeyEvent: _onKeyEvent,
-        child: widget.listBuilder?.call(context, _scrollController, _wrapListItem) ??
-            _defaultListBuilder(
-              context,
-              _scrollController,
-              _wrapListItem,
-            ),
+        child: list,
       ),
     );
   }

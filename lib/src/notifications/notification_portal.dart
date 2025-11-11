@@ -219,23 +219,25 @@ class LdNotificationWidget extends StatelessWidget {
     }
 
     return LdSpring(
-        initialPosition: 0,
-        position: 1 - index * 0.1,
-        child: _buildNotificationBody(context),
-        builder: (context, state, child) {
-          return LdSpring(
-              initialPosition: 0,
-              position: yOffset,
-              child: child,
-              builder: (context, yOffset, child) {
-                return Transform.translate(
-                  offset: Offset(0, yOffset.position),
-                  child: Transform.scale(
-                    scale: state.position,
-                    child: child,
-                  ),
-                );
-              });
-        });
+      initialPosition: 0,
+      position: 1 - index * 0.1,
+      child: _buildNotificationBody(context),
+      builder: (context, state, child) {
+        return LdSpring(
+          initialPosition: 0,
+          position: yOffset,
+          child: child,
+          builder: (context, yOffset, child) {
+            return Transform.translate(
+              offset: Offset(0, yOffset.position),
+              child: Transform.scale(
+                scale: state.position,
+                child: child,
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 }
