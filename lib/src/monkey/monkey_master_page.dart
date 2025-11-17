@@ -1,6 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/monkey/monkey_shell_state.dart';
+import 'package:provider/provider.dart';
 
 class LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   const LdMonkeyMasterPage({
@@ -56,6 +58,7 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
     BuildContext context,
     LdRepository<T, IdType> repository,
     LdMonkeyShellState<T, IdType> shellState,
+    LdMonkeyActions<T, IdType> actions,
   ) {
     if (widget.buildList != null) {
       return widget.buildList!(context, repository);
@@ -66,9 +69,9 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
       initialSelectedItems: shellState.selectedItems,
       multiSelect: true,
       onSelectionChange: (selected) => shellState.setSelectedItems(selected),
-      itemBuilder: (context, item, index) => LdMonkeySingleShortcuts(
+      itemBuilder: (context, item, index) => LdMonkeySingleShortcuts<T, IdType>(
         item: item.value!.id,
-        actions: shellState.actions,
+        actions: actions,
         child: LdMonkeyContextMenu<T, IdType>(
           item: item,
           child: LdListItemAnimation(
@@ -87,22 +90,22 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
   Widget build(BuildContext context) {
     final shellState = LdMonkeyShellState.of<T, IdType>(context, watch: true);
     final repository = LdRepository.of<T, IdType>(context);
+    final actions = context.read<LdMonkeyActions<T, IdType>>();
 
     return LdNotificationProvider(
       child: LdNotificationPortal(
-        child: StreamBuilder<Set<IdType>>(
-          stream: shellState.selectedItemsStream,
-          initialData: shellState.selectedItems,
-          builder: (context, selectionSnapshot) {
+        child: ListenableBuilder(
+          listenable: shellState,
+          builder: (context, _) {
             return LdMonkeyMultiShortcuts(
-              actions: shellState.actions,
+              actions: actions,
               child: Builder(
                 builder: (context) {
                   return LdScaffold(
                     appBar: widget.appBar ?? LdMonkeyAppBar<T, IdType>(location: LdMonkeyActionLocation.masterAppBar),
                     secondaryAppBar: widget.secondaryAppBar ??
                         LdMonkeyAppBar<T, IdType>(location: LdMonkeyActionLocation.masterSecondary),
-                    body: _buildList(context, repository, shellState),
+                    body: _buildList(context, repository, shellState, actions),
                   );
                 },
               ),

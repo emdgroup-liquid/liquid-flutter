@@ -16,16 +16,19 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
     final newSelection = !listSelection.contains(item.value!.id) ? {item.value!.id} : listSelection;
 
     final shell = LdMonkeyShellState.of<T, IdType>(context);
+    final actions = context.read<LdMonkeyActions<T, IdType>>();
 
     return Provider.value(
       value: LdMonkeySelection<IdType>(items: newSelection),
       child: Provider.value(
         value: newSelection,
         child: Builder(builder: (newContext) {
-          final actions = shell.actions.where((e) => e.isVisible(newContext, location: LdMonkeyActionLocation.context));
+          final visibleActions =
+              actions.where((e) => e.isVisible(context, location: LdMonkeyActionLocation.context)).toList();
+
           return LdContextMenu(
             child: child,
-            disabled: (listSelection.length > 1 && !listSelection.contains(item.value!.id)) || actions.isEmpty,
+            disabled: (listSelection.length > 1 && !listSelection.contains(item.value!.id)) || visibleActions.isEmpty,
             builder: (context, isOpen, open, child) => child!,
             menuProviders: (context) => [
               Provider<LdPaginatorItem<T>>.value(value: item),
@@ -40,7 +43,7 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
                 value: LdRepository.of<T, IdType>(context),
               ),
               Provider<List<LdMonkeyAction<T, IdType>>>.value(
-                value: actions.toList(),
+                value: visibleActions,
               ),
             ],
             menuBuilder: (context, menuBuilder) => ConstrainedBox(
@@ -48,7 +51,6 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: actions
-                    .where((e) => e.isVisible(context, location: LdMonkeyActionLocation.context))
                     .map(
                       (action) => LdButtonConfigProvider(
                           const LdButtonConfig(

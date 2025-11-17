@@ -10,3 +10,4 @@ export 'monkey_detail_state.dart';
 export 'monkey_shell.dart';
 export 'monkey_selection.dart';
 export 'detail_page.dart';
+export 'monkey_shell_state.dart';

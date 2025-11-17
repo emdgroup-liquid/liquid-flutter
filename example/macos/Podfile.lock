@@ -44,7 +44,7 @@ SPEC CHECKSUMS:
   device_info_plus: 4fb280989f669696856f8b129e4a5e3cd6c48f76
   FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
   liquid_flutter_window_utils: 4f6190831a93935ae3f7c1078a2dcb7f4b384af5
-  package_info_plus: f0052d280d17aa382b932f399edf32507174e870
+  package_info_plus: a8a591e70e87ce97ce5d21b2594f69cea9e0312f
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
   url_launcher_macos: 0fba8ddabfc33ce0a9afe7c5fef5aab3d8d2d673

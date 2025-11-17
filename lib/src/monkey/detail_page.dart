@@ -23,9 +23,6 @@ class LdMonkeyDetailPage<T extends Identifiable<IdType>, IdType> extends Statele
 
   @override
   Widget build(BuildContext context) {
-    final shellState = LdMonkeyShellState.of<T, IdType>(context);
-    final repository = LdRepository.of<T, IdType>(context);
-
     return LdScaffold(
       appBar: primaryAppBar ?? LdMonkeyAppBar<T, IdType>(location: LdMonkeyActionLocation.detailAppBar),
       secondaryAppBar: secondaryAppBar ?? LdMonkeyAppBar<T, IdType>(location: LdMonkeyActionLocation.detailSecondary),
@@ -54,7 +51,6 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
   Widget build(BuildContext context) {
     context.watch<LdMonkeyShellState<T, IdType>>();
 
-    print("building ld monkey app bar ${location}");
     final effectiveLayout = context.read<LdMonkeyEffectiveLayoutMode>();
     final repository = LdRepository.of<T, IdType>(context);
     final searchFilter = _getSearchFilter(context);
@@ -111,6 +107,7 @@ class _LdMonkeyStreamSelectionState<T extends Identifiable<IdType>, IdType>
   }
 
   void _onItemsChanged(List<LdPaginatorItem<T>> items) {
+    print("onItemsChanged: $items");
     setState(() {
       _items = items;
     });
@@ -126,6 +123,8 @@ class _LdMonkeyStreamSelectionState<T extends Identifiable<IdType>, IdType>
   @override
   void initState() {
     super.initState();
+
+    final shellState = LdMonkeyShellState.of<T, IdType>(context);
 
     _selectionSubscription = LdMonkeyShellState.of<T, IdType>(context).selectedItemsStream.listen(_onSelectionChanged);
     _onSelectionChanged(LdMonkeyShellState.of<T, IdType>(context).selectedItems);

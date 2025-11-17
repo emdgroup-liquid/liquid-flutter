@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:liquid/demos/task_demo/demo_data.dart';
 import 'package:liquid/demos/task_demo/detail.dart';
@@ -11,13 +12,19 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class TaskShell extends StatelessWidget {
   final Widget child;
-  const TaskShell({super.key, required this.child});
+  final GoRouterState state;
+  const TaskShell({
+    super.key,
+    required this.child,
+    required this.state,
+  });
   @override
   Widget build(BuildContext context) {
     return LdMonkeyShell<Task, int>(
       basePath: "/task-demo",
       parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
       layoutMode: LdMonkeyLayoutMode.auto,
+      routeSelection: state.pathParameters['selected'],
       masterPage: TaskMasterPage(),
       repositoryBuilder: (context) async => taskRepository,
       actions: [
@@ -242,7 +249,10 @@ class TaskDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyDetailPage<Task, int>(
-      primaryAppBar: LdMonkeyAppBar<Task, int>(location: LdMonkeyActionLocation.detailAppBar, title: Text("Task")),
+      primaryAppBar: LdMonkeyAppBar<Task, int>(
+        location: LdMonkeyActionLocation.detailAppBar,
+        title: Text("Task"),
+      ),
       buildDetail: (context, item) => TaskDetail(task: item),
     );
   }

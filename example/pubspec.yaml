@@ -34,7 +34,7 @@ dependencies:
   web: ^1.1.0
   flutter_sticky_header: ^0.8.0
   wolt_modal_sheet: ^0.9.4
-  google_fonts: ^6.2.1
+  google_fonts: ^6.3.2
   url_launcher: ^6.3.1
   fuzzy: ^0.5.1
   collection: ^1.19.0

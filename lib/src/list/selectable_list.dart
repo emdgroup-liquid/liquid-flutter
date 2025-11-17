@@ -142,6 +142,7 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
   void onTap(IdType item) {
     _focusNode.requestFocus();
     if (!isMultiSelect) {
+      print('onTap: $item');
       _selectedItems.toggle(item);
       return;
     }

@@ -218,7 +218,9 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
   Iterable<LdFilterOption<T, IdType>> get activeFilters => _filters.values.where((e) => e.isOn);
 
   Future<void> initWithSelection(Set<IdType> selection) async {
+    print("initWithSelection: $selection");
     if (_getOffsetById == null) {
+      print("initWithSelection: No getOffsetById");
       return;
     }
     final currentFilters = activeFilters.toSet();
@@ -229,6 +231,8 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
       filters: currentFilters,
       sortOptions: currentSortOptions,
     );
+
+    print("initWithSelection: firstOffset: $firstOffset");
 
     initialOffset = firstOffset ?? 0;
 

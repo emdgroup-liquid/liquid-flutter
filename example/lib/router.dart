@@ -103,7 +103,7 @@ class AppRouter {
               masterPage: TaskMasterPage(),
               repositoryBuilder: (context) async => taskRepository,
               layoutMode: LdMonkeyLayoutMode.auto,
-              shellBuilder: (context, child) => TaskShell(child: child),
+              shellBuilder: (context, state, child) => TaskShell(state: state, child: child),
             ),
           ],
         ),

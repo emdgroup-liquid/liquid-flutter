@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
@@ -294,10 +295,12 @@ class _MovieDetailState extends State<_MovieDetail> {
 class MovieShell extends StatelessWidget {
   final Widget child;
   final Widget masterPage;
-  const MovieShell({super.key, required this.child, required this.masterPage});
+  final GoRouterState state;
+  const MovieShell({super.key, required this.child, required this.masterPage, required this.state});
   @override
   Widget build(BuildContext context) {
     return LdMonkeyShell<_Movie, int>(
+      routeSelection: state.pathParameters['selected'],
       masterPage: masterPage,
       parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
       layoutMode: LdMonkeyLayoutMode.neverSideBySide,

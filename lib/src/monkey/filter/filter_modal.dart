@@ -66,6 +66,7 @@ class LdFilterModal<T extends Identifiable<IdType>, IdType> extends StatelessWid
                           (e) => LdListItem(
                             borderRadius: LdTheme.of(context).radius(LdSize.s),
                             isSelected: e.isOn,
+                            selectionControl: LdSelectionControl.radio,
                             title: Text(e.label(context)),
                             trailing: e.icon(context),
                             onSelectionChanged: (selected) {

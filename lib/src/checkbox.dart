@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/src/color/color.dart';
 import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/haptics.dart';
+import 'package:liquid_flutter/src/preview_wrapper.dart';
 import 'package:liquid_flutter/src/touchable/touchable.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
@@ -12,6 +13,26 @@ import 'theme/theme.dart';
 import 'annotations.dart';
 
 part 'checkbox.variants.g.dart';
+
+@LiquidMultiPreview(
+  name: 'LdCheckbox checked',
+)
+Widget ldCheckboxPreview() {
+  return const LdCheckbox(
+    checked: true,
+    label: 'Checkbox',
+  );
+}
+
+@LiquidMultiPreview(
+  name: 'LdCheckbox unchecked',
+)
+Widget ldCheckboxPreviewUnchecked() {
+  return const LdCheckbox(
+    checked: false,
+    label: 'Checkbox',
+  );
+}
 
 /// A checkbox control.
 @Variants([

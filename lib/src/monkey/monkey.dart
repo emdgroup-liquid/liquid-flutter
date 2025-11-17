@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/monkey/monkey_shell_state.dart';
 import 'package:provider/provider.dart';
 /*
 /// A master-detail navigation component that provides a responsive layout for managing
@@ -309,7 +310,11 @@ List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
   required Future<LdRepository<T, IdType>> Function(BuildContext context) repositoryBuilder,
   required LdMonkeyLayoutMode layoutMode,
   required Set<IdType> Function(String selected) parseSelected,
-  Widget Function(BuildContext context, Widget child)? shellBuilder,
+  Widget Function(
+    BuildContext context,
+    GoRouterState state,
+    Widget child,
+  )? shellBuilder,
   LdModalRoute Function(BuildContext context)? filterModalBuilder,
   bool detailInDialog = false,
 }) {
@@ -335,7 +340,6 @@ List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
               name: "$basePath-detail",
               path: "/:selected",
               pageBuilder: (context, goState) {
-                final shellState = LdMonkeyShellState.of<T, IdType>(context);
                 final effectiveLayout = context.read<LdMonkeyEffectiveLayoutMode>();
 
                 final page = detailPage;
@@ -362,7 +366,7 @@ List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
         ),
       ],
       builder: (context, state, child) => shellBuilder != null
-          ? shellBuilder(context, child)
+          ? shellBuilder(context, state, child)
           : LdMonkeyShell(
               child: child,
               basePath: basePath,
