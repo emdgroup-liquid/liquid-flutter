@@ -4,18 +4,19 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class OpenDrawerButton extends StatelessWidget {
-  const OpenDrawerButton({super.key});
+  const OpenDrawerButton({super.key, this.drawerParent});
+
+  final LdScaffoldState? drawerParent;
 
   @override
   Widget build(BuildContext context) {
     final drawerState = context.watch<LdDrawerState?>();
 
     final icon = drawerState?.isSideBySide ?? false ? LucideIcons.panelLeftOpen : LucideIcons.menu;
-    final scaffold = context.findAncestorStateOfType<LdScaffoldState>();
 
     return Tooltip(
         message: LiquidLocalizations.of(context).openDrawer,
-        child: LdButton.ghost(child: Icon(icon), onPressed: () => scaffold?.openDrawer()));
+        child: LdButton.ghost(child: Icon(icon), onPressed: () => drawerParent?.openDrawer()));
   }
 }
 

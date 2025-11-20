@@ -168,7 +168,6 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     final sortOptions = _sortOptions.where((e) => e.isOn).toList();
 
     if (filters.isEmpty && sortOptions.isEmpty) {
-      await refreshList();
       return;
     }
 
@@ -212,7 +211,6 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
 
     setItems(sortedItems);
     mutex.release();
-    await refreshList();
   }
 
   Iterable<LdFilterOption<T, IdType>> get activeFilters => _filters.values.where((e) => e.isOn);

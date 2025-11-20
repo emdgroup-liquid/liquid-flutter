@@ -38,6 +38,7 @@ class _AppScaffoldState extends State<AppScaffold> {
           child: LdScaffold(
             drawer: MainNavigationDrawer(),
             appBar: LdAppBar(
+              shadowMode: LdAppBarShadowMode.hidden,
               leading: Container(
                 height: 24,
                 decoration: BoxDecoration(

@@ -275,9 +275,25 @@ class TaskMasterPage extends StatelessWidget {
     return LdMonkeyMasterPage<Task, int>(
       appBar: LdMonkeyAppBar<Task, int>(location: LdMonkeyActionLocation.masterAppBar, title: Text("Tasks")),
       buildItem: (context, item) => LdListItem(
-        title: Text(item.value!.task),
-        subtitle: Text("${Jiffy.parseFromDateTime(item.value!.due).fromNow()} #${item.value!.id}"),
-        leading: LdAvatar(child: Icon(item.value!.done ? LucideIcons.squareCheck : LucideIcons.square)),
+        title: Text(
+          item.value!.task,
+          style: TextStyle(
+            decoration: item.value!.done ? TextDecoration.lineThrough : TextDecoration.none,
+          ),
+        ),
+        subtitle: Text("Due ${Jiffy.parseFromDateTime(item.value!.due).fromNow()}"),
+        leading: LdAvatar(
+          color: switch (item.value!.done) {
+            true => LdTheme.of(context).success,
+            false => switch (item.value!.due.isBefore(DateTime.now())) {
+                true => LdTheme.of(context).error,
+                false => LdTheme.of(context).primary,
+              },
+          },
+          child: Icon(
+            item.value!.done ? LucideIcons.squareCheck : LucideIcons.square,
+          ),
+        ),
       ),
     );
   }

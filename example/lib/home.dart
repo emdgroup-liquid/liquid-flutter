@@ -156,13 +156,6 @@ class _HomeState extends State<Home> {
             LdText.p(
               "You can now use the components in your app. Please refer to the documentation for more information.",
             ),
-            LdText.hl("Changing the theme size"),
-            LdText.p(
-                "Liquid Flutter supports three different base sizes that try to make it suitable for desktop and mobile use cases. The default size is not the LdSize passed to components directly, rather it scales the entire user interface."
-                " This is done to preserve the visual hierarchy of the components. On Desktop LdThemeSize.s is reccomended, on mobile LdThemeSize.m is reccomended."),
-            const CodeBlock(
-              code: """LdTheme.of(context).setThemeSize(LdThemeSize.s/m/l);""",
-            ),
           ],
         )
       ],

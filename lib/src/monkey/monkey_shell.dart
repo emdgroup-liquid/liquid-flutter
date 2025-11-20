@@ -6,8 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/monkey/intents.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import 'package:multi_split_view/multi_split_view.dart';
 import 'package:provider/provider.dart';
 
 const monkeyShortcuts = {
@@ -139,7 +139,7 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
   /// Parses initial state from URL query parameters.
   void _parseInitialState() {
     final queryParameters = _getQueryParameters();
-    state.setShowSelectionControls(queryParameters['showSelectionControls'] == 'true');
+    state.setShowSelectionControls(queryParameters['select'] == 'true');
 
     if (widget.routeSelection != null) {
       state.setSelectedItems(_parseSelected(widget.routeSelection ?? ""));
@@ -219,6 +219,8 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
 
     await Future.delayed(Duration.zero);
 
+    print("updateSelectionFromRoute: ${widget.routeSelection}");
+
     var newSelectedIds = _parseSelected(widget.routeSelection ?? "");
     state.setSelectedItems(newSelectedIds);
   }
@@ -296,7 +298,7 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
 
     // Add showSelectionControls query parameter
     if (state.showSelectionControls) {
-      queryParameters['showSelectionControls'] = 'true';
+      queryParameters['select'] = 'true';
     }
 
     final uri = Uri.parse(detailPath);
@@ -338,7 +340,6 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
   Widget _buildInitialized(
     BuildContext context,
   ) {
-    print("state.selectedItems: ${state.selectedItems}");
     return Provider.value(
       value: LdMonkeySelection<IdType>(items: state.selectedItems),
       updateShouldNotify: (previous, next) => previous != next,
@@ -371,51 +372,41 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
           return Provider.value(
             value: effectiveLayout,
             child: LdScaffold(
-              body: ColoredBox(
-                color: theme.background,
-                child: MultiSplitViewTheme(
-                  data: MultiSplitViewThemeData(
-                    dividerThickness: 2,
-                  ),
-                  child: MultiSplitView(
-                    dividerBuilder: (context, index, resizable, dragging, highlighted, themeData) => VerticalDivider(
-                      color: theme.border,
-                      thickness: 1,
-                      width: 1,
+              drawerWidth: 500,
+              drawer: widget.masterPage,
+              body: ListenableBuilder(
+                listenable: state,
+                builder: (context, _) {
+                  final selectedItems = state.selectedItems;
+
+                  if (selectedItems.isNotEmpty && _showingDetail) {
+                    return widget.child;
+                  }
+                  final drawerState = context.watch<LdDrawerState>();
+                  final scaffold = context.findAncestorStateOfType<LdScaffoldState>();
+                  return Center(
+                    child: LdAutoSpace(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        if (drawerState.isOpen != true) ...[
+                          LdText.l(LiquidLocalizations.of(context).listHidden),
+                          LdButton(
+                            leading: const Icon(LucideIcons.panelLeftOpen),
+                            child: const Text("Show list"),
+                            onPressed: () {
+                              scaffold?.openDrawer();
+                            },
+                          ),
+                        ],
+                        LdMute(
+                          child: LdText.l(
+                            "Select something",
+                          ),
+                        ),
+                      ],
                     ),
-                    initialAreas: [
-                      Area(
-                        flex: 1,
-                        builder: (context, area) => widget.masterPage,
-                      ),
-                      Area(
-                        flex: widget.detailPanelFlex?.toDouble() ?? 2.0,
-                        builder: (context, area) {
-                          // We need to wrap the child in a stream builder to ensure
-                          // that the child is rebuilt when the state changes as the
-                          // Area will not rebuild.
-
-                          return ListenableBuilder(
-                              listenable: state,
-                              builder: (context, _) {
-                                final selectedItems = state.selectedItems;
-
-                                if (selectedItems.isNotEmpty && _showingDetail) {
-                                  return widget.child;
-                                }
-                                return Center(
-                                  child: LdMute(
-                                    child: LdText.l(
-                                      "Select something",
-                                    ),
-                                  ),
-                                );
-                              });
-                        },
-                      ),
-                    ],
-                  ),
-                ),
+                  );
+                },
               ),
             ),
           );

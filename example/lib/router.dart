@@ -94,20 +94,6 @@ class AppRouter {
     StatefulShellRoute.indexedStack(
       branches: [
         StatefulShellBranch(
-          initialLocation: "/task-demo",
-          routes: [
-            ...buildMonkeyRoutes<Task, int>(
-              basePath: "/task-demo",
-              parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
-              detailPage: TaskDetailPage(),
-              masterPage: TaskMasterPage(),
-              repositoryBuilder: (context) async => taskRepository,
-              layoutMode: LdMonkeyLayoutMode.auto,
-              shellBuilder: (context, state, child) => TaskShell(state: state, child: child),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
           initialLocation: "/movie-demo",
           routes: [
             ...buildMonkeyRoutes(
@@ -162,6 +148,15 @@ class AppRouter {
           path: "/material",
           pageBuilder: (context, state) =>
               NoTransitionPage<void>(key: state.pageKey, child: const MaterialDocumentation()),
+        ),
+        ...buildMonkeyRoutes<Task, int>(
+          basePath: "/task-demo",
+          parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
+          detailPage: TaskDetailPage(),
+          masterPage: TaskMasterPage(),
+          repositoryBuilder: (context) async => taskRepository,
+          layoutMode: LdMonkeyLayoutMode.auto,
+          shellBuilder: (context, state, child) => TaskShell(state: state, child: child),
         ),
 
         /*GoRoute(

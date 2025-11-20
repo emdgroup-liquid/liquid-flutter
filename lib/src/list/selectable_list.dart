@@ -294,6 +294,8 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
       _ctrlPressed = event is KeyDownEvent;
     }
 
+    setState(() {});
+
     if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.arrowDown) {
       // Get the item that has the focus
       for (final item in _itemFocusNodes.entries) {
@@ -363,7 +365,7 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
   }
 
   Widget _wrapListItem(BuildContext context, LdPaginatorItem<T> item, int index) {
-    _itemKeys[item.value!.id] = GlobalKey(debugLabel: "Selection" + item.value!.id.toString());
+    _itemKeys[item.value!.id] ??= GlobalKey(debugLabel: "Selection" + item.value!.id.toString());
     _itemFocusNodes[item.value!.id] ??= FocusNode();
 
     return AnimatedBuilder(
@@ -433,11 +435,12 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
                 onEndDrag: _onEndDrag,
                 onCancel: _onCancel,
                 child: Focus(
-                    focusNode: _focusNode,
-                    autofocus: true,
-                    onFocusChange: _onFocusChange,
-                    onKeyEvent: _onKeyEvent,
-                    child: Container()),
+                  focusNode: _focusNode,
+                  autofocus: true,
+                  onFocusChange: _onFocusChange,
+                  onKeyEvent: _onKeyEvent,
+                  child: Container(),
+                ),
               ),
             )
         ],
@@ -463,7 +466,52 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
         autofocus: true,
         onFocusChange: _onFocusChange,
         onKeyEvent: _onKeyEvent,
-        child: list,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Positioned.fill(child: list),
+            if (_ctrlPressed || _shiftPressed)
+              Align(
+                alignment: Alignment.bottomLeft,
+                child: Padding(
+                  padding: MediaQuery.paddingOf(context),
+                  child: Container(
+                      margin: LdTheme.of(context).pad(),
+                      padding: LdTheme.of(context).pad(size: LdSize.s),
+                      decoration: BoxDecoration(
+                        color: LdTheme.of(context).surface,
+                        borderRadius: LdTheme.of(context).radius(LdSize.m),
+                        border: Border.all(
+                          color: LdTheme.of(context).border,
+                          width: LdTheme.of(context).borderWidth,
+                        ),
+                      ),
+                      child: LdAutoSpace(
+                        children: [
+                          if (_ctrlPressed) ...[
+                            Row(
+                              spacing: LdTheme.of(context).paddingSize(),
+                              children: [
+                                Icon(LucideIcons.command, size: 16, color: LdTheme.of(context).text),
+                                LdText.l(LiquidLocalizations.of(context).ctrlListExplanation)
+                              ],
+                            ),
+                          ],
+                          if (_shiftPressed) ...[
+                            Row(
+                              spacing: LdTheme.of(context).paddingSize(),
+                              children: [
+                                Icon(LucideIcons.arrowBigUp, size: 16, color: LdTheme.of(context).text),
+                                LdText.l(LiquidLocalizations.of(context).shiftListExplanation)
+                              ],
+                            ),
+                          ],
+                        ],
+                      )),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

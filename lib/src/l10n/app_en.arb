@@ -46,5 +46,8 @@
   "clearSelection": "Clear selection?", 
   "clearSelectionBody": "Are you sure you want to discard your selection of {n} items?",
   "openDrawer": "Open Sidebar",
-  "closeDrawer": "Close Sidebar"
+  "closeDrawer": "Close Sidebar",
+  "ctrlListExplanation": "Select multiple items while holding cmd/ctrl",
+  "listHidden": "The list was hidden",
+  "shiftListExplanation": "Select a range of items while holding shift"
 }

@@ -148,4 +148,13 @@ class LiquidLocalizationsEn extends LiquidLocalizations {
 
   @override
   String get closeDrawer => 'Close Sidebar';
+
+  @override
+  String get ctrlListExplanation => 'Select multiple items while holding cmd/ctrl';
+
+  @override
+  String get listHidden => 'The list was hidden';
+
+  @override
+  String get shiftListExplanation => 'Select a range of items while holding shift';
 }

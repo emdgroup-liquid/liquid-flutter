@@ -12,15 +12,11 @@ class LdMonkeyShellState<T extends Identifiable<IdType>, IdType> with ChangeNoti
 
   bool _showSelectionControls = false;
 
-  Set<IdType> _deletedItems = {};
-
   LdMonkeyEffectiveLayoutMode? _effectiveLayout;
 
   Set<IdType> get selectedItems => _selectedItems;
 
   bool get showSelectionControls => _showSelectionControls;
-
-  Set<IdType> get deletedItems => _deletedItems;
 
   LdMonkeyEffectiveLayoutMode? get effectiveLayout => _effectiveLayout;
 
@@ -38,11 +34,6 @@ class LdMonkeyShellState<T extends Identifiable<IdType>, IdType> with ChangeNoti
     notifyListeners();
   }
 
-  Future<void> setDeletedItems(Set<IdType> deletedItems) async {
-    _deletedItems = deletedItems;
-    notifyListeners();
-  }
-
   Future<void> setEffectiveLayout(LdMonkeyEffectiveLayoutMode effectiveLayout) async {
     await Future.delayed(Duration.zero);
     _effectiveLayout = effectiveLayout;
@@ -54,17 +45,15 @@ class LdMonkeyShellState<T extends Identifiable<IdType>, IdType> with ChangeNoti
     return other is LdMonkeyShellState<T, IdType> &&
         other.selectedItems == selectedItems &&
         other.showSelectionControls == showSelectionControls &&
-        other.deletedItems == deletedItems &&
         other.effectiveLayout == effectiveLayout;
   }
 
   @override
-  int get hashCode =>
-      selectedItems.hashCode ^ showSelectionControls.hashCode ^ deletedItems.hashCode ^ effectiveLayout.hashCode;
+  int get hashCode => selectedItems.hashCode ^ showSelectionControls.hashCode ^ effectiveLayout.hashCode;
 
   @override
   String toString() {
-    return 'LdMonkeyShellState(selectedItems: $selectedItems, showSelectionControls: $showSelectionControls, deletedItems: $deletedItems, effectiveLayout: $effectiveLayout)';
+    return 'LdMonkeyShellState(selectedItems: $selectedItems, showSelectionControls: $showSelectionControls, effectiveLayout: $effectiveLayout)';
   }
 
   static LdMonkeyShellState<T, IdType> of<T extends Identifiable<IdType>, IdType>(

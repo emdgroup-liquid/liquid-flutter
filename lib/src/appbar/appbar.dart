@@ -174,14 +174,30 @@ class _LdAppBarState extends State<LdAppBar> {
     return _drawerState?.isSideBySide ?? false;
   }
 
-  bool get _showOpenDrawerButton {
-    if (!_hasDrawer) return false;
-    if (_slot != LdScaffoldSlot.appBarTop) return false;
-    if (_isSideBySide) {
-      return !_isDrawerOpen;
+  LdScaffoldState? _findDrawerParent(BuildContext context) {
+    BuildContext? currentContext = context;
+    while (currentContext != null) {
+      final scaffoldState = currentContext.findAncestorStateOfType<LdScaffoldState>();
+      if (scaffoldState == null) {
+        return null;
+      }
+      if (scaffoldState.hasDrawer && !scaffoldState.isDrawerOpen) {
+        return scaffoldState;
+      }
+      currentContext = scaffoldState.context;
     }
+    return null;
+  }
 
-    return true;
+  bool get _showOpenDrawerButton {
+    if (_slot != LdScaffoldSlot.appBarTop) return false;
+    if (_drawerSlot == LdDrawerSlot.drawer) return false;
+
+    final drawerParent = _findDrawerParent(context);
+    if (drawerParent == null) return false;
+    if (drawerParent.widget.appBar != null && drawerParent.widget.appBar != widget) return false;
+
+    return !drawerParent.isDrawerOpen;
   }
 
   bool get _showWindowsWindowControls {
@@ -452,17 +468,18 @@ class _LdAppBarState extends State<LdAppBar> {
                     return Row(
                       children: [
                         if (widget.showWindowControls && !_isModal) const MacOSWindowControls(),
-                        if (_hasDrawer) ...[
-                          LdReveal(
-                            revealed: _showOpenDrawerButton,
-                            child: const Row(
-                              children: [
-                                OpenDrawerButton(),
-                                ldSpacerM,
-                              ],
-                            ),
+                        LdReveal(
+                          axes: const {
+                            Axis.horizontal,
+                          },
+                          revealed: _showOpenDrawerButton,
+                          child: Row(
+                            children: [
+                              OpenDrawerButton(drawerParent: _findDrawerParent(context)),
+                              ldSpacerM,
+                            ],
                           ),
-                        ],
+                        ),
                         if (leading != null) ...[leading, ldSpacerM],
                         if (widget.title != null || widget.actions.isNotEmpty || hasSearch)
                           Expanded(

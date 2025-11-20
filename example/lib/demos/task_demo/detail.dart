@@ -15,21 +15,20 @@ class TaskDetail extends StatefulWidget {
 
 class _TaskDetailState extends State<TaskDetail> {
   final TextEditingController _taskController = TextEditingController();
-  final TextEditingController _dueController = TextEditingController();
   DateTime? _dueDate;
+
+  bool get _isDirty => _taskController.text != widget.task.value?.task || _dueDate != widget.task.value?.due;
 
   @override
   void initState() {
     super.initState();
     _taskController.text = widget.task.value?.task ?? "";
-    _dueController.text = widget.task.value?.due != null ? Jiffy.parseFromDateTime(widget.task.value!.due).yMMMd : "";
     _dueDate = widget.task.value?.due;
   }
 
   @override
   void dispose() {
     _taskController.dispose();
-    _dueController.dispose();
     super.dispose();
   }
 
@@ -57,11 +56,12 @@ class _TaskDetailState extends State<TaskDetail> {
           LdDatePicker(
             useRootNavigator: true,
             label: "Due date",
+            value: _dueDate,
             onChanged: (date) {
               if (date == null) return;
+              print("date: $date");
               setState(() {
                 _dueDate = date;
-                _dueController.text = Jiffy.parseFromDateTime(date).yMMMd;
               });
             },
           ),
@@ -71,7 +71,7 @@ class _TaskDetailState extends State<TaskDetail> {
           Row(
             children: [
               LdReveal.quick(
-                revealed: _taskController.text.isNotEmpty && _dueDate != null,
+                revealed: _taskController.text.isNotEmpty && _dueDate != null && _isDirty,
                 child: LdSubmit<void, void>(
                   config: LdSubmitConfig<void, void>(
                     submitText: "Save",

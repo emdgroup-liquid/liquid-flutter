@@ -352,6 +352,24 @@ abstract class LiquidLocalizations {
   /// In en, this message translates to:
   /// **'Close Sidebar'**
   String get closeDrawer;
+
+  /// No description provided for @ctrlListExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Select multiple items while holding cmd/ctrl'**
+  String get ctrlListExplanation;
+
+  /// No description provided for @listHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'The list was hidden'**
+  String get listHidden;
+
+  /// No description provided for @shiftListExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a range of items while holding shift'**
+  String get shiftListExplanation;
 }
 
 class _LiquidLocalizationsDelegate extends LocalizationsDelegate<LiquidLocalizations> {

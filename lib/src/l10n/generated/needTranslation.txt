@@ -20,6 +20,9 @@
     "clearSelection",
     "clearSelectionBody",
     "openDrawer",
-    "closeDrawer"
+    "closeDrawer",
+    "ctrlListExplanation",
+    "listHidden",
+    "shiftListExplanation"
   ]
 }

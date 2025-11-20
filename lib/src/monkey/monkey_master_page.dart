@@ -11,10 +11,12 @@ class LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType> extends Statefu
     this.appBar,
     this.secondaryAppBar,
     this.buildList,
+    this.multiSelect = true,
   }) : assert(buildList != null || buildItem != null, "Either buildList or buildItem must be provided");
 
   final Widget Function(BuildContext context, LdRepository<T, IdType> repository)? buildList;
   final Widget Function(BuildContext context, LdPaginatorItem<T> item)? buildItem;
+  final bool multiSelect;
   final Widget? appBar;
   final Widget? secondaryAppBar;
 
@@ -67,7 +69,7 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
       showSelectionControls: shellState.showSelectionControls,
       paginator: repository,
       initialSelectedItems: shellState.selectedItems,
-      multiSelect: true,
+      multiSelect: widget.multiSelect,
       onSelectionChange: (selected) => shellState.setSelectedItems(selected),
       itemBuilder: (context, item, index) => LdMonkeySingleShortcuts<T, IdType>(
         item: item.value!.id,

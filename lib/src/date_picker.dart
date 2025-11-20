@@ -84,8 +84,10 @@ class _LdDatePickerState extends State<LdDatePicker> {
             mode: LdTouchableSurfaceMode.input,
             isInput: true,
             key: const Key("date_picker_button"),
-            onPressed: () {
-              open();
+            onPressed: () async {
+              await open();
+              if (!mounted) return;
+              widget.onChanged(_selectedDateNotifier.value);
             },
             disabled: widget.disabled,
             builder: (context, colors, status, _) => Container(

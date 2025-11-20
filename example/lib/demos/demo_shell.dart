@@ -19,6 +19,9 @@ class DemoShell extends StatelessWidget {
       resizeToAvoidBottomInset: false,
       appBar: theme.platform.isDesktop
           ? LdAppBar(
+              shadowMode: LdAppBarShadowMode.hidden,
+              borderMode: LdAppBarBorderMode.visible,
+              backgroundMode: LdAppBarBackgroundMode.visible,
               title: const Text("LdMonkey Demos"),
             )
           : null,

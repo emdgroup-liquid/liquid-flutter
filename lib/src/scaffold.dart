@@ -473,6 +473,8 @@ class LdScaffoldState extends State<LdScaffold> {
     return context.watch<LdScaffoldLayoutState?>();
   }
 
+  bool get isDrawerOpen => _drawerState?.isOpen ?? false;
+
   void _onDrawerStateChange(LdDrawerState drawerState) {
     setState(() {
       _drawerState = drawerState;
@@ -695,7 +697,8 @@ class LdScaffoldState extends State<LdScaffold> {
     super.dispose();
   }
 
-  void _handleBodyScrollOffsetChange() {
+  void _handleBodyScrollOffsetChange() async {
+    await Future.delayed(Duration.zero);
     double scrollOffset = _bodyScrollOffset.value;
 
     if (_lastScrollOffset == scrollOffset) {
@@ -710,7 +713,9 @@ class LdScaffoldState extends State<LdScaffold> {
     _updateAppBarOffset(AppBarRole.secondary, scrollOffset);
 
     _lastScrollOffset = scrollOffset;
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void _updateAppBarOffset(AppBarRole role, double scrollOffset) {

@@ -343,6 +343,10 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
         /// No grouping is provided.. we just use the items as is
         _groupedItems = widget.paginator.currentList();
       }
+
+      // We remove keys that are no longer in the list
+      final presentIds = _groupedItems.map((item) => item.item?.value?.id).where((id) => id != null).toSet();
+      _itemKeys.removeWhere((id, key) => !presentIds.contains(id));
     });
   }
 
@@ -440,9 +444,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
   ) {
     final item = LdPaginatorLoadedItem(value: listEntry.item!.value, state: listEntry.item!.state);
 
-    // print("buildActualItem: ${item.value.id} - ${listEntry.item}");
-
-    _itemKeys[item.value.id] = GlobalKey(debugLabel: "list" + item.value.id.toString());
+    _itemKeys[item.value.id] ??= GlobalKey(debugLabel: "list" + item.value.id.toString());
 
     if (listEntry.item!.state == LdPaginatorItemState.pendingRefresh) {
       widget.paginator.fetchPageAtOffset(listEntry.position!);
