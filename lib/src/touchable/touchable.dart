@@ -240,28 +240,30 @@ class LdTouchableTouchFeedback extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LdSpring(
-      springConstant: 10,
-      dampingCoefficient: 5,
-      initialPosition: status.pressed ? 1 : 0,
-      position: status.pressed ? 1 : 0,
-      builder: (context, state, child) {
-        double squeezeFactor = (status.panOffset?.dx.abs() ?? 0) * 0.0001 * state.position;
+    return LayoutBuilder(builder: (context, constraints) {
+      return LdSpring(
+        springConstant: 10,
+        dampingCoefficient: 5,
+        initialPosition: status.pressed ? 1 : 0,
+        position: status.pressed ? 1 : 0,
+        builder: (context, state, child) {
+          double squeezeFactor = (status.panOffset?.dx.abs() ?? 0) * 0.00001 * state.position;
 
-        final scale = state.position * 0.01 + 1 + squeezeFactor;
+          final scale = 1 + squeezeFactor;
 
-        return Transform(
-            alignment: Alignment.center,
-            transform: Matrix4.identity()
-              ..scaleByDouble(
-                scale,
-                scale,
-                1.0,
-                1.0,
-              ),
-            child: child);
-      },
-      child: child,
-    );
+          return Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.identity()
+                ..scaleByDouble(
+                  scale,
+                  scale,
+                  1.0,
+                  1.0,
+                ),
+              child: child);
+        },
+        child: child,
+      );
+    });
   }
 }

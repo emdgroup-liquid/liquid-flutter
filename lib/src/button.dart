@@ -430,7 +430,7 @@ class _ButtonShape extends StatelessWidget {
                 child: child,
                 data: IconThemeData(
                   color: colors.text,
-                  size: circular ? theme.labelSize(size) * 1.2 : theme.labelSize(size),
+                  size: circular ? theme.labelSize(size) : theme.labelSize(size),
                 ),
               ),
             ),

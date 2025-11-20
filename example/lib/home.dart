@@ -18,17 +18,16 @@ class _HomeState extends State<Home> {
     final theme = LdTheme.of(context, listen: true);
 
     return LdScaffoldBody(
+      addContainer: true,
       children: [
         LdAutoSpace(
           children: [
             Row(
               children: [
                 Container(
-                  decoration:
-                      BoxDecoration(borderRadius: theme.radius(LdSize.m)),
+                  decoration: BoxDecoration(borderRadius: theme.radius(LdSize.m)),
                   clipBehavior: Clip.hardEdge,
-                  child: Image.asset("liquid_flutter_icon.jpg",
-                      width: 48, height: 48),
+                  child: Image.asset("liquid_flutter_icon.jpg", width: 48, height: 48),
                 ),
                 ldSpacerM,
                 Flexible(

@@ -4,9 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/appbar/appbar_frame.dart';
 import 'package:liquid_flutter/src/appbar/macos_window_controls.dart';
 import 'package:liquid_flutter/src/appbar/windows_window_controls.dart';
-import 'package:liquid_flutter/src/modal/size_notifier.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:provider/provider.dart';
@@ -16,18 +16,21 @@ enum LdAppBarShadowMode {
   visible,
   whenScrolled,
   hidden,
+  adaptive,
 }
 
 enum LdAppBarBorderMode {
   visible,
   whenScrolled,
   hidden,
+  adaptive,
 }
 
 enum LdAppBarBackgroundMode {
   visible,
   whenScrolled,
   hidden,
+  adaptive,
 }
 
 class LdAppBar extends StatefulWidget {
@@ -85,9 +88,9 @@ class LdAppBar extends StatefulWidget {
     this.implyCloseModalButton = true,
     this.implyLeading,
     this.bottom,
-    this.shadowMode = LdAppBarShadowMode.whenScrolled,
-    this.borderMode = LdAppBarBorderMode.whenScrolled,
-    this.backgroundMode = LdAppBarBackgroundMode.whenScrolled,
+    this.shadowMode = LdAppBarShadowMode.adaptive,
+    this.borderMode = LdAppBarBorderMode.adaptive,
+    this.backgroundMode = LdAppBarBackgroundMode.adaptive,
     this.overflowMenuProviders,
     this.debugName,
   });
@@ -139,9 +142,7 @@ class _LdAppBarState extends State<LdAppBar> {
 
   bool get _canPopParentRoute {
     final ModalRoute<Object?>? parentRoute = ModalRoute.of(context);
-
     final bool canPop = parentRoute?.canPop ?? false;
-
     return canPop;
   }
 
@@ -186,7 +187,7 @@ class _LdAppBarState extends State<LdAppBar> {
   bool get _showWindowsWindowControls {
     return LdTheme.of(context).platform == LdPlatform.windows &&
         _slot == LdScaffoldSlot.appBarTop &&
-        _layoutState?.level == 0 &&
+        _layoutState?.levelForEffectivePosition() == 0 &&
         !_isDrawer;
   }
 
@@ -217,15 +218,6 @@ class _LdAppBarState extends State<LdAppBar> {
     return context.findAncestorStateOfType<LdScaffoldState>();
   }
 
-  EdgeInsets _padding(BuildContext context) {
-    final theme = LdTheme.of(context);
-    final basePadding = theme.pad(size: LdSize.s);
-    if (_slot?.effectivePosition == EffectivePosition.top) {
-      return basePadding.copyWith(left: 0, right: 0);
-    }
-    return basePadding;
-  }
-
   TextStyle get _headerStyle {
     final theme = LdTheme.of(context, listen: true);
     return switch (theme.themeSize) {
@@ -242,29 +234,6 @@ class _LdAppBarState extends State<LdAppBar> {
           lineHeight: 1,
         ),
     };
-  }
-
-  EdgeInsets get _outsideContainerPadding {
-    final pad = LdTheme.of(context).pad(size: LdSize.s);
-    final viewPadding = MediaQuery.of(context).viewPadding;
-
-    final minimumPadding =
-        (viewPadding.atLeast(pad)).trimToEffectivePosition(_slot?.effectivePosition ?? EffectivePosition.top);
-
-    // Now we need to add the padding for the other app bars, that are either in the same scaffold or in the parent scaffold.
-
-    final otherAppBarHeight = _layoutState?.effectiveHeightOfOthers(_slot!) ?? 0;
-
-    final viewInsets = _focusScopeNode.hasFocus ? MediaQuery.of(context).viewInsets : EdgeInsets.zero;
-
-    return (minimumPadding)
-        .atLeast(EdgeInsets.only(
-              top: _slot?.effectivePosition == EffectivePosition.top ? otherAppBarHeight : 0,
-              bottom: _slot?.effectivePosition == EffectivePosition.bottom ? otherAppBarHeight : 0,
-            ) +
-            pad)
-        .atLeast(viewInsets + pad)
-        .trimToEffectivePosition(_slot?.effectivePosition ?? EffectivePosition.top);
   }
 
   bool get _isInTopSlot {
@@ -284,58 +253,63 @@ class _LdAppBarState extends State<LdAppBar> {
   }
 
   bool _shouldShowShadow(bool isScrolledUnder) {
+    final theme = LdTheme.of(context);
     return switch (widget.shadowMode) {
       LdAppBarShadowMode.visible => true,
       LdAppBarShadowMode.whenScrolled => isScrolledUnder,
       LdAppBarShadowMode.hidden => false,
+      LdAppBarShadowMode.adaptive => switch (theme.platform.isDesktop) {
+          false => isScrolledUnder,
+          true => true,
+        },
     };
   }
 
   bool _shouldShowBorder(bool isScrolledUnder) {
+    final theme = LdTheme.of(context);
     return switch (widget.borderMode) {
       LdAppBarBorderMode.visible => true,
       LdAppBarBorderMode.whenScrolled => isScrolledUnder,
       LdAppBarBorderMode.hidden => false,
+      LdAppBarBorderMode.adaptive => switch (theme.platform.isDesktop) {
+          false => isScrolledUnder,
+          true => true,
+        },
     };
   }
 
   /// Wraps the app bar in a container that applies the correct padding to make sure
   /// the app bar is not covered by the system UI or parent app bars.
-  Widget _buildOutsideContainer(BuildContext context, bool isScrolledUnder, Widget child) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 100),
-      padding: _outsideContainerPadding,
-      decoration: BoxDecoration(
-        color: _isInTopSlot ? _fillColor(isScrolledUnder) : null,
-        gradient: !_isInTopSlot
-            ? LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                stops: const [0, 0.3],
-                colors: [
-                  LdTheme.of(context).absolute.withAlpha(0),
-                  LdTheme.of(context).absolute.withAlpha(200),
-                ],
-              )
-            : null,
-        boxShadow: [
-          if (_isInTopSlot)
-            ldShadowSticky.copyWith(
-              color: _shouldShowShadow(isScrolledUnder)
-                  ? ldShadowSticky.color.withAlpha(isScrolledUnder ? 50 : 0)
-                  : Colors.transparent,
-            ),
-        ],
-        border: _isInTopSlot
-            ? Border(
-                bottom: BorderSide(
-                  color: _shouldShowBorder(isScrolledUnder) ? LdTheme.of(context).border : Colors.transparent,
-                  width: LdTheme.of(context).borderWidth,
-                ),
-              )
-            : null,
-      ),
-      child: child,
+  BoxDecoration _buildOutsideDecoration(BuildContext context, bool isScrolledUnder) {
+    return BoxDecoration(
+      color: _isInTopSlot ? _fillColor(isScrolledUnder) : null,
+      gradient: !_isInTopSlot
+          ? LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: const [0, 0.3],
+              colors: [
+                LdTheme.of(context).absolute.withAlpha(0),
+                LdTheme.of(context).absolute.withAlpha(200),
+              ],
+            )
+          : null,
+      boxShadow: [
+        if (_isInTopSlot)
+          ldShadowSticky.copyWith(
+            color: _shouldShowShadow(isScrolledUnder)
+                ? ldShadowSticky.color.withAlpha(isScrolledUnder ? 50 : 0)
+                : Colors.transparent,
+          ),
+      ],
+      border: _isInTopSlot
+          ? Border(
+              bottom: BorderSide(
+                color: _shouldShowBorder(isScrolledUnder) ? LdTheme.of(context).border : Colors.transparent,
+                width: LdTheme.of(context).borderWidth,
+              ),
+            )
+          : null,
     );
   }
 
@@ -350,7 +324,9 @@ class _LdAppBarState extends State<LdAppBar> {
   }
 
   Color _fillColor(bool isScrolledUnder) {
+    final theme = LdTheme.of(context);
     final color = widget.backgroundColor ?? LdTheme.of(context).surface;
+
     return switch (widget.backgroundMode) {
       LdAppBarBackgroundMode.hidden => Colors.transparent,
       LdAppBarBackgroundMode.visible => color,
@@ -358,6 +334,13 @@ class _LdAppBarState extends State<LdAppBar> {
           color.withAlpha(_fillOpacity(isScrolledUnder)),
           LdTheme.of(context).background,
         ),
+      LdAppBarBackgroundMode.adaptive => switch (theme.platform.isDesktop) {
+          false => Color.alphaBlend(
+              color.withAlpha(_fillOpacity(isScrolledUnder)),
+              LdTheme.of(context).background,
+            ),
+          true => color,
+        },
     };
   }
 
@@ -376,7 +359,7 @@ class _LdAppBarState extends State<LdAppBar> {
     return widget.title != null || widget.actions.isNotEmpty || widget.searchConfig != null;
   }
 
-  Widget _buildInsideContainer(BuildContext context, bool isScrolledUnder, Widget child) {
+  BoxDecoration _buildInsideDecoration(BuildContext context, bool isScrolledUnder) {
     late BoxDecoration decoration;
 
     if (!_isInTopSlot) {
@@ -390,29 +373,14 @@ class _LdAppBarState extends State<LdAppBar> {
             ),
         ],
         border: Border.all(
-          color: _shouldShowBorder(isScrolledUnder) ? LdTheme.of(context).floatingBorder : Colors.transparent,
+          color: LdTheme.of(context).floatingBorder,
           width: LdTheme.of(context).borderWidth,
         ),
       );
     } else {
       decoration = const BoxDecoration();
     }
-
-    return MeasureSize(
-        onSizeChange: _onSizeChange,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 100),
-          padding: _padding(context),
-          decoration: decoration,
-          child: child,
-        ));
-  }
-
-  void _onSizeChange(Size size) {
-    final slot = _slot;
-    if (slot == null) return;
-
-    _scaffold?.onAppBarSizeChange(slot, size);
+    return decoration;
   }
 
   SystemUiOverlayStyle get _systemUiOverlayStyle {
@@ -420,7 +388,7 @@ class _LdAppBarState extends State<LdAppBar> {
     if (theme.isDark) {
       return SystemUiOverlayStyle(
         statusBarBrightness: Brightness.dark,
-        statusBarIconBrightness: Brightness.dark,
+        statusBarIconBrightness: Brightness.light,
         statusBarColor: Colors.transparent,
         systemNavigationBarColor: theme.background.withAlpha(150),
         systemNavigationBarDividerColor: Colors.transparent,
@@ -430,7 +398,7 @@ class _LdAppBarState extends State<LdAppBar> {
     }
     return SystemUiOverlayStyle(
       statusBarBrightness: Brightness.light,
-      statusBarIconBrightness: Brightness.light,
+      statusBarIconBrightness: Brightness.dark,
       statusBarColor: Colors.transparent,
       systemNavigationBarColor: theme.background.withAlpha(150),
       systemNavigationBarDividerColor: Colors.transparent,
@@ -439,161 +407,134 @@ class _LdAppBarState extends State<LdAppBar> {
     );
   }
 
-  void _reportMargin() {
-    final margin = _outsideContainerPadding;
-    if (_slot == null) return;
-    _scaffold?.onAppBarMarginChange(_slot!, margin);
-  }
-
   @override
   Widget build(BuildContext context) {
     final layoutState = context.watch<LdScaffoldLayoutState>();
 
-    final scrollListenable = _layoutState?.bodyScrollOffset;
-
     final leading = _buildLeading(context);
 
-    return FocusScope(
-      node: _focusScopeNode,
-      child: ValueListenableBuilder(
-          valueListenable: scrollListenable ?? ValueNotifier<double>(0),
-          builder: (context, value, child) {
-            final scrolledUnder = value > 0 || _isInBottomSlot;
+    final isScrolledUnder = layoutState.isScrolled;
 
-            WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-              _reportMargin();
-            });
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: _systemUiOverlayStyle,
+      child: LdWrapConditional(
+        condition: _slot?.effectivePosition == EffectivePosition.top && !_isModal,
+        builder: (context, child) => GestureDetector(
+          onPanStart: (details) {
+            LdAppBar.callbacks?.onMove?.call();
+          },
+          onDoubleTap: () {
+            LdScaffoldState.maybeOf(context)?.scrollToTop();
+          },
+          child: child,
+        ),
+        child: KeyedSubtree(
+          key: _key,
+          child: AppBarFrame.fromSlot(
+            debugName: widget.debugName,
+            slot: _slot!,
+            outsideMinPadding: EdgeInsets.zero,
+            insetBorderRadius: !_isModal,
+            attached: _slot?.effectivePosition == EffectivePosition.top,
+            insideDecoration: _buildInsideDecoration(context, isScrolledUnder),
+            outsideDecoration: _buildOutsideDecoration(context, isScrolledUnder),
+            child: LdButtonConfigProvider(
+              const LdButtonConfig(
+                mode: LdButtonMode.ghost,
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  LayoutBuilder(builder: (context, constraints) {
+                    final hasSearch = widget.searchConfig != null;
 
-            final appBar = AnnotatedRegion<SystemUiOverlayStyle>(
-              value: _systemUiOverlayStyle,
-              child: _buildOutsideContainer(
-                context,
-                scrolledUnder,
-                _buildInsideContainer(
-                  context,
-                  scrolledUnder,
-                  LdWrapConditional(
-                    condition: widget.addContainer,
-                    builder: (context, child) => LdContainer(
-                      padding: EdgeInsets.zero,
-                      child: child,
-                    ),
-                    child: LdButtonConfigProvider(
-                      const LdButtonConfig(
-                        mode: LdButtonMode.ghost,
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          LayoutBuilder(builder: (context, constraints) {
-                            final hasSearch = widget.searchConfig != null;
-
-                            return Row(
+                    return Row(
+                      children: [
+                        if (widget.showWindowControls && !_isModal) const MacOSWindowControls(),
+                        if (_hasDrawer) ...[
+                          LdReveal(
+                            revealed: _showOpenDrawerButton,
+                            child: const Row(
                               children: [
-                                if (widget.showWindowControls && !_isModal) const MacOSWindowControls(),
-                                if (_hasDrawer) ...[
-                                  LdReveal(
-                                    revealed: _showOpenDrawerButton,
-                                    child: const Row(
-                                      children: [
-                                        OpenDrawerButton(),
-                                        ldSpacerM,
-                                      ],
+                                OpenDrawerButton(),
+                                ldSpacerM,
+                              ],
+                            ),
+                          ),
+                        ],
+                        if (leading != null) ...[leading, ldSpacerM],
+                        if (widget.title != null || widget.actions.isNotEmpty || hasSearch)
+                          Expanded(
+                              child: LdOverflowView(
+                            spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment:
+                                widget.title == null ? MainAxisAlignment.start : MainAxisAlignment.center,
+                            builder: (context, remainingItemCount) {
+                              if (remainingItemCount > widget.actions.length) {
+                                // Todo: not even the title fits.
+                                return const SizedBox();
+                              }
+                              return LdAppbarActionOverflowMenu(
+                                layoutState: layoutState,
+                                actions: widget.actions.sublist(widget.actions.length - remainingItemCount),
+                                menuProviders: widget.overflowMenuProviders,
+                                inMenu: true,
+                              );
+                            },
+                            children: [
+                              if (widget.title != null)
+                                LdFlexibleChild(
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: DefaultTextStyle(
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: _headerStyle,
+                                      child: widget.title ?? const SizedBox(),
                                     ),
                                   ),
-                                ],
-                                if (leading != null) ...[leading, ldSpacerM],
-                                if (widget.title != null || widget.actions.isNotEmpty || hasSearch)
-                                  Expanded(
-                                      child: LdOverflowView(
-                                    spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    mainAxisAlignment:
-                                        widget.title == null ? MainAxisAlignment.start : MainAxisAlignment.center,
-                                    builder: (context, remainingItemCount) {
-                                      if (remainingItemCount > widget.actions.length) {
-                                        // Todo: not even the title fits.
-                                        return const SizedBox();
-                                      }
-                                      return LdAppbarActionOverflowMenu(
-                                        layoutState: layoutState,
-                                        actions: widget.actions.sublist(widget.actions.length - remainingItemCount),
-                                        menuProviders: widget.overflowMenuProviders,
-                                        inMenu: true,
-                                      );
-                                    },
-                                    children: [
-                                      if (widget.title != null)
-                                        LdFlexibleChild(
-                                          child: Align(
-                                            alignment: Alignment.centerLeft,
-                                            child: DefaultTextStyle(
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: _headerStyle,
-                                              child: widget.title ?? const SizedBox(),
-                                            ),
-                                          ),
-                                        ),
-                                      if (hasSearch)
-                                        LdFlexibleChild(
-                                          child: LdSearchInput(
-                                            searchConfig: widget.searchConfig!,
-                                            isBottomNavigationBar: _isInBottomSlot,
-                                            fullWidth: false,
-                                          ),
-                                        ),
-                                      ...widget.actions
-                                    ],
-                                  ))
-                                else
-                                  const SizedBox.shrink(),
-                                LdReveal(revealed: _showCloseDrawerButton, child: const CloseDrawerButton()),
-                                if (widget.trailing != null) widget.trailing!,
-                                if (_closeModalButton != null) ...[_closeModalButton!],
-                                if (widget.showWindowControls && !_isModal)
-                                  LdReveal(revealed: _showWindowsWindowControls, child: const WindowsWindowControls()),
-                              ],
-                            );
-                          }),
-                          if (widget.bottom != null) ...[
-                            LdWrapConditional(
-                              condition: _hasTopContent,
-                              builder: (context, child) => Padding(
-                                padding: EdgeInsets.only(
-                                  top: LdTheme.of(context).pad(size: LdSize.s).top,
                                 ),
-                                child: child,
-                              ),
-                              child: widget.bottom!,
-                            ),
-                          ],
-                        ],
+                              if (hasSearch)
+                                LdFlexibleChild(
+                                  child: LdSearchInput(
+                                    searchConfig: widget.searchConfig!,
+                                    isBottomNavigationBar: _isInBottomSlot,
+                                    fullWidth: false,
+                                  ),
+                                ),
+                              ...widget.actions
+                            ],
+                          ))
+                        else
+                          const SizedBox.shrink(),
+                        LdReveal(revealed: _showCloseDrawerButton, child: const CloseDrawerButton()),
+                        if (widget.trailing != null) widget.trailing!,
+                        if (_closeModalButton != null) ...[_closeModalButton!],
+                        if (widget.showWindowControls && !_isModal)
+                          LdReveal(revealed: _showWindowsWindowControls, child: const WindowsWindowControls()),
+                      ],
+                    );
+                  }),
+                  if (widget.bottom != null) ...[
+                    LdWrapConditional(
+                      condition: _hasTopContent,
+                      builder: (context, child) => Padding(
+                        padding: EdgeInsets.only(
+                          top: LdTheme.of(context).pad(size: LdSize.s).top,
+                        ),
+                        child: child,
                       ),
+                      child: widget.bottom!,
                     ),
-                  ),
-                ),
+                  ],
+                ],
               ),
-            );
-
-            return LdWrapConditional(
-              condition: _slot == LdScaffoldSlot.appBarTop && !_isModal,
-              builder: (context, child) => GestureDetector(
-                onPanStart: (details) {
-                  LdAppBar.callbacks?.onMove?.call();
-                },
-                onDoubleTap: () {
-                  LdScaffoldState.maybeOf(context)?.scrollToTop();
-                },
-                child: child,
-              ),
-              child: KeyedSubtree(
-                key: _key,
-                child: appBar,
-              ),
-            );
-          }),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

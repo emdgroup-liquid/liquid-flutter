@@ -73,29 +73,33 @@ class LdListItemWidget extends StatelessWidget {
 
     Widget _buildSelectionControls() {
       if (selectionControl == LdSelectionControl.none) return const SizedBox.shrink();
-      return Row(
-        children: [
-          switch (selectionControl) {
-            LdSelectionControl.radio => LdRadio(
-                checked: isSelected,
-                color: color,
-                disabled: disabledState,
-                onChanged: (value) {
-                  onSelectionChanged?.call(value);
-                },
-              ),
-            LdSelectionControl.checkbox => LdCheckbox(
-                checked: isSelected,
-                color: color,
-                disabled: disabledState,
-                onChanged: (value) {
-                  onSelectionChanged?.call(value);
-                },
-              ),
-            LdSelectionControl.none => const SizedBox.shrink(),
-          },
-          ldSpacerM,
-        ],
+      return SizedBox(
+        height: theme.paddingSize(size: LdSize.m) * 3,
+        width: theme.paddingSize(size: LdSize.m) * 3,
+        child: Row(
+          children: [
+            switch (selectionControl) {
+              LdSelectionControl.radio => LdRadio(
+                  checked: isSelected,
+                  color: color,
+                  disabled: disabledState,
+                  onChanged: (value) {
+                    onSelectionChanged?.call(value);
+                  },
+                ),
+              LdSelectionControl.checkbox => LdCheckbox(
+                  checked: isSelected,
+                  color: color,
+                  disabled: disabledState,
+                  onChanged: (value) {
+                    onSelectionChanged?.call(value);
+                  },
+                ),
+              LdSelectionControl.none => const SizedBox.shrink(),
+            },
+            ldSpacerM,
+          ],
+        ),
       );
     }
 
@@ -113,6 +117,7 @@ class LdListItemWidget extends StatelessWidget {
       if (leading == null) return const SizedBox.shrink();
       return _buildIconTheme(
         LdReveal.quick(
+          axes: const {Axis.horizontal},
           child: Row(
             children: [
               leading!,
@@ -200,6 +205,7 @@ class LdListItemWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 LdReveal.quick(
+                  axes: const {Axis.horizontal},
                   child: _buildSelectionControls(),
                   revealed: selectionControl != LdSelectionControl.none,
                   initialRevealed: selectionControl != LdSelectionControl.none,

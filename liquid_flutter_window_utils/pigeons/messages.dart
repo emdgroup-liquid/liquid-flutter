@@ -6,6 +6,11 @@ import 'package:pigeon/pigeon.dart';
     dartOptions: DartOptions(),
     swiftOut: 'macos/Classes/Messages.swift',
     swiftOptions: SwiftOptions(),
+    kotlinOut:
+        'android/src/main/kotlin/com/liquid/flutter/window_utils/Messages.kt',
+    kotlinOptions: KotlinOptions(
+      package: 'com.liquid.flutter.window_utils',
+    ),
   ),
 )
 class WindowState {
@@ -38,6 +43,7 @@ abstract class WindowUtilsApi {
   void maximizeWindow();
   bool isWindowMaximized();
   WindowState getWindowState();
+  double getScreenRadius();
 }
 
 @FlutterApi()

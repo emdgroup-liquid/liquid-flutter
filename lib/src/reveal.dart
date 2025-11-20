@@ -15,6 +15,7 @@ class LdReveal extends StatelessWidget {
   final double mass;
   final bool? initialRevealed;
   final int? bufferSprings;
+  final Set<Axis> axes;
 
   final Function(BuildContext context, List<LdSpringState> states)? onAnimationEnd;
 
@@ -25,6 +26,7 @@ class LdReveal extends StatelessWidget {
     this.initialRevealed,
     this.mass = 5,
     this.onAnimationEnd,
+    this.axes = const {Axis.horizontal, Axis.vertical},
 
     /// Springs that are added as a buffer to the reveal effect effectively delaying the opacity / scale effect to prevent clipping the content visibly. Increase this value if the reveal effect is clipping the content.
     this.bufferSprings = 5,
@@ -38,6 +40,7 @@ class LdReveal extends StatelessWidget {
       {required bool revealed,
       required Widget child,
       bool? initialRevealed,
+      Set<Axis> axes = const {Axis.horizontal, Axis.vertical},
       double transformXOffset = 0,
       double transformYOffset = 0}) {
     return LdReveal(
@@ -50,15 +53,18 @@ class LdReveal extends StatelessWidget {
       springConstant: 20,
       dampingCoefficient: 15,
       initialRevealed: initialRevealed,
+      axes: axes,
     );
   }
 
-  factory LdReveal.slow(
-      {required bool revealed,
-      required Widget child,
-      bool? initialRevealed,
-      double transformXOffset = 0,
-      double transformYOffset = 0}) {
+  factory LdReveal.slow({
+    required bool revealed,
+    required Widget child,
+    bool? initialRevealed,
+    double transformXOffset = 0,
+    double transformYOffset = 0,
+    Set<Axis> axes = const {Axis.horizontal, Axis.vertical},
+  }) {
     return LdReveal(
       revealed: revealed,
       child: child,
@@ -69,6 +75,7 @@ class LdReveal extends StatelessWidget {
       springConstant: 10,
       dampingCoefficient: 15,
       initialRevealed: initialRevealed,
+      axes: axes,
     );
   }
 
@@ -103,8 +110,8 @@ class LdReveal extends StatelessWidget {
             condition: heightFactor != 1 || widthFactor != 1,
             builder: (context, child) => ClipRRect(
               child: Align(
-                heightFactor: heightFactor,
-                widthFactor: widthFactor,
+                heightFactor: axes.contains(Axis.vertical) ? heightFactor : 1,
+                widthFactor: axes.contains(Axis.horizontal) ? widthFactor : 1,
                 child: Transform.scale(
                   scale: scaleValue.clamp(0, double.infinity),
                   child: Opacity(

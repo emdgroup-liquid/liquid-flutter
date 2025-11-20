@@ -8,6 +8,7 @@ class LdScaffoldBody extends StatelessWidget {
   final Color? backgroundColor;
   final ScrollController? scrollController;
   final bool autoSpaceChildren;
+  final bool addContainer;
   const LdScaffoldBody({
     super.key,
     this.children = const [],
@@ -16,12 +17,15 @@ class LdScaffoldBody extends StatelessWidget {
     this.scrollController,
     this.backgroundColor,
     this.autoSpaceChildren = true,
+    this.addContainer = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final padding = MediaQuery.paddingOf(context);
-    final themePadding = LdTheme.of(context).pad(size: minimumPadding);
+
+    final theme = LdTheme.of(context, listen: true);
+    final themePadding = theme.pad(size: minimumPadding);
 
     final effectiveChildren = autoSpaceChildren ? children.autoSpace(context) : children;
 
@@ -29,38 +33,51 @@ class LdScaffoldBody extends StatelessWidget {
     final effectiveController =
         scrollController ?? (context.findAncestorStateOfType<LdScaffoldState>()?.effectiveScrollController);
 
-    return ColoredBox(
-      color: backgroundColor ?? LdTheme.of(context).background,
-      child: CustomScrollView(
-        controller: effectiveController,
-        slivers: [
-          if (effectiveChildren.isNotEmpty)
-            SliverPadding(
-              padding: padding + themePadding,
-              sliver: SliverList.builder(
-                itemCount: effectiveChildren.length,
-                itemBuilder: (context, index) => effectiveChildren[index],
-              ),
-            ),
-          if (slivers.isNotEmpty)
-            ...slivers.asMap().entries.map((entry) {
-              final index = entry.key;
-              final sliver = entry.value;
-              final isFirst = index == 0;
-              final isLast = index == slivers.length - 1;
+    return LayoutBuilder(builder: (context, constraints) {
+      final basePadding = themePadding + padding;
+      EdgeInsets horizontalPadding = basePadding;
 
-              return SliverPadding(
-                padding: EdgeInsets.only(
-                  left: padding.left + themePadding.left,
-                  right: padding.right + themePadding.right,
-                  top: isFirst ? padding.top + themePadding.top : 0,
-                  bottom: isLast ? padding.bottom + themePadding.bottom : 0,
+      if (addContainer) {
+        final maxWidthPadding = EdgeInsets.only(
+            left: (constraints.maxWidth - theme.sizingConfig.containerMaxWidth) / 2,
+            right: (constraints.maxWidth - theme.sizingConfig.containerMaxWidth) / 2);
+        horizontalPadding = horizontalPadding.atLeast(maxWidthPadding);
+      }
+
+      return ColoredBox(
+        color: backgroundColor ?? LdTheme.of(context).background,
+        child: CustomScrollView(
+          controller: effectiveController,
+          slivers: [
+            if (effectiveChildren.isNotEmpty)
+              SliverPadding(
+                padding: horizontalPadding.copyWith(
+                  top: (themePadding.top + padding.top),
+                  bottom: (themePadding.bottom + padding.bottom),
                 ),
-                sliver: sliver,
-              );
-            }),
-        ],
-      ),
-    );
+                sliver: SliverList.builder(
+                  itemCount: effectiveChildren.length,
+                  itemBuilder: (context, index) => effectiveChildren[index],
+                ),
+              ),
+            if (slivers.isNotEmpty)
+              ...slivers.asMap().entries.map((entry) {
+                final index = entry.key;
+                final sliver = entry.value;
+                final isFirst = index == 0;
+                final isLast = index == slivers.length - 1;
+
+                return SliverPadding(
+                  padding: horizontalPadding.copyWith(
+                    top: isFirst ? padding.top + themePadding.top : 0,
+                    bottom: isLast ? padding.bottom + themePadding.bottom : 0,
+                  ),
+                  sliver: sliver,
+                );
+              }),
+          ],
+        ),
+      );
+    });
   }
 }

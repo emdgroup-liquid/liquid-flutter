@@ -7,6 +7,7 @@ import 'package:liquid/demos/task_demo/detail.dart';
 import 'package:liquid/demos/task_demo/repository.dart';
 import 'package:liquid/demos/task_demo/task.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/monkey/monkey_app_bar.dart';
 
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -177,6 +178,7 @@ class TaskShell extends StatelessWidget {
           icon: Icon(LucideIcons.copy),
         ),
         LdMonkeySubmitAction(
+          color: LdTheme.of(context).error,
           visibility: {
             LdMonkeyActionVisibility(
               location: LdMonkeyActionLocation.detailAppBar,
@@ -206,32 +208,39 @@ class TaskShell extends StatelessWidget {
               await taskRepository.deleteBatch(selection.items);
             },
           ),
-          child: Text("Delete"),
+          child: Builder(builder: (context) {
+            return Text(
+              LiquidLocalizations.of(context).deleteNItems(
+                LdMonkeySelection.of<Task, int>(context).items.length,
+              ),
+            );
+          }),
           icon: Icon(LucideIcons.trash2),
         ),
         toggleSelectionControls<Task, int>(),
         toggleFilters<Task, int>(),
         LdMonkeyBareChildAction(
           builder: (context) => LdButton(
-              child: Text("Show selection"),
+              child: Text("Show ${LdMonkeySelection.of<Task, int>(context).items.length} items"),
               onPressed: () async {
                 final shellState = LdMonkeyShellState.of<Task, int>(context);
                 shellState.setShowSelectionControls(false);
-                shellState.setSelectedItems(LdMonkeySelection.of<Task, int>(context).items);
+                shellState.setSelectedItems(shellState.selectedItems);
               }),
           onShortcutTrigger: (context) async {
             final shellState = LdMonkeyShellState.of<Task, int>(context);
-            shellState.setShowSelectionControls(false);
             shellState.setSelectedItems(LdMonkeySelection.of<Task, int>(context).items);
+            shellState.setShowSelectionControls(false);
           },
           visibility: {
             LdMonkeyActionVisibility(
               location: LdMonkeyActionLocation.masterSecondary,
-              minSelectionCount: 1,
+              minSelectionCount: 2,
               maxSelectionCount: null,
               layoutModes: {
                 LdMonkeyEffectiveLayoutMode.master,
               },
+              visibleWhenShowingSelectionControls: true,
             ),
           },
         ),

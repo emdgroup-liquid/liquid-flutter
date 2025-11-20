@@ -19,13 +19,16 @@ class MacOSWindowControls extends StatelessWidget {
 
     bool show = false;
 
-    if (layoutState?.level == 0) {
-      if (drawerSlot == LdDrawerSlot.body) {
+    final level = layoutState?.levelForEffectivePosition();
+
+    if (level == 0) {
+      if (drawerSlot == null) {
+        show = true;
+      } else if (drawerSlot == LdDrawerSlot.body) {
         if (!(drawerState?.isOpen ?? false)) {
           show = true;
         }
-      }
-      if (drawerSlot == LdDrawerSlot.drawer) {
+      } else if (drawerSlot == LdDrawerSlot.drawer) {
         if (drawerState?.isOpen ?? false) {
           show = true;
         }

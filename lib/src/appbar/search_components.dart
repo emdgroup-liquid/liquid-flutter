@@ -26,8 +26,9 @@ class LdSearchInput extends StatefulWidget {
 class _LdSearchInputState extends State<LdSearchInput> {
   final GlobalKey _inputKey = GlobalKey();
 
-  final FocusNode _inputWrapperFocusNode = FocusNode();
-  final FocusScopeNode _suggestionsFocusNode = FocusScopeNode();
+  final _inputWrapperFocusNode = FocusScopeNode();
+  final _suggestionsFocusNode = FocusScopeNode();
+  final TextEditingController _inputController = TextEditingController();
 
   OverlayEntry? _overlayEntry;
   late final ValueNotifier<Rect?> _inputRectNotifier;
@@ -40,21 +41,22 @@ class _LdSearchInputState extends State<LdSearchInput> {
     _inputRectNotifier = ValueNotifier<Rect?>(null);
     _intentSubscription = LdScaffoldState.maybeOf(context)?.intentRouter.listen(_onScaffoldIntent);
 
-    widget.searchConfig.inputFocusNode.addListener(_onFocusChanged);
+    _inputWrapperFocusNode.addListener(_onFocusChanged);
   }
 
   void _onScaffoldIntent(Intent intent) {
     if (intent is SearchIntent) {
-      widget.searchConfig.inputFocusNode.requestFocus();
+      _inputWrapperFocusNode.requestFocus();
     }
   }
 
   @override
   void dispose() {
-    widget.searchConfig.inputFocusNode.removeListener(_onFocusChanged);
+    _inputWrapperFocusNode.removeListener(_onFocusChanged);
     _intentSubscription?.cancel();
     _inputWrapperFocusNode.dispose();
     _suggestionsFocusNode.dispose();
+    _inputController.dispose();
 
     _inputRectNotifier.dispose();
     _overlayEntry?.remove();
@@ -62,7 +64,7 @@ class _LdSearchInputState extends State<LdSearchInput> {
   }
 
   void _onFocusChanged() async {
-    final hasFocus = widget.searchConfig.inputFocusNode.hasFocus;
+    final hasFocus = _inputWrapperFocusNode.hasFocus;
     final suggestionsHasFocus = _suggestionsFocusNode.hasFocus;
 
     await Future.delayed(const Duration(milliseconds: 50));
@@ -70,6 +72,7 @@ class _LdSearchInputState extends State<LdSearchInput> {
     if (hasFocus && widget.searchConfig.getSuggestions != null && !suggestionsHasFocus) {
       _showSuggestionsOverlay();
     } else if (!hasFocus && !suggestionsHasFocus) {
+      print("close suggestions overlay");
       _closeOverlay();
     }
 
@@ -100,7 +103,7 @@ class _LdSearchInputState extends State<LdSearchInput> {
     }
 
     _updateInputRect();
-
+    print("show suggestions overlay");
     // Show the suggestions overlay using Overlay instead of ModalRoute
     _showOverlay();
   }
@@ -112,6 +115,7 @@ class _LdSearchInputState extends State<LdSearchInput> {
     _overlayEntry = OverlayEntry(
       builder: (context) {
         return LdSearchSuggestionsOverlay(
+          inputController: _inputController,
           searchConfig: widget.searchConfig,
           onSuggestionAccepted: _onSuggestionAccepted,
           inputRectNotifier: _inputRectNotifier,
@@ -128,14 +132,13 @@ class _LdSearchInputState extends State<LdSearchInput> {
   void _closeOverlay() {
     _overlayEntry?.remove();
     _overlayEntry = null;
-    widget.searchConfig.inputFocusNode.unfocus();
   }
 
   void _onSuggestionAccepted(String suggestion) {
-    widget.searchConfig.inputController.text = suggestion;
+    _inputController.text = suggestion;
     widget.searchConfig.onSearch(suggestion);
     _closeOverlay();
-    widget.searchConfig.inputFocusNode.nextFocus();
+    _inputWrapperFocusNode.nextFocus();
   }
 
   KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
@@ -150,6 +153,7 @@ class _LdSearchInputState extends State<LdSearchInput> {
 
   @override
   Widget build(BuildContext context) {
+    final viewInsets = MediaQuery.viewInsetsOf(context);
     // Update input rect when the widget rebuilds (e.g., when layout changes)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_overlayEntry != null) {
@@ -157,7 +161,7 @@ class _LdSearchInputState extends State<LdSearchInput> {
       }
     });
     return Actions(
-      actions: <Type, Action<Intent>>{SearchIntent: SearchAction(searchFocusNode: widget.searchConfig.inputFocusNode)},
+      actions: <Type, Action<Intent>>{SearchIntent: SearchAction(searchFocusNode: _inputWrapperFocusNode)},
       child: LdWrapConditional(
         condition: !widget.fullWidth,
         builder: (context, child) => ConstrainedBox(
@@ -174,23 +178,21 @@ class _LdSearchInputState extends State<LdSearchInput> {
                   key: _inputKey,
                   textInputAction: TextInputAction.search,
                   hint: LiquidLocalizations.of(context).search,
-                  controller: widget.searchConfig.inputController,
+                  controller: _inputController,
                   onSubmitted: (text) => widget.searchConfig.onSearch(text),
-                  focusNode: widget.searchConfig.inputFocusNode,
                 ),
               ),
             ),
             LdReveal(
-              revealed: widget.searchConfig.inputFocusNode.hasFocus ||
-                  _suggestionsFocusNode.hasFocus ||
-                  widget.searchConfig.inputController.text.isNotEmpty,
+              revealed: _inputWrapperFocusNode.hasFocus || _suggestionsFocusNode.hasFocus,
               child: Padding(
                 padding: const EdgeInsets.only(left: 8.0),
                 child: LdButton.vague(
                   child: const Icon(LucideIcons.x),
                   onPressed: () {
-                    widget.searchConfig.inputController.clear();
+                    _inputController.clear();
                     widget.searchConfig.onSearch('');
+                    _inputWrapperFocusNode.unfocus();
                     _closeOverlay();
                   },
                 ),
@@ -210,6 +212,7 @@ class LdSearchSuggestionsOverlay extends StatefulWidget {
   final VoidCallback onDismiss;
   final FocusScopeNode suggestionsFocusNode;
   final void Function(String suggestion) onSuggestionAccepted;
+  final TextEditingController inputController;
 
   const LdSearchSuggestionsOverlay({
     super.key,
@@ -219,6 +222,7 @@ class LdSearchSuggestionsOverlay extends StatefulWidget {
     required this.onDismiss,
     required this.suggestionsFocusNode,
     required this.onSuggestionAccepted,
+    required this.inputController,
   });
 
   @override
@@ -249,13 +253,13 @@ class _LdSearchSuggestionsOverlayState extends State<LdSearchSuggestionsOverlay>
     _fadeController.forward();
 
     // Listen to text changes
-    widget.searchConfig.inputController.addListener(_onTextChanged);
+    widget.inputController.addListener(_onTextChanged);
 
     // Listen to input rect changes
     widget.inputRectNotifier.addListener(_onInputRectChanged);
 
     // Initial query
-    _currentQuery = widget.searchConfig.inputController.text;
+    _currentQuery = widget.inputController.text;
   }
 
   @override
@@ -263,13 +267,13 @@ class _LdSearchSuggestionsOverlayState extends State<LdSearchSuggestionsOverlay>
     _debounceTimer?.cancel();
     _fadeController.dispose();
 
-    widget.searchConfig.inputController.removeListener(_onTextChanged);
+    widget.inputController.removeListener(_onTextChanged);
     widget.inputRectNotifier.removeListener(_onInputRectChanged);
     super.dispose();
   }
 
   void _onTextChanged() {
-    final newQuery = widget.searchConfig.inputController.text;
+    final newQuery = widget.inputController.text;
     if (newQuery != _currentQuery) {
       _debounceTimer?.cancel();
       _debounceTimer = Timer(const Duration(milliseconds: 300), () {
@@ -314,35 +318,33 @@ class _LdSearchSuggestionsOverlayState extends State<LdSearchSuggestionsOverlay>
             type: MaterialType.transparency,
             child: GestureDetector(
               onTap: _close,
-              child: Padding(
-                padding: MediaQuery.of(context).padding.atLeast(MediaQuery.of(context).viewInsets),
-                child: Stack(
-                  children: [
-                    // Suggestions container
-                    _placeOverlay(
-                      screenSize,
-                      inputRect,
-                      Container(
-                        clipBehavior: Clip.hardEdge,
-                        decoration: BoxDecoration(
-                          color: theme.surface.withAlpha(255),
-                          borderRadius: theme.radius(LdSize.m),
-                          border: Border.all(
-                            color: theme.border,
-                            width: theme.borderWidth,
-                          ),
-                          boxShadow: [
-                            ldShadowSticky,
-                          ],
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Suggestions container
+                  _placeOverlay(
+                    screenSize,
+                    inputRect,
+                    Container(
+                      clipBehavior: Clip.hardEdge,
+                      decoration: BoxDecoration(
+                        color: theme.surface.withAlpha(255),
+                        borderRadius: theme.radius(LdSize.m),
+                        border: Border.all(
+                          color: theme.border,
+                          width: theme.borderWidth,
                         ),
-                        child: FocusScope(
-                          node: widget.suggestionsFocusNode,
-                          child: _buildSuggestionsContent(),
-                        ),
+                        boxShadow: [
+                          ldShadowSticky,
+                        ],
+                      ),
+                      child: FocusScope(
+                        node: widget.suggestionsFocusNode,
+                        child: SingleChildScrollView(child: _buildSuggestionsContent()),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -368,17 +370,12 @@ class _LdSearchSuggestionsOverlayState extends State<LdSearchSuggestionsOverlay>
       );
     } else {
       return Positioned(
-          left: padding,
-          right: padding,
-          top: 0,
-          bottom: inputRect.height + LdTheme.of(context).pad(size: LdSize.m).vertical * 2,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              child,
-            ],
-          ));
+        left: padding,
+        right: padding,
+        bottom: screenSize.height - inputRect.top + 2 * padding,
+        top: MediaQuery.of(context).viewPadding.top,
+        child: child,
+      );
     }
   }
 
@@ -414,7 +411,6 @@ class _LdSearchSuggestionsOverlayState extends State<LdSearchSuggestionsOverlay>
           }
           return NotificationListener<LdSearchAcceptSuggestion>(
             onNotification: (notification) {
-              widget.searchConfig.inputController.text = notification.suggestion.toString();
               widget.onSuggestionAccepted(notification.suggestion.toString());
               return true;
             },

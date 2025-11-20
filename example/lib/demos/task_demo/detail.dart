@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:liquid/demos/task_demo/task.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class TaskDetail extends StatefulWidget {
   final LdPaginatorItem<Task> task;
@@ -37,67 +38,65 @@ class _TaskDetailState extends State<TaskDetail> {
     if (widget.task.value == null) {
       return LdCard(child: Center(child: LdLoader()));
     }
-    return LdCard(
+    return LdWrapConditional(
+      condition: LdMonkeyShellState.of<Task, int>(context).selectedItems.length > 1,
+      builder: (context, child) {
+        return LdCard(
+          child: child,
+        );
+      },
       child: LdAutoSpace(
         children: [
+          LdReveal(revealed: widget.task.value?.done == true, child: LdBadge.success(child: Text("Done"))),
           LdInput(
-            label: "Task",
             hint: "What do you want to do?",
+            maxLines: null,
             controller: _taskController,
+            size: LdSize.l,
           ),
-          GestureDetector(
-            onTap: () async {
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: _dueDate ?? DateTime.now(),
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2100),
-              );
-              if (picked != null) {
-                setState(() {
-                  _dueDate = picked;
-                  _dueController.text = Jiffy.parseFromDateTime(picked).yMMMd;
-                });
-              }
+          LdDatePicker(
+            useRootNavigator: true,
+            label: "Due date",
+            onChanged: (date) {
+              if (date == null) return;
+              setState(() {
+                _dueDate = date;
+                _dueController.text = Jiffy.parseFromDateTime(date).yMMMd;
+              });
             },
-            child: AbsorbPointer(
-              child: LdInput(
-                label: "Due date",
-                hint: "When do you want to do it?",
-                controller: _dueController,
-                disabled: true,
-              ),
-            ),
           ),
           LdText(
             "Last updated: ${Jiffy.parseFromDateTime(widget.task.value!.lastUpdate).fromNow()}",
           ),
           Row(
             children: [
-              LdSubmit<void, void>(
-                config: LdSubmitConfig<void, void>(
-                  submitText: "Save",
-                  debugLabel: "Save Task",
-                  action: (_) async {
-                    final newTask = Task(
-                      widget.task.value!.id,
-                      _taskController.text,
-                      _dueDate ?? DateTime.now(),
-                      widget.task.value!.done,
-                      widget.task.value!.lastUpdate,
-                    );
-                    final repo = LdRepository.of<Task, int>(context);
-                    await repo.update(
-                      widget.task.value!.id,
-                      newTask,
-                    );
-                  },
+              LdReveal.quick(
+                revealed: _taskController.text.isNotEmpty && _dueDate != null,
+                child: LdSubmit<void, void>(
+                  config: LdSubmitConfig<void, void>(
+                    submitText: "Save",
+                    debugLabel: "Save Task",
+                    action: (_) async {
+                      final newTask = Task(
+                        widget.task.value!.id,
+                        _taskController.text,
+                        _dueDate ?? DateTime.now(),
+                        widget.task.value!.done,
+                        widget.task.value!.lastUpdate,
+                      );
+                      final repo = LdRepository.of<Task, int>(context);
+                      await repo.update(
+                        widget.task.value!.id,
+                        newTask,
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
           ).spaceM(),
         ],
       ),
-    ).padL();
+    );
   }
 }

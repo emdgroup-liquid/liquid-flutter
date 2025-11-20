@@ -65,7 +65,7 @@ import 'components/bento_gallery.dart';
 class AppRouter {
   AppRouter();
 
-  late final router = GoRouter(debugLogDiagnostics: true, initialLocation: "/components/modal", routes: [
+  late final router = GoRouter(debugLogDiagnostics: true, initialLocation: "/", routes: [
     ShellRoute(
       routes: [
         GoRoute(

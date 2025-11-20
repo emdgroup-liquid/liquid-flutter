@@ -24,24 +24,27 @@ class LdMonkeyShellState<T extends Identifiable<IdType>, IdType> with ChangeNoti
 
   LdMonkeyEffectiveLayoutMode? get effectiveLayout => _effectiveLayout;
 
-  void setSelectedItems(Set<IdType> selectedItems) {
-    print('setSelectedItems: $selectedItems');
+  Future<void> setSelectedItems(Set<IdType> selectedItems) async {
+    await Future.delayed(Duration.zero);
+    if (selectedItems == _selectedItems) return;
     _selectedItems = selectedItems;
     _selectedItemsStreamController.add(selectedItems);
     notifyListeners();
   }
 
-  void setShowSelectionControls(bool showSelectionControls) {
+  void setShowSelectionControls(bool showSelectionControls) async {
+    await Future.delayed(Duration.zero);
     _showSelectionControls = showSelectionControls;
     notifyListeners();
   }
 
-  void setDeletedItems(Set<IdType> deletedItems) {
+  Future<void> setDeletedItems(Set<IdType> deletedItems) async {
     _deletedItems = deletedItems;
     notifyListeners();
   }
 
-  void setEffectiveLayout(LdMonkeyEffectiveLayoutMode effectiveLayout) {
+  Future<void> setEffectiveLayout(LdMonkeyEffectiveLayoutMode effectiveLayout) async {
+    await Future.delayed(Duration.zero);
     _effectiveLayout = effectiveLayout;
     notifyListeners();
   }

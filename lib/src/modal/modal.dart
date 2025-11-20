@@ -146,9 +146,14 @@ class LdModalRoute<T> extends PageRoute<T> {
       topPadding = availableHeight - finalHeight;
     }
 
-    return MediaQuery.removePadding(
-      context: context,
-      removeTop: true,
+    final mediaQuery = MediaQuery.of(context);
+
+    return MediaQuery(
+      data: mediaQuery.copyWith(
+        padding: mediaQuery.padding.copyWith(top: 0),
+        viewPadding: mediaQuery.viewPadding.copyWith(top: 0),
+        viewInsets: mediaQuery.viewInsets.copyWith(top: 0),
+      ),
       child: Container(
         margin: sheetInsets,
         padding: EdgeInsets.only(top: topPadding),
@@ -573,7 +578,7 @@ class _LdSheetDragController<T> {
     } else {
       if (isCurrent) {
         final NavigatorState rootNavigator = Navigator.of(navigator.context, rootNavigator: true);
-        rootNavigator.pop();
+        rootNavigator.maybePop();
       }
 
       if (controller.isAnimating) {

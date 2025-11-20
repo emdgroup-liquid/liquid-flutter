@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter_window_utils/messages.g.dart';
-import 'package:liquid_flutter_window_utils/screen_radius_defaults.dart';
 
 /// An implementation of [LiquidFlutterWindowUtilsPlatform] that uses Pigeon.
 class LiquidFlutterWindowUtils implements WindowStateEventApi {
@@ -12,9 +11,12 @@ class LiquidFlutterWindowUtils implements WindowStateEventApi {
       LiquidFlutterWindowUtils._();
 
   LiquidFlutterWindowUtils._() {
-    if (defaultTargetPlatform == TargetPlatform.macOS) {
+    if (defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.android) {
       _api = WindowUtilsApi();
-      _setupFlutterApi();
+      if (defaultTargetPlatform == TargetPlatform.macOS) {
+        _setupFlutterApi();
+      }
     } else {
       _api = null;
     }
@@ -87,6 +89,10 @@ class LiquidFlutterWindowUtils implements WindowStateEventApi {
           isMaximized: false,
           isMinimized: false,
         );
+  }
+
+  Future<double> getScreenRadius() async {
+    return await _api?.getScreenRadius() ?? 0.0;
   }
 
   /// Stream of window state changes

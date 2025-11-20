@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/monkey/monkey_shell_state.dart';
+import 'package:liquid_flutter/src/monkey/monkey_app_bar.dart';
 import 'package:provider/provider.dart';
 
 class LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
@@ -102,10 +102,20 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
               child: Builder(
                 builder: (context) {
                   return LdScaffold(
-                    appBar: widget.appBar ?? LdMonkeyAppBar<T, IdType>(location: LdMonkeyActionLocation.masterAppBar),
+                    appBar: widget.appBar ??
+                        LdMonkeyAppBar<T, IdType>(
+                          location: LdMonkeyActionLocation.masterAppBar,
+                        ),
                     secondaryAppBar: widget.secondaryAppBar ??
-                        LdMonkeyAppBar<T, IdType>(location: LdMonkeyActionLocation.masterSecondary),
-                    body: _buildList(context, repository, shellState, actions),
+                        LdMonkeyAppBar<T, IdType>(
+                          location: LdMonkeyActionLocation.masterSecondary,
+                        ),
+                    body: _buildList(
+                      context,
+                      repository,
+                      shellState,
+                      actions,
+                    ),
                   );
                 },
               ),

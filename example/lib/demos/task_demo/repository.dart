@@ -10,11 +10,8 @@ final taskRepository = LdRepository<Task, int>(
   pageSize: 5,
   getOffsetById: (id, {filters, sortOptions}) async {
     // Apply the same filtering and sorting logic as fetchListWithParameters
-    final filtered = testData
-        .where((element) =>
-            filters?.every((filter) => filter.optimisticFilter(element)) ??
-            true)
-        .toList();
+    final filtered =
+        testData.where((element) => filters?.every((filter) => filter.optimisticFilter(element)) ?? true).toList();
 
     for (final sortOption in sortOptions ?? []) {
       filtered.sort((a, b) => sortOption.optimisticSort(a, b));
@@ -78,8 +75,7 @@ final taskRepository = LdRepository<Task, int>(
       },
       getSuggestions: (searchText) async {
         return testData
-            .where((element) =>
-                element.task.toLowerCase().startsWith(searchText.toLowerCase()))
+            .where((element) => element.task.toLowerCase().startsWith(searchText.toLowerCase()))
             .map((e) => e.task)
             .toList();
       },
@@ -94,11 +90,8 @@ final taskRepository = LdRepository<Task, int>(
   }) async {
     await Future.delayed(const Duration(milliseconds: 200));
 
-    final filtered = testData
-        .where((element) =>
-            filters?.every((filter) => filter.optimisticFilter(element)) ??
-            true)
-        .toList();
+    final filtered =
+        testData.where((element) => filters?.every((filter) => filter.optimisticFilter(element)) ?? true).toList();
 
     for (final sortOption in sortOptions ?? []) {
       filtered.sort((a, b) => sortOption.optimisticSort(a, b));
@@ -112,12 +105,6 @@ final taskRepository = LdRepository<Task, int>(
   },
   deleteItem: (int id) async {
     testData.removeWhere((element) => element.id == id);
-    await Future.delayed(const Duration(milliseconds: 500));
-  },
-  deleteBatch: (ids) async {
-    for (final id in ids) {
-      testData.removeWhere((element) => element.id == id);
-    }
     await Future.delayed(const Duration(milliseconds: 500));
   },
   updateItem: (id, newItem) async {

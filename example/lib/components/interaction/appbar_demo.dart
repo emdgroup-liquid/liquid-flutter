@@ -41,13 +41,10 @@ class _AppBarDemoState extends State<AppBarDemo> {
   void dispose() {
     _scrollController.dispose();
 
-    _primarySearchConfig?.dispose();
-    _secondarySearchConfig?.dispose();
     super.dispose();
   }
 
   void _updatePrimarySearchConfig() {
-    _primarySearchConfig?.dispose();
     _primarySearchConfig = null;
     if (_hasPrimarySearchConfig) {
       _primarySearchConfig = LdSearchConfig(
@@ -70,7 +67,6 @@ class _AppBarDemoState extends State<AppBarDemo> {
   }
 
   void _updateSecondarySearchConfig() {
-    _secondarySearchConfig?.dispose();
     _secondarySearchConfig = null;
     if (_hasSecondarySearchConfig) {
       _secondarySearchConfig = LdSearchConfig(

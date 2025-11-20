@@ -164,7 +164,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     _updated(_items[index]!.copyWith(state: LdPaginatorItemState.deleted));
 
     _items.remove(index);
-
+    totalItems--;
     final newOrder = <int, LdPaginatorItem<T>>{};
 
     for (final item in _items.entries) {
@@ -435,6 +435,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   }
 
   Stream<List<LdPaginatorItem<T>>> watchListOfItems(Set<IdType> ids) async* {
+    yield ids.map((id) => getItemById(id)).nonNulls.toList();
     await for (final update in updatedItems) {
       yield ids.map((id) => getItemById(id)).nonNulls.toList();
       if (ids.contains(update.value?.id)) {

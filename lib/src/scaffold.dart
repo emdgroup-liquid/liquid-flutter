@@ -97,6 +97,7 @@ class LdScaffoldAppBarState {
   final double verticalMargin;
   final double innerHeight;
   final double offset;
+  final bool willHide;
   final EffectivePosition effectivePosition;
 
   const LdScaffoldAppBarState({
@@ -104,6 +105,7 @@ class LdScaffoldAppBarState {
     required this.innerHeight,
     required this.offset,
     required this.effectivePosition,
+    required this.willHide,
   });
 
   LdScaffoldAppBarState copyWith({
@@ -111,21 +113,23 @@ class LdScaffoldAppBarState {
     double? innerHeight,
     double? offset,
     EffectivePosition? effectivePosition,
+    bool? willHide,
   }) {
     return LdScaffoldAppBarState(
       verticalMargin: verticalMargin ?? this.verticalMargin,
       innerHeight: innerHeight ?? this.innerHeight,
       offset: offset ?? this.offset,
       effectivePosition: effectivePosition ?? this.effectivePosition,
+      willHide: willHide ?? this.willHide,
     );
   }
 
   double get effectiveHeight {
-    return verticalMargin + innerHeight - offset;
+    return verticalMargin + innerHeight + (willHide ? offset : 0);
   }
 
   double get effectiveInnerHeight {
-    return max(0, innerHeight - offset);
+    return max(0, innerHeight - (willHide ? offset : 0));
   }
 
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -153,6 +157,7 @@ class LdScaffoldLayoutState {
   final LdScaffoldSlot slot;
   final LdScaffoldLayoutState? parentLayoutState;
   final String? debugName;
+  final bool isScrolled;
 
   final LdScaffoldAppBarState? appBarState;
   final LdScaffoldAppBarState? secondaryAppBarState;
@@ -163,6 +168,7 @@ class LdScaffoldLayoutState {
     required this.drawerScrollOffset,
     required this.parentLayoutState,
     this.debugName,
+    this.isScrolled = false,
     this.appBarState,
     this.secondaryAppBarState,
   });
@@ -197,8 +203,6 @@ class LdScaffoldLayoutState {
       currentLayoutState = currentLayoutState.parentLayoutState;
     }
 
-    // Sort the app bars by height
-
     double top = 0;
     double bottom = 0;
 
@@ -223,11 +227,23 @@ class LdScaffoldLayoutState {
     return "$level - $debugName - $slot - ${appBarState?.effectiveHeight} - ${secondaryAppBarState?.effectiveHeight} \n ${parentLayoutState?.toDebugString()}";
   }
 
-  double effectiveHeightOfOthers(LdScaffoldSlot slot) {
+  int levelForEffectivePosition() {
     final effectivePosition = slot.effectivePosition;
-    if (effectivePosition == null) {
-      return 0;
+    int level = 0;
+    LdScaffoldLayoutState? currentLayoutState = parentLayoutState;
+    while (currentLayoutState != null) {
+      if (currentLayoutState.appBarState?.effectivePosition == effectivePosition) {
+        level++;
+      }
+      if (currentLayoutState.secondaryAppBarState?.effectivePosition == effectivePosition) {
+        level++;
+      }
+      currentLayoutState = currentLayoutState.parentLayoutState;
     }
+    return level;
+  }
+
+  double effectiveHeightOfOthers(EffectivePosition effectivePosition, AppBarRole appBarRole) {
     List<LdScaffoldAppBarState> appBars = [];
 
     // Walk up the tree and collect the app bars
@@ -247,7 +263,7 @@ class LdScaffoldLayoutState {
     double total = 0;
 
     for (var appBar in appBars) {
-      total += appBar.effectiveHeight;
+      total += appBar.effectiveInnerHeight;
     }
 
     if (slot.role == AppBarRole.secondary && appBarState?.effectivePosition == effectivePosition) {
@@ -265,6 +281,7 @@ class LdScaffoldLayoutState {
     String? debugName,
     LdScaffoldAppBarState? appBarState,
     LdScaffoldAppBarState? secondaryAppBarState,
+    bool? isScrolled,
   }) {
     return LdScaffoldLayoutState(
       debugName: debugName ?? this.debugName,
@@ -274,6 +291,7 @@ class LdScaffoldLayoutState {
       slot: slot ?? this.slot,
       appBarState: appBarState ?? this.appBarState,
       secondaryAppBarState: secondaryAppBarState ?? this.secondaryAppBarState,
+      isScrolled: isScrolled ?? this.isScrolled,
     );
   }
 
@@ -401,8 +419,8 @@ class LdScaffoldState extends State<LdScaffold> {
     setState(() {});
   }
 
-  void onAppBarSizeChange(LdScaffoldSlot slot, Size size) {
-    if (slot.role == AppBarRole.primary) {
+  void onAppBarSizeChange(AppBarRole role, Size size) {
+    if (role == AppBarRole.primary) {
       if (_appBarState?.innerHeight == size.height) {
         return;
       }
@@ -480,6 +498,7 @@ class LdScaffoldState extends State<LdScaffold> {
       secondaryAppBarState: _secondaryAppBarState,
       bodyScrollOffset: _bodyScrollOffset,
       drawerScrollOffset: _drawerScrollOffset,
+      isScrolled: _lastScrollOffset > 5,
     );
   }
 
@@ -694,38 +713,28 @@ class LdScaffoldState extends State<LdScaffold> {
   }
 
   void _updateAppBarOffset(AppBarRole role, double scrollOffset) {
-    if (!_shouldHideAppBar(role)) {
-      return;
-    }
-
     var appBarState = role == AppBarRole.primary ? _appBarState : _secondaryAppBarState;
 
     if (appBarState == null) {
       return;
     }
 
-    if (scrollOffset < 100) {
+    // Calculate scroll direction and velocity
+    final double scrollDelta = scrollOffset - _lastScrollOffset;
+    final bool isScrollingDown = scrollDelta > 0;
+    final bool isScrollingUp = scrollDelta < 0;
+
+    double maxOffset = appBarState.innerHeight + appBarState.verticalMargin;
+
+    // Bottom appBar: hide downward (positive offset) down means delta is positive.
+    if (isScrollingDown) {
       appBarState = appBarState.copyWith(
-        offset: 0.0,
+        offset: min(appBarState.offset + scrollDelta * 0.5, maxOffset),
       );
-    } else {
-      // Calculate scroll direction and velocity
-      final double scrollDelta = scrollOffset - _lastScrollOffset;
-      final bool isScrollingDown = scrollDelta > 0;
-      final bool isScrollingUp = scrollDelta < 0;
-
-      double maxOffset = appBarState.innerHeight + appBarState.verticalMargin;
-
-      // Bottom appBar: hide downward (positive offset) down means delta is positive.
-      if (isScrollingDown) {
-        appBarState = appBarState.copyWith(
-          offset: min(appBarState.offset + scrollDelta, maxOffset),
-        );
-      } else if (isScrollingUp) {
-        appBarState = appBarState.copyWith(
-          offset: max(appBarState.offset + scrollDelta, 0),
-        );
-      }
+    } else if (isScrollingUp) {
+      appBarState = appBarState.copyWith(
+        offset: max(appBarState.offset + scrollDelta, 0),
+      );
     }
 
     switch (role) {
@@ -770,12 +779,29 @@ class LdScaffoldState extends State<LdScaffold> {
 
   Widget _placeAppBar(BuildContext context, Widget appBar) {
     final effectivePosition = _effectiveAppBarPosition;
+    final shouldHideAppBar = _shouldHideAppBar(AppBarRole.primary);
 
     _appBarState = LdScaffoldAppBarState(
       verticalMargin: _appBarState?.verticalMargin ?? 0,
       innerHeight: _appBarState?.innerHeight ?? 0,
       offset: _appBarState?.offset ?? 0,
       effectivePosition: effectivePosition,
+      willHide: shouldHideAppBar,
+    );
+
+    double offset = ((_appBarState?.offset ?? 0));
+
+    if (effectivePosition == EffectivePosition.top) {
+      offset = -offset;
+    }
+
+    final transformedAppBar = LdWrapConditional(
+      condition: shouldHideAppBar,
+      builder: (context, child) => Transform.translate(
+        offset: Offset(0, offset),
+        child: child,
+      ),
+      child: appBar,
     );
 
     if (effectivePosition == EffectivePosition.top) {
@@ -784,10 +810,7 @@ class LdScaffoldState extends State<LdScaffold> {
         top: 0,
         left: 0,
         right: 0,
-        child: Transform.translate(
-          offset: Offset(0, -(_appBarState?.offset ?? 0)),
-          child: appBar,
-        ),
+        child: transformedAppBar,
       );
     }
 
@@ -796,21 +819,32 @@ class LdScaffoldState extends State<LdScaffold> {
       bottom: 0,
       left: 0,
       right: 0,
-      child: Transform.translate(
-        offset: Offset(0, _appBarState?.offset ?? 0),
-        child: appBar,
-      ),
+      child: transformedAppBar,
     );
   }
 
   Widget _placeSecondaryNavigationBar(BuildContext context, Widget secondaryNavigationBar) {
     final effectivePosition = _effectiveSecondaryAppBarPosition;
+    final shouldHideSecondaryAppBar = _shouldHideAppBar(AppBarRole.secondary);
 
     _secondaryAppBarState ??= LdScaffoldAppBarState(
       verticalMargin: _secondaryAppBarState?.verticalMargin ?? 0,
       innerHeight: _secondaryAppBarState?.innerHeight ?? 0,
       offset: _secondaryAppBarState?.offset ?? 0,
       effectivePosition: effectivePosition,
+      willHide: shouldHideSecondaryAppBar,
+    );
+    double offset = ((_secondaryAppBarState?.offset ?? 0) - 100).clamp(0, double.infinity);
+    if (effectivePosition == EffectivePosition.top) {
+      offset = -offset;
+    }
+    final transformedSecondaryAppBar = LdWrapConditional(
+      condition: shouldHideSecondaryAppBar,
+      builder: (context, child) => Transform.translate(
+        offset: Offset(0, offset),
+        child: child,
+      ),
+      child: secondaryNavigationBar,
     );
 
     if (effectivePosition == EffectivePosition.top) {
@@ -818,10 +852,7 @@ class LdScaffoldState extends State<LdScaffold> {
         top: 0,
         left: 0,
         right: 0,
-        child: Transform.translate(
-          offset: Offset(0, -(_secondaryAppBarState?.offset ?? 0)),
-          child: secondaryNavigationBar,
-        ),
+        child: transformedSecondaryAppBar,
       );
     }
 
@@ -829,10 +860,7 @@ class LdScaffoldState extends State<LdScaffold> {
       left: 0,
       right: 0,
       bottom: 0,
-      child: Transform.translate(
-        offset: Offset(0, _secondaryAppBarState?.offset ?? 0),
-        child: secondaryNavigationBar,
-      ),
+      child: transformedSecondaryAppBar,
     );
   }
 

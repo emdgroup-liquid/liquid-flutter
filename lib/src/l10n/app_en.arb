@@ -27,6 +27,12 @@
   "createNew": "Create new",
   "delete": "Delete",
   "deleteSelected": "Delete selected",
+  "deleteNItems": "Delete {items} {items,plural, =1{item}other{items}}",
+  "@deleteNItems": {
+    "placeholders" : { 
+      "items": {}
+    }
+  },
   "edit": "Edit",
   "select": "Select",
   "filter": "Filter",

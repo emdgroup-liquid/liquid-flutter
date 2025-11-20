@@ -19,6 +19,8 @@ class LdSizingConfig {
   double themeLPaddingM;
   double themeLPaddingL;
 
+  double containerMaxWidth;
+
   LdSizingConfig({
     this.radiusXS = 4.0,
     this.radiusS = 8.0,
@@ -36,5 +38,6 @@ class LdSizingConfig {
     this.themeLPaddingS = 16.0,
     this.themeLPaddingM = 24.0,
     this.themeLPaddingL = 32.0,
+    this.containerMaxWidth = 1200.0,
   });
 }

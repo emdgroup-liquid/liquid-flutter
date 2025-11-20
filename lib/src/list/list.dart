@@ -440,9 +440,9 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
   ) {
     final item = LdPaginatorLoadedItem(value: listEntry.item!.value, state: listEntry.item!.state);
 
-    if (!_itemKeys.containsKey(item.value.id)) {
-      _itemKeys[item.value.id] = GlobalKey(debugLabel: "list" + item.value.id.toString());
-    }
+    // print("buildActualItem: ${item.value.id} - ${listEntry.item}");
+
+    _itemKeys[item.value.id] = GlobalKey(debugLabel: "list" + item.value.id.toString());
 
     if (listEntry.item!.state == LdPaginatorItemState.pendingRefresh) {
       widget.paginator.fetchPageAtOffset(listEntry.position!);

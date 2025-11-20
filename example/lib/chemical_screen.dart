@@ -51,7 +51,6 @@ class _ChemicalScreenState extends State<ChemicalScreen> {
   @override
   void dispose() {
     super.dispose();
-    searchConfig.dispose();
   }
 
   @override

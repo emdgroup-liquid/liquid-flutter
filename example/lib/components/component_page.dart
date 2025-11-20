@@ -38,6 +38,7 @@ class ComponentPage extends StatelessWidget {
         appBarPlacement: LdScaffoldAppBarPlacement.mobileBottomDesktopTop,
         appBar: LdAppBar(
           borderMode: LdAppBarBorderMode.visible,
+          addContainer: true,
           title: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,6 +54,7 @@ class ComponentPage extends StatelessWidget {
           ),
         ),
         body: LdScaffoldBody(
+          addContainer: true,
           children: [
             MarkdownBody(data: text ?? ""),
             // Demo

@@ -342,7 +342,7 @@ class _ModalDemoState extends State<ModalDemo> {
                 scaleParent: false,
                 sheetAspectRatio: 1.1,
                 sheetInsets: const EdgeInsets.all(10),
-                sheetBorderRadius: BorderRadius.circular(LdTheme.of(context).screenRadius - 5),
+                sheetBorderRadius: BorderRadius.circular(LdTheme.of(context).screenRadius / 2 - 5),
                 pageBuilder: (context2) => LdScaffold(
                   body: Center(
                     child: LdText("This is a modal with screen radius"),

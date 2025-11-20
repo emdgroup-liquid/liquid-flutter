@@ -32,8 +32,10 @@ abstract class LdMonkeyAction<T extends Identifiable<IdType>, IdType> {
   bool isVisible(BuildContext context, {LdMonkeyActionLocation? location}) {
     location ??= context.read<LdMonkeyActionLocation>();
 
+    final shellState = LdMonkeyShellState.of<T, IdType>(context, watch: true);
     final repository = LdRepository.of<T, IdType>(context);
-    final selection = LdMonkeySelection.of<T, IdType>(context, listen: false);
+    final selection = LdMonkeySelection.of<T, IdType>(context);
+
     final effectiveLayoutMode = context.read<LdMonkeyEffectiveLayoutMode>();
 
     final selectedItemCount = selection.items.length;
@@ -50,6 +52,9 @@ abstract class LdMonkeyAction<T extends Identifiable<IdType>, IdType> {
 
       if (!visibility.layoutModes.contains(effectiveLayoutMode)) {
         continue;
+      }
+      if (visibility.visibleWhenShowingSelectionControls == true && !shellState.showSelectionControls) {
+        return false;
       }
 
       if (visibility.applyFilters.isNotEmpty) {
@@ -134,9 +139,12 @@ class LdMonkeySubmitAction<T extends Identifiable<IdType>, IdType, Result> exten
             submitButtonBuilder: (submitButtonBuilder, controller) {
               return LdButton(
                 color: color,
-                onPressed: () {
-                  maybePopContextMenu(context);
-                  controller.trigger();
+                loading: controller.state.type == LdSubmitStateType.loading,
+                loadingText: config(context).loadingText,
+                disabled: !controller.canTrigger,
+                onPressed: () async {
+                  await maybePopContextMenu(context);
+                  await controller.trigger();
                 },
                 leading: icon,
                 child: child!,

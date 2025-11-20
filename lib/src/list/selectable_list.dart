@@ -142,7 +142,6 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
   void onTap(IdType item) {
     _focusNode.requestFocus();
     if (!isMultiSelect) {
-      print('onTap: $item');
       _selectedItems.toggle(item);
       return;
     }
@@ -151,7 +150,7 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
     // We select all items between the last selected item and the current item
     if (_shiftPressed) {
       _selectRange(item);
-    } else if (_ctrlPressed) {
+    } else if (_ctrlPressed || widget.showSelectionControls) {
       // We allow multi select and the user is holding ctrl, therefore we toggle the item
       // while keeping the other selected items
       _selectedItems.toggle(item);
@@ -364,13 +363,8 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
   }
 
   Widget _wrapListItem(BuildContext context, LdPaginatorItem<T> item, int index) {
-    if (!_itemKeys.containsKey(item.value!.id)) {
-      _itemKeys[item.value!.id] = GlobalKey(debugLabel: "Selection" + item.value!.id.toString());
-    }
-
-    if (!_itemFocusNodes.containsKey(item.value!.id)) {
-      _itemFocusNodes[item.value!.id] = FocusNode();
-    }
+    _itemKeys[item.value!.id] = GlobalKey(debugLabel: "Selection" + item.value!.id.toString());
+    _itemFocusNodes[item.value!.id] ??= FocusNode();
 
     return AnimatedBuilder(
       animation: _changeNotifier,
@@ -417,34 +411,35 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
       return Stack(
         children: [
           list,
-          Positioned(
-            left: 0,
-            top: 0,
-            bottom: 0,
-            width: 42,
-            child: _DragRect(
-              mobile: true,
-              onTapOutside: () {
-                if (!_isDragging) {
-                  return;
-                }
+          if (widget.showSelectionControls)
+            Positioned(
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: 42,
+              child: _DragRect(
+                mobile: true,
+                onTapOutside: () {
+                  if (!_isDragging) {
+                    return;
+                  }
 
-                _selectedItems.clear();
-                setState(() {});
-                widget.onSelectionChange?.call({});
-              },
-              key: _rootKey,
-              onUpdateRect: _onUpdateDragRect,
-              onEndDrag: _onEndDrag,
-              onCancel: _onCancel,
-              child: Focus(
-                  focusNode: _focusNode,
-                  autofocus: true,
-                  onFocusChange: _onFocusChange,
-                  onKeyEvent: _onKeyEvent,
-                  child: Container()),
-            ),
-          )
+                  _selectedItems.clear();
+                  setState(() {});
+                  widget.onSelectionChange?.call({});
+                },
+                key: _rootKey,
+                onUpdateRect: _onUpdateDragRect,
+                onEndDrag: _onEndDrag,
+                onCancel: _onCancel,
+                child: Focus(
+                    focusNode: _focusNode,
+                    autofocus: true,
+                    onFocusChange: _onFocusChange,
+                    onKeyEvent: _onKeyEvent,
+                    child: Container()),
+              ),
+            )
         ],
       );
     }

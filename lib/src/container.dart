@@ -9,11 +9,11 @@ class LdContainer extends StatelessWidget {
   final Widget child;
 
   final EdgeInsets? padding;
-  final double maxWidth;
+  final double? maxWidth;
 
   const LdContainer({
     required this.child,
-    this.maxWidth = 1200,
+    this.maxWidth,
     this.padding,
     super.key,
   });
@@ -22,9 +22,12 @@ class LdContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     // Default padding is the balanced L
 
+    final theme = LdTheme.of(context, listen: true);
+
+    final maxWidth = this.maxWidth ?? theme.sizingConfig.containerMaxWidth;
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        final theme = LdTheme.of(context, listen: true);
         var finalPadding = padding ?? (theme.pad(size: LdSize.l) * 1);
 
         // If the screen is larger than the max width, center the content

@@ -112,7 +112,7 @@ class _LdInputState extends State<LdInput> {
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
 
-    final contentPadding = theme.balPad(widget.size) - EdgeInsets.all(theme.borderWidth);
+    final contentPadding = theme.pad() - EdgeInsets.all(theme.borderWidth);
 
     final cursorHeight = theme.labelSize(widget.size);
 

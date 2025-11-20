@@ -95,6 +95,17 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
   String get deleteSelected => 'Delete selected';
 
   @override
+  String deleteNItems(num items) {
+    String _temp0 = intl.Intl.pluralLogic(
+      items,
+      locale: localeName,
+      other: 'items',
+      one: 'item',
+    );
+    return 'Delete $items $_temp0';
+  }
+
+  @override
   String get edit => 'Edit';
 
   @override

@@ -6,6 +6,7 @@
     "createNew",
     "delete",
     "deleteSelected",
+    "deleteNItems",
     "edit",
     "select",
     "filter",

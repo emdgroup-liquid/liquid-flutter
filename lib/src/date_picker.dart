@@ -73,18 +73,35 @@ class _LdDatePickerState extends State<LdDatePicker> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = LdTheme.of(context);
     return LdModalBuilder(
       useRootNavigator: widget.useRootNavigator,
       builder: (context, open) => LdBundle(
         children: [
           if (widget.label != null) LdText.l(widget.label!),
-          LdButton(
-            child: Text(initialDateString),
+          LdTouchableSurface(
+            allowTapOutside: true,
+            mode: LdTouchableSurfaceMode.input,
+            isInput: true,
             key: const Key("date_picker_button"),
-            onPressed: open,
-            autoLoading: false,
-            mode: widget.buttonMode,
+            onPressed: () {
+              open();
+            },
             disabled: widget.disabled,
+            builder: (context, colors, status, _) => Container(
+              clipBehavior: Clip.hardEdge,
+              padding: theme.pad(size: LdSize.s),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: theme.radius(LdSize.s),
+                border: Border.all(
+                  color: colors.border,
+                  width: theme.borderWidth,
+                ),
+              ),
+              child: LdText.l(initialDateString),
+            ),
           )
         ],
       ),

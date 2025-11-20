@@ -50,7 +50,7 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
               constraints: const BoxConstraints(maxWidth: 300),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: actions
+                children: visibleActions
                     .map(
                       (action) => LdButtonConfigProvider(
                           const LdButtonConfig(

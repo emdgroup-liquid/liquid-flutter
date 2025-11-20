@@ -151,6 +151,19 @@ public class LiquidFlutterWindowUtilsPlugin: NSObject, FlutterPlugin, WindowUtil
     return window.isZoomed
   }
   
+  public func getScreenRadius() throws -> Double {
+    let osVersion = ProcessInfo.processInfo.operatingSystemVersion
+    let majorVersion = osVersion.majorVersion
+    
+    // macOS 26 "Tahoe" introduced "Liquid Glass" design with increased corner radius
+    if majorVersion >= 26 {
+      return 26.0
+    }
+    
+    // Standard corner radius for macOS versions prior to 26
+    return 10.0
+  }
+  
   internal func getWindowState() throws -> WindowState {
     guard let window = LiquidFlutterWindowUtilsPlugin.getCurrentWindow() else {
       return WindowState(

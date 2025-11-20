@@ -1,11 +1,11 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/monkey/intents.dart';
-import 'package:liquid_flutter/src/monkey/monkey_shell_state.dart';
 
 import 'package:multi_split_view/multi_split_view.dart';
 import 'package:provider/provider.dart';
@@ -130,7 +130,6 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
     _setupSubscriptions();
 
     if (state.selectedItems.isNotEmpty) {
-      print('Got initital selection');
       await _repository!.initWithSelection(state.selectedItems);
     } else {
       await _repository!.fetchItemsAtOffset(0);
@@ -143,7 +142,6 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
     state.setShowSelectionControls(queryParameters['showSelectionControls'] == 'true');
 
     if (widget.routeSelection != null) {
-      print("Route selection: ${widget.routeSelection}");
       state.setSelectedItems(_parseSelected(widget.routeSelection ?? ""));
     }
     if (queryParameters.isNotEmpty) {
@@ -174,25 +172,17 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
     _sortSubscription = _repository!.sortStream.listen((_) => _updateQueryParameters());
     _repositoryUpdatedItemsSubscription = _repository!.updatedItems.listen((item) {
       if (item.state == LdPaginatorItemState.deleted && item.value?.id != null) {
-        final id = item.value!.id! as IdType;
-        state.setDeletedItems({
-          id,
-          ...state.deletedItems,
-        });
         state.setSelectedItems(state.selectedItems.difference({item.value?.id!}));
       }
     });
     _state.addListener(() async {
       await Future.delayed(Duration.zero);
-      _applyStateToUrl();
-    });
-  }
 
-  /// Sets the selected items and updates the URL.
-  void setSelectedItems(Set<IdType> selectedItems) {
-    state.setSelectedItems(selectedItems);
-    setState(() {});
-    _applyStateToUrl();
+      _applyStateToUrl();
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   /// Sets the visibility of selection controls and updates the URL.
@@ -202,7 +192,7 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
 
     // Clear selection when hiding controls
     if (!showSelectionControls) {
-      setSelectedItems({});
+      state.setSelectedItems({});
     }
   }
 
@@ -230,7 +220,7 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
     await Future.delayed(Duration.zero);
 
     var newSelectedIds = _parseSelected(widget.routeSelection ?? "");
-    setSelectedItems(newSelectedIds);
+    state.setSelectedItems(newSelectedIds);
   }
 
   @override
@@ -297,6 +287,7 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
 
     final router = GoRouter.of(context);
     final detailPath = _serialiseDetailPath(state.selectedItems);
+
     final queryParameters = <String, String>{};
 
     // Add repository query parameters
@@ -312,18 +303,22 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
     final newUri = uri.replace(queryParameters: queryParameters);
 
     final currentSelected = _parseSelected(widget.routeSelection ?? "");
-    if (currentSelected == state.selectedItems) {
+
+    final selectedState = state.selectedItems;
+
+    final currentQueryParameters = _getQueryParameters();
+
+    if (setEquals(currentSelected, selectedState) && mapEquals(currentQueryParameters, queryParameters)) {
       return;
     }
 
-    if (state.selectedItems.isNotEmpty) {
+    if (selectedState.isNotEmpty) {
       if (_showingDetail) {
         router.replace(newUri.toString());
       } else {
-        if (state.showSelectionControls) {
+        if (state.showSelectionControls && selectedState.isNotEmpty) {
           return;
         }
-
         router.push(newUri.toString());
       }
     } else {
@@ -343,8 +338,10 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
   Widget _buildInitialized(
     BuildContext context,
   ) {
+    print("state.selectedItems: ${state.selectedItems}");
     return Provider.value(
       value: LdMonkeySelection<IdType>(items: state.selectedItems),
+      updateShouldNotify: (previous, next) => previous != next,
       child: ListenableProvider.value(
         value: _repository!,
         child: LayoutBuilder(builder: (context, constraints) {

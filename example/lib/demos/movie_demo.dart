@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/monkey/monkey_app_bar.dart';
 
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -240,55 +241,53 @@ class _MovieDetailState extends State<_MovieDetail> {
     if (widget.movie.value == null) {
       return LdCard(child: Center(child: LdLoader()));
     }
-    return LdCard(
-      child: LdAutoSpace(
-        children: [
-          LdInput(
-            label: "Title",
-            hint: "Movie title",
-            controller: _titleController,
-          ),
-          LdInput(
-            label: "Genre",
-            hint: "Movie genre",
-            controller: _genreController,
-          ),
-          LdInput(
-            label: "Rating",
-            hint: "1-5",
-            controller: _ratingController,
-            keyboardType: TextInputType.number,
-          ),
-          LdText(
-            "Last updated: ${Jiffy.parseFromDateTime(widget.movie.value!.lastUpdate).fromNow()}",
-          ),
-          Row(
-            children: [
-              LdSubmit<void, void>(
-                config: LdSubmitConfig<void, void>(
-                  submitText: "Save",
-                  debugLabel: "Save Movie",
-                  action: (_) async {
-                    final newMovie = _Movie(
-                      widget.movie.value!.id,
-                      _titleController.text,
-                      _genreController.text,
-                      int.tryParse(_ratingController.text) ?? 1,
-                      widget.movie.value!.lastUpdate,
-                    );
-                    final repo = LdRepository.of<_Movie, int>(context);
-                    await repo.update(
-                      widget.movie.value!.id,
-                      newMovie,
-                    );
-                  },
-                ),
+    return LdAutoSpace(
+      children: [
+        LdInput(
+          label: "Title",
+          hint: "Movie title",
+          controller: _titleController,
+        ),
+        LdInput(
+          label: "Genre",
+          hint: "Movie genre",
+          controller: _genreController,
+        ),
+        LdInput(
+          label: "Rating",
+          hint: "1-5",
+          controller: _ratingController,
+          keyboardType: TextInputType.number,
+        ),
+        LdText(
+          "Last updated: ${Jiffy.parseFromDateTime(widget.movie.value!.lastUpdate).fromNow()}",
+        ),
+        Row(
+          children: [
+            LdSubmit<void, void>(
+              config: LdSubmitConfig<void, void>(
+                submitText: "Save",
+                debugLabel: "Save Movie",
+                action: (_) async {
+                  final newMovie = _Movie(
+                    widget.movie.value!.id,
+                    _titleController.text,
+                    _genreController.text,
+                    int.tryParse(_ratingController.text) ?? 1,
+                    widget.movie.value!.lastUpdate,
+                  );
+                  final repo = LdRepository.of<_Movie, int>(context);
+                  await repo.update(
+                    widget.movie.value!.id,
+                    newMovie,
+                  );
+                },
               ),
-            ],
-          ).spaceM(),
-        ],
-      ),
-    ).padL();
+            ),
+          ],
+        ).spaceM(),
+      ],
+    );
   }
 }
 
@@ -390,7 +389,11 @@ class MovieDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyDetailPage<_Movie, int>(
-      primaryAppBar: LdMonkeyAppBar<_Movie, int>(location: LdMonkeyActionLocation.detailAppBar, title: Text("Movie")),
+      primaryAppBar: LdMonkeyAppBar<_Movie, int>(
+        location: LdMonkeyActionLocation.detailAppBar,
+        title: Text("Movie"),
+        debugName: "MovieDetailPage",
+      ),
       buildDetail: (context, item) => _MovieDetail(movie: item),
     );
   }

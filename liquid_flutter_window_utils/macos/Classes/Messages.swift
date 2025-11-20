@@ -127,6 +127,7 @@ protocol WindowUtilsApi {
   func maximizeWindow() throws
   func isWindowMaximized() throws -> Bool
   func getWindowState() throws -> WindowState
+  func getScreenRadius() throws -> Double
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -272,6 +273,19 @@ class WindowUtilsApiSetup {
       }
     } else {
       getWindowStateChannel.setMessageHandler(nil)
+    }
+    let getScreenRadiusChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.getScreenRadius", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      getScreenRadiusChannel.setMessageHandler { _, reply in
+        do {
+          let result = try api.getScreenRadius()
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      getScreenRadiusChannel.setMessageHandler(nil)
     }
   }
 }
