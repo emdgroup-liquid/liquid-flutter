@@ -190,16 +190,17 @@ class LdScaffoldLayoutState {
     while (currentLayoutState != null) {
       final appBarState = currentLayoutState.appBarState;
       final secondaryAppBarState = currentLayoutState.secondaryAppBarState;
-      if (appBarState?.effectivePosition == EffectivePosition.top) {
-        topAppBars.add(appBarState!);
-      } else if (appBarState?.effectivePosition == EffectivePosition.bottom) {
-        bottomAppBars.add(appBarState!);
-      }
       if (secondaryAppBarState?.effectivePosition == EffectivePosition.top) {
         topAppBars.add(secondaryAppBarState!);
       } else if (secondaryAppBarState?.effectivePosition == EffectivePosition.bottom) {
         bottomAppBars.add(secondaryAppBarState!);
       }
+      if (appBarState?.effectivePosition == EffectivePosition.top) {
+        topAppBars.add(appBarState!);
+      } else if (appBarState?.effectivePosition == EffectivePosition.bottom) {
+        bottomAppBars.add(appBarState!);
+      }
+
       currentLayoutState = currentLayoutState.parentLayoutState;
     }
 
@@ -214,10 +215,10 @@ class LdScaffoldLayoutState {
     }
 
     if (topAppBars.isNotEmpty) {
-      top += topAppBars.first.verticalMargin;
+      top += topAppBars.last.verticalMargin;
     }
     if (bottomAppBars.isNotEmpty) {
-      bottom += bottomAppBars.first.verticalMargin;
+      bottom += bottomAppBars.last.verticalMargin;
     }
 
     return EdgeInsets.only(top: top, bottom: bottom);
