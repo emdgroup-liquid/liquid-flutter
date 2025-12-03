@@ -46,7 +46,7 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
                 value: visibleActions,
               ),
             ],
-            menuBuilder: (context, menuBuilder) => ConstrainedBox(
+            menuBuilder: (context) => ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 300),
               child: Column(
                 mainAxisSize: MainAxisSize.min,

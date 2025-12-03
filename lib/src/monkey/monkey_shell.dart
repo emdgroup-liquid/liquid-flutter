@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/drawer_state.dart';
 import 'package:liquid_flutter/src/monkey/intents.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -28,6 +29,7 @@ class LdMonkeyShell<T extends Identifiable<IdType>, IdType> extends StatefulWidg
     required this.masterPage,
     required this.parseSelected,
     required this.routeSelection,
+    required this.queryParameters,
     this.actions = const [],
     this.buildDetailPath,
     this.detailPanelFlex = 2,
@@ -44,6 +46,9 @@ class LdMonkeyShell<T extends Identifiable<IdType>, IdType> extends StatefulWidg
   /// The selection part of the route path, is usually a comma separated
   /// list of ids.
   final String? routeSelection;
+
+  /// Query parameters from the current route.
+  final Map<String, String> queryParameters;
 
   /// Builder function that creates a repository instance asynchronously.
   /// If not provided, the repository will be looked up in the context.
@@ -107,13 +112,22 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
 
   LdMonkeyShellState<T, IdType> get state => _state;
 
+  /// Mutex to prevent race condition between state→URL and URL→state updates.
+  /// When applying state to URL, we create a completer. URL changes that try
+  /// to update state will check if this completer exists and skip the update
+  /// if it does (meaning we're currently applying state to URL).
+  Completer<void>? _urlUpdateMutex;
+
   @override
   void initState() {
     super.initState();
+    // Set up state listener immediately - doesn't depend on repository
+    _state.addListener(_onStateChange);
+    // Apply initial URL state to shell state
+    _onUrlChange();
   }
 
   Future<void> _initRepository() async {
-    print('initRepository');
     if (widget.repositoryBuilder != null) {
       _repository = await widget.repositoryBuilder!(context);
     } else {
@@ -126,7 +140,25 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
       }
     }
 
-    _parseInitialState();
+    // Apply query parameters to repository filters
+    // Iterate over all filters to ensure disabled filters are properly cleared
+    for (final filter in _repository!.filters.values) {
+      final value = widget.queryParameters[filter.name];
+
+      if (value != null) {
+        _repository!.updateFilter(
+          filter.name,
+          (filter) => (filter as LdFilterOption<T, IdType>).marshalSerialized(value),
+        );
+      } else if (filter.isOn) {
+        // Disable filter if it's not in query parameters but currently enabled
+        _repository!.updateFilter(
+          filter.name,
+          (filter) => filter!.copyWith(isOn: false),
+        );
+      }
+    }
+
     _setupSubscriptions();
 
     if (state.selectedItems.isNotEmpty) {
@@ -136,29 +168,6 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
     }
   }
 
-  /// Parses initial state from URL query parameters.
-  void _parseInitialState() {
-    final queryParameters = _getQueryParameters();
-    state.setShowSelectionControls(queryParameters['select'] == 'true');
-
-    if (widget.routeSelection != null) {
-      state.setSelectedItems(_parseSelected(widget.routeSelection ?? ""));
-    }
-    if (queryParameters.isNotEmpty) {
-      for (final filter in _repository!.filters.values) {
-        final value = queryParameters[filter.name];
-
-        if (value != null) {
-          _repository!.updateFilter(
-            filter.name,
-            (filter) => (filter as LdFilterOption<T, IdType>).marshalSerialized(value),
-          );
-        }
-      }
-    }
-    setState(() {});
-  }
-
   Set<IdType> _parseSelected(String selected) {
     if (selected.isEmpty) {
       return {};
@@ -166,21 +175,55 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
     return widget.parseSelected(selected);
   }
 
-  // Listen to updates from the repository and route state
+  /// Callback when state changes - applies state to URL.
+  void _onStateChange() async {
+    if (!mounted || _repository == null) return;
+
+    // If we're currently applying URL to state, skip this update to prevent loop
+    if (_urlUpdateMutex != null) {
+      return;
+    }
+
+    await _applyStateToUrl();
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  /// Callback when URL changes - applies URL to state.
+  void _onUrlChange() {
+    if (!mounted) return;
+
+    // If we're currently applying state to URL, skip this update to prevent loop
+    if (_urlUpdateMutex != null) {
+      return;
+    }
+
+    // Update showSelectionControls from query parameters
+    final newShowSelectionControls = widget.queryParameters['select'] == 'true';
+    if (newShowSelectionControls != state.showSelectionControls) {
+      state.setShowSelectionControls(newShowSelectionControls);
+    }
+
+    // Update selected items from route selection
+    if (widget.routeSelection != null) {
+      final newSelectedIds = _parseSelected(widget.routeSelection ?? "");
+      if (!setEquals(newSelectedIds, state.selectedItems)) {
+        state.setSelectedItems(newSelectedIds);
+      }
+    } else if (state.selectedItems.isNotEmpty) {
+      // Clear selection if route selection is null
+      state.setSelectedItems({});
+    }
+  }
+
+  // Listen to updates from the repository only
   void _setupSubscriptions() {
-    _filterSubscription = _repository!.filterStream.listen((_) => _updateQueryParameters());
-    _sortSubscription = _repository!.sortStream.listen((_) => _updateQueryParameters());
+    _filterSubscription = _repository!.filterStream.listen((_) => _onStateChange());
+    _sortSubscription = _repository!.sortStream.listen((_) => _onStateChange());
     _repositoryUpdatedItemsSubscription = _repository!.updatedItems.listen((item) {
       if (item.state == LdPaginatorItemState.deleted && item.value?.id != null) {
         state.setSelectedItems(state.selectedItems.difference({item.value?.id!}));
-      }
-    });
-    _state.addListener(() async {
-      await Future.delayed(Duration.zero);
-
-      _applyStateToUrl();
-      if (mounted) {
-        setState(() {});
       }
     });
   }
@@ -188,7 +231,6 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
   /// Sets the visibility of selection controls and updates the URL.
   void setShowSelectionControls(bool showSelectionControls) {
     state.setShowSelectionControls(showSelectionControls);
-    _updateQueryParameters();
 
     // Clear selection when hiding controls
     if (!showSelectionControls) {
@@ -200,34 +242,19 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
   void didUpdateWidget(LdMonkeyShell<T, IdType> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.routeSelection != widget.routeSelection) {
-      _updateSelectionFromRoute();
+    // Check if URL changed (query parameters or route selection)
+    final queryParamsChanged = !mapEquals(oldWidget.queryParameters, widget.queryParameters);
+    final routeSelectionChanged = oldWidget.routeSelection != widget.routeSelection;
+
+    if (queryParamsChanged || routeSelectionChanged) {
+      _onUrlChange();
     }
-
-    // Parse showSelectionControls from query params if they changed
-    final queryParameters = _getQueryParameters();
-    final newShowSelectionControls = queryParameters['showSelectionControls'] == 'true';
-    if (newShowSelectionControls != state.showSelectionControls) {
-      state.setShowSelectionControls(newShowSelectionControls);
-    }
-  }
-
-  // The route selection changed, we parse the ids and set the selected items.
-  // This basically binds the router to the shell state.
-  void _updateSelectionFromRoute() async {
-    if (!mounted) return;
-
-    await Future.delayed(Duration.zero);
-
-    print("updateSelectionFromRoute: ${widget.routeSelection}");
-
-    var newSelectedIds = _parseSelected(widget.routeSelection ?? "");
-    state.setSelectedItems(newSelectedIds);
   }
 
   @override
   void dispose() {
     super.dispose();
+    _state.removeListener(_onStateChange);
     _filterSubscription.cancel();
     _sortSubscription.cancel();
     _repositoryUpdatedItemsSubscription.cancel();
@@ -240,19 +267,20 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
     return currentUri;
   }
 
-  // Apply the query parameters to the route. Filters and sort options provide
-  // the query parameters.
-  void _updateQueryParameters() {
+  /// Builds query parameters from repository and state.
+  Map<String, String> _buildQueryParameters() {
     final queryParameters = <String, String>{};
 
-    final repoParams = _repository!.queryParameters;
-    queryParameters.addAll(repoParams.map((key, value) => MapEntry(key, value.toString())));
-  }
+    if (_repository != null) {
+      final repoParams = _repository!.queryParameters;
+      queryParameters.addAll(repoParams.map((key, value) => MapEntry(key, value.toString())));
+    }
 
-  // Get the query parameters from the router.
-  Map<String, String> _getQueryParameters() {
-    final router = GoRouter.of(context);
-    final queryParameters = router.routerDelegate.currentConfiguration.uri.queryParameters;
+    // Add showSelectionControls query parameter
+    if (state.showSelectionControls) {
+      queryParameters['select'] = 'true';
+    }
+
     return queryParameters;
   }
 
@@ -284,55 +312,57 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
   }
 
   // Update the selection in the URL.
-  void _applyStateToUrl() {
-    if (!mounted) return;
+  // Acquires a mutex to prevent URL→state updates during this operation.
+  Future<void> _applyStateToUrl() async {
+    if (!mounted || _repository == null) return;
 
-    final router = GoRouter.of(context);
-    final detailPath = _serialiseDetailPath(state.selectedItems);
+    // Acquire mutex to prevent URL→state updates during URL change
+    _urlUpdateMutex = Completer<void>();
 
-    final queryParameters = <String, String>{};
+    try {
+      final router = GoRouter.of(context);
+      final detailPath = _serialiseDetailPath(state.selectedItems);
 
-    // Add repository query parameters
-    final repoParams = _repository!.queryParameters;
-    queryParameters.addAll(repoParams.map((key, value) => MapEntry(key, value.toString())));
+      final queryParameters = _buildQueryParameters();
 
-    // Add showSelectionControls query parameter
-    if (state.showSelectionControls) {
-      queryParameters['select'] = 'true';
-    }
+      final uri = Uri.parse(detailPath);
+      final newUri = uri.replace(queryParameters: queryParameters);
 
-    final uri = Uri.parse(detailPath);
-    final newUri = uri.replace(queryParameters: queryParameters);
+      final currentSelected = _parseSelected(widget.routeSelection ?? "");
+      final selectedState = state.selectedItems;
 
-    final currentSelected = _parseSelected(widget.routeSelection ?? "");
+      // Skip if nothing changed
+      if (setEquals(currentSelected, selectedState) && mapEquals(widget.queryParameters, queryParameters)) {
+        return;
+      }
 
-    final selectedState = state.selectedItems;
-
-    final currentQueryParameters = _getQueryParameters();
-
-    if (setEquals(currentSelected, selectedState) && mapEquals(currentQueryParameters, queryParameters)) {
-      return;
-    }
-
-    if (selectedState.isNotEmpty) {
-      if (_showingDetail) {
-        router.replace(newUri.toString());
-      } else {
-        if (state.showSelectionControls && selectedState.isNotEmpty) {
-          return;
+      if (selectedState.isNotEmpty) {
+        if (_showingDetail) {
+          router.replace(newUri.toString());
+        } else {
+          if (state.showSelectionControls && selectedState.isNotEmpty) {
+            return;
+          }
+          router.push(newUri.toString());
         }
-        router.push(newUri.toString());
-      }
-    } else {
-      if (_showingDetail) {
-        router.pop();
       } else {
-        final baseUri = Uri.parse(widget.basePath);
-        final baseUriWithParams = baseUri.replace(queryParameters: queryParameters);
-        router.replace(baseUriWithParams.toString());
+        if (_showingDetail) {
+          router.pop();
+        } else {
+          final baseUri = Uri.parse(widget.basePath);
+          final baseUriWithParams = baseUri.replace(queryParameters: queryParameters);
+          router.replace(baseUriWithParams.toString());
+        }
       }
+
+      // Wait for router to process the URL change
+      await Future.delayed(Duration.zero);
+      setState(() {});
+    } finally {
+      // Release mutex after URL update completes
+      _urlUpdateMutex?.complete();
+      _urlUpdateMutex = null;
     }
-    setState(() {});
   }
 
   LdMonkeyEffectiveLayoutMode? _lastEffectiveLayout;
@@ -366,8 +396,6 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
               ),
             );
           }
-
-          final theme = LdTheme.of(context);
 
           return Provider.value(
             value: effectiveLayout,

@@ -7,6 +7,8 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_frame.dart';
 import 'package:liquid_flutter/src/appbar/macos_window_controls.dart';
 import 'package:liquid_flutter/src/appbar/windows_window_controls.dart';
+import 'package:liquid_flutter/src/drawer_state.dart';
+import 'package:liquid_flutter/src/scaffold_layout_state.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:provider/provider.dart';
@@ -425,11 +427,13 @@ class _LdAppBarState extends State<LdAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    final layoutState = context.watch<LdScaffoldLayoutState>();
+    final layoutState = context.read<LdScaffoldLayoutState>();
 
     final leading = _buildLeading(context);
 
-    final isScrolledUnder = layoutState.isScrolled;
+    // Determine which offset ValueNotifier to use based on the slot
+    final offsetNotifier =
+        _slot?.role == AppBarRole.secondary ? layoutState.secondaryAppBarOffset : layoutState.appBarOffset;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: _systemUiOverlayStyle,
@@ -446,109 +450,115 @@ class _LdAppBarState extends State<LdAppBar> {
         ),
         child: KeyedSubtree(
           key: _key,
-          child: AppBarFrame.fromSlot(
-            debugName: widget.debugName,
-            slot: _slot!,
-            outsideMinPadding: EdgeInsets.zero,
-            insetBorderRadius: !_isModal,
-            attached: _slot?.effectivePosition == EffectivePosition.top,
-            insideDecoration: _buildInsideDecoration(context, isScrolledUnder),
-            outsideDecoration: _buildOutsideDecoration(context, isScrolledUnder),
-            child: LdButtonConfigProvider(
-              const LdButtonConfig(
-                mode: LdButtonMode.ghost,
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  LayoutBuilder(builder: (context, constraints) {
-                    final hasSearch = widget.searchConfig != null;
+          child: ValueListenableBuilder<double>(
+            valueListenable: offsetNotifier,
+            builder: (context, offset, child) {
+              final isScrolledUnder = offset > 5;
+              return AppBarFrame.fromSlot(
+                debugName: widget.debugName,
+                slot: _slot!,
+                outsideMinPadding: EdgeInsets.zero,
+                insetBorderRadius: !_isModal,
+                attached: _slot?.effectivePosition == EffectivePosition.top,
+                insideDecoration: _buildInsideDecoration(context, isScrolledUnder),
+                outsideDecoration: _buildOutsideDecoration(context, isScrolledUnder),
+                child: LdButtonConfigProvider(
+                  const LdButtonConfig(
+                    mode: LdButtonMode.ghost,
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      LayoutBuilder(builder: (context, constraints) {
+                        final hasSearch = widget.searchConfig != null;
 
-                    return Row(
-                      children: [
-                        if (widget.showWindowControls && !_isModal) const MacOSWindowControls(),
-                        LdReveal(
-                          axes: const {
-                            Axis.horizontal,
-                          },
-                          revealed: _showOpenDrawerButton,
-                          child: Row(
-                            children: [
-                              OpenDrawerButton(drawerParent: _findDrawerParent(context)),
-                              ldSpacerM,
-                            ],
-                          ),
-                        ),
-                        if (leading != null) ...[leading, ldSpacerM],
-                        if (widget.title != null || widget.actions.isNotEmpty || hasSearch)
-                          Expanded(
-                              child: LdOverflowView(
-                            spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment:
-                                widget.title == null ? MainAxisAlignment.start : MainAxisAlignment.center,
-                            builder: (context, remainingItemCount) {
-                              if (remainingItemCount > widget.actions.length) {
-                                // Todo: not even the title fits.
-                                return const SizedBox();
-                              }
-                              return LdAppbarActionOverflowMenu(
-                                layoutState: layoutState,
-                                actions: widget.actions.sublist(widget.actions.length - remainingItemCount),
-                                menuProviders: widget.overflowMenuProviders,
-                                inMenu: true,
-                              );
-                            },
-                            children: [
-                              if (widget.title != null)
-                                LdFlexibleChild(
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: DefaultTextStyle(
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: _headerStyle,
-                                      child: widget.title ?? const SizedBox(),
+                        return Row(
+                          children: [
+                            if (widget.showWindowControls && !_isModal) const MacOSWindowControls(),
+                            LdReveal(
+                              axes: const {
+                                Axis.horizontal,
+                              },
+                              revealed: _showOpenDrawerButton,
+                              child: Row(
+                                children: [
+                                  OpenDrawerButton(drawerParent: _findDrawerParent(context)),
+                                  ldSpacerM,
+                                ],
+                              ),
+                            ),
+                            if (leading != null) ...[leading, ldSpacerM],
+                            if (widget.title != null || widget.actions.isNotEmpty || hasSearch)
+                              Expanded(
+                                  child: LdOverflowView(
+                                spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment:
+                                    widget.title == null ? MainAxisAlignment.start : MainAxisAlignment.center,
+                                builder: (context, remainingItemCount) {
+                                  if (remainingItemCount > widget.actions.length) {
+                                    // Todo: not even the title fits.
+                                    return const SizedBox();
+                                  }
+                                  return LdAppbarActionOverflowMenu(
+                                    layoutState: layoutState,
+                                    actions: widget.actions.sublist(widget.actions.length - remainingItemCount),
+                                    menuProviders: widget.overflowMenuProviders,
+                                    inMenu: true,
+                                  );
+                                },
+                                children: [
+                                  if (widget.title != null)
+                                    LdFlexibleChild(
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: DefaultTextStyle(
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: _headerStyle,
+                                          child: widget.title ?? const SizedBox(),
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
-                              if (hasSearch)
-                                LdFlexibleChild(
-                                  child: LdSearchInput(
-                                    searchConfig: widget.searchConfig!,
-                                    isBottomNavigationBar: _isInBottomSlot,
-                                    fullWidth: false,
-                                  ),
-                                ),
-                              ...widget.actions
-                            ],
-                          ))
-                        else
-                          const SizedBox.shrink(),
-                        LdReveal(revealed: _showCloseDrawerButton, child: const CloseDrawerButton()),
-                        if (widget.trailing != null) widget.trailing!,
-                        if (_closeModalButton != null) ...[_closeModalButton!],
-                        if (widget.showWindowControls && !_isModal)
-                          LdReveal(revealed: _showWindowsWindowControls, child: const WindowsWindowControls()),
-                      ],
-                    );
-                  }),
-                  if (widget.bottom != null) ...[
-                    LdWrapConditional(
-                      condition: _hasTopContent,
-                      builder: (context, child) => Padding(
-                        padding: EdgeInsets.only(
-                          top: LdTheme.of(context).pad(size: LdSize.s).top,
+                                  if (hasSearch)
+                                    LdFlexibleChild(
+                                      child: LdSearchInput(
+                                        searchConfig: widget.searchConfig!,
+                                        isBottomNavigationBar: _isInBottomSlot,
+                                        fullWidth: false,
+                                      ),
+                                    ),
+                                  ...widget.actions
+                                ],
+                              ))
+                            else
+                              const SizedBox.shrink(),
+                            LdReveal(revealed: _showCloseDrawerButton, child: const CloseDrawerButton()),
+                            if (widget.trailing != null) widget.trailing!,
+                            if (_closeModalButton != null) ...[_closeModalButton!],
+                            if (widget.showWindowControls && !_isModal)
+                              LdReveal(revealed: _showWindowsWindowControls, child: const WindowsWindowControls()),
+                          ],
+                        );
+                      }),
+                      if (widget.bottom != null) ...[
+                        LdWrapConditional(
+                          condition: _hasTopContent,
+                          builder: (context, child) => Padding(
+                            padding: EdgeInsets.only(
+                              top: LdTheme.of(context).pad(size: LdSize.s).top,
+                            ),
+                            child: child,
+                          ),
+                          child: widget.bottom!,
                         ),
-                        child: child,
-                      ),
-                      child: widget.bottom!,
-                    ),
-                  ],
-                ],
-              ),
-            ),
+                      ],
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),

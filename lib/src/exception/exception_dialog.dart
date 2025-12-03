@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 /// Renders an LdException in a dialog
 class LdExceptionDialog extends StatelessWidget {
@@ -15,29 +16,35 @@ class LdExceptionDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localizedError = error.localize(context);
-    return LdAutoSpace(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        LdText.h(
-          localizedError.message,
-          textAlign: TextAlign.center,
-        ),
-        if (localizedError.moreInfo != null)
-          LdMute(
-            child: LdText.ps(
-              localizedError.moreInfo!,
-              textAlign: TextAlign.center,
-            ),
+    return LdScaffold(
+      appBar: const LdAppBar(),
+      body: LdScaffoldBody(
+        children: [
+          LdText.h(
+            localizedError.message,
+            textAlign: TextAlign.center,
           ),
-        primaryButton ??
-            LdButton.ghost(
-              width: double.infinity,
-              child: Text(LiquidLocalizations.of(context).close),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            )
-      ],
+          if (localizedError.moreInfo != null)
+            LdMute(
+              child: LdText.ps(
+                localizedError.moreInfo!,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          if (kDebugMode && localizedError.stackTrace != null)
+            LdRunnerLog(
+              messages: localizedError.stackTrace!.toString().split("\n"),
+            ),
+          primaryButton ??
+              LdButton.ghost(
+                width: double.infinity,
+                child: Text(LiquidLocalizations.of(context).close),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+        ],
+      ),
     );
   }
 

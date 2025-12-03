@@ -11,3 +11,6 @@ export 'monkey_shell.dart';
 export 'monkey_selection.dart';
 export 'detail_page.dart';
 export 'monkey_shell_state.dart';
+export 'monkey_stack_detail_view.dart';
+export 'monkey_scrollable_detail_view.dart';
+export 'monkey_app_bar.dart';

@@ -136,12 +136,20 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
   }
 
   Future<void> updateFilter(
-      String name, LdFilterOption<T, IdType> Function(LdFilterOption<T, IdType>? filter) updater) async {
+    String name,
+    LdFilterOption<T, IdType> Function(LdFilterOption<T, IdType>? filter) updater,
+  ) async {
     final existingFilter = _filters[name];
     assert(existingFilter != null, 'Cannot update filter. Filter with name $name does not exist');
     _filters[name] = updater(existingFilter);
     _filterStreamController.add(_filters.values.toSet());
+
     await applyOptimisticFilterAndSorting();
+
+    // If we disabled a filter we need to perform a refresh of the list
+    if (existingFilter!.isOn && !_filters[name]!.isOn) {
+      await refreshList();
+    }
   }
 
   Future<void> updateSortOption(LdSortOption<T, IdType> sortOption) async {
@@ -166,10 +174,6 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
   Future<void> applyOptimisticFilterAndSorting() async {
     final filters = activeFilters.toList();
     final sortOptions = _sortOptions.where((e) => e.isOn).toList();
-
-    if (filters.isEmpty && sortOptions.isEmpty) {
-      return;
-    }
 
     await mutex.acquire();
     var filteredItems = Map.fromEntries(
@@ -315,8 +319,8 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
   }
 
   Future<T?> create(T? newValue, {int? index}) async {
+    final newIndex = scheduleItemCreation(newValue, index: index);
     if (_createItem != null) {
-      final newIndex = scheduleItemCreation(newValue, index: index);
       //applyOptimisticFilterAndSorting();
       try {
         final newItem = await _createItem!(newValue);
@@ -332,6 +336,11 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
         rollbackItemCreation(newIndex);
         rethrow;
       }
+    } else {
+      final newItem = await _createItem!(newValue);
+      confirmItemCreation(newIndex, newValue: newItem);
+      applyOptimisticFilterAndSorting();
+      return newItem;
     }
     return null;
   }

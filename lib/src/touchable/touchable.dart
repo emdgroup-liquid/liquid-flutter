@@ -217,13 +217,19 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
                 } else {}
               }),
               onPointerMove: (event) {
-                _safeSetState(() {
-                  _panOffset = event.localPosition;
-                });
+                if (_pressed) {
+                  _safeSetState(() {
+                    _panOffset = event.localPosition;
+                  });
+                }
               },
-              onPointerCancel: (_) => _safeSetState(() {
-                _pressed = false;
-              }),
+              onPointerCancel: (_) {
+                if (_pressed) {
+                  _safeSetState(() {
+                    _pressed = false;
+                  });
+                }
+              },
               child: widget.builder(context, colors, status, widget.child),
             ),
           );

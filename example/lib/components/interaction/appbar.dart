@@ -34,12 +34,11 @@ class AppBarApi extends StatelessWidget {
                     onPressed: () {},
                   ),
                   LdContextMenu(
-                    menuBuilder: (context, onDismiss) =>
-                        Column(mainAxisSize: MainAxisSize.min, children: [
+                    menuBuilder: (context) => Column(mainAxisSize: MainAxisSize.min, children: [
                       LdButton.ghost(
                         width: 300,
                         onPressed: () {
-                          onDismiss();
+                          Navigator.of(context).pop();
                         },
                         child: const Text("Item 1"),
                       ),

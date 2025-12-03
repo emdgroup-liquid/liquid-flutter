@@ -9,6 +9,7 @@ class LdModalPage<T> extends Page<T> {
   final LdModalRoute<T> Function(BuildContext context) builder;
 
   const LdModalPage({
+    super.key,
     required this.builder,
   });
 
@@ -39,8 +40,7 @@ class LdModalPage<T> extends Page<T> {
 class LdModalRoute<T> extends PageRoute<T> {
   final BuildContext context;
 
-  final Color? _barrierColor;
-  final String _cachedBarrierLabel;
+  final String? _barrierLabel;
 
   final LdModalTypeMode modalTypeMode;
 
@@ -79,19 +79,20 @@ class LdModalRoute<T> extends PageRoute<T> {
     this.sheetInsets,
     String? barrierLabel,
     super.settings,
-  })  : _barrierColor = LdTheme.of(context).palette.neutral.shades[8].withAlpha(150),
-        _cachedBarrierLabel = barrierLabel ?? LiquidLocalizations.of(context).close;
-
+  }) : _barrierLabel = barrierLabel;
   @override
-  Color? get barrierColor => _barrierColor;
-
-  @override
-  String? get barrierLabel => _cachedBarrierLabel;
-
-  Future<T?> show(BuildContext context, {bool useRootNavigator = false}) {
-    final safeContext = useRootNavigator ? Navigator.of(context, rootNavigator: true) : Navigator.of(context);
-    return safeContext.push<T>(this);
+  Color? get barrierColor {
+    final theme = LdTheme.of(navigator!.context);
+    return theme.palette.neutral.shades[8].withAlpha(150);
   }
+
+  @override
+  String? get barrierLabel {
+    return _barrierLabel ?? LiquidLocalizations.of(navigator!.context).close;
+  }
+
+  Future<T?> show(BuildContext context, {bool useRootNavigator = false}) =>
+      (useRootNavigator ? Navigator.of(context, rootNavigator: true) : Navigator.of(context)).push<T>(this);
 
   /// Determines if this route should behave as a sheet based on modalTypeMode and screen size.
   bool _shouldBeSheet(BoxConstraints constraints) {

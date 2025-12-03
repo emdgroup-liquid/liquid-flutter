@@ -12,7 +12,7 @@ mixin LdLabeledAction {
   String? loadingText(BuildContext context);
   bool isActive(BuildContext context) => false;
 
-  Widget? buildContextMenu(BuildContext context, VoidCallback close) => null;
+  Widget? buildContextMenu(BuildContext context) => null;
 
   bool isVisible(BuildContext context) => true;
 
@@ -27,7 +27,7 @@ mixin LdLabeledAction {
 
 typedef LdLabeledActionActiveFunction = bool Function(BuildContext context);
 
-typedef LdLabeledActionContextMenuFunction = Widget Function(BuildContext context, VoidCallback close);
+typedef LdLabeledActionContextMenuFunction = Widget Function(BuildContext context);
 
 typedef LdBoolPredicate = bool Function(BuildContext context);
 typedef StringBuilder = String Function(BuildContext context);
@@ -103,7 +103,7 @@ class LdLabeledActionBuilder with LdLabeledAction {
   }
 
   @override
-  Widget? buildContextMenu(BuildContext context, VoidCallback close) {
-    return _buildContextMenu?.call(context, close);
+  Widget? buildContextMenu(BuildContext context) {
+    return _buildContextMenu?.call(context);
   }
 }

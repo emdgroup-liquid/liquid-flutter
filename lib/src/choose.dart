@@ -17,7 +17,8 @@ enum LdChooseMode {
 class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   final LdRepository<T, IdType>? repository;
   final List<T>? items;
-  final Widget Function(BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder;
+  final Widget Function(
+      BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder;
   final Widget Function(BuildContext context, T item) selectedItemBuilder;
   final bool disabled;
   final bool allowEmpty;
@@ -31,6 +32,13 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   final LdSize size;
   final String? label;
   final Text? placeholder;
+  final Widget Function(
+    BuildContext context,
+    List<T> selectedItems,
+    VoidCallback onTap,
+    bool isLoading,
+    LdException? error,
+  )? triggerBuilder;
 
   const LdChoose({
     this.repository,
@@ -48,9 +56,12 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
     this.size = LdSize.m,
     this.truncateDisplay,
     this.value,
+    this.triggerBuilder,
     super.key,
-  })  : assert(items != null || repository != null, 'Either items or repository must be provided'),
-        assert(items == null || repository == null, 'Cannot provide both items and repository');
+  })  : assert(items != null || repository != null,
+            'Either items or repository must be provided'),
+        assert(items == null || repository == null,
+            'Cannot provide both items and repository');
 
   /// Convenience constructor that creates an LdChoose from a list of LdSelectItem.
   ///
@@ -59,7 +70,9 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   static fromList<T extends Identifiable<IdType>, IdType>({
     required List<T> items,
     required Function(Set<IdType>) onChanged,
-    required Widget Function(BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder,
+    required Widget Function(
+            BuildContext context, LdPaginatorItem<T> item, int index)
+        itemBuilder,
     required Widget Function(BuildContext context, T item) selectedItemBuilder,
     Set<IdType>? value,
     bool allowEmpty = false,
@@ -71,6 +84,13 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
     Text? placeholder,
     LdSize size = LdSize.m,
     int? truncateDisplay,
+    Widget Function(
+      BuildContext context,
+      List<T> selectedItems,
+      VoidCallback onTap,
+      bool isLoading,
+      LdException? error,
+    )? triggerBuilder,
     Key? key,
   }) {
     return LdChoose<T, IdType>(
@@ -90,6 +110,7 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
       size: size,
       truncateDisplay: truncateDisplay,
       value: value,
+      triggerBuilder: triggerBuilder,
       key: key,
     );
   }
@@ -107,6 +128,13 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
     Text? placeholder,
     LdSize size = LdSize.m,
     int? truncateDisplay,
+    Widget Function(
+      BuildContext context,
+      List<LdSelectItem<T>> selectedItems,
+      VoidCallback onTap,
+      bool isLoading,
+      LdException? error,
+    )? triggerBuilder,
     Key? key,
   }) {
     return fromList(
@@ -131,6 +159,7 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
       placeholder: placeholder,
       size: size,
       truncateDisplay: truncateDisplay,
+      triggerBuilder: triggerBuilder,
       key: key,
     );
   }
@@ -139,7 +168,8 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   State<LdChoose<T, IdType>> createState() => _LdChooseState<T, IdType>();
 }
 
-class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdChoose<T, IdType>> {
+class _LdChooseState<T extends Identifiable<IdType>, IdType>
+    extends State<LdChoose<T, IdType>> {
   late LdRepository<T, IdType> _repository;
   bool _ownsRepository = false;
 
@@ -156,7 +186,10 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
             icon: (context) => const Icon(Icons.search),
             optimisticFilter: (item, searchText) {
               if (item is LdSelectItem<dynamic>) {
-                return (item as LdSelectItem<dynamic>).searchString?.contains(searchText) ?? false;
+                return (item as LdSelectItem<dynamic>)
+                        .searchString
+                        ?.contains(searchText) ??
+                    false;
               }
 
               return item.toString().contains(searchText);
@@ -186,10 +219,12 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
   }
 
   Future<void> _onTap(BuildContext context) async {
-    final nav = widget.useRootNavigator ? Navigator.of(context, rootNavigator: true) : Navigator.of(context);
+    final nav = widget.useRootNavigator
+        ? Navigator.of(context, rootNavigator: true)
+        : Navigator.of(context);
 
-    final shouldUsePage =
-        widget.mode == LdChooseMode.page || (widget.mode == LdChooseMode.auto && _repository.totalItems > 10);
+    final shouldUsePage = widget.mode == LdChooseMode.page ||
+        (widget.mode == LdChooseMode.auto && _repository.totalItems > 10);
 
     final result = await (shouldUsePage
         ? nav.push<Set<IdType>>(
@@ -200,7 +235,8 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
                     initialSelectedItems: widget.value ?? <IdType>{},
                     multiple: widget.multiple,
                     allowEmpty: widget.allowEmpty,
-                    label: widget.label ?? LiquidLocalizations.of(context).choose,
+                    label:
+                        widget.label ?? LiquidLocalizations.of(context).choose,
                   )),
             ),
           )
@@ -221,6 +257,7 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
     if (result != null) {
       widget.onChanged(result);
     }
+    setState(() {});
   }
 
   Widget _buildSelectedItem(BuildContext context, T item) {
@@ -233,17 +270,70 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
 
   @override
   Widget build(BuildContext context) {
-    var theme = LdTheme.of(context, listen: true);
-
     final selectedIds = widget.value?.toList() ?? <IdType>[];
-    final selectedItems = selectedIds.length;
 
-    int displayItems = selectedItems;
+    return LdSubmit(
+      arg: widget.value,
+      config: LdSubmitConfig<List<T>, Set<IdType>?>(
+        autoTrigger: true,
+        action: (ids) async {
+          if (ids == null) {
+            return [];
+          }
+
+          final allItems = await _fetchSelectedItems(
+            ids.toList().sublist(0, _getDisplayItems(ids.toList())),
+          );
+
+          return allItems;
+        },
+      ),
+      builder: LdSubmitCustomBuilder<List<T>, Set<IdType>?>(
+        builder: (context, controller, stateType) {
+          final selectedItems = controller.state.result ?? <T>[];
+          final isLoading = stateType == LdSubmitStateType.loading;
+          final error = controller.state.error;
+
+          // Use custom trigger builder if provided
+          if (widget.triggerBuilder != null) {
+            return widget.triggerBuilder!(
+              context,
+              selectedItems,
+              () => _onTap(context),
+              isLoading,
+              error,
+            );
+          }
+
+          // Default trigger builder
+          return _buildDefaultTrigger(
+            context,
+            selectedItems,
+            selectedIds,
+            isLoading,
+            error,
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildDefaultTrigger(
+    BuildContext context,
+    List<T> selectedItems,
+    List<IdType> selectedIds,
+    bool isLoading,
+    LdException? error,
+  ) {
+    var theme = LdTheme.of(context, listen: true);
+    final selectedItemsCount = selectedIds.length;
+
+    int displayItems = selectedItemsCount;
     int left = 0;
 
     if (widget.truncateDisplay != null) {
       displayItems = min(displayItems, widget.truncateDisplay!);
-      left = selectedItems - displayItems;
+      left = selectedItemsCount - displayItems;
     }
 
     return Column(
@@ -264,43 +354,12 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
               Expanded(
                 child: Opacity(
                   opacity: widget.disabled ? 0.5 : 1,
-                  child: LdSubmit(
-                    arg: widget.value?.toSet(),
-                    config: LdSubmitConfig<List<T>, Set<IdType>>(
-                      autoTrigger: true,
-                      action: (ids) async {
-                        final allItems = await _fetchSelectedItems(
-                          ids!.toList().sublist(0, _getDisplayItems(ids.toList())),
-                        );
-
-                        return allItems;
-                      },
-                    ),
-                    builder: LdSubmitCustomBuilder<List<T>, Set<IdType>>(builder: (context, controller, stateType) {
-                      if (stateType == LdSubmitStateType.result) {
-                        return Wrap(
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            ...controller.state.result!.map((item) => _buildSelectedItem(context, item)).toList(),
-                            if (left > 0)
-                              LdText(
-                                "+$left",
-                                type: LdTextType.label,
-                              )
-                          ],
-                        );
-                      }
-                      if (stateType == LdSubmitStateType.error) {
-                        return LdExceptionView(
-                          exception: controller.state.error!.localize(context),
-                          direction: Axis.horizontal,
-                          retryController: controller.retryController,
-                        );
-                      }
-                      return const Center(child: LdLoader(size: 12));
-                    }),
+                  child: _buildSelectedItemsDisplay(
+                    context,
+                    selectedItems,
+                    left,
+                    isLoading,
+                    error,
                   ),
                 ),
               ),
@@ -338,11 +397,53 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
       ],
     );
   }
+
+  Widget _buildSelectedItemsDisplay(
+    BuildContext context,
+    List<T> selectedItems,
+    int left,
+    bool isLoading,
+    LdException? error,
+  ) {
+    if (isLoading) {
+      return const Center(child: LdLoader(size: 12));
+    }
+
+    if (error != null) {
+      return LdExceptionView(
+        exception: error.localize(context),
+        direction: Axis.horizontal,
+      );
+    }
+
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        if (selectedItems.isEmpty)
+          LdMute(
+            child: LdText.ls("No items selected"),
+          ),
+        if (selectedItems.isNotEmpty)
+          ...selectedItems
+              .map((item) => _buildSelectedItem(context, item))
+              .toList(),
+        if (selectedItems.isNotEmpty && left > 0)
+          LdText(
+            "+$left",
+            type: LdTextType.label,
+          ),
+      ],
+    );
+  }
 }
 
-class _LdChoosePage<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
+class _LdChoosePage<T extends Identifiable<IdType>, IdType>
+    extends StatefulWidget {
   final LdRepository<T, IdType> repository;
-  final Widget Function(BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder;
+  final Widget Function(
+      BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder;
   final Set<IdType> initialSelectedItems;
   final bool multiple;
   final bool allowEmpty;
@@ -359,10 +460,12 @@ class _LdChoosePage<T extends Identifiable<IdType>, IdType> extends StatefulWidg
   });
 
   @override
-  State<_LdChoosePage<T, IdType>> createState() => _LdChoosePageState<T, IdType>();
+  State<_LdChoosePage<T, IdType>> createState() =>
+      _LdChoosePageState<T, IdType>();
 }
 
-class _LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<_LdChoosePage<T, IdType>> {
+class _LdChoosePageState<T extends Identifiable<IdType>, IdType>
+    extends State<_LdChoosePage<T, IdType>> {
   late Set<IdType> _selectedItems;
 
   @override
@@ -373,7 +476,9 @@ class _LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<_
 
   void _handleSelectionChange(Set<IdType> selectedItems) {
     // Enforce allowEmpty constraint
-    if (!widget.allowEmpty && selectedItems.isEmpty && _selectedItems.isNotEmpty) {
+    if (!widget.allowEmpty &&
+        selectedItems.isEmpty &&
+        _selectedItems.isNotEmpty) {
       return; // Prevent clearing selection if allowEmpty is false
     }
 

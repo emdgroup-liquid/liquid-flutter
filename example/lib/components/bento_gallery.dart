@@ -519,7 +519,7 @@ class _BentoCard extends StatelessWidget {
       case "Context Menu":
         return LdContextMenu(
           builder: (context, isOpen, open, child) => child!,
-          menuBuilder: (context, onDismiss) => SizedBox(
+          menuBuilder: (context) => SizedBox(
             width: 150,
             height: 150,
             child: Center(

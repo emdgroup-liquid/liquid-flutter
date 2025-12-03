@@ -73,33 +73,29 @@ class LdListItemWidget extends StatelessWidget {
 
     Widget _buildSelectionControls() {
       if (selectionControl == LdSelectionControl.none) return const SizedBox.shrink();
-      return SizedBox(
-        height: theme.paddingSize(size: LdSize.m) * 3,
-        width: theme.paddingSize(size: LdSize.m) * 3,
-        child: Row(
-          children: [
-            switch (selectionControl) {
-              LdSelectionControl.radio => LdRadio(
-                  checked: isSelected,
-                  color: color,
-                  disabled: disabledState,
-                  onChanged: (value) {
-                    onSelectionChanged?.call(value);
-                  },
-                ),
-              LdSelectionControl.checkbox => LdCheckbox(
-                  checked: isSelected,
-                  color: color,
-                  disabled: disabledState,
-                  onChanged: (value) {
-                    onSelectionChanged?.call(value);
-                  },
-                ),
-              LdSelectionControl.none => const SizedBox.shrink(),
-            },
-            ldSpacerM,
-          ],
-        ),
+      return Row(
+        children: [
+          switch (selectionControl) {
+            LdSelectionControl.radio => LdRadio(
+                checked: isSelected,
+                color: color,
+                disabled: disabledState,
+                onChanged: (value) {
+                  onSelectionChanged?.call(value);
+                },
+              ),
+            LdSelectionControl.checkbox => LdCheckbox(
+                checked: isSelected,
+                color: color,
+                disabled: disabledState,
+                onChanged: (value) {
+                  onSelectionChanged?.call(value);
+                },
+              ),
+            LdSelectionControl.none => const SizedBox.shrink(),
+          },
+          ldSpacerM,
+        ],
       );
     }
 

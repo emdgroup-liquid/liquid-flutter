@@ -34,67 +34,65 @@ class _AppScaffoldState extends State<AppScaffold> {
   Widget build(BuildContext context) {
     return ResponsiveBuilder(
       builder: (context, size) {
-        return LdPortal(
-          child: LdScaffold(
-            drawer: MainNavigationDrawer(),
-            appBar: LdAppBar(
-              shadowMode: LdAppBarShadowMode.hidden,
-              leading: Container(
-                height: 24,
-                decoration: BoxDecoration(
-                  borderRadius: LdTheme.of(context).radius(LdSize.m),
+        return LdScaffold(
+          drawer: MainNavigationDrawer(),
+          appBar: LdAppBar(
+            shadowMode: LdAppBarShadowMode.hidden,
+            leading: Container(
+              height: 24,
+              decoration: BoxDecoration(
+                borderRadius: LdTheme.of(context).radius(LdSize.m),
+              ),
+              clipBehavior: Clip.hardEdge,
+              child: Image.asset(
+                "liquid_flutter_icon.jpg",
+              ),
+            ),
+            title: widget.title,
+            actions: [
+              LdButton(
+                leading: const Icon(LucideIcons.github),
+                onPressed: () {
+                  launchUrl(
+                    Uri.parse(
+                      "https://github.com/emdgroup-liquid/liquid-flutter",
+                    ),
+                  );
+                },
+                child: const Text("GitHub"),
+              ),
+              LdContextMenu(
+                builder: (context, isOpen, open, child) => LdButton(
+                  leading: const Icon(LucideIcons.paintBucket),
+                  onPressed: open,
+                  child: const Text("Theme"),
                 ),
-                clipBehavior: Clip.hardEdge,
-                child: Image.asset(
-                  "liquid_flutter_icon.jpg",
+                menuBuilder: (context) => ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: 300,
+                  ),
+                  child: SingleChildScrollView(
+                    child: LdAutoSpace(
+                      children: [
+                        const PlatformSelector(),
+                        ldSpacerM,
+                        const ThemeSelector(),
+                        ldSpacerM,
+                        const SizeSelector(),
+                        ldSpacerM,
+                        const RadiusSelector(),
+                        ldSpacerM,
+                        const FontSelector(),
+                        ldSpacerM,
+                        const HeadlineFontSelector(),
+                      ],
+                    ).padL(),
+                  ),
                 ),
               ),
-              title: widget.title,
-              actions: [
-                LdButton(
-                  leading: const Icon(LucideIcons.github),
-                  onPressed: () {
-                    launchUrl(
-                      Uri.parse(
-                        "https://github.com/emdgroup-liquid/liquid-flutter",
-                      ),
-                    );
-                  },
-                  child: const Text("GitHub"),
-                ),
-                LdContextMenu(
-                  builder: (context, isOpen, open, child) => LdButton(
-                    leading: const Icon(LucideIcons.paintBucket),
-                    onPressed: open,
-                    child: const Text("Theme"),
-                  ),
-                  menuBuilder: (context, close) => ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: 300,
-                    ),
-                    child: SingleChildScrollView(
-                      child: LdAutoSpace(
-                        children: [
-                          const PlatformSelector(),
-                          ldSpacerM,
-                          const ThemeSelector(),
-                          ldSpacerM,
-                          const SizeSelector(),
-                          ldSpacerM,
-                          const RadiusSelector(),
-                          ldSpacerM,
-                          const FontSelector(),
-                          ldSpacerM,
-                          const HeadlineFontSelector(),
-                        ],
-                      ).padL(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            body: widget.child,
+            ],
           ),
+          body: widget.child,
         );
       },
     );

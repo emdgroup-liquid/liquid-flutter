@@ -29,6 +29,7 @@ import 'package:liquid/components/form_elements/radio.dart';
 import 'package:liquid/components/feedback/reveal.dart';
 import 'package:liquid/components/interaction/action_runner.dart';
 import 'package:liquid/components/form_elements/select.dart';
+import 'package:liquid/components/interaction/speed_reader.dart';
 import 'package:liquid/components/form_elements/slider.dart';
 import 'package:liquid/components/layout/spring.dart';
 import 'package:liquid/components/form_elements/submit.dart';
@@ -65,7 +66,7 @@ import 'components/bento_gallery.dart';
 class AppRouter {
   AppRouter();
 
-  late final router = GoRouter(debugLogDiagnostics: true, initialLocation: "/", routes: [
+  late final router = GoRouter(debugLogDiagnostics: true, initialLocation: "/components/select", routes: [
     ShellRoute(
       routes: [
         GoRoute(
@@ -276,6 +277,10 @@ class AppRouter {
         GoRoute(
           path: "/components/orb",
           pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const OrbDemo()),
+        ),
+        GoRoute(
+          path: "/components/speed-reader",
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const SpeedReaderDemo()),
         ),
         GoRoute(
           path: "/components/loader",

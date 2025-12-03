@@ -131,7 +131,8 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
       .length;
 
   Object? get error => _error;
-
+  StackTrace? get errorStackTrace => _errorStackTrace;
+  StackTrace? _errorStackTrace;
   bool get hasError => _error != null;
 
   List<T?> get items => List<T?>.generate(totalItems, (i) => _items[i]?.value);
@@ -489,42 +490,38 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
         _reset();
       }
 
-      if (page.error != null) {
-        _setError(page.error);
-      } else {
-        totalItems = page.total;
+      totalItems = page.total;
 
-        // Insert items at their exact positions
-        for (int i = 0; i < page.newItems.length; i++) {
-          // Check if the item is already in the list
-          final item = page.newItems[i];
+      // Insert items at their exact positions
+      for (int i = 0; i < page.newItems.length; i++) {
+        // Check if the item is already in the list
+        final item = page.newItems[i];
 
-          // In case the item is already in the list but at a wrong position,
-          // we remove it
+        // In case the item is already in the list but at a wrong position,
+        // we remove it
 
-          var toRemove = <int>[];
+        var toRemove = <int>[];
 
-          for (final existingItem in _items.entries) {
-            if (existingItem.value.value?.id == item.id) {
-              toRemove.add(existingItem.key);
-            }
+        for (final existingItem in _items.entries) {
+          if (existingItem.value.value?.id == item.id) {
+            toRemove.add(existingItem.key);
           }
-
-          for (var item in toRemove) {
-            _items.remove(item);
-          }
-
-          final idx = offset + i;
-
-          _items[idx] = LdPaginatorItem<T>(value: item, state: LdPaginatorItemState.loaded);
-          _updated(_items[idx]);
-          loadedItems.add(item);
         }
+
+        for (var item in toRemove) {
+          _items.remove(item);
+        }
+
+        final idx = offset + i;
+
+        _items[idx] = LdPaginatorItem<T>(value: item, state: LdPaginatorItemState.loaded);
+        _updated(_items[idx]);
+        loadedItems.add(item);
 
         _setError(null);
       }
-    } catch (e) {
-      _setError(e);
+    } catch (e, s) {
+      _setError(e, stackTrace: s);
       _requestedOffsets.remove(offset); // Allow retry if there was an error
     }
 
@@ -567,8 +564,9 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     notifyListeners();
   }
 
-  void _setError(Object? error) {
+  void _setError(Object? error, {StackTrace? stackTrace}) {
     _error = error;
+    _errorStackTrace = stackTrace;
     notifyListeners();
   }
 

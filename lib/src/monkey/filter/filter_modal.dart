@@ -30,7 +30,7 @@ class LdFilterContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
           open();
         },
       ),
-      menuBuilder: (context, onDismiss) => const LdFilterModal(),
+      menuBuilder: (context) => const LdFilterModal(),
     );
   }
 }

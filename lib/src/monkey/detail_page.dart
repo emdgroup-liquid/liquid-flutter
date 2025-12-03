@@ -4,29 +4,56 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/monkey/monkey_app_bar.dart';
 import 'package:liquid_flutter/src/monkey/monkey_scrollable_detail_view.dart';
+import 'package:liquid_flutter/src/monkey/monkey_stack_detail_view.dart';
 
 /// The page rendered by [LdMonkey] to show the detail of the selected
 /// items
 class LdMonkeyDetailPage<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
   final Widget? primaryAppBar;
   final Widget? secondaryAppBar;
-  final Widget Function(BuildContext context, LdPaginatorItem<T> item) buildDetail;
+  final Widget body;
 
   const LdMonkeyDetailPage({
     this.primaryAppBar,
     this.secondaryAppBar,
-    required this.buildDetail,
+    required this.body,
     super.key,
   });
+
+  factory LdMonkeyDetailPage.scrollable({
+    Widget? primaryAppBar,
+    Widget? secondaryAppBar,
+    required Widget Function(BuildContext context, LdPaginatorItem<T> item) buildDetail,
+  }) {
+    return LdMonkeyDetailPage(
+      primaryAppBar: primaryAppBar,
+      secondaryAppBar: secondaryAppBar,
+      body: LdMonkeyScrollableDetailView<T, IdType>(
+        buildDetail: buildDetail,
+      ),
+    );
+  }
+
+  factory LdMonkeyDetailPage.stacked({
+    Widget? primaryAppBar,
+    Widget? secondaryAppBar,
+    required Widget Function(BuildContext context, LdPaginatorItem<T> item) buildDetail,
+  }) {
+    return LdMonkeyDetailPage(
+      primaryAppBar: primaryAppBar,
+      secondaryAppBar: secondaryAppBar,
+      body: LdMonkeyStackDetailView<T, IdType>(
+        buildDetail: buildDetail,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return LdScaffold(
       appBar: primaryAppBar ?? LdMonkeyAppBar<T, IdType>(location: LdMonkeyActionLocation.detailAppBar),
       secondaryAppBar: secondaryAppBar ?? LdMonkeyAppBar<T, IdType>(location: LdMonkeyActionLocation.detailSecondary),
-      body: LdMonkeyScrollableDetailView<T, IdType>(
-        buildDetail: buildDetail,
-      ),
+      body: body,
     );
   }
 }

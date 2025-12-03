@@ -22,6 +22,7 @@ class TaskShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyShell<Task, int>(
+      queryParameters: state.uri.queryParameters,
       basePath: "/task-demo",
       parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
       layoutMode: LdMonkeyLayoutMode.auto,
@@ -257,7 +258,7 @@ class TaskDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LdMonkeyDetailPage<Task, int>(
+    return LdMonkeyDetailPage<Task, int>.scrollable(
       primaryAppBar: LdMonkeyAppBar<Task, int>(
         location: LdMonkeyActionLocation.detailAppBar,
         title: Text("Task"),

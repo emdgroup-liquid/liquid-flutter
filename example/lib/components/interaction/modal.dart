@@ -91,6 +91,13 @@ class _DemoSheet extends StatelessWidget {
                           ),
                         ],
                       ),
+                      LdSelect(
+                        items: [
+                          LdSelectItem(value: "item1", child: const Text("Item 1")),
+                          LdSelectItem(value: "item2", child: const Text("Item 2")),
+                          LdSelectItem(value: "item3", child: const Text("Item 3")),
+                        ],
+                      ),
                     ],
                   ),
                   secondaryAppBarPlacement: LdScaffoldAppBarPlacement.bottom,
@@ -395,15 +402,21 @@ class _ModalDemoState extends State<ModalDemo> {
                     title: const Text("Modal with list items"),
                   ),
                   body: LdScaffoldBody(
+                    minimumPadding: EdgeInsets.zero,
                     children: [
-                      LdText("Modal with list items"),
                       LdListItem(
                         title: const Text("Item 1"),
                         subtitle: const Text("Subtitle"),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
                       ),
                       LdListItem(
                         title: const Text("Item 2"),
                         subtitle: const Text("Subtitle"),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
                       ),
                     ],
                   ),

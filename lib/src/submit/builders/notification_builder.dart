@@ -79,15 +79,16 @@ class _LdSubmitNotificationState<T, Arg> extends State<_LdSubmitNotification<T, 
   void _dismissNotification() {
     if (_notification != null) {
       _notificationsController?.onDismissNotification(_notification!);
-    }
+      _notification = null;
+    } else {}
   }
 
   LdNotification? _notification;
 
-  Future<void> _onStateChanged(LdSubmitState<T> state, LdSubmitController<T, Arg> controller) async {
+  void _onStateChanged(LdSubmitState<T> state, LdSubmitController<T, Arg> controller) {
     _dismissNotification();
     if (state.type == LdSubmitStateType.loading) {
-      _notification = await _notificationsController?.addNotification(
+      _notification = _notificationsController?.addNotification(
         LdNotification(
           message: controller.config.loadingText ?? LiquidLocalizations.of(context).loading,
           type: LdNotificationType.loading,
@@ -97,7 +98,7 @@ class _LdSubmitNotificationState<T, Arg> extends State<_LdSubmitNotification<T, 
     }
     if (state.type == LdSubmitStateType.error) {
       final localizedError = state.error!.localize(context);
-      _notification = await _notificationsController?.addNotification(
+      _notification = _notificationsController?.addNotification(
         LdNotification(
           message: localizedError.message,
           subMessage: localizedError.moreInfo,
@@ -105,8 +106,9 @@ class _LdSubmitNotificationState<T, Arg> extends State<_LdSubmitNotification<T, 
         ),
       );
     }
+
     if (state.type == LdSubmitStateType.result && widget.successMessage != null) {
-      _notification = await _notificationsController?.addNotification(
+      _notification = _notificationsController?.addNotification(
         LdNotification(
           message: widget.successMessage!,
           type: LdNotificationType.success,

@@ -52,6 +52,7 @@ class LdContextMenu extends StatefulWidget {
     required this.menuBuilder,
     this.dismissOnOutsideTap = true,
     this.placeAboveTrigger = false,
+    this.inheritTriggerWidth = false,
     this.scaleFromTrigger = false,
     this.blurMode = LdContextMenuBlurMode.mobileOnly,
     this.zoomMode = LdContextZoomMode.mobileOnly,
@@ -72,6 +73,8 @@ class LdContextMenu extends StatefulWidget {
 
   final bool dismissOnOutsideTap;
 
+  final bool inheritTriggerWidth;
+
   final LdColor? triggerColor;
 
   final bool listenForTaps;
@@ -90,7 +93,6 @@ class LdContextMenu extends StatefulWidget {
 
   final Widget Function(
     BuildContext context,
-    VoidCallback onDismiss,
   ) menuBuilder;
 
   @override
@@ -159,8 +161,9 @@ class _LdContextMenuState extends State<LdContextMenu> {
 
     Navigator.of(context, rootNavigator: true).push(
       ContextMenuRoute(
+        inheritTriggerWidth: widget.inheritTriggerWidth,
         placeAboveTrigger: widget.placeAboveTrigger,
-        menuBuilder: (ctx, onDismiss) => widget.menuBuilder(ctx, onDismiss),
+        menuBuilder: (ctx) => widget.menuBuilder(ctx),
         effectivePositionMode: _effectivePositionMode,
         triggerKey: _triggerKey,
         cursorPosition: _cursorPosition,
@@ -169,7 +172,11 @@ class _LdContextMenuState extends State<LdContextMenu> {
         shouldBlur: _shouldBlur,
         shouldZoom: _shouldZoom,
         backgroundColor: null,
-        providers: widget.menuProviders?.call(context),
+        providers: [
+          ...(widget.menuProviders?.call(context) ?? []),
+          ListenableProvider.value(value: LdTheme.of(context)),
+          ListenableProvider.value(value: LdNotificationsController.maybeOf(context))
+        ],
         triggerBuilder: (context, isShuttle, trigger, child) => widget.builder(
           context,
           isShuttle,
@@ -216,10 +223,11 @@ class _LdContextMenuState extends State<LdContextMenu> {
 
 /// A modal route for displaying a context menu, supporting custom positioning, blur, and zoom.
 class ContextMenuRoute extends ModalRoute<void> {
-  final Widget Function(BuildContext, VoidCallback) menuBuilder;
+  final Widget Function(BuildContext) menuBuilder;
 
   final Offset triggerPosition;
   final GlobalKey triggerKey;
+  final bool inheritTriggerWidth;
   final Size triggerSize;
   final bool shouldBlur;
   final LdContextPositionMode effectivePositionMode;
@@ -250,6 +258,7 @@ class ContextMenuRoute extends ModalRoute<void> {
     required this.triggerKey,
     required this.triggerBuilder,
     required this.child,
+    required this.inheritTriggerWidth,
   });
 
   @override
@@ -281,7 +290,7 @@ class ContextMenuRoute extends ModalRoute<void> {
     onDismiss?.call();
   }
 
-  (Rect, Alignment) _resizeMenuToScreen(
+  (Rect, Alignment, Size) _resizeMenuToScreen(
     BuildContext context,
     Size menuSize,
   ) {
@@ -293,53 +302,116 @@ class ContextMenuRoute extends ModalRoute<void> {
       mediaQuery = MediaQueryData.fromView(view);
     }
 
+    // Determine the reference point and size for positioning the menu
+    // This can be either the trigger widget or the cursor position
     Offset triggerPosition;
     Size triggerSize;
 
     if (effectivePositionMode == LdContextPositionMode.relativeTrigger || cursorPosition == null) {
+      // Position relative to the trigger widget (e.g., button or widget that opened the menu)
+      // Add small padding (5px) to create visual spacing from the trigger
       triggerPosition = this.triggerPosition;
       triggerSize = Size(this.triggerSize.width + 5, this.triggerSize.height + 5);
     } else {
+      // Position relative to cursor position (e.g., right-click location)
+      // Use a small 5x5 size as a virtual trigger point at the cursor
       triggerPosition = cursorPosition ?? Offset.zero;
       triggerSize = const Size(5, 5);
     }
 
-    final viewInsets = mediaQuery.viewInsets + LdTheme.of(context).pad(size: LdSize.m);
+    // Calculate available screen space accounting for keyboard/insets
+    // Add theme padding to ensure menu doesn't touch screen edges
+    final themePadding = LdTheme.of(context).pad(size: LdSize.m);
+    final viewInsets = mediaQuery.viewInsets + themePadding;
 
     final screenSize = mediaQuery.size;
 
-    final menuWidth = menuSize.width;
-    final menuHeight = menuSize.height;
+    // Calculate the actual available space after accounting for insets
+    final availableLeft = viewInsets.left;
+    final availableRight = screenSize.width - viewInsets.right;
+    final availableTop = viewInsets.top;
+    final availableBottom = screenSize.height - viewInsets.bottom;
+    final availableWidth = availableRight - availableLeft;
+    final availableHeight = availableBottom - availableTop;
 
-    final availableWidth = screenSize.width - viewInsets.right - viewInsets.left;
-    final availableHeight = screenSize.height - viewInsets.bottom - viewInsets.top;
+    // Constrain menu size to available space
+    final constrainedMenuWidth = min(inheritTriggerWidth ? triggerSize.width : menuSize.width, availableWidth);
+    final constrainedMenuHeight = min(menuSize.height, availableHeight);
 
-    final overflowX = min(
-      0,
-      availableWidth - (triggerPosition.dx) - menuWidth,
+    // Step 1: Try default position (below and right of trigger/cursor)
+    // This follows reading direction
+    double menuX = triggerPosition.dx;
+    double menuY = triggerPosition.dy + triggerSize.height;
+    bool isRightOfTrigger = true;
+    bool isBelowTrigger = true;
+
+    // Step 2: Check if menu fits on the right side
+    // If not, align right edge with cursor (menu left of cursor)
+    if (menuX + constrainedMenuWidth > availableRight) {
+      // No space on right, place menu to the left of trigger
+      menuX = triggerPosition.dx - constrainedMenuWidth;
+      isRightOfTrigger = false;
+    }
+
+    // Ensure menu doesn't go off screen edges horizontally
+    if (menuX < availableLeft) {
+      menuX = availableLeft;
+    }
+    if (menuX + constrainedMenuWidth > availableRight) {
+      menuX = availableRight - constrainedMenuWidth;
+    }
+
+    // Step 3: Check if menu fits below trigger
+    // If not, shift up until bottom aligns with screen bottom
+    if (menuY + constrainedMenuHeight > availableBottom) {
+      // No space below, shift menu up
+      menuY = availableBottom - constrainedMenuHeight;
+      isBelowTrigger = false;
+    }
+
+    // Ensure menu doesn't go off screen edges vertically
+    if (menuY < availableTop) {
+      menuY = availableTop;
+    }
+    if (menuY + constrainedMenuHeight > availableBottom) {
+      menuY = availableBottom - constrainedMenuHeight;
+    }
+
+    // Step 4: If menu still can't fit horizontally, try placing above trigger (last resort)
+    // This only happens if the menu is wider than available horizontal space
+    if (constrainedMenuWidth > availableWidth) {
+      // Menu is too wide to fit anywhere horizontally
+      // Try placing above trigger as last resort
+      final aboveY = triggerPosition.dy - constrainedMenuHeight;
+      if (aboveY >= availableTop) {
+        menuY = aboveY;
+        isBelowTrigger = false;
+      }
+      // If it still doesn't fit, we'll constrain it to available space
+    }
+
+    // Calculate final menu rectangle
+    final menuRect = Rect.fromLTWH(
+      menuX,
+      menuY,
+      constrainedMenuWidth,
+      constrainedMenuHeight,
     );
 
-    final overflowY = min(
-      0,
-      availableHeight - (triggerPosition.dy) - menuHeight - (placeAboveTrigger ? 0 : triggerSize.height),
-    );
-
-    final baseRect = Rect.fromLTWH(
-      triggerPosition.dx + overflowX,
-      triggerPosition.dy + overflowY + (placeAboveTrigger ? 0 : triggerSize.height),
-      menuSize.width,
-      menuSize.height,
-    );
-
-    final isLeftOfTrigger = baseRect.left < triggerPosition.dx;
-    final isAboveTrigger = baseRect.top < triggerPosition.dy;
-
-    return switch ((isLeftOfTrigger, isAboveTrigger)) {
-      (true, true) => (baseRect, Alignment.bottomRight),
-      (true, false) => (baseRect, Alignment.topRight),
-      (false, true) => (baseRect, Alignment.bottomLeft),
-      (false, false) => (baseRect, Alignment.topLeft),
+    // Calculate alignment based on final position relative to trigger
+    // Alignment determines the animation origin point
+    final alignment = switch ((isRightOfTrigger, isBelowTrigger)) {
+      (true, true) => Alignment.topLeft, // Menu is right and below trigger
+      (true, false) => Alignment.bottomLeft, // Menu is right and above trigger
+      (false, true) => Alignment.topRight, // Menu is left and below trigger
+      (false, false) => Alignment.bottomRight, // Menu is left and above trigger
     };
+
+    // Calculate maximum constraints for the menu container
+    // These ensure the menu never exceeds available space
+    final maxConstraints = Size(availableWidth, availableHeight);
+
+    return (menuRect, alignment, maxConstraints);
   }
 
   @override
@@ -375,88 +447,167 @@ class ContextMenuRoute extends ModalRoute<void> {
       );
     }
 
-    return LdWrapConditional(
-      condition: shouldBlur,
-      builder: (context, child) => BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10 * animation.value, sigmaY: 10 * animation.value),
-        child: child,
-      ),
-      child: Stack(
-        children: [
-          if (shouldZoom)
-            Positioned(
-              left: triggerPosition.dx,
-              top: triggerPosition.dy,
-              width: triggerSize.width,
-              height: triggerSize.height,
-              child: Transform.scale(
-                scale: 1 + 0.05 * animation.value,
-                child: _wrapWithProviders(
-                  context,
-                  (context2) => triggerBuilder(
-                    context2,
-                    false,
-                    () {},
-                    this.child,
-                  ),
-                ),
-              ),
+    return ValueListenableBuilder(
+        valueListenable: _menuSizeNotifier,
+        builder: (context, menuSize, child) {
+          return LdWrapConditional(
+            condition: shouldBlur,
+            builder: (context, child) => BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10 * animation.value, sigmaY: 10 * animation.value),
+              child: child,
             ),
-          _buildAnimatedMenuTransition(context, _menuSizeNotifier.value, animation),
-        ],
-      ),
-    );
+            child: Stack(
+              children: [
+                if (shouldZoom)
+                  Positioned(
+                    left: triggerPosition.dx,
+                    top: triggerPosition.dy,
+                    width: triggerSize.width,
+                    height: triggerSize.height,
+                    child: Transform.scale(
+                      scale: 1 + 0.05 * animation.value,
+                      child: _wrapWithProviders(
+                        context,
+                        (context2) => triggerBuilder(
+                          context2,
+                          false,
+                          () {},
+                          this.child,
+                        ),
+                      ),
+                    ),
+                  ),
+                _buildAnimatedMenuTransition(context, menuSize, animation),
+              ],
+            ),
+          );
+        });
   }
 
   Widget _buildOffstageMenuForMeasurement(BuildContext context) {
     return Offstage(
       child: MeasureSize(
-        onSizeChange: (size) => _menuSizeNotifier.value = size,
-        child: Stack(
-          children: [
-            _buildAnimatedMenuTransition(context, _menuSizeNotifier.value, null),
-          ],
+        onSizeChange: (size) {
+          _menuSizeNotifier.value = size;
+        },
+        child: _wrapWithProviders(
+          context,
+          (context2) => menuBuilder(
+            context2,
+          ),
         ),
       ),
     );
   }
 
   Widget _buildAnimatedMenuTransition(BuildContext context, Size menuSize, Animation<double>? animation) {
-    final (endRect, alignment) = _resizeMenuToScreen(context, menuSize);
+    final (endRect, alignment, maxConstraints) = _resizeMenuToScreen(context, menuSize);
 
-    return Positioned(
-      left: endRect.left,
-      top: endRect.top,
-      child: NotificationListener<LdContextMenuDissmissNotification>(
-        onNotification: (notification) {
-          Navigator.of(context).maybePop();
+    // Calculate triggerRect from triggerPosition and triggerSize
+    final triggerRect = Rect.fromLTWH(
+      triggerPosition.dx,
+      triggerPosition.dy,
+      triggerSize.width,
+      triggerSize.height,
+    );
 
-          return true;
-        },
-        child: LdWrapConditional(
-          condition: animation != null,
-          builder: (context, child) => FadeTransition(
-            opacity: animation!,
-            child: ScaleTransition(
-              alignment: alignment,
-              scale: animation,
-              child: child,
+    return NotificationListener<LdContextMenuDissmissNotification>(
+      onNotification: (notification) {
+        Navigator.of(context).maybePop();
+
+        return true;
+      },
+      child: Builder(builder: (context) {
+        if (animation == null) {
+          return Positioned(
+            left: endRect.left,
+            top: endRect.top,
+            width: endRect.width,
+            height: endRect.height,
+            child: _wrapWithProviders(
+              context,
+              (context2) => _wrapMenuContent(
+                context2,
+                menuBuilder(context2),
+                alignment,
+                maxConstraints,
+                false,
+              ),
             ),
-          ),
-          child: _wrapWithProviders(
+          );
+        }
+
+        return AnimatedBuilder(
+          animation: animation,
+          builder: (context, child) {
+            // Tween position and size from triggerRect to endRect
+            final rectTween = RectTween(begin: triggerRect, end: endRect);
+            final animatedRect = rectTween.evaluate(CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOut,
+                )) ??
+                endRect;
+
+            // Use Interval curve to stagger the content reveal after shape transformation
+            // Content starts revealing at 70% of the animation
+            final revealAnimation = CurvedAnimation(
+              parent: animation,
+              curve: const Interval(0.7, 1.0, curve: Curves.easeOut),
+            );
+
+            return Positioned(
+              left: animatedRect.left,
+              top: animatedRect.top,
+              width: animatedRect.width + 2,
+              height: animatedRect.height + 2,
+              child: _wrapWithProviders(
+                context,
+                (context2) => Stack(
+                  children: [
+                    // Decoration is always visible during shape transformation
+                    Positioned.fill(
+                      child: _wrapMenuDecoration(
+                        context2,
+                        alignment,
+                        maxConstraints,
+                        Opacity(
+                          opacity: revealAnimation.value,
+                          child: Transform.scale(
+                            scale: 0.8 + (0.2 * revealAnimation.value),
+                            alignment: alignment,
+                            child: child,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Content is revealed with animation
+                  ],
+                ),
+              ),
+            );
+          },
+          child: _wrapMenuContent(
             context,
-            (context2) => _wrapMenu(
-              context2,
-              menuBuilder(context2, onDismiss ?? () {}),
-              alignment,
-            ),
+            menuBuilder(context),
+            alignment,
+            maxConstraints,
+            animation.isAnimating,
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 
   Offset _getMenuOffset(Alignment alignment) {
+    if (inheritTriggerWidth) {
+      return switch (alignment) {
+        Alignment.bottomRight => const Offset(0, -20),
+        Alignment.topRight => const Offset(0, -20),
+        Alignment.bottomLeft => const Offset(0, 20),
+        Alignment.topLeft => const Offset(0, -20),
+        _ => Offset.zero,
+      };
+    }
     return switch (alignment) {
       Alignment.bottomRight => const Offset(-20, -20),
       Alignment.topRight => const Offset(20, -20),
@@ -466,16 +617,36 @@ class ContextMenuRoute extends ModalRoute<void> {
     };
   }
 
-  Widget _wrapMenu(BuildContext context, Widget menu, Alignment alignment) {
+  Widget _wrapMenuDecoration(BuildContext context, Alignment alignment, Size maxConstraints, Widget child) {
     return Material(
       type: MaterialType.transparency,
-      child: Container(
-        clipBehavior: Clip.hardEdge,
-        decoration: BoxDecoration(
-          color: LdTheme.of(context).surface,
-          borderRadius: LdTheme.of(context).radius(LdSize.m),
-          boxShadow: [BoxShadow(color: Colors.black.withAlpha(50), blurRadius: 12)],
-          border: Border.all(color: LdTheme.of(context).floatingBorder, width: LdTheme.of(context).borderWidth),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: maxConstraints.width,
+          maxHeight: maxConstraints.height,
+        ),
+        child: Container(
+          clipBehavior: Clip.hardEdge,
+          decoration: BoxDecoration(
+            color: LdTheme.of(context).surface,
+            borderRadius: LdTheme.of(context).radius(LdSize.m),
+            boxShadow: [BoxShadow(color: Colors.black.withAlpha(50), blurRadius: 12)],
+            border: Border.all(color: LdTheme.of(context).floatingBorder, width: LdTheme.of(context).borderWidth),
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  Widget _wrapMenuContent(
+      BuildContext context, Widget menu, Alignment alignment, Size maxConstraints, bool isAnimating) {
+    return Material(
+      type: MaterialType.transparency,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: maxConstraints.width,
+          maxHeight: maxConstraints.height,
         ),
         child: LdSpring(
           mass: 15,
@@ -494,7 +665,12 @@ class ContextMenuRoute extends ModalRoute<void> {
           },
           child: SingleChildScrollView(
             child: MeasureSize(
-              onSizeChange: (size) => _menuSizeNotifier.value = size,
+              onSizeChange: (size) {
+                if (isAnimating) {
+                  return;
+                }
+                _menuSizeNotifier.value = size;
+              },
               child: menu,
             ),
           ),

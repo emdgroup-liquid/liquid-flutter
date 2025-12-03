@@ -31,12 +31,7 @@ class _ListDemoState extends State<ListDemo> {
     await Future.delayed(const Duration(milliseconds: 500));
 
     if (_simulateError) {
-      return LdListPage(
-        newItems: [],
-        hasMore: false,
-        total: 0,
-        error: "Simulated error",
-      );
+      throw Exception("Simulated error");
     }
 
     // return a list of 10 items for each page, except for the last page
@@ -84,8 +79,7 @@ class _ListDemoState extends State<ListDemo> {
                   ),
                   paginator: _paginator,
                   assumedItemHeight: _assumeItemHeight ? 50 : null,
-                  groupingCriterion:
-                      _enableGrouping ? (item) => item.category : null,
+                  groupingCriterion: _enableGrouping ? (item) => item.category : null,
                   groupHeaderBuilder: _enableGrouping
                       ? (context, remainder) => LdListSeperator(
                             onSurface: _onSurface,
@@ -210,8 +204,7 @@ class _ListDemoState extends State<ListDemo> {
               children: [
                 LdToggle(
                     checked: _assumeItemHeight,
-                    label:
-                        "Assume item height (by passing the assumedItemHeight parameter). ",
+                    label: "Assume item height (by passing the assumedItemHeight parameter). ",
                     onChanged: (value) {
                       setState(() {
                         _assumeItemHeight = value;
@@ -227,8 +220,7 @@ class _ListDemoState extends State<ListDemo> {
               children: [
                 LdToggle(
                     checked: _enableGrouping,
-                    label:
-                        "Enable grouping (by passing the groupingCriterion parameter and a seperatorBuilder)",
+                    label: "Enable grouping (by passing the groupingCriterion parameter and a seperatorBuilder)",
                     onChanged: (value) {
                       setState(() {
                         _enableGrouping = value;
@@ -268,9 +260,7 @@ class _ListDemoState extends State<ListDemo> {
                   child: LdListEmpty(
                     onRefresh: () {
                       LdNotificationsController.of(context).addNotification(
-                        LdNotification(
-                            message: "Refreshed",
-                            type: LdNotificationType.success),
+                        LdNotification(message: "Refreshed", type: LdNotificationType.success),
                       );
                     },
                   ))),

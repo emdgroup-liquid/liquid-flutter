@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/modal/size_notifier.dart';
+import 'package:liquid_flutter/src/scaffold_layout_state.dart';
 import 'package:provider/provider.dart';
 
 class AppBarFrame extends StatefulWidget {

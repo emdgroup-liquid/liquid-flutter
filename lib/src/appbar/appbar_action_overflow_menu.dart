@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart' hide LdLabeledAction, LdLabeledActionType, LdAppBarActionWidget;
+import 'package:liquid_flutter/src/scaffold_layout_state.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/single_child_widget.dart';
 
@@ -30,7 +31,7 @@ class LdAppbarActionOverflowMenu extends StatelessWidget {
         onPressed: open,
         child: const Icon(LucideIcons.ellipsisVertical),
       ),
-      menuBuilder: (context, close) => ConstrainedBox(
+      menuBuilder: (context) => ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 200),
         child: LdButtonConfigProvider(
           const LdButtonConfig(

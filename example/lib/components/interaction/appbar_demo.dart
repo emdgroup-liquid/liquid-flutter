@@ -112,13 +112,13 @@ class _AppBarDemoState extends State<AppBarDemo> {
                   },
                   child: const Text('More'),
                 ),
-            menuBuilder: (context, close) => Column(
+            menuBuilder: (context) => Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     LdButton.ghost(
                       width: 200,
                       onPressed: () {
-                        close();
+                        Navigator.of(context).pop();
                         // Action 1
                       },
                       child: LdText.p('Action 1'),
@@ -126,7 +126,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
                     LdButton.ghost(
                       width: 200,
                       onPressed: () {
-                        close();
+                        Navigator.of(context).pop();
                         // Action 2
                       },
                       child: LdText.p('Action 2'),
@@ -134,7 +134,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
                     LdButton.ghost(
                       width: 200,
                       onPressed: () {
-                        close();
+                        Navigator.of(context).pop();
                         // Action 3
                       },
                       child: LdText.p('Action 3'),

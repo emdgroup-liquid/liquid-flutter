@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart' hide LdLabeledAction, LdLabeledActionType;
+import 'package:liquid_flutter/src/scaffold_layout_state.dart';
 import 'package:provider/single_child_widget.dart';
 import 'action_trigger_button.dart';
 import 'labeled_action.dart';
@@ -35,7 +36,7 @@ class LdAppBarActionWidget extends StatelessWidget {
             onPressed: () => open(),
             disabled: false,
           ),
-          menuBuilder: (context, close) => action.buildContextMenu.call(context, close) ?? const SizedBox(),
+          menuBuilder: (context) => action.buildContextMenu.call(context) ?? const SizedBox(),
         );
       case LdLabeledActionType.none:
         return ActionTriggerButton(

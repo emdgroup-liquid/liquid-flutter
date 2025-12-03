@@ -21,6 +21,13 @@ class LdRenderOverflowView extends RenderBox
   bool _isHorizontal;
 
   bool _hasOverflow = false;
+
+  // Cache for intrinsic size calculations
+  Map<RenderBox, Size>? _cachedIntrinsicSizes;
+  BoxConstraints? _cachedConstraints;
+  Map<int, double>? _cachedIndicatorSizes;
+  int? _lastIndicatorOverflowCount;
+  BoxConstraints? _lastIndicatorConstraints;
   LdRenderOverflowView({
     List<RenderBox>? children,
     required Axis direction,
@@ -49,6 +56,7 @@ class LdRenderOverflowView extends RenderBox
   set crossAxisAlignment(CrossAxisAlignment value) {
     if (_crossAxisAlignment != value) {
       _crossAxisAlignment = value;
+      _invalidateCache();
       markNeedsLayout();
     }
   }
@@ -58,6 +66,7 @@ class LdRenderOverflowView extends RenderBox
     if (_direction != value) {
       _direction = value;
       _isHorizontal = direction == Axis.horizontal;
+      _invalidateCache();
       markNeedsLayout();
     }
   }
@@ -66,6 +75,7 @@ class LdRenderOverflowView extends RenderBox
   set mainAxisAlignment(MainAxisAlignment value) {
     if (_mainAxisAlignment != value) {
       _mainAxisAlignment = value;
+      _invalidateCache();
       markNeedsLayout();
     }
   }
@@ -79,6 +89,7 @@ class LdRenderOverflowView extends RenderBox
     assert(value > double.negativeInfinity && value < double.infinity);
     if (_spacing != value) {
       _spacing = value;
+      _invalidateCache();
       markNeedsLayout();
     }
   }
@@ -108,6 +119,28 @@ class LdRenderOverflowView extends RenderBox
 
   double getMainSize(Size size) {
     return _isHorizontal ? size.width : size.height;
+  }
+
+  /// Checks if constraints have changed significantly (more than 1 pixel difference)
+  bool _constraintsChangedSignificantly(BoxConstraints newConstraints) {
+    if (_cachedConstraints == null) {
+      return true;
+    }
+
+    const epsilon = 1.0;
+    return (newConstraints.maxWidth - _cachedConstraints!.maxWidth).abs() > epsilon ||
+        (newConstraints.maxHeight - _cachedConstraints!.maxHeight).abs() > epsilon ||
+        (newConstraints.minWidth - _cachedConstraints!.minWidth).abs() > epsilon ||
+        (newConstraints.minHeight - _cachedConstraints!.minHeight).abs() > epsilon;
+  }
+
+  /// Invalidates the cache
+  void _invalidateCache() {
+    _cachedIntrinsicSizes = null;
+    _cachedConstraints = null;
+    _cachedIndicatorSizes = null;
+    _lastIndicatorOverflowCount = null;
+    _lastIndicatorConstraints = null;
   }
 
   @override
@@ -164,6 +197,14 @@ class LdRenderOverflowView extends RenderBox
     assert(firstChild != null);
     resetOffstage();
 
+    // Invalidate indicator cache if constraints changed significantly
+    // (intrinsic sizes cache is handled in _getChildrenIntrinsicSizes)
+    if (_constraintsChangedSignificantly(constraints)) {
+      _cachedIndicatorSizes = null;
+      _lastIndicatorOverflowCount = null;
+      _lastIndicatorConstraints = null;
+    }
+
     _performFlexibleLayout();
   }
 
@@ -214,11 +255,34 @@ class LdRenderOverflowView extends RenderBox
   }
 
   Iterable<Size> _getChildrenIntrinsicSizes(List<RenderBox> children) {
-    return _children.map((e) {
-      return Size(
-        e.getMaxIntrinsicWidth(constraints.maxHeight),
-        e.getMaxIntrinsicHeight(constraints.maxWidth),
+    // Check if constraints have changed significantly
+    final constraintsChanged = _constraintsChangedSignificantly(constraints);
+
+    // Initialize cache if needed or if constraints changed
+    if (_cachedIntrinsicSizes == null || constraintsChanged) {
+      _cachedIntrinsicSizes = <RenderBox, Size>{};
+      _cachedConstraints = constraints;
+    } else {
+      // Remove stale cache entries for children that are no longer in the list
+      final childrenSet = children.toSet();
+      _cachedIntrinsicSizes!.removeWhere((child, _) => !childrenSet.contains(child));
+    }
+
+    // Return cached or calculate intrinsic sizes
+    return children.map((child) {
+      // Check if we have a cached size for this child
+      final cachedSize = _cachedIntrinsicSizes![child];
+      if (cachedSize != null) {
+        return cachedSize;
+      }
+
+      // Calculate intrinsic size and cache it
+      final size = Size(
+        child.getMaxIntrinsicWidth(constraints.maxHeight),
+        child.getMaxIntrinsicHeight(constraints.maxWidth),
       );
+      _cachedIntrinsicSizes![child] = size;
+      return size;
     });
   }
 
@@ -240,15 +304,38 @@ class LdRenderOverflowView extends RenderBox
   /// [overflowCount], we need to layout to determine its size.
   RenderBox _layoutOverflowIndicator(int overflowCount) {
     final overflowIndicator = lastChild!;
+
+    // Initialize indicator cache if needed
+    _cachedIndicatorSizes ??= <int, double>{};
+
+    final indicatorConstraints = _childConstraints(0);
     final overflowIndicatorConstraints = BoxValueConstraints<int>(
       value: overflowCount,
-      constraints: _childConstraints(0),
+      constraints: indicatorConstraints,
     );
 
+    // Check if we can skip layout: same overflow count and constraints haven't changed
+    final canSkipLayout = _lastIndicatorOverflowCount == overflowCount &&
+        _lastIndicatorConstraints != null &&
+        !_constraintsChangedSignificantly(_lastIndicatorConstraints!);
+
+    if (canSkipLayout && _cachedIndicatorSizes!.containsKey(overflowCount)) {
+      // We've already laid out with this overflow count and constraints,
+      // and we have a cached size, so we can skip the layout
+      return overflowIndicator;
+    }
+
+    // Perform layout
     overflowIndicator.layout(
       overflowIndicatorConstraints,
       parentUsesSize: true,
     );
+
+    // Cache the main size for this overflow count
+    final indicatorSize = _getMainSizeOfRenderBox(overflowIndicator);
+    _cachedIndicatorSizes![overflowCount] = indicatorSize;
+    _lastIndicatorOverflowCount = overflowCount;
+    _lastIndicatorConstraints = indicatorConstraints;
 
     return overflowIndicator;
   }
@@ -303,7 +390,7 @@ class LdRenderOverflowView extends RenderBox
 
     final renderedChildren = _children.sublist(0, fittingChildren);
 
-    final overflowCount = childCount - fittingChildren - 1;
+    int overflowCount = childCount - fittingChildren - 1;
 
     if (showOverflowIndicator) {
       // We need to place the overflow indicator.
@@ -322,9 +409,14 @@ class LdRenderOverflowView extends RenderBox
 
         renderedChildren.removeLast();
         fittingChildren--;
+        overflowCount++;
 
         filledExtent -= getMainSize(childrenSizes.elementAt(fittingChildren));
       }
+
+      // Layout the overflow indicator again to pass the correct count to the overflow indicator.
+
+      _layoutOverflowIndicator(overflowCount);
 
       renderedChildren.add(overflowIndicator);
 

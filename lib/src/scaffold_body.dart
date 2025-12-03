@@ -4,7 +4,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 class LdScaffoldBody extends StatelessWidget {
   final List<Widget> children;
   final List<Widget> slivers;
-  final LdSize minimumPadding;
+  final EdgeInsets? minimumPadding;
   final Color? backgroundColor;
   final ScrollController? scrollController;
   final bool autoSpaceChildren;
@@ -12,7 +12,9 @@ class LdScaffoldBody extends StatelessWidget {
   const LdScaffoldBody({
     super.key,
     this.children = const [],
-    this.minimumPadding = LdSize.m,
+
+    /// The minimum padding to apply to the scaffold body. Defaults to [LdSize.m].
+    this.minimumPadding,
     this.slivers = const [],
     this.scrollController,
     this.backgroundColor,
@@ -25,7 +27,8 @@ class LdScaffoldBody extends StatelessWidget {
     final padding = MediaQuery.paddingOf(context);
 
     final theme = LdTheme.of(context, listen: true);
-    final themePadding = theme.pad(size: minimumPadding);
+
+    final themePadding = minimumPadding ?? theme.pad();
 
     final effectiveChildren = autoSpaceChildren ? children.autoSpace(context) : children;
 

@@ -17,7 +17,8 @@ class LdReveal extends StatelessWidget {
   final int? bufferSprings;
   final Set<Axis> axes;
 
-  final Function(BuildContext context, List<LdSpringState> states)? onAnimationEnd;
+  final Function(BuildContext context, List<LdSpringState> states)?
+      onAnimationEnd;
 
   const LdReveal({
     required this.revealed,
@@ -40,6 +41,7 @@ class LdReveal extends StatelessWidget {
       {required bool revealed,
       required Widget child,
       bool? initialRevealed,
+      Key? key,
       Set<Axis> axes = const {Axis.horizontal, Axis.vertical},
       double transformXOffset = 0,
       double transformYOffset = 0}) {
@@ -54,6 +56,7 @@ class LdReveal extends StatelessWidget {
       dampingCoefficient: 15,
       initialRevealed: initialRevealed,
       axes: axes,
+      key: key,
     );
   }
 

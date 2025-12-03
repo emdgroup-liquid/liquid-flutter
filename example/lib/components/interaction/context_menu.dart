@@ -16,82 +16,77 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
   LdContextZoomMode _zoomMode = LdContextZoomMode.mobileOnly;
   LdContextPositionMode _positionMode = LdContextPositionMode.auto;
 
-  _buildMenu(BuildContext context, VoidCallback onDismiss) =>
-      SingleChildScrollView(
-        child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              LdListItem(
+  _buildMenu(BuildContext context) => SingleChildScrollView(
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          LdListItem(
+            width: double.infinity,
+            leading: const Icon(LucideIcons.pen),
+            subContent: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: SizedBox(
                 width: double.infinity,
-                leading: const Icon(LucideIcons.pen),
-                subContent: Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: LdSwitch(
-                      value: false,
-                      onChanged: (p0) {},
-                      children: const {
-                        true: Text("On"),
-                        false: Text("Off"),
-                      },
-                    ),
-                  ),
+                child: LdSwitch(
+                  value: false,
+                  onChanged: (p0) {},
+                  children: const {
+                    true: Text("On"),
+                    false: Text("Off"),
+                  },
                 ),
-                title: const Text("Turbo mode"),
               ),
-              LdListItem(
-                width: double.infinity,
-                leading: const Icon(LucideIcons.pen),
-                onPressed: () {
-                  LdContextMenuDissmissNotification().dispatch(context);
-                },
-                title: const Text("Edit"),
-              ),
-              LdListItem(
-                width: double.infinity,
-                leading: const Icon(LucideIcons.copy),
-                onPressed: () {
-                  onDismiss();
-                },
-                title: const Text("Copy"),
-              ),
-              LdListItem(
-                width: double.infinity,
-                leading: const Icon(LucideIcons.share2),
-                onPressed: () {
-                  onDismiss();
-                },
-                title: const Text("Share"),
-              ),
-              LdListItem(
-                width: double.infinity,
-                leading: const Icon(LucideIcons.star),
-                onPressed: () {
-                  onDismiss();
-                },
-                title: const Text("Favorite"),
-              ),
-              LdListItem(
-                width: double.infinity,
-                leading: const Icon(LucideIcons.archive),
-                onPressed: () {
-                  onDismiss();
-                },
-                title: const Text("Archive"),
-              ),
-              const LdDivider(),
-              LdListItem(
-                width: double.infinity,
-                leading: const Icon(LucideIcons.trash2, color: Colors.red),
-                onPressed: () {
-                  onDismiss();
-                },
-                title:
-                    const Text("Delete", style: TextStyle(color: Colors.red)),
-              ),
-            ]),
+            ),
+            title: const Text("Turbo mode"),
+          ),
+          LdListItem(
+            width: double.infinity,
+            leading: const Icon(LucideIcons.pen),
+            onPressed: () {
+              LdContextMenuDissmissNotification().dispatch(context);
+            },
+            title: const Text("Edit"),
+          ),
+          LdListItem(
+            width: double.infinity,
+            leading: const Icon(LucideIcons.copy),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            title: const Text("Copy"),
+          ),
+          LdListItem(
+            width: double.infinity,
+            leading: const Icon(LucideIcons.share2),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            title: const Text("Share"),
+          ),
+          LdListItem(
+            width: double.infinity,
+            leading: const Icon(LucideIcons.star),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            title: const Text("Favorite"),
+          ),
+          LdListItem(
+            width: double.infinity,
+            leading: const Icon(LucideIcons.archive),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            title: const Text("Archive"),
+          ),
+          const LdDivider(),
+          LdListItem(
+            width: double.infinity,
+            leading: const Icon(LucideIcons.trash2, color: Colors.red),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            title: const Text("Delete", style: TextStyle(color: Colors.red)),
+          ),
+        ]),
       );
   @override
   Widget build(BuildContext context) {
@@ -104,12 +99,12 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
               zoomMode: _zoomMode,
               blurMode: _blurMode,
               positionMode: _positionMode,
-              menuBuilder: (context, onDismiss) {
+              menuBuilder: (context) {
                 return ConstrainedBox(
                     constraints: BoxConstraints(
                       maxWidth: 300,
                     ),
-                    child: _buildMenu(context, onDismiss));
+                    child: _buildMenu(context));
               },
               child: Container(
                 decoration: BoxDecoration(
@@ -126,8 +121,7 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
                     child: Text("C"),
                   ),
                   title: const Text("Right click me"),
-                  subtitle: const Text(
-                      "If you are using a touch screen, long press instead"),
+                  subtitle: const Text("If you are using a touch screen, long press instead"),
                 ),
               ),
               builder: (
@@ -145,12 +139,12 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
                     zoomMode: _zoomMode,
                     blurMode: _blurMode,
                     positionMode: _positionMode,
-                    menuBuilder: (context, onDismiss) {
+                    menuBuilder: (context) {
                       return ConstrainedBox(
                         constraints: BoxConstraints(
                           maxWidth: 300,
                         ),
-                        child: _buildMenu(context, onDismiss),
+                        child: _buildMenu(context),
                       );
                     },
                     builder: (

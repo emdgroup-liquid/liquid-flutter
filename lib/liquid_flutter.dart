@@ -76,6 +76,7 @@ export 'src/scaffold.dart';
 export 'src/scaffold_body.dart';
 export 'src/select.dart';
 export 'src/slider.dart';
+export 'src/speed_reader.dart';
 export 'src/spacer.dart';
 export 'src/spring.dart';
 export 'src/submit/builders/centered_builder.dart';

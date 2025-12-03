@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
@@ -99,17 +100,28 @@ class _LdSubmitState<T, Arg> extends State<LdSubmit<T, Arg>> {
   void didUpdateWidget(covariant LdSubmit<T, Arg> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (_argNotifier.value != widget.arg || oldWidget.arg != widget.arg) {
-      _argNotifier.value = widget.arg;
+    if (oldWidget.arg is Set && widget.arg is Set) {
+      if (!setEquals(oldWidget.arg as Set, widget.arg as Set)) {
+        _argNotifier.value = widget.arg;
+      }
+    } else {
+      if (_argNotifier.value != widget.arg || oldWidget.arg != widget.arg) {
+        _argNotifier.value = widget.arg;
+      }
     }
+
     if (widget.config != oldWidget.config) {
       if (_createdController) {
         _controller?.dispose();
         _createdController = false;
       }
-      _controller = LdSubmitController<T, Arg>(config: widget.config!, arg: _argNotifier);
+      _controller = LdSubmitController<T, Arg>(
+        config: widget.config!,
+        arg: _argNotifier,
+      );
       _createdController = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        print("init controller, due to config change");
         _controller?.init();
       });
     }

@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/monkey/monkey_shell_state.dart';
 import 'package:provider/provider.dart';
 /*
 /// A master-detail navigation component that provides a responsive layout for managing
@@ -375,6 +374,7 @@ List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
               repositoryBuilder: repositoryBuilder,
               layoutMode: layoutMode,
               routeSelection: state.pathParameters['selected'],
+              queryParameters: state.uri.queryParameters,
             ),
     )
   ];

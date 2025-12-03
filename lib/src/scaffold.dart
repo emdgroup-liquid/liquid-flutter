@@ -5,7 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/drawer_layout.dart';
+import 'package:liquid_flutter/src/drawer_state.dart';
 import 'package:liquid_flutter/src/monkey/intents.dart';
+import 'package:liquid_flutter/src/scaffold_layout_state.dart';
 import 'package:provider/provider.dart';
 
 enum LdAppBarScrollBehavior {
@@ -151,177 +154,6 @@ class LdScaffoldAppBarState {
   }
 }
 
-class LdScaffoldLayoutState {
-  final ValueNotifier<double> bodyScrollOffset;
-  final ValueNotifier<double> drawerScrollOffset;
-  final LdScaffoldSlot slot;
-  final LdScaffoldLayoutState? parentLayoutState;
-  final String? debugName;
-  final bool isScrolled;
-
-  final LdScaffoldAppBarState? appBarState;
-  final LdScaffoldAppBarState? secondaryAppBarState;
-
-  const LdScaffoldLayoutState({
-    required this.slot,
-    required this.bodyScrollOffset,
-    required this.drawerScrollOffset,
-    required this.parentLayoutState,
-    this.debugName,
-    this.isScrolled = false,
-    this.appBarState,
-    this.secondaryAppBarState,
-  });
-
-  int get level {
-    if (parentLayoutState == null) {
-      return 0;
-    }
-    return parentLayoutState!.level + 1;
-  }
-
-  /// Returns the total height of the app bars in the tree. Does not take into account the scroll effect.
-  EdgeInsets get totalInsets {
-    List<LdScaffoldAppBarState> topAppBars = [];
-    List<LdScaffoldAppBarState> bottomAppBars = [];
-
-    // Walk up the tree and collect the app bars
-    LdScaffoldLayoutState? currentLayoutState = this;
-    while (currentLayoutState != null) {
-      final appBarState = currentLayoutState.appBarState;
-      final secondaryAppBarState = currentLayoutState.secondaryAppBarState;
-      if (secondaryAppBarState?.effectivePosition == EffectivePosition.top) {
-        topAppBars.add(secondaryAppBarState!);
-      } else if (secondaryAppBarState?.effectivePosition == EffectivePosition.bottom) {
-        bottomAppBars.add(secondaryAppBarState!);
-      }
-      if (appBarState?.effectivePosition == EffectivePosition.top) {
-        topAppBars.add(appBarState!);
-      } else if (appBarState?.effectivePosition == EffectivePosition.bottom) {
-        bottomAppBars.add(appBarState!);
-      }
-
-      currentLayoutState = currentLayoutState.parentLayoutState;
-    }
-
-    double top = 0;
-    double bottom = 0;
-
-    for (var appBar in topAppBars) {
-      top += appBar.innerHeight;
-    }
-    for (var appBar in bottomAppBars) {
-      bottom += appBar.innerHeight;
-    }
-
-    if (topAppBars.isNotEmpty) {
-      top += topAppBars.last.verticalMargin;
-    }
-    if (bottomAppBars.isNotEmpty) {
-      bottom += bottomAppBars.last.verticalMargin;
-    }
-
-    return EdgeInsets.only(top: top, bottom: bottom);
-  }
-
-  String toDebugString() {
-    return "$level - $debugName - $slot - ${appBarState?.effectiveHeight} - ${secondaryAppBarState?.effectiveHeight} \n ${parentLayoutState?.toDebugString()}";
-  }
-
-  int levelForEffectivePosition() {
-    final effectivePosition = slot.effectivePosition;
-    int level = 0;
-    LdScaffoldLayoutState? currentLayoutState = parentLayoutState;
-    while (currentLayoutState != null) {
-      if (currentLayoutState.appBarState?.effectivePosition == effectivePosition) {
-        level++;
-      }
-      if (currentLayoutState.secondaryAppBarState?.effectivePosition == effectivePosition) {
-        level++;
-      }
-      currentLayoutState = currentLayoutState.parentLayoutState;
-    }
-    return level;
-  }
-
-  double effectiveHeightOfOthers(EffectivePosition effectivePosition, AppBarRole appBarRole) {
-    List<LdScaffoldAppBarState> appBars = [];
-
-    // Walk up the tree and collect the app bars
-    LdScaffoldLayoutState? currentLayoutState = parentLayoutState;
-    while (currentLayoutState != null) {
-      final appBarState = currentLayoutState.appBarState;
-      final secondaryAppBarState = currentLayoutState.secondaryAppBarState;
-      if (appBarState?.effectivePosition == effectivePosition) {
-        appBars.add(appBarState!);
-      }
-      if (secondaryAppBarState?.effectivePosition == effectivePosition) {
-        appBars.add(secondaryAppBarState!);
-      }
-      currentLayoutState = currentLayoutState.parentLayoutState;
-    }
-
-    double total = 0;
-
-    for (var appBar in appBars) {
-      total += appBar.effectiveInnerHeight;
-    }
-
-    if (slot.role == AppBarRole.secondary && appBarState?.effectivePosition == effectivePosition) {
-      total += appBarState?.effectiveInnerHeight ?? 0;
-    }
-
-    return total;
-  }
-
-  LdScaffoldLayoutState copyWith({
-    ValueNotifier<double>? bodyScrollOffset,
-    ValueNotifier<double>? drawerScrollOffset,
-    LdScaffoldSlot? slot,
-    LdScaffoldLayoutState? parentLayoutState,
-    String? debugName,
-    LdScaffoldAppBarState? appBarState,
-    LdScaffoldAppBarState? secondaryAppBarState,
-    bool? isScrolled,
-  }) {
-    return LdScaffoldLayoutState(
-      debugName: debugName ?? this.debugName,
-      bodyScrollOffset: bodyScrollOffset ?? this.bodyScrollOffset,
-      drawerScrollOffset: drawerScrollOffset ?? this.drawerScrollOffset,
-      parentLayoutState: parentLayoutState ?? this.parentLayoutState,
-      slot: slot ?? this.slot,
-      appBarState: appBarState ?? this.appBarState,
-      secondaryAppBarState: secondaryAppBarState ?? this.secondaryAppBarState,
-      isScrolled: isScrolled ?? this.isScrolled,
-    );
-  }
-
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    properties.add(StringProperty('debugName', debugName));
-    properties.add(IntProperty('level', level));
-    properties.add(EnumProperty<LdScaffoldSlot>('slot', slot));
-    properties.add(DoubleProperty('bodyScrollOffset', bodyScrollOffset.value));
-    properties.add(DoubleProperty('drawerScrollOffset', drawerScrollOffset.value));
-    properties.add(DiagnosticsProperty<EdgeInsets>('effectiveInsets', totalInsets));
-    properties.add(DiagnosticsProperty<LdScaffoldAppBarState?>('appBarState', appBarState));
-    properties.add(DiagnosticsProperty<LdScaffoldAppBarState?>('secondaryAppBarState', secondaryAppBarState));
-    properties.add(DiagnosticsProperty<LdScaffoldLayoutState?>('parentLayoutState', parentLayoutState));
-  }
-
-  @override
-  String toString() {
-    return '''LdScaffoldLayoutState(
-    level: $level, 
-    parentLayoutState: ${parentLayoutState?.toString().split('\n').join('\n    ')}, 
-    slot: $slot,
-    bodyScrollOffset: $bodyScrollOffset,
-    drawerScrollOffset: $drawerScrollOffset,
-    appBarState: ${appBarState?.toString().split('\n').join('\n    ')},
-    secondaryAppBarState: ${secondaryAppBarState?.toString().split('\n').join('\n    ')},
-    )''';
-  }
-}
-
 enum LdScaffoldAppBarPlacement {
   mobileTopDesktopBottom,
   mobileBottomDesktopTop,
@@ -365,6 +197,8 @@ class LdScaffoldState extends State<LdScaffold> {
 
   final _bodyScrollOffset = ValueNotifier<double>(0);
   final _drawerScrollOffset = ValueNotifier<double>(0);
+  final _appBarOffset = ValueNotifier<double>(0);
+  final _secondaryAppBarOffset = ValueNotifier<double>(0);
 
   double _lastScrollOffset = 0.0;
 
@@ -501,6 +335,8 @@ class LdScaffoldState extends State<LdScaffold> {
       secondaryAppBarState: _secondaryAppBarState,
       bodyScrollOffset: _bodyScrollOffset,
       drawerScrollOffset: _drawerScrollOffset,
+      appBarOffset: _appBarOffset,
+      secondaryAppBarOffset: _secondaryAppBarOffset,
       isScrolled: _lastScrollOffset > 5,
     );
   }
@@ -529,53 +365,53 @@ class LdScaffoldState extends State<LdScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      clipBehavior: Clip.hardEdge,
-      decoration: _scaffoldDecoration ?? const BoxDecoration(),
-      child: Shortcuts(
-        shortcuts: {
-          toggleDrawerShortcut: const ToggleDrawerIntent(),
-          const SingleActivator(LogicalKeyboardKey.keyF, meta: true): const SearchIntent(),
-        },
-        child: Actions(
-          actions: {
-            SearchIntent: CallbackAction(
-              onInvoke: (intent) {
-                _intentRouterController.add(intent);
-                return null;
-              },
-            )
+    return LdNotificationProvider(
+      debugLabel: "Scaffold Body Provider ${widget.debugName}",
+      child: Container(
+        clipBehavior: Clip.hardEdge,
+        decoration: _scaffoldDecoration ?? const BoxDecoration(),
+        child: Shortcuts(
+          shortcuts: {
+            toggleDrawerShortcut: const ToggleDrawerIntent(),
+            const SingleActivator(LogicalKeyboardKey.keyF, meta: true): const SearchIntent(),
           },
-          child: LayoutBuilder(builder: (context, constraints) {
-            final layoutState = _layoutState(context);
+          child: Actions(
+            actions: {
+              SearchIntent: CallbackAction(
+                onInvoke: (intent) {
+                  _intentRouterController.add(intent);
+                  return null;
+                },
+              )
+            },
+            child: LayoutBuilder(builder: (context, constraints) {
+              final layoutState = _layoutState(context);
 
-            final bodyStack = Stack(children: [
-              // Body
-              Positioned(
-                  top: 0,
-                  left: 0,
-                  bottom: 0,
-                  right: 0,
-                  child: Stack(
-                    children: [
-                      // Body
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        child: MediaQuery(
-                          data: MediaQuery.of(context).copyWith(
-                            padding: _bodyPadding(context),
-                          ),
-                          child: ScrollObserver(
-                            position: _bodyScrollOffset,
-                            child: Provider.value(
-                              value: layoutState.copyWith(slot: LdScaffoldSlot.body),
-                              child: PrimaryScrollController(
-                                controller: effectiveScrollController,
-                                child: LdNotificationProvider(
-                                  debugLabel: "Scaffold Body Provider ${widget.debugName}",
+              final bodyStack = Stack(children: [
+                // Body
+                Positioned(
+                    top: 0,
+                    left: 0,
+                    bottom: 0,
+                    right: 0,
+                    child: Stack(
+                      children: [
+                        // Body
+                        Positioned(
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          child: MediaQuery(
+                            data: MediaQuery.of(context).copyWith(
+                              padding: _bodyPadding(context),
+                            ),
+                            child: ScrollObserver(
+                              position: _bodyScrollOffset,
+                              child: Provider.value(
+                                value: layoutState.copyWith(slot: LdScaffoldSlot.body),
+                                child: PrimaryScrollController(
+                                  controller: effectiveScrollController,
                                   child: LdNotificationPortal(
                                     debugLabel: "Scaffold Body ${widget.debugName}",
                                     child: widget.body,
@@ -585,69 +421,69 @@ class LdScaffoldState extends State<LdScaffold> {
                             ),
                           ),
                         ),
-                      ),
 
-                      // Bottom Navigation Bar
-                      if (widget.secondaryAppBar != null)
-                        _placeSecondaryNavigationBar(
-                          context,
-                          Focus(
-                            focusNode: _bottomNavigationBarFocusNode,
-                            child: Provider.value(
-                              value: layoutState.copyWith(
-                                slot: _effectiveSecondaryAppBarPosition == EffectivePosition.top
-                                    ? LdScaffoldSlot.secondaryAppBarTop
-                                    : LdScaffoldSlot.secondaryAppBarBottom,
+                        // Bottom Navigation Bar
+                        if (widget.secondaryAppBar != null)
+                          _placeSecondaryNavigationBar(
+                            context,
+                            Focus(
+                              focusNode: _bottomNavigationBarFocusNode,
+                              child: Provider.value(
+                                value: layoutState.copyWith(
+                                  slot: _effectiveSecondaryAppBarPosition == EffectivePosition.top
+                                      ? LdScaffoldSlot.secondaryAppBarTop
+                                      : LdScaffoldSlot.secondaryAppBarBottom,
+                                ),
+                                child: widget.secondaryAppBar!,
                               ),
-                              child: widget.secondaryAppBar!,
                             ),
                           ),
-                        ),
-                      // AppBar
-                      if (widget.appBar != null)
-                        _placeAppBar(
-                          context,
-                          Provider.value(
-                            value: layoutState.copyWith(
-                              slot: _effectiveAppBarPosition == EffectivePosition.top
-                                  ? LdScaffoldSlot.appBarTop
-                                  : LdScaffoldSlot.appBarBottom,
+                        // AppBar
+                        if (widget.appBar != null)
+                          _placeAppBar(
+                            context,
+                            Provider.value(
+                              value: layoutState.copyWith(
+                                slot: _effectiveAppBarPosition == EffectivePosition.top
+                                    ? LdScaffoldSlot.appBarTop
+                                    : LdScaffoldSlot.appBarBottom,
+                              ),
+                              child: widget.appBar!,
                             ),
-                            child: widget.appBar!,
                           ),
-                        ),
-                    ],
-                  ))
-            ]);
+                      ],
+                    ))
+              ]);
 
-            if (widget.drawer != null) {
-              return _LdDrawerLayout(
-                intents: intentRouter,
-                drawerWidth: widget.drawerWidth,
-                onStateChange: _onDrawerStateChange,
-                drawer: RepaintBoundary(
-                  child: FocusScope(
-                    node: _focusScopeNode,
-                    child: ScrollObserver(
-                      position: _drawerScrollOffset,
-                      child: widget.drawer!,
+              if (widget.drawer != null) {
+                return LdDrawerLayout(
+                  intents: intentRouter,
+                  drawerWidth: widget.drawerWidth,
+                  onStateChange: _onDrawerStateChange,
+                  drawer: RepaintBoundary(
+                    child: FocusScope(
+                      node: _focusScopeNode,
+                      child: ScrollObserver(
+                        position: _drawerScrollOffset,
+                        child: widget.drawer!,
+                      ),
                     ),
                   ),
-                ),
-                body: bodyStack,
-                reflowBreakpoint: widget.reflowBreakpoint ?? 900,
-              );
-            }
+                  body: bodyStack,
+                  reflowBreakpoint: widget.reflowBreakpoint ?? 900,
+                );
+              }
 
-            return Material(
-              type: MaterialType.transparency,
-              child: Container(
-                clipBehavior: Clip.hardEdge,
-                decoration: _scaffoldDecoration,
-                child: bodyStack,
-              ),
-            );
-          }),
+              return Material(
+                type: MaterialType.transparency,
+                child: Container(
+                  clipBehavior: Clip.hardEdge,
+                  decoration: _scaffoldDecoration,
+                  child: bodyStack,
+                ),
+              );
+            }),
+          ),
         ),
       ),
     );
@@ -672,11 +508,13 @@ class LdScaffoldState extends State<LdScaffold> {
       _appBarState = _appBarState?.copyWith(
         offset: 0.0,
       );
+      _appBarOffset.value = 0.0;
     }
     if (oldWidget.secondaryAppBarScrollBehavior != widget.secondaryAppBarScrollBehavior) {
       _secondaryAppBarState = _secondaryAppBarState?.copyWith(
         offset: 0.0,
       );
+      _secondaryAppBarOffset.value = 0.0;
     }
     if (oldWidget.appBarPlacement != widget.appBarPlacement) {
       _appBarState = null;
@@ -693,6 +531,8 @@ class LdScaffoldState extends State<LdScaffold> {
     _bottomNavigationBarFocusNode.dispose();
     _intentRouterController.close();
     _internalScrollController?.dispose();
+    _appBarOffset.dispose();
+    _secondaryAppBarOffset.dispose();
 
     super.dispose();
   }
@@ -713,9 +553,6 @@ class LdScaffoldState extends State<LdScaffold> {
     _updateAppBarOffset(AppBarRole.secondary, scrollOffset);
 
     _lastScrollOffset = scrollOffset;
-    if (mounted) {
-      setState(() {});
-    }
   }
 
   void _updateAppBarOffset(AppBarRole role, double scrollOffset) {
@@ -732,23 +569,30 @@ class LdScaffoldState extends State<LdScaffold> {
 
     double maxOffset = appBarState.innerHeight + appBarState.verticalMargin;
 
+    double newOffset;
     // Bottom appBar: hide downward (positive offset) down means delta is positive.
     if (isScrollingDown) {
+      newOffset = min(appBarState.offset + scrollDelta * 0.5, maxOffset);
       appBarState = appBarState.copyWith(
-        offset: min(appBarState.offset + scrollDelta * 0.5, maxOffset),
+        offset: newOffset,
       );
     } else if (isScrollingUp) {
+      newOffset = max(appBarState.offset + scrollDelta, 0);
       appBarState = appBarState.copyWith(
-        offset: max(appBarState.offset + scrollDelta, 0),
+        offset: newOffset,
       );
+    } else {
+      newOffset = appBarState.offset;
     }
 
     switch (role) {
       case AppBarRole.primary:
         _appBarState = appBarState;
+        _appBarOffset.value = newOffset;
         break;
       case AppBarRole.secondary:
         _secondaryAppBarState = appBarState;
+        _secondaryAppBarOffset.value = newOffset;
         break;
     }
   }
@@ -795,19 +639,23 @@ class LdScaffoldState extends State<LdScaffold> {
       willHide: shouldHideAppBar,
     );
 
-    double offset = ((_appBarState?.offset ?? 0));
+    final transformedAppBar = ValueListenableBuilder<double>(
+      valueListenable: _appBarOffset,
+      builder: (context, offsetValue, child) {
+        double offset = offsetValue;
+        if (effectivePosition == EffectivePosition.top) {
+          offset = -offset;
+        }
 
-    if (effectivePosition == EffectivePosition.top) {
-      offset = -offset;
-    }
-
-    final transformedAppBar = LdWrapConditional(
-      condition: shouldHideAppBar,
-      builder: (context, child) => Transform.translate(
-        offset: Offset(0, offset),
-        child: child,
-      ),
-      child: appBar,
+        return LdWrapConditional(
+          condition: shouldHideAppBar,
+          builder: (context, child) => Transform.translate(
+            offset: Offset(0, offset),
+            child: child,
+          ),
+          child: appBar,
+        );
+      },
     );
 
     if (effectivePosition == EffectivePosition.top) {
@@ -840,17 +688,23 @@ class LdScaffoldState extends State<LdScaffold> {
       effectivePosition: effectivePosition,
       willHide: shouldHideSecondaryAppBar,
     );
-    double offset = ((_secondaryAppBarState?.offset ?? 0) - 100).clamp(0, double.infinity);
-    if (effectivePosition == EffectivePosition.top) {
-      offset = -offset;
-    }
-    final transformedSecondaryAppBar = LdWrapConditional(
-      condition: shouldHideSecondaryAppBar,
-      builder: (context, child) => Transform.translate(
-        offset: Offset(0, offset),
-        child: child,
-      ),
-      child: secondaryNavigationBar,
+
+    final transformedSecondaryAppBar = ValueListenableBuilder<double>(
+      valueListenable: _secondaryAppBarOffset,
+      builder: (context, offsetValue, child) {
+        double offset = ((offsetValue - 100).clamp(0, double.infinity));
+        if (effectivePosition == EffectivePosition.top) {
+          offset = -offset;
+        }
+        return LdWrapConditional(
+          condition: shouldHideSecondaryAppBar,
+          builder: (context, child) => Transform.translate(
+            offset: Offset(0, offset),
+            child: child,
+          ),
+          child: secondaryNavigationBar,
+        );
+      },
     );
 
     if (effectivePosition == EffectivePosition.top) {
@@ -914,15 +768,6 @@ class ScrollObserver extends StatelessWidget {
   }
 }
 
-extension on List<Widget> {
-  List<Widget> reverseIf(bool condition) {
-    if (condition) {
-      return reversed.toList();
-    }
-    return this;
-  }
-}
-
 extension AtLeastEdgeInsets on EdgeInsets {
   EdgeInsets atLeast(EdgeInsets other) {
     return EdgeInsets.fromLTRB(
@@ -937,283 +782,4 @@ extension AtLeastEdgeInsets on EdgeInsets {
 enum LdDrawerSlot {
   drawer,
   body,
-}
-
-class LdDrawerState {
-  final bool isOpen;
-  final bool isSideBySide;
-
-  const LdDrawerState({required this.isOpen, required this.isSideBySide});
-
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    properties.add(FlagProperty('isOpen', value: isOpen, ifTrue: 'open'));
-    properties.add(FlagProperty('isSideBySide', value: isSideBySide, ifTrue: 'enabled'));
-  }
-}
-
-class _LdDrawerLayout extends StatefulWidget {
-  final Widget drawer;
-  final Widget body;
-  final double reflowBreakpoint;
-  final Stream<Intent> intents;
-  final void Function(LdDrawerState) onStateChange;
-
-  final double drawerWidth;
-  const _LdDrawerLayout({
-    required this.drawer,
-    required this.body,
-    required this.reflowBreakpoint,
-    required this.drawerWidth,
-    required this.onStateChange,
-    required this.intents,
-  });
-
-  @override
-  State<_LdDrawerLayout> createState() => _LdDrawerLayoutState();
-}
-
-class _LdDrawerLayoutState extends State<_LdDrawerLayout> {
-  bool _isDragging = false;
-  LocalHistoryEntry? _historyEntry;
-
-  double _drawerOffset = 0;
-  double _effectiveDrawerWidth = 0;
-  bool _isSideBySide = false;
-
-  StreamSubscription<Intent>? _intentSubscription;
-
-  @override
-  initState() {
-    super.initState();
-    _intentSubscription = widget.intents.listen(_handleIntent);
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      if (_isSideBySide) {
-        _showDrawer();
-      }
-    });
-  }
-
-  void _handleIntent(Intent intent) {
-    if (intent is OpenDrawerIntent) {
-      _showDrawer();
-    } else if (intent is CloseDrawerIntent) {
-      _hideDrawer();
-    } else if (intent is ToggleDrawerIntent) {
-      if (_isDrawerOpen) {
-        _hideDrawer();
-      } else {
-        _showDrawer();
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _intentSubscription?.cancel();
-    _historyEntry?.remove();
-    super.dispose();
-  }
-
-  void _onDragEnd(DragEndDetails details) {
-    if (_isDragging) {
-      _isDragging = false;
-    }
-    if (_drawerOffset > _effectiveDrawerWidth / 2) {
-      _ensureHistoryEntry();
-      setState(() {
-        _drawerOffset = _effectiveDrawerWidth;
-      });
-    } else {
-      _handleHistoryEntryRemoved();
-    }
-    _onStateChange();
-  }
-
-  void _ensureHistoryEntry() {
-    if (_historyEntry == null) {
-      final ModalRoute<dynamic>? route = ModalRoute.of(context);
-      if (route != null) {
-        _historyEntry = LocalHistoryEntry(
-          onRemove: _handleHistoryEntryRemoved,
-          impliesAppBarDismissal: false,
-        );
-      }
-    }
-  }
-
-  void _onDragUpdate(DragUpdateDetails details) {
-    if (!_isDragging && (details.localPosition.dx - _drawerOffset).abs() <= 75) {
-      _isDragging = true;
-    }
-    if (_isDragging) {
-      setState(() {
-        _drawerOffset = details.localPosition.dx;
-        _drawerOffset = _drawerOffset.clamp(0, _effectiveDrawerWidth);
-      });
-    }
-  }
-
-  void _onStateChange() {
-    widget.onStateChange(LdDrawerState(isOpen: _isDrawerOpen, isSideBySide: _isSideBySide));
-  }
-
-  void _handleHistoryEntryRemoved() {
-    _hideDrawer();
-  }
-
-  void _showDrawer() {
-    setState(() {
-      _drawerOffset = _effectiveDrawerWidth;
-    });
-    _ensureHistoryEntry();
-    _onStateChange();
-  }
-
-  void _hideDrawer() {
-    setState(() {
-      _drawerOffset = 0;
-    });
-    _historyEntry?.remove();
-    _onStateChange();
-  }
-
-  bool get _isDrawerOpen => _drawerOffset > _effectiveDrawerWidth / 2;
-
-  Border? get _drawerBorder {
-    return Border(
-      right: BorderSide(
-        color: LdTheme.of(context).border,
-        width: 1,
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      type: MaterialType.transparency,
-      child: Actions(
-        actions: {
-          ToggleDrawerIntent: ToggleDrawerAction(
-            onToggleDrawer: () {
-              if (_isDrawerOpen) {
-                _hideDrawer();
-              } else {
-                _showDrawer();
-              }
-            },
-          ),
-          OpenDrawerIntent: CallbackAction(
-            onInvoke: (intent) {
-              _showDrawer();
-              return null;
-            },
-          ),
-          CloseDrawerIntent: CallbackAction(
-            onInvoke: (intent) {
-              _hideDrawer();
-              return null;
-            },
-          ),
-        },
-        child: GestureDetector(
-          onHorizontalDragUpdate: _onDragUpdate,
-          onHorizontalDragEnd: _onDragEnd,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              _isSideBySide = constraints.maxWidth >= widget.reflowBreakpoint;
-              _effectiveDrawerWidth = min(constraints.maxWidth * 0.75, widget.drawerWidth);
-
-              return Stack(
-                children: [
-                  LdSpring(
-                    mass: 1,
-                    springConstant: 12,
-                    dampingCoefficient: 9,
-                    initialPosition: 0,
-                    position: _drawerOffset,
-                    builder: (context, state, child) {
-                      double bodyLeft, bodyWidth;
-                      if (_isSideBySide) {
-                        bodyLeft = state.position;
-                        bodyWidth = constraints.maxWidth - state.position;
-                      } else {
-                        bodyLeft = 0;
-                        bodyWidth = constraints.maxWidth;
-                      }
-
-                      return Positioned(
-                        top: 0,
-                        width: bodyWidth,
-                        bottom: 0,
-                        left: bodyLeft,
-                        child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              boxShadow: [ldShadowSticky],
-                              color: LdTheme.of(context).background,
-                            ),
-                            child: child!),
-                      );
-                    },
-                    child: Provider.value(
-                      value: LdDrawerSlot.body,
-                      child: Provider.value(
-                        value: LdDrawerState(isOpen: _isDrawerOpen, isSideBySide: _isSideBySide),
-                        child: widget.body,
-                      ),
-                    ),
-                  ),
-                  if (_isDrawerOpen && !_isSideBySide)
-                    ModalBarrier(
-                      color: Colors.black.withValues(alpha: 0.5),
-                      onDismiss: () {
-                        _hideDrawer();
-                      },
-                    ),
-                  LdSpring(
-                    mass: 1,
-                    springConstant: 12,
-                    dampingCoefficient: 9,
-                    initialPosition: 0,
-                    position: _drawerOffset,
-                    builder: (context, state, child) {
-                      double drawerLeft, drawerWidth;
-                      if (_isSideBySide) {
-                        drawerLeft = state.position - _effectiveDrawerWidth;
-                        drawerWidth = _effectiveDrawerWidth;
-                      } else {
-                        drawerLeft = min(0, state.position - _effectiveDrawerWidth);
-                        drawerWidth = _effectiveDrawerWidth;
-                      }
-
-                      return Positioned(
-                        top: 0,
-                        bottom: 0,
-                        width: drawerWidth,
-                        left: drawerLeft,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: _drawerBorder,
-                            color: LdTheme.of(context).background,
-                          ),
-                          child: child!,
-                        ),
-                      );
-                    },
-                    child: Provider.value(
-                      value: LdDrawerSlot.drawer,
-                      child: Provider.value(
-                        value: LdDrawerState(isOpen: _isDrawerOpen, isSideBySide: _isSideBySide),
-                        child: widget.drawer,
-                      ),
-                    ),
-                  )
-                ].reverseIf(_isSideBySide),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
 }

@@ -299,6 +299,7 @@ class MovieShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyShell<_Movie, int>(
+      queryParameters: state.uri.queryParameters,
       routeSelection: state.pathParameters['selected'],
       masterPage: masterPage,
       parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
@@ -388,7 +389,7 @@ class MovieDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LdMonkeyDetailPage<_Movie, int>(
+    return LdMonkeyDetailPage<_Movie, int>.scrollable(
       primaryAppBar: LdMonkeyAppBar<_Movie, int>(
         location: LdMonkeyActionLocation.detailAppBar,
         title: Text("Movie"),

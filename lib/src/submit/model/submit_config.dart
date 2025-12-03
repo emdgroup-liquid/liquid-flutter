@@ -1,9 +1,12 @@
 import 'dart:ui';
 
+import 'package:equatable/equatable.dart';
+import 'package:flutter/widgets.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 /// A configuration for a submit action.
-class LdSubmitConfig<T, Arg> {
+class LdSubmitConfig<T, Arg> extends Equatable {
+  final Key? key;
   final String? loadingText;
   final String? submitText;
   final bool allowResubmit;
@@ -19,6 +22,8 @@ class LdSubmitConfig<T, Arg> {
   final String? debugLabel;
 
   const LdSubmitConfig({
+    this.key,
+
     /// The text to display when the action is loading
     this.loadingText,
 
@@ -56,4 +61,19 @@ class LdSubmitConfig<T, Arg> {
   });
 
   bool get hapticsEnabled => withHaptics ?? !autoTrigger;
+
+  @override
+  List<Object?> get props => [
+        key,
+        loadingText,
+        submitText,
+        allowResubmit,
+        withHaptics,
+        autoTrigger,
+        timeout,
+        allowCancel,
+        onCanceled,
+        retryConfig,
+        debugLabel
+      ];
 }

@@ -1,5 +1,7 @@
+import 'package:equatable/equatable.dart';
+
 /// Configuration for retry behavior
-class LdRetryConfig {
+class LdRetryConfig extends Equatable {
   /// Maximum number of attempts (including the initial attempt).
   /// If set to 1, the retry button will be hidden immediately.
   /// Defaults to 4 (i.e. 3 retries).
@@ -60,4 +62,13 @@ class LdRetryConfig {
         enableAutomaticRetries: true,
         useJitter: true,
       );
+
+  @override
+  List<Object?> get props => [
+        maxAttempts,
+        enableAutomaticRetries,
+        baseDelay,
+        hideManualRetryButton,
+        useJitter,
+      ];
 }

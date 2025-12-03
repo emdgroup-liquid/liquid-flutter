@@ -26,7 +26,7 @@ class LdNotificationsController extends ChangeNotifier {
 
   List<LdNotification> get notifications => _notifications;
 
-  Future<LdNotification> error(
+  LdNotification error(
     String message, {
     Duration? duration = const Duration(seconds: 5),
     bool canDismiss = true,
@@ -41,7 +41,7 @@ class LdNotificationsController extends ChangeNotifier {
     ));
   }
 
-  Future<LdNotification> success(
+  LdNotification success(
     String message, {
     Duration? duration = const Duration(seconds: 5),
     bool canDismiss = true,
@@ -56,7 +56,7 @@ class LdNotificationsController extends ChangeNotifier {
     ));
   }
 
-  Future<LdNotification> warning(
+  LdNotification warning(
     String message, {
     Duration? duration = const Duration(seconds: 5),
     bool canDismiss = true,
@@ -71,13 +71,12 @@ class LdNotificationsController extends ChangeNotifier {
     ));
   }
 
-  Future<LdNotification> addNotification(LdNotification notification) async {
+  LdNotification addNotification(LdNotification notification) {
     _notifications.add(notification);
     _safeNotifyListeners();
     if (notification.haptics != null) {
       LdHaptics.vibrate(notification.haptics!);
     }
-    await Future.delayed(const Duration(milliseconds: 100));
 
     if (notification.duration != null) {
       Future.delayed(notification.duration!, () {
@@ -88,6 +87,7 @@ class LdNotificationsController extends ChangeNotifier {
   }
 
   Future<void> onDismissNotification(LdNotification notification) async {
+    assert(_notifications.contains(notification), "Notification not found in list");
     notification.removing = true;
 
     await Future.delayed(const Duration(milliseconds: 0));
@@ -114,5 +114,9 @@ class LdNotificationsController extends ChangeNotifier {
 
   static LdNotificationsController of(BuildContext context) {
     return Provider.of<LdNotificationsController>(context, listen: false);
+  }
+
+  static LdNotificationsController? maybeOf(BuildContext context) {
+    return context.read<LdNotificationsController?>();
   }
 }

@@ -62,6 +62,12 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
           _ => null,
         },
         title: title,
+        overflowMenuProviders: (context) => [
+              ListenableProvider.value(value: LdRepository.of<T, IdType>(context)),
+              ListenableProvider.value(value: LdMonkeyShellState.of<T, IdType>(context)),
+              Provider.value(value: context.read<LdMonkeyEffectiveLayoutMode>()),
+              Provider.value(value: context.read<LdMonkeySelection<IdType>>())
+            ],
         actions: [
           ...actions,
           ...additionalActions,
