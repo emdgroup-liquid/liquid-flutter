@@ -4,6 +4,7 @@ import 'package:liquid/code_block.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -55,9 +56,35 @@ class _DemoSheet extends StatelessWidget {
             barrierDismissible: userDismissable,
             fixedDialogSize: fixedDialogSize ? const Size(400, 400) : null,
             pageBuilder: (context) => LdScaffold(
-                  appBar: LdAppBar(
-                    title: const Text("Modal"),
+                  appBars: [
+                    LdAppBar(
+                      title: const Text("Modal"),
+                    ),
+                    LdAppBar(
+                      position: AppBarPosition.bottom,
+                      actions: [
+                        LdFlexibleChild(
+                          child: LdButton.vague(
+                            width: double.infinity,
+                          color: LdTheme.of(context).error,
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text("Cancel"),
+                        ),
+                      ),
+                      LdFlexibleChild(
+                        child: LdButton.vague(
+                          width: double.infinity,
+                          onPressed: () {
+                            Navigator.of(context).pop("Hello world");
+                          },
+                          child: const Text("Confirm"),
+                        ),
+                      ),
+                    ],
                   ),
+                  ],
                   body: LdScaffoldBody(
                     children: [
                       LdText.p(
@@ -97,30 +124,6 @@ class _DemoSheet extends StatelessWidget {
                           LdSelectItem(value: "item2", child: const Text("Item 2")),
                           LdSelectItem(value: "item3", child: const Text("Item 3")),
                         ],
-                      ),
-                    ],
-                  ),
-                  secondaryAppBarPlacement: LdScaffoldAppBarPlacement.bottom,
-                  secondaryAppBar: LdAppBar(
-                    actions: [
-                      LdFlexibleChild(
-                        child: LdButton.vague(
-                          width: double.infinity,
-                          color: LdTheme.of(context).error,
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text("Cancel"),
-                        ),
-                      ),
-                      LdFlexibleChild(
-                        child: LdButton.vague(
-                          width: double.infinity,
-                          onPressed: () {
-                            Navigator.of(context).pop("Hello world");
-                          },
-                          child: const Text("Confirm"),
-                        ),
                       ),
                     ],
                   ),
@@ -369,9 +372,11 @@ class _ModalDemoState extends State<ModalDemo> {
               modal: LdModalRoute(
                 context: context,
                 pageBuilder: (context) => LdScaffold(
-                  appBar: LdAppBar(
-                    title: const Text("This is a modal with action button"),
-                  ),
+                  appBars: [
+                    LdAppBar(
+                      title: const Text("This is a modal with action button"),
+                    ),
+                  ],
                   body: LdScaffoldBody(
                     children: [
                       LdText("This is a modal with action button"),
@@ -398,9 +403,11 @@ class _ModalDemoState extends State<ModalDemo> {
               modal: LdModalRoute(
                 context: context,
                 pageBuilder: (context) => LdScaffold(
-                  appBar: LdAppBar(
-                    title: const Text("Modal with list items"),
-                  ),
+                  appBars: [
+                    LdAppBar(
+                      title: const Text("Modal with list items"),
+                    ),
+                  ],
                   body: LdScaffoldBody(
                     minimumPadding: EdgeInsets.zero,
                     children: [

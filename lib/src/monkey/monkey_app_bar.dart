@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 import 'package:provider/provider.dart';
 
 class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
@@ -41,6 +41,18 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
     }
     return LdAppBar(
         debugName: debugName,
+        order: switch (location) {
+          LdMonkeyActionLocation.masterAppBar => 1,
+          LdMonkeyActionLocation.masterSecondary => 2,
+          LdMonkeyActionLocation.detailAppBar => 1,
+          LdMonkeyActionLocation.detailSecondary => 2,
+          _ => 0,
+        },
+        position: switch (location) {
+          LdMonkeyActionLocation.masterAppBar || LdMonkeyActionLocation.detailAppBar => AppBarPosition.top,
+          LdMonkeyActionLocation.masterSecondary || LdMonkeyActionLocation.detailSecondary => AppBarPosition.bottom,
+          _ => AppBarPosition.top,
+        },
         shadowMode: switch (location) {
           LdMonkeyActionLocation.masterAppBar || LdMonkeyActionLocation.masterSecondary => LdAppBarShadowMode.hidden,
           _ => LdAppBarShadowMode.whenScrolled,

@@ -128,6 +128,7 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
                 context,
                 shuttle,
                 trigger,
+                isOpen,
                 child,
               ) =>
                   child!,
@@ -151,6 +152,7 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
                       context,
                       shuttle,
                       trigger,
+                      isOpen,
                       child,
                     ) =>
                         LdButton(

@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class _Potion {
@@ -57,38 +58,30 @@ class _ChemicalScreenState extends State<ChemicalScreen> {
   Widget build(BuildContext context) {
     return LdScaffold(
       debugName: "Chemical screen",
-      appBarScrollBehavior: LdAppBarScrollBehavior.mobileOnly,
-      secondaryAppBar: LdAppBar(
-        debugName: "Secondary app bar",
-        actions: [
-          LdButton(
-            leading: const Icon(LucideIcons.shoppingBag),
-            onPressed: () {
-              LdNotificationsController.of(context).addNotification(
-                LdNotification(
-                  type: LdNotificationType.success,
-                  message: "Added to cart",
-                ),
-              );
-            },
-            child: const Text("Add to cart"),
-          ),
-          LdButton(
-            leading: const Icon(LucideIcons.download),
-            onPressed: () {
-              LdNotificationsController.of(context).addNotification(
-                LdNotification(type: LdNotificationType.success, message: "Downloading certificate"),
-              );
-            },
-            child: const Text("Download certificate"),
-          ),
-        ],
-        searchConfig: searchConfig,
-      ),
-      appBar: LdAppBar(
-        debugName: "Primary app bar ",
-        title: const Text("Chemical"),
-      ),
+      appBars: [
+        LdAppBar(
+          order: 1,
+          debugName: "Primary app bar ",
+          title: const Text("Chemical"),
+        ),
+        LdAppBar(
+          scrollBehavior: LdAppBarScrollBehavior.mobileOnly,
+          debugName: "Secondary app bar",
+          order: 2,
+          actions: [
+            LdButton(
+              leading: const Icon(LucideIcons.download),
+              onPressed: () {
+                LdNotificationsController.of(context).addNotification(
+                  LdNotification(type: LdNotificationType.success, message: "Downloading certificate"),
+                );
+              },
+              child: const Text("Download certificate"),
+            ),
+          ],
+          searchConfig: searchConfig,
+        ),
+      ],
       body: LdScaffoldBody(
         children: [
           LdBreadcrumb.fromStrings(
@@ -196,9 +189,11 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
               modal: LdModalRoute(
                 context: context,
                 pageBuilder: (context) => LdScaffold(
-                  appBar: LdAppBar(
-                    title: const Text("Deduct"),
-                  ),
+                  appBars: [
+                    LdAppBar(
+                      title: const Text("Deduct"),
+                    )
+                  ],
                   body: LdScaffoldBody(
                     children: [
                       LdListItem(
@@ -425,23 +420,26 @@ class ChemicalShell extends StatelessWidget {
   const ChemicalShell({super.key, required this.child});
   @override
   Widget build(BuildContext context) {
+    final theme = LdTheme.of(context);
     return LdScaffold(
       resizeToAvoidBottomInset: false,
       debugName: "Chemical shell",
-      appBarScrollBehavior: LdAppBarScrollBehavior.mobileOnly,
-      appBarPlacement: LdScaffoldAppBarPlacement.mobileBottomDesktopTop,
-      appBar: TabNavigation(
-        activeRoute: GoRouterState.of(context).uri.path,
-        tabs: [
-          LdNavigationTab(label: "Chemical", icon: const Icon(LucideIcons.beaker), route: "/chemical"),
-          LdNavigationTab(label: "Details", icon: const Icon(LucideIcons.book), route: "/chemical-detail"),
-          LdNavigationTab(label: "Usage", icon: const Icon(LucideIcons.book), route: "/chemical-usage"),
-          LdNavigationTab(label: "Exit", icon: const Icon(LucideIcons.x), route: "/"),
-        ],
-        onTabPressed: (route) {
-          context.replace(route);
-        },
-      ),
+      appBars: [
+        TabNavigation(
+          position: theme.platform.isMobile ? AppBarPosition.bottom : AppBarPosition.top,
+          scrollBehavior: LdAppBarScrollBehavior.mobileOnly,
+          activeRoute: GoRouterState.of(context).uri.path,
+          tabs: [
+            LdNavigationTab(label: "Chemical", icon: const Icon(LucideIcons.beaker), route: "/chemical"),
+            LdNavigationTab(label: "Details", icon: const Icon(LucideIcons.book), route: "/chemical-detail"),
+            LdNavigationTab(label: "Usage", icon: const Icon(LucideIcons.book), route: "/chemical-usage"),
+            LdNavigationTab(label: "Exit", icon: const Icon(LucideIcons.x), route: "/"),
+          ],
+          onTabPressed: (route) {
+            context.replace(route);
+          },
+        ),
+      ],
       body: child,
     );
   }

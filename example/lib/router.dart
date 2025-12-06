@@ -66,7 +66,7 @@ import 'components/bento_gallery.dart';
 class AppRouter {
   AppRouter();
 
-  late final router = GoRouter(debugLogDiagnostics: true, initialLocation: "/components/select", routes: [
+  late final router = GoRouter(debugLogDiagnostics: true, initialLocation: "/task-demo", routes: [
     ShellRoute(
       routes: [
         GoRoute(
@@ -91,27 +91,6 @@ class AppRouter {
       pageBuilder: (context, state) {
         return NoTransitionPage(child: AppBarDemo());
       },
-    ),
-    StatefulShellRoute.indexedStack(
-      branches: [
-        StatefulShellBranch(
-          initialLocation: "/movie-demo",
-          routes: [
-            ...buildMonkeyRoutes(
-              basePath: "/movie-demo",
-              parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
-              detailPage: MovieDetailPage(),
-              detailInDialog: true,
-              masterPage: MovieMasterPage(),
-              repositoryBuilder: (context) async => movieRepository,
-              layoutMode: LdMonkeyLayoutMode.neverSideBySide,
-            ),
-          ],
-        ),
-      ],
-      builder: (context, state, navigationShell) => DemoShell(
-        child: navigationShell,
-      ),
     ),
     ShellRoute(
       builder: (context, state, child) {
@@ -150,14 +129,40 @@ class AppRouter {
           pageBuilder: (context, state) =>
               NoTransitionPage<void>(key: state.pageKey, child: const MaterialDocumentation()),
         ),
-        ...buildMonkeyRoutes<Task, int>(
-          basePath: "/task-demo",
-          parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
-          detailPage: TaskDetailPage(),
-          masterPage: TaskMasterPage(),
-          repositoryBuilder: (context) async => taskRepository,
-          layoutMode: LdMonkeyLayoutMode.auto,
-          shellBuilder: (context, state, child) => TaskShell(state: state, child: child),
+        StatefulShellRoute.indexedStack(
+          branches: [
+            StatefulShellBranch(
+              initialLocation: "/movie-demo",
+              routes: [
+                ...buildMonkeyRoutes(
+                  basePath: "/movie-demo",
+                  parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
+                  detailPage: MovieDetailPage(),
+                  detailInDialog: true,
+                  masterPage: MovieMasterPage(),
+                  repositoryBuilder: (context) async => movieRepository,
+                  layoutMode: LdMonkeyLayoutMode.neverSideBySide,
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              initialLocation: "/task-demo",
+              routes: [
+                ...buildMonkeyRoutes<Task, int>(
+                  basePath: "/task-demo",
+                  parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
+                  detailPage: TaskDetailPage(),
+                  masterPage: TaskMasterPage(),
+                  repositoryBuilder: (context) async => taskRepository,
+                  layoutMode: LdMonkeyLayoutMode.auto,
+                  shellBuilder: (context, state, child) => TaskShell(state: state, child: child),
+                ),
+              ],
+            ),
+          ],
+          builder: (context, state, navigationShell) => DemoShell(
+            child: navigationShell,
+          ),
         ),
 
         /*GoRoute(
@@ -343,9 +348,11 @@ class AppRouter {
                   builder: (context) => LdModalRoute(
                     context: context,
                     pageBuilder: (context) => LdScaffold(
-                      appBar: LdAppBar(
-                        title: const Text("This is a title"),
-                      ),
+                      appBars: [
+                        LdAppBar(
+                          title: const Text("This is a title"),
+                        ),
+                      ],
                       body: LdScaffoldBody(
                         children: [
                           LdText("This is modal content"),

@@ -7,9 +7,11 @@ LdModalRoute ldFilterModal<T extends Identifiable<IdType>, IdType>(BuildContext 
   return LdModalRoute(
     context: context,
     pageBuilder: (context) => LdScaffold(
-      appBar: LdAppBar(
-        title: Text(LiquidLocalizations.of(context).filter),
-      ),
+      appBars: [
+        LdAppBar(
+          title: Text(LiquidLocalizations.of(context).filter),
+        ),
+      ],
       body: LdScaffoldBody(children: [LdFilterModal<T, IdType>()]),
     ),
   );
@@ -23,8 +25,9 @@ class LdFilterContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
   @override
   Widget build(BuildContext context) {
     return LdContextMenu(
-      builder: (context, isOpen, open, child) => LdButton.ghost(
+      builder: (context, isShuttle, open, isOpen, child) => LdButton.ghost(
         autoLoading: false,
+        active: isOpen,
         child: Text(LiquidLocalizations.of(context).filter),
         onPressed: () {
           open();

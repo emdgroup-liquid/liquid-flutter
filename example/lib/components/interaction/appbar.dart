@@ -43,7 +43,8 @@ class AppBarApi extends StatelessWidget {
                         child: const Text("Item 1"),
                       ),
                     ]),
-                    builder: (context, isOpen, open, child) => LdButton.ghost(
+                    builder: (context, isShuttle, open, isOpen, child) => LdButton.ghost(
+                      active: isOpen,
                       child: const Icon(LucideIcons.ellipsisVertical),
                       onPressed: () {
                         open();

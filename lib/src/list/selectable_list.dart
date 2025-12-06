@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/monkey/intents.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class LdSelectableList<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
@@ -141,6 +142,7 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
   // Called when the user taps an item
   void onTap(IdType item) {
     _focusNode.requestFocus();
+
     if (!isMultiSelect) {
       _selectedItems.toggle(item);
       return;

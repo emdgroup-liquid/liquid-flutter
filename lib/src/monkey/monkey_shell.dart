@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/drawer_layout.dart';
 import 'package:liquid_flutter/src/drawer_state.dart';
 import 'package:liquid_flutter/src/monkey/intents.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -411,7 +412,6 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
                     return widget.child;
                   }
                   final drawerState = context.watch<LdDrawerState>();
-                  final scaffold = context.findAncestorStateOfType<LdScaffoldState>();
                   return Center(
                     child: LdAutoSpace(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -422,7 +422,7 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
                             leading: const Icon(LucideIcons.panelLeftOpen),
                             child: const Text("Show list"),
                             onPressed: () {
-                              scaffold?.openDrawer();
+                              LdDrawerLayout.openDrawer(context);
                             },
                           ),
                         ],
@@ -445,26 +445,25 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
 
   @override
   Widget build(BuildContext context) {
-    if (_repository == null) {
-      return LdSubmit<void, void>(
-        config: LdSubmitConfig(
-          autoTrigger: true,
-          timeout: null,
-          action: (_) async {
-            await _initRepository();
-          },
-        ),
-        builder: const LdSubmitCenteredBuilder<void, void>(),
-      );
-    }
-
-    return Provider.value(
-      value: actions,
-      child: ChangeNotifierProvider.value(
-        value: state,
-        child: Shortcuts(
-          shortcuts: monkeyShortcuts,
-          child: FocusScope(autofocus: true, child: _buildInitialized(context)),
+    return LdSubmit<bool, void>(
+      config: LdSubmitConfig(
+        autoTrigger: true,
+        timeout: null,
+        action: (_) async {
+          await _initRepository();
+          return true;
+        },
+      ),
+      builder: LdSubmitCenteredBuilder<bool, void>(
+        resultBuilder: (context, response, controller) => Provider.value(
+          value: actions,
+          child: ChangeNotifierProvider.value(
+            value: state,
+            child: Shortcuts(
+              shortcuts: monkeyShortcuts,
+              child: FocusScope(autofocus: true, child: _buildInitialized(context)),
+            ),
+          ),
         ),
       ),
     );

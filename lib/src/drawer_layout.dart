@@ -10,7 +10,7 @@ class LdDrawerLayout extends StatefulWidget {
   final Widget drawer;
   final Widget body;
   final double reflowBreakpoint;
-  final Stream<Intent> intents;
+
   final void Function(LdDrawerState) onStateChange;
 
   final double drawerWidth;
@@ -21,14 +21,29 @@ class LdDrawerLayout extends StatefulWidget {
     required this.reflowBreakpoint,
     required this.drawerWidth,
     required this.onStateChange,
-    required this.intents,
   });
 
   @override
-  State<LdDrawerLayout> createState() => _LdDrawerLayoutState();
+  State<LdDrawerLayout> createState() => LdDrawerLayoutState();
+
+  static LdDrawerLayoutState? maybeStateOf(BuildContext context) {
+    return context.findAncestorStateOfType<LdDrawerLayoutState>();
+  }
+
+  static openDrawer(BuildContext context) {
+    maybeStateOf(context)?.openDrawer();
+  }
+
+  static closeDrawer(BuildContext context) {
+    maybeStateOf(context)?.closeDrawer();
+  }
+
+  static toggleDrawer(BuildContext context) {
+    maybeStateOf(context)?.toggleDrawer();
+  }
 }
 
-class _LdDrawerLayoutState extends State<LdDrawerLayout> {
+class LdDrawerLayoutState extends State<LdDrawerLayout> {
   bool _isDragging = false;
   LocalHistoryEntry? _historyEntry;
 
@@ -41,7 +56,6 @@ class _LdDrawerLayoutState extends State<LdDrawerLayout> {
   @override
   initState() {
     super.initState();
-    _intentSubscription = widget.intents.listen(_handleIntent);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       if (_isSideBySide) {
         _showDrawer();
@@ -60,6 +74,22 @@ class _LdDrawerLayoutState extends State<LdDrawerLayout> {
       } else {
         _showDrawer();
       }
+    }
+  }
+
+  void openDrawer() {
+    _showDrawer();
+  }
+
+  void closeDrawer() {
+    _hideDrawer();
+  }
+
+  void toggleDrawer() {
+    if (_isDrawerOpen) {
+      _hideDrawer();
+    } else {
+      _showDrawer();
     }
   }
 

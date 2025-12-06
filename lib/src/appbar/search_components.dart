@@ -39,15 +39,8 @@ class _LdSearchInputState extends State<LdSearchInput> {
   void initState() {
     super.initState();
     _inputRectNotifier = ValueNotifier<Rect?>(null);
-    _intentSubscription = LdScaffoldState.maybeOf(context)?.intentRouter.listen(_onScaffoldIntent);
 
     _inputWrapperFocusNode.addListener(_onFocusChanged);
-  }
-
-  void _onScaffoldIntent(Intent intent) {
-    if (intent is SearchIntent) {
-      _inputWrapperFocusNode.requestFocus();
-    }
   }
 
   @override
@@ -153,7 +146,6 @@ class _LdSearchInputState extends State<LdSearchInput> {
 
   @override
   Widget build(BuildContext context) {
-    final viewInsets = MediaQuery.viewInsetsOf(context);
     // Update input rect when the widget rebuilds (e.g., when layout changes)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_overlayEntry != null) {

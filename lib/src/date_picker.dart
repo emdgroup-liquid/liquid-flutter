@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 import 'package:liquid_flutter/src/shrinkwrap_pageview.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -340,17 +341,18 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
     );
 
     return LdScaffold(
-      appBar: LdAppBar(
-        title: Text(widget.label),
-        backgroundMode: LdAppBarBackgroundMode.visible,
-        borderMode: LdAppBarBorderMode.visible,
-        shadowMode: LdAppBarShadowMode.visible,
-      ),
-      secondaryAppBarPlacement: LdScaffoldAppBarPlacement.bottom,
-      secondaryAppBar: LdAppBar(
-        actions: [
-          LdButton(
-            active: isSelected(DateTime.now()),
+      appBars: [
+        LdAppBar(
+          title: Text(widget.label),
+          backgroundMode: LdAppBarBackgroundMode.visible,
+          borderMode: LdAppBarBorderMode.visible,
+          shadowMode: LdAppBarShadowMode.visible,
+        ),
+        LdAppBar(
+          position: AppBarPosition.bottom,
+          actions: [
+            LdButton(
+              active: isSelected(DateTime.now()),
             disabled: !isValidDate(DateTime.now()),
             child: const Text('Today'),
             onPressed: () {
@@ -376,6 +378,7 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
           },
         ),
       ),
+      ],
       body: LdScaffoldBody(
         children: [
           LdBundle(

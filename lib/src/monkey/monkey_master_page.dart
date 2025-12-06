@@ -104,14 +104,18 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
               child: Builder(
                 builder: (context) {
                   return LdScaffold(
-                    appBar: widget.appBar ??
-                        LdMonkeyAppBar<T, IdType>(
-                          location: LdMonkeyActionLocation.masterAppBar,
-                        ),
-                    secondaryAppBar: widget.secondaryAppBar ??
-                        LdMonkeyAppBar<T, IdType>(
-                          location: LdMonkeyActionLocation.masterSecondary,
-                        ),
+                    appBars: [
+                      widget.appBar ??
+                          LdMonkeyAppBar<T, IdType>(
+                            location: LdMonkeyActionLocation.masterAppBar,
+                            debugName: "Master App Bar",
+                          ),
+                      widget.secondaryAppBar ??
+                          LdMonkeyAppBar<T, IdType>(
+                            location: LdMonkeyActionLocation.masterSecondary,
+                            debugName: "Master Secondary App Bar",
+                          ),
+                    ],
                     body: _buildList(
                       context,
                       repository,

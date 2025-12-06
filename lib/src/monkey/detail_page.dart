@@ -51,8 +51,10 @@ class LdMonkeyDetailPage<T extends Identifiable<IdType>, IdType> extends Statele
   @override
   Widget build(BuildContext context) {
     return LdScaffold(
-      appBar: primaryAppBar ?? LdMonkeyAppBar<T, IdType>(location: LdMonkeyActionLocation.detailAppBar),
-      secondaryAppBar: secondaryAppBar ?? LdMonkeyAppBar<T, IdType>(location: LdMonkeyActionLocation.detailSecondary),
+      appBars: [
+        primaryAppBar ?? LdMonkeyAppBar<T, IdType>(location: LdMonkeyActionLocation.detailAppBar),
+        secondaryAppBar ?? LdMonkeyAppBar<T, IdType>(location: LdMonkeyActionLocation.detailSecondary),
+      ],
       body: body,
     );
   }

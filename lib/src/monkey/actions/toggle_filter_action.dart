@@ -50,7 +50,7 @@ LdMonkeyAction<T, IdType> toggleFilters<T extends Identifiable<IdType>, IdType>(
               ListenableProvider<LdRepository<T, IdType>>.value(value: repository),
             ];
           },
-          builder: (context, isOpen, open, child) => LdButton(child: icon, onPressed: open),
+          builder: (context, isShuttle, open, isOpen, child) => LdButton(child: icon, onPressed: open),
           menuBuilder: (context) => ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 300),
             child: LdFilterModal<T, IdType>(),

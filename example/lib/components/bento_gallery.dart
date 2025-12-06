@@ -9,20 +9,22 @@ class BentoGallery extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdScaffold(
-      appBar: LdAppBar(
-        addContainer: true,
-        title: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text("Bento Gallery"),
-            LdBreadcrumb.fromStrings([
-              "Components",
-              "Bento Gallery",
-            ]),
-          ],
+      appBars: [
+        LdAppBar(
+          addContainer: true,
+          title: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text("Bento Gallery"),
+              LdBreadcrumb.fromStrings([
+                "Components",
+                "Bento Gallery",
+              ]),
+            ],
+          ),
         ),
-      ),
+      ],
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
@@ -518,7 +520,7 @@ class _BentoCard extends StatelessWidget {
 
       case "Context Menu":
         return LdContextMenu(
-          builder: (context, isOpen, open, child) => child!,
+          builder: (context, isShuttle, open, isOpen, child) => child!,
           menuBuilder: (context) => SizedBox(
             width: 150,
             height: 150,

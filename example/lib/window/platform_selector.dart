@@ -21,7 +21,12 @@ class _PlatformSelectorState extends State<PlatformSelector> {
       "Android": LdPlatform.android,
       "Linux": LdPlatform.linux,
       "Windows": LdPlatform.windows,
-      "Web": LdPlatform.web,
+      "Web Android": LdPlatform.webAndroid,
+      "Web iOS": LdPlatform.webIOS,
+      "Web macOS": LdPlatform.webMacOS,
+      "Web Windows": LdPlatform.webWindows,
+      "Web Linux": LdPlatform.webLinux,
+      "Web Unknown": LdPlatform.webUnknown,
     };
 
     return LdSelect<LdPlatform>(

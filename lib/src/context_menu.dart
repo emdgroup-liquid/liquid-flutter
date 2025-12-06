@@ -89,7 +89,13 @@ class LdContextMenu extends StatefulWidget {
 
   final Widget? child;
 
-  final Widget Function(BuildContext context, bool isShuttle, VoidCallback trigger, Widget? child) builder;
+  final Widget Function(
+    BuildContext context,
+    bool isShuttle,
+    VoidCallback trigger,
+    bool isOpen,
+    Widget? child,
+  ) builder;
 
   final Widget Function(
     BuildContext context,
@@ -109,6 +115,8 @@ class _LdContextMenuState extends State<LdContextMenu> {
   final ValueNotifier<Size> _menuSizeNotifier = ValueNotifier(Size.zero);
 
   bool get _mobile => !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+
+  bool _isOpen = false;
 
   @override
   void dispose() {
@@ -158,8 +166,11 @@ class _LdContextMenuState extends State<LdContextMenu> {
       return;
     }
     _cursorPosition = globalPosition;
+    setState(() {
+      _isOpen = true;
+    });
 
-    Navigator.of(context, rootNavigator: true).push(
+    await Navigator.of(context, rootNavigator: true).push(
       ContextMenuRoute(
         inheritTriggerWidth: widget.inheritTriggerWidth,
         placeAboveTrigger: widget.placeAboveTrigger,
@@ -181,11 +192,15 @@ class _LdContextMenuState extends State<LdContextMenu> {
           context,
           isShuttle,
           trigger,
+          _isOpen,
           child,
         ),
         child: widget.child,
       ),
     );
+    setState(() {
+      _isOpen = false;
+    });
   }
 
   Widget _buildTriggerDetector(BuildContext context) {
@@ -201,16 +216,14 @@ class _LdContextMenuState extends State<LdContextMenu> {
         LdHaptics.vibrate(HapticsType.heavy);
         _open(globalPosition: details.globalPosition);
       },
-      child: Hero(
-        tag: "context-menu-trigger-${_triggerKey.hashCode}",
-        child: widget.builder(
-          context,
-          false,
-          () {
-            _open();
-          },
-          widget.child,
-        ),
+      child: widget.builder(
+        context,
+        false,
+        () {
+          _open();
+        },
+        _isOpen,
+        widget.child,
       ),
     );
   }

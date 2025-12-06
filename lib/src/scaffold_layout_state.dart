@@ -1,7 +1,49 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/scaffold.dart';
+
+// Legacy types - kept for compatibility but not actively used
+enum LdScaffoldSlot {
+  body,
+  drawer,
+}
+
+enum EffectivePosition {
+  top,
+  bottom,
+}
+
+enum AppBarRole {
+  primary,
+  secondary,
+}
+
+class LdScaffoldAppBarState {
+  final double innerHeight;
+  final double verticalMargin;
+  final double effectiveHeight;
+  final double effectiveInnerHeight;
+  final EffectivePosition effectivePosition;
+
+  const LdScaffoldAppBarState({
+    required this.innerHeight,
+    required this.verticalMargin,
+    required this.effectiveHeight,
+    required this.effectiveInnerHeight,
+    required this.effectivePosition,
+  });
+}
+
+extension LdScaffoldSlotExtension on LdScaffoldSlot {
+  EffectivePosition get effectivePosition {
+    // This is a stub - actual implementation would depend on app bar configuration
+    return EffectivePosition.top;
+  }
+
+  AppBarRole get role {
+    // This is a stub - actual implementation would depend on app bar configuration
+    return AppBarRole.primary;
+  }
+}
 
 class LdScaffoldLayoutState {
   final ValueNotifier<double> bodyScrollOffset;

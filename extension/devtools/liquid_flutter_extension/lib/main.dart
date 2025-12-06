@@ -15,7 +15,7 @@ void main() {
               localizationsDelegates:
                   LiquidLocalizations.localizationsDelegates,
               home: LdScaffold(
-                appBar: LdAppBar(title: Text('Liquid Flutter Extension')),
+                appBars: [LdAppBar(title: Text('Liquid Flutter Extension'))],
                 body: const LiquidFlutterExtension(),
               ),
             );

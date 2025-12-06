@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 
 Future<bool> ldConfirmModal(
     {String? description,
@@ -21,12 +22,13 @@ Future<bool> ldConfirmModal(
       dialogSize: LdSize.s,
       pageBuilder: (context) {
         return LdScaffold(
-          appBar: LdAppBar(
-            title: title ?? Text(locale.confirm),
-          ),
-          secondaryAppBarPlacement: LdScaffoldAppBarPlacement.bottom,
-          secondaryAppBar: LdAppBar(
-            actions: [
+          appBars: [
+            LdAppBar(
+              title: title ?? Text(locale.confirm),
+            ),
+            LdAppBar(
+              position: AppBarPosition.bottom,
+              actions: [
               LdFlexibleChild(
                 child: LdButton(
                   size: LdSize.l,
@@ -47,6 +49,7 @@ Future<bool> ldConfirmModal(
               ),
             ],
           ),
+        ],
           body: LdScaffoldBody(
             children: [
               LdAutoSpace(
@@ -138,30 +141,32 @@ class _LdEnterTextModalState extends State<_LdEnterTextModal> {
   @override
   Widget build(BuildContext context) {
     return LdScaffold(
-      appBar: LdAppBar(
-        title: widget.title ?? Text(LiquidLocalizations.of(context).enterText),
-      ),
-      secondaryAppBarPlacement: LdScaffoldAppBarPlacement.bottom,
-      secondaryAppBar: LdAppBar(
-        actions: [
-          if (widget.allowDismiss)
+      appBars: [
+        LdAppBar(
+          title: widget.title ?? Text(LiquidLocalizations.of(context).enterText),
+        ),
+        LdAppBar(
+          position: AppBarPosition.bottom,
+          actions: [
+            if (widget.allowDismiss)
+              LdFlexibleChild(
+                child: LdButton.vague(
+                  color: LdTheme.of(context).error,
+                  width: double.infinity,
+                  child: Text(LiquidLocalizations.of(context).cancel),
+                  onPressed: () => Navigator.of(context).pop(null),
+                ),
+              ),
             LdFlexibleChild(
-              child: LdButton.vague(
-                color: LdTheme.of(context).error,
+              child: LdButton.filled(
                 width: double.infinity,
-                child: Text(LiquidLocalizations.of(context).cancel),
-                onPressed: () => Navigator.of(context).pop(null),
+                child: Text(LiquidLocalizations.of(context).done),
+                onPressed: () => Navigator.of(context).pop(_controller.text),
               ),
             ),
-          LdFlexibleChild(
-            child: LdButton.filled(
-              width: double.infinity,
-              child: Text(LiquidLocalizations.of(context).done),
-              onPressed: () => Navigator.of(context).pop(_controller.text),
-            ),
-          ),
-        ],
-      ),
+          ],
+        ),
+      ],
       body: LdScaffoldBody(
         children: [
           LdAutoSpace(children: [

@@ -29,7 +29,10 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
           return LdContextMenu(
             child: child,
             disabled: (listSelection.length > 1 && !listSelection.contains(item.value!.id)) || visibleActions.isEmpty,
-            builder: (context, isOpen, open, child) => child!,
+            builder: (context, isShuttle, open, isOpen, child) => LdButtonConfigProvider(
+              LdButtonConfig(active: isOpen),
+              child!,
+            ),
             menuProviders: (context) => [
               Provider<LdPaginatorItem<T>>.value(value: item),
               ChangeNotifierProvider<LdMonkeyShellState<T, IdType>>.value(value: shell),

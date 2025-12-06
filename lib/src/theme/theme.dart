@@ -4,12 +4,34 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 import 'package:provider/provider.dart';
 
-enum LdPlatform { macos, ios, android, linux, windows, web }
+enum LdPlatform { macos, ios, android, linux, windows, webAndroid, webIOS, webMacOS, webWindows, webLinux, webUnknown }
 
 extension LdPlatformExtension on LdPlatform {
-  bool get isDesktop => this == LdPlatform.macos || this == LdPlatform.windows || this == LdPlatform.linux;
-  bool get isMobile => this == LdPlatform.ios || this == LdPlatform.android;
-  bool get isWeb => this == LdPlatform.web;
+  bool get isDesktop => switch (this) {
+        LdPlatform.macos => true,
+        LdPlatform.windows => true,
+        LdPlatform.linux => true,
+        LdPlatform.webMacOS => true,
+        LdPlatform.webWindows => true,
+        LdPlatform.webLinux => true,
+        _ => false,
+      };
+  bool get isMobile => switch (this) {
+        LdPlatform.ios => true,
+        LdPlatform.android => true,
+        LdPlatform.webIOS => true,
+        LdPlatform.webAndroid => true,
+        _ => false,
+      };
+  bool get isWeb => switch (this) {
+        LdPlatform.webAndroid => true,
+        LdPlatform.webIOS => true,
+        LdPlatform.webMacOS => true,
+        LdPlatform.webWindows => true,
+        LdPlatform.webLinux => true,
+        LdPlatform.webUnknown => true,
+        _ => false,
+      };
 }
 
 /// Provides a theme to all the components in the widget tree
@@ -31,8 +53,12 @@ class LdTheme extends ChangeNotifier {
       (false, TargetPlatform.macOS) => LdPlatform.macos,
       (false, TargetPlatform.linux) => LdPlatform.linux,
       (false, TargetPlatform.windows) => LdPlatform.windows,
-      (true, _) => LdPlatform.web,
-      _ => LdPlatform.web,
+      (true, TargetPlatform.android) => LdPlatform.webAndroid,
+      (true, TargetPlatform.iOS) => LdPlatform.webIOS,
+      (true, TargetPlatform.macOS) => LdPlatform.webMacOS,
+      (true, TargetPlatform.windows) => LdPlatform.webWindows,
+      (true, TargetPlatform.linux) => LdPlatform.webLinux,
+      _ => LdPlatform.webUnknown,
     };
   }
 

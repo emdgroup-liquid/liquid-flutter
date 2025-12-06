@@ -7,7 +7,6 @@ import 'package:liquid/demos/task_demo/detail.dart';
 import 'package:liquid/demos/task_demo/repository.dart';
 import 'package:liquid/demos/task_demo/task.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/monkey/monkey_app_bar.dart';
 
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -260,6 +259,7 @@ class TaskDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return LdMonkeyDetailPage<Task, int>.scrollable(
       primaryAppBar: LdMonkeyAppBar<Task, int>(
+        debugName: "Detail App Bar Task",
         location: LdMonkeyActionLocation.detailAppBar,
         title: Text("Task"),
       ),
@@ -274,7 +274,11 @@ class TaskMasterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyMasterPage<Task, int>(
-      appBar: LdMonkeyAppBar<Task, int>(location: LdMonkeyActionLocation.masterAppBar, title: Text("Tasks")),
+      appBar: LdMonkeyAppBar<Task, int>(
+        location: LdMonkeyActionLocation.masterAppBar,
+        title: Text("Tasks"),
+        debugName: "Master App Bar Tasks",
+      ),
       buildItem: (context, item) => LdListItem(
         title: Text(
           item.value!.task,

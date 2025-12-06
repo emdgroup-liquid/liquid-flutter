@@ -28,7 +28,7 @@ class LdAppBarActionWidget extends StatelessWidget {
           menuProviders: menuProviders,
           blurMode: LdContextMenuBlurMode.never,
           zoomMode: LdContextZoomMode.never,
-          builder: (context, isOpen, open, child) => ActionTriggerButton(
+          builder: (context, isShuttle, open, isOpen, child) => ActionTriggerButton(
             action: action,
             loadingText: action.loadingText(context),
             layoutState: layoutState,

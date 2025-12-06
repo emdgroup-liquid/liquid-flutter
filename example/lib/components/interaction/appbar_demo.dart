@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class AppBarDemo extends StatefulWidget {
@@ -18,8 +19,8 @@ class _AppBarDemoState extends State<AppBarDemo> {
   LdAppBarScrollBehavior _primaryScrollBehavior = LdAppBarScrollBehavior.static;
   LdAppBarScrollBehavior _secondaryScrollBehavior = LdAppBarScrollBehavior.static;
 
-  LdScaffoldAppBarPlacement _primaryAppBarPlacement = LdScaffoldAppBarPlacement.top;
-  LdScaffoldAppBarPlacement _secondaryAppBarPlacement = LdScaffoldAppBarPlacement.mobileBottomDesktopTop;
+  AppBarPosition _primaryAppBarPosition = AppBarPosition.top;
+  AppBarPosition _secondaryAppBarPosition = AppBarPosition.bottom;
 
   LdAppBarShadowMode _shadowMode = LdAppBarShadowMode.whenScrolled;
   LdAppBarBorderMode _borderMode = LdAppBarBorderMode.whenScrolled;
@@ -105,7 +106,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
           child: const Text('Settings'),
         ),
         LdContextMenu(
-            builder: (context, isOpen, open, child) => LdButton(
+            builder: (context, isShuttle, open, isOpen, child) => LdButton(
                   leading: const Icon(LucideIcons.ellipsisVertical),
                   onPressed: () {
                     open();
@@ -162,30 +163,30 @@ class _AppBarDemoState extends State<AppBarDemo> {
   @override
   Widget build(BuildContext context) {
     return LdScaffold(
-      appBar: _hasPrimary
-          ? LdAppBar(
-              title: LdText.l('Primary AppBar'),
-              actions: _actions,
-              searchConfig: _primarySearchConfig,
-              shadowMode: _shadowMode,
-              borderMode: _borderMode,
-              backgroundMode: _backgroundMode,
-            )
-          : null,
-      secondaryAppBar: _hasSecondary
-          ? LdAppBar(
-              title: LdText.l('Secondary AppBar'),
-              actions: _actions.take(3).toList(), // Fewer actions for secondary
-              searchConfig: _secondarySearchConfig,
-              shadowMode: _shadowMode,
-              borderMode: _borderMode,
-              backgroundMode: _backgroundMode,
-            )
-          : null,
-      appBarPlacement: _primaryAppBarPlacement,
-      secondaryAppBarPlacement: _secondaryAppBarPlacement,
-      appBarScrollBehavior: _primaryScrollBehavior,
-      secondaryAppBarScrollBehavior: _secondaryScrollBehavior,
+      appBars: [
+        if (_hasPrimary)
+          LdAppBar(
+            position: _primaryAppBarPosition,
+            scrollBehavior: _primaryScrollBehavior,
+            title: LdText.l('Primary AppBar'),
+            actions: _actions,
+            searchConfig: _primarySearchConfig,
+            shadowMode: _shadowMode,
+            borderMode: _borderMode,
+            backgroundMode: _backgroundMode,
+          ),
+        if (_hasSecondary)
+          LdAppBar(
+            position: _secondaryAppBarPosition,
+            scrollBehavior: _secondaryScrollBehavior,
+            title: LdText.l('Secondary AppBar'),
+            actions: _actions.take(3).toList(), // Fewer actions for secondary
+            searchConfig: _secondarySearchConfig,
+            shadowMode: _shadowMode,
+            borderMode: _borderMode,
+            backgroundMode: _backgroundMode,
+          ),
+      ],
       primaryScrollController: _scrollController,
       body: LdScaffoldBody(
         children: [
@@ -223,14 +224,12 @@ class _AppBarDemoState extends State<AppBarDemo> {
                   ],
                 ),
                 LdText.p('Position:'),
-                LdSwitch<LdScaffoldAppBarPlacement>(
-                  value: _primaryAppBarPlacement,
-                  onChanged: (value) => setState(() => _primaryAppBarPlacement = value),
+                LdSwitch<AppBarPosition>(
+                  value: _primaryAppBarPosition,
+                  onChanged: (value) => setState(() => _primaryAppBarPosition = value),
                   children: {
-                    LdScaffoldAppBarPlacement.top: LdText.p('Top'),
-                    LdScaffoldAppBarPlacement.bottom: LdText.p('Bottom'),
-                    LdScaffoldAppBarPlacement.mobileTopDesktopBottom: LdText.p('Mobile Top, Desktop Bottom'),
-                    LdScaffoldAppBarPlacement.mobileBottomDesktopTop: LdText.p('Mobile Bottom, Desktop Top'),
+                    AppBarPosition.top: LdText.p('Top'),
+                    AppBarPosition.bottom: LdText.p('Bottom'),
                   },
                 ),
                 LdText.p('Scroll Behavior:'),
@@ -272,14 +271,12 @@ class _AppBarDemoState extends State<AppBarDemo> {
                   ],
                 ),
                 LdText.p('Position:'),
-                LdSwitch<LdScaffoldAppBarPlacement>(
-                  value: _secondaryAppBarPlacement,
-                  onChanged: (value) => setState(() => _secondaryAppBarPlacement = value),
+                LdSwitch<AppBarPosition>(
+                  value: _secondaryAppBarPosition,
+                  onChanged: (value) => setState(() => _secondaryAppBarPosition = value),
                   children: {
-                    LdScaffoldAppBarPlacement.top: LdText.p('Top'),
-                    LdScaffoldAppBarPlacement.bottom: LdText.p('Bottom'),
-                    LdScaffoldAppBarPlacement.mobileTopDesktopBottom: LdText.p('Mobile Top, Desktop Bottom'),
-                    LdScaffoldAppBarPlacement.mobileBottomDesktopTop: LdText.p('Mobile Bottom, Desktop Top'),
+                    AppBarPosition.top: LdText.p('Top'),
+                    AppBarPosition.bottom: LdText.p('Bottom'),
                   },
                 ),
                 LdText.p('Scroll Behavior:'),

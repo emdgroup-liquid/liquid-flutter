@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:liquid/components/layout/components_accordion.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 import 'package:provider/provider.dart';
 
 class ComponentPagePath {
@@ -31,28 +32,31 @@ class ComponentPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = LdTheme.of(context);
     return Provider<ComponentPagePath>.value(
       value: ComponentPagePath(path: path),
       child: LdScaffold(
-        appBarScrollBehavior: LdAppBarScrollBehavior.mobileOnly,
-        appBarPlacement: LdScaffoldAppBarPlacement.mobileBottomDesktopTop,
-        appBar: LdAppBar(
-          borderMode: LdAppBarBorderMode.visible,
-          addContainer: true,
-          title: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-              ),
-              LdBreadcrumb.fromStrings([
-                category,
-                title,
-              ]),
-            ],
+        appBars: [
+          LdAppBar(
+            position: theme.platform.isMobile ? AppBarPosition.bottom : AppBarPosition.top,
+            scrollBehavior: LdAppBarScrollBehavior.mobileOnly,
+            borderMode: LdAppBarBorderMode.visible,
+            addContainer: true,
+            title: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                ),
+                LdBreadcrumb.fromStrings([
+                  category,
+                  title,
+                ]),
+              ],
+            ),
           ),
-        ),
+        ],
         body: LdScaffoldBody(
           addContainer: true,
           children: [

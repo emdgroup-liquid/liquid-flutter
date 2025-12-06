@@ -497,35 +497,36 @@ class _LdChoosePageState<T extends Identifiable<IdType>, IdType>
     final searchConfig = widget.repository.getSearchConfig();
     return LdScaffold(
       debugName: "LdChoosePage",
-      appBar: LdAppBar(
-        debugName: "LdChoosePageAppBar",
-        title: Text(widget.label),
-        implyCloseModalButton: false,
-        actions: [
-          LdButton.ghost(
-            disabled: _selectedItems.isEmpty,
-            onPressed: () {
-              setState(() {
-                _selectedItems = {};
-              });
-            },
-            child: const Text("Clear"),
+      appBars: [
+        LdAppBar(
+          debugName: "LdChoosePageAppBar",
+          title: Text(widget.label),
+          implyCloseModalButton: false,
+          actions: [
+            LdButton.ghost(
+              disabled: _selectedItems.isEmpty,
+              onPressed: () {
+                setState(() {
+                  _selectedItems = {};
+                });
+              },
+              child: const Text("Clear"),
+            ),
+            LdButton(
+              disabled: _selectedItems.isEmpty && !widget.allowEmpty,
+              onPressed: () {
+                maybePopContextMenu(context);
+                Navigator.of(context).pop(_selectedItems);
+              },
+              child: const Text("Done"),
+            ),
+          ],
+        ),
+        if (searchConfig != null)
+          LdAppBar(
+            searchConfig: searchConfig,
           ),
-          LdButton(
-            disabled: _selectedItems.isEmpty && !widget.allowEmpty,
-            onPressed: () {
-              maybePopContextMenu(context);
-              Navigator.of(context).pop(_selectedItems);
-            },
-            child: const Text("Done"),
-          ),
-        ],
-      ),
-      secondaryAppBar: searchConfig != null
-          ? LdAppBar(
-              searchConfig: searchConfig,
-            )
-          : null,
+      ],
       body: Builder(builder: (context) {
         return LdSelectableList<T, IdType>(
             paginator: widget.repository,

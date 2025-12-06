@@ -121,7 +121,6 @@ class _LdSubmitState<T, Arg> extends State<LdSubmit<T, Arg>> {
       );
       _createdController = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        print("init controller, due to config change");
         _controller?.init();
       });
     }

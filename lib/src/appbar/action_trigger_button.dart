@@ -56,7 +56,9 @@ class ActionTriggerButton extends StatelessWidget {
       if (icon == null) {
         child = Text(label);
       } else {
-        if (layoutState.slot == LdScaffoldSlot.secondaryAppBarBottom && action.alwaysShowLabel) {
+        // Show label for bottom app bars if alwaysShowLabel is true
+        // This check can be enhanced to detect bottom position from context if needed
+        if (action.alwaysShowLabel) {
           child = Column(
             children: [icon, ldSpacerXS, Text(label)],
           );

@@ -206,6 +206,7 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
     required LdSelectItem<T>? activeItem,
     required TextStyle defaultTextStyle,
     required VoidCallback open,
+    required bool isOpen,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -219,6 +220,7 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
           open();
           _focusNodeChildren?.requestFocus();
         },
+        active: isOpen,
         color: theme.palette.primary,
         builder: (context, _, status, __) {
           final colors = inputColor(
@@ -279,9 +281,10 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
           inheritTriggerWidth: true,
           listenForTaps: false,
           placeAboveTrigger: true,
-          builder: (context, isOpen, open, child) {
+          builder: (context, isShuttle, open, isOpen, child) {
             return _buildDropdownButton(
               context: context,
+              isOpen: isOpen,
               theme: theme,
               activeItem: activeItem,
               defaultTextStyle: defaultTextStyle,

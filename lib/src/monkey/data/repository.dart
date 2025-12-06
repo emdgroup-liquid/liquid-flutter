@@ -342,7 +342,6 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
       applyOptimisticFilterAndSorting();
       return newItem;
     }
-    return null;
   }
 
   Future<void> deleteBatch(Set<IdType> ids) async {

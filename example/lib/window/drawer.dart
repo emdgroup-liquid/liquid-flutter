@@ -192,10 +192,12 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
   @override
   Widget build(BuildContext context) {
     return LdScaffold(
-      appBar: LdAppBar(
-        title: Text("Navigation"),
-        debugName: "Drawer AppBar",
-      ),
+      appBars: [
+        LdAppBar(
+          title: Text("Navigation"),
+          debugName: "Drawer AppBar",
+        ),
+      ],
       body: Builder(builder: (context) {
         return LdScaffoldBody(children: [
           LdDrawerItemSection(

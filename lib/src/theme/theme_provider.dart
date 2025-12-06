@@ -75,7 +75,7 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
     WidgetsBinding.instance.addObserver(this);
 
     if (widget.autoSize) {
-      if (kIsWeb || Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
+      if (_theme.platform.isDesktop) {
         _theme.setThemeSize(LdThemeSize.s);
       } else {
         _theme.setThemeSize(LdThemeSize.m);
