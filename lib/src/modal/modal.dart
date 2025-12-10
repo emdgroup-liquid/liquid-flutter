@@ -39,7 +39,8 @@ class LdModalPage<T> extends Page<T> {
 class LdModalRoute<T> extends PageRoute<T> {
   final BuildContext context;
 
-  final String? _barrierLabel;
+  final Color? _barrierColor;
+  final String _cachedBarrierLabel;
 
   final LdModalTypeMode modalTypeMode;
 
@@ -78,18 +79,14 @@ class LdModalRoute<T> extends PageRoute<T> {
     this.sheetInsets,
     String? barrierLabel,
     super.settings,
-  }) : _barrierLabel = barrierLabel;
+  })  : _barrierColor = LdTheme.of(context).palette.neutral.shades[8].withAlpha(150),
+        _cachedBarrierLabel = barrierLabel ?? LiquidLocalizations.of(context).close;
 
   @override
-  Color? get barrierColor {
-    final theme = LdTheme.of(context);
-    return theme.palette.neutral.shades[8].withAlpha(150);
-  }
+  Color? get barrierColor => _barrierColor;
 
   @override
-  String? get barrierLabel {
-    return _barrierLabel ?? LiquidLocalizations.of(context).close;
-  }
+  String? get barrierLabel => _cachedBarrierLabel;
 
   Future<T?> show(BuildContext context, {bool useRootNavigator = false}) {
     final safeContext = useRootNavigator ? Navigator.of(context, rootNavigator: true) : Navigator.of(context);
