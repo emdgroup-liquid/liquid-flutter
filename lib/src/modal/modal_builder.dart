@@ -35,7 +35,7 @@ class LdModalBuilderState extends State<LdModalBuilder> {
   Future<dynamic> open(BuildContext context) async {
     final safeContext = widget.useRootNavigator ? Navigator.of(context, rootNavigator: true) : Navigator.of(context);
 
-    await safeContext.push(widget.modal);
+    return await safeContext.push(widget.modal);
   }
 
   @override
