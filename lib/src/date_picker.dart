@@ -349,35 +349,35 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
           shadowMode: LdAppBarShadowMode.visible,
         ),
         LdAppBar(
-          position: AppBarPosition.bottom,
+          positionMode: LdAppBarPositionMode.bottom,
           actions: [
             LdButton(
               active: isSelected(DateTime.now()),
-            disabled: !isValidDate(DateTime.now()),
-            child: const Text('Today'),
+              disabled: !isValidDate(DateTime.now()),
+              child: const Text('Today'),
+              onPressed: () {
+                _selectDate(DateTime.now());
+              },
+            ),
+            ...[7, 30, 90]
+                .map((days) => LdButton(
+                      active: isSelected(widget.selectedDateNotifier.value.add(Duration(days: days))),
+                      disabled: !isValidDate(widget.selectedDateNotifier.value.add(Duration(days: days))),
+                      child: Text('+${days}d'),
+                      onPressed: () {
+                        _selectDate(widget.selectedDateNotifier.value.add(Duration(days: days)));
+                      },
+                    ))
+                .toList(),
+          ],
+          trailing: LdButton.filled(
+            child: const Text('Done'),
+            leading: const Icon(LucideIcons.chevronRight),
             onPressed: () {
-              _selectDate(DateTime.now());
+              Navigator.of(context).pop(widget.selectedDateNotifier.value);
             },
           ),
-          ...[7, 30, 90]
-              .map((days) => LdButton(
-                    active: isSelected(widget.selectedDateNotifier.value.add(Duration(days: days))),
-                    disabled: !isValidDate(widget.selectedDateNotifier.value.add(Duration(days: days))),
-                    child: Text('+${days}d'),
-                    onPressed: () {
-                      _selectDate(widget.selectedDateNotifier.value.add(Duration(days: days)));
-                    },
-                  ))
-              .toList(),
-        ],
-        trailing: LdButton.filled(
-          child: const Text('Done'),
-          leading: const Icon(LucideIcons.chevronRight),
-          onPressed: () {
-            Navigator.of(context).pop(widget.selectedDateNotifier.value);
-          },
         ),
-      ),
       ],
       body: LdScaffoldBody(
         children: [

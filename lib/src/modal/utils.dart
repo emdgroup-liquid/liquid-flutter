@@ -27,29 +27,29 @@ Future<bool> ldConfirmModal(
               title: title ?? Text(locale.confirm),
             ),
             LdAppBar(
-              position: AppBarPosition.bottom,
+              positionMode: LdAppBarPositionMode.bottom,
               actions: [
-              LdFlexibleChild(
-                child: LdButton(
-                  size: LdSize.l,
-                  width: double.infinity,
-                  color: cancelColor ?? LdTheme.of(context).error,
-                  child: negative ?? Text(locale.cancel),
-                  onPressed: () => Navigator.of(context).pop(false),
+                LdFlexibleChild(
+                  child: LdButton(
+                    size: LdSize.l,
+                    width: double.infinity,
+                    color: cancelColor ?? LdTheme.of(context).error,
+                    child: negative ?? Text(locale.cancel),
+                    onPressed: () => Navigator.of(context).pop(false),
+                  ),
                 ),
-              ),
-              LdFlexibleChild(
-                child: LdButton(
-                  size: LdSize.l,
-                  width: double.infinity,
-                  color: confirmColor ?? LdTheme.of(context).primary,
-                  child: positive ?? Text(locale.confirm),
-                  onPressed: () => Navigator.of(context).pop(true),
+                LdFlexibleChild(
+                  child: LdButton(
+                    size: LdSize.l,
+                    width: double.infinity,
+                    color: confirmColor ?? LdTheme.of(context).primary,
+                    child: positive ?? Text(locale.confirm),
+                    onPressed: () => Navigator.of(context).pop(true),
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
           body: LdScaffoldBody(
             children: [
               LdAutoSpace(
@@ -146,7 +146,7 @@ class _LdEnterTextModalState extends State<_LdEnterTextModal> {
           title: widget.title ?? Text(LiquidLocalizations.of(context).enterText),
         ),
         LdAppBar(
-          position: AppBarPosition.bottom,
+          positionMode: LdAppBarPositionMode.bottom,
           actions: [
             if (widget.allowDismiss)
               LdFlexibleChild(

@@ -111,17 +111,22 @@ class LdListItemWidget extends StatelessWidget {
 
     Widget _buildLeading() {
       if (leading == null) return const SizedBox.shrink();
-      return _buildIconTheme(
-        LdReveal.quick(
-          axes: const {Axis.horizontal},
-          child: Row(
-            children: [
-              leading!,
-              ldSpacerM,
-            ],
+      return LdAvatarConfigProvider(
+        LdAvatarConfig(
+          color: color,
+        ),
+        _buildIconTheme(
+          LdReveal.quick(
+            axes: const {Axis.horizontal},
+            child: Row(
+              children: [
+                leading!,
+                ldSpacerM,
+              ],
+            ),
+            revealed: !(selectionControl != LdSelectionControl.none && tradeLeadingForSelectionControl),
+            initialRevealed: !(selectionControl != LdSelectionControl.none && tradeLeadingForSelectionControl),
           ),
-          revealed: !(selectionControl != LdSelectionControl.none && tradeLeadingForSelectionControl),
-          initialRevealed: !(selectionControl != LdSelectionControl.none && tradeLeadingForSelectionControl),
         ),
       );
     }

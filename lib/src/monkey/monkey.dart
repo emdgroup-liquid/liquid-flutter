@@ -330,7 +330,7 @@ List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
         GoRoute(
           name: "$basePath-master",
           path: basePath,
-          pageBuilder: (context, state) => NoTransitionPage<void>(
+          pageBuilder: (context, state) => MaterialPage<void>(
             key: state.pageKey,
             child: masterPage,
           ),

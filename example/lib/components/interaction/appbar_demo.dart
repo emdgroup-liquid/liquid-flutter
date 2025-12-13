@@ -19,8 +19,8 @@ class _AppBarDemoState extends State<AppBarDemo> {
   LdAppBarScrollBehavior _primaryScrollBehavior = LdAppBarScrollBehavior.static;
   LdAppBarScrollBehavior _secondaryScrollBehavior = LdAppBarScrollBehavior.static;
 
-  AppBarPosition _primaryAppBarPosition = AppBarPosition.top;
-  AppBarPosition _secondaryAppBarPosition = AppBarPosition.bottom;
+  LdAppBarPositionMode _primaryAppBarPositionMode = LdAppBarPositionMode.top;
+  LdAppBarPositionMode _secondaryAppBarPositionMode = LdAppBarPositionMode.bottom;
 
   LdAppBarShadowMode _shadowMode = LdAppBarShadowMode.whenScrolled;
   LdAppBarBorderMode _borderMode = LdAppBarBorderMode.whenScrolled;
@@ -166,7 +166,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
       appBars: [
         if (_hasPrimary)
           LdAppBar(
-            position: _primaryAppBarPosition,
+            positionMode: _primaryAppBarPositionMode,
             scrollBehavior: _primaryScrollBehavior,
             title: LdText.l('Primary AppBar'),
             actions: _actions,
@@ -177,7 +177,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
           ),
         if (_hasSecondary)
           LdAppBar(
-            position: _secondaryAppBarPosition,
+            positionMode: _secondaryAppBarPositionMode,
             scrollBehavior: _secondaryScrollBehavior,
             title: LdText.l('Secondary AppBar'),
             actions: _actions.take(3).toList(), // Fewer actions for secondary
@@ -224,12 +224,13 @@ class _AppBarDemoState extends State<AppBarDemo> {
                   ],
                 ),
                 LdText.p('Position:'),
-                LdSwitch<AppBarPosition>(
-                  value: _primaryAppBarPosition,
-                  onChanged: (value) => setState(() => _primaryAppBarPosition = value),
+                LdSwitch<LdAppBarPositionMode>(
+                  value: _primaryAppBarPositionMode,
+                  onChanged: (value) => setState(() => _primaryAppBarPositionMode = value),
                   children: {
-                    AppBarPosition.top: LdText.p('Top'),
-                    AppBarPosition.bottom: LdText.p('Bottom'),
+                    LdAppBarPositionMode.top: LdText.p('Top'),
+                    LdAppBarPositionMode.bottom: LdText.p('Bottom'),
+                    LdAppBarPositionMode.adaptive: LdText.p('Adaptive'),
                   },
                 ),
                 LdText.p('Scroll Behavior:'),
@@ -271,12 +272,13 @@ class _AppBarDemoState extends State<AppBarDemo> {
                   ],
                 ),
                 LdText.p('Position:'),
-                LdSwitch<AppBarPosition>(
-                  value: _secondaryAppBarPosition,
-                  onChanged: (value) => setState(() => _secondaryAppBarPosition = value),
+                LdSwitch<LdAppBarPositionMode>(
+                  value: _secondaryAppBarPositionMode,
+                  onChanged: (value) => setState(() => _secondaryAppBarPositionMode = value),
                   children: {
-                    AppBarPosition.top: LdText.p('Top'),
-                    AppBarPosition.bottom: LdText.p('Bottom'),
+                    LdAppBarPositionMode.top: LdText.p('Top'),
+                    LdAppBarPositionMode.bottom: LdText.p('Bottom'),
+                    LdAppBarPositionMode.adaptive: LdText.p('Adaptive'),
                   },
                 ),
                 LdText.p('Scroll Behavior:'),

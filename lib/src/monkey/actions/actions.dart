@@ -44,8 +44,10 @@ abstract class LdMonkeyAction<T extends Identifiable<IdType>, IdType> {
       return false;
     }
 
-    final selectedItems =
-        selection.items.map((e) => repository.getItemById(e)).whereType<LdPaginatorItem<T>>().toList();
+    final selectedItems = selection.items
+        .map((e) => repository.getItemById(e))
+        .whereType<LdPaginatorItem<T>>()
+        .toList();
 
     for (final visibility in this.visibility) {
       if (visibility.location != location) continue;
@@ -53,7 +55,8 @@ abstract class LdMonkeyAction<T extends Identifiable<IdType>, IdType> {
       if (!visibility.layoutModes.contains(effectiveLayoutMode)) {
         continue;
       }
-      if (visibility.visibleWhenShowingSelectionControls == true && !shellState.showSelectionControls) {
+      if (visibility.visibleWhenShowingSelectionControls == true &&
+          !shellState.showSelectionControls) {
         return false;
       }
 
@@ -69,7 +72,8 @@ abstract class LdMonkeyAction<T extends Identifiable<IdType>, IdType> {
         }
       }
 
-      if ((visibility.maxSelectionCount == null || selectedItemCount <= visibility.maxSelectionCount!) &&
+      if ((visibility.maxSelectionCount == null ||
+              selectedItemCount <= visibility.maxSelectionCount!) &&
           selectedItemCount >= visibility.minSelectionCount) {
         return true;
       }
@@ -81,7 +85,8 @@ abstract class LdMonkeyAction<T extends Identifiable<IdType>, IdType> {
   Widget build(BuildContext context);
 }
 
-class LdMonkeyBareChildAction<T extends Identifiable<IdType>, IdType> extends LdMonkeyAction<T, IdType> {
+class LdMonkeyBareChildAction<T extends Identifiable<IdType>, IdType>
+    extends LdMonkeyAction<T, IdType> {
   final Widget Function(BuildContext context) builder;
   final FutureOr<void> Function(BuildContext context) onShortcutTrigger;
 
@@ -104,7 +109,8 @@ class LdMonkeyBareChildAction<T extends Identifiable<IdType>, IdType> extends Ld
   }
 }
 
-class LdMonkeySubmitAction<T extends Identifiable<IdType>, IdType, Result> extends LdMonkeyAction<T, IdType> {
+class LdMonkeySubmitAction<T extends Identifiable<IdType>, IdType, Result>
+    extends LdMonkeyAction<T, IdType> {
   final LdSubmitConfig<Result, void> Function(BuildContext context) config;
   final Widget? child;
   final Widget? icon;
@@ -131,13 +137,14 @@ class LdMonkeySubmitAction<T extends Identifiable<IdType>, IdType, Result> exten
 
   @override
   Widget build(BuildContext context) {
-    assert(builder != null || (child != null), "You must provide a builder, child, or icon");
+    assert(builder != null || (child != null),
+        "You must provide a builder, child, or icon");
     return LdSubmit<Result, void>(
       config: config(context),
       builder: builder ??
           LdSubmitNotificationBuilder<Result, void>(
             submitButtonBuilder: (submitButtonBuilder, controller) {
-              return LdButton(
+              return LdAppBarAction(
                 color: color,
                 loading: controller.state.type == LdSubmitStateType.loading,
                 loadingText: config(context).loadingText,
@@ -182,7 +189,9 @@ class ToggleDrawerAction extends Action<ToggleDrawerIntent> {
 
   final bool _isActionEnabled;
 
-  ToggleDrawerAction({required this.onToggleDrawer, bool isActionEnabled = true}) : _isActionEnabled = isActionEnabled;
+  ToggleDrawerAction(
+      {required this.onToggleDrawer, bool isActionEnabled = true})
+      : _isActionEnabled = isActionEnabled;
 
   @override
   bool get isActionEnabled {

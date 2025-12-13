@@ -61,29 +61,29 @@ class _DemoSheet extends StatelessWidget {
                       title: const Text("Modal"),
                     ),
                     LdAppBar(
-                      position: AppBarPosition.bottom,
+                      positionMode: LdAppBarPositionMode.bottom,
                       actions: [
                         LdFlexibleChild(
                           child: LdButton.vague(
                             width: double.infinity,
-                          color: LdTheme.of(context).error,
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text("Cancel"),
+                            color: LdTheme.of(context).error,
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text("Cancel"),
+                          ),
                         ),
-                      ),
-                      LdFlexibleChild(
-                        child: LdButton.vague(
-                          width: double.infinity,
-                          onPressed: () {
-                            Navigator.of(context).pop("Hello world");
-                          },
-                          child: const Text("Confirm"),
+                        LdFlexibleChild(
+                          child: LdButton.vague(
+                            width: double.infinity,
+                            onPressed: () {
+                              Navigator.of(context).pop("Hello world");
+                            },
+                            child: const Text("Confirm"),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
                   ],
                   body: LdScaffoldBody(
                     children: [

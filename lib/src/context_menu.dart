@@ -171,7 +171,7 @@ class _LdContextMenuState extends State<LdContextMenu> {
     });
 
     await Navigator.of(context, rootNavigator: true).push(
-      ContextMenuRoute(
+      LdContextMenuRoute(
         inheritTriggerWidth: widget.inheritTriggerWidth,
         placeAboveTrigger: widget.placeAboveTrigger,
         menuBuilder: (ctx) => widget.menuBuilder(ctx),
@@ -235,7 +235,7 @@ class _LdContextMenuState extends State<LdContextMenu> {
 }
 
 /// A modal route for displaying a context menu, supporting custom positioning, blur, and zoom.
-class ContextMenuRoute extends ModalRoute<void> {
+class LdContextMenuRoute extends ModalRoute<void> {
   final Widget Function(BuildContext) menuBuilder;
 
   final Offset triggerPosition;
@@ -256,7 +256,7 @@ class ContextMenuRoute extends ModalRoute<void> {
   final ValueNotifier<Size> _menuSizeNotifier = ValueNotifier(Size.zero);
 
   /// [providers] allows you to inject providers into the context menu route.
-  ContextMenuRoute({
+  LdContextMenuRoute({
     required this.menuBuilder,
     required this.effectivePositionMode,
     this.cursorPosition,

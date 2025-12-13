@@ -25,6 +25,7 @@ class LdInput extends StatefulWidget {
   final bool disabled;
   final bool loading;
   final Widget? leading;
+  final bool allowTapOutside;
 
   final Widget? trailingHint;
 
@@ -42,6 +43,7 @@ class LdInput extends StatefulWidget {
       this.autofocus = false,
       this.showClear = false,
       this.size = LdSize.m,
+      this.allowTapOutside = true,
       this.onBlurred,
       this.valid = true,
       this.loading = false,
@@ -170,7 +172,7 @@ class _LdInputState extends State<LdInput> {
                 },
               },
               child: LdTouchableSurface(
-                allowTapOutside: true,
+                allowTapOutside: widget.allowTapOutside,
                 mode: LdTouchableSurfaceMode.input,
                 isInput: true,
                 focusNode: _focusScopeNode,

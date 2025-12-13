@@ -38,7 +38,6 @@ class ComponentPage extends StatelessWidget {
       child: LdScaffold(
         appBars: [
           LdAppBar(
-            position: theme.platform.isMobile ? AppBarPosition.bottom : AppBarPosition.top,
             scrollBehavior: LdAppBarScrollBehavior.mobileOnly,
             borderMode: LdAppBarBorderMode.visible,
             addContainer: true,

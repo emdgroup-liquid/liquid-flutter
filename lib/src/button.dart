@@ -418,6 +418,7 @@ class _ButtonShape extends StatelessWidget {
             padding: _padding(context),
             child: DefaultTextStyle(
               textAlign: center ? TextAlign.center : null,
+              maxLines: 1,
               style: TextStyle(
                 color: colors.text,
                 package: theme.fontFamilyPackage,

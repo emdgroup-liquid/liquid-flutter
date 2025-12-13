@@ -220,7 +220,8 @@ class TaskShell extends StatelessWidget {
         toggleSelectionControls<Task, int>(),
         toggleFilters<Task, int>(),
         LdMonkeyBareChildAction(
-          builder: (context) => LdButton(
+          builder: (context) => LdAppBarAction(
+              leading: Icon(LucideIcons.eye),
               child: Text("Show ${LdMonkeySelection.of<Task, int>(context).items.length} items"),
               onPressed: () async {
                 final shellState = LdMonkeyShellState.of<Task, int>(context);

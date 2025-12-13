@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:provider/provider.dart';
 
-class LdAvatar extends StatelessWidget {
+part 'avatar.variants.g.dart';
+
+@Variants([
+  Variant('success', defaults: {'color': 'LdTheme.of(context).success'}),
+  Variant('warning', defaults: {'color': 'LdTheme.of(context).warning'}),
+  Variant('error', defaults: {'color': 'LdTheme.of(context).error'}),
+])
+class LdAvatarWidget extends StatelessWidget {
   final Widget child;
 
   final LdColor? color;
@@ -10,16 +18,16 @@ class LdAvatar extends StatelessWidget {
 
   final LdSize size;
 
-  const LdAvatar({
+  const LdAvatarWidget({
     super.key,
     required this.child,
-    this.color,
-    this.circular = false,
-    this.size = LdSize.m,
+    @ContextConfigurable() this.color,
+    @ContextConfigurable() this.circular = false,
+    @ContextConfigurable() this.size = LdSize.m,
   });
 
   @override
-  build(BuildContext context) {
+  Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
 
     final foreground = color ?? theme.primary;

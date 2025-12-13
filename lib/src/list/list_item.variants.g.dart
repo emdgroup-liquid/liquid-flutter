@@ -58,13 +58,15 @@ class LdListItemConfigProvider extends StatelessWidget {
             borderRadius: config.borderRadius ?? parentConfig.borderRadius,
             disabled: config.disabled ?? parentConfig.disabled,
             isSelected: config.isSelected ?? parentConfig.isSelected,
-            onSelectionChanged: config.onSelectionChanged ?? parentConfig.onSelectionChanged,
+            onSelectionChanged:
+                config.onSelectionChanged ?? parentConfig.onSelectionChanged,
             onPressed: config.onPressed ?? parentConfig.onPressed,
             padding: config.padding ?? parentConfig.padding,
             focusNode: config.focusNode ?? parentConfig.focusNode,
             trailing: config.trailing ?? parentConfig.trailing,
             color: config.color ?? parentConfig.color,
-            selectionControl: config.selectionControl ?? parentConfig.selectionControl)
+            selectionControl:
+                config.selectionControl ?? parentConfig.selectionControl)
         : config;
     return Provider<LdListItemConfig>.value(
       value: mergedConfig,
@@ -178,8 +180,7 @@ class LdListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final config = Provider.of<LdListItemConfig?>(context, listen: true);
-
+    final config = Provider.of<LdListItemConfig?>(context, listen: false);
     return LdListItemWidget(
       active: active ?? config?.active ?? false,
       borderRadius: borderRadius ?? config?.borderRadius,
@@ -198,7 +199,9 @@ class LdListItem extends StatelessWidget {
       trailing: trailing ?? config?.trailing,
       color: color ?? config?.color,
       width: width,
-      selectionControl: selectionControl ?? config?.selectionControl ?? LdSelectionControl.none,
+      selectionControl: selectionControl ??
+          config?.selectionControl ??
+          LdSelectionControl.none,
     );
   }
 }

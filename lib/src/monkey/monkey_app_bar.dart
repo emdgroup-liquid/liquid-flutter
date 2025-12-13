@@ -9,10 +9,12 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
   final LdMonkeyActionLocation location;
   final String? debugName;
   final List<Widget> additionalActions;
+  final LdAppBarPositionMode? positionMode;
   const LdMonkeyAppBar({
     super.key,
     this.title,
     this.additionalActions = const [],
+    this.positionMode,
     required this.location,
     this.debugName,
   });
@@ -48,11 +50,14 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
           LdMonkeyActionLocation.detailSecondary => 2,
           _ => 0,
         },
-        position: switch (location) {
-          LdMonkeyActionLocation.masterAppBar || LdMonkeyActionLocation.detailAppBar => AppBarPosition.top,
-          LdMonkeyActionLocation.masterSecondary || LdMonkeyActionLocation.detailSecondary => AppBarPosition.bottom,
-          _ => AppBarPosition.top,
-        },
+        positionMode: positionMode ??
+            switch (location) {
+              LdMonkeyActionLocation.masterAppBar || LdMonkeyActionLocation.detailAppBar => LdAppBarPositionMode.top,
+              LdMonkeyActionLocation.masterSecondary ||
+              LdMonkeyActionLocation.detailSecondary =>
+                LdAppBarPositionMode.adaptive,
+              _ => LdAppBarPositionMode.top,
+            },
         shadowMode: switch (location) {
           LdMonkeyActionLocation.masterAppBar || LdMonkeyActionLocation.masterSecondary => LdAppBarShadowMode.hidden,
           _ => LdAppBarShadowMode.whenScrolled,

@@ -105,6 +105,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
 
     // We add the viewInsets to the padding in case something inside the appbar is focused.
     final viewInsets = _focusScopeNode.hasFocus ? MediaQuery.of(context).viewInsets : EdgeInsets.zero;
+
     final trimmedViewInsets = widget.position == AppBarPosition.top
         ? EdgeInsets.only(top: viewInsets.top)
         : EdgeInsets.only(bottom: viewInsets.bottom);
@@ -178,6 +179,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
 
   @override
   Widget build(BuildContext context) {
+    MediaQuery.viewInsetsOf(context);
     final outsidePadding = _outsideContainerPadding();
     if (outsidePadding != _previousOutsidePadding) {
       _previousOutsidePadding = outsidePadding;
