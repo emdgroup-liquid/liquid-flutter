@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_registry.dart';
 
-enum AppBarPosition {
+enum LdAppBarPosition {
   top,
   bottom,
 }
 
 class LdAppBarScrollWrapper extends StatefulWidget {
   final Widget child;
-  final AppBarPosition position;
+  final LdAppBarPosition position;
   final LdAppBarScrollBehavior scrollBehavior;
 
   const LdAppBarScrollWrapper({
@@ -31,6 +31,14 @@ class LdAppBarScrollWrapperState extends State<LdAppBarScrollWrapper> {
   AppBarRegistryState? _registryState;
   VoidCallback? _registryListener;
   LdAppBarRegistryKey? _registryKey;
+
+  @override
+  void didUpdateWidget(covariant LdAppBarScrollWrapper oldWidget) {
+    if (oldWidget.scrollBehavior != widget.scrollBehavior) {
+      _handleScrollOffsetChange();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
 
   @override
   void didChangeDependencies() {
@@ -57,7 +65,8 @@ class LdAppBarScrollWrapperState extends State<LdAppBarScrollWrapper> {
       _registryState = newRegistryState;
 
       if (_registryState != null) {
-        _registryListener = () {
+        _registryListener = () async {
+          await Future.delayed(Duration.zero);
           if (mounted) {
             setState(() {});
           }
@@ -82,6 +91,7 @@ class LdAppBarScrollWrapperState extends State<LdAppBarScrollWrapper> {
     }
 
     final scrollOffset = _scrollOffsetNotifier!.value;
+
     final level = _registryState!.getLevel(_registryKey!, widget.position);
     final adjustedScrollOffset = scrollOffset - level * 150;
 
@@ -98,7 +108,8 @@ class LdAppBarScrollWrapperState extends State<LdAppBarScrollWrapper> {
 
   void _updateAppBarOffset(double scrollOffset, AppBarInfo currentInfo, bool scrolledUnder) {
     final double scrollDelta = scrollOffset - _lastScrollOffset;
-    final bool isScrollingDown = scrollDelta > 0;
+
+    final bool isScrollingDown = scrollDelta > 0 && scrollOffset > 100;
     final bool isScrollingUp = scrollDelta < 0;
 
     double maxOffset = currentInfo.innerHeight + currentInfo.verticalMargin;
@@ -117,7 +128,11 @@ class LdAppBarScrollWrapperState extends State<LdAppBarScrollWrapper> {
     if (_registryState != null && _registryKey != null) {
       _registryState!.updateAppBarInfo(
         _registryKey!,
-        currentInfo.copyWith(offset: newOffset, scrollUnder: scrolledUnder),
+        currentInfo.copyWith(
+          offset: newOffset,
+          scrollUnder: scrolledUnder,
+          willHide: _shouldHideAppBar(),
+        ),
       );
     }
   }
@@ -134,14 +149,15 @@ class LdAppBarScrollWrapperState extends State<LdAppBarScrollWrapper> {
   @override
   Widget build(BuildContext context) {
     final shouldHide = _shouldHideAppBar();
-    final currentInfo =
-        _registryState != null && _registryKey != null ? _registryState!.getAppBarInfo(_registryKey!) : null;
-    final offset = currentInfo?.offset ?? 0.0;
-    final effectiveOffset = widget.position == AppBarPosition.top ? -offset : offset;
 
     final positionedChild = ValueListenableBuilder<double>(
       valueListenable: _scrollOffsetNotifier ?? ValueNotifier(0.0),
       builder: (context, scrollValue, child) {
+        final currentInfo =
+            _registryState != null && _registryKey != null ? _registryState!.getAppBarInfo(_registryKey!) : null;
+        final offset = currentInfo?.offset ?? 0.0;
+        final effectiveOffset = widget.position == LdAppBarPosition.top ? -offset : offset;
+
         return LdWrapConditional(
           condition: shouldHide,
           builder: (context, child) => Transform.translate(
@@ -154,7 +170,7 @@ class LdAppBarScrollWrapperState extends State<LdAppBarScrollWrapper> {
     );
 
     // Position the app bar in the stack, accounting for cumulative height
-    if (widget.position == AppBarPosition.top) {
+    if (widget.position == LdAppBarPosition.top) {
       return Positioned(
         top: 0,
         left: 0,

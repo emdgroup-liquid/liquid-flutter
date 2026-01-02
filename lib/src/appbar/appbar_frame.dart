@@ -6,12 +6,13 @@ import 'package:liquid_flutter/src/appbar/appbar_registry.dart';
 
 class AppBarFrame extends StatefulWidget {
   final Widget child;
-  final AppBarPosition position;
+  final LdAppBarPosition position;
 
   final BoxDecoration? insideDecoration;
   final BoxDecoration? outsideDecoration;
   final EdgeInsets? insidePadding;
   final EdgeInsets? outsideMinPadding;
+  final bool addContainer;
   final bool insetBorderRadius;
   final String? debugName;
 
@@ -25,6 +26,7 @@ class AppBarFrame extends StatefulWidget {
     required this.child,
     required this.position,
     this.attached = true,
+    this.addContainer = false,
     this.insideDecoration,
     this.outsideDecoration,
     this.insetBorderRadius = true,
@@ -66,7 +68,8 @@ class _AppBarFrameState extends State<AppBarFrame> {
     );
   }
 
-  void _onRegistryChange() {
+  void _onRegistryChange() async {
+    await Future.delayed(Duration.zero);
     if (!mounted) return;
     setState(() {});
   }
@@ -75,13 +78,19 @@ class _AppBarFrameState extends State<AppBarFrame> {
     return context.maybeAppBarRegistryKey();
   }
 
-  double _calculateOtherAppBarHeight(AppBarPosition position) {
+  double _calculateOtherAppBarHeight(LdAppBarPosition position) {
     final registry = AppBarRegistry.maybeStateOf(context);
     final key = _getKey();
     if (registry == null || key == null) {
       return 0.0;
     }
-    return registry.getEffectiveHeightOfOthers(key);
+    final modalRoute = ModalRoute.of(context);
+    if (modalRoute is LdModalRoute) {
+      return registry.getEffectiveHeightOfOthers(key, limitToChildrenOf: modalRoute.context);
+    }
+    return registry.getEffectiveHeightOfOthers(
+      key,
+    );
   }
 
   int _calculateLevel() {
@@ -94,32 +103,45 @@ class _AppBarFrameState extends State<AppBarFrame> {
     return registryState.getLevel(key, widget.position);
   }
 
-  EdgeInsets _outsideContainerPadding() {
+  EdgeInsets _containerPadding(BoxConstraints constraints) {
+    if (widget.addContainer) {
+      final maxWidth = LdTheme.of(context).sizingConfig.containerMaxWidth;
+      return EdgeInsets.symmetric(horizontal: ((constraints.maxWidth - maxWidth) / 2).clamp(0.0, double.infinity));
+    }
+    return EdgeInsets.zero;
+  }
+
+  EdgeInsets _outsideContainerPadding(BoxConstraints constraints) {
     final viewPadding = MediaQuery.viewPaddingOf(context);
     final theme = LdTheme.of(context);
 
     // Trim viewPadding to only the relevant side
-    final trimmedViewPadding = widget.position == AppBarPosition.top
+    final trimmedViewPadding = widget.position == LdAppBarPosition.top
         ? EdgeInsets.only(top: viewPadding.top)
         : EdgeInsets.only(bottom: viewPadding.bottom);
 
     // We add the viewInsets to the padding in case something inside the appbar is focused.
     final viewInsets = _focusScopeNode.hasFocus ? MediaQuery.of(context).viewInsets : EdgeInsets.zero;
 
-    final trimmedViewInsets = widget.position == AppBarPosition.top
+    final trimmedViewInsets = widget.position == LdAppBarPosition.top
         ? EdgeInsets.only(top: viewInsets.top)
         : EdgeInsets.only(bottom: viewInsets.bottom);
 
     final otherAppBarHeight = _calculateOtherAppBarHeight(widget.position);
 
     EdgeInsets otherPadding;
-    if (widget.position == AppBarPosition.top) {
+    if (widget.position == LdAppBarPosition.top) {
       otherPadding = EdgeInsets.only(top: otherAppBarHeight);
     } else {
       otherPadding = EdgeInsets.only(bottom: otherAppBarHeight);
     }
 
-    final extraPadding = widget.outsideMinPadding ?? (widget.attached ? EdgeInsets.zero : theme.pad(size: LdSize.s));
+    final extraPadding = widget.outsideMinPadding ??
+        (widget.attached
+            ? EdgeInsets.zero
+            : theme.pad(size: LdSize.s).atLeast(
+                  _containerPadding(constraints),
+                ));
 
     final level = _calculateLevel();
 
@@ -127,19 +149,23 @@ class _AppBarFrameState extends State<AppBarFrame> {
         trimmedViewPadding.atLeast(otherPadding + extraPadding).atLeast(trimmedViewInsets).atLeast(extraPadding);
     if (level == 0 && widget.insetBorderRadius) {
       // In case we already inset from the radius, we need to reduce the padding by the inset amount.
-      final inset = widget.position == AppBarPosition.top ? result.top : result.bottom;
+      final inset = widget.position == LdAppBarPosition.top ? result.top : result.bottom;
       return result.atLeast(EdgeInsets.symmetric(horizontal: (theme.screenRadius) / 2 - inset));
     }
 
     return result;
   }
 
-  EdgeInsets get _insidePadding {
+  EdgeInsets _insidePadding(BoxConstraints constraints) {
     if (widget.insidePadding != null) {
       return widget.insidePadding!;
     }
     final theme = LdTheme.of(context);
-    return theme.pad(size: LdSize.s);
+    if (widget.attached) {
+      return theme.pad(size: LdSize.s).atLeast(_containerPadding(constraints));
+    } else {
+      return theme.pad(size: LdSize.s);
+    }
   }
 
   void _onSizeChange(Size size) {
@@ -165,7 +191,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
     final key = _getKey();
     if (registry == null || key == null) return;
 
-    final verticalMargin = widget.position == AppBarPosition.top ? outsidePadding.top : outsidePadding.bottom;
+    final verticalMargin = widget.position == LdAppBarPosition.top ? outsidePadding.top : outsidePadding.bottom;
 
     final currentInfo = registry.getAppBarInfo(key) ?? AppBarInfo.initial(widget.position);
     registry.updateAppBarInfo(
@@ -180,31 +206,41 @@ class _AppBarFrameState extends State<AppBarFrame> {
   @override
   Widget build(BuildContext context) {
     MediaQuery.viewInsetsOf(context);
-    final outsidePadding = _outsideContainerPadding();
-    if (outsidePadding != _previousOutsidePadding) {
-      _previousOutsidePadding = outsidePadding;
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        _updateMargin(outsidePadding);
-      });
-    }
+    return LayoutBuilder(builder: (context, constraints) {
+      final outsidePadding = _outsideContainerPadding(constraints);
+      if (outsidePadding != _previousOutsidePadding) {
+        _previousOutsidePadding = outsidePadding;
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          _updateMargin(outsidePadding);
+        });
+      }
 
-    return FocusScope(
-      node: _focusScopeNode,
-      child: Container(
-        padding: outsidePadding,
-        decoration: widget.outsideDecoration,
-        key: Key("appbar_frame_outside_${widget.position.name}"),
-        child: MeasureSize(
-          onSizeChange: _onSizeChange,
-          child: Container(
-            decoration: widget.insideDecoration,
-            padding: _insidePadding,
-            clipBehavior: Clip.hardEdge,
-            key: Key("appbar_frame_inside_${widget.position.name}"),
-            child: widget.child,
-          ),
-        ),
-      ),
-    );
+      return ValueListenableBuilder(
+        valueListenable: LdScaffoldState.maybeOf(context)?.bodyScrollOffset ?? ValueNotifier(0.0),
+        builder: (context, value, child) {
+          return FocusScope(
+            node: _focusScopeNode,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: outsidePadding,
+              decoration: widget.outsideDecoration,
+              key: Key("appbar_frame_outside_${widget.position.name}"),
+              child: MeasureSize(
+                onSizeChange: _onSizeChange,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  decoration: widget.insideDecoration,
+                  padding: _insidePadding(constraints),
+                  clipBehavior: Clip.hardEdge,
+                  key: Key("appbar_frame_inside_${widget.position.name}"),
+                  child: child,
+                ),
+              ),
+            ),
+          );
+        },
+        child: widget.child,
+      );
+    });
   }
 }

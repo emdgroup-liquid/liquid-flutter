@@ -1,8 +1,8 @@
-import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/drawer_state.dart';
+import 'package:liquid_flutter/src/haptics.dart';
 import 'package:liquid_flutter/src/monkey/intents.dart';
 import 'package:provider/provider.dart';
 
@@ -10,6 +10,7 @@ class LdDrawerLayout extends StatefulWidget {
   final Widget drawer;
   final Widget body;
   final double reflowBreakpoint;
+  final bool enableScaling;
 
   final void Function(LdDrawerState) onStateChange;
 
@@ -20,6 +21,7 @@ class LdDrawerLayout extends StatefulWidget {
     required this.body,
     required this.reflowBreakpoint,
     required this.drawerWidth,
+    this.enableScaling = false,
     required this.onStateChange,
   });
 
@@ -44,37 +46,16 @@ class LdDrawerLayout extends StatefulWidget {
 }
 
 class LdDrawerLayoutState extends State<LdDrawerLayout> {
-  bool _isDragging = false;
   LocalHistoryEntry? _historyEntry;
 
-  double _drawerOffset = 0;
+  int _visibleStartIndex = 1; // Start with only body visible (closed)
+  int _visibleEndIndex = 1;
   double _effectiveDrawerWidth = 0;
   bool _isSideBySide = false;
-
-  StreamSubscription<Intent>? _intentSubscription;
 
   @override
   initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      if (_isSideBySide) {
-        _showDrawer();
-      }
-    });
-  }
-
-  void _handleIntent(Intent intent) {
-    if (intent is OpenDrawerIntent) {
-      _showDrawer();
-    } else if (intent is CloseDrawerIntent) {
-      _hideDrawer();
-    } else if (intent is ToggleDrawerIntent) {
-      if (_isDrawerOpen) {
-        _hideDrawer();
-      } else {
-        _showDrawer();
-      }
-    }
   }
 
   void openDrawer() {
@@ -95,23 +76,24 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
 
   @override
   void dispose() {
-    _intentSubscription?.cancel();
     _historyEntry?.remove();
     super.dispose();
   }
 
-  void _onDragEnd(DragEndDetails details) {
-    if (_isDragging) {
-      _isDragging = false;
-    }
-    if (_drawerOffset > _effectiveDrawerWidth / 2) {
+  void _onVisibleRangeChanged(int startIndex, int endIndex) {
+    final wasOpen = _isDrawerOpen;
+    setState(() {
+      _visibleStartIndex = startIndex;
+      _visibleEndIndex = endIndex;
+    });
+
+    if (_isDrawerOpen && !wasOpen) {
       _ensureHistoryEntry();
-      setState(() {
-        _drawerOffset = _effectiveDrawerWidth;
-      });
-    } else {
-      _handleHistoryEntryRemoved();
+    } else if (!_isDrawerOpen && wasOpen) {
+      _historyEntry?.remove();
+      _historyEntry = null;
     }
+
     _onStateChange();
   }
 
@@ -123,19 +105,8 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
           onRemove: _handleHistoryEntryRemoved,
           impliesAppBarDismissal: false,
         );
+        route.addLocalHistoryEntry(_historyEntry!);
       }
-    }
-  }
-
-  void _onDragUpdate(DragUpdateDetails details) {
-    if (!_isDragging && (details.localPosition.dx - _drawerOffset).abs() <= 75) {
-      _isDragging = true;
-    }
-    if (_isDragging) {
-      setState(() {
-        _drawerOffset = details.localPosition.dx;
-        _drawerOffset = _drawerOffset.clamp(0, _effectiveDrawerWidth);
-      });
     }
   }
 
@@ -149,21 +120,26 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
 
   void _showDrawer() {
     setState(() {
-      _drawerOffset = _effectiveDrawerWidth;
+      _visibleStartIndex = 0;
+      _visibleEndIndex = 1;
     });
     _ensureHistoryEntry();
     _onStateChange();
+    LdHaptics.vibrate(HapticsType.light);
   }
 
   void _hideDrawer() {
     setState(() {
-      _drawerOffset = 0;
+      _visibleStartIndex = 1;
+      _visibleEndIndex = 1;
     });
     _historyEntry?.remove();
+    _historyEntry = null;
     _onStateChange();
+    LdHaptics.vibrate(HapticsType.light);
   }
 
-  bool get _isDrawerOpen => _drawerOffset > _effectiveDrawerWidth / 2;
+  bool get _isDrawerOpen => _visibleStartIndex == 0;
 
   Border? get _drawerBorder {
     return Border(
@@ -202,113 +178,71 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
             },
           ),
         },
-        child: GestureDetector(
-          onHorizontalDragUpdate: _onDragUpdate,
-          onHorizontalDragEnd: _onDragEnd,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              _isSideBySide = constraints.maxWidth >= widget.reflowBreakpoint;
-              _effectiveDrawerWidth = min(constraints.maxWidth * 0.75, widget.drawerWidth);
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            _isSideBySide = constraints.maxWidth >= widget.reflowBreakpoint;
+            _effectiveDrawerWidth = min(constraints.maxWidth * 0.75, widget.drawerWidth);
 
-              return Stack(
-                children: [
-                  LdSpring(
-                    mass: 1,
-                    springConstant: 12,
-                    dampingCoefficient: 9,
-                    initialPosition: 0,
-                    position: _drawerOffset,
-                    builder: (context, state, child) {
-                      double bodyLeft, bodyWidth;
-                      if (_isSideBySide) {
-                        bodyLeft = state.position;
-                        bodyWidth = constraints.maxWidth - state.position;
-                      } else {
-                        bodyLeft = 0;
-                        bodyWidth = constraints.maxWidth;
-                      }
+            final mode = _isSideBySide ? LdMultiPanelLayoutMode.sideBySide : LdMultiPanelLayoutMode.stacked;
 
-                      return Positioned(
-                        top: 0,
-                        width: bodyWidth,
-                        bottom: 0,
-                        left: bodyLeft,
-                        child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              boxShadow: [ldShadowSticky],
-                              color: LdTheme.of(context).background,
-                            ),
-                            child: child!),
-                      );
-                    },
-                    child: Provider.value(
-                      value: LdDrawerSlot.body,
+            return Stack(
+              children: [
+                LdMultiPanelLayout(
+                  enableScaling: widget.enableScaling,
+                  children: [
+                    // Drawer panel (index 0)
+                    Provider.value(
+                      value: LdDrawerSlot.drawer,
                       child: Provider.value(
-                        value: LdDrawerState(isOpen: _isDrawerOpen, isSideBySide: _isSideBySide),
-                        child: widget.body,
-                      ),
-                    ),
-                  ),
-                  if (_isDrawerOpen && !_isSideBySide)
-                    ModalBarrier(
-                      color: Colors.black.withValues(alpha: 0.5),
-                      onDismiss: () {
-                        _hideDrawer();
-                      },
-                    ),
-                  LdSpring(
-                    mass: 1,
-                    springConstant: 12,
-                    dampingCoefficient: 9,
-                    initialPosition: 0,
-                    position: _drawerOffset,
-                    builder: (context, state, child) {
-                      double drawerLeft, drawerWidth;
-                      if (_isSideBySide) {
-                        drawerLeft = state.position - _effectiveDrawerWidth;
-                        drawerWidth = _effectiveDrawerWidth;
-                      } else {
-                        drawerLeft = min(0, state.position - _effectiveDrawerWidth);
-                        drawerWidth = _effectiveDrawerWidth;
-                      }
-
-                      return Positioned(
-                        top: 0,
-                        bottom: 0,
-                        width: drawerWidth,
-                        left: drawerLeft,
+                        value: LdDrawerState(
+                          isOpen: _isDrawerOpen,
+                          isSideBySide: _isSideBySide,
+                        ),
                         child: Container(
                           decoration: BoxDecoration(
                             border: _drawerBorder,
                             color: LdTheme.of(context).background,
                           ),
-                          child: child!,
+                          child: widget.drawer,
                         ),
-                      );
-                    },
-                    child: Provider.value(
-                      value: LdDrawerSlot.drawer,
-                      child: Provider.value(
-                        value: LdDrawerState(isOpen: _isDrawerOpen, isSideBySide: _isSideBySide),
-                        child: widget.drawer,
                       ),
                     ),
-                  )
-                ].reverseIf(_isSideBySide),
-              );
-            },
-          ),
+                    // Body panel (index 1)
+                    Provider.value(
+                      value: LdDrawerSlot.body,
+                      child: Provider.value(
+                        value: LdDrawerState(
+                          isOpen: _isDrawerOpen,
+                          isSideBySide: _isSideBySide,
+                        ),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            boxShadow: [ldShadowSticky],
+                            color: LdTheme.of(context).background,
+                          ),
+                          child: widget.body,
+                        ),
+                      ),
+                    ),
+                  ],
+                  widths: [
+                    PanelWidth.fixed(_effectiveDrawerWidth),
+                    const PanelWidth.fill(),
+                  ],
+                  mode: mode,
+                  visibleStartIndex: _visibleStartIndex,
+                  visibleEndIndex: _visibleEndIndex,
+                  onVisibleRangeChanged: _onVisibleRangeChanged,
+                  mass: 1,
+                  springConstant: 12,
+                  dampingCoefficient: 9,
+                  spacing: 0,
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
-  }
-}
-
-extension on List<Widget> {
-  List<Widget> reverseIf(bool condition) {
-    if (condition) {
-      return reversed.toList();
-    }
-    return this;
   }
 }

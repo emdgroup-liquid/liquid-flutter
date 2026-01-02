@@ -54,7 +54,7 @@ class LdButtonConfigProvider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final parentConfig = Provider.of<LdButtonConfig?>(context, listen: false);
+    final parentConfig = Provider.of<LdButtonConfig?>(context, listen: true);
     final mergedConfig = parentConfig != null
         ? LdButtonConfig(
             autoLoading: config.autoLoading ?? parentConfig.autoLoading,
@@ -504,7 +504,7 @@ class LdButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final config = Provider.of<LdButtonConfig?>(context, listen: false);
+    final config = Provider.of<LdButtonConfig?>(context, listen: true);
     return LdButtonWidget(
       child: child,
       onPressed: onPressed,

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/appbar/appbar_registry.dart';
+import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 import 'package:liquid_flutter/src/drawer_state.dart';
-import 'package:liquid_flutter/src/scaffold_layout_state.dart';
 import 'package:provider/provider.dart';
 
 class MacOSWindowControls extends StatelessWidget {
@@ -15,18 +16,27 @@ class MacOSWindowControls extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final layoutState = context.watch<LdScaffoldLayoutState?>();
+    bool show = false;
+
+    final registry = AppBarRegistry.maybeStateOf(context);
+
+    final appBarKey = context.maybeAppBarRegistryKey();
+
+    int level = 1;
+
+    if (appBarKey != null && registry != null) {
+      final appBarInfo = registry.getAppBarInfo(appBarKey);
+
+      if (appBarInfo != null && appBarInfo.position == LdAppBarPosition.top) {
+        level = registry.getLevel(appBarKey, LdAppBarPosition.top);
+      }
+    }
+
     final drawerSlot = context.watch<LdDrawerSlot?>();
     final drawerState = context.watch<LdDrawerState?>();
 
-    bool show = false;
-
-    final level = layoutState?.levelForEffectivePosition();
-
     if (level == 0) {
-      if (drawerSlot == null) {
-        show = true;
-      } else if (drawerSlot == LdDrawerSlot.body) {
+      if (drawerSlot == LdDrawerSlot.body) {
         if (!(drawerState?.isOpen ?? false)) {
           show = true;
         }
@@ -37,47 +47,48 @@ class MacOSWindowControls extends StatelessWidget {
       }
     }
 
-    if (!show) {
-      return const SizedBox.shrink();
-    }
-
-    return Row(
-      children: [
-        Tooltip(
-          message: LiquidLocalizations.of(context).close,
-          child: LdButton.ghost(
-            size: LdSize.xs,
-            color: LdTheme.of(context).error,
-            child: const Icon(Icons.circle, size: 14),
-            onPressed: () {
-              LdAppBar.callbacks?.onClose?.call();
-            },
+    return LdReveal.quick(
+      revealed: show,
+      initialRevealed: show,
+      axes: const {Axis.horizontal},
+      child: Row(
+        children: [
+          Tooltip(
+            message: LiquidLocalizations.of(context).close,
+            child: LdButton.ghost(
+              size: LdSize.xs,
+              color: LdTheme.of(context).error,
+              child: const Icon(Icons.circle, size: 14),
+              onPressed: () {
+                LdAppBar.callbacks?.onClose?.call();
+              },
+            ),
           ),
-        ),
-        Tooltip(
-          message: LiquidLocalizations.of(context).minimize,
-          child: LdButton.ghost(
-            size: LdSize.xs,
-            color: LdTheme.of(context).warning,
-            child: const Icon(Icons.circle, size: 14),
-            onPressed: () {
-              LdAppBar.callbacks?.onMinimize?.call();
-            },
+          Tooltip(
+            message: LiquidLocalizations.of(context).minimize,
+            child: LdButton.ghost(
+              size: LdSize.xs,
+              color: LdTheme.of(context).warning,
+              child: const Icon(Icons.circle, size: 14),
+              onPressed: () {
+                LdAppBar.callbacks?.onMinimize?.call();
+              },
+            ),
           ),
-        ),
-        Tooltip(
-          message: LiquidLocalizations.of(context).maximize,
-          child: LdButton.ghost(
-            size: LdSize.xs,
-            color: LdTheme.of(context).success,
-            child: const Icon(Icons.circle, size: 14),
-            onPressed: () {
-              LdAppBar.callbacks?.onMaximize?.call();
-            },
+          Tooltip(
+            message: LiquidLocalizations.of(context).maximize,
+            child: LdButton.ghost(
+              size: LdSize.xs,
+              color: LdTheme.of(context).success,
+              child: const Icon(Icons.circle, size: 14),
+              onPressed: () {
+                LdAppBar.callbacks?.onMaximize?.call();
+              },
+            ),
           ),
-        ),
-        ldSpacerL,
-      ],
+          ldSpacerM,
+        ],
+      ),
     );
   }
 }

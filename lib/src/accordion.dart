@@ -28,12 +28,6 @@ class LdAccordion extends StatefulWidget {
   /// The duration of the animation.
   final Duration speed;
 
-  /// The curve to use when expanding.
-  final Curve curveExpand;
-
-  /// The curve to use when collapsing.
-  final Curve curveCollapse;
-
   /// Whether or not to wrap the active item in a card.
   final bool wrapActiveInCard;
 
@@ -43,14 +37,16 @@ class LdAccordion extends StatefulWidget {
   /// Whether or not to shrink the accordion to the content.
   final bool shrinkWrap;
 
+  ///  The size of the accordion.
+  final LdSize? size;
+
   const LdAccordion({
     required this.childBuilder,
     required this.headerBuilder,
     required this.itemCount,
     this.allowMultipleOpen = false,
     this.childPadding,
-    this.curveCollapse = Curves.easeOut,
-    this.curveExpand = Curves.easeIn,
+    this.size,
     this.headerPadding,
     this.initialOpenIndex = const {},
     this.wrapActiveInCard = false,
@@ -67,12 +63,14 @@ class LdAccordion extends StatefulWidget {
     bool wrapActiveInCard = false,
     bool flatCard = true,
     bool allowMultipleOpen = false,
+    LdSize? size,
     Set<int> initialOpenIndex = const {},
   }) {
     return LdAccordion(
         childBuilder: (context, n) => items[n].child,
         itemCount: items.length,
         headerBuilder: (context, n) => items[n].header,
+        size: size,
         wrapActiveInCard: wrapActiveInCard,
         flatCard: flatCard,
         allowMultipleOpen: allowMultipleOpen,
@@ -100,8 +98,7 @@ class _LdAccordionChild extends StatelessWidget {
   final EdgeInsets headerPadding;
   final EdgeInsets childPadding;
   final Function() onPressed;
-  final Curve curveExpand;
-  final Curve curveCollapse;
+  final LdSize size;
   final bool collapsed;
   final bool disableElevation;
   const _LdAccordionChild(
@@ -114,8 +111,7 @@ class _LdAccordionChild extends StatelessWidget {
       required this.childPadding,
       required this.speed,
       required this.header,
-      required this.curveExpand,
-      required this.curveCollapse,
+      required this.size,
       Key? key})
       : super(key: key);
 
@@ -134,7 +130,7 @@ class _LdAccordionChild extends StatelessWidget {
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
         color: !collapsed ? color : null,
-        borderRadius: wrapActiveInCard ? theme.radius(LdSize.m) : null,
+        borderRadius: wrapActiveInCard ? theme.radius(size) : null,
         border: Border.all(
           color: wrapActiveInCard && !collapsed ? theme.border : Colors.transparent,
           width: theme.borderWidth,
@@ -163,7 +159,7 @@ class _LdAccordionChild extends StatelessWidget {
                       style: ldBuildTextStyle(
                         theme,
                         LdTextType.label,
-                        LdSize.m,
+                        size,
                         color: colorBundle.text,
                       ),
                     ),
@@ -171,7 +167,7 @@ class _LdAccordionChild extends StatelessWidget {
                   AnimatedRotation(
                     child: Icon(
                       Icons.chevron_right_rounded,
-                      size: 24,
+                      size: theme.labelSize(size),
                       color: colorBundle.icon,
                     ),
                     duration: const Duration(milliseconds: 150),
@@ -210,8 +206,8 @@ class _LdAccordionState extends State<LdAccordion> {
   Widget build(BuildContext context) {
     var theme = LdTheme.of(context, listen: true);
 
-    var headerPadding = widget.headerPadding ?? theme.pad(size: LdSize.s);
-    var childPadding = widget.childPadding ?? theme.pad(size: LdSize.s);
+    var headerPadding = widget.headerPadding ?? theme.pad(size: widget.size ?? LdSize.s);
+    var childPadding = widget.childPadding ?? theme.pad(size: widget.size ?? LdSize.s);
 
     return FocusTraversalGroup(
       child: ListView.separated(
@@ -221,12 +217,11 @@ class _LdAccordionState extends State<LdAccordion> {
         itemCount: widget.itemCount,
         separatorBuilder: (context, n) => !widget.wrapActiveInCard ? const LdDivider() : const SizedBox.shrink(),
         itemBuilder: (context, n) => _LdAccordionChild(
-          curveCollapse: widget.curveCollapse,
-          curveExpand: widget.curveExpand,
           collapsed: !openIndex.contains(n),
           child: widget.childBuilder(context, n),
           wrapActiveInCard: widget.wrapActiveInCard,
           disableElevation: widget.flatCard,
+          size: widget.size ?? LdSize.m,
           headerPadding: headerPadding,
           speed: widget.speed,
           childPadding: childPadding,

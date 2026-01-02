@@ -2,6 +2,10 @@ import Cocoa
 import FlutterMacOS
 
 public class LiquidFlutterWindowUtilsPlugin: NSObject, FlutterPlugin, WindowUtilsApi {
+    func setSystemGestureExclusionRects(rects: [Rect]) throws {
+        throw FlutterError(code: "UNAVAILABLE_API", message: "This API is not supported on macos", details: nil)
+    }
+    
   private var registrar: FlutterPluginRegistrar?
   private var eventApi: WindowStateEventApi?
   private var currentWindow: NSWindow?

@@ -95,6 +95,12 @@ class LiquidFlutterWindowUtils implements WindowStateEventApi {
     return await _api?.getScreenRadius() ?? 0.0;
   }
 
+  Future<void> setSystemGestureExclusionRects(List<Rect> rects) async {
+    if (_api != null && defaultTargetPlatform == TargetPlatform.android) {
+      return await _api!.setSystemGestureExclusionRects(rects);
+    }
+  }
+
   /// Stream of window state changes
   Stream<WindowState> get windowStateStream {
     return _windowStateController.stream;

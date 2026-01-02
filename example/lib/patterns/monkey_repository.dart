@@ -70,11 +70,25 @@ class MonkeyRepositoryDemo extends StatelessWidget {
     Set<LdFilterOption<Task, int>>? filters,
     List<LdSortOption<Task, int>>? sortOptions,
   }) async {
+    // Apply filters
+    var filtered = testData.where((item) {
+      return filters?.every((filter) => filter.optimisticFilter(item)) ?? true;
+    }).toList();
+    
+    // Apply sorting
+    for (final sortOption in sortOptions ?? []) {
+      filtered.sort((a, b) => sortOption.optimisticSort(a, b));
+    }
+    
+    // Apply pagination
+    final startIndex = offset;
+    final endIndex = (offset + pageSize).clamp(0, filtered.length);
+    final pageItems = filtered.sublist(startIndex, endIndex);
+    
     return LdListPage<Task>(
-      newItems: // items
-      hasMore: // boolean
-      total: // number of items
-
+      newItems: pageItems,
+      hasMore: endIndex < filtered.length,
+      total: filtered.length,
     );
   },
   
@@ -85,18 +99,25 @@ class MonkeyRepositoryDemo extends StatelessWidget {
   },
   
   // Optional: Delete multiple items
-  deleteBatch: (ids) async {
-
+  deleteBatch: (Set<int> ids) async {
+    testData.removeWhere((element) => ids.contains(element.id));
+    await Future.delayed(const Duration(milliseconds: 500));
   },
   
   // Optional: Update a single item
-  updateItem: (id, newItem) async {
-    // returns Future<Task>
+  updateItem: (int id, Task newItem) async {
+    final index = testData.indexWhere((element) => element.id == id);
+    final updatedItem = newItem.copyWith(lastUpdate: DateTime.now());
+    testData[index] = updatedItem;
+    await Future.delayed(const Duration(milliseconds: 500));
+    return updatedItem;
   },
   
-  // Optional: Create a new item, takes a new id and the item to create 
-  createItem: (id, item) async {
-    // returns Future<Task>
+  // Optional: Create a new item (no id parameter - id is part of the item)
+  createItem: (Task? item) async {
+    testData.add(item!);
+    await Future.delayed(const Duration(milliseconds: 500));
+    return item;
   },
 );''',
         ),
@@ -171,23 +192,21 @@ class MonkeyRepositoryDemo extends StatelessWidget {
   ),
 },''',
         ),
-        LdText.hs("5. Use the repository in LdMonkey"),
+        LdText.hs("5. Use the repository in buildMonkeyRoutes"),
         LdText.p(
-            "The repository is used within the LdMonkey pattern to provide all CRUD functionality. The repository handles all data operations automatically."),
+            "The repository is used within the monkey pattern via buildMonkeyRoutes. The repository handles all data operations automatically."),
         CodeBlock(
           language: "dart",
-          code: '''final taskDemo = LdMonkey<Task, int, bool>(
-  path: "/task-demo",
-  allowMultipleSelection: true,
-  presentationMode: MonkeyDetailVariant.page,
-  layoutMode: MonkeyLayoutMode.auto,
-  showMultiSelectItems: true,
-  parseId: (id) => int.parse(id),
-  detailPath: (items) => "/task-demo/\${items.join(",")}",
-  // Note: Repository is now built in buildMonkeyRoutes using repositoryBuilder
-  buildDetail: (context, item) => TaskDetail(task: item),
-  // ... rest of configuration
-);''',
+          code: '''// The repository is passed to buildMonkeyRoutes using repositoryBuilder
+...buildMonkeyRoutes<Task, int>(
+  basePath: "/task-demo",
+  pathParameterName: "task",
+  parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
+  masterPage: TaskMasterPage(),
+  detailPage: TaskDetailPage(),
+  repositoryBuilder: (context) async => taskRepository,
+  layoutMode: LdMonkeyLayoutMode.auto,
+),''',
         ),
       ]),
     );

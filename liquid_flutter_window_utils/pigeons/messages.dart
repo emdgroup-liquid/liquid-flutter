@@ -31,6 +31,20 @@ class WindowState {
   });
 }
 
+class Rect {
+  final int left;
+  final int top;
+  final int right;
+  final int bottom;
+
+  const Rect({
+    required this.left,
+    required this.top,
+    required this.right,
+    required this.bottom,
+  });
+}
+
 @HostApi()
 abstract class WindowUtilsApi {
   bool setWindowSize(int width, int height);
@@ -44,6 +58,7 @@ abstract class WindowUtilsApi {
   bool isWindowMaximized();
   WindowState getWindowState();
   double getScreenRadius();
+  void setSystemGestureExclusionRects(List<Rect> rects);
 }
 
 @FlutterApi()

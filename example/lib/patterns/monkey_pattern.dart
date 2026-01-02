@@ -16,172 +16,188 @@ class MonkeyPatternDemo extends StatelessWidget {
       demo: LdAutoSpace(children: [
         LdText.h("LdMonkey Pattern Configuration"),
         LdText.p(
-            "The LdMonkey class is the main configuration class for the monkey pattern. It defines how your master-detail interface behaves, including routing, selection, actions, and layout."),
-        ComponentsAccordion(components: {"LdMonkey"}),
+            "The monkey pattern is configured using the buildMonkeyRoutes function and LdMonkeyShell widget. This defines how your master-detail interface behaves, including routing, selection, actions, and layout."),
+        ComponentsAccordion(components: {"LdMonkeyShell", "buildMonkeyRoutes"}),
         LdText.hs("1. Basic Configuration"),
         LdText.p(
-            "Start by creating an LdMonkey instance with the required parameters. This defines the core behavior of your pattern."),
+            "Start by creating master and detail page widgets, then use buildMonkeyRoutes to integrate them with GoRouter."),
         CodeBlock(
           language: "dart",
-          code: '''final taskDemo = LdMonkey<Task, int>(
-  // Required: Base path for your monkey pattern
-  path: "/task-demo",
-  
-  // Required: How to parse ID from URL string
-  parseId: (id) => int.parse(id),
-  
-  // Required: How to build detail path from selected items
-  detailPath: (items) => "/task-demo/\${items.join(",")}",
-  
-  // Required: Detail widget builder
-  buildDetail: (context, item) => TaskDetail(task: item),
-  
-  // Required: List builder function
-  listBuilder: (context, route, state, onSelectionChange) {
-    final shellState = LdMonkeyShellState.of<Task, int>(context);
-    return LdSelectableList<Task, int>(
-      showSelectionControls: shellState.showSelectionControls,
-      initialSelectedItems: shellState.selectedItems,
-      // ... list configuration
+          code: '''// Create your master page widget
+class TaskMasterPage extends StatelessWidget {
+  const TaskMasterPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return LdMonkeyMasterPage<Task, int>(
+      appBar: LdMonkeyAppBar<Task, int>(
+        location: LdMonkeyActionLocation.masterAppBar,
+        title: Text("Tasks"),
+      ),
+      buildItem: (context, item) => LdListItem(
+        title: Text(item.value!.task),
+        subtitle: Text("Due: \${item.value!.due}"),
+      ),
     );
-  },
-);''',
+  }
+}
+
+// Create your detail page widget
+class TaskDetailPage extends StatelessWidget {
+  const TaskDetailPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return LdMonkeyDetailPage<Task, int>.scrollable(
+      primaryAppBar: LdMonkeyAppBar<Task, int>(
+        location: LdMonkeyActionLocation.detailAppBar,
+        title: Text("Task"),
+      ),
+      buildDetail: (context, item) => TaskDetail(task: item),
+    );
+  }
+}''',
         ),
         LdText.hs("2. Selection Configuration"),
         LdText.p(
-            "Configure how selection works in your monkey pattern. This includes multi-selection, selection controls, and selection persistence."),
+            "Selection is handled automatically by LdMonkeyShell. You can access and modify selection state using LdMonkeyShellState."),
         CodeBlock(
           language: "dart",
-          code: '''LdMonkey<Task, int, bool>(
-  // Enable/disable multiple selection
-  allowMultipleSelection: true,
-  
-  // Show multi-select items in the detail view
-  showMultiSelectItems: true,
-  
-  // Optional: Custom selection parser for URL state
-  parseSelected: (selected) {
-    return selected.split(',').map(int.parse).toSet();
-  },
-  
-  // ... other configuration
-);''',
+          code: '''// In your shell widget or actions
+final shellState = LdMonkeyShellState.of<Task, int>(context);
+
+// Get current selection
+final selectedItems = shellState.selectedItems;
+
+// Set selection
+shellState.setSelectedItems({taskId});
+
+// Parse selected items from URL (used in buildMonkeyRoutes)
+parseSelected: (selected) {
+  return selected.split(',').map(int.parse).toSet();
+},''',
         ),
         LdText.hs("3. Layout Configuration"),
-        LdText.p(
-            "Control how your monkey pattern responds to different screen sizes and layouts."),
+        LdText.p("Control how your monkey pattern responds to different screen sizes and layouts."),
         CodeBlock(
           language: "dart",
-          code: '''LdMonkey<Task, int, bool>(
-  // Breakpoint for responsive reflow (default: 600)
-  reflowBreakpoint: 600,
+          code: '''...buildMonkeyRoutes<Task, int>(
+  basePath: "/task-demo",
+  pathParameterName: "task",
+  parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
+  masterPage: TaskMasterPage(),
+  detailPage: TaskDetailPage(),
+  repositoryBuilder: (context) async => taskRepository,
   
   // Layout mode for detail view
-  layoutMode: MonkeyLayoutMode.auto, // auto, sideBySide, neverSideBySide
+  layoutMode: LdMonkeyLayoutMode.auto, // auto, sideBySide, neverSideBySide
   
-  // Flex ratio for detail view in side-by-side layout (default: 2)
-  detailFlex: 2,
+  // Show detail in a dialog instead of a page
+  detailInDialog: false,
   
-  // How detail view is presented
-  presentationMode: MonkeyDetailVariant.page, // page, dialog
-  
-  // ... other configuration
-);''',
-        ),
-        LdText.hs("4. Actions Configuration"),
-        LdText.p(
-            "Define actions that users can perform on items. Actions can appear in different locations and have various visibility conditions. See the Actions documentation for detailed examples."),
-        CodeBlock(
-          language: "dart",
-          code: '''LdMonkey<Task, int, bool>(
-  actions: [
-    // Your custom actions here
-    // See Actions documentation for detailed examples
-  ],
-  
-  // ... other configuration
-);''',
-        ),
-        LdText.hs("5. List Builder Configuration"),
-        LdText.p(
-            "The listBuilder function is where you define how your selectable list behaves. This includes the list widget, item builder, and selection handling."),
-        CodeBlock(
-          language: "dart",
-          code: '''LdMonkey<Task, int, bool>(
-  listBuilder: (route, initialSelection, onSelectionChange) {
-    return LdSelectableList<Task, int, bool>(
-      // Show selection controls (checkboxes, etc.)
-      showSelectionControls: route.state.showSelectionControls,
-      
-      // List widget builder
-      listBuilder: (context, scrollController, itemBuilder) {
-        return LdList(
-          paginator: route.repository,
-          itemBuilder: itemBuilder,
-          scrollController: scrollController,
-          assumedItemHeight: 50,
-        );
-      },
-      
-      // Paginator for data
-      paginator: route.repository,
-      
-      // Initial selection state
-      initialSelectedItems: route.state.selectedItems,
-      
-      // Enable multi-selection
-      multiSelect: true,
-      
-      // Selection change callback
-      onSelectionChange: (selected) => onSelectionChange(selected),
-      
-      // Individual item builder
-      itemBuilder: (context, item, index) => LdMonkeySingleShortcuts(
-        item: item.value!.id,
-        actions: route.actions,
-        child: LdMonkeyContextMenu<Task, int, bool>(
-          item: item,
-          child: LdListItemAnimation(
-            state: item.state,
-            child: LdMonkeyContext.of<Task, int, bool>(context).isSideBySide
-                ? LdListItem.trailingForward(
-                    title: Text(item.value!.task),
-                    subtitle: Text("Due: \${item.value!.due}"),
-                    
-                  )
-                : LdListItem(
-                    title: Text(item.value!.task),
-                    subtitle: Text("Due: \${item.value!.due}"),
-                   
-                  ),
-          ),
-        ),
-      ),
-    );
-  },
-  
-  // ... other configuration
-);''',
-        ),
-        LdText.hs("6. Shell Wrapper"),
-        LdText.p(
-            "Optionally wrap your monkey pattern with a custom shell widget for additional functionality like navigation, headers, or sidebars."),
-        CodeBlock(
-          language: "dart",
-          code: '''LdMonkey<Task, int, bool>(
-  // Optional shell wrapper
-  wrapShell: (context, child) {
-    return LdDrawer(
+  // Optional: Custom shell wrapper
+  shellBuilder: (context, state, child) {
+    return LdMonkeyShell<Task, int>(
+      basePath: "/task-demo",
+      layoutMode: LdMonkeyLayoutMode.auto,
+      masterPage: TaskMasterPage(),
+      parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
+      routeState: state,
+      repositoryBuilder: (context) async => taskRepository,
+      pathParameterName: "task",
+      // Breakpoint for responsive reflow (default: 600)
+      reflowBreakpoint: 600,
+      // Flex ratio for detail view in side-by-side layout (default: 2)
+      detailPanelFlex: 2,
+      actions: [
+        // Your actions here
+      ],
       child: child,
     );
   },
-  
+),''',
+        ),
+        LdText.hs("4. Actions Configuration"),
+        LdText.p(
+            "Define actions that users can perform on items. Actions are passed to LdMonkeyShell. See the Actions documentation for detailed examples."),
+        CodeBlock(
+          language: "dart",
+          code: '''LdMonkeyShell<Task, int>(
   // ... other configuration
-);''',
+  actions: [
+    LdMonkeySubmitAction(
+      visibility: {
+        LdMonkeyActionVisibility(
+          location: LdMonkeyActionLocation.masterAppBar,
+        ),
+      },
+      child: Text("New Task"),
+      icon: Icon(LucideIcons.plus),
+      config: (context) => LdSubmitConfig(
+        loadingText: "Creating new task",
+        action: (_) async {
+          // Your action implementation
+        },
+      ),
+    ),
+    // See Actions documentation for more examples
+  ],
+),''',
+        ),
+        LdText.hs("5. Master Page Configuration"),
+        LdText.p(
+            "The master page displays the list of items. Use LdMonkeyMasterPage to integrate with the monkey pattern."),
+        CodeBlock(
+          language: "dart",
+          code: '''class TaskMasterPage extends StatelessWidget {
+  const TaskMasterPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return LdMonkeyMasterPage<Task, int>(
+      appBar: LdMonkeyAppBar<Task, int>(
+        location: LdMonkeyActionLocation.masterAppBar,
+        title: Text("Tasks"),
+      ),
+      buildItem: (context, item) {
+        return LdListItem(
+          title: Text(item.value!.task),
+          subtitle: Text("Due: \${item.value!.due}"),
+          leading: LdAvatar(
+            child: Icon(
+              item.value!.done ? LucideIcons.squareCheck : LucideIcons.square,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}''',
+        ),
+        LdText.hs("6. Detail Page Configuration"),
+        LdText.p(
+            "The detail page displays details for selected items. Use LdMonkeyDetailPage to integrate with the monkey pattern."),
+        CodeBlock(
+          language: "dart",
+          code: '''class TaskDetailPage extends StatelessWidget {
+  const TaskDetailPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return LdMonkeyDetailPage<Task, int>.scrollable(
+      primaryAppBar: LdMonkeyAppBar<Task, int>(
+        location: LdMonkeyActionLocation.detailAppBar,
+        title: Text("Task"),
+      ),
+      buildDetail: (context, item) {
+        return TaskDetail(task: item);
+      },
+    );
+  }
+}''',
         ),
         LdText.hs("7. Integration with GoRouter"),
-        LdText.p(
-            "Finally, integrate your monkey pattern with GoRouter by calling the buildRoute() method."),
+        LdText.p("Integrate your monkey pattern with GoRouter by calling buildMonkeyRoutes."),
         CodeBlock(
           language: "dart",
           code: '''final router = GoRouter(
@@ -191,93 +207,113 @@ class MonkeyPatternDemo extends StatelessWidget {
     // Add monkey pattern routes using buildMonkeyRoutes
     ...buildMonkeyRoutes<Task, int>(
       basePath: "/task-demo",
-      route: taskDemo,
+      pathParameterName: "task",
+      parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
+      masterPage: TaskMasterPage(),
+      detailPage: TaskDetailPage(),
       repositoryBuilder: (context) async => taskRepository,
-      layoutMode: MonkeyLayoutMode.auto,
-    ),
-    
-    // Or mount at a specific path
-    GoRoute(
-      path: "/tasks",
-      routes: buildMonkeyRoutes<Task, int>(
-        basePath: "/tasks",
-        route: taskDemo,
-        repositoryBuilder: (context) async => taskRepository,
-        layoutMode: MonkeyLayoutMode.auto,
-      ),
+      layoutMode: LdMonkeyLayoutMode.auto,
     ),
   ],
 );''',
         ),
         LdText.hs("8. Complete Example"),
-        LdText.p(
-            "Here's a complete example of a task management monkey pattern:"),
+        LdText.p("Here's a complete example of a task management monkey pattern:"),
         CodeBlock(
           language: "dart",
-          code: '''final taskDemo = LdMonkey<Task, int>(
-  path: "/task-demo",
-  allowMultipleSelection: true,
-  presentationMode: MonkeyDetailVariant.page,
-  layoutMode: MonkeyLayoutMode.auto,
-  showMultiSelectItems: true,
-  parseId: (id) => int.parse(id),
-  detailPath: (items) => "/task-demo/\${items.join(",")}",
-  buildDetail: (context, item) => TaskDetail(task: item),
-  listBuilder: (context, route, state, onSelectionChange) {
-    final shellState = LdMonkeyShellState.of<Task, int>(context);
-    return LdSelectableList<Task, int>(
-      showSelectionControls: shellState.showSelectionControls,
-      listBuilder: (context, scrollController, itemBuilder) {
-        return LdList(
-          paginator: route.repository,
-          itemBuilder: itemBuilder,
-          scrollController: scrollController,
-          assumedItemHeight: 50,
-        );
-      },
-      paginator: route.repository,
-      initialSelectedItems: shellState.selectedItems,
-      multiSelect: true,
-      onSelectionChange: (selected) => onSelectionChange(selected),
-      itemBuilder: (context, item, index) => LdMonkeySingleShortcuts(
-        item: item.value!.id,
-        actions: route.actions,
-        child: LdMonkeyContextMenu<Task, int, bool>(
-          item: item,
-          child: LdListItemAnimation(
-            state: item.state,
-            child: LdMonkeyContext.of<Task, int, bool>(context).isSideBySide
-                ? LdListItem.trailingForward(
-                    title: Text(item.value!.task),
-                    subtitle: Text("Due: \${item.value!.due}"),                    
-                  )
-                : LdListItem(
-                    title: Text(item.value!.task),
-                    subtitle: Text("Due: \${item.value!.due}"),
-                  ),
-          ),
-        ),
+          code: '''// Master page
+class TaskMasterPage extends StatelessWidget {
+  const TaskMasterPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return LdMonkeyMasterPage<Task, int>(
+      appBar: LdMonkeyAppBar<Task, int>(
+        location: LdMonkeyActionLocation.masterAppBar,
+        title: Text("Tasks"),
+      ),
+      buildItem: (context, item) => LdListItem(
+        title: Text(item.value!.task),
+        subtitle: Text("Due: \${item.value!.due}"),
       ),
     );
-  },
-  actions: [
-    // Your actions here - see Actions documentation for examples
+  }
+}
+
+// Detail page
+class TaskDetailPage extends StatelessWidget {
+  const TaskDetailPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return LdMonkeyDetailPage<Task, int>.scrollable(
+      primaryAppBar: LdMonkeyAppBar<Task, int>(
+        location: LdMonkeyActionLocation.detailAppBar,
+        title: Text("Task"),
+      ),
+      buildDetail: (context, item) => TaskDetail(task: item),
+    );
+  }
+}
+
+// Shell wrapper (optional, for custom actions)
+class TaskShell extends StatelessWidget {
+  final Widget child;
+  final GoRouterState state;
+  
+  const TaskShell({
+    super.key,
+    required this.child,
+    required this.state,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return LdMonkeyShell<Task, int>(
+      basePath: "/task-demo",
+      layoutMode: LdMonkeyLayoutMode.auto,
+      masterPage: TaskMasterPage(),
+      parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
+      routeState: state,
+      repositoryBuilder: (context) async => taskRepository,
+      pathParameterName: "task",
+      actions: [
+        // Your actions here - see Actions documentation for examples
+      ],
+      child: child,
+    );
+  }
+}
+
+// Router configuration
+final router = GoRouter(
+  routes: [
+    ...buildMonkeyRoutes<Task, int>(
+      basePath: "/task-demo",
+      pathParameterName: "task",
+      parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
+      masterPage: TaskMasterPage(),
+      detailPage: TaskDetailPage(),
+      repositoryBuilder: (context) async => taskRepository,
+      layoutMode: LdMonkeyLayoutMode.auto,
+      shellBuilder: (context, state, child) => TaskShell(
+        state: state,
+        child: child,
+      ),
+    ),
   ],
 );''',
         ),
         LdText.hs("9. Related Documentation"),
-        LdText.p(
-            "For more detailed information on specific aspects of the monkey pattern:"),
+        LdText.p("For more detailed information on specific aspects of the monkey pattern:"),
         LdAutoSpace(children: [
           LdCard(
             header: Text("Repository"),
-            child: LdText.p(
-                "Learn how to set up the data repository with sorting and filtering"),
+            child: LdText.p("Learn how to set up the data repository with sorting and filtering"),
           ),
           LdCard(
             header: Text("Actions"),
-            child:
-                LdText.p("Detailed guide to creating and configuring actions"),
+            child: LdText.p("Detailed guide to creating and configuring actions"),
           ),
           LdCard(
             header: Text("Sorting & Filtering"),

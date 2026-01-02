@@ -84,7 +84,7 @@ class _HomeState extends State<Home> {
                   mode: LdButtonMode.outline,
                   trailing: const Icon(LucideIcons.arrowRight),
                   onPressed: () {
-                    context.go("/chemical");
+                    context.push("/chemical");
                   },
                   child: const Text("Chemical Inventory")),
               LdButton(

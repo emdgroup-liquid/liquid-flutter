@@ -426,7 +426,6 @@ class ChemicalShell extends StatelessWidget {
       debugName: "Chemical shell",
       appBars: [
         TabNavigation(
-          position: theme.platform.isMobile ? AppBarPosition.bottom : AppBarPosition.top,
           scrollBehavior: LdAppBarScrollBehavior.mobileOnly,
           activeRoute: GoRouterState.of(context).uri.path,
           tabs: [

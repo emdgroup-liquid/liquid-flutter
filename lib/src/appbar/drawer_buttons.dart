@@ -35,7 +35,7 @@ class OpenDrawerButton extends StatelessWidget {
     if (appBarKey == null) return false;
 
     final appBarInfo = registry.getAppBarInfo(appBarKey);
-    if (appBarInfo == null || appBarInfo.position != AppBarPosition.top) return false;
+    if (appBarInfo == null || appBarInfo.position != LdAppBarPosition.top) return false;
 
     // Get the drawer layout's element context to use as limit
     BuildContext? limitContext = context.findAncestorStateOfType<LdDrawerLayoutState>()?.context;
@@ -57,14 +57,19 @@ class OpenDrawerButton extends StatelessWidget {
       axes: const {Axis.horizontal},
       initialRevealed: shouldShow,
       revealed: shouldShow,
-      child: Tooltip(
-        message: LiquidLocalizations.of(context).openDrawer,
-        child: LdButton.ghost(
-          child: Icon(icon),
-          onPressed: () {
-            LdDrawerLayout.openDrawer(context);
-          },
-        ),
+      child: Row(
+        children: [
+          Tooltip(
+            message: LiquidLocalizations.of(context).openDrawer,
+            child: LdButton.ghost(
+              child: Icon(icon),
+              onPressed: () {
+                LdDrawerLayout.openDrawer(context);
+              },
+            ),
+          ),
+          ldSpacerM,
+        ],
       ),
     );
   }
@@ -85,7 +90,7 @@ class CloseDrawerButton extends StatelessWidget {
 
     final drawerState = context.watch<LdDrawerState?>();
     if (drawerState == null) return false;
-    if (drawerState.isOpen && drawerState.isSideBySide) return false;
+    if (!drawerState.isOpen) return false;
 
     // Check if position is top - we need to get the app bar registry and check position
     final registry = AppBarRegistry.maybeStateOf(context);
@@ -95,7 +100,7 @@ class CloseDrawerButton extends StatelessWidget {
     if (appBarKey == null) return false;
 
     final appBarInfo = registry.getAppBarInfo(appBarKey);
-    if (appBarInfo == null || appBarInfo.position != AppBarPosition.top) return false;
+    if (appBarInfo == null || appBarInfo.position != LdAppBarPosition.top) return false;
 
     final limitContext = context.findAncestorStateOfType<LdDrawerLayoutState>()?.context;
 

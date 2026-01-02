@@ -71,12 +71,51 @@ class WindowState {
   }
 }
 
+class Rect {
+  Rect({
+    required this.left,
+    required this.top,
+    required this.right,
+    required this.bottom,
+  });
+
+  int left;
+
+  int top;
+
+  int right;
+
+  int bottom;
+
+  Object encode() {
+    return <Object?>[
+      left,
+      top,
+      right,
+      bottom,
+    ];
+  }
+
+  static Rect decode(Object result) {
+    result as List<Object?>;
+    return Rect(
+      left: result[0]! as int,
+      top: result[1]! as int,
+      right: result[2]! as int,
+      bottom: result[3]! as int,
+    );
+  }
+}
+
 class _WindowUtilsApiCodec extends StandardMessageCodec {
   const _WindowUtilsApiCodec();
   @override
   void writeValue(WriteBuffer buffer, Object? value) {
-    if (value is WindowState) {
+    if (value is Rect) {
       buffer.putUint8(128);
+      writeValue(buffer, value.encode());
+    } else if (value is WindowState) {
+      buffer.putUint8(129);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -87,6 +126,8 @@ class _WindowUtilsApiCodec extends StandardMessageCodec {
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
       case 128: 
+        return Rect.decode(readValue(buffer)!);
+      case 129: 
         return WindowState.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -368,6 +409,28 @@ class WindowUtilsApi {
       );
     } else {
       return (replyList[0] as double?)!;
+    }
+  }
+
+  Future<void> setSystemGestureExclusionRects(List<Rect?> arg_rects) async {
+    const String channelName = 'dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.setSystemGestureExclusionRects';
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+      channelName,
+      codec,
+      binaryMessenger: _binaryMessenger,
+    );
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_rects]) as List<Object?>?;
+    if (replyList == null) {
+      throw _createConnectionError(channelName);
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
     }
   }
 }

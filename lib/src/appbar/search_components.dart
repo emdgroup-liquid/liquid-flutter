@@ -65,7 +65,6 @@ class _LdSearchInputState extends State<LdSearchInput> {
     if (hasFocus && widget.searchConfig.getSuggestions != null && !suggestionsHasFocus) {
       _showSuggestionsOverlay();
     } else if (!hasFocus && !suggestionsHasFocus) {
-      print("close suggestions overlay");
       _closeOverlay();
     }
 
@@ -96,7 +95,6 @@ class _LdSearchInputState extends State<LdSearchInput> {
     }
 
     _updateInputRect();
-    print("show suggestions overlay");
     // Show the suggestions overlay using Overlay instead of ModalRoute
     _showOverlay();
   }

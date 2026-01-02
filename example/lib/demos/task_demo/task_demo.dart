@@ -21,13 +21,13 @@ class TaskShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyShell<Task, int>(
-      queryParameters: state.uri.queryParameters,
       basePath: "/task-demo",
-      parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
       layoutMode: LdMonkeyLayoutMode.auto,
-      routeSelection: state.pathParameters['selected'],
       masterPage: TaskMasterPage(),
+      parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
+      routeState: state,
       repositoryBuilder: (context) async => taskRepository,
+      pathParameterName: "task",
       actions: [
         LdMonkeySubmitAction(
           visibility: {

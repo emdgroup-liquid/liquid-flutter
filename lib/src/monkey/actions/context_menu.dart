@@ -19,7 +19,7 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
     final actions = context.read<LdMonkeyActions<T, IdType>>();
 
     return Provider.value(
-      value: LdMonkeySelection<IdType>(items: newSelection),
+      value: LdMonkeySelection<T, IdType>(items: newSelection),
       child: Provider.value(
         value: newSelection,
         child: Builder(builder: (newContext) {
@@ -39,7 +39,7 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
               Provider.value(
                 value: context.read<LdMonkeyEffectiveLayoutMode>(),
               ),
-              Provider<LdMonkeySelection<IdType>>.value(
+              Provider<LdMonkeySelection<T, IdType>>.value(
                 value: LdMonkeySelection(items: newSelection),
               ),
               ListenableProvider.value(

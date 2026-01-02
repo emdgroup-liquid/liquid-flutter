@@ -58,7 +58,6 @@ class _TaskDetailState extends State<TaskDetail> {
             value: _dueDate,
             onChanged: (date) {
               if (date == null) return;
-              print("date: $date");
               setState(() {
                 _dueDate = date;
               });

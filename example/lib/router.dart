@@ -9,6 +9,7 @@ import 'package:liquid/components/form_elements/choose.dart';
 import 'package:liquid/components/interaction/context_menu.dart';
 import 'package:liquid/components/form_elements/date_time_pickers.dart';
 import 'package:liquid/components/layout/drawer.dart';
+import 'package:liquid/components/layout/multi_panel_layout.dart';
 import 'package:liquid/components/feedback/exception.dart';
 import 'package:liquid/components/data_display/icon.dart';
 import 'package:liquid/components/feedback/indicator.dart';
@@ -60,13 +61,17 @@ import 'components/feedback/notification.dart';
 import 'components/data_display/table.dart';
 import 'components/data_display/tag.dart';
 import 'window/app_scaffold.dart';
-import 'components/interaction/appbar.dart';
+
 import 'components/bento_gallery.dart';
 
 class AppRouter {
   AppRouter();
 
-  late final router = GoRouter(debugLogDiagnostics: true, initialLocation: "/task-demo", routes: [
+  late final router = GoRouter(debugLogDiagnostics: true, initialLocation: "/", routes: [
+    GoRoute(
+      path: "/nav-test",
+      pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const NavTest()),
+    ),
     ShellRoute(
       routes: [
         GoRoute(
@@ -86,11 +91,50 @@ class AppRouter {
         child: child,
       ),
     ),
+    StatefulShellRoute.indexedStack(
+      branches: [
+        StatefulShellBranch(
+          initialLocation: "/movie-demo",
+          routes: [
+            ...buildMonkeyRoutes(
+              basePath: "/movie-demo",
+              pathParameterName: "movieId",
+              parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
+              detailPage: MovieDetailPage(),
+              detailInDialog: true,
+              masterPage: MovieMasterPage(),
+              repositoryBuilder: (context) async => movieRepository,
+              layoutMode: LdMonkeyLayoutMode.neverSideBySide,
+              shellBuilder: (context, state, child) => MovieShell(state: state, child: child),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          initialLocation: "/task-demo",
+          routes: [
+            ...buildMonkeyRoutes<Task, int>(
+              basePath: "/task-demo",
+              pathParameterName: "taskId",
+              parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
+              detailPage: TaskDetailPage(),
+              masterPage: TaskMasterPage(),
+              repositoryBuilder: (context) async => taskRepository,
+              layoutMode: LdMonkeyLayoutMode.auto,
+              shellBuilder: (context, state, child) => TaskShell(state: state, child: child),
+            ),
+          ],
+        ),
+      ],
+      builder: (context, state, navigationShell) => DemoShell(
+        child: navigationShell,
+      ),
+    ),
     GoRoute(
-      path: '/appbar-demo',
-      pageBuilder: (context, state) {
-        return NoTransitionPage(child: AppBarDemo());
-      },
+      path: "/components/appbar",
+      pageBuilder: (context, state) => NoTransitionPage<void>(
+        key: state.pageKey,
+        child: const AppBarDemo(),
+      ),
     ),
     ShellRoute(
       builder: (context, state, child) {
@@ -129,47 +173,6 @@ class AppRouter {
           pageBuilder: (context, state) =>
               NoTransitionPage<void>(key: state.pageKey, child: const MaterialDocumentation()),
         ),
-        StatefulShellRoute.indexedStack(
-          branches: [
-            StatefulShellBranch(
-              initialLocation: "/movie-demo",
-              routes: [
-                ...buildMonkeyRoutes(
-                  basePath: "/movie-demo",
-                  parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
-                  detailPage: MovieDetailPage(),
-                  detailInDialog: true,
-                  masterPage: MovieMasterPage(),
-                  repositoryBuilder: (context) async => movieRepository,
-                  layoutMode: LdMonkeyLayoutMode.neverSideBySide,
-                ),
-              ],
-            ),
-            StatefulShellBranch(
-              initialLocation: "/task-demo",
-              routes: [
-                ...buildMonkeyRoutes<Task, int>(
-                  basePath: "/task-demo",
-                  parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
-                  detailPage: TaskDetailPage(),
-                  masterPage: TaskMasterPage(),
-                  repositoryBuilder: (context) async => taskRepository,
-                  layoutMode: LdMonkeyLayoutMode.auto,
-                  shellBuilder: (context, state, child) => TaskShell(state: state, child: child),
-                ),
-              ],
-            ),
-          ],
-          builder: (context, state, navigationShell) => DemoShell(
-            child: navigationShell,
-          ),
-        ),
-
-        /*GoRoute(
-            path: "/tokens",
-            pageBuilder: (context, state) => NoTransitionPage<void>(
-                key: state.pageKey, child: const TokensDemo()),
-          ),*/
         GoRoute(
           path: "/patterns/monkey",
           pageBuilder: (context, state) => NoTransitionPage<void>(
@@ -224,6 +227,11 @@ class AppRouter {
         GoRoute(
           path: "/components/drawer",
           pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const DrawerDemo()),
+        ),
+        GoRoute(
+          path: "/components/multi-panel-layout",
+          pageBuilder: (context, state) =>
+              NoTransitionPage<void>(key: state.pageKey, child: const MultiPanelLayoutDemo()),
         ),
         GoRoute(
           path: "/components/toggle",
@@ -388,19 +396,6 @@ class AppRouter {
           path: "/components/tabs",
           pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const TabsDemo()),
         ),
-        /*GoRoute(
-            path: "/components/reactive_form",
-            pageBuilder: (context, state) {
-              return NoTransitionPage<void>(
-                  key: state.pageKey, child: const ReactiveFormDemo());
-            }),*/
-        GoRoute(
-          path: "/components/appbar",
-          pageBuilder: (context, state) => NoTransitionPage<void>(
-            key: state.pageKey,
-            child: const AppBarApi(),
-          ),
-        ),
         GoRoute(
           path: "/components/bento-gallery",
           pageBuilder: (context, state) => NoTransitionPage<void>(
@@ -411,4 +406,30 @@ class AppRouter {
       ],
     ),
   ]);
+}
+
+class NavTest extends StatelessWidget {
+  const NavTest({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return LdScaffold(
+      drawer: LdScaffold(
+          appBars: [
+            LdAppBar(
+              title: Text("Drawer"),
+            ),
+          ],
+          body: LdButton(
+            child: Text("Pop"),
+            onPressed: () => context.pop(),
+          )),
+      appBars: [
+        LdAppBar(
+          title: Text("Nav Test"),
+        ),
+      ],
+      body: LdText("Nav Test"),
+    );
+  }
 }

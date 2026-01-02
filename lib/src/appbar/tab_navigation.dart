@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/appbar/appbar.dart';
 import 'package:liquid_flutter/src/appbar/appbar_frame.dart';
 import 'package:liquid_flutter/src/appbar/appbar_registry.dart';
 import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
@@ -11,33 +12,35 @@ class LdNavigationTab {
   final String route;
   final bool Function(BuildContext context)? isActive;
 
-  const LdNavigationTab({required this.label, required this.icon, required this.route, this.isActive});
-}
-
-enum TabAttachedMode {
-  always,
-  desktopOnly,
-  mobileOnly,
-  whenTop,
-  whenBottom,
+  const LdNavigationTab(
+      {required this.label,
+      required this.icon,
+      required this.route,
+      this.isActive});
 }
 
 class TabNavigation extends StatefulWidget {
   final String activeRoute;
   final void Function(String route) onTabPressed;
   final List<LdNavigationTab> tabs;
-  final TabAttachedMode attachedMode;
-  final AppBarPosition position;
+  final LdAppBarAttachedMode attachedMode;
+  final LdAppBarBackgroundMode backgroundMode;
+  final LdAppBarPositionMode position;
   final LdAppBarScrollBehavior scrollBehavior;
+  final bool addContainer;
   final int order;
+  final bool enableGradient;
 
   const TabNavigation({
     super.key,
     required this.activeRoute,
     required this.tabs,
     required this.onTabPressed,
-    this.attachedMode = TabAttachedMode.whenTop,
-    this.position = AppBarPosition.bottom,
+    this.addContainer = false,
+    this.enableGradient = true,
+    this.attachedMode = LdAppBarAttachedMode.adaptive,
+    this.backgroundMode = LdAppBarBackgroundMode.adaptive,
+    this.position = LdAppBarPositionMode.adaptive,
     this.scrollBehavior = LdAppBarScrollBehavior.static,
     this.order = 0,
   });
@@ -49,19 +52,27 @@ class TabNavigation extends StatefulWidget {
 class _TabNavigationState extends State<TabNavigation> {
   final FocusNode _focusNode = FocusNode();
 
-  bool get _attached {
-    final theme = LdTheme.of(context, listen: true);
-    return switch (widget.attachedMode) {
-      TabAttachedMode.always => true,
-      TabAttachedMode.desktopOnly => theme.platform.isDesktop,
-      TabAttachedMode.mobileOnly => !theme.platform.isDesktop,
-      TabAttachedMode.whenTop => _effectivePosition == AppBarPosition.top,
-      TabAttachedMode.whenBottom => _effectivePosition == AppBarPosition.bottom,
+  LdAppBarPosition get _effectivePosition {
+    return switch (widget.position) {
+      LdAppBarPositionMode.adaptive => LdTheme.of(context).platform.isDesktop
+          ? LdAppBarPosition.top
+          : LdAppBarPosition.bottom,
+      LdAppBarPositionMode.top => LdAppBarPosition.top,
+      LdAppBarPositionMode.bottom => LdAppBarPosition.bottom,
     };
   }
 
-  AppBarPosition get _effectivePosition {
-    return widget.position;
+  bool _effectivelyAttached(BuildContext context) {
+    final position = _effectivePosition;
+    final attached = switch (widget.attachedMode) {
+      LdAppBarAttachedMode.attached => true,
+      LdAppBarAttachedMode.adaptive => switch (position) {
+          LdAppBarPosition.bottom => LdTheme.of(context).platform.isDesktop,
+          _ => true,
+        },
+      LdAppBarAttachedMode.floating => false,
+    };
+    return attached;
   }
 
   int _activeIndex() {
@@ -69,7 +80,7 @@ class _TabNavigationState extends State<TabNavigation> {
       if (tab.isActive != null) {
         return tab.isActive!(context);
       }
-      return widget.activeRoute == tab.route;
+      return widget.activeRoute.startsWith(tab.route);
     });
   }
 
@@ -101,7 +112,9 @@ class _TabNavigationState extends State<TabNavigation> {
 
   int _getClosestTab(BuildContext context) {
     // Calculate which tab the indicator is closest to based on its left position
-    final closestTabIndex = (_indicatorPosition / _tabWidth).round().clamp(0, widget.tabs.length - 1);
+    final closestTabIndex = (_indicatorPosition / _tabWidth)
+        .round()
+        .clamp(0, widget.tabs.length - 1);
     return closestTabIndex;
   }
 
@@ -122,7 +135,8 @@ class _TabNavigationState extends State<TabNavigation> {
     }
     setState(() {
       _dragging = true;
-      _indicatorPosition = (_dragStartIndicatorPosition + (details.localPosition.dx - _dragStartPosition))
+      _indicatorPosition = (_dragStartIndicatorPosition +
+              (details.localPosition.dx - _dragStartPosition))
           .clamp(0, _navWidth - _tabWidth);
     });
   }
@@ -133,51 +147,105 @@ class _TabNavigationState extends State<TabNavigation> {
     LdHaptics.vibrate(HapticsType.light);
   }
 
-  BoxDecoration? get _outsideDecoration {
-    final theme = LdTheme.of(context, listen: true);
-    if (_attached) {
-      return BoxDecoration(
-          color: theme.surface,
-          border: switch (_effectivePosition) {
-            AppBarPosition.top => Border(bottom: BorderSide(color: theme.border, width: theme.borderWidth)),
-            AppBarPosition.bottom => Border(top: BorderSide(color: theme.border, width: theme.borderWidth)),
-          });
+  int _fillOpacity(bool isScrolledUnder) {
+    int opacity = 0;
+
+    if (isScrolledUnder || _effectivePosition == LdAppBarPosition.bottom) {
+      opacity = 255;
     }
-    return BoxDecoration(
-        gradient: LinearGradient(
-      begin: switch (_effectivePosition) {
-        AppBarPosition.top => Alignment.bottomCenter,
-        AppBarPosition.bottom => Alignment.topCenter,
-      },
-      end: switch (_effectivePosition) {
-        AppBarPosition.top => Alignment.topCenter,
-        AppBarPosition.bottom => Alignment.bottomCenter,
-      },
-      stops: const [0, 0.3],
-      colors: [
-        LdTheme.of(context).absolute.withAlpha(0),
-        LdTheme.of(context).absolute.withAlpha(200),
-      ],
-    ));
+
+    return opacity;
   }
 
-  BoxDecoration? get _insideDecoration {
-    if (_attached) {
-      return const BoxDecoration();
-    }
-    final theme = LdTheme.of(context, listen: true);
+  Color _fillColor(bool isScrolledUnder) {
+    final theme = LdTheme.of(context);
+    final color = LdTheme.of(context).surface;
+
+    return switch (widget.backgroundMode) {
+      LdAppBarBackgroundMode.hidden => Colors.transparent,
+      LdAppBarBackgroundMode.visible => color,
+      LdAppBarBackgroundMode.whenScrolled => Color.alphaBlend(
+          color.withAlpha(_fillOpacity(isScrolledUnder)),
+          LdTheme.of(context).background,
+        ),
+      LdAppBarBackgroundMode.adaptive => switch (theme.platform.isDesktop) {
+          false => Color.alphaBlend(
+              color.withAlpha(_fillOpacity(isScrolledUnder)),
+              LdTheme.of(context).background,
+            ),
+          true => color,
+        },
+    };
+  }
+
+  BoxDecoration _buildOutsideDecoration({
+    required BuildContext context,
+    required bool isScrolledUnder,
+    required bool isAttached,
+    required LdAppBarPosition position,
+  }) {
     return BoxDecoration(
-      color: theme.surface,
-      border: Border.all(color: theme.floatingBorder, width: theme.borderWidth),
-      borderRadius: LdTheme.of(context).radius(LdSize.m),
+      // We fill the outside container when attached.
+      color: isAttached ? _fillColor(isScrolledUnder) : null,
+      // Gradient behind the floating app bar.
+      gradient: !isAttached && widget.enableGradient
+          ? LinearGradient(
+              begin: switch (position) {
+                LdAppBarPosition.bottom => Alignment.topCenter,
+                LdAppBarPosition.top => Alignment.bottomCenter,
+              },
+              end: switch (position) {
+                LdAppBarPosition.bottom => Alignment.bottomCenter,
+                LdAppBarPosition.top => Alignment.topCenter,
+              },
+              stops: const [0, 0.3],
+              colors: [
+                LdTheme.of(context).absolute.withAlpha(0),
+                LdTheme.of(context).absolute.withAlpha(200),
+              ],
+            )
+          : null,
+      // Add a border to the app bar when attached. either top or bottom.
+      border: isAttached
+          ? Border(
+              bottom: switch (position) {
+                LdAppBarPosition.top => BorderSide(
+                    color: LdTheme.of(context).border,
+                    width: LdTheme.of(context).borderWidth,
+                  ),
+                LdAppBarPosition.bottom => BorderSide.none,
+              },
+              top: switch (position) {
+                LdAppBarPosition.bottom => BorderSide(
+                    color: LdTheme.of(context).border,
+                    width: LdTheme.of(context).borderWidth,
+                  ),
+                LdAppBarPosition.top => BorderSide.none,
+              },
+            )
+          : null,
     );
   }
 
-  EdgeInsets? get _insidePadding {
-    if (_attached) {
-      return EdgeInsets.zero;
+  BoxDecoration _buildInsideDecoration({
+    required BuildContext context,
+    required bool isScrolledUnder,
+    required bool isAttached,
+    required LdAppBarPosition position,
+  }) {
+    if (isAttached) {
+      return const BoxDecoration();
     }
-    return EdgeInsets.zero;
+
+    final theme = LdTheme.of(context);
+    return BoxDecoration(
+      borderRadius: BorderRadius.circular(theme.radiusSize(LdSize.m)),
+      color: _fillColor(isScrolledUnder),
+      border: Border.all(
+        color: theme.floatingBorder,
+        width: theme.borderWidth,
+      ),
+    );
   }
 
   @override
@@ -187,135 +255,193 @@ class _TabNavigationState extends State<TabNavigation> {
       child: Builder(
         builder: (context) {
           final theme = LdTheme.of(context, listen: true);
+          final isAttached = _effectivelyAttached(context);
           return LdAppBarScrollWrapper(
-            position: widget.position,
+            position: _effectivePosition,
             scrollBehavior: widget.scrollBehavior,
-            child: LdTouchableSurface(
-              focusNode: _focusNode,
-              onPressed: () {},
-              builder: (context, colors, status, _) {
-                return LdTouchableTouchFeedback(
-                  status: status,
-                  child: AppBarFrame(
-                    position: _effectivePosition,
-                    attached: _attached,
-                    insidePadding: _insidePadding,
-                    outsideDecoration: _outsideDecoration,
-                    outsideMinPadding: _attached ? EdgeInsets.zero : null,
-                    insideDecoration: _insideDecoration,
-                    insetBorderRadius: !_attached,
-                    child: LayoutBuilder(builder: (context, constraints) {
-                      if (constraints.maxWidth != _navWidth) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (mounted) {
-                            setState(() {
-                              _navWidth = constraints.maxWidth;
-                              _updateIndicatorPosition();
+            child: ScrolledUnderBuilder(
+              builder: (context, isScrolledUnder) {
+                return LdTouchableSurface(
+                  focusNode: _focusNode,
+                  onPressed: () {},
+                  builder: (context, colors, status, _) {
+                    return LdTouchableTouchFeedback(
+                      status: status,
+                      child: AppBarFrame(
+                        position: _effectivePosition,
+                        attached: isAttached,
+                        addContainer: widget.addContainer,
+                        insidePadding: EdgeInsets.zero,
+                        outsideDecoration: _buildOutsideDecoration(
+                          context: context,
+                          isScrolledUnder: isScrolledUnder,
+                          isAttached: isAttached,
+                          position: _effectivePosition,
+                        ),
+                        outsideMinPadding: isAttached ? EdgeInsets.zero : null,
+                        insideDecoration: _buildInsideDecoration(
+                          context: context,
+                          isScrolledUnder: isScrolledUnder,
+                          isAttached: isAttached,
+                          position: _effectivePosition,
+                        ),
+                        insetBorderRadius: !isAttached,
+                        child: LayoutBuilder(builder: (context, constraints) {
+                          if (constraints.maxWidth != _navWidth) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (mounted) {
+                                setState(() {
+                                  _navWidth = constraints.maxWidth;
+                                  _updateIndicatorPosition();
+                                });
+                              }
                             });
                           }
-                        });
-                      }
 
-                      return Stack(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: widget.tabs
-                                .map((tab) => Expanded(
-                                      child: LdTouchableSurface(
-                                        mode: LdTouchableSurfaceMode.neutralGhost,
-                                        onPressed: () => _onTabTap(tab.route),
-                                        builder: (context, colors, status, _) {
-                                          return Container(
-                                            decoration: BoxDecoration(
-                                              color: colors.surface,
-                                              borderRadius: _attached ? null : LdTheme.of(context).radius(LdSize.m),
-                                            ),
-                                            child: Builder(
-                                              builder: (context) {
-                                                final iconColor = theme.palette.text;
-                                                final textColor = theme.palette.text;
-                                                final icon = IconTheme(
-                                                  data:
-                                                      IconThemeData(color: iconColor, size: theme.labelSize(LdSize.l)),
-                                                  child: tab.icon,
-                                                );
+                          return Stack(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: widget.tabs
+                                    .map((tab) => Expanded(
+                                          child: LdTouchableSurface(
+                                            mode: LdTouchableSurfaceMode
+                                                .neutralGhost,
+                                            onPressed: () =>
+                                                _onTabTap(tab.route),
+                                            builder:
+                                                (context, colors, status, _) {
+                                              return Container(
+                                                decoration: BoxDecoration(
+                                                  color: colors.surface,
+                                                  borderRadius: isAttached
+                                                      ? null
+                                                      : LdTheme.of(context)
+                                                          .radius(LdSize.m),
+                                                ),
+                                                child: Builder(
+                                                  builder: (context) {
+                                                    final iconColor =
+                                                        theme.palette.text;
+                                                    final textColor =
+                                                        theme.palette.text;
+                                                    final icon = IconTheme(
+                                                      data: IconThemeData(
+                                                          color: iconColor,
+                                                          size: theme.labelSize(
+                                                              LdSize.l)),
+                                                      child: tab.icon,
+                                                    );
 
-                                                if (constraints.maxWidth < 500) {
-                                                  return Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                                    children: [
-                                                      icon,
-                                                      ldSpacerXS,
-                                                      LdText.ls(tab.label, color: textColor)
-                                                    ],
-                                                  ).padXS();
-                                                }
-                                                return Row(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    icon,
-                                                    ldSpacerS,
-                                                    Flexible(child: LdText.l(tab.label, color: textColor)),
-                                                  ],
-                                                ).padS();
-                                              },
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ))
-                                .toList(),
-                          ),
-                          LdSpring(
-                            springConstant: 20,
-                            dampingCoefficient: 20,
-                            mass: 5,
-                            position: _indicatorPosition,
-                            child: LdSpring(
-                              position: _dragging ? 1.1 : 1,
-                              builder: (context, state, child) => Transform.scale(
-                                scale: state.position.clamp(0, 2),
-                                child: child!,
+                                                    if (constraints.maxWidth <
+                                                        500) {
+                                                      return Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          icon,
+                                                          ldSpacerXS,
+                                                          LdText.ls(tab.label,
+                                                              color: textColor),
+                                                        ],
+                                                      ).padXS();
+                                                    }
+                                                    return Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        icon,
+                                                        ldSpacerS,
+                                                        Flexible(
+                                                            child: LdText.l(
+                                                                tab.label,
+                                                                color:
+                                                                    textColor)),
+                                                      ],
+                                                    ).padS();
+                                                  },
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ))
+                                    .toList(),
                               ),
-                              child: GestureDetector(
-                                onHorizontalDragStart: (details) {
-                                  _dragStartPosition = details.localPosition.dx;
-                                  _dragStartIndicatorPosition = _indicatorPosition;
-                                  _lastDraggedTabIndex = _getClosestTab(context);
-                                },
-                                onHorizontalDragUpdate: _onIndicatorDragUpdate,
-                                onHorizontalDragCancel: () {
-                                  _dragging = false;
-                                  _updateIndicatorPosition();
-                                },
-                                onHorizontalDragEnd: _onIndicatorDragEnd,
-                                child: Container(
-                                  width: constraints.maxWidth / widget.tabs.length,
-                                  decoration: BoxDecoration(
-                                    color: theme.primaryColor.withAlpha(100),
-                                    border: switch (_attached) {
-                                      true => switch (_effectivePosition) {
-                                          AppBarPosition.top => Border(
-                                              bottom: BorderSide(color: theme.primaryColor, width: theme.borderWidth)),
-                                          AppBarPosition.bottom => Border(
-                                              top: BorderSide(color: theme.primaryColor, width: theme.borderWidth)),
-                                        },
-                                      false => Border.all(color: theme.primaryColor, width: theme.borderWidth),
+                              LdSpring(
+                                springConstant: 20,
+                                dampingCoefficient: 20,
+                                mass: 5,
+                                position: _indicatorPosition,
+                                child: LdSpring(
+                                  position: _dragging ? 1.1 : 1,
+                                  builder: (context, state, child) =>
+                                      Transform.scale(
+                                    scale: state.position.clamp(0, 2),
+                                    child: child!,
+                                  ),
+                                  child: GestureDetector(
+                                    onHorizontalDragStart: (details) {
+                                      _dragStartPosition =
+                                          details.localPosition.dx;
+                                      _dragStartIndicatorPosition =
+                                          _indicatorPosition;
+                                      _lastDraggedTabIndex =
+                                          _getClosestTab(context);
                                     },
-                                    borderRadius: _attached ? null : LdTheme.of(context).radius(LdSize.m),
+                                    onHorizontalDragUpdate:
+                                        _onIndicatorDragUpdate,
+                                    onHorizontalDragCancel: () {
+                                      _dragging = false;
+                                      _updateIndicatorPosition();
+                                    },
+                                    onHorizontalDragEnd: _onIndicatorDragEnd,
+                                    child: Container(
+                                      width: constraints.maxWidth /
+                                          widget.tabs.length,
+                                      decoration: BoxDecoration(
+                                        color:
+                                            theme.primaryColor.withAlpha(100),
+                                        border: switch (isAttached) {
+                                          true => switch (_effectivePosition) {
+                                              LdAppBarPosition.top => Border(
+                                                  bottom: BorderSide(
+                                                      color: theme.primaryColor,
+                                                      width:
+                                                          theme.borderWidth)),
+                                              LdAppBarPosition.bottom => Border(
+                                                  top: BorderSide(
+                                                      color: theme.primaryColor,
+                                                      width:
+                                                          theme.borderWidth)),
+                                            },
+                                          false => Border.all(
+                                              color: theme.primaryColor,
+                                              width: theme.borderWidth),
+                                        },
+                                        borderRadius: isAttached
+                                            ? null
+                                            : LdTheme.of(context)
+                                                .radius(LdSize.m),
+                                      ),
+                                    ),
                                   ),
                                 ),
+                                builder: (context, state, child) {
+                                  return Positioned(
+                                      bottom: 0,
+                                      top: 0,
+                                      left: state.position,
+                                      child: child!);
+                                },
                               ),
-                            ),
-                            builder: (context, state, child) {
-                              return Positioned(bottom: 0, top: 0, left: state.position, child: child!);
-                            },
-                          ),
-                        ],
-                      );
-                    }),
-                  ),
+                            ],
+                          );
+                        }),
+                      ),
+                    );
+                  },
                 );
               },
             ),

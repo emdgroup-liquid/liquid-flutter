@@ -75,7 +75,7 @@ class LdListConfigProvider<T extends Identifiable<IdType>, IdType>
   @override
   Widget build(BuildContext context) {
     final parentConfig =
-        Provider.of<LdListConfig<T, IdType>?>(context, listen: false);
+        Provider.of<LdListConfig<T, IdType>?>(context, listen: true);
     final mergedConfig = parentConfig != null
         ? LdListConfig<T, IdType>(
             itemBuilder: config.itemBuilder ?? parentConfig.itemBuilder,
@@ -172,8 +172,7 @@ class LdList<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final config =
-        Provider.of<LdListConfig<T, IdType>?>(context, listen: false);
+    final config = Provider.of<LdListConfig<T, IdType>?>(context, listen: true);
     assert(config?.itemBuilder != null || itemBuilder != null,
         "Parameter itemBuilder is required and it was neither provided nor directly passed");
     assert(config?.paginator != null || paginator != null,

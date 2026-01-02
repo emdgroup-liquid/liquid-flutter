@@ -38,7 +38,7 @@ class LdNotificationPortal extends StatelessWidget {
         final theme = LdTheme.of(context, listen: true);
         return Stack(
           children: [
-            child!,
+            Positioned.fill(child: child!),
             Align(
               alignment: Alignment.bottomCenter,
               child: Padding(

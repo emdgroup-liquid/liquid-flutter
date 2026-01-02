@@ -38,7 +38,8 @@ const components = [
   _Component("Card", "/components/card", LucideIcons.square, ComponentCategory.layout),
   _Component("Divider", "/components/divider", LucideIcons.minus, ComponentCategory.layout),
   _Component("Drawer", "/components/drawer", LucideIcons.menu, ComponentCategory.layout),
-
+  _Component("Multi Panel Layout", "/components/multi-panel-layout", LucideIcons.panelTop, ComponentCategory.layout),
+  _Component("AppBar", "/components/appbar", LucideIcons.layoutDashboard, ComponentCategory.layout),
   _Component("Spring", "/components/spring", LucideIcons.shell, ComponentCategory.layout),
   _Component("List Item", "/components/list-item", LucideIcons.listTree, ComponentCategory.layout),
   _Component(

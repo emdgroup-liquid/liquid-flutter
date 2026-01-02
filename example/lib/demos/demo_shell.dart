@@ -28,9 +28,9 @@ class DemoShell extends StatelessWidget {
           ),
         if (isRoot || theme.platform.isDesktop)
           TabNavigation(
-            position: theme.platform.isMobile ? AppBarPosition.bottom : AppBarPosition.top,
+            position: LdAppBarPositionMode.adaptive,
             order: 1,
-            attachedMode: TabAttachedMode.always,
+            attachedMode: LdAppBarAttachedMode.attached,
             activeRoute: GoRouterState.of(context).uri.path,
             tabs: [
               LdNavigationTab(
@@ -55,11 +55,13 @@ class DemoShell extends StatelessWidget {
               if (route == "/") {
                 context.go("/");
               } else {
-                child.goBranch(switch (route) {
-                  "/task-demo" => 0,
-                  "/movie-demo" => 1,
+                final branchIndex = switch (route) {
+                  "/task-demo" => 1,
+                  "/movie-demo" => 0,
                   _ => throw Exception("Invalid route: $route"),
-                });
+                };
+
+                child.goBranch(branchIndex);
               }
             },
           ),

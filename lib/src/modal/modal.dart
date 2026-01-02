@@ -31,7 +31,7 @@ class LdModalPage<T> extends Page<T> {
       dialogBorderRadius: route.dialogBorderRadius,
       sheetBreakpoint: route.sheetBreakpoint,
       sheetInsets: route.sheetInsets,
-      barrierLabel: route.barrierLabel,
+      barrierLabel: route.barrierLabel ?? LiquidLocalizations.of(context).close,
       settings: this,
     );
   }
@@ -88,7 +88,7 @@ class LdModalRoute<T> extends PageRoute<T> {
 
   @override
   String? get barrierLabel {
-    return _barrierLabel ?? LiquidLocalizations.of(navigator!.context).close;
+    return _barrierLabel;
   }
 
   Future<T?> show(BuildContext context, {bool useRootNavigator = false}) =>

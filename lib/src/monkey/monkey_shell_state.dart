@@ -31,12 +31,11 @@ class LdMonkeyShellState<T extends Identifiable<IdType>, IdType> with ChangeNoti
   void setShowSelectionControls(bool showSelectionControls) async {
     await Future.delayed(Duration.zero);
     _showSelectionControls = showSelectionControls;
-    print("setShowSelectionControls: $showSelectionControls");
+
     notifyListeners();
   }
 
   Future<void> setEffectiveLayout(LdMonkeyEffectiveLayoutMode effectiveLayout) async {
-    await Future.delayed(Duration.zero);
     _effectiveLayout = effectiveLayout;
     notifyListeners();
   }

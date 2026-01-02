@@ -583,7 +583,7 @@ class VariantBuilder implements Builder {
                   : '';
           bodyStatements.add(
             Code(
-                'final config = Provider.of<$configClassName$typeArgsString?>(context, listen: false);'),
+                'final config = Provider.of<$configClassName$typeArgsString?>(context, listen: true);'),
           );
         }
 
@@ -752,7 +752,7 @@ class VariantBuilder implements Builder {
         // Read parent config
         bodyStatements.add(
           Code(
-              'final parentConfig = Provider.of<$configClassName$typeArgsString?>(context, listen: false);'),
+              'final parentConfig = Provider.of<$configClassName$typeArgsString?>(context, listen: true);'),
         );
 
         // Generate merge arguments for each context-configurable parameter

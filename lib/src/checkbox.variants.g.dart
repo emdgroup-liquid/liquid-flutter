@@ -36,7 +36,7 @@ class LdCheckboxConfigProvider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final parentConfig = Provider.of<LdCheckboxConfig?>(context, listen: false);
+    final parentConfig = Provider.of<LdCheckboxConfig?>(context, listen: true);
     final mergedConfig = parentConfig != null
         ? LdCheckboxConfig(
             checked: config.checked ?? parentConfig.checked,
@@ -153,7 +153,7 @@ class LdCheckbox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final config = Provider.of<LdCheckboxConfig?>(context, listen: false);
+    final config = Provider.of<LdCheckboxConfig?>(context, listen: true);
     return LdCheckboxWidget(
       label: label,
       checked: checked ?? config?.checked ?? false,

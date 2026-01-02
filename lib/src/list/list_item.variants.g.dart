@@ -51,7 +51,7 @@ class LdListItemConfigProvider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final parentConfig = Provider.of<LdListItemConfig?>(context, listen: false);
+    final parentConfig = Provider.of<LdListItemConfig?>(context, listen: true);
     final mergedConfig = parentConfig != null
         ? LdListItemConfig(
             active: config.active ?? parentConfig.active,
@@ -180,7 +180,7 @@ class LdListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final config = Provider.of<LdListItemConfig?>(context, listen: false);
+    final config = Provider.of<LdListItemConfig?>(context, listen: true);
     return LdListItemWidget(
       active: active ?? config?.active ?? false,
       borderRadius: borderRadius ?? config?.borderRadius,

@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 
 class LdAppBarRegistryKey {
@@ -22,11 +25,12 @@ class LdAppBarRegistryKey {
 }
 
 class AppBarInfo {
-  final AppBarPosition position;
+  final LdAppBarPosition position;
   final double innerHeight;
   final double verticalMargin;
   final double offset;
   final bool scrollUnder;
+  final bool willHide;
 
   const AppBarInfo({
     required this.position,
@@ -34,21 +38,24 @@ class AppBarInfo {
     required this.verticalMargin,
     required this.offset,
     required this.scrollUnder,
+    required this.willHide,
   });
 
-  factory AppBarInfo.initial(AppBarPosition position) {
+  factory AppBarInfo.initial(LdAppBarPosition position) {
     return AppBarInfo(
       position: position,
       innerHeight: 0.0,
       verticalMargin: 0.0,
       offset: 0.0,
       scrollUnder: false,
+      willHide: false,
     );
   }
 
   AppBarInfo copyWith({
-    AppBarPosition? position,
+    LdAppBarPosition? position,
     double? innerHeight,
+    bool? willHide,
     double? verticalMargin,
     double? offset,
     bool? scrollUnder,
@@ -59,6 +66,7 @@ class AppBarInfo {
       verticalMargin: verticalMargin ?? this.verticalMargin,
       offset: offset ?? this.offset,
       scrollUnder: scrollUnder ?? this.scrollUnder,
+      willHide: willHide ?? this.willHide,
     );
   }
 
@@ -181,7 +189,7 @@ class AppBarRegistryState extends ChangeNotifyingState<AppBarRegistry> {
     }
     _usedOrders.add(actualOrder);
     final key = LdAppBarRegistryKey(order: actualOrder, debugName: debugName);
-    _appBarRegistry[key] = AppBarInfo.initial(AppBarPosition.top);
+    _appBarRegistry[key] = AppBarInfo.initial(LdAppBarPosition.top);
 
     return key;
   }
@@ -195,8 +203,22 @@ class AppBarRegistryState extends ChangeNotifyingState<AppBarRegistry> {
   }
 
   void _updateBodyPadding() async {
-    final top = getTotalHeightAtPosition(AppBarPosition.top);
-    final bottom = getTotalHeightAtPosition(AppBarPosition.bottom);
+    await Future.delayed(Duration.zero);
+    if (!mounted) return;
+    final modalRoute = ModalRoute.of(context);
+    BuildContext? limitToChildrenOf;
+    if (modalRoute is LdModalRoute) {
+      limitToChildrenOf = modalRoute.subtreeContext;
+    }
+
+    final top = getTotalHeightAtPosition(
+      LdAppBarPosition.top,
+      limitToChildrenOf: limitToChildrenOf,
+    );
+    final bottom = getTotalHeightAtPosition(
+      LdAppBarPosition.bottom,
+      limitToChildrenOf: limitToChildrenOf,
+    );
     final newPadding = EdgeInsets.only(top: top, bottom: bottom);
     if (_bodyPadding.value != newPadding) {
       await Future.delayed(Duration.zero);
@@ -318,7 +340,7 @@ class AppBarRegistryState extends ChangeNotifyingState<AppBarRegistry> {
     return found;
   }
 
-  List<AppBarInfo> getAppBarsAtPosition(AppBarPosition position, {BuildContext? limitToChildrenOf}) {
+  List<AppBarInfo> getAppBarsAtPosition(LdAppBarPosition position, {BuildContext? limitToChildrenOf}) {
     if (!mounted) {
       return [];
     }
@@ -342,11 +364,17 @@ class AppBarRegistryState extends ChangeNotifyingState<AppBarRegistry> {
   /// The level considers:
   /// - Parent registries that have appbars at the same position
   /// - Appbars in the current registry at the same position that come before this appbar
-  int getLevel(LdAppBarRegistryKey appBarKey, AppBarPosition position) {
-    return getHigherAppBars(appBarKey).length;
+  int getLevel(LdAppBarRegistryKey appBarKey, LdAppBarPosition position, {BuildContext? limitToChildrenOf}) {
+    return getHigherAppBars(appBarKey, limitToChildrenOf: limitToChildrenOf).length;
   }
 
-  List<AppBarInfo> getAllAppBarsAtPosition(AppBarPosition position) {
+  List<AppBarInfo> getAllAppBarsAtPosition(LdAppBarPosition position, {BuildContext? limitToChildrenOf}) {
+    if (!mounted) {
+      return [];
+    }
+    if (limitToChildrenOf != null && !_isDescendantOf(context, limitToChildrenOf)) {
+      return [];
+    }
     // Get appbars sorted by order
 
     final sortedKeys = _appBarRegistry.keys.toList()..sort((a, b) => a.order.compareTo(b.order));
@@ -354,21 +382,21 @@ class AppBarRegistryState extends ChangeNotifyingState<AppBarRegistry> {
     final appbars =
         sortedKeys.where((k) => _appBarRegistry[k]?.position == position).map((k) => _appBarRegistry[k]!).toList();
 
-    return (_parentRegistry?.getAllAppBarsAtPosition(position) ?? []) + appbars;
+    return (_parentRegistry?.getAllAppBarsAtPosition(position, limitToChildrenOf: limitToChildrenOf) ?? []) + appbars;
   }
 
-  double getTotalHeightAtPosition(AppBarPosition position) {
-    final appBars = getAllAppBarsAtPosition(position);
+  double getTotalHeightAtPosition(LdAppBarPosition position, {BuildContext? limitToChildrenOf}) {
+    final appBars = getAllAppBarsAtPosition(position, limitToChildrenOf: limitToChildrenOf);
 
     return appBars.fold(0.0, (sum, appBar) => sum + appBar.innerHeight) + (appBars.firstOrNull?.verticalMargin ?? 0);
   }
 
-  double getEffectiveHeightOfOthers(LdAppBarRegistryKey key) {
+  double getEffectiveHeightOfOthers(LdAppBarRegistryKey key, {BuildContext? limitToChildrenOf}) {
     double total = 0.0;
-    final appBars = getHigherAppBars(key);
+    final appBars = getHigherAppBars(key, limitToChildrenOf: limitToChildrenOf);
 
     for (final appBar in appBars) {
-      total += appBar.innerHeight;
+      total += max(0, appBar.innerHeight - (appBar.willHide ? appBar.offset : 0.0));
     }
     if (appBars.isNotEmpty) {
       total += appBars.first.verticalMargin;
@@ -376,7 +404,7 @@ class AppBarRegistryState extends ChangeNotifyingState<AppBarRegistry> {
     return total;
   }
 
-  double getCumulativeHeightForPosition(AppBarPosition position, LdAppBarRegistryKey excludeKey) {
+  double getCumulativeHeightForPosition(LdAppBarPosition position, LdAppBarRegistryKey excludeKey) {
     double cumulativeHeight = 0.0;
     // Get sorted keys by order
     final sortedKeys = _appBarRegistry.keys.toList()..sort((a, b) => a.order.compareTo(b.order));

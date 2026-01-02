@@ -38,8 +38,7 @@ class _ListItem<T extends Identifiable> {
 }
 
 /// Extension to convert [LdPaginator] data into a list of [_ListItem]s
-extension GetItemList<T extends Identifiable<IdType>, IdType>
-    on LdPaginator<T, IdType> {
+extension GetItemList<T extends Identifiable<IdType>, IdType> on LdPaginator<T, IdType> {
   List<_ListItem<T>> currentList() {
     final result = <_ListItem<T>>[];
     if (totalItems == 0) return result;
@@ -70,8 +69,7 @@ typedef LdListItemBuilder<T extends Identifiable> = Widget Function(
 /// - Empty state handling
 
 @Variants([])
-class LdListWidget<T extends Identifiable<IdType>, IdType>
-    extends StatefulWidget {
+class LdListWidget<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   const LdListWidget({
     super.key,
     @ContextConfigurable() required this.itemBuilder,
@@ -113,13 +111,11 @@ class LdListWidget<T extends Identifiable<IdType>, IdType>
   )? errorBuilder;
 
   /// Built when there are missing items that are being loaded
-  final Widget Function(BuildContext context, int position, int totalItems)?
-      loadingBuilder;
+  final Widget Function(BuildContext context, int position, int totalItems)? loadingBuilder;
 
   // Grouping configuration
   final dynamic Function(T item)? groupingCriterion;
-  final Widget Function(BuildContext context, dynamic criterion)?
-      groupHeaderBuilder;
+  final Widget Function(BuildContext context, dynamic criterion)? groupHeaderBuilder;
 
   /// Built between items. Not called between items and group headers.
   final Widget Function(BuildContext context)? separatorBuilder;
@@ -179,10 +175,8 @@ class LdListWidget<T extends Identifiable<IdType>, IdType>
       value: separatorBuilder != null,
       ifTrue: 'enabled',
     ));
-    properties
-        .add(DiagnosticsProperty<LdRetryConfig?>('retryConfig', retryConfig));
-    properties.add(DiagnosticsProperty<ScrollController?>(
-        'scrollController', scrollController));
+    properties.add(DiagnosticsProperty<LdRetryConfig?>('retryConfig', retryConfig));
+    properties.add(DiagnosticsProperty<ScrollController?>('scrollController', scrollController));
     properties.add(DiagnosticsProperty("paginator", paginator));
   }
 
@@ -190,8 +184,7 @@ class LdListWidget<T extends Identifiable<IdType>, IdType>
   State<LdListWidget<T, IdType>> createState() => _LdListState<T, IdType>();
 }
 
-class _LdListState<T extends Identifiable<IdType>, IdType>
-    extends State<LdListWidget<T, IdType>> {
+class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListWidget<T, IdType>> {
   // State variables
   List<_ListItem<T>> _groupedItems = [];
   late final ScrollController _scrollController;
@@ -251,8 +244,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType>
   }
 
   bool _shouldRegroupItems(LdListWidget<T, IdType> oldWidget) {
-    return oldWidget.groupingCriterion != widget.groupingCriterion ||
-        widget.paginator != oldWidget.paginator;
+    return oldWidget.groupingCriterion != widget.groupingCriterion || widget.paginator != oldWidget.paginator;
   }
 
   bool _shouldUpdateDataListener(LdListWidget<T, IdType> oldWidget) {
@@ -341,13 +333,11 @@ class _LdListState<T extends Identifiable<IdType>, IdType>
   void _updateGroupedItems() {
     setState(() {
       /// If grouping is enabled, we need to group the items
-      if (widget.groupHeaderBuilder != null &&
-          widget.groupingCriterion != null) {
+      if (widget.groupHeaderBuilder != null && widget.groupingCriterion != null) {
         _groupedItems = _groupItems();
 
         /// Only a separator is provided.. we need to intersperse the items
-      } else if (widget.groupingCriterion == null &&
-          widget.separatorBuilder != null) {
+      } else if (widget.groupingCriterion == null && widget.separatorBuilder != null) {
         _groupedItems = _createInterspersedList();
       } else {
         /// No grouping is provided.. we just use the items as is
@@ -355,10 +345,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType>
       }
 
       // We remove keys that are no longer in the list
-      final presentIds = _groupedItems
-          .map((item) => item.item?.value?.id)
-          .where((id) => id != null)
-          .toSet();
+      final presentIds = _groupedItems.map((item) => item.item?.value?.id).where((id) => id != null).toSet();
       _itemKeys.removeWhere((id, key) => !presentIds.contains(id));
     });
   }
@@ -384,9 +371,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType>
 
   ScrollPhysics get _scrollPhysics {
     return widget.physics ??
-        (widget.shrinkWrap
-            ? const NeverScrollableScrollPhysics()
-            : const AlwaysScrollableScrollPhysics());
+        (widget.shrinkWrap ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics());
   }
 
   List<Widget> _buildSlivers(BuildContext context) {
@@ -457,11 +442,9 @@ class _LdListState<T extends Identifiable<IdType>, IdType>
     _ListItem<T> listEntry,
     int index,
   ) {
-    final item = LdPaginatorLoadedItem(
-        value: listEntry.item!.value, state: listEntry.item!.state);
+    final item = LdPaginatorLoadedItem(value: listEntry.item!.value, state: listEntry.item!.state);
 
-    _itemKeys[item.value.id] ??=
-        GlobalKey(debugLabel: "list" + item.value.id.toString());
+    _itemKeys[item.value.id] ??= GlobalKey(debugLabel: "list" + item.value.id.toString());
 
     if (listEntry.item!.state == LdPaginatorItemState.pendingRefresh) {
       widget.paginator.fetchPageAtOffset(listEntry.position!);
@@ -470,8 +453,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType>
     return KeyedSubtree(
       key: _itemKeys[item.value.id],
       child: switch (listEntry.item!.state) {
-        LdPaginatorItemState.fetching =>
-          _buildLoader(context, listEntry.position!),
+        LdPaginatorItemState.fetching => _buildLoader(context, listEntry.position!),
         _ => widget.itemBuilder(context, item, listEntry.position!),
       },
     );
@@ -519,8 +501,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType>
     double totalHeight = 0;
     double count = 0;
     for (final item in _itemKeys.values) {
-      final height =
-          item.currentContext?.findRenderObject()?.paintBounds.height;
+      final height = item.currentContext?.findRenderObject()?.paintBounds.height;
 
       if (height != null) {
         totalHeight += height;
@@ -550,15 +531,13 @@ class _LdListState<T extends Identifiable<IdType>, IdType>
 
     final offset = averageHeight * widget.paginator.initialOffset;
 
-    _scrollController.animateTo(offset,
-        duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
+    _scrollController.animateTo(offset, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
   }
 
   @override
   Widget build(BuildContext context) {
     if (widget.paginator.hasError) {
-      return _buildError(widget.paginator.error!,
-          stackTrace: widget.paginator.errorStackTrace);
+      return _buildError(widget.paginator.error!, stackTrace: widget.paginator.errorStackTrace);
     }
 
     if (widget.paginator.currentItemCount == 0 && !widget.paginator.busy) {

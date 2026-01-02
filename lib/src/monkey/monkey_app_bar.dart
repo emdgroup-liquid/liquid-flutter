@@ -9,6 +9,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
   final LdMonkeyActionLocation location;
   final String? debugName;
   final List<Widget> additionalActions;
+  final Widget? leading;
   final LdAppBarPositionMode? positionMode;
   const LdMonkeyAppBar({
     super.key,
@@ -16,6 +17,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
     this.additionalActions = const [],
     this.positionMode,
     required this.location,
+    this.leading,
     this.debugName,
   });
 
@@ -34,6 +36,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
     final repository = LdRepository.of<T, IdType>(context);
     final searchFilter = _getSearchFilter(context);
     final showSearch = searchFilter != null && location == LdMonkeyActionLocation.masterSecondary;
+
     final actions = ldMonkeyAppBarActionsForLocation<T, IdType>(
       context,
       location,
@@ -41,8 +44,10 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
     if (showSearch == false && actions.isEmpty && additionalActions.isEmpty && title == null) {
       return const SizedBox.shrink();
     }
+
     return LdAppBar(
         debugName: debugName,
+        leading: leading,
         order: switch (location) {
           LdMonkeyActionLocation.masterAppBar => 1,
           LdMonkeyActionLocation.masterSecondary => 2,
@@ -64,7 +69,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
         },
         implyLeading: switch (location) {
           LdMonkeyActionLocation.detailAppBar => effectiveLayout == LdMonkeyEffectiveLayoutMode.detail,
-          _ => false,
+          _ => null,
         },
         searchConfig: switch (location) {
           LdMonkeyActionLocation.masterSecondary => searchFilter?.searchConfig((query) {
@@ -83,7 +88,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
               ListenableProvider.value(value: LdRepository.of<T, IdType>(context)),
               ListenableProvider.value(value: LdMonkeyShellState.of<T, IdType>(context)),
               Provider.value(value: context.read<LdMonkeyEffectiveLayoutMode>()),
-              Provider.value(value: context.read<LdMonkeySelection<IdType>>())
+              Provider.value(value: context.read<LdMonkeySelection<T, IdType>>())
             ],
         actions: [
           ...actions,

@@ -52,7 +52,8 @@ class _AppScaffoldState extends State<AppScaffold> {
               ),
               title: widget.title,
               actions: [
-                LdButton(
+                LdAppBarAction(
+                  tooltip: "GitHub",
                   leading: const Icon(LucideIcons.github),
                   onPressed: () {
                     launchUrl(
@@ -64,7 +65,8 @@ class _AppScaffoldState extends State<AppScaffold> {
                   child: const Text("GitHub"),
                 ),
                 LdContextMenu(
-                  builder: (context, isShuttle, open, isOpen, child) => LdButton(
+                  builder: (context, isShuttle, open, isOpen, child) => LdAppBarAction(
+                    tooltip: "Theme",
                     leading: const Icon(LucideIcons.paintBucket),
                     onPressed: open,
                     active: isOpen,

@@ -5,10 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/drawer_layout.dart';
 import 'package:liquid_flutter/src/drawer_state.dart';
 import 'package:liquid_flutter/src/monkey/intents.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:provider/provider.dart';
 
@@ -26,30 +24,29 @@ class LdMonkeyShell<T extends Identifiable<IdType>, IdType> extends StatefulWidg
     super.key,
     required this.basePath,
     required this.child,
-    required this.layoutMode,
+    this.layoutMode = LdMonkeyLayoutMode.auto,
+    required this.routeState,
     required this.masterPage,
     required this.parseSelected,
-    required this.routeSelection,
-    required this.queryParameters,
     this.actions = const [],
     this.buildDetailPath,
     this.detailPanelFlex = 2,
     this.reflowBreakpoint = 600,
     this.repositoryBuilder,
+    required this.pathParameterName,
   });
+
+  /// The item id for the route parameters, this will be used to disambiguate between multiple monkey patterns
+  final String pathParameterName;
+
+  /// The state of the route parameters, this will be used to get the selected items
+  final GoRouterState routeState;
 
   /// The base path for the monkey pattern.
   final String basePath;
 
   /// Child route provided by go_router
   final Widget child;
-
-  /// The selection part of the route path, is usually a comma separated
-  /// list of ids.
-  final String? routeSelection;
-
-  /// Query parameters from the current route.
-  final Map<String, String> queryParameters;
 
   /// Builder function that creates a repository instance asynchronously.
   /// If not provided, the repository will be looked up in the context.
@@ -94,6 +91,17 @@ class LdMonkeyShell<T extends Identifiable<IdType>, IdType> extends StatefulWidg
   /// The master page to display in the master panel. This parameter is not used
   /// if the the effective layout is not side by side.
   final Widget masterPage;
+
+  String? get routeSelection {
+    return routeState.pathParameters["selected_${pathParameterName}"];
+  }
+
+  /// Query parameters from the current route. Only includes parameters that start with the path parameter name.
+  Map<String, String> get queryParameters => Map.fromEntries(
+        routeState.uri.queryParameters.entries.where(
+          (entry) => entry.key.startsWith(pathParameterName),
+        ),
+      );
 
   @override
   State<LdMonkeyShell<T, IdType>> createState() => _LdMonkeyShellState<T, IdType>();
@@ -186,9 +194,6 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
     }
 
     await _applyStateToUrl();
-    if (mounted) {
-      setState(() {});
-    }
   }
 
   /// Callback when URL changes - applies URL to state.
@@ -201,14 +206,14 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
     }
 
     // Update showSelectionControls from query parameters
-    final newShowSelectionControls = widget.queryParameters['select'] == 'true';
+    final newShowSelectionControls = widget.queryParameters['${widget.pathParameterName}-select'] == 'true';
     if (newShowSelectionControls != state.showSelectionControls) {
       state.setShowSelectionControls(newShowSelectionControls);
     }
 
     // Update selected items from route selection
     if (widget.routeSelection != null) {
-      final newSelectedIds = _parseSelected(widget.routeSelection ?? "");
+      final newSelectedIds = _parseSelected(widget.routeSelection!);
       if (!setEquals(newSelectedIds, state.selectedItems)) {
         state.setSelectedItems(newSelectedIds);
       }
@@ -263,9 +268,7 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
 
   // Whether we are currently showing the detail page.
   bool get _showingDetail {
-    final router = GoRouter.of(context);
-    final currentUri = router.state.pathParameters.containsKey("selected");
-    return currentUri;
+    return widget.routeSelection != null;
   }
 
   /// Builds query parameters from repository and state.
@@ -279,7 +282,7 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
 
     // Add showSelectionControls query parameter
     if (state.showSelectionControls) {
-      queryParameters['select'] = 'true';
+      queryParameters['${widget.pathParameterName}-select'] = 'true';
     }
 
     return queryParameters;
@@ -355,10 +358,6 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
           router.replace(baseUriWithParams.toString());
         }
       }
-
-      // Wait for router to process the URL change
-      await Future.delayed(Duration.zero);
-      setState(() {});
     } finally {
       // Release mutex after URL update completes
       _urlUpdateMutex?.complete();
@@ -372,7 +371,7 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
     BuildContext context,
   ) {
     return Provider.value(
-      value: LdMonkeySelection<IdType>(items: state.selectedItems),
+      value: LdMonkeySelection<T, IdType>(items: state.selectedItems),
       updateShouldNotify: (previous, next) => previous != next,
       child: ListenableProvider.value(
         value: _repository!,
@@ -399,45 +398,30 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
           }
 
           return Provider.value(
-            value: effectiveLayout,
-            child: LdScaffold(
-              drawerWidth: 500,
-              drawer: widget.masterPage,
-              body: ListenableBuilder(
-                listenable: state,
-                builder: (context, _) {
-                  final selectedItems = state.selectedItems;
+              value: effectiveLayout,
+              child: ListenableBuilder(
+                  listenable: state,
+                  builder: (context, _) {
+                    final selectedItems = state.selectedItems;
 
-                  if (selectedItems.isNotEmpty && _showingDetail) {
-                    return widget.child;
-                  }
-                  final drawerState = context.watch<LdDrawerState>();
-                  return Center(
-                    child: LdAutoSpace(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        if (drawerState.isOpen != true) ...[
-                          LdText.l(LiquidLocalizations.of(context).listHidden),
-                          LdButton(
-                            leading: const Icon(LucideIcons.panelLeftOpen),
-                            child: const Text("Show list"),
-                            onPressed: () {
-                              LdDrawerLayout.openDrawer(context);
-                            },
-                          ),
+                    final showDetail = selectedItems.isNotEmpty && _showingDetail;
+
+                    return Provider.value(
+                      value: LdDrawerState(isOpen: showDetail, isSideBySide: true),
+                      child: LdMultiPanelLayout(
+                        enableBorders: true,
+                        visibleStartIndex: 0,
+                        spacing: 0,
+                        visibleEndIndex: showDetail ? 1 : 0,
+                        widths: const [PanelWidth.fill(), PanelWidth.fill(fillFlex: 2)],
+                        children: [
+                          Provider.value(
+                              value: showDetail ? LdDrawerSlot.drawer : LdDrawerSlot.body, child: widget.masterPage),
+                          if (showDetail) Provider.value(value: LdDrawerSlot.body, child: widget.child) else Container()
                         ],
-                        LdMute(
-                          child: LdText.l(
-                            "Select something",
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-          );
+                      ),
+                    );
+                  }));
         }),
       ),
     );

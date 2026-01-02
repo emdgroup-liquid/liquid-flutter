@@ -27,7 +27,7 @@ class LdAvatarConfigProvider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final parentConfig = Provider.of<LdAvatarConfig?>(context, listen: false);
+    final parentConfig = Provider.of<LdAvatarConfig?>(context, listen: true);
     final mergedConfig = parentConfig != null
         ? LdAvatarConfig(
             color: config.color ?? parentConfig.color,
@@ -114,7 +114,7 @@ class LdAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final config = Provider.of<LdAvatarConfig?>(context, listen: false);
+    final config = Provider.of<LdAvatarConfig?>(context, listen: true);
     return LdAvatarWidget(
       child: child,
       color: color ?? config?.color,

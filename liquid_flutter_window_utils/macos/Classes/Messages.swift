@@ -79,10 +79,42 @@ struct WindowState {
     ]
   }
 }
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct Rect {
+  var left: Int64
+  var top: Int64
+  var right: Int64
+  var bottom: Int64
+
+  static func fromList(_ list: [Any?]) -> Rect? {
+    let left = list[0] is Int64 ? list[0] as! Int64 : Int64(list[0] as! Int32)
+    let top = list[1] is Int64 ? list[1] as! Int64 : Int64(list[1] as! Int32)
+    let right = list[2] is Int64 ? list[2] as! Int64 : Int64(list[2] as! Int32)
+    let bottom = list[3] is Int64 ? list[3] as! Int64 : Int64(list[3] as! Int32)
+
+    return Rect(
+      left: left,
+      top: top,
+      right: right,
+      bottom: bottom
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      left,
+      top,
+      right,
+      bottom,
+    ]
+  }
+}
 private class WindowUtilsApiCodecReader: FlutterStandardReader {
   override func readValue(ofType type: UInt8) -> Any? {
     switch type {
       case 128:
+        return Rect.fromList(self.readValue() as! [Any?])
+      case 129:
         return WindowState.fromList(self.readValue() as! [Any?])
       default:
         return super.readValue(ofType: type)
@@ -92,8 +124,11 @@ private class WindowUtilsApiCodecReader: FlutterStandardReader {
 
 private class WindowUtilsApiCodecWriter: FlutterStandardWriter {
   override func writeValue(_ value: Any) {
-    if let value = value as? WindowState {
+    if let value = value as? Rect {
       super.writeByte(128)
+      super.writeValue(value.toList())
+    } else if let value = value as? WindowState {
+      super.writeByte(129)
       super.writeValue(value.toList())
     } else {
       super.writeValue(value)
@@ -128,6 +163,7 @@ protocol WindowUtilsApi {
   func isWindowMaximized() throws -> Bool
   func getWindowState() throws -> WindowState
   func getScreenRadius() throws -> Double
+  func setSystemGestureExclusionRects(rects: [Rect]) throws
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -286,6 +322,21 @@ class WindowUtilsApiSetup {
       }
     } else {
       getScreenRadiusChannel.setMessageHandler(nil)
+    }
+    let setSystemGestureExclusionRectsChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.setSystemGestureExclusionRects", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      setSystemGestureExclusionRectsChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let rectsArg = args[0] as! [Rect]
+        do {
+          try api.setSystemGestureExclusionRects(rects: rectsArg)
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      setSystemGestureExclusionRectsChannel.setMessageHandler(nil)
     }
   }
 }

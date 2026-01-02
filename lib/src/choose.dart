@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/touchable/input_color.dart';
@@ -224,12 +225,14 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType>
         : Navigator.of(context);
 
     final shouldUsePage = widget.mode == LdChooseMode.page ||
-        (widget.mode == LdChooseMode.auto && _repository.totalItems > 10);
+        (widget.mode == LdChooseMode.auto &&
+            _repository.totalItems > 10 &&
+            LdTheme.of(context).platform.isMobile);
 
     final result = await (shouldUsePage
         ? nav.push<Set<IdType>>(
             MaterialPageRoute(
-              builder: ((context) => _LdChoosePage<T, IdType>(
+              builder: ((context) => LdChoosePage<T, IdType>(
                     repository: _repository,
                     itemBuilder: widget.itemBuilder,
                     initialSelectedItems: widget.value ?? <IdType>{},
@@ -243,7 +246,7 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType>
         : nav.push<Set<IdType>>(
             LdModalRoute(
               context: context,
-              pageBuilder: (context) => _LdChoosePage<T, IdType>(
+              pageBuilder: (context) => LdChoosePage<T, IdType>(
                 repository: _repository,
                 itemBuilder: widget.itemBuilder,
                 initialSelectedItems: widget.value ?? <IdType>{},
@@ -274,6 +277,11 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType>
 
     return LdSubmit(
       arg: widget.value,
+      argEquals: (oldArg, newArg) {
+        bool equals = setEquals(oldArg, newArg);
+
+        return equals;
+      },
       config: LdSubmitConfig<List<T>, Set<IdType>?>(
         autoTrigger: true,
         action: (ids) async {
@@ -439,7 +447,7 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType>
   }
 }
 
-class _LdChoosePage<T extends Identifiable<IdType>, IdType>
+class LdChoosePage<T extends Identifiable<IdType>, IdType>
     extends StatefulWidget {
   final LdRepository<T, IdType> repository;
   final Widget Function(
@@ -449,7 +457,7 @@ class _LdChoosePage<T extends Identifiable<IdType>, IdType>
   final bool allowEmpty;
   final String label;
 
-  const _LdChoosePage({
+  const LdChoosePage({
     required this.repository,
     required this.itemBuilder,
     required this.initialSelectedItems,
@@ -460,12 +468,12 @@ class _LdChoosePage<T extends Identifiable<IdType>, IdType>
   });
 
   @override
-  State<_LdChoosePage<T, IdType>> createState() =>
+  State<LdChoosePage<T, IdType>> createState() =>
       _LdChoosePageState<T, IdType>();
 }
 
 class _LdChoosePageState<T extends Identifiable<IdType>, IdType>
-    extends State<_LdChoosePage<T, IdType>> {
+    extends State<LdChoosePage<T, IdType>> {
   late Set<IdType> _selectedItems;
 
   @override
@@ -503,15 +511,16 @@ class _LdChoosePageState<T extends Identifiable<IdType>, IdType>
           title: Text(widget.label),
           implyCloseModalButton: false,
           actions: [
-            LdButton.ghost(
-              disabled: _selectedItems.isEmpty,
-              onPressed: () {
-                setState(() {
-                  _selectedItems = {};
-                });
-              },
-              child: const Text("Clear"),
-            ),
+            if (widget.allowEmpty)
+              LdButton.ghost(
+                disabled: _selectedItems.isEmpty,
+                onPressed: () {
+                  setState(() {
+                    _selectedItems = {};
+                  });
+                },
+                child: const Text("Clear"),
+              ),
             LdButton(
               disabled: _selectedItems.isEmpty && !widget.allowEmpty,
               onPressed: () {

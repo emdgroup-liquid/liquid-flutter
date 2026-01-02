@@ -55,6 +55,9 @@ export 'src/list/selectable_list.dart';
 export 'src/list/ld_list_item_animation.dart';
 export 'src/loading.dart';
 export 'src/monkey/index.dart';
+export 'src/multi_panel/multi_panel_layout.dart';
+export 'src/multi_panel/multi_panel_layout_mode.dart';
+export 'src/multi_panel/panel_width.dart';
 
 export 'src/modal/modal.dart';
 export 'src/modal/modal_builder.dart';

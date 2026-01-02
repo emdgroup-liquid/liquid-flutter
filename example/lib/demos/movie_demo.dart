@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/monkey/monkey_app_bar.dart';
 
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -131,83 +130,6 @@ final movieRepository = LdRepository<_Movie, int>(
   },
 );
 
-/*
-final movieDemo = LdMonkey<_Movie, int>(
-  path: "/movie-demo",
-  allowMultipleSelection: true,
-  layoutMode: LdMonkeyLayoutMode.neverSideBySide,
-  showMultiSelectItems: true,
-  parseId: (id) => int.parse(id),
-  detailPath: (items) => "/movie-demo/${items.join(",")}",
-  buildDetail: (context, item) => _MovieDetail(movie: item),
-  listBuilder: (context, route, state, onSelectionChange) {
-    final shellState = LdMonkeyShellState.of<_Movie, int>(context);
-    return LdSelectableList<_Movie, int>(
-      showSelectionControls: shellState.showSelectionControls,
-      listBuilder: (context, scrollController, itemBuilder) {
-        return CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-                child: LdList(
-              shrinkWrap: true,
-              separatorBuilder: (context) => LdDivider(),
-              header: LdAutoBackground(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: LdText.l("Movie"),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: LdText.l("Genre"),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: LdText.l("Rating"),
-                    ),
-                  ],
-                ).spaceM().padL(),
-              ),
-              paginator: route.repository,
-              itemBuilder: itemBuilder,
-              scrollController: scrollController,
-              assumedItemHeight: 50,
-            ))
-          ],
-        );
-      },
-      paginator: route.repository,
-      initialSelectedItems: shellState.selectedItems,
-      multiSelect: true,
-      onSelectionChange: (selected) => onSelectionChange(selected),
-      itemBuilder: (context, item, index) {
-        return LdMonkeySingleShortcuts(
-          item: item.value!.id,
-          actions: shellState.actions,
-          child: LdMonkeyContextMenu<_Movie, int>(
-            item: item,
-            child: LdListItemAnimation(
-              state: item.state,
-              child: LdTableRow(
-                isOdd: index.isOdd,
-                title: Text(
-                  item.value!.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text(item.value!.genre),
-                subContent: Text("Rating: ${item.value!.rating}/5"),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  },
-);*/
-
 class _MovieDetail extends StatefulWidget {
   final LdPaginatorItem<_Movie> movie;
   const _MovieDetail({required this.movie});
@@ -293,18 +215,21 @@ class _MovieDetailState extends State<_MovieDetail> {
 
 class MovieShell extends StatelessWidget {
   final Widget child;
-  final Widget masterPage;
   final GoRouterState state;
-  const MovieShell({super.key, required this.child, required this.masterPage, required this.state});
+  const MovieShell({
+    super.key,
+    required this.child,
+    required this.state,
+  });
   @override
   Widget build(BuildContext context) {
     return LdMonkeyShell<_Movie, int>(
-      queryParameters: state.uri.queryParameters,
-      routeSelection: state.pathParameters['selected'],
-      masterPage: masterPage,
-      parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
-      layoutMode: LdMonkeyLayoutMode.neverSideBySide,
+      pathParameterName: "movie",
+      routeState: state,
       basePath: "/movie-demo",
+      layoutMode: LdMonkeyLayoutMode.neverSideBySide,
+      masterPage: MovieMasterPage(),
+      parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
       repositoryBuilder: (context) async => movieRepository,
       actions: [
         toggleFilters<_Movie, int>(),
@@ -406,7 +331,10 @@ class MovieMasterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyMasterPage<_Movie, int>(
-      appBar: LdMonkeyAppBar<_Movie, int>(location: LdMonkeyActionLocation.masterAppBar, title: Text("Movies")),
+      appBar: LdMonkeyAppBar<_Movie, int>(
+        location: LdMonkeyActionLocation.masterAppBar,
+        title: Text("Movies"),
+      ),
       buildItem: (context, item) => LdListItem(
         title: Text(item.value!.title),
         subtitle: Text(item.value!.genre),

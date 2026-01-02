@@ -17,14 +17,13 @@ class MonkeyActionsDemo extends StatelessWidget {
         LdText.h("LdMonkey Actions"),
         LdText.p(
             "Actions in the monkey pattern allow users to perform operations on selected items. Actions can appear in different locations throughout the interface and have various visibility conditions."),
-        ComponentsAccordion(
-            components: {"LdMonkeyAction", "LdMonkeyActionVisibility"}),
+        ComponentsAccordion(components: {"LdMonkeyAction", "LdMonkeyActionVisibility"}),
         LdText.hs("1. Basic Action Structure"),
         LdText.p(
-            "Every action is defined using the LdMonkeyAction class with visibility conditions, labels, icons, and the action logic."),
+            "Actions are defined using LdMonkeySubmitAction (for submit-based actions) or LdMonkeyBareChildAction (for custom widgets). Actions have visibility conditions, labels, icons, and action logic."),
         CodeBlock(
           language: "dart",
-          code: '''LdMonkeyAction(
+          code: '''LdMonkeySubmitAction(
   // Where the action should appear
   visibility: {
     LdMonkeyActionVisibility(
@@ -38,43 +37,41 @@ class MonkeyActionsDemo extends StatelessWidget {
   },
   
   // UI elements
-  buildLabel: (context, selection) => "New Task",
-  buildIcon: (context, selection) => const Icon(LucideIcons.plus),
+  child: Text("New Task"),
+  icon: Icon(LucideIcons.plus),
   
   // The actual action logic
-  action: (context, selection) async {
-    // Your action implementation here
-  },
+  config: (context) => LdSubmitConfig(
+    loadingText: "Creating new task",
+    action: (_) async {
+      // Your action implementation here
+      // Access selection using: LdMonkeySelection.of<Task, int>(context).items
+    },
+  ),
 )''',
         ),
         LdText.hs("2. Action Locations"),
-        LdText.p(
-            "Actions can be placed in different locations throughout the monkey pattern interface:"),
+        LdText.p("Actions can be placed in different locations throughout the monkey pattern interface:"),
         LdAutoSpace(children: [
           LdCard(
             header: Text("LdMonkeyActionLocation.masterAppBar"),
-            child: LdText.p(
-                "Primary app bar in the master view - typically for create actions"),
+            child: LdText.p("Primary app bar in the master view - typically for create actions"),
           ),
           LdCard(
             header: Text("LdMonkeyActionLocation.masterSecondary"),
-            child: LdText.p(
-                "Secondary app bar in the master view - for search, filters, and bulk operations"),
+            child: LdText.p("Secondary app bar in the master view - for search, filters, and bulk operations"),
           ),
           LdCard(
             header: Text("LdMonkeyActionLocation.detailAppBar"),
-            child: LdText.p(
-                "Primary app bar in the detail view - for item-specific actions"),
+            child: LdText.p("Primary app bar in the detail view - for item-specific actions"),
           ),
           LdCard(
             header: Text("LdMonkeyActionLocation.detailSecondary"),
-            child: LdText.p(
-                "Secondary app bar in the detail view - for additional item actions"),
+            child: LdText.p("Secondary app bar in the detail view - for additional item actions"),
           ),
           LdCard(
             header: Text("LdMonkeyActionLocation.context"),
-            child: LdText.p(
-                "Context menu when right-clicking on items - for quick actions"),
+            child: LdText.p("Context menu when right-clicking on items - for quick actions"),
           ),
         ]),
         LdText.hs("3. Action Visibility Conditions"),
@@ -91,20 +88,21 @@ class MonkeyActionsDemo extends StatelessWidget {
   // Apply filters to selection
   applyFilters: {"todo"},      // Only show when "todo" filter is active
   
-  // Visibility in split view
-  visibleInSplitView: true,    // Show in side-by-side layout
-  
-  // Custom visibility function
-  visible: (context, selection, filters) {
-    return selection.length > 0;
+  // Layout modes where action is visible
+  layoutModes: {
+    LdMonkeyEffectiveLayoutMode.sideBySide,
+    LdMonkeyEffectiveLayoutMode.detail,
   },
+  
+  // Show only when selection controls are visible
+  visibleWhenShowingSelectionControls: true,
 )''',
         ),
         LdText.hs("4. Create Action Example"),
         LdText.p("A typical create action that appears in the master app bar:"),
         CodeBlock(
           language: "dart",
-          code: '''LdMonkeyAction(
+          code: '''LdMonkeySubmitAction(
   visibility: {
     LdMonkeyActionVisibility(
       location: LdMonkeyActionLocation.masterAppBar,
@@ -113,45 +111,46 @@ class MonkeyActionsDemo extends StatelessWidget {
   shortcutActivators: {
     SingleActivator(LogicalKeyboardKey.keyN, meta: true),
   },
-  buildLoadingText: (context, selection) => "Creating new task",
-  buildLabel: (context, selection) => "New Task",
-  buildIcon: (context, selection) => const Icon(LucideIcons.plus),
-  action: (context, selection) async {
-    final route = LdMonkey.of<Task, int, bool>(context);
-    
-    // Show input dialog
-    final newTaskNotification = LdNotificationsController.of(context)
-        .enterText(
-            message: "New task",
-            inputHint: "New Task",
-            inputLabel: "Task");
-    
-    final newTaskText = await newTaskNotification.inputCompleter.future;
-    
-    if (newTaskText == null) return;
-    
-    // Create the new item
-    final newTask = Task(
-      testData.length + 1,
-      newTaskText,
-      DateTime.now().add(const Duration(days: 1)),
-      false,
-      DateTime.now(),
-    );
-    
-    await taskRepository.create(newTask);
-    
-    // Select the new item
-    route.setSelectedItems({newTask.id});
-  },
+  child: Text("New Task"),
+  icon: Icon(LucideIcons.plus),
+  config: (context) => LdSubmitConfig(
+    loadingText: "Creating new task",
+    action: (_) async {
+      final shellState = LdMonkeyShellState.of<Task, int>(context);
+      
+      // Show input dialog
+      final newTaskText = await ldEnterTextModal(
+        context: context,
+        initialValue: "New task",
+        inputHint: "New Task",
+        inputLabel: "Task",
+        useRootNavigator: true,
+      );
+      
+      if (newTaskText == null) return;
+      
+      // Create the new item
+      final newTask = Task(
+        testData.length + 1,
+        newTaskText,
+        DateTime.now().add(const Duration(days: 1)),
+        false,
+        DateTime.now(),
+      );
+      
+      await taskRepository.create(newTask);
+      
+      // Select the new item
+      shellState.setSelectedItems({newTask.id});
+    },
+  ),
 )''',
         ),
         LdText.hs("5. Delete Action Example"),
-        LdText.p(
-            "A delete action that appears in multiple locations with different conditions:"),
+        LdText.p("A delete action that appears in multiple locations with different conditions:"),
         CodeBlock(
           language: "dart",
-          code: '''LdMonkeyAction(
+          code: '''LdMonkeySubmitAction(
   visibility: {
     // Show in detail app bar when items are selected
     LdMonkeyActionVisibility(
@@ -165,35 +164,40 @@ class MonkeyActionsDemo extends StatelessWidget {
       minSelectionCount: 1,
       maxSelectionCount: null,
     ),
-    // Show in master secondary when items are selected (not in split view)
+    // Show in master secondary when items are selected (only in master layout)
     LdMonkeyActionVisibility(
       location: LdMonkeyActionLocation.masterSecondary,
       minSelectionCount: 1,
       maxSelectionCount: null,
-      visibleInSplitView: false,
+      layoutModes: {LdMonkeyEffectiveLayoutMode.master},
     ),
   },
   shortcutActivators: {
     SingleActivator(LogicalKeyboardKey.delete),
     SingleActivator(LogicalKeyboardKey.backspace),
   },
-  buildLoadingText: (context, selection) =>
-      "Deleting \${selection.length} \${selection.length == 1 ? "item" : "items"}",
-  buildLabel: (context, selection) =>
-      "Delete \${selection.length} \${selection.length == 1 ? "item" : "items"}",
-  buildIcon: (context, selection) => const Icon(LucideIcons.trash2),
-  color: shadRed, // Use error color for destructive actions
-  action: (context, selection) async {
-    await taskRepository.deleteBatch(selection);
-  },
+  color: LdTheme.of(context).error, // Use error color for destructive actions
+  child: Builder(builder: (context) {
+    final selection = LdMonkeySelection.of<Task, int>(context);
+    return Text(
+      LiquidLocalizations.of(context).deleteNItems(selection.items.length),
+    );
+  }),
+  icon: Icon(LucideIcons.trash2),
+  config: (context) => LdSubmitConfig(
+    loadingText: "Deleting",
+    action: (_) async {
+      final selection = LdMonkeySelection.of<Task, int>(context);
+      await taskRepository.deleteBatch(selection.items);
+    },
+  ),
 )''',
         ),
         LdText.hs("6. Conditional Actions"),
-        LdText.p(
-            "Actions that only appear under certain conditions, like when specific filters are active:"),
+        LdText.p("Actions that only appear under certain conditions, like when specific filters are active:"),
         CodeBlock(
           language: "dart",
-          code: '''LdMonkeyAction(
+          code: '''LdMonkeySubmitAction(
   visibility: {
     // Only show for todo items
     LdMonkeyActionVisibility(
@@ -212,26 +216,30 @@ class MonkeyActionsDemo extends StatelessWidget {
   shortcutActivators: {
     SingleActivator(LogicalKeyboardKey.keyD),
   },
-  buildLoadingText: (context, selection) => "Marking as done",
-  buildLabel: (context, selection) => "Done",
-  buildIcon: (context, selection) => const Icon(LucideIcons.check),
-  action: (context, selection) async {
-    final updatedItems = <Task>{};
-    
-    for (final id in selection) {
-      final item = await taskRepository.getById(id);
-      updatedItems.add(item.copyWith(done: true));
-    }
-    
-    await taskRepository.updateBatch(updatedItems);
-  },
+  child: Text("Done"),
+  icon: Icon(LucideIcons.check),
+  config: (context) => LdSubmitConfig(
+    loadingText: "Marking as done",
+    allowResubmit: true,
+    action: (_) async {
+      final updatedItems = <Task>{};
+      final selection = LdMonkeySelection.of<Task, int>(context);
+      
+      for (final id in selection.items) {
+        final item = await taskRepository.getById(id);
+        updatedItems.add(item.copyWith(done: true));
+      }
+      
+      await taskRepository.updateBatch(updatedItems);
+    },
+  ),
 )''',
         ),
         LdText.hs("7. Single Item Actions"),
         LdText.p("Actions that work on exactly one item at a time:"),
         CodeBlock(
           language: "dart",
-          code: '''LdMonkeyAction(
+          code: '''LdMonkeySubmitAction(
   visibility: {
     LdMonkeyActionVisibility(
       location: LdMonkeyActionLocation.detailAppBar,
@@ -247,65 +255,67 @@ class MonkeyActionsDemo extends StatelessWidget {
   shortcutActivators: {
     SingleActivator(LogicalKeyboardKey.keyD, meta: true),
   },
-  buildLoadingText: (context, selection) => "Duplicating",
-  buildLabel: (context, selection) => "Duplicate",
-  buildIcon: (context, selection) => const Icon(LucideIcons.copy),
+  child: Text("Duplicate"),
+  icon: Icon(LucideIcons.copy),
   multiSelect: false, // Explicitly disable multi-select
-  action: (context, selection) async {
-    final route = LdMonkey.of<Task, int, bool>(context);
-    final item = await taskRepository.getById(selection.first);
-    
-    final newItem = item.copyWith(
-      id: testData.length + 1,
-      task: "\${item.task} (copy)",
-    );
-    
-    await taskRepository.create(newItem);
-    route.setSelectedItems({newItem.id});
-  },
+  config: (context) => LdSubmitConfig(
+    loadingText: "Duplicating",
+    action: (_) async {
+      final shellState = LdMonkeyShellState.of<Task, int>(context);
+      final selection = LdMonkeySelection.of<Task, int>(context);
+      final item = await taskRepository.getById(selection.items.first);
+      
+      final newItem = item.copyWith(
+        id: testData.length + 1,
+        task: "\${item.task} (copy)",
+      );
+      
+      await taskRepository.create(newItem);
+      shellState.setSelectedItems({newItem.id});
+    },
+  ),
 )''',
         ),
         LdText.hs("8. Built-in Actions"),
-        LdText.p(
-            "The monkey pattern provides some built-in actions for common operations:"),
+        LdText.p("The monkey pattern provides some built-in actions for common operations:"),
         CodeBlock(
           language: "dart",
           code: '''actions: [
   // Your custom actions...
   
   // Toggle selection controls (checkboxes)
-  toggleSelectionControls<Task, int, bool>(),
+  toggleSelectionControls<Task, int>(),
   
   // Toggle filter panel
-  toggleFilters<Task, int, bool>(),
+  toggleFilters<Task, int>(),
 ],''',
         ),
         LdText.hs("9. Action Properties"),
-        LdText.p("Additional properties you can configure on actions:"),
+        LdText.p("Additional properties you can configure on LdMonkeySubmitAction:"),
         LdAutoSpace(children: [
           LdCard(
-            header: Text("buildLoadingText"),
-            child: LdText.p("Text shown while the action is executing"),
+            header: Text("config"),
+            child: LdText.p("LdSubmitConfig function that provides loadingText and action logic"),
+          ),
+          LdCard(
+            header: Text("child"),
+            child: LdText.p("Widget to display as the action label (typically Text)"),
+          ),
+          LdCard(
+            header: Text("icon"),
+            child: LdText.p("Icon widget to display with the action"),
           ),
           LdCard(
             header: Text("color"),
-            child: LdText.p(
-                "Color for the action button (useful for destructive actions)"),
+            child: LdText.p("Color for the action button (useful for destructive actions)"),
           ),
           LdCard(
             header: Text("multiSelect"),
-            child: LdText.p(
-                "Whether the action supports multiple selection (default: true)"),
-          ),
-          LdCard(
-            header: Text("submitType"),
-            child: LdText.p(
-                "How the action should be submitted (none, primary, etc.)"),
+            child: LdText.p("Whether the action supports multiple selection (default: true)"),
           ),
         ]),
         LdText.hs("10. Keyboard Shortcuts"),
-        LdText.p(
-            "Actions can have keyboard shortcuts using Flutter's ShortcutActivator system:"),
+        LdText.p("Actions can have keyboard shortcuts using Flutter's ShortcutActivator system:"),
         CodeBlock(
           language: "dart",
           code: '''shortcutActivators: {
@@ -321,13 +331,12 @@ class MonkeyActionsDemo extends StatelessWidget {
 },''',
         ),
         LdText.hs("11. Complete Actions Example"),
-        LdText.p(
-            "Here's a complete set of actions for a task management system:"),
+        LdText.p("Here's a complete set of actions for a task management system:"),
         CodeBlock(
           language: "dart",
           code: '''actions: [
   // Create new task
-  LdMonkeyAction(
+  LdMonkeySubmitAction(
     visibility: {
       LdMonkeyActionVisibility(
         location: LdMonkeyActionLocation.masterAppBar,
@@ -336,15 +345,19 @@ class MonkeyActionsDemo extends StatelessWidget {
     shortcutActivators: {
       SingleActivator(LogicalKeyboardKey.keyN, meta: true),
     },
-    buildLabel: (context, selection) => "New Task",
-    buildIcon: (context, selection) => const Icon(LucideIcons.plus),
-    action: (context, selection) async {
-      // Create logic
-    },
+    child: Text("New Task"),
+    icon: Icon(LucideIcons.plus),
+    config: (context) => LdSubmitConfig(
+      loadingText: "Creating new task",
+      action: (_) async {
+        final shellState = LdMonkeyShellState.of<Task, int>(context);
+        // Create logic
+      },
+    ),
   ),
   
   // Mark as done (only for todo items)
-  LdMonkeyAction(
+  LdMonkeySubmitAction(
     visibility: {
       LdMonkeyActionVisibility(
         location: LdMonkeyActionLocation.detailAppBar,
@@ -360,15 +373,19 @@ class MonkeyActionsDemo extends StatelessWidget {
     shortcutActivators: {
       SingleActivator(LogicalKeyboardKey.keyD),
     },
-    buildLabel: (context, selection) => "Done",
-    buildIcon: (context, selection) => const Icon(LucideIcons.check),
-    action: (context, selection) async {
-      // Mark as done logic
-    },
+    child: Text("Done"),
+    icon: Icon(LucideIcons.check),
+    config: (context) => LdSubmitConfig(
+      loadingText: "Marking as done",
+      action: (_) async {
+        final selection = LdMonkeySelection.of<Task, int>(context);
+        // Mark as done logic
+      },
+    ),
   ),
   
   // Delete action
-  LdMonkeyAction(
+  LdMonkeySubmitAction(
     visibility: {
       LdMonkeyActionVisibility(
         location: LdMonkeyActionLocation.detailAppBar,
@@ -382,17 +399,21 @@ class MonkeyActionsDemo extends StatelessWidget {
     shortcutActivators: {
       SingleActivator(LogicalKeyboardKey.delete),
     },
-    buildLabel: (context, selection) => "Delete",
-    buildIcon: (context, selection) => const Icon(LucideIcons.trash2),
-    color: shadRed,
-    action: (context, selection) async {
-      // Delete logic
-    },
+    child: Text("Delete"),
+    icon: Icon(LucideIcons.trash2),
+    color: LdTheme.of(context).error,
+    config: (context) => LdSubmitConfig(
+      loadingText: "Deleting",
+      action: (_) async {
+        final selection = LdMonkeySelection.of<Task, int>(context);
+        // Delete logic
+      },
+    ),
   ),
   
   // Built-in actions
-  toggleSelectionControls<Task, int, bool>(),
-  toggleFilters<Task, int, bool>(),
+  toggleSelectionControls<Task, int>(),
+  toggleFilters<Task, int>(),
 ],''',
         ),
       ]),

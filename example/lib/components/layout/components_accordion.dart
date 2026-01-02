@@ -56,9 +56,7 @@ class _ComponentsAccordionState extends State<ComponentsAccordion> {
         allDocComponents.where((element) => widget.components.contains(element.name)).toList();
 
     return LdAccordion(
-      curveExpand: Curves.easeInOut,
       wrapActiveInCard: true,
-      curveCollapse: Curves.easeInOut,
       initialOpenIndex: widget.initialOpenIndex ?? {},
       childBuilder: ((context, n) {
         var component = relevantComponents[n];

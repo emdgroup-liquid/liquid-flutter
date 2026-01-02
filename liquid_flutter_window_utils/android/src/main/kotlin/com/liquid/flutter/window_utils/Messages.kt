@@ -79,11 +79,44 @@ data class WindowState (
     )
   }
 }
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class Rect (
+  val left: Long,
+  val top: Long,
+  val right: Long,
+  val bottom: Long
+
+) {
+  companion object {
+    @Suppress("UNCHECKED_CAST")
+    fun fromList(list: List<Any?>): Rect {
+      val left = list[0].let { if (it is Int) it.toLong() else it as Long }
+      val top = list[1].let { if (it is Int) it.toLong() else it as Long }
+      val right = list[2].let { if (it is Int) it.toLong() else it as Long }
+      val bottom = list[3].let { if (it is Int) it.toLong() else it as Long }
+      return Rect(left, top, right, bottom)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf<Any?>(
+      left,
+      top,
+      right,
+      bottom,
+    )
+  }
+}
 @Suppress("UNCHECKED_CAST")
 private object WindowUtilsApiCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return when (type) {
       128.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          Rect.fromList(it)
+        }
+      }
+      129.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           WindowState.fromList(it)
         }
@@ -93,8 +126,12 @@ private object WindowUtilsApiCodec : StandardMessageCodec() {
   }
   override fun writeValue(stream: ByteArrayOutputStream, value: Any?)   {
     when (value) {
-      is WindowState -> {
+      is Rect -> {
         stream.write(128)
+        writeValue(stream, value.toList())
+      }
+      is WindowState -> {
+        stream.write(129)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -115,6 +152,7 @@ interface WindowUtilsApi {
   fun isWindowMaximized(): Boolean
   fun getWindowState(): WindowState
   fun getScreenRadius(): Double
+  fun setSystemGestureExclusionRects(rects: List<Rect>)
 
   companion object {
     /** The codec used by WindowUtilsApi. */
@@ -305,6 +343,25 @@ interface WindowUtilsApi {
             var wrapped: List<Any?>
             try {
               wrapped = listOf<Any?>(api.getScreenRadius())
+            } catch (exception: Throwable) {
+              wrapped = wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.liquid_flutter_window_utils.WindowUtilsApi.setSystemGestureExclusionRects", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val rectsArg = args[0] as List<Rect>
+            var wrapped: List<Any?>
+            try {
+              api.setSystemGestureExclusionRects(rectsArg)
+              wrapped = listOf<Any?>(null)
             } catch (exception: Throwable) {
               wrapped = wrapError(exception)
             }

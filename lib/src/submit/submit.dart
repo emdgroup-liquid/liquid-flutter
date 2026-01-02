@@ -59,6 +59,7 @@ class LdSubmit<T, Arg> extends StatefulWidget {
   final LdSubmitController<T, Arg>? controller;
   final Widget? builder;
   final Arg? arg;
+  final bool Function(Arg? oldArg, Arg? newArg)? argEquals;
 
   const LdSubmit({
     super.key,
@@ -68,6 +69,7 @@ class LdSubmit<T, Arg> extends StatefulWidget {
 
     /// Will default to [LdSubmitInlineBuilder] if not provided
     this.builder,
+    this.argEquals,
   });
 
   @override
@@ -100,8 +102,8 @@ class _LdSubmitState<T, Arg> extends State<LdSubmit<T, Arg>> {
   void didUpdateWidget(covariant LdSubmit<T, Arg> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.arg is Set && widget.arg is Set) {
-      if (!setEquals(oldWidget.arg as Set, widget.arg as Set)) {
+    if (widget.argEquals != null) {
+      if (!widget.argEquals!(oldWidget.arg, widget.arg)) {
         _argNotifier.value = widget.arg;
       }
     } else {

@@ -306,9 +306,11 @@ List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
   required String basePath,
   required Widget detailPage,
   required Widget masterPage,
-  required Future<LdRepository<T, IdType>> Function(BuildContext context) repositoryBuilder,
+  required Future<LdRepository<T, IdType>> Function(BuildContext context)
+      repositoryBuilder,
   required LdMonkeyLayoutMode layoutMode,
   required Set<IdType> Function(String selected) parseSelected,
+  required String pathParameterName,
   Widget Function(
     BuildContext context,
     GoRouterState state,
@@ -322,7 +324,8 @@ List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
       name: "$basePath-filters",
       path: "$basePath/filters",
       pageBuilder: (context, state) => LdModalPage(
-        builder: (context) => filterModalBuilder?.call(context) ?? ldFilterModal(context),
+        builder: (context) =>
+            filterModalBuilder?.call(context) ?? ldFilterModal(context),
       ),
     ),
     ShellRoute(
@@ -337,16 +340,18 @@ List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
           routes: [
             GoRoute(
               name: "$basePath-detail",
-              path: "/:selected",
+              path: "/:selected_$pathParameterName",
               pageBuilder: (context, goState) {
-                final effectiveLayout = context.read<LdMonkeyEffectiveLayoutMode>();
+                final effectiveLayout =
+                    context.read<LdMonkeyEffectiveLayoutMode>();
 
                 final page = detailPage;
 
                 if (effectiveLayout == LdMonkeyEffectiveLayoutMode.detail) {
                   if (detailInDialog) {
                     return LdModalPage(
-                      builder: (context) => LdModalRoute(context: context, pageBuilder: (context) => page),
+                      builder: (context) => LdModalRoute(
+                          context: context, pageBuilder: (context) => page),
                     );
                   }
 
@@ -373,8 +378,8 @@ List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
               masterPage: masterPage,
               repositoryBuilder: repositoryBuilder,
               layoutMode: layoutMode,
-              routeSelection: state.pathParameters['selected'],
-              queryParameters: state.uri.queryParameters,
+              routeState: state,
+              pathParameterName: pathParameterName,
             ),
     )
   ];
