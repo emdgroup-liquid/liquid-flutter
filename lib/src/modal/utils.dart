@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 
 Future<bool> ldConfirmModal(
     {String? description,
@@ -72,16 +71,17 @@ Future<bool> ldConfirmModal(
   return res == true;
 }
 
-Future<String?> ldEnterTextModal(
-    {String? description,
-    Widget? title,
-    Widget? additionalContent,
-    required BuildContext context,
-    bool useRootNavigator = false,
-    String? initialValue,
-    String? inputHint,
-    String? inputLabel,
-    bool allowDismiss = true}) async {
+Future<String?> ldEnterTextModal({
+  String? description,
+  Widget? title,
+  Widget? additionalContent,
+  required BuildContext context,
+  bool useRootNavigator = false,
+  String? initialValue,
+  String? inputHint,
+  String? inputLabel,
+  bool allowDismiss = true,
+}) async {
   final res = await LdModalRoute<String?>(
       context: context,
       barrierDismissible: allowDismiss,
@@ -140,13 +140,17 @@ class _LdEnterTextModalState extends State<_LdEnterTextModal> {
 
   @override
   Widget build(BuildContext context) {
+    print(MediaQuery.of(context).viewInsets);
     return LdScaffold(
       appBars: [
         LdAppBar(
-          title: widget.title ?? Text(LiquidLocalizations.of(context).enterText),
+          title:
+              widget.title ?? Text(LiquidLocalizations.of(context).enterText),
         ),
         LdAppBar(
           positionMode: LdAppBarPositionMode.bottom,
+          avoidViewInsets: true,
+          attachedMode: LdAppBarAttachedMode.attached,
           actions: [
             if (widget.allowDismiss)
               LdFlexibleChild(
@@ -175,8 +179,10 @@ class _LdEnterTextModalState extends State<_LdEnterTextModal> {
             LdInput(
               controller: _controller,
               autofocus: true,
-              hint: widget.inputHint ?? LiquidLocalizations.of(context).enterText,
-              label: widget.inputLabel ?? LiquidLocalizations.of(context).enterText,
+              hint:
+                  widget.inputHint ?? LiquidLocalizations.of(context).enterText,
+              label: widget.inputLabel ??
+                  LiquidLocalizations.of(context).enterText,
               onSubmitted: (text) => Navigator.of(context).pop(text),
             ),
           ]),

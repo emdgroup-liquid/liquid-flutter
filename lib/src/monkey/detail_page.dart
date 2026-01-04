@@ -2,9 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/monkey/monkey_app_bar.dart';
-import 'package:liquid_flutter/src/monkey/monkey_scrollable_detail_view.dart';
-import 'package:liquid_flutter/src/monkey/monkey_stack_detail_view.dart';
 
 /// The page rendered by [LdMonkey] to show the detail of the selected
 /// items
@@ -71,13 +68,13 @@ class LdMonkeyStreamSelection<T extends Identifiable<IdType>, IdType> extends St
 
 class _LdMonkeyStreamSelectionState<T extends Identifiable<IdType>, IdType>
     extends State<LdMonkeyStreamSelection<T, IdType>> {
-  late final StreamSubscription<Set<IdType>> _selectionSubscription;
+  late final StreamSubscription<Set<IdType>> _viewingSubscription;
   StreamSubscription<List<LdPaginatorItem<T>>>? _itemsSubscription;
   List<LdPaginatorItem<T>> _items = [];
 
-  void _onSelectionChanged(Set<IdType> selection) {
+  void _onSelectionChanged(Set<IdType> viewing) {
     _itemsSubscription?.cancel();
-    _itemsSubscription = LdRepository.of<T, IdType>(context).watchListOfItems(selection).listen(_onItemsChanged);
+    _itemsSubscription = LdRepository.of<T, IdType>(context).watchListOfItems(viewing).listen(_onItemsChanged);
   }
 
   void _onItemsChanged(List<LdPaginatorItem<T>> items) {
@@ -88,7 +85,7 @@ class _LdMonkeyStreamSelectionState<T extends Identifiable<IdType>, IdType>
 
   @override
   void dispose() {
-    _selectionSubscription.cancel();
+    _viewingSubscription.cancel();
     _itemsSubscription?.cancel();
     super.dispose();
   }
@@ -99,8 +96,8 @@ class _LdMonkeyStreamSelectionState<T extends Identifiable<IdType>, IdType>
 
     final shellState = LdMonkeyShellState.of<T, IdType>(context);
 
-    _selectionSubscription = shellState.selectedItemsStream.listen(_onSelectionChanged);
-    _onSelectionChanged(shellState.selectedItems);
+    _viewingSubscription = shellState.viewingItemsStream.listen(_onSelectionChanged);
+    _onSelectionChanged(shellState.viewingItems);
   }
 
   @override

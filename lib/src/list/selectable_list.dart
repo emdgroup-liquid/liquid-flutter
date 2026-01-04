@@ -5,7 +5,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/monkey/intents.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class LdSelectableList<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
@@ -449,20 +448,24 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
       );
     }
 
-    return _DragRect(
-      onTapOutside: () {
-        if (!_isDragging) {
-          return;
-        }
-        _selectedItems.clear();
-        setState(() {});
-        widget.onSelectionChange?.call({});
-      },
-      key: _rootKey,
-      onUpdateRect: _onUpdateDragRect,
-      onEndDrag: _onEndDrag,
-      isAdditive: _dragIsAdditive,
-      onCancel: _onCancel,
+    return LdWrapConditional(
+      condition: widget.multiSelect,
+      builder: (context, child) => _DragRect(
+        onTapOutside: () {
+          if (!_isDragging) {
+            return;
+          }
+          _selectedItems.clear();
+          setState(() {});
+          widget.onSelectionChange?.call({});
+        },
+        key: _rootKey,
+        onUpdateRect: _onUpdateDragRect,
+        onEndDrag: _onEndDrag,
+        isAdditive: _dragIsAdditive,
+        onCancel: _onCancel,
+        child: child,
+      ),
       child: Focus(
         focusNode: _focusNode,
         autofocus: true,
@@ -472,7 +475,7 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
           fit: StackFit.expand,
           children: [
             Positioned.fill(child: list),
-            if (_ctrlPressed || _shiftPressed)
+            if ((_ctrlPressed || _shiftPressed) && widget.multiSelect)
               Align(
                 alignment: Alignment.bottomLeft,
                 child: Padding(
@@ -734,8 +737,9 @@ class _DragRectState extends State<_DragRect> {
 
   @override
   Widget build(BuildContext context) {
-    return OverlayPortal.targetsRootOverlay(
+    return OverlayPortal(
       controller: _overlayPortalController,
+      overlayLocation: OverlayChildLocation.rootOverlay,
       overlayChildBuilder: (context) {
         final rect = _dragRect;
         if (rect == null) {

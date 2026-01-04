@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/modal/size_notifier.dart';
@@ -14,6 +15,7 @@ class AppBarFrame extends StatefulWidget {
   final EdgeInsets? outsideMinPadding;
   final bool addContainer;
   final bool insetBorderRadius;
+  final bool avoidViewInsets;
   final String? debugName;
 
   /// Whether the appbar is attached to the scaffold or floating.
@@ -29,6 +31,7 @@ class AppBarFrame extends StatefulWidget {
     this.addContainer = false,
     this.insideDecoration,
     this.outsideDecoration,
+    this.avoidViewInsets = false,
     this.insetBorderRadius = true,
     this.insidePadding,
     this.outsideMinPadding,
@@ -42,6 +45,22 @@ class AppBarFrame extends StatefulWidget {
 class _AppBarFrameState extends State<AppBarFrame> {
   final FocusScopeNode _focusScopeNode = FocusScopeNode();
   late final _registry = AppBarRegistry.maybeStateOf(context)!;
+
+  @override
+  debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty("debugName", widget.debugName));
+    properties.add(StringProperty("position", widget.position.name));
+    properties.add(StringProperty("attached", widget.attached.toString()));
+    properties.add(StringProperty("addContainer", widget.addContainer.toString()));
+    properties.add(StringProperty("insetBorderRadius", widget.insetBorderRadius.toString()));
+    properties.add(StringProperty("avoidViewInsets", widget.avoidViewInsets.toString()));
+    properties.add(StringProperty("insideDecoration", widget.insideDecoration?.toString()));
+    properties.add(StringProperty("outsideDecoration", widget.outsideDecoration?.toString()));
+    properties.add(StringProperty("insidePadding", widget.insidePadding?.toString()));
+    properties.add(StringProperty("outsideMinPadding", widget.outsideMinPadding?.toString()));
+    properties.add(StringProperty("child", widget.child.toString()));
+  }
 
   @override
   void initState() {
@@ -86,7 +105,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
     }
     final modalRoute = ModalRoute.of(context);
     if (modalRoute is LdModalRoute) {
-      return registry.getEffectiveHeightOfOthers(key, limitToChildrenOf: modalRoute.context);
+      return registry.getEffectiveHeightOfOthers(key, limitToChildrenOf: modalRoute.subtreeContext);
     }
     return registry.getEffectiveHeightOfOthers(
       key,
@@ -121,7 +140,8 @@ class _AppBarFrameState extends State<AppBarFrame> {
         : EdgeInsets.only(bottom: viewPadding.bottom);
 
     // We add the viewInsets to the padding in case something inside the appbar is focused.
-    final viewInsets = _focusScopeNode.hasFocus ? MediaQuery.of(context).viewInsets : EdgeInsets.zero;
+    final viewInsets =
+        _focusScopeNode.hasFocus || widget.avoidViewInsets ? MediaQuery.of(context).viewInsets : EdgeInsets.zero;
 
     final trimmedViewInsets = widget.position == LdAppBarPosition.top
         ? EdgeInsets.only(top: viewInsets.top)

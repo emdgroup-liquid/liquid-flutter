@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class _Potion {
@@ -58,30 +57,6 @@ class _ChemicalScreenState extends State<ChemicalScreen> {
   Widget build(BuildContext context) {
     return LdScaffold(
       debugName: "Chemical screen",
-      appBars: [
-        LdAppBar(
-          order: 1,
-          debugName: "Primary app bar ",
-          title: const Text("Chemical"),
-        ),
-        LdAppBar(
-          scrollBehavior: LdAppBarScrollBehavior.mobileOnly,
-          debugName: "Secondary app bar",
-          order: 2,
-          actions: [
-            LdButton(
-              leading: const Icon(LucideIcons.download),
-              onPressed: () {
-                LdNotificationsController.of(context).addNotification(
-                  LdNotification(type: LdNotificationType.success, message: "Downloading certificate"),
-                );
-              },
-              child: const Text("Download certificate"),
-            ),
-          ],
-          searchConfig: searchConfig,
-        ),
-      ],
       body: LdScaffoldBody(
         children: [
           LdBreadcrumb.fromStrings(
@@ -420,7 +395,6 @@ class ChemicalShell extends StatelessWidget {
   const ChemicalShell({super.key, required this.child});
   @override
   Widget build(BuildContext context) {
-    final theme = LdTheme.of(context);
     return LdScaffold(
       resizeToAvoidBottomInset: false,
       debugName: "Chemical shell",

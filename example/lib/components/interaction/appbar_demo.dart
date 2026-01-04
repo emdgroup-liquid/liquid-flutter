@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// A comprehensive demo showcasing [LdAppBar] features and capabilities.
@@ -86,7 +85,9 @@ class _AppBarDemoState extends State<AppBarDemo> {
               .toList();
         },
         buildSuggestion: (context, suggestion) {
-          return LdText.p(suggestion.toString());
+          return LdListItem(
+            title: Text(suggestion.toString()),
+          );
         },
       );
     } else {
@@ -106,7 +107,9 @@ class _AppBarDemoState extends State<AppBarDemo> {
               .toList();
         },
         buildSuggestion: (context, suggestion) {
-          return LdText.p(suggestion.toString());
+          return LdListItem(
+            title: Text(suggestion.toString()),
+          );
         },
       );
     } else {

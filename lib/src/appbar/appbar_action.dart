@@ -30,6 +30,7 @@ class LdAppBarAction extends StatelessWidget {
   final bool active;
   final FutureOr<void> Function() onPressed;
   final bool preferLeadingOnMobile;
+  final LdButtonMode? buttonMode;
   final bool disabled;
   final String? loadingText;
   final LdColor? color;
@@ -48,6 +49,7 @@ class LdAppBarAction extends StatelessWidget {
     this.loadingText,
     this.loading = false,
     required this.child,
+    this.buttonMode,
     required this.onPressed,
   });
 
@@ -89,6 +91,7 @@ class LdAppBarAction extends StatelessWidget {
       child: LdButton(
         active: active,
         onPressed: onPressed,
+        mode: buttonMode,
         disabled: disabled,
         loading: loading,
         loadingText: loadingText,

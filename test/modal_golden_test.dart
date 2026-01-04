@@ -35,7 +35,7 @@ void main() {
                       modal: LdModalRoute(
                         context: context,
                         pageBuilder: (context) => const LdScaffold(
-                          appBar: LdAppBar(title: Text("Dialog title")),
+                          appBars: [LdAppBar(title: Text("Dialog title"))],
                           body: LdScaffoldBody(children: [LdText("Dialog content")]),
                         ),
                       ),
@@ -70,7 +70,7 @@ void main() {
                         modal: LdModalRoute(
                           context: context,
                           pageBuilder: (context) => const LdScaffold(
-                            appBar: LdAppBar(title: Text("Dialog title")),
+                            appBars: [LdAppBar(title: Text("Dialog title"))],
                             body: LdScaffoldBody(children: [LdText("Dialog content")]),
                           ),
                         ),

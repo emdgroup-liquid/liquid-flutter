@@ -290,7 +290,6 @@ class VariantBuilder implements Builder {
 
         final isContextConfigurable = matchingParam != null &&
             _hasContextConfigurableAnnotation(matchingParam);
-        final hasDefaultValue = matchingParam?.defaultValueCode != null;
 
         String fieldType;
 

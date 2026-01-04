@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/monkey/detail_page.dart';
 
 class LdMonkeyScrollableDetailView<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
   final Widget Function(BuildContext context, LdPaginatorItem<T> item) buildDetail;

@@ -210,9 +210,10 @@ class _LdSubmitDialogState<T, Arg> extends State<_LdSubmitDialog<T, Arg>> {
     );
 
     if (widget.targetRoot) {
-      return OverlayPortal.targetsRootOverlay(
+      return OverlayPortal(
         controller: _overlayController,
         overlayChildBuilder: _overlayChildBuilder,
+        overlayLocation: OverlayChildLocation.rootOverlay,
       );
     }
     return OverlayPortal(

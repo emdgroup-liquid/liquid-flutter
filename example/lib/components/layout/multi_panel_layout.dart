@@ -29,8 +29,6 @@ class _MultiPanelLayoutDemoState extends State<MultiPanelLayoutDemo> {
 
   void _initializePanels() {
     _panelWidths.clear();
-    final theme = LdTheme.of(context);
-    final isDark = theme.isDark;
 
     _panelWidths.addAll([
       const PanelWidth.fixed(200),
@@ -111,19 +109,6 @@ class _MultiPanelLayoutDemoState extends State<MultiPanelLayoutDemo> {
         ),
       );
     });
-  }
-
-  String _getWidthDescription(int index) {
-    if (index >= _panelWidths.length) return "Unknown";
-    final width = _panelWidths[index];
-    if (width.isFixed && width.fixedValue != null) {
-      return "Fixed: ${width.fixedValue!.toInt()}px";
-    } else if (width.isFraction && width.fractionNumerator != null && width.fractionDenominator != null) {
-      return "Fraction: ${width.fractionNumerator}/${width.fractionDenominator}";
-    } else if (width.isFill) {
-      return "Fill remaining";
-    }
-    return "Unknown";
   }
 
   void _changeMode(LdMultiPanelLayoutMode? mode) {
@@ -371,16 +356,6 @@ class _MultiPanelLayoutDemoState extends State<MultiPanelLayoutDemo> {
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSimplePanel(int index, String title, Color color) {
-    return Container(
-      color: color.withValues(alpha: 0.2),
-      padding: LdTheme.of(context).pad(),
-      child: Center(
-        child: LdText.hs(title),
       ),
     );
   }

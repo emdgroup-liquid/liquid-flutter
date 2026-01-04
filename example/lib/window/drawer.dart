@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:liquid/main.dart';
 import 'package:liquid/router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/drawer_state.dart';
+
 import 'package:liquid_flutter_emd_theme/liquid_flutter_emd_theme.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
@@ -193,6 +193,7 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
   @override
   Widget build(BuildContext context) {
     return LdScaffold(
+      backgroundColor: LdTheme.of(context).surface,
       appBars: [
         LdAppBar(
           title: Text("Navigation"),

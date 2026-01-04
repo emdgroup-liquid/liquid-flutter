@@ -47,22 +47,25 @@ class LdNotificationPortal extends StatelessWidget {
                   right: MediaQuery.paddingOf(context).right + theme.pad(size: LdSize.m).right,
                   bottom: MediaQuery.paddingOf(context).bottom + theme.pad(size: LdSize.m).bottom,
                 ),
-                child: Stack(
-                  children: notifier.notifications.mapIndexed((
-                    index,
-                    notification,
-                  ) {
-                    return LdNotificationWidget(
-                      key: notification.key,
-                      index: notifier.notifications.length - index - 1,
-                      notification: notification,
-                      removing: notification.removing,
-                      didConfirm: notification.didConfirm,
-                      onDismiss: () {
-                        notifier.onDismissNotification(notification);
-                      },
-                    );
-                  }).toList(),
+                child: LdContainer(
+                  maxWidth: theme.sizingConfig.containerMaxWidth / 2,
+                  child: Stack(
+                    children: notifier.notifications.mapIndexed((
+                      index,
+                      notification,
+                    ) {
+                      return LdNotificationWidget(
+                        key: notification.key,
+                        index: notifier.notifications.length - index - 1,
+                        notification: notification,
+                        removing: notification.removing,
+                        didConfirm: notification.didConfirm,
+                        onDismiss: () {
+                          notifier.onDismissNotification(notification);
+                        },
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
             )
@@ -158,7 +161,7 @@ class LdNotificationWidget extends StatelessWidget {
         color: _theme(context).surface,
         boxShadow: [ldShadowSticky],
         border: Border.all(
-          color: LdTheme.of(context).border,
+          color: LdTheme.of(context).floatingBorder,
           width: LdTheme.of(context).borderWidth,
         ),
         borderRadius: theme.radius(LdSize.l),

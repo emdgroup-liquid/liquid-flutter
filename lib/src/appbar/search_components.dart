@@ -28,7 +28,9 @@ class _LdSearchInputState extends State<LdSearchInput> {
 
   final _inputWrapperFocusNode = FocusScopeNode();
   final _suggestionsFocusNode = FocusScopeNode();
-  final TextEditingController _inputController = TextEditingController();
+  late final TextEditingController _inputController = TextEditingController(
+    text: widget.searchConfig.initialQuery,
+  );
 
   OverlayEntry? _overlayEntry;
   late final ValueNotifier<Rect?> _inputRectNotifier;
@@ -167,27 +169,31 @@ class _LdSearchInputState extends State<LdSearchInput> {
                 child: LdInput(
                   key: _inputKey,
                   textInputAction: TextInputAction.search,
-                  hint: LiquidLocalizations.of(context).search,
+                  hint: widget.searchConfig.hint ?? LiquidLocalizations.of(context).search,
                   controller: _inputController,
                   onSubmitted: (text) => widget.searchConfig.onSearch(text),
                 ),
               ),
             ),
-            LdReveal(
-              revealed: _inputWrapperFocusNode.hasFocus || _suggestionsFocusNode.hasFocus,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: LdButton.vague(
-                  child: const Icon(LucideIcons.x),
-                  onPressed: () {
-                    _inputController.clear();
-                    widget.searchConfig.onSearch('');
-                    _inputWrapperFocusNode.unfocus();
-                    _closeOverlay();
-                  },
-                ),
-              ),
-            ),
+            ValueListenableBuilder(
+                valueListenable: _inputController,
+                builder: (context, value, child) {
+                  return LdReveal(
+                    revealed: _inputController.text.isNotEmpty,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: LdButton.vague(
+                        child: const Icon(LucideIcons.x),
+                        onPressed: () {
+                          _inputController.clear();
+                          widget.searchConfig.onSearch('');
+                          _inputWrapperFocusNode.unfocus();
+                          _closeOverlay();
+                        },
+                      ),
+                    ),
+                  );
+                }),
           ],
         ),
       ),

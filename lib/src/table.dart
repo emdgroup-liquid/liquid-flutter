@@ -180,6 +180,7 @@ class _LdTableState<T> extends State<LdTable<T>> {
             separatorBuilder: (context, index) {
               return const LdDivider();
             },
+            padding: EdgeInsets.zero,
             physics: const NeverScrollableScrollPhysics(),
             itemBuilder: (context, index) {
               var row = _sortDir ? _sortedRows[index] : _sortedRows.reversed.elementAt(index);

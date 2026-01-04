@@ -17,8 +17,8 @@ class LdExceptionDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final localizedError = error.localize(context);
     return LdScaffold(
-      appBars: [
-        const LdAppBar(),
+      appBars: const [
+        LdAppBar(),
       ],
       body: LdScaffoldBody(
         children: [

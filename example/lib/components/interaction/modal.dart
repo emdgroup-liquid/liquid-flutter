@@ -4,7 +4,6 @@ import 'package:liquid/code_block.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -22,7 +21,7 @@ class _DemoSheet extends StatelessWidget {
   final bool useScreenRadius;
   final bool enableHeader;
   final bool userDismissable;
-  final bool enableInsets;
+  final double insetValue;
   final bool enableFooter;
 
   const _DemoSheet({
@@ -32,7 +31,7 @@ class _DemoSheet extends StatelessWidget {
     required this.useScreenRadius,
     required this.enableHeader,
     required this.userDismissable,
-    required this.enableInsets,
+    required this.insetValue,
     required this.enableFooter,
   });
 
@@ -54,36 +53,41 @@ class _DemoSheet extends StatelessWidget {
             context: context,
             modalTypeMode: mode,
             barrierDismissible: userDismissable,
+            scaleParent: enableScaling,
             fixedDialogSize: fixedDialogSize ? const Size(400, 400) : null,
+            sheetInsets: insetValue > 0 ? EdgeInsets.all(insetValue) : EdgeInsets.zero,
+            sheetBorderRadius: useScreenRadius ? BorderRadius.circular(LdTheme.of(context).screenRadius / 2) : null,
             pageBuilder: (context) => LdScaffold(
                   appBars: [
-                    LdAppBar(
-                      title: const Text("Modal"),
-                    ),
-                    LdAppBar(
-                      positionMode: LdAppBarPositionMode.bottom,
-                      actions: [
-                        LdFlexibleChild(
-                          child: LdButton.vague(
-                            width: double.infinity,
-                            color: LdTheme.of(context).error,
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text("Cancel"),
+                    if (enableHeader)
+                      LdAppBar(
+                        title: const Text("Modal"),
+                      ),
+                    if (enableFooter)
+                      LdAppBar(
+                        positionMode: LdAppBarPositionMode.bottom,
+                        actions: [
+                          LdFlexibleChild(
+                            child: LdButton.vague(
+                              width: double.infinity,
+                              color: LdTheme.of(context).error,
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text("Cancel"),
+                            ),
                           ),
-                        ),
-                        LdFlexibleChild(
-                          child: LdButton.vague(
-                            width: double.infinity,
-                            onPressed: () {
-                              Navigator.of(context).pop("Hello world");
-                            },
-                            child: const Text("Confirm"),
+                          LdFlexibleChild(
+                            child: LdButton.vague(
+                              width: double.infinity,
+                              onPressed: () {
+                                Navigator.of(context).pop("Hello world");
+                              },
+                              child: const Text("Confirm"),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
                   ],
                   body: LdScaffoldBody(
                     children: [
@@ -101,7 +105,7 @@ class _DemoSheet extends StatelessWidget {
                         children: [
                           _DemoSheet(
                             enableHeader: enableHeader,
-                            enableInsets: enableInsets,
+                            insetValue: insetValue,
                             enableScaling: enableScaling,
                             fixedDialogSize: fixedDialogSize,
                             enableFooter: enableFooter,
@@ -144,7 +148,7 @@ class _ModalDemoState extends State<ModalDemo> {
 
   bool _enableFooter = true;
 
-  bool _enableInset = false;
+  double _insetValue = 0;
 
   LdModalTypeMode mode = LdModalTypeMode.auto;
 
@@ -153,42 +157,19 @@ class _ModalDemoState extends State<ModalDemo> {
     return ComponentPage(
         path: "lib/components/interaction/modal.dart",
         title: "LdModal",
-        apiComponents: const ["LdModal", "LdModalBuilder", "LdModalPage"],
+        apiComponents: const ["LdModalRoute", "LdModalBuilder", "LdModalPage"],
         demo: LdAutoSpace(
           children: [
             LdText(
-              "Allows to place content in a modal that overlays the current screen. "
-              "Liquid Modals are based on the [wolt_modal_sheet](https://pub.dev/packages/wolt_modal_sheet) package. The LdModal components provide an easy wrapper around the existing APIs to make it easier to use in Liquid applications.",
-              processLinks: true,
+              "Allows to place content in a modal that overlays the current screen.",
               onLinkTap: (link) {
                 launchUrl(Uri.parse(link));
               },
             ),
-            LdText.h("LdModalBuilder"),
-            const LdText(
-              "The LdModalBuilder is a utility widget that displays a modal when a button is pressed. Attention: This requries a LdPortal at the root of your application if you want to enable the scaling effect.",
-            ),
-            const CodeBlock(code: """
-                LdModalBuilder(
-                  builder: (context, openModal) {
-                    return LdButton(
-                      onPressed: openSheet,
-                      child: const Text("Open Modal"),
-                    );
-                  },
-                  modal: LdModal(
-                    modalContent: (
-                      context,
-                    ) =>
-                       Text("My content")
-                    ),
-                  ),
-                ),
-            """),
             ComponentWell(
               child: Center(
                 child: _DemoSheet(
-                  enableInsets: _enableInset,
+                  insetValue: _insetValue,
                   fixedDialogSize: _fixedDialogSize,
                   enableHeader: _enableHeader,
                   enableFooter: _enableFooter,
@@ -208,12 +189,18 @@ class _ModalDemoState extends State<ModalDemo> {
                 });
               },
             ),
-            LdToggle(
-              label: "Insets enabled",
-              checked: _enableInset,
+            LdText.l("Sheet insets"),
+            LdSwitch(
+              children: {
+                0.0: const Text("0"),
+                8.0: const Text("8"),
+                16.0: const Text("16"),
+                32.0: const Text("32"),
+              },
+              value: _insetValue,
               onChanged: (value) {
                 setState(() {
-                  _enableInset = value;
+                  _insetValue = value;
                 });
               },
             ),
@@ -280,6 +267,30 @@ class _ModalDemoState extends State<ModalDemo> {
                 );
               },
             ),
+            LdText.h("LdModalBuilder"),
+            const LdText(
+              "The LdModalBuilder is a utility widget that displays a modal when a button is pressed. It takes a builder function that creates a button and an LdModalRoute that defines the modal content.",
+            ),
+            const CodeBlock(code: """
+                LdModalBuilder(
+                  builder: (context, openModal) {
+                    return LdButton(
+                      onPressed: openModal,
+                      child: const Text("Open Modal"),
+                    );
+                  },
+                  modal: LdModalRoute(
+                    context: context,
+                    pageBuilder: (context) => LdScaffold(
+                      body: LdScaffoldBody(
+                        children: [
+                          LdText("My content"),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+            """),
             LdText.h("LdModalPage"),
             LdText.p(
                 "If your application uses GoRouter, you can use the LdModalPage to open a modal when a route is visited."),
@@ -297,11 +308,20 @@ class _ModalDemoState extends State<ModalDemo> {
                   GoRoute(
                     path: "my-modal",
                     pageBuilder: (context, state) => LdModalPage(
-                      builder: LdModal(
-                        title: const Text("This is a title"),
-                        modalContent: (context) {
-                          return const Text("This is modal content");
-                        },
+                      builder: (context) => LdModalRoute(
+                        context: context,
+                        pageBuilder: (context) => LdScaffold(
+                          appBars: [
+                            LdAppBar(
+                              title: const Text("This is a title"),
+                            ),
+                          ],
+                          body: LdScaffoldBody(
+                            children: [
+                              LdText("This is modal content"),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   )

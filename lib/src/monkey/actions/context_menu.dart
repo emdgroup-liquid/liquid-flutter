@@ -11,7 +11,7 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
   @override
   Widget build(BuildContext context) {
     final selection = LdMonkeySelection.of<T, IdType>(context);
-    final listSelection = selection.items;
+    final listSelection = selection.selection;
 
     final newSelection = !listSelection.contains(item.value!.id) ? {item.value!.id} : listSelection;
 
@@ -19,7 +19,7 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
     final actions = context.read<LdMonkeyActions<T, IdType>>();
 
     return Provider.value(
-      value: LdMonkeySelection<T, IdType>(items: newSelection),
+      value: LdMonkeySelection<T, IdType>(selection: newSelection, viewing: selection.viewing),
       child: Provider.value(
         value: newSelection,
         child: Builder(builder: (newContext) {
@@ -40,7 +40,7 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
                 value: context.read<LdMonkeyEffectiveLayoutMode>(),
               ),
               Provider<LdMonkeySelection<T, IdType>>.value(
-                value: LdMonkeySelection(items: newSelection),
+                value: LdMonkeySelection(selection: newSelection, viewing: selection.viewing),
               ),
               ListenableProvider.value(
                 value: LdRepository.of<T, IdType>(context),

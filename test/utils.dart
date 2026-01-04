@@ -11,16 +11,14 @@ Widget withLiquidTheme(Widget child, {LdTheme? theme}) {
         DefaultWidgetsLocalizations.delegate,
         LiquidLocalizations.delegate
       ],
-      home: LdPortal(
-        child: Scaffold(
-          body: Directionality(
-            textDirection: TextDirection.ltr,
-            child: MediaQuery(
-                data: const MediaQueryData(
-                  size: Size(800, 800),
-                ),
-                child: child),
-          ),
+      home: Scaffold(
+        body: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+              data: const MediaQueryData(
+                size: Size(800, 800),
+              ),
+              child: child),
         ),
       ),
     ),

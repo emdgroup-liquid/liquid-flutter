@@ -2,11 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:liquid_flutter/src/form_label.dart';
-import 'package:liquid_flutter/src/touchable/input_color.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../liquid_flutter.dart';
+import '../../liquid_flutter.dart';
 
 enum LdChooseMode {
   page,
@@ -14,12 +11,42 @@ enum LdChooseMode {
   auto,
 }
 
+class LdChooseTriggerConfig<T extends Identifiable<IdType>, IdType> {
+  final List<T> selectedItems;
+  final List<IdType> selectedIds;
+  final LdSubmitState<List<T>> state;
+  final VoidCallback onTap;
+  final int truncateDisplay;
+  final String label;
+  final Widget? hint;
+  final LdSize size;
+  final bool disabled;
+  final Widget Function(BuildContext context, T item) selectedItemBuilder;
+
+  const LdChooseTriggerConfig({
+    required this.selectedItems,
+    required this.selectedIds,
+    required this.state,
+    required this.onTap,
+    required this.truncateDisplay,
+    required this.label,
+    required this.hint,
+    required this.size,
+    required this.disabled,
+    required this.selectedItemBuilder,
+  });
+}
+
+typedef LdChooseTriggerBuilder<T extends Identifiable<IdType>, IdType> = Widget Function(
+  BuildContext context,
+  LdChooseTriggerConfig<T, IdType> config,
+);
+
 /// A widget that presents a dropdown in a seperate page.
 class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   final LdRepository<T, IdType>? repository;
   final List<T>? items;
-  final Widget Function(
-      BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder;
+  final Widget Function(BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder;
   final Widget Function(BuildContext context, T item) selectedItemBuilder;
   final bool disabled;
   final bool allowEmpty;
@@ -32,14 +59,8 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   final int? truncateDisplay;
   final LdSize size;
   final String? label;
-  final Text? placeholder;
-  final Widget Function(
-    BuildContext context,
-    List<T> selectedItems,
-    VoidCallback onTap,
-    bool isLoading,
-    LdException? error,
-  )? triggerBuilder;
+  final Text? hint;
+  final LdChooseTriggerBuilder<T, IdType>? triggerBuilder;
 
   const LdChoose({
     this.repository,
@@ -53,16 +74,14 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
     this.multiple = false,
     this.mode = LdChooseMode.auto,
     required this.onChanged,
-    this.placeholder,
+    this.hint,
     this.size = LdSize.m,
     this.truncateDisplay,
     this.value,
     this.triggerBuilder,
     super.key,
-  })  : assert(items != null || repository != null,
-            'Either items or repository must be provided'),
-        assert(items == null || repository == null,
-            'Cannot provide both items and repository');
+  })  : assert(items != null || repository != null, 'Either items or repository must be provided'),
+        assert(items == null || repository == null, 'Cannot provide both items and repository');
 
   /// Convenience constructor that creates an LdChoose from a list of LdSelectItem.
   ///
@@ -71,10 +90,9 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   static fromList<T extends Identifiable<IdType>, IdType>({
     required List<T> items,
     required Function(Set<IdType>) onChanged,
-    required Widget Function(
-            BuildContext context, LdPaginatorItem<T> item, int index)
-        itemBuilder,
+    required Widget Function(BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder,
     required Widget Function(BuildContext context, T item) selectedItemBuilder,
+    LdChooseTriggerBuilder<T, IdType>? triggerBuilder,
     Set<IdType>? value,
     bool allowEmpty = false,
     bool useRootNavigator = true,
@@ -85,13 +103,6 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
     Text? placeholder,
     LdSize size = LdSize.m,
     int? truncateDisplay,
-    Widget Function(
-      BuildContext context,
-      List<T> selectedItems,
-      VoidCallback onTap,
-      bool isLoading,
-      LdException? error,
-    )? triggerBuilder,
     Key? key,
   }) {
     return LdChoose<T, IdType>(
@@ -107,7 +118,7 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
       multiple: multiple,
       mode: mode,
       onChanged: onChanged,
-      placeholder: placeholder,
+      hint: placeholder,
       size: size,
       truncateDisplay: truncateDisplay,
       value: value,
@@ -129,16 +140,10 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
     Text? placeholder,
     LdSize size = LdSize.m,
     int? truncateDisplay,
-    Widget Function(
-      BuildContext context,
-      List<LdSelectItem<T>> selectedItems,
-      VoidCallback onTap,
-      bool isLoading,
-      LdException? error,
-    )? triggerBuilder,
+    LdChooseTriggerBuilder<LdSelectItem<T>, T>? triggerBuilder,
     Key? key,
   }) {
-    return fromList(
+    return fromList<LdSelectItem<T>, T>(
       items: items,
       onChanged: onChanged,
       itemBuilder: (context, item, index) {
@@ -148,7 +153,7 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
         );
       },
       selectedItemBuilder: (context, item) {
-        return LdTag(child: item.child);
+        return item.child;
       },
       value: value,
       allowEmpty: allowEmpty,
@@ -169,8 +174,7 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   State<LdChoose<T, IdType>> createState() => _LdChooseState<T, IdType>();
 }
 
-class _LdChooseState<T extends Identifiable<IdType>, IdType>
-    extends State<LdChoose<T, IdType>> {
+class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdChoose<T, IdType>> {
   late LdRepository<T, IdType> _repository;
   bool _ownsRepository = false;
 
@@ -181,21 +185,35 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType>
       _repository = LdRepository.fromList<T, IdType>(
         list: widget.items!,
         filters: {
-          LdFilterSearchOption<T, IdType, dynamic>(
-            name: 'search',
-            label: (context) => 'Search',
-            icon: (context) => const Icon(Icons.search),
-            optimisticFilter: (item, searchText) {
-              if (item is LdSelectItem<dynamic>) {
-                return (item as LdSelectItem<dynamic>)
-                        .searchString
-                        ?.contains(searchText) ??
-                    false;
-              }
+          LdFilterSearchOption<T, IdType, LdSelectItem<dynamic>>(
+              name: 'search',
+              label: (context) => 'Search',
+              icon: (context) => const Icon(Icons.search),
+              optimisticFilter: (item, searchText) {
+                if (item is LdSelectItem<dynamic>) {
+                  return (item as LdSelectItem<dynamic>)
+                          .searchString
+                          ?.toLowerCase()
+                          .contains(searchText.toLowerCase()) ??
+                      false;
+                }
 
-              return item.toString().contains(searchText);
-            },
-          ),
+                return item.toString().toLowerCase().contains(searchText.toLowerCase());
+              },
+              buildSuggestion: (context, suggestion) {
+                final item = suggestion as LdSelectItem<dynamic>;
+                return LdListItem(
+                  title: suggestion.child,
+                  onPressed: () {
+                    LdSearchAcceptSuggestion(suggestion: item.searchString).dispatch(context);
+                  },
+                );
+              },
+              getSuggestions: (searchText) async {
+                return (widget.items! as List<LdSelectItem<dynamic>>).where((item) {
+                  return (item).searchString?.toLowerCase().contains(searchText.toLowerCase()) ?? false;
+                }).toList();
+              }),
         },
       );
       _repository.initialOffset = 0;
@@ -220,27 +238,25 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType>
   }
 
   Future<void> _onTap(BuildContext context) async {
-    final nav = widget.useRootNavigator
-        ? Navigator.of(context, rootNavigator: true)
-        : Navigator.of(context);
+    final nav = widget.useRootNavigator ? Navigator.of(context, rootNavigator: true) : Navigator.of(context);
 
-    final shouldUsePage = widget.mode == LdChooseMode.page ||
-        (widget.mode == LdChooseMode.auto &&
-            _repository.totalItems > 10 &&
-            LdTheme.of(context).platform.isMobile);
+    final shouldUsePage = switch (widget.mode) {
+      LdChooseMode.page => true,
+      LdChooseMode.modal => false,
+      LdChooseMode.auto => _repository.totalItems > 10 && LdTheme.of(context).platform.isMobile,
+    };
 
     final result = await (shouldUsePage
         ? nav.push<Set<IdType>>(
             MaterialPageRoute(
-              builder: ((context) => LdChoosePage<T, IdType>(
-                    repository: _repository,
-                    itemBuilder: widget.itemBuilder,
-                    initialSelectedItems: widget.value ?? <IdType>{},
-                    multiple: widget.multiple,
-                    allowEmpty: widget.allowEmpty,
-                    label:
-                        widget.label ?? LiquidLocalizations.of(context).choose,
-                  )),
+              builder: (context) => LdChoosePage<T, IdType>(
+                repository: _repository,
+                itemBuilder: widget.itemBuilder,
+                initialSelectedItems: widget.value ?? <IdType>{},
+                multiple: widget.multiple,
+                allowEmpty: widget.allowEmpty,
+                label: widget.label ?? LiquidLocalizations.of(context).choose,
+              ),
             ),
           )
         : nav.push<Set<IdType>>(
@@ -279,7 +295,6 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType>
       arg: widget.value,
       argEquals: (oldArg, newArg) {
         bool equals = setEquals(oldArg, newArg);
-
         return equals;
       },
       config: LdSubmitConfig<List<T>, Set<IdType>?>(
@@ -299,159 +314,38 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType>
       builder: LdSubmitCustomBuilder<List<T>, Set<IdType>?>(
         builder: (context, controller, stateType) {
           final selectedItems = controller.state.result ?? <T>[];
-          final isLoading = stateType == LdSubmitStateType.loading;
-          final error = controller.state.error;
+
+          final triggerConfig = LdChooseTriggerConfig<T, IdType>(
+            selectedItems: selectedItems,
+            hint: widget.hint,
+            selectedIds: selectedIds,
+            state: controller.state,
+            onTap: () => _onTap(context),
+            truncateDisplay: widget.truncateDisplay ?? 3,
+            label: widget.label ?? LiquidLocalizations.of(context).choose,
+            size: widget.size,
+            disabled: widget.disabled,
+            selectedItemBuilder: widget.selectedItemBuilder,
+          );
 
           // Use custom trigger builder if provided
           if (widget.triggerBuilder != null) {
-            return widget.triggerBuilder!(
-              context,
-              selectedItems,
-              () => _onTap(context),
-              isLoading,
-              error,
-            );
+            return widget.triggerBuilder!(context, triggerConfig);
           }
 
           // Default trigger builder
-          return _buildDefaultTrigger(
-            context,
-            selectedItems,
-            selectedIds,
-            isLoading,
-            error,
+          return LdChooseInputTrigger(
+            config: triggerConfig,
           );
         },
       ),
     );
   }
-
-  Widget _buildDefaultTrigger(
-    BuildContext context,
-    List<T> selectedItems,
-    List<IdType> selectedIds,
-    bool isLoading,
-    LdException? error,
-  ) {
-    var theme = LdTheme.of(context, listen: true);
-    final selectedItemsCount = selectedIds.length;
-
-    int displayItems = selectedItemsCount;
-    int left = 0;
-
-    if (widget.truncateDisplay != null) {
-      displayItems = min(displayItems, widget.truncateDisplay!);
-      left = selectedItemsCount - displayItems;
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        LdFormLabel(
-          label: widget.label,
-          size: widget.size,
-        ),
-        LdTouchableSurface(
-          disabled: widget.disabled,
-          key: const Key("ldChoose_trigger"),
-          onPressed: () => _onTap(context),
-          mode: LdTouchableSurfaceMode.neutralGhost,
-          child: Row(
-            children: [
-              Expanded(
-                child: Opacity(
-                  opacity: widget.disabled ? 0.5 : 1,
-                  child: _buildSelectedItemsDisplay(
-                    context,
-                    selectedItems,
-                    left,
-                    isLoading,
-                    error,
-                  ),
-                ),
-              ),
-              Icon(
-                LucideIcons.chevronRight,
-                size: theme.labelSize(widget.size),
-                color: theme.primaryColor,
-              ),
-            ],
-          ),
-          color: theme.palette.primary,
-          builder: (contxt, _, status, child) {
-            final colorBundle = inputColor(
-              theme,
-              status,
-              isValid: true,
-              onSurface: LdSurfaceInfo.of(context).isSurface,
-            );
-
-            return Container(
-              child: child!,
-              padding: theme.balPad(widget.size),
-              clipBehavior: Clip.hardEdge,
-              decoration: BoxDecoration(
-                borderRadius: theme.radius(LdSize.s),
-                color: colorBundle.surface,
-                border: Border.all(
-                  color: colorBundle.border,
-                  width: theme.borderWidth,
-                ),
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSelectedItemsDisplay(
-    BuildContext context,
-    List<T> selectedItems,
-    int left,
-    bool isLoading,
-    LdException? error,
-  ) {
-    if (isLoading) {
-      return const Center(child: LdLoader(size: 12));
-    }
-
-    if (error != null) {
-      return LdExceptionView(
-        exception: error.localize(context),
-        direction: Axis.horizontal,
-      );
-    }
-
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        if (selectedItems.isEmpty)
-          LdMute(
-            child: LdText.ls("No items selected"),
-          ),
-        if (selectedItems.isNotEmpty)
-          ...selectedItems
-              .map((item) => _buildSelectedItem(context, item))
-              .toList(),
-        if (selectedItems.isNotEmpty && left > 0)
-          LdText(
-            "+$left",
-            type: LdTextType.label,
-          ),
-      ],
-    );
-  }
 }
 
-class LdChoosePage<T extends Identifiable<IdType>, IdType>
-    extends StatefulWidget {
+class LdChoosePage<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   final LdRepository<T, IdType> repository;
-  final Widget Function(
-      BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder;
+  final Widget Function(BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder;
   final Set<IdType> initialSelectedItems;
   final bool multiple;
   final bool allowEmpty;
@@ -468,12 +362,10 @@ class LdChoosePage<T extends Identifiable<IdType>, IdType>
   });
 
   @override
-  State<LdChoosePage<T, IdType>> createState() =>
-      _LdChoosePageState<T, IdType>();
+  State<LdChoosePage<T, IdType>> createState() => _LdChoosePageState<T, IdType>();
 }
 
-class _LdChoosePageState<T extends Identifiable<IdType>, IdType>
-    extends State<LdChoosePage<T, IdType>> {
+class _LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<LdChoosePage<T, IdType>> {
   late Set<IdType> _selectedItems;
 
   @override
@@ -484,9 +376,7 @@ class _LdChoosePageState<T extends Identifiable<IdType>, IdType>
 
   void _handleSelectionChange(Set<IdType> selectedItems) {
     // Enforce allowEmpty constraint
-    if (!widget.allowEmpty &&
-        selectedItems.isEmpty &&
-        _selectedItems.isNotEmpty) {
+    if (!widget.allowEmpty && selectedItems.isEmpty && _selectedItems.isNotEmpty) {
       return; // Prevent clearing selection if allowEmpty is false
     }
 
@@ -509,6 +399,7 @@ class _LdChoosePageState<T extends Identifiable<IdType>, IdType>
         LdAppBar(
           debugName: "LdChoosePageAppBar",
           title: Text(widget.label),
+          order: 0,
           implyCloseModalButton: false,
           actions: [
             if (widget.allowEmpty)
@@ -532,7 +423,9 @@ class _LdChoosePageState<T extends Identifiable<IdType>, IdType>
           ],
         ),
         if (searchConfig != null)
-          LdAppBar(
+          LdAppBar.top(
+            order: 1,
+            debugName: "LdChoosePageSearchAppBar",
             searchConfig: searchConfig,
           ),
       ],

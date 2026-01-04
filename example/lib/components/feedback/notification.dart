@@ -142,7 +142,7 @@ class NotificationDemo extends StatelessWidget {
                 LdButton(
                     child: const Text("Loading"),
                     onPressed: () async {
-                      final notification = await LdNotificationsController.of(context).addNotification(
+                      final notification = LdNotificationsController.of(context).addNotification(
                         LdNotification(
                           type: LdNotificationType.loading,
                           canDismiss: false,

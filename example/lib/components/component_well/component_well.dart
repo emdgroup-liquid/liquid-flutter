@@ -14,6 +14,7 @@ class ComponentWell extends StatefulWidget {
   final EdgeInsets? padding;
   final bool onSurface;
   final Widget? title;
+  final double? minHeight;
   final Widget? description;
   final Color? color;
   ShowSourceCodeOptions? showSourceCodeOptions;
@@ -26,6 +27,7 @@ class ComponentWell extends StatefulWidget {
     this.showSourceCodeOptions,
     this.title,
     this.description,
+    this.minHeight,
   });
 
   @override
@@ -49,24 +51,19 @@ class _ComponentWellState extends State<ComponentWell> {
       path = Provider.of<ComponentPagePath>(context).path;
     }
 
-    final showSourceCode =
-        widget.showSourceCodeOptions?.showButton ?? true && path != null;
+    final showSourceCode = widget.showSourceCodeOptions?.showButton ?? true && path != null;
 
     return LdAutoSpace(
       children: [
         if (widget.title != null)
           Row(
-            children: [
-              Expanded(child: widget.title!),
-              if (showSourceCode) buildSourceCodeModal(context, path!)
-            ],
+            children: [Expanded(child: widget.title!), if (showSourceCode) buildSourceCodeModal(context, path!)],
           ),
         if (widget.description != null) widget.description!,
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: widget.color ??
-                (widget.onSurface ? theme.surface : theme.background),
+            color: widget.color ?? (widget.onSurface ? theme.surface : theme.background),
             borderRadius: theme.radius(LdSize.m),
             border: Border.all(
               color: theme.border,
@@ -74,6 +71,7 @@ class _ComponentWellState extends State<ComponentWell> {
               strokeAlign: BorderSide.strokeAlignOutside,
             ),
           ),
+          constraints: BoxConstraints(minHeight: widget.minHeight ?? 0),
           clipBehavior: Clip.hardEdge,
           padding: widget.padding ??
               EdgeInsets.symmetric(
@@ -129,8 +127,7 @@ class _ComponentWellState extends State<ComponentWell> {
                   return await rootBundle.loadString(arg!);
                 }),
             builder: LdSubmitCenteredBuilder<String, String>(
-              resultBuilder: (context, result, controller) =>
-                  SourceCodeExtractor(
+              resultBuilder: (context, result, controller) => SourceCodeExtractor(
                 options: widget.showSourceCodeOptions,
                 sourceCode: result,
                 index: instanceIndex,

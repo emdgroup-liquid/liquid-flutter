@@ -12,27 +12,35 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class TaskShell extends StatelessWidget {
   final Widget child;
-  final GoRouterState state;
+  final GoRouterState routeState;
+  final String pathParameterName;
+  final Widget masterPage;
+  final String basePath;
+
   const TaskShell({
     super.key,
     required this.child,
-    required this.state,
+    required this.routeState,
+    required this.pathParameterName,
+    required this.masterPage,
+    required this.basePath,
   });
   @override
   Widget build(BuildContext context) {
     return LdMonkeyShell<Task, int>(
-      basePath: "/task-demo",
+      basePath: basePath,
       layoutMode: LdMonkeyLayoutMode.auto,
-      masterPage: TaskMasterPage(),
-      parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
-      routeState: state,
+      masterPage: masterPage,
+      parseSelected: (selected) => selected.split("_").map(int.parse).toSet(),
+      routeState: routeState,
       repositoryBuilder: (context) async => taskRepository,
-      pathParameterName: "task",
+      pathParameterName: pathParameterName,
       actions: [
         LdMonkeySubmitAction(
           visibility: {
             LdMonkeyActionVisibility(
               location: LdMonkeyActionLocation.masterAppBar,
+              visibleWhenShowingSelectionControls: false,
             ),
           },
           shortcutActivators: {
@@ -94,8 +102,8 @@ class TaskShell extends StatelessWidget {
             allowResubmit: true,
             action: (_) async {
               final updatedItems = <Task>{};
-              final selection = LdMonkeySelection.of<Task, int>(context);
-              for (final id in selection.items) {
+              final selection = LdMonkeySelection.adaptive<Task, int>(context);
+              for (final id in selection) {
                 final item = await taskRepository.getById(id);
                 updatedItems.add(item.copyWith(done: true));
               }
@@ -127,9 +135,9 @@ class TaskShell extends StatelessWidget {
             allowResubmit: true,
             action: (_) async {
               final updatedItems = <Task>{};
-              final selection = LdMonkeySelection.of<Task, int>(context);
+              final selection = LdMonkeySelection.adaptive<Task, int>(context);
 
-              for (final id in selection.items) {
+              for (final id in selection) {
                 final item = await taskRepository.getById(id);
                 updatedItems.add(item.copyWith(done: false));
               }
@@ -159,8 +167,8 @@ class TaskShell extends StatelessWidget {
             loadingText: "Duplicating",
             action: (_) async {
               final shellState = LdMonkeyShellState.of<Task, int>(context);
-              final selection = LdMonkeySelection.of<Task, int>(context);
-              final item = await taskRepository.getById(selection.items.first);
+              final selection = LdMonkeySelection.adaptive<Task, int>(context);
+              final item = await taskRepository.getById(selection.first);
 
               final newItem = item.copyWith(
                 id: testData.length + 1,
@@ -204,14 +212,14 @@ class TaskShell extends StatelessWidget {
           config: (context) => LdSubmitConfig(
             loadingText: "Deleting",
             action: (_) async {
-              final selection = LdMonkeySelection.of<Task, int>(context);
-              await taskRepository.deleteBatch(selection.items);
+              final selection = LdMonkeySelection.adaptive<Task, int>(context);
+              await taskRepository.deleteBatch(selection);
             },
           ),
           child: Builder(builder: (context) {
             return Text(
               LiquidLocalizations.of(context).deleteNItems(
-                LdMonkeySelection.of<Task, int>(context).items.length,
+                LdMonkeySelection.adaptive<Task, int>(context).length,
               ),
             );
           }),
@@ -219,19 +227,18 @@ class TaskShell extends StatelessWidget {
         ),
         toggleSelectionControls<Task, int>(),
         toggleFilters<Task, int>(),
+        showSelection<Task, int>(),
         LdMonkeyBareChildAction(
           builder: (context) => LdAppBarAction(
               leading: Icon(LucideIcons.eye),
-              child: Text("Show ${LdMonkeySelection.of<Task, int>(context).items.length} items"),
+              child: Text("Show ${LdMonkeySelection.of<Task, int>(context).selection.length} items"),
               onPressed: () async {
                 final shellState = LdMonkeyShellState.of<Task, int>(context);
-                shellState.setShowSelectionControls(false);
-                shellState.setSelectedItems(shellState.selectedItems);
+                shellState.setViewingItems(LdMonkeySelection.of<Task, int>(context).selection);
               }),
           onShortcutTrigger: (context) async {
             final shellState = LdMonkeyShellState.of<Task, int>(context);
-            shellState.setSelectedItems(LdMonkeySelection.of<Task, int>(context).items);
-            shellState.setShowSelectionControls(false);
+            shellState.setViewingItems(LdMonkeySelection.of<Task, int>(context).selection);
           },
           visibility: {
             LdMonkeyActionVisibility(

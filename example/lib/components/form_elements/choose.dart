@@ -31,18 +31,21 @@ class _ChooseDemoState extends State<ChooseDemo> {
     return ComponentPage(
       path: "lib/components/form_elements/choose.dart",
       title: "LdChoose",
+      apiComponents: [
+        "LdChoose",
+        "LdSelectItem",
+      ],
       demo: LdAutoSpace(
         children: [
           LdText.p(
-            "LdChoose is a versatile dropdown selection component that allows users to select one or multiple items from a list of options. It supports both single and multiple selection modes, can be configured to require a selection or allow empty values, and adapts its appearance based on the platform and context.",
-          ),
-          LdText.p(
-            "The component provides a searchable interface on desktop and a bottom sheet selector on mobile devices. It handles keyboard navigation, supports disabled items, and can truncate long selections for better display. Use LdChoose when you need a rich selection interface with built-in platform-specific behaviors.",
+            "LdChoose is a selection component that allows users to select one or multiple items from a list of options. It supports both single and multiple selection modes, can be configured to require a selection or allow empty values, and adapts its appearance based on the platform and context.",
           ),
           ComponentWell(
+            padding: EdgeInsets.all(32),
             onSurface: _onSurface,
-            child: Column(
-              children: [
+            minHeight: 300,
+            child: Center(
+              child: LdAutoSpace(children: [
                 LdChoose.fromSelectItems(
                   label: "Your pie choice",
                   allowEmpty: _allowEmpty,
@@ -53,62 +56,29 @@ class _ChooseDemoState extends State<ChooseDemo> {
                   truncateDisplay: 3,
                   mode: _mode,
                   onChanged: _onChange,
-                  items: const [
-                    LdSelectItem(
-                      child: Text("Raspberry pie"),
-                      value: "raspberry",
-                      searchString: "Raspberry pie",
-                    ),
-                    LdSelectItem(
-                      child: Text("Strawberry pie"),
-                      value: "strawberry",
-                      searchString: "Strawberry pie",
-                    ),
-                    LdSelectItem(
-                      child: Text("Apple pie"),
-                      enabled: false,
-                      value: "apple",
-                      searchString: "Apple pie",
-                    ),
-                    LdSelectItem(
-                      child: Text("Blueberry pie"),
-                      value: "blueberry",
-                      searchString: "Blueberry pie",
-                    ),
-                    LdSelectItem(
-                      child: Text("Cherry pie"),
-                      value: "cherry",
-                      searchString: "Cherry pie",
-                    ),
-                    LdSelectItem(
-                      child: Text("Peach pie"),
-                      value: "peach",
-                      searchString: "Peach pie",
-                    ),
-                    LdSelectItem(
-                      child: Text("Chocolate pie"),
-                      value: "chocolate",
-                      searchString: "Chocolate pie",
-                    ),
-                    LdSelectItem(
-                      child: Text("Banana bread"),
-                      value: "banana",
-                      searchString: "Banana bread",
-                    ),
-                    LdSelectItem(
-                      child: Text("Pumpkin pie"),
-                      value: "pumpkin",
-                      searchString: "Pumpkin pie",
-                    ),
-                    LdSelectItem(
-                      child: Text("Lemon pie"),
-                      value: "lemon",
-                      searchString: "Lemon pie",
-                    ),
-                  ],
+                  // List of LdSelectItem
+                  items: pies,
                 ),
-                ldSpacerM,
-              ],
+                LdText.p("List item trigger"),
+                LdCard(
+                  padding: EdgeInsets.zero,
+                  child: LdChoose.fromSelectItems<String>(
+                    items: pies,
+                    onChanged: _onChange,
+                    label: "Your pie choice",
+                    allowEmpty: _allowEmpty,
+                    disabled: _disabled,
+                    multiple: _multiple,
+                    placeholder: const Text("Choose a pie"),
+                    value: _value,
+                    truncateDisplay: 3,
+                    mode: _mode,
+                    triggerBuilder: (context, config) {
+                      return LdChooseListItemTrigger<LdSelectItem<String>, String>(config: config);
+                    },
+                  ),
+                )
+              ]),
             ),
           ),
           ldSpacerM,
@@ -198,3 +168,57 @@ class _ChooseDemoState extends State<ChooseDemo> {
     );
   }
 }
+
+var pies = [
+  LdSelectItem(
+    child: Text("Raspberry pie"),
+    value: "raspberry",
+    searchString: "Raspberry pie",
+  ),
+  LdSelectItem(
+    child: Text("Strawberry pie"),
+    value: "strawberry",
+    searchString: "Strawberry pie",
+  ),
+  LdSelectItem(
+    child: Text("Apple pie"),
+    enabled: false,
+    value: "apple",
+    searchString: "Apple pie",
+  ),
+  LdSelectItem(
+    child: Text("Blueberry pie"),
+    value: "blueberry",
+    searchString: "Blueberry pie",
+  ),
+  LdSelectItem(
+    child: Text("Cherry pie"),
+    value: "cherry",
+    searchString: "Cherry pie",
+  ),
+  LdSelectItem(
+    child: Text("Peach pie"),
+    value: "peach",
+    searchString: "Peach pie",
+  ),
+  LdSelectItem(
+    child: Text("Chocolate pie"),
+    value: "chocolate",
+    searchString: "Chocolate pie",
+  ),
+  LdSelectItem(
+    child: Text("Banana bread"),
+    value: "banana",
+    searchString: "Banana bread",
+  ),
+  LdSelectItem(
+    child: Text("Pumpkin pie"),
+    value: "pumpkin",
+    searchString: "Pumpkin pie",
+  ),
+  LdSelectItem(
+    child: Text("Lemon pie"),
+    value: "lemon",
+    searchString: "Lemon pie",
+  ),
+];

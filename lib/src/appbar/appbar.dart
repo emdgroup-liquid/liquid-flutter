@@ -135,7 +135,7 @@ class LdAppBar extends StatefulWidget {
   final LdAppBarAttachedMode attachedMode;
   final bool showWindowControls;
   final bool implyCloseModalButton;
-
+  final bool avoidViewInsets;
   final bool autoAttachToKeyboard;
 
   final List<Widget> actions;
@@ -182,6 +182,7 @@ class LdAppBar extends StatefulWidget {
     this.debugName,
     this.implyCloseModalButton = true,
     this.implyLeading,
+    this.avoidViewInsets = false,
     this.leading,
     this.order = 0,
     this.overflowMenuProviders,
@@ -201,6 +202,7 @@ class LdAppBar extends StatefulWidget {
     this.leading,
     this.autoAttachToKeyboard = true,
     this.trailing,
+    this.avoidViewInsets = false,
     this.showWindowControls = true,
     this.backgroundColor,
     this.searchConfig,
@@ -226,6 +228,7 @@ class LdAppBar extends StatefulWidget {
     this.trailing,
     this.addContainer = false,
     this.showWindowControls = true,
+    this.avoidViewInsets = false,
     this.attachedMode = LdAppBarAttachedMode.adaptive,
     this.autoAttachToKeyboard = true,
     this.backgroundColor,
@@ -564,14 +567,16 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
 
   Color _fillColor(bool isScrolledUnder) {
     final theme = LdTheme.of(context);
-    final color = widget.appBar.backgroundColor ?? LdTheme.of(context).surface;
+    final parentIsSurface = context.read<LdSurfaceInfo?>()?.isSurface ?? false;
+    final autoSurfaceColor = parentIsSurface ? LdTheme.of(context).background : LdTheme.of(context).surface;
+    final color = widget.appBar.backgroundColor ?? autoSurfaceColor;
 
     return switch (widget.appBar.backgroundMode) {
       LdAppBarBackgroundMode.hidden => Colors.transparent,
       LdAppBarBackgroundMode.visible => color,
       LdAppBarBackgroundMode.whenScrolled => Color.alphaBlend(
           color.withAlpha(_fillOpacity(isScrolledUnder)),
-          LdTheme.of(context).background,
+          autoSurfaceColor,
         ),
       LdAppBarBackgroundMode.adaptive => switch (theme.platform.isDesktop) {
           false => Color.alphaBlend(
@@ -581,6 +586,13 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
           true => color,
         },
     };
+  }
+
+  bool get _isSurface {
+    if (widget.appBar.backgroundColor != null) return false;
+    final parentIsSurface = context.read<LdSurfaceInfo?>()?.isSurface ?? false;
+    if (parentIsSurface) return true;
+    return false;
   }
 
   double _borderRadius(BuildContext context) {
@@ -674,109 +686,113 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
             child: KeyedSubtree(
               key: ValueKey('appbar_${appBarKey.order}'),
               child: ScrolledUnderBuilder(builder: (context, isScrolledUnder) {
-                return AppBarFrame(
-                  addContainer: widget.appBar.addContainer,
-                  debugName: widget.appBar.debugName,
-                  position: position,
-                  insetBorderRadius: !_isModal,
-                  attached: isAttached,
-                  insideDecoration: _buildInsideDecoration(
-                    context: context,
-                    isScrolledUnder: isScrolledUnder,
-                    isAttached: isAttached,
+                return Provider.value(
+                  value: LdSurfaceInfo(isSurface: _isSurface),
+                  child: AppBarFrame(
+                    avoidViewInsets: widget.appBar.avoidViewInsets,
+                    addContainer: widget.appBar.addContainer,
+                    debugName: widget.appBar.debugName,
                     position: position,
-                  ),
-                  outsideDecoration: _buildOutsideDecoration(
-                    context: context,
-                    isScrolledUnder: isScrolledUnder,
-                    isAttached: isAttached,
-                    position: position,
-                  ),
-                  child: LdButtonConfigProvider(
-                    const LdButtonConfig(
-                      mode: LdButtonMode.ghost,
+                    insetBorderRadius: !_isModal,
+                    attached: isAttached,
+                    insideDecoration: _buildInsideDecoration(
+                      context: context,
+                      isScrolledUnder: isScrolledUnder,
+                      isAttached: isAttached,
+                      position: position,
                     ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        LayoutBuilder(builder: (context, constraints) {
-                          final hasSearch = widget.appBar.searchConfig != null;
+                    outsideDecoration: _buildOutsideDecoration(
+                      context: context,
+                      isScrolledUnder: isScrolledUnder,
+                      isAttached: isAttached,
+                      position: position,
+                    ),
+                    child: LdButtonConfigProvider(
+                      const LdButtonConfig(
+                        mode: LdButtonMode.ghost,
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          LayoutBuilder(builder: (context, constraints) {
+                            final hasSearch = widget.appBar.searchConfig != null;
 
-                          final overflowItems = [
-                            if (widget.appBar.title != null)
-                              LdFlexibleChild(
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: DefaultTextStyle(
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                    style: _headerStyle,
-                                    child: widget.appBar.title!,
+                            final overflowItems = [
+                              if (widget.appBar.title != null)
+                                LdFlexibleChild(
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: DefaultTextStyle(
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                      style: _headerStyle,
+                                      child: widget.appBar.title!,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            if (hasSearch)
-                              LdFlexibleChild(
-                                child: LdSearchInput(
-                                  searchConfig: widget.appBar.searchConfig!,
-                                  isBottomNavigationBar: _isInBottomSlot,
-                                  fullWidth: false,
-                                ),
-                              ),
-                            ...widget.appBar.actions
-                          ];
-
-                          return Row(
-                            children: [
-                              if (widget.appBar.showWindowControls && !_isModal) const MacOSWindowControls(),
-                              OpenDrawerButton(drawerParent: _findDrawerParent(context)),
-                              if (leading != null) ...[leading, ldSpacerM],
-                              if (overflowItems.isNotEmpty)
-                                Expanded(
-                                  child: LdOverflowView(
-                                    spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    mainAxisAlignment: widget.appBar.title == null
-                                        ? MainAxisAlignment.start
-                                        : MainAxisAlignment.center,
-                                    builder: (context, remainingItemCount) {
-                                      final remainder = overflowItems.sublist(
-                                        overflowItems.length - remainingItemCount,
-                                      );
-                                      return LdAppbarActionOverflowMenu(
-                                        actions: remainder,
-                                        menuProviders: widget.appBar.overflowMenuProviders,
-                                        inMenu: true,
-                                      );
-                                    },
-                                    children: overflowItems,
+                              if (hasSearch)
+                                LdFlexibleChild(
+                                  child: LdSearchInput(
+                                    searchConfig: widget.appBar.searchConfig!,
+                                    isBottomNavigationBar: _isInBottomSlot,
+                                    fullWidth: false,
                                   ),
                                 ),
-                              const CloseDrawerButton(),
-                              if (widget.appBar.trailing != null) widget.appBar.trailing!,
-                              if (_closeModalButton(context) != null) ...[_closeModalButton(context)!],
-                              if (widget.appBar.showWindowControls && !_isModal)
-                                LdReveal(
-                                  revealed: _showWindowsWindowControls,
-                                  child: const WindowsWindowControls(),
+                              ...widget.appBar.actions
+                            ];
+
+                            return Row(
+                              children: [
+                                if (widget.appBar.showWindowControls && !_isModal) const MacOSWindowControls(),
+                                OpenDrawerButton(drawerParent: _findDrawerParent(context)),
+                                if (leading != null) ...[leading, ldSpacerM],
+                                if (overflowItems.isNotEmpty)
+                                  Expanded(
+                                    child: LdOverflowView(
+                                      spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      mainAxisAlignment: widget.appBar.title == null
+                                          ? MainAxisAlignment.start
+                                          : MainAxisAlignment.center,
+                                      builder: (context, remainingItemCount) {
+                                        final remainder = overflowItems.sublist(
+                                          overflowItems.length - remainingItemCount,
+                                        );
+                                        return LdAppbarActionOverflowMenu(
+                                          actions: remainder,
+                                          menuProviders: widget.appBar.overflowMenuProviders,
+                                          inMenu: true,
+                                        );
+                                      },
+                                      children: overflowItems,
+                                    ),
+                                  ),
+                                const CloseDrawerButton(),
+                                if (widget.appBar.trailing != null) widget.appBar.trailing!,
+                                if (_closeModalButton(context) != null) ...[_closeModalButton(context)!],
+                                if (widget.appBar.showWindowControls && !_isModal)
+                                  LdReveal(
+                                    revealed: _showWindowsWindowControls,
+                                    child: const WindowsWindowControls(),
+                                  ),
+                              ],
+                            );
+                          }),
+                          if (widget.appBar.bottom != null) ...[
+                            LdWrapConditional(
+                              condition: _hasTopContent,
+                              builder: (context, child) => Padding(
+                                padding: EdgeInsets.only(
+                                  top: LdTheme.of(context).pad(size: LdSize.s).top,
                                 ),
-                            ],
-                          );
-                        }),
-                        if (widget.appBar.bottom != null) ...[
-                          LdWrapConditional(
-                            condition: _hasTopContent,
-                            builder: (context, child) => Padding(
-                              padding: EdgeInsets.only(
-                                top: LdTheme.of(context).pad(size: LdSize.s).top,
+                                child: child,
                               ),
-                              child: child,
+                              child: widget.appBar.bottom!,
                             ),
-                            child: widget.appBar.bottom!,
-                          ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   ),
                 );

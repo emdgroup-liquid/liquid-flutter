@@ -215,20 +215,26 @@ class _MovieDetailState extends State<_MovieDetail> {
 
 class MovieShell extends StatelessWidget {
   final Widget child;
-  final GoRouterState state;
+  final GoRouterState routeState;
+  final String pathParameterName;
+  final Widget masterPage;
+  final String basePath;
   const MovieShell({
     super.key,
     required this.child,
-    required this.state,
+    required this.routeState,
+    required this.pathParameterName,
+    required this.masterPage,
+    required this.basePath,
   });
   @override
   Widget build(BuildContext context) {
     return LdMonkeyShell<_Movie, int>(
-      pathParameterName: "movie",
-      routeState: state,
-      basePath: "/movie-demo",
+      pathParameterName: pathParameterName,
+      routeState: routeState,
+      basePath: basePath,
       layoutMode: LdMonkeyLayoutMode.neverSideBySide,
-      masterPage: MovieMasterPage(),
+      masterPage: masterPage,
       parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
       repositoryBuilder: (context) async => movieRepository,
       actions: [
@@ -251,7 +257,7 @@ class MovieShell extends StatelessWidget {
           },
           config: (context) => LdSubmitConfig(
             action: (_) async {
-              final selectionItems = LdMonkeySelection.of<_Movie, int>(context).items;
+              final selectionItems = LdMonkeySelection.adaptive<_Movie, int>(context);
               final shellState = LdMonkeyShellState.of<_Movie, int>(context);
               final item = await movieRepository.getById(selectionItems.first);
 
@@ -295,8 +301,8 @@ class MovieShell extends StatelessWidget {
           },
           config: (context) => LdSubmitConfig(
             action: (_) async {
-              final selection = LdMonkeySelection.of<_Movie, int>(context);
-              await movieRepository.deleteBatch(selection.items);
+              final selection = LdMonkeySelection.adaptive<_Movie, int>(context);
+              await movieRepository.deleteBatch(selection);
             },
           ),
           child: Text("Delete"),

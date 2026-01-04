@@ -29,7 +29,7 @@ Widget liquidFrame({
         GlobalWidgetsLocalizations.delegate,
         LiquidLocalizations.delegate,
       ],
-      home: LdPortal(child: Builder(builder: (context) {
+      home: Builder(builder: (context) {
         return Container(
             padding: const EdgeInsets.all(16),
             margin: const EdgeInsets.all(16),
@@ -46,7 +46,7 @@ Widget liquidFrame({
                     );
                   },
                 )));
-      })),
+      }),
     ),
   );
 }

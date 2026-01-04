@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:liquid/components/layout/components_accordion.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 import 'package:provider/provider.dart';
 
 class ComponentPagePath {
@@ -32,7 +31,6 @@ class ComponentPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = LdTheme.of(context);
     return Provider<ComponentPagePath>.value(
       value: ComponentPagePath(path: path),
       child: LdScaffold(

@@ -24,7 +24,7 @@ class LdBreadcrumb extends StatelessWidget {
     return Wrap(
         crossAxisAlignment: WrapCrossAlignment.center,
         spacing: 4,
-        children: intersperse<Widget>(
+        children: intersperseIterable<Widget>(
             Padding(
               padding: const EdgeInsets.only(top: 2.0),
               child: Icon(

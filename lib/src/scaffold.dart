@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/drawer_layout.dart';
-import 'package:liquid_flutter/src/drawer_state.dart';
 import 'package:liquid_flutter/src/monkey/intents.dart';
 import 'package:liquid_flutter/src/appbar/appbar_registry.dart';
 

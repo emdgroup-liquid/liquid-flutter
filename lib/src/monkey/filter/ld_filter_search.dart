@@ -5,14 +5,15 @@ class LdFilterSearchOption<T extends Identifiable<IdType>, IdType, Suggestion> e
   final String searchText;
   final bool Function(T item, String searchText) _optimisticFilter;
   final Future<List<Suggestion>> Function(String)? getSuggestions;
-  final Widget Function(BuildContext context, dynamic suggestion)? buildSuggestion;
+  final LdListItem Function(BuildContext context, dynamic suggestion)? buildSuggestion;
   final Duration debounceDelay;
   final String? hint;
 
   LdSearchConfig? searchConfig(Function(String query) onSearch) => LdSearchConfig(
         getSuggestions: getSuggestions,
         buildSuggestion: buildSuggestion,
-        inputController: TextEditingController(text: searchText),
+        initialQuery: searchText,
+        hint: hint,
         onSearch: onSearch,
       );
 
@@ -59,7 +60,7 @@ class LdFilterSearchOption<T extends Identifiable<IdType>, IdType, Suggestion> e
     String? hint,
     bool Function(T item, String searchText)? optimisticFilter,
     Future<List<Suggestion>> Function(String)? getSuggestions,
-    Widget Function(BuildContext context, dynamic suggestion)? buildSuggestion,
+    LdListItem Function(BuildContext context, dynamic suggestion)? buildSuggestion,
     Duration? debounceDelay,
   }) {
     return LdFilterSearchOption<T, IdType, Suggestion>(

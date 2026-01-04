@@ -352,7 +352,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
 
   // Alternate between a separator and an item
   List<_ListItem<T>> _createInterspersedList() {
-    return intersperse(
+    return intersperseIterable(
       _ListItem<T>(
         type: _ListItemType.separator,
       ),

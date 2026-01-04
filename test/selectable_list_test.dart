@@ -41,7 +41,7 @@ void main() {
                   title: Text(item.value?.value ?? ''),
                 );
               },
-              listBuilder: listBuilder,
+              listBuilder: (context, itemBuilder) => listBuilder(context, ScrollController(), itemBuilder),
               paginator: paginator,
               multiSelect: multiSelect,
               onSelectionChange: (s) {

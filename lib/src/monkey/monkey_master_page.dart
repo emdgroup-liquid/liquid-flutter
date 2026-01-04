@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/monkey/monkey_app_bar.dart';
 import 'package:provider/provider.dart';
 
 class LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
@@ -43,6 +42,8 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
       searchConfig = LdSearchConfig(
         getSuggestions: searchFilter.getSuggestions,
         buildSuggestion: searchFilter.buildSuggestion,
+        initialQuery: searchFilter.searchText,
+        hint: searchFilter.hint,
         onSearch: (query) {
           repository.updateFilter(searchFilter.name, (filter) {
             filter as LdFilterSearchOption<T, IdType, dynamic>;

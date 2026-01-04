@@ -72,25 +72,6 @@ class AppRouter {
       path: "/nav-test",
       pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const NavTest()),
     ),
-    ShellRoute(
-      routes: [
-        GoRoute(
-          path: "/chemical",
-          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const ChemicalScreen()),
-        ),
-        GoRoute(
-          path: "/chemical-detail",
-          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const ThemeDemo()),
-        ),
-        GoRoute(
-          path: "/chemical-usage",
-          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const ThemeDemo()),
-        ),
-      ],
-      builder: (context, state, child) => ChemicalShell(
-        child: child,
-      ),
-    ),
     StatefulShellRoute.indexedStack(
       branches: [
         StatefulShellBranch(
@@ -105,7 +86,21 @@ class AppRouter {
               masterPage: MovieMasterPage(),
               repositoryBuilder: (context) async => movieRepository,
               layoutMode: LdMonkeyLayoutMode.neverSideBySide,
-              shellBuilder: (context, state, child) => MovieShell(state: state, child: child),
+              shellBuilder: ({
+                required BuildContext context,
+                required GoRouterState routeState,
+                required Widget child,
+                required String basePath,
+                required String pathParameterName,
+                required Widget masterPage,
+              }) =>
+                  MovieShell(
+                routeState: routeState,
+                pathParameterName: pathParameterName,
+                masterPage: masterPage,
+                basePath: basePath,
+                child: child,
+              ),
             ),
           ],
         ),
@@ -120,7 +115,21 @@ class AppRouter {
               masterPage: TaskMasterPage(),
               repositoryBuilder: (context) async => taskRepository,
               layoutMode: LdMonkeyLayoutMode.auto,
-              shellBuilder: (context, state, child) => TaskShell(state: state, child: child),
+              shellBuilder: ({
+                required BuildContext context,
+                required GoRouterState routeState,
+                required Widget child,
+                required String pathParameterName,
+                required Widget masterPage,
+                required String basePath,
+              }) =>
+                  TaskShell(
+                routeState: routeState,
+                basePath: basePath,
+                pathParameterName: pathParameterName,
+                masterPage: masterPage,
+                child: child,
+              ),
             ),
           ],
         ),
@@ -145,6 +154,27 @@ class AppRouter {
         );
       },
       routes: [
+        ShellRoute(
+          pageBuilder: (context, state, child) => NoTransitionPage<void>(
+            key: state.pageKey,
+            child: ChemicalShell(child: child),
+          ),
+          routes: [
+            GoRoute(
+              path: "/chemical",
+              pageBuilder: (context, state) =>
+                  NoTransitionPage<void>(key: state.pageKey, child: const ChemicalScreen()),
+            ),
+            GoRoute(
+              path: "/chemical-detail",
+              pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const ThemeDemo()),
+            ),
+            GoRoute(
+              path: "/chemical-usage",
+              pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const ThemeDemo()),
+            ),
+          ],
+        ),
         GoRoute(
           path: "/",
           pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const Home()),
