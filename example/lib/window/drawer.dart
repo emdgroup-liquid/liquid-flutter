@@ -248,7 +248,7 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
           ),
           LdDrawerItemSection(
             active: GoRouterState.of(context).uri.path == "/typography",
-            leading: const Icon(LucideIcons.text),
+            leading: const Icon(LucideIcons.textSelect),
             onPressed: () => _showPage(context, "/typography"),
             child: const Text("Typography"),
           ),
