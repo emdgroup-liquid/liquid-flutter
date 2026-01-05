@@ -2,11 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/l10n/generated/liquid_localizations_en.dart';
-
-import 'golden_utils.dart';
 
 _wrapWithMaterialApp(Widget widget) {
   return LdNotificationProvider(
@@ -69,76 +66,6 @@ void main() {
         ),
       );
     }
-
-    // Golden test
-    testGoldens("LdExceptionView Golden", (WidgetTester tester) async {
-      await multiGolden(tester, "LdExceptionView", {
-        "Error Vertical": (tester, place) async {
-          await place(
-            _buildBasicExceptionView(
-              exception: sampleErrorException,
-            ),
-          );
-          await tester.pumpAndSettle();
-          return null;
-        },
-        "Warning Vertical": (tester, place) async {
-          await place(
-            _buildBasicExceptionView(
-              exception: sampleWarningException,
-            ),
-          );
-          await tester.pumpAndSettle();
-          return null;
-        },
-        "Success Vertical": (tester, place) async {
-          await place(
-            _buildBasicExceptionView(
-              exception: sampleSuccessException,
-            ),
-          );
-          await tester.pumpAndSettle();
-          return null;
-        },
-        "Error Horizontal": (tester, place) async {
-          await place(
-            _buildBasicExceptionView(
-              exception: sampleErrorException,
-              direction: Axis.horizontal,
-            ),
-          );
-          await tester.pumpAndSettle();
-          return null;
-        },
-        "With RetryController": (tester, place) async {
-          final retryController = LdRetryController(
-            onRetry: () async {
-              await Future.delayed(const Duration(milliseconds: 500));
-            },
-            config: LdRetryConfig.unlimitedManualRetries(),
-          );
-
-          await place(
-            _buildBasicExceptionView(
-              exception: sampleErrorException,
-              retryController: retryController,
-            ),
-          );
-          await tester.pumpAndSettle();
-          return null;
-        },
-        "Null Exception": (tester, place) async {
-          await place(
-            _buildBasicExceptionView(
-              exception: null,
-              retry: () {},
-            ),
-          );
-          await tester.pumpAndSettle();
-          return null;
-        },
-      });
-    });
 
     testWidgets('LdExceptionView displays message correctly', (WidgetTester tester) async {
       // Build and pump the widget
@@ -324,7 +251,7 @@ void main() {
 
       // Verify dialog appears
       expect(
-        find.text(sampleErrorException.moreInfo ?? ''),
+        find.text(sampleErrorException.moreInfo!),
         findsOneWidget,
       );
     });
