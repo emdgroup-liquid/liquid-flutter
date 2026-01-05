@@ -40,11 +40,7 @@ dependencies:
   shared_preferences: ^2.5.3
   jiffy: ^6.4.3
 
-  mtrust_api_guard:
-    path: ../../mtrust-api-guard
-    # git:
-    #   url: git@github.com:emdgroup/mtrust-api-guard.git
-    #   ref: fix_string_escaping_comment
+  mtrust_api_guard: ^2.1.0
 
   liquid_flutter_window_utils:
     path: ../liquid_flutter_window_utils
