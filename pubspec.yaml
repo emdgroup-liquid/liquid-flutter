@@ -2,6 +2,7 @@ name: liquid_flutter
 description: Liquid Oxygen Components for Flutter
 version: 22.0.4
 repository: https://github.com/emdgroup-liquid/liquid-flutter
+publish_to: none
 environment:
   sdk: ">=3.0.0 <4.0.0"
 dependencies:
