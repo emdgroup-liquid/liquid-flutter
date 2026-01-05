@@ -84,6 +84,11 @@ class LdFilterRange<T extends Identifiable<IdType>, IdType> extends LdFilterOpti
       range: range ?? this.range,
     );
   }
+
+  @override
+  Widget build(BuildContext context, LdRepository<T, IdType> repository) {
+    return LdFilterRangeWidget<T, IdType>(filter: this);
+  }
 }
 
 extension InRange on RangeValues {
@@ -92,7 +97,7 @@ extension InRange on RangeValues {
   }
 }
 
-class LdFilterRangeWidget<T extends Identifiable<IdType>, IdType, GroupBy> extends StatelessWidget {
+class LdFilterRangeWidget<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
   final LdFilterRange<T, IdType> filter;
 
   const LdFilterRangeWidget({super.key, required this.filter});

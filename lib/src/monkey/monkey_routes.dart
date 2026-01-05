@@ -47,13 +47,6 @@ List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
   bool detailInDialog = false,
 }) {
   return [
-    GoRoute(
-      name: "$basePath-filters",
-      path: "$basePath/filters",
-      pageBuilder: (context, state) => LdModalPage(
-        builder: (context) => filterModalBuilder?.call(context) ?? ldFilterModal(context),
-      ),
-    ),
     ShellRoute(
       routes: [
         GoRoute(
@@ -75,7 +68,10 @@ List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
                 if (effectiveLayout == LdMonkeyEffectiveLayoutMode.detail) {
                   if (detailInDialog) {
                     return LdModalPage(
-                      builder: (context) => LdModalRoute(context: context, pageBuilder: (context) => page),
+                      builder: (context) => LdModalRoute(
+                        context: context,
+                        pageBuilder: (context) => page,
+                      ),
                     );
                   }
 

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
@@ -18,16 +17,16 @@ void main() {
     await test.pumpWidget(LdThemeProvider(
       theme: theme,
       child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: MaterialApp(
-              home: Portal(
-            child: Scaffold(
-              body: LdSelect<String>(key: const ValueKey("select"), onChanged: onChange, value: value, items: const [
-                LdSelectItem(child: Text("test1"), value: "test1"),
-                LdSelectItem(child: Text("test2"), value: "test2"),
-              ]),
-            ),
-          ))),
+        textDirection: TextDirection.ltr,
+        child: MaterialApp(
+          home: Scaffold(
+            body: LdSelect<String>(key: const ValueKey("select"), onChanged: onChange, value: value, items: const [
+              LdSelectItem(child: Text("test1"), value: "test1"),
+              LdSelectItem(child: Text("test2"), value: "test2"),
+            ]),
+          ),
+        ),
+      ),
     ));
 
     await test.pumpAndSettle();

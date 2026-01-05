@@ -66,4 +66,9 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
       optimisticFilter: optimisticFilter ?? _optimisticFilter,
     );
   }
+
+  @override
+  Widget build(BuildContext context, LdRepository<T, IdType> repository) {
+    return LdFilterOneOfWidget<T, IdType, E>(filter: this);
+  }
 }

@@ -9,7 +9,7 @@ class LdFilterSearchOption<T extends Identifiable<IdType>, IdType, Suggestion> e
   final Duration debounceDelay;
   final String? hint;
 
-  LdSearchConfig? searchConfig(Function(String query) onSearch) => LdSearchConfig(
+  LdSearchConfig searchConfig(Function(String query) onSearch) => LdSearchConfig(
         getSuggestions: getSuggestions,
         buildSuggestion: buildSuggestion,
         initialQuery: searchText,
@@ -75,5 +75,22 @@ class LdFilterSearchOption<T extends Identifiable<IdType>, IdType, Suggestion> e
       buildSuggestion: buildSuggestion ?? this.buildSuggestion,
       debounceDelay: debounceDelay ?? this.debounceDelay,
     );
+  }
+
+  @override
+  Widget build(BuildContext context, LdRepository<T, IdType> repository) {
+    return LdSearchInput(
+        fullWidth: true,
+        searchConfig: searchConfig(
+          (query) {
+            repository.updateFilter(
+              name,
+              (filter) => (filter as LdFilterSearchOption<T, IdType, Suggestion>).copyWith(
+                isOn: query.trim().isNotEmpty,
+                searchText: query,
+              ),
+            );
+          },
+        ));
   }
 }

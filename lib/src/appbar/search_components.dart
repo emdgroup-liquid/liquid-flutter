@@ -46,6 +46,14 @@ class _LdSearchInputState extends State<LdSearchInput> {
   }
 
   @override
+  didUpdateWidget(LdSearchInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.searchConfig.initialQuery != widget.searchConfig.initialQuery) {
+      _inputController.text = widget.searchConfig.initialQuery ?? '';
+    }
+  }
+
+  @override
   void dispose() {
     _inputWrapperFocusNode.removeListener(_onFocusChanged);
     _intentSubscription?.cancel();

@@ -15,7 +15,7 @@ class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
     Set<E>? initialSelected,
     required bool Function(T item, List<E> selected) optimisticFilter,
   })  : _optimisticFilter = optimisticFilter,
-        selectedValues = initialSelected ?? {};
+        selectedValues = Set<E>.from(initialSelected ?? {});
 
   @override
   String serialize() {
@@ -61,5 +61,10 @@ class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
       initialSelected: selectedValues ?? this.selectedValues,
       optimisticFilter: optimisticFilter ?? _optimisticFilter,
     );
+  }
+
+  @override
+  Widget build(BuildContext context, LdRepository<T, IdType> repository) {
+    return LdFilterAnyOfWidget<T, IdType, E>(filter: this);
   }
 }

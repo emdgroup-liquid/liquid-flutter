@@ -10,7 +10,7 @@ void main() {
       "Collapsed": (tester, place) async {
         await place(LdAccordion(
           childBuilder: (context, n) {
-            return SizedBox(height: 50, child: Text("Test $n"));
+            return SizedBox(height: 50, child: LdText.p("Test $n"));
           },
           itemCount: 2,
           initialOpenIndex: const {},
@@ -24,7 +24,7 @@ void main() {
         await place(
           LdAccordion(
             childBuilder: (context, n) {
-              return SizedBox(height: 50, child: Text("Test $n"));
+              return SizedBox(height: 50, child: LdText.p("Test $n"));
             },
             itemCount: 2,
             initialOpenIndex: const {0},
@@ -39,7 +39,7 @@ void main() {
         await place(
           LdAccordion(
             childBuilder: (context, n) {
-              return SizedBox(height: 50, child: Text("Test $n"));
+              return SizedBox(height: 50, child: LdText.p("Test $n"));
             },
             itemCount: 2,
             wrapActiveInCard: true,
@@ -54,7 +54,7 @@ void main() {
       "Double open": (tester, place) async {
         await place(LdAccordion(
           childBuilder: (context, n) {
-            return SizedBox(height: 50, child: Text("Test $n"));
+            return SizedBox(height: 50, child: LdText.p("Test $n"));
           },
           itemCount: 2,
           wrapActiveInCard: true,

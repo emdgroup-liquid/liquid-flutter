@@ -176,12 +176,11 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
           builder: (context, child) {
             return Directionality(
               textDirection: TextDirection.ltr,
-              child: DefaultTextStyle(
-                style: TextStyle(
-                  color: _theme.text,
-                  fontFamily: _theme.fontFamily,
-                  package: _theme.fontFamilyPackage,
-                  decoration: TextDecoration.none,
+              child: DefaultTextStyle.merge(
+                style: ldBuildTextStyle(
+                  _theme,
+                  LdTextType.paragraph,
+                  LdSize.m,
                 ),
                 child: child!,
               ),

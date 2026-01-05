@@ -300,11 +300,11 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
     }
   }
 
-  void _handleAppBarRegistryChange() async {
-    await Future.delayed(Duration.zero);
-    if (mounted) {
+  void _handleAppBarRegistryChange() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       setState(() {});
-    }
+    });
   }
 
   bool get _isModal {
@@ -331,7 +331,8 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
   }
 
   bool get _canPopParentRoute {
-    return context.canPop();
+    final parentRoute = ModalRoute.of(context);
+    return parentRoute?.canPop ?? false;
   }
 
   LdDrawerSlot? get _drawerSlot {

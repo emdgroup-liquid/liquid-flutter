@@ -313,18 +313,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final moreInfoFinder = find.byWidgetPredicate(
-        (widget) =>
-            widget is LdButton &&
-            widget.child is LdAutoSpace &&
-            (widget.child as LdAutoSpace).children.first is Text &&
-            ((widget.child as LdAutoSpace).children.first as Text).data == LiquidLocalizationsEn().moreInfo,
-      );
+      final moreInfoFinder = find.byKey(const Key('more-info-button'));
+
       expect(moreInfoFinder, findsOneWidget);
 
       // Tap the button and verify dialog opens
       await tester.tap(moreInfoFinder.first);
-      await tester.pumpAndSettle(const Duration(milliseconds: 1000));
+
+      await tester.pumpAndSettle();
 
       // Verify dialog appears
       expect(

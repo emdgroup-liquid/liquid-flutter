@@ -96,6 +96,7 @@ class LdExceptionView extends StatelessWidget {
 
   _buildDialogButton(BuildContext context, VoidCallback moreInfo) {
     return LdButton(
+      key: const Key('more-info-button'),
       child: LdAutoSpace(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -122,8 +123,10 @@ class LdExceptionView extends StatelessWidget {
           revealed: true,
           initialRevealed: false,
           child: LdHint(
-            child: Text(exception?.message ??
-                LiquidLocalizations.of(context).unknownError),
+            child: Text(
+              exception?.message ?? LiquidLocalizations.of(context).unknownError,
+              key: const Key('exception-message'),
+            ),
             type: exception?.type ?? LdHintType.error,
           ),
         ),
@@ -168,8 +171,7 @@ class LdExceptionView extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (exception?.moreInfo != null)
-              _buildDialogButton(context, moreInfo),
+            if (exception?.moreInfo != null) _buildDialogButton(context, moreInfo),
             if (controller?.showRetryButton == true) ...[
               ldSpacerM,
               _buildRetryButton(context, controller),
@@ -187,26 +189,22 @@ class LdExceptionView extends StatelessWidget {
     return StreamBuilder<LdRetryState>(
         stream: controller?.stateStream ?? const Stream.empty(),
         builder: (context, snapshot) {
-          return LdAutoSpace(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                LdModalBuilder(
-                  useRootNavigator: true,
-                  modal: LdModalRoute(
-                    context: context,
-                    pageBuilder: (context) => LdExceptionDialog(
-                      error: exception!,
-                    ),
-                  ),
-                  builder: (context, open) => switch (direction) {
-                    (Axis.horizontal) =>
-                      _buildHorizontal(context, open, controller),
-                    (Axis.vertical) =>
-                      _buildVertical(context, open, controller),
-                  },
+          return LdAutoSpace(crossAxisAlignment: CrossAxisAlignment.center, children: [
+            LdModalBuilder(
+              useRootNavigator: true,
+              modal: LdModalRoute(
+                context: context,
+                pageBuilder: (context) => LdExceptionDialog(
+                  error: exception!,
                 ),
-                _buildRetryIndicator(context, controller),
-              ]);
+              ),
+              builder: (context, open) => switch (direction) {
+                (Axis.horizontal) => _buildHorizontal(context, open, controller),
+                (Axis.vertical) => _buildVertical(context, open, controller),
+              },
+            ),
+            _buildRetryIndicator(context, controller),
+          ]);
         });
   }
 }

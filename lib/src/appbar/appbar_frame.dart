@@ -87,10 +87,11 @@ class _AppBarFrameState extends State<AppBarFrame> {
     );
   }
 
-  void _onRegistryChange() async {
-    await Future.delayed(Duration.zero);
-    if (!mounted) return;
-    setState(() {});
+  void _onRegistryChange() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() {});
+    });
   }
 
   LdAppBarRegistryKey? _getKey() {

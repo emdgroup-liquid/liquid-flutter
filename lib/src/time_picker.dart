@@ -55,6 +55,7 @@ class LdTimePicker extends StatelessWidget {
         fixedDialogSize: const Size(300, 300),
         pageBuilder: (context) => LdScaffold(
           body: LdScaffoldBody(
+            key: const Key('time_picker_sheet'),
             children: [
               LdTimePickerWidget(
                 initialTime: value,

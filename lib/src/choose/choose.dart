@@ -127,9 +127,9 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
     );
   }
 
-  static fromSelectItems<T>({
+  static LdChoose<LdSelectItem<T>, T> fromSelectItems<T>({
     required List<LdSelectItem<T>> items,
-    required Function(Set<T>) onChanged,
+    required void Function(Set<T>) onChanged,
     Set<T>? value,
     bool allowEmpty = false,
     bool useRootNavigator = true,
@@ -248,7 +248,7 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
 
     final result = await (shouldUsePage
         ? nav.push<Set<IdType>>(
-            MaterialPageRoute(
+            MaterialPageRoute<Set<IdType>>(
               builder: (context) => LdChoosePage<T, IdType>(
                 repository: _repository,
                 itemBuilder: widget.itemBuilder,
@@ -260,7 +260,7 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
             ),
           )
         : nav.push<Set<IdType>>(
-            LdModalRoute(
+            LdModalRoute<Set<IdType>>(
               context: context,
               pageBuilder: (context) => LdChoosePage<T, IdType>(
                 repository: _repository,
@@ -277,10 +277,6 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
       widget.onChanged(result);
     }
     setState(() {});
-  }
-
-  Widget _buildSelectedItem(BuildContext context, T item) {
-    return widget.selectedItemBuilder(context, item);
   }
 
   int _getDisplayItems(List<IdType> ids) {
@@ -371,7 +367,7 @@ class _LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<L
   @override
   void initState() {
     super.initState();
-    _selectedItems = Set.from(widget.initialSelectedItems);
+    _selectedItems = Set<IdType>.from(widget.initialSelectedItems);
   }
 
   void _handleSelectionChange(Set<IdType> selectedItems) {
@@ -414,6 +410,7 @@ class _LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<L
               ),
             LdButton(
               disabled: _selectedItems.isEmpty && !widget.allowEmpty,
+              key: const Key("ldChoose_done"),
               onPressed: () {
                 maybePopContextMenu(context);
                 Navigator.of(context).pop(_selectedItems);

@@ -6,8 +6,11 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
 class LdMonkeyShellState<T extends Identifiable<IdType>, IdType> with ChangeNotifier {
-  final bool immediateViewSelection = false;
-  final bool allowMultipleSelection = true;
+  bool _immediateViewSelection = false;
+  bool _allowMultipleSelection = true;
+  String basePath;
+
+  LdMonkeyShellState({required this.basePath});
 
   Set<IdType> _selectedItems = {};
 
@@ -28,19 +31,19 @@ class LdMonkeyShellState<T extends Identifiable<IdType>, IdType> with ChangeNoti
   Set<IdType> get viewingItems => _viewingItems;
 
   bool get showSelectionControls => _showSelectionControls;
+  bool get immediateViewSelection => _immediateViewSelection;
+  bool get allowMultipleSelection => _allowMultipleSelection;
 
   LdMonkeyEffectiveLayoutMode? get effectiveLayout => _effectiveLayout;
 
-  Future<void> setSelectedItems(Set<IdType> selectedItems) async {
-    await Future.delayed(Duration.zero);
-
+  void setSelectedItems(Set<IdType> selectedItems) {
     Set<IdType> newSelectedItems = {};
-    Set<IdType>? newViewingItems = null;
+    Set<IdType>? newViewingItems;
     // Prevent multiple selection if not allowed
-    if (!allowMultipleSelection && selectedItems.length > 1) {
+    if (!_allowMultipleSelection && selectedItems.length > 1) {
       selectedItems = selectedItems.toList().take(1).toSet();
     }
-    if (immediateViewSelection || (selectedItems.length == 1 && !showSelectionControls)) {
+    if (_immediateViewSelection || (selectedItems.length == 1 && !showSelectionControls)) {
       newViewingItems = selectedItems;
 
       selectedItems = {};
@@ -66,22 +69,30 @@ class LdMonkeyShellState<T extends Identifiable<IdType>, IdType> with ChangeNoti
     }
   }
 
-  Future<void> setViewingItems(Set<IdType> viewingItems) async {
-    await Future.delayed(Duration.zero);
-    if (viewingItems == _viewingItems) return;
+  void setImmediateViewSelection(bool immediateViewSelection) {
+    _immediateViewSelection = immediateViewSelection;
+    notifyListeners();
+  }
+
+  void setAllowMultipleSelection(bool allowMultipleSelection) {
+    _allowMultipleSelection = allowMultipleSelection;
+    notifyListeners();
+  }
+
+  void setViewingItems(Set<IdType> viewingItems) {
+    if (setEquals(viewingItems, _viewingItems)) return;
     _viewingItems = viewingItems;
     _viewingItemsStreamController.add(viewingItems);
     notifyListeners();
   }
 
-  void setShowSelectionControls(bool showSelectionControls) async {
-    await Future.delayed(Duration.zero);
+  void setShowSelectionControls(bool showSelectionControls) {
     _showSelectionControls = showSelectionControls;
 
     notifyListeners();
   }
 
-  Future<void> setEffectiveLayout(LdMonkeyEffectiveLayoutMode effectiveLayout) async {
+  void setEffectiveLayout(LdMonkeyEffectiveLayoutMode effectiveLayout) {
     _effectiveLayout = effectiveLayout;
     notifyListeners();
   }
@@ -89,8 +100,8 @@ class LdMonkeyShellState<T extends Identifiable<IdType>, IdType> with ChangeNoti
   @override
   bool operator ==(Object other) {
     return other is LdMonkeyShellState<T, IdType> &&
-        other.selectedItems == selectedItems &&
-        other.viewingItems == viewingItems &&
+        setEquals(selectedItems, other.selectedItems) &&
+        setEquals(viewingItems, other.viewingItems) &&
         other.showSelectionControls == showSelectionControls &&
         other.effectiveLayout == effectiveLayout;
   }

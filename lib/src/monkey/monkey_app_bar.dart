@@ -10,6 +10,9 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
   final List<Widget> additionalActions;
   final Widget? leading;
   final LdAppBarPositionMode? positionMode;
+  final LdAppBarBackgroundMode? backgroundMode;
+  final LdAppBarShadowMode? shadowMode;
+  final LdAppBarBorderMode? borderMode;
   const LdMonkeyAppBar({
     super.key,
     this.title,
@@ -18,6 +21,9 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
     required this.location,
     this.leading,
     this.debugName,
+    this.backgroundMode,
+    this.shadowMode,
+    this.borderMode,
   });
 
   LdFilterSearchOption<T, IdType, dynamic>? _getSearchFilter(BuildContext context) {
@@ -49,6 +55,8 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
       child: Builder(builder: (context) {
         return LdAppBar(
             debugName: debugName,
+            backgroundMode: backgroundMode ?? LdAppBarBackgroundMode.adaptive,
+            borderMode: borderMode ?? LdAppBarBorderMode.adaptive,
             leading: leading,
             order: switch (location) {
               LdMonkeyActionLocation.masterAppBar => 1,
@@ -67,12 +75,13 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
                     LdAppBarPositionMode.adaptive,
                   _ => LdAppBarPositionMode.top,
                 },
-            shadowMode: switch (location) {
-              LdMonkeyActionLocation.masterAppBar ||
-              LdMonkeyActionLocation.masterSecondary =>
-                LdAppBarShadowMode.hidden,
-              _ => LdAppBarShadowMode.whenScrolled,
-            },
+            shadowMode: shadowMode ??
+                switch (location) {
+                  LdMonkeyActionLocation.masterAppBar ||
+                  LdMonkeyActionLocation.masterSecondary =>
+                    LdAppBarShadowMode.hidden,
+                  _ => LdAppBarShadowMode.whenScrolled,
+                },
             implyLeading: switch (location) {
               LdMonkeyActionLocation.detailAppBar => effectiveLayout == LdMonkeyEffectiveLayoutMode.detail,
               _ => null,

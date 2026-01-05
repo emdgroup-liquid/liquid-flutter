@@ -25,7 +25,7 @@ void main() {
     expect(find.text('1/1/2023'), findsOneWidget);
   });
 
-  testWidgets('opens date picker when button is pressed', (WidgetTester tester) async {
+  testWidgets('opens date picker when pressed', (WidgetTester tester) async {
     await tester.pumpWidget(
       withLiquidTheme(
         LdDatePicker(
@@ -35,8 +35,10 @@ void main() {
       ),
     );
 
+    await tester.pumpAndSettle();
+
     // Open the date picker
-    await tester.tap(find.byType(LdButton));
+    await tester.tap(find.byKey(const Key('date_picker_button')));
     await tester.pumpAndSettle();
 
     // Check if the date picker sheet is opened
@@ -91,7 +93,7 @@ void main() {
     );
 
     // Open the date picker
-    await tester.tap(find.byType(LdButton));
+    await tester.tap(find.byKey(const Key('date_picker_button')));
     await tester.pumpAndSettle();
 
     // Verify that dates outside the range are disabled

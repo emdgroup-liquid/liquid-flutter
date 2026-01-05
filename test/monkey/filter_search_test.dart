@@ -3,25 +3,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
-// Test item class
-class _TestItem with Identifiable<int> {
-  @override
-  final int id;
-  final String name;
-  final int value;
-  final bool active;
-
-  _TestItem(this.id, this.name, this.value, [bool? active]) : active = active ?? true;
-
-  @override
-  String toString() => '_TestItem(id: $id, name: $name, value: $value, active: $active)';
-}
+import 'test_utils.dart';
 
 void main() {
   group('LdFilterSearchOption Tests', () {
     group('Serialization', () {
       test('serialize() returns searchText when on and non-empty', () {
-        final filter = LdFilterSearchOption<_TestItem, int, String>(
+        final filter = LdFilterSearchOption<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),
@@ -34,7 +22,7 @@ void main() {
       });
 
       test('serialize() returns empty string when off', () {
-        final filter = LdFilterSearchOption<_TestItem, int, String>(
+        final filter = LdFilterSearchOption<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),
@@ -47,7 +35,7 @@ void main() {
       });
 
       test('serialize() returns empty string when searchText is empty', () {
-        final filter = LdFilterSearchOption<_TestItem, int, String>(
+        final filter = LdFilterSearchOption<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),
@@ -60,7 +48,7 @@ void main() {
       });
 
       test('marshalSerialized() updates searchText and isOn state', () {
-        final filter = LdFilterSearchOption<_TestItem, int, String>(
+        final filter = LdFilterSearchOption<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),
@@ -75,7 +63,7 @@ void main() {
       });
 
       test('marshalSerialized() sets isOn to false when empty', () {
-        final filter = LdFilterSearchOption<_TestItem, int, String>(
+        final filter = LdFilterSearchOption<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),
@@ -92,7 +80,7 @@ void main() {
 
     group('Optimistic Filtering', () {
       test('optimisticFilter() works correctly with search text', () {
-        final filter = LdFilterSearchOption<_TestItem, int, String>(
+        final filter = LdFilterSearchOption<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),
@@ -101,15 +89,15 @@ void main() {
           optimisticFilter: (item, searchText) => item.name.contains(searchText),
         );
 
-        final matchingItem = _TestItem(1, 'Item 1', 10);
-        final nonMatchingItem = _TestItem(2, 'Item 2', 20);
+        final matchingItem = createTestItem(1, name: 'Item 1');
+        final nonMatchingItem = createTestItem(2, name: 'Item 2');
 
         expect(filter.optimisticFilter(matchingItem), isTrue);
         expect(filter.optimisticFilter(nonMatchingItem), isFalse);
       });
 
       test('optimisticFilter() returns true when filter is off', () {
-        final filter = LdFilterSearchOption<_TestItem, int, String>(
+        final filter = LdFilterSearchOption<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),
@@ -118,12 +106,12 @@ void main() {
           optimisticFilter: (item, searchText) => item.name.contains(searchText),
         );
 
-        final item = _TestItem(1, 'Item 1', 10);
+        final item = createTestItem(1, name: 'Item 1');
         expect(filter.optimisticFilter(item), isTrue);
       });
 
       test('optimisticFilter() returns true when searchText is empty', () {
-        final filter = LdFilterSearchOption<_TestItem, int, String>(
+        final filter = LdFilterSearchOption<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),
@@ -132,14 +120,14 @@ void main() {
           optimisticFilter: (item, searchText) => item.name.contains(searchText),
         );
 
-        final item = _TestItem(1, 'Item 1', 10);
+        final item = createTestItem(1, name: 'Item 1');
         expect(filter.optimisticFilter(item), isTrue);
       });
     });
 
     group('CopyWith', () {
       test('copyWith() preserves all properties', () {
-        final filter = LdFilterSearchOption<_TestItem, int, String>(
+        final filter = LdFilterSearchOption<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),
@@ -163,7 +151,7 @@ void main() {
       });
 
       test('copyWith() preserves optimisticFilter function', () {
-        final filter = LdFilterSearchOption<_TestItem, int, String>(
+        final filter = LdFilterSearchOption<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),
@@ -173,7 +161,7 @@ void main() {
         );
 
         final newFilter = filter.copyWith(searchText: 'Item 1');
-        final item = _TestItem(1, 'Item 1', 10);
+        final item = createTestItem(1, name: 'Item 1');
 
         expect(newFilter.optimisticFilter(item), isTrue);
       });
@@ -181,29 +169,7 @@ void main() {
 
     group('UI Rendering', () {
       testWidgets('renders search input widget', (WidgetTester tester) async {
-        final repository = LdRepository<_TestItem, int>(
-          fetchListWithParameters: ({required offset, required pageSize, pageToken, filters, sortOptions}) async {
-            return LdListPage<_TestItem>(newItems: [], hasMore: false, total: 0);
-          },
-          getById: (id) async => _TestItem(id, 'Test', 0),
-        );
-
-        final monkey = LdMonkey<_TestItem, int>(
-          path: '/test',
-          parseId: (id) => int.parse(id),
-          detailPath: (ids) => '/test/${ids.join(",")}',
-          buildRepository: (context) => repository,
-          buildDetail: (context, item) => Text(item.value?.name ?? 'Loading'),
-          listBuilder: (route, state, onSelectionChanged) => LdSelectableList<_TestItem, int>(
-                paginator: route.repository,
-                itemBuilder: (context, item, index) => LdListItem(
-                  title: Text(item.value?.name ?? ''),
-                ),
-                onSelectionChange: onSelectionChanged,
-              ),
-        );
-
-        final filter = LdFilterSearchOption<_TestItem, int, String>(
+        final filter = LdFilterSearchOption<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),
@@ -212,26 +178,28 @@ void main() {
           optimisticFilter: (item, searchText) => item.name.contains(searchText),
         );
 
+        final repository = createTestRepository(filters: {filter});
+
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
               home: Scaffold(
-                body: Provider<LdMonkey<_TestItem, int>>.value(
-                  value: monkey,
-                  child: Builder(
-                    builder: (context) {
-                      monkey.initRepository(context, {}, {});
-                      return Row(
-                        children: [
-                          Expanded(child: Text(filter.searchText)),
-                          LdButton.vague(
-                            child: const Icon(Icons.close),
-                            size: LdSize.s,
-                            onPressed: () {},
-                          ),
-                        ],
-                      ).padM();
-                    },
+                body: ListenableProvider.value(
+                  value: repository,
+                  child: Row(
+                    children: [
+                      Expanded(child: Text(filter.searchText)),
+                      LdButton.vague(
+                        child: const Icon(Icons.close),
+                        size: LdSize.s,
+                        onPressed: () {
+                          repository.updateFilter(
+                            filter.name,
+                            (f) => f!.copyWith(isOn: false),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ),
               ),

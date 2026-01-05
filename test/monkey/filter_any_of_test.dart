@@ -1,25 +1,10 @@
-import 'dart:io';
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
-// Test item class
-class _TestItem with Identifiable<int> {
-  @override
-  final int id;
-  final String name;
-  final int value;
-  final String category;
-
-  _TestItem(this.id, this.name, this.value, this.category);
-
-  @override
-  String toString() => '_TestItem(id: $id, name: $name, value: $value, category: $category)';
-}
+import 'test_utils.dart';
 
 enum _Category { categoryA, categoryB, categoryC }
 
@@ -31,9 +16,14 @@ void main() {
       _Category.categoryC: (BuildContext context) => const Text('Category C'),
     };
 
+    // Helper to create test items with category
+    TestItem createTestItemWithCategory(int id, String category) {
+      return TestItem(id, 'Item $id', id * 10, true, category);
+    }
+
     group('Serialization', () {
       test('serialize() returns comma-separated selected values', () {
-        final filter = LdFilterAnyOf<_TestItem, int, _Category>(
+        final filter = LdFilterAnyOf<TestItem, int, _Category>(
           name: 'categories',
           label: (context) => 'Categories',
           icon: (context) => const Icon(Icons.category),
@@ -50,7 +40,7 @@ void main() {
       });
 
       test('serialize() returns empty string when no selection', () {
-        final filter = LdFilterAnyOf<_TestItem, int, _Category>(
+        final filter = LdFilterAnyOf<TestItem, int, _Category>(
           name: 'categories',
           label: (context) => 'Categories',
           icon: (context) => const Icon(Icons.category),
@@ -64,7 +54,7 @@ void main() {
       });
 
       test('serialize() returns empty string when filter is off', () {
-        final filter = LdFilterAnyOf<_TestItem, int, _Category>(
+        final filter = LdFilterAnyOf<TestItem, int, _Category>(
           name: 'categories',
           label: (context) => 'Categories',
           icon: (context) => const Icon(Icons.category),
@@ -78,7 +68,7 @@ void main() {
       });
 
       test('marshalSerialized() parses multiple values', () {
-        final filter = LdFilterAnyOf<_TestItem, int, _Category>(
+        final filter = LdFilterAnyOf<TestItem, int, _Category>(
           name: 'categories',
           label: (context) => 'Categories',
           icon: (context) => const Icon(Icons.category),
@@ -93,7 +83,7 @@ void main() {
       });
 
       test('marshalSerialized() handles empty string', () {
-        final filter = LdFilterAnyOf<_TestItem, int, _Category>(
+        final filter = LdFilterAnyOf<TestItem, int, _Category>(
           name: 'categories',
           label: (context) => 'Categories',
           icon: (context) => const Icon(Icons.category),
@@ -109,7 +99,7 @@ void main() {
       });
 
       test('marshalSerialized() handles invalid values', () {
-        final filter = LdFilterAnyOf<_TestItem, int, _Category>(
+        final filter = LdFilterAnyOf<TestItem, int, _Category>(
           name: 'categories',
           label: (context) => 'Categories',
           icon: (context) => const Icon(Icons.category),
@@ -127,7 +117,7 @@ void main() {
 
     group('Optimistic Filtering', () {
       test('optimisticFilter() uses selected values set', () {
-        final filter = LdFilterAnyOf<_TestItem, int, _Category>(
+        final filter = LdFilterAnyOf<TestItem, int, _Category>(
           name: 'categories',
           label: (context) => 'Categories',
           icon: (context) => const Icon(Icons.category),
@@ -140,9 +130,9 @@ void main() {
           },
         );
 
-        final matchingItemA = _TestItem(1, 'Item 1', 10, 'A');
-        final matchingItemB = _TestItem(2, 'Item 2', 20, 'B');
-        final nonMatchingItem = _TestItem(3, 'Item 3', 30, 'C');
+        final matchingItemA = createTestItemWithCategory(1, 'A');
+        final matchingItemB = createTestItemWithCategory(2, 'B');
+        final nonMatchingItem = createTestItemWithCategory(3, 'C');
 
         expect(filter.optimisticFilter(matchingItemA), isTrue);
         expect(filter.optimisticFilter(matchingItemB), isTrue);
@@ -150,7 +140,7 @@ void main() {
       });
 
       test('optimisticFilter() returns false when selectedValues is empty', () {
-        final filter = LdFilterAnyOf<_TestItem, int, _Category>(
+        final filter = LdFilterAnyOf<TestItem, int, _Category>(
           name: 'categories',
           label: (context) => 'Categories',
           icon: (context) => const Icon(Icons.category),
@@ -160,14 +150,14 @@ void main() {
           optimisticFilter: (item, selected) => selected.isNotEmpty && selected.contains(_Category.categoryA),
         );
 
-        final item = _TestItem(1, 'Item 1', 10, 'A');
+        final item = createTestItemWithCategory(1, 'A');
         expect(filter.optimisticFilter(item), isFalse);
       });
     });
 
     group('CopyWith', () {
       test('copyWith() updates selectedValues correctly', () {
-        final filter = LdFilterAnyOf<_TestItem, int, _Category>(
+        final filter = LdFilterAnyOf<TestItem, int, _Category>(
           name: 'categories',
           label: (context) => 'Categories',
           icon: (context) => const Icon(Icons.category),
@@ -187,7 +177,7 @@ void main() {
       });
 
       test('copyWith() preserves optimisticFilter function', () {
-        final filter = LdFilterAnyOf<_TestItem, int, _Category>(
+        final filter = LdFilterAnyOf<TestItem, int, _Category>(
           name: 'categories',
           label: (context) => 'Categories',
           icon: (context) => const Icon(Icons.category),
@@ -198,7 +188,7 @@ void main() {
         );
 
         final newFilter = filter.copyWith(selectedValues: {_Category.categoryA});
-        final item = _TestItem(1, 'Item 1', 10, 'A');
+        final item = createTestItemWithCategory(1, 'A');
 
         expect(newFilter.optimisticFilter(item), isTrue);
       });
@@ -207,7 +197,7 @@ void main() {
     group('UI Rendering', () {
       testWidgets('renders in LdFilterModal and can be activated/deactivated and interacted with',
           (WidgetTester tester) async {
-        final filter = LdFilterAnyOf<_TestItem, int, _Category>(
+        final filter = LdFilterAnyOf<TestItem, int, _Category>(
           name: 'categories',
           label: (context) => 'Categories',
           icon: (context) => const Icon(Icons.category),
@@ -216,27 +206,8 @@ void main() {
           optimisticFilter: (item, selected) => selected.any((cat) => item.category.contains(cat.toString())),
         );
 
-        final repository = LdRepository<_TestItem, int>(
+        final repository = createTestRepository(
           filters: {filter},
-          fetchListWithParameters: ({required offset, required pageSize, pageToken, filters, sortOptions}) async {
-            return LdListPage<_TestItem>(newItems: [], hasMore: false, total: 0);
-          },
-          getById: (id) async => _TestItem(id, 'Test', 0, 'A'),
-        );
-
-        final monkey = LdMonkey<_TestItem, int>(
-          path: '/test',
-          parseId: (id) => int.parse(id),
-          detailPath: (ids) => '/test/${ids.join(",")}',
-          buildRepository: (context) => repository,
-          buildDetail: (context, item) => Text(item.value?.name ?? 'Loading'),
-          listBuilder: (route, state, onSelectionChanged) => LdSelectableList<_TestItem, int>(
-            paginator: route.repository,
-            itemBuilder: (context, item, index) => LdListItem(
-              title: Text(item.value?.name ?? ''),
-            ),
-            onSelectionChange: onSelectionChanged,
-          ),
         );
 
         await tester.pumpWidget(
@@ -244,16 +215,9 @@ void main() {
             child: MaterialApp(
               localizationsDelegates: LiquidLocalizations.localizationsDelegates,
               home: Scaffold(
-                body: Provider<LdMonkey<_TestItem, int>>.value(
-                  value: monkey,
-                  child: Builder(
-                    builder: (context) {
-                      monkey.initRepository(context, {}, {});
-                      return LdFilterModal(
-                        route: monkey,
-                      );
-                    },
-                  ),
+                body: ListenableProvider.value(
+                  value: repository,
+                  child: const LdFilterModal<TestItem, int>(),
                 ),
               ),
             ),
@@ -302,7 +266,7 @@ void main() {
         await doneChooseMenu(tester);
 
         // Verify Category A is selected
-        final updatedFilter = repository.filters['categories'] as LdFilterAnyOf<_TestItem, int, _Category>;
+        final updatedFilter = repository.filters['categories'] as LdFilterAnyOf<TestItem, int, _Category>;
         expect(updatedFilter.selectedValues, contains(_Category.categoryA));
         expect(updatedFilter.isOn, isTrue);
 
@@ -319,7 +283,7 @@ void main() {
         await doneChooseMenu(tester);
 
         // Verify both categories are selected
-        final updatedFilter2 = repository.filters['categories'] as LdFilterAnyOf<_TestItem, int, _Category>;
+        final updatedFilter2 = repository.filters['categories'] as LdFilterAnyOf<TestItem, int, _Category>;
         expect(updatedFilter2.selectedValues, contains(_Category.categoryA));
         expect(updatedFilter2.selectedValues, contains(_Category.categoryB));
         expect(updatedFilter2.isOn, isTrue);
@@ -334,7 +298,7 @@ void main() {
         await doneChooseMenu(tester);
 
         // Verify only Category B is selected
-        final updatedFilter3 = repository.filters['categories'] as LdFilterAnyOf<_TestItem, int, _Category>;
+        final updatedFilter3 = repository.filters['categories'] as LdFilterAnyOf<TestItem, int, _Category>;
         expect(updatedFilter3.selectedValues, isNot(contains(_Category.categoryA)));
         expect(updatedFilter3.selectedValues, contains(_Category.categoryB));
         expect(updatedFilter3.isOn, isTrue);
@@ -350,11 +314,4 @@ void main() {
       });
     });
   });
-}
-
-Future<void> debugCaptureImage(WidgetTester tester, String name) async {
-  final image = await captureImage(find.byType(MaterialApp).evaluate().first);
-  debugPrint('image: ${image.width}x${image.height}');
-  File('$name.png').writeAsBytesSync((await image.toByteData(format: ImageByteFormat.png))!.buffer.asInt8List());
-  image.dispose();
 }

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_portal/flutter_portal.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/l10n/generated/liquid_localizations_en.dart';
@@ -130,16 +130,12 @@ void main() {
       MaterialApp(
         localizationsDelegates: const [LiquidLocalizations.delegate],
         home: LdThemeProvider(
-          child: LdPortal(
-            child: Scaffold(
-              body: Portal(
-                child: LdSubmit<int, void>(
-                  config: LdSubmitConfig(action: (arg) async {
-                    return await completer.future;
-                  }),
-                  builder: const LdSubmitDialogBuilder<int, void>(),
-                ),
-              ),
+          child: Scaffold(
+            body: LdSubmit<int, void>(
+              config: LdSubmitConfig(action: (arg) async {
+                return await completer.future;
+              }),
+              builder: const LdSubmitDialogBuilder<int, void>(),
             ),
           ),
         ),
@@ -188,16 +184,14 @@ void main() {
       MaterialApp(
         localizationsDelegates: const [LiquidLocalizations.delegate],
         home: LdThemeProvider(
-          child: LdPortal(
-            child: Scaffold(
-              body: LdExceptionMapperProvider(
-                exceptionMapper: customMapper,
-                child: LdSubmit<int, void>(
-                  config: LdSubmitConfig(action: (arg) async {
-                    await completer.future;
-                    throw TimeoutException('Timeout');
-                  }),
-                ),
+          child: Scaffold(
+            body: LdExceptionMapperProvider(
+              exceptionMapper: customMapper,
+              child: LdSubmit<int, void>(
+                config: LdSubmitConfig(action: (arg) async {
+                  await completer.future;
+                  throw TimeoutException('Timeout');
+                }),
               ),
             ),
           ),
@@ -257,11 +251,9 @@ void main() {
       MaterialApp(
         localizationsDelegates: const [LiquidLocalizations.delegate],
         home: LdThemeProvider(
-          child: LdPortal(
-            child: Scaffold(
-              body: LdSubmit<int, void>(
-                controller: controller,
-              ),
+          child: Scaffold(
+            body: LdSubmit<int, void>(
+              controller: controller,
             ),
           ),
         ),

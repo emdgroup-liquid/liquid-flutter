@@ -226,7 +226,7 @@ class TaskShell extends StatelessWidget {
           icon: Icon(LucideIcons.trash2),
         ),
         toggleSelectionControls<Task, int>(),
-        toggleFilters<Task, int>(),
+        showFilterModal<Task, int>(),
         showSelection<Task, int>(),
         LdMonkeyBareChildAction(
           builder: (context) => LdAppBarAction(

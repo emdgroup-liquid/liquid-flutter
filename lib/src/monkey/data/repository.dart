@@ -6,8 +6,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 import 'package:provider/provider.dart';
 
-typedef FetchListWithParameters<T extends Identifiable<IdType>, IdType>
-    = Future<LdListPage<T>> Function({
+typedef FetchListWithParameters<T extends Identifiable<IdType>, IdType> = Future<LdListPage<T>> Function({
   required int offset,
   required int pageSize,
   String? pageToken,
@@ -15,12 +14,10 @@ typedef FetchListWithParameters<T extends Identifiable<IdType>, IdType>
   List<LdSortOption<T, IdType>>? sortOptions,
 });
 
-class LdRepository<T extends Identifiable<IdType>, IdType>
-    extends LdPaginator<T, IdType> {
+class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T, IdType> {
   final Future<T> Function(IdType id) _getById;
   final Future<int?> Function(IdType id,
-      {Set<LdFilterOption<T, IdType>>? filters,
-      List<LdSortOption<T, IdType>>? sortOptions})? _getOffsetById;
+      {Set<LdFilterOption<T, IdType>>? filters, List<LdSortOption<T, IdType>>? sortOptions})? _getOffsetById;
   final Future<void> Function(Set<T> items)? _updateBatch;
   final Future<void> Function(IdType id)? _deleteItem;
   final Future<T?> Function(IdType id, T newItem)? _updateItem;
@@ -35,20 +32,14 @@ class LdRepository<T extends Identifiable<IdType>, IdType>
   final Map<String, LdFilterOption<T, IdType>> _filters;
   final List<LdSortOption<T, IdType>> _sortOptions;
 
-  Map<String, LdFilterOption<T, IdType>> get filters =>
-      Map.unmodifiable(_filters);
-  List<LdSortOption<T, IdType>> get sortOptions =>
-      List.unmodifiable(_sortOptions);
+  Map<String, LdFilterOption<T, IdType>> get filters => Map.unmodifiable(_filters);
+  List<LdSortOption<T, IdType>> get sortOptions => List.unmodifiable(_sortOptions);
 
-  final _filterStreamController =
-      StreamController<Set<LdFilterOption<T, IdType>>>.broadcast();
-  Stream<Set<LdFilterOption<T, IdType>>> get filterStream =>
-      _filterStreamController.stream;
+  final _filterStreamController = StreamController<Set<LdFilterOption<T, IdType>>>.broadcast();
+  Stream<Set<LdFilterOption<T, IdType>>> get filterStream => _filterStreamController.stream;
 
-  final _sortStreamController =
-      StreamController<List<LdSortOption<T, IdType>>>.broadcast();
-  Stream<List<LdSortOption<T, IdType>>> get sortStream =>
-      _sortStreamController.stream;
+  final _sortStreamController = StreamController<List<LdSortOption<T, IdType>>>.broadcast();
+  Stream<List<LdSortOption<T, IdType>>> get sortStream => _sortStreamController.stream;
 
   LdRepository({
     required FetchListWithParameters<T, IdType> fetchListWithParameters,
@@ -57,8 +48,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType>
     Set<LdFilterOption<T, IdType>>? filters,
     List<LdSortOption<T, IdType>>? sortOptions,
     Future<int?> Function(IdType id,
-            {Set<LdFilterOption<T, IdType>>? filters,
-            List<LdSortOption<T, IdType>>? sortOptions})?
+            {Set<LdFilterOption<T, IdType>>? filters, List<LdSortOption<T, IdType>>? sortOptions})?
         getOffsetById,
     Future<void> Function(IdType id)? deleteItem,
     Future<T?> Function(IdType id, T newItem)? updateItem,
@@ -72,8 +62,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType>
         _getOffsetById = getOffsetById,
         _deleteItem = deleteItem,
         _updateItem = updateItem,
-        _filters =
-            Map.fromEntries(filters?.map((e) => MapEntry(e.name, e)) ?? []),
+        _filters = Map.fromEntries(filters?.map((e) => MapEntry(e.name, e)) ?? []),
         _createItem = createItem,
         _sortOptions = sortOptions ?? [],
         _deleteBatch = deleteBatch,
@@ -81,8 +70,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType>
     fetchListFunction = _fetchListPaginator;
   }
 
-  static LdRepository<L, IdType>
-      fromList<L extends Identifiable<IdType>, IdType>({
+  static LdRepository<L, IdType> fromList<L extends Identifiable<IdType>, IdType>({
     required List<L> list,
     Set<LdFilterOption<L, IdType>>? filters,
     List<LdSortOption<L, IdType>>? sortOptions,
@@ -90,17 +78,15 @@ class LdRepository<T extends Identifiable<IdType>, IdType>
     return LdRepository<L, IdType>(
       filters: filters,
       sortOptions: sortOptions,
-      fetchListWithParameters: (
-          {required offset,
-          required pageSize,
-          pageToken,
-          filters,
-          sortOptions}) async {
-        final filtered = list
-            .where((item) =>
-                filters?.every((filter) => filter.optimisticFilter(item)) ??
-                true)
-            .toList();
+      fetchListWithParameters: ({
+        required offset,
+        required pageSize,
+        pageToken,
+        filters,
+        sortOptions,
+      }) async {
+        final filtered =
+            list.where((item) => filters?.every((filter) => filter.optimisticFilter(item)) ?? true).toList();
         for (final sortOption in sortOptions ?? []) {
           filtered.sort((a, b) => sortOption.optimisticSort(a, b));
         }
@@ -129,13 +115,11 @@ class LdRepository<T extends Identifiable<IdType>, IdType>
     );
   }
 
-  static LdRepository<T, IdType> of<T extends Identifiable<IdType>, IdType>(
-      BuildContext context) {
+  static LdRepository<T, IdType> of<T extends Identifiable<IdType>, IdType>(BuildContext context) {
     return context.read<LdRepository<T, IdType>>();
   }
 
-  static LdRepository<T, IdType>?
-      maybeOf<T extends Identifiable<IdType>, IdType>(BuildContext context) {
+  static LdRepository<T, IdType>? maybeOf<T extends Identifiable<IdType>, IdType>(BuildContext context) {
     return context.read<LdRepository<T, IdType>?>();
   }
 
@@ -159,12 +143,10 @@ class LdRepository<T extends Identifiable<IdType>, IdType>
 
   Future<void> updateFilter(
     String name,
-    LdFilterOption<T, IdType> Function(LdFilterOption<T, IdType>? filter)
-        updater,
+    LdFilterOption<T, IdType> Function(LdFilterOption<T, IdType>? filter) updater,
   ) async {
     final existingFilter = _filters[name];
-    assert(existingFilter != null,
-        'Cannot update filter. Filter with name $name does not exist');
+    assert(existingFilter != null, 'Cannot update filter. Filter with name $name does not exist');
     _filters[name] = updater(existingFilter);
     _filterStreamController.add(_filters.values.toSet());
 
@@ -177,8 +159,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType>
   }
 
   Future<void> updateSortOption(LdSortOption<T, IdType> sortOption) async {
-    final existingSortOption =
-        _sortOptions.firstWhereOrNull((e) => e.name == sortOption.name);
+    final existingSortOption = _sortOptions.firstWhereOrNull((e) => e.name == sortOption.name);
     assert(existingSortOption != null,
         'Cannot update sort option. Sort option with name ${sortOption.name} does not exist');
     _sortOptions.remove(existingSortOption);
@@ -188,8 +169,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType>
   }
 
   Future<void> setActiveSortOption(String name) async {
-    final newOptions =
-        _sortOptions.map((e) => e.copyWith(isOn: e.name == name)).toList();
+    final newOptions = _sortOptions.map((e) => e.copyWith(isOn: e.name == name)).toList();
 
     _sortOptions.clear();
     _sortOptions.addAll(newOptions);
@@ -204,11 +184,9 @@ class LdRepository<T extends Identifiable<IdType>, IdType>
     await mutex.acquire();
     var filteredItems = Map.fromEntries(
       itemsMap.entries.where((item) => item.value.value != null).map((item) {
-        final filterApplies = filters
-            .every((filter) => filter.optimisticFilter(item.value.value!));
+        final filterApplies = filters.every((filter) => filter.optimisticFilter(item.value.value!));
 
-        var newState =
-            filterApplies ? item.value.state : LdPaginatorItemState.filteredOut;
+        var newState = filterApplies ? item.value.state : LdPaginatorItemState.filteredOut;
 
         if (newState == LdPaginatorItemState.filteredOut && filterApplies) {
           newState = LdPaginatorItemState.loaded;
@@ -225,10 +203,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType>
 
     replaceItems(filteredItems);
 
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    filteredItems.removeWhere((key, value) =>
-        value.state == LdPaginatorItemState.filteredOut || value.value == null);
+    filteredItems.removeWhere((key, value) => value.state == LdPaginatorItemState.filteredOut || value.value == null);
 
     final sortedItems = filteredItems.values.toList();
 
@@ -236,8 +211,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType>
 
     for (final sortOption in sortOptions) {
       if (sortOption.optimisticSort != null) {
-        sortedItems
-            .sort((a, b) => sortOption.optimisticSort!(a.value!, b.value!));
+        sortedItems.sort((a, b) => sortOption.optimisticSort!(a.value!, b.value!));
       }
     }
 
@@ -247,8 +221,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType>
     mutex.release();
   }
 
-  Iterable<LdFilterOption<T, IdType>> get activeFilters =>
-      _filters.values.where((e) => e.isOn);
+  Iterable<LdFilterOption<T, IdType>> get activeFilters => _filters.values.where((e) => e.isOn);
 
   Future<void> initWithSelection(Set<IdType> selection) async {
     if (_getOffsetById == null) {
@@ -349,6 +322,10 @@ class LdRepository<T extends Identifiable<IdType>, IdType>
   }
 
   Future<T?> create(T? newValue, {int? index}) async {
+    assert(
+      _createItem != null,
+      'Cannot create item. createItem was not configured for this repository',
+    );
     final newIndex = scheduleItemCreation(newValue, index: index);
     if (_createItem != null) {
       //applyOptimisticFilterAndSorting();
@@ -366,12 +343,8 @@ class LdRepository<T extends Identifiable<IdType>, IdType>
         rollbackItemCreation(newIndex);
         rethrow;
       }
-    } else {
-      final newItem = await _createItem!(newValue);
-      confirmItemCreation(newIndex, newValue: newItem);
-      applyOptimisticFilterAndSorting();
-      return newItem;
     }
+    return null;
   }
 
   Future<void> deleteBatch(Set<IdType> ids) async {
@@ -404,8 +377,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType>
   }
 
   LdSearchConfig? getSearchConfig() {
-    final searchFilter = filters.values
-            .firstWhereOrNull((filter) => filter is LdFilterSearchOption)
+    final searchFilter = filters.values.firstWhereOrNull((filter) => filter is LdFilterSearchOption)
         as LdFilterSearchOption<T, IdType, dynamic>?;
     if (searchFilter != null) {
       return searchFilter.searchConfig((query) {

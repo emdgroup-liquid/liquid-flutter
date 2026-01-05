@@ -202,29 +202,31 @@ class AppBarRegistryState extends ChangeNotifyingState<AppBarRegistry> {
     _updateBodyPadding();
   }
 
-  void _updateBodyPadding() async {
-    await Future.delayed(Duration.zero);
-    if (!mounted) return;
-    final modalRoute = ModalRoute.of(context);
-    BuildContext? limitToChildrenOf;
-    if (modalRoute is LdModalRoute) {
-      limitToChildrenOf = modalRoute.subtreeContext;
-    }
-
-    final top = getTotalHeightAtPosition(
-      LdAppBarPosition.top,
-      limitToChildrenOf: limitToChildrenOf,
-    );
-    final bottom = getTotalHeightAtPosition(
-      LdAppBarPosition.bottom,
-      limitToChildrenOf: limitToChildrenOf,
-    );
-    final newPadding = EdgeInsets.only(top: top, bottom: bottom);
-    if (_bodyPadding.value != newPadding) {
-      await Future.delayed(Duration.zero);
+  void _updateBodyPadding() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _bodyPadding.value = newPadding;
-    }
+      final modalRoute = ModalRoute.of(context);
+      BuildContext? limitToChildrenOf;
+      if (modalRoute is LdModalRoute) {
+        limitToChildrenOf = modalRoute.subtreeContext;
+      }
+
+      final top = getTotalHeightAtPosition(
+        LdAppBarPosition.top,
+        limitToChildrenOf: limitToChildrenOf,
+      );
+      final bottom = getTotalHeightAtPosition(
+        LdAppBarPosition.bottom,
+        limitToChildrenOf: limitToChildrenOf,
+      );
+      final newPadding = EdgeInsets.only(top: top, bottom: bottom);
+      if (_bodyPadding.value != newPadding) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _bodyPadding.value = newPadding;
+        });
+      }
+    });
   }
 
   @override
@@ -262,6 +264,8 @@ class AppBarRegistryState extends ChangeNotifyingState<AppBarRegistry> {
     }
     _parentRegistryListener = null;
     _bodyPadding.dispose();
+    _parentRegistry = null;
+    _parentRegistryListener = null;
     super.dispose();
   }
 

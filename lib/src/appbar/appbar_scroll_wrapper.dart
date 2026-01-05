@@ -65,11 +65,11 @@ class LdAppBarScrollWrapperState extends State<LdAppBarScrollWrapper> {
       _registryState = newRegistryState;
 
       if (_registryState != null) {
-        _registryListener = () async {
-          await Future.delayed(Duration.zero);
-          if (mounted) {
+        _registryListener = () {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
             setState(() {});
-          }
+          });
         };
         _registryState!.addListener(_registryListener!);
       }

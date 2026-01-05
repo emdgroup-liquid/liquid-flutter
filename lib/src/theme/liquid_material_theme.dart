@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/src/tokens.dart';
-import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import 'theme.dart';
 
 /// build a material theme with the current [LdThemeData] to create a [MaterialApp]
@@ -106,15 +105,7 @@ ThemeData getMaterialTheme(LdTheme theme) {
       onSurface: theme.text,
     ),
     textTheme: text,
-    extensions: [
-      WoltModalSheetThemeData(
-        topBarShadowColor: theme.background.withAlpha(0),
-        backgroundColor: theme.surface,
-        navBarHeight: 48,
-        topBarElevation: 0,
-        isTopBarLayerAlwaysVisible: true,
-        modalBarrierColor: theme.palette.neutral.shades.last.withAlpha(204),
-      )
-    ],
+    package: theme.fontFamilyPackage,
+    fontFamily: theme.fontFamily,
   );
 }

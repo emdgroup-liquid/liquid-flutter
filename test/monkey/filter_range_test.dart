@@ -4,24 +4,24 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
-// Test item class
-class _TestItem with Identifiable<int> {
+// Test item class for range tests (needs price field)
+class _RangeTestItem with Identifiable<int> {
   @override
   final int id;
   final String name;
   final double price;
 
-  _TestItem(this.id, this.name, this.price);
+  _RangeTestItem(this.id, this.name, this.price);
 
   @override
-  String toString() => '_TestItem(id: $id, name: $name, price: $price)';
+  String toString() => '_RangeTestItem(id: $id, name: $name, price: $price)';
 }
 
 void main() {
   group('LdFilterRange Tests', () {
     group('Serialization', () {
       test('serialize() formats range with correct precision based on step', () {
-        final filter = LdFilterRange<_TestItem, int>(
+        final filter = LdFilterRange<_RangeTestItem, int>(
           name: 'price',
           label: (context) => 'Price',
           icon: (context) => const Icon(Icons.attach_money),
@@ -39,7 +39,7 @@ void main() {
       });
 
       test('serialize() handles integer step', () {
-        final filter = LdFilterRange<_TestItem, int>(
+        final filter = LdFilterRange<_RangeTestItem, int>(
           name: 'price',
           label: (context) => 'Price',
           icon: (context) => const Icon(Icons.attach_money),
@@ -56,7 +56,7 @@ void main() {
       });
 
       test('marshalSerialized() parses comma-separated min,max', () {
-        final filter = LdFilterRange<_TestItem, int>(
+        final filter = LdFilterRange<_RangeTestItem, int>(
           name: 'price',
           label: (context) => 'Price',
           icon: (context) => const Icon(Icons.attach_money),
@@ -73,7 +73,7 @@ void main() {
       });
 
       test('marshalSerialized() validates range bounds', () {
-        final filter = LdFilterRange<_TestItem, int>(
+        final filter = LdFilterRange<_RangeTestItem, int>(
           name: 'price',
           label: (context) => 'Price',
           icon: (context) => const Icon(Icons.attach_money),
@@ -88,7 +88,7 @@ void main() {
       });
 
       test('marshalSerialized() handles invalid input', () {
-        final filter = LdFilterRange<_TestItem, int>(
+        final filter = LdFilterRange<_RangeTestItem, int>(
           name: 'price',
           label: (context) => 'Price',
           icon: (context) => const Icon(Icons.attach_money),
@@ -109,7 +109,7 @@ void main() {
       });
 
       test('marshalSerialized() handles empty string', () {
-        final filter = LdFilterRange<_TestItem, int>(
+        final filter = LdFilterRange<_RangeTestItem, int>(
           name: 'price',
           label: (context) => 'Price',
           icon: (context) => const Icon(Icons.attach_money),
@@ -127,7 +127,7 @@ void main() {
 
     group('Optimistic Filtering', () {
       test('optimisticFilter() uses range values', () {
-        final filter = LdFilterRange<_TestItem, int>(
+        final filter = LdFilterRange<_RangeTestItem, int>(
           name: 'price',
           label: (context) => 'Price',
           icon: (context) => const Icon(Icons.attach_money),
@@ -138,9 +138,9 @@ void main() {
           optimisticFilter: (item, range) => item.price >= range.start && item.price <= range.end,
         );
 
-        final matchingItem = _TestItem(1, 'Item 1', 15.0);
-        final belowRangeItem = _TestItem(2, 'Item 2', 5.0);
-        final aboveRangeItem = _TestItem(3, 'Item 3', 25.0);
+        final matchingItem = _RangeTestItem(1, 'Item 1', 15.0);
+        final belowRangeItem = _RangeTestItem(2, 'Item 2', 5.0);
+        final aboveRangeItem = _RangeTestItem(3, 'Item 3', 25.0);
 
         expect(filter.optimisticFilter(matchingItem), isTrue);
         expect(filter.optimisticFilter(belowRangeItem), isFalse);
@@ -150,7 +150,7 @@ void main() {
 
     group('CopyWith', () {
       test('copyWith() updates range correctly', () {
-        final filter = LdFilterRange<_TestItem, int>(
+        final filter = LdFilterRange<_RangeTestItem, int>(
           name: 'price',
           label: (context) => 'Price',
           icon: (context) => const Icon(Icons.attach_money),
@@ -173,7 +173,7 @@ void main() {
       });
 
       test('copyWith() preserves optimisticFilter function', () {
-        final filter = LdFilterRange<_TestItem, int>(
+        final filter = LdFilterRange<_RangeTestItem, int>(
           name: 'price',
           label: (context) => 'Price',
           icon: (context) => const Icon(Icons.attach_money),
@@ -185,7 +185,7 @@ void main() {
         );
 
         final newFilter = filter.copyWith(range: const RangeValues(15, 25));
-        final item = _TestItem(1, 'Item 1', 20.0);
+        final item = _RangeTestItem(1, 'Item 1', 20.0);
 
         expect(newFilter.optimisticFilter(item), isTrue);
       });
@@ -220,7 +220,7 @@ void main() {
     group('UI Rendering', () {
       testWidgets('renders in LdFilterModal and can be activated/deactivated and interacted with',
           (WidgetTester tester) async {
-        final filter = LdFilterRange<_TestItem, int>(
+        final filter = LdFilterRange<_RangeTestItem, int>(
           name: 'priceRange',
           label: (context) => 'Price',
           icon: (context) => const Icon(Icons.attach_money),
@@ -230,27 +230,12 @@ void main() {
           optimisticFilter: (item, range) => item.price >= range.start && item.price <= range.end,
         );
 
-        final repository = LdRepository<_TestItem, int>(
+        final repository = LdRepository<_RangeTestItem, int>(
           filters: {filter},
           fetchListWithParameters: ({required offset, required pageSize, pageToken, filters, sortOptions}) async {
-            return LdListPage<_TestItem>(newItems: [], hasMore: false, total: 0);
+            return LdListPage<_RangeTestItem>(newItems: [], hasMore: false, total: 0);
           },
-          getById: (id) async => _TestItem(id, 'Test', 10.0),
-        );
-
-        final monkey = LdMonkey<_TestItem, int>(
-          path: '/test',
-          parseId: (id) => int.parse(id),
-          detailPath: (ids) => '/test/${ids.join(",")}',
-          buildRepository: (context) => repository,
-          buildDetail: (context, item) => Text(item.value?.name ?? 'Loading'),
-          listBuilder: (route, state, onSelectionChanged) => LdSelectableList<_TestItem, int>(
-            paginator: route.repository,
-            itemBuilder: (context, item, index) => LdListItem(
-              title: Text(item.value?.name ?? ''),
-            ),
-            onSelectionChange: onSelectionChanged,
-          ),
+          getById: (id) async => _RangeTestItem(id, 'Test', 10.0),
         );
 
         await tester.pumpWidget(
@@ -258,16 +243,9 @@ void main() {
             child: MaterialApp(
               localizationsDelegates: LiquidLocalizations.localizationsDelegates,
               home: Scaffold(
-                body: Provider<LdMonkey<_TestItem, int>>.value(
-                  value: monkey,
-                  child: Builder(
-                    builder: (context) {
-                      monkey.initRepository(context, {}, {});
-                      return LdFilterModal(
-                        route: monkey,
-                      );
-                    },
-                  ),
+                body: ListenableProvider.value(
+                  value: repository,
+                  child: const LdFilterModal<_RangeTestItem, int>(),
                 ),
               ),
             ),
@@ -301,7 +279,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Verify the range has been updated
-        final updatedFilter = repository.filters['priceRange'] as LdFilterRange<_TestItem, int>;
+        final updatedFilter = repository.filters['priceRange'] as LdFilterRange<_RangeTestItem, int>;
 
         expect(updatedFilter.range.start, greaterThan(initialRange.start));
 
@@ -310,7 +288,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Verify the end range has been updated
-        final updatedFilter2 = repository.filters['priceRange'] as LdFilterRange<_TestItem, int>;
+        final updatedFilter2 = repository.filters['priceRange'] as LdFilterRange<_RangeTestItem, int>;
         expect(updatedFilter2.range.end, lessThan(initialRange.end));
 
         // Find and tap the X button to deactivate

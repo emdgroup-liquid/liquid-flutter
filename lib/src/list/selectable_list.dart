@@ -47,7 +47,7 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
   );
 
   late final _dragRectItems = _SetNotifier<IdType>(
-    {},
+    <IdType>{},
     true,
   );
 

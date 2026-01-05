@@ -22,31 +22,29 @@ Widget liquidFrame({
     theme: theme,
     autoSize: false,
     brightnessMode: isDark ? LdThemeBrightnessMode.dark : LdThemeBrightnessMode.light,
-    child: MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: getMaterialTheme(theme),
-      localizationsDelegates: const [
-        GlobalWidgetsLocalizations.delegate,
-        LiquidLocalizations.delegate,
-      ],
-      home: Builder(builder: (context) {
-        return Container(
-            padding: const EdgeInsets.all(16),
-            margin: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: theme.background,
-              borderRadius: theme.radius(LdSize.m),
-            ),
-            child: Directionality(
-                textDirection: TextDirection.ltr,
-                child: Builder(
-                  builder: (context) {
-                    return SingleChildScrollView(
-                      child: Center(key: key, child: child),
-                    );
-                  },
-                )));
-      }),
+    child: LdThemedAppBuilder(
+      appBuilder: (context, theme) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: theme,
+          localizationsDelegates: const [
+            GlobalWidgetsLocalizations.delegate,
+            LiquidLocalizations.delegate,
+          ],
+          home: Builder(builder: (context) {
+            return Container(
+                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: LdTheme.of(context).background,
+                  borderRadius: LdTheme.of(context).radius(LdSize.m),
+                ),
+                child: SingleChildScrollView(
+                  child: Center(key: key, child: child),
+                ));
+          }),
+        );
+      },
     ),
   );
 }

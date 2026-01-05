@@ -4,6 +4,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 abstract class LdFilterOption<T extends Identifiable<IdType>, IdType> {
   final String Function(BuildContext context) label;
   final Widget Function(BuildContext context) icon;
+
   final String name;
   final bool isOn;
 
@@ -32,4 +33,6 @@ abstract class LdFilterOption<T extends Identifiable<IdType>, IdType> {
     required this.name,
     this.isOn = false,
   });
+
+  Widget build(BuildContext context, LdRepository<T, IdType> repository);
 }

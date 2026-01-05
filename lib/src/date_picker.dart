@@ -340,6 +340,7 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
     );
 
     return LdScaffold(
+      key: const Key("date_picker_sheet"),
       appBars: [
         LdAppBar(
           title: Text(widget.label),
@@ -351,6 +352,7 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
           positionMode: LdAppBarPositionMode.bottom,
           actions: [
             LdButton(
+              key: const Key('today'),
               active: isSelected(DateTime.now()),
               disabled: !isValidDate(DateTime.now()),
               child: const Text('Today'),
@@ -360,6 +362,7 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
             ),
             ...[7, 30, 90]
                 .map((days) => LdButton(
+                      key: Key('in${days}d'),
                       active: isSelected(widget.selectedDateNotifier.value.add(Duration(days: days))),
                       disabled: !isValidDate(widget.selectedDateNotifier.value.add(Duration(days: days))),
                       child: Text('+${days}d'),
@@ -370,6 +373,7 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
                 .toList(),
           ],
           trailing: LdButton.filled(
+            key: const Key('done'),
             child: const Text('Done'),
             leading: const Icon(LucideIcons.chevronRight),
             onPressed: () {

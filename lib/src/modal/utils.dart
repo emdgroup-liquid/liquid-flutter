@@ -140,12 +140,10 @@ class _LdEnterTextModalState extends State<_LdEnterTextModal> {
 
   @override
   Widget build(BuildContext context) {
-    print(MediaQuery.of(context).viewInsets);
     return LdScaffold(
       appBars: [
         LdAppBar(
-          title:
-              widget.title ?? Text(LiquidLocalizations.of(context).enterText),
+          title: widget.title ?? Text(LiquidLocalizations.of(context).enterText),
         ),
         LdAppBar(
           positionMode: LdAppBarPositionMode.bottom,
@@ -179,10 +177,8 @@ class _LdEnterTextModalState extends State<_LdEnterTextModal> {
             LdInput(
               controller: _controller,
               autofocus: true,
-              hint:
-                  widget.inputHint ?? LiquidLocalizations.of(context).enterText,
-              label: widget.inputLabel ??
-                  LiquidLocalizations.of(context).enterText,
+              hint: widget.inputHint ?? LiquidLocalizations.of(context).enterText,
+              label: widget.inputLabel ?? LiquidLocalizations.of(context).enterText,
               onSubmitted: (text) => Navigator.of(context).pop(text),
             ),
           ]),

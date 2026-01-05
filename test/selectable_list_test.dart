@@ -1,9 +1,8 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:liquid_flutter/liquid_flutter.dart'; // Adjust if needed
+import 'package:liquid_flutter/liquid_flutter.dart';
+import 'utils.dart';
 
 class _SampleStringItem with Identifiable<String> {
   final String value;
@@ -32,8 +31,14 @@ void main() {
         );
       }
 
+      final theme = LdTheme();
+      theme.platform = LdPlatform.macos;
       return LdThemeProvider(
+        theme: theme,
         child: MaterialApp(
+          localizationsDelegates: const [
+            LiquidLocalizations.delegate,
+          ],
           home: Scaffold(
             body: LdSelectableList<_SampleStringItem, String>(
               itemBuilder: (context, item, index) {
@@ -45,6 +50,7 @@ void main() {
               paginator: paginator,
               multiSelect: multiSelect,
               onSelectionChange: (s) {
+                printOnFailure("onSelectionChange: $s");
                 selected = Set.from(s);
               },
             ),
@@ -68,23 +74,23 @@ void main() {
     });
 
     testWidgets('selects multiple items with drag rectangle', (WidgetTester tester) async {
-      await tester.pumpWidget(buildTestWidget());
+      await tester.pumpWidget(buildTestWidget(multiSelect: true));
       await tester.pumpAndSettle();
 
-      final first = tester.getCenter(find.text('A'));
+      final first = find.text('A');
+      final firstCenter = tester.getCenter(first);
+      final last = find.text('C');
+      final lastCenter = tester.getCenter(last);
 
-      final last = tester.getCenter(find.text('C'));
+      printOnFailure("first: $first");
+      printOnFailure("last: $last");
 
-      // Start drag gesture (simulate drag rectangle)
-      await tester.dragFrom(
-        first,
-        Offset(last.dx - first.dx + 10, last.dy - first.dy),
-        kind: PointerDeviceKind.mouse,
-        touchSlopX: 2,
-        touchSlopY: 2,
+      // Perform pan gesture from A to C
+      await performPanGesture(
+        tester,
+        startPosition: firstCenter,
+        endPosition: lastCenter + const Offset(10, 0),
       );
-
-      await tester.pumpAndSettle();
 
       // Should select A, B, C
       expect(selected.containsAll(['A', 'B', 'C']), isTrue);

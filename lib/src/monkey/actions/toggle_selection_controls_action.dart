@@ -19,6 +19,7 @@ LdMonkeyAction<T, IdType> toggleSelectionControls<T extends Identifiable<IdType>
       builder: (context) {
         final shellState = LdMonkeyShellState.of<T, IdType>(context);
         return LdAppBarAction(
+          key: const Key('toggle_selection_controls'),
           leading: const Icon(LucideIcons.pen),
           child: Text(LiquidLocalizations.of(context).select),
           active: shellState.showSelectionControls,

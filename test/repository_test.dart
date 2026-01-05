@@ -72,6 +72,11 @@ class _MockFilterOption<T extends Identifiable<IdType>, IdType> extends LdFilter
       serializedValue: _serializedValue,
     );
   }
+
+  @override
+  Widget build(BuildContext context, LdRepository<T, IdType> repository) {
+    return const SizedBox();
+  }
 }
 
 // Mock sort option for testing
@@ -346,7 +351,7 @@ void main() {
         expect(item?.state, equals(LdPaginatorItemState.rolledBackCreation));
       });
 
-      test('returns null when createItem callback is null', () async {
+      test('throws assertion error when createItem callback is null', () async {
         final items = [
           _TestItem(1, 'Item 1', 10),
           _TestItem(2, 'Item 2', 20),
@@ -356,12 +361,8 @@ void main() {
           createItem: null,
           initialItems: items,
         );
-        await Future.delayed(const Duration(milliseconds: 100));
-
         final newItem = _TestItem(0, 'New Item', 50);
-        final result = await repository.create(newItem);
-
-        expect(result, isNull);
+        expect(() => repository.create(newItem), throwsAssertionError);
       });
     });
 
@@ -481,6 +482,7 @@ void main() {
         var rollbackCount = 0;
         final repository = createRepository(
           updateBatch: (items) async {
+            rollbackCount = items.length;
             throw Exception('Batch update failed');
           },
           autoLoad: true,
@@ -1161,6 +1163,27 @@ void main() {
           isOn: true,
         );
 
+        final repository = createRepository(
+          fetchListWithParameters: ({
+            required offset,
+            required pageSize,
+            pageToken,
+            filters,
+            sortOptions,
+          }) async {
+            calledWithFilters.add(filters ?? {});
+            calledWithSortOptions.add(sortOptions ?? []);
+            return LdListPage<_TestItem>(
+              newItems: [],
+              hasMore: false,
+              total: 0,
+            );
+          },
+          filters: {filter},
+          sortOptions: [sort],
+        );
+
+        await repository.refreshList();
         await Future.delayed(const Duration(milliseconds: 100));
 
         expect(calledWithFilters.length, greaterThan(0));

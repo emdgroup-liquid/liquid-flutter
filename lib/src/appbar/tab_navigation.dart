@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_frame.dart';
 import 'package:liquid_flutter/src/appbar/appbar_registry.dart';
 import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 import 'package:liquid_flutter/src/haptics.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class LdNavigationTab {
   final String label;
@@ -25,6 +28,7 @@ class TabNavigation extends StatefulWidget {
   final bool addContainer;
   final int order;
   final bool enableGradient;
+  final int maxVisibleTabs;
 
   const TabNavigation({
     super.key,
@@ -38,6 +42,7 @@ class TabNavigation extends StatefulWidget {
     this.position = LdAppBarPositionMode.adaptive,
     this.scrollBehavior = LdAppBarScrollBehavior.static,
     this.order = 0,
+    this.maxVisibleTabs = 5,
   });
 
   @override
@@ -46,6 +51,7 @@ class TabNavigation extends StatefulWidget {
 
 class _TabNavigationState extends State<TabNavigation> {
   final FocusNode _focusNode = FocusNode();
+  final GlobalKey<LdContextMenuState> _moreMenuKey = GlobalKey();
 
   LdAppBarPosition get _effectivePosition {
     return switch (widget.position) {
@@ -96,11 +102,13 @@ class _TabNavigationState extends State<TabNavigation> {
 
   void _updateIndicatorPosition() {
     setState(() {
-      _indicatorPosition = _activeIndex() * _navWidth / widget.tabs.length;
+      _indicatorPosition = min(_activeIndex(), _visibleTabs - 1) * _navWidth / _visibleTabs;
     });
   }
 
-  double get _tabWidth => _navWidth / widget.tabs.length;
+  int get _visibleTabs => max(1, min(widget.tabs.length, widget.maxVisibleTabs + 1));
+
+  double get _tabWidth => _navWidth / _visibleTabs;
 
   double _dragStartPosition = 0;
   int _lastDraggedTabIndex = 0;
@@ -109,21 +117,28 @@ class _TabNavigationState extends State<TabNavigation> {
 
   int _getClosestTab(BuildContext context) {
     // Calculate which tab the indicator is closest to based on its left position
-    final closestTabIndex = (_indicatorPosition / _tabWidth).round().clamp(0, widget.tabs.length - 1);
+    final closestTabIndex = (_indicatorPosition / _tabWidth).round().clamp(0, _visibleTabs - 1);
     return closestTabIndex;
   }
 
   void _onIndicatorDragEnd(DragEndDetails details) {
     final closestTabIndex = _getClosestTab(context);
-    widget.onTabPressed(widget.tabs[closestTabIndex].route);
+    if (closestTabIndex == _visibleTabs - 1 && _showingMore) {
+      _moreMenuKey.currentState?.open();
+    } else {
+      widget.onTabPressed(widget.tabs[closestTabIndex].route);
+    }
     _updateIndicatorPosition();
     setState(() {
       _dragging = false;
     });
   }
 
+  bool get _showingMore => widget.tabs.length > _visibleTabs;
+
   void _onIndicatorDragUpdate(DragUpdateDetails details) {
     final currentTabIndex = _getClosestTab(context);
+
     if (_lastDraggedTabIndex != currentTabIndex) {
       LdHaptics.vibrate(HapticsType.heavy);
       _lastDraggedTabIndex = currentTabIndex;
@@ -281,6 +296,12 @@ class _TabNavigationState extends State<TabNavigation> {
                         ),
                         insetBorderRadius: !isAttached,
                         child: LayoutBuilder(builder: (context, constraints) {
+                          final tabWidth =
+                              constraints.maxWidth ~/ max(min(widget.tabs.length, widget.maxVisibleTabs), 1);
+                          final fittingTabs = constraints.maxWidth ~/ tabWidth;
+
+                          final overflowTabs = widget.tabs.sublist(fittingTabs);
+
                           if (constraints.maxWidth != _navWidth) {
                             WidgetsBinding.instance.addPostFrameCallback((_) {
                               if (mounted) {
@@ -294,9 +315,9 @@ class _TabNavigationState extends State<TabNavigation> {
 
                           return Stack(
                             children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: widget.tabs
+                              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                ...widget.tabs
+                                    .sublist(0, fittingTabs)
                                     .map((tab) => Expanded(
                                           child: LdTouchableSurface(
                                             mode: LdTouchableSurfaceMode.neutralGhost,
@@ -314,7 +335,9 @@ class _TabNavigationState extends State<TabNavigation> {
                                                     final textColor = theme.palette.text;
                                                     final icon = IconTheme(
                                                       data: IconThemeData(
-                                                          color: iconColor, size: theme.labelSize(LdSize.l)),
+                                                        color: iconColor,
+                                                        size: theme.labelSize(LdSize.l),
+                                                      ),
                                                       child: tab.icon,
                                                     );
 
@@ -324,7 +347,7 @@ class _TabNavigationState extends State<TabNavigation> {
                                                         children: [
                                                           icon,
                                                           ldSpacerXS,
-                                                          LdText.ls(tab.label, color: textColor),
+                                                          LdText.ls(tab.label, color: textColor, maxLines: 1),
                                                         ],
                                                       ).padXS();
                                                     }
@@ -333,7 +356,9 @@ class _TabNavigationState extends State<TabNavigation> {
                                                       children: [
                                                         icon,
                                                         ldSpacerS,
-                                                        Flexible(child: LdText.l(tab.label, color: textColor)),
+                                                        Flexible(
+                                                          child: LdText.l(tab.label, color: textColor, maxLines: 1),
+                                                        ),
                                                       ],
                                                     ).padS();
                                                   },
@@ -343,7 +368,81 @@ class _TabNavigationState extends State<TabNavigation> {
                                           ),
                                         ))
                                     .toList(),
-                              ),
+                                if (overflowTabs.isNotEmpty) ...[
+                                  Expanded(
+                                      child: LdContextMenu(
+                                          key: _moreMenuKey,
+                                          menuBuilder: (context) {
+                                            return ConstrainedBox(
+                                              constraints: const BoxConstraints(maxWidth: 200),
+                                              child: SingleChildScrollView(
+                                                child: Column(
+                                                  children: [
+                                                    ...overflowTabs.map((tab) {
+                                                      return LdListItem(
+                                                        active: tab.route == widget.activeRoute,
+                                                        leading: tab.icon,
+                                                        title: Text(tab.label),
+                                                        onPressed: () {
+                                                          _onTabTap(tab.route);
+                                                          LdContextMenuDissmissNotification().dispatch(context);
+                                                        },
+                                                      );
+                                                    })
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          builder: (context, isShuttle, trigger, isOpen, child) {
+                                            return LdTouchableSurface(
+                                              mode: LdTouchableSurfaceMode.neutralGhost,
+                                              onPressed: trigger,
+                                              builder: (context, colors, status, _) {
+                                                return Container(
+                                                    decoration: BoxDecoration(
+                                                      color: colors.surface,
+                                                      borderRadius:
+                                                          isAttached ? null : LdTheme.of(context).radius(LdSize.m),
+                                                    ),
+                                                    child: Builder(builder: (context) {
+                                                      final iconColor = theme.palette.text;
+                                                      final textColor = theme.palette.text;
+                                                      final icon = IconTheme(
+                                                        data: IconThemeData(
+                                                          color: iconColor,
+                                                          size: theme.labelSize(LdSize.l),
+                                                        ),
+                                                        child: const Icon(LucideIcons.ellipsisVertical),
+                                                      );
+
+                                                      if (constraints.maxWidth < 500) {
+                                                        return Column(
+                                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                                          children: [
+                                                            icon,
+                                                            ldSpacerXS,
+                                                            LdText.ls("More", color: textColor, maxLines: 1),
+                                                          ],
+                                                        ).padXS();
+                                                      }
+
+                                                      return Row(
+                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                        children: [
+                                                          icon,
+                                                          ldSpacerS,
+                                                          Flexible(
+                                                            child: LdText.l("More", color: textColor, maxLines: 1),
+                                                          ),
+                                                        ],
+                                                      ).padS();
+                                                    }));
+                                              },
+                                            );
+                                          }))
+                                ]
+                              ]),
                               LdSpring(
                                 springConstant: 20,
                                 dampingCoefficient: 20,
@@ -368,7 +467,7 @@ class _TabNavigationState extends State<TabNavigation> {
                                     },
                                     onHorizontalDragEnd: _onIndicatorDragEnd,
                                     child: Container(
-                                      width: constraints.maxWidth / widget.tabs.length,
+                                      width: constraints.maxWidth / _visibleTabs,
                                       decoration: BoxDecoration(
                                         color: theme.primaryColor.withAlpha(100),
                                         border: switch (isAttached) {

@@ -65,7 +65,6 @@ export 'src/multi_panel/panel_width.dart';
 export 'src/modal/modal.dart';
 export 'src/modal/modal_builder.dart';
 export 'src/modal/modal_type_mode.dart';
-export 'src/modal/modal_types.dart';
 export 'src/modal/sheet.dart';
 export 'src/modal/utils.dart';
 export 'src/notifications/notification.dart';

@@ -102,10 +102,10 @@ class LdContextMenu extends StatefulWidget {
   ) menuBuilder;
 
   @override
-  State<LdContextMenu> createState() => _LdContextMenuState();
+  State<LdContextMenu> createState() => LdContextMenuState();
 }
 
-class _LdContextMenuState extends State<LdContextMenu> {
+class LdContextMenuState extends State<LdContextMenu> {
   final GlobalKey _triggerKey = GlobalKey(debugLabel: "Trigger Key");
 
   RenderBox? _triggerBox;
@@ -157,7 +157,7 @@ class _LdContextMenuState extends State<LdContextMenu> {
     return _triggerBox?.size;
   }
 
-  void _open({Offset? globalPosition}) async {
+  void open({Offset? globalPosition}) async {
     if (widget.disabled) {
       return;
     }
@@ -207,20 +207,20 @@ class _LdContextMenuState extends State<LdContextMenu> {
     return GestureDetector(
       key: _triggerKey,
       onSecondaryTapDown: (details) {
-        _open(globalPosition: details.globalPosition);
+        open(globalPosition: details.globalPosition);
       },
       onLongPressStart: (details) {
         if (!_mobile) {
           return;
         }
         LdHaptics.vibrate(HapticsType.heavy);
-        _open(globalPosition: details.globalPosition);
+        open(globalPosition: details.globalPosition);
       },
       child: widget.builder(
         context,
         false,
         () {
-          _open();
+          open();
         },
         _isOpen,
         widget.child,

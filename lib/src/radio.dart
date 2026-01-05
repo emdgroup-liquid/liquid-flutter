@@ -58,7 +58,7 @@ class LdRadio extends StatelessWidget {
         onPressed: _onTap,
         mode: LdTouchableSurfaceMode.outline,
         hitTestBehavior: HitTestBehavior.opaque,
-        active: checked,
+        //active: checked,
         disabled: disabled,
         color: color ?? theme.palette.primary,
         builder: (contxt, colorBundle, status, _) {

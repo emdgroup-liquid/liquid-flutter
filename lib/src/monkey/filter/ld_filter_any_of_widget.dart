@@ -13,8 +13,9 @@ class LdFilterAnyOfWidget<T extends Identifiable<IdType>, IdType, E> extends Sta
   @override
   Widget build(BuildContext context) {
     final repository = LdRepository.of<T, IdType>(context);
-    final items = filter.allValues.entries
-        .map((e) => LdSelectItem<E>(
+
+    List<LdSelectItem<E>> items = filter.allValues.entries
+        .map<LdSelectItem<E>>((e) => LdSelectItem<E>(
               value: e.key,
               child: e.value(context),
             ))
@@ -40,7 +41,7 @@ class LdFilterAnyOfWidget<T extends Identifiable<IdType>, IdType, E> extends Sta
           ],
         ),
         if (items.isNotEmpty)
-          LdChoose.fromSelectItems(
+          LdChoose.fromSelectItems<E>(
             items: items,
             multiple: true,
             value: filter.selectedValues,
