@@ -185,7 +185,7 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
       _repository = LdRepository.fromList<T, IdType>(
         list: widget.items!,
         filters: {
-          LdFilterSearchOption<T, IdType, LdSelectItem<dynamic>>(
+          LdFilterSearch<T, IdType, LdSelectItem<dynamic>>(
               name: 'search',
               label: (context) => 'Search',
               icon: (context) => const Icon(Icons.search),

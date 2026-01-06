@@ -15,20 +15,13 @@ class _Movie with Identifiable<int> {
   final DateTime lastUpdate;
   _Movie(this.id, this.title, this.genre, this.rating, this.lastUpdate);
 
-  _Movie copyWith({
-    int? id,
-    String? title,
-    String? genre,
-    int? rating,
-    DateTime? lastUpdate,
-  }) =>
-      _Movie(
-        id ?? this.id,
-        title ?? this.title,
-        genre ?? this.genre,
-        rating ?? this.rating,
-        lastUpdate ?? this.lastUpdate,
-      );
+  _Movie copyWith({int? id, String? title, String? genre, int? rating, DateTime? lastUpdate}) => _Movie(
+    id ?? this.id,
+    title ?? this.title,
+    genre ?? this.genre,
+    rating ?? this.rating,
+    lastUpdate ?? this.lastUpdate,
+  );
 }
 
 var movieData = [
@@ -57,8 +50,9 @@ final movieRepository = LdRepository<_Movie, int>(
     await Future.delayed(const Duration(seconds: 1));
 
     // Apply the same filtering and sorting logic as fetchListWithParameters
-    final filtered =
-        movieData.where((element) => filters?.every((filter) => filter.optimisticFilter(element)) ?? true).toList();
+    final filtered = movieData
+        .where((element) => filters?.every((filter) => filter.optimisticFilter(element)) ?? true)
+        .toList();
 
     for (final sortOption in sortOptions ?? []) {
       filtered.sort((a, b) => sortOption.optimisticSort(a, b));
@@ -91,22 +85,24 @@ final movieRepository = LdRepository<_Movie, int>(
       optimisticFilter: (item, value) => value.contains(item.genre),
     ),
   },
-  fetchListWithParameters: ({
-    required int offset,
-    required int pageSize,
-    String? pageToken,
-    Set<LdFilterOption<_Movie, int>>? filters,
-    List<LdSortOption<_Movie, int>>? sortOptions,
-  }) async {
-    await Future.delayed(const Duration(milliseconds: 50));
-    final filtered =
-        movieData.where((element) => filters?.every((filter) => filter.optimisticFilter(element)) ?? true).toList();
-    return LdListPage<_Movie>(
-      newItems: filtered.skip(offset).take(pageSize).toList(),
-      hasMore: offset + pageSize < filtered.length,
-      total: filtered.length,
-    );
-  },
+  fetchListWithParameters:
+      ({
+        required int offset,
+        required int pageSize,
+        String? pageToken,
+        Set<LdFilterOption<_Movie, int>>? filters,
+        List<LdSortOption<_Movie, int>>? sortOptions,
+      }) async {
+        await Future.delayed(const Duration(milliseconds: 50));
+        final filtered = movieData
+            .where((element) => filters?.every((filter) => filter.optimisticFilter(element)) ?? true)
+            .toList();
+        return LdListPage<_Movie>(
+          newItems: filtered.skip(offset).take(pageSize).toList(),
+          hasMore: offset + pageSize < filtered.length,
+          total: filtered.length,
+        );
+      },
   deleteItem: (int id) async {
     movieData.removeWhere((element) => element.id == id);
     await Future.delayed(const Duration(milliseconds: 500));
@@ -165,25 +161,10 @@ class _MovieDetailState extends State<_MovieDetail> {
     }
     return LdAutoSpace(
       children: [
-        LdInput(
-          label: "Title",
-          hint: "Movie title",
-          controller: _titleController,
-        ),
-        LdInput(
-          label: "Genre",
-          hint: "Movie genre",
-          controller: _genreController,
-        ),
-        LdInput(
-          label: "Rating",
-          hint: "1-5",
-          controller: _ratingController,
-          keyboardType: TextInputType.number,
-        ),
-        LdText(
-          "Last updated: ${Jiffy.parseFromDateTime(widget.movie.value!.lastUpdate).fromNow()}",
-        ),
+        LdInput(label: "Title", hint: "Movie title", controller: _titleController),
+        LdInput(label: "Genre", hint: "Movie genre", controller: _genreController),
+        LdInput(label: "Rating", hint: "1-5", controller: _ratingController, keyboardType: TextInputType.number),
+        LdText("Last updated: ${Jiffy.parseFromDateTime(widget.movie.value!.lastUpdate).fromNow()}"),
         Row(
           children: [
             LdSubmit<void, void>(
@@ -199,10 +180,7 @@ class _MovieDetailState extends State<_MovieDetail> {
                     widget.movie.value!.lastUpdate,
                   );
                   final repo = LdRepository.of<_Movie, int>(context);
-                  await repo.update(
-                    widget.movie.value!.id,
-                    newMovie,
-                  );
+                  await repo.update(widget.movie.value!.id, newMovie);
                 },
               ),
             ),
@@ -238,7 +216,7 @@ class MovieShell extends StatelessWidget {
       parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
       repositoryBuilder: (context) async => movieRepository,
       actions: [
-        toggleFilters<_Movie, int>(),
+        showFilterContextMenu<_Movie, int>(),
         LdMonkeySubmitAction(
           visibility: {
             LdMonkeyActionVisibility(
@@ -252,19 +230,14 @@ class MovieShell extends StatelessWidget {
               maxSelectionCount: 1,
             ),
           },
-          shortcutActivators: {
-            SingleActivator(LogicalKeyboardKey.keyD, meta: true),
-          },
+          shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyD, meta: true)},
           config: (context) => LdSubmitConfig(
             action: (_) async {
               final selectionItems = LdMonkeySelection.adaptive<_Movie, int>(context);
               final shellState = LdMonkeyShellState.of<_Movie, int>(context);
               final item = await movieRepository.getById(selectionItems.first);
 
-              final newItem = item.copyWith(
-                id: movieData.length + 1,
-                title: "${item.title} (copy)",
-              );
+              final newItem = item.copyWith(id: movieData.length + 1, title: "${item.title} (copy)");
 
               await movieRepository.create(newItem);
 
@@ -337,16 +310,11 @@ class MovieMasterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyMasterPage<_Movie, int>(
-      appBar: LdMonkeyAppBar<_Movie, int>(
-        location: LdMonkeyActionLocation.masterAppBar,
-        title: Text("Movies"),
-      ),
+      appBar: LdMonkeyAppBar<_Movie, int>(location: LdMonkeyActionLocation.masterAppBar, title: Text("Movies")),
       buildItem: (context, item) => LdListItem(
         title: Text(item.value!.title),
         subtitle: Text(item.value!.genre),
-        trailing: Row(children: [
-          for (var i = 0; i < item.value!.rating; i++) Icon(LucideIcons.star),
-        ]),
+        trailing: Row(children: [for (var i = 0; i < item.value!.rating; i++) Icon(LucideIcons.star)]),
       ),
     );
   }

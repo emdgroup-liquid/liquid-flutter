@@ -9,7 +9,7 @@ void main() {
   group('Filter Modal Tests', () {
     group('LdFilterModal Widget', () {
       testWidgets('renders correctly with filters', (WidgetTester tester) async {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
@@ -38,7 +38,7 @@ void main() {
       });
 
       testWidgets('shows active and inactive filters separately', (WidgetTester tester) async {
-        final activeFilter = LdFilterBoolOption<TestItem, int>(
+        final activeFilter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
@@ -46,7 +46,7 @@ void main() {
           optimisticFilter: (item) => item.active,
         );
 
-        final inactiveFilter = LdFilterBoolOption<TestItem, int>(
+        final inactiveFilter = LdFilterBool<TestItem, int>(
           name: 'inactive',
           label: (context) => 'Inactive',
           icon: (context) => const Icon(Icons.close),
@@ -79,7 +79,7 @@ void main() {
       });
 
       testWidgets('updates when filter stream emits', (WidgetTester tester) async {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),

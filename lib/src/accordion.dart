@@ -56,6 +56,32 @@ class LdAccordion extends StatefulWidget {
     Key? key,
   }) : super(key: key);
 
+  factory LdAccordion.single(
+      {Key? key,
+      EdgeInsets? headerPadding,
+      EdgeInsets? childPadding,
+      LdSize? size,
+      bool wrapActiveInCard = false,
+      bool flatCard = true,
+      bool allowMultipleOpen = false,
+      required Widget child,
+      required Widget header,
+      bool initialOpen = false}) {
+    return LdAccordion(
+      childBuilder: (context, n) => child,
+      itemCount: 1,
+      headerBuilder: (context, n) => header,
+      key: key,
+      headerPadding: headerPadding,
+      childPadding: childPadding,
+      size: size,
+      wrapActiveInCard: wrapActiveInCard,
+      flatCard: flatCard,
+      allowMultipleOpen: allowMultipleOpen,
+      initialOpenIndex: initialOpen ? {0} : const {},
+    );
+  }
+
   /// Creates an accordion from a list of [LdAccordionItem]s.
   factory LdAccordion.fromList(
     List<LdAccordionItem> items, {
@@ -162,6 +188,7 @@ class _LdAccordionChild extends StatelessWidget {
                         size,
                         color: colorBundle.text,
                       ),
+                      maxLines: 1,
                     ),
                   ),
                   AnimatedRotation(

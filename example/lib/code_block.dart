@@ -48,40 +48,29 @@ class _CodeBlockState extends State<CodeBlock> {
 
   @override
   Widget build(BuildContext context) {
-    bool isDesktop =
-        kIsWeb || Platform.isWindows || Platform.isMacOS || Platform.isLinux;
+    bool isDesktop = kIsWeb || Platform.isWindows || Platform.isMacOS || Platform.isLinux;
 
     return LayoutBuilder(
       builder: (context, _) => LdWrapConditional(
         condition: widget.wrapCard,
-        builder: (context, child) => LdCard(
-          child: child,
-        ),
+        builder: (context, child) => LdCard(child: child),
         child: Stack(
           children: [
-            SourceCode(
-              code: widget.code,
-            ),
+            SourceCode(code: widget.code),
             if (isDesktop && widget.showCopyButton)
               Align(
                 alignment: Alignment.topRight,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: LdButton(
-                    color: shadSky,
-                    size: LdSize.s,
-                    mode: LdButtonMode.outline,
-                    onPressed: () {
-                      Clipboard.setData(ClipboardData(text: widget.code));
-                      LdNotificationsController.of(context).addNotification(
-                        LdNotification(
-                          message: "Copied to clipboard",
-                          type: LdNotificationType.success,
-                        ),
-                      );
-                    },
-                    child: const Text("Copy"),
-                  ),
+                child: LdButton(
+                  color: shadSky,
+                  size: LdSize.s,
+                  mode: LdButtonMode.outline,
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: widget.code));
+                    LdNotificationsController.of(
+                      context,
+                    ).addNotification(LdNotification(message: "Copied to clipboard", type: LdNotificationType.success));
+                  },
+                  child: const Text("Copy"),
                 ),
               ),
           ],

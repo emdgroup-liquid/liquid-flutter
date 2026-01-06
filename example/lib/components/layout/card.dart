@@ -14,97 +14,59 @@ class _CardDemoState extends State<CardDemo> {
   @override
   Widget build(BuildContext context) {
     var ipsum = const Text(
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nunc vel tincidunt lacinia, nunc nisl aliquam nisl, eu aliquet nisl nisl eu ante.");
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nunc vel tincidunt lacinia, nunc nisl aliquam nisl, eu aliquet nisl nisl eu ante.",
+    );
     return ComponentPage(
       path: "lib/components/layout/card.dart",
       title: "LdCard",
+      text:
+          "Cards are versatile containers that group related content and actions. They can include headers, footers, and various interactive elements. Cards provide a consistent way to present information while maintaining visual hierarchy and organization."
+          "Cards can be styled with or without elevation (flat), and can be placed on different background surfaces. They automatically adapt their appearance based on the theme and surface they're placed on.",
+
       demo: LdAutoSpace(
         children: [
-          LdText.p(
-            "Cards are versatile containers that group related content and actions. They can include headers, footers, and various interactive elements. Cards provide a consistent way to present information while maintaining visual hierarchy and organization.",
-          ),
-          LdText.p(
-            "Cards can be styled with or without elevation (flat), and can be placed on different background surfaces. They automatically adapt their appearance based on the theme and surface they're placed on.",
-          ),
-          LdText.h("Flat Card with child only"),
           ComponentWell(
-            child: LdCard(
-              child: LdText.l("Hello world"),
-            ),
+            title: Text("Flat Card with child only"),
+            child: LdCard(child: LdText.l("Hello world")),
           ),
-          LdText.h("Flat Card with header and footer"),
+
           ComponentWell(
+            title: Text("Flat Card with header and footer"),
+
             child: Column(
               children: [
                 LdCard(
-                  child: LdAutoSpace(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      LdText.h(
-                        "Hello World!",
-                      ),
-                      // lorem ipsum text
-                      ipsum,
-                    ],
-                  ),
-                ),
-                ldSpacerM,
-                LdCard(
-                  header: const Row(
-                    children: [
-                      LdTag(child: Text("Important information for you")),
-                    ],
-                  ),
+                  header: const Row(children: [LdTag(child: Text("Important information for you"))]),
                   footer: Row(
-                    children: [
-                      LdButton(
-                        child: const Text("Action"),
-                        onPressed: () {},
-                      ),
-                    ],
+                    children: [LdButton(child: const Text("Action"), onPressed: () {})],
                   ), // bool
 
-                  child: Column(
+                  child: LdAutoSpace(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      LdText.h(
-                        "Hello footer",
-                      ),
-                      ldSpacerM,
-                      // lorem ipsum text
-                      ipsum,
-                    ],
+                    children: [LdText.h("Hello with a header"), ipsum],
                   ),
                 ),
               ],
             ),
           ),
-          LdText.h("Card on surface"),
           ComponentWell(
+            title: Text("Card on surface"),
             onSurface: true,
             child: LdCard(
-              child: LdAutoSpace(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  LdText.h("Card on surface"),
-                  LdText.l(
-                    "This card is placed on a surface background. Notice how it adapts its appearance automatically.",
-                  ),
-                ],
+              child: LdText.l(
+                "This card is placed on a surface background. Notice how it adapts its appearance automatically.",
               ),
             ),
           ),
-          LdText.h("Elevated Card"),
           ComponentWell(
+            title: Text("Elevated Card"),
             child: LdCard(
               flat: false,
               child: LdAutoSpace(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   LdText.h("Elevated Card"),
-                  LdText.l(
-                    "This card has elevation applied to make it stand out from the background.",
-                  ),
+                  LdText.l("This card has elevation applied to make it stand out from the background."),
                 ],
               ),
             ),

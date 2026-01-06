@@ -34,8 +34,8 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
   void initState() {
     super.initState();
     final repository = LdRepository.of<T, IdType>(context);
-    final searchFilter = repository.filters.values.firstWhereOrNull((filter) => filter is LdFilterSearchOption)
-        as LdFilterSearchOption<T, IdType, dynamic>?;
+    final searchFilter = repository.filters.values.firstWhereOrNull((filter) => filter is LdFilterSearch)
+        as LdFilterSearch<T, IdType, dynamic>?;
 
     if (searchFilter != null) {
       searchConfig = LdSearchConfig(
@@ -45,7 +45,7 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
         hint: searchFilter.hint,
         onSearch: (query) {
           repository.updateFilter(searchFilter.name, (filter) {
-            filter as LdFilterSearchOption<T, IdType, dynamic>;
+            filter as LdFilterSearch<T, IdType, dynamic>;
             return filter.copyWith(
               isOn: query.isNotEmpty,
               searchText: query,

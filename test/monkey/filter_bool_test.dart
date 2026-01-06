@@ -15,7 +15,7 @@ void main() {
 
     group('Serialization', () {
       test('serialize() returns "true" when filter is on', () {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
@@ -27,7 +27,7 @@ void main() {
       });
 
       test('serialize() returns "true" when filter is off', () {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
@@ -39,7 +39,7 @@ void main() {
       });
 
       test('marshalSerialized() sets isOn to true regardless of input', () {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
@@ -52,7 +52,7 @@ void main() {
       });
 
       test('marshalSerialized() sets isOn to true with empty string', () {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
@@ -65,7 +65,7 @@ void main() {
       });
 
       test('marshalSerialized() sets isOn to true with any value', () {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
@@ -80,7 +80,7 @@ void main() {
 
     group('Optimistic Filtering', () {
       test('optimisticFilter() uses provided function when filter is on', () {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
@@ -96,7 +96,7 @@ void main() {
       });
 
       test('optimisticFilter() uses provided function when filter is off', () {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
@@ -112,7 +112,7 @@ void main() {
       });
 
       test('optimisticFilter() works with complex filter logic', () {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'high-value',
           label: (context) => 'High Value',
           icon: (context) => const Icon(Icons.star),
@@ -132,7 +132,7 @@ void main() {
 
     group('CopyWith', () {
       test('copyWith() updates isOn correctly', () {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
@@ -147,7 +147,7 @@ void main() {
       });
 
       test('copyWith() updates name correctly', () {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
@@ -161,7 +161,7 @@ void main() {
       });
 
       test('copyWith() updates label correctly', () {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
@@ -176,7 +176,7 @@ void main() {
       });
 
       test('copyWith() updates icon correctly', () {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
@@ -191,7 +191,7 @@ void main() {
       });
 
       test('copyWith() updates optimisticFilter correctly', () {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
@@ -209,7 +209,7 @@ void main() {
       });
 
       test('copyWith() preserves values when not provided', () {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
@@ -230,7 +230,7 @@ void main() {
 
     group('UI Rendering', () {
       testWidgets('build() returns Container when filter is off', (WidgetTester tester) async {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
@@ -262,7 +262,7 @@ void main() {
       });
 
       testWidgets('build() returns LdListItem when filter is on', (WidgetTester tester) async {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
@@ -294,7 +294,7 @@ void main() {
       });
 
       testWidgets('build() shows X button when filter is on', (WidgetTester tester) async {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
@@ -325,7 +325,7 @@ void main() {
       });
 
       testWidgets('tapping X button deactivates filter', (WidgetTester tester) async {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
@@ -363,7 +363,7 @@ void main() {
       });
 
       testWidgets('renders in LdFilterModal and can be activated/deactivated', (WidgetTester tester) async {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),

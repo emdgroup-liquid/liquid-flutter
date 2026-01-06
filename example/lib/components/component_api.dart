@@ -8,11 +8,7 @@ import '../code_block.dart';
 class ComponentApi extends StatefulWidget {
   final DocComponent component;
   final bool showPrivate;
-  const ComponentApi({
-    required this.component,
-    this.showPrivate = false,
-    super.key,
-  });
+  const ComponentApi({required this.component, this.showPrivate = false, super.key});
 
   @override
   State<ComponentApi> createState() => _ComponentApiState();
@@ -31,8 +27,7 @@ class _ComponentApiState extends State<ComponentApi> {
     StringBuffer buffer = StringBuffer();
 
     // Constructor name
-    String constructorName =
-        constructor.name.isEmpty ? widget.component.name : constructor.name;
+    String constructorName = constructor.name.isEmpty ? widget.component.name : constructor.name;
     buffer.write("$constructorName(");
 
     // Positional parameters
@@ -58,8 +53,7 @@ class _ComponentApiState extends State<ComponentApi> {
         if (parameter.description.isNotEmpty) {
           buffer.write("\n  /// ${parameter.description}");
         }
-        buffer.write(
-            "\n  ${parameter.required ? 'required ' : ''}${parameter.type} ${parameter.name}");
+        buffer.write("\n  ${parameter.required ? 'required ' : ''}${parameter.type} ${parameter.name}");
         if (i < namedParameters.length - 1) {
           buffer.write(",");
         }
@@ -80,8 +74,7 @@ class _ComponentApiState extends State<ComponentApi> {
     List<DocProperty> sortedProperties = widget.component.properties.toList();
 
     if (!_showPrivate) {
-      sortedProperties =
-          sortedProperties.where((e) => !e.name.startsWith('_')).toList();
+      sortedProperties = sortedProperties.where((e) => !e.name.startsWith('_')).toList();
     }
 
     sortedProperties.sort((a, b) {
@@ -101,19 +94,13 @@ class _ComponentApiState extends State<ComponentApi> {
           physics: const NeverScrollableScrollPhysics(),
           itemBuilder: ((context, index) {
             var constructor = widget.component.constructors[index];
-            String constructorSignature =
-                _generateConstructorSignature(constructor);
+            String constructorSignature = _generateConstructorSignature(constructor);
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ldSpacerM,
-                CodeBlock(
-                  showCopyButton: false,
-                  wrapCard: false,
-                  code: constructorSignature,
-                  language: "dart",
-                ),
+                CodeBlock(showCopyButton: false, wrapCard: false, code: constructorSignature, language: "dart"),
                 ldSpacerM,
               ],
             );
@@ -123,63 +110,79 @@ class _ComponentApiState extends State<ComponentApi> {
           shrinkWrap: true,
         ),
         ldSpacerM,
-        LdText.hs(
-          "Properties",
-        ),
+        LdText.hs("Properties"),
         ldSpacerM,
         DefaultTextStyle(
-            style: TextStyle(
-                fontFamily: "NotoSansMono",
-                fontSize: 12,
-                color: LdTheme.of(context).text),
-            child: ListView.separated(
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: sortedProperties.length,
-                shrinkWrap: true,
-                separatorBuilder: (context, index) => const LdDivider(),
-                itemBuilder: (context, index) {
-                  var e = sortedProperties[index];
+          style: TextStyle(fontFamily: "NotoSansMono", fontSize: 12, color: LdTheme.of(context).text),
+          child: ListView.separated(
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: sortedProperties.length,
+            shrinkWrap: true,
+            separatorBuilder: (context, index) => const LdDivider(),
+            itemBuilder: (context, index) {
+              var e = sortedProperties[index];
 
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              return LdBundle(
+                children: [
+                  if (e.description.isNotEmpty)
+                    LdAccordion.single(
+                      header: Text(e.description.replaceAll("///", "")),
+                      child: LdMute(child: LdText.p(e.description.replaceAll("///", ""))),
+                    ),
+                  ldSpacerS,
+                  Wrap(
+                    spacing: 4,
+                    runSpacing: 4,
                     children: [
-                      if (e.description.isNotEmpty)
-                        LdMute(
-                          child: LdText.p(
-                            e.description.replaceAll("///", ""),
-                          ),
-                        ),
-                      ldSpacerS,
-                      Wrap(
-                        spacing: 4,
-                        runSpacing: 4,
-                        children: [
-                          CodeBlock(
-                            wrapCard: false,
-                            showCopyButton: false,
-                            code: [
-                              if (e.features.isNotEmpty)
-                                '${e.features.join(' ')} ',
-                              e.type,
-                              ' ',
-                              e.name,
-                            ].join(),
-                          ),
-                        ],
+                      CodeBlock(
+                        wrapCard: false,
+                        showCopyButton: false,
+                        code: [if (e.features.isNotEmpty) '${e.features.join(' ')} ', e.type, ' ', e.name].join(),
                       ),
-                      ldSpacerS,
                     ],
-                  );
-                })),
+                  ),
+                  ldSpacerS,
+                ],
+              );
+            },
+          ),
+        ),
         ldSpacerL,
-        LdText.hs(
-          "Methods",
-        ),
+        LdText.hs("Methods"),
         ldSpacerM,
-        Text(
-          widget.component.methods.join("\n"),
-          style: const TextStyle(fontFamily: "NotoSansMono", fontSize: 12),
-        ),
+        ...widget.component.methods.map((e) {
+          final signature = CodeBlock(
+            wrapCard: false,
+            showCopyButton: false,
+            code: [
+              if (e.features.isNotEmpty) '${e.features.join(' ')} ',
+              e.returnType,
+              ' ',
+              e.name,
+              '(',
+              e.signature
+                  .map(
+                    (p) =>
+                        '${p.named ? '{' : ''}${p.type} ${p.name}${p.required ? '' : '?'}${p.defaultValue != null ? ' = ${p.defaultValue}' : ''}${p.named ? '}' : ''}',
+                  )
+                  .join(', '),
+              ')',
+            ].join(),
+          );
+          return LdBundle(
+            children: [
+              if (e.description.isNotEmpty)
+                LdAccordion.single(
+                  headerPadding: LdTheme.of(context).pad(size: LdSize.s).copyWith(left: 0),
+                  header: signature,
+
+                  child: LdMute(child: LdText.p(e.description.replaceAll("///", ""))),
+                )
+              else
+                signature,
+            ],
+          );
+        }),
       ],
     );
   }

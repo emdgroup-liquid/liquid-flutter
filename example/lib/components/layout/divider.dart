@@ -16,24 +16,19 @@ class DividerDemo extends StatelessWidget {
       demo: LdAutoSpace(
         children: [
           LdText.p(
-              "The LdDivider component provides a simple horizontal line to visually separate content sections. "
-              "It helps create clear visual hierarchy and improve readability by organizing content into distinct groups."),
+            "The LdDivider component provides a simple horizontal line to visually separate content sections. "
+            "It helps create clear visual hierarchy and improve readability by organizing content into distinct groups.",
+          ),
           LdText.p(
-              "Dividers can be customized with different heights and can be inset to align with content that has leading elements."),
+            "Dividers can be customized with different heights and can be inset to align with content that has leading elements.",
+          ),
           ComponentWell(
             title: LdText.hs("Standard divider"),
-            child: Column(
-              children: [
-                LdDivider(),
-                ldSpacerM,
-                LdText(
-                  "You have my undivided attention",
-                ),
-                ldSpacerM,
-                LdDivider(),
-              ],
+            child: LdAutoSpace(
+              children: [LdText("Some content goes here"), LdDivider(), LdText("Some content goes there")],
             ),
           ),
+
           ComponentWell(
             title: LdText.hs("Inset for leading"),
             description: LdText.p(
@@ -43,18 +38,14 @@ class DividerDemo extends StatelessWidget {
               children: [
                 LdListItem(
                   disabled: true,
-                  leading: LdAvatar(
-                    child: const Icon(LucideIcons.circle),
-                  ),
-                  title: const Text("You have my undivided attention"),
+                  leading: LdAvatar(child: const Icon(LucideIcons.circle)),
+                  title: const Text("List item with leading element"),
                 ),
                 LdDivider(insetForLeading: true),
                 LdListItem(
                   disabled: true,
-                  leading: LdAvatar(
-                    child: const Icon(LucideIcons.circle),
-                  ),
-                  title: const Text("You have my undivided attention"),
+                  leading: LdAvatar(child: const Icon(LucideIcons.circle)),
+                  title: const Text("List item with leading element"),
                 ),
               ],
             ),

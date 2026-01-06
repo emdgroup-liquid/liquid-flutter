@@ -140,7 +140,7 @@ void main() {
       });
 
       testWidgets('filter changes update URL query parameters', (WidgetTester tester) async {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'id-active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),

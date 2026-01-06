@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:liquid_flutter/liquid_flutter.dart';
 
@@ -26,15 +25,12 @@ List<Widget> generateAutoSpacings({
   List<Widget> finalChildren = [];
   int index = 0;
   for (var child in children) {
-    if (animate) {
-      finalChildren.add(child.animate(delay: 50.ms * finalChildren.length).fadeIn().moveY(begin: 5));
-    } else {
-      finalChildren.add(child);
+    var next = index == children.length - 1 ? null : children[index + 1];
+    index++;
+    if (child is LdSpacer) {
+      continue;
     }
-
-    if (index == children.length - 1) {
-      break;
-    }
+    finalChildren.add(child);
 
     if (child is LdReveal) {
       child = child.child;
@@ -50,16 +46,8 @@ List<Widget> generateAutoSpacings({
 
     final element = spacingMatrix[child.runtimeType];
 
-    var next = children[index + 1];
-
     if (next is LdMute) {
       next = next.child;
-    }
-
-    index++;
-
-    if (child is LdSpacer || next is LdSpacer) {
-      continue;
     }
 
     if (child is LdText && next is LdText) {
@@ -103,15 +91,15 @@ List<Widget> generateAutoSpacings({
 
         continue;
       }
-
-      if (element[_Default] != null) {
-        for (int i = 0; i < element[_Default]!.multiplier; i++) {
-          finalChildren.add(
-            LdSpacer(size: element[_Default]!.size),
-          );
-        }
-        continue;
+    }
+    final defaultSpacings = spacingMatrix[_Default]!;
+    if (defaultSpacings[next.runtimeType] != null) {
+      for (int i = 0; i < defaultSpacings[next.runtimeType]!.multiplier; i++) {
+        finalChildren.add(
+          LdSpacer(size: defaultSpacings[next.runtimeType]!.size),
+        );
       }
+      continue;
     }
 
     finalChildren.add(
@@ -133,7 +121,6 @@ class _LdSizeItem {
 
 const Map<Type, Map<Type, _LdSizeItem>> spacingMatrix = {
   LdButton: {
-    _Default: _LdSizeItem(LdSize.m, 1),
     LdButton: _LdSizeItem(LdSize.s, 1),
   },
   LdRadio: {
@@ -146,25 +133,27 @@ const Map<Type, Map<Type, _LdSizeItem>> spacingMatrix = {
     LdToggle: _LdSizeItem(LdSize.s, 1),
   },
   LdBundle: {
-    _Default: _LdSizeItem(LdSize.l, 1),
     LdBundle: _LdSizeItem(LdSize.l, 2),
   },
   LdDivider: {
     _Default: _LdSizeItem(LdSize.l, 1),
   },
   LdCard: {
-    _Default: _LdSizeItem(LdSize.l, 1),
     LdCard: _LdSizeItem(LdSize.l, 2),
   },
   LdDrawerItemSection: {
-    _Default: _LdSizeItem(LdSize.l, 1),
     LdDrawerItemSection: _LdSizeItem(LdSize.xs, 1),
-    LdSectionHeader: _LdSizeItem(LdSize.l, 1)
+    LdSectionHeader: _LdSizeItem(LdSize.l, 1),
   },
   LdListItem: {
-    _Default: _LdSizeItem(LdSize.m, 1),
     LdListItem: _LdSizeItem(LdSize.s, 1),
   },
+  _Default: {
+    LdBundle: _LdSizeItem(LdSize.l, 1),
+    LdCard: _LdSizeItem(LdSize.l, 1),
+    LdDivider: _LdSizeItem(LdSize.l, 1),
+    LdButton: _LdSizeItem(LdSize.l, 1),
+  }
 };
 
 extension LdAutoSpaceExt on List<Widget> {

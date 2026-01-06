@@ -9,7 +9,7 @@ void main() {
   group('LdFilterSearchOption Tests', () {
     group('Serialization', () {
       test('serialize() returns searchText when on and non-empty', () {
-        final filter = LdFilterSearchOption<TestItem, int, String>(
+        final filter = LdFilterSearch<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),
@@ -22,7 +22,7 @@ void main() {
       });
 
       test('serialize() returns empty string when off', () {
-        final filter = LdFilterSearchOption<TestItem, int, String>(
+        final filter = LdFilterSearch<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),
@@ -35,7 +35,7 @@ void main() {
       });
 
       test('serialize() returns empty string when searchText is empty', () {
-        final filter = LdFilterSearchOption<TestItem, int, String>(
+        final filter = LdFilterSearch<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),
@@ -48,7 +48,7 @@ void main() {
       });
 
       test('marshalSerialized() updates searchText and isOn state', () {
-        final filter = LdFilterSearchOption<TestItem, int, String>(
+        final filter = LdFilterSearch<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),
@@ -63,7 +63,7 @@ void main() {
       });
 
       test('marshalSerialized() sets isOn to false when empty', () {
-        final filter = LdFilterSearchOption<TestItem, int, String>(
+        final filter = LdFilterSearch<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),
@@ -80,7 +80,7 @@ void main() {
 
     group('Optimistic Filtering', () {
       test('optimisticFilter() works correctly with search text', () {
-        final filter = LdFilterSearchOption<TestItem, int, String>(
+        final filter = LdFilterSearch<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),
@@ -97,7 +97,7 @@ void main() {
       });
 
       test('optimisticFilter() returns true when filter is off', () {
-        final filter = LdFilterSearchOption<TestItem, int, String>(
+        final filter = LdFilterSearch<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),
@@ -111,7 +111,7 @@ void main() {
       });
 
       test('optimisticFilter() returns true when searchText is empty', () {
-        final filter = LdFilterSearchOption<TestItem, int, String>(
+        final filter = LdFilterSearch<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),
@@ -127,7 +127,7 @@ void main() {
 
     group('CopyWith', () {
       test('copyWith() preserves all properties', () {
-        final filter = LdFilterSearchOption<TestItem, int, String>(
+        final filter = LdFilterSearch<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),
@@ -151,7 +151,7 @@ void main() {
       });
 
       test('copyWith() preserves optimisticFilter function', () {
-        final filter = LdFilterSearchOption<TestItem, int, String>(
+        final filter = LdFilterSearch<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),
@@ -169,7 +169,7 @@ void main() {
 
     group('UI Rendering', () {
       testWidgets('renders search input widget', (WidgetTester tester) async {
-        final filter = LdFilterSearchOption<TestItem, int, String>(
+        final filter = LdFilterSearch<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),

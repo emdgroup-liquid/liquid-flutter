@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class LdFilterBoolOption<T extends Identifiable<IdType>, IdType> extends LdFilterOption<T, IdType> {
+class LdFilterBool<T extends Identifiable<IdType>, IdType> extends LdFilterOption<T, IdType> {
   final bool Function(T item) _optimisticFilter;
 
-  LdFilterBoolOption({
+  LdFilterBool({
     required super.name,
     required super.label,
     required super.icon,
@@ -19,7 +19,7 @@ class LdFilterBoolOption<T extends Identifiable<IdType>, IdType> extends LdFilte
   }
 
   @override
-  LdFilterBoolOption<T, IdType> marshalSerialized(String value) {
+  LdFilterBool<T, IdType> marshalSerialized(String value) {
     return copyWith(isOn: true);
   }
 
@@ -29,14 +29,14 @@ class LdFilterBoolOption<T extends Identifiable<IdType>, IdType> extends LdFilte
   }
 
   @override
-  LdFilterBoolOption<T, IdType> copyWith({
+  LdFilterBool<T, IdType> copyWith({
     String Function(BuildContext context)? label,
     Widget Function(BuildContext context)? icon,
     String? name,
     bool? isOn,
     bool Function(T item)? optimisticFilter,
   }) {
-    return LdFilterBoolOption<T, IdType>(
+    return LdFilterBool<T, IdType>(
       name: name ?? this.name,
       label: label ?? this.label,
       icon: icon ?? this.icon,

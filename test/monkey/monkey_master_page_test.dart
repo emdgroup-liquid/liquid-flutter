@@ -9,7 +9,7 @@ void main() {
   group('LdMonkeyMasterPage Tests', () {
     group('Search Integration', () {
       testWidgets('initializes search config when search filter exists', (WidgetTester tester) async {
-        final searchFilter = LdFilterSearchOption<TestItem, int, String>(
+        final searchFilter = LdFilterSearch<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),

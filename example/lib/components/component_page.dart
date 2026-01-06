@@ -43,13 +43,8 @@ class ComponentPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                ),
-                LdBreadcrumb.fromStrings([
-                  category,
-                  title,
-                ]),
+                Text(title),
+                LdBreadcrumb.fromStrings([category, title]),
               ],
             ),
           ),
@@ -57,19 +52,16 @@ class ComponentPage extends StatelessWidget {
         body: LdScaffoldBody(
           addContainer: true,
           children: [
-            MarkdownBody(data: text ?? ""),
-            // Demo
+            LdText.h(title),
 
+            if (text != null) MarkdownBody(data: text!),
+
+            // Demo
             demo ?? Container(),
 
-            LdText.h(
-              "API Reference",
-            ),
+            LdText.h("API Reference"),
 
-            ComponentsAccordion(
-              components: apiComponents?.toSet() ?? {title},
-              initialOpenIndex: {0},
-            ),
+            ComponentsAccordion(components: apiComponents?.toSet() ?? {title}, initialOpenIndex: {0}),
           ],
         ),
       ),

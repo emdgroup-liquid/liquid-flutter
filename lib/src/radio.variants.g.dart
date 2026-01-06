@@ -4,7 +4,7 @@ class LdRadio extends StatelessWidget {
   const LdRadio({
     this.label,
     required this.checked,
-    this.size = LdSize.s,
+    this.size = LdSize.m,
     this.onChanged,
     this.color,
     this.disabled = false,
@@ -26,7 +26,7 @@ class LdRadio extends StatelessWidget {
   static Widget success({
     String? label,
     required bool checked,
-    LdSize size = LdSize.s,
+    LdSize size = LdSize.m,
     dynamic Function(bool)? onChanged,
     LdColor? color,
     bool disabled = false,
@@ -48,7 +48,7 @@ class LdRadio extends StatelessWidget {
   static Widget warning({
     String? label,
     required bool checked,
-    LdSize size = LdSize.s,
+    LdSize size = LdSize.m,
     dynamic Function(bool)? onChanged,
     LdColor? color,
     bool disabled = false,
@@ -70,7 +70,7 @@ class LdRadio extends StatelessWidget {
   static Widget error({
     String? label,
     required bool checked,
-    LdSize size = LdSize.s,
+    LdSize size = LdSize.m,
     dynamic Function(bool)? onChanged,
     LdColor? color,
     bool disabled = false,

@@ -26,10 +26,10 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
     this.borderMode,
   });
 
-  LdFilterSearchOption<T, IdType, dynamic>? _getSearchFilter(BuildContext context) {
+  LdFilterSearch<T, IdType, dynamic>? _getSearchFilter(BuildContext context) {
     final repository = LdRepository.of<T, IdType>(context);
-    final searchFilter = repository.filters.values.firstWhereOrNull((filter) => filter is LdFilterSearchOption)
-        as LdFilterSearchOption<T, IdType, dynamic>?;
+    final searchFilter = repository.filters.values.firstWhereOrNull((filter) => filter is LdFilterSearch)
+        as LdFilterSearch<T, IdType, dynamic>?;
     return searchFilter;
   }
 
@@ -89,7 +89,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
             searchConfig: switch (location) {
               LdMonkeyActionLocation.masterSecondary => searchFilter?.searchConfig((query) {
                   repository.updateFilter(searchFilter.name, (filter) {
-                    filter as LdFilterSearchOption<T, IdType, dynamic>;
+                    filter as LdFilterSearch<T, IdType, dynamic>;
                     return filter.copyWith(
                       isOn: query.isNotEmpty,
                       searchText: query,

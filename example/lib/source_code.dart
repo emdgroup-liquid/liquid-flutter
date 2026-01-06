@@ -9,8 +9,7 @@ class SourceCode extends StatefulWidget {
   final String language;
   final EdgeInsets? padding;
 
-  const SourceCode(
-      {super.key, required this.code, this.language = "dart", this.padding});
+  const SourceCode({super.key, required this.code, this.language = "dart", this.padding});
 
   @override
   State<SourceCode> createState() => _SourceCodeState();
@@ -30,28 +29,24 @@ class _SourceCodeState extends State<SourceCode> {
     final ldTheme = LdTheme.of(context);
 
     themeDark = await HighlighterTheme.loadFromAssets(
-        [
-          "packages/syntax_highlight/themes/dark_plus.json",
-          "packages/syntax_highlight/themes/dark_vs.json"
-        ],
-        TextStyle(
-          fontFamily: "NotoSansMono",
-          color: ldTheme.palette.neutral.relative(false, 1),
-          background: Paint()..color = Colors.transparent,
-          fontSize: ldTheme.paragraphSize(LdSize.s),
-        ));
+      ["packages/syntax_highlight/themes/dark_plus.json", "packages/syntax_highlight/themes/dark_vs.json"],
+      TextStyle(
+        fontFamily: "NotoSansMono",
+        color: ldTheme.palette.neutral.relative(false, 1),
+        background: Paint()..color = Colors.transparent,
+        fontSize: ldTheme.paragraphSize(LdSize.s),
+      ),
+    );
 
     themeLight = await HighlighterTheme.loadFromAssets(
-        [
-          "packages/syntax_highlight/themes/light_vs.json",
-          "packages/syntax_highlight/themes/light_plus.json"
-        ],
-        TextStyle(
-          fontFamily: "NotoSansMono",
-          color: ldTheme.palette.neutral.relative(true, 1),
-          background: Paint()..color = Colors.transparent,
-          fontSize: ldTheme.paragraphSize(LdSize.s),
-        ));
+      ["packages/syntax_highlight/themes/light_vs.json", "packages/syntax_highlight/themes/light_plus.json"],
+      TextStyle(
+        fontFamily: "NotoSansMono",
+        color: ldTheme.palette.neutral.relative(true, 1),
+        background: Paint()..color = Colors.transparent,
+        fontSize: ldTheme.paragraphSize(LdSize.s),
+      ),
+    );
 
     if (mounted) {
       setState(() {});
@@ -95,7 +90,7 @@ class _SourceCodeState extends State<SourceCode> {
     return Container(
       width: double.infinity,
       padding: widget.padding,
-      decoration: BoxDecoration(color: LdTheme.of(context).surface),
+
       child: SelectableRegion(
         focusNode: FocusNode(),
         selectionControls: materialTextSelectionControls,

@@ -3,7 +3,8 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-LdMonkeyAction<T, IdType> toggleFilters<T extends Identifiable<IdType>, IdType>() => LdMonkeyBareChildAction<T, IdType>(
+LdMonkeyAction<T, IdType> showFilterContextMenu<T extends Identifiable<IdType>, IdType>() =>
+    LdMonkeyBareChildAction<T, IdType>(
       onShortcutTrigger: (context) {},
       visibility: {
         LdMonkeyActionVisibility(

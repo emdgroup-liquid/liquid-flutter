@@ -57,7 +57,10 @@ class _ComponentWellState extends State<ComponentWell> {
       children: [
         if (widget.title != null)
           Row(
-            children: [Expanded(child: widget.title!), if (showSourceCode) buildSourceCodeModal(context, path!)],
+            children: [
+              Expanded(child: widget.title!),
+              if (showSourceCode) buildSourceCodeModal(context, path!),
+            ],
           ),
         if (widget.description != null) widget.description!,
         Container(
@@ -73,21 +76,14 @@ class _ComponentWellState extends State<ComponentWell> {
           ),
           constraints: BoxConstraints(minHeight: widget.minHeight ?? 0),
           clipBehavior: Clip.hardEdge,
-          padding: widget.padding ??
-              EdgeInsets.symmetric(
-                vertical: showSourceCode ? 16 : 32,
-                horizontal: 16,
-              ),
+          padding: widget.padding ?? EdgeInsets.all(64),
           child: Provider.value(
             value: LdSurfaceInfo(isSurface: widget.onSurface),
             child: widget.child,
           ),
         ),
         if (showSourceCode && widget.title == null)
-          Align(
-            alignment: Alignment.centerRight,
-            child: buildSourceCodeModal(context, path!),
-          ),
+          Align(alignment: Alignment.centerRight, child: buildSourceCodeModal(context, path!)),
       ],
     );
   }
@@ -115,33 +111,34 @@ class _ComponentWellState extends State<ComponentWell> {
     return LdModalBuilder(
       modal: LdModalRoute(
         context: context,
-        dialogSize: LdSize.l,
+        dialogSize: LdSize.m,
         pageBuilder: (context) => LdScaffold(
-            body: LdScaffoldBody(children: [
-          LdSubmit<String, String>(
-            arg: sourcePath,
-            config: LdSubmitConfig(
-                autoTrigger: true,
-                action: (arg) async {
-                  // Load the source code
-                  return await rootBundle.loadString(arg!);
-                }),
-            builder: LdSubmitCenteredBuilder<String, String>(
-              resultBuilder: (context, result, controller) => SourceCodeExtractor(
-                options: widget.showSourceCodeOptions,
-                sourceCode: result,
-                index: instanceIndex,
+          appBars: [LdAppBar(title: Text("Source Code"))],
+          body: LdScaffoldBody(
+            children: [
+              LdSubmit<String, String>(
+                arg: sourcePath,
+                config: LdSubmitConfig(
+                  autoTrigger: true,
+                  action: (arg) async {
+                    // Load the source code
+                    return await rootBundle.loadString(arg!);
+                  },
+                ),
+                builder: LdSubmitCenteredBuilder<String, String>(
+                  resultBuilder: (context, result, controller) => SourceCodeExtractor(
+                    options: widget.showSourceCodeOptions,
+                    sourceCode: result,
+                    index: instanceIndex,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ])),
+        ),
       ),
       builder: (context, showModal) {
-        return LdButton.ghost(
-          autoLoading: false,
-          onPressed: showModal,
-          child: const Icon(LucideIcons.code),
-        );
+        return LdButton.ghost(autoLoading: false, onPressed: showModal, child: const Icon(LucideIcons.code));
       },
     );
   }

@@ -49,7 +49,7 @@ void main() {
       });
 
       testWidgets('applies query parameters to repository filters', (WidgetTester tester) async {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'id-active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
@@ -93,7 +93,7 @@ void main() {
       });
 
       testWidgets('disables filters not in query parameters', (WidgetTester tester) async {
-        final filter = LdFilterBoolOption<TestItem, int>(
+        final filter = LdFilterBool<TestItem, int>(
           name: 'id-active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),

@@ -502,7 +502,7 @@ void main() {
         final repository = createTestRepository();
         final shellState = LdMonkeyShellState<TestItem, int>(basePath: '/test');
 
-        final action = toggleFilters<TestItem, int>();
+        final action = showFilterContextMenu<TestItem, int>();
 
         await tester.pumpWidget(
           LdThemeProvider(

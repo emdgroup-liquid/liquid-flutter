@@ -10,8 +10,9 @@ final taskRepository = LdRepository<Task, int>(
   pageSize: 5,
   getOffsetById: (id, {filters, sortOptions}) async {
     // Apply the same filtering and sorting logic as fetchListWithParameters
-    final filtered =
-        testData.where((element) => filters?.every((filter) => filter.optimisticFilter(element)) ?? true).toList();
+    final filtered = testData
+        .where((element) => filters?.every((filter) => filter.optimisticFilter(element)) ?? true)
+        .toList();
 
     for (final sortOption in sortOptions ?? []) {
       filtered.sort((a, b) => sortOption.optimisticSort(a, b));
@@ -42,7 +43,7 @@ final taskRepository = LdRepository<Task, int>(
     ),
   ],
   filters: {
-    LdFilterBoolOption<Task, int>(
+    LdFilterBool<Task, int>(
       name: "done",
       label: (context) => "Done",
       icon: (context) => const Icon(LucideIcons.check),
@@ -50,7 +51,7 @@ final taskRepository = LdRepository<Task, int>(
         return item.done;
       },
     ),
-    LdFilterBoolOption<Task, int>(
+    LdFilterBool<Task, int>(
       name: "todo",
       label: (context) => "To do",
       icon: (context) => const Icon(LucideIcons.hourglass),
@@ -58,7 +59,7 @@ final taskRepository = LdRepository<Task, int>(
         return !item.done;
       },
     ),
-    LdFilterSearchOption<Task, int, String>(
+    LdFilterSearch<Task, int, String>(
       name: "search",
       label: (context) => "Search",
       icon: (context) => const Icon(LucideIcons.search),
@@ -81,28 +82,30 @@ final taskRepository = LdRepository<Task, int>(
       },
     ),
   },
-  fetchListWithParameters: ({
-    required int offset,
-    required int pageSize,
-    String? pageToken,
-    Set<LdFilterOption<Task, int>>? filters,
-    List<LdSortOption<Task, int>>? sortOptions,
-  }) async {
-    await Future.delayed(const Duration(milliseconds: 200));
+  fetchListWithParameters:
+      ({
+        required int offset,
+        required int pageSize,
+        String? pageToken,
+        Set<LdFilterOption<Task, int>>? filters,
+        List<LdSortOption<Task, int>>? sortOptions,
+      }) async {
+        await Future.delayed(const Duration(milliseconds: 200));
 
-    final filtered =
-        testData.where((element) => filters?.every((filter) => filter.optimisticFilter(element)) ?? true).toList();
+        final filtered = testData
+            .where((element) => filters?.every((filter) => filter.optimisticFilter(element)) ?? true)
+            .toList();
 
-    for (final sortOption in sortOptions ?? []) {
-      filtered.sort((a, b) => sortOption.optimisticSort(a, b));
-    }
+        for (final sortOption in sortOptions ?? []) {
+          filtered.sort((a, b) => sortOption.optimisticSort(a, b));
+        }
 
-    return LdListPage<Task>(
-      newItems: filtered.skip(offset).take(pageSize).toList(),
-      hasMore: offset + pageSize < filtered.length,
-      total: filtered.length,
-    );
-  },
+        return LdListPage<Task>(
+          newItems: filtered.skip(offset).take(pageSize).toList(),
+          hasMore: offset + pageSize < filtered.length,
+          total: filtered.length,
+        );
+      },
   deleteItem: (int id) async {
     testData.removeWhere((element) => element.id == id);
     await Future.delayed(const Duration(milliseconds: 500));

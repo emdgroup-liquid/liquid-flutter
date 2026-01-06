@@ -377,12 +377,12 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
   }
 
   LdSearchConfig? getSearchConfig() {
-    final searchFilter = filters.values.firstWhereOrNull((filter) => filter is LdFilterSearchOption)
-        as LdFilterSearchOption<T, IdType, dynamic>?;
+    final searchFilter =
+        filters.values.firstWhereOrNull((filter) => filter is LdFilterSearch) as LdFilterSearch<T, IdType, dynamic>?;
     if (searchFilter != null) {
       return searchFilter.searchConfig((query) {
         updateFilter(searchFilter.name, (filter) {
-          filter as LdFilterSearchOption<T, IdType, dynamic>;
+          filter as LdFilterSearch<T, IdType, dynamic>;
           return filter.copyWith(
             isOn: query.isNotEmpty,
             searchText: query,

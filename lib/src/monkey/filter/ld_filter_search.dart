@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-class LdFilterSearchOption<T extends Identifiable<IdType>, IdType, Suggestion> extends LdFilterOption<T, IdType> {
+class LdFilterSearch<T extends Identifiable<IdType>, IdType, Suggestion> extends LdFilterOption<T, IdType> {
   final String searchText;
   final bool Function(T item, String searchText) _optimisticFilter;
   final Future<List<Suggestion>> Function(String)? getSuggestions;
@@ -17,7 +17,7 @@ class LdFilterSearchOption<T extends Identifiable<IdType>, IdType, Suggestion> e
         onSearch: onSearch,
       );
 
-  LdFilterSearchOption({
+  LdFilterSearch({
     required super.name,
     required super.label,
     required super.icon,
@@ -37,7 +37,7 @@ class LdFilterSearchOption<T extends Identifiable<IdType>, IdType, Suggestion> e
   }
 
   @override
-  LdFilterSearchOption<T, IdType, Suggestion> marshalSerialized(String value) {
+  LdFilterSearch<T, IdType, Suggestion> marshalSerialized(String value) {
     return copyWith(
       searchText: value,
       isOn: value.isNotEmpty,
@@ -51,7 +51,7 @@ class LdFilterSearchOption<T extends Identifiable<IdType>, IdType, Suggestion> e
   }
 
   @override
-  LdFilterSearchOption<T, IdType, Suggestion> copyWith({
+  LdFilterSearch<T, IdType, Suggestion> copyWith({
     String Function(BuildContext context)? label,
     Widget Function(BuildContext context)? icon,
     String? name,
@@ -63,7 +63,7 @@ class LdFilterSearchOption<T extends Identifiable<IdType>, IdType, Suggestion> e
     LdListItem Function(BuildContext context, dynamic suggestion)? buildSuggestion,
     Duration? debounceDelay,
   }) {
-    return LdFilterSearchOption<T, IdType, Suggestion>(
+    return LdFilterSearch<T, IdType, Suggestion>(
       name: name ?? this.name,
       label: label ?? this.label,
       icon: icon ?? this.icon,
@@ -85,7 +85,7 @@ class LdFilterSearchOption<T extends Identifiable<IdType>, IdType, Suggestion> e
           (query) {
             repository.updateFilter(
               name,
-              (filter) => (filter as LdFilterSearchOption<T, IdType, Suggestion>).copyWith(
+              (filter) => (filter as LdFilterSearch<T, IdType, Suggestion>).copyWith(
                 isOn: query.trim().isNotEmpty,
                 searchText: query,
               ),
