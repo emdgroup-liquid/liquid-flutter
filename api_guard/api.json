@@ -48670,7 +48670,7 @@
             "type": "LdSize",
             "named": true,
             "required": false,
-            "defaultValue": "LdSize.s",
+            "defaultValue": "LdSize.m",
             "annotations": []
           },
           {
@@ -49029,7 +49029,7 @@
             "type": "LdSize",
             "named": true,
             "required": false,
-            "defaultValue": "LdSize.s",
+            "defaultValue": "LdSize.m",
             "annotations": []
           },
           {
@@ -49103,7 +49103,7 @@
             "type": "LdSize",
             "named": true,
             "required": false,
-            "defaultValue": "LdSize.s",
+            "defaultValue": "LdSize.m",
             "annotations": []
           },
           {
@@ -49177,7 +49177,7 @@
             "type": "LdSize",
             "named": true,
             "required": false,
-            "defaultValue": "LdSize.s",
+            "defaultValue": "LdSize.m",
             "annotations": []
           },
           {
@@ -51501,6 +51501,105 @@
         ],
         "features": [
           "const"
+        ],
+        "annotations": []
+      },
+      {
+        "name": "single",
+        "signature": [
+          {
+            "name": "key",
+            "description": "",
+            "type": "Key?",
+            "named": true,
+            "required": false,
+            "defaultValue": null,
+            "annotations": []
+          },
+          {
+            "name": "headerPadding",
+            "description": "",
+            "type": "EdgeInsets?",
+            "named": true,
+            "required": false,
+            "defaultValue": null,
+            "annotations": []
+          },
+          {
+            "name": "childPadding",
+            "description": "",
+            "type": "EdgeInsets?",
+            "named": true,
+            "required": false,
+            "defaultValue": null,
+            "annotations": []
+          },
+          {
+            "name": "size",
+            "description": "",
+            "type": "LdSize?",
+            "named": true,
+            "required": false,
+            "defaultValue": null,
+            "annotations": []
+          },
+          {
+            "name": "wrapActiveInCard",
+            "description": "",
+            "type": "bool",
+            "named": true,
+            "required": false,
+            "defaultValue": "false",
+            "annotations": []
+          },
+          {
+            "name": "flatCard",
+            "description": "",
+            "type": "bool",
+            "named": true,
+            "required": false,
+            "defaultValue": "true",
+            "annotations": []
+          },
+          {
+            "name": "allowMultipleOpen",
+            "description": "",
+            "type": "bool",
+            "named": true,
+            "required": false,
+            "defaultValue": "false",
+            "annotations": []
+          },
+          {
+            "name": "child",
+            "description": "",
+            "type": "Widget",
+            "named": true,
+            "required": true,
+            "defaultValue": null,
+            "annotations": []
+          },
+          {
+            "name": "header",
+            "description": "",
+            "type": "Widget",
+            "named": true,
+            "required": true,
+            "defaultValue": null,
+            "annotations": []
+          },
+          {
+            "name": "initialOpen",
+            "description": "",
+            "type": "bool",
+            "named": true,
+            "required": false,
+            "defaultValue": "false",
+            "annotations": []
+          }
+        ],
+        "features": [
+          "factory"
         ],
         "annotations": []
       },
@@ -98112,7 +98211,7 @@
       },
       {
         "name": "_getSearchFilter",
-        "returnType": "LdFilterSearchOption<T, IdType, dynamic>?",
+        "returnType": "LdFilterSearch<T, IdType, dynamic>?",
         "signature": [
           {
             "name": "context",
@@ -101067,14 +101166,14 @@
   },
   {
     "filePath": "lib/src/monkey/actions/toggle_filter_action.dart",
-    "name": "toggleFilters",
+    "name": "showFilterContextMenu",
     "isNullSafe": true,
     "description": "",
     "constructors": [],
     "properties": [],
     "methods": [
       {
-        "name": "toggleFilters",
+        "name": "showFilterContextMenu",
         "returnType": "LdMonkeyAction<T, IdType>",
         "signature": [],
         "features": [
@@ -102266,7 +102365,7 @@
   },
   {
     "filePath": "lib/src/monkey/filter/ld_filter_bool.dart",
-    "name": "LdFilterBoolOption",
+    "name": "LdFilterBool",
     "isNullSafe": true,
     "description": "",
     "constructors": [
@@ -102383,7 +102482,7 @@
       },
       {
         "name": "marshalSerialized",
-        "returnType": "LdFilterBoolOption<T, IdType>",
+        "returnType": "LdFilterBool<T, IdType>",
         "signature": [
           {
             "name": "value",
@@ -102423,7 +102522,7 @@
       },
       {
         "name": "copyWith",
-        "returnType": "LdFilterBoolOption<T, IdType>",
+        "returnType": "LdFilterBool<T, IdType>",
         "signature": [
           {
             "name": "label",
@@ -102798,7 +102897,7 @@
   },
   {
     "filePath": "lib/src/monkey/filter/ld_filter_search.dart",
-    "name": "LdFilterSearchOption",
+    "name": "LdFilterSearch",
     "isNullSafe": true,
     "description": "",
     "constructors": [
@@ -103005,7 +103104,7 @@
       },
       {
         "name": "marshalSerialized",
-        "returnType": "LdFilterSearchOption<T, IdType, Suggestion>",
+        "returnType": "LdFilterSearch<T, IdType, Suggestion>",
         "signature": [
           {
             "name": "value",
@@ -103045,7 +103144,7 @@
       },
       {
         "name": "copyWith",
-        "returnType": "LdFilterSearchOption<T, IdType, Suggestion>",
+        "returnType": "LdFilterSearch<T, IdType, Suggestion>",
         "signature": [
           {
             "name": "label",
