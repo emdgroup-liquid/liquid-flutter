@@ -35,7 +35,7 @@ import 'package:liquid/components/form_elements/slider.dart';
 import 'package:liquid/components/layout/spring.dart';
 import 'package:liquid/components/form_elements/submit.dart';
 import 'package:liquid/components/form_elements/switch.dart';
-import 'package:liquid/components/tab.dart';
+import 'package:liquid/components/interaction/tab.dart';
 import 'package:liquid/components/form_elements/toggle.dart';
 import 'package:liquid/demos/layout_documentation.dart';
 import 'package:liquid/demos/movie_demo.dart';
@@ -410,6 +410,10 @@ class AppRouter {
           pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const TagDemo()),
         ),
         GoRoute(
+          path: "/components/tab",
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const TabsDemo()),
+        ),
+        GoRoute(
           path: "/components/list",
           pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const ListDemo()),
         ),
@@ -421,10 +425,6 @@ class AppRouter {
           path: "/components/selectable-list",
           pageBuilder: (context, state) =>
               NoTransitionPage<void>(key: state.pageKey, child: const SelectableListDemo()),
-        ),
-        GoRoute(
-          path: "/components/tabs",
-          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const TabsDemo()),
         ),
         GoRoute(
           path: "/components/bento-gallery",

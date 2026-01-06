@@ -112,10 +112,10 @@ class LdListItemWidget extends StatelessWidget {
     Widget _buildLeading() {
       if (leading == null) return const SizedBox.shrink();
       return LdAvatarConfigProvider(
-        LdAvatarConfig(
+        config: LdAvatarConfig(
           color: color,
         ),
-        _buildIconTheme(
+        child: _buildIconTheme(
           LdReveal.quick(
             axes: const {Axis.horizontal},
             child: Row(

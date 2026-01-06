@@ -21,8 +21,7 @@ class _RadioDemoState extends State<RadioDemo> {
       demo: ComponentWell(
         child: Padding(
           padding: const EdgeInsets.all(32.0),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             LdRadio(
               label: "Cookie",
               checked: _selection == "cookie",
@@ -34,8 +33,7 @@ class _RadioDemoState extends State<RadioDemo> {
               height: 8,
             ),
             LdRadio(
-              label:
-                  "Pie with a very long label to explain what this choice does",
+              label: "Pie with a very long label to explain what this choice does",
               checked: _selection == "pie",
               onChanged: (p0) => setState(() {
                 _selection = "pie";

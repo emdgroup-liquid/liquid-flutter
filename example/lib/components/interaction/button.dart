@@ -94,16 +94,10 @@ class _ButtonDemoState extends State<ButtonDemo> {
                         value: _mode,
                         label: "Mode",
                         items: const [
-                          LdSelectItem(
-                              child: Text("Filled"),
-                              value: LdButtonMode.filled),
-                          LdSelectItem(
-                              child: Text("Outline"),
-                              value: LdButtonMode.outline),
-                          LdSelectItem(
-                              child: Text("Ghost"), value: LdButtonMode.ghost),
-                          LdSelectItem(
-                              child: Text("Vague"), value: LdButtonMode.vague),
+                          LdSelectItem(child: Text("Filled"), value: LdButtonMode.filled),
+                          LdSelectItem(child: Text("Outline"), value: LdButtonMode.outline),
+                          LdSelectItem(child: Text("Ghost"), value: LdButtonMode.ghost),
+                          LdSelectItem(child: Text("Vague"), value: LdButtonMode.vague),
                         ],
                         onChanged: _changeMode),
                   ],
@@ -133,15 +127,10 @@ class _ButtonDemoState extends State<ButtonDemo> {
                         value: _size,
                         label: "Size",
                         items: const [
-                          LdSelectItem(
-                              child: Text("Extra Small (XS)"),
-                              value: LdSize.xs),
-                          LdSelectItem(
-                              child: Text("Small (S)"), value: LdSize.s),
-                          LdSelectItem(
-                              child: Text("Medium (M)"), value: LdSize.m),
-                          LdSelectItem(
-                              child: Text("Large (L)"), value: LdSize.l),
+                          LdSelectItem(child: Text("Extra Small (XS)"), value: LdSize.xs),
+                          LdSelectItem(child: Text("Small (S)"), value: LdSize.s),
+                          LdSelectItem(child: Text("Medium (M)"), value: LdSize.m),
+                          LdSelectItem(child: Text("Large (L)"), value: LdSize.l),
                         ],
                         onChanged: _changeSize),
                   ],
@@ -218,8 +207,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                           LdNotificationsController.of(context).addNotification(
                             LdNotification(
                               type: LdNotificationType.success,
-                              message:
-                                  "You pressed a button with a leading widget!",
+                              message: "You pressed a button with a leading widget!",
                             ),
                           );
                         },
@@ -232,8 +220,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                           LdNotificationsController.of(context).addNotification(
                             LdNotification(
                               type: LdNotificationType.success,
-                              message:
-                                  "You pressed a button with a trailing widget!",
+                              message: "You pressed a button with a trailing widget!",
                             ),
                           );
                         },
@@ -326,8 +313,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                         onPressed: () {
                           LdNotificationsController.of(context).addNotification(
                             LdNotification(
-                                message: "You pressed the full width button",
-                                type: LdNotificationType.success),
+                                message: "You pressed the full width button", type: LdNotificationType.success),
                           );
                         },
                         width: double.infinity,
@@ -351,19 +337,18 @@ class _ButtonDemoState extends State<ButtonDemo> {
                     children: [
                       /*begin demo:LdButtonConfig*/
                       LdButtonConfigProvider(
-                        const LdButtonConfig(
+                        config: const LdButtonConfig(
                           mode: LdButtonMode.outline,
                           size: LdSize.s,
                           disabled: false,
                         ),
-                        Wrap(
+                        child: Wrap(
                           spacing: 8,
                           runSpacing: 8,
                           children: [
                             LdButton(
                               onPressed: () {
-                                LdNotificationsController.of(context)
-                                    .addNotification(
+                                LdNotificationsController.of(context).addNotification(
                                   LdNotification(
                                     message: "Button 1",
                                     type: LdNotificationType.success,
@@ -374,8 +359,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                             ),
                             LdButton(
                               onPressed: () {
-                                LdNotificationsController.of(context)
-                                    .addNotification(
+                                LdNotificationsController.of(context).addNotification(
                                   LdNotification(
                                     message: "Button 2",
                                     type: LdNotificationType.success,
@@ -388,8 +372,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                               mode: LdButtonMode.filled,
                               size: LdSize.m,
                               onPressed: () {
-                                LdNotificationsController.of(context)
-                                    .addNotification(
+                                LdNotificationsController.of(context).addNotification(
                                   LdNotification(
                                     message: "Button 3 (overrides config)",
                                     type: LdNotificationType.success,

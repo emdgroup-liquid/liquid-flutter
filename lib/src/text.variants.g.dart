@@ -459,7 +459,7 @@ class LdText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LdTextWidget(
+    return _LdTextWidget(
       text,
       textAlign: textAlign,
       maxLines: maxLines,

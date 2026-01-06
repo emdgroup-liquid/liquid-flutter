@@ -30,8 +30,8 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
             child: child,
             disabled: (listSelection.length > 1 && !listSelection.contains(item.value!.id)) || visibleActions.isEmpty,
             builder: (context, isShuttle, open, isOpen, child) => LdButtonConfigProvider(
-              LdButtonConfig(active: isOpen),
-              child!,
+              config: LdButtonConfig(active: isOpen),
+              child: child!,
             ),
             menuProviders: (context) => [
               Provider<LdPaginatorItem<T>>.value(value: item),
@@ -56,7 +56,7 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
                 children: visibleActions
                     .map(
                       (action) => LdButtonConfigProvider(
-                          const LdButtonConfig(
+                          config: const LdButtonConfig(
                             borderRadius: BorderRadius.zero,
                             disableSqueeze: true,
                             alignment: MainAxisAlignment.start,
@@ -66,7 +66,7 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
                             width: double.infinity,
                             mode: LdButtonMode.ghost,
                           ),
-                          action.build(context)),
+                          child: action.build(context)),
                     )
                     .toList(),
               ),

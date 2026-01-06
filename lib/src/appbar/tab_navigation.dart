@@ -17,7 +17,7 @@ class LdNavigationTab {
   const LdNavigationTab({required this.label, required this.icon, required this.route, this.isActive});
 }
 
-class TabNavigation extends StatefulWidget {
+class LdTabNavigation extends StatefulWidget {
   final String activeRoute;
   final void Function(String route) onTabPressed;
   final List<LdNavigationTab> tabs;
@@ -30,7 +30,7 @@ class TabNavigation extends StatefulWidget {
   final bool enableGradient;
   final int maxVisibleTabs;
 
-  const TabNavigation({
+  const LdTabNavigation({
     super.key,
     required this.activeRoute,
     required this.tabs,
@@ -46,10 +46,10 @@ class TabNavigation extends StatefulWidget {
   });
 
   @override
-  State<TabNavigation> createState() => _TabNavigationState();
+  State<LdTabNavigation> createState() => _LdTabNavigationState();
 }
 
-class _TabNavigationState extends State<TabNavigation> {
+class _LdTabNavigationState extends State<LdTabNavigation> {
   final FocusNode _focusNode = FocusNode();
   final GlobalKey<LdContextMenuState> _moreMenuKey = GlobalKey();
 
@@ -92,7 +92,7 @@ class _TabNavigationState extends State<TabNavigation> {
   double _navWidth = 0;
 
   @override
-  void didUpdateWidget(TabNavigation oldWidget) {
+  void didUpdateWidget(LdTabNavigation oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.activeRoute != widget.activeRoute) {

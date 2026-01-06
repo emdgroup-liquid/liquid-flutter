@@ -9,19 +9,19 @@ part 'counter.variants.g.dart';
   Variant('l', defaults: {'size': 'LdSize.l'}),
   Variant('xs', defaults: {'size': 'LdSize.xs'}),
 ])
-class LdCounterWidget extends StatefulWidget {
+class _LdCounterWidget extends StatefulWidget {
   final double value;
 
   final LdSize size;
   final int precision;
 
-  const LdCounterWidget({super.key, required this.value, this.precision = 0, this.size = LdSize.m});
+  const _LdCounterWidget({required this.value, this.precision = 0, this.size = LdSize.m});
 
   @override
-  State<LdCounterWidget> createState() => _LdCounterState();
+  State<_LdCounterWidget> createState() => _LdCounterState();
 }
 
-class _LdCounterState extends State<LdCounterWidget> {
+class _LdCounterState extends State<_LdCounterWidget> {
   final List<(bool, String)> _digits = [];
   @override
   void initState() {

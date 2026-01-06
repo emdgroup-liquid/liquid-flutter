@@ -437,10 +437,10 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
             return Provider.value(
               value: effectiveLayout,
               child: LdListItemConfigProvider(
-                const LdListItemConfig(
+                config: const LdListItemConfig(
                   trailing: LdListDefaultTrailingForward(),
                 ),
-                widget.child,
+                child: widget.child,
               ),
             );
           }

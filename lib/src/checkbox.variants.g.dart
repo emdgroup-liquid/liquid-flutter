@@ -24,9 +24,9 @@ class LdCheckboxConfig {
 }
 
 class LdCheckboxConfigProvider extends StatelessWidget {
-  const LdCheckboxConfigProvider(
-    this.config,
-    this.child, {
+  const LdCheckboxConfigProvider({
+    required this.config,
+    required this.child,
     super.key,
   });
 
@@ -154,7 +154,7 @@ class LdCheckbox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final config = Provider.of<LdCheckboxConfig?>(context, listen: true);
-    return LdCheckboxWidget(
+    return _LdCheckboxWidget(
       label: label,
       checked: checked ?? config?.checked ?? false,
       onChanged: onChanged ?? config?.onChanged,

@@ -14,7 +14,7 @@ enum LdRadioMode { primary, warning, error }
   Variant('warning', defaults: {'color': 'LdTheme.of(context).warning'}),
   Variant('error', defaults: {'color': 'LdTheme.of(context).error'}),
 ])
-class LdRadio extends StatelessWidget {
+class _LdRadioWidget extends StatelessWidget {
   final String? label;
   final bool checked;
   final bool disabled;
@@ -23,7 +23,7 @@ class LdRadio extends StatelessWidget {
   final LdColor? color;
   final Function(bool)? onChanged;
 
-  const LdRadio(
+  const _LdRadioWidget(
       {this.label,
       required this.checked,
       this.size = LdSize.s,

@@ -213,8 +213,10 @@ class VariantBuilder implements Builder {
       return [];
     }
 
-    final publicClassName =
-        classItem.name.substring(0, classItem.name.length - "Widget".length);
+    final publicClassName = classItem.name
+        .substring(0, classItem.name.length - "Widget".length)
+        .removePrefix("_");
+
     final privateWidgetName = classItem.name;
 
     // Extract type parameters from the class
@@ -718,17 +720,23 @@ class VariantBuilder implements Builder {
       // Constructor
       builder.constructors.add(Constructor((cb) {
         cb.constant = true;
-        cb.requiredParameters.add(Parameter((pb) => pb
-          ..name = 'config'
-          ..toThis = true));
-        cb.requiredParameters.add(Parameter((pb) => pb
-          ..name = 'child'
-          ..toThis = true));
-        cb.optionalParameters.add(Parameter((pb) => pb
-          ..name = 'key'
-          ..named = true
-          ..toSuper = true
-          ..required = false));
+        cb.optionalParameters.addAll([
+          Parameter((pb) => pb
+            ..name = 'config'
+            ..toThis = true
+            ..named = true
+            ..required = true),
+          Parameter((pb) => pb
+            ..name = 'child'
+            ..toThis = true
+            ..named = true
+            ..required = true),
+          Parameter((pb) => pb
+            ..name = 'key'
+            ..named = true
+            ..toSuper = true
+            ..required = false),
+        ]);
       }));
 
       // Build method
@@ -802,3 +810,12 @@ class _VariantData {
 }
 
 Builder variantGenerator(BuilderOptions _) => VariantBuilder();
+
+extension on String {
+  String removePrefix(String prefix) {
+    if (startsWith(prefix)) {
+      return substring(prefix.length);
+    }
+    return this;
+  }
+}

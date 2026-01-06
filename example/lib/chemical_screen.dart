@@ -399,7 +399,7 @@ class ChemicalShell extends StatelessWidget {
       resizeToAvoidBottomInset: false,
       debugName: "Chemical shell",
       appBars: [
-        TabNavigation(
+        LdTabNavigation(
           scrollBehavior: LdAppBarScrollBehavior.mobileOnly,
           activeRoute: GoRouterState.of(context).uri.path,
           tabs: [

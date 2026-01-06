@@ -9,7 +9,7 @@ part 'avatar.variants.g.dart';
   Variant('warning', defaults: {'color': 'LdTheme.of(context).warning'}),
   Variant('error', defaults: {'color': 'LdTheme.of(context).error'}),
 ])
-class LdAvatarWidget extends StatelessWidget {
+class _LdAvatarWidget extends StatelessWidget {
   final Widget child;
 
   final LdColor? color;
@@ -18,8 +18,7 @@ class LdAvatarWidget extends StatelessWidget {
 
   final LdSize size;
 
-  const LdAvatarWidget({
-    super.key,
+  const _LdAvatarWidget({
     required this.child,
     @ContextConfigurable() this.color,
     @ContextConfigurable() this.circular = false,

@@ -62,9 +62,9 @@ class LdListConfig<T extends Identifiable<IdType>, IdType> {
 
 class LdListConfigProvider<T extends Identifiable<IdType>, IdType>
     extends StatelessWidget {
-  const LdListConfigProvider(
-    this.config,
-    this.child, {
+  const LdListConfigProvider({
+    required this.config,
+    required this.child,
     super.key,
   });
 

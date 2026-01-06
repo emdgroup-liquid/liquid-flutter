@@ -9,14 +9,14 @@ part 'tag.variants.g.dart';
   Variant('warning', defaults: {'color': 'LdTheme.of(context).warning'}),
   Variant('error', defaults: {'color': 'LdTheme.of(context).error'}),
 ])
-class LdTagWidget extends StatelessWidget {
+class _LdTagWidget extends StatelessWidget {
   final Widget child;
 
   final Function? onDismiss;
   final LdSize size;
 
   final LdColor? color;
-  const LdTagWidget({Key? key, required this.child, this.color, this.onDismiss, this.size = LdSize.m})
+  const _LdTagWidget({Key? key, required this.child, this.color, this.onDismiss, this.size = LdSize.m})
       : super(key: key);
 
   double _padding(LdTheme theme) {

@@ -26,7 +26,7 @@ class DemoShell extends StatelessWidget {
             title: const Text("LdMonkey Demos"),
           ),
         if (isRoot || theme.platform.isDesktop)
-          TabNavigation(
+          LdTabNavigation(
             position: LdAppBarPositionMode.adaptive,
             order: 1,
             attachedMode: LdAppBarAttachedMode.attached,

@@ -32,13 +32,13 @@ class LdAppbarActionOverflowMenu extends StatelessWidget {
       menuBuilder: (context) => ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 200),
         child: LdButtonConfigProvider(
-          const LdButtonConfig(
+          config: const LdButtonConfig(
             mode: LdButtonMode.ghost,
             disableSqueeze: true,
             width: double.infinity,
             borderRadius: BorderRadius.zero,
           ),
-          ListView(
+          child: ListView(
             shrinkWrap: true,
             padding: EdgeInsets.zero,
             children: [

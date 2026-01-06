@@ -147,7 +147,7 @@ class LdHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LdHintWidget(
+    return _LdHintWidget(
       child: child,
       type: type,
       size: size,

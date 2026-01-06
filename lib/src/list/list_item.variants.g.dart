@@ -39,9 +39,9 @@ class LdListItemConfig {
 }
 
 class LdListItemConfigProvider extends StatelessWidget {
-  const LdListItemConfigProvider(
-    this.config,
-    this.child, {
+  const LdListItemConfigProvider({
+    required this.config,
+    required this.child,
     super.key,
   });
 

@@ -40,7 +40,7 @@ Widget ldCheckboxPreviewUnchecked() {
   Variant('warning', defaults: {'color': 'LdTheme.of(context).warning'}),
   Variant('error', defaults: {'color': 'LdTheme.of(context).error'}),
 ])
-class LdCheckboxWidget extends StatefulWidget {
+class _LdCheckboxWidget extends StatefulWidget {
   final String? label;
   final bool checked;
   final bool disabled;
@@ -49,7 +49,7 @@ class LdCheckboxWidget extends StatefulWidget {
   final LdSize size;
   final Function(bool)? onChanged;
   final LdColor? color;
-  const LdCheckboxWidget(
+  const _LdCheckboxWidget(
       {this.label,
       @ContextConfigurable() this.checked = false,
       @ContextConfigurable() this.onChanged,
@@ -61,10 +61,10 @@ class LdCheckboxWidget extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<LdCheckboxWidget> createState() => _LdCheckboxState();
+  State<_LdCheckboxWidget> createState() => _LdCheckboxState();
 }
 
-class _LdCheckboxState extends State<LdCheckboxWidget> {
+class _LdCheckboxState extends State<_LdCheckboxWidget> {
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);

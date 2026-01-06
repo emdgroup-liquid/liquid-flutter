@@ -709,10 +709,10 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
                       position: position,
                     ),
                     child: LdButtonConfigProvider(
-                      const LdButtonConfig(
+                      config: const LdButtonConfig(
                         mode: LdButtonMode.ghost,
                       ),
-                      Column(
+                      child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,
                         children: [

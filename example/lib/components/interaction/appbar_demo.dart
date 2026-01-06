@@ -227,7 +227,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
           attachedMode: _attachedMode,
         ),
         if (_showTabNavigation)
-          TabNavigation(
+          LdTabNavigation(
             activeRoute: _activeTabRoute,
             onTabPressed: (route) => setState(() => _activeTabRoute = route),
             tabs: const [

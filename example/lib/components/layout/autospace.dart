@@ -48,17 +48,21 @@ class _AutoSpaceDemoState extends State<AutoSpaceDemo> {
               LdText.hs(
                 "Second section",
               ),
-              const LdRadio(
-                checked: true,
-                label: "Option 1",
-              ),
-              const LdRadio(
-                checked: false,
-                label: "Option 2",
-              ),
-              const LdRadio(
-                checked: false,
-                label: "Option 3",
+              LdBundle(
+                children: [
+                  const LdRadio(
+                    checked: true,
+                    label: "Option 1",
+                  ),
+                  const LdRadio(
+                    checked: false,
+                    label: "Option 2",
+                  ),
+                  const LdRadio(
+                    checked: false,
+                    label: "Option 3",
+                  ),
+                ],
               ),
               const LdCheckbox(checked: true, label: "Agree to the ToS"),
               LdButton(child: const Text("Button"), onPressed: () {}),

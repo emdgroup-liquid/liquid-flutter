@@ -15,9 +15,9 @@ class LdAvatarConfig {
 }
 
 class LdAvatarConfigProvider extends StatelessWidget {
-  const LdAvatarConfigProvider(
-    this.config,
-    this.child, {
+  const LdAvatarConfigProvider({
+    required this.config,
+    required this.child,
     super.key,
   });
 
@@ -115,7 +115,7 @@ class LdAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final config = Provider.of<LdAvatarConfig?>(context, listen: true);
-    return LdAvatarWidget(
+    return _LdAvatarWidget(
       child: child,
       color: color ?? config?.color,
       circular: circular ?? config?.circular ?? false,

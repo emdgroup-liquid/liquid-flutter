@@ -42,9 +42,9 @@ class LdButtonConfig {
 }
 
 class LdButtonConfigProvider extends StatelessWidget {
-  const LdButtonConfigProvider(
-    this.config,
-    this.child, {
+  const LdButtonConfigProvider({
+    required this.config,
+    required this.child,
     super.key,
   });
 
@@ -505,7 +505,7 @@ class LdButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final config = Provider.of<LdButtonConfig?>(context, listen: true);
-    return LdButtonWidget(
+    return _LdButtonWidget(
       child: child,
       onPressed: onPressed,
       autoLoading: autoLoading ?? config?.autoLoading ?? true,

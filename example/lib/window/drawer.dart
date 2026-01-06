@@ -82,6 +82,12 @@ const components = [
   _Component("Modal", "/components/modal", LucideIcons.messageSquare, ComponentCategory.interaction),
   _Component("Orb", "/components/orb", LucideIcons.droplet, ComponentCategory.interaction),
   _Component("Speed Reader", "/components/speed-reader", LucideIcons.bookOpen, ComponentCategory.interaction),
+  _Component(
+    "Tab Navigation",
+    "/components/tab",
+    LucideIcons.betweenVerticalEnd,
+    ComponentCategory.interaction,
+  ),
 
   // Data Display
   _Component("Icon", "/components/icon", LucideIcons.image, ComponentCategory.dataDisplay),

@@ -27,18 +27,17 @@ enum LdHintType {
   Variant('pending', defaults: {'type': 'LdHintType.pending'}),
   Variant('ongoing', defaults: {'type': 'LdHintType.ongoing'}),
 ])
-class LdHintWidget extends StatelessWidget {
+class _LdHintWidget extends StatelessWidget {
   final Widget? child;
   final LdHintType type;
   final LdSize size;
   final CrossAxisAlignment crossAxisAlignment;
 
-  const LdHintWidget({
+  const _LdHintWidget({
     this.child,
     required this.type,
     this.size = LdSize.m,
     this.crossAxisAlignment = CrossAxisAlignment.center,
-    super.key,
   });
 
   @override

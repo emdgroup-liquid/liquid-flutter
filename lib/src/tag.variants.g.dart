@@ -73,7 +73,7 @@ class LdTag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LdTagWidget(
+    return _LdTagWidget(
       child: child,
       color: color,
       onDismiss: onDismiss,

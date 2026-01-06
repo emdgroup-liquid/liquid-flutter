@@ -128,7 +128,7 @@ class LdIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LdIndicatorWidget(
+    return _LdIndicatorWidget(
       type: type,
       size: size,
       customSize: customSize,

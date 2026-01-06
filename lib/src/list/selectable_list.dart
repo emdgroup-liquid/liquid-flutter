@@ -391,8 +391,8 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
           onPressed: () => onTap(item.value!.id),
         );
         return LdListItemConfigProvider(
-          config,
-          widget.itemBuilder(context, item, index),
+          config: config,
+          child: widget.itemBuilder(context, item, index),
         );
       },
     );
@@ -403,11 +403,11 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
   @override
   Widget build(BuildContext context) {
     final list = LdListConfigProvider(
-      LdListConfig(
+      config: LdListConfig(
         paginator: widget.paginator,
         scrollController: _scrollController,
       ),
-      widget.listBuilder?.call(context, _wrapListItem) ?? _defaultListBuilder(context, _wrapListItem),
+      child: widget.listBuilder?.call(context, _wrapListItem) ?? _defaultListBuilder(context, _wrapListItem),
     );
 
     if (isMobile) {

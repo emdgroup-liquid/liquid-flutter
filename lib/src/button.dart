@@ -26,7 +26,7 @@ enum LdButtonMode { filled, outline, ghost, vague }
   Variant('error', defaults: {'color': 'LdTheme.of(context).error'}),
   Variant('success', defaults: {'color': 'LdTheme.of(context).success'}),
 ])
-class LdButtonWidget extends StatefulWidget {
+class _LdButtonWidget extends StatefulWidget {
   final Widget child;
   final FutureOr<void> Function() onPressed;
   final bool disabled;
@@ -51,7 +51,7 @@ class LdButtonWidget extends StatefulWidget {
   final String? loadingText;
   final String? errorText;
 
-  const LdButtonWidget({
+  const _LdButtonWidget({
     required this.child,
     required this.onPressed,
     @ContextConfigurable() this.autoLoading = true,
@@ -77,10 +77,10 @@ class LdButtonWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<LdButtonWidget> createState() => _LdButtonState();
+  State<_LdButtonWidget> createState() => _LdButtonState();
 }
 
-class _LdButtonState extends State<LdButtonWidget> {
+class _LdButtonState extends State<_LdButtonWidget> {
   bool _loading = false;
 
   bool _failed = false;
@@ -209,7 +209,7 @@ class _LdButtonState extends State<LdButtonWidget> {
   }
 
   @override
-  void didUpdateWidget(covariant LdButtonWidget oldWidget) {
+  void didUpdateWidget(covariant _LdButtonWidget oldWidget) {
     if (oldWidget.loading != widget.loading) {
       setState(() {
         _loading = widget.loading;

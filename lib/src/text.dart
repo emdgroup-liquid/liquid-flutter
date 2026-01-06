@@ -79,51 +79,48 @@ TextStyle ldBuildTextStyle(LdTheme theme, LdTextType type, LdSize size,
 }
 
 @Variants([
+  Variant('caption', defaults: {'type': 'LdTextType.caption'}),
+  Variant('h', defaults: {'type': 'LdTextType.headline', 'size': 'LdSize.m'}),
+  Variant('hl', defaults: {'type': 'LdTextType.headline', 'size': 'LdSize.l'}),
+  Variant('hs', defaults: {'type': 'LdTextType.headline', 'size': 'LdSize.s'}),
+  Variant('hxs', defaults: {'type': 'LdTextType.headline', 'size': 'LdSize.xs'}),
+  Variant('l', defaults: {'type': 'LdTextType.label'}),
+  Variant('ll', defaults: {'type': 'LdTextType.label', 'size': 'LdSize.l'}),
+  Variant('ls', defaults: {'type': 'LdTextType.label', 'size': 'LdSize.s'}),
+  Variant('lxs', defaults: {'type': 'LdTextType.label', 'size': 'LdSize.xs'}),
   Variant('p', defaults: {'type': 'LdTextType.paragraph'}),
   Variant('pl', defaults: {'type': 'LdTextType.paragraph', 'size': 'LdSize.l'}),
   Variant('ps', defaults: {'type': 'LdTextType.paragraph', 'size': 'LdSize.s'}),
   Variant('pxs', defaults: {'type': 'LdTextType.paragraph', 'size': 'LdSize.xs'}),
-  Variant('hl', defaults: {'type': 'LdTextType.headline', 'size': 'LdSize.l'}),
-  Variant('h', defaults: {'type': 'LdTextType.headline', 'size': 'LdSize.m'}),
-  Variant('hs', defaults: {'type': 'LdTextType.headline', 'size': 'LdSize.s'}),
-  Variant('hxs', defaults: {'type': 'LdTextType.headline', 'size': 'LdSize.xs'}),
-  Variant('l', defaults: {'type': 'LdTextType.label'}),
-  Variant('ls', defaults: {'type': 'LdTextType.label', 'size': 'LdSize.s'}),
-  Variant('ll', defaults: {'type': 'LdTextType.label', 'size': 'LdSize.l'}),
-  Variant('lxs', defaults: {'type': 'LdTextType.label', 'size': 'LdSize.xs'}),
-  Variant('caption', defaults: {'type': 'LdTextType.caption'}),
 ])
-class LdTextWidget extends StatelessWidget {
+class _LdTextWidget extends StatelessWidget {
+  final bool processLinks;
+  final Color? color;
+  final double? lineHeight;
+  final FontWeight? fontWeight;
+  final int? maxLines;
+  final LdSize size;
+  final LdTextType? type;
   final String text;
   final TextAlign? textAlign;
-  final int? maxLines;
-  final double? lineHeight;
-  final TextOverflow? overflow;
   final TextDecoration? decoration;
-  final FontWeight? fontWeight;
-  final Color? color;
-
-  final bool processLinks;
-
-  final LdSize size;
-
-  final LdTextType? type;
-
+  final TextOverflow? overflow;
   final void Function(String)? onLinkTap;
 
-  const LdTextWidget(this.text,
-      {super.key,
-      this.textAlign,
-      this.maxLines,
-      this.overflow,
-      this.decoration,
-      this.size = LdSize.m,
-      this.type = LdTextType.paragraph,
-      this.onLinkTap,
-      this.fontWeight,
-      this.lineHeight,
-      this.processLinks = false,
-      this.color});
+  const _LdTextWidget(
+    this.text, {
+    this.color,
+    this.decoration,
+    this.fontWeight,
+    this.lineHeight,
+    this.maxLines,
+    this.onLinkTap,
+    this.overflow,
+    this.processLinks = false,
+    this.size = LdSize.m,
+    this.textAlign,
+    this.type = LdTextType.paragraph,
+  });
 
   @override
   Widget build(BuildContext context) {

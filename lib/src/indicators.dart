@@ -25,13 +25,12 @@ enum LdIndicatorType {
   Variant('pending', defaults: {'type': 'LdIndicatorType.pending'}),
   Variant('ongoing', defaults: {'type': 'LdIndicatorType.ongoing'}),
 ])
-class LdIndicatorWidget extends StatelessWidget {
+class _LdIndicatorWidget extends StatelessWidget {
   final LdIndicatorType type;
   final LdSize size;
   final double? customSize;
 
-  const LdIndicatorWidget({
-    super.key,
+  const _LdIndicatorWidget({
     required this.type,
     this.size = LdSize.m,
     this.customSize,
