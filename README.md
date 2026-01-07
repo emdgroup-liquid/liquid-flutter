@@ -5,7 +5,7 @@
 ## Liquid Flutter
 
 This is a [flutter](https://flutter.dev) implementation of the [liquid design system](https://liquid.emd.design) used at EMD. It is designed to be used in desktop and mobile applications.
-While the design system is licensed under [Apache 2.0](./LICENSE) please note that [EMD Branding elements](https://github.com/emdgroup-liquid/liquid-flutter-emd-theme) are provided with a proprietary license.
+While the design system is licensed under [Apache 2.0](./LICENSE) please note that [EMD Branding elements](./packages/liquid_flutter_emd_theme/) are provided with a proprietary license.
 
 Please rely on the [online documentation](https://emdgroup-liquid.github.io/liquid-flutter/)
 

@@ -1,0 +1,12 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+
+analyzer:
+  exclude:
+    - lib/oss_licenses.dart
+    - build/**
+
+formatter:
+  page_width: 120

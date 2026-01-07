@@ -1,0 +1,28 @@
+{
+  "de": [
+    "search",
+    "selectTime",
+    "clearError",
+    "createNew",
+    "delete",
+    "deleteSelected",
+    "deleteNItems",
+    "edit",
+    "select",
+    "filter",
+    "apply",
+    "activeFilters",
+    "sort",
+    "minimize",
+    "maximize",
+    "showDrawer",
+    "hideDrawer",
+    "clearSelection",
+    "clearSelectionBody",
+    "openDrawer",
+    "closeDrawer",
+    "ctrlListExplanation",
+    "listHidden",
+    "shiftListExplanation"
+  ]
+}

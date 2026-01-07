@@ -1,0 +1,20 @@
+name: liquid_flutter_emd_theme
+description: EMD theme for liquid flutter
+repository: https://github.com/emdgroup-liquid/liquid-flutter-emd-theme
+version: 0.0.4
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+resolution: workspace
+dependencies:
+  flutter:
+    sdk: flutter
+  liquid_flutter: ^22.0.1
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: EMD
+      fonts:
+        - asset: lib/fonts/EMD.ttf
+    - family: LiquidIcons
+      fonts:
+        - asset: lib/fonts/LiquidIcons.ttf

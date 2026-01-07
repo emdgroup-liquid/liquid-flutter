@@ -1,13 +1,16 @@
 name: "Release Main"
+
 on:
   push:
     branches:
       - main
+
 jobs:
-  release_liquid_flutter:
+  release_packages:
+    runs-on: ubuntu-latest
     permissions:
       id-token: write
-    runs-on: ubuntu-latest
+      contents: write
     steps:
       - name: 🔑 Get token for bumper app
         uses: actions/create-github-app-token@v1
@@ -15,107 +18,251 @@ jobs:
         with:
           app-id: ${{ secrets.bumper_app_id }}
           private-key: ${{ secrets.bumper_key }}
+
       - name: 👀 Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+
+      - name: Install Git LFS
+        run: sudo apt-get install -y git-lfs && git lfs install
+
+      - name: Pull LFS files
+        run: git lfs pull
+
       - name: Install Flutter
         uses: subosito/flutter-action@v2
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Install Melos
+        run: dart pub global activate melos
+
+      - name: Install mtrust_api_guard
+        run: dart pub global activate mtrust_api_guard
+
       - name: Configure git
         run: |
           git fetch --prune --unshallow
           git config --global user.name "GitHub Actions"
           git config --global user.email "gh-actions@emdgroup.com"
-      - name: 🔂 Run standard-version
-        run: |
-          npx standard-version --skip.tag
-      - name: ⏎ Get new version
-        uses: actions/github-script@v7
-        id: get_new_version
-        with:
-          result-encoding: string
-          script: |
-            const fs = require('fs');
-            const package = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-            return package.version;
-      - run: npm install yaml
-      - name: Update version in pubspec
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const yaml = require("yaml");
-            const version = '${{ steps.get_new_version.outputs.result }}';
-            const pubspec = yaml.parse(fs.readFileSync('pubspec.yaml', 'utf8'));
-            pubspec.version = version;
-            fs.writeFileSync('pubspec.yaml', yaml.stringify(pubspec));
-      - name: Run build runner
-        run: flutter pub run build_runner build --delete-conflicting-outputs
-      - name: Generate l10n
-        run: flutter gen-l10n
+
+      - name: Bootstrap Melos
+        run: melos bootstrap
+
+      - name: Run analyzer
+        run: melos exec -- dart analyze
+
       - name: Run tests
-        run: flutter test
+        run: melos exec -- flutter test
 
-      - name: Run linter
-        run: flutter analyze
-      - name: Add changed source files
+      - name: Get changed packages
+        id: changed_packages
         run: |
-          git add pubspec.yaml lib/ package.json
-          git commit -m "chore(release): ${{ steps.get_new_version.outputs.result }} [skip ci]"
-      - name: Dry run publish
-        run: flutter pub publish --dry-run
+          # Get list of changed packages
+          CHANGED_PACKAGES=$(melos exec --diff=origin/main -- echo '$MELOS_PACKAGE_NAME' | grep -v '^$' | sort -u || true)
+          if [ -z "$CHANGED_PACKAGES" ]; then
+            echo "No changed packages detected"
+            echo "packages=" >> $GITHUB_OUTPUT
+          else
+            echo "Changed packages: $CHANGED_PACKAGES"
+            echo "packages<<EOF" >> $GITHUB_OUTPUT
+            echo "$CHANGED_PACKAGES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
 
-      - run: |
-          git push origin main
+      - name: Version changed packages
+        id: version_packages
+        continue-on-error: true
+        run: |
+          mkdir -p version_outputs
+          
+          # Run mtrust_api_guard on changed packages (no pre-release for main)
+          melos exec --diff=origin/main -- bash -c '
+            if [ -f "pubspec.yaml" ]; then
+              PACKAGE_NAME=$(basename $(pwd))
+              OUTPUT_FILE="version_output_${PACKAGE_NAME}.json"
+              
+              # Try to run mtrust_api_guard if api_guard directory exists
+              if [ -d "api_guard" ]; then
+                echo "Running mtrust_api_guard for $PACKAGE_NAME"
+                if mtrust_api_guard version --no-commit --no-tag --badge --generate-changelog --json=$OUTPUT_FILE; then
+                  if [ -f "$OUTPUT_FILE" ]; then
+                    cp "$OUTPUT_FILE" "../../version_outputs/"
+                    echo "Version output saved for $PACKAGE_NAME"
+                  fi
+                fi
+              else
+                echo "Skipping $PACKAGE_NAME (no api_guard directory - package will not be versioned automatically)"
+              fi
+            fi
+          '
 
-      - name: 🪵 Extract changelog for current version
+      - name: Update package versions and dependencies
+        run: |
+          # Install yaml parser
+          npm install -g yaml
+          
+          # Process each version output using inline node script to avoid shell escaping issues
+          if [ -d "version_outputs" ]; then
+            for version_file in version_outputs/version_output_*.json; do
+              if [ -f "$version_file" ]; then
+                echo "Processing version file: $version_file"
+                node -e "
+                  const fs = require('fs');
+                  const yaml = require('yaml');
+                  const path = require('path');
+                  
+                  const versionFile = process.argv[1];
+                  const versionData = JSON.parse(fs.readFileSync(versionFile, 'utf8'));
+                  const packageName = path.basename(versionFile, '.json').replace('version_output_', '');
+                  const newVersion = versionData.version;
+                  
+                  console.log('Updating ' + packageName + ' to version ' + newVersion);
+                  
+                  const packagesDir = 'packages';
+                  const packageDirs = fs.readdirSync(packagesDir, { withFileTypes: true })
+                    .filter(dirent => dirent.isDirectory())
+                    .map(dirent => dirent.name);
+                  
+                  const packageDir = packageDirs.find(dir => dir === packageName);
+                  if (!packageDir) {
+                    console.log('Package directory not found for ' + packageName);
+                    process.exit(0);
+                  }
+                  
+                  const packagePath = path.join(packagesDir, packageDir);
+                  const pubspecPath = path.join(packagePath, 'pubspec.yaml');
+                  
+                  const pubspec = yaml.parse(fs.readFileSync(pubspecPath, 'utf8'));
+                  pubspec.version = newVersion;
+                  fs.writeFileSync(pubspecPath, yaml.stringify(pubspec));
+                  console.log('Updated ' + packageName + ' version to ' + newVersion);
+                  
+                  console.log('Updating dependants of ' + packageName);
+                  const allPubspecs = [];
+                  function findPubspecs(dir) {
+                    const entries = fs.readdirSync(dir, { withFileTypes: true });
+                    for (const entry of entries) {
+                      const fullPath = path.join(dir, entry.name);
+                      if (entry.isDirectory() && entry.name !== 'node_modules' && entry.name !== '.dart_tool') {
+                        findPubspecs(fullPath);
+                      } else if (entry.isFile() && entry.name === 'pubspec.yaml') {
+                        allPubspecs.push(fullPath);
+                      }
+                    }
+                  }
+                  findPubspecs(packagesDir);
+                  
+                  for (const pubspecFile of allPubspecs) {
+                    const pubspecContent = yaml.parse(fs.readFileSync(pubspecFile, 'utf8'));
+                    if (pubspecContent.dependencies && pubspecContent.dependencies[packageName]) {
+                      const dep = pubspecContent.dependencies[packageName];
+                      if (typeof dep === 'object' && dep.path) {
+                        console.log('Skipping path dependency in ' + path.dirname(pubspecFile));
+                        continue;
+                      }
+                      if (typeof dep === 'string') {
+                        pubspecContent.dependencies[packageName] = '^' + newVersion;
+                      } else if (dep && !dep.path && dep.version) {
+                        pubspecContent.dependencies[packageName].version = '^' + newVersion;
+                      }
+                      fs.writeFileSync(pubspecFile, yaml.stringify(pubspecContent));
+                      console.log('Updated dependency in ' + path.dirname(pubspecFile));
+                    }
+                  }
+                " "$version_file"
+              fi
+            done
+          fi
+
+      - name: Run dry-run publish for changed packages
+        run: |
+          melos exec --diff=origin/main -- bash -c '
+            if [ -f "pubspec.yaml" ] && [ "$(grep -c "publish_to: none" pubspec.yaml || true)" -eq 0 ]; then
+              PACKAGE_NAME=$(basename $(pwd))
+              echo "Running dry-run publish for $PACKAGE_NAME"
+              flutter pub publish --dry-run || true
+            fi
+          ' || true
+
+      - name: Commit version changes
+        run: |
+          git add packages/*/pubspec.yaml
+          if git diff --staged --quiet; then
+            echo "No version changes to commit"
+          else
+            git commit -m "chore(release): update package versions [skip ci]" || true
+          fi
+
+      - name: Create and push tags
+        run: |
+          if [ -d "version_outputs" ]; then
+            for version_file in version_outputs/version_output_*.json; do
+              if [ -f "$version_file" ]; then
+                PACKAGE_NAME=$(basename "$version_file" | sed 's/version_output_//' | sed 's/.json//')
+                NEW_VERSION=$(node -e "const fs=require('fs'); const data=JSON.parse(fs.readFileSync('$version_file')); console.log(data.version);")
+                
+                # Convert package name to tag format (liquid_flutter_test_utils -> liquid-flutter-test-utils)
+                TAG_NAME=$(echo "$PACKAGE_NAME" | sed 's/_/-/g')-v$NEW_VERSION
+                
+                echo "Creating tag: $TAG_NAME"
+                git tag "$TAG_NAME" || true
+              fi
+            done
+            
+            # Push tags
+            git push origin --tags || true
+          fi
+
+      - name: Push changes
+        run: |
+          git push origin main || true
+
+      - name: 🪵 Extract changelogs and create releases
         uses: actions/github-script@v7
         with:
           script: |
-            const fs = require("fs");
-            const changelog = fs.readFileSync("CHANGELOG.md", "utf8");
-            const lines = changelog.split("\n");
-            let lastVersion = [];
-            for (let line of lines) {
-                // Match the version header, by looking for a markdown header followed by semver  (optionally wrapped in [])
-                // Semver regex from https://semver.org/
-                if (line.match(/^#{2,} \[?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?\]?/)) {
-                    if (lastVersion.length != 0) {
-                        break;
-                    } else {
-                        console.log("Extracting changelog for: " + line)
-                        lastVersion.push(line);
-                        continue;
-                    }
-                }
-                if (lastVersion.length > 0) {
-                    lastVersion.push(line);
-                }
+            const fs = require('fs');
+            const path = require('path');
+            
+            if (!fs.existsSync('version_outputs')) {
+              console.log('No version outputs found');
+              return;
             }
-
-            fs.writeFileSync("last_version.md", lastVersion.slice(1).join("\n").trim(), "utf8");
-
-      # Create a release
-      - name: 🚀 Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ steps.get_new_version.outputs.result }}
-          name: Release ${{ steps.get_new_version.outputs.result }}
-          body_path: last_version.md
-          prerelease: false
-
-      # - name: Publish to pub.dev
-      #   uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+            
+            const files = fs.readdirSync('version_outputs');
+            for (const file of files) {
+              if (file.startsWith('version_output_') && file.endsWith('.json')) {
+                try {
+                  const filePath = path.join('version_outputs', file);
+                  const versionData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+                  const packageName = file.replace('version_output_', '').replace('.json', '');
+                  const tagName = packageName.replace(/_/g, '-') + '-v' + versionData.version;
+                  
+                  // Create release
+                  await github.rest.repos.createRelease({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    tag_name: tagName,
+                    name: `${packageName} ${versionData.version}`,
+                    body: versionData.changelog || 'No changelog available',
+                    prerelease: false,
+                  });
+                  
+                  console.log(`Created release for ${tagName}`);
+                } catch (error) {
+                  console.error(`Error creating release for ${file}:`, error);
+                }
+              }
+            }
 
       - name: Build example
         run: |
-          cd example 
+          cd apps/example
           flutter build web --release --base-href /liquid-flutter/
+
       - name: Deploy example
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./example/build/web
+          publish_dir: ./apps/example/build/web

@@ -1,0 +1,6 @@
+targets:
+  $default:
+    builders:
+      pigeon:
+        options:
+          input: pigeons/messages.dart

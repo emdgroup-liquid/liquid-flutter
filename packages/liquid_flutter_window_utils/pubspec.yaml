@@ -1,0 +1,29 @@
+name: liquid_flutter_window_utils
+description: "Utility platform interface for interacting with the window"
+version: 0.0.1
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+  flutter: ">=3.3.0"
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  plugin_platform_interface: ^2.0.2
+  device_info_plus: ^11.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  pigeon: ^25.5.0
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.liquid.flutter.window_utils
+        pluginClass: LiquidFlutterWindowUtilsPlugin
+      macos:
+        pluginClass: LiquidFlutterWindowUtilsPlugin

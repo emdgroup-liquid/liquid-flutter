@@ -1,6 +1,0 @@
-{
-  "de": [
-    "search",
-    "selectTime"
-  ]
-}

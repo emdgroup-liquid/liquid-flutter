@@ -1,0 +1,132 @@
+import 'package:flutter/material.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
+
+/// A utility to reveal some content, with a fade in and collapse effect
+class LdReveal extends StatelessWidget {
+  final bool revealed;
+
+  final Widget child;
+
+  final double transformXOffset;
+  final double transformYOffset;
+
+  final double springConstant;
+  final double dampingCoefficient;
+  final double mass;
+  final bool? initialRevealed;
+  final int? bufferSprings;
+  final Set<Axis> axes;
+
+  final Function(BuildContext context, List<LdSpringState> states)? onAnimationEnd;
+
+  const LdReveal({
+    required this.revealed,
+    this.transformXOffset = 0,
+    this.transformYOffset = 0,
+    this.initialRevealed,
+    this.mass = 5,
+    this.onAnimationEnd,
+    this.axes = const {Axis.horizontal, Axis.vertical},
+
+    /// Springs that are added as a buffer to the reveal effect effectively delaying the opacity / scale effect to prevent clipping the content visibly. Increase this value if the reveal effect is clipping the content.
+    this.bufferSprings = 5,
+    this.springConstant = 5,
+    this.dampingCoefficient = 10,
+    required this.child,
+    super.key,
+  });
+
+  factory LdReveal.quick(
+      {required bool revealed,
+      required Widget child,
+      bool? initialRevealed,
+      Key? key,
+      Set<Axis> axes = const {Axis.horizontal, Axis.vertical},
+      double transformXOffset = 0,
+      double transformYOffset = 0}) {
+    return LdReveal(
+      revealed: revealed,
+      transformXOffset: transformXOffset,
+      transformYOffset: transformYOffset,
+      mass: 2,
+      bufferSprings: 5,
+      springConstant: 20,
+      dampingCoefficient: 15,
+      initialRevealed: initialRevealed,
+      axes: axes,
+      key: key,
+      child: child,
+    );
+  }
+
+  factory LdReveal.slow({
+    required bool revealed,
+    required Widget child,
+    bool? initialRevealed,
+    double transformXOffset = 0,
+    double transformYOffset = 0,
+    Set<Axis> axes = const {Axis.horizontal, Axis.vertical},
+  }) {
+    return LdReveal(
+      revealed: revealed,
+      transformXOffset: transformXOffset,
+      transformYOffset: transformYOffset,
+      mass: 2,
+      bufferSprings: 5,
+      springConstant: 10,
+      dampingCoefficient: 15,
+      initialRevealed: initialRevealed,
+      axes: axes,
+      child: child,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LdChainedSprings(
+      count: bufferSprings ?? 10,
+      reversed: !revealed,
+      targetPosition: revealed ? 1 : 0,
+      onAnimationEnd: onAnimationEnd,
+      initialPosition: initialRevealed != null ? (initialRevealed! ? 1 : 0) : 0,
+      dampingCoefficient: dampingCoefficient,
+      springConstant: springConstant,
+      mass: mass,
+      child: child,
+      builder: (context, states, child) {
+        final scaleValue = states.first.position.clamp(0.0, 1.0);
+        final opacityValue = states.last.position.clamp(0.0, 1.0);
+
+        double dx = 0.0, dy = 0.0, heightFactor = 1, widthFactor = 1;
+
+        heightFactor = scaleValue.clamp(0, 1);
+        widthFactor = scaleValue.clamp(0, 1);
+
+        dy = (1 - opacityValue) * transformYOffset;
+
+        dx = (1 - opacityValue) * transformXOffset;
+
+        return Transform.translate(
+          offset: Offset(dx, dy),
+          child: LdWrapConditional(
+            condition: heightFactor != 1 || widthFactor != 1,
+            builder: (context, child) => ClipRRect(
+              child: Align(
+                heightFactor: axes.contains(Axis.vertical) ? heightFactor : 1,
+                widthFactor: axes.contains(Axis.horizontal) ? widthFactor : 1,
+                child: Transform.scale(
+                  scale: scaleValue.clamp(0, double.infinity),
+                  child: Opacity(
+                    opacity: opacityValue.clamp(0, 1),
+                    child: child,
+                  ),
+                ),
+              ),
+            ),
+            child: child!,
+          ),
+        );
+      },
+    );
+  }
+}

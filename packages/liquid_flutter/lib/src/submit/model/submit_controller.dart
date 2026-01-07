@@ -1,0 +1,238 @@
+import 'dart:async';
+import 'dart:math';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/haptics.dart';
+import 'package:liquid_flutter/src/submit/model/devtools.dart';
+
+/// Handles the lifecyle of a submit action. Pass a [LdSubmitConfig] to the
+/// controller to configure the submit action.
+/// Updated LdSubmitController that uses LdRetryController
+class LdSubmitController<T, Arg> {
+  final LdSubmitConfig<T, Arg> config;
+
+  late final String id;
+
+  final _stateController = StreamController<LdSubmitState<T>>.broadcast();
+  late final LdRetryController _retryController;
+  LdRetryController get retryController => _retryController;
+
+  Stream<LdSubmitState<T>> get stateStream => _stateController.stream;
+
+  ValueNotifier<Arg?>? arg;
+
+  LdSubmitController({required this.config, this.arg}) {
+    _retryController = LdRetryController(
+      onRetry: _nextAttempt,
+      config: config.retryConfig ?? const LdRetryConfig(),
+    );
+
+    id = Random().nextInt(1000000).toString();
+
+    // Listen to retry state changes to update submit state
+    _retryController.stateStream.listen((retryState) {
+      if (state.type == LdSubmitStateType.error) {
+        _stateController.add(
+          LdSubmitState<T>(
+            type: LdSubmitStateType.error,
+            error: state.error?.copyWith(
+              attempt: retryState.attempt,
+            ),
+          ),
+        );
+      }
+    });
+
+    arg?.addListener(_onArgChanged);
+  }
+
+  void _onArgChanged() {
+    if (config.autoTrigger && canTrigger) {
+      _trigger();
+    }
+  }
+
+  LdSubmitState<T> state = LdSubmitState<T>(type: LdSubmitStateType.idle);
+
+  Future<void> init() async {
+    if (config.autoTrigger) {
+      Future.delayed(Duration.zero, _trigger);
+    }
+    SubmitDevTools.instance.registerController(this);
+    _stateController.add(state);
+  }
+
+  void _setState(LdSubmitState<T> newState) {
+    state = newState;
+    if (!_stateController.isClosed) {
+      _stateController.add(newState);
+    }
+  }
+
+  bool get canCancel => config.allowCancel == true && _isLoading;
+
+  Future<void> cancel() async {
+    if (!canCancel) {
+      return;
+    }
+
+    if (config.onCanceled != null) {
+      config.onCanceled!();
+    }
+
+    if (ldPrintDebugMessages) {
+      debugPrint("Cancelling submit controller");
+    }
+
+    _retryController.reset();
+    _setState(LdSubmitState<T>(type: LdSubmitStateType.idle));
+  }
+
+  Future<void> _trigger() async {
+    if (_disposed) {
+      return;
+    }
+
+    if (config.hapticsEnabled) {
+      LdHaptics.vibrate(HapticsType.light);
+    }
+
+    _retryController.notifyOperationStarted();
+
+    _setState(
+      LdSubmitState<T>(type: LdSubmitStateType.loading),
+    );
+
+    T res;
+    try {
+      if (config.timeout != null) {
+        res = await config.action(arg?.value).timeout(config.timeout!);
+      } else {
+        res = await config.action(arg?.value);
+      }
+
+      if (!_isLoading) return;
+
+      _retryController.notifyOperationCompleted();
+
+      _setState(
+        LdSubmitState<T>(type: LdSubmitStateType.result, result: res),
+      );
+
+      if (config.hapticsEnabled) {
+        LdHaptics.vibrate(HapticsType.success);
+      }
+    } catch (e, s) {
+      // Somehow the state is not loading anymore...
+      if (!_isLoading) return;
+
+      // Convert the exception using the exceptionMapper
+      final exception = LdException(
+        exception: e,
+        stackTrace: s,
+        attempt: _retryController.state.attempt,
+      );
+
+      if (ldPrintDebugMessages) {
+        debugPrint(
+          "An error occurred in LdSubmitController<${T.toString()}>: $e \n $s",
+        );
+      }
+
+      if (config.hapticsEnabled) {
+        LdHaptics.vibrate(HapticsType.error);
+      }
+
+      _setState(
+        LdSubmitState(
+          type: LdSubmitStateType.error,
+          error: exception.copyWith(
+            attempt: _retryController.state.attempt,
+          ),
+        ),
+      );
+
+      // Handle the retry logic through the retry controller
+      _retryController.handleError(canRetry: exception.canRetry);
+    }
+  }
+
+  void debugForceError() {
+    if (!canTrigger) {
+      return;
+    }
+
+    _setState(
+      LdSubmitState<T>(type: LdSubmitStateType.error, error: LdException(exception: Exception("Debug error"))),
+    );
+  }
+
+  bool get _isError => state.type == LdSubmitStateType.error;
+  bool get _isLoading => state.type == LdSubmitStateType.loading;
+  bool get _isResult => state.type == LdSubmitStateType.result;
+  bool get _isIdle => state.type == LdSubmitStateType.idle;
+
+  bool get canRetry => _retryController.state.canRetry;
+
+  bool get canRetrigger => _isError && state.error?.canRetry == true;
+
+  bool get canTrigger => _isIdle || canRetry || (_isResult && config.allowResubmit == true);
+
+  Future<void> trigger() async {
+    if (!canTrigger) {
+      if (ldPrintDebugMessages) {
+        debugPrint("Cannot trigger, state is ${state.type}");
+      }
+      return;
+    }
+    await _trigger();
+  }
+
+  void _nextAttempt() {
+    if (_isError) {
+      _trigger();
+    }
+  }
+
+  void reset() {
+    if (ldPrintDebugMessages) {
+      debugPrint("Resetting submit controller");
+    }
+    _retryController.reset();
+    _setState(LdSubmitState<T>(type: LdSubmitStateType.idle));
+  }
+
+  bool _disposed = false;
+
+  bool get disposed => _disposed;
+
+  void dispose() {
+    if (_isLoading) {
+      cancel();
+    }
+    _retryController.dispose();
+    arg?.removeListener(_onArgChanged);
+    _disposed = true;
+    _stateController.close();
+    SubmitDevTools.instance.unregisterController(this);
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      "id": id,
+      "type": state.type.toString(),
+      "retryController": _retryController.toMap(),
+      "canRetry": canRetry,
+      "canRetrigger": canRetrigger,
+      "canTrigger": canTrigger,
+      "isError": _isError,
+      "isLoading": _isLoading,
+      "isResult": _isResult,
+      "isIdle": _isIdle,
+      "error": state.error?.toString(),
+      "result": state.result?.toString(),
+    };
+  }
+}

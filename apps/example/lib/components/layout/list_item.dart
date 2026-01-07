@@ -1,0 +1,179 @@
+import 'package:flutter/material.dart';
+import 'package:liquid/components/component_page.dart';
+import 'package:liquid/components/component_well/component_well.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
+
+class ListItemDemo extends StatefulWidget {
+  const ListItemDemo({super.key});
+
+  @override
+  State<ListItemDemo> createState() => _ListItemDemoState();
+}
+
+class _ListItemDemoState extends State<ListItemDemo> {
+  LdSelectionControl _showSelectionControls = LdSelectionControl.none;
+  final Set<int> _selectedItems = {};
+  bool _toggleValue = false;
+  void _setSelectionControls(LdSelectionControl value) {
+    setState(() {
+      _showSelectionControls = value;
+    });
+  }
+
+  void _selectItem(int index) {
+    setState(() {
+      _selectedItems.add(index);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ComponentPage(
+      path: "lib/components/layout/list_item.dart",
+      title: "LdListItem",
+      demo: LdAutoSpace(
+        children: [
+          LdText.p(
+              "The LdListItem can be used to display information in a list format. It supports:"),
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: LdText.p(
+              "• Leading and trailing widgets\n"
+              "• Selection controls (checkbox/radio)\n"
+              "• Disabled state\n"
+              "• Forward indicator\n"
+              "• Title and subtitle\n"
+              "• Custom tap handling",
+            ),
+          ),
+          ldSpacerL,
+          ComponentWell(
+            onSurface: true,
+            padding: EdgeInsets.zero,
+            child: Column(
+              children: [
+                LdListItem(
+                  selectionControl: _showSelectionControls,
+                  isSelected: _selectedItems.contains(0),
+                  onSelectionChanged: (selected) => _selectItem(0),
+                  leading: LdAvatar(
+                    child: Text("A"),
+                  ),
+                  title: Text("Liquid Flutter List"),
+                  subtitle: Text("This is a subtitle"),
+                ),
+                LdDivider(
+                  height: 1,
+                ),
+                LdListItem(
+                  leading: LdAvatar(
+                    child: Text("B"),
+                  ),
+                  onPressed: () {
+                    LdNotificationsController.of(context).addNotification(
+                      LdNotification(
+                          message: "You pressed the list item",
+                          type: LdNotificationType.success),
+                    );
+                  },
+                  title: Text("Press me"),
+                  subtitle: Text("I will  trade leading for selection control"),
+                ),
+                LdListSeperator(
+                  child: Text("This is a separator"),
+                ),
+                LdListItem(
+                  disabled: true,
+                  selectionControl: _showSelectionControls,
+                  isSelected: _selectedItems.contains(2),
+                  trailing: LdTag(
+                    child: Text("Hyper hyper"),
+                  ),
+                  onSelectionChanged: (selected) => _selectItem(2),
+                  leading: LdAvatar(
+                    child: Text("C"),
+                  ),
+                  title: Text("You cant press me because I am disabled"),
+                  subtitle: Text("This is another subtitle"),
+                ),
+                LdListItem(
+                  leading: LdAvatar(
+                    child: Text("D"),
+                  ),
+                  selectionControl: _showSelectionControls,
+                  isSelected: _selectedItems.contains(3),
+                  onSelectionChanged: (selected) => _selectItem(3),
+                  title: Text("Very Good Option"),
+                  subtitle: Text("This is another subtitle"),
+                )
+              ],
+            ),
+          ),
+          ldSpacerM,
+          LdSwitch<LdSelectionControl>(
+            children: const {
+              LdSelectionControl.none: Text("None"),
+              LdSelectionControl.checkbox: Text("Checkbox"),
+              LdSelectionControl.radio: Text("Radio")
+            },
+            value: _showSelectionControls,
+            onChanged: _setSelectionControls,
+          ),
+          ComponentWell(
+            title: LdText.h("LdListItemToggle"),
+            description: LdText.p(
+              "The LdListItemToggle is a convenient wrapper around LdListItem and LdToggle. It is used to toggle the value of a boolean variable.",
+            ),
+            onSurface: true,
+            child: Column(
+              children: [
+                LdListItemToggle(
+                  checked: _toggleValue,
+                  borderRadius: LdTheme.of(context).radius(LdSize.m),
+                  onChanged: (value) {
+                    setState(() {
+                      _toggleValue = value;
+                    });
+                  },
+                  title: Text("Toggle me"),
+                  subtitle: Text("I will toggle the value"),
+                )
+              ],
+            ),
+          ),
+          ComponentWell(
+            title: LdText.h("LdListItemLoading"),
+            description: LdText.p(
+              "Show some skeleton while waiting for the data to load.",
+            ),
+            onSurface: true,
+            child: LdAutoSpace(
+              children: [
+                LdText.p("With leading and subtitle"),
+                LdListItemLoading(
+                  hasLeading: true,
+                  hasSubtitle: true,
+                ),
+                LdText.p("With leading"),
+                LdListItemLoading(
+                  hasLeading: true,
+                ),
+                LdText.p("With leading and trailing"),
+                LdListItemLoading(
+                  hasLeading: true,
+                  hasTrailing: true,
+                ),
+                LdText.p("With leading and trailing and subtitle"),
+                LdListItemLoading(
+                  hasLeading: true,
+                  hasTrailing: true,
+                  hasSubtitle: true,
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
