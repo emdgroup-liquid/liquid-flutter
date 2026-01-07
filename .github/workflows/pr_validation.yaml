@@ -1,0 +1,186 @@
+name: "PR Validation"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - dev
+      - main
+
+jobs:
+  validate_pr:
+    permissions:
+      pull-requests: write
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/semantic_pull_request.yml@v1
+
+  validate_dart:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
+
+      - name: Install Git LFS
+        run: sudo apt-get install -y git-lfs && git lfs install
+
+      - name: Pull LFS files
+        run: git lfs pull
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+
+      - name: Install Melos
+        run: dart pub global activate melos
+
+      - name: Bootstrap Melos
+        run: melos bootstrap
+
+      - name: Run analyzer
+        run: melos exec -- dart analyze
+
+      - name: Run tests
+        run: |
+          melos exec -- flutter test --coverage --reporter json || true
+
+      - name: Report test results
+        uses: dorny/test-reporter@v2
+        if: always()
+        with:
+          name: Flutter Tests
+          path: "**/.dart_tool/test_results.json"
+          reporter: flutter-json
+          list-suites: all
+          list-tests: all
+          fail-on-error: false
+
+      - name: Install mtrust_api_guard
+        run: dart pub global activate mtrust_api_guard
+
+      - name: Run mtrust_api_guard on changed packages
+        id: version_check
+        continue-on-error: true
+        run: |
+          # Create directory to collect version outputs
+          mkdir -p version_outputs
+          
+          # Track if any packages were processed
+          PACKAGES_PROCESSED=0
+          
+          # Run mtrust_api_guard on changed packages and collect outputs
+          melos exec --diff=origin/${{ github.base_ref }} -- bash -c '
+            if [ -f "pubspec.yaml" ]; then
+              PACKAGE_NAME=$(basename $(pwd))
+              OUTPUT_FILE="version_output_${PACKAGE_NAME}.json"
+              
+              # Try to run mtrust_api_guard if api_guard directory exists, otherwise skip
+              if [ -d "api_guard" ]; then
+                if mtrust_api_guard version --no-commit --no-tag --badge --generate-changelog --json=$OUTPUT_FILE; then
+                  if [ -f "$OUTPUT_FILE" ]; then
+                    cp "$OUTPUT_FILE" "../../version_outputs/"
+                    echo "1" >> "../../version_outputs/.count"
+                  fi
+                fi
+              else
+                echo "Skipping $PACKAGE_NAME (no api_guard directory)"
+              fi
+            fi
+          '
+          
+          # Check if any packages were processed
+          if [ -f "version_outputs/.count" ]; then
+            PACKAGES_PROCESSED=$(cat version_outputs/.count | wc -l)
+          fi
+          
+          if [ "$PACKAGES_PROCESSED" -eq 0 ]; then
+            echo "No packages with version changes detected"
+            exit 0
+          fi
+
+      - name: Generate version summary and comment on PR
+        if: github.event_name == 'pull_request' && steps.version_check.outcome == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            const versionOutputsDir = 'version_outputs';
+            let allVersions = [];
+            
+            // Collect all version outputs
+            if (fs.existsSync(versionOutputsDir)) {
+              const files = fs.readdirSync(versionOutputsDir);
+              for (const file of files) {
+                if (file.startsWith('version_output_') && file.endsWith('.json')) {
+                  try {
+                    const filePath = path.join(versionOutputsDir, file);
+                    const content = fs.readFileSync(filePath, 'utf8');
+                    const versionData = JSON.parse(content);
+                    const packageName = file.replace('version_output_', '').replace('.json', '');
+                    allVersions.push({ package: packageName, ...versionData });
+                  } catch (error) {
+                    console.error(`Error parsing ${file}:`, error);
+                  }
+                }
+              }
+            }
+            
+            if (allVersions.length === 0) {
+              console.log('No version changes detected');
+              return;
+            }
+            
+            // Generate job summary
+            const jobSummary = core.summary;
+            jobSummary.addHeading('Version Analysis');
+            
+            for (const versionInfo of allVersions) {
+              jobSummary.addHeading(`Package: ${versionInfo.package}`, 3);
+              jobSummary.addRaw(`\n\n**Next Version:** \`${versionInfo.version}\`\n\n`);
+              
+              if (versionInfo.badge) {
+                jobSummary.addRaw(`\n\n**Badge:**\n<img src="data:image/svg+xml;utf8,${encodeURIComponent(versionInfo.badge)}" alt="Version Badge" />\n\n`);
+              }
+              
+              if (versionInfo.changelog) {
+                jobSummary.addHeading('Changelog', 4);
+                jobSummary.addRaw('\n\n');
+                jobSummary.addRaw(versionInfo.changelog);
+              }
+            }
+            
+            await jobSummary.write();
+            console.log('Job summary written');
+            
+            // Generate PR comment
+            let comment = '## Version Analysis\n\n';
+            
+            for (const versionInfo of allVersions) {
+              comment += `### ${versionInfo.package}\n\n`;
+              comment += `**Next Version:** \`${versionInfo.version}\`\n\n`;
+              
+              if (versionInfo.badge) {
+                comment += `**Badge:**\n<img src="data:image/svg+xml;utf8,${encodeURIComponent(versionInfo.badge)}" alt="Version Badge" />\n\n`;
+              }
+              
+              comment += `**Changelog:** 📄 [View detailed changelog in job summary](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})\n\n`;
+            }
+            
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment,
+            });
+            
+            console.log('Successfully posted version analysis comment');
+
+      - name: Install very_good_cli
+        run: dart pub global activate very_good_cli
+
+      - name: Check licenses
+        run: very_good analyze --check-licenses
+
