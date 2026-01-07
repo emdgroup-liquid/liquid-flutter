@@ -21,10 +21,8 @@ melos:
   scripts:
     api_guard:
       packageFilters:
+        diff: "origin/main...HEAD"
         noPrivate: true
-        diff: "origin/dev...HEAD"
       orderDependents: true
       concurrency: 1
-      steps:
-        - dart pub global activate mtrust_api_guard
-        - mtrust_api_guard version --no-commit --no-tag --badge --generate-changelog --json=./version_output.json
+      exec: mtrust_api_guard version --no-commit --no-tag --badge --generate-changelog --json=./version_output.json --tag-prefix=\$(basename \$PWD)/v

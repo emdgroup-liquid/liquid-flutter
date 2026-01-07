@@ -2,7 +2,6 @@ name: liquid_flutter
 description: Liquid Oxygen Components for Flutter
 version: 23.0.0-1
 repository: https://github.com/emdgroup-liquid/liquid-flutter
-publish_to: none
 resolution: workspace
 environment:
   sdk: ">=3.5.0 <4.0.0"
@@ -39,8 +38,7 @@ dev_dependencies:
   analyzer: ^7.4.5
   build_runner: ^2.1.10
   flutter_oss_licenses: ">=2.0.1 <4.0.0"
-  liquid_generators:
-    path: ../liquid-generators
+  liquid_generators: ^0.0.1-1
   golden_toolkit: ^0.15.0
   change_case: ^2.1.0
 flutter:
