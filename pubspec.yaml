@@ -25,4 +25,4 @@ melos:
         noPrivate: true
       orderDependents: true
       concurrency: 1
-      exec: mtrust_api_guard version --no-commit --no-tag --badge --generate-changelog --json=./version_output.json --tag-prefix=\$(basename \$PWD)/v
+      exec: mtrust_api_guard version --root=\$PWD --no-commit --no-tag --badge --generate-changelog --json=./version_output.json --tag-prefix=\$(basename \$PWD)/v
