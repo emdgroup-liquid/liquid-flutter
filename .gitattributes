@@ -1,2 +1,5 @@
-test/goldens/**/*.png filter=lfs diff=lfs merge=lfs -text
+# Golden test images - track all PNG files in test/goldens directories with Git LFS
+**/test/goldens/**/*.png filter=lfs diff=lfs merge=lfs -text
 
+# Golden widget tree files - track XML files in test/golden_widget_trees directories with Git LFS
+**/test/golden_widget_trees/**/*.xml filter=lfs diff=lfs merge=lfs -text

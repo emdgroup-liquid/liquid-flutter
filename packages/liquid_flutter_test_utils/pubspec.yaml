@@ -1,0 +1,36 @@
+name: liquid_flutter_test_utils
+description: Test utilities for Liquid Flutter and more
+version: 1.6.2
+homepage: https://github.com/emdgroup-liquid/liquid-flutter-test-utils
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+  flutter: ">=1.17.0"
+resolution: workspace
+dependencies:
+  diff_match_patch: ^0.4.1
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  golden_toolkit: ^0.15.0
+  go_router: ^17.0.0
+  liquid_flutter: ^22.0.4
+  path: ^1.9.0
+  flutter_svg: ^2.0.17
+  responsive_builder: ^0.7.1
+dev_dependencies:
+  flutter_lints: ^6.0.0
+flutter:
+  generate: true
+  uses-material-design: true
+  assets:
+    - assets/
+  fonts:
+    - family: Lato
+      fonts:
+        - asset: packages/liquid_flutter/fonts/Lato-Regular.ttf
+          weight: 500
+        - asset: packages/liquid_flutter/fonts/Lato-Bold.ttf
+          weight: 800

@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 
 import 'package:analyzer/dart/element/element.dart';
@@ -5,6 +7,7 @@ import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
+import 'package:pub_semver/pub_semver.dart';
 import 'package:source_gen/source_gen.dart';
 
 class VariantBuilder implements Builder {
@@ -48,8 +51,9 @@ class VariantBuilder implements Builder {
         );
 
         final emitter = DartEmitter.scoped();
-        final output =
-            DartFormatter().format('${outputLibrary.accept(emitter)}');
+        final output = DartFormatter(
+          languageVersion: Version.parse("3.5.0"),
+        ).format('${outputLibrary.accept(emitter)}');
 
         await buildStep.writeAsString(
           buildStep.inputId.changeExtension('.variants.g.dart'),

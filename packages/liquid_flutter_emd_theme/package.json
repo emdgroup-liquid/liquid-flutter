@@ -1,0 +1,18 @@
+{
+  "name": "liquid-flutter-emd-theme",
+  "version": "0.0.4",
+  "description": "Liquid Flutter EMD branding tokens and assets.",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "Custom",
+  "dependencies": {
+    "yaml": "^2.7.1"
+  }
+}

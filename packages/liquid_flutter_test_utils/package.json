@@ -1,0 +1,14 @@
+{
+  "name": "liquid-flutter-test-utils",
+  "version": "1.6.2",
+  "description": "Test utilities for Liquid Flutter and more",
+  "scripts": {
+    "test": "flutter test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "yaml": "^2.8.1"
+  }
+}

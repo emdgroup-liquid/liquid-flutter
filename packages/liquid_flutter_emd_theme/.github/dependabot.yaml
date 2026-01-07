@@ -1,0 +1,11 @@
+version: 2
+updates:
+  - package-ecosystem: "pub"
+    directories:
+      - "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
