@@ -24,6 +24,7 @@ melos:
         noPrivate: true
         diff: "origin/dev...HEAD"
       orderDependents: true
+      concurrency: 1
       steps:
         - dart pub global activate mtrust_api_guard
         - mtrust_api_guard version --no-commit --no-tag --badge --generate-changelog --json=./version_output.json
