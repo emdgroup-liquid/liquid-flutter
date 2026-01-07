@@ -2,7 +2,6 @@ part of 'tag.dart';
 
 class LdTag extends StatelessWidget {
   const LdTag({
-    super.key,
     required this.child,
     this.color,
     this.onDismiss,
@@ -18,55 +17,55 @@ class LdTag extends StatelessWidget {
   final LdColor? color;
 
   static Widget success({
-    Key? key,
     required Widget child,
     LdColor? color,
     Function? onDismiss,
     LdSize size = LdSize.m,
+    Key? key,
   }) {
     return Builder(
       builder: (BuildContext context) => LdTag(
-        key: key,
         child: child,
         color: LdTheme.of(context).success,
         onDismiss: onDismiss,
         size: size,
+        key: key,
       ),
     );
   }
 
   static Widget warning({
-    Key? key,
     required Widget child,
     LdColor? color,
     Function? onDismiss,
     LdSize size = LdSize.m,
+    Key? key,
   }) {
     return Builder(
       builder: (BuildContext context) => LdTag(
-        key: key,
         child: child,
         color: LdTheme.of(context).warning,
         onDismiss: onDismiss,
         size: size,
+        key: key,
       ),
     );
   }
 
   static Widget error({
-    Key? key,
     required Widget child,
     LdColor? color,
     Function? onDismiss,
     LdSize size = LdSize.m,
+    Key? key,
   }) {
     return Builder(
       builder: (BuildContext context) => LdTag(
-        key: key,
         child: child,
         color: LdTheme.of(context).error,
         onDismiss: onDismiss,
         size: size,
+        key: key,
       ),
     );
   }

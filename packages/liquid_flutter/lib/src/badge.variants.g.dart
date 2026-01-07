@@ -30,12 +30,12 @@ class LdBadge extends StatelessWidget {
   }) {
     return Builder(
       builder: (BuildContext context) => LdBadge(
+        child: child,
         color: LdTheme.of(context).success,
         size: size,
         symmetric: symmetric,
         maxLines: maxLines,
         key: key,
-        child: child,
       ),
     );
   }
@@ -50,12 +50,12 @@ class LdBadge extends StatelessWidget {
   }) {
     return Builder(
       builder: (BuildContext context) => LdBadge(
+        child: child,
         color: LdTheme.of(context).warning,
         size: size,
         symmetric: symmetric,
         maxLines: maxLines,
         key: key,
-        child: child,
       ),
     );
   }
@@ -70,12 +70,12 @@ class LdBadge extends StatelessWidget {
   }) {
     return Builder(
       builder: (BuildContext context) => LdBadge(
+        child: child,
         color: LdTheme.of(context).error,
         size: size,
         symmetric: symmetric,
         maxLines: maxLines,
         key: key,
-        child: child,
       ),
     );
   }
@@ -83,11 +83,11 @@ class LdBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdBadgeWidget(
+      child: child,
       color: color,
       size: size,
       symmetric: symmetric,
       maxLines: maxLines,
-      child: child,
     );
   }
 }

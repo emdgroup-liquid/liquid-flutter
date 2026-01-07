@@ -68,7 +68,8 @@ class LdButtonConfigProvider extends StatelessWidget {
             circular: config.circular ?? parentConfig.circular,
             mode: config.mode ?? parentConfig.mode,
             size: config.size ?? parentConfig.size,
-            disableSqueeze: config.disableSqueeze ?? parentConfig.disableSqueeze)
+            disableSqueeze:
+                config.disableSqueeze ?? parentConfig.disableSqueeze)
         : config;
     return Provider<LdButtonConfig>.value(
       value: mergedConfig,
@@ -100,7 +101,6 @@ class LdButton extends StatelessWidget {
     this.size,
     this.trailing,
     this.disableSqueeze,
-    super.key,
   });
 
   factory LdButton.ghost({
@@ -125,9 +125,10 @@ class LdButton extends StatelessWidget {
     LdSize? size,
     Widget? trailing,
     bool? disableSqueeze,
-    Key? key,
+    super.key,
   }) {
     return LdButton(
+      child: child,
       onPressed: onPressed,
       autoLoading: autoLoading,
       borderRadius: borderRadius,
@@ -149,7 +150,6 @@ class LdButton extends StatelessWidget {
       trailing: trailing,
       disableSqueeze: disableSqueeze,
       key: key,
-      child: child,
     );
   }
 
@@ -175,9 +175,10 @@ class LdButton extends StatelessWidget {
     LdSize? size,
     Widget? trailing,
     bool? disableSqueeze,
-    Key? key,
+    super.key,
   }) {
     return LdButton(
+      child: child,
       onPressed: onPressed,
       autoLoading: autoLoading,
       borderRadius: borderRadius,
@@ -199,7 +200,6 @@ class LdButton extends StatelessWidget {
       trailing: trailing,
       disableSqueeze: disableSqueeze,
       key: key,
-      child: child,
     );
   }
 
@@ -225,9 +225,10 @@ class LdButton extends StatelessWidget {
     LdSize? size,
     Widget? trailing,
     bool? disableSqueeze,
-    Key? key,
+    super.key,
   }) {
     return LdButton(
+      child: child,
       onPressed: onPressed,
       autoLoading: autoLoading,
       borderRadius: borderRadius,
@@ -249,7 +250,6 @@ class LdButton extends StatelessWidget {
       trailing: trailing,
       disableSqueeze: disableSqueeze,
       key: key,
-      child: child,
     );
   }
 
@@ -275,9 +275,10 @@ class LdButton extends StatelessWidget {
     LdSize? size,
     Widget? trailing,
     bool? disableSqueeze,
-    Key? key,
+    super.key,
   }) {
     return LdButton(
+      child: child,
       onPressed: onPressed,
       autoLoading: autoLoading,
       borderRadius: borderRadius,
@@ -299,7 +300,6 @@ class LdButton extends StatelessWidget {
       trailing: trailing,
       disableSqueeze: disableSqueeze,
       key: key,
-      child: child,
     );
   }
 
@@ -371,6 +371,7 @@ class LdButton extends StatelessWidget {
   }) {
     return Builder(
       builder: (BuildContext context) => LdButton(
+        child: child,
         onPressed: onPressed,
         autoLoading: autoLoading,
         borderRadius: borderRadius,
@@ -392,7 +393,6 @@ class LdButton extends StatelessWidget {
         trailing: trailing,
         disableSqueeze: disableSqueeze,
         key: key,
-        child: child,
       ),
     );
   }
@@ -423,6 +423,7 @@ class LdButton extends StatelessWidget {
   }) {
     return Builder(
       builder: (BuildContext context) => LdButton(
+        child: child,
         onPressed: onPressed,
         autoLoading: autoLoading,
         borderRadius: borderRadius,
@@ -444,7 +445,6 @@ class LdButton extends StatelessWidget {
         trailing: trailing,
         disableSqueeze: disableSqueeze,
         key: key,
-        child: child,
       ),
     );
   }
@@ -475,6 +475,7 @@ class LdButton extends StatelessWidget {
   }) {
     return Builder(
       builder: (BuildContext context) => LdButton(
+        child: child,
         onPressed: onPressed,
         autoLoading: autoLoading,
         borderRadius: borderRadius,
@@ -496,7 +497,6 @@ class LdButton extends StatelessWidget {
         trailing: trailing,
         disableSqueeze: disableSqueeze,
         key: key,
-        child: child,
       ),
     );
   }
@@ -505,6 +505,7 @@ class LdButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final config = Provider.of<LdButtonConfig?>(context, listen: true);
     return _LdButtonWidget(
+      child: child,
       onPressed: onPressed,
       autoLoading: autoLoading ?? config?.autoLoading ?? true,
       borderRadius: borderRadius ?? config?.borderRadius,
@@ -525,7 +526,6 @@ class LdButton extends StatelessWidget {
       size: size ?? config?.size ?? LdSize.m,
       trailing: trailing,
       disableSqueeze: disableSqueeze ?? config?.disableSqueeze ?? false,
-      child: child,
     );
   }
 }

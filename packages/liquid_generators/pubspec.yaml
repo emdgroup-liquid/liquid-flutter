@@ -1,0 +1,18 @@
+name: liquid_generators
+publish_to: none
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+resolution: workspace
+dependencies:
+  analyzer: ^7.7.1
+  build: ^2.5.4
+  code_builder: ^4.11.1
+  flutter:
+    sdk: flutter
+  liquid_flutter: ^23.0.0-1
+  pub_semver: ^2.2.0
+  source_gen: ^2.0.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0

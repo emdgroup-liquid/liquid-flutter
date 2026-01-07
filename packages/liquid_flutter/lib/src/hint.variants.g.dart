@@ -6,7 +6,6 @@ class LdHint extends StatelessWidget {
     required this.type,
     this.size = LdSize.m,
     this.crossAxisAlignment = CrossAxisAlignment.center,
-    super.key,
   });
 
   factory LdHint.info({
@@ -14,7 +13,7 @@ class LdHint extends StatelessWidget {
     required LdHintType type,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
-    Key? key,
+    super.key,
   }) {
     return LdHint(
       child: child,
@@ -30,7 +29,7 @@ class LdHint extends StatelessWidget {
     required LdHintType type,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
-    Key? key,
+    super.key,
   }) {
     return LdHint(
       child: child,
@@ -46,7 +45,7 @@ class LdHint extends StatelessWidget {
     required LdHintType type,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
-    Key? key,
+    super.key,
   }) {
     return LdHint(
       child: child,
@@ -62,7 +61,7 @@ class LdHint extends StatelessWidget {
     required LdHintType type,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
-    Key? key,
+    super.key,
   }) {
     return LdHint(
       child: child,
@@ -78,7 +77,7 @@ class LdHint extends StatelessWidget {
     required LdHintType type,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
-    Key? key,
+    super.key,
   }) {
     return LdHint(
       child: child,
@@ -94,7 +93,7 @@ class LdHint extends StatelessWidget {
     required LdHintType type,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
-    Key? key,
+    super.key,
   }) {
     return LdHint(
       child: child,
@@ -110,7 +109,7 @@ class LdHint extends StatelessWidget {
     required LdHintType type,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
-    Key? key,
+    super.key,
   }) {
     return LdHint(
       child: child,
@@ -126,7 +125,7 @@ class LdHint extends StatelessWidget {
     required LdHintType type,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
-    Key? key,
+    super.key,
   }) {
     return LdHint(
       child: child,

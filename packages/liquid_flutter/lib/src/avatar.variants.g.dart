@@ -43,7 +43,6 @@ class LdAvatarConfigProvider extends StatelessWidget {
 
 class LdAvatar extends StatelessWidget {
   const LdAvatar({
-    super.key,
     required this.child,
     this.color,
     this.circular,
@@ -59,55 +58,55 @@ class LdAvatar extends StatelessWidget {
   final LdSize? size;
 
   static Widget success({
-    Key? key,
     required Widget child,
     LdColor? color,
     bool? circular,
     LdSize? size,
+    Key? key,
   }) {
     return Builder(
       builder: (BuildContext context) => LdAvatar(
-        key: key,
+        child: child,
         color: LdTheme.of(context).success,
         circular: circular,
         size: size,
-        child: child,
+        key: key,
       ),
     );
   }
 
   static Widget warning({
-    Key? key,
     required Widget child,
     LdColor? color,
     bool? circular,
     LdSize? size,
+    Key? key,
   }) {
     return Builder(
       builder: (BuildContext context) => LdAvatar(
-        key: key,
+        child: child,
         color: LdTheme.of(context).warning,
         circular: circular,
         size: size,
-        child: child,
+        key: key,
       ),
     );
   }
 
   static Widget error({
-    Key? key,
     required Widget child,
     LdColor? color,
     bool? circular,
     LdSize? size,
+    Key? key,
   }) {
     return Builder(
       builder: (BuildContext context) => LdAvatar(
-        key: key,
+        child: child,
         color: LdTheme.of(context).error,
         circular: circular,
         size: size,
-        child: child,
+        key: key,
       ),
     );
   }
@@ -116,10 +115,10 @@ class LdAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final config = Provider.of<LdAvatarConfig?>(context, listen: true);
     return _LdAvatarWidget(
+      child: child,
       color: color ?? config?.color,
       circular: circular ?? config?.circular ?? false,
       size: size ?? config?.size ?? LdSize.m,
-      child: child,
     );
   }
 }

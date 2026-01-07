@@ -40,7 +40,7 @@ dev_dependencies:
   build_runner: ^2.1.10
   flutter_oss_licenses: ">=2.0.1 <4.0.0"
   liquid_generators:
-    path: ./generators
+    path: ../liquid-generators
   golden_toolkit: ^0.15.0
   change_case: ^2.1.0
 flutter:

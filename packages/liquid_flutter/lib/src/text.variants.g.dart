@@ -3,457 +3,456 @@ part of 'text.dart';
 class LdText extends StatelessWidget {
   const LdText(
     this.text, {
-    super.key,
-    this.textAlign,
-    this.maxLines,
-    this.overflow,
+    this.color,
     this.decoration,
-    this.size = LdSize.m,
-    this.type = LdTextType.paragraph,
-    this.onLinkTap,
     this.fontWeight,
     this.lineHeight,
+    this.maxLines,
+    this.onLinkTap,
+    this.overflow,
     this.processLinks = false,
-    this.color,
+    this.size = LdSize.m,
+    this.textAlign,
+    this.type = LdTextType.paragraph,
   });
 
-  factory LdText.p(
+  factory LdText.caption(
     String text, {
-    Key? key,
-    TextAlign? textAlign,
-    int? maxLines,
-    TextOverflow? overflow,
+    Color? color,
     TextDecoration? decoration,
-    LdSize size = LdSize.m,
-    LdTextType? type = LdTextType.paragraph,
-    void Function(String)? onLinkTap,
     FontWeight? fontWeight,
     double? lineHeight,
+    int? maxLines,
+    void Function(String)? onLinkTap,
+    TextOverflow? overflow,
     bool processLinks = false,
-    Color? color,
+    LdSize size = LdSize.m,
+    TextAlign? textAlign,
+    LdTextType? type = LdTextType.paragraph,
+    super.key,
   }) {
     return LdText(
       text,
-      key: key,
-      textAlign: textAlign,
-      maxLines: maxLines,
-      overflow: overflow,
+      color: color,
       decoration: decoration,
+      fontWeight: fontWeight,
+      lineHeight: lineHeight,
+      maxLines: maxLines,
+      onLinkTap: onLinkTap,
+      overflow: overflow,
+      processLinks: processLinks,
       size: size,
-      type: LdTextType.paragraph,
-      onLinkTap: onLinkTap,
-      fontWeight: fontWeight,
-      lineHeight: lineHeight,
-      processLinks: processLinks,
-      color: color,
-    );
-  }
-
-  factory LdText.pl(
-    String text, {
-    Key? key,
-    TextAlign? textAlign,
-    int? maxLines,
-    TextOverflow? overflow,
-    TextDecoration? decoration,
-    LdSize size = LdSize.m,
-    LdTextType? type = LdTextType.paragraph,
-    void Function(String)? onLinkTap,
-    FontWeight? fontWeight,
-    double? lineHeight,
-    bool processLinks = false,
-    Color? color,
-  }) {
-    return LdText(
-      text,
-      key: key,
       textAlign: textAlign,
-      maxLines: maxLines,
-      overflow: overflow,
-      decoration: decoration,
-      size: LdSize.l,
-      type: LdTextType.paragraph,
-      onLinkTap: onLinkTap,
-      fontWeight: fontWeight,
-      lineHeight: lineHeight,
-      processLinks: processLinks,
-      color: color,
-    );
-  }
-
-  factory LdText.ps(
-    String text, {
-    Key? key,
-    TextAlign? textAlign,
-    int? maxLines,
-    TextOverflow? overflow,
-    TextDecoration? decoration,
-    LdSize size = LdSize.m,
-    LdTextType? type = LdTextType.paragraph,
-    void Function(String)? onLinkTap,
-    FontWeight? fontWeight,
-    double? lineHeight,
-    bool processLinks = false,
-    Color? color,
-  }) {
-    return LdText(
-      text,
+      type: LdTextType.caption,
       key: key,
-      textAlign: textAlign,
-      maxLines: maxLines,
-      overflow: overflow,
-      decoration: decoration,
-      size: LdSize.s,
-      type: LdTextType.paragraph,
-      onLinkTap: onLinkTap,
-      fontWeight: fontWeight,
-      lineHeight: lineHeight,
-      processLinks: processLinks,
-      color: color,
-    );
-  }
-
-  factory LdText.pxs(
-    String text, {
-    Key? key,
-    TextAlign? textAlign,
-    int? maxLines,
-    TextOverflow? overflow,
-    TextDecoration? decoration,
-    LdSize size = LdSize.m,
-    LdTextType? type = LdTextType.paragraph,
-    void Function(String)? onLinkTap,
-    FontWeight? fontWeight,
-    double? lineHeight,
-    bool processLinks = false,
-    Color? color,
-  }) {
-    return LdText(
-      text,
-      key: key,
-      textAlign: textAlign,
-      maxLines: maxLines,
-      overflow: overflow,
-      decoration: decoration,
-      size: LdSize.xs,
-      type: LdTextType.paragraph,
-      onLinkTap: onLinkTap,
-      fontWeight: fontWeight,
-      lineHeight: lineHeight,
-      processLinks: processLinks,
-      color: color,
-    );
-  }
-
-  factory LdText.hl(
-    String text, {
-    Key? key,
-    TextAlign? textAlign,
-    int? maxLines,
-    TextOverflow? overflow,
-    TextDecoration? decoration,
-    LdSize size = LdSize.m,
-    LdTextType? type = LdTextType.paragraph,
-    void Function(String)? onLinkTap,
-    FontWeight? fontWeight,
-    double? lineHeight,
-    bool processLinks = false,
-    Color? color,
-  }) {
-    return LdText(
-      text,
-      key: key,
-      textAlign: textAlign,
-      maxLines: maxLines,
-      overflow: overflow,
-      decoration: decoration,
-      size: LdSize.l,
-      type: LdTextType.headline,
-      onLinkTap: onLinkTap,
-      fontWeight: fontWeight,
-      lineHeight: lineHeight,
-      processLinks: processLinks,
-      color: color,
     );
   }
 
   factory LdText.h(
     String text, {
-    Key? key,
-    TextAlign? textAlign,
-    int? maxLines,
-    TextOverflow? overflow,
+    Color? color,
     TextDecoration? decoration,
-    LdSize size = LdSize.m,
-    LdTextType? type = LdTextType.paragraph,
-    void Function(String)? onLinkTap,
     FontWeight? fontWeight,
     double? lineHeight,
+    int? maxLines,
+    void Function(String)? onLinkTap,
+    TextOverflow? overflow,
     bool processLinks = false,
-    Color? color,
+    LdSize size = LdSize.m,
+    TextAlign? textAlign,
+    LdTextType? type = LdTextType.paragraph,
+    super.key,
   }) {
     return LdText(
       text,
-      key: key,
-      textAlign: textAlign,
-      maxLines: maxLines,
-      overflow: overflow,
+      color: color,
       decoration: decoration,
-      size: LdSize.m,
-      type: LdTextType.headline,
-      onLinkTap: onLinkTap,
       fontWeight: fontWeight,
       lineHeight: lineHeight,
+      maxLines: maxLines,
+      onLinkTap: onLinkTap,
+      overflow: overflow,
       processLinks: processLinks,
+      size: LdSize.m,
+      textAlign: textAlign,
+      type: LdTextType.headline,
+      key: key,
+    );
+  }
+
+  factory LdText.hl(
+    String text, {
+    Color? color,
+    TextDecoration? decoration,
+    FontWeight? fontWeight,
+    double? lineHeight,
+    int? maxLines,
+    void Function(String)? onLinkTap,
+    TextOverflow? overflow,
+    bool processLinks = false,
+    LdSize size = LdSize.m,
+    TextAlign? textAlign,
+    LdTextType? type = LdTextType.paragraph,
+    super.key,
+  }) {
+    return LdText(
+      text,
       color: color,
+      decoration: decoration,
+      fontWeight: fontWeight,
+      lineHeight: lineHeight,
+      maxLines: maxLines,
+      onLinkTap: onLinkTap,
+      overflow: overflow,
+      processLinks: processLinks,
+      size: LdSize.l,
+      textAlign: textAlign,
+      type: LdTextType.headline,
+      key: key,
     );
   }
 
   factory LdText.hs(
     String text, {
-    Key? key,
-    TextAlign? textAlign,
-    int? maxLines,
-    TextOverflow? overflow,
+    Color? color,
     TextDecoration? decoration,
-    LdSize size = LdSize.m,
-    LdTextType? type = LdTextType.paragraph,
-    void Function(String)? onLinkTap,
     FontWeight? fontWeight,
     double? lineHeight,
+    int? maxLines,
+    void Function(String)? onLinkTap,
+    TextOverflow? overflow,
     bool processLinks = false,
-    Color? color,
+    LdSize size = LdSize.m,
+    TextAlign? textAlign,
+    LdTextType? type = LdTextType.paragraph,
+    super.key,
   }) {
     return LdText(
       text,
-      key: key,
-      textAlign: textAlign,
-      maxLines: maxLines,
-      overflow: overflow,
+      color: color,
       decoration: decoration,
-      size: LdSize.s,
-      type: LdTextType.headline,
-      onLinkTap: onLinkTap,
       fontWeight: fontWeight,
       lineHeight: lineHeight,
+      maxLines: maxLines,
+      onLinkTap: onLinkTap,
+      overflow: overflow,
       processLinks: processLinks,
-      color: color,
+      size: LdSize.s,
+      textAlign: textAlign,
+      type: LdTextType.headline,
+      key: key,
     );
   }
 
   factory LdText.hxs(
     String text, {
-    Key? key,
-    TextAlign? textAlign,
-    int? maxLines,
-    TextOverflow? overflow,
+    Color? color,
     TextDecoration? decoration,
-    LdSize size = LdSize.m,
-    LdTextType? type = LdTextType.paragraph,
-    void Function(String)? onLinkTap,
     FontWeight? fontWeight,
     double? lineHeight,
+    int? maxLines,
+    void Function(String)? onLinkTap,
+    TextOverflow? overflow,
     bool processLinks = false,
-    Color? color,
+    LdSize size = LdSize.m,
+    TextAlign? textAlign,
+    LdTextType? type = LdTextType.paragraph,
+    super.key,
   }) {
     return LdText(
       text,
-      key: key,
-      textAlign: textAlign,
-      maxLines: maxLines,
-      overflow: overflow,
+      color: color,
       decoration: decoration,
-      size: LdSize.xs,
-      type: LdTextType.headline,
-      onLinkTap: onLinkTap,
       fontWeight: fontWeight,
       lineHeight: lineHeight,
+      maxLines: maxLines,
+      onLinkTap: onLinkTap,
+      overflow: overflow,
       processLinks: processLinks,
-      color: color,
+      size: LdSize.xs,
+      textAlign: textAlign,
+      type: LdTextType.headline,
+      key: key,
     );
   }
 
   factory LdText.l(
     String text, {
-    Key? key,
-    TextAlign? textAlign,
-    int? maxLines,
-    TextOverflow? overflow,
+    Color? color,
     TextDecoration? decoration,
-    LdSize size = LdSize.m,
-    LdTextType? type = LdTextType.paragraph,
-    void Function(String)? onLinkTap,
     FontWeight? fontWeight,
     double? lineHeight,
+    int? maxLines,
+    void Function(String)? onLinkTap,
+    TextOverflow? overflow,
     bool processLinks = false,
-    Color? color,
+    LdSize size = LdSize.m,
+    TextAlign? textAlign,
+    LdTextType? type = LdTextType.paragraph,
+    super.key,
   }) {
     return LdText(
       text,
-      key: key,
-      textAlign: textAlign,
-      maxLines: maxLines,
-      overflow: overflow,
+      color: color,
       decoration: decoration,
+      fontWeight: fontWeight,
+      lineHeight: lineHeight,
+      maxLines: maxLines,
+      onLinkTap: onLinkTap,
+      overflow: overflow,
+      processLinks: processLinks,
       size: size,
-      type: LdTextType.label,
-      onLinkTap: onLinkTap,
-      fontWeight: fontWeight,
-      lineHeight: lineHeight,
-      processLinks: processLinks,
-      color: color,
-    );
-  }
-
-  factory LdText.ls(
-    String text, {
-    Key? key,
-    TextAlign? textAlign,
-    int? maxLines,
-    TextOverflow? overflow,
-    TextDecoration? decoration,
-    LdSize size = LdSize.m,
-    LdTextType? type = LdTextType.paragraph,
-    void Function(String)? onLinkTap,
-    FontWeight? fontWeight,
-    double? lineHeight,
-    bool processLinks = false,
-    Color? color,
-  }) {
-    return LdText(
-      text,
-      key: key,
       textAlign: textAlign,
-      maxLines: maxLines,
-      overflow: overflow,
-      decoration: decoration,
-      size: LdSize.s,
       type: LdTextType.label,
-      onLinkTap: onLinkTap,
-      fontWeight: fontWeight,
-      lineHeight: lineHeight,
-      processLinks: processLinks,
-      color: color,
+      key: key,
     );
   }
 
   factory LdText.ll(
     String text, {
-    Key? key,
-    TextAlign? textAlign,
-    int? maxLines,
-    TextOverflow? overflow,
+    Color? color,
     TextDecoration? decoration,
-    LdSize size = LdSize.m,
-    LdTextType? type = LdTextType.paragraph,
-    void Function(String)? onLinkTap,
     FontWeight? fontWeight,
     double? lineHeight,
+    int? maxLines,
+    void Function(String)? onLinkTap,
+    TextOverflow? overflow,
     bool processLinks = false,
-    Color? color,
+    LdSize size = LdSize.m,
+    TextAlign? textAlign,
+    LdTextType? type = LdTextType.paragraph,
+    super.key,
   }) {
     return LdText(
       text,
-      key: key,
-      textAlign: textAlign,
-      maxLines: maxLines,
-      overflow: overflow,
+      color: color,
       decoration: decoration,
-      size: LdSize.l,
-      type: LdTextType.label,
-      onLinkTap: onLinkTap,
       fontWeight: fontWeight,
       lineHeight: lineHeight,
+      maxLines: maxLines,
+      onLinkTap: onLinkTap,
+      overflow: overflow,
       processLinks: processLinks,
+      size: LdSize.l,
+      textAlign: textAlign,
+      type: LdTextType.label,
+      key: key,
+    );
+  }
+
+  factory LdText.ls(
+    String text, {
+    Color? color,
+    TextDecoration? decoration,
+    FontWeight? fontWeight,
+    double? lineHeight,
+    int? maxLines,
+    void Function(String)? onLinkTap,
+    TextOverflow? overflow,
+    bool processLinks = false,
+    LdSize size = LdSize.m,
+    TextAlign? textAlign,
+    LdTextType? type = LdTextType.paragraph,
+    super.key,
+  }) {
+    return LdText(
+      text,
       color: color,
+      decoration: decoration,
+      fontWeight: fontWeight,
+      lineHeight: lineHeight,
+      maxLines: maxLines,
+      onLinkTap: onLinkTap,
+      overflow: overflow,
+      processLinks: processLinks,
+      size: LdSize.s,
+      textAlign: textAlign,
+      type: LdTextType.label,
+      key: key,
     );
   }
 
   factory LdText.lxs(
     String text, {
-    Key? key,
-    TextAlign? textAlign,
-    int? maxLines,
-    TextOverflow? overflow,
+    Color? color,
     TextDecoration? decoration,
-    LdSize size = LdSize.m,
-    LdTextType? type = LdTextType.paragraph,
-    void Function(String)? onLinkTap,
     FontWeight? fontWeight,
     double? lineHeight,
+    int? maxLines,
+    void Function(String)? onLinkTap,
+    TextOverflow? overflow,
     bool processLinks = false,
-    Color? color,
+    LdSize size = LdSize.m,
+    TextAlign? textAlign,
+    LdTextType? type = LdTextType.paragraph,
+    super.key,
   }) {
     return LdText(
       text,
-      key: key,
-      textAlign: textAlign,
-      maxLines: maxLines,
-      overflow: overflow,
+      color: color,
       decoration: decoration,
-      size: LdSize.xs,
-      type: LdTextType.label,
-      onLinkTap: onLinkTap,
       fontWeight: fontWeight,
       lineHeight: lineHeight,
+      maxLines: maxLines,
+      onLinkTap: onLinkTap,
+      overflow: overflow,
       processLinks: processLinks,
-      color: color,
+      size: LdSize.xs,
+      textAlign: textAlign,
+      type: LdTextType.label,
+      key: key,
     );
   }
 
-  factory LdText.caption(
+  factory LdText.p(
     String text, {
-    Key? key,
-    TextAlign? textAlign,
-    int? maxLines,
-    TextOverflow? overflow,
+    Color? color,
     TextDecoration? decoration,
-    LdSize size = LdSize.m,
-    LdTextType? type = LdTextType.paragraph,
-    void Function(String)? onLinkTap,
     FontWeight? fontWeight,
     double? lineHeight,
+    int? maxLines,
+    void Function(String)? onLinkTap,
+    TextOverflow? overflow,
     bool processLinks = false,
-    Color? color,
+    LdSize size = LdSize.m,
+    TextAlign? textAlign,
+    LdTextType? type = LdTextType.paragraph,
+    super.key,
   }) {
     return LdText(
       text,
-      key: key,
-      textAlign: textAlign,
-      maxLines: maxLines,
-      overflow: overflow,
+      color: color,
       decoration: decoration,
-      size: size,
-      type: LdTextType.caption,
-      onLinkTap: onLinkTap,
       fontWeight: fontWeight,
       lineHeight: lineHeight,
+      maxLines: maxLines,
+      onLinkTap: onLinkTap,
+      overflow: overflow,
       processLinks: processLinks,
-      color: color,
+      size: size,
+      textAlign: textAlign,
+      type: LdTextType.paragraph,
+      key: key,
     );
   }
+
+  factory LdText.pl(
+    String text, {
+    Color? color,
+    TextDecoration? decoration,
+    FontWeight? fontWeight,
+    double? lineHeight,
+    int? maxLines,
+    void Function(String)? onLinkTap,
+    TextOverflow? overflow,
+    bool processLinks = false,
+    LdSize size = LdSize.m,
+    TextAlign? textAlign,
+    LdTextType? type = LdTextType.paragraph,
+    super.key,
+  }) {
+    return LdText(
+      text,
+      color: color,
+      decoration: decoration,
+      fontWeight: fontWeight,
+      lineHeight: lineHeight,
+      maxLines: maxLines,
+      onLinkTap: onLinkTap,
+      overflow: overflow,
+      processLinks: processLinks,
+      size: LdSize.l,
+      textAlign: textAlign,
+      type: LdTextType.paragraph,
+      key: key,
+    );
+  }
+
+  factory LdText.ps(
+    String text, {
+    Color? color,
+    TextDecoration? decoration,
+    FontWeight? fontWeight,
+    double? lineHeight,
+    int? maxLines,
+    void Function(String)? onLinkTap,
+    TextOverflow? overflow,
+    bool processLinks = false,
+    LdSize size = LdSize.m,
+    TextAlign? textAlign,
+    LdTextType? type = LdTextType.paragraph,
+    super.key,
+  }) {
+    return LdText(
+      text,
+      color: color,
+      decoration: decoration,
+      fontWeight: fontWeight,
+      lineHeight: lineHeight,
+      maxLines: maxLines,
+      onLinkTap: onLinkTap,
+      overflow: overflow,
+      processLinks: processLinks,
+      size: LdSize.s,
+      textAlign: textAlign,
+      type: LdTextType.paragraph,
+      key: key,
+    );
+  }
+
+  factory LdText.pxs(
+    String text, {
+    Color? color,
+    TextDecoration? decoration,
+    FontWeight? fontWeight,
+    double? lineHeight,
+    int? maxLines,
+    void Function(String)? onLinkTap,
+    TextOverflow? overflow,
+    bool processLinks = false,
+    LdSize size = LdSize.m,
+    TextAlign? textAlign,
+    LdTextType? type = LdTextType.paragraph,
+    super.key,
+  }) {
+    return LdText(
+      text,
+      color: color,
+      decoration: decoration,
+      fontWeight: fontWeight,
+      lineHeight: lineHeight,
+      maxLines: maxLines,
+      onLinkTap: onLinkTap,
+      overflow: overflow,
+      processLinks: processLinks,
+      size: LdSize.xs,
+      textAlign: textAlign,
+      type: LdTextType.paragraph,
+      key: key,
+    );
+  }
+
+  final bool processLinks;
+
+  final Color? color;
+
+  final double? lineHeight;
+
+  final FontWeight? fontWeight;
+
+  final int? maxLines;
+
+  final LdSize size;
+
+  final LdTextType? type;
 
   final String text;
 
   final TextAlign? textAlign;
 
-  final int? maxLines;
-
-  final double? lineHeight;
-
-  final TextOverflow? overflow;
-
   final TextDecoration? decoration;
 
-  final FontWeight? fontWeight;
-
-  final Color? color;
-
-  final bool processLinks;
-
-  final LdSize size;
-
-  final LdTextType? type;
+  final TextOverflow? overflow;
 
   final void Function(String)? onLinkTap;
 
@@ -461,17 +460,17 @@ class LdText extends StatelessWidget {
   Widget build(BuildContext context) {
     return _LdTextWidget(
       text,
-      textAlign: textAlign,
-      maxLines: maxLines,
-      overflow: overflow,
+      color: color,
       decoration: decoration,
-      size: size,
-      type: type,
-      onLinkTap: onLinkTap,
       fontWeight: fontWeight,
       lineHeight: lineHeight,
+      maxLines: maxLines,
+      onLinkTap: onLinkTap,
+      overflow: overflow,
       processLinks: processLinks,
-      color: color,
+      size: size,
+      textAlign: textAlign,
+      type: type,
     );
   }
 }

@@ -2,51 +2,50 @@ part of 'counter.dart';
 
 class LdCounter extends StatelessWidget {
   const LdCounter({
-    super.key,
     required this.value,
     this.precision = 0,
     this.size = LdSize.m,
   });
 
   factory LdCounter.s({
-    Key? key,
     required double value,
     int precision = 0,
     LdSize size = LdSize.m,
+    super.key,
   }) {
     return LdCounter(
-      key: key,
       value: value,
       precision: precision,
       size: LdSize.s,
+      key: key,
     );
   }
 
   factory LdCounter.l({
-    Key? key,
     required double value,
     int precision = 0,
     LdSize size = LdSize.m,
+    super.key,
   }) {
     return LdCounter(
-      key: key,
       value: value,
       precision: precision,
       size: LdSize.l,
+      key: key,
     );
   }
 
   factory LdCounter.xs({
-    Key? key,
     required double value,
     int precision = 0,
     LdSize size = LdSize.m,
+    super.key,
   }) {
     return LdCounter(
-      key: key,
       value: value,
       precision: precision,
       size: LdSize.xs,
+      key: key,
     );
   }
 
