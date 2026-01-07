@@ -21,12 +21,6 @@ class LocalFileComparatorWithThreshold extends LocalFileComparator {
     );
 
     if (!result.passed && result.diffPercent <= threshold) {
-      debugPrint(
-        'A difference of ${result.diffPercent * 100}% was found, but it is '
-        'acceptable since it is not greater than the threshold of '
-        '${threshold * 100}%',
-      );
-
       return true;
     }
 

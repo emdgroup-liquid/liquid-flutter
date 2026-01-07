@@ -12,3 +12,18 @@ workspace:
   - apps/example
 dev_dependencies:
   melos: ^7.1.0
+
+melos:
+  categories:
+    testable:
+      - packages/liquid_flutter
+      - packages/liquid_flutter_test_utils
+  scripts:
+    api_guard:
+      packageFilters:
+        noPrivate: true
+        diff: "origin/dev...HEAD"
+      orderDependents: true
+      steps:
+        - dart pub global activate mtrust_api_guard
+        - mtrust_api_guard version --no-commit --no-tag --badge --generate-changelog --json=./version_output.json
