@@ -324,7 +324,7 @@ class VariantBuilder implements Builder {
 
         // Add optional parameters (named) using this.fieldName syntax
         cb.optionalParameters.addAll(
-          optionalParams.map((p) {
+          optionalParams.where((p) => p.name != 'key').map((p) {
             final isContextConfigurable = contextConfigurableParams.contains(p);
             final hasDefaultValue = p.defaultValueCode != null;
 
@@ -345,6 +345,16 @@ class VariantBuilder implements Builder {
                       ? Code(p.defaultValueCode!)
                       : null));
           }),
+        );
+
+        cb.optionalParameters.add(
+          Parameter(
+            (pb) => pb
+              ..name = 'key'
+              ..named = true
+              ..toSuper = true
+              ..required = false,
+          ),
         );
       }));
 

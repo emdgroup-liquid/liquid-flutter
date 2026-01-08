@@ -5,6 +5,7 @@ class LdCounter extends StatelessWidget {
     required this.value,
     this.precision = 0,
     this.size = LdSize.m,
+    super.key,
   });
 
   factory LdCounter.s({

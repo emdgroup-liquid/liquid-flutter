@@ -112,7 +112,6 @@ class LdListConfigProvider<T extends Identifiable<IdType>, IdType>
 
 class LdList<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
   const LdList({
-    super.key,
     this.itemBuilder,
     this.paginator,
     this.areEqual,
@@ -131,6 +130,7 @@ class LdList<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
     this.scrollController,
     this.separatorBuilder,
     this.shrinkWrap,
+    super.key,
   });
 
   final Widget Function(BuildContext, LdPaginatorLoadedItem<T>, int)?

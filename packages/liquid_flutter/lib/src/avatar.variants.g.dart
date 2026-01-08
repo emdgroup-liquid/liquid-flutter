@@ -47,6 +47,7 @@ class LdAvatar extends StatelessWidget {
     this.color,
     this.circular,
     this.size,
+    super.key,
   });
 
   final Widget child;

@@ -77,7 +77,6 @@ class LdListItemConfigProvider extends StatelessWidget {
 
 class LdListItem extends StatelessWidget {
   const LdListItem({
-    super.key,
     this.active,
     this.borderRadius,
     this.disabled,
@@ -96,6 +95,7 @@ class LdListItem extends StatelessWidget {
     this.color,
     this.width,
     this.selectionControl,
+    super.key,
   });
 
   factory LdListItem.trailingForward({

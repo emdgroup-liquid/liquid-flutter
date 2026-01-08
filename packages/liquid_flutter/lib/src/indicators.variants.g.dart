@@ -5,6 +5,7 @@ class LdIndicator extends StatelessWidget {
     required this.type,
     this.size = LdSize.m,
     this.customSize,
+    super.key,
   });
 
   factory LdIndicator.info({

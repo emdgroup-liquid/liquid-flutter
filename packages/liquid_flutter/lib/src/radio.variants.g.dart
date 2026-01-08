@@ -8,6 +8,7 @@ class LdRadio extends StatelessWidget {
     this.onChanged,
     this.color,
     this.disabled = false,
+    super.key,
   });
 
   final String? label;

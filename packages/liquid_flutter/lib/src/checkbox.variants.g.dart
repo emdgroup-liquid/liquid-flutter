@@ -62,6 +62,7 @@ class LdCheckbox extends StatelessWidget {
     this.focusNode,
     this.size,
     this.disabled,
+    super.key,
   });
 
   final String? label;

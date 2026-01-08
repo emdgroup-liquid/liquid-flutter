@@ -101,6 +101,7 @@ class LdButton extends StatelessWidget {
     this.size,
     this.trailing,
     this.disableSqueeze,
+    super.key,
   });
 
   factory LdButton.ghost({

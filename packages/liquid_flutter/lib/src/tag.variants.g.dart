@@ -6,6 +6,7 @@ class LdTag extends StatelessWidget {
     this.color,
     this.onDismiss,
     this.size = LdSize.m,
+    super.key,
   });
 
   final Widget child;

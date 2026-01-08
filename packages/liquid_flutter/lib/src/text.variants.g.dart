@@ -14,6 +14,7 @@ class LdText extends StatelessWidget {
     this.size = LdSize.m,
     this.textAlign,
     this.type = LdTextType.paragraph,
+    super.key,
   });
 
   factory LdText.caption(
