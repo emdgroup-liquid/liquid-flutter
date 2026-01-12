@@ -27,10 +27,3 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
-  fonts:
-    - family: Lato
-      fonts:
-        - asset: packages/liquid_flutter/fonts/Lato-Regular.ttf
-          weight: 500
-        - asset: packages/liquid_flutter/fonts/Lato-Bold.ttf
-          weight: 800

@@ -53,14 +53,6 @@ class LdCollapseState extends State<LdCollapse> with SingleTickerProviderStateMi
         initialPosition: widget.collapsed ? 0 : 1,
         child: widget.child,
         builder: (context, state, child) {
-          if (!state.isMoving) {
-            if (widget.collapsed) {
-              return const SizedBox.shrink();
-            } else {
-              return child!;
-            }
-          }
-
           return ClipRect(
             child: Align(
               alignment: alignment,

@@ -86,6 +86,8 @@ class LdModalRoute<T> extends PageRoute<T> {
     return theme.palette.neutral.shades[8].withAlpha(150);
   }
 
+  static const double topGapRatio = 0.08;
+
   @override
   String? get barrierLabel {
     return _barrierLabel;
@@ -111,13 +113,22 @@ class LdModalRoute<T> extends PageRoute<T> {
     return constraints.maxWidth < breakpoint;
   }
 
+  double _topPadding(BuildContext context) {
+    final maxWidth = MediaQuery.widthOf(context);
+    final maxHeight = MediaQuery.heightOf(context);
+    final topPadding = maxHeight * topGapRatio;
+    if (sheetAspectRatio != null) {
+      final desiredHeight = maxWidth / sheetAspectRatio!;
+      final finalHeight = desiredHeight.clamp(0, maxHeight);
+
+      return maxHeight - finalHeight;
+    }
+    return topPadding;
+  }
+
   /// Builds content for sheet mode with top gap and rounded corners.
   Widget _buildSheetContent(BuildContext context, Widget child) {
-    // Top gap ratio matching CupertinoSheetRoute (_kTopGapRatio = 0.08)
-    const double topGapRatio = 0.08;
-    double topPadding = MediaQuery.heightOf(context) * topGapRatio;
-    final screenSize = MediaQuery.sizeOf(context);
-    final availableHeight = screenSize.height - topPadding;
+    double topPadding = _topPadding(context);
 
     Widget content = Container(
       clipBehavior: Clip.hardEdge,
@@ -139,15 +150,6 @@ class LdModalRoute<T> extends PageRoute<T> {
     );
 
     // Apply aspect ratio constraint if provided
-    if (sheetAspectRatio != null) {
-      final maxWidth = screenSize.width;
-      final maxHeight = availableHeight;
-
-      final desiredHeight = maxWidth / sheetAspectRatio!;
-      final finalHeight = desiredHeight.clamp(0, maxHeight);
-
-      topPadding = availableHeight - finalHeight;
-    }
 
     final mediaQuery = MediaQuery.of(context);
 
@@ -267,6 +269,7 @@ class LdModalRoute<T> extends PageRoute<T> {
     final bool enableDrag = barrierDismissible;
 
     return CupertinoSheetTransition(
+      topGap: topGapRatio,
       primaryRouteAnimation: animation,
       secondaryRouteAnimation: secondaryAnimation,
       linearTransition: linearTransition,

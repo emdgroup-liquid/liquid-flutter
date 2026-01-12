@@ -9,7 +9,6 @@ import 'package:liquid_flutter_test_utils/system_ui/system_overlays.dart';
 
 /// Create a frame for a widget to be used in golden tests.
 Widget ldFrame({
-  required Key key,
   required Widget child,
   required bool dark,
   required LdThemeSize size,
@@ -47,7 +46,20 @@ Widget ldFrame({
         appBuilder: (context, theme) => MaterialApp.router(
           debugShowCheckedModeBanner: false,
           theme: theme.copyWith(
-            platform: ldFrameOptions.targetPlatform,
+            platform: switch (ldFrameOptions.platform) {
+              LdPlatform.android => TargetPlatform.android,
+              LdPlatform.ios => TargetPlatform.iOS,
+              LdPlatform.macos => TargetPlatform.macOS,
+              LdPlatform.linux => TargetPlatform.linux,
+              LdPlatform.windows => TargetPlatform.windows,
+              LdPlatform.webAndroid => TargetPlatform.android,
+              LdPlatform.webIOS => TargetPlatform.iOS,
+              LdPlatform.webMacOS => TargetPlatform.macOS,
+              LdPlatform.webWindows => TargetPlatform.windows,
+              LdPlatform.webLinux => TargetPlatform.linux,
+              LdPlatform.webUnknown => TargetPlatform.android,
+              null => TargetPlatform.android,
+            },
           ),
           locale: LiquidLocalizations.supportedLocales.first,
           supportedLocales: LiquidLocalizations.supportedLocales,
@@ -75,26 +87,23 @@ Widget ldFrame({
                   padding: padding,
                   viewInsets: padding,
                 ),
-                child: KeyedSubtree(
-                  key: key,
-                  child: SystemOverlayDetector(
-                    builder: (context, style) {
-                      if (ldFrameOptions.build != null) {
-                        return ldFrameOptions.build!(
-                          context,
-                          orientation,
-                          child,
-                          dark,
-                          style ??
-                              (!dark
-                                  ? SystemUiOverlayStyle.dark
-                                  : SystemUiOverlayStyle.light),
-                        );
-                      }
+                child: SystemOverlayDetector(
+                  builder: (context, style) {
+                    if (ldFrameOptions.build != null) {
+                      return ldFrameOptions.build!(
+                        context,
+                        orientation,
+                        child,
+                        dark,
+                        style ??
+                            (!dark
+                                ? SystemUiOverlayStyle.dark
+                                : SystemUiOverlayStyle.light),
+                      );
+                    }
 
-                      return child;
-                    },
-                  ),
+                    return child;
+                  },
                 ),
               );
             },

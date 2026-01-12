@@ -18,6 +18,7 @@ class LdListRenderItem<T extends Identifiable> {
   LdListRenderItem({
     required this.type,
     this.item,
+    this.groupItems = const [],
     this.separationCriterion,
     this.position,
   }) : assert(
@@ -27,6 +28,7 @@ class LdListRenderItem<T extends Identifiable> {
 
   final LdPaginatorItem<T>? item;
   final LdListRenderItemType type;
+  final List<LdListRenderItem<T>> groupItems;
   final dynamic separationCriterion;
 
   /// The position that this item belongs to.
@@ -115,7 +117,7 @@ class LdListWidget<T extends Identifiable<IdType>, IdType> extends StatefulWidge
 
   // Grouping configuration
   final dynamic Function(T item)? groupingCriterion;
-  final Widget Function(BuildContext context, dynamic criterion)? groupHeaderBuilder;
+  final Widget Function(BuildContext context, dynamic criterion, List<LdPaginatorItem<T>> items)? groupHeaderBuilder;
 
   /// Built between items. Not called between items and group headers.
   final Widget Function(BuildContext context)? separatorBuilder;
@@ -263,13 +265,15 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
 
   /// Groups items sequentially based on the grouping criterion
   List<LdListRenderItem<T>> _groupItems() {
-    final groupedItems = <LdListRenderItem<T>>[];
+    final result = <LdListRenderItem<T>>[];
     dynamic lastSeparationCriterion;
+
+    int groupIndex = -1;
 
     for (final item in widget.paginator.currentList()) {
       if (item.item == null) {
         // Loader
-        groupedItems.add(
+        result.add(
           LdListRenderItem<T>(
             position: item.position,
             type: LdListRenderItemType.item,
@@ -281,29 +285,33 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
       final currentCriterion = widget.groupingCriterion!(item.item!.value!);
       if (lastSeparationCriterion != currentCriterion) {
         // Group header
-        groupedItems.add(
+        result.add(
           LdListRenderItem(
             position: item.position,
             type: LdListRenderItemType.groupHeader,
             separationCriterion: currentCriterion,
+            groupItems: [],
           ),
         );
         lastSeparationCriterion = currentCriterion;
+        groupIndex = result.length - 1;
       } else {
         // Separator
         if (widget.separatorBuilder != null) {
-          groupedItems.add(
-            LdListRenderItem(
-              position: item.position,
-              type: LdListRenderItemType.separator,
-            ),
-          );
+          result.add(LdListRenderItem<T>(
+            position: item.position,
+            type: LdListRenderItemType.separator,
+          ));
         }
       }
-      groupedItems.add(item);
+
+      if (groupIndex != -1) {
+        result[groupIndex].groupItems.add(item);
+      }
+      result.add(item);
     }
 
-    return groupedItems;
+    return result;
   }
 
   Future<void> _onDataChange() async {
@@ -412,6 +420,9 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
       return widget.groupHeaderBuilder!(
         context,
         item.separationCriterion,
+        item.groupItems.map((e) {
+          return e.item!;
+        }).toList(),
       );
     }
 

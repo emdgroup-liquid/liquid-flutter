@@ -24,7 +24,7 @@ class LdScaffoldBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final padding = MediaQuery.paddingOf(context);
+    final padding = MediaQuery.paddingOf(context).atLeast(MediaQuery.viewPaddingOf(context));
 
     final theme = LdTheme.of(context, listen: true);
 

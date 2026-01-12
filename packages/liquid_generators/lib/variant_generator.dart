@@ -230,8 +230,10 @@ class VariantBuilder implements Builder {
     final constructor = classItem.constructors.first;
     final positionalParams =
         constructor.parameters.where((p) => p.isPositional).toList();
-    final optionalParams =
-        constructor.parameters.where((p) => !p.isPositional).toList();
+    final optionalParams = constructor.parameters
+        .where((p) => !p.isPositional)
+        .where((p) => p.name != 'key')
+        .toList();
 
     // Detect context-configurable parameters
     final contextConfigurableParams = <ParameterElement>[];
@@ -324,7 +326,7 @@ class VariantBuilder implements Builder {
 
         // Add optional parameters (named) using this.fieldName syntax
         cb.optionalParameters.addAll(
-          optionalParams.where((p) => p.name != 'key').map((p) {
+          optionalParams.map((p) {
             final isContextConfigurable = contextConfigurableParams.contains(p);
             final hasDefaultValue = p.defaultValueCode != null;
 
@@ -360,10 +362,6 @@ class VariantBuilder implements Builder {
 
       // 3. Generate factory constructors for variants (or static methods for context-dependent)
       for (final variant in variants) {
-        // Add Key parameter if not already present
-        final hasKeyParam = optionalParams.any((p) => p.name == 'key') ||
-            positionalParams.any((p) => p.name == 'key');
-
         if (variant.requiresContext) {
           // Generate static method that returns Widget (can return Builder)
           final staticMethod = Method((mb) {
@@ -410,15 +408,13 @@ class VariantBuilder implements Builder {
               }),
             );
 
-            if (!hasKeyParam) {
-              mb.optionalParameters.add(
-                Parameter((pb) => pb
-                  ..name = 'key'
-                  ..named = true
-                  ..type = refer('Key?')
-                  ..required = false),
-              );
-            }
+            mb.optionalParameters.add(
+              Parameter((pb) => pb
+                ..name = 'key'
+                ..named = true
+                ..type = refer('Key?')
+                ..required = false),
+            );
 
             // Build argument strings for code generation
             final namedArgsList = <String>[];
@@ -434,10 +430,7 @@ class VariantBuilder implements Builder {
               }
             }
 
-            // Add key if needed
-            if (!hasKeyParam) {
-              namedArgsList.add('key: key');
-            }
+            namedArgsList.add('key: key');
 
             // Create the Builder that wraps the public class instantiation
             // Build type arguments string if needed
@@ -511,15 +504,16 @@ class VariantBuilder implements Builder {
               }),
             );
 
-            if (!hasKeyParam) {
-              cb.optionalParameters.add(
-                Parameter((pb) => pb
+            cb.optionalParameters.add(
+              Parameter(
+                (pb) => pb
                   ..name = 'key'
                   ..named = true
-                  ..toSuper = true
-                  ..required = false),
-              );
-            }
+                  ..type = refer('Key?')
+                  ..toSuper = false
+                  ..required = false,
+              ),
+            );
 
             // Direct instantiation with literal defaults
             final positionalArgs =
@@ -535,9 +529,7 @@ class VariantBuilder implements Builder {
               }
             }
 
-            if (!hasKeyParam) {
-              namedArgs['key'] = refer('key');
-            }
+            namedArgs['key'] = refer('key');
 
             // Create reference with type parameters if needed
             // When using type parameters as type arguments, we only use the names, not the bounds
@@ -602,7 +594,7 @@ class VariantBuilder implements Builder {
           );
         }
 
-        for (final param in optionalParams.where((p) => p.name != 'key')) {
+        for (final param in optionalParams) {
           final isContextConfigurable =
               contextConfigurableParams.contains(param);
           if (isContextConfigurable && configClassName != null) {

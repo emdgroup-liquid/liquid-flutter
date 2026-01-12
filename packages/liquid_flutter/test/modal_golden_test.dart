@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-
-import 'golden_utils.dart';
+import 'package:liquid_flutter_test_utils/liquid_flutter_test_utils.dart';
+import 'package:liquid_flutter_test_utils/ld_frame_options.dart';
 
 void main() {
   testGoldens("LdModal Golden", (WidgetTester tester) async {
@@ -45,7 +45,6 @@ void main() {
               ),
             ),
           );
-          return null;
         },
         "LdModal Open": (tester, place) async {
           await place(
@@ -81,10 +80,9 @@ void main() {
               ),
             ),
           );
-          return null;
         },
       },
-      height: 500,
+      frameScenarios: const [LdFrameOptions(width: 500, height: 500)],
     );
   });
 }

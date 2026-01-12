@@ -415,16 +415,7 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
 
   bool get _showWindowsWindowControls {
     // Calculate level by walking up scaffolds
-    int level = 0;
-    BuildContext? currentContext = context;
-    while (currentContext != null) {
-      final scaffoldState = currentContext.findAncestorStateOfType<LdScaffoldState>();
-      if (scaffoldState == null) break;
-      currentContext = scaffoldState.context;
-      if (currentContext == context) break;
-      level++;
-    }
-
+    final level = _level();
     return LdTheme.of(context).platform == LdPlatform.windows && _isInTopSlot && level == 0 && !_isDrawer;
   }
 

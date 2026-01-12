@@ -32,7 +32,9 @@ LdMonkeyAction<T, IdType> showFilterModal<T extends Identifiable<IdType>, IdType
         active: LdRepository.of<T, IdType>(context).activeFilters.isNotEmpty,
         leading: const Icon(LucideIcons.listFilter),
         onPressed: () {
-          Navigator.push(context, ldFilterModal<T, IdType>(context));
+          Navigator.of(context, rootNavigator: true).push(
+            ldFilterModal<T, IdType>(context),
+          );
         },
         child: Text(LiquidLocalizations.of(context).filter),
       ),

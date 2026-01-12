@@ -272,11 +272,12 @@ class _LdButtonState extends State<_LdButtonWidget> {
                 duration: 200.ms,
                 child: Stack(alignment: Alignment.center, children: [
                   AnimatedOpacity(
-                      duration: const Duration(
-                        milliseconds: 200,
-                      ),
-                      opacity: !isLoading && !_failed ? 1 : 0,
-                      child: _buttonContent),
+                    duration: const Duration(
+                      milliseconds: 200,
+                    ),
+                    opacity: !isLoading && !_failed ? 1 : 0,
+                    child: _buttonContent,
+                  ),
                   LdSpring(
                     dampingCoefficient: 5,
                     position: isLoading ? 0 : 1,
@@ -429,7 +430,7 @@ class _ButtonShape extends StatelessWidget {
               child: IconTheme(
                 data: IconThemeData(
                   color: colors.text,
-                  size: circular ? theme.labelSize(size) : theme.labelSize(size),
+                  size: theme.labelSize(size),
                 ),
                 child: child,
               ),

@@ -22,7 +22,7 @@ class LdScaffold extends StatefulWidget {
   final Color? backgroundColor;
   final Widget? drawer;
   final String? debugName;
-  final bool? resizeToAvoidBottomInset;
+
   final bool extendBodyBehindAppBar;
   final double drawerWidth;
 
@@ -40,7 +40,6 @@ class LdScaffold extends StatefulWidget {
     properties.add(ColorProperty('backgroundColor', backgroundColor));
     properties.add(DoubleProperty('drawerWidth', drawerWidth));
     properties.add(DoubleProperty('reflowBreakpoint', reflowBreakpoint));
-    properties.add(DiagnosticsProperty<bool?>('resizeToAvoidBottomInset', resizeToAvoidBottomInset));
     properties.add(DiagnosticsProperty<List<Widget>?>('appBars', appBars));
     properties.add(DiagnosticsProperty<Widget?>('drawer', drawer));
     properties.add(DiagnosticsProperty<TextEditingController?>('searchController', searchController));
@@ -59,7 +58,6 @@ class LdScaffold extends StatefulWidget {
     this.drawer,
     this.drawerWidth = 304,
     this.reflowBreakpoint = 900,
-    this.resizeToAvoidBottomInset,
     this.searchController,
     this.primaryScrollController,
   });

@@ -280,7 +280,7 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                         position: _effectivePosition,
                         attached: isAttached,
                         addContainer: widget.addContainer,
-                        insidePadding: EdgeInsets.zero,
+                        insidePadding: isAttached ? EdgeInsets.zero : LdTheme.of(context).pad(size: LdSize.s),
                         outsideDecoration: _buildOutsideDecoration(
                           context: context,
                           isScrolledUnder: isScrolledUnder,
@@ -318,18 +318,19 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                                 ...widget.tabs.sublist(0, fittingTabs).map((tab) => Expanded(
                                       child: LdTouchableSurface(
-                                        mode: LdTouchableSurfaceMode.neutralGhost,
+                                        mode: LdTouchableSurfaceMode.ghost,
+                                        color: theme.primary,
                                         onPressed: () => _onTabTap(tab.route),
                                         builder: (context, colors, status, _) {
                                           return Container(
                                             decoration: BoxDecoration(
                                               color: colors.surface,
-                                              borderRadius: isAttached ? null : LdTheme.of(context).radius(LdSize.m),
+                                              borderRadius: isAttached ? null : LdTheme.of(context).radius(LdSize.s),
                                             ),
                                             child: Builder(
                                               builder: (context) {
-                                                final iconColor = theme.palette.text;
-                                                final textColor = theme.palette.text;
+                                                final iconColor = colors.icon;
+                                                final textColor = colors.text;
                                                 final icon = IconTheme(
                                                   data: IconThemeData(
                                                     color: iconColor,
@@ -392,18 +393,19 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                                           },
                                           builder: (context, isShuttle, trigger, isOpen, child) {
                                             return LdTouchableSurface(
-                                              mode: LdTouchableSurfaceMode.neutralGhost,
+                                              mode: LdTouchableSurfaceMode.ghost,
+                                              color: theme.primary,
                                               onPressed: trigger,
                                               builder: (context, colors, status, _) {
                                                 return Container(
                                                     decoration: BoxDecoration(
                                                       color: colors.surface,
                                                       borderRadius:
-                                                          isAttached ? null : LdTheme.of(context).radius(LdSize.m),
+                                                          isAttached ? null : LdTheme.of(context).radius(LdSize.s),
                                                     ),
                                                     child: Builder(builder: (context) {
-                                                      final iconColor = theme.palette.text;
-                                                      final textColor = theme.palette.text;
+                                                      final iconColor = colors.icon;
+                                                      final textColor = colors.text;
                                                       final icon = IconTheme(
                                                         data: IconThemeData(
                                                           color: iconColor,
@@ -465,7 +467,7 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                                     child: Container(
                                       width: constraints.maxWidth / _visibleTabs,
                                       decoration: BoxDecoration(
-                                        color: theme.primaryColor.withAlpha(100),
+                                        color: theme.primaryColor.withAlpha(26),
                                         border: switch (isAttached) {
                                           true => switch (_effectivePosition) {
                                               LdAppBarPosition.top => Border(
@@ -474,9 +476,9 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                                               LdAppBarPosition.bottom => Border(
                                                   top: BorderSide(color: theme.primaryColor, width: theme.borderWidth)),
                                             },
-                                          false => Border.all(color: theme.primaryColor, width: theme.borderWidth),
+                                          false => null,
                                         },
-                                        borderRadius: isAttached ? null : LdTheme.of(context).radius(LdSize.m),
+                                        borderRadius: isAttached ? null : LdTheme.of(context).radius(LdSize.s),
                                       ),
                                     ),
                                   ),

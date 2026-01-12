@@ -23,11 +23,7 @@ class _ListDemoState extends State<ListDemo> {
     fetchListFunction: _fetchItems,
   );
 
-  Future<LdListPage<_DemoItem>> _fetchItems({
-    required int offset,
-    required int pageSize,
-    String? pageToken,
-  }) async {
+  Future<LdListPage<_DemoItem>> _fetchItems({required int offset, required int pageSize, String? pageToken}) async {
     await Future.delayed(const Duration(milliseconds: 500));
 
     if (_simulateError) {
@@ -58,86 +54,62 @@ class _ListDemoState extends State<ListDemo> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ComponentWell(
-              padding: EdgeInsets.zero,
-              onSurface: _onSurface,
-              child: SizedBox(
-                height: 300,
-                child: LdList<_DemoItem, int>(
-                  header: const LdListItem(
-                    leading: LdAvatar(
-                      child: Text("H"),
-                    ),
-                    title: Text("Header"),
-                    subtitle: Text("This is a header"),
-                  ),
-                  footer: const LdListItem(
-                    leading: LdAvatar(
-                      child: Text("F"),
-                    ),
-                    title: Text("Footer"),
-                    subtitle: Text("This is a Footer"),
-                  ),
-                  paginator: _paginator,
-                  assumedItemHeight: _assumeItemHeight ? 50 : null,
-                  groupingCriterion: _enableGrouping ? (item) => item.category : null,
-                  groupHeaderBuilder: _enableGrouping
-                      ? (context, remainder) => LdListSeperator(
-                            onSurface: _onSurface,
-                            child: Text(
-                              "Range $remainder",
-                            ),
-                          )
-                      : null,
-                  loadingBuilder: (context, currentPage, totalItems) {
-                    return const LdListItemLoading(
-                      hasLeading: true,
-                      hasSubContent: false,
-                    );
-                  },
-                  separatorBuilder: (
-                    context,
-                  ) {
-                    return Padding(
-                      padding: const EdgeInsets.only(left: 16),
-                      child: const LdDivider(),
-                    );
-                  },
-                  itemBuilder: (context, item, state) {
-                    return LdListItem(
-                      leading: LdAvatar(
-                        color: LdTheme.of(context).palette.success,
-                        child: Text(item.value.name.toString().substring(0, 1)),
-                      ),
-                      title: Text(item.value.name),
-                      subtitle: Text(item.value.category),
-                    );
-                  },
+            padding: EdgeInsets.zero,
+            onSurface: _onSurface,
+            child: SizedBox(
+              height: 300,
+              child: LdList<_DemoItem, int>(
+                header: const LdListItem(
+                  leading: LdAvatar(child: Text("H")),
+                  title: Text("Header"),
+                  subtitle: Text("This is a header"),
                 ),
-              )),
+                footer: const LdListItem(
+                  leading: LdAvatar(child: Text("F")),
+                  title: Text("Footer"),
+                  subtitle: Text("This is a Footer"),
+                ),
+                paginator: _paginator,
+                assumedItemHeight: _assumeItemHeight ? 50 : null,
+                groupingCriterion: _enableGrouping ? (item) => item.category : null,
+                groupHeaderBuilder: _enableGrouping
+                    ? (context, remainder, items) =>
+                          LdListSeperator(onSurface: _onSurface, child: Text("Range $remainder"))
+                    : null,
+                loadingBuilder: (context, currentPage, totalItems) {
+                  return const LdListItemLoading(hasLeading: true, hasSubContent: false);
+                },
+                separatorBuilder: (context) {
+                  return Padding(padding: const EdgeInsets.only(left: 16), child: const LdDivider());
+                },
+                itemBuilder: (context, item, state) {
+                  return LdListItem(
+                    leading: LdAvatar(
+                      color: LdTheme.of(context).palette.success,
+                      child: Text(item.value.name.toString().substring(0, 1)),
+                    ),
+                    title: Text(item.value.name),
+                    subtitle: Text(item.value.category),
+                  );
+                },
+              ),
+            ),
+          ),
           ldSpacerM,
           LdCard(
             child: LdAutoSpace(
               children: [
                 Wrap(
                   children: [
+                    LdButton(onPressed: _paginator.refreshList, child: const Text("Refresh list")),
                     LdButton(
-                      onPressed: _paginator.refreshList,
-                      child: const Text(
-                        "Refresh list",
-                      ),
-                    ),
-                    LdButton(
-                      child: const Text(
-                        "Clear list",
-                      ),
+                      child: const Text("Clear list"),
                       onPressed: () {
                         _paginator.reset();
                       },
                     ),
                     LdButton(
-                      child: const Text(
-                        "Delete item 1",
-                      ),
+                      child: const Text("Delete item 1"),
                       onPressed: () {
                         _paginator.scheduleItemDeletion(1);
                       },
@@ -170,31 +142,29 @@ class _ListDemoState extends State<ListDemo> {
                     ),
                   ],
                 ).spaceM(),
+                LdToggle(label: "On Surface", checked: _onSurface, onChanged: _setOnSurface),
                 LdToggle(
-                  label: "On Surface",
-                  checked: _onSurface,
-                  onChanged: _setOnSurface,
+                  checked: _simulateError,
+                  label: "Simulate error",
+                  onChanged: (value) {
+                    setState(() {
+                      _simulateError = value;
+                    });
+                  },
                 ),
                 LdToggle(
-                    checked: _simulateError,
-                    label: "Simulate error",
-                    onChanged: (value) {
-                      setState(() {
-                        _simulateError = value;
-                      });
-                    }),
-                LdToggle(
-                    checked: _bidirectionalScrolling,
-                    label: "Bidirectional scrolling",
-                    onChanged: (value) {
-                      setState(() {
-                        _bidirectionalScrolling = value;
-                        _paginator = LdPaginator<_DemoItem, int>(
-                          initialOffset: _bidirectionalScrolling ? 50 : 0,
-                          fetchListFunction: _fetchItems,
-                        );
-                      });
-                    }),
+                  checked: _bidirectionalScrolling,
+                  label: "Bidirectional scrolling",
+                  onChanged: (value) {
+                    setState(() {
+                      _bidirectionalScrolling = value;
+                      _paginator = LdPaginator<_DemoItem, int>(
+                        initialOffset: _bidirectionalScrolling ? 50 : 0,
+                        fetchListFunction: _fetchItems,
+                      );
+                    });
+                  },
+                ),
               ],
             ),
           ),
@@ -203,15 +173,17 @@ class _ListDemoState extends State<ListDemo> {
             child: LdAutoSpace(
               children: [
                 LdToggle(
-                    checked: _assumeItemHeight,
-                    label: "Assume item height (by passing the assumedItemHeight parameter). ",
-                    onChanged: (value) {
-                      setState(() {
-                        _assumeItemHeight = value;
-                      });
-                    }),
+                  checked: _assumeItemHeight,
+                  label: "Assume item height (by passing the assumedItemHeight parameter). ",
+                  onChanged: (value) {
+                    setState(() {
+                      _assumeItemHeight = value;
+                    });
+                  },
+                ),
                 LdText.p(
-                    "This will make the scrollbar the correct size and allow flinging, but might result in more data being loaded."),
+                  "This will make the scrollbar the correct size and allow flinging, but might result in more data being loaded.",
+                ),
               ],
             ),
           ),
@@ -219,19 +191,18 @@ class _ListDemoState extends State<ListDemo> {
             child: LdAutoSpace(
               children: [
                 LdToggle(
-                    checked: _enableGrouping,
-                    label: "Enable grouping (by passing the groupingCriterion parameter and a seperatorBuilder)",
-                    onChanged: (value) {
-                      setState(() {
-                        _enableGrouping = value;
-                      });
-                    }),
+                  checked: _enableGrouping,
+                  label: "Enable grouping (by passing the groupingCriterion parameter and a seperatorBuilder)",
+                  onChanged: (value) {
+                    setState(() {
+                      _enableGrouping = value;
+                    });
+                  },
+                ),
               ],
             ),
           ),
-          LdBundle(
-            children: [],
-          ),
+          LdBundle(children: []),
           ldSpacerM,
           const LdDivider(),
           ldSpacerM,
@@ -241,47 +212,35 @@ class _ListDemoState extends State<ListDemo> {
             paginator: LdPaginator.fromList(_demoItems),
             itemBuilder: (context, item, index) {
               return LdListItem(
-                leading: LdAvatar(
-                  child: Text(item.value.name),
-                ),
+                leading: LdAvatar(child: Text(item.value.name)),
                 title: Text(item.value.name),
                 subtitle: Text(item.value.category),
               );
             },
           ),
-          LdText.h(
-            "Empty state LdListEmpty()",
-          ),
+          LdText.h("Empty state LdListEmpty()"),
           ldSpacerM,
           SizedBox(
-              height: 200,
-              child: LdCard(
-                  expandChild: true,
-                  child: LdListEmpty(
-                    onRefresh: () {
-                      LdNotificationsController.of(context).addNotification(
-                        LdNotification(message: "Refreshed", type: LdNotificationType.success),
-                      );
-                    },
-                  ))),
-          ldSpacerM,
-          LdText.h(
-            "LdListSeperator()",
+            height: 200,
+            child: LdCard(
+              expandChild: true,
+              child: LdListEmpty(
+                onRefresh: () {
+                  LdNotificationsController.of(
+                    context,
+                  ).addNotification(LdNotification(message: "Refreshed", type: LdNotificationType.success));
+                },
+              ),
+            ),
           ),
           ldSpacerM,
-          const LdListSeperator(
-            child: Text("This is a separator"),
-          ),
+          LdText.h("LdListSeperator()"),
+          ldSpacerM,
+          const LdListSeperator(child: Text("This is a separator")),
           ldSpacerM,
           const Text("Loading state LdListLoading()"),
           ldSpacerM,
-          const LdCard(
-            padding: EdgeInsets.zero,
-            child: LdListItemLoading(
-              hasLeading: true,
-              hasTrailing: true,
-            ),
-          )
+          const LdCard(padding: EdgeInsets.zero, child: LdListItemLoading(hasLeading: true, hasTrailing: true)),
         ],
       ),
     );

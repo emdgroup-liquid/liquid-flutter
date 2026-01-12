@@ -76,7 +76,7 @@ class _ComponentWellState extends State<ComponentWell> {
           ),
           constraints: BoxConstraints(minHeight: widget.minHeight ?? 0),
           clipBehavior: Clip.hardEdge,
-          padding: widget.padding ?? EdgeInsets.all(64),
+          padding: widget.padding ?? EdgeInsets.all(theme.platform.isMobile ? 16 : 64),
           child: Provider.value(
             value: LdSurfaceInfo(isSurface: widget.onSurface),
             child: widget.child,

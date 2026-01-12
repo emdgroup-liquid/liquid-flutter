@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
+import 'package:golden_toolkit/golden_toolkit.dart' hide loadAppFonts;
 import 'package:liquid_flutter/liquid_flutter.dart';
-
-import 'golden_utils.dart';
+import 'package:liquid_flutter_test_utils/liquid_flutter_test_utils.dart';
 
 void main() {
   testGoldens("LdAccordion looks correct", (tester) async {
@@ -18,7 +17,6 @@ void main() {
             return Text("Header $n");
           },
         ));
-        return null;
       },
       "Initially Open": (tester, place) async {
         await place(
@@ -33,7 +31,6 @@ void main() {
             },
           ),
         );
-        return null;
       },
       "Elevated": (tester, place) async {
         await place(
@@ -49,7 +46,6 @@ void main() {
             },
           ),
         );
-        return null;
       },
       "Double open": (tester, place) async {
         await place(LdAccordion(
@@ -63,7 +59,6 @@ void main() {
             return Text("Header $n");
           },
         ));
-        return null;
       },
     });
   });

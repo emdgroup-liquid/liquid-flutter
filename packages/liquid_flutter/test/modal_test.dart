@@ -5,21 +5,19 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-
-import 'golden_utils.dart';
+import 'package:liquid_flutter_test_utils/ld_theme_wrapper.dart';
 
 void main() {
   testWidgets('LdModal', (WidgetTester test) async {
     ldDisableAnimations = true;
     await test.pumpWidget(
-      liquidFrame(
-        isDark: false,
-        key: const Key("frame"),
+      ldThemeWrapper(
         size: LdThemeSize.m,
+        brightnessMode: LdThemeBrightnessMode.light,
         child: SizedBox(
           height: 500,
           child: Builder(builder: (context) {
-            return Scaffold(
+            return LdScaffold(
                 body: Center(
               child: LdModalBuilder(
                 builder: (context, open) {
@@ -28,8 +26,16 @@ void main() {
                 modal: LdModalRoute(
                   context: context,
                   pageBuilder: (context) => const LdScaffold(
-                    appBars: [LdAppBar(title: Text("Dialog title"))],
-                    body: LdScaffoldBody(children: [LdText("Dialog content")]),
+                    appBars: [
+                      LdAppBar(
+                        title: Text("Dialog title"),
+                      )
+                    ],
+                    body: LdScaffoldBody(children: [
+                      LdText(
+                        "Dialog content",
+                      )
+                    ]),
                   ),
                 ),
               ),

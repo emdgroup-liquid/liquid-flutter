@@ -16,7 +16,7 @@ class DemoShell extends StatelessWidget {
     final theme = LdTheme.of(context);
     return LdScaffold(
       debugName: "Demo Shell Scaffold",
-      resizeToAvoidBottomInset: false,
+
       appBars: [
         if (theme.platform.isDesktop)
           LdAppBar(
@@ -44,11 +44,7 @@ class DemoShell extends StatelessWidget {
                 route: "/movie-demo",
                 isActive: (context) => GoRouterState.of(context).uri.path.startsWith("/movie-demo"),
               ),
-              LdNavigationTab(
-                label: "Exit",
-                icon: const Icon(LucideIcons.x),
-                route: "/",
-              ),
+              LdNavigationTab(label: "Exit", icon: const Icon(LucideIcons.x), route: "/"),
             ],
             onTabPressed: (route) {
               if (route == "/") {

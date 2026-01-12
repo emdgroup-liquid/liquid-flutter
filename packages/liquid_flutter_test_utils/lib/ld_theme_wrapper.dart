@@ -8,28 +8,31 @@ Widget ldThemeWrapper({
   LdThemeBrightnessMode brightnessMode = LdThemeBrightnessMode.auto,
   LdThemeSize? size,
   List<LocalizationsDelegate> localizationsDelegates = const [],
+  LdPlatform? platform,
   required Widget child,
 }) {
   final theme = LdTheme();
   if (size != null) {
     theme.setThemeSize(size);
   }
-  return Localizations(
-    delegates: [
-      ...localizationsDelegates,
-      GlobalMaterialLocalizations.delegate,
-      GlobalWidgetsLocalizations.delegate,
-      LiquidLocalizations.delegate,
-    ],
-    locale: const Locale('en'),
-    child: Directionality(
-      textDirection: TextDirection.ltr,
-      child: LdThemeProvider(
+  if (platform != null) {
+    theme.platform = platform;
+  }
+  return LdThemeProvider(
+    theme: theme,
+    brightnessMode: brightnessMode,
+    child: LdThemedAppBuilder(appBuilder: (context, theme) {
+      return MaterialApp(
         theme: theme,
-        autoSize: size == null,
-        brightnessMode: brightnessMode,
-        child: child,
-      ),
-    ),
+        localizationsDelegates: [
+          ...localizationsDelegates,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          LiquidLocalizations.delegate,
+        ],
+        locale: const Locale('en'),
+        home: child,
+      );
+    }),
   );
 }

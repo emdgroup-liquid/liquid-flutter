@@ -32,6 +32,10 @@ List<Widget> generateAutoSpacings({
     }
     finalChildren.add(child);
 
+    if (next == null) {
+      break;
+    }
+
     if (child is LdReveal) {
       child = child.child;
     }

@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-
-import 'golden_utils.dart';
+import 'package:liquid_flutter_test_utils/liquid_flutter_test_utils.dart';
 
 void main() {
   // Sample exceptions to use for our tests
@@ -55,7 +54,6 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        return null;
       },
       "Warning Vertical": (tester, place) async {
         await place(
@@ -64,7 +62,6 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        return null;
       },
       "Success Vertical": (tester, place) async {
         await place(
@@ -73,7 +70,6 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        return null;
       },
       "Error Horizontal": (tester, place) async {
         await place(
@@ -83,7 +79,6 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        return null;
       },
       "With RetryController": (tester, place) async {
         final retryController = LdRetryController(
@@ -100,7 +95,6 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        return null;
       },
       "Null Exception": (tester, place) async {
         await place(
@@ -110,7 +104,6 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        return null;
       },
     });
   });

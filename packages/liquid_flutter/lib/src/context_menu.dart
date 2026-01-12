@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -9,17 +8,6 @@ import 'package:liquid_flutter/src/haptics.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:liquid_flutter/src/modal/size_notifier.dart';
-
-enum LdContextMenuBlurMode {
-  /// Blur on mobile
-  mobileOnly,
-
-  /// Always blur
-  always,
-
-  /// Never blur
-  never,
-}
 
 enum LdContextZoomMode {
   /// Zoom on mobile
@@ -53,8 +41,7 @@ class LdContextMenu extends StatefulWidget {
     this.dismissOnOutsideTap = true,
     this.placeAboveTrigger = false,
     this.inheritTriggerWidth = false,
-    this.scaleFromTrigger = false,
-    this.blurMode = LdContextMenuBlurMode.mobileOnly,
+    this.scaleFromTrigger = true,
     this.zoomMode = LdContextZoomMode.mobileOnly,
     this.listenForTaps = true,
     this.visible,
@@ -83,7 +70,6 @@ class LdContextMenu extends StatefulWidget {
 
   final List<SingleChildWidget>? Function(BuildContext context)? menuProviders;
 
-  final LdContextMenuBlurMode blurMode;
   final LdContextZoomMode zoomMode;
   final LdContextPositionMode positionMode;
 
@@ -122,14 +108,6 @@ class LdContextMenuState extends State<LdContextMenu> {
   void dispose() {
     _menuSizeNotifier.dispose();
     super.dispose();
-  }
-
-  bool get _shouldBlur {
-    return switch (widget.blurMode) {
-      (LdContextMenuBlurMode.mobileOnly) => _mobile,
-      (LdContextMenuBlurMode.always) => true,
-      (LdContextMenuBlurMode.never) => false,
-    };
   }
 
   bool get _shouldZoom {
@@ -172,6 +150,7 @@ class LdContextMenuState extends State<LdContextMenu> {
 
     await Navigator.of(context, rootNavigator: true).push(
       LdContextMenuRoute(
+        scaleFromTrigger: widget.scaleFromTrigger,
         inheritTriggerWidth: widget.inheritTriggerWidth,
         placeAboveTrigger: widget.placeAboveTrigger,
         menuBuilder: (ctx) => widget.menuBuilder(ctx),
@@ -180,7 +159,6 @@ class LdContextMenuState extends State<LdContextMenu> {
         cursorPosition: _cursorPosition,
         triggerPosition: _getTriggerPosition() ?? Offset.zero,
         triggerSize: _getTriggerSize() ?? Size.zero,
-        shouldBlur: _shouldBlur,
         shouldZoom: _shouldZoom,
         backgroundColor: null,
         providers: [
@@ -188,13 +166,6 @@ class LdContextMenuState extends State<LdContextMenu> {
           ListenableProvider.value(value: LdTheme.of(context)),
           ListenableProvider.value(value: LdNotificationsController.maybeOf(context))
         ],
-        triggerBuilder: (context, isShuttle, trigger, child) => widget.builder(
-          context,
-          isShuttle,
-          trigger,
-          _isOpen,
-          child,
-        ),
         child: widget.child,
       ),
     );
@@ -242,14 +213,14 @@ class LdContextMenuRoute extends ModalRoute<void> {
   final GlobalKey triggerKey;
   final bool inheritTriggerWidth;
   final Size triggerSize;
-  final bool shouldBlur;
+  final bool scaleFromTrigger;
+
   final LdContextPositionMode effectivePositionMode;
   final Offset? cursorPosition;
   final bool shouldZoom;
   final Color? backgroundColor;
   final VoidCallback? onDismiss;
   final List<SingleChildWidget>? providers;
-  final Widget Function(BuildContext, bool, VoidCallback, Widget?) triggerBuilder;
   final Widget? child;
   final bool placeAboveTrigger;
 
@@ -261,15 +232,14 @@ class LdContextMenuRoute extends ModalRoute<void> {
     required this.effectivePositionMode,
     this.cursorPosition,
     this.placeAboveTrigger = false,
-    this.shouldBlur = false,
     this.shouldZoom = false,
     this.backgroundColor,
+    this.scaleFromTrigger = false,
     this.onDismiss,
     required this.triggerPosition,
     required this.triggerSize,
     this.providers,
     required this.triggerKey,
-    required this.triggerBuilder,
     required this.child,
     required this.inheritTriggerWidth,
   });
@@ -283,7 +253,10 @@ class LdContextMenuRoute extends ModalRoute<void> {
   @override
   RouteSettings get settings => const RouteSettings(name: "ContextMenu");
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 200);
+  Duration get transitionDuration => const Duration(milliseconds: 300);
+
+  @override
+  Duration get reverseTransitionDuration => Duration.zero;
 
   @override
   bool get barrierDismissible => true;
@@ -324,7 +297,11 @@ class LdContextMenuRoute extends ModalRoute<void> {
       // Position relative to the trigger widget (e.g., button or widget that opened the menu)
       // Add small padding (5px) to create visual spacing from the trigger
       triggerPosition = this.triggerPosition;
-      triggerSize = Size(this.triggerSize.width + 5, this.triggerSize.height + 5);
+      if (inheritTriggerWidth) {
+        triggerSize = Size(this.triggerSize.width, this.triggerSize.height + 5);
+      } else {
+        triggerSize = Size(this.triggerSize.width + 5, this.triggerSize.height + 5);
+      }
     } else {
       // Position relative to cursor position (e.g., right-click location)
       // Use a small 5x5 size as a virtual trigger point at the cursor
@@ -463,36 +440,11 @@ class LdContextMenuRoute extends ModalRoute<void> {
     return ValueListenableBuilder(
         valueListenable: _menuSizeNotifier,
         builder: (context, menuSize, child) {
-          return LdWrapConditional(
-            condition: shouldBlur,
-            builder: (context, child) => BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10 * animation.value, sigmaY: 10 * animation.value),
-              child: child,
-            ),
-            child: Stack(
-              children: [
-                if (shouldZoom)
-                  Positioned(
-                    left: triggerPosition.dx,
-                    top: triggerPosition.dy,
-                    width: triggerSize.width,
-                    height: triggerSize.height,
-                    child: Transform.scale(
-                      scale: 1 + 0.05 * animation.value,
-                      child: _wrapWithProviders(
-                        context,
-                        (context2) => triggerBuilder(
-                          context2,
-                          false,
-                          () {},
-                          this.child,
-                        ),
-                      ),
-                    ),
-                  ),
-                _buildAnimatedMenuTransition(context, menuSize, animation),
-              ],
-            ),
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              _buildAnimatedMenuTransition(context, menuSize, animation),
+            ],
           );
         });
   }
@@ -553,19 +505,23 @@ class LdContextMenuRoute extends ModalRoute<void> {
         return AnimatedBuilder(
           animation: animation,
           builder: (context, child) {
-            // Tween position and size from triggerRect to endRect
-            final rectTween = RectTween(begin: triggerRect, end: endRect);
-            final animatedRect = rectTween.evaluate(CurvedAnimation(
-                  parent: animation,
-                  curve: Curves.easeOut,
-                )) ??
-                endRect;
+            Rect animatedRect = endRect;
+
+            animatedRect = RectTween(
+              begin: triggerRect,
+              end: endRect,
+            ).evaluate(
+              CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeInOut,
+              ),
+            )!;
 
             // Use Interval curve to stagger the content reveal after shape transformation
             // Content starts revealing at 70% of the animation
             final revealAnimation = CurvedAnimation(
               parent: animation,
-              curve: const Interval(0.7, 1.0, curve: Curves.easeOut),
+              curve: const Interval(0.7, 1.0, curve: Curves.decelerate),
             );
 
             return Positioned(
@@ -583,13 +539,10 @@ class LdContextMenuRoute extends ModalRoute<void> {
                         context2,
                         alignment,
                         maxConstraints,
+                        animation,
                         Opacity(
                           opacity: revealAnimation.value,
-                          child: Transform.scale(
-                            scale: 0.8 + (0.2 * revealAnimation.value),
-                            alignment: alignment,
-                            child: child,
-                          ),
+                          child: child,
                         ),
                       ),
                     ),
@@ -630,7 +583,13 @@ class LdContextMenuRoute extends ModalRoute<void> {
     };
   }
 
-  Widget _wrapMenuDecoration(BuildContext context, Alignment alignment, Size maxConstraints, Widget child) {
+  Widget _wrapMenuDecoration(
+    BuildContext context,
+    Alignment alignment,
+    Size maxConstraints,
+    Animation<double> animation,
+    Widget child,
+  ) {
     return Material(
       type: MaterialType.transparency,
       child: ConstrainedBox(
@@ -641,10 +600,35 @@ class LdContextMenuRoute extends ModalRoute<void> {
         child: Container(
           clipBehavior: Clip.hardEdge,
           decoration: BoxDecoration(
-            color: LdTheme.of(context).surface,
-            borderRadius: LdTheme.of(context).radius(LdSize.m),
-            boxShadow: [BoxShadow(color: Colors.black.withAlpha(50), blurRadius: 12)],
-            border: Border.all(color: LdTheme.of(context).floatingBorder, width: LdTheme.of(context).borderWidth),
+            color: ColorTween(
+              begin: LdTheme.of(context).surface.withAlpha(0),
+              end: LdTheme.of(context).surface,
+            ).evaluate(
+              CurvedAnimation(
+                parent: animation,
+                curve: Interval(
+                  0.1,
+                  0.8,
+                ),
+              ),
+            ),
+            borderRadius: scaleFromTrigger
+                ? BorderRadius.circular(
+                    Tween<double>(
+                      begin: 100,
+                      end: LdTheme.of(context).radiusSize(LdSize.s),
+                    ).evaluate(animation),
+                  )
+                : LdTheme.of(context).radius(LdSize.s),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withAlpha((animation.value * 55).toInt()), blurRadius: 12),
+            ],
+            border: Border.all(
+              color: LdTheme.of(context).floatingBorder.withAlpha(
+                    (animation.value * 255).toInt(),
+                  ),
+              width: LdTheme.of(context).borderWidth,
+            ),
           ),
           child: child,
         ),
@@ -684,7 +668,10 @@ class LdContextMenuRoute extends ModalRoute<void> {
                 }
                 _menuSizeNotifier.value = size;
               },
-              child: menu,
+              child: Provider.value(
+                value: LdAppBarActionDisplayMode.contextMenu,
+                child: menu,
+              ),
             ),
           ),
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_test_utils/ld_frame_options.dart';
 
 final iPadPro11 = LdFrameOptions(
@@ -8,7 +9,7 @@ final iPadPro11 = LdFrameOptions(
   label: 'iPadPro11',
   height: 1210,
   viewPaddig: EdgeInsets.all(25),
-  targetPlatform: TargetPlatform.iOS,
+  platform: LdPlatform.ios,
   screenRadius: 30,
   build: (
     BuildContext context,

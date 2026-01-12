@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter_test_utils/golden_utils.dart';
 import 'package:liquid_flutter_test_utils/ld_frame_options.dart';
 import 'package:liquid_flutter_test_utils/ld_frame.dart';
 import 'package:liquid_flutter_test_utils/widget_tree_test.dart';
@@ -51,10 +52,12 @@ Future<void> multiGolden(
   List<Orientation> orientationScenarios = const [Orientation.portrait],
 
   /// Whether to clip the screen to the screen radius.
-  bool clipScreenToRadius = false,
+  bool clipScreenToRadius = true,
 }) async {
   debugDisableShadows = false;
   ldDisableAnimations = true;
+  ldIncludeFontPackage = false;
+  await loadAppFonts();
 
   // Track if any test fails
   List<String> failureMessages = [];
@@ -77,7 +80,7 @@ Future<void> multiGolden(
             tester.view.devicePixelRatio = ldFrameOptions.devicePixelRatio;
 
             // Apply target platform from ldFrameOptions
-            if (ldFrameOptions.targetPlatform != null) {
+            if (ldFrameOptions.platform != null) {
               debugDefaultTargetPlatformOverride =
                   ldFrameOptions.targetPlatform;
             }
@@ -106,11 +109,11 @@ Future<void> multiGolden(
             // Place the widget
             await entry.value(tester, (widget) async {
               final frame = ClipRRect(
+                key: key,
                 borderRadius: BorderRadius.circular(
                   clipScreenToRadius ? ldFrameOptions.screenRadius ?? 0 : 0,
                 ),
                 child: ldFrame(
-                  key: key,
                   child: widget,
                   dark: brightness == Brightness.dark,
                   size: themeSize,

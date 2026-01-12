@@ -1,8 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
-import 'package:liquid_flutter_test_utils/gen/fonts.gen.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_test_utils/local_file_comparator_with_threshold.dart';
 
 /// The localizations delegates to be used in golden tests.
@@ -24,21 +25,31 @@ Future<void> setupGoldenTest({
   ];
 
   // Ensure the binding is initialized
-  WidgetsFlutterBinding.ensureInitialized();
+
+  //WidgetsFlutterBinding.ensureInitialized();
 
   // Setup the golden file comparator
   const directory = 'test/goldens';
   goldenFileComparator = LocalFileComparatorWithThreshold(
-      Uri.directory(directory), fileComparatorThreshold);
+    Uri.directory(directory),
+    fileComparatorThreshold,
+  );
 
   // Load the fonts
-  await loadAppFonts();
-  final fonts = <String, String>{
-    FontFamily.lato: 'packages/liquid_flutter/fonts/Lato-Regular.ttf',
-  };
-  for (final entry in fonts.entries) {
-    final fontLoader = FontLoader(entry.key)
-      ..addFont(rootBundle.load(entry.value));
+}
+
+Future<void> loadAppFonts() async {
+  final fontManifest = await rootBundle.loadStructuredData<Iterable<dynamic>>(
+    'FontManifest.json',
+    (string) async => json.decode(string),
+  );
+
+  for (final Map<String, dynamic> font in fontManifest) {
+    final fontLoader = FontLoader(font['family']);
+    for (final Map<String, dynamic> fontType in font['fonts']) {
+      fontLoader.addFont(rootBundle.load(fontType['asset']));
+    }
     await fontLoader.load();
   }
+  ldIncludeFontPackage = false;
 }
