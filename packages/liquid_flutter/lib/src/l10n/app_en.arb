@@ -18,6 +18,7 @@
   "selectTime": "Select time",
   "unknownError": "An unknown error occurred",
   "moreInfo": "More info",
+  "errorDetails": "Error details",
   "close": "Close",
   "clearError": "Clear error",
   "loading": "Loading...",

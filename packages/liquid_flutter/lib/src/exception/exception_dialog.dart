@@ -17,8 +17,20 @@ class LdExceptionDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final localizedError = error.localize(context);
     return LdScaffold(
-      appBars: const [
-        LdAppBar(),
+      appBars: [
+        LdAppBar(
+          title: Text(LiquidLocalizations.of(context).errorDetails),
+        ),
+        LdAppBar.bottom(actions: [
+          primaryButton ??
+              LdButton.ghost(
+                width: double.infinity,
+                child: Text(LiquidLocalizations.of(context).close),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+        ])
       ],
       body: LdScaffoldBody(
         children: [
@@ -34,17 +46,13 @@ class LdExceptionDialog extends StatelessWidget {
               ),
             ),
           if (kDebugMode && localizedError.stackTrace != null)
-            LdRunnerLog(
-              messages: localizedError.stackTrace!.toString().split("\n"),
+            LdHint(
+              type: LdHintType.info,
+              child: Text("Stack trace only visible in debug mode."),
             ),
-          primaryButton ??
-              LdButton.ghost(
-                width: double.infinity,
-                child: Text(LiquidLocalizations.of(context).close),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              )
+          LdRunnerLog(
+            messages: localizedError.stackTrace!.toString().split("\n"),
+          ),
         ],
       ),
     );

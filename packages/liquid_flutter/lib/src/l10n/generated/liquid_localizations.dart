@@ -209,6 +209,12 @@ abstract class LiquidLocalizations {
   /// **'More info'**
   String get moreInfo;
 
+  /// No description provided for @errorDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Error details'**
+  String get errorDetails;
+
   /// No description provided for @close.
   ///
   /// In en, this message translates to:

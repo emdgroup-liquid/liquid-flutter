@@ -68,6 +68,9 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
   String get moreInfo => 'Weitere Informationen';
 
   @override
+  String get errorDetails => 'Error details';
+
+  @override
   String get close => 'Schließen';
 
   @override

@@ -133,21 +133,20 @@ class LdExceptionView extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            LdReveal.quick(
-              revealed: exception?.moreInfo != null,
-              initialRevealed: false,
-              child: _buildDialogButton(context, moreInfo),
-            ),
             if (controller?.showRetryButton == true) ...[
-              ldSpacerM,
               LdReveal.quick(
                 revealed: true,
                 initialRevealed: false,
                 child: _buildRetryButton(context, controller),
               ),
             ],
+            LdReveal.quick(
+              revealed: exception?.moreInfo != null,
+              initialRevealed: false,
+              child: _buildDialogButton(context, moreInfo),
+            ),
           ],
-        )
+        ).spaceM()
       ],
     );
   }

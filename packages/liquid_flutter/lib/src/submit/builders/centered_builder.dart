@@ -26,42 +26,50 @@ class LdSubmitCenteredBuilder<T, Arg> extends LdSubmitBuilder<T, Arg> {
           return resultBuilder!(context, state.result as T, controller);
         }
 
-        return Center(
-          child: LdAutoSpace(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              if (state.type == LdSubmitStateType.error)
-                errorBuilder != null
-                    ? errorBuilder!(context, state.error!, controller)
-                    : LdExceptionView(
-                        exception: state.error?.localize(context),
-                        direction: Axis.vertical,
-                        retryController: controller.retryController,
-                      )
-              else if (state.type == LdSubmitStateType.idle && !controller.config.autoTrigger)
-                submitButtonBuilder != null
-                    ? submitButtonBuilder!(context, controller)
-                    : LdSubmitButton(
-                        controller: controller,
-                      )
-              else if (state.type == LdSubmitStateType.loading)
-                loadingBuilder != null
-                    ? loadingBuilder!(context, controller)
-                    : LdAutoSpace(
-                        animate: true,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const LdLoader(),
-                          if (controller.config.loadingText != null) Text(controller.config.loadingText!),
-                          if (controller.canCancel)
-                            LdButton.ghost(
-                              onPressed: controller.cancel,
-                              child: Text(LiquidLocalizations.of(context).cancel),
-                            ),
-                        ],
+        final child = switch (state.type) {
+          LdSubmitStateType.result => resultBuilder != null
+              ? resultBuilder!(context, state.result as T, controller)
+              : null,
+          LdSubmitStateType.error => errorBuilder != null
+              ? errorBuilder!(context, state.error!, controller)
+              : LdExceptionView(
+                  exception: state.error?.localize(context),
+                  direction: Axis.vertical,
+                  retryController: controller.retryController,
+                ),
+          LdSubmitStateType.idle => switch (controller.config.autoTrigger) {
+              true => SizedBox.shrink(),
+              false => submitButtonBuilder != null
+                  ? submitButtonBuilder!(context, controller)
+                  : LdSubmitButton(
+                      controller: controller,
+                    ),
+            },
+          false => submitButtonBuilder != null
+              ? submitButtonBuilder!(context, controller)
+              : LdSubmitButton(
+                  controller: controller,
+                ),
+          LdSubmitStateType.loading => loadingBuilder != null
+              ? loadingBuilder!(context, controller)
+              : LdAutoSpace(
+                  animate: true,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const LdLoader(),
+                    if (controller.config.loadingText != null)
+                      Text(controller.config.loadingText!),
+                    if (controller.canCancel)
+                      LdButton.ghost(
+                        onPressed: controller.cancel,
+                        child: Text(LiquidLocalizations.of(context).cancel),
                       ),
-            ],
-          ),
+                  ],
+                ),
+        };
+
+        return Center(
+          child: child,
         );
       },
     );
