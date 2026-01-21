@@ -269,7 +269,6 @@ class LdModalRoute<T> extends PageRoute<T> {
     final bool enableDrag = barrierDismissible;
 
     return CupertinoSheetTransition(
-      topGap: topGapRatio,
       primaryRouteAnimation: animation,
       secondaryRouteAnimation: secondaryAnimation,
       linearTransition: linearTransition,
