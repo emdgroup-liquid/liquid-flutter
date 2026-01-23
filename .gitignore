@@ -41,5 +41,7 @@ coverage/
 
 
 **/failures/*.png
+**/failures/*.xml
+**/failures/*.html
 
 **/test-results.json
