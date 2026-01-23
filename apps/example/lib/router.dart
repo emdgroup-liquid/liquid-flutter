@@ -11,6 +11,7 @@ import 'package:liquid/components/form_elements/date_time_pickers.dart';
 import 'package:liquid/components/layout/drawer.dart';
 import 'package:liquid/components/layout/multi_panel_layout.dart';
 import 'package:liquid/components/feedback/exception.dart';
+import 'package:liquid/components/data_display/avatar.dart';
 import 'package:liquid/components/data_display/icon.dart';
 import 'package:liquid/components/feedback/indicator.dart';
 import 'package:liquid/components/layout/list.dart';
@@ -340,6 +341,10 @@ class AppRouter {
         GoRoute(
           path: "/components/hint",
           pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const HintDemo()),
+        ),
+        GoRoute(
+          path: "/components/avatar",
+          pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const AvatarDemo()),
         ),
         GoRoute(
           path: "/components/icon",

@@ -80,6 +80,7 @@ const components = [
   _Component("Tab Navigation", "/components/tab", LucideIcons.betweenVerticalEnd, ComponentCategory.interaction),
 
   // Data Display
+  _Component("Avatar", "/components/avatar", LucideIcons.user, ComponentCategory.dataDisplay),
   _Component("Icon", "/components/icon", LucideIcons.image, ComponentCategory.dataDisplay),
   _Component("Table", "/components/table", LucideIcons.grid3x3, ComponentCategory.dataDisplay),
   _Component("Tag", "/components/tag", LucideIcons.tag, ComponentCategory.dataDisplay),
