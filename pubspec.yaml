@@ -19,6 +19,10 @@ melos:
       - packages/liquid_flutter
       - packages/liquid_flutter_test_utils
   scripts:
+    test:
+      exec: flutter test
+      packageFilters:
+        category: testable
     api_guard:
       packageFilters:
         diff: "origin/main...HEAD"
