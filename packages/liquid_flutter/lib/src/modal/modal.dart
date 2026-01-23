@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/modal/sheet_transition.dart';
 
 /// A Page implementation for use with GoRouter that displays an LdModal.
 ///
@@ -93,11 +94,13 @@ class LdModalRoute<T> extends PageRoute<T> {
     return _barrierLabel;
   }
 
+  static bool hasParentSheet(BuildContext context) {
+    final modalRoute = ModalRoute.of(context);
+    return modalRoute is LdModalRoute;
+  }
+
   Future<T?> show(BuildContext context, {bool useRootNavigator = false}) =>
-      (useRootNavigator
-              ? Navigator.of(context, rootNavigator: true)
-              : Navigator.of(context))
-          .push<T>(this);
+      (useRootNavigator ? Navigator.of(context, rootNavigator: true) : Navigator.of(context)).push<T>(this);
 
   /// Determines if this route should behave as a sheet based on modalTypeMode and screen size.
   bool _shouldBeSheet(BoxConstraints constraints) {
@@ -134,9 +137,7 @@ class LdModalRoute<T> extends PageRoute<T> {
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
         borderRadius: sheetBorderRadius ??
-            LdTheme.of(context)
-                .radius(LdSize.l)
-                .copyWith(bottomLeft: Radius.zero, bottomRight: Radius.zero),
+            LdTheme.of(context).radius(LdSize.l).copyWith(bottomLeft: Radius.zero, bottomRight: Radius.zero),
         border: Border.all(
           color: LdTheme.of(context).border,
           width: LdTheme.of(context).borderWidth,
@@ -268,7 +269,8 @@ class LdModalRoute<T> extends PageRoute<T> {
     // Drag is enabled only if barrierDismissible is true
     final bool enableDrag = barrierDismissible;
 
-    return CupertinoSheetTransition(
+    return LdModalSheetTransition(
+      topGap: topGapRatio,
       primaryRouteAnimation: animation,
       secondaryRouteAnimation: secondaryAnimation,
       linearTransition: linearTransition,
@@ -315,11 +317,9 @@ class LdModalRoute<T> extends PageRoute<T> {
       final bool isSheet = _shouldBeSheet(constraints);
 
       if (isSheet) {
-        return _buildSheetTransitions(
-            context, animation, secondaryAnimation, child);
+        return _buildSheetTransitions(context, animation, secondaryAnimation, child);
       } else {
-        return _buildDialogTransitions(
-            context, animation, secondaryAnimation, child);
+        return _buildDialogTransitions(context, animation, secondaryAnimation, child);
       }
     });
   }
@@ -355,10 +355,8 @@ class LdModalRoute<T> extends PageRoute<T> {
       parent: secondaryAnimation,
     );
 
-    final Animation<Offset> slideAnimation =
-        curvedAnimation.drive(_kDialogMidUpTween);
-    final Animation<double> scaleAnimation =
-        curvedAnimation.drive(_kDialogScaleTween);
+    final Animation<Offset> slideAnimation = curvedAnimation.drive(_kDialogMidUpTween);
+    final Animation<double> scaleAnimation = curvedAnimation.drive(_kDialogScaleTween);
     curvedAnimation.dispose();
 
     return SlideTransition(
@@ -399,12 +397,11 @@ class LdModalRoute<T> extends PageRoute<T> {
               return child ?? const SizedBox.shrink();
             }
             // Apply dialog stacking transition
-            return _delegatedDialogSecondaryTransition(
-                secondaryAnimation, child);
+            return _delegatedDialogSecondaryTransition(secondaryAnimation, child);
           }
 
           // For sheets or when dismissed, fall back to sheet transition
-          return CupertinoSheetTransition.delegateTransition(
+          return LdModalSheetTransition.delegateTransition(
             context,
             animation,
             secondaryAnimation,
@@ -446,12 +443,10 @@ class _LdSheetDragGestureDetector<T> extends StatefulWidget {
   final Widget child;
 
   @override
-  State<_LdSheetDragGestureDetector<T>> createState() =>
-      _LdSheetDragGestureDetectorState<T>();
+  State<_LdSheetDragGestureDetector<T>> createState() => _LdSheetDragGestureDetectorState<T>();
 }
 
-class _LdSheetDragGestureDetectorState<T>
-    extends State<_LdSheetDragGestureDetector<T>> {
+class _LdSheetDragGestureDetectorState<T> extends State<_LdSheetDragGestureDetector<T>> {
   _LdSheetDragController<T>? _dragController;
   late VerticalDragGestureRecognizer _recognizer;
 
@@ -511,8 +506,7 @@ class _LdSheetDragGestureDetectorState<T>
       return;
     }
 
-    final double velocity =
-        details.velocity.pixelsPerSecond.dy / context.size!.height;
+    final double velocity = details.velocity.pixelsPerSecond.dy / context.size!.height;
     _dragController!.dragEnd(velocity);
     _dragController = null;
   }
@@ -559,8 +553,7 @@ class _LdSheetDragController<T> {
 
   // Constants from CupertinoSheetRoute
   static const double _kMinFlingVelocity = 2.0;
-  static const Duration _kDroppedSheetDragAnimationDuration =
-      Duration(milliseconds: 300);
+  static const Duration _kDroppedSheetDragAnimationDuration = Duration(milliseconds: 300);
 
   void dragUpdate(double delta) {
     controller.value -= delta;
@@ -591,8 +584,7 @@ class _LdSheetDragController<T> {
       );
     } else {
       if (isCurrent) {
-        final NavigatorState rootNavigator =
-            Navigator.of(navigator.context, rootNavigator: true);
+        final NavigatorState rootNavigator = Navigator.of(navigator.context, rootNavigator: true);
         rootNavigator.maybePop();
       }
 
