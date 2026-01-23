@@ -76,8 +76,7 @@ class LdExceptionView extends StatelessWidget {
     return retryController;
   }
 
-  Widget _buildRetryButton(
-      BuildContext context, LdRetryController? controller) {
+  Widget _buildRetryButton(BuildContext context, LdRetryController? controller) {
     return LdButton(
       key: const Key('retry-button'),
       mode: LdButtonMode.filled,
@@ -88,8 +87,7 @@ class LdExceptionView extends StatelessWidget {
     );
   }
 
-  Widget _buildRetryIndicator(
-      BuildContext context, LdRetryController? controller) {
+  Widget _buildRetryIndicator(BuildContext context, LdRetryController? controller) {
     if (!(controller?.showRetryIndicator == true)) return const SizedBox();
     return LdExceptionRetryIndicator(
       retryState: controller!.state,
@@ -127,8 +125,7 @@ class LdExceptionView extends StatelessWidget {
           child: LdHint(
             type: exception?.type ?? LdHintType.error,
             child: Text(
-              exception?.message ??
-                  LiquidLocalizations.of(context).unknownError,
+              exception?.message ?? LiquidLocalizations.of(context).unknownError,
               key: const Key('exception-message'),
             ),
           ),
@@ -173,8 +170,7 @@ class LdExceptionView extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (exception?.moreInfo != null)
-              _buildDialogButton(context, moreInfo),
+            if (exception?.moreInfo != null) _buildDialogButton(context, moreInfo),
             if (controller?.showRetryButton == true) ...[
               ldSpacerM,
               _buildRetryButton(context, controller),
@@ -187,31 +183,27 @@ class LdExceptionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = this.retryController ?? _createRetryController();
+    final controller = retryController ?? _createRetryController();
 
     return StreamBuilder<LdRetryState>(
         stream: controller?.stateStream ?? const Stream.empty(),
         builder: (context, snapshot) {
-          return LdAutoSpace(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                LdModalBuilder(
-                  useRootNavigator: true,
-                  modal: LdModalRoute(
-                    context: context,
-                    pageBuilder: (context) => LdExceptionDialog(
-                      error: exception!,
-                    ),
-                  ),
-                  builder: (context, open) => switch (direction) {
-                    (Axis.horizontal) =>
-                      _buildHorizontal(context, open, controller),
-                    (Axis.vertical) =>
-                      _buildVertical(context, open, controller),
-                  },
+          return LdAutoSpace(crossAxisAlignment: CrossAxisAlignment.center, children: [
+            LdModalBuilder(
+              useRootNavigator: true,
+              modal: LdModalRoute(
+                context: context,
+                pageBuilder: (context) => LdExceptionDialog(
+                  error: exception!,
                 ),
-                _buildRetryIndicator(context, controller),
-              ]);
+              ),
+              builder: (context, open) => switch (direction) {
+                (Axis.horizontal) => _buildHorizontal(context, open, controller),
+                (Axis.vertical) => _buildVertical(context, open, controller),
+              },
+            ),
+            _buildRetryIndicator(context, controller),
+          ]);
         });
   }
 }

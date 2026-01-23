@@ -118,9 +118,7 @@ class _NavigationBar extends StatelessWidget {
       height: 5,
       margin: EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: dark
-            ? Colors.white.withOpacity(0.3)
-            : Colors.black.withOpacity(0.3),
+        color: dark ? Colors.white.withAlpha(77) : Colors.black.withAlpha(77),
         borderRadius: BorderRadius.circular(2.5),
       ),
     );

@@ -414,8 +414,6 @@ void main() {
       ldDisableAnimations = true;
       LdScaffoldState? foundState;
 
-      bool? drawerState;
-
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: const [LiquidLocalizations.delegate],
