@@ -27,9 +27,8 @@ class LdSubmitCenteredBuilder<T, Arg> extends LdSubmitBuilder<T, Arg> {
         }
 
         final child = switch (state.type) {
-          LdSubmitStateType.result => resultBuilder != null
-              ? resultBuilder!(context, state.result as T, controller)
-              : null,
+          LdSubmitStateType.result =>
+            resultBuilder != null ? resultBuilder!(context, state.result as T, controller) : null,
           LdSubmitStateType.error => errorBuilder != null
               ? errorBuilder!(context, state.error!, controller)
               : LdExceptionView(
@@ -45,11 +44,6 @@ class LdSubmitCenteredBuilder<T, Arg> extends LdSubmitBuilder<T, Arg> {
                       controller: controller,
                     ),
             },
-          false => submitButtonBuilder != null
-              ? submitButtonBuilder!(context, controller)
-              : LdSubmitButton(
-                  controller: controller,
-                ),
           LdSubmitStateType.loading => loadingBuilder != null
               ? loadingBuilder!(context, controller)
               : LdAutoSpace(
@@ -57,8 +51,7 @@ class LdSubmitCenteredBuilder<T, Arg> extends LdSubmitBuilder<T, Arg> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const LdLoader(),
-                    if (controller.config.loadingText != null)
-                      Text(controller.config.loadingText!),
+                    if (controller.config.loadingText != null) Text(controller.config.loadingText!),
                     if (controller.canCancel)
                       LdButton.ghost(
                         onPressed: controller.cancel,
