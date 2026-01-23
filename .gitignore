@@ -40,8 +40,8 @@ coverage/
 .fvm/flutter_sdk
 
 
-**/failures/*.png
-**/failures/*.xml
-**/failures/*.html
+packages/liquid_flutter/test/failures/
+packages/liquid_flutter_test_utils/test/failures/
+
 
 **/test-results.json
