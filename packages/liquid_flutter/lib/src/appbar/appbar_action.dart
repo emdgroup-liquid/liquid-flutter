@@ -56,8 +56,6 @@ class LdAppBarAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final modalRoute = ModalRoute.of(context);
-
     final isMobile = LdTheme.of(context).platform.isMobile;
 
     final isInContextMenu = context.read<LdAppBarActionDisplayMode?>() == LdAppBarActionDisplayMode.contextMenu;
