@@ -47,7 +47,7 @@ class LdTheme extends ChangeNotifier {
   LdSizingConfig get sizingConfig => _sizingConfig;
 
   LdTheme() {
-    _platform = switch ((kIsWeb, defaultTargetPlatform)) {
+    _platform = switch ((kIsWeb || kIsWasm, defaultTargetPlatform)) {
       (false, TargetPlatform.android) => LdPlatform.android,
       (false, TargetPlatform.iOS) => LdPlatform.ios,
       (false, TargetPlatform.macOS) => LdPlatform.macos,

@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:liquid_flutter_window_utils/liquid_flutter_window_utils.dart';
 
 Future<double> getScreenRadius() async {
-  if (kIsWeb) {
+  if (kIsWeb || kIsWasm) {
     return 0.0;
   }
 
@@ -20,10 +20,8 @@ Future<double> getScreenRadius() async {
 
   if (Platform.isAndroid) {
     try {
-      final devicePixelRatio =
-          PlatformDispatcher.instance.views.first.devicePixelRatio;
-      return await LiquidFlutterWindowUtils.instance.getScreenRadius() /
-          devicePixelRatio;
+      final devicePixelRatio = PlatformDispatcher.instance.views.first.devicePixelRatio;
+      return await LiquidFlutterWindowUtils.instance.getScreenRadius() / devicePixelRatio;
     } catch (e) {
       // Fallback to 0.0 if API call fails
       return 0.0;

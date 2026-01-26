@@ -40,7 +40,7 @@ class _LdOrbState extends State<LdOrb> with TickerProviderStateMixin {
     _animation = _tween.animate(_animationController!);
 
     _animationController!.repeat(reverse: false);
-    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+    if (LdTheme.of(context).platform.isMobile) {
       _streamSubscription = accelerometerEventStream().listen((AccelerometerEvent event) {
         setState(() {
           double x = event.x, y = event.y, z = event.z;

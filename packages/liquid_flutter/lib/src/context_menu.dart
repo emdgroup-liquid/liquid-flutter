@@ -100,7 +100,7 @@ class LdContextMenuState extends State<LdContextMenu> {
 
   final ValueNotifier<Size> _menuSizeNotifier = ValueNotifier(Size.zero);
 
-  bool get _mobile => !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+  bool get _mobile => LdTheme.of(context).platform.isMobile;
 
   bool _isOpen = false;
 

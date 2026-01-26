@@ -274,7 +274,7 @@ class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
             Expanded(
               child: LdInput(
                 hint: 'HH',
-                autofocus: kIsWeb || Platform.isMacOS || Platform.isLinux || Platform.isWindows,
+                autofocus: LdTheme.of(context).platform.isDesktop,
                 focusNode: _hourFocusNode,
                 controller: _hourControllerText,
                 size: LdSize.l,

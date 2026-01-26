@@ -6,7 +6,7 @@ export 'package:haptic_feedback/haptic_feedback.dart' show HapticsType;
 
 class LdHaptics {
   static Future<void> vibrate(HapticsType type) async {
-    if (kIsWeb) {
+    if (kIsWeb || kIsWasm) {
       return;
     }
 
