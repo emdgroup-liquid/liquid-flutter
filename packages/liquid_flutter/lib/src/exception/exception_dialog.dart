@@ -16,6 +16,7 @@ class LdExceptionDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localizedError = error.localize(context);
+
     return LdScaffold(
       appBars: [
         LdAppBar(
@@ -45,14 +46,15 @@ class LdExceptionDialog extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             ),
-          if (kDebugMode && localizedError.stackTrace != null)
+          if (kDebugMode && localizedError.stackTrace != null) ...[
             LdHint(
               type: LdHintType.info,
               child: Text("Stack trace only visible in debug mode."),
             ),
-          LdRunnerLog(
-            messages: localizedError.stackTrace!.toString().split("\n"),
-          ),
+            LdRunnerLog(
+              messages: localizedError.stackTrace.toString().split("\n"),
+            ),
+          ]
         ],
       ),
     );

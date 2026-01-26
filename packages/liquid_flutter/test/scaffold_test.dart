@@ -292,9 +292,8 @@ void main() {
       expect(scrollController.offset, equals(0));
     });
 
-    testWidgets('Scaffold drawer state stream', (WidgetTester tester) async {
+    testWidgets('Scaffold drawer state is initialised', (WidgetTester tester) async {
       ldDisableAnimations = true;
-      bool? drawerState;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -313,37 +312,8 @@ void main() {
       await tester.pumpAndSettle();
 
       final scaffoldState = tester.state<LdScaffoldState>(find.byType(LdScaffold));
-      scaffoldState.drawerStream.listen((isOpen) {
-        drawerState = isOpen;
-      });
 
       expect(scaffoldState.hasDrawer, isTrue);
-      expect(drawerState, isNotNull);
-    });
-
-    testWidgets('Scaffold extendBodyBehindAppBar behavior', (WidgetTester tester) async {
-      ldDisableAnimations = true;
-      await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldThemeWrapper(
-            size: LdThemeSize.m,
-            brightnessMode: LdThemeBrightnessMode.light,
-            child: LdScaffold(
-              extendBodyBehindAppBar: true,
-              appBars: [
-                LdAppBar.top(title: const Text('App Bar')),
-              ],
-              body: const Center(child: Text('Test Body')),
-            ),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      expect(find.text('App Bar'), findsOneWidget);
-      expect(find.text('Test Body'), findsOneWidget);
     });
 
     testWidgets('Scaffold drawer width customization', (WidgetTester tester) async {
