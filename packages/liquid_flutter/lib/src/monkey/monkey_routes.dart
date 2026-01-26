@@ -42,6 +42,7 @@ List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
     required String pathParameterName,
     required Widget masterPage,
     required String basePath,
+    required Set<IdType> Function(String selected) parseSelected,
   })? shellBuilder,
   LdModalRoute Function(BuildContext context)? filterModalBuilder,
   bool detailInDialog = false,
@@ -97,6 +98,7 @@ List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
               basePath: basePath,
               masterPage: masterPage,
               pathParameterName: pathParameterName,
+              parseSelected: parseSelected,
             )
           : LdMonkeyShell(
               basePath: basePath,
