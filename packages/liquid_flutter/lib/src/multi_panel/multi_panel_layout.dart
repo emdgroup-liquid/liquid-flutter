@@ -802,9 +802,3 @@ class LdMultiPanelChildState {
     return context.watch<LdMultiPanelChildState>();
   }
 }
-
-extension on window_utils.Rect {
-  String toStringHumanReadable() {
-    return 'Rect(left: $left, top: $top, right: $right, bottom: $bottom)';
-  }
-}
