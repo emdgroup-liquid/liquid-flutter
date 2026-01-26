@@ -84,7 +84,7 @@ class AppRouter {
               ...buildMonkeyRoutes(
                 basePath: "/movie-demo",
                 pathParameterName: "movieId",
-                parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
+                parseSelected: (selected) => selected.split("_").map(int.parse).toSet(),
                 detailPage: MovieDetailPage(),
                 detailInDialog: true,
                 masterPage: MovieMasterPage(),
@@ -116,7 +116,7 @@ class AppRouter {
               ...buildMonkeyRoutes<Task, int>(
                 basePath: "/task-demo",
                 pathParameterName: "taskId",
-                parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
+                parseSelected: (selected) => selected.split("_").map(int.parse).toSet(),
                 detailPage: TaskDetailPage(),
                 masterPage: TaskMasterPage(),
                 repositoryBuilder: (context) async => taskRepository,
