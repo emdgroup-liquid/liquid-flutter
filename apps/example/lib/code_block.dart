@@ -48,7 +48,7 @@ class _CodeBlockState extends State<CodeBlock> {
 
   @override
   Widget build(BuildContext context) {
-    bool isDesktop = kIsWeb || Platform.isWindows || Platform.isMacOS || Platform.isLinux;
+    bool isDesktop = LdTheme.of(context).platform.isDesktop;
 
     return LayoutBuilder(
       builder: (context, _) => LdWrapConditional(
