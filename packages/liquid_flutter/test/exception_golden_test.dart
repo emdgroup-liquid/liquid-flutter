@@ -25,7 +25,7 @@ void main() {
   );
 
   Widget buildBasicExceptionView({
-    required LdLocalizedException? exception,
+    required LdLocalizedException exception,
     LdRetryController? retryController,
     VoidCallback? retry,
     Axis direction = Axis.vertical,
@@ -92,15 +92,6 @@ void main() {
           buildBasicExceptionView(
             exception: sampleErrorException,
             retryController: retryController,
-          ),
-        );
-        await tester.pumpAndSettle();
-      },
-      "Null Exception": (tester, place) async {
-        await place(
-          buildBasicExceptionView(
-            exception: null,
-            retry: () {},
           ),
         );
         await tester.pumpAndSettle();

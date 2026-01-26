@@ -55,27 +55,24 @@ void main() {
     testWidgets('App bar with leading widget', (WidgetTester tester) async {
       ldDisableAnimations = true;
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldThemeWrapper(
-            size: LdThemeSize.m,
-            brightnessMode: LdThemeBrightnessMode.light,
-            child: LdScaffold(
-              appBars: [
-                LdAppBar.top(
-                  title: const Text('App Bar'),
-                  leading: const Icon(LucideIcons.menu),
-                ),
-              ],
-              body: const Center(child: Text('Body')),
-            ),
+        ldThemeWrapper(
+          size: LdThemeSize.m,
+          brightnessMode: LdThemeBrightnessMode.light,
+          child: LdScaffold(
+            appBars: [
+              LdAppBar.top(
+                title: const Text('App Bar'),
+                leading: const Icon(LucideIcons.database),
+              ),
+            ],
+            body: const Center(child: Text('Body')),
           ),
         ),
       );
 
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(LucideIcons.menu), findsOneWidget);
+      expect(find.byIcon(LucideIcons.database), findsOneWidget);
     });
 
     testWidgets('App bar with trailing widget', (WidgetTester tester) async {

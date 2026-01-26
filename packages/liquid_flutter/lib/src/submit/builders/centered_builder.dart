@@ -32,7 +32,7 @@ class LdSubmitCenteredBuilder<T, Arg> extends LdSubmitBuilder<T, Arg> {
           LdSubmitStateType.error => errorBuilder != null
               ? errorBuilder!(context, state.error!, controller)
               : LdExceptionView(
-                  exception: state.error?.localize(context),
+                  exception: state.error!.localize(context),
                   direction: Axis.vertical,
                   retryController: controller.retryController,
                 ),

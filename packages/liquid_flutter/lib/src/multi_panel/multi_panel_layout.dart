@@ -124,8 +124,6 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
       );
     }
 
-    debugPrint('exclusionRects: ${exclusionRects.map((e) => e.toStringHumanReadable()).join(', ')}');
-
     // Set exclusion rects on Android
     LiquidFlutterWindowUtils.instance.setSystemGestureExclusionRects(exclusionRects).catchError((error) {
       debugPrint('Failed to set system gesture exclusion rects: $error');

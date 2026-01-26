@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 /// Renders an LdException
 class LdExceptionView extends StatelessWidget {
   /// The exception to render
-  final LdLocalizedException? exception;
+  final LdLocalizedException exception;
 
   /// The controller for managing retry operations
   final LdRetryController? retryController;
@@ -55,7 +55,7 @@ class LdExceptionView extends StatelessWidget {
   }
 
   LdColor color(BuildContext context) {
-    switch (exception?.type) {
+    switch (exception.type) {
       case LdHintType.warning:
         return LdTheme.of(context).warning;
       case LdHintType.success:
@@ -123,9 +123,9 @@ class LdExceptionView extends StatelessWidget {
           revealed: true,
           initialRevealed: false,
           child: LdHint(
-            type: exception?.type ?? LdHintType.error,
+            type: exception.type,
             child: Text(
-              exception?.message ?? LiquidLocalizations.of(context).unknownError,
+              exception.message,
               key: const Key('exception-message'),
             ),
           ),
@@ -141,7 +141,7 @@ class LdExceptionView extends StatelessWidget {
               ),
             ],
             LdReveal.quick(
-              revealed: exception?.moreInfo != null,
+              revealed: exception.moreInfo != null,
               initialRevealed: false,
               child: _buildDialogButton(context, moreInfo),
             ),
@@ -160,17 +160,17 @@ class LdExceptionView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         LdHint(
-          type: exception?.type ?? LdHintType.error,
+          type: exception.type,
           size: LdSize.l,
         ),
         LdText.p(
-          exception?.message ?? LiquidLocalizations.of(context).unknownError,
+          exception.message,
           textAlign: TextAlign.center,
         ),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (exception?.moreInfo != null) _buildDialogButton(context, moreInfo),
+            if (exception.moreInfo != null) _buildDialogButton(context, moreInfo),
             if (controller?.showRetryButton == true) ...[
               ldSpacerM,
               _buildRetryButton(context, controller),
@@ -194,7 +194,7 @@ class LdExceptionView extends StatelessWidget {
               modal: LdModalRoute(
                 context: context,
                 pageBuilder: (context) => LdExceptionDialog(
-                  error: exception!,
+                  error: exception,
                 ),
               ),
               builder: (context, open) => switch (direction) {
