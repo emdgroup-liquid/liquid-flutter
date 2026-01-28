@@ -165,6 +165,7 @@ void main() {
             required context,
             required routeState,
             required child,
+            required parseSelected,
             required pathParameterName,
             required masterPage,
             required basePath,

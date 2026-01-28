@@ -137,8 +137,8 @@ class _AppBarFrameState extends State<AppBarFrame> {
 
     // Trim viewPadding to only the relevant side
     final trimmedViewPadding = widget.position == LdAppBarPosition.top
-        ? EdgeInsets.only(top: viewPadding.top)
-        : EdgeInsets.only(bottom: viewPadding.bottom);
+        ? EdgeInsets.only(top: viewPadding.top, left: viewPadding.left, right: viewPadding.right)
+        : EdgeInsets.only(bottom: viewPadding.bottom, left: viewPadding.left, right: viewPadding.right);
 
     // We add the viewInsets to the padding in case something inside the appbar is focused.
     final viewInsets =
