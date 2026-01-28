@@ -160,4 +160,10 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
 
   @override
   String get shiftListExplanation => 'Select a range of items while holding shift';
+
+  @override
+  String get copy => 'Copy';
+
+  @override
+  String get copiedToClipboard => 'Copied to clipboard';
 }

@@ -1,11 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class LdRunnerLog extends StatefulWidget {
+  /// The list of messages to display.
   final List<String> messages;
+
+  /// Whether to show a copy button.
+  ///
+  /// Defaults to false. The button is only shown on desktop platforms.
+  final bool showCopyButton;
+
+  /// An optional builder that can be used to override the default Text widget for each line.
+  final Widget Function(BuildContext context, int index, String content)? lineBuilder;
+
   const LdRunnerLog({
     super.key,
     required this.messages,
+    this.showCopyButton = false,
+    this.lineBuilder,
   });
 
   @override
@@ -14,6 +27,7 @@ class LdRunnerLog extends StatefulWidget {
 
 class _LdRunnerLogState extends State<LdRunnerLog> {
   final FocusNode _node = FocusNode();
+  bool _isHovering = false;
 
   @override
   dispose() {
@@ -50,13 +64,14 @@ class _LdRunnerLogState extends State<LdRunnerLog> {
                 ),
                 ldSpacerS,
                 Expanded(
-                  child: Text(
-                    widget.messages[index],
-                    style: TextStyle(
-                      fontFamily: "NotoSansMono",
-                      fontSize: theme.paragraphSize(LdSize.s),
-                    ),
-                  ),
+                  child: widget.lineBuilder?.call(context, index, widget.messages[index]) ??
+                      Text(
+                        widget.messages[index],
+                        style: TextStyle(
+                          fontFamily: "NotoSansMono",
+                          fontSize: theme.paragraphSize(LdSize.s),
+                        ),
+                      ),
                 ),
               ],
             ),
@@ -67,24 +82,61 @@ class _LdRunnerLogState extends State<LdRunnerLog> {
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
+    bool isDesktop = LdTheme.of(context).platform.isDesktop;
+    final tr = LiquidLocalizations.of(context);
+
     return LdCard(
       padding: EdgeInsets.zero,
-      child: SelectableRegion(
-        focusNode: _node,
-        selectionControls: MaterialTextSelectionControls(),
-        child: SizedBox(
-          height: widget.messages.length < 50 ? null : 300,
-          child: ListView.builder(
-            padding: EdgeInsets.zero,
-            shrinkWrap: widget.messages.length < 50,
-            itemCount: widget.messages.length,
-            physics: widget.messages.length < 50
-                ? const NeverScrollableScrollPhysics()
-                : const AlwaysScrollableScrollPhysics(),
-            itemBuilder: (context, index) {
-              return buildLine(index, theme);
-            },
-          ),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _isHovering = true),
+        onExit: (_) => setState(() => _isHovering = false),
+        child: Stack(
+          children: [
+            SelectableRegion(
+              focusNode: _node,
+              selectionControls: MaterialTextSelectionControls(),
+              child: SizedBox(
+                height: widget.messages.length < 50 ? null : 300,
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: widget.messages.length < 50,
+                  itemCount: widget.messages.length,
+                  physics: widget.messages.length < 50
+                      ? const NeverScrollableScrollPhysics()
+                      : const AlwaysScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    return buildLine(index, theme);
+                  },
+                ),
+              ),
+            ),
+            if (widget.showCopyButton && isDesktop && _isHovering)
+              Positioned(
+                top: theme.balPad(LdSize.s).top,
+                right: theme.balPad(LdSize.s).right,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: theme.palette.surface,
+                    borderRadius: theme.radius(LdSize.s),
+                  ),
+                  child: LdButton(
+                    color: shadSky,
+                    size: LdSize.s,
+                    mode: LdButtonMode.outline,
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: widget.messages.join("\n")));
+                      LdNotificationsController.of(context).addNotification(
+                        LdNotification(
+                          message: tr.copiedToClipboard,
+                          type: LdNotificationType.success,
+                        ),
+                      );
+                    },
+                    child: Text(tr.copy),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -99,6 +151,9 @@ class LdRunnerStep extends StatelessWidget {
   final bool isExpanded;
   final VoidCallback? onPress;
 
+  /// An optional custom indicator to use instead of the default [LdIndicator].
+  final Widget? customIndicator;
+
   final List<Widget>? children;
 
   const LdRunnerStep(
@@ -109,6 +164,7 @@ class LdRunnerStep extends StatelessWidget {
       this.trailing,
       this.isExpanded = false,
       this.onPress,
+      this.customIndicator,
       this.children});
 
   @override
@@ -150,7 +206,7 @@ class LdRunnerStep extends StatelessWidget {
                       width: 32,
                     ),
                   ldSpacerS,
-                  LdIndicator(type: this.status),
+                  customIndicator ?? LdIndicator(type: this.status),
                   ldSpacerM,
                   Expanded(
                     child: DefaultTextStyle(

@@ -24,6 +24,8 @@
     "closeDrawer",
     "ctrlListExplanation",
     "listHidden",
-    "shiftListExplanation"
+    "shiftListExplanation",
+    "copy",
+    "copiedToClipboard"
   ]
 }

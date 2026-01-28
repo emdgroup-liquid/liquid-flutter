@@ -376,6 +376,18 @@ abstract class LiquidLocalizations {
   /// In en, this message translates to:
   /// **'Select a range of items while holding shift'**
   String get shiftListExplanation;
+
+  /// No description provided for @copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copy;
+
+  /// No description provided for @copiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get copiedToClipboard;
 }
 
 class _LiquidLocalizationsDelegate extends LocalizationsDelegate<LiquidLocalizations> {
