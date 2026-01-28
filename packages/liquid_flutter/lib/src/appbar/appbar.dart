@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_frame.dart';
 import 'package:liquid_flutter/src/appbar/appbar_registry.dart';
@@ -11,7 +10,6 @@ import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 import 'package:liquid_flutter/src/appbar/macos_window_controls.dart';
 import 'package:liquid_flutter/src/appbar/windows_window_controls.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
@@ -427,7 +425,7 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
     if (_canPopParentRoute && !_isDrawer && !_isModal && _level() == 0 && !_isInBottomSlot) {
       return LdButton.ghost(
         child: const Icon(LucideIcons.chevronLeft),
-        onPressed: () => context.pop(),
+        onPressed: () => Navigator.of(context).maybePop(),
       );
     }
 
