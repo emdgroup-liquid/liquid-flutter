@@ -88,7 +88,12 @@ class WidgetTreeNode {
   Finder finder;
   List<WidgetTreeNode> children;
 
-  String toXmlString({int indent = 0, required int boundsPrecision}) {
+  String toXmlString({
+    int indent = 0,
+    required int boundsPrecision,
+    Rect? parentBounds,
+    BoxConstraints? parentConstraints,
+  }) {
     final indentStr = '  ' * indent;
     final tag = widget.runtimeType
         .toString()
@@ -100,13 +105,46 @@ class WidgetTreeNode {
     // associate properties with their values (opt-in selection)
     final diagnostics = widget.toDiagnosticsNode().getProperties();
     final allowedNames = _allowedPropertyNames(widget, diagnostics);
-    final Map<String, dynamic> props = {
-      for (final p in diagnostics)
-        if (p.name != null && p.value != null && allowedNames.contains(p.name))
-          p.name!: _sanitizeAttributeValue(
-            p.value.toString(),
-          ),
-    };
+    final Map<String, dynamic> props = {};
+
+    // Process properties, handling BoxDecoration specially
+    for (final p in diagnostics) {
+      if (p.name != null && p.value != null && allowedNames.contains(p.name)) {
+        // Check if this is a BoxDecoration property (bg or decoration)
+        if ((p.name == 'bg' || p.name == 'decoration') &&
+            p.value is BoxDecoration) {
+          // Flatten BoxDecoration properties directly onto the element
+          final decoration = p.value as BoxDecoration;
+          final flattenedProps = _serializeBoxDecoration(decoration);
+          // Sanitize the flattened property values
+          for (final entry in flattenedProps.entries) {
+            props[entry.key] = _sanitizeAttributeValue(entry.value);
+          }
+        } else {
+          // Regular property handling
+          props[p.name!] = _sanitizeAttributeValue(
+            _getPropertyValueString(p),
+          );
+        }
+      }
+    }
+
+    // Determine if bounds should be included:
+    // - Always include for root widget (parentBounds is null)
+    // - Include if bounds differ from parent bounds
+    final shouldIncludeBounds = bounds != null &&
+        (parentBounds == null ||
+            !_boundsMatchParent(bounds!, parentBounds, boundsPrecision));
+
+    // Determine if constraints should be included:
+    // - Always include for root widget (parentConstraints is null)
+    // - Include if constraints differ from parent constraints
+    final boxConstraints =
+        constraints is BoxConstraints ? (constraints as BoxConstraints) : null;
+    final shouldIncludeConstraints = boxConstraints != null &&
+        (parentConstraints == null ||
+            !_constraintsMatchParent(boxConstraints, parentConstraints));
+
     final attrs = [
       ...props.entries.map((e) {
         // Height and line height are conflicting properties
@@ -115,7 +153,7 @@ class WidgetTreeNode {
         }
         return ' ${e.key}="${e.value}"';
       }),
-      if (bounds != null) ...[
+      if (shouldIncludeBounds) ...[
         if (!props.containsKey("left"))
           ' left="${bounds!.left.toStringAsFixed(boundsPrecision)}"',
         if (!props.containsKey("top"))
@@ -123,11 +161,11 @@ class WidgetTreeNode {
         ' width="${bounds!.width.toStringAsFixed(boundsPrecision)}"',
         ' height="${bounds!.height.toStringAsFixed(boundsPrecision)}"',
       ],
-      if (constraints is BoxConstraints) ...[
-        ' maxHeight="${(constraints as BoxConstraints).maxHeight}"',
-        ' maxWidth="${(constraints as BoxConstraints).maxWidth}"',
-        ' minHeight="${(constraints as BoxConstraints).minHeight}"',
-        ' minWidth="${(constraints as BoxConstraints).minWidth}"',
+      if (shouldIncludeConstraints) ...[
+        ' maxHeight="${boxConstraints.maxHeight}"',
+        ' maxWidth="${boxConstraints.maxWidth}"',
+        ' minHeight="${boxConstraints.minHeight}"',
+        ' minWidth="${boxConstraints.minWidth}"',
       ],
       if (widget is RichText) ...[
         ' text="${_sanitizeAttributeValue((widget as RichText).text.toPlainText())}"',
@@ -164,7 +202,10 @@ class WidgetTreeNode {
         : [
               '',
               ...children.map((child) => child.toXmlString(
-                  indent: indent + 1, boundsPrecision: boundsPrecision)),
+                  indent: indent + 1,
+                  boundsPrecision: boundsPrecision,
+                  parentBounds: bounds,
+                  parentConstraints: boxConstraints)),
               '',
             ].join('\n') +
             indentStr;
@@ -262,6 +303,152 @@ Set<String> _allowedPropertyNames(
   return allowed;
 }
 
+/// Serializes a BoxDecoration to a flattened map of XML attributes
+Map<String, String> _serializeBoxDecoration(BoxDecoration decoration) {
+  final Map<String, String> props = {};
+
+  // Color
+  if (decoration.color != null) {
+    props['bgColor'] = _colorToHex(decoration.color);
+  }
+
+  // BorderRadius (BorderRadiusGeometry can be BorderRadius or BorderRadiusDirectional)
+  if (decoration.borderRadius != null) {
+    if (decoration.borderRadius is BorderRadius) {
+      props['borderRadius'] =
+          _serializeBorderRadius(decoration.borderRadius! as BorderRadius);
+    }
+    // BorderRadiusDirectional could be handled here if needed
+  }
+
+  // Border (BoxBorder can be Border or BorderDirectional)
+  if (decoration.border != null) {
+    if (decoration.border is Border) {
+      final borderProps = _serializeBorder(decoration.border! as Border);
+      props.addAll(borderProps);
+    }
+    // BorderDirectional could be handled here if needed
+  }
+
+  // BoxShadow (simplified - just count for now, could be expanded)
+  if (decoration.boxShadow != null && decoration.boxShadow!.isNotEmpty) {
+    // For now, we'll just note that shadows exist
+    // Could be expanded to serialize shadow details if needed
+    props['hasBoxShadow'] = 'true';
+  }
+
+  // Gradient
+  if (decoration.gradient != null) {
+    // Could be expanded to serialize gradient details if needed
+    props['hasGradient'] = 'true';
+  }
+
+  return props;
+}
+
+/// Serializes a BorderRadius to a compact string format
+String _serializeBorderRadius(BorderRadius radius) {
+  final topLeft = radius.topLeft;
+  final topRight = radius.topRight;
+  final bottomLeft = radius.bottomLeft;
+  final bottomRight = radius.bottomRight;
+
+  // Check if it's uniform (all corners the same and circular)
+  if (topLeft.x == topLeft.y &&
+      topRight.x == topRight.y &&
+      bottomLeft.x == bottomLeft.y &&
+      bottomRight.x == bottomRight.y &&
+      topLeft.x == topRight.x &&
+      topLeft.x == bottomLeft.x &&
+      topLeft.x == bottomRight.x) {
+    // Uniform circular radius - just return the value
+    return topLeft.x.toString();
+  }
+
+  // For non-uniform radius, serialize each corner
+  // Format: "tl:${x},${y} tr:${x},${y} bl:${x},${y} br:${x},${y}"
+  return 'tl:${topLeft.x},${topLeft.y} tr:${topRight.x},${topRight.y} bl:${bottomLeft.x},${bottomLeft.y} br:${bottomRight.x},${bottomRight.y}';
+}
+
+/// Serializes a Border to a map of XML attributes
+Map<String, String> _serializeBorder(Border border) {
+  final Map<String, String> props = {};
+
+  // Check if it's a uniform border (all sides the same)
+  if (border.isUniform) {
+    final side = border.top;
+    if (side.style != BorderStyle.none) {
+      props['borderColor'] = _colorToHex(side.color);
+      props['borderWidth'] = side.width.toString();
+      // Include strokeAlign if it's not the default (BorderSide.strokeAlignInside = -1.0)
+      if (side.strokeAlign != BorderSide.strokeAlignInside) {
+        props['borderStrokeAlign'] = side.strokeAlign.toString();
+      }
+    }
+  } else {
+    // Non-uniform border - serialize each side
+    if (border.top.style != BorderStyle.none) {
+      props['borderTopColor'] = _colorToHex(border.top.color);
+      props['borderTopWidth'] = border.top.width.toString();
+    }
+    if (border.right.style != BorderStyle.none) {
+      props['borderRightColor'] = _colorToHex(border.right.color);
+      props['borderRightWidth'] = border.right.width.toString();
+    }
+    if (border.bottom.style != BorderStyle.none) {
+      props['borderBottomColor'] = _colorToHex(border.bottom.color);
+      props['borderBottomWidth'] = border.bottom.width.toString();
+    }
+    if (border.left.style != BorderStyle.none) {
+      props['borderLeftColor'] = _colorToHex(border.left.color);
+      props['borderLeftWidth'] = border.left.width.toString();
+    }
+  }
+
+  return props;
+}
+
+String _getPropertyValueString(DiagnosticsNode property) {
+  if (property is DiagnosticsProperty) {
+    final value = property.value;
+    if (value != null) {
+      // Serialize Color objects to hex format with opacity
+      if (value is Color) {
+        return _colorToHex(value);
+      }
+
+      // Check if the value itself is an enum
+      if (value is Enum) {
+        // Return dot shorthand (e.g., ".vertical" instead of "Axis.vertical")
+        return '.${value.name}';
+      }
+
+      // Use valueToString() for EnumProperty to get shorter enum names
+      if (property is EnumProperty) {
+        final enumValue = property.valueToString();
+        // Return dot shorthand (e.g., ".vertical" instead of "Axis.vertical")
+        return '.$enumValue';
+      }
+
+      // For string values that match patterns like "ClassName.memberName"
+      // (without parentheses or complex syntax), convert to dot shorthand
+      // (e.g., "EdgeInsets.zero" -> ".zero", "Clip.none" -> ".none")
+      final stringValue = value.toString();
+      // Match ClassName.memberName where memberName is a simple identifier
+      // and doesn't contain parentheses (to avoid matching constructors like EdgeInsets.all(14.0))
+      final dotShorthandPattern =
+          RegExp(r'^([A-Z][a-zA-Z0-9_]*\.)([a-zA-Z0-9_]+)$');
+      final match = dotShorthandPattern.firstMatch(stringValue);
+      if (match != null && !stringValue.contains('(')) {
+        return '.${match.group(2)}';
+      }
+
+      return stringValue;
+    }
+  }
+  return 'null';
+}
+
 String _sanitizeAttributeValue(String value) {
   return value
       .replaceAll('"', "'")
@@ -279,6 +466,37 @@ String _colorToHex(Color? color) {
   final b = (color.b * 255).toInt().toRadixString(16).padLeft(2, '0');
 
   return '#$a$r$g$b'.toUpperCase();
+}
+
+/// Checks if the current bounds match the parent bounds.
+/// For relative bounds, this means the widget fills its parent exactly.
+/// For absolute bounds, this means the bounds are identical.
+bool _boundsMatchParent(Rect bounds, Rect parentBounds, int precision) {
+  // Round values to the specified precision for comparison
+  final boundsLeft = bounds.left.toStringAsFixed(precision);
+  final boundsTop = bounds.top.toStringAsFixed(precision);
+  final boundsWidth = bounds.width.toStringAsFixed(precision);
+  final boundsHeight = bounds.height.toStringAsFixed(precision);
+
+  final parentLeft = parentBounds.left.toStringAsFixed(precision);
+  final parentTop = parentBounds.top.toStringAsFixed(precision);
+  final parentWidth = parentBounds.width.toStringAsFixed(precision);
+  final parentHeight = parentBounds.height.toStringAsFixed(precision);
+
+  // Bounds match if position and size match parent
+  return boundsLeft == parentLeft &&
+      boundsTop == parentTop &&
+      boundsWidth == parentWidth &&
+      boundsHeight == parentHeight;
+}
+
+/// Checks if the current constraints match the parent constraints.
+bool _constraintsMatchParent(
+    BoxConstraints constraints, BoxConstraints parentConstraints) {
+  return constraints.maxHeight == parentConstraints.maxHeight &&
+      constraints.maxWidth == parentConstraints.maxWidth &&
+      constraints.minHeight == parentConstraints.minHeight &&
+      constraints.minWidth == parentConstraints.minWidth;
 }
 
 /// Wrapper for widget tree testing
@@ -302,6 +520,8 @@ Future<void> widgetTreeMatchesGolden(
   // e.g. hash codes, keys, etc. that change between test runs
   final testTreeStripped = testTree?.toXmlString(
         boundsPrecision: options.boundsPrecision,
+        parentBounds: null,
+        parentConstraints: null,
       ) ??
       '';
 

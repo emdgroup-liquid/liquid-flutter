@@ -296,7 +296,7 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
                     child: MediaQuery(
                         data: mediaQuery.copyWith(
                             viewPadding: mediaQuery.viewPadding.copyWith(
-                          left: min(mediaQuery.viewPadding.left - left, mediaQuery.viewPadding.left),
+                          left: leftPadding,
                           right: rightPadding,
                         )),
                         child: child!),
