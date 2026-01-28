@@ -97,16 +97,15 @@ class WidgetTreeNode {
         .replaceAll(',', '-')
         .replaceAll(' ', '');
 
-    // associate properties with their values
-    Map<String, dynamic> props = {
-      for (var p in widget.toDiagnosticsNode().getProperties())
-        if (p.name != null && p.value != null)
-          p.name!: p.value
-              .toString()
-              .replaceAll('"', "'")
-              .replaceAll("&", "&amp;")
-              .replaceAll(RegExp(r'\s+'), ' ')
-              .trim(),
+    // associate properties with their values (opt-in selection)
+    final diagnostics = widget.toDiagnosticsNode().getProperties();
+    final allowedNames = _allowedPropertyNames(widget, diagnostics);
+    final Map<String, dynamic> props = {
+      for (final p in diagnostics)
+        if (p.name != null && p.value != null && allowedNames.contains(p.name))
+          p.name!: _sanitizeAttributeValue(
+            p.value.toString(),
+          ),
     };
     final attrs = [
       ...props.entries.map((e) {
@@ -131,12 +130,33 @@ class WidgetTreeNode {
         ' minWidth="${(constraints as BoxConstraints).minWidth}"',
       ],
       if (widget is RichText) ...[
-        ' color="${(widget as RichText).text.style?.color?.toString() ?? 'null'}"',
+        ' text="${_sanitizeAttributeValue((widget as RichText).text.toPlainText())}"',
+        ' color="${_colorToHex((widget as RichText).text.style?.color)}"',
         ' family="${(widget as RichText).text.style?.fontFamily ?? 'null'}"',
         ' size="${(widget as RichText).text.style?.fontSize ?? 'null'}"',
         ' weight="${(widget as RichText).text.style?.fontWeight?.toString() ?? 'null'}"',
         ' lineHeight="${(widget as RichText).text.style?.height?.toString() ?? 'null'}"',
       ],
+      if (widget is Text) ...[
+        ' text="${_sanitizeAttributeValue((widget as Text).data ?? (widget as Text).textSpan?.toPlainText() ?? '')}"',
+        ' overflow="${(widget as Text).overflow?.toString() ?? 'null'}"',
+        ' alignment="${(widget as Text).textAlign?.toString() ?? 'null'}"',
+        ' weight="${(widget as Text).style?.fontWeight?.toString() ?? 'null'}"',
+        ' lineHeight="${(widget as Text).style?.height?.toString() ?? 'null'}"',
+      ],
+      // Handle LdText widget - check by runtimeType string to avoid import dependency
+      if (widget.runtimeType.toString() == 'LdText')
+        ...(() {
+          try {
+            final ldText = widget as dynamic;
+            return [
+              ' type="${ldText.type?.toString() ?? 'null'}"',
+              ' size="${ldText.size?.toString() ?? 'null'}"',
+            ];
+          } catch (_) {
+            return <String>[];
+          }
+        })(),
     ].join('');
 
     final content = children.isEmpty
@@ -152,10 +172,113 @@ class WidgetTreeNode {
     final closingTag = children.isEmpty ? '' : '</$tag>';
     final result = '$indentStr<$tag$attrs$slash>$content$closingTag'
         // replace UID hash codes with a generic placeholder
-        .replaceAllMapped(RegExp(r'([a-zA-Z_>]+)#[0-9a-fA-F]+'),
-            (match) => '${match.group(1)}#HASH');
+        .replaceAllMapped(
+      RegExp(r'([a-zA-Z_>]+)#[0-9a-fA-F]+'),
+      (match) => '${match.group(1)}#HASH',
+    );
     return result;
   }
+}
+
+Set<String> _allowedPropertyNames(
+  Widget widget,
+  List<DiagnosticsNode> diagnostics,
+) {
+  // Always allow keys by default.
+  final allowed = <String>{'key'};
+
+  // For Semantics widgets, keep all diagnostics so we do not lose
+  // accessibility-related information.
+  if (widget is Semantics || widget is IndexedSemantics) {
+    return {
+      for (final p in diagnostics)
+        if (p.name != null) p.name!,
+    };
+  }
+
+  // Use switch expression to match widget types and add specific properties.
+  allowed.addAll(
+    switch (widget) {
+      Container() || DecoratedBox() || AnimatedContainer() => [
+          // Decoration / padding / margin.
+          'bg', // existing decoration diagnostic for Container.
+          'decoration',
+          'foregroundDecoration',
+          'padding',
+          'margin',
+          'clipBehavior',
+        ],
+      Padding() => ['padding'],
+      Row() || Column() => [
+          // Row / Column layout parameters.
+          'direction',
+          'mainAxisAlignment',
+          'mainAxisSize',
+          'crossAxisAlignment',
+          'verticalDirection',
+          'clipBehavior',
+          'spacing',
+        ],
+      Icon() => [
+          // Icon data.
+          'icon',
+        ],
+      ClipRect() || ClipRRect() || ClipPath() || ClipOval() => [
+          // Clip widgets.
+          'clipBehavior',
+        ],
+      ListView() ||
+      GridView() ||
+      PageView() ||
+      SingleChildScrollView() ||
+      CustomScrollView() ||
+      Scrollable() ||
+      ShrinkWrappingViewport() =>
+        [
+          // Scroll views and related widgets.
+          'scrollDirection',
+          'reverse',
+          'physics',
+          'shrinkWrap',
+          'padding',
+          'axisDirection',
+        ],
+      Expanded() || Flexible() => [
+          // Flex parameters.
+          'flex',
+        ],
+      Align() || Center() => [
+          // Alignment parameters.
+          'alignment',
+        ],
+      Listener() || MouseRegion() => [
+          // Pointer / mouse behavior.
+          'behavior',
+        ],
+      _ => [],
+    },
+  );
+
+  return allowed;
+}
+
+String _sanitizeAttributeValue(String value) {
+  return value
+      .replaceAll('"', "'")
+      .replaceAll("&", "&amp;")
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
+}
+
+String _colorToHex(Color? color) {
+  if (color == null) return 'null';
+
+  final a = (color.a * 255).toInt().toRadixString(16).padLeft(2, '0');
+  final r = (color.r * 255).toInt().toRadixString(16).padLeft(2, '0');
+  final g = (color.g * 255).toInt().toRadixString(16).padLeft(2, '0');
+  final b = (color.b * 255).toInt().toRadixString(16).padLeft(2, '0');
+
+  return '#$a$r$g$b'.toUpperCase();
 }
 
 /// Wrapper for widget tree testing
