@@ -162,10 +162,10 @@ class WidgetTreeNode {
         ' height="${bounds!.height.toStringAsFixed(boundsPrecision)}"',
       ],
       if (shouldIncludeConstraints) ...[
-        ' maxHeight="${boxConstraints.maxHeight}"',
-        ' maxWidth="${boxConstraints.maxWidth}"',
-        ' minHeight="${boxConstraints.minHeight}"',
-        ' minWidth="${boxConstraints.minWidth}"',
+        ' maxHeight="${boxConstraints.maxHeight.toStringAsFixed(boundsPrecision)}"',
+        ' maxWidth="${boxConstraints.maxWidth.toStringAsFixed(boundsPrecision)}"',
+        ' minHeight="${boxConstraints.minHeight.toStringAsFixed(boundsPrecision)}"',
+        ' minWidth="${boxConstraints.minWidth.toStringAsFixed(boundsPrecision)}"',
       ],
       if (widget is RichText) ...[
         ' text="${_sanitizeAttributeValue((widget as RichText).text.toPlainText())}"',
