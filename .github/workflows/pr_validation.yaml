@@ -48,6 +48,22 @@ jobs:
         run: |
           melos exec --category=testable -- flutter test --coverage --file-reporter "json:./test-results.json"
 
+      - name: Upload test failures
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-failures_liquid_flutter_test_utils
+          path: packages/liquid_flutter_test_utils/test/failures/
+          if-no-files-found: ignore
+
+      - name: Upload test failures liquid_flutter
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-failures_liquid_flutter
+          path: packages/liquid_flutter/test/failures/
+          if-no-files-found: ignore
+
       - name: Report test results
         uses: dorny/test-reporter@v2
         if: always()
