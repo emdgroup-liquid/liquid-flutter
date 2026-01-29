@@ -27,3 +27,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
+  fonts:
+    - family: Lato
+      fonts:
+        - asset: packages/liquid_flutter/fonts/Lato-Regular.ttf

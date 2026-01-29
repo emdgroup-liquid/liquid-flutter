@@ -15,11 +15,11 @@ final fairphone6 = LdFrameOptions(
   build: (
     BuildContext context,
     Orientation orientation,
+    SystemUiOverlayStyle? systemUiOverlayStyle,
     Widget child,
-    bool dark,
-    SystemUiOverlayStyle navigationBarStyle,
   ) {
     final isPortrait = orientation == Orientation.portrait;
+    final dark = LdTheme.of(context).isDark;
 
     return Stack(
       fit: StackFit.expand,
@@ -29,7 +29,7 @@ final fairphone6 = LdFrameOptions(
           Align(
             alignment: Alignment.topCenter,
             child: _StatusBar(
-              style: navigationBarStyle,
+              style: systemUiOverlayStyle ?? SystemUiOverlayStyle.light,
             ),
           ),
           Align(
@@ -46,7 +46,7 @@ final fairphone6 = LdFrameOptions(
           Align(
             alignment: Alignment.topCenter,
             child: _StatusBar(
-              style: navigationBarStyle,
+              style: systemUiOverlayStyle ?? SystemUiOverlayStyle.light,
             ),
           ),
           Align(
@@ -70,20 +70,20 @@ class _StatusBar extends StatelessWidget {
     required this.style,
   });
 
-  final SystemUiOverlayStyle style;
+  final SystemUiOverlayStyle? style;
 
   @override
   Widget build(BuildContext context) {
     final statusTop = 12.0;
     return Container(
       padding: EdgeInsets.only(left: 16, right: 24, top: statusTop),
-      color: style.statusBarColor ?? Colors.transparent,
+      color: style?.statusBarColor ?? Colors.transparent,
       child: Row(
         children: [
           SvgPicture.asset(
             package: 'liquid_flutter_test_utils',
             height: 10,
-            style.statusBarIconBrightness == Brightness.light
+            style?.statusBarIconBrightness == Brightness.light
                 ? 'assets/status_bar_left_android_light.svg'
                 : 'assets/status_bar_left_android_dark.svg',
           ),
@@ -93,7 +93,7 @@ class _StatusBar extends StatelessWidget {
           SvgPicture.asset(
             package: 'liquid_flutter_test_utils',
             height: 14,
-            style.statusBarIconBrightness == Brightness.light
+            style?.statusBarIconBrightness == Brightness.light
                 ? 'assets/status_bar_right_android_light.svg'
                 : 'assets/status_bar_right_android_dark.svg',
           ),

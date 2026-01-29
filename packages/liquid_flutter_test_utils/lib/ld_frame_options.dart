@@ -23,9 +23,8 @@ class LdFrameOptions {
   final Widget Function(
     BuildContext context,
     Orientation orientation,
+    SystemUiOverlayStyle? systemUiOverlayStyle,
     Widget child,
-    bool dark,
-    SystemUiOverlayStyle navigationBarStyle,
   )? build;
 
   /// The width of the device frame in logical pixels.
@@ -76,9 +75,8 @@ class LdFrameOptions {
     Widget Function(
       BuildContext context,
       Orientation orientation,
+      SystemUiOverlayStyle? systemUiOverlayStyle,
       Widget child,
-      bool dark,
-      SystemUiOverlayStyle navigationBarStyle,
     )? build,
     double? width,
     double? height,

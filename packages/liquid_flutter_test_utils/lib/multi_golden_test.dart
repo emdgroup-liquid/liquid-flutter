@@ -114,12 +114,14 @@ Future<void> multiGolden(
                   clipScreenToRadius ? ldFrameOptions.screenRadius ?? 0 : 0,
                 ),
                 child: ldFrame(
-                  child: widget,
-                  dark: brightness == Brightness.dark,
-                  size: themeSize,
-                  ldFrameOptions: ldFrameOptions,
-                  orientation: orientation,
-                ),
+                    child: widget,
+                    size: themeSize,
+                    ldFrameOptions: ldFrameOptions,
+                    orientation: orientation,
+                    brightnessMode: switch (brightness) {
+                      Brightness.light => LdThemeBrightnessMode.light,
+                      Brightness.dark => LdThemeBrightnessMode.dark,
+                    }),
               );
 
               // If we dont have a specified height, we need to wrap the frame in a

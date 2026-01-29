@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter_test_utils/ld_theme_wrapper.dart';
+import 'package:liquid_flutter_test_utils/ld_frame.dart';
 
 void main() {
   group('LdScaffold Widget Tests', () {
@@ -11,7 +11,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldThemeWrapper(
+          home: ldFrame(
             size: LdThemeSize.m,
             brightnessMode: LdThemeBrightnessMode.light,
             child: LdScaffold(
@@ -32,7 +32,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldThemeWrapper(
+          home: ldFrame(
             size: LdThemeSize.m,
             brightnessMode: LdThemeBrightnessMode.light,
             child: LdScaffold(
@@ -56,7 +56,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldThemeWrapper(
+          home: ldFrame(
             size: LdThemeSize.m,
             brightnessMode: LdThemeBrightnessMode.light,
             child: LdScaffold(
@@ -82,7 +82,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldThemeWrapper(
+          home: ldFrame(
             size: LdThemeSize.m,
             brightnessMode: LdThemeBrightnessMode.light,
             child: LdScaffold(
@@ -105,7 +105,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldThemeWrapper(
+          home: ldFrame(
             size: LdThemeSize.m,
             brightnessMode: LdThemeBrightnessMode.light,
             child: LdScaffold(
@@ -136,7 +136,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldThemeWrapper(
+          home: ldFrame(
             size: LdThemeSize.m,
             brightnessMode: LdThemeBrightnessMode.light,
             child: LdScaffold(
@@ -165,7 +165,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldThemeWrapper(
+          home: ldFrame(
             size: LdThemeSize.m,
             brightnessMode: LdThemeBrightnessMode.light,
             child: LdScaffold(
@@ -195,7 +195,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldThemeWrapper(
+          home: ldFrame(
             size: LdThemeSize.m,
             brightnessMode: LdThemeBrightnessMode.light,
             child: LdScaffold(
@@ -224,7 +224,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldThemeWrapper(
+          home: ldFrame(
             size: LdThemeSize.m,
             brightnessMode: LdThemeBrightnessMode.light,
             child: LdScaffold(
@@ -256,7 +256,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldThemeWrapper(
+          home: ldFrame(
             size: LdThemeSize.m,
             brightnessMode: LdThemeBrightnessMode.light,
             child: LdScaffold(
@@ -298,7 +298,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldThemeWrapper(
+          home: ldFrame(
             size: LdThemeSize.m,
             brightnessMode: LdThemeBrightnessMode.light,
             child: LdScaffold(
@@ -323,7 +323,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldThemeWrapper(
+          home: ldFrame(
             size: LdThemeSize.m,
             brightnessMode: LdThemeBrightnessMode.light,
             child: LdScaffold(
@@ -348,7 +348,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldThemeWrapper(
+          home: ldFrame(
             size: LdThemeSize.m,
             brightnessMode: LdThemeBrightnessMode.light,
             child: LdScaffold(
@@ -390,7 +390,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldThemeWrapper(
+          home: ldFrame(
             size: LdThemeSize.m,
             brightnessMode: LdThemeBrightnessMode.light,
             child: LdScaffold(

@@ -622,29 +622,7 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
     );
   }
 
-  SystemUiOverlayStyle get _systemUiOverlayStyle {
-    final theme = LdTheme.of(context, listen: true);
-    if (theme.isDark) {
-      return SystemUiOverlayStyle(
-        statusBarBrightness: Brightness.dark,
-        statusBarIconBrightness: Brightness.light,
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: theme.background.withAlpha(150),
-        systemNavigationBarDividerColor: Colors.transparent,
-        systemNavigationBarIconBrightness: Brightness.light,
-        systemNavigationBarContrastEnforced: false,
-      );
-    }
-    return SystemUiOverlayStyle(
-      statusBarBrightness: Brightness.light,
-      statusBarIconBrightness: Brightness.dark,
-      statusBarColor: Colors.transparent,
-      systemNavigationBarColor: theme.background.withAlpha(150),
-      systemNavigationBarDividerColor: Colors.transparent,
-      systemNavigationBarIconBrightness: Brightness.dark,
-      systemNavigationBarContrastEnforced: false,
-    );
-  }
+  SystemUiOverlayStyle get _systemUiOverlayStyle => appBarSystemUiOverlayStyle(LdTheme.of(context, listen: true));
 
   @override
   Widget build(BuildContext context) {

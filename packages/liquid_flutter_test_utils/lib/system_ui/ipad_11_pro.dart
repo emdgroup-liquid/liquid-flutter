@@ -14,9 +14,8 @@ final iPadPro11 = LdFrameOptions(
   build: (
     BuildContext context,
     Orientation orientation,
+    SystemUiOverlayStyle? navigationBarStyle,
     Widget child,
-    bool dark,
-    SystemUiOverlayStyle navigationBarStyle,
   ) {
     return Stack(
       children: [
@@ -37,7 +36,7 @@ class _WindowHandle extends StatelessWidget {
     required this.style,
   });
 
-  final SystemUiOverlayStyle style;
+  final SystemUiOverlayStyle? style;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +47,7 @@ class _WindowHandle extends StatelessWidget {
         child: Icon(
           Icons.more_horiz,
           size: 28,
-          color: (style.statusBarIconBrightness == Brightness.light
+          color: (style?.statusBarIconBrightness == Brightness.light
                   ? Colors.white
                   : Colors.black)
               .withAlpha(200),
@@ -63,7 +62,7 @@ class _StatusBar extends StatelessWidget {
     required this.style,
   });
 
-  final SystemUiOverlayStyle style;
+  final SystemUiOverlayStyle? style;
 
   @override
   Widget build(BuildContext context) {
@@ -71,13 +70,13 @@ class _StatusBar extends StatelessWidget {
     final statusTop = 8.0;
     return Container(
       padding: EdgeInsets.only(left: 28, right: 28, top: statusTop),
-      color: style.statusBarColor ?? Colors.transparent,
+      color: style?.statusBarColor ?? Colors.transparent,
       child: Row(
         children: [
           SvgPicture.asset(
             height: statusHeight,
             package: 'liquid_flutter_test_utils',
-            style.statusBarIconBrightness == Brightness.light
+            style?.statusBarIconBrightness == Brightness.light
                 ? 'assets/status_bar_left_light.svg'
                 : 'assets/status_bar_left_dark.svg',
           ),
@@ -85,7 +84,7 @@ class _StatusBar extends StatelessWidget {
           SvgPicture.asset(
             height: statusHeight,
             package: 'liquid_flutter_test_utils',
-            style.statusBarIconBrightness == Brightness.light
+            style?.statusBarIconBrightness == Brightness.light
                 ? 'assets/status_bar_right_light.svg'
                 : 'assets/status_bar_right_dark.svg',
           ),

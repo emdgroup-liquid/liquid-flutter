@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
+import 'package:liquid_flutter_test_utils/ld_frame.dart';
 import 'package:liquid_flutter_test_utils/ld_frame_options.dart';
 import 'package:liquid_flutter_test_utils/golden_utils.dart';
-import 'package:liquid_flutter_test_utils/ld_theme_wrapper.dart';
 import 'package:liquid_flutter_test_utils/multi_golden_test.dart';
 import 'package:liquid_flutter_test_utils/system_ui/ipad_11_pro.dart';
 import 'package:liquid_flutter_test_utils/system_ui/iphone_16_pro.dart';
@@ -49,7 +49,7 @@ void main() {
   /// Generate a widget tree for a simple "hello world" widget.
   testGoldens("Arbitrary single widget tree renders correctly", (tester) async {
     const key = ValueKey("HelloWorld");
-    final widget = ldThemeWrapper(
+    final widget = ldFrame(
       child: Container(
         key: key,
         height: 100,

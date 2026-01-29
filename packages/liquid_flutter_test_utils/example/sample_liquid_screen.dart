@@ -12,11 +12,8 @@ class SampleLiquidScreen extends StatelessWidget {
 
     return LdScaffold(
       appBars: [LdAppBar(title: const Text('Sample Liquid Screen'))],
-      body: SafeArea(
-        bottom: false,
-        child: SingleChildScrollView(
-          child: SampleLiquidWidget().padL(),
-        ),
+      body: LdScaffoldBody(
+        children: [SampleLiquidWidget()],
       ),
     );
   }

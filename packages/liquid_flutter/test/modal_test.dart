@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter_test_utils/ld_frame.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:liquid_flutter_test_utils/ld_theme_wrapper.dart';
 
 void main() {
   testWidgets('LdModal', (WidgetTester test) async {
     ldDisableAnimations = true;
     await test.pumpWidget(
-      ldThemeWrapper(
+      ldFrame(
         size: LdThemeSize.m,
         brightnessMode: LdThemeBrightnessMode.light,
         child: SizedBox(
