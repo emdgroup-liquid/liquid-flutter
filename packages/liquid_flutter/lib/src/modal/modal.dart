@@ -381,34 +381,35 @@ class LdModalRoute<T> extends PageRoute<T> {
       bool allowSnapshotting,
       Widget? child,
     ) {
-      // Check if this route is in dialog mode
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          final bool isDialog = !route._shouldBeSheet(constraints);
-          final modalRoute = ModalRoute.of(context);
-          final parentIsModal = modalRoute is LdModalRoute;
+      // Determine dialog mode based on current MediaQuery instead of LayoutBuilder
+      final Size screenSize = MediaQuery.sizeOf(context);
+      final BoxConstraints constraints = BoxConstraints(
+        maxWidth: screenSize.width,
+        maxHeight: screenSize.height,
+      );
+      final bool isDialog = !route._shouldBeSheet(constraints);
+      final modalRoute = ModalRoute.of(context);
+      final parentIsModal = modalRoute is LdModalRoute;
 
-          if (route.scaleParent == false) {
-            return child ?? const SizedBox.shrink();
-          }
+      if (route.scaleParent == false) {
+        return child ?? const SizedBox.shrink();
+      }
 
-          if (isDialog && !secondaryAnimation.isDismissed) {
-            if (!parentIsModal) {
-              return child ?? const SizedBox.shrink();
-            }
-            // Apply dialog stacking transition
-            return _delegatedDialogSecondaryTransition(secondaryAnimation, child);
-          }
+      if (isDialog && !secondaryAnimation.isDismissed) {
+        if (!parentIsModal) {
+          return child ?? const SizedBox.shrink();
+        }
+        // Apply dialog stacking transition
+        return _delegatedDialogSecondaryTransition(secondaryAnimation, child);
+      }
 
-          // For sheets or when dismissed, fall back to sheet transition
-          return LdModalSheetTransition.delegateTransition(
-            context,
-            animation,
-            secondaryAnimation,
-            allowSnapshotting,
-            child,
-          );
-        },
+      // For sheets or when dismissed, fall back to sheet transition
+      return LdModalSheetTransition.delegateTransition(
+        context,
+        animation,
+        secondaryAnimation,
+        allowSnapshotting,
+        child,
       );
     };
   }
