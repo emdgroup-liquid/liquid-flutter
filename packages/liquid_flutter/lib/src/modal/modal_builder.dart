@@ -35,7 +35,25 @@ class LdModalBuilderState extends State<LdModalBuilder> {
   Future<dynamic> open(BuildContext context) async {
     final safeContext = widget.useRootNavigator ? Navigator.of(context, rootNavigator: true) : Navigator.of(context);
 
-    return await safeContext.push(widget.modal);
+    // Call the builder to create a fresh route instance
+    final route = LdModalRoute(
+      context: widget.modal.context,
+      pageBuilder: widget.modal.pageBuilder,
+      barrierDismissible: widget.modal.barrierDismissible,
+      modalTypeMode: widget.modal.modalTypeMode,
+      scaleParent: widget.modal.scaleParent,
+      maintainState: widget.modal.maintainState,
+      dialogSize: widget.modal.dialogSize,
+      sheetBorderRadius: widget.modal.sheetBorderRadius,
+      fixedDialogSize: widget.modal.fixedDialogSize,
+      sheetAspectRatio: widget.modal.sheetAspectRatio,
+      dialogBorderRadius: widget.modal.dialogBorderRadius,
+      sheetBreakpoint: widget.modal.sheetBreakpoint,
+      sheetInsets: widget.modal.sheetInsets,
+      barrierLabel: widget.modal.barrierLabel,
+      settings: widget.modal.settings,
+    );
+    return await safeContext.push(route);
   }
 
   @override
