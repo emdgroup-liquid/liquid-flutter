@@ -37,9 +37,7 @@ typedef GoldenWidgetBuilder = Future<void> Function(
 Future<void> resetTester(WidgetTester tester) async {
   // Reset view properties (devicePixelRatio, physicalSize, etc.)
   final view = tester.view;
-  if (view is TestFlutterView) {
-    view.reset();
-  }
+  view.reset();
   // Reset surface size to default
   await tester.binding.setSurfaceSize(null);
 }
@@ -198,7 +196,7 @@ Future<void> multiGolden(
                           final pngFile = File(
                             path.join(
                               failurePath,
-                              '$name',
+                              name,
                               '$slug.png',
                             ),
                           );
