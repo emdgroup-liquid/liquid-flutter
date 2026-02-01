@@ -41,6 +41,14 @@ jobs:
       - name: Bootstrap Melos
         run: melos bootstrap
 
+      # Licens checks are suspended, as very_good_cli does not support workspaces yet.
+
+      # - name: Install very_good_cli
+      #   run: dart pub global activate very_good_cli
+
+      # - name: Check licenses
+      #   run: very_good packages check licenses --allowed=MIT,Apache-2.0,BSD-3-Clause,BSD-2-Clause
+
       - name: Run analyzer
         run: melos exec -- dart analyze
 
@@ -190,9 +198,3 @@ jobs:
             });
 
             console.log('Successfully posted version analysis comment');
-
-      - name: Install very_good_cli
-        run: dart pub global activate very_good_cli
-
-      - name: Check licenses
-        run: very_good analyze --check-licenses
