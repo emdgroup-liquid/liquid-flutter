@@ -43,5 +43,7 @@ coverage/
 packages/liquid_flutter/test/failures/
 packages/liquid_flutter_test_utils/test/failures/
 
+# Golden test images - only XML widget trees are checked in; PNGs generated on mismatch for debugging
+**/test/goldens/**/*.png
 
 **/test-results.json

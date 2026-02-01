@@ -1,7 +1,12 @@
+import 'dart:io';
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:path/path.dart' as path;
 import 'package:liquid_flutter_test_utils/golden_utils.dart';
 import 'package:liquid_flutter_test_utils/ld_frame_options.dart';
 import 'package:liquid_flutter_test_utils/ld_frame.dart';
@@ -108,20 +113,22 @@ Future<void> multiGolden(
 
             // Place the widget
             await entry.value(tester, (widget) async {
-              final frame = ClipRRect(
+              final frame = RepaintBoundary(
                 key: key,
-                borderRadius: BorderRadius.circular(
-                  clipScreenToRadius ? ldFrameOptions.screenRadius ?? 0 : 0,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(
+                    clipScreenToRadius ? ldFrameOptions.screenRadius ?? 0 : 0,
+                  ),
+                  child: ldFrame(
+                      child: widget,
+                      size: themeSize,
+                      ldFrameOptions: ldFrameOptions,
+                      orientation: orientation,
+                      brightnessMode: switch (brightness) {
+                        Brightness.light => LdThemeBrightnessMode.light,
+                        Brightness.dark => LdThemeBrightnessMode.dark,
+                      }),
                 ),
-                child: ldFrame(
-                    child: widget,
-                    size: themeSize,
-                    ldFrameOptions: ldFrameOptions,
-                    orientation: orientation,
-                    brightnessMode: switch (brightness) {
-                      Brightness.light => LdThemeBrightnessMode.light,
-                      Brightness.dark => LdThemeBrightnessMode.dark,
-                    }),
               );
 
               // If we dont have a specified height, we need to wrap the frame in a
@@ -151,6 +158,34 @@ Future<void> multiGolden(
                     options: WidgetTreeOptions(goldenName: '$name/$slug'),
                   );
                 } catch (e) {
+                  // Capture screenshot for visual debugging when XML mismatches
+                  try {
+                    await tester.pumpAndSettle();
+                    final element = tester.element(find.byKey(key));
+                    final renderObject = element.renderObject;
+                    if (renderObject is RenderRepaintBoundary) {
+                      final image = await renderObject.toImage(
+                        pixelRatio: tester.view.devicePixelRatio,
+                      );
+                      final byteData = await image.toByteData(
+                        format: ui.ImageByteFormat.png,
+                      );
+                      if (byteData != null) {
+                        const failurePath = 'test/failures/golden_widget_trees';
+                        final pngFile = File(
+                          path.join(
+                            failurePath,
+                            '$name',
+                            '$slug.png',
+                          ),
+                        );
+                        pngFile.parent.createSync(recursive: true);
+                        pngFile.writeAsBytesSync(byteData.buffer.asUint8List());
+                      }
+                    }
+                  } catch (_) {
+                    // Ignore screenshot failures; the XML failure is the main error
+                  }
                   failureMessages.add(
                       'Widget tree test failed for $name/$slug: ${e.toString()}');
                 }
@@ -158,32 +193,6 @@ Future<void> multiGolden(
             });
 
             await tester.pumpAndSettle();
-
-            if (ldFrameOptions.height == null) {
-              size = find.byKey(key).evaluate().first.size!;
-
-              await tester.binding.setSurfaceSize(
-                Size(size.width, size.height),
-              );
-
-              tester.view.physicalSize = Size(
-                size.width,
-                (size.height),
-              );
-            }
-
-            await tester.pumpAndSettle();
-
-            try {
-              await expectLater(
-                find.byKey(key),
-                matchesGoldenFile('goldens/$name/$slug.png'),
-              );
-            } catch (e) {
-              failureMessages.add(
-                'Screen matching golden failed for $name/$slug: ${e.toString()}',
-              );
-            }
 
             debugDefaultTargetPlatformOverride = null;
           }
