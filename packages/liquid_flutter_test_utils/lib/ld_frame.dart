@@ -4,17 +4,15 @@ import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_test_utils/ld_frame_options.dart';
 import 'package:liquid_flutter_test_utils/golden_utils.dart';
-import 'package:liquid_flutter_test_utils/ld_theme_wrapper.dart';
 import 'package:liquid_flutter_test_utils/system_ui/system_overlays.dart';
 
 /// Create a frame for a widget to be used in golden tests.
 Widget ldFrame({
-  required Key key,
   required Widget child,
-  required bool dark,
-  required LdThemeSize size,
-  required LdFrameOptions ldFrameOptions,
-  required Orientation orientation,
+  LdThemeBrightnessMode brightnessMode = LdThemeBrightnessMode.light,
+  LdThemeSize? size,
+  LdFrameOptions ldFrameOptions = const LdFrameOptions(),
+  Orientation orientation = Orientation.portrait,
   bool showBackButton = false,
 }) {
   GoRouter router(Function(BuildContext, GoRouterState) app) {
@@ -39,16 +37,14 @@ Widget ldFrame({
     // force a new subtree each time a new frame is created in order to avoid
     // state issues
     key: UniqueKey(),
-    child: ldThemeWrapper(
+    child: LdThemeProvider(
       size: size,
-      brightnessMode:
-          dark ? LdThemeBrightnessMode.dark : LdThemeBrightnessMode.light,
+      platform: ldFrameOptions.platform,
+      brightnessMode: brightnessMode,
       child: LdThemedAppBuilder(
         appBuilder: (context, theme) => MaterialApp.router(
+          theme: theme,
           debugShowCheckedModeBanner: false,
-          theme: theme.copyWith(
-            platform: ldFrameOptions.targetPlatform,
-          ),
           locale: LiquidLocalizations.supportedLocales.first,
           supportedLocales: LiquidLocalizations.supportedLocales,
           localizationsDelegates: [
@@ -75,26 +71,28 @@ Widget ldFrame({
                   padding: padding,
                   viewInsets: padding,
                 ),
-                child: KeyedSubtree(
-                  key: key,
-                  child: SystemOverlayDetector(
-                    builder: (context, style) {
-                      if (ldFrameOptions.build != null) {
-                        return ldFrameOptions.build!(
-                          context,
-                          orientation,
-                          child,
-                          dark,
-                          style ??
-                              (!dark
-                                  ? SystemUiOverlayStyle.dark
-                                  : SystemUiOverlayStyle.light),
-                        );
-                      }
+                child: SystemOverlayDetector(
+                  builder: (context, style) {
+                    if (ldFrameOptions.build != null) {
+                      return ldFrameOptions.build!(
+                        context,
+                        orientation,
+                        switch (style) {
+                          null => switch (brightnessMode) {
+                              LdThemeBrightnessMode.light =>
+                                SystemUiOverlayStyle.dark,
+                              LdThemeBrightnessMode.dark =>
+                                SystemUiOverlayStyle.light,
+                              _ => null
+                            },
+                          _ => style,
+                        },
+                        child,
+                      );
+                    }
 
-                      return child;
-                    },
-                  ),
+                    return child;
+                  },
                 ),
               );
             },

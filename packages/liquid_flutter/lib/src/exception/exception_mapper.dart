@@ -73,6 +73,13 @@ class LdExceptionMapper {
       }
     }
 
+    if (e is LdException) {
+      return LdLocalizedException.fromLdException(
+        exception: e,
+        message: localizations.unknownError,
+      );
+    }
+
     final exception = LdLocalizedException(
       message: localizations.unknownError,
       canRetry: true,
@@ -82,23 +89,23 @@ class LdExceptionMapper {
     );
 
     if (e is SocketException) {
-      return LdLocalizedException.fromException(
-        exception,
-        localizations.networkError,
+      return LdLocalizedException.fromLdException(
+        exception: exception,
+        message: localizations.networkError,
       );
     }
 
     if (e is TimeoutException) {
-      return LdLocalizedException.fromException(
-        exception,
-        localizations.timeoutError,
+      return LdLocalizedException.fromLdException(
+        exception: exception,
+        message: localizations.timeoutError,
       );
     }
 
     if (e is FormatException) {
-      return LdLocalizedException.fromException(
-        exception,
-        localizations.formatError,
+      return LdLocalizedException.fromLdException(
+        exception: exception,
+        message: localizations.formatError,
         moreInfo: e.toString(),
       );
     }

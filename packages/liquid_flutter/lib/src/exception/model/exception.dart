@@ -81,10 +81,14 @@ class LdLocalizedException extends LdException {
     super.exception,
   });
 
-  factory LdLocalizedException.fromException(LdException exception, String message, {String? moreInfo}) {
+  factory LdLocalizedException.fromLdException({
+    required LdException exception,
+    required String message,
+    String? moreInfo,
+  }) {
     return LdLocalizedException(
       message: message,
-      moreInfo: moreInfo,
+      moreInfo: exception.exception.toString(),
       canRetry: exception.canRetry,
       type: exception.type,
       attempt: exception.attempt,

@@ -1,30 +1,26 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-
-import 'golden_utils.dart';
+import 'package:liquid_flutter_test_utils/liquid_flutter_test_utils.dart';
 
 void main() {
   testGoldens("LdCard Golden", (WidgetTester tester) async {
     await multiGolden(tester, "LdCard", {
       "LdCard": (tester, place) async {
-        await place(const LdCard(
-          header: Text("Header"),
-          footer: Text("Footer"),
-          child: Text("Hello"),
-        ));
-        return null;
+        await place(LdCard(
+          header: LdText.p("Header"),
+          footer: LdText.p("Footer"),
+          child: LdText.p("Hello"),
+        ).padL());
       },
       "LdCard on surface": (tester, place) async {
         await place(LdAutoBackground(
-          child: const LdCard(
-            header: Text("Header"),
-            footer: Text("Footer"),
-            child: Text("Hello"),
+          child: LdCard(
+            header: LdText.p("Header"),
+            footer: LdText.p("Footer"),
+            child: LdText.p("Hello"),
           ).padL(),
         ));
-        return null;
       },
     });
   });

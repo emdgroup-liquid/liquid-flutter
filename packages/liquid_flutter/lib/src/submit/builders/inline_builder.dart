@@ -42,7 +42,7 @@ class LdSubmitInlineBuilder<T, Arg> extends LdSubmitBuilder<T, Arg> {
                 errorBuilder!(context, state.error!, controller)
               else
                 LdExceptionView(
-                  exception: state.error?.localize(context),
+                  exception: state.error!.localize(context),
                   direction: Axis.horizontal,
                   retryController: controller.retryController,
                 )

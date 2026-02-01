@@ -14,12 +14,14 @@ class _LdAvatarWidget extends StatelessWidget {
 
   final LdColor? color;
 
+  final bool emoji;
   final bool circular;
 
   final LdSize size;
 
   const _LdAvatarWidget({
     required this.child,
+    this.emoji = false,
     @ContextConfigurable() this.color,
     @ContextConfigurable() this.circular = false,
     @ContextConfigurable() this.size = LdSize.m,
@@ -40,7 +42,7 @@ class _LdAvatarWidget extends StatelessWidget {
       width: theme.paddingSize(size: size) * 3,
       decoration: BoxDecoration(
         color: fillColor,
-        borderRadius: circular ? null : theme.radius(LdSize.m),
+        borderRadius: circular ? null : theme.radius(LdSize.s),
         shape: circular ? BoxShape.circle : BoxShape.rectangle,
       ),
       child: Center(
@@ -56,8 +58,17 @@ class _LdAvatarWidget extends StatelessWidget {
               LdTextType.label,
               LdSize.l,
               color: textIconColor,
+              lineHeight: 1,
             ),
-            child: child,
+            child: LdWrapConditional(
+                condition: emoji,
+                builder: (context, child) {
+                  return Padding(
+                    padding: EdgeInsets.only(left: 4),
+                    child: child,
+                  );
+                },
+                child: child),
           ),
         ),
       ),

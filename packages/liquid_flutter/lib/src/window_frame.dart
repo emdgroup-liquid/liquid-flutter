@@ -1,6 +1,3 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
@@ -15,8 +12,8 @@ class LdWindowFrame extends StatelessWidget {
   final Widget Function(BuildContext context, Widget child) frameBuilder;
   final Widget title;
 
-  bool get showWindowFrame {
-    return !kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS);
+  bool showWindowFrame(BuildContext context) {
+    return LdTheme.of(context).platform.isDesktop;
   }
 
   @override
@@ -24,7 +21,7 @@ class LdWindowFrame extends StatelessWidget {
     final theme = LdTheme.of(context, listen: true);
     return Column(
       children: [
-        if (showWindowFrame)
+        if (showWindowFrame(context))
           frameBuilder(
             context,
             Container(

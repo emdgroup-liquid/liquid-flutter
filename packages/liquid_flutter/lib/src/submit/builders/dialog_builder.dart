@@ -131,7 +131,7 @@ class _LdSubmitDialogState<T, Arg> extends State<LdSubmitDialog<T, Arg>> {
     }
 
     return LdExceptionView(
-      exception: controller.state.error?.localize(context),
+      exception: controller.state.error!.localize(context),
       direction: Axis.vertical,
       retryController: controller.retryController,
     ).padL();

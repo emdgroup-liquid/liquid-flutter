@@ -18,6 +18,9 @@ class LdThemeProvider extends StatefulWidget {
 
   final LdThemeBrightnessMode brightnessMode;
 
+  final LdThemeSize? size;
+  final LdPlatform? platform;
+
   /// The dark palette to use when [autoBrightness] is true defaults to [deepOcean]
   final LdPalette? darkPalette;
 
@@ -26,7 +29,6 @@ class LdThemeProvider extends StatefulWidget {
 
   /// If true the theme will change based on the type of the device
   /// will use LdThemeSize.m on mobile and LdThemeSize.s on desktop
-  final bool autoSize;
 
   final Stream<double>? screenRadiusStream;
 
@@ -35,10 +37,11 @@ class LdThemeProvider extends StatefulWidget {
     super.key,
     this.theme,
     this.brightnessMode = LdThemeBrightnessMode.auto,
-    this.autoSize = true,
     this.darkPalette,
     this.lightPalette,
     this.screenRadiusStream,
+    this.size,
+    this.platform,
   });
 
   @override
@@ -72,12 +75,14 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
     _theme.addListener(themeChanged);
     WidgetsBinding.instance.addObserver(this);
 
-    if (widget.autoSize) {
+    if (widget.size == null) {
       if (_theme.platform.isDesktop) {
         _theme.setThemeSize(LdThemeSize.s);
       } else {
         _theme.setThemeSize(LdThemeSize.m);
       }
+    } else {
+      _theme.setThemeSize(widget.size!);
     }
 
     super.initState();
@@ -120,11 +125,6 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
     if (_theme.platform == LdPlatform.macos) {
       return BoxDecoration(
         color: _theme.background,
-        /* border: Border.all(
-          color: _theme.border,
-          width: 1,
-          strokeAlign: BorderSide.strokeAlignOutside,
-        ), */
         borderRadius: BorderRadius.circular(_theme.screenRadius),
       );
     }
@@ -140,6 +140,14 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
 
     if (oldWidget.brightnessMode != widget.brightnessMode) {
       _applyBrightness();
+    }
+    if (oldWidget.size != widget.size) {
+      _theme.setThemeSize(widget.size!);
+    }
+    if (oldWidget.platform != widget.platform) {
+      if (widget.platform == null) {
+        _theme.platform = widget.platform!;
+      }
     }
 
     super.didUpdateWidget(oldWidget);

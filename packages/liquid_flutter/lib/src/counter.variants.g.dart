@@ -12,7 +12,7 @@ class LdCounter extends StatelessWidget {
     required double value,
     int precision = 0,
     LdSize size = LdSize.m,
-    super.key,
+    Key? key,
   }) {
     return LdCounter(
       value: value,
@@ -26,7 +26,7 @@ class LdCounter extends StatelessWidget {
     required double value,
     int precision = 0,
     LdSize size = LdSize.m,
-    super.key,
+    Key? key,
   }) {
     return LdCounter(
       value: value,
@@ -40,7 +40,7 @@ class LdCounter extends StatelessWidget {
     required double value,
     int precision = 0,
     LdSize size = LdSize.m,
-    super.key,
+    Key? key,
   }) {
     return LdCounter(
       value: value,

@@ -12,7 +12,6 @@ class ContextMenuDemo extends StatefulWidget {
 }
 
 class _ContextMenuDemoState extends State<ContextMenuDemo> {
-  LdContextMenuBlurMode _blurMode = LdContextMenuBlurMode.mobileOnly;
   LdContextZoomMode _zoomMode = LdContextZoomMode.mobileOnly;
   LdContextPositionMode _positionMode = LdContextPositionMode.auto;
 
@@ -94,7 +93,7 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
         children: [
           LdContextMenu(
             zoomMode: _zoomMode,
-            blurMode: _blurMode,
+
             positionMode: _positionMode,
             menuBuilder: (context) {
               return ConstrainedBox(constraints: BoxConstraints(maxWidth: 300), child: _buildMenu(context));
@@ -119,7 +118,7 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
               children: [
                 LdContextMenu(
                   zoomMode: _zoomMode,
-                  blurMode: _blurMode,
+
                   positionMode: _positionMode,
                   menuBuilder: (context) {
                     return ConstrainedBox(constraints: BoxConstraints(maxWidth: 300), child: _buildMenu(context));
@@ -130,20 +129,7 @@ class _ContextMenuDemoState extends State<ContextMenuDemo> {
               ],
             ),
           ),
-          LdSwitch(
-            label: "Blur",
-            children: const {
-              LdContextMenuBlurMode.always: Text("Always"),
-              LdContextMenuBlurMode.mobileOnly: Text("Mobile only"),
-              LdContextMenuBlurMode.never: Text("Never"),
-            },
-            value: _blurMode,
-            onChanged: (p0) {
-              setState(() {
-                _blurMode = p0;
-              });
-            },
-          ),
+
           LdSwitch(
             label: "Zoom",
             children: const {

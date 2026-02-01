@@ -3,8 +3,6 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter_window_utils/liquid_flutter_window_utils.dart';
-import 'package:liquid_flutter_window_utils/messages.g.dart' as window_utils;
 import 'package:provider/provider.dart';
 
 class LdMultiPanelLayout extends StatefulWidget {
@@ -69,76 +67,6 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
     _initializePositions();
   }
 
-  @override
-  void dispose() {
-    _clearGestureExclusionRects();
-    super.dispose();
-  }
-
-  void _updateGestureExclusionRects(double availableWidth) {
-    // Only update in stacked mode
-    if (widget.mode != LdMultiPanelLayoutMode.stacked) {
-      _clearGestureExclusionRects();
-      return;
-    }
-
-    final renderBox = _layoutKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox == null || !renderBox.attached) {
-      return;
-    }
-
-    // Get layout bounds in screen coordinates
-    final topLeft = renderBox.localToGlobal(Offset.zero);
-    final bottomRight = renderBox.localToGlobal(Offset(renderBox.size.width, renderBox.size.height));
-
-    // Use the same threshold as the gesture logic
-    const threshold = 50.0;
-
-    final exclusionRects = <window_utils.Rect>[];
-
-    // Check if there are panels to the left of visible range
-    final hasPanelsToLeft = widget.visibleStartIndex > 0;
-    if (hasPanelsToLeft) {
-      // Add exclusion region on the left edge
-      exclusionRects.add(
-        window_utils.Rect(
-          left: topLeft.dx.toInt(),
-          top: topLeft.dy.toInt(),
-          right: (topLeft.dx + threshold).toInt(),
-          bottom: bottomRight.dy.toInt(),
-        ),
-      );
-    }
-
-    // Check if there are panels to the right of visible range
-    final hasPanelsToRight = widget.visibleEndIndex < widget.children.length - 1;
-    if (hasPanelsToRight) {
-      // Add exclusion region on the right edge
-      exclusionRects.add(
-        window_utils.Rect(
-          left: (bottomRight.dx - threshold).toInt(),
-          top: topLeft.dy.toInt(),
-          right: bottomRight.dx.toInt(),
-          bottom: bottomRight.dy.toInt(),
-        ),
-      );
-    }
-
-    debugPrint('exclusionRects: ${exclusionRects.map((e) => e.toStringHumanReadable()).join(', ')}');
-
-    // Set exclusion rects on Android
-    LiquidFlutterWindowUtils.instance.setSystemGestureExclusionRects(exclusionRects).catchError((error) {
-      debugPrint('Failed to set system gesture exclusion rects: $error');
-    });
-  }
-
-  void _clearGestureExclusionRects() {
-    // Clear exclusion rects by passing an empty list
-    LiquidFlutterWindowUtils.instance.setSystemGestureExclusionRects([]).catchError((error) {
-      debugPrint('Failed to clear system gesture exclusion rects: $error');
-    });
-  }
-
   void _initializePositions() {
     _positions = List.filled(widget.children.length, 0.0);
     setState(() {});
@@ -154,9 +82,6 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
         oldWidget.spacing != widget.spacing) {
       _initializePositions();
       // Update gesture exclusion rects when visible range changes
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _updateGestureExclusionRects(_totalWidth);
-      });
     }
   }
 
@@ -239,11 +164,6 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
 
     _dragOffset = 0;
     setState(() {});
-
-    // Update gesture exclusion rects after drag ends
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _updateGestureExclusionRects(_totalWidth);
-    });
   }
 
   ({List<double> positions, List<double> widths}) _calculateLayout(
@@ -318,11 +238,6 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
             layoutWidget = _buildStacked(availableWidth);
           }
 
-          // Update gesture exclusion rects after layout
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _updateGestureExclusionRects(availableWidth);
-          });
-
           return Container(
             key: _layoutKey,
             child: layoutWidget,
@@ -338,6 +253,7 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
     double availableWidth,
   ) {
     final theme = LdTheme.of(context);
+    final mediaQuery = MediaQuery.of(context);
     return Stack(
       children: [
         for (var i = 0; i < widget.children.length; i++)
@@ -351,6 +267,10 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
             onAnimationEnd: (context, state) {},
             builder: (context, state, child) {
               final left = state.position.clamp(-widths[i], availableWidth);
+              final right = availableWidth - (targetPositions[i] + widths[i]);
+
+              final rightPadding = max(0.0, mediaQuery.viewPadding.right - right);
+              final leftPadding = max(0.0, mediaQuery.viewPadding.left - left);
 
               return Provider.value(
                 value: LdMultiPanelChildState(
@@ -373,7 +293,13 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
                         ),
                       ),
                     ),
-                    child: child!,
+                    child: MediaQuery(
+                        data: mediaQuery.copyWith(
+                            viewPadding: mediaQuery.viewPadding.copyWith(
+                          left: leftPadding,
+                          right: rightPadding,
+                        )),
+                        child: child!),
                   ),
                 ),
               );
@@ -802,11 +728,5 @@ class LdMultiPanelChildState {
 
   static LdMultiPanelChildState watch(BuildContext context) {
     return context.watch<LdMultiPanelChildState>();
-  }
-}
-
-extension on window_utils.Rect {
-  String toStringHumanReadable() {
-    return 'Rect(left: $left, top: $top, right: $right, bottom: $bottom)';
   }
 }

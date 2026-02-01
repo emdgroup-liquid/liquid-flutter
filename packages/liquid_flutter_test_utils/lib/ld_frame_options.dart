@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_test_utils/system_ui/iphone_16_pro.dart';
 
 /// Configuration options for creating device frames in golden tests.
@@ -22,9 +23,8 @@ class LdFrameOptions {
   final Widget Function(
     BuildContext context,
     Orientation orientation,
+    SystemUiOverlayStyle? systemUiOverlayStyle,
     Widget child,
-    bool dark,
-    SystemUiOverlayStyle navigationBarStyle,
   )? build;
 
   /// The width of the device frame in logical pixels.
@@ -45,7 +45,7 @@ class LdFrameOptions {
   /// This affects the rendering density of the frame.
   final double devicePixelRatio;
 
-  final TargetPlatform? targetPlatform;
+  final LdPlatform? platform;
 
   /// Creates a configuration for a device frame.
   ///
@@ -61,7 +61,7 @@ class LdFrameOptions {
     this.height,
     this.devicePixelRatio = 1.0,
     this.screenRadius,
-    this.targetPlatform,
+    this.platform,
   });
 
   /// Creates a copy of this [LdFrameOptions] but with the given fields replaced
@@ -75,15 +75,14 @@ class LdFrameOptions {
     Widget Function(
       BuildContext context,
       Orientation orientation,
+      SystemUiOverlayStyle? systemUiOverlayStyle,
       Widget child,
-      bool dark,
-      SystemUiOverlayStyle navigationBarStyle,
     )? build,
     double? width,
     double? height,
     double? devicePixelRatio,
     double? screenRadius,
-    TargetPlatform? targetPlatform,
+    LdPlatform? platform,
   }) {
     return LdFrameOptions(
       label: label ?? this.label,
@@ -93,7 +92,24 @@ class LdFrameOptions {
       height: height ?? this.height,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
       screenRadius: screenRadius ?? this.screenRadius,
-      targetPlatform: targetPlatform ?? this.targetPlatform,
+      platform: platform ?? this.platform,
     );
+  }
+
+  TargetPlatform get targetPlatform {
+    return switch (platform) {
+      LdPlatform.android => TargetPlatform.android,
+      LdPlatform.ios => TargetPlatform.iOS,
+      LdPlatform.macos => TargetPlatform.macOS,
+      LdPlatform.linux => TargetPlatform.linux,
+      LdPlatform.windows => TargetPlatform.windows,
+      LdPlatform.webAndroid => TargetPlatform.android,
+      LdPlatform.webIOS => TargetPlatform.iOS,
+      LdPlatform.webMacOS => TargetPlatform.macOS,
+      LdPlatform.webWindows => TargetPlatform.windows,
+      LdPlatform.webLinux => TargetPlatform.linux,
+      LdPlatform.webUnknown => TargetPlatform.android,
+      null => TargetPlatform.android,
+    };
   }
 }

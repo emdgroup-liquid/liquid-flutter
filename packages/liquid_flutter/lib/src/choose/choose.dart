@@ -61,6 +61,8 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   final String? label;
   final Text? hint;
   final LdChooseTriggerBuilder<T, IdType>? triggerBuilder;
+  final dynamic Function(T)? groupingCriterion;
+  final Widget Function(BuildContext context, dynamic criterion, List<LdPaginatorItem<T>>)? groupHeaderBuilder;
 
   const LdChoose({
     this.repository,
@@ -72,6 +74,8 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
     this.disabled = false,
     this.label,
     this.multiple = false,
+    this.groupHeaderBuilder,
+    this.groupingCriterion,
     this.mode = LdChooseMode.auto,
     required this.onChanged,
     this.hint,
@@ -251,6 +255,8 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
             MaterialPageRoute<Set<IdType>>(
               builder: (context) => LdChoosePage<T, IdType>(
                 repository: _repository,
+                groupHeaderBuilder: widget.groupHeaderBuilder,
+                groupingCriterion: widget.groupingCriterion,
                 itemBuilder: widget.itemBuilder,
                 initialSelectedItems: widget.value ?? <IdType>{},
                 multiple: widget.multiple,
@@ -265,6 +271,8 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
               pageBuilder: (context) => LdChoosePage<T, IdType>(
                 repository: _repository,
                 itemBuilder: widget.itemBuilder,
+                groupHeaderBuilder: widget.groupHeaderBuilder,
+                groupingCriterion: widget.groupingCriterion,
                 initialSelectedItems: widget.value ?? <IdType>{},
                 multiple: widget.multiple,
                 allowEmpty: widget.allowEmpty,
@@ -345,6 +353,8 @@ class LdChoosePage<T extends Identifiable<IdType>, IdType> extends StatefulWidge
   final Set<IdType> initialSelectedItems;
   final bool multiple;
   final bool allowEmpty;
+  final dynamic Function(T)? groupingCriterion;
+  final Widget Function(BuildContext context, dynamic criterion, List<LdPaginatorItem<T>> items)? groupHeaderBuilder;
   final String label;
 
   const LdChoosePage({
@@ -354,14 +364,16 @@ class LdChoosePage<T extends Identifiable<IdType>, IdType> extends StatefulWidge
     required this.multiple,
     required this.allowEmpty,
     required this.label,
+    required this.groupingCriterion,
+    required this.groupHeaderBuilder,
     super.key,
   });
 
   @override
-  State<LdChoosePage<T, IdType>> createState() => _LdChoosePageState<T, IdType>();
+  State<LdChoosePage<T, IdType>> createState() => LdChoosePageState<T, IdType>();
 }
 
-class _LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<LdChoosePage<T, IdType>> {
+class LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<LdChoosePage<T, IdType>> {
   late Set<IdType> _selectedItems;
 
   @override
@@ -384,6 +396,36 @@ class _LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<L
     // if (!widget.multiple && selectedItems.length == 1) {
     //   Navigator.of(context).pop(selectedItems);
     // }
+  }
+
+  void selectItem(IdType id) {
+    setState(() {
+      _selectedItems.add(id);
+    });
+  }
+
+  void deselectItem(IdType id) {
+    setState(() {
+      _selectedItems.remove(id);
+    });
+  }
+
+  void selectItems(Set<IdType> items) {
+    setState(() {
+      _selectedItems.addAll(items);
+    });
+  }
+
+  void deselectItems(Set<IdType> items) {
+    setState(() {
+      _selectedItems.removeAll(items);
+    });
+  }
+
+  Set<IdType> get selection => _selectedItems;
+
+  static LdChoosePageState<T, IdType>? of<T extends Identifiable<IdType>, IdType>(BuildContext context) {
+    return context.findAncestorStateOfType<LdChoosePageState<T, IdType>>();
   }
 
   @override
@@ -436,6 +478,8 @@ class _LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<L
             onSelectionChange: _handleSelectionChange,
             listBuilder: (context, itemBuilder) {
               return LdList(
+                groupingCriterion: widget.groupingCriterion,
+                groupHeaderBuilder: widget.groupHeaderBuilder,
                 paginator: widget.repository,
                 padding: MediaQuery.paddingOf(context),
                 itemBuilder: itemBuilder,

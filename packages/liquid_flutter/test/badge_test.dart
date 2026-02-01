@@ -3,48 +3,42 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 
 import 'package:liquid_flutter/liquid_flutter.dart';
-
-import 'golden_utils.dart';
+import 'package:liquid_flutter_test_utils/liquid_flutter_test_utils.dart';
+import 'package:liquid_flutter_test_utils/ld_frame_options.dart';
 
 void main() {
   testGoldens("LdBadge Golden", (WidgetTester tester) async {
-    await multiGolden(
-        tester,
-        "LdBadge",
-        {
-          "default": (tester, place) async {
-            await place(const LdBadge(
-              color: shadSky,
-              child: Text("Hello"),
-            ));
-            return null;
-          },
-          "LdSize.l": (tester, place) async {
-            await place(const LdBadge(
-              color: shadSky,
-              size: LdSize.l,
-              child: Text("Hello"),
-            ));
-            return null;
-          },
-          "LdSize.s": (tester, place) async {
-            await place(const LdBadge(
-              color: shadSky,
-              size: LdSize.s,
-              child: Text("Hello"),
-            ));
-            return null;
-          },
-          "LdSize.xs": (tester, place) async {
-            await place(const LdBadge(
-              color: shadSky,
-              size: LdSize.xs,
-              child: Text("Hello"),
-            ));
-            return null;
-          },
-        },
-        width: 200);
+    await multiGolden(tester, "LdBadge", {
+      "default": (tester, place) async {
+        await place(const LdBadge(
+          color: shadSky,
+          child: Text("Hello"),
+        ));
+      },
+      "LdSize.l": (tester, place) async {
+        await place(const LdBadge(
+          color: shadSky,
+          size: LdSize.l,
+          child: Text("Hello"),
+        ));
+      },
+      "LdSize.s": (tester, place) async {
+        await place(const LdBadge(
+          color: shadSky,
+          size: LdSize.s,
+          child: Text("Hello"),
+        ));
+      },
+      "LdSize.xs": (tester, place) async {
+        await place(const LdBadge(
+          color: shadSky,
+          size: LdSize.xs,
+          child: Text("Hello"),
+        ));
+      },
+    }, frameScenarios: const [
+      LdFrameOptions(width: 200)
+    ]);
   });
 
   testWidgets('LdBadge', (WidgetTester test) async {

@@ -68,6 +68,9 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
   String get moreInfo => 'Weitere Informationen';
 
   @override
+  String get errorDetails => 'Error details';
+
+  @override
   String get close => 'Schließen';
 
   @override
@@ -157,4 +160,10 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
 
   @override
   String get shiftListExplanation => 'Select a range of items while holding shift';
+
+  @override
+  String get copy => 'Copy';
+
+  @override
+  String get copiedToClipboard => 'Copied to clipboard';
 }

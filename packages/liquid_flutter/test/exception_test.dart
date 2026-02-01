@@ -48,7 +48,7 @@ void main() {
     );
 
     Widget buildBasicExceptionView({
-      required LdLocalizedException? exception,
+      required LdLocalizedException exception,
       LdRetryController? retryController,
       VoidCallback? retry,
       Axis direction = Axis.vertical,

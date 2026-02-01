@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_frame.dart';
 import 'package:liquid_flutter/src/appbar/appbar_registry.dart';
@@ -11,7 +10,6 @@ import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 import 'package:liquid_flutter/src/appbar/macos_window_controls.dart';
 import 'package:liquid_flutter/src/appbar/windows_window_controls.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
@@ -415,16 +413,7 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
 
   bool get _showWindowsWindowControls {
     // Calculate level by walking up scaffolds
-    int level = 0;
-    BuildContext? currentContext = context;
-    while (currentContext != null) {
-      final scaffoldState = currentContext.findAncestorStateOfType<LdScaffoldState>();
-      if (scaffoldState == null) break;
-      currentContext = scaffoldState.context;
-      if (currentContext == context) break;
-      level++;
-    }
-
+    final level = _level();
     return LdTheme.of(context).platform == LdPlatform.windows && _isInTopSlot && level == 0 && !_isDrawer;
   }
 
@@ -436,7 +425,7 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
     if (_canPopParentRoute && !_isDrawer && !_isModal && _level() == 0 && !_isInBottomSlot) {
       return LdButton.ghost(
         child: const Icon(LucideIcons.chevronLeft),
-        onPressed: () => context.pop(),
+        onPressed: () => Navigator.of(context).maybePop(),
       );
     }
 
@@ -633,29 +622,7 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
     );
   }
 
-  SystemUiOverlayStyle get _systemUiOverlayStyle {
-    final theme = LdTheme.of(context, listen: true);
-    if (theme.isDark) {
-      return SystemUiOverlayStyle(
-        statusBarBrightness: Brightness.dark,
-        statusBarIconBrightness: Brightness.light,
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: theme.background.withAlpha(150),
-        systemNavigationBarDividerColor: Colors.transparent,
-        systemNavigationBarIconBrightness: Brightness.light,
-        systemNavigationBarContrastEnforced: false,
-      );
-    }
-    return SystemUiOverlayStyle(
-      statusBarBrightness: Brightness.light,
-      statusBarIconBrightness: Brightness.dark,
-      statusBarColor: Colors.transparent,
-      systemNavigationBarColor: theme.background.withAlpha(150),
-      systemNavigationBarDividerColor: Colors.transparent,
-      systemNavigationBarIconBrightness: Brightness.dark,
-      systemNavigationBarContrastEnforced: false,
-    );
-  }
+  SystemUiOverlayStyle get _systemUiOverlayStyle => appBarSystemUiOverlayStyle(LdTheme.of(context, listen: true));
 
   @override
   Widget build(BuildContext context) {

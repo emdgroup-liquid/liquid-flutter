@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-
-import 'golden_utils.dart';
+import 'package:liquid_flutter_test_utils/liquid_flutter_test_utils.dart';
+import 'package:liquid_flutter_test_utils/ld_frame_options.dart';
 
 void main() {
   testGoldens("LdTimePicker", (WidgetTester tester) async {
@@ -17,7 +17,6 @@ void main() {
             value: const TimeOfDay(hour: 14, minute: 30),
             onChanged: (_) {},
           ));
-          return null;
         },
         "Disabled": (tester, place) async {
           await place(LdTimePicker(
@@ -26,7 +25,6 @@ void main() {
             onChanged: (_) {},
             disabled: true,
           ));
-          return null;
         },
         "Open": (tester, place) async {
           await place(LdTimePicker(
@@ -40,12 +38,9 @@ void main() {
           );
 
           await tester.pumpAndSettle();
-
-          return null;
         },
       },
-      width: 900,
-      height: 900,
+      frameScenarios: const [LdFrameOptions(width: 900, height: 900)],
     );
   });
 }

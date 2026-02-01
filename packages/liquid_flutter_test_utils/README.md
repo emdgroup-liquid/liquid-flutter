@@ -1,13 +1,13 @@
 # liquid-flutter-test-utils
 
-A Flutter package providing utilities for testing Liquid Flutter widgets, including golden image testing and widget tree verification.
+A Flutter package providing utilities for testing Liquid Flutter widgets, including golden widget tree verification.
 
 It is intertwined with the [Liquid Flutter](https://pub.dev/packages/liquid_flutter) component library and the [Golden Toolkit](https://pub.dev/packages/golden_toolkit)
-package for golden image testing.
+package for golden testing.
 
 ## Features
 
-- **Golden Image Testing**: Generate screenshot-like golden images for UI verification.
+- **Widget Tree Golden Testing**: Capture and verify the widget tree structure as XML. Only XML files are checked in; PNG images are generated only when XML mismatches occur (for visual debugging).
 - **Widget Tree Testing**: Capture and verify the widget tree structure.
 - **Multi-Theme Testing**: Test widgets across different Liquid theme sizes and brightness modes.
 - **Flexible Frame Options**: Control how widgets are framed for testing.
@@ -40,9 +40,9 @@ void main() {
 }
 ```
 
-### Basic Golden Image Testing
+### Basic Golden Widget Tree Testing
 
-Test a widget and generate golden images across all Liquid theme variations:
+Test a widget and generate golden widget trees (XML) across all Liquid theme variations:
 
 ```dart
 import 'package:liquid_flutter_test_utils/multi_golden_test.dart';
@@ -133,36 +133,27 @@ await multiGolden(
 
 ## Generated Golden Files
 
-When running the tests, the package generates golden images for all combinations of theme sizes and brightness modes. The files follow this structure:
+When running the tests, the package generates **XML widget tree golden files** for all combinations of theme sizes and brightness modes. Only XML files are checked in; PNG images are not stored in version control.
+
+The XML files follow this structure:
 
 ```
-test/goldens/
+test/golden_widget_trees/
 └── SampleLiquidWidget/
     ├── Default/
-    │   ├── L_dark.png   # Large theme size, dark mode
-    │   ├── L_light.png  # Large theme size, light mode
-    │   ├── M_dark.png   # Medium theme size, dark mode
-    │   ├── M_light.png  # Medium theme size, light mode
-    │   ├── S_dark.png   # Small theme size, dark mode
-    │   └── S_light.png  # Small theme size, light mode
+    │   ├── L_dark.xml   # Large theme size, dark mode
+    │   ├── L_light.xml  # Large theme size, light mode
+    │   ├── M_dark.xml   # Medium theme size, dark mode
+    │   ├── M_light.xml  # Medium theme size, light mode
+    │   ├── S_dark.xml   # Small theme size, dark mode
+    │   └── S_light.xml  # Small theme size, light mode
     └── Error/
-        ├── L_dark.png
-        ├── L_light.png
-        ├── M_dark.png
-        ├── M_light.png
-        ├── S_dark.png
-        └── S_light.png
+        ├── L_dark.xml
+        ├── L_light.xml
+        ...
 ```
 
-Each state of your widget (e.g., "Default", "Error") gets its own directory containing all theme variations.
-
-Here are some example generated golden images that were generated for `SampleLiquidWidget`:
-
-| Theme      | Dark Mode                                                 | Light Mode                                                 |
-| ---------- | --------------------------------------------------------- | ---------------------------------------------------------- |
-| **Large**  | ![](./test/goldens/SampleLiquidWidget/Default/L_dark.png) | ![](./test/goldens/SampleLiquidWidget/Default/L_light.png) |
-| **Medium** | ![](./test/goldens/SampleLiquidWidget/Default/M_dark.png) | ![](./test/goldens/SampleLiquidWidget/Default/M_light.png) |
-| **Small**  | ![](./test/goldens/SampleLiquidWidget/Default/S_dark.png) | ![](./test/goldens/SampleLiquidWidget/Default/S_light.png) |
+When an XML mismatch occurs, a PNG screenshot is generated to `test/failures/golden_widget_trees/` for visual debugging. These failure artifacts are gitignored.
 
 ## Advanced Features
 
@@ -188,16 +179,6 @@ The `LdFrameOptions` constructor allows you to configure the widget frame with t
 | `height`         | `int?`         | `null`                            | The height of the frame. If `null`, the height will adjust to fit the widget or screen size.                |
 | `uiMode`         | `GoldenUiMode` | `GoldenUiMode.screenWithSystemUi` | Defines how the frame should be sized (collapsed, screen, or screenWithSystemUi).                           |
 | `showBackButton` | `bool`         | `false`                           | Whether the app bar should show a back button. Useful for generating screenshots for screens on sub-routes. |
-
-### Custom Threshold for Image Comparison
-
-Specify a threshold for image comparison to tolerate minor pixel differences:
-
-```dart
-await setupGoldenTest(
-  fileComparatorThreshold: 0.02, // Accept up to 2% difference
-);
-```
 
 ### Custom Localizations
 

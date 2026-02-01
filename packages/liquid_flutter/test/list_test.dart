@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-
-import 'golden_utils.dart';
+import 'package:liquid_flutter_test_utils/liquid_flutter_test_utils.dart';
 
 MaterialApp _wrapWithMaterialApp(Widget widget) {
   return MaterialApp(
@@ -50,7 +49,7 @@ void main() {
     Widget buildBasicListWidget({
       required LdPaginator<_SampleItem, int> data,
       String Function(_SampleItem item)? grouping,
-      Widget Function(BuildContext context, dynamic criterion)? groupingBuilder,
+      Widget Function(BuildContext context, dynamic criterion, List<LdPaginatorItem<_SampleItem>>)? groupingBuilder,
       Widget Function(BuildContext context)? seperatorBuilder,
       Widget? header,
       Widget? footer,
@@ -64,7 +63,7 @@ void main() {
           groupingCriterion: grouping,
           separatorBuilder: seperatorBuilder ?? (context) => const LdDivider(),
           groupHeaderBuilder: groupingBuilder ??
-              (context, criterion) {
+              (context, criterion, items) {
                 // add a divider between groups by default
                 return Text("Group $criterion").padS();
               },
@@ -89,7 +88,6 @@ void main() {
             ),
           );
           await tester.pumpAndSettle();
-          return null;
         },
         "List With Grouping, Header, Footer": (tester, place) async {
           await place(
@@ -97,7 +95,7 @@ void main() {
               data: LdPaginator<_SampleItem, int>.fromList(sampleItems.sublist(0, 10)),
               // build two groups, items 1-5 and 6-10
               grouping: (item) => item.nr <= 5 ? 'Group 1-5' : 'Group 6-10',
-              groupingBuilder: (context, criterion) {
+              groupingBuilder: (context, criterion, items) {
                 return LdAutoSpace(
                   children: [
                     const LdDivider(),
@@ -123,7 +121,6 @@ void main() {
             ),
           );
           await tester.pumpAndSettle(const Duration(milliseconds: 500));
-          return null;
         },
         "Empty State": (tester, place) async {
           final paginator = LdPaginator<_SampleItem, int>.fromList([]);
@@ -140,7 +137,6 @@ void main() {
             ),
           );
           await tester.pumpAndSettle(const Duration(milliseconds: 500));
-          return null;
         },
         "Error State": (tester, place) async {
           final errorProducingPaginator = LdPaginator<_SampleItem, int>(
@@ -164,7 +160,6 @@ void main() {
             ),
           );
           await tester.pumpAndSettle(const Duration(milliseconds: 500));
-          return null;
         },
       });
     });
@@ -219,7 +214,7 @@ void main() {
           LdList<_SampleStringItem, String>(
             paginator: paginator,
             groupingCriterion: (item) => item.title.split(':')[0].trim(),
-            groupHeaderBuilder: (context, criterion) => Text(criterion),
+            groupHeaderBuilder: (context, criterion, items) => Text(criterion),
             itemBuilder: (context, item, index) => Text(item.value.title),
           ),
         ),

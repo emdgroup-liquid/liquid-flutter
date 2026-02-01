@@ -14,7 +14,7 @@ class LdHint extends StatelessWidget {
     required LdHintType type,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
-    super.key,
+    Key? key,
   }) {
     return LdHint(
       child: child,
@@ -30,7 +30,7 @@ class LdHint extends StatelessWidget {
     required LdHintType type,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
-    super.key,
+    Key? key,
   }) {
     return LdHint(
       child: child,
@@ -46,7 +46,7 @@ class LdHint extends StatelessWidget {
     required LdHintType type,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
-    super.key,
+    Key? key,
   }) {
     return LdHint(
       child: child,
@@ -62,7 +62,7 @@ class LdHint extends StatelessWidget {
     required LdHintType type,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
-    super.key,
+    Key? key,
   }) {
     return LdHint(
       child: child,
@@ -78,7 +78,7 @@ class LdHint extends StatelessWidget {
     required LdHintType type,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
-    super.key,
+    Key? key,
   }) {
     return LdHint(
       child: child,
@@ -94,7 +94,7 @@ class LdHint extends StatelessWidget {
     required LdHintType type,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
-    super.key,
+    Key? key,
   }) {
     return LdHint(
       child: child,
@@ -110,7 +110,7 @@ class LdHint extends StatelessWidget {
     required LdHintType type,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
-    super.key,
+    Key? key,
   }) {
     return LdHint(
       child: child,
@@ -126,7 +126,7 @@ class LdHint extends StatelessWidget {
     required LdHintType type,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
-    super.key,
+    Key? key,
   }) {
     return LdHint(
       child: child,

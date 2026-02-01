@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_test_utils/ld_frame_options.dart';
 
 final iPadPro11 = LdFrameOptions(
@@ -8,14 +9,13 @@ final iPadPro11 = LdFrameOptions(
   label: 'iPadPro11',
   height: 1210,
   viewPaddig: EdgeInsets.all(25),
-  targetPlatform: TargetPlatform.iOS,
+  platform: LdPlatform.ios,
   screenRadius: 30,
   build: (
     BuildContext context,
     Orientation orientation,
+    SystemUiOverlayStyle? navigationBarStyle,
     Widget child,
-    bool dark,
-    SystemUiOverlayStyle navigationBarStyle,
   ) {
     return Stack(
       children: [
@@ -36,7 +36,7 @@ class _WindowHandle extends StatelessWidget {
     required this.style,
   });
 
-  final SystemUiOverlayStyle style;
+  final SystemUiOverlayStyle? style;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +47,7 @@ class _WindowHandle extends StatelessWidget {
         child: Icon(
           Icons.more_horiz,
           size: 28,
-          color: (style.statusBarIconBrightness == Brightness.light
+          color: (style?.statusBarIconBrightness == Brightness.light
                   ? Colors.white
                   : Colors.black)
               .withAlpha(200),
@@ -62,7 +62,7 @@ class _StatusBar extends StatelessWidget {
     required this.style,
   });
 
-  final SystemUiOverlayStyle style;
+  final SystemUiOverlayStyle? style;
 
   @override
   Widget build(BuildContext context) {
@@ -70,13 +70,13 @@ class _StatusBar extends StatelessWidget {
     final statusTop = 8.0;
     return Container(
       padding: EdgeInsets.only(left: 28, right: 28, top: statusTop),
-      color: style.statusBarColor ?? Colors.transparent,
+      color: style?.statusBarColor ?? Colors.transparent,
       child: Row(
         children: [
           SvgPicture.asset(
             height: statusHeight,
             package: 'liquid_flutter_test_utils',
-            style.statusBarIconBrightness == Brightness.light
+            style?.statusBarIconBrightness == Brightness.light
                 ? 'assets/status_bar_left_light.svg'
                 : 'assets/status_bar_left_dark.svg',
           ),
@@ -84,7 +84,7 @@ class _StatusBar extends StatelessWidget {
           SvgPicture.asset(
             height: statusHeight,
             package: 'liquid_flutter_test_utils',
-            style.statusBarIconBrightness == Brightness.light
+            style?.statusBarIconBrightness == Brightness.light
                 ? 'assets/status_bar_right_light.svg'
                 : 'assets/status_bar_right_dark.svg',
           ),

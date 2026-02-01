@@ -12,7 +12,7 @@ class LdIndicator extends StatelessWidget {
     required LdIndicatorType type,
     LdSize size = LdSize.m,
     double? customSize,
-    super.key,
+    Key? key,
   }) {
     return LdIndicator(
       type: LdIndicatorType.info,
@@ -26,7 +26,7 @@ class LdIndicator extends StatelessWidget {
     required LdIndicatorType type,
     LdSize size = LdSize.m,
     double? customSize,
-    super.key,
+    Key? key,
   }) {
     return LdIndicator(
       type: LdIndicatorType.warning,
@@ -40,7 +40,7 @@ class LdIndicator extends StatelessWidget {
     required LdIndicatorType type,
     LdSize size = LdSize.m,
     double? customSize,
-    super.key,
+    Key? key,
   }) {
     return LdIndicator(
       type: LdIndicatorType.canceled,
@@ -54,7 +54,7 @@ class LdIndicator extends StatelessWidget {
     required LdIndicatorType type,
     LdSize size = LdSize.m,
     double? customSize,
-    super.key,
+    Key? key,
   }) {
     return LdIndicator(
       type: LdIndicatorType.error,
@@ -68,7 +68,7 @@ class LdIndicator extends StatelessWidget {
     required LdIndicatorType type,
     LdSize size = LdSize.m,
     double? customSize,
-    super.key,
+    Key? key,
   }) {
     return LdIndicator(
       type: LdIndicatorType.success,
@@ -82,7 +82,7 @@ class LdIndicator extends StatelessWidget {
     required LdIndicatorType type,
     LdSize size = LdSize.m,
     double? customSize,
-    super.key,
+    Key? key,
   }) {
     return LdIndicator(
       type: LdIndicatorType.loading,
@@ -96,7 +96,7 @@ class LdIndicator extends StatelessWidget {
     required LdIndicatorType type,
     LdSize size = LdSize.m,
     double? customSize,
-    super.key,
+    Key? key,
   }) {
     return LdIndicator(
       type: LdIndicatorType.pending,
@@ -110,7 +110,7 @@ class LdIndicator extends StatelessWidget {
     required LdIndicatorType type,
     LdSize size = LdSize.m,
     double? customSize,
-    super.key,
+    Key? key,
   }) {
     return LdIndicator(
       type: LdIndicatorType.ongoing,

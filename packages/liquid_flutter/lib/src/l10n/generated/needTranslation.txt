@@ -2,6 +2,7 @@
   "de": [
     "search",
     "selectTime",
+    "errorDetails",
     "clearError",
     "createNew",
     "delete",
@@ -23,6 +24,8 @@
     "closeDrawer",
     "ctrlListExplanation",
     "listHidden",
-    "shiftListExplanation"
+    "shiftListExplanation",
+    "copy",
+    "copiedToClipboard"
   ]
 }

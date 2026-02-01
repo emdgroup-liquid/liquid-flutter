@@ -5,7 +5,6 @@ import 'package:flutter/widgets.dart';
 /// Returns the [SystemUiOverlayStyle] found at the top (status bar) and bottom (navigation bar)
 /// of the screen, as Flutter would use for system chrome adjustment.
 ///
-/// Returns a tuple: (upper, lower), where either may be null if not found.
 ///
 /// [renderView] should be the current [RenderView] (e.g., RendererBinding.instance.renderView).
 ///
@@ -74,6 +73,7 @@ class _SystemOverlayDetectorState extends State<SystemOverlayDetector> {
       final style = readSystemUiOverlayStyles(
         context,
       );
+
       setState(() {
         _style = style;
       });

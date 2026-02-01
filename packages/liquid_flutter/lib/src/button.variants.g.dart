@@ -126,7 +126,7 @@ class LdButton extends StatelessWidget {
     LdSize? size,
     Widget? trailing,
     bool? disableSqueeze,
-    super.key,
+    Key? key,
   }) {
     return LdButton(
       child: child,
@@ -176,7 +176,7 @@ class LdButton extends StatelessWidget {
     LdSize? size,
     Widget? trailing,
     bool? disableSqueeze,
-    super.key,
+    Key? key,
   }) {
     return LdButton(
       child: child,
@@ -226,7 +226,7 @@ class LdButton extends StatelessWidget {
     LdSize? size,
     Widget? trailing,
     bool? disableSqueeze,
-    super.key,
+    Key? key,
   }) {
     return LdButton(
       child: child,
@@ -276,7 +276,7 @@ class LdButton extends StatelessWidget {
     LdSize? size,
     Widget? trailing,
     bool? disableSqueeze,
-    super.key,
+    Key? key,
   }) {
     return LdButton(
       child: child,

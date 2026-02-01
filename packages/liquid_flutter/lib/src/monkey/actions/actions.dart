@@ -32,49 +32,13 @@ abstract class LdMonkeyAction<T extends Identifiable<IdType>, IdType> {
   bool isVisible(BuildContext context, {LdMonkeyActionLocation? location}) {
     location ??= context.read<LdMonkeyActionLocation>();
 
-    final shellState = LdMonkeyShellState.of<T, IdType>(context, watch: true);
-    final repository = LdRepository.of<T, IdType>(context);
-    final selection = LdMonkeySelection.adaptive<T, IdType>(context, location: location);
-
-    final effectiveLayoutMode = context.read<LdMonkeyEffectiveLayoutMode>();
-
     // Use viewing items for detail page actions, selection for master page actions
 
     if (!visibility.any((e) => e.location == location)) {
       return false;
     }
 
-    final selectedItems = selection.map((e) => repository.getItemById(e)).whereType<LdPaginatorItem<T>>().toList();
-
-    for (final visibility in this.visibility) {
-      if (visibility.location != location) continue;
-
-      if (!visibility.layoutModes.contains(effectiveLayoutMode)) {
-        continue;
-      }
-      if (visibility.visibleWhenShowingSelectionControls == false && shellState.showSelectionControls) {
-        return false;
-      }
-
-      if (visibility.applyFilters.isNotEmpty) {
-        final filters = visibility.applyFilters.map(
-          (filterName) => repository.filters[filterName]!,
-        );
-
-        for (final filter in filters) {
-          if (selectedItems.any((e) => !filter.optimisticFilter(e.value!))) {
-            return false;
-          }
-        }
-      }
-
-      if ((visibility.maxSelectionCount == null || selection.length <= visibility.maxSelectionCount!) &&
-          selection.length >= visibility.minSelectionCount) {
-        return true;
-      }
-    }
-
-    return false;
+    return visibility.any((e) => e.isVisibleInContext<T, IdType>(context, location: location));
   }
 
   Widget build(BuildContext context);

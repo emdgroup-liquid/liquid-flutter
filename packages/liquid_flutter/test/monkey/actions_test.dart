@@ -256,6 +256,90 @@ void main() {
           ),
         );
       });
+
+      testWidgets('isVisible respects custom isVisible function returning false', (WidgetTester tester) async {
+        final repository = createTestRepository();
+        final shellState = LdMonkeyShellState<TestItem, int>(basePath: '/test');
+        final selection = LdMonkeySelection<TestItem, int>(selection: {}, viewing: {});
+
+        final action = LdMonkeyBareChildAction<TestItem, int>(
+          visibility: {
+            LdMonkeyActionVisibility(
+              location: LdMonkeyActionLocation.masterAppBar,
+              minSelectionCount: 0,
+              isVisible: (context) => false,
+            ),
+          },
+          builder: (context) => Container(),
+          onShortcutTrigger: (context) async {},
+        );
+
+        await tester.pumpWidget(
+          ListenableProvider.value(
+            value: repository,
+            child: ListenableProvider.value(
+              value: shellState,
+              child: Provider.value(
+                value: selection,
+                child: Provider.value(
+                  value: LdMonkeyActionLocation.masterAppBar,
+                  child: Provider.value(
+                    value: LdMonkeyEffectiveLayoutMode.master,
+                    child: Builder(
+                      builder: (context) {
+                        expect(action.isVisible(context), isFalse);
+                        return Container();
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      });
+
+      testWidgets('isVisible respects custom isVisible function returning true', (WidgetTester tester) async {
+        final repository = createTestRepository();
+        final shellState = LdMonkeyShellState<TestItem, int>(basePath: '/test');
+        final selection = LdMonkeySelection<TestItem, int>(selection: {}, viewing: {});
+
+        final action = LdMonkeyBareChildAction<TestItem, int>(
+          visibility: {
+            LdMonkeyActionVisibility(
+              location: LdMonkeyActionLocation.masterAppBar,
+              minSelectionCount: 0,
+              isVisible: (context) => true,
+            ),
+          },
+          builder: (context) => Container(),
+          onShortcutTrigger: (context) async {},
+        );
+
+        await tester.pumpWidget(
+          ListenableProvider.value(
+            value: repository,
+            child: ListenableProvider.value(
+              value: shellState,
+              child: Provider.value(
+                value: selection,
+                child: Provider.value(
+                  value: LdMonkeyActionLocation.masterAppBar,
+                  child: Provider.value(
+                    value: LdMonkeyEffectiveLayoutMode.master,
+                    child: Builder(
+                      builder: (context) {
+                        expect(action.isVisible(context), isTrue);
+                        return Container();
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      });
     });
 
     group('LdMonkeyBareChildAction', () {

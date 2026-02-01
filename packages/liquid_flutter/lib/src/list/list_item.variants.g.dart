@@ -99,7 +99,6 @@ class LdListItem extends StatelessWidget {
   });
 
   factory LdListItem.trailingForward({
-    Key? key,
     bool? active,
     BorderRadius? borderRadius,
     bool? disabled,
@@ -118,9 +117,9 @@ class LdListItem extends StatelessWidget {
     LdColor? color,
     double? width,
     LdSelectionControl? selectionControl,
+    Key? key,
   }) {
     return LdListItem(
-      key: key,
       active: active,
       borderRadius: borderRadius,
       disabled: disabled,
@@ -139,6 +138,7 @@ class LdListItem extends StatelessWidget {
       color: color,
       width: width,
       selectionControl: selectionControl,
+      key: key,
     );
   }
 

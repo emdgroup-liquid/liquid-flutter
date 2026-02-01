@@ -146,6 +146,7 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
           runSpacing: 8,
           children: [
             LdModalBuilder(
+              useRootNavigator: true,
               builder: (context, onPress) {
                 return LdButton(
                   leading: const Icon(LucideIcons.arrowDown),
@@ -158,6 +159,7 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
                 pageBuilder: (context) => LdScaffold(
                   appBars: [LdAppBar(title: const Text("Deduct"))],
                   body: LdScaffoldBody(
+                    minimumPadding: EdgeInsets.zero,
                     children: [
                       LdListItem(
                         title: const Text("Deduct 0.1l"),
@@ -365,7 +367,6 @@ class ChemicalShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdScaffold(
-      resizeToAvoidBottomInset: false,
       debugName: "Chemical shell",
       appBars: [
         LdTabNavigation(

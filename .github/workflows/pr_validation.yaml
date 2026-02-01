@@ -31,6 +31,9 @@ jobs:
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.38.8
 
       - name: Install Melos
         run: dart pub global activate melos
@@ -38,12 +41,36 @@ jobs:
       - name: Bootstrap Melos
         run: melos bootstrap
 
+      # Licens checks are suspended, as very_good_cli does not support workspaces yet.
+
+      # - name: Install very_good_cli
+      #   run: dart pub global activate very_good_cli
+
+      # - name: Check licenses
+      #   run: very_good packages check licenses --allowed=MIT,Apache-2.0,BSD-3-Clause,BSD-2-Clause
+
       - name: Run analyzer
         run: melos exec -- dart analyze
 
       - name: Run tests
         run: |
           melos exec --category=testable -- flutter test --coverage --file-reporter "json:./test-results.json"
+
+      - name: Upload test failures
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-failures_liquid_flutter_test_utils
+          path: packages/liquid_flutter_test_utils/test/failures/
+          if-no-files-found: ignore
+
+      - name: Upload test failures liquid_flutter
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-failures_liquid_flutter
+          path: packages/liquid_flutter/test/failures/
+          if-no-files-found: ignore
 
       - name: Report test results
         uses: dorny/test-reporter@v2
@@ -171,9 +198,3 @@ jobs:
             });
 
             console.log('Successfully posted version analysis comment');
-
-      - name: Install very_good_cli
-        run: dart pub global activate very_good_cli
-
-      - name: Check licenses
-        run: very_good analyze --check-licenses

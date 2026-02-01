@@ -196,6 +196,7 @@ class MovieShell extends StatelessWidget {
   final GoRouterState routeState;
   final String pathParameterName;
   final Widget masterPage;
+  final Set<int> Function(String selected) parseSelected;
   final String basePath;
   const MovieShell({
     super.key,
@@ -204,6 +205,7 @@ class MovieShell extends StatelessWidget {
     required this.pathParameterName,
     required this.masterPage,
     required this.basePath,
+    required this.parseSelected,
   });
   @override
   Widget build(BuildContext context) {
@@ -211,9 +213,10 @@ class MovieShell extends StatelessWidget {
       pathParameterName: pathParameterName,
       routeState: routeState,
       basePath: basePath,
+      parseSelected: parseSelected,
       layoutMode: LdMonkeyLayoutMode.neverSideBySide,
       masterPage: masterPage,
-      parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
+
       repositoryBuilder: (context) async => movieRepository,
       actions: [
         showFilterContextMenu<_Movie, int>(),

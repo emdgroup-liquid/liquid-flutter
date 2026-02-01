@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_frame.dart';
 import 'package:liquid_flutter/src/appbar/appbar_registry.dart';
@@ -268,231 +269,237 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
           return LdAppBarScrollWrapper(
             position: _effectivePosition,
             scrollBehavior: widget.scrollBehavior,
-            child: ScrolledUnderBuilder(
-              builder: (context, isScrolledUnder) {
-                return LdTouchableSurface(
-                  focusNode: _focusNode,
-                  onPressed: () {},
-                  builder: (context, colors, status, _) {
-                    return LdTouchableTouchFeedback(
-                      status: status,
-                      child: AppBarFrame(
-                        position: _effectivePosition,
-                        attached: isAttached,
-                        addContainer: widget.addContainer,
-                        insidePadding: EdgeInsets.zero,
-                        outsideDecoration: _buildOutsideDecoration(
-                          context: context,
-                          isScrolledUnder: isScrolledUnder,
-                          isAttached: isAttached,
+            child: AnnotatedRegion<SystemUiOverlayStyle>(
+              value: appBarSystemUiOverlayStyle(theme),
+              child: ScrolledUnderBuilder(
+                builder: (context, isScrolledUnder) {
+                  return LdTouchableSurface(
+                    focusNode: _focusNode,
+                    onPressed: () {},
+                    builder: (context, colors, status, _) {
+                      return LdTouchableTouchFeedback(
+                        status: status,
+                        child: AppBarFrame(
                           position: _effectivePosition,
-                        ),
-                        outsideMinPadding: isAttached ? EdgeInsets.zero : null,
-                        insideDecoration: _buildInsideDecoration(
-                          context: context,
-                          isScrolledUnder: isScrolledUnder,
-                          isAttached: isAttached,
-                          position: _effectivePosition,
-                        ),
-                        insetBorderRadius: !isAttached,
-                        child: LayoutBuilder(builder: (context, constraints) {
-                          final tabWidth =
-                              constraints.maxWidth ~/ max(min(widget.tabs.length, widget.maxVisibleTabs), 1);
-                          final fittingTabs = constraints.maxWidth ~/ tabWidth;
+                          attached: isAttached,
+                          addContainer: widget.addContainer,
+                          insidePadding: isAttached ? EdgeInsets.zero : LdTheme.of(context).pad(size: LdSize.s),
+                          outsideDecoration: _buildOutsideDecoration(
+                            context: context,
+                            isScrolledUnder: isScrolledUnder,
+                            isAttached: isAttached,
+                            position: _effectivePosition,
+                          ),
+                          outsideMinPadding: isAttached ? EdgeInsets.zero : null,
+                          insideDecoration: _buildInsideDecoration(
+                            context: context,
+                            isScrolledUnder: isScrolledUnder,
+                            isAttached: isAttached,
+                            position: _effectivePosition,
+                          ),
+                          insetBorderRadius: !isAttached,
+                          child: LayoutBuilder(builder: (context, constraints) {
+                            final tabWidth =
+                                constraints.maxWidth ~/ max(min(widget.tabs.length, widget.maxVisibleTabs), 1);
+                            final fittingTabs = constraints.maxWidth ~/ tabWidth;
 
-                          final overflowTabs = widget.tabs.sublist(fittingTabs);
+                            final overflowTabs = widget.tabs.sublist(fittingTabs);
 
-                          if (constraints.maxWidth != _navWidth) {
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              if (mounted) {
-                                setState(() {
-                                  _navWidth = constraints.maxWidth;
-                                  _updateIndicatorPosition();
-                                });
-                              }
-                            });
-                          }
+                            if (constraints.maxWidth != _navWidth) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted) {
+                                  setState(() {
+                                    _navWidth = constraints.maxWidth;
+                                    _updateIndicatorPosition();
+                                  });
+                                }
+                              });
+                            }
 
-                          return Stack(
-                            children: [
-                              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                ...widget.tabs.sublist(0, fittingTabs).map((tab) => Expanded(
-                                      child: LdTouchableSurface(
-                                        mode: LdTouchableSurfaceMode.neutralGhost,
-                                        onPressed: () => _onTabTap(tab.route),
-                                        builder: (context, colors, status, _) {
-                                          return Container(
-                                            decoration: BoxDecoration(
-                                              color: colors.surface,
-                                              borderRadius: isAttached ? null : LdTheme.of(context).radius(LdSize.m),
-                                            ),
-                                            child: Builder(
-                                              builder: (context) {
-                                                final iconColor = theme.palette.text;
-                                                final textColor = theme.palette.text;
-                                                final icon = IconTheme(
-                                                  data: IconThemeData(
-                                                    color: iconColor,
-                                                    size: theme.labelSize(LdSize.l),
-                                                  ),
-                                                  child: tab.icon,
-                                                );
+                            return Stack(
+                              children: [
+                                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                  ...widget.tabs.sublist(0, fittingTabs).map((tab) => Expanded(
+                                        child: LdTouchableSurface(
+                                          mode: LdTouchableSurfaceMode.ghost,
+                                          color: theme.primary,
+                                          onPressed: () => _onTabTap(tab.route),
+                                          builder: (context, colors, status, _) {
+                                            return Container(
+                                              decoration: BoxDecoration(
+                                                color: colors.surface,
+                                                borderRadius: isAttached ? null : LdTheme.of(context).radius(LdSize.s),
+                                              ),
+                                              child: Builder(
+                                                builder: (context) {
+                                                  final iconColor = colors.icon;
+                                                  final textColor = colors.text;
+                                                  final icon = IconTheme(
+                                                    data: IconThemeData(
+                                                      color: iconColor,
+                                                      size: theme.labelSize(LdSize.l),
+                                                    ),
+                                                    child: tab.icon,
+                                                  );
 
-                                                if (constraints.maxWidth < 500) {
-                                                  return Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                  if (constraints.maxWidth < 500) {
+                                                    return Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                                      children: [
+                                                        icon,
+                                                        ldSpacerXS,
+                                                        LdText.ls(tab.label, color: textColor, maxLines: 1),
+                                                      ],
+                                                    ).padXS();
+                                                  }
+                                                  return Row(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
                                                     children: [
                                                       icon,
-                                                      ldSpacerXS,
-                                                      LdText.ls(tab.label, color: textColor, maxLines: 1),
+                                                      ldSpacerS,
+                                                      Flexible(
+                                                        child: LdText.l(tab.label, color: textColor, maxLines: 1),
+                                                      ),
                                                     ],
-                                                  ).padXS();
-                                                }
-                                                return Row(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    icon,
-                                                    ldSpacerS,
-                                                    Flexible(
-                                                      child: LdText.l(tab.label, color: textColor, maxLines: 1),
-                                                    ),
-                                                  ],
-                                                ).padS();
-                                              },
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    )),
-                                if (overflowTabs.isNotEmpty) ...[
-                                  Expanded(
-                                      child: LdContextMenu(
-                                          key: _moreMenuKey,
-                                          menuBuilder: (context) {
-                                            return ConstrainedBox(
-                                              constraints: const BoxConstraints(maxWidth: 200),
-                                              child: SingleChildScrollView(
-                                                child: Column(
-                                                  children: [
-                                                    ...overflowTabs.map((tab) {
-                                                      return LdListItem(
-                                                        active: tab.route == widget.activeRoute,
-                                                        leading: tab.icon,
-                                                        title: Text(tab.label),
-                                                        onPressed: () {
-                                                          _onTabTap(tab.route);
-                                                          LdContextMenuDissmissNotification().dispatch(context);
-                                                        },
-                                                      );
-                                                    })
-                                                  ],
-                                                ),
+                                                  ).padS();
+                                                },
                                               ),
                                             );
                                           },
-                                          builder: (context, isShuttle, trigger, isOpen, child) {
-                                            return LdTouchableSurface(
-                                              mode: LdTouchableSurfaceMode.neutralGhost,
-                                              onPressed: trigger,
-                                              builder: (context, colors, status, _) {
-                                                return Container(
-                                                    decoration: BoxDecoration(
-                                                      color: colors.surface,
-                                                      borderRadius:
-                                                          isAttached ? null : LdTheme.of(context).radius(LdSize.m),
-                                                    ),
-                                                    child: Builder(builder: (context) {
-                                                      final iconColor = theme.palette.text;
-                                                      final textColor = theme.palette.text;
-                                                      final icon = IconTheme(
-                                                        data: IconThemeData(
-                                                          color: iconColor,
-                                                          size: theme.labelSize(LdSize.l),
-                                                        ),
-                                                        child: const Icon(LucideIcons.ellipsisVertical),
-                                                      );
+                                        ),
+                                      )),
+                                  if (overflowTabs.isNotEmpty) ...[
+                                    Expanded(
+                                        child: LdContextMenu(
+                                            key: _moreMenuKey,
+                                            menuBuilder: (context) {
+                                              return ConstrainedBox(
+                                                constraints: const BoxConstraints(maxWidth: 200),
+                                                child: SingleChildScrollView(
+                                                  child: Column(
+                                                    children: [
+                                                      ...overflowTabs.map((tab) {
+                                                        return LdListItem(
+                                                          active: tab.route == widget.activeRoute,
+                                                          leading: tab.icon,
+                                                          title: Text(tab.label),
+                                                          onPressed: () {
+                                                            _onTabTap(tab.route);
+                                                            LdContextMenuDissmissNotification().dispatch(context);
+                                                          },
+                                                        );
+                                                      })
+                                                    ],
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            builder: (context, isShuttle, trigger, isOpen, child) {
+                                              return LdTouchableSurface(
+                                                mode: LdTouchableSurfaceMode.ghost,
+                                                color: theme.primary,
+                                                onPressed: trigger,
+                                                builder: (context, colors, status, _) {
+                                                  return Container(
+                                                      decoration: BoxDecoration(
+                                                        color: colors.surface,
+                                                        borderRadius:
+                                                            isAttached ? null : LdTheme.of(context).radius(LdSize.s),
+                                                      ),
+                                                      child: Builder(builder: (context) {
+                                                        final iconColor = colors.icon;
+                                                        final textColor = colors.text;
+                                                        final icon = IconTheme(
+                                                          data: IconThemeData(
+                                                            color: iconColor,
+                                                            size: theme.labelSize(LdSize.l),
+                                                          ),
+                                                          child: const Icon(LucideIcons.ellipsisVertical),
+                                                        );
 
-                                                      if (constraints.maxWidth < 500) {
-                                                        return Column(
-                                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                                        if (constraints.maxWidth < 500) {
+                                                          return Column(
+                                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                                            children: [
+                                                              icon,
+                                                              ldSpacerXS,
+                                                              LdText.ls("More", color: textColor, maxLines: 1),
+                                                            ],
+                                                          ).padXS();
+                                                        }
+
+                                                        return Row(
+                                                          mainAxisAlignment: MainAxisAlignment.center,
                                                           children: [
                                                             icon,
-                                                            ldSpacerXS,
-                                                            LdText.ls("More", color: textColor, maxLines: 1),
+                                                            ldSpacerS,
+                                                            Flexible(
+                                                              child: LdText.l("More", color: textColor, maxLines: 1),
+                                                            ),
                                                           ],
-                                                        ).padXS();
-                                                      }
-
-                                                      return Row(
-                                                        mainAxisAlignment: MainAxisAlignment.center,
-                                                        children: [
-                                                          icon,
-                                                          ldSpacerS,
-                                                          Flexible(
-                                                            child: LdText.l("More", color: textColor, maxLines: 1),
-                                                          ),
-                                                        ],
-                                                      ).padS();
-                                                    }));
+                                                        ).padS();
+                                                      }));
+                                                },
+                                              );
+                                            }))
+                                  ]
+                                ]),
+                                LdSpring(
+                                  springConstant: 20,
+                                  dampingCoefficient: 20,
+                                  mass: 5,
+                                  position: _indicatorPosition,
+                                  child: LdSpring(
+                                    position: _dragging ? 1.1 : 1,
+                                    builder: (context, state, child) => Transform.scale(
+                                      scale: state.position.clamp(0, 2),
+                                      child: child!,
+                                    ),
+                                    child: GestureDetector(
+                                      onHorizontalDragStart: (details) {
+                                        _dragStartPosition = details.localPosition.dx;
+                                        _dragStartIndicatorPosition = _indicatorPosition;
+                                        _lastDraggedTabIndex = _getClosestTab(context);
+                                      },
+                                      onHorizontalDragUpdate: _onIndicatorDragUpdate,
+                                      onHorizontalDragCancel: () {
+                                        _dragging = false;
+                                        _updateIndicatorPosition();
+                                      },
+                                      onHorizontalDragEnd: _onIndicatorDragEnd,
+                                      child: Container(
+                                        width: constraints.maxWidth / _visibleTabs,
+                                        decoration: BoxDecoration(
+                                          color: theme.primaryColor.withAlpha(26),
+                                          border: switch (isAttached) {
+                                            true => switch (_effectivePosition) {
+                                                LdAppBarPosition.top => Border(
+                                                    bottom: BorderSide(
+                                                        color: theme.primaryColor, width: theme.borderWidth)),
+                                                LdAppBarPosition.bottom => Border(
+                                                    top: BorderSide(
+                                                        color: theme.primaryColor, width: theme.borderWidth)),
                                               },
-                                            );
-                                          }))
-                                ]
-                              ]),
-                              LdSpring(
-                                springConstant: 20,
-                                dampingCoefficient: 20,
-                                mass: 5,
-                                position: _indicatorPosition,
-                                child: LdSpring(
-                                  position: _dragging ? 1.1 : 1,
-                                  builder: (context, state, child) => Transform.scale(
-                                    scale: state.position.clamp(0, 2),
-                                    child: child!,
-                                  ),
-                                  child: GestureDetector(
-                                    onHorizontalDragStart: (details) {
-                                      _dragStartPosition = details.localPosition.dx;
-                                      _dragStartIndicatorPosition = _indicatorPosition;
-                                      _lastDraggedTabIndex = _getClosestTab(context);
-                                    },
-                                    onHorizontalDragUpdate: _onIndicatorDragUpdate,
-                                    onHorizontalDragCancel: () {
-                                      _dragging = false;
-                                      _updateIndicatorPosition();
-                                    },
-                                    onHorizontalDragEnd: _onIndicatorDragEnd,
-                                    child: Container(
-                                      width: constraints.maxWidth / _visibleTabs,
-                                      decoration: BoxDecoration(
-                                        color: theme.primaryColor.withAlpha(100),
-                                        border: switch (isAttached) {
-                                          true => switch (_effectivePosition) {
-                                              LdAppBarPosition.top => Border(
-                                                  bottom:
-                                                      BorderSide(color: theme.primaryColor, width: theme.borderWidth)),
-                                              LdAppBarPosition.bottom => Border(
-                                                  top: BorderSide(color: theme.primaryColor, width: theme.borderWidth)),
-                                            },
-                                          false => Border.all(color: theme.primaryColor, width: theme.borderWidth),
-                                        },
-                                        borderRadius: isAttached ? null : LdTheme.of(context).radius(LdSize.m),
+                                            false => null,
+                                          },
+                                          borderRadius: isAttached ? null : LdTheme.of(context).radius(LdSize.s),
+                                        ),
                                       ),
                                     ),
                                   ),
+                                  builder: (context, state, child) {
+                                    return Positioned(bottom: 0, top: 0, left: state.position, child: child!);
+                                  },
                                 ),
-                                builder: (context, state, child) {
-                                  return Positioned(bottom: 0, top: 0, left: state.position, child: child!);
-                                },
-                              ),
-                            ],
-                          );
-                        }),
-                      ),
-                    );
-                  },
-                );
-              },
+                              ],
+                            );
+                          }),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           );
         },

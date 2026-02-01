@@ -16,7 +16,7 @@ class TaskShell extends StatelessWidget {
   final String pathParameterName;
   final Widget masterPage;
   final String basePath;
-
+  final Set<int> Function(String selected) parseSelected;
   const TaskShell({
     super.key,
     required this.child,
@@ -24,6 +24,7 @@ class TaskShell extends StatelessWidget {
     required this.pathParameterName,
     required this.masterPage,
     required this.basePath,
+    required this.parseSelected,
   });
   @override
   Widget build(BuildContext context) {
@@ -31,8 +32,9 @@ class TaskShell extends StatelessWidget {
       basePath: basePath,
       layoutMode: LdMonkeyLayoutMode.auto,
       masterPage: masterPage,
-      parseSelected: (selected) => selected.split("_").map(int.parse).toSet(),
+
       routeState: routeState,
+      parseSelected: parseSelected,
       repositoryBuilder: (context) async => taskRepository,
       pathParameterName: pathParameterName,
       actions: [
@@ -43,9 +45,7 @@ class TaskShell extends StatelessWidget {
               visibleWhenShowingSelectionControls: false,
             ),
           },
-          shortcutActivators: {
-            SingleActivator(LogicalKeyboardKey.keyN, meta: true),
-          },
+          shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyN, meta: true)},
           config: (context) => LdSubmitConfig(
             loadingText: "Creating new task",
             action: (_) async {
@@ -83,10 +83,11 @@ class TaskShell extends StatelessWidget {
         LdMonkeySubmitAction(
           visibility: {
             LdMonkeyActionVisibility(
-                location: LdMonkeyActionLocation.detailAppBar,
-                minSelectionCount: 1,
-                maxSelectionCount: null,
-                applyFilters: {"todo"}),
+              location: LdMonkeyActionLocation.detailAppBar,
+              minSelectionCount: 1,
+              maxSelectionCount: null,
+              applyFilters: {"todo"},
+            ),
             LdMonkeyActionVisibility(
               location: LdMonkeyActionLocation.context,
               minSelectionCount: 1,
@@ -94,9 +95,7 @@ class TaskShell extends StatelessWidget {
               applyFilters: {"todo"},
             ),
           },
-          shortcutActivators: {
-            SingleActivator(LogicalKeyboardKey.keyD),
-          },
+          shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyD)},
           config: (context) => LdSubmitConfig(
             loadingText: "Marking as done",
             allowResubmit: true,
@@ -127,9 +126,7 @@ class TaskShell extends StatelessWidget {
               maxSelectionCount: null,
             ),
           },
-          shortcutActivators: {
-            SingleActivator(LogicalKeyboardKey.keyU),
-          },
+          shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyU)},
           config: (context) => LdSubmitConfig(
             loadingText: "Marking as undone",
             allowResubmit: true,
@@ -160,9 +157,7 @@ class TaskShell extends StatelessWidget {
               maxSelectionCount: 1,
             ),
           },
-          shortcutActivators: {
-            SingleActivator(LogicalKeyboardKey.keyD, meta: true),
-          },
+          shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyD, meta: true)},
           config: (context) => LdSubmitConfig(
             loadingText: "Duplicating",
             action: (_) async {
@@ -170,10 +165,7 @@ class TaskShell extends StatelessWidget {
               final selection = LdMonkeySelection.adaptive<Task, int>(context);
               final item = await taskRepository.getById(selection.first);
 
-              final newItem = item.copyWith(
-                id: testData.length + 1,
-                task: "${item.task} (copy)",
-              );
+              final newItem = item.copyWith(id: testData.length + 1, task: "${item.task} (copy)");
 
               await taskRepository.create(newItem);
 
@@ -216,13 +208,13 @@ class TaskShell extends StatelessWidget {
               await taskRepository.deleteBatch(selection);
             },
           ),
-          child: Builder(builder: (context) {
-            return Text(
-              LiquidLocalizations.of(context).deleteNItems(
-                LdMonkeySelection.adaptive<Task, int>(context).length,
-              ),
-            );
-          }),
+          child: Builder(
+            builder: (context) {
+              return Text(
+                LiquidLocalizations.of(context).deleteNItems(LdMonkeySelection.adaptive<Task, int>(context).length),
+              );
+            },
+          ),
           icon: Icon(LucideIcons.trash2),
         ),
         toggleSelectionControls<Task, int>(),
@@ -230,12 +222,13 @@ class TaskShell extends StatelessWidget {
         showSelection<Task, int>(),
         LdMonkeyBareChildAction(
           builder: (context) => LdAppBarAction(
-              leading: Icon(LucideIcons.eye),
-              child: Text("Show ${LdMonkeySelection.of<Task, int>(context).selection.length} items"),
-              onPressed: () async {
-                final shellState = LdMonkeyShellState.of<Task, int>(context);
-                shellState.setViewingItems(LdMonkeySelection.of<Task, int>(context).selection);
-              }),
+            leading: Icon(LucideIcons.eye),
+            child: Text("Show ${LdMonkeySelection.of<Task, int>(context).selection.length} items"),
+            onPressed: () async {
+              final shellState = LdMonkeyShellState.of<Task, int>(context);
+              shellState.setViewingItems(LdMonkeySelection.of<Task, int>(context).selection);
+            },
+          ),
           onShortcutTrigger: (context) async {
             final shellState = LdMonkeyShellState.of<Task, int>(context);
             shellState.setViewingItems(LdMonkeySelection.of<Task, int>(context).selection);
@@ -245,9 +238,7 @@ class TaskShell extends StatelessWidget {
               location: LdMonkeyActionLocation.masterSecondary,
               minSelectionCount: 2,
               maxSelectionCount: null,
-              layoutModes: {
-                LdMonkeyEffectiveLayoutMode.master,
-              },
+              layoutModes: {LdMonkeyEffectiveLayoutMode.master},
               visibleWhenShowingSelectionControls: true,
             ),
           },
@@ -259,9 +250,7 @@ class TaskShell extends StatelessWidget {
 }
 
 class TaskDetailPage extends StatelessWidget {
-  const TaskDetailPage({
-    super.key,
-  });
+  const TaskDetailPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -290,22 +279,18 @@ class TaskMasterPage extends StatelessWidget {
       buildItem: (context, item) => LdListItem(
         title: Text(
           item.value!.task,
-          style: TextStyle(
-            decoration: item.value!.done ? TextDecoration.lineThrough : TextDecoration.none,
-          ),
+          style: TextStyle(decoration: item.value!.done ? TextDecoration.lineThrough : TextDecoration.none),
         ),
         subtitle: Text("Due ${Jiffy.parseFromDateTime(item.value!.due).fromNow()}"),
         leading: LdAvatar(
           color: switch (item.value!.done) {
             true => LdTheme.of(context).success,
             false => switch (item.value!.due.isBefore(DateTime.now())) {
-                true => LdTheme.of(context).error,
-                false => LdTheme.of(context).primary,
-              },
+              true => LdTheme.of(context).error,
+              false => LdTheme.of(context).primary,
+            },
           },
-          child: Icon(
-            item.value!.done ? LucideIcons.squareCheck : LucideIcons.square,
-          ),
+          child: Icon(item.value!.done ? LucideIcons.squareCheck : LucideIcons.square),
         ),
       ),
     );

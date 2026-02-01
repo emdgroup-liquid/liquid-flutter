@@ -1,6 +1,3 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid/source_code.dart';
@@ -48,7 +45,8 @@ class _CodeBlockState extends State<CodeBlock> {
 
   @override
   Widget build(BuildContext context) {
-    bool isDesktop = kIsWeb || Platform.isWindows || Platform.isMacOS || Platform.isLinux;
+    bool isDesktop = LdTheme.of(context).platform.isDesktop;
+    final tr = LiquidLocalizations.of(context);
 
     return LayoutBuilder(
       builder: (context, _) => LdWrapConditional(
@@ -68,9 +66,9 @@ class _CodeBlockState extends State<CodeBlock> {
                     Clipboard.setData(ClipboardData(text: widget.code));
                     LdNotificationsController.of(
                       context,
-                    ).addNotification(LdNotification(message: "Copied to clipboard", type: LdNotificationType.success));
+                    ).addNotification(LdNotification(message: tr.copiedToClipboard, type: LdNotificationType.success));
                   },
-                  child: const Text("Copy"),
+                  child: Text(tr.copy),
                 ),
               ),
           ],

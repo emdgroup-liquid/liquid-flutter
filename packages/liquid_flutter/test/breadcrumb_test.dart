@@ -6,7 +6,7 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-import 'golden_utils.dart';
+import 'package:liquid_flutter_test_utils/liquid_flutter_test_utils.dart';
 
 void main() {
   testGoldens("LdBreadcrumb Golden", (WidgetTester tester) async {
@@ -15,7 +15,6 @@ void main() {
         await place(LdBreadcrumb.fromStrings(
           const ["Home", "About", "Contact"],
         ));
-        return null;
       },
     });
   });

@@ -7,5 +7,4 @@ nullable-getter: false
 format: false
 use-escaping: true
 output-dir: lib/src/l10n/generated
-synthetic-package: false
 untranslated-messages-file: lib/src/l10n/generated/needTranslation.txt

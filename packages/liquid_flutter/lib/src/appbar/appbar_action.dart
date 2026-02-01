@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:provider/provider.dart';
 
 /// An action button designed for use in app bars that adapts its appearance based on context.
 ///
@@ -55,11 +56,9 @@ class LdAppBarAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final modalRoute = ModalRoute.of(context);
-
     final isMobile = LdTheme.of(context).platform.isMobile;
 
-    final isInContextMenu = modalRoute != null && modalRoute is LdContextMenuRoute;
+    final isInContextMenu = context.read<LdAppBarActionDisplayMode?>() == LdAppBarActionDisplayMode.contextMenu;
     if (isInContextMenu) {
       return LdListItem(
         color: color,
@@ -102,4 +101,9 @@ class LdAppBarAction extends StatelessWidget {
       ),
     );
   }
+}
+
+enum LdAppBarActionDisplayMode {
+  appBar,
+  contextMenu,
 }

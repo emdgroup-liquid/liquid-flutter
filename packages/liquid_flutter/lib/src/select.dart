@@ -166,35 +166,29 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
   }) {
     return FocusScope(
       node: _focusNodeChildren,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const LdDivider(height: 1),
-          Scrollbar(
-            controller: _controller,
-            thumbVisibility: true,
-            child: ListView.separated(
-              shrinkWrap: true,
-              controller: _controller,
-              padding: EdgeInsets.zero,
-              itemCount: widget.items.length,
-              separatorBuilder: (context, index) => const LdDivider(height: 1),
-              itemBuilder: (context, index) {
-                var e = widget.items[index];
-                final isActive = activeItem == e;
-                final autoFocus = isActive || (activeItem == null && index == 0);
-                return _buildDropdownItem(
-                  context: context,
-                  item: e,
-                  isActive: isActive,
-                  autoFocus: autoFocus,
-                  theme: theme,
-                  defaultTextStyle: defaultTextStyle,
-                );
-              },
-            ),
-          ),
-        ],
+      child: Scrollbar(
+        controller: _controller,
+        thumbVisibility: true,
+        child: ListView.separated(
+          shrinkWrap: true,
+          controller: _controller,
+          padding: EdgeInsets.zero,
+          itemCount: widget.items.length,
+          separatorBuilder: (context, index) => const LdDivider(height: 1),
+          itemBuilder: (context, index) {
+            var e = widget.items[index];
+            final isActive = activeItem == e;
+            final autoFocus = isActive || (activeItem == null && index == 0);
+            return _buildDropdownItem(
+              context: context,
+              item: e,
+              isActive: isActive,
+              autoFocus: autoFocus,
+              theme: theme,
+              defaultTextStyle: defaultTextStyle,
+            );
+          },
+        ),
       ),
     );
   }
@@ -265,6 +259,7 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
       theme,
       LdTextType.label,
       size,
+      color: widget.disabled ? theme.textMuted : theme.text,
       lineHeight: 1,
     );
     return Column(
@@ -275,11 +270,10 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
         LdFormLabel(label: widget.label, size: size),
         LdContextMenu(
           positionMode: LdContextPositionMode.relativeTrigger,
-          blurMode: LdContextMenuBlurMode.never,
           zoomMode: LdContextZoomMode.never,
           dismissOnOutsideTap: true,
           inheritTriggerWidth: true,
-          listenForTaps: false,
+          scaleFromTrigger: false,
           placeAboveTrigger: true,
           builder: (context, isShuttle, open, isOpen, child) {
             return _buildDropdownButton(

@@ -37,7 +37,8 @@ class LdListConfig<T extends Identifiable<IdType>, IdType> {
 
   final Widget? footer;
 
-  final Widget Function(BuildContext, dynamic)? groupHeaderBuilder;
+  final Widget Function(BuildContext, dynamic, List<LdPaginatorItem<T>>)?
+      groupHeaderBuilder;
 
   final dynamic Function(T)? groupingCriterion;
 
@@ -144,7 +145,8 @@ class LdList<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
 
   final dynamic Function(T)? groupingCriterion;
 
-  final Widget Function(BuildContext, dynamic)? groupHeaderBuilder;
+  final Widget Function(BuildContext, dynamic, List<LdPaginatorItem<T>>)?
+      groupHeaderBuilder;
 
   final Widget Function(BuildContext)? separatorBuilder;
 

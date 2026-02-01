@@ -107,5 +107,18 @@ ThemeData getMaterialTheme(LdTheme theme) {
     textTheme: text,
     package: theme.fontFamilyPackage,
     fontFamily: theme.fontFamily,
+    platform: switch (theme.platform) {
+      LdPlatform.android => TargetPlatform.android,
+      LdPlatform.ios => TargetPlatform.iOS,
+      LdPlatform.macos => TargetPlatform.macOS,
+      LdPlatform.linux => TargetPlatform.linux,
+      LdPlatform.windows => TargetPlatform.windows,
+      LdPlatform.webAndroid => TargetPlatform.android,
+      LdPlatform.webIOS => TargetPlatform.iOS,
+      LdPlatform.webMacOS => TargetPlatform.macOS,
+      LdPlatform.webWindows => TargetPlatform.windows,
+      LdPlatform.webLinux => TargetPlatform.linux,
+      LdPlatform.webUnknown => TargetPlatform.android,
+    },
   );
 }

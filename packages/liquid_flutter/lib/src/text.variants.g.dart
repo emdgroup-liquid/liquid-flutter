@@ -30,7 +30,7 @@ class LdText extends StatelessWidget {
     LdSize size = LdSize.m,
     TextAlign? textAlign,
     LdTextType? type = LdTextType.paragraph,
-    super.key,
+    Key? key,
   }) {
     return LdText(
       text,
@@ -62,7 +62,7 @@ class LdText extends StatelessWidget {
     LdSize size = LdSize.m,
     TextAlign? textAlign,
     LdTextType? type = LdTextType.paragraph,
-    super.key,
+    Key? key,
   }) {
     return LdText(
       text,
@@ -94,7 +94,7 @@ class LdText extends StatelessWidget {
     LdSize size = LdSize.m,
     TextAlign? textAlign,
     LdTextType? type = LdTextType.paragraph,
-    super.key,
+    Key? key,
   }) {
     return LdText(
       text,
@@ -126,7 +126,7 @@ class LdText extends StatelessWidget {
     LdSize size = LdSize.m,
     TextAlign? textAlign,
     LdTextType? type = LdTextType.paragraph,
-    super.key,
+    Key? key,
   }) {
     return LdText(
       text,
@@ -158,7 +158,7 @@ class LdText extends StatelessWidget {
     LdSize size = LdSize.m,
     TextAlign? textAlign,
     LdTextType? type = LdTextType.paragraph,
-    super.key,
+    Key? key,
   }) {
     return LdText(
       text,
@@ -190,7 +190,7 @@ class LdText extends StatelessWidget {
     LdSize size = LdSize.m,
     TextAlign? textAlign,
     LdTextType? type = LdTextType.paragraph,
-    super.key,
+    Key? key,
   }) {
     return LdText(
       text,
@@ -222,7 +222,7 @@ class LdText extends StatelessWidget {
     LdSize size = LdSize.m,
     TextAlign? textAlign,
     LdTextType? type = LdTextType.paragraph,
-    super.key,
+    Key? key,
   }) {
     return LdText(
       text,
@@ -254,7 +254,7 @@ class LdText extends StatelessWidget {
     LdSize size = LdSize.m,
     TextAlign? textAlign,
     LdTextType? type = LdTextType.paragraph,
-    super.key,
+    Key? key,
   }) {
     return LdText(
       text,
@@ -286,7 +286,7 @@ class LdText extends StatelessWidget {
     LdSize size = LdSize.m,
     TextAlign? textAlign,
     LdTextType? type = LdTextType.paragraph,
-    super.key,
+    Key? key,
   }) {
     return LdText(
       text,
@@ -318,7 +318,7 @@ class LdText extends StatelessWidget {
     LdSize size = LdSize.m,
     TextAlign? textAlign,
     LdTextType? type = LdTextType.paragraph,
-    super.key,
+    Key? key,
   }) {
     return LdText(
       text,
@@ -350,7 +350,7 @@ class LdText extends StatelessWidget {
     LdSize size = LdSize.m,
     TextAlign? textAlign,
     LdTextType? type = LdTextType.paragraph,
-    super.key,
+    Key? key,
   }) {
     return LdText(
       text,
@@ -382,7 +382,7 @@ class LdText extends StatelessWidget {
     LdSize size = LdSize.m,
     TextAlign? textAlign,
     LdTextType? type = LdTextType.paragraph,
-    super.key,
+    Key? key,
   }) {
     return LdText(
       text,
@@ -414,7 +414,7 @@ class LdText extends StatelessWidget {
     LdSize size = LdSize.m,
     TextAlign? textAlign,
     LdTextType? type = LdTextType.paragraph,
-    super.key,
+    Key? key,
   }) {
     return LdText(
       text,

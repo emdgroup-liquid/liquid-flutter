@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
@@ -40,7 +38,7 @@ class _LdOrbState extends State<LdOrb> with TickerProviderStateMixin {
     _animation = _tween.animate(_animationController!);
 
     _animationController!.repeat(reverse: false);
-    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+    if (LdTheme.of(context).platform.isMobile) {
       _streamSubscription = accelerometerEventStream().listen((AccelerometerEvent event) {
         setState(() {
           double x = event.x, y = event.y, z = event.z;
