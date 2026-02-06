@@ -116,8 +116,18 @@ class _LdCounterDigitState extends State<_LdCounterDigit> {
 
   void _generateTextWidths() {
     final theme = LdTheme.of(context);
-    _textWidths =
-        chars.map((e) => calculateTextWidth(e, ldBuildTextStyle(theme, LdTextType.headline, widget.size))).toList();
+    _textWidths = chars
+        .map(
+          (e) => calculateTextWidth(
+            e,
+            ldBuildTextStyle(
+              theme,
+              LdTextType.headline,
+              widget.size,
+            ),
+          ),
+        )
+        .toList();
   }
 
   @override

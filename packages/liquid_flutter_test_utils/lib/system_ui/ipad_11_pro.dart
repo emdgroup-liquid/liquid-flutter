@@ -47,10 +47,7 @@ class _WindowHandle extends StatelessWidget {
         child: Icon(
           Icons.more_horiz,
           size: 28,
-          color: (style?.statusBarIconBrightness == Brightness.light
-                  ? Colors.white
-                  : Colors.black)
-              .withAlpha(200),
+          color: (style?.statusBarIconBrightness == Brightness.light ? Colors.white : Colors.black).withAlpha(200),
         ),
       ),
     );

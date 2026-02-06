@@ -222,7 +222,10 @@ class _OrbPainter extends CustomPainter {
     );
 
     // Circle to the bottom middle
-    path.arcToPoint(Offset(center.dx, inset + height), radius: Radius.circular(height / 2));
+    path.arcToPoint(
+      Offset(center.dx, inset + height),
+      radius: Radius.circular(height / 2),
+    );
 
     // To the start of the wave to close the path
     path.arcToPoint(waveStart, radius: Radius.circular(height / 2));
@@ -252,7 +255,10 @@ class _OrbPainter extends CustomPainter {
       waveEnd.dy,
     );
 
-    secondWave.arcToPoint(Offset(center.dx, inset + height), radius: Radius.circular(height / 2));
+    secondWave.arcToPoint(
+      Offset(center.dx, inset + height),
+      radius: Radius.circular(height / 2),
+    );
 
     secondWave.arcToPoint(waveStart, radius: Radius.circular(height / 2));
 
@@ -278,9 +284,15 @@ class _OrbPainter extends CustomPainter {
 
     // draw to bubbles
     canvas.drawCircle(
-        Offset(width * 0.75, fillPercentage * height + height / 3), width / 30, Paint()..color = bubbleColor);
+      Offset(width * 0.75, fillPercentage * height + height / 3),
+      width / 30,
+      Paint()..color = bubbleColor,
+    );
     canvas.drawCircle(
-        Offset(width * 0.8, fillPercentage * height + height / 2.5), width / 50, Paint()..color = bubbleColor);
+      Offset(width * 0.8, fillPercentage * height + height / 2.5),
+      width / 50,
+      Paint()..color = bubbleColor,
+    );
 
     // draw border last
     canvas.drawCircle(center, height / 2, border);
