@@ -1,0 +1,261 @@
+---
+alwaysApply: true
+---
+# Liquid Flutter (Design System)
+
+## Overview
+The Liquid Flutter design system provides a comprehensive set of components and utilities for building consistent, beautiful Flutter applications. This guide helps agents quickly understand and apply the design system effectively.
+
+## Core Components for General Tasks
+
+### Layout Components
+- **LdScaffold**: Main page scaffold with app bars and drawer support. Use `appBars` parameter (List) to pass app bars.
+- **LdAppBar**: App bar component. Pass as a List to LdScaffold's `appBars` parameter.
+- **LdScaffoldBody**: Body wrapper for scaffold content. Use `addContainer: true` for automatic container padding.
+- **LdAutoSpace**: Automatically spaces children in a Column based on component types. Use for arranging items vertically with proper spacing.
+- **LdBundle**: Wrapper that applies LdAutoSpace to its children. Use for grouping related content.
+- **LdCard**: Card component with optional header/footer. When placing LdListItems in a Card, set `padding: EdgeInsets.zero` and use a Column.
+- **LdContainer**: Container component with theme-aware styling.
+
+### Text Components
+- **LdText**: Primary text component. Use factory constructors:
+  - `LdText.h()` / `LdText.hl()` / `LdText.hs()` / `LdText.hxs()` - Headlines (large, large, small, extra-small)
+  - `LdText.p()` - Paragraphs (body text)
+  - `LdText.l()` / `LdText.ls()` / `LdText.lxs()` - Labels (medium, small, extra-small)
+  - `LdText.caption()` - Caption text (uppercase, muted)
+- **Rule**: Always use LdText for labels and paragraphs unless the text is a child of another UI component like a button.
+
+### Form Components
+- **LdInput**: Text input field
+- **LdButton**: Button component with variants
+  - Mode variants: `LdButton.filled`, `LdButton.outline`, `LdButton.ghost`, `LdButton.vague`
+    - To build an icon button you can simply pass an icon as child.
+  - Color variants: `LdButton.warning`, `LdButton.error`, `LdButton.success` 
+- **LdCheckbox**: Checkbox input
+- **LdRadio**: Radio button input
+- **LdSwitch**: Toggle switch
+- **LdSelect**: Dropdown select
+- **LdSlider**: Slider input
+- **LdDatePicker**: Date picker
+- **LdTimePicker**: Time picker
+
+### List Components
+- **LdList**: List container
+- **LdListItem**: List item component. When placing in LdCard, set Card padding to 0 and use Column.
+- **LdListEmpty**: Empty state for lists
+- **LdListLoading**: Loading state for lists
+
+### Feedback Components
+- **LdNotification**: Notification component
+- **LdHint**: Hint/info component
+- **LdLoading**: Loading indicator
+- **LdExceptionView**: Error/exception display
+
+### Modal/Dialog Components
+- **LdModalRoute**: Use for dialogs, modals, and sheets. Provides consistent modal behavior.
+- **LdSheet**: Sheet component (bottom sheet)
+
+### Other Common Components
+- **LdBadge**: Badge component
+- **LdTag**: Tag component
+- **LdAvatar**: Avatar component, also used to place leading icons or initials in LdListItems
+- **LdDivider**: Divider component
+- **LdAccordion**: Accordion/collapsible component
+- **LdBreadcrumb**: Breadcrumb navigation
+- **LdTable**: Table component
+
+## Spacing
+
+### Padding
+Apply padding using extension methods on Widget:
+- `.padXS()` / `.padS()` / `.padM()` / `.padL()` - Symmetric padding (all sides)
+- `.pad(LdSize.size)` - Custom size symmetric padding
+- `.padBalXS()` / `.padBalS()` / `.padBalM()` / `.padBalL()` - Balanced padding (horizontal stronger than vertical)
+- `.padBal(LdSize.size)` - Custom size balanced padding
+- `.padVertical({size: LdSize.m})` - Vertical padding only
+- `.padHorizontal({size: LdSize.m})` - Horizontal padding only
+- `.insetLeft()` / `.insetRight()` / `.insetTop()` / `.insetBottom()` - Single side padding
+
+**Alternative**: Use `LdTheme.of(context).pad(size)` method:
+```dart
+LdTheme.of(context).pad(LdSize.m)  // Returns EdgeInsets
+LdTheme.of(context).balPad(LdSize.m)  // Returns balanced EdgeInsets
+```
+
+### Spacers
+Use spacer constants for spacing between widgets:
+- `ldSpacerXS` / `ldSpacerS` / `ldSpacerM` / `ldSpacerL` - General spacers
+- `ldHSpacerXS` / `ldHSpacerS` / `ldHSpacerM` / `ldHSpacerL` - Horizontal spacers
+- `ldVSpacerXS` / `ldVSpacerS` / `ldVSpacerM` / `ldVSpacerL` - Vertical spacers
+
+**Rule**: When arranging items in a Column, unless you require no spacing, use `LdAutoSpace()` which automatically applies appropriate spacing based on component types.
+
+### Row/Column Spacing
+For Row and Column widgets, use extension methods:
+- `.spaceXS()` / `.spaceS()` / `.spaceM()` / `.spaceL()` - Applies spacing between children
+
+## Text Usage
+
+### When to Use LdText
+- **Always** use LdText for standalone labels and paragraphs
+- **Exception**: Don't use LdText when text is a child of another UI component (e.g., button labels)
+
+### Text Shorthands
+- `LdText.p()` - For paragraphs/body text
+- `LdText.l()` - For labels
+- `LdText.h()` - For headlines
+
+### Example
+```dart
+LdAutoSpace(
+  children: [
+    LdText.h("Page Title"),
+    LdText.p("This is paragraph text"),
+    LdText.l("Label Text"),
+    LdButton(
+      child: Text("Button"), // OK - child of button
+    ),
+  ],
+)
+```
+
+## Colors
+
+### Retrieving Colors from Theme
+Access colors via `LdTheme.of(context)`:
+
+**Semantic Colors:**
+- `theme.text` - Default text color
+- `theme.textMuted` - Muted text color
+- `theme.background` - Page background color
+- `theme.surface` - Surface/elevated background color
+- `theme.border` - Border color
+- `theme.floatingBorder` - Floating element border color
+- `theme.stroke` - Stroke color
+
+**Primary Colors:**
+- `theme.primaryColor` - Primary color
+- `theme.primaryColorText` - Contrasting text for primary
+- `theme.secondaryColor` - Secondary color
+- `theme.secondaryColorText` - Contrasting text for secondary
+
+**State Colors:**
+- `theme.errorColor` / `theme.errorColorText` - Error state
+- `theme.successColor` / `theme.successColorText` - Success state
+- `theme.warningColor` / `theme.warningColorText` - Warning state
+
+**Neutral Shades:**
+- `theme.neutralShade(int shade)` - Get neutral shade (0-10, where 0 is lightest, 10 is darkest)
+
+**Color Names:**
+- `theme.primary` - Returns LdColor name
+- `theme.secondary` - Returns LdColor name
+- `theme.success` - Returns LdColor name
+- `theme.warning` - Returns LdColor name
+- `theme.error` - Returns LdColor name
+
+### Example
+```dart
+Container(
+  color: LdTheme.of(context).surface,
+  child: LdText.p(
+    "Text",
+    color: LdTheme.of(context).text,
+  ),
+)
+```
+
+## Border Radius
+
+Apply border radius using:
+- `LdTheme.of(context).radius(LdSize.size)` - Returns BorderRadius
+- `LdTheme.of(context).radiusSize(LdSize.size)` - Returns double
+
+Available sizes: `LdSize.xs`, `LdSize.s`, `LdSize.m`, `LdSize.l`
+
+### Example
+```dart
+Container(
+  decoration: BoxDecoration(
+    borderRadius: LdTheme.of(context).radius(LdSize.m),
+  ),
+)
+```
+
+## Common Patterns
+
+### Scaffold with AppBar
+```dart
+LdScaffold(
+  appBars: [
+    LdAppBar(
+      title: LdText.h("Page Title"),
+    ),
+  ],
+  body: LdScaffoldBody(
+    addContainer: true,
+    children: [
+      // Content here
+    ],
+  ),
+)
+```
+
+### Card with ListItems
+```dart
+LdCard(
+  padding: EdgeInsets.zero, // Important: zero padding
+  child: Column(
+    children: [
+      LdListItem(...),
+      LdListItem(...),
+    ],
+  ),
+)
+```
+
+### Modal/Dialog
+```dart
+// Use LdModalRoute for navigation-based modals
+LdModalRoute(
+  context: context,
+  pageBuilder: (context) => LdScaffold(),
+)
+```
+
+### Auto-Spaced Column
+```dart
+LdAutoSpace(
+  children: [
+    LdText.h("Title"),
+    LdText.p("Description"),
+    LdButton(...),
+    ldSpacerM, // Manual spacer if needed
+    LdCard(...),
+  ],
+)
+```
+
+## Size System
+
+The design system uses `LdSize` enum:
+- `LdSize.xs` - Extra small
+- `LdSize.s` - Small
+- `LdSize.m` - Medium (default)
+- `LdSize.l` - Large
+
+Most components accept a `size` parameter using `LdSize`.
+
+## Best Practices
+
+1. **Always use LdAutoSpace** for Columns unless you specifically need no spacing
+2. **Use LdText** for all standalone text, except when inside other components
+3. **Apply padding** using extension methods (`.padM()`) or `LdTheme.of(context).pad()`
+4. **Use spacer constants** (`ldSpacerM`) for manual spacing when needed
+5. **Set Card padding to zero** when containing ListItems
+6. **Use LdScaffold and LdAppBar** for page structure
+7. **Use LdModalRoute** for dialogs, modals, and sheets
+8. **Retrieve colors** from `LdTheme.of(context)` rather than hardcoding
+9. **Apply radius** using `LdTheme.of(context).radius()` for consistency
+10. Use Lucide icons wherever possible instead of the default Icons or CupertinoIcons.
+11. To build a screen that navigates to sub-screens place the links to sub pages in LdListItem.trailingForward and group them in an LdCard. You can then add a group name using LdText.caption above the LdCard.

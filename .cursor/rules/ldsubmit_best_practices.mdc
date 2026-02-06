@@ -1,0 +1,51 @@
+---
+alwaysApply: false
+---
+
+# LdSubmit Best Practices
+
+This rule applies when working with `LdSubmit` widgets in Liquid Flutter. Follow these best practices to ensure consistent, maintainable code.
+
+## Best Practices
+
+1. **Always use LdSubmit for async operations** that might fail
+2. **Use inline builder for forms**, centered for page loads
+3. **Use autoTrigger** for operations that should run on mount
+4. **Configure retries** for network operations that might temporarily fail
+5. **Use LdExceptionMapper** for error handling - throw regular exceptions and let the mapper handle localization
+
+## Service Access Patterns
+
+When accessing services in `LdSubmit` actions, follow these patterns:
+
+```dart
+// ✅ Good: Service access in action (stateless services) or via closures
+class OrderForm extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // Lookup stateful services in build method
+    final orderService = context.read<OrderService>();
+    final authService = context.read<AuthService>();
+    
+    return LdSubmit<Order, OrderData>(
+      config: LdSubmitConfig<Order, OrderData>(
+        action: (data) async {
+          // Access services via closure
+          if (!authService.isAuthenticated) {
+            throw LdLocalizedException(message: 'Not authenticated');
+          }
+          
+          // For stateless services, access directly
+          return await ApiService.instance.createOrder(data!);
+        },
+      ),
+      builder: LdSubmitInlineBuilder<Order, OrderData>(),
+    );
+  }
+}
+```
+
+**Key Points:**
+- Lookup stateful services (Provider-based) in the `build` method and access them via closures
+- Access stateless services (singletons) directly in the action
+- Never store service references in service classes - always lookup via context at evaluation time

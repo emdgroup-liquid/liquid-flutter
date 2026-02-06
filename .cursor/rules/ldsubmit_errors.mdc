@@ -1,0 +1,68 @@
+---
+alwaysApply: false
+---
+
+# LdSubmit Error Handling
+
+This rule applies when working with error handling in `LdSubmit` widgets or async operations in Liquid Flutter.
+
+## Error Handling
+
+`LdSubmit` automatically handles exceptions and displays them using `LdExceptionView`. Exceptions are mapped to user-friendly messages via `LdExceptionMapper`.
+
+**✅ Recommended: Throw regular exceptions and use LdExceptionMapper**
+
+The default mapper handles common exceptions (`SocketException`, `TimeoutException`, `FormatException`) automatically. For custom exceptions, provide a custom mapper:
+
+```dart
+// In your app root or feature widget
+Widget build(BuildContext context) {
+  // Capture localizations when creating the mapper
+  final localizations = LiquidLocalizations.of(context);
+  
+  return LdExceptionMapperProvider(
+    exceptionMapper: LdExceptionMapper(
+      localizations: localizations,
+      onException: (e, {stackTrace}) {
+        // Use captured localizations for custom exception types
+        if (e is NetworkException) {
+          return LdLocalizedException(
+            message: localizations.networkError,
+            moreInfo: localizations.moreInfo,
+          );
+        }
+        if (e is AuthenticationException) {
+          return LdLocalizedException(
+            message: localizations.errorOccurred,
+            moreInfo: localizations.moreInfo, // Use localized strings
+            canRetry: false,
+          );
+        }
+        // Return null to use default mapper
+        return null;
+      },
+    ),
+    child: LdSubmit<User, void>(
+      config: LdSubmitConfig<User, void>(
+        action: (_) async {
+          // Just throw regular exceptions - mapper handles them
+          return await ApiService.instance.getUser();
+        },
+      ),
+      builder: LdSubmitInlineBuilder<User, void>(),
+    ),
+  );
+}
+```
+
+**❌ Not recommended: Throwing LdLocalizedException directly**
+
+```dart
+// Don't do this - use LdExceptionMapper instead
+throw LdLocalizedException(
+  message: 'Network error',
+  moreInfo: 'Please check your internet connection',
+);
+```
+
+The mapper approach centralizes error handling, makes exceptions easier to test, and allows for consistent error messages across your app.
