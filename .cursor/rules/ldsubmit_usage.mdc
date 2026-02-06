@@ -1,0 +1,214 @@
+---
+alwaysApply: false
+---
+
+# LdSubmit Usage Patterns
+
+This rule applies when working with `LdSubmit` widgets or async operations in Liquid Flutter. `LdSubmit` is the primary widget for handling asynchronous operations that might fail. It manages loading states, error handling, retries, and result display automatically.
+
+## When to Use LdSubmit
+
+Use `LdSubmit` whenever you have:
+- An async operation triggered by user action (button tap, form submit)
+- An async operation that runs on mount (loading data)
+- Operations that might fail and need error handling
+- Operations that benefit from retry logic
+
+**✅ Use LdSubmit:**
+- Form submissions
+- API calls triggered by buttons
+- Loading data on page mount
+- File uploads/downloads
+- Any operation that can fail
+
+**❌ Don't use LdSubmit:**
+- Simple state updates (use `setState`)
+- Operations that never fail (use regular async/await)
+- Background tasks that don't need UI feedback
+
+## Basic Usage
+
+```dart
+class LoginForm extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return LdSubmit<User, LoginCredentials>(
+      arg: credentials
+      config: LdSubmitConfig<User, LoginCredentials>(
+        action: (credentials) async {
+          // Services are accessed via closures or passed as arguments
+          // For stateless services, access directly:
+          return await ApiService.instance.login(
+            credentials!.email,
+            credentials.password,
+          );
+        },
+        submitText: 'Login',
+        loadingText: 'Logging in...',
+      ),
+      builder: LdSubmitInlineBuilder<User, LoginCredentials>(
+        resultBuilder: (context, user, controller) {
+          return LdText.p('Welcome, ${user.name}!');
+        },
+      ),
+    );
+  }
+}
+```
+
+## Builders
+
+`LdSubmit` uses builders to determine how to display different states:
+
+1. **LdSubmitInlineBuilder**: Displays loading/error inline (default, best for forms)
+2. **LdSubmitCenteredBuilder**: Centers loading/error states (best for page loads)
+3. **LdSubmitDialogBuilder**: Shows loading/error in a dialog (blocks interaction)
+4. **LdSubmitNotificationBuilder**: Shows loading/error as notifications (non-blocking)
+
+```dart
+// Inline (default) - for forms
+LdSubmit<User, void>(
+  config: LdSubmitConfig<User, void>(action: (_) => fetchUser()),
+  builder: LdSubmitInlineBuilder<User, void>(),
+)
+
+// Centered - for page loads
+LdSubmit<User, void>(
+  config: LdSubmitConfig<User, void>(action: (_) => fetchUser()),
+  builder: LdSubmitCenteredBuilder<User, void>(),
+)
+
+// Dialog - blocks interaction
+LdSubmit<User, void>(
+  config: LdSubmitConfig<User, void>(action: (_) => fetchUser()),
+  builder: LdSubmitDialogBuilder<User, void>(),
+)
+```
+
+## Auto-Triggering
+
+Use `autoTrigger: true` for operations that should run immediately when the widget mounts:
+
+```dart
+LdSubmit<List<Post>, void>(
+  config: LdSubmitConfig<List<Post>, void>(
+    autoTrigger: true, // Runs on mount
+    action: (_) async {
+      return await ApiService.instance.getPosts();
+    },
+  ),
+  builder: LdSubmitCenteredBuilder<List<Post>, void>(
+    resultBuilder: (context, posts, controller) {
+      return PostsList(posts: posts);
+    },
+  ),
+)
+```
+
+## Passing Arguments
+
+Pass arguments that change over time:
+
+```dart
+class SearchScreen extends StatefulWidget {
+  @override
+  State<SearchScreen> createState() => _SearchScreenState();
+}
+
+class _SearchScreenState extends State<SearchScreen> {
+  String _query = '';
+
+  @override
+  Widget build(BuildContext context) {
+    return LdAutoSpace(
+      children: [
+        LdInput(
+          label: 'Search',
+          onChanged: (value) => setState(() => _query = value),
+        ),
+        LdSubmit<List<Result>, String>(
+          arg: _query, // Passes query to action
+          config: LdSubmitConfig<List<Result>, String>(
+            action: (query) async {
+              if (query == null || query.isEmpty) {
+                return [];
+              }
+              return await ApiService.instance.search(query);
+            },
+          ),
+          builder: LdSubmitInlineBuilder<List<Result>, String>(
+            resultBuilder: (context, results, controller) {
+              return ResultsList(results: results);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+```
+
+## Retry Configuration
+
+Configure automatic retries with exponential backoff:
+
+```dart
+LdSubmit<User, void>(
+  config: LdSubmitConfig<User, void>(
+    action: (_) => fetchUser(),
+    retryConfig: LdRetryConfig.defaultAutomaticRetries(),
+    // Or customize:
+    // retryConfig: LdRetryConfig(
+    //   maxAttempts: 3,
+    //   initialDelay: Duration(seconds: 1),
+    // ),
+  ),
+  builder: LdSubmitCenteredBuilder<User, void>(),
+)
+```
+
+## Using LdSubmitController
+
+For programmatic control, use `LdSubmitController`:
+
+However, it is important to keep in mind that this is usually not necessary. Instead we should usually use a custom builder that can read the controller from the LdSubmit widget. Managing the controller adds code and complexity.
+
+```dart
+class OrderForm extends StatefulWidget {
+  @override
+  State<OrderForm> createState() => _OrderFormState();
+}
+
+class _OrderFormState extends State<OrderForm> {
+  late final LdSubmitController<Order, OrderData> _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = LdSubmitController<Order, OrderData>(
+      config: LdSubmitConfig<Order, OrderData>(
+        action: (data) => createOrder(data!),
+      ),
+    );
+    _controller.init();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LdSubmit<Order, OrderData>(
+      controller: _controller,
+      builder: LdSubmitInlineBuilder<Order, OrderData>(
+        resultBuilder: (context, order, controller) {
+          return LdText.p('Order created: ${order.id}');
+        },
+      ),
+    );
+  }
+}
+```
