@@ -102,6 +102,7 @@ export 'src/text.dart';
 export 'src/text_list.dart';
 export 'src/theme/liquid_material_theme.dart';
 export 'src/theme/sizing_config.dart';
+export 'src/theme/platform.dart';
 
 export 'src/theme/theme.dart';
 export 'src/theme/theme_provider.dart';
