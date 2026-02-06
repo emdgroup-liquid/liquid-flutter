@@ -32,14 +32,7 @@ class _PlatformSelectorState extends State<PlatformSelector> {
     return LdSelect<LdPlatform>(
       label: "Platform",
       value: platform,
-      items: platforms.entries
-          .map(
-            (e) => LdSelectItem(
-              child: Text(e.key),
-              value: e.value,
-            ),
-          )
-          .toList(),
+      items: platforms.entries.map((e) => LdSelectItem(child: Text(e.key), value: e.value)).toList(),
       onChanged: (value) {
         themeService.platform = value;
       },

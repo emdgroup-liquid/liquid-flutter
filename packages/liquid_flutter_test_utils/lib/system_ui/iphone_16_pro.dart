@@ -138,9 +138,7 @@ class _HomeIndicator extends StatelessWidget {
       fit: BoxFit.fitWidth,
       package: 'liquid_flutter_test_utils',
       // invert to have contrast
-      !dark
-          ? 'assets/home_indicator_dark.svg'
-          : 'assets/home_indicator_light.svg',
+      !dark ? 'assets/home_indicator_dark.svg' : 'assets/home_indicator_light.svg',
     );
 
     return Padding(
