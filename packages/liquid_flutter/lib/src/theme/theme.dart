@@ -4,36 +4,6 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 import 'package:provider/provider.dart';
 
-enum LdPlatform { macos, ios, android, linux, windows, webAndroid, webIOS, webMacOS, webWindows, webLinux, webUnknown }
-
-extension LdPlatformExtension on LdPlatform {
-  bool get isDesktop => switch (this) {
-        LdPlatform.macos => true,
-        LdPlatform.windows => true,
-        LdPlatform.linux => true,
-        LdPlatform.webMacOS => true,
-        LdPlatform.webWindows => true,
-        LdPlatform.webLinux => true,
-        _ => false,
-      };
-  bool get isMobile => switch (this) {
-        LdPlatform.ios => true,
-        LdPlatform.android => true,
-        LdPlatform.webIOS => true,
-        LdPlatform.webAndroid => true,
-        _ => false,
-      };
-  bool get isWeb => switch (this) {
-        LdPlatform.webAndroid => true,
-        LdPlatform.webIOS => true,
-        LdPlatform.webMacOS => true,
-        LdPlatform.webWindows => true,
-        LdPlatform.webLinux => true,
-        LdPlatform.webUnknown => true,
-        _ => false,
-      };
-}
-
 /// Provides a theme to all the components in the widget tree
 /// Theme can be accessed using LdTheme.of(context)
 class LdTheme extends ChangeNotifier {
@@ -76,6 +46,7 @@ class LdTheme extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Get the radius for a given size as a BorderRadius
   BorderRadius radius(LdSize size) {
     return BorderRadius.circular(switch (size) {
       (LdSize.xs) => _sizingConfig.radiusXS,
@@ -85,6 +56,7 @@ class LdTheme extends ChangeNotifier {
     });
   }
 
+  /// Get the size of the radius for a given size as a double
   double radiusSize(LdSize size) {
     return switch (size) {
       (LdSize.xs) => _sizingConfig.radiusXS,
