@@ -1,4 +1,4 @@
-library liquid_flutter_emd_theme;
+library;
 
 export 'src/colors.dart';
 
