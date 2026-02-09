@@ -3,8 +3,14 @@ updates:
   - package-ecosystem: "pub"
     directories:
       - "/"
-      - "/example"
-      - "/generators"
+      - "/apps/example"
+      - "/packages/liquid_flutter"
+      - "/packages/liquid_flutter_emd_theme"
+      - "/packages/liquid_flutter_test_utils"
+      - "/packages/liquid_flutter_window_utils"
+      - "/packages/liquid_generators"
+      - "/packages/liquid_flutter/generators"
+      - "/packages/liquid_flutter/extension/devtools/liquid_flutter_extension"
     schedule:
       interval: "weekly"
     groups:
