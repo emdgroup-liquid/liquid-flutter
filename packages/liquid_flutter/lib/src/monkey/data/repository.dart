@@ -30,6 +30,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
 
   final Map<String, LdFilterOption<T, IdType>> _filters;
   final List<LdSortOption<T, IdType>> _sortOptions;
+  final Map<IdType, LdPaginatorItem<T>> _filteredOutCache = {};
 
   Map<String, LdFilterOption<T, IdType>> get filters => Map.unmodifiable(_filters);
   List<LdSortOption<T, IdType>> get sortOptions => List.unmodifiable(_sortOptions);
@@ -182,18 +183,32 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
 
     await mutex.acquire();
     try {
-      final updatedItems = itemsMap.entries.where((item) => item.value.value != null).map((item) {
-        final filterApplies = filters.every((filter) => filter.optimisticFilter(item.value.value!));
+      final allItemsById = <IdType, LdPaginatorItem<T>>{};
 
-        var newState = item.value.state;
+      for (final cached in _filteredOutCache.values) {
+        if (cached.value != null) {
+          allItemsById[cached.value!.id] = cached;
+        }
+      }
+
+      for (final item in itemsMap.values) {
+        if (item.value != null) {
+          allItemsById[item.value!.id] = item;
+        }
+      }
+
+      final updatedItems = allItemsById.values.map((item) {
+        final filterApplies = filters.every((filter) => filter.optimisticFilter(item.value!));
+
+        var newState = item.state;
 
         if (!filterApplies) {
           newState = LdPaginatorItemState.filteredOut;
-        } else if (item.value.state == LdPaginatorItemState.filteredOut) {
+        } else if (item.state == LdPaginatorItemState.filteredOut) {
           newState = LdPaginatorItemState.loaded;
         }
 
-        return item.value.copyWith(
+        return item.copyWith(
           state: newState,
         );
       }).toList();
@@ -207,10 +222,14 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
       final visibleItems = updatedItems.where((item) => item.state != LdPaginatorItemState.filteredOut).toList();
       final filteredOutItems = updatedItems.where((item) => item.state == LdPaginatorItemState.filteredOut).toList();
 
-      // Keep filtered-out items in-memory for quick restore when filters broaden,
-      // but only expose visible items through [0..totalItems) for list rendering.
+      _filteredOutCache
+        ..clear()
+        ..addEntries(filteredOutItems.map((item) => MapEntry(item.value!.id, item)));
+
+      // Keep filtered-out items in a dedicated cache for quick restore when
+      // filters broaden, while exposing only visible items in paginator indices.
       totalItems = visibleItems.length;
-      setItems([...visibleItems, ...filteredOutItems]);
+      setItems(visibleItems);
     } finally {
       mutex.release();
     }
@@ -390,6 +409,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
 
   @override
   void dispose() {
+    _filteredOutCache.clear();
     _filterStreamController.close();
     _sortStreamController.close();
     super.dispose();
