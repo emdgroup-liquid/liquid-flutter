@@ -204,8 +204,13 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
         }
       }
 
-      totalItems = updatedItems.length;
-      setItems(updatedItems);
+      final visibleItems = updatedItems.where((item) => item.state != LdPaginatorItemState.filteredOut).toList();
+      final filteredOutItems = updatedItems.where((item) => item.state == LdPaginatorItemState.filteredOut).toList();
+
+      // Keep filtered-out items in-memory for quick restore when filters broaden,
+      // but only expose visible items through [0..totalItems) for list rendering.
+      totalItems = visibleItems.length;
+      setItems([...visibleItems, ...filteredOutItems]);
     } finally {
       mutex.release();
     }

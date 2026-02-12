@@ -733,6 +733,17 @@ void main() {
         // After narrowing, only ids 2 and 3 should still be visible.
         expect(narrowedVisibleIds, equals({2, 3}));
 
+        // While the filter is still narrowed, a refresh should not resurrect
+        // filtered-out items into the visible range.
+        await repository.refreshList();
+
+        final afterRefreshVisibleIds = repository.itemsMap.values
+            .where((item) => item.value != null && item.state != LdPaginatorItemState.filteredOut)
+            .map((item) => item.value!.id)
+            .toSet();
+
+        expect(afterRefreshVisibleIds, equals({2, 3}));
+
         // BROADENING phase (regression coverage):
         // broaden the same active filter again and verify previously filtered-out
         // items are restored without disabling/removing the filter.
