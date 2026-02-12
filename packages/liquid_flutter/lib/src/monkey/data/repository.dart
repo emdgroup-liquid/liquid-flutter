@@ -182,43 +182,34 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     final sortOptions = _sortOptions.where((e) => e.isOn).toList();
 
     await mutex.acquire();
-    var filteredItems = Map.fromEntries(
-      itemsMap.entries.where((item) => item.value.value != null).map((item) {
+    try {
+      final updatedItems = itemsMap.entries.where((item) => item.value.value != null).map((item) {
         final filterApplies = filters.every((filter) => filter.optimisticFilter(item.value.value!));
 
-        var newState = filterApplies ? item.value.state : LdPaginatorItemState.filteredOut;
+        var newState = item.value.state;
 
-        if (newState == LdPaginatorItemState.filteredOut && filterApplies) {
+        if (!filterApplies) {
+          newState = LdPaginatorItemState.filteredOut;
+        } else if (item.value.state == LdPaginatorItemState.filteredOut) {
           newState = LdPaginatorItemState.loaded;
         }
 
-        return MapEntry(
-          item.key,
-          item.value.copyWith(
-            state: newState,
-          ),
+        return item.value.copyWith(
+          state: newState,
         );
-      }),
-    );
+      }).toList();
 
-    replaceItems(filteredItems);
-
-    filteredItems.removeWhere((key, value) => value.state == LdPaginatorItemState.filteredOut || value.value == null);
-
-    final sortedItems = filteredItems.values.toList();
-
-    totalItems = filteredItems.length;
-
-    for (final sortOption in sortOptions) {
-      if (sortOption.optimisticSort != null) {
-        sortedItems.sort((a, b) => sortOption.optimisticSort!(a.value!, b.value!));
+      for (final sortOption in sortOptions) {
+        if (sortOption.optimisticSort != null) {
+          updatedItems.sort((a, b) => sortOption.optimisticSort!(a.value!, b.value!));
+        }
       }
+
+      totalItems = updatedItems.length;
+      setItems(updatedItems);
+    } finally {
+      mutex.release();
     }
-
-    // Apply the sorting to the previous list
-
-    setItems(sortedItems);
-    mutex.release();
   }
 
   Iterable<LdFilterOption<T, IdType>> get activeFilters => _filters.values.where((e) => e.isOn);
