@@ -267,7 +267,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   // Refresh List - clear and fetch initial data
   Future<void> refreshList() async {
     for (final item in _items.entries) {
-      if (item.value.value != null) {
+      if (item.value.value != null && item.value.state != LdPaginatorItemState.filteredOut) {
         _items[item.key] = item.value.copyWith(state: LdPaginatorItemState.pendingRefresh);
       }
     }

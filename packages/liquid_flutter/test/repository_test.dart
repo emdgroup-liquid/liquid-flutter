@@ -678,12 +678,15 @@ void main() {
       });
 
       test('applyOptimisticFilterAndSorting filters items correctly', () async {
-        final filter = _MockFilterOption<_TestItem, int>(
-          name: 'valueFilter',
-          label: (context) => 'Value Filter',
+        final filter = LdFilterRange<_TestItem, int>(
+          name: 'valueRange',
+          label: (context) => 'Value Range',
           icon: (context) => const Icon(Icons.filter_list),
-          optimisticFilterFunc: (item) => item.value > 15,
+          min: 0,
+          max: 100,
+          range: const RangeValues(0, 100),
           isOn: true,
+          optimisticFilter: (item, range) => item.value >= range.start && item.value <= range.end,
         );
 
         final items = [
@@ -715,17 +718,47 @@ void main() {
         });
         repository.totalItems = 3;
 
-        await repository.updateFilter('valueFilter', (f) => f!.copyWith(isOn: true));
-        await Future.delayed(const Duration(milliseconds: 600)); // Wait for optimistic filtering delay
+        // NARROWING phase:
+        // tighten the active range filter so only items in [20, 30] remain visible.
+        await repository.updateFilter(
+          'valueRange',
+          (f) => (f as LdFilterRange<_TestItem, int>).copyWith(range: const RangeValues(20, 30), isOn: true),
+        );
 
-        final filteredItems = repository.itemsMap.values
-            .where((item) => item.state != LdPaginatorItemState.filteredOut)
-            .map((item) => item.value)
-            .whereType<_TestItem>()
-            .toList();
+        final narrowedVisibleIds = repository.itemsMap.values
+            .where((item) => item.value != null && item.state != LdPaginatorItemState.filteredOut)
+            .map((item) => item.value!.id)
+            .toSet();
 
-        expect(filteredItems.length, greaterThan(0));
-        expect(filteredItems.every((item) => item.value > 15), isTrue);
+        // After narrowing, only ids 2 and 3 should still be visible.
+        expect(narrowedVisibleIds, equals({2, 3}));
+
+        // While the filter is still narrowed, a refresh should not resurrect
+        // filtered-out items into the visible range.
+        await repository.refreshList();
+
+        final afterRefreshVisibleIds = repository.itemsMap.values
+            .where((item) => item.value != null && item.state != LdPaginatorItemState.filteredOut)
+            .map((item) => item.value!.id)
+            .toSet();
+
+        expect(afterRefreshVisibleIds, equals({2, 3}));
+
+        // BROADENING phase (regression coverage):
+        // broaden the same active filter again and verify previously filtered-out
+        // items are restored without disabling/removing the filter.
+        await repository.updateFilter(
+          'valueRange',
+          (f) => (f as LdFilterRange<_TestItem, int>).copyWith(range: const RangeValues(0, 30), isOn: true),
+        );
+
+        final broadenedVisibleIds = repository.itemsMap.values
+            .where((item) => item.value != null && item.state != LdPaginatorItemState.filteredOut)
+            .map((item) => item.value!.id)
+            .toSet();
+
+        // Item 1 must reappear here. This is the bug we are guarding against.
+        expect(broadenedVisibleIds, equals({1, 2, 3}));
       });
     });
 

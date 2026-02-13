@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-
 import 'package:provider/provider.dart';
 
 typedef FetchListWithParameters<T extends Identifiable<IdType>, IdType> = Future<LdListPage<T>> Function({
@@ -31,6 +30,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
 
   final Map<String, LdFilterOption<T, IdType>> _filters;
   final List<LdSortOption<T, IdType>> _sortOptions;
+  final Map<IdType, LdPaginatorItem<T>> _filteredOutCache = {};
 
   Map<String, LdFilterOption<T, IdType>> get filters => Map.unmodifiable(_filters);
   List<LdSortOption<T, IdType>> get sortOptions => List.unmodifiable(_sortOptions);
@@ -182,43 +182,57 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     final sortOptions = _sortOptions.where((e) => e.isOn).toList();
 
     await mutex.acquire();
-    var filteredItems = Map.fromEntries(
-      itemsMap.entries.where((item) => item.value.value != null).map((item) {
-        final filterApplies = filters.every((filter) => filter.optimisticFilter(item.value.value!));
+    try {
+      final allItemsById = <IdType, LdPaginatorItem<T>>{};
 
-        var newState = filterApplies ? item.value.state : LdPaginatorItemState.filteredOut;
+      for (final cached in _filteredOutCache.values) {
+        if (cached.value != null) {
+          allItemsById[cached.value!.id] = cached;
+        }
+      }
 
-        if (newState == LdPaginatorItemState.filteredOut && filterApplies) {
+      for (final item in itemsMap.values) {
+        if (item.value != null) {
+          allItemsById[item.value!.id] = item;
+        }
+      }
+
+      final updatedItems = allItemsById.values.map((item) {
+        final filterApplies = filters.every((filter) => filter.optimisticFilter(item.value!));
+
+        var newState = item.state;
+
+        if (!filterApplies) {
+          newState = LdPaginatorItemState.filteredOut;
+        } else if (item.state == LdPaginatorItemState.filteredOut) {
           newState = LdPaginatorItemState.loaded;
         }
 
-        return MapEntry(
-          item.key,
-          item.value.copyWith(
-            state: newState,
-          ),
+        return item.copyWith(
+          state: newState,
         );
-      }),
-    );
+      }).toList();
 
-    replaceItems(filteredItems);
-
-    filteredItems.removeWhere((key, value) => value.state == LdPaginatorItemState.filteredOut || value.value == null);
-
-    final sortedItems = filteredItems.values.toList();
-
-    totalItems = filteredItems.length;
-
-    for (final sortOption in sortOptions) {
-      if (sortOption.optimisticSort != null) {
-        sortedItems.sort((a, b) => sortOption.optimisticSort!(a.value!, b.value!));
+      for (final sortOption in sortOptions) {
+        if (sortOption.optimisticSort != null) {
+          updatedItems.sort((a, b) => sortOption.optimisticSort!(a.value!, b.value!));
+        }
       }
+
+      final visibleItems = updatedItems.where((item) => item.state != LdPaginatorItemState.filteredOut).toList();
+      final filteredOutItems = updatedItems.where((item) => item.state == LdPaginatorItemState.filteredOut).toList();
+
+      _filteredOutCache
+        ..clear()
+        ..addEntries(filteredOutItems.map((item) => MapEntry(item.value!.id, item)));
+
+      // Keep filtered-out items in a dedicated cache for quick restore when
+      // filters broaden, while exposing only visible items in paginator indices.
+      totalItems = visibleItems.length;
+      setItems(visibleItems);
+    } finally {
+      mutex.release();
     }
-
-    // Apply the sorting to the previous list
-
-    setItems(sortedItems);
-    mutex.release();
   }
 
   Iterable<LdFilterOption<T, IdType>> get activeFilters => _filters.values.where((e) => e.isOn);
@@ -395,6 +409,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
 
   @override
   void dispose() {
+    _filteredOutCache.clear();
     _filterStreamController.close();
     _sortStreamController.close();
     super.dispose();
