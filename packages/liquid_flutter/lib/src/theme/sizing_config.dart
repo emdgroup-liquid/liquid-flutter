@@ -30,7 +30,7 @@ class LdSizingConfig {
     this.themeSPaddingS = 8.0,
     this.themeSPaddingM = 10.0,
     this.themeSPaddingL = 12.0,
-    this.themeMPaddingXS = 8.0,
+    this.themeMPaddingXS = 6.0,
     this.themeMPaddingS = 12.0,
     this.themeMPaddingM = 14.0,
     this.themeMPaddingL = 24.0,

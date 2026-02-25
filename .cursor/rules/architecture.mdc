@@ -9,7 +9,9 @@ This guide outlines the opinionated architecture for building applications with 
 ## Core Principles
 
 ### 1. Simple Widget Structures
+
 We favor simple, straightforward widget structures:
+
 - **StatelessWidget**: For pure presentation components
 - **StatefulWidget**: For components that need local state
 - **Provider**: For shared state management across the widget tree
@@ -17,6 +19,7 @@ We favor simple, straightforward widget structures:
 Avoid complex state management solutions unless absolutely necessary. The combination of StatefulWidget and Provider covers 95% of use cases.
 
 ### 2. Widget Tree-Oriented Folder Structure
+
 Organize your codebase around the widget tree structure, not by technical layers. This makes it easier to find code related to a specific screen or feature.
 
 ```
@@ -41,13 +44,16 @@ lib/
 ```
 
 **Key Points:**
+
 - Each major screen/feature gets its own folder
 - Components specific to a feature live in that feature's folder
 - Shared components live in `shared/widgets/`
 - The folder structure mirrors the widget tree hierarchy
 
 ### 3. UI-Logic Coupling is Acceptable
+
 We favor coupling UI to logic because:
+
 - Widget tests in Flutter are cheap and fast
 - The main source of bugs is often the coupling between UI and logic anyway
 - Keeping UI and logic together improves discoverability and reduces cognitive load
@@ -55,14 +61,17 @@ We favor coupling UI to logic because:
 ## Services Architecture
 
 ### Stateless Services (Global)
+
 Services that are **strictly stateless** can be global singletons or static classes.
 
 **Characteristics of stateless services:**
+
 - No mutable state
 - Pure functions or functions that only read from external sources (e.g., API calls)
 - Thread-safe and can be called from anywhere
 
 **Example:**
+
 ```dart
 // lib/shared/services/api_service.dart
 class ApiService {
@@ -78,23 +87,25 @@ class ApiService {
 ```
 
 ### Stateful Services (Widget Tree)
+
 Any service that maintains state **must** be mounted in the widget tree using Provider.
 
 **Example:**
+
 ```dart
 // lib/shared/services/auth_service.dart
 class AuthService extends ChangeNotifier {
   User? _currentUser;
-  
+
   User? get currentUser => _currentUser;
-  
+
   bool get isAuthenticated => _currentUser != null;
-  
+
   Future<void> login(String email, String password) async {
     _currentUser = await ApiService.instance.authenticate(email, password);
     notifyListeners();
   }
-  
+
   void logout() {
     _currentUser = null;
     notifyListeners();
@@ -109,15 +120,17 @@ ListenableProvider<AuthService>(
 ```
 
 ### Service Dependencies: Context-Based Lookup
+
 Services that consume other services **must never store references** to service instances. Instead, look up services at evaluation time using `context`.
 
 **❌ Bad: Storing service references**
+
 ```dart
 class OrderService extends ChangeNotifier {
   final AuthService _authService; // ❌ Don't store references
-  
+
   OrderService(this._authService);
-  
+
   Future<void> createOrder(Order order) async {
     final userId = _authService.currentUser?.id; // ❌ Using stored reference
     // ...
@@ -126,12 +139,13 @@ class OrderService extends ChangeNotifier {
 ```
 
 **✅ Good: Context-based lookup**
+
 ```dart
 /// Reference dependencies that are looked up via [BuildContext] in the doc comment
 
 class OrderService extends ChangeNotifier {
   // No stored references
-  
+
   Future<void> createOrder(BuildContext context, Order order) async {
     // Lookup the services you require here.
   }
@@ -143,6 +157,7 @@ class OrderService extends ChangeNotifier {
 ## Provider Usage Patterns
 
 ### Basic Provider Setup
+
 ```dart
 // In main.dart or feature root
 Provider<MyService>(
@@ -152,6 +167,7 @@ Provider<MyService>(
 ```
 
 ### Reading Providers
+
 ```dart
 // Read without listening (for one-time access)
 final service = context.read<MyService>();
@@ -164,6 +180,7 @@ final service = Provider.of<MyService>(context, listen: true);
 ```
 
 ### Provider Best Practices
+
 1. **Use `context.read<T>()`** for one-time access (e.g., in callbacks)
 2. **Use `context.watch<T>()`** when the widget needs to rebuild on changes
 3. **Place providers** as high in the tree as needed, but no higher
@@ -172,6 +189,7 @@ final service = Provider.of<MyService>(context, listen: true);
 ## Testing Strategy
 
 ### Widget Tests are Primary
+
 Since we favor UI-logic coupling, widget tests are the primary testing mechanism:
 
 ```dart
@@ -182,12 +200,13 @@ testWidgets('UserProfile displays user name', (tester) async {
       child: MaterialApp(home: UserProfile()),
     ),
   );
-  
+
   expect(find.text('John Doe'), findsOneWidget);
 });
 ```
 
 ### Unit Tests for Pure Logic
+
 Use unit tests for pure business logic that doesn't depend on Flutter:
 
 ```dart
@@ -200,6 +219,7 @@ test('calculateTotal adds items correctly', () {
 ## Common Patterns
 
 ### Feature with Provider
+
 ```dart
 // lib/todos/todos.dart
 class TodosScreen extends StatelessWidget {
@@ -225,7 +245,7 @@ class TodosScreen extends StatelessWidget {
 class TodosProvider extends ChangeNotifier {
   List<Todo> _todos = [];
   List<Todo> get todos => _todos;
-  
+
   void addTodo(Todo todo) {
     _todos.add(todo);
     notifyListeners();
@@ -245,6 +265,7 @@ class TodosList extends StatelessWidget {
 ```
 
 ### Stateless Service Usage
+
 ```dart
 // In a widget callback
 LdButton(
@@ -266,6 +287,7 @@ Build methods have a tendency to become very long and complicated. Follow these 
 Compute all styles, properties, and derived values before building the widget tree. This keeps the widget tree clean and makes it easier to understand what's being rendered.
 
 **❌ Bad: Computing in the widget tree**
+
 ```dart
 @override
 Widget build(BuildContext context) {
@@ -287,6 +309,7 @@ Widget build(BuildContext context) {
 ```
 
 **✅ Good: Computing before returning**
+
 ```dart
 @override
 Widget build(BuildContext context) {
@@ -335,6 +358,7 @@ Widget build(BuildContext context) {
 For widgets that expose builder functions (e.g., `LayoutBuilder`, `Builder`, `Consumer`), keep simple decisions inline in the builder. If the logic becomes complicated, extract it to a private method.
 
 **✅ Good: Simple logic in builder**
+
 ```dart
 @override
 Widget build(BuildContext context) {
@@ -348,6 +372,7 @@ Widget build(BuildContext context) {
 ```
 
 **✅ Good: Complex logic extracted to private method**
+
 ```dart
 @override
 Widget build(BuildContext context) {
@@ -361,7 +386,7 @@ Widget _buildLayout(BuildContext context, BoxConstraints constraints) {
   final isWide = constraints.maxWidth > 600;
   final isTall = constraints.maxHeight > 800;
   final padding = isWide ? LdSize.l : LdSize.m;
-  
+
   if (isWide && isTall) {
     return _buildWideTallLayout(theme, padding);
   } else if (isWide) {
@@ -377,10 +402,11 @@ Widget _buildLayout(BuildContext context, BoxConstraints constraints) {
 Prefer switch statements (with the new `=>` syntax) over nested ternary operators. Switch statements are more readable and easier to maintain.
 
 **❌ Bad: Nested ternary operators**
+
 ```dart
 @override
 Widget build(BuildContext context) {
-  return status == 'loading' 
+  return status == 'loading'
     ? LoadingWidget()
     : status == 'error'
       ? ErrorWidget(error)
@@ -391,6 +417,7 @@ Widget build(BuildContext context) {
 ```
 
 **✅ Good: Switch statement**
+
 ```dart
 @override
 Widget build(BuildContext context) {
@@ -408,6 +435,7 @@ Widget build(BuildContext context) {
 When you need to conditionally wrap a widget with a parent, use `LdWrapConditional` instead of ternary operators or if statements.
 
 **❌ Bad: Ternary operator for conditional wrapping**
+
 ```dart
 @override
 Widget build(BuildContext context) {
@@ -421,6 +449,7 @@ Widget build(BuildContext context) {
 ```
 
 **✅ Good: LdWrapConditional**
+
 ```dart
 @override
 Widget build(BuildContext context) {
@@ -440,6 +469,7 @@ Widget build(BuildContext context) {
 For components that expose both a builder function and a child parameter, only move widgets into the builder that are actually affected by the builder's context (e.g., constraints). Keep unaffected widgets as the child parameter.
 
 **❌ Bad: Moving all widgets into builder**
+
 ```dart
 @override
 Widget build(BuildContext context) {
@@ -459,6 +489,7 @@ Widget build(BuildContext context) {
 ```
 
 **✅ Good: Only affected widgets in builder**
+
 ```dart
 @override
 Widget build(BuildContext context) {
@@ -490,7 +521,7 @@ Widget build(BuildContext context) {
 6. **Service dependencies**: Lookup at evaluation time, never store references
 7. **Context in callbacks**: Never pass context to services, pass it to callbacks
 8. **Test with widgets**: Widget tests are your primary testing tool
-9. **Async operations**: Use `LdSubmit` for async operations that might fail (see `ldsubmit_usage.mdc`, `ldsubmit_errors.mdc`, and `ldsubmit_best_practices.mdc` for detailed guidance)
+9. **Async operations**: Use `LdSubmit` for async operations that might fail or that have a loading state. (see `ldsubmit_usage.mdc`, `ldsubmit_errors.mdc`, and `ldsubmit_best_practices.mdc` for detailed guidance)
 10. **App root setup**: See `app_root_setup.mdc` for root widget tree hierarchy and initialization patterns
 
 This architecture keeps your codebase simple, testable, and maintainable while leveraging Flutter's strengths.

@@ -1,14 +1,17 @@
 ---
 alwaysApply: true
 ---
+
 # Liquid Flutter (Design System)
 
 ## Overview
+
 The Liquid Flutter design system provides a comprehensive set of components and utilities for building consistent, beautiful Flutter applications. This guide helps agents quickly understand and apply the design system effectively.
 
 ## Core Components for General Tasks
 
 ### Layout Components
+
 - **LdScaffold**: Main page scaffold with app bars and drawer support. Use `appBars` parameter (List) to pass app bars.
 - **LdAppBar**: App bar component. Pass as a List to LdScaffold's `appBars` parameter.
 - **LdScaffoldBody**: Body wrapper for scaffold content. Use `addContainer: true` for automatic container padding.
@@ -18,6 +21,7 @@ The Liquid Flutter design system provides a comprehensive set of components and 
 - **LdContainer**: Container component with theme-aware styling.
 
 ### Text Components
+
 - **LdText**: Primary text component. Use factory constructors:
   - `LdText.h()` / `LdText.hl()` / `LdText.hs()` / `LdText.hxs()` - Headlines (large, large, small, extra-small)
   - `LdText.p()` - Paragraphs (body text)
@@ -26,11 +30,12 @@ The Liquid Flutter design system provides a comprehensive set of components and 
 - **Rule**: Always use LdText for labels and paragraphs unless the text is a child of another UI component like a button.
 
 ### Form Components
+
 - **LdInput**: Text input field
 - **LdButton**: Button component with variants
   - Mode variants: `LdButton.filled`, `LdButton.outline`, `LdButton.ghost`, `LdButton.vague`
     - To build an icon button you can simply pass an icon as child.
-  - Color variants: `LdButton.warning`, `LdButton.error`, `LdButton.success` 
+  - Color variants: `LdButton.warning`, `LdButton.error`, `LdButton.success`
 - **LdCheckbox**: Checkbox input
 - **LdRadio**: Radio button input
 - **LdSwitch**: Toggle switch
@@ -40,22 +45,26 @@ The Liquid Flutter design system provides a comprehensive set of components and 
 - **LdTimePicker**: Time picker
 
 ### List Components
+
 - **LdList**: List container
 - **LdListItem**: List item component. When placing in LdCard, set Card padding to 0 and use Column.
 - **LdListEmpty**: Empty state for lists
 - **LdListLoading**: Loading state for lists
 
 ### Feedback Components
+
 - **LdNotification**: Notification component
 - **LdHint**: Hint/info component
 - **LdLoading**: Loading indicator
 - **LdExceptionView**: Error/exception display
 
 ### Modal/Dialog Components
+
 - **LdModalRoute**: Use for dialogs, modals, and sheets. Provides consistent modal behavior.
 - **LdSheet**: Sheet component (bottom sheet)
 
 ### Other Common Components
+
 - **LdBadge**: Badge component
 - **LdTag**: Tag component
 - **LdAvatar**: Avatar component, also used to place leading icons or initials in LdListItems
@@ -67,7 +76,9 @@ The Liquid Flutter design system provides a comprehensive set of components and 
 ## Spacing
 
 ### Padding
+
 Apply padding using extension methods on Widget:
+
 - `.padXS()` / `.padS()` / `.padM()` / `.padL()` - Symmetric padding (all sides)
 - `.pad(LdSize.size)` - Custom size symmetric padding
 - `.padBalXS()` / `.padBalS()` / `.padBalM()` / `.padBalL()` - Balanced padding (horizontal stronger than vertical)
@@ -77,13 +88,16 @@ Apply padding using extension methods on Widget:
 - `.insetLeft()` / `.insetRight()` / `.insetTop()` / `.insetBottom()` - Single side padding
 
 **Alternative**: Use `LdTheme.of(context).pad(size)` method:
+
 ```dart
 LdTheme.of(context).pad(LdSize.m)  // Returns EdgeInsets
 LdTheme.of(context).balPad(LdSize.m)  // Returns balanced EdgeInsets
 ```
 
 ### Spacers
+
 Use spacer constants for spacing between widgets:
+
 - `ldSpacerXS` / `ldSpacerS` / `ldSpacerM` / `ldSpacerL` - General spacers
 - `ldHSpacerXS` / `ldHSpacerS` / `ldHSpacerM` / `ldHSpacerL` - Horizontal spacers
 - `ldVSpacerXS` / `ldVSpacerS` / `ldVSpacerM` / `ldVSpacerL` - Vertical spacers
@@ -91,21 +105,26 @@ Use spacer constants for spacing between widgets:
 **Rule**: When arranging items in a Column, unless you require no spacing, use `LdAutoSpace()` which automatically applies appropriate spacing based on component types.
 
 ### Row/Column Spacing
+
 For Row and Column widgets, use extension methods:
+
 - `.spaceXS()` / `.spaceS()` / `.spaceM()` / `.spaceL()` - Applies spacing between children
 
 ## Text Usage
 
 ### When to Use LdText
+
 - **Always** use LdText for standalone labels and paragraphs
 - **Exception**: Don't use LdText when text is a child of another UI component (e.g., button labels)
 
 ### Text Shorthands
+
 - `LdText.p()` - For paragraphs/body text
 - `LdText.l()` - For labels
 - `LdText.h()` - For headlines
 
 ### Example
+
 ```dart
 LdAutoSpace(
   children: [
@@ -122,9 +141,11 @@ LdAutoSpace(
 ## Colors
 
 ### Retrieving Colors from Theme
+
 Access colors via `LdTheme.of(context)`:
 
 **Semantic Colors:**
+
 - `theme.text` - Default text color
 - `theme.textMuted` - Muted text color
 - `theme.background` - Page background color
@@ -134,20 +155,24 @@ Access colors via `LdTheme.of(context)`:
 - `theme.stroke` - Stroke color
 
 **Primary Colors:**
+
 - `theme.primaryColor` - Primary color
 - `theme.primaryColorText` - Contrasting text for primary
 - `theme.secondaryColor` - Secondary color
 - `theme.secondaryColorText` - Contrasting text for secondary
 
 **State Colors:**
+
 - `theme.errorColor` / `theme.errorColorText` - Error state
 - `theme.successColor` / `theme.successColorText` - Success state
 - `theme.warningColor` / `theme.warningColorText` - Warning state
 
 **Neutral Shades:**
+
 - `theme.neutralShade(int shade)` - Get neutral shade (0-10, where 0 is lightest, 10 is darkest)
 
 **Color Names:**
+
 - `theme.primary` - Returns LdColor name
 - `theme.secondary` - Returns LdColor name
 - `theme.success` - Returns LdColor name
@@ -155,12 +180,12 @@ Access colors via `LdTheme.of(context)`:
 - `theme.error` - Returns LdColor name
 
 ### Example
+
 ```dart
 Container(
   color: LdTheme.of(context).surface,
   child: LdText.p(
     "Text",
-    color: LdTheme.of(context).text,
   ),
 )
 ```
@@ -168,12 +193,14 @@ Container(
 ## Border Radius
 
 Apply border radius using:
+
 - `LdTheme.of(context).radius(LdSize.size)` - Returns BorderRadius
 - `LdTheme.of(context).radiusSize(LdSize.size)` - Returns double
 
 Available sizes: `LdSize.xs`, `LdSize.s`, `LdSize.m`, `LdSize.l`
 
 ### Example
+
 ```dart
 Container(
   decoration: BoxDecoration(
@@ -185,23 +212,25 @@ Container(
 ## Common Patterns
 
 ### Scaffold with AppBar
+
 ```dart
 LdScaffold(
   appBars: [
     LdAppBar(
-      title: LdText.h("Page Title"),
+      title: Text("Page Title"), // Do not use LdText here
     ),
   ],
   body: LdScaffoldBody(
     addContainer: true,
     children: [
-      // Content here
+      // Content here, will be automatically scrolling and spaced
     ],
   ),
 )
 ```
 
 ### Card with ListItems
+
 ```dart
 LdCard(
   padding: EdgeInsets.zero, // Important: zero padding
@@ -215,6 +244,7 @@ LdCard(
 ```
 
 ### Modal/Dialog
+
 ```dart
 // Use LdModalRoute for navigation-based modals
 LdModalRoute(
@@ -224,6 +254,7 @@ LdModalRoute(
 ```
 
 ### Auto-Spaced Column
+
 ```dart
 LdAutoSpace(
   children: [
@@ -239,6 +270,7 @@ LdAutoSpace(
 ## Size System
 
 The design system uses `LdSize` enum:
+
 - `LdSize.xs` - Extra small
 - `LdSize.s` - Small
 - `LdSize.m` - Medium (default)
