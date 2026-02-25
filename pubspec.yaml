@@ -10,6 +10,7 @@ workspace:
   - packages/liquid_flutter_test_utils
   - packages/liquid_flutter/extension/devtools/liquid_flutter_extension
   - apps/example
+  - apps/liquid-gen
 dev_dependencies:
   melos: ^7.1.0
 
