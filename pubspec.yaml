@@ -9,6 +9,7 @@ workspace:
   - packages/liquid_generators
   - packages/liquid_flutter_test_utils
   - packages/liquid_flutter/extension/devtools/liquid_flutter_extension
+  - packages/liquid_flutter_md
   - apps/example
 dev_dependencies:
   melos: ^7.1.0
@@ -18,6 +19,7 @@ melos:
     testable:
       - packages/liquid_flutter
       - packages/liquid_flutter_test_utils
+      - packages/liquid_flutter_md
   scripts:
     test:
       exec: flutter test
