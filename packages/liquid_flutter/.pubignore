@@ -5,8 +5,9 @@ node_modules/
 test/
 .dockerignore
 logo.png
+extensions/devtools/liquid_flutter_extension
 
 example/
 generators/
-build/
+
 mobile_screens.webp

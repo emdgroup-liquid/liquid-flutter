@@ -25,8 +25,9 @@
 **/doc/api/
 .dart_tool/
 .packages
+example/build/
+apps/example/build/
 build/
-
 **/.flutter-plugins-dependencies
 **/.flutter-plugins
 **/.packages
@@ -38,6 +39,7 @@ coverage/
 .fvm/flutter_sdk
 
 
+packages/liquid_flutter/extension/devtools/liquid_flutter_extension/build/
 packages/liquid_flutter/test/failures/
 packages/liquid_flutter_test_utils/test/failures/
 
@@ -45,3 +47,4 @@ packages/liquid_flutter_test_utils/test/failures/
 **/test/goldens/**/*.png
 
 **/test-results.json
+
