@@ -1,3 +1,3 @@
-## 0.0.1
+## 0.0.1-1
 
-* TODO: Describe initial release.
+Refer to the changelog in the parent directory.
