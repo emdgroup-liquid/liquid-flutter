@@ -83,7 +83,7 @@ class LdMonkeyShell<T extends Identifiable<IdType>, IdType> extends StatefulWidg
   /// Flex ratio for the detail panel in side-by-side layout.
   ///
   /// Higher values give more space to the detail view. Defaults to 2.
-  final int? detailPanelFlex;
+  final double detailPanelFlex;
 
   /// Function to generate the detail path for a set of selected item IDs.
   ///
@@ -221,6 +221,7 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
 
   /// Callback when URL changes - applies URL to state.
   void _onUrlChange() {
+    print('Updating URL from ${widget.routeSelection}');
     // If we're currently applying state to URL, skip this update to prevent loop
     if (_urlUpdateMutex != null) {
       return;
@@ -239,6 +240,7 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
 
     if (widget.routeSelection != "filters") {
       final newViewingIds = _parseSelected(widget.routeSelection ?? "");
+
       state.setViewingItems(newViewingIds);
     }
   }
@@ -341,7 +343,7 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
 
   LdMonkeyEffectiveLayoutMode _geteEffectiveLayoutMode(BoxConstraints constraints) {
     final wouldBeSideBySide = constraints.maxWidth > widget.reflowBreakpoint;
-    final showingDetatil = _showingDetail;
+    final showingDetatil = _state.viewingItems.isNotEmpty;
 
     return switch (widget.layoutMode) {
       LdMonkeyLayoutMode.sideBySide => LdMonkeyEffectiveLayoutMode.sideBySide,
@@ -459,7 +461,7 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
                         visibleStartIndex: 0,
                         spacing: 0,
                         visibleEndIndex: showDetail ? 1 : 0,
-                        widths: const [PanelWidth.fill(), PanelWidth.fill(fillFlex: 2)],
+                        widths: [PanelWidth.fill(), PanelWidth.fill(fillFlex: widget.detailPanelFlex)],
                         children: [
                           Provider.value(
                               value: showDetail ? LdDrawerSlot.drawer : LdDrawerSlot.body, child: widget.masterPage),
