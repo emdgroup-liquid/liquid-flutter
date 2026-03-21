@@ -37,7 +37,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
   Widget build(BuildContext context) {
     context.watch<LdMonkeyShellState<T, IdType>>();
 
-    final effectiveLayout = context.read<LdMonkeyEffectiveLayoutMode>();
+    final effectiveLayout = context.watch<LdMonkeyEffectiveLayoutMode>();
     final repository = LdRepository.of<T, IdType>(context);
     final searchFilter = _getSearchFilter(context);
     final showSearch = searchFilter != null && location == LdMonkeyActionLocation.masterSecondary;
