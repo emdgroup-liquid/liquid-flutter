@@ -31,16 +31,6 @@ class LdException extends Error {
     this.exception,
   });
 
-  factory LdException.fromDynamic(BuildContext context, dynamic e) {
-    final exceptionMapper = context.read<LdExceptionMapper?>() ??
-        LdExceptionMapper(
-          localizations: LiquidLocalizations.of(context),
-        );
-    final ldException = exceptionMapper.handle(e);
-
-    return ldException;
-  }
-
   LdException copyWith({
     String? message,
     String? moreInfo,
@@ -58,28 +48,55 @@ class LdException extends Error {
     );
   }
 
+  @override
+  String toString() {
+    return "LdException(canRetry: $canRetry, type: $type, exception: $exception, stackTrace: $stackTrace, attempt: $attempt)";
+  }
+
   LdLocalizedException localize(BuildContext context) {
-    final exceptionMapper = context.read<LdExceptionMapper?>() ??
-        LdExceptionMapper(
-          localizations: LiquidLocalizations.of(context),
-        );
-    return exceptionMapper.handle(this);
+    if (this is LdLocalizedException) {
+      return this as LdLocalizedException;
+    }
+    final exceptionMapper = context.read<LdExceptionLocalizerMapper?>();
+    if (exceptionMapper == null) {
+      return LdExceptionLocalizerMapper(
+        onException: (context, e) => null,
+      ).handle(
+        context: context,
+        e: this,
+      );
+    }
+    return exceptionMapper.handle(
+      context: context,
+      e: this,
+    );
   }
 }
 
 class LdLocalizedException extends LdException {
   final String message;
   final String? moreInfo;
+  final Widget Function(BuildContext context)? additionalBuilder;
+  final Widget Function(BuildContext context)? additionalDetailsBuilder;
+  final Widget Function(BuildContext context)? customIconBuilder;
 
   LdLocalizedException({
     required this.message,
     this.moreInfo,
+    this.additionalBuilder,
+    this.additionalDetailsBuilder,
+    this.customIconBuilder,
     super.canRetry = true,
     super.type = LdHintType.error,
     super.attempt,
     super.stackTrace,
     super.exception,
   });
+
+  @override
+  String toString() {
+    return "LdLocalizedException(message: $message, moreInfo: $moreInfo, canRetry: $canRetry, type: $type, attempt: $attempt, stackTrace: $stackTrace, exception: $exception)";
+  }
 
   factory LdLocalizedException.fromLdException({
     required LdException exception,

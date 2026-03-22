@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/l10n/generated/liquid_localizations_en.dart';
 
 class CounterProvider extends StatefulWidget {
   final Widget Function(BuildContext context, int counter) builder;
@@ -168,15 +167,12 @@ void main() {
   });
 
   testWidgets("LdSubmit with custom exception mapper", (WidgetTester tester) async {
-    final customMapper = LdExceptionMapper(
-      localizations: LiquidLocalizationsEn(),
-      onException: (e, {stackTrace}) {
-        return LdLocalizedException(
-          message: "Custom exception",
-          type: LdHintType.error,
-        );
-      },
-    );
+    LdLocalizedException customMapper(context, e) {
+      return LdLocalizedException(
+        message: "Custom exception",
+        type: LdHintType.error,
+      );
+    }
 
     final completer = Completer<void>();
 
@@ -185,8 +181,8 @@ void main() {
         localizationsDelegates: const [LiquidLocalizations.delegate],
         home: LdThemeProvider(
           child: Scaffold(
-            body: LdExceptionMapperProvider(
-              exceptionMapper: customMapper,
+            body: LdExceptionLocalizer(
+              onException: customMapper,
               child: LdSubmit<int, void>(
                 config: LdSubmitConfig(action: (arg) async {
                   await completer.future;

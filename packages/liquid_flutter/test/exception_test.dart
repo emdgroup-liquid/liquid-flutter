@@ -168,9 +168,11 @@ void main() {
               return SizedBox(
                 width: 500,
                 height: 500,
-                child: LdExceptionView.fromDynamic(
-                  const SocketException('Network error'),
-                  context,
+                child: LdExceptionView(
+                  exception: LdException(
+                    exception: const SocketException('Network error'),
+                    stackTrace: StackTrace.current,
+                  ),
                   retry: () {},
                 ),
               );
@@ -318,6 +320,143 @@ void main() {
           ),
         );
       }, throwsAssertionError);
+    });
+  });
+
+  group('LdExceptionLocalizerMapper Tests', () {
+    testWidgets('parent fallback and default fallback work correctly', (WidgetTester tester) async {
+      // Create parent mapper
+      final parentMapper = LdExceptionLocalizerMapper(
+        onException: (context, e) {
+          if (e.exception is SocketException) {
+            return LdLocalizedException(
+              message: 'Parent handled SocketException',
+            );
+          }
+          return null;
+        },
+      );
+
+      // Create child mapper
+      final childMapper = LdExceptionLocalizerMapper(
+        parent: parentMapper,
+        onException: (context, e) {
+          if (e.exception is FormatException) {
+            return LdLocalizedException(
+              message: 'Child handled FormatException',
+            );
+          }
+          return null;
+        },
+      );
+
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          Builder(
+            builder: (context) {
+              // Test child handling
+              final childHandled = childMapper.handle(
+                context: context,
+                e: LdException(exception: const FormatException()),
+              );
+              expect(childHandled.message, 'Child handled FormatException');
+
+              // Test parent fallback
+              final parentHandled = childMapper.handle(
+                context: context,
+                e: LdException(exception: const SocketException('')),
+              );
+              expect(parentHandled.message, 'Parent handled SocketException');
+
+              // Test default fallback (unhandled)
+              final defaultHandled = childMapper.handle(
+                context: context,
+                e: LdException(exception: Exception('Unknown error')),
+              );
+              expect(defaultHandled.message, LiquidLocalizationsEn().unknownError);
+
+              return const SizedBox();
+            },
+          ),
+        ),
+      );
+    });
+  });
+
+  group('LdExceptionView Custom Builders', () {
+    final customException = LdLocalizedException(
+      message: 'Custom Exception',
+      moreInfo: 'With custom builders',
+      customIconBuilder: (context) => const Icon(Icons.star, key: Key('custom-icon')),
+      additionalBuilder: (context) => const Text('Additional Build', key: Key('additional-builder')),
+      additionalDetailsBuilder: (context) => const Text('Details Build', key: Key('details-builder')),
+    );
+
+    testWidgets('vertical layout renders customIconBuilder and additionalDetailsBuilder', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          SizedBox(
+            width: 300,
+            height: 300,
+            child: LdExceptionView(
+              exception: customException,
+              direction: Axis.vertical,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('custom-icon')), findsOneWidget);
+      expect(find.byKey(const Key('details-builder')), findsOneWidget);
+      expect(find.byKey(const Key('additional-builder')), findsNothing);
+    });
+
+    testWidgets('horizontal layout renders customIconBuilder and additionalBuilder', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          SizedBox(
+            width: 300,
+            height: 300,
+            child: LdExceptionView(
+              exception: customException,
+              direction: Axis.horizontal,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('custom-icon')), findsOneWidget);
+      expect(find.byKey(const Key('additional-builder')), findsOneWidget);
+      expect(find.byKey(const Key('details-builder')), findsNothing);
+    });
+
+    testWidgets('dialog renders additionalDetailsBuilder', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          SizedBox(
+            width: 300,
+            height: 300,
+            child: LdExceptionView(
+              exception: customException,
+              direction: Axis.horizontal,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tap the "more info" button
+      final moreInfoFinder = find.byKey(const Key('more-info-button'));
+      expect(moreInfoFinder, findsOneWidget);
+      await tester.tap(moreInfoFinder.first);
+      await tester.pumpAndSettle();
+
+      // In the modal dialog, the additionalDetailsBuilder should be present
+      expect(find.byKey(const Key('details-builder')), findsOneWidget);
+      // The dialog also displays the custom icon
+      expect(find.byKey(const Key('custom-icon')), findsWidgets);
     });
   });
 }

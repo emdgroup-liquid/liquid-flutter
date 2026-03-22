@@ -35,6 +35,9 @@ class LdExceptionDialog extends StatelessWidget {
       ],
       body: LdScaffoldBody(
         children: [
+          if (localizedError.customIconBuilder != null) ...[
+            localizedError.customIconBuilder!(context),
+          ],
           LdText.h(
             localizedError.message,
             textAlign: TextAlign.center,
@@ -46,6 +49,9 @@ class LdExceptionDialog extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             ),
+          if (localizedError.additionalDetailsBuilder != null) ...[
+            localizedError.additionalDetailsBuilder!(context),
+          ],
           if (kDebugMode && localizedError.stackTrace != null) ...[
             LdHint(
               type: LdHintType.info,

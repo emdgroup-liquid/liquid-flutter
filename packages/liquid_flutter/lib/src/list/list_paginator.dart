@@ -47,7 +47,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
   bool _busy = false;
 
-  Object? _error;
+  LdException? _error;
 
   Completer? _currentOperation;
   final List<int> _offsetQueue = List.empty(growable: true);
@@ -130,9 +130,8 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
       )
       .length;
 
-  Object? get error => _error;
-  StackTrace? get errorStackTrace => _errorStackTrace;
-  StackTrace? _errorStackTrace;
+  LdException? get error => _error;
+
   bool get hasError => _error != null;
 
   List<T?> get items => List<T?>.generate(totalItems, (i) => _items[i]?.value);
@@ -520,7 +519,10 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
         _setError(null);
       }
     } catch (e, s) {
-      _setError(e, stackTrace: s);
+      _setError(LdException(
+        exception: e,
+        stackTrace: s,
+      ));
       _requestedOffsets.remove(offset); // Allow retry if there was an error
     }
 
@@ -563,9 +565,8 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     notifyListeners();
   }
 
-  void _setError(Object? error, {StackTrace? stackTrace}) {
+  void _setError(LdException? error) {
     _error = error;
-    _errorStackTrace = stackTrace;
     notifyListeners();
   }
 

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:provider/provider.dart';
 
 /// Renders an LdException
 class LdExceptionView extends StatelessWidget {
   /// The exception to render
-  final LdLocalizedException exception;
+  final LdException exception;
 
   /// The controller for managing retry operations
   final LdRetryController? retryController;
@@ -28,31 +27,6 @@ class LdExceptionView extends StatelessWidget {
           retryController == null || retry == null,
           'Cannot provide both retryController and retry. Use only one.',
         );
-
-  /// Creates an LdExceptionView from a dynamic error.
-  /// Uses the [LdExceptionMapper] to map the error to an LdException.
-  factory LdExceptionView.fromDynamic(
-    dynamic error,
-    BuildContext context, {
-    Axis direction = Axis.vertical,
-    LdRetryController? retryController,
-    VoidCallback? retry,
-    StackTrace? stackTrace,
-  }) {
-    final exceptionMapper = context.read<LdExceptionMapper?>() ??
-        LdExceptionMapper(
-          localizations: LiquidLocalizations.of(context),
-        );
-
-    final ldException = exceptionMapper.handle(error, stackTrace: stackTrace);
-
-    return LdExceptionView(
-      exception: ldException,
-      retryController: retryController,
-      retry: retry,
-      direction: direction,
-    );
-  }
 
   LdColor color(BuildContext context) {
     switch (exception.type) {
@@ -117,18 +91,20 @@ class LdExceptionView extends StatelessWidget {
     VoidCallback moreInfo,
     LdRetryController? controller,
   ) {
+    final localizedException = exception.localize(context);
     return LdAutoSpace(
       children: [
         LdReveal.quick(
           revealed: true,
           initialRevealed: false,
-          child: LdHint(
-            type: exception.type,
-            child: Text(
-              exception.message,
-              key: const Key('exception-message'),
-            ),
-          ),
+          child: localizedException.customIconBuilder?.call(context) ??
+              LdHint(
+                type: exception.type,
+                child: Text(
+                  localizedException.message,
+                  key: const Key('exception-message'),
+                ),
+              ),
         ),
         Row(
           mainAxisSize: MainAxisSize.min,
@@ -141,12 +117,15 @@ class LdExceptionView extends StatelessWidget {
               ),
             ],
             LdReveal.quick(
-              revealed: exception.moreInfo != null,
+              revealed: localizedException.moreInfo != null,
               initialRevealed: false,
               child: _buildDialogButton(context, moreInfo),
             ),
           ],
-        ).spaceM()
+        ).spaceM(),
+        if (localizedException.additionalBuilder != null) ...[
+          localizedException.additionalBuilder!(context),
+        ],
       ],
     );
   }
@@ -156,27 +135,32 @@ class LdExceptionView extends StatelessWidget {
     VoidCallback moreInfo,
     LdRetryController? controller,
   ) {
+    final localizedException = exception.localize(context);
     return LdAutoSpace(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        LdHint(
-          type: exception.type,
-          size: LdSize.l,
-        ),
+        localizedException.customIconBuilder?.call(context) ??
+            LdHint(
+              type: exception.type,
+              size: LdSize.l,
+            ),
         LdText.p(
-          exception.message,
+          localizedException.message,
           textAlign: TextAlign.center,
         ),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (exception.moreInfo != null) _buildDialogButton(context, moreInfo),
+            if (localizedException.moreInfo != null) _buildDialogButton(context, moreInfo),
             if (controller?.showRetryButton == true) ...[
               ldSpacerM,
               _buildRetryButton(context, controller),
             ],
           ],
-        )
+        ),
+        if (localizedException.additionalDetailsBuilder != null) ...[
+          localizedException.additionalDetailsBuilder!(context),
+        ],
       ],
     );
   }

@@ -128,12 +128,28 @@ class LdSubmitController<T, Arg> {
       // Somehow the state is not loading anymore...
       if (!_isLoading) return;
 
+      late LdException exception;
+
+      if (e is LdLocalizedException) {
+        if (ldPrintDebugMessages) {
+          debugPrint(
+            "Throwing a localized exception is a bad practive. "
+            "Use an LdExceptionLocalizer to handle translations. "
+            "Otherwise exceptions will not respect the current locale.",
+          );
+        }
+      }
+
       // Convert the exception using the exceptionMapper
-      final exception = LdException(
-        exception: e,
-        stackTrace: s,
-        attempt: _retryController.state.attempt,
-      );
+      if (e is LdException) {
+        exception = e;
+      } else {
+        exception = LdException(
+          exception: e,
+          stackTrace: s,
+          attempt: _retryController.state.attempt,
+        );
+      }
 
       if (ldPrintDebugMessages) {
         debugPrint(

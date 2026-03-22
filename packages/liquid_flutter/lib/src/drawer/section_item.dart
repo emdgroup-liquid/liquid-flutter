@@ -95,12 +95,13 @@ class _LdDrawerItemSectionState extends State<LdDrawerItemSection> {
       onPressed: _onTap,
       color: _theme.palette.primary,
       builder: (context, colorBundle, status, _) => Container(
-          padding: _theme.pad(size: LdSize.s),
-          decoration: BoxDecoration(
-            color: colorBundle.surface,
-            borderRadius: _theme.radius(LdSize.m),
-          ),
-          child: Row(children: [
+        padding: _theme.pad(size: LdSize.s),
+        decoration: BoxDecoration(
+          color: colorBundle.surface,
+          borderRadius: _theme.radius(LdSize.m),
+        ),
+        child: Row(
+          children: [
             widget.leading != null
                 ? _leading(colorBundle.icon)
                 : const SizedBox(
@@ -108,14 +109,15 @@ class _LdDrawerItemSectionState extends State<LdDrawerItemSection> {
                     width: 10,
                   ),
             Expanded(
-                child: DefaultTextStyle(
-                    style: ldBuildTextStyle(
-                      _theme,
-                      LdTextType.label,
-                      LdSize.m,
-                      color: _theme.text,
-                    ),
-                    child: widget.child)),
+              child: DefaultTextStyle(
+                  style: ldBuildTextStyle(
+                    _theme,
+                    LdTextType.label,
+                    LdSize.m,
+                    color: _theme.text,
+                  ),
+                  child: widget.child),
+            ),
             IconTheme(
               data: IconThemeData(
                 color: colorBundle.icon,
@@ -123,7 +125,9 @@ class _LdDrawerItemSectionState extends State<LdDrawerItemSection> {
               ),
               child: _trailingItem,
             ),
-          ])),
+          ],
+        ),
+      ),
     );
   }
 

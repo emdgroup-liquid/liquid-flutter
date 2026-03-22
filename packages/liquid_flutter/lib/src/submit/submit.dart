@@ -147,8 +147,6 @@ class _LdSubmitState<T, Arg> extends State<LdSubmit<T, Arg>> {
       "You must provide either a config or a controller",
     );
 
-    return LdExceptionMapperProvider(
-      child: _buildProvider(context),
-    );
+    return _buildProvider(context);
   }
 }

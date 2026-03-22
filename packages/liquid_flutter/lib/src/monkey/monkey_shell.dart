@@ -221,7 +221,6 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
 
   /// Callback when URL changes - applies URL to state.
   void _onUrlChange() {
-    print('Updating URL from ${widget.routeSelection}');
     // If we're currently applying state to URL, skip this update to prevent loop
     if (_urlUpdateMutex != null) {
       return;
@@ -253,13 +252,17 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
     _sortSubscription = _repository!.sortStream.listen((_) {
       _onStateChange();
     });
-    _repositoryUpdatedItemsSubscription = _repository!.updatedItems.listen((item) {
-      if (item.state == LdPaginatorItemState.deleted && item.value?.id != null) {
-        state.setSelectedItems(
-          state.selectedItems.difference({item.value?.id!}),
-        );
-      }
-    });
+    _repositoryUpdatedItemsSubscription = _repository!.updatedItems.listen(
+      _onRepositoryUpdatedItems,
+    );
+  }
+
+  void _onRepositoryUpdatedItems(LdPaginatorItem<T> item) {
+    if (item.state == LdPaginatorItemState.deleted && item.value?.id != null) {
+      state.setViewingItems(
+        state.selectedItems.difference({item.value?.id!}),
+      );
+    }
   }
 
   /// Sets the visibility of selection controls and updates the URL.
