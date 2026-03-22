@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:provider/provider.dart';
 
-class LdSubmitLoadingIndicator extends StatelessWidget {
-  final bool loading;
-  final String? loadingText;
+class LdSubmitLoadingIndicator<T, Arg> extends StatelessWidget {
   final Axis direction;
 
-  const LdSubmitLoadingIndicator(
-      {super.key, required this.loading, this.loadingText, this.direction = Axis.horizontal});
+  const LdSubmitLoadingIndicator({
+    super.key,
+    this.direction = Axis.horizontal,
+  });
 
   @override
   Widget build(BuildContext context) {
-    if (!loading) {
-      return const SizedBox();
-    }
+    final controller = context.watch<LdSubmitController<T, Arg>>();
 
     return switch (direction) {
       (Axis.horizontal) => Row(
@@ -21,7 +20,7 @@ class LdSubmitLoadingIndicator extends StatelessWidget {
             const LdLoader(),
             ldSpacerS,
             LdText.l(
-              loadingText ?? LiquidLocalizations.of(context).loading,
+              controller.config.loadingText ?? LiquidLocalizations.of(context).loading,
             ),
           ],
         ),
@@ -30,7 +29,7 @@ class LdSubmitLoadingIndicator extends StatelessWidget {
             const LdLoader(),
             ldSpacerS,
             LdText.l(
-              loadingText ?? LiquidLocalizations.of(context).loading,
+              controller.config.loadingText ?? LiquidLocalizations.of(context).loading,
             ),
           ],
         ),

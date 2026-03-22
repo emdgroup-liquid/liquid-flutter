@@ -428,52 +428,64 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
       updateShouldNotify: (previous, next) => previous != next,
       child: ListenableProvider.value(
         value: _repository!,
-        child: LayoutBuilder(builder: (context, constraints) {
-          final effectiveLayout = _geteEffectiveLayoutMode(constraints);
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final effectiveLayout = _geteEffectiveLayoutMode(constraints);
 
-          if (effectiveLayout != _lastEffectiveLayout) {
-            _lastEffectiveLayout = effectiveLayout;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              state.setEffectiveLayout(effectiveLayout);
-            });
-          }
+            if (effectiveLayout != _lastEffectiveLayout) {
+              _lastEffectiveLayout = effectiveLayout;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                state.setEffectiveLayout(effectiveLayout);
+              });
+            }
 
-          if (effectiveLayout != LdMonkeyEffectiveLayoutMode.sideBySide) {
+            if (effectiveLayout != LdMonkeyEffectiveLayoutMode.sideBySide) {
+              return Provider.value(
+                value: effectiveLayout,
+                child: LdListItemConfigProvider(
+                  config: const LdListItemConfig(
+                    trailing: LdListDefaultTrailingForward(),
+                  ),
+                  child: widget.child,
+                ),
+              );
+            }
+
             return Provider.value(
               value: effectiveLayout,
-              child: LdListItemConfigProvider(
-                config: const LdListItemConfig(
-                  trailing: LdListDefaultTrailingForward(),
-                ),
-                child: widget.child,
+              child: ListenableBuilder(
+                listenable: state,
+                builder: (context, _) {
+                  final showDetail = _showingDetail;
+
+                  return Provider.value(
+                    value: LdDrawerState(isOpen: showDetail, isSideBySide: true),
+                    child: LdMultiPanelLayout(
+                      enableBorders: true,
+                      visibleStartIndex: 0,
+                      spacing: 0,
+                      visibleEndIndex: showDetail ? 1 : 0,
+                      widths: [PanelWidth.fill(), PanelWidth.fill(fillFlex: widget.detailPanelFlex)],
+                      children: [
+                        Provider.value(
+                          value: showDetail ? LdDrawerSlot.drawer : LdDrawerSlot.body,
+                          child: widget.masterPage,
+                        ),
+                        if (showDetail)
+                          Provider.value(
+                            value: LdDrawerSlot.body,
+                            child: widget.child,
+                          )
+                        else
+                          widget.child
+                      ],
+                    ),
+                  );
+                },
               ),
             );
-          }
-
-          return Provider.value(
-              value: effectiveLayout,
-              child: ListenableBuilder(
-                  listenable: state,
-                  builder: (context, _) {
-                    final showDetail = _showingDetail;
-
-                    return Provider.value(
-                      value: LdDrawerState(isOpen: showDetail, isSideBySide: true),
-                      child: LdMultiPanelLayout(
-                        enableBorders: true,
-                        visibleStartIndex: 0,
-                        spacing: 0,
-                        visibleEndIndex: showDetail ? 1 : 0,
-                        widths: [PanelWidth.fill(), PanelWidth.fill(fillFlex: widget.detailPanelFlex)],
-                        children: [
-                          Provider.value(
-                              value: showDetail ? LdDrawerSlot.drawer : LdDrawerSlot.body, child: widget.masterPage),
-                          if (showDetail) Provider.value(value: LdDrawerSlot.body, child: widget.child) else Container()
-                        ],
-                      ),
-                    );
-                  }));
-        }),
+          },
+        ),
       ),
     );
   }
@@ -489,7 +501,7 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
           return true;
         },
       ),
-      builder: LdSubmitCenteredBuilder<bool, void>(
+      child: LdSubmitCenteredBuilder<bool, void>(
         resultBuilder: (context, response, controller) => Provider.value(
           value: actions,
           child: ChangeNotifierProvider.value(

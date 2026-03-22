@@ -69,6 +69,7 @@ List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
                 if (effectiveLayout == LdMonkeyEffectiveLayoutMode.detail) {
                   if (detailInDialog) {
                     return LdModalPage(
+                      key: goState.pageKey,
                       builder: (context) => LdModalRoute(
                         context: context,
                         pageBuilder: (context) => page,

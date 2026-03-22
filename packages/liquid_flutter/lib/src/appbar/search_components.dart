@@ -395,7 +395,7 @@ class _LdSearchSuggestionsOverlayState extends State<LdSearchSuggestionsOverlay>
             final result = await widget.searchConfig.getSuggestions!(query);
             return result;
           }),
-      builder: LdSubmitCenteredBuilder<List<dynamic>, String>(
+      child: LdSubmitCenteredBuilder<List<dynamic>, String>(
         resultBuilder: (context, result, controller) {
           final suggestions = result;
 

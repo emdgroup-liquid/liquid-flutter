@@ -56,7 +56,7 @@ abstract class LdSubmitBuilder<T, Arg> extends StatelessWidget {
 class LdSubmit<T, Arg> extends StatefulWidget {
   final LdSubmitConfig<T, Arg>? config;
   final LdSubmitController<T, Arg>? controller;
-  final Widget? builder;
+  final Widget? child;
   final Arg? arg;
   final bool Function(Arg? oldArg, Arg? newArg)? argEquals;
 
@@ -67,7 +67,7 @@ class LdSubmit<T, Arg> extends StatefulWidget {
     this.controller,
 
     /// Will default to [LdSubmitInlineBuilder] if not provided
-    this.builder,
+    this.child,
     this.argEquals,
   });
 
@@ -76,7 +76,7 @@ class LdSubmit<T, Arg> extends StatefulWidget {
 }
 
 class _LdSubmitState<T, Arg> extends State<LdSubmit<T, Arg>> {
-  Widget get submitBuilder => widget.builder ?? LdSubmitInlineBuilder<T, Arg>();
+  Widget get submitBuilder => widget.child ?? LdSubmitInlineBuilder<T, Arg>();
 
   late final _argNotifier = ValueNotifier<Arg?>(widget.arg);
 
@@ -130,11 +130,14 @@ class _LdSubmitState<T, Arg> extends State<LdSubmit<T, Arg>> {
   @override
   void dispose() {
     _argNotifier.dispose();
+    if (_createdController) {
+      _controller?.dispose();
+    }
     super.dispose();
   }
 
   Widget _buildProvider(BuildContext context) {
-    return Provider.value(
+    return ListenableProvider.value(
       value: _controller,
       child: submitBuilder,
     );

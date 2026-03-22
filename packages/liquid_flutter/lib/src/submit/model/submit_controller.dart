@@ -10,7 +10,7 @@ import 'package:liquid_flutter/src/submit/model/devtools.dart';
 /// Handles the lifecyle of a submit action. Pass a [LdSubmitConfig] to the
 /// controller to configure the submit action.
 /// Updated LdSubmitController that uses LdRetryController
-class LdSubmitController<T, Arg> {
+class LdSubmitController<T, Arg> with ChangeNotifier {
   final LdSubmitConfig<T, Arg> config;
 
   late final String id;
@@ -69,6 +69,7 @@ class LdSubmitController<T, Arg> {
     if (!_stateController.isClosed) {
       _stateController.add(newState);
     }
+    notifyListeners();
   }
 
   bool get canCancel => config.allowCancel == true && _isLoading;
@@ -224,6 +225,7 @@ class LdSubmitController<T, Arg> {
 
   bool get disposed => _disposed;
 
+  @override
   void dispose() {
     if (_isLoading) {
       cancel();
@@ -233,6 +235,7 @@ class LdSubmitController<T, Arg> {
     _disposed = true;
     _stateController.close();
     SubmitDevTools.instance.unregisterController(this);
+    super.dispose();
   }
 
   Map<String, dynamic> toMap() {

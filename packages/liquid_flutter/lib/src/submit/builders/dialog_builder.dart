@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/submit/builders/submit_button.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class LdSubmitDialogBuilder<T, Arg> extends LdSubmitBuilder<T, Arg> {
@@ -137,52 +138,71 @@ class _LdSubmitDialogState<T, Arg> extends State<LdSubmitDialog<T, Arg>> {
     ).padL();
   }
 
+  void _handleDismiss() {
+    if (_submitController.state.type == LdSubmitStateType.error) {
+      if (_submitController.canRetry) {
+        _submitController.reset();
+      }
+    }
+    if (_submitController.state.type == LdSubmitStateType.loading) {
+      if (_submitController.canCancel) {
+        _submitController.cancel();
+      }
+    }
+  }
+
   Widget _overlayChildBuilder(BuildContext context) {
+    final theme = LdTheme.of(context);
     return Stack(
       children: [
         Positioned.fill(
           child: ColoredBox(
-            color: LdTheme.of(context).palette.neutral.shades[8].withAlpha(200),
+            color: theme.palette.neutral.shades[8].withAlpha(150),
           ),
         ),
-        ModalBarrier(onDismiss: () {
-          if (_submitController.state.type == LdSubmitStateType.error) {
-            if (_submitController.canRetry) {
-              _submitController.reset();
-            }
-          }
-          if (_submitController.state.type == LdSubmitStateType.loading) {
-            if (_submitController.canCancel) {
-              _submitController.cancel();
-            }
-          }
-        }),
+        ModalBarrier(onDismiss: _handleDismiss),
         Center(
-          child: Container(
-            decoration: BoxDecoration(
-              color: LdTheme.of(context).surface,
-              border: Border.all(
-                color: LdTheme.of(context).border,
-                width: 1,
-              ),
-              borderRadius: LdTheme.of(context).radius(LdSize.l),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minWidth: 300,
+              minHeight: 200,
+              maxWidth: 400,
+              maxHeight: 400,
             ),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minWidth: 300,
-                minHeight: 200,
-                maxWidth: 400,
-                maxHeight: 400,
+            child: Container(
+              decoration: BoxDecoration(
+                color: LdTheme.of(context).background,
+                border: Border.all(
+                  color: LdTheme.of(context).stroke,
+                  width: theme.borderWidth,
+                ),
+                borderRadius: LdTheme.of(context).radius(LdSize.l),
               ),
-              child: Center(
-                child: switch (_submitController.state.type) {
-                  (LdSubmitStateType.loading) => buildLoadingDialog(context, _submitController),
-                  (LdSubmitStateType.error) => buildErrorDialog(context, _submitController),
-                  (_) => Container(),
-                },
-              ),
-            ),
-          ).padL(),
+              child: Column(
+                children: [
+                  if (_submitController.canCancel || _submitController.canRetry)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        LdButton.vague(
+                          onPressed: _handleDismiss,
+                          child: Icon(LucideIcons.x),
+                        ),
+                      ],
+                    ),
+                  Expanded(
+                    child: Center(
+                      child: switch (_submitController.state.type) {
+                        (LdSubmitStateType.loading) => buildLoadingDialog(context, _submitController),
+                        (LdSubmitStateType.error) => buildErrorDialog(context, _submitController),
+                        (_) => Container(),
+                      },
+                    ),
+                  ),
+                ],
+              ).padS(),
+            ).padL(),
+          ),
         ),
       ],
     );
@@ -203,22 +223,17 @@ class _LdSubmitDialogState<T, Arg> extends State<LdSubmitDialog<T, Arg>> {
         if (widget.submitButtonBuilder != null)
           widget.submitButtonBuilder!(context, _submitController)
         else if (widget.showSubmitButton == true || _submitController.config.autoTrigger == false)
-          LdSubmitButton(
-            controller: _submitController,
-          ),
+          LdSubmitButton<T, Arg>(),
       ],
     );
 
-    if (widget.targetRoot) {
-      return OverlayPortal(
-        controller: _overlayController,
-        overlayChildBuilder: _overlayChildBuilder,
-        overlayLocation: OverlayChildLocation.rootOverlay,
-      );
-    }
     return OverlayPortal(
       controller: _overlayController,
       overlayChildBuilder: _overlayChildBuilder,
+      overlayLocation: switch (widget.targetRoot) {
+        true => OverlayChildLocation.rootOverlay,
+        false => OverlayChildLocation.nearestOverlay,
+      },
       child: child,
     );
   }

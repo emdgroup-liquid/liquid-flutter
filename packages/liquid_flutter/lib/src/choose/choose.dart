@@ -315,7 +315,7 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
           return allItems;
         },
       ),
-      builder: LdSubmitCustomBuilder<List<T>, Set<IdType>?>(
+      child: LdSubmitCustomBuilder<List<T>, Set<IdType>?>(
         builder: (context, controller, stateType) {
           final selectedItems = controller.state.result ?? <T>[];
 

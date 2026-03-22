@@ -134,7 +134,7 @@ void main() {
               config: LdSubmitConfig(action: (arg) async {
                 return await completer.future;
               }),
-              builder: const LdSubmitDialogBuilder<int, void>(),
+              child: const LdSubmitDialogBuilder<int, void>(),
             ),
           ),
         ),
@@ -321,7 +321,7 @@ void main() {
                 config: LdSubmitConfig(action: (arg) async {
                   return arg! + 2;
                 }),
-                builder: LdSubmitInlineBuilder<int, int>(
+                child: LdSubmitInlineBuilder<int, int>(
                   resultBuilder: (context, result, controller) {
                     return Text("The result is $result");
                   },
@@ -362,7 +362,7 @@ void main() {
                     action: (arg) async {
                       return arg! + 2;
                     }),
-                builder: LdSubmitInlineBuilder<int, int>(
+                child: LdSubmitInlineBuilder<int, int>(
                   resultBuilder: (context, result, controller) {
                     return Text("The result is $result");
                   },

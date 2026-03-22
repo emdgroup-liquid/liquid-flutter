@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/submit/builders/cancel_button.dart';
+import 'package:liquid_flutter/src/submit/builders/error_view.dart';
 import 'package:liquid_flutter/src/submit/builders/submit_button.dart';
 import 'package:provider/provider.dart';
 
@@ -13,15 +15,6 @@ class LdSubmitInlineBuilder<T, Arg> extends LdSubmitBuilder<T, Arg> {
   });
 
   final bool? showSubmitButton;
-
-  Widget buildSubmitButton(
-    BuildContext context,
-    LdSubmitController<T, Arg> controller,
-  ) {
-    return LdSubmitButton(
-      controller: controller,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,23 +34,16 @@ class LdSubmitInlineBuilder<T, Arg> extends LdSubmitBuilder<T, Arg> {
               if (errorBuilder != null)
                 errorBuilder!(context, state.error!, controller)
               else
-                LdExceptionView(
-                  exception: state.error!.localize(context),
+                LdSubmitErrorView<T, Arg>(
                   direction: Axis.horizontal,
-                  retryController: controller.retryController,
                 )
             else if (submitButtonBuilder != null)
               submitButtonBuilder!(context, controller)
             else if (showSubmitButton == true || controller.config.autoTrigger == false)
-              LdSubmitButton(
-                controller: controller,
-              ),
+              LdSubmitButton<T, Arg>(),
             LdReveal.quick(
               revealed: controller.canCancel,
-              child: LdButton.ghost(
-                onPressed: controller.cancel,
-                child: Text(LiquidLocalizations.of(context).cancel),
-              ),
+              child: LdSubmitCancelButton<T, Arg>(),
             )
           ],
         );

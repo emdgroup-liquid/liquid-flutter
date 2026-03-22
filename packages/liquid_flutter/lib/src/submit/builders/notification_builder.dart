@@ -18,15 +18,6 @@ class LdSubmitNotificationBuilder<T, Arg> extends LdSubmitBuilder<T, Arg> {
 
   final String? successMessage;
 
-  Widget buildSubmitButton(
-    BuildContext context,
-    LdSubmitController<T, Arg> controller,
-  ) {
-    return LdSubmitButton(
-      controller: controller,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return _LdSubmitNotification<T, Arg>(
@@ -134,9 +125,7 @@ class _LdSubmitNotificationState<T, Arg> extends State<_LdSubmitNotification<T, 
             if (widget.submitButtonBuilder != null)
               widget.submitButtonBuilder!(context, controller)
             else if (widget.showSubmitButton == true || controller.config.autoTrigger == false)
-              LdSubmitButton(
-                controller: controller,
-              ),
+              LdSubmitButton<T, Arg>(),
             LdReveal.quick(
               revealed: controller.canCancel,
               child: LdButton.ghost(

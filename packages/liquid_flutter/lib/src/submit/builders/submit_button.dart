@@ -1,19 +1,24 @@
 import 'package:flutter/widgets.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:provider/provider.dart';
 
-class LdSubmitButton extends StatelessWidget {
-  final LdSubmitController controller;
-
+class LdSubmitButton<T, Arg> extends StatelessWidget {
   final Widget? leading;
   final Widget? trailing;
   final LdSize size;
   final LdColor? color;
 
-  const LdSubmitButton(
-      {super.key, required this.controller, this.leading, this.trailing, this.size = LdSize.m, this.color});
+  const LdSubmitButton({
+    super.key,
+    this.leading,
+    this.trailing,
+    this.size = LdSize.m,
+    this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final controller = context.watch<LdSubmitController<T, Arg>>();
     final state = controller.state;
 
     return LdButton(

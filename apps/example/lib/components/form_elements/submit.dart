@@ -72,12 +72,12 @@ class _SubmitDemoState extends State<SubmitDemo> {
                           return randomNumber;
                         },
                       ),
-                      builder: LdSubmitInlineBuilder<int, void>(
+                      child: LdSubmitInlineBuilder<int, void>(
                         resultBuilder: (context, result, controller) {
                           return Text("The result is $result");
                         },
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -98,6 +98,7 @@ class _SubmitDemoState extends State<SubmitDemo> {
                   children: [
                     SizedBox(
                       height: 200,
+                      width: double.infinity,
                       child: LdSubmit<int, void>(
                         config: LdSubmitConfig<int, void>(
                           allowResubmit: true,
@@ -119,19 +120,17 @@ class _SubmitDemoState extends State<SubmitDemo> {
                             return randomNumber;
                           },
                         ),
-                        builder: LdSubmitCenteredBuilder<int, void>(
+                        child: LdSubmitCenteredBuilder<int, void>(
                           resultBuilder: (context, result, controller) {
                             return Text("The result is $result");
                           },
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
-              const ComponentsAccordion(
-                components: {"LdSubmitCenteredBuilder"},
-              ),
+              const ComponentsAccordion(components: {"LdSubmitCenteredBuilder"}),
             ],
           ),
           ldSpacerL,
@@ -167,15 +166,13 @@ class _SubmitDemoState extends State<SubmitDemo> {
                           return randomNumber;
                         },
                       ),
-                      builder: LdSubmitDialogBuilder<int, void>(
+                      child: LdSubmitDialogBuilder<int, void>(
                         resultBuilder: (context, result, controller) {
-                          return Column(
+                          return LdAutoSpace(
                             children: [
                               Text("The result is $result"),
-                              LdButton(
-                                onPressed: controller.reset,
-                                child: const Text("Reset"),
-                              ),
+                              LdButton(onPressed: controller.reset, child: const Text("Reset")),
+                              LdDivider(),
                             ],
                           );
                         },
@@ -220,7 +217,7 @@ class _SubmitDemoState extends State<SubmitDemo> {
                           return randomNumber;
                         },
                       ),
-                      builder: LdSubmitNotificationBuilder<int, void>(
+                      child: LdSubmitNotificationBuilder<int, void>(
                         successMessage: "Successfully performed action",
                         resultBuilder: (context, result, controller) {
                           return Text("The result is $result");
@@ -230,8 +227,7 @@ class _SubmitDemoState extends State<SubmitDemo> {
                   ],
                 ),
               ),
-              const ComponentsAccordion(
-                  components: {"LdSubmitNotificationBuilder"}),
+              const ComponentsAccordion(components: {"LdSubmitNotificationBuilder"}),
             ],
           ),
           ldSpacerL,
@@ -241,14 +237,12 @@ class _SubmitDemoState extends State<SubmitDemo> {
               LdText.h("Auto trigger"),
               LdSubmit<void, void>(
                 config: LdSubmitConfig<void, void>(
-                    autoTrigger: true,
-                    action: (_) {
-                      return Future.delayed(
-                        const Duration(seconds: 2),
-                        () => 42,
-                      );
-                    }),
-              )
+                  autoTrigger: true,
+                  action: (_) {
+                    return Future.delayed(const Duration(seconds: 2), () => 42);
+                  },
+                ),
+              ),
             ],
           ),
           LdBundle(
@@ -259,62 +253,52 @@ class _SubmitDemoState extends State<SubmitDemo> {
               ),
               ComponentWell(
                 child: LdSubmit<void, void>(
-                  builder: LdSubmitCenteredBuilder<void, void>(),
                   config: LdSubmitConfig<void, void>(
                     retryConfig: LdRetryConfig.defaultAutomaticRetries(),
                     action: (_) {
-                      return Future.delayed(
-                        const Duration(seconds: 2),
-                        () {
-                          throw LdLocalizedException(
-                            message: "Something went wrong",
-                            moreInfo: "Nothing actually happened",
-                          );
-                        },
-                      );
+                      return Future.delayed(const Duration(seconds: 2), () {
+                        throw LdLocalizedException(
+                          message: "Something went wrong",
+                          moreInfo: "Nothing actually happened",
+                        );
+                      });
                     },
                   ),
+                  child: LdSubmitCenteredBuilder<void, void>(),
                 ),
-              )
+              ),
             ],
           ),
           LdBundle(
             children: [
               LdText.h("LdSubmitConfig"),
-              LdText.p(
-                "The LdSubmitConfig is used to configure the LdSubmit widget.",
-              ),
+              LdText.p("The LdSubmitConfig is used to configure the LdSubmit widget."),
               ComponentsAccordion(components: {"LdSubmitConfig"}),
               LdText.h("LdSubmitController"),
               LdText.p(
                 "The LdSubmitController handles the state of the LdSubmit component. It posesses a .state property of type LdSubmitState.",
               ),
-              LdText.p(
-                  "You can observe the controller through its .stateStream property."),
-              ComponentsAccordion(components: {
-                "LdSubmitController",
-                "LdSubmitState",
-              }),
+              LdText.p("You can observe the controller through its .stateStream property."),
+              ComponentsAccordion(components: {"LdSubmitController", "LdSubmitState"}),
             ],
           ),
           ComponentWell(
-              title: LdText.h("Passing an arg"),
-              description: Text(
-                "You can pass an arg to the LdSubmit widget to be used in the action.",
+            title: LdText.h("Passing an arg"),
+            description: Text("You can pass an arg to the LdSubmit widget to be used in the action."),
+            child: LdSubmit<double, double>(
+              arg: _arg,
+              config: LdSubmitConfig<double, double>(
+                action: (arg) async {
+                  return arg!;
+                },
               ),
-              child: LdSubmit<double, double>(
-                arg: _arg,
-                config: LdSubmitConfig<double, double>(
-                  action: (arg) async {
-                    return arg!;
-                  },
-                ),
-                builder: LdSubmitInlineBuilder<double, double>(
-                  resultBuilder: (context, result, controller) {
-                    return Text("The result is $result");
-                  },
-                ),
-              )),
+              child: LdSubmitInlineBuilder<double, double>(
+                resultBuilder: (context, result, controller) {
+                  return Text("The result is $result");
+                },
+              ),
+            ),
+          ),
           Slider(value: _arg, onChanged: setArg, min: 0, max: 42),
           LdBundle(
             children: [
@@ -322,11 +306,7 @@ class _SubmitDemoState extends State<SubmitDemo> {
               LdText.p(
                 "Exceptions are caught, handled by an LdExceptionMapper and displayed in an LdExceptionView. The Exception mapper can be used to configure how a specific exception is displayed. To add a custom exception you can either throw an LdException directly or provide a custom LdExceptionMapper to the LdSubmitConfig.",
               ),
-              ComponentsAccordion(components: {
-                "LdException",
-                "LdExceptionMapper",
-                "LdExceptionView",
-              }),
+              ComponentsAccordion(components: {"LdException", "LdExceptionMapper", "LdExceptionView"}),
             ],
           ),
         ],

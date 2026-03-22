@@ -97,7 +97,7 @@ class LdMonkeySubmitAction<T extends Identifiable<IdType>, IdType, Result> exten
     assert(builder != null || (child != null), "You must provide a builder, child, or icon");
     return LdSubmit<Result, void>(
       config: config(context),
-      builder: builder ??
+      child: builder ??
           LdSubmitNotificationBuilder<Result, void>(
             submitButtonBuilder: (submitButtonBuilder, controller) {
               return LdAppBarAction(

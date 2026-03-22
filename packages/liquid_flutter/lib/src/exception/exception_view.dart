@@ -55,7 +55,7 @@ class LdExceptionView extends StatelessWidget {
       key: const Key('retry-button'),
       mode: LdButtonMode.filled,
       color: LdTheme.of(context).error,
-      onPressed: controller?.retry ?? () {},
+      onPressed: controller?.retry ?? retry ?? () {},
       loading: controller?.state.isRetrying == true,
       child: Text(LiquidLocalizations.of(context).retry),
     );
@@ -65,6 +65,7 @@ class LdExceptionView extends StatelessWidget {
     if (!(controller?.showRetryIndicator == true)) return const SizedBox();
     return LdExceptionRetryIndicator(
       retryState: controller!.state,
+      cancelRetry: controller.reset,
     );
   }
 

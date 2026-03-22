@@ -125,7 +125,7 @@ class _ComponentWellState extends State<ComponentWell> {
                     return await rootBundle.loadString(arg!);
                   },
                 ),
-                builder: LdSubmitCenteredBuilder<String, String>(
+                child: LdSubmitCenteredBuilder<String, String>(
                   resultBuilder: (context, result, controller) => SourceCodeExtractor(
                     options: widget.showSourceCodeOptions,
                     sourceCode: result,

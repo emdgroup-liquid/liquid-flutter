@@ -3,6 +3,9 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
 /// A custom builder that allows you to build your own submit widget.
+@Deprecated(
+  "You can use a simple builder with context.watch<LdSubmitController<T, Arg>>() to build your own submit widget.",
+)
 class LdSubmitCustomBuilder<T, Arg> extends StatelessWidget {
   final Widget Function(
     BuildContext context,
