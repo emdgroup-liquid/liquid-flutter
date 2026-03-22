@@ -8,7 +8,7 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
-  liquid_flutter: ^23.0.0-1
+  liquid_flutter: ^23.0.0-2
 flutter:
   uses-material-design: true
   fonts:
