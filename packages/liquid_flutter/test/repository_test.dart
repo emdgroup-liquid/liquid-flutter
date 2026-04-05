@@ -343,7 +343,9 @@ void main() {
         await Future.delayed(const Duration(milliseconds: 100));
 
         final newItem = _TestItem(0, 'New Item', 50);
-        expect(() => repository.create(newItem), throwsException);
+        final result = await repository.create(newItem);
+
+        expect(result, isNull);
 
         // Wait for rollback
         await Future.delayed(const Duration(milliseconds: 100));
