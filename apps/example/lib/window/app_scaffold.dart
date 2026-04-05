@@ -42,7 +42,7 @@ class _AppScaffoldState extends State<AppScaffold> {
           actions: [
             LdAppBarAction(
               tooltip: "GitHub",
-              leading: const Icon(LucideIcons.github),
+              leading: Icon(LucideIcons.github),
               onPressed: () {
                 launchUrl(Uri.parse("https://github.com/emdgroup-liquid/liquid-flutter"));
               },
