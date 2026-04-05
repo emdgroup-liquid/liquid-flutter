@@ -344,7 +344,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     try {
       final newItem = await _createItem!(newValue);
       confirmItemCreation(newIndex, newValue: newItem);
-      applyOptimisticFilterAndSorting();
+      await applyOptimisticFilterAndSorting();
       return newItem;
     } catch (e, stackTrace) {
       if (ldPrintDebugMessages) {
@@ -353,7 +353,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
       }
 
       rollbackItemCreation(newIndex);
-      rethrow;
+      return null;
     }
   }
 

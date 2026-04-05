@@ -307,7 +307,6 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
   @override
   void dispose() {
     super.dispose();
-    _state.removeListener(_onStateChange);
     _selectedItemsSubscription?.cancel();
     _viewingItemsSubscription?.cancel();
     _filterSubscription.cancel();
