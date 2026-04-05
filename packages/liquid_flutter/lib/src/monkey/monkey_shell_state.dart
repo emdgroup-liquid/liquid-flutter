@@ -115,6 +115,13 @@ class LdMonkeyShellState<T extends Identifiable<IdType>, IdType> with ChangeNoti
     return 'LdMonkeyShellState(selectedItems: $selectedItems, viewingItems: $viewingItems, showSelectionControls: $showSelectionControls, effectiveLayout: $effectiveLayout)';
   }
 
+  @override
+  void dispose() {
+    _selectedItemsStreamController.close();
+    _viewingItemsStreamController.close();
+    super.dispose();
+  }
+
   static LdMonkeyShellState<T, IdType> of<T extends Identifiable<IdType>, IdType>(
     BuildContext context, {
     bool watch = false,

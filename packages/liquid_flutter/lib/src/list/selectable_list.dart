@@ -92,6 +92,11 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
     _focusNode.dispose();
     _scrollController.dispose();
     _selectedItems.dispose();
+    for (final focusNode in _itemFocusNodes.values) {
+      focusNode.dispose();
+    }
+    _itemKeys.clear();
+    _itemFocusNodes.clear();
     super.dispose();
   }
 

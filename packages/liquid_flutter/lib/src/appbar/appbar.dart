@@ -1,11 +1,11 @@
-import 'dart:math';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/appbar/appbar_decoration.dart';
 import 'package:liquid_flutter/src/appbar/appbar_frame.dart';
 import 'package:liquid_flutter/src/appbar/appbar_registry.dart';
+import 'package:liquid_flutter/src/appbar/appbar_scroll_behavior.dart';
 import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 import 'package:liquid_flutter/src/appbar/macos_window_controls.dart';
 import 'package:liquid_flutter/src/appbar/windows_window_controls.dart';
@@ -274,6 +274,13 @@ class _LdAppBarInner extends StatefulWidget {
 class _LdAppBarInnerState extends State<_LdAppBarInner> {
   final FocusScopeNode _focusScopeNode = FocusScopeNode();
 
+  LdAppBarDecorationBuilder get _decorationBuilder => LdAppBarDecorationBuilder(
+        backgroundColor: widget.appBar.backgroundColor,
+        shadowMode: widget.appBar.shadowMode,
+        borderMode: widget.appBar.borderMode,
+        backgroundMode: widget.appBar.backgroundMode,
+      );
+
   @override
   void dispose() {
     _focusScopeNode.dispose();
@@ -458,168 +465,8 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
     return _effectivePosition == LdAppBarPosition.bottom;
   }
 
-  bool _shouldShowShadow(bool isScrolledUnder) {
-    final theme = LdTheme.of(context);
-    return switch (widget.appBar.shadowMode) {
-      LdAppBarShadowMode.visible => true,
-      LdAppBarShadowMode.whenScrolled => isScrolledUnder,
-      LdAppBarShadowMode.hidden => false,
-      LdAppBarShadowMode.adaptive => switch (theme.platform.isDesktop) {
-          false => isScrolledUnder,
-          true => true,
-        },
-    };
-  }
-
-  bool _shouldShowBorder(bool isScrolledUnder) {
-    final theme = LdTheme.of(context);
-    return switch (widget.appBar.borderMode) {
-      LdAppBarBorderMode.visible => true,
-      LdAppBarBorderMode.whenScrolled => isScrolledUnder,
-      LdAppBarBorderMode.hidden => false,
-      LdAppBarBorderMode.adaptive => switch (theme.platform.isDesktop) {
-          false => isScrolledUnder,
-          true => true,
-        },
-    };
-  }
-
-  /// Wraps the app bar in a container that applies the correct padding to make sure
-  /// the app bar is not covered by the system UI or parent app bars.
-  BoxDecoration _buildOutsideDecoration({
-    required BuildContext context,
-    required bool isScrolledUnder,
-    required bool isAttached,
-    required LdAppBarPosition position,
-  }) {
-    return BoxDecoration(
-      // We fill the outside container when attached.
-      color: isAttached ? _fillColor(isScrolledUnder) : null,
-      // Gradient behind the floating app bar.
-      gradient: !isAttached
-          ? LinearGradient(
-              begin: switch (position) {
-                LdAppBarPosition.bottom => Alignment.topCenter,
-                LdAppBarPosition.top => Alignment.bottomCenter,
-              },
-              end: switch (position) {
-                LdAppBarPosition.bottom => Alignment.bottomCenter,
-                LdAppBarPosition.top => Alignment.topCenter,
-              },
-              stops: const [0, 0.3],
-              colors: [
-                LdTheme.of(context).absolute.withAlpha(0),
-                LdTheme.of(context).absolute.withAlpha(200),
-              ],
-            )
-          : null,
-      // Shadow behind the the bar only visible when attached.
-      boxShadow: [
-        if (isAttached)
-          ldShadowSticky.copyWith(
-            color: _shouldShowShadow(isScrolledUnder)
-                ? ldShadowSticky.color.withAlpha(isScrolledUnder ? 50 : 0)
-                : Colors.transparent,
-          ),
-      ],
-      // Add a border to the app bar when attached. either top or bottom.
-      // to separate the app bar from the content.
-      border: isAttached
-          ? Border(
-              bottom: switch (position) {
-                LdAppBarPosition.top => BorderSide(
-                    color: _shouldShowBorder(isScrolledUnder) ? LdTheme.of(context).border : Colors.transparent,
-                    width: LdTheme.of(context).borderWidth,
-                  ),
-                LdAppBarPosition.bottom => BorderSide.none,
-              },
-              top: switch (position) {
-                LdAppBarPosition.bottom => BorderSide(
-                    color: _shouldShowBorder(isScrolledUnder) ? LdTheme.of(context).border : Colors.transparent,
-                    width: LdTheme.of(context).borderWidth,
-                  ),
-                LdAppBarPosition.top => BorderSide.none,
-              },
-            )
-          : null,
-    );
-  }
-
-  int _fillOpacity(bool isScrolledUnder) {
-    int opacity = 0;
-
-    if (isScrolledUnder || _isInBottomSlot) {
-      opacity = 255;
-    }
-
-    return opacity;
-  }
-
-  Color _fillColor(bool isScrolledUnder) {
-    final theme = LdTheme.of(context);
-    final parentIsSurface = context.read<LdSurfaceInfo?>()?.isSurface ?? false;
-    final autoSurfaceColor = parentIsSurface ? LdTheme.of(context).background : LdTheme.of(context).surface;
-    final color = widget.appBar.backgroundColor ?? autoSurfaceColor;
-
-    return switch (widget.appBar.backgroundMode) {
-      LdAppBarBackgroundMode.hidden => Colors.transparent,
-      LdAppBarBackgroundMode.visible => color,
-      LdAppBarBackgroundMode.whenScrolled => Color.alphaBlend(
-          color.withAlpha(_fillOpacity(isScrolledUnder)),
-          autoSurfaceColor,
-        ),
-      LdAppBarBackgroundMode.adaptive => switch (theme.platform.isDesktop) {
-          false => Color.alphaBlend(
-              color.withAlpha(_fillOpacity(isScrolledUnder)),
-              LdTheme.of(context).background,
-            ),
-          true => color,
-        },
-    };
-  }
-
-  bool get _isSurface {
-    if (widget.appBar.backgroundColor != null) return false;
-    final parentIsSurface = context.read<LdSurfaceInfo?>()?.isSurface ?? false;
-    if (parentIsSurface) return true;
-    return false;
-  }
-
-  double _borderRadius(BuildContext context) {
-    final theme = LdTheme.of(context);
-    // Secondary app bars (bottom navigation) typically don't have radius when at top
-    // This logic might need adjustment based on actual usage
-    final radius = theme.radiusSize(LdSize.m);
-    return radius;
-  }
-
   bool get _hasTopContent {
     return widget.appBar.title != null || widget.appBar.actions.isNotEmpty || widget.appBar.searchConfig != null;
-  }
-
-  BoxDecoration _buildInsideDecoration({
-    required BuildContext context,
-    required bool isScrolledUnder,
-    required bool isAttached,
-    required LdAppBarPosition position,
-  }) {
-    if (isAttached) {
-      return const BoxDecoration();
-    }
-
-    return BoxDecoration(
-      borderRadius: BorderRadius.circular(_borderRadius(context)),
-      color: _fillColor(isScrolledUnder),
-      boxShadow: [
-        ldShadowSticky.copyWith(
-          color: _shouldShowShadow(isScrolledUnder) ? ldShadowSticky.color : Colors.transparent,
-        ),
-      ],
-      border: Border.all(
-        color: LdTheme.of(context).floatingBorder,
-        width: LdTheme.of(context).borderWidth,
-      ),
-    );
   }
 
   SystemUiOverlayStyle get _systemUiOverlayStyle => appBarSystemUiOverlayStyle(LdTheme.of(context, listen: true));
@@ -654,8 +501,10 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
             child: KeyedSubtree(
               key: ValueKey('appbar_${appBarKey.order}'),
               child: ScrolledUnderBuilder(builder: (context, isScrolledUnder) {
+                final isSurface =
+                    widget.appBar.backgroundColor == null && (context.read<LdSurfaceInfo?>()?.isSurface ?? false);
                 return Provider.value(
-                  value: LdSurfaceInfo(isSurface: _isSurface),
+                  value: LdSurfaceInfo(isSurface: isSurface),
                   child: AppBarFrame(
                     avoidViewInsets: widget.appBar.avoidViewInsets,
                     addContainer: widget.appBar.addContainer,
@@ -663,13 +512,13 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
                     position: position,
                     insetBorderRadius: !_isModal,
                     attached: isAttached,
-                    insideDecoration: _buildInsideDecoration(
+                    insideDecoration: _decorationBuilder.buildInsideDecoration(
                       context: context,
                       isScrolledUnder: isScrolledUnder,
                       isAttached: isAttached,
                       position: position,
                     ),
-                    outsideDecoration: _buildOutsideDecoration(
+                    outsideDecoration: _decorationBuilder.buildOutsideDecoration(
                       context: context,
                       isScrolledUnder: isScrolledUnder,
                       isAttached: isAttached,
@@ -770,85 +619,5 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
         ),
       ),
     );
-  }
-}
-
-extension AtLeastBorderRadius on BorderRadius {
-  BorderRadius atLeast(BorderRadius other) {
-    return BorderRadius.only(
-      topLeft: topLeft.atLeast(other.topLeft),
-      topRight: topRight.atLeast(other.topRight),
-      bottomLeft: bottomLeft.atLeast(other.bottomLeft),
-      bottomRight: bottomRight.atLeast(other.bottomRight),
-    );
-  }
-}
-
-extension AtLeast on Radius {
-  Radius atLeast(Radius other) {
-    assert(x == y, "Radius must be circular");
-    assert(other.x == other.y, "Other radius must be circular");
-    return Radius.circular(max(x, other.x));
-  }
-}
-
-extension TrimToAppBarPosition on EdgeInsets {
-  EdgeInsets trimToAppBarPosition(LdAppBarPosition position) {
-    return copyWith(
-      top: position == LdAppBarPosition.top ? top : 0,
-      bottom: position == LdAppBarPosition.bottom ? bottom : 0,
-    );
-  }
-}
-
-class ScrolledUnderBuilder extends StatefulWidget {
-  final Widget Function(BuildContext context, bool isScrolledUnder) builder;
-
-  const ScrolledUnderBuilder({super.key, required this.builder});
-
-  @override
-  State<ScrolledUnderBuilder> createState() => _ScrolledUnderBuilderState();
-}
-
-class _ScrolledUnderBuilderState extends State<ScrolledUnderBuilder> {
-  bool _isScrolledUnder = false;
-
-  AppBarRegistryState? _registry;
-  late final appBarKey = context.maybeAppBarRegistryKey()!;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final newRegistry = AppBarRegistry.maybeStateOf(context);
-    if (_registry != newRegistry) {
-      _registry?.removeListener(_onRegistryChange);
-      _registry = newRegistry;
-      _registry?.addListener(_onRegistryChange);
-      _onRegistryChange();
-    }
-  }
-
-  @override
-  void dispose() {
-    _registry?.removeListener(_onRegistryChange);
-    super.dispose();
-  }
-
-  void _onRegistryChange() {
-    if (!mounted) return;
-    if (_registry == null) return;
-    final currentInfo = _registry!.getAppBarInfo(appBarKey);
-    if (currentInfo == null) return;
-    final isScrolledUnder = currentInfo.scrollUnder;
-    if (isScrolledUnder != _isScrolledUnder) {
-      setState(() {
-        _isScrolledUnder = isScrolledUnder;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.builder(context, _isScrolledUnder);
   }
 }
