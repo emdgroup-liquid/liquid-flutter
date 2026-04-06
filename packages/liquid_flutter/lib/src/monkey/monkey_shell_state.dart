@@ -37,7 +37,6 @@ class LdMonkeyShellState<T extends Identifiable<IdType>, IdType> with ChangeNoti
   LdMonkeyEffectiveLayoutMode? get effectiveLayout => _effectiveLayout;
 
   void setSelectedItems(Set<IdType> selectedItems) {
-    print("setSelectedItems: $selectedItems");
     Set<IdType> newSelectedItems = {};
     Set<IdType>? newViewingItems;
     // Prevent multiple selection if not allowed
@@ -81,7 +80,6 @@ class LdMonkeyShellState<T extends Identifiable<IdType>, IdType> with ChangeNoti
   }
 
   void setViewingItems(Set<IdType> viewingItems) {
-    print("setViewingItems: $viewingItems");
     if (setEquals(viewingItems, _viewingItems)) return;
     _viewingItems = viewingItems;
     _viewingItemsStreamController.add(viewingItems);
@@ -115,6 +113,13 @@ class LdMonkeyShellState<T extends Identifiable<IdType>, IdType> with ChangeNoti
   @override
   String toString() {
     return 'LdMonkeyShellState(selectedItems: $selectedItems, viewingItems: $viewingItems, showSelectionControls: $showSelectionControls, effectiveLayout: $effectiveLayout)';
+  }
+
+  @override
+  void dispose() {
+    _selectedItemsStreamController.close();
+    _viewingItemsStreamController.close();
+    super.dispose();
   }
 
   static LdMonkeyShellState<T, IdType> of<T extends Identifiable<IdType>, IdType>(

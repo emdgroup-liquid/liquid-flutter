@@ -33,18 +33,6 @@ class LdScaffoldAppBarState {
   });
 }
 
-extension LdScaffoldSlotExtension on LdScaffoldSlot {
-  EffectivePosition get effectivePosition {
-    // This is a stub - actual implementation would depend on app bar configuration
-    return EffectivePosition.top;
-  }
-
-  AppBarRole get role {
-    // This is a stub - actual implementation would depend on app bar configuration
-    return AppBarRole.primary;
-  }
-}
-
 class LdScaffoldLayoutState {
   final ValueNotifier<double> bodyScrollOffset;
   final ValueNotifier<double> drawerScrollOffset;
@@ -127,7 +115,7 @@ class LdScaffoldLayoutState {
   }
 
   int levelForEffectivePosition() {
-    final effectivePosition = slot.effectivePosition;
+    final effectivePosition = appBarState?.effectivePosition ?? EffectivePosition.top;
     int level = 0;
     LdScaffoldLayoutState? currentLayoutState = parentLayoutState;
     while (currentLayoutState != null) {
@@ -145,7 +133,6 @@ class LdScaffoldLayoutState {
   double effectiveHeightOfOthers(EffectivePosition effectivePosition, AppBarRole appBarRole) {
     List<LdScaffoldAppBarState> appBars = [];
 
-    // Walk up the tree and collect the app bars
     LdScaffoldLayoutState? currentLayoutState = parentLayoutState;
     while (currentLayoutState != null) {
       final appBarState = currentLayoutState.appBarState;
@@ -163,10 +150,6 @@ class LdScaffoldLayoutState {
 
     for (var appBar in appBars) {
       total += appBar.effectiveInnerHeight;
-    }
-
-    if (slot.role == AppBarRole.secondary && appBarState?.effectivePosition == effectivePosition) {
-      total += appBarState?.effectiveInnerHeight ?? 0;
     }
 
     return total;

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_frame.dart';
 import 'package:liquid_flutter/src/appbar/appbar_registry.dart';
+import 'package:liquid_flutter/src/appbar/appbar_scroll_behavior.dart';
 import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 import 'package:liquid_flutter/src/haptics.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';

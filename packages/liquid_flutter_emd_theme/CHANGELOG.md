@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-### [0.0.5-1] Compatibility with liquid flutter v23
+### [0.0.5-2] Compatibility with liquid flutter v23
 
 ### [0.0.4](https://github.com/emdgroup-liquid/liquid-flutter-emd-theme/compare/v0.0.3...v0.0.4) (2025-05-10)
 

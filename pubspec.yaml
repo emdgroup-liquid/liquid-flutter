@@ -19,6 +19,8 @@ melos:
       - packages/liquid_flutter
       - packages/liquid_flutter_test_utils
   scripts:
+    analyze: 
+      exec: dart analyze
     test:
       exec: flutter test
       packageFilters:

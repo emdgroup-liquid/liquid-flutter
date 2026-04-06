@@ -341,24 +341,20 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
       'Cannot create item. createItem was not configured for this repository',
     );
     final newIndex = scheduleItemCreation(newValue, index: index);
-    if (_createItem != null) {
-      //applyOptimisticFilterAndSorting();
-      try {
-        final newItem = await _createItem(newValue);
-        confirmItemCreation(newIndex, newValue: newItem);
-        applyOptimisticFilterAndSorting();
-        return newItem;
-      } catch (e, stackTrace) {
-        if (ldPrintDebugMessages) {
-          debugPrint("Error creating item: $e");
-          debugPrint(stackTrace.toString());
-        }
-
-        rollbackItemCreation(newIndex);
-        rethrow;
+    try {
+      final newItem = await _createItem!(newValue);
+      confirmItemCreation(newIndex, newValue: newItem);
+      await applyOptimisticFilterAndSorting();
+      return newItem;
+    } catch (e, stackTrace) {
+      if (ldPrintDebugMessages) {
+        debugPrint("Error creating item: $e");
+        debugPrint(stackTrace.toString());
       }
+
+      rollbackItemCreation(newIndex);
+      return null;
     }
-    return null;
   }
 
   Future<void> deleteBatch(Set<IdType> ids) async {

@@ -693,6 +693,6 @@ class LdContextMenuRoute extends ModalRoute<void> {
 Future<bool> maybePopContextMenu(BuildContext context) async {
   final rootNavigatorContext = Navigator.of(context, rootNavigator: true);
 
-  rootNavigatorContext.popUntil((route) => route.settings.name != "ContextMenu");
-  return true;
+  final result = await rootNavigatorContext.maybePop();
+  return result;
 }

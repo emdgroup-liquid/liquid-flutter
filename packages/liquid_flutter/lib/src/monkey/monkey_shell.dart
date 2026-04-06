@@ -122,6 +122,8 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
   late final StreamSubscription _filterSubscription;
   late final StreamSubscription _sortSubscription;
   late final StreamSubscription _repositoryUpdatedItemsSubscription;
+  StreamSubscription? _selectedItemsSubscription;
+  StreamSubscription? _viewingItemsSubscription;
 
   /// The actions that are available in the master and detail pages.
   List<LdMonkeyAction<T, IdType>> get actions => widget.actions;
@@ -142,11 +144,11 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
   void initState() {
     super.initState();
 
-    _state.selectedItemsStream.listen((selectedItems) {
+    _selectedItemsSubscription = _state.selectedItemsStream.listen((selectedItems) {
       _onStateChange();
     });
 
-    _state.viewingItemsStream.listen((viewingItems) {
+    _viewingItemsSubscription = _state.viewingItemsStream.listen((viewingItems) {
       _onStateChange();
     });
 
@@ -305,7 +307,8 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
   @override
   void dispose() {
     super.dispose();
-    _state.removeListener(_onStateChange);
+    _selectedItemsSubscription?.cancel();
+    _viewingItemsSubscription?.cancel();
     _filterSubscription.cancel();
     _sortSubscription.cancel();
     _repositoryUpdatedItemsSubscription.cancel();
