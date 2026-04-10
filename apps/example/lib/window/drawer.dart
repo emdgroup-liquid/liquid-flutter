@@ -82,6 +82,7 @@ const components = [
   // Data Display
   _Component("Avatar", "/components/avatar", LucideIcons.user, ComponentCategory.dataDisplay),
   _Component("Icon", "/components/icon", LucideIcons.image, ComponentCategory.dataDisplay),
+  _Component("Markdown", "/components/markdown", LucideIcons.fileText, ComponentCategory.dataDisplay),
   _Component("Table", "/components/table", LucideIcons.grid3x3, ComponentCategory.dataDisplay),
   _Component("Tag", "/components/tag", LucideIcons.tag, ComponentCategory.dataDisplay),
 ];

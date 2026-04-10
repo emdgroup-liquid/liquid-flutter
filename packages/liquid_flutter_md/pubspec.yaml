@@ -1,0 +1,23 @@
+name: liquid_flutter_md
+description: "Markdown rendering package for Liquid Flutter"
+version: 0.0.1
+
+environment:
+  sdk: ^3.10.7
+  flutter: ">=1.17.0"
+
+resolution: workspace
+dependencies:
+  flutter:
+    sdk: flutter
+  collection: ^1.19.1
+  liquid_flutter: any
+  html_unescape: ^2.0.0
+  markdown: ^7.3.0
+  syntax_highlight: ^0.5.0
+  url_launcher: ^6.3.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0

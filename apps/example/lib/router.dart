@@ -59,6 +59,7 @@ import 'components/form_elements/form.dart';
 import 'components/feedback/hint.dart';
 import 'components/form_elements/input.dart';
 import 'components/feedback/notification.dart';
+import 'components/data_display/markdown.dart';
 import 'components/data_display/table.dart';
 import 'components/data_display/tag.dart';
 import 'window/app_scaffold.dart';
@@ -410,6 +411,11 @@ class AppRouter {
           GoRoute(
             path: "/components/bento-gallery",
             pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const BentoGallery()),
+          ),
+          GoRoute(
+            path: "/components/markdown",
+            pageBuilder: (context, state) =>
+                NoTransitionPage<void>(key: state.pageKey, child: const MarkdownDemo()),
           ),
         ],
       ),
