@@ -24,10 +24,10 @@ class LdSubmitLoadingIndicator<T, Arg> extends StatelessWidget {
             ),
           ],
         ),
-      (Axis.vertical) => Column(
+      (Axis.vertical) => LdAutoSpace(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const LdLoader(),
-            ldSpacerS,
             LdText.l(
               controller.config.loadingText ?? LiquidLocalizations.of(context).loading,
             ),
