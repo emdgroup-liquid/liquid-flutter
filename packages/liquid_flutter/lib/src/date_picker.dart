@@ -511,8 +511,9 @@ class _MonthView extends StatelessWidget {
                   size: LdSize.s,
                   width: double.infinity,
                   disabled: !isValidDate(day),
+                  circular: true,
                   color: theme.palette.neutral,
-                  child: Text(day.day.toString()),
+                  child: Center(child: Text(day.day.toString())),
                   onPressed: () {
                     onSelected(day);
                   },
@@ -536,8 +537,9 @@ class _MonthView extends StatelessWidget {
                 width: double.infinity,
                 key: Key("day_${day.year}_${day.month}_${day.day}"),
                 mode: _buttonMode(day),
+                circular: true,
                 disabled: !isValidDate(day),
-                child: Text(day.day.toString()),
+                child: Center(child: Text(day.day.toString())),
                 onPressed: () {
                   onSelected(day);
                 },
