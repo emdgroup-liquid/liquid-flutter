@@ -29,6 +29,7 @@ class LdModalPage<T> extends Page<T> {
       sheetBorderRadius: route.sheetBorderRadius,
       fixedDialogSize: route.fixedDialogSize,
       sheetAspectRatio: route.sheetAspectRatio,
+      topGapRatio: route.topGapRatio,
       dialogBorderRadius: route.dialogBorderRadius,
       sheetBreakpoint: route.sheetBreakpoint,
       sheetInsets: route.sheetInsets,
@@ -64,6 +65,8 @@ class LdModalRoute<T> extends PageRoute<T> {
 
   final Widget Function(BuildContext context) pageBuilder;
 
+  final double topGapRatio;
+
   LdModalRoute({
     required this.context,
     super.barrierDismissible = true,
@@ -78,6 +81,7 @@ class LdModalRoute<T> extends PageRoute<T> {
     this.dialogBorderRadius,
     this.sheetBreakpoint,
     this.sheetInsets,
+    this.topGapRatio = 0.08,
     String? barrierLabel,
     super.settings,
   }) : _barrierLabel = barrierLabel;
@@ -86,8 +90,6 @@ class LdModalRoute<T> extends PageRoute<T> {
     final theme = LdTheme.of(navigator!.context);
     return theme.palette.neutral.shades[8].withAlpha(150);
   }
-
-  static const double topGapRatio = 0.08;
 
   @override
   String? get barrierLabel {
@@ -99,7 +101,10 @@ class LdModalRoute<T> extends PageRoute<T> {
     return modalRoute is LdModalRoute;
   }
 
-  Future<T?> show(BuildContext context, {bool useRootNavigator = false}) =>
+  Future<T?> show(
+    BuildContext context, {
+    bool useRootNavigator = false,
+  }) =>
       (useRootNavigator ? Navigator.of(context, rootNavigator: true) : Navigator.of(context)).push<T>(this);
 
   /// Determines if this route should behave as a sheet based on modalTypeMode and screen size.
@@ -451,9 +456,6 @@ class _LdSheetDragGestureDetectorState<T> extends State<_LdSheetDragGestureDetec
   _LdSheetDragController<T>? _dragController;
   late VerticalDragGestureRecognizer _recognizer;
 
-  // Constants from CupertinoSheetRoute
-  static const double _kTopGapRatio = 0.08;
-
   @override
   void initState() {
     super.initState();
@@ -495,7 +497,7 @@ class _LdSheetDragGestureDetectorState<T> extends State<_LdSheetDragGestureDetec
     if (context.size == null) return;
 
     final double screenHeight = context.size!.height;
-    final double sheetHeight = screenHeight - (screenHeight * _kTopGapRatio);
+    final double sheetHeight = screenHeight - (screenHeight * widget.route.topGapRatio);
     _dragController!.dragUpdate(details.primaryDelta! / sheetHeight);
   }
 
