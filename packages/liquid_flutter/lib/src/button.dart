@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -91,6 +92,31 @@ class _LdButtonState extends State<_LdButtonWidget> {
     super.initState();
   }
 
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(FlagProperty('_loading', value: _loading, ifTrue: 'loading'))
+      ..add(FlagProperty('_failed', value: _failed, ifTrue: 'failed'))
+      ..add(DiagnosticsProperty<LdException?>('_error', _error))
+      ..add(DiagnosticsProperty('widget.onPressed', widget.onPressed))
+      ..add(DiagnosticsProperty('widget.child', widget.child))
+      ..add(StringProperty('widget.loadingText', widget.loadingText))
+      ..add(StringProperty('widget.errorText', widget.errorText))
+      ..add(DiagnosticsProperty('widget.leading', widget.leading))
+      ..add(DiagnosticsProperty('widget.trailing', widget.trailing))
+      ..add(DiagnosticsProperty('widget.autoLoading', widget.autoLoading))
+      ..add(DiagnosticsProperty('widget.active', widget.active))
+      ..add(DiagnosticsProperty('_circular', _circular))
+      ..add(DiagnosticsProperty('widget.disabled', widget.disabled))
+      ..add(DiagnosticsProperty('widget.disableSqueeze', widget.disableSqueeze))
+      ..add(DiagnosticsProperty('widget.alignment', widget.alignment))
+      ..add(EnumProperty('widget.mode', widget.mode))
+      ..add(EnumProperty('widget.size', widget.size))
+      ..add(DiagnosticsProperty('widget.color', widget.color))
+      ..add(DoubleProperty('widget.width', widget.width));
+  }
+
   // Button themes are determined using the theme provider
   LdTheme get _theme => Provider.of<LdTheme>(context, listen: true);
 
@@ -100,11 +126,8 @@ class _LdButtonState extends State<_LdButtonWidget> {
     return Flexible(child: child);
   }
 
-  Widget get _trailing {
-    if (widget.trailing == null) {
-      return Container();
-    }
-    return Padding(padding: const EdgeInsets.only(left: 8.0), child: widget.trailing);
+  Widget? get _trailing {
+    return widget.trailing;
   }
 
   MainAxisAlignment get _alignment {
@@ -127,15 +150,17 @@ class _LdButtonState extends State<_LdButtonWidget> {
       mainAxisSize: widget.width == double.infinity ? MainAxisSize.max : MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: _alignment,
-      children: [_leading, _child, _trailing],
+      spacing: _theme.paddingSize(size: LdSize.s),
+      children: [
+        if (widget.leading != null) _leading!,
+        _child,
+        if (widget.trailing != null) _trailing!,
+      ],
     );
   }
 
-  Widget get _leading {
-    if (widget.leading == null) {
-      return const SizedBox();
-    }
-    return Padding(padding: const EdgeInsets.only(right: 8.0), child: widget.leading!);
+  Widget? get _leading {
+    return widget.leading!;
   }
 
   Widget _loadingContent(LdColorBundle bundle) {
@@ -220,7 +245,7 @@ class _LdButtonState extends State<_LdButtonWidget> {
   }
 
   bool get _circular {
-    return widget.circular == true || (widget.child is Icon && widget.circular == null);
+    return widget.circular ?? (widget.child is Icon);
   }
 
   @override
@@ -349,6 +374,22 @@ class _ButtonShape extends StatelessWidget {
     required this.disableSqueeze,
   });
 
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(EnumProperty<LdButtonMode>('mode', mode))
+      ..add(DiagnosticsProperty<LdColorBundle>('colors', colors))
+      ..add(DiagnosticsProperty<BorderRadius?>('borderRadius', borderRadius))
+      ..add(FlagProperty('center', value: center, ifTrue: 'center'))
+      ..add(EnumProperty<LdSize>('size', size))
+      ..add(DoubleProperty('width', width))
+      ..add(FlagProperty('disableSqueeze', value: disableSqueeze, ifTrue: 'disableSqueeze'))
+      ..add(FlagProperty('circular', value: circular, ifTrue: 'circular'))
+      ..add(DiagnosticsProperty<Widget>('child', child))
+      ..add(DiagnosticsProperty<Offset?>('panOffset', panOffset));
+  }
+
   Border? _border(BuildContext context) {
     switch (mode) {
       case LdButtonMode.outline:
@@ -361,13 +402,25 @@ class _ButtonShape extends StatelessWidget {
     }
   }
 
+  double get _circularSizeBump {
+    if (!circular) {
+      return 0;
+    }
+    return switch (size) {
+      (LdSize.xs) => 1,
+      (LdSize.s) => 2,
+      (LdSize.m) => 4,
+      (LdSize.l) => 6,
+    };
+  }
+
   EdgeInsets _padding(BuildContext context) {
     final theme = LdTheme.of(context);
 
     var borderWidth = EdgeInsets.all(_border(context)?.left.width ?? 0);
 
     if (circular) {
-      EdgeInsets.zero;
+      return theme.pad(size: size) - EdgeInsets.all(_circularSizeBump);
     }
 
     return theme.balPad(size) - borderWidth;
@@ -430,7 +483,7 @@ class _ButtonShape extends StatelessWidget {
               child: IconTheme(
                 data: IconThemeData(
                   color: colors.text,
-                  size: theme.labelSize(size),
+                  size: theme.labelSize(size) + _circularSizeBump,
                 ),
                 child: child,
               ),
