@@ -49,9 +49,26 @@ class LdTimePicker extends StatelessWidget {
         ],
       ),
       modal: LdModalRoute(
+        topGapRatio: 0.5,
         context: context,
         fixedDialogSize: const Size(300, 300),
         pageBuilder: (context) => LdScaffold(
+          appBars: [
+            LdAppBar(
+              title: Text(LiquidLocalizations.of(context).selectTime),
+            ),
+            LdAppBar.bottom(
+              actions: [
+                LdFlexibleChild(
+                  child: LdButton.vague(
+                    width: double.infinity,
+                    child: Text(LiquidLocalizations.of(context).done),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                )
+              ],
+            ),
+          ],
           body: LdScaffoldBody(
             key: const Key('time_picker_sheet'),
             children: [
@@ -304,16 +321,6 @@ class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
             ),
           ],
         ),
-        Flexible(
-          child: LdButton(
-            width: double.infinity,
-            onPressed: () {
-              _submit();
-            },
-            child: const Text('Done'),
-          ),
-        ),
-        ldSpacerL,
       ],
     );
   }
