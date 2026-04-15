@@ -58,12 +58,14 @@ class _LdFormState extends State<LdForm> {
   }
 
   Widget _buildField(LdFormItem field) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 16),
-      child: LdAutoSpace(crossAxisAlignment: CrossAxisAlignment.start, children: [
+    return LdAutoSpace(
+      children: [
         field.child,
-        LdCollapse(collapsed: !widget.hints.containsKey(field.key), child: _buildHint(field.key)),
-      ]),
+        LdCollapse(
+          collapsed: !widget.hints.containsKey(field.key),
+          child: _buildHint(field.key),
+        ),
+      ],
     );
   }
 
@@ -103,13 +105,16 @@ class _LdFormState extends State<LdForm> {
   @override
   Widget build(BuildContext context) {
     return IgnorePointer(
-        ignoring: widget.disabled,
-        child: Opacity(
-          opacity: widget.disabled ? 0.5 : 1,
-          child: Form(
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [...widget.fields.map(_buildField), _buildSubmit(context)])),
-        ));
+      ignoring: widget.disabled,
+      child: Opacity(
+        opacity: widget.disabled ? 0.5 : 1,
+        child: Form(
+          child: LdAutoSpace(
+            defaultSpacing: LdSize.s,
+            children: [...widget.fields.map(_buildField), _buildSubmit(context)],
+          ),
+        ),
+      ),
+    );
   }
 }
