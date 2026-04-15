@@ -23,20 +23,26 @@ void main() async {
   await Highlighter.initialize(['dart', 'yaml', 'sql']);
 
   // Window callbacks for macOS
-  LdAppBar.callbacks = LdWindowCallbacks(onClose: () {
-    LiquidFlutterWindowUtils.instance.closeWindow();
-  }, onMinimize: () {
-    LiquidFlutterWindowUtils.instance.minimizeWindow();
-  }, onMaximize: () {
-    LiquidFlutterWindowUtils.instance.maximizeWindow();
-  }, onMove: () {
-    LiquidFlutterWindowUtils.instance.startDragging();
-  });
+  LdAppBar.callbacks = LdWindowCallbacks(
+    onClose: () {
+      LiquidFlutterWindowUtils.instance.closeWindow();
+    },
+    onMinimize: () {
+      LiquidFlutterWindowUtils.instance.minimizeWindow();
+    },
+    onMaximize: () {
+      LiquidFlutterWindowUtils.instance.maximizeWindow();
+    },
+    onMove: () {
+      LiquidFlutterWindowUtils.instance.startDragging();
+    },
+  );
 
   // Listen for window ready events
   LiquidFlutterWindowUtils.instance.windowReadyStream.listen((isReady) async {
     if (isReady) {
       // You can perform any initialization here that requires the window to be ready
+      print('window ready');
       await LiquidFlutterWindowUtils.instance.configureWindow();
     }
   });

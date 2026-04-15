@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
-import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class FormDemo extends StatefulWidget {
@@ -28,82 +27,78 @@ class _FormDemoState extends State<FormDemo> {
       demo: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ComponentWell(
-            onSurface: true,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                LdForm(disabled: _formDisabled, hints: _hints, onSubmit: _submit, key: _formKey, fields: [
-                  LdFormItem(
-                    "firstName",
-                    LdInput(
-                      hint: "First Name",
-                      label: "First Name",
-                      valid: _nameValid,
-                      textInputAction: TextInputAction.next,
-                      controller: _nameController,
-                    ),
-                  ),
-                  LdFormItem(
-                    "lastName",
-                    LdInput(
-                      hint: "Last Name",
-                      label: "Last Name",
-                      controller: _lastNameController,
-                    ),
-                  ),
-                  LdFormItem(
-                      "selectField",
-                      const LdSelect<String>(items: [
-                        LdSelectItem(value: "1", child: Text("First choice")),
-                        LdSelectItem(value: "2", child: Text("Second choice")),
-                      ])),
-                  LdFormItem(
-                    "lastName",
-                    LdChoose.fromList(
-                        label: "Choose something",
-                        placeholder: const Text("Select an option"),
-                        multiple: true,
-                        onChanged: (value) {
-                          // Handle value change
-                        },
-                        itemBuilder: (context, item, index) {
-                          return LdListItem(
-                            title: Text(item.value?.toString() ?? "No selection"),
-                            disabled: item.value?.enabled ?? false,
-                          );
-                        },
-                        selectedItemBuilder: (context, item) {
-                          return Text(item.value.toString());
-                        },
-                        items: const [
-                          LdSelectItem(value: "1", child: Text("First choice")),
-                          LdSelectItem(value: "2", child: Text("Second choice")),
-                        ]),
-                  ),
-                  LdFormItem(
-                    "disabledField",
-                    LdInput(
-                      hint: "Disabled Field",
-                      label: "Disabled Field",
-                      disabled: true,
-                      controller: _disabledFieldController,
-                    ),
-                  ),
-                  LdFormItem(
-                    "bio",
-                    LdInput(
-                      hint: "About you",
-                      label: "Biography",
-                      minLines: 3,
-                      maxLines: 5,
-                      textInputAction: TextInputAction.done,
-                      controller: _bioController,
-                    ),
-                  ),
-                ]),
-              ],
-            ),
+          LdForm(
+            disabled: _formDisabled,
+            hints: _hints,
+            onSubmit: _submit,
+            key: _formKey,
+            fields: [
+              LdFormItem(
+                "firstName",
+                LdInput(
+                  hint: "First Name",
+                  label: "First Name",
+                  valid: _nameValid,
+                  textInputAction: TextInputAction.next,
+                  controller: _nameController,
+                ),
+              ),
+              LdFormItem("lastName", LdInput(hint: "Last Name", label: "Last Name", controller: _lastNameController)),
+              LdFormItem(
+                "selectField",
+                const LdSelect<String>(
+                  label: "Select a choice",
+                  items: [
+                    LdSelectItem(value: "1", child: Text("First choice")),
+                    LdSelectItem(value: "2", child: Text("Second choice")),
+                  ],
+                ),
+              ),
+              LdFormItem(
+                "lastName",
+                LdChoose.fromList(
+                  label: "Choose something",
+                  placeholder: const Text("Select an option"),
+                  multiple: true,
+                  onChanged: (value) {
+                    // Handle value change
+                  },
+                  itemBuilder: (context, item, index) {
+                    return LdListItem(
+                      title: Text(item.value?.toString() ?? "No selection"),
+                      disabled: item.value?.enabled ?? false,
+                    );
+                  },
+                  selectedItemBuilder: (context, item) {
+                    return Text(item.value.toString());
+                  },
+                  items: const [
+                    LdSelectItem(value: "1", child: Text("First choice")),
+                    LdSelectItem(value: "2", child: Text("Second choice")),
+                  ],
+                ),
+              ),
+              LdFormItem(
+                "disabledField",
+                LdInput(
+                  hint: "Disabled Field",
+                  label: "Disabled Field",
+                  disabled: true,
+                  controller: _disabledFieldController,
+                ),
+              ),
+              LdFormItem(
+                "bio",
+                LdInput(
+                  hint: "About you",
+                  label: "Biography",
+                  minLines: 3,
+                  maxLines: 5,
+                  textInputAction: TextInputAction.done,
+                  controller: _bioController,
+                ),
+              ),
+            ],
           ),
           ldSpacerM,
           LdToggle(

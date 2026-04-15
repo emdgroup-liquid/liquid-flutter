@@ -20,8 +20,6 @@ class _TabsDemoState extends State<TabsDemo> with SingleTickerProviderStateMixin
 
   bool _enableGradient = true;
 
-  int _maxVisibleTabs = 5;
-
   final List<LdNavigationTab> _tabs = [
     LdNavigationTab(label: "Home", route: "/", icon: Icon(LucideIcons.house)),
     LdNavigationTab(label: "Settings", route: "/settings", icon: Icon(LucideIcons.settings)),
@@ -29,7 +27,6 @@ class _TabsDemoState extends State<TabsDemo> with SingleTickerProviderStateMixin
     LdNavigationTab(label: "Messages", route: "/messages", icon: Icon(LucideIcons.messageSquare)),
     LdNavigationTab(label: "Notifications", route: "/notifications", icon: Icon(LucideIcons.bell)),
     LdNavigationTab(label: "Search", route: "/search", icon: Icon(LucideIcons.search)),
-    LdNavigationTab(label: "More", route: "/more", icon: Icon(LucideIcons.ellipsisVertical)),
   ];
 
   @override
@@ -68,10 +65,7 @@ class _TabsDemoState extends State<TabsDemo> with SingleTickerProviderStateMixin
                     position: LdAppBarPositionMode.bottom,
                     scrollBehavior: _scrollBehavior,
                     enableGradient: _enableGradient,
-                    maxVisibleTabs: _maxVisibleTabs,
-                    onTabPressed: (route) => setState(
-                      () => _activeRoute = route,
-                    ),
+                    onTabPressed: (route) => setState(() => _activeRoute = route),
                   ),
                 ],
               ),
@@ -82,7 +76,8 @@ class _TabsDemoState extends State<TabsDemo> with SingleTickerProviderStateMixin
               children: [
                 LdText.caption('Configuration'),
                 LdText.p(
-                    "Enable a gradient effect visible when not attached to make the tab bar more visually seperated from the background"),
+                  "Enable a gradient effect visible when not attached to make the tab bar more visually seperated from the background",
+                ),
                 LdToggle(
                   label: 'Enable Gradient',
                   disabled: _attachedMode != LdAppBarAttachedMode.floating,
@@ -102,18 +97,6 @@ class _TabsDemoState extends State<TabsDemo> with SingleTickerProviderStateMixin
                     LdAppBarAttachedMode.adaptive: const Text('.adaptive'),
                     LdAppBarAttachedMode.floating: const Text('.floating'),
                   },
-                ),
-                LdSelect<int>(
-                  value: _maxVisibleTabs,
-                  label: 'Max Visible Tabs',
-                  items: List.generate(
-                    10,
-                    (index) => LdSelectItem(
-                      child: Text("${index + 1}"),
-                      value: index + 1,
-                    ),
-                  ),
-                  onChanged: (value) => setState(() => _maxVisibleTabs = value),
                 ),
               ],
             ),
