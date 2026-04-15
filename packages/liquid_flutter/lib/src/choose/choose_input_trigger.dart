@@ -48,16 +48,10 @@ class LdChooseInputTrigger<T extends Identifiable<IdType>, IdType> extends State
           disabled: disabled,
           key: const Key("ldChoose_trigger"),
           onPressed: onTap,
-          mode: LdTouchableSurfaceMode.neutralGhost,
+          mode: LdTouchableSurfaceMode.input,
+          isInput: true,
           color: theme.palette.primary,
-          builder: (contxt, _, status, child) {
-            final colorBundle = inputColor(
-              theme,
-              status,
-              isValid: true,
-              onSurface: LdSurfaceInfo.of(context).isSurface,
-            );
-
+          builder: (contxt, colorBundle, status, child) {
             return Container(
               padding: theme.balPad(size),
               clipBehavior: Clip.hardEdge,
@@ -86,7 +80,15 @@ class LdChooseInputTrigger<T extends Identifiable<IdType>, IdType> extends State
                     child: Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        if (selectedItemsCount == 0) LdMute(child: config.hint!),
+                        if (selectedItemsCount == 0)
+                          DefaultTextStyle(
+                              style: ldBuildTextStyle(
+                                theme,
+                                LdTextType.label,
+                                LdSize.m,
+                                color: theme.textMuted,
+                              ),
+                              child: config.hint!),
                         ...selectedItems
                             .sublist(0, displayItems)
                             .map((item) => selectedItemBuilder(context, item))
