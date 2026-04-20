@@ -275,6 +275,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     // The list has not been fetched yet or we filtered out all the items
     // optimistically.
     if (totalItems == 0 || _items.isEmpty) {
+      print('fetching initial items');
       _setBusy(true);
       _offsetQueue.clear();
       await fetchItemsAtOffset(initialOffset);

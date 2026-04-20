@@ -153,9 +153,8 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     await applyOptimisticFilterAndSorting();
 
     // If we disabled a filter we need to perform a refresh of the list
-    if (existingFilter!.isOn && !_filters[name]!.isOn) {
-      await refreshList();
-    }
+
+    await refreshList();
   }
 
   Future<void> updateSortOption(LdSortOption<T, IdType> sortOption) async {

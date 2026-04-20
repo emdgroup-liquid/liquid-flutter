@@ -463,24 +463,29 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
 
                   return Provider.value(
                     value: LdDrawerState(isOpen: showDetail, isSideBySide: true),
-                    child: LdMultiPanelLayout(
-                      enableBorders: true,
-                      visibleStartIndex: 0,
-                      spacing: 0,
-                      visibleEndIndex: showDetail ? 1 : 0,
-                      widths: [PanelWidth.fill(), PanelWidth.fill(fillFlex: widget.detailPanelFlex)],
+                    child: Stack(
                       children: [
-                        Provider.value(
-                          value: showDetail ? LdDrawerSlot.drawer : LdDrawerSlot.body,
-                          child: widget.masterPage,
+                        LdMultiPanelLayout(
+                          enableBorders: true,
+                          visibleStartIndex: 0,
+                          spacing: 0,
+                          visibleEndIndex: showDetail ? 1 : 0,
+                          widths: [PanelWidth.fill(), PanelWidth.fill(fillFlex: widget.detailPanelFlex)],
+                          children: [
+                            Provider.value(
+                              value: showDetail ? LdDrawerSlot.drawer : LdDrawerSlot.body,
+                              child: widget.masterPage,
+                            ),
+                            if (showDetail)
+                              Provider.value(
+                                value: LdDrawerSlot.body,
+                                child: widget.child,
+                              )
+                            else
+                              SizedBox.shrink(),
+                          ],
                         ),
-                        if (showDetail)
-                          Provider.value(
-                            value: LdDrawerSlot.body,
-                            child: widget.child,
-                          )
-                        else
-                          widget.child
+                        if (!showDetail) widget.child,
                       ],
                     ),
                   );
