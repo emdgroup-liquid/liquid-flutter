@@ -144,7 +144,6 @@ void main() {
           name: 'id-active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
-          optimisticFilter: (item) => item.active,
         );
 
         final repository = createTestRepository(filters: {filter});

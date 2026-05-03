@@ -59,21 +59,25 @@ class LdListItemWidget extends StatelessWidget {
     return Row(
       children: [
         switch (selectionControl) {
-          LdSelectionControl.radio => LdRadio(
-              checked: isSelected,
-              color: color,
-              disabled: disabledState,
-              onChanged: (value) {
-                onSelectionChanged?.call(value);
-              },
+          LdSelectionControl.radio => ExcludeFocus(
+              child: LdRadio(
+                checked: isSelected,
+                color: color,
+                disabled: disabledState,
+                onChanged: (value) {
+                  onSelectionChanged?.call(value);
+                },
+              ),
             ),
-          LdSelectionControl.checkbox => LdCheckbox(
-              checked: isSelected,
-              color: color,
-              disabled: disabledState,
-              onChanged: (value) {
-                onSelectionChanged?.call(value);
-              },
+          LdSelectionControl.checkbox => ExcludeFocus(
+              child: LdCheckbox(
+                checked: isSelected,
+                color: color,
+                disabled: disabledState,
+                onChanged: (value) {
+                  onSelectionChanged?.call(value);
+                },
+              ),
             ),
           LdSelectionControl.none => const SizedBox.shrink(),
         },

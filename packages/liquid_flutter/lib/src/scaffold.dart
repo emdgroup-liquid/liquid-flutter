@@ -212,7 +212,7 @@ class LdScaffoldState extends State<LdScaffold> {
                                 controller: effectiveScrollController,
                                 child: LdNotificationPortal(
                                   debugLabel: "Scaffold Body ${widget.debugName}",
-                                  child: widget.body,
+                                  child: FocusTraversalGroup(child: widget.body),
                                 ),
                               ),
                             ),

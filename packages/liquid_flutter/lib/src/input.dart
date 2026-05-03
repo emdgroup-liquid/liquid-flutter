@@ -16,6 +16,7 @@ class LdInput extends StatefulWidget {
   final Iterable<String>? autofillHints;
   final bool obscureText;
   final bool autofocus;
+  final Widget? trailing;
   final TextInputAction? textInputAction;
   final TextInputType? keyboardType;
   final FocusNode? focusNode;
@@ -35,6 +36,7 @@ class LdInput extends StatefulWidget {
   const LdInput({
     required this.hint,
     this.controller,
+    this.trailing,
     this.label,
     this.obscureText = false,
     this.leading,
@@ -114,7 +116,9 @@ class _LdInputState extends State<LdInput> {
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
 
-    final contentPadding = theme.pad() - EdgeInsets.all(theme.borderWidth);
+    final contentPadding = theme.pad() -
+        EdgeInsets.all(theme.borderWidth) -
+        (widget.showClear ? EdgeInsets.only(top: 4, bottom: 4) : EdgeInsets.zero);
 
     final cursorHeight = theme.labelSize(widget.size);
 
@@ -126,33 +130,23 @@ class _LdInputState extends State<LdInput> {
       height: 1,
     );
 
-    Widget? suffix;
+    var clearButton = widget.showClear
+        ? LdButton.vague(
+            size: widget.size == LdSize.l ? LdSize.s : LdSize.xs,
+            onPressed: () {
+              _controller.clear();
+              widget.onCleared?.call();
+            },
+            child: const Icon(LucideIcons.x))
+        : null;
 
-    var clearButton = LdButton.vague(
-        size: widget.size == LdSize.l ? LdSize.s : LdSize.xs,
-        onPressed: () {
-          _controller.clear();
-          widget.onCleared?.call();
-        },
-        child: const Icon(LucideIcons.x));
-
-    if (widget.trailingHint != null) {
-      final trailingHint = DefaultTextStyle(
-        style: hintStyle,
-        child: widget.trailingHint!,
-      );
-
-      if (widget.showClear) {
-        suffix = AnimatedSwitcher(
-          duration: const Duration(milliseconds: 150),
-          child: _controller.text.isEmpty ? trailingHint : clearButton,
-        );
-      } else {
-        suffix = trailingHint;
-      }
-    } else if (widget.showClear) {
-      suffix = clearButton;
-    }
+    final suffix = AnimatedSwitcher(
+      duration: const Duration(milliseconds: 150),
+      child: switch (_controller.text.isEmpty && widget.trailingHint != null) {
+        true => DefaultTextStyle(style: hintStyle, child: widget.trailingHint!),
+        false => widget.trailing ?? clearButton,
+      },
+    );
 
     return Material(
       type: MaterialType.transparency,

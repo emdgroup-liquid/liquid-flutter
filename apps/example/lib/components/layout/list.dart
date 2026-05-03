@@ -23,7 +23,7 @@ class _ListDemoState extends State<ListDemo> {
     fetchListFunction: _fetchItems,
   );
 
-  Future<LdListPage<_DemoItem>> _fetchItems({required int offset, required int pageSize, String? pageToken}) async {
+  Future<LdListPage<_DemoItem>> _fetchItems(FetchPageParameters<_DemoItem, int> parameters) async {
     await Future.delayed(const Duration(milliseconds: 500));
 
     if (_simulateError) {
@@ -33,8 +33,8 @@ class _ListDemoState extends State<ListDemo> {
     // return a list of 10 items for each page, except for the last page
     // in total, there are 95 items
     return LdListPage<_DemoItem>(
-      newItems: _demoItems.skip(offset).take(pageSize).toList(),
-      hasMore: offset + pageSize < _demoItems.length,
+      newItems: _demoItems.skip(parameters.offset).take(parameters.pageSize).toList(),
+      hasMore: parameters.offset + parameters.pageSize < _demoItems.length,
       total: _demoItems.length,
     );
   }
@@ -101,7 +101,10 @@ class _ListDemoState extends State<ListDemo> {
               children: [
                 Wrap(
                   children: [
-                    LdButton(onPressed: _paginator.refreshList, child: const Text("Refresh list")),
+                    LdButton(
+                      onPressed: () => _paginator.refreshList(context: context, hard: true),
+                      child: const Text("Refresh list"),
+                    ),
                     LdButton(
                       child: const Text("Clear list"),
                       onPressed: () {

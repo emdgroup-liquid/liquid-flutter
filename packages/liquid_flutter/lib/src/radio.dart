@@ -19,6 +19,7 @@ class _LdRadioWidget extends StatelessWidget {
   final bool checked;
   final bool disabled;
   final LdSize size;
+  final FocusNode? focusNode;
 
   final LdColor? color;
   final Function(bool)? onChanged;
@@ -29,6 +30,7 @@ class _LdRadioWidget extends StatelessWidget {
     this.size = LdSize.s,
     this.onChanged,
     this.color,
+    this.focusNode,
     this.disabled = false,
   });
 
@@ -57,6 +59,7 @@ class _LdRadioWidget extends StatelessWidget {
         onPressed: _onTap,
         mode: LdTouchableSurfaceMode.outline,
         hitTestBehavior: HitTestBehavior.opaque,
+        focusNode: focusNode,
         //active: checked,
         disabled: disabled,
         color: color ?? theme.palette.primary,

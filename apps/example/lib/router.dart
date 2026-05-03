@@ -82,63 +82,29 @@ class AppRouter {
           StatefulShellBranch(
             initialLocation: "/movie-demo",
             routes: [
-              ...buildMonkeyRoutes(
-                basePath: "/movie-demo",
-                pathParameterName: "movieId",
-                parseSelected: (selected) => selected.split("_").map(int.parse).toSet(),
+              ...buildMonkeyRoutes<MovieDemo, int>(
+                routeConfig: LdMonkeyRouteConfig.identifiableInt<MovieDemo>(itemName: "movie", basePath: "/movie-demo"),
+                sortOptions: [],
+                actions: movieActions,
+                filters: movieFilters,
                 detailPage: MovieDetailPage(),
                 detailInDialog: true,
                 masterPage: MovieMasterPage(),
-                repositoryBuilder: (context) async => movieRepository,
-                layoutMode: LdMonkeyLayoutMode.neverSideBySide,
-                shellBuilder:
-                    ({
-                      required BuildContext context,
-                      required GoRouterState routeState,
-                      required Widget child,
-                      required String basePath,
-                      required String pathParameterName,
-                      required Widget masterPage,
-                      required Set<int> Function(String selected) parseSelected,
-                    }) => MovieShell(
-                      routeState: routeState,
-                      pathParameterName: pathParameterName,
-                      parseSelected: parseSelected,
-                      masterPage: masterPage,
-                      basePath: basePath,
-                      child: child,
-                    ),
+                repositoryBuilder: (context) => movieRepository(context),
               ),
             ],
-          ),  
+          ),
           StatefulShellBranch(
-            initialLocation: "/task-demo",
+            initialLocation: "/task-demo?sort-task=due-asc",
             routes: [
               ...buildMonkeyRoutes<Task, int>(
-                basePath: "/task-demo",
-                pathParameterName: "taskId",
-                parseSelected: (selected) => selected.split("_").map(int.parse).toSet(),
+                routeConfig: LdMonkeyRouteConfig.identifiableInt<Task>(itemName: "task", basePath: "/task-demo"),
+                sortOptions: taskSortOptions,
+                actions: taskActions,
+                filters: taskFilters,
                 detailPage: TaskDetailPage(),
                 masterPage: TaskMasterPage(),
-                repositoryBuilder: (context) async => taskRepository,
-                layoutMode: LdMonkeyLayoutMode.auto,
-                shellBuilder:
-                    ({
-                      required BuildContext context,
-                      required GoRouterState routeState,
-                      required Widget child,
-                      required String pathParameterName,
-                      required Set<int> Function(String selected) parseSelected,
-                      required Widget masterPage,
-                      required String basePath,
-                    }) => TaskShell(
-                      routeState: routeState,
-                      basePath: basePath,
-                      parseSelected: parseSelected,
-                      pathParameterName: pathParameterName,
-                      masterPage: masterPage,
-                      child: child,
-                    ),
+                repositoryBuilder: (context) => taskRepository(context),
               ),
             ],
           ),
@@ -414,8 +380,7 @@ class AppRouter {
           ),
           GoRoute(
             path: "/components/markdown",
-            pageBuilder: (context, state) =>
-                NoTransitionPage<void>(key: state.pageKey, child: const MarkdownDemo()),
+            pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const MarkdownDemo()),
           ),
         ],
       ),

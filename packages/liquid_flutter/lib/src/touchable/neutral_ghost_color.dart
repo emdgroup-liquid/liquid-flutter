@@ -18,11 +18,30 @@ LdColorBundle neutralGhostColor(LdTheme theme, LdTouchableStatus status) {
     );
   }
 
+  if (status.focus || status.pressed) {
+    return LdColorBundle.autoText(
+      theme: theme,
+      surface: isOdd ? theme.neutralShade(4) : theme.neutralShade(4),
+      textColor: palette.primary,
+      iconColor: palette.primary,
+      border: border,
+    );
+  }
+
   if (status.active) {
     return LdColorBundle.autoText(
       theme: theme,
       surface: Color.alphaBlend(theme.primaryColor.withAlpha(20),
           neutral.relative(theme.isDark, (isOdd ? 3 : 2) + (status.onSurface ? 0 : 1))),
+      border: border,
+      iconColor: palette.primary,
+    );
+  }
+
+  if (status.pressed) {
+    return LdColorBundle.autoText(
+      theme: theme,
+      surface: neutral.relative(theme.isDark, (isOdd ? 3 : 2) + (status.onSurface ? 0 : 1)),
       border: border,
       iconColor: palette.primary,
     );
@@ -34,16 +53,6 @@ LdColorBundle neutralGhostColor(LdTheme theme, LdTouchableStatus status) {
       surface: neutral.relative(theme.isDark, (isOdd ? 3 : 2) + (status.onSurface ? 0 : 1)),
       border: border,
       iconColor: palette.primary,
-    );
-  }
-
-  if (status.focus) {
-    return LdColorBundle.autoText(
-      theme: theme,
-      surface: isOdd ? theme.neutralShade(3) : theme.neutralShade(3),
-      textColor: palette.primary,
-      iconColor: palette.primary,
-      border: border,
     );
   }
 

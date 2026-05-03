@@ -56,19 +56,22 @@ class OpenDrawerButton extends StatelessWidget {
       axes: const {Axis.horizontal},
       initialRevealed: shouldShow,
       revealed: shouldShow,
-      child: Row(
-        children: [
-          Tooltip(
-            message: LiquidLocalizations.of(context).openDrawer,
-            child: LdButton.ghost(
-              child: Icon(icon),
-              onPressed: () {
-                LdDrawerLayout.openDrawer(context);
-              },
+      child: ExcludeFocus(
+        excluding: !shouldShow,
+        child: Row(
+          children: [
+            Tooltip(
+              message: LiquidLocalizations.of(context).openDrawer,
+              child: LdButton.ghost(
+                child: Icon(icon),
+                onPressed: () {
+                  LdDrawerLayout.openDrawer(context);
+                },
+              ),
             ),
-          ),
-          ldSpacerM,
-        ],
+            ldSpacerM,
+          ],
+        ),
       ),
     );
   }

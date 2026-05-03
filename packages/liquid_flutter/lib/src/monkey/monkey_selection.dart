@@ -6,20 +6,19 @@ import 'package:provider/provider.dart';
 class LdMonkeySelection<T extends Identifiable<IdType>, IdType> {
   final Set<IdType> selection;
   final Set<IdType> viewing;
+  final bool showSelectionControls;
 
   LdMonkeySelection({
     required this.selection,
     required this.viewing,
+    required this.showSelectionControls,
   });
 
-  static LdMonkeySelection<T, IdType>
-      of<T extends Identifiable<IdType>, IdType>(
+  static LdMonkeySelection<T, IdType> of<T extends Identifiable<IdType>, IdType>(
     BuildContext context, {
     bool listen = false,
   }) {
-    return listen
-        ? context.watch<LdMonkeySelection<T, IdType>>()
-        : context.read<LdMonkeySelection<T, IdType>>();
+    return listen ? context.watch<LdMonkeySelection<T, IdType>>() : context.read<LdMonkeySelection<T, IdType>>();
   }
 
   static Set<IdType> adaptive<T extends Identifiable<IdType>, IdType>(
@@ -29,9 +28,8 @@ class LdMonkeySelection<T extends Identifiable<IdType>, IdType> {
   }) {
     location ??= context.read<LdMonkeyActionLocation>();
 
-    final selection = listen
-        ? context.watch<LdMonkeySelection<T, IdType>>()
-        : context.read<LdMonkeySelection<T, IdType>>();
+    final selection =
+        listen ? context.watch<LdMonkeySelection<T, IdType>>() : context.read<LdMonkeySelection<T, IdType>>();
 
     return switch (location) {
       LdMonkeyActionLocation.detailAppBar => selection.viewing,
@@ -42,18 +40,14 @@ class LdMonkeySelection<T extends Identifiable<IdType>, IdType> {
     };
   }
 
-  static Future<List<T>>
-      getSelectedItems<T extends Identifiable<IdType>, IdType>(
-          BuildContext context) async {
+  static Future<List<T>> getSelectedItems<T extends Identifiable<IdType>, IdType>(BuildContext context) async {
     final selection = adaptive<T, IdType>(context);
     final repository = LdRepository.of<T, IdType>(context);
 
     return Future.wait(selection.map((id) => (repository.getById(id))));
   }
 
-  static Future<List<T>>
-      getViewingItems<T extends Identifiable<IdType>, IdType>(
-          BuildContext context) async {
+  static Future<List<T>> getViewingItems<T extends Identifiable<IdType>, IdType>(BuildContext context) async {
     final selection = of<T, IdType>(context).viewing;
     final repository = LdRepository.of<T, IdType>(context);
 
@@ -64,7 +58,8 @@ class LdMonkeySelection<T extends Identifiable<IdType>, IdType> {
   bool operator ==(Object other) {
     if (other is LdMonkeySelection<T, IdType>) {
       return setEquals(selection, other.selection) &&
-          setEquals(viewing, other.viewing);
+          setEquals(viewing, other.viewing) &&
+          showSelectionControls == other.showSelectionControls;
     }
     return false;
   }

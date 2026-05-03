@@ -7,7 +7,6 @@ class LdFilterRange<T extends Identifiable<IdType>, IdType> extends LdFilterOpti
   final double min;
   final double max;
   final double step;
-  final bool Function(T item, RangeValues range) _optimisticFilter;
 
   LdFilterRange({
     required super.name,
@@ -17,10 +16,9 @@ class LdFilterRange<T extends Identifiable<IdType>, IdType> extends LdFilterOpti
     required this.min,
     this.step = 1,
     required this.max,
-    required bool Function(T item, RangeValues range) optimisticFilter,
     RangeValues? range,
-  })  : _optimisticFilter = optimisticFilter,
-        range = range ?? RangeValues(min, max);
+    super.isEnabled,
+  }) : range = range ?? RangeValues(min, max);
 
   @override
   String serialize() {
@@ -56,11 +54,6 @@ class LdFilterRange<T extends Identifiable<IdType>, IdType> extends LdFilterOpti
   }
 
   @override
-  bool optimisticFilter(T item) {
-    return _optimisticFilter(item, range);
-  }
-
-  @override
   LdFilterRange<T, IdType> copyWith({
     String Function(BuildContext context)? label,
     Widget Function(BuildContext context)? icon,
@@ -70,7 +63,7 @@ class LdFilterRange<T extends Identifiable<IdType>, IdType> extends LdFilterOpti
     double? min,
     double? max,
     double? step,
-    bool Function(T item, RangeValues range)? optimisticFilter,
+    bool Function(BuildContext context)? isEnabled,
   }) {
     return LdFilterRange<T, IdType>(
       name: name ?? this.name,
@@ -80,13 +73,13 @@ class LdFilterRange<T extends Identifiable<IdType>, IdType> extends LdFilterOpti
       min: min ?? this.min,
       max: max ?? this.max,
       step: step ?? this.step,
-      optimisticFilter: optimisticFilter ?? _optimisticFilter,
       range: range ?? this.range,
+      isEnabled: isEnabled ?? this.isEnabled,
     );
   }
 
   @override
-  Widget build(BuildContext context, LdRepository<T, IdType> repository) {
+  Widget build(BuildContext context) {
     return LdFilterRangeWidget<T, IdType>(filter: this);
   }
 }
@@ -104,7 +97,6 @@ class LdFilterRangeWidget<T extends Identifiable<IdType>, IdType> extends Statel
 
   @override
   Widget build(BuildContext context) {
-    final repository = LdRepository.of<T, IdType>(context);
     return LdAutoSpace(
       children: [
         Row(
@@ -113,9 +105,11 @@ class LdFilterRangeWidget<T extends Identifiable<IdType>, IdType> extends Statel
             LdButton.vague(
               size: LdSize.s,
               onPressed: () {
-                repository.updateFilter(
-                  filter.name,
-                  (filter) => (filter as LdFilterRange<T, IdType>).copyWith(isOn: false),
+                filter.update(
+                  context,
+                  filter.copyWith(
+                    isOn: false,
+                  ),
                 );
               },
               child: const Icon(LucideIcons.x),
@@ -132,9 +126,11 @@ class LdFilterRangeWidget<T extends Identifiable<IdType>, IdType> extends Statel
               divisions: (filter.max - filter.min) ~/ filter.step,
               values: filter.range,
               onChanged: (values) {
-                repository.updateFilter(
-                  filter.name,
-                  (filter) => (filter as LdFilterRange<T, IdType>).copyWith(range: values),
+                filter.update(
+                  context,
+                  filter.copyWith(
+                    range: values,
+                  ),
                 );
               }),
         )

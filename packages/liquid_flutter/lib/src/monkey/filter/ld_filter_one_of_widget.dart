@@ -12,7 +12,6 @@ class LdFilterOneOfWidget<T extends Identifiable<IdType>, IdType, E> extends Sta
 
   @override
   Widget build(BuildContext context) {
-    final repository = LdRepository.of<T, IdType>(context);
     return LdCard(
       child: LdAutoSpace(
         children: [
@@ -22,9 +21,11 @@ class LdFilterOneOfWidget<T extends Identifiable<IdType>, IdType, E> extends Sta
               LdButton.vague(
                 size: LdSize.s,
                 onPressed: () {
-                  repository.updateFilter(
-                    filter.name,
-                    (filter) => (filter as LdFilterOneOf<T, IdType, E>).copyWith(isOn: false),
+                  filter.update(
+                    context,
+                    filter.copyWith(
+                      isOn: false,
+                    ),
                   );
                 },
                 child: const Icon(LucideIcons.x),
@@ -40,9 +41,12 @@ class LdFilterOneOfWidget<T extends Identifiable<IdType>, IdType, E> extends Sta
               ),
               value: filter.selectedValue ?? filter.allValues.keys.first,
               onChanged: (E value) {
-                repository.updateFilter(
-                  filter.name,
-                  (filter) => (filter as LdFilterOneOf<T, IdType, E>).copyWith(selectedValue: value, isOn: true),
+                filter.update(
+                  context,
+                  filter.copyWith(
+                    selectedValue: value,
+                    isOn: true,
+                  ),
                 );
               },
             ),

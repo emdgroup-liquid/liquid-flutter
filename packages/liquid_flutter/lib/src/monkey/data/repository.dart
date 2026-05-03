@@ -3,259 +3,146 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/monkey/data/fetch_offset_parameters.dart';
+import 'package:liquid_flutter/src/monkey/data/fetch_page_parameters.dart';
 import 'package:provider/provider.dart';
 
-typedef FetchListWithParameters<T extends Identifiable<IdType>, IdType> = Future<LdListPage<T>> Function({
-  required int offset,
-  required int pageSize,
-  String? pageToken,
-  Set<LdFilterOption<T, IdType>>? filters,
-  List<LdSortOption<T, IdType>>? sortOptions,
-});
-
 class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T, IdType> {
-  final Future<T> Function(IdType id) _getById;
-  final Future<int?> Function(IdType id,
-      {Set<LdFilterOption<T, IdType>>? filters, List<LdSortOption<T, IdType>>? sortOptions})? _getOffsetById;
-  final Future<void> Function(Set<T> items)? _updateBatch;
-  final Future<void> Function(IdType id)? _deleteItem;
+  final Future<int?> Function(FetchOffsetParameters<T, IdType> parameters)? _getOffsetById;
+
   final Future<T?> Function(IdType id, T newItem)? _updateItem;
   final Future<T?> Function(T? newItem)? _createItem;
+  final Future<T> Function(IdType id) _getById;
+  final Future<void> Function(IdType id)? _deleteItem;
   final Future<void> Function(Set<IdType> ids)? _deleteBatch;
+  final Future<void> Function(Set<T> items)? _updateBatch;
 
-  final FetchListWithParameters<T, IdType> _fetchListWithParameters;
-
-  String singularItemTitle;
-  String pluralItemTitle;
-
-  final Map<String, LdFilterOption<T, IdType>> _filters;
+  final Set<LdFilterOption<T, IdType>> _filters;
   final List<LdSortOption<T, IdType>> _sortOptions;
-  final Map<IdType, LdPaginatorItem<T>> _filteredOutCache = {};
-
-  Map<String, LdFilterOption<T, IdType>> get filters => Map.unmodifiable(_filters);
-  List<LdSortOption<T, IdType>> get sortOptions => List.unmodifiable(_sortOptions);
-
-  final _filterStreamController = StreamController<Set<LdFilterOption<T, IdType>>>.broadcast();
-  Stream<Set<LdFilterOption<T, IdType>>> get filterStream => _filterStreamController.stream;
-
-  final _sortStreamController = StreamController<List<LdSortOption<T, IdType>>>.broadcast();
-  Stream<List<LdSortOption<T, IdType>>> get sortStream => _sortStreamController.stream;
+  IdType? _lastSelectionAnchorId;
 
   LdRepository({
-    required FetchListWithParameters<T, IdType> fetchListWithParameters,
+    required Future<LdListPage<T>> Function(FetchPageParameters<T, IdType> parameters) fetchListWithParameters,
     super.pageSize,
     required Future<T> Function(IdType id) getById,
     Set<LdFilterOption<T, IdType>>? filters,
     List<LdSortOption<T, IdType>>? sortOptions,
-    Future<int?> Function(IdType id,
-            {Set<LdFilterOption<T, IdType>>? filters, List<LdSortOption<T, IdType>>? sortOptions})?
-        getOffsetById,
+    Future<int?> Function(FetchOffsetParameters<T, IdType> parameters)? getOffsetById,
     Future<void> Function(IdType id)? deleteItem,
     Future<T?> Function(IdType id, T newItem)? updateItem,
     Future<T?> Function(T? newItem)? createItem,
     Future<void> Function(Set<IdType> ids)? deleteBatch,
     Future<void> Function(Set<T> items)? updateBatch,
-    this.singularItemTitle = "Item",
-    this.pluralItemTitle = "Items",
-  })  : _fetchListWithParameters = fetchListWithParameters,
-        _getById = getById,
+  })  : _getById = getById,
         _getOffsetById = getOffsetById,
         _deleteItem = deleteItem,
         _updateItem = updateItem,
-        _filters = Map.fromEntries(filters?.map((e) => MapEntry(e.name, e)) ?? []),
+        _filters = filters ?? {},
         _createItem = createItem,
         _sortOptions = sortOptions ?? [],
         _deleteBatch = deleteBatch,
         _updateBatch = updateBatch {
-    fetchListFunction = _fetchListPaginator;
+    fetchListFunction = (parameters) {
+      return fetchListWithParameters(
+        FetchPageParameters(
+          context: parameters.context,
+          offset: parameters.offset,
+          pageSize: parameters.pageSize,
+          pageToken: parameters.pageToken,
+          filters: _filters.where((e) => e.isOn).toSet(),
+          sortOptions: _sortOptions.where((e) => e.isOn).toList(),
+        ),
+      );
+    };
   }
 
-  static LdRepository<L, IdType> fromList<L extends Identifiable<IdType>, IdType>({
-    required List<L> list,
-    Set<LdFilterOption<L, IdType>>? filters,
-    List<LdSortOption<L, IdType>>? sortOptions,
-  }) {
-    return LdRepository<L, IdType>(
-      filters: filters,
-      sortOptions: sortOptions,
-      fetchListWithParameters: ({
-        required offset,
-        required pageSize,
-        pageToken,
-        filters,
-        sortOptions,
-      }) async {
-        final filtered =
-            list.where((item) => filters?.every((filter) => filter.optimisticFilter(item)) ?? true).toList();
-        for (final sortOption in sortOptions ?? []) {
-          filtered.sort((a, b) => sortOption.optimisticSort(a, b));
-        }
-        return LdListPage<L>(
-          newItems: filtered.skip(offset).take(pageSize).toList(),
-          hasMore: offset + pageSize < filtered.length,
-          total: filtered.length,
-        );
-      },
-      getById: (id) async => list.firstWhere((item) => item.id == id),
+  Iterable<LdFilterOption<T, IdType>> get activeFilters => _filters.where((e) => e.isOn);
+
+  List<LdSortOption<T, IdType>> get sortOptions => List.unmodifiable(_sortOptions);
+
+  Future<T?> create(T? newValue, {int? index}) async {
+    assert(
+      _createItem != null,
+      'Cannot create item. createItem was not configured for this repository',
     );
-  }
-
-  // Adapter for the LdPaginator
-  Future<LdListPage<T>> _fetchListPaginator({
-    required int offset,
-    required int pageSize,
-    String? pageToken,
-  }) {
-    return _fetchListWithParameters(
-      offset: offset,
-      pageSize: pageSize,
-      pageToken: pageToken,
-      filters: activeFilters.toSet(),
-      sortOptions: _sortOptions.where((e) => e.isOn).toList(),
-    );
-  }
-
-  static LdRepository<T, IdType> of<T extends Identifiable<IdType>, IdType>(BuildContext context) {
-    return context.read<LdRepository<T, IdType>>();
-  }
-
-  static LdRepository<T, IdType>? maybeOf<T extends Identifiable<IdType>, IdType>(BuildContext context) {
-    return context.read<LdRepository<T, IdType>?>();
-  }
-
-  Map<String, dynamic> get queryParameters {
-    var parameters = <String, dynamic>{};
-
-    for (final filter in _filters.values) {
-      if (filter.isOn) {
-        parameters[filter.name] = filter.serialize();
-      }
-    }
-
-    final sort = _sortOptions.where((e) => e.isOn).toList();
-
-    if (sort.isNotEmpty) {
-      parameters['sort'] = sort.map((e) => e.serialize()).join(',');
-    }
-
-    return parameters;
-  }
-
-  Future<void> updateFilter(
-    String name,
-    LdFilterOption<T, IdType> Function(LdFilterOption<T, IdType>? filter) updater,
-  ) async {
-    final existingFilter = _filters[name];
-    assert(existingFilter != null, 'Cannot update filter. Filter with name $name does not exist');
-    _filters[name] = updater(existingFilter);
-    _filterStreamController.add(_filters.values.toSet());
-
-    await applyOptimisticFilterAndSorting();
-
-    // If we disabled a filter we need to perform a refresh of the list
-
-    await refreshList();
-  }
-
-  Future<void> updateSortOption(LdSortOption<T, IdType> sortOption) async {
-    final existingSortOption = _sortOptions.firstWhereOrNull((e) => e.name == sortOption.name);
-    assert(existingSortOption != null,
-        'Cannot update sort option. Sort option with name ${sortOption.name} does not exist');
-    _sortOptions.remove(existingSortOption);
-    _sortOptions.add(sortOption);
-    _sortStreamController.add(_sortOptions);
-    await applyOptimisticFilterAndSorting();
-  }
-
-  Future<void> setActiveSortOption(String name) async {
-    final newOptions = _sortOptions.map((e) => e.copyWith(isOn: e.name == name)).toList();
-
-    _sortOptions.clear();
-    _sortOptions.addAll(newOptions);
-    _sortStreamController.add(_sortOptions);
-    await applyOptimisticFilterAndSorting();
-  }
-
-  Future<void> applyOptimisticFilterAndSorting() async {
-    final filters = activeFilters.toList();
-    final sortOptions = _sortOptions.where((e) => e.isOn).toList();
-
-    await mutex.acquire();
+    final newIndex = scheduleItemCreation(newValue, index: index);
     try {
-      final allItemsById = <IdType, LdPaginatorItem<T>>{};
-
-      for (final cached in _filteredOutCache.values) {
-        if (cached.value != null) {
-          allItemsById[cached.value!.id] = cached;
-        }
+      final newItem = await _createItem!(newValue);
+      confirmItemCreation(newIndex, newValue: newItem);
+      return newItem;
+    } catch (e, stackTrace) {
+      if (ldPrintDebugMessages) {
+        debugPrint("Error creating item: $e");
+        debugPrint(stackTrace.toString());
       }
 
-      for (final item in itemsMap.values) {
-        if (item.value != null) {
-          allItemsById[item.value!.id] = item;
-        }
-      }
-
-      final updatedItems = allItemsById.values.map((item) {
-        final filterApplies = filters.every((filter) => filter.optimisticFilter(item.value!));
-
-        var newState = item.state;
-
-        if (!filterApplies) {
-          newState = LdPaginatorItemState.filteredOut;
-        } else if (item.state == LdPaginatorItemState.filteredOut) {
-          newState = LdPaginatorItemState.loaded;
-        }
-
-        return item.copyWith(
-          state: newState,
-        );
-      }).toList();
-
-      for (final sortOption in sortOptions) {
-        if (sortOption.optimisticSort != null) {
-          updatedItems.sort((a, b) => sortOption.optimisticSort!(a.value!, b.value!));
-        }
-      }
-
-      final visibleItems = updatedItems.where((item) => item.state != LdPaginatorItemState.filteredOut).toList();
-      final filteredOutItems = updatedItems.where((item) => item.state == LdPaginatorItemState.filteredOut).toList();
-
-      _filteredOutCache
-        ..clear()
-        ..addEntries(filteredOutItems.map((item) => MapEntry(item.value!.id, item)));
-
-      // Keep filtered-out items in a dedicated cache for quick restore when
-      // filters broaden, while exposing only visible items in paginator indices.
-      totalItems = visibleItems.length;
-      setItems(visibleItems);
-    } finally {
-      mutex.release();
+      rollbackItemCreation(newIndex);
+      return null;
     }
   }
 
-  Iterable<LdFilterOption<T, IdType>> get activeFilters => _filters.values.where((e) => e.isOn);
+  /// Updates the filters for the repository.
+  void updateFilters(Set<LdFilterOption<T, IdType>> filters) {
+    print("Updating filters: $filters");
+    _filters.clear();
+    _filters.addAll(filters);
+  }
 
-  Future<void> initWithSelection(Set<IdType> selection) async {
-    if (_getOffsetById == null) {
-      return;
+  /// Updates the sort options for the repository.
+  void updateSortOptions(List<LdSortOption<T, IdType>> sortOptions) {
+    _sortOptions.clear();
+    _sortOptions.addAll(sortOptions);
+  }
+
+  Set<LdFilterOption<T, IdType>> get filters => Set.unmodifiable(_filters);
+
+  Future<void> delete({required BuildContext context, required IdType id}) async {
+    if (_deleteItem != null) {
+      scheduleItemDeletion(id);
+      try {
+        await _deleteItem(id);
+        if (!context.mounted) {
+          return;
+        }
+        confirmItemDeletion(context: context, id: id);
+      } catch (e) {
+        rollbackItemDeletion(id);
+        rethrow;
+      }
     }
-    final currentFilters = activeFilters.toSet();
-    final currentSortOptions = _sortOptions.where((e) => e.isOn).toList();
+  }
 
-    final firstOffset = await _getOffsetById(
-      selection.first,
-      filters: currentFilters,
-      sortOptions: currentSortOptions,
-    );
+  Future<void> deleteBatch({required BuildContext context, required Set<IdType> ids}) async {
+    if (_deleteBatch == null) {
+      for (var id in ids) {
+        await delete(context: context, id: id);
+      }
+    } else {
+      final exceptions = <dynamic>[];
+      for (final id in ids) {
+        scheduleItemDeletion(id);
+      }
+      try {
+        await _deleteBatch(ids);
 
-    initialOffset = firstOffset ?? 0;
+        for (final id in ids) {
+          if (!context.mounted) {
+            break;
+          }
+          confirmItemDeletion(context: context, id: id, refresh: false);
+        }
+      } catch (e) {
+        for (final id in ids) {
+          rollbackItemDeletion(id);
+        }
+        exceptions.add(e);
+      }
 
-    if (firstOffset == null) {
-      return;
+      if (exceptions.isNotEmpty && context.mounted) {
+        refreshList(context: context);
+        throw Exception(exceptions);
+      }
     }
-
-    await fetchItemsAtOffset(firstOffset);
   }
 
   Future<T> getById(IdType id, {bool skipCache = false}) async {
@@ -268,14 +155,73 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     return await _getById(id);
   }
 
-  Future<void> delete(IdType id) async {
-    if (_deleteItem != null) {
-      scheduleItemDeletion(id);
+  Future<void> initWithSelection(BuildContext context, Set<IdType> selection) async {
+    if (selection.isEmpty) {
+      return;
+    }
+    _lastSelectionAnchorId = selection.first;
+    if (_getOffsetById == null) {
+      return;
+    }
+    final currentFilters = activeFilters.toSet();
+    final currentSortOptions = _sortOptions.where((e) => e.isOn).toList();
+
+    final firstOffset = await _getOffsetById(FetchOffsetParameters(
+      context: context,
+      id: selection.first,
+      filters: currentFilters,
+      sortOptions: currentSortOptions,
+    ));
+
+    initialOffset = firstOffset ?? 0;
+
+    if (firstOffset == null || !context.mounted) {
+      return;
+    }
+
+    await fetchPageAtOffset(context, firstOffset);
+  }
+
+  @override
+  Future<void> refreshList({
+    required BuildContext context,
+    bool hard = false,
+    IdType? anchorId,
+  }) async {
+    final effectiveAnchorId = anchorId ?? _resolveDefaultRefreshAnchorId();
+    final currentFilters = activeFilters.toSet();
+    final currentSortOptions = _sortOptions.where((e) => e.isOn).toList();
+
+    if (effectiveAnchorId != null && _getOffsetById != null) {
+      final anchorOffset = await _getOffsetById(
+        FetchOffsetParameters(
+          context: context,
+          id: effectiveAnchorId,
+          filters: currentFilters,
+          sortOptions: currentSortOptions,
+        ),
+      );
+      if (anchorOffset != null) {
+        initialOffset = anchorOffset;
+      }
+    }
+
+    if (!context.mounted) {
+      return;
+    }
+
+    await super.refreshList(context: context, hard: true);
+  }
+
+  Future<void> update(IdType id, T newValue) async {
+    if (_updateItem != null) {
+      scheduleItemUpdate(id, newValue);
       try {
-        await _deleteItem(id);
-        confirmItemDeletion(id);
+        final newItemFromServer = await _updateItem(id, newValue);
+        final newItem = newItemFromServer ?? newValue;
+        confirmItemUpdate(id, newItem);
       } catch (e) {
-        rollbackItemDeletion(id);
+        await rollbackItemUpdate(id);
         rethrow;
       }
     }
@@ -297,7 +243,6 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
         }
         rethrow;
       }
-      await applyOptimisticFilterAndSorting();
     } else {
       final exceptions = <dynamic>[];
       for (final item in items) {
@@ -310,103 +255,66 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
         }
       }
 
-      await applyOptimisticFilterAndSorting();
       if (exceptions.isNotEmpty) {
         throw Exception(exceptions);
       }
     }
   }
 
-  Future<void> update(IdType id, T newValue) async {
-    if (_updateItem != null) {
-      scheduleItemUpdate(id, newValue);
-      try {
-        final newItemFromServer = await _updateItem(id, newValue);
-        final newItem = newItemFromServer ?? newValue;
-        confirmItemUpdate(id, newItem);
-
-        await applyOptimisticFilterAndSorting();
-      } catch (e) {
-        await rollbackItemUpdate(id);
-        //await applyOptimisticFilterAndSorting();
-        rethrow;
-      }
+  IdType? _resolveDefaultRefreshAnchorId() {
+    final currentItem = getItemAt(initialOffset);
+    if (currentItem?.value != null) {
+      return currentItem!.value!.id;
     }
+
+    if (_lastSelectionAnchorId != null) {
+      return _lastSelectionAnchorId;
+    }
+
+    return itemsMap.entries
+        .where((entry) => entry.value.value != null)
+        .map((entry) => entry.value.value!.id)
+        .firstOrNull;
   }
 
-  Future<T?> create(T? newValue, {int? index}) async {
-    assert(
-      _createItem != null,
-      'Cannot create item. createItem was not configured for this repository',
+  static LdRepository<L, IdType> fromList<L extends Identifiable<IdType>, IdType>({
+    required List<L> list,
+    Set<LdFilterOption<L, IdType>>? filters,
+    List<LdSortOption<L, IdType>>? sortOptions,
+    bool Function(L item, Set<LdFilterOption<L, IdType>>? activeFilters)? filterFunction,
+    int Function(L a, L b, List<LdSortOption<L, IdType>>? activeSortOptions)? sortFunction,
+  }) {
+    return LdRepository<L, IdType>(
+      filters: filters,
+      sortOptions: sortOptions,
+      fetchListWithParameters: (parameters) async {
+        var filtered = list.toList();
+        final filters = parameters.filters;
+        final sortOptions = parameters.sortOptions;
+
+        if (filterFunction != null && filters != null && filters.isNotEmpty) {
+          filtered = filtered.where((item) => filterFunction(item, filters)).toList();
+        }
+
+        if (sortFunction != null && sortOptions != null && sortOptions.isNotEmpty) {
+          filtered.sort((a, b) => sortFunction(a, b, sortOptions));
+        }
+
+        return LdListPage<L>(
+          newItems: filtered.skip(parameters.offset).take(parameters.pageSize).toList(),
+          hasMore: parameters.offset + parameters.pageSize < filtered.length,
+          total: filtered.length,
+        );
+      },
+      getById: (id) async => list.firstWhere((item) => item.id == id),
     );
-    final newIndex = scheduleItemCreation(newValue, index: index);
-    try {
-      final newItem = await _createItem!(newValue);
-      confirmItemCreation(newIndex, newValue: newItem);
-      await applyOptimisticFilterAndSorting();
-      return newItem;
-    } catch (e, stackTrace) {
-      if (ldPrintDebugMessages) {
-        debugPrint("Error creating item: $e");
-        debugPrint(stackTrace.toString());
-      }
-
-      rollbackItemCreation(newIndex);
-      return null;
-    }
   }
 
-  Future<void> deleteBatch(Set<IdType> ids) async {
-    if (_deleteBatch == null) {
-      for (var id in ids) {
-        await delete(id);
-      }
-    } else {
-      final exceptions = <dynamic>[];
-      for (final id in ids) {
-        scheduleItemDeletion(id);
-      }
-      try {
-        await _deleteBatch(ids);
-        for (final id in ids) {
-          confirmItemDeletion(id, refresh: false);
-        }
-      } catch (e) {
-        for (final id in ids) {
-          rollbackItemDeletion(id);
-        }
-        exceptions.add(e);
-      }
-
-      if (exceptions.isNotEmpty) {
-        refreshList();
-        throw Exception(exceptions);
-      }
-    }
+  static LdRepository<T, IdType>? maybeOf<T extends Identifiable<IdType>, IdType>(BuildContext context) {
+    return context.read<LdRepository<T, IdType>?>();
   }
 
-  LdSearchConfig? getSearchConfig() {
-    final searchFilter =
-        filters.values.firstWhereOrNull((filter) => filter is LdFilterSearch) as LdFilterSearch<T, IdType, dynamic>?;
-    if (searchFilter != null) {
-      return searchFilter.searchConfig((query) {
-        updateFilter(searchFilter.name, (filter) {
-          filter as LdFilterSearch<T, IdType, dynamic>;
-          return filter.copyWith(
-            isOn: query.isNotEmpty,
-            searchText: query,
-          );
-        });
-      });
-    }
-    return null;
-  }
-
-  @override
-  void dispose() {
-    _filteredOutCache.clear();
-    _filterStreamController.close();
-    _sortStreamController.close();
-    super.dispose();
+  static LdRepository<T, IdType> of<T extends Identifiable<IdType>, IdType>(BuildContext context) {
+    return context.read<LdRepository<T, IdType>>();
   }
 }

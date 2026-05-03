@@ -115,32 +115,30 @@ LdRepository<TestItem, int> createTestRepository({
   List<TestItem>? initialItems,
   Set<LdFilterOption<TestItem, int>>? filters,
   List<LdSortOption<TestItem, int>>? sortOptions,
-  Future<int?> Function(int id, {Set<LdFilterOption<TestItem, int>>? filters, List<LdSortOption<TestItem, int>>? sortOptions})? getOffsetById,
+  Future<int?> Function(int id,
+          {Set<LdFilterOption<TestItem, int>>? filters, List<LdSortOption<TestItem, int>>? sortOptions})?
+      getOffsetById,
   Future<void> Function(int id)? deleteItem,
   Future<TestItem?> Function(int id, TestItem newItem)? updateItem,
   Future<TestItem?> Function(TestItem? newItem)? createItem,
   Future<void> Function(Set<int> ids)? deleteBatch,
   Future<void> Function(Set<TestItem> items)? updateBatch,
 }) {
-  final items = initialItems ?? [
-    TestItem(1, 'Item 1', 10),
-    TestItem(2, 'Item 2', 20),
-    TestItem(3, 'Item 3', 30),
-  ];
+  final items = initialItems ??
+      [
+        TestItem(1, 'Item 1', 10),
+        TestItem(2, 'Item 2', 20),
+        TestItem(3, 'Item 3', 30),
+      ];
 
   return LdRepository<TestItem, int>(
     fetchListWithParameters: ({required offset, required pageSize, pageToken, filters, sortOptions}) async {
-      var filtered = items.where((item) => filters?.every((filter) => filter.optimisticFilter(item)) ?? true).toList();
-
-      for (final sortOption in sortOptions ?? []) {
-        filtered.sort((a, b) => sortOption.optimisticSort(a, b));
-      }
-
-      final paginated = filtered.skip(offset).take(pageSize).toList();
+      // Simulate a server that returns all items (no server-side filtering in test helper)
+      final paginated = items.skip(offset).take(pageSize).toList();
       return LdListPage<TestItem>(
         newItems: paginated,
-        hasMore: offset + pageSize < filtered.length,
-        total: filtered.length,
+        hasMore: offset + pageSize < items.length,
+        total: items.length,
       );
     },
     getById: (id) async => items.firstWhere((item) => item.id == id),
@@ -168,4 +166,3 @@ TestItem createTestItem(int id, {String? name, int? value, bool? active, String?
 
 // Note: GoRouterState is not easily mockable, so tests should use real GoRouter instances
 // This helper is kept for reference but tests should create GoRouter directly
-

@@ -37,46 +37,43 @@ class LdNotificationPortal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<LdNotificationsController>(
-      child: child,
-      builder: (context, notifier, child) {
-        final theme = LdTheme.of(context, listen: true);
-        return Stack(
-          children: [
-            Positioned.fill(child: child!),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: EdgeInsets.only(
-                  left: MediaQuery.paddingOf(context).left + theme.pad(size: LdSize.m).left,
-                  right: MediaQuery.paddingOf(context).right + theme.pad(size: LdSize.m).right,
-                  bottom: MediaQuery.paddingOf(context).bottom + theme.pad(size: LdSize.m).bottom,
-                ),
-                child: LdContainer(
-                  maxWidth: theme.sizingConfig.containerMaxWidth / 2,
-                  child: Stack(
-                    children: notifier.notifications.mapIndexed((
-                      index,
-                      notification,
-                    ) {
-                      return LdNotificationWidget(
-                        key: notification.key,
-                        index: notifier.notifications.length - index - 1,
-                        notification: notification,
-                        removing: notification.removing,
-                        didConfirm: notification.didConfirm,
-                        onDismiss: () {
-                          notifier.onDismissNotification(notification);
-                        },
-                      );
-                    }).toList(),
-                  ),
-                ),
+    final controller = context.watch<LdNotificationsController>();
+
+    final theme = LdTheme.of(context, listen: true);
+    return Stack(
+      children: [
+        Positioned.fill(child: child),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: MediaQuery.paddingOf(context).left + theme.pad(size: LdSize.m).left,
+              right: MediaQuery.paddingOf(context).right + theme.pad(size: LdSize.m).right,
+              bottom: MediaQuery.paddingOf(context).bottom + theme.pad(size: LdSize.m).bottom,
+            ),
+            child: LdContainer(
+              maxWidth: theme.sizingConfig.containerMaxWidth / 2,
+              child: Stack(
+                children: controller.notifications.mapIndexed((
+                  index,
+                  notification,
+                ) {
+                  return LdNotificationWidget(
+                    key: notification.key,
+                    index: controller.notifications.length - index - 1,
+                    notification: notification,
+                    removing: notification.removing,
+                    didConfirm: notification.didConfirm,
+                    onDismiss: () {
+                      controller.onDismissNotification(notification);
+                    },
+                  );
+                }).toList(),
               ),
-            )
-          ],
-        );
-      },
+            ),
+          ),
+        )
+      ],
     );
   }
 }

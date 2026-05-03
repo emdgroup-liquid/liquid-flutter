@@ -12,8 +12,6 @@ class LdFilterAnyOfWidget<T extends Identifiable<IdType>, IdType, E> extends Sta
 
   @override
   Widget build(BuildContext context) {
-    final repository = LdRepository.of<T, IdType>(context);
-
     List<LdSelectItem<E>> items = filter.allValues.entries
         .map<LdSelectItem<E>>((e) => LdSelectItem<E>(
               value: e.key,
@@ -29,9 +27,9 @@ class LdFilterAnyOfWidget<T extends Identifiable<IdType>, IdType, E> extends Sta
             LdButton.vague(
               size: LdSize.s,
               onPressed: () {
-                repository.updateFilter(
-                  filter.name,
-                  (filter) => (filter as LdFilterAnyOf<T, IdType, E>).copyWith(
+                filter.update(
+                  context,
+                  filter.copyWith(
                     isOn: false,
                   ),
                 );
@@ -47,9 +45,9 @@ class LdFilterAnyOfWidget<T extends Identifiable<IdType>, IdType, E> extends Sta
             value: filter.selectedValues,
             placeholder: Text(filter.label(context)),
             onChanged: (Set<E> values) {
-              repository.updateFilter(
-                filter.name,
-                (filter) => (filter as LdFilterAnyOf<T, IdType, E>).copyWith(
+              filter.update(
+                context,
+                filter.copyWith(
                   selectedValues: values,
                   isOn: values.isNotEmpty,
                 ),

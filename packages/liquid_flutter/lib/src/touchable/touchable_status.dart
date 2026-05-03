@@ -19,4 +19,13 @@ class LdTouchableStatus {
     this.isOdd = false,
     this.onSurface = false,
   });
+
+  @override
+  String toString() {
+    return 'LdTouchableStatus('
+        '${hovering ? 'hovering' : ''}${focus ? 'focus' : ''}'
+        '${active ? 'active' : ''}${disabled ? 'disabled' : ''}'
+        '${pressed ? 'pressed' : ''}${panOffset != null ? 'panOffset: ${panOffset?.toString()}' : ''}'
+        '${isOdd ? 'isOdd' : ''}${onSurface ? 'onSurface' : ''})';
+  }
 }

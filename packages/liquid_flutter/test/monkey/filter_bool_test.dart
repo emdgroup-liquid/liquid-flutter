@@ -20,7 +20,6 @@ void main() {
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
           isOn: true,
-          optimisticFilter: (item) => item.active,
         );
 
         expect(filter.serialize(), equals('true'));
@@ -32,7 +31,6 @@ void main() {
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
           isOn: false,
-          optimisticFilter: (item) => item.active,
         );
 
         expect(filter.serialize(), equals('true'));
@@ -44,7 +42,6 @@ void main() {
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
           isOn: false,
-          optimisticFilter: (item) => item.active,
         );
 
         final marshaled = filter.marshalSerialized('true');
@@ -57,7 +54,6 @@ void main() {
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
           isOn: false,
-          optimisticFilter: (item) => item.active,
         );
 
         final marshaled = filter.marshalSerialized('');
@@ -70,63 +66,10 @@ void main() {
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
           isOn: false,
-          optimisticFilter: (item) => item.active,
         );
 
         final marshaled = filter.marshalSerialized('invalid');
         expect(marshaled.isOn, isTrue);
-      });
-    });
-
-    group('Optimistic Filtering', () {
-      test('optimisticFilter() uses provided function when filter is on', () {
-        final filter = LdFilterBool<TestItem, int>(
-          name: 'active',
-          label: (context) => 'Active',
-          icon: (context) => const Icon(Icons.check),
-          isOn: true,
-          optimisticFilter: (item) => item.active,
-        );
-
-        final activeItem = createTestItem(1, active: true);
-        final inactiveItem = createTestItem(2, active: false);
-
-        expect(filter.optimisticFilter(activeItem), isTrue);
-        expect(filter.optimisticFilter(inactiveItem), isFalse);
-      });
-
-      test('optimisticFilter() uses provided function when filter is off', () {
-        final filter = LdFilterBool<TestItem, int>(
-          name: 'active',
-          label: (context) => 'Active',
-          icon: (context) => const Icon(Icons.check),
-          isOn: false,
-          optimisticFilter: (item) => item.active,
-        );
-
-        final activeItem = createTestItem(1, active: true);
-        final inactiveItem = createTestItem(2, active: false);
-
-        expect(filter.optimisticFilter(activeItem), isTrue);
-        expect(filter.optimisticFilter(inactiveItem), isFalse);
-      });
-
-      test('optimisticFilter() works with complex filter logic', () {
-        final filter = LdFilterBool<TestItem, int>(
-          name: 'high-value',
-          label: (context) => 'High Value',
-          icon: (context) => const Icon(Icons.star),
-          isOn: true,
-          optimisticFilter: (item) => item.value > 20 && item.active,
-        );
-
-        final highValueActiveItem = createTestItem(3, active: true); // value = 30
-        final lowValueActiveItem = createTestItem(1, active: true); // value = 10
-        final highValueInactiveItem = createTestItem(3, active: false); // value = 30
-
-        expect(filter.optimisticFilter(highValueActiveItem), isTrue);
-        expect(filter.optimisticFilter(lowValueActiveItem), isFalse);
-        expect(filter.optimisticFilter(highValueInactiveItem), isFalse);
       });
     });
 
@@ -137,7 +80,6 @@ void main() {
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
           isOn: false,
-          optimisticFilter: (item) => item.active,
         );
 
         final newFilter = filter.copyWith(isOn: true);
@@ -151,7 +93,6 @@ void main() {
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
-          optimisticFilter: (item) => item.active,
         );
 
         final newFilter = filter.copyWith(name: 'inactive');
@@ -165,7 +106,6 @@ void main() {
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
-          optimisticFilter: (item) => item.active,
         );
 
         final newFilter = filter.copyWith(label: (context) => 'Inactive');
@@ -180,7 +120,6 @@ void main() {
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
-          optimisticFilter: (item) => item.active,
         );
 
         final newFilter = filter.copyWith(icon: (context) => const Icon(Icons.close));
@@ -190,31 +129,12 @@ void main() {
         expect((newFilter.icon(context) as Icon).icon, equals(Icons.close));
       });
 
-      test('copyWith() updates optimisticFilter correctly', () {
-        final filter = LdFilterBool<TestItem, int>(
-          name: 'active',
-          label: (context) => 'Active',
-          icon: (context) => const Icon(Icons.check),
-          optimisticFilter: (item) => item.active,
-        );
-
-        final newFilter = filter.copyWith(optimisticFilter: (item) => !item.active);
-        final activeItem = createTestItem(1, active: true);
-        final inactiveItem = createTestItem(2, active: false);
-
-        expect(newFilter.optimisticFilter(activeItem), isFalse);
-        expect(newFilter.optimisticFilter(inactiveItem), isTrue);
-        expect(filter.optimisticFilter(activeItem), isTrue);
-        expect(filter.optimisticFilter(inactiveItem), isFalse);
-      });
-
       test('copyWith() preserves values when not provided', () {
         final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
           isOn: true,
-          optimisticFilter: (item) => item.active,
         );
 
         final newFilter = filter.copyWith();
@@ -223,8 +143,6 @@ void main() {
         expect(newFilter.isOn, equals(filter.isOn));
         final context = MockBuildContext();
         expect(newFilter.label(context), equals(filter.label(context)));
-        final item = createTestItem(1, active: true);
-        expect(newFilter.optimisticFilter(item), equals(filter.optimisticFilter(item)));
       });
     });
 
@@ -235,7 +153,6 @@ void main() {
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
           isOn: false,
-          optimisticFilter: (item) => item.active,
         );
 
         final repository = createTestRepository(filters: {filter});
@@ -267,7 +184,6 @@ void main() {
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
           isOn: true,
-          optimisticFilter: (item) => item.active,
         );
 
         final repository = createTestRepository(filters: {filter});
@@ -299,7 +215,6 @@ void main() {
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
           isOn: true,
-          optimisticFilter: (item) => item.active,
         );
 
         final repository = createTestRepository(filters: {filter});
@@ -330,7 +245,6 @@ void main() {
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
           isOn: true,
-          optimisticFilter: (item) => item.active,
         );
 
         final repository = createTestRepository(filters: {filter});
@@ -368,7 +282,6 @@ void main() {
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
           isOn: false,
-          optimisticFilter: (item) => item.active,
         );
 
         final repository = createTestRepository(filters: {filter});

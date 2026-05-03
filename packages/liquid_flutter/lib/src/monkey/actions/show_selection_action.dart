@@ -6,22 +6,20 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 LdMonkeyAction<T, IdType> showSelection<T extends Identifiable<IdType>, IdType>() => LdMonkeyBareChildAction<T, IdType>(
       onShortcutTrigger: (context) async {
-        final shellState = LdMonkeyShellState.of<T, IdType>(context);
         final selection = LdMonkeySelection.of<T, IdType>(context);
 
         if (selection.selection.isNotEmpty) {
-          shellState.setViewingItems(selection.selection);
+          MonkeyRouterAdapter.updateViewingItems<T, IdType>(context, selection.selection);
         }
       },
       visibility: {
         LdMonkeyActionVisibility(
-          location: LdMonkeyActionLocation.masterAppBar,
+          location: LdMonkeyActionLocation.masterSecondary,
           minSelectionCount: 1,
           maxSelectionCount: null,
         ),
       },
       builder: (context) {
-        final shellState = LdMonkeyShellState.of<T, IdType>(context);
         final selection = LdMonkeySelection.of<T, IdType>(context);
 
         // Only show if selection exists and is different from viewing
@@ -35,9 +33,10 @@ LdMonkeyAction<T, IdType> showSelection<T extends Identifiable<IdType>, IdType>(
           key: const Key('show_selection'),
           buttonMode: LdButtonMode.filled,
           leading: const Icon(LucideIcons.eye),
+          preferLeadingOnMobile: false,
           child: const Text('Show Selection'),
           onPressed: () async {
-            shellState.setViewingItems(selection.selection);
+            MonkeyRouterAdapter.updateViewingItems<T, IdType>(context, selection.selection);
           },
         );
       },

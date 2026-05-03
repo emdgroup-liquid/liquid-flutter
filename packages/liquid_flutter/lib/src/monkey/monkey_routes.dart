@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'dart:core';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -28,22 +28,14 @@ import 'package:provider/provider.dart';
 ///
 /// Returns a list of routes that can be added to a [GoRouter] configuration.
 List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
-  required String basePath,
+  required LdMonkeyRouteConfig<T, IdType> routeConfig,
   required Widget detailPage,
   required Widget masterPage,
-  required Future<LdRepository<T, IdType>> Function(BuildContext context) repositoryBuilder,
-  required LdMonkeyLayoutMode layoutMode,
-  required Set<IdType> Function(String selected) parseSelected,
-  required String pathParameterName,
-  Widget Function({
-    required BuildContext context,
-    required GoRouterState routeState,
-    required Widget child,
-    required String pathParameterName,
-    required Widget masterPage,
-    required String basePath,
-    required Set<IdType> Function(String selected) parseSelected,
-  })? shellBuilder,
+  required LdRepository<T, IdType> Function(BuildContext context) repositoryBuilder,
+  required List<LdFilterOption<T, IdType>> filters,
+  required List<LdSortOption<T, IdType>> sortOptions,
+  required List<LdMonkeyAction<T, IdType>> actions,
+  Widget? monkeyShell,
   LdModalRoute Function(BuildContext context)? filterModalBuilder,
   bool detailInDialog = false,
 }) {
@@ -51,25 +43,23 @@ List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
     ShellRoute(
       routes: [
         GoRoute(
-          name: "$basePath-master",
-          path: basePath,
+          name: routeConfig.masterRouteName,
+          path: routeConfig.basePath,
           pageBuilder: (context, state) => MaterialPage<void>(
-            key: state.pageKey,
             child: masterPage,
           ),
           routes: [
             GoRoute(
-              name: "$basePath-detail",
-              path: "/:selected_$pathParameterName",
+              name: routeConfig.detailRouteName,
+              path: "/:${routeConfig.viewingParamName}",
               pageBuilder: (context, goState) {
                 final effectiveLayout = context.read<LdMonkeyEffectiveLayoutMode>();
 
                 final page = detailPage;
 
-                if (effectiveLayout == LdMonkeyEffectiveLayoutMode.detail) {
+                if (effectiveLayout != LdMonkeyEffectiveLayoutMode.sideBySide) {
                   if (detailInDialog) {
                     return LdModalPage(
-                      key: goState.pageKey,
                       builder: (context) => LdModalRoute(
                         context: context,
                         pageBuilder: (context) => page,
@@ -79,11 +69,9 @@ List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
 
                   return MaterialPage(
                     child: page,
-                    key: goState.pageKey,
                   );
                 }
                 return NoTransitionPage<void>(
-                  key: goState.pageKey,
                   child: page,
                 );
               },
@@ -91,26 +79,27 @@ List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
           ],
         ),
       ],
-      builder: (context, routeState, child) => shellBuilder != null
-          ? shellBuilder(
-              context: context,
-              routeState: routeState,
-              child: child,
-              basePath: basePath,
-              masterPage: masterPage,
-              pathParameterName: pathParameterName,
-              parseSelected: parseSelected,
-            )
-          : LdMonkeyShell(
-              basePath: basePath,
-              parseSelected: parseSelected,
-              masterPage: masterPage,
+      builder: (context, routeState, child) {
+        return Provider<LdMonkeyRouteConfig<T, IdType>>.value(
+          value: routeConfig,
+          child: Provider<LdMonkeyActions<T, IdType>>.value(
+            value: actions,
+            child: LdRepositoryProvider<T, IdType>(
               repositoryBuilder: repositoryBuilder,
-              layoutMode: layoutMode,
-              routeState: routeState,
-              pathParameterName: pathParameterName,
-              child: child,
+              child: MonkeyRouterAdapter<T, IdType>(
+                routeConfig: routeConfig,
+                filters: filters,
+                sortOptions: sortOptions,
+                child: monkeyShell ??
+                    LdMonkeyShell<T, IdType>(
+                      masterPage: masterPage,
+                      child: child,
+                    ),
+              ),
             ),
-    )
+          ),
+        );
+      },
+    ),
   ];
 }

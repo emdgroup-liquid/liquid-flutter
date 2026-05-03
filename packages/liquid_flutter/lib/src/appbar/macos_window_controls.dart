@@ -50,43 +50,46 @@ class MacOSWindowControls extends StatelessWidget {
       revealed: show,
       initialRevealed: show,
       axes: const {Axis.horizontal},
-      child: Row(
-        children: [
-          Tooltip(
-            message: LiquidLocalizations.of(context).close,
-            child: LdButton.ghost(
-              size: LdSize.xs,
-              color: LdTheme.of(context).error,
-              child: const Icon(Icons.circle, size: 14),
-              onPressed: () {
-                LdAppBar.callbacks?.onClose?.call();
-              },
+      child: ExcludeFocus(
+        excluding: !show,
+        child: Row(
+          children: [
+            Tooltip(
+              message: LiquidLocalizations.of(context).close,
+              child: LdButton.ghost(
+                size: LdSize.xs,
+                color: LdTheme.of(context).error,
+                child: const Icon(Icons.circle, size: 14),
+                onPressed: () {
+                  LdAppBar.callbacks?.onClose?.call();
+                },
+              ),
             ),
-          ),
-          Tooltip(
-            message: LiquidLocalizations.of(context).minimize,
-            child: LdButton.ghost(
-              size: LdSize.xs,
-              color: LdTheme.of(context).warning,
-              child: const Icon(Icons.circle, size: 14),
-              onPressed: () {
-                LdAppBar.callbacks?.onMinimize?.call();
-              },
+            Tooltip(
+              message: LiquidLocalizations.of(context).minimize,
+              child: LdButton.ghost(
+                size: LdSize.xs,
+                color: LdTheme.of(context).warning,
+                child: const Icon(Icons.circle, size: 14),
+                onPressed: () {
+                  LdAppBar.callbacks?.onMinimize?.call();
+                },
+              ),
             ),
-          ),
-          Tooltip(
-            message: LiquidLocalizations.of(context).maximize,
-            child: LdButton.ghost(
-              size: LdSize.xs,
-              color: LdTheme.of(context).success,
-              child: const Icon(Icons.circle, size: 14),
-              onPressed: () {
-                LdAppBar.callbacks?.onMaximize?.call();
-              },
+            Tooltip(
+              message: LiquidLocalizations.of(context).maximize,
+              child: LdButton.ghost(
+                size: LdSize.xs,
+                color: LdTheme.of(context).success,
+                child: const Icon(Icons.circle, size: 14),
+                onPressed: () {
+                  LdAppBar.callbacks?.onMaximize?.call();
+                },
+              ),
             ),
-          ),
-          ldSpacerM,
-        ],
+            ldSpacerM,
+          ],
+        ),
       ),
     );
   }

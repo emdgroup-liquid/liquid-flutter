@@ -41,7 +41,7 @@ class LdListItemAnimation extends StatelessWidget {
             duration: const Duration(milliseconds: 1000),
           )
           .shakeX(hz: 3),
-      LdPaginatorItemState.deleting || LdPaginatorItemState.filteredOut => LdReveal.quick(
+      LdPaginatorItemState.deleting => LdReveal.quick(
           revealed: false,
           initialRevealed: true,
           child: child,

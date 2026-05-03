@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -62,36 +63,58 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
 
   @override
   void initState() {
+    super.initState();
+
     if (widget.theme == null) {
       _createdTheme = LdTheme();
     }
-
-    _applyBrightness();
-
-    _listenToScreenRadiusStream();
-
     _palette = _theme.palette;
     _themeSize = _theme.themeSize;
     _theme.addListener(themeChanged);
     WidgetsBinding.instance.addObserver(this);
 
-    if (widget.size == null) {
-      if (_theme.platform.isDesktop) {
-        _theme.setThemeSize(LdThemeSize.s);
-      } else {
-        _theme.setThemeSize(LdThemeSize.m);
-      }
-    } else {
-      _theme.setThemeSize(widget.size!);
+    _listenToScreenRadiusStream();
+    _runAfterFrame(_applyInitialTheme);
+  }
+
+  void _runAfterFrame(VoidCallback callback) {
+    if (!mounted) {
+      return;
     }
 
-    super.initState();
+    final phase = SchedulerBinding.instance.schedulerPhase;
+    final shouldDefer = switch (phase) {
+      SchedulerPhase.idle || SchedulerPhase.postFrameCallbacks => false,
+      _ => true,
+    };
+
+    if (!shouldDefer) {
+      callback();
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      callback();
+    });
+  }
+
+  void _applyInitialTheme() {
+    _applyPlatformOverride();
+    _applyBrightness();
+    _applyThemeSize();
   }
 
   void _listenToScreenRadiusStream() {
     _screenRadiusSubscription = widget.screenRadiusStream?.listen((radius) {
-      _theme.screenRadius = radius;
-      setState(() {});
+      _runAfterFrame(() {
+        if (_theme.screenRadius == radius) {
+          return;
+        }
+        _theme.screenRadius = radius;
+      });
     });
   }
 
@@ -102,22 +125,78 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
   }
 
   void _applyBrightness() {
-    switch (widget.brightnessMode) {
-      case LdThemeBrightnessMode.auto:
-        var brightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    final targetPalette = switch (widget.brightnessMode) {
+      LdThemeBrightnessMode.auto =>
+        WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark
+            ? _darkPalette
+            : _lightPalette,
+      LdThemeBrightnessMode.light => _lightPalette,
+      LdThemeBrightnessMode.dark => _darkPalette,
+    };
 
-        if (brightness == Brightness.dark && _theme.palette != _darkPalette) {
-          _theme.setPalette(_darkPalette);
-        } else {
-          _theme.setPalette(_lightPalette);
-        }
-        break;
-      case LdThemeBrightnessMode.light:
-        _theme.setPalette(_lightPalette);
-        break;
-      case LdThemeBrightnessMode.dark:
-        _theme.setPalette(_darkPalette);
-        break;
+    if (_theme.palette == targetPalette) {
+      return;
+    }
+    _theme.setPalette(targetPalette);
+  }
+
+  void _applyThemeSize() {
+    final targetThemeSize = widget.size ??
+        switch (_theme.platform.isDesktop) {
+          true => LdThemeSize.s,
+          false => LdThemeSize.m,
+        };
+
+    if (_theme.themeSize == targetThemeSize) {
+      return;
+    }
+    _theme.setThemeSize(targetThemeSize);
+  }
+
+  void _applyPlatformOverride() {
+    final platform = widget.platform;
+    if (platform == null || _theme.platform == platform) {
+      return;
+    }
+    _theme.platform = platform;
+  }
+
+  @override
+  void didUpdateWidget(covariant LdThemeProvider oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.theme != widget.theme) {
+      oldWidget.theme?.removeListener(themeChanged);
+      widget.theme?.addListener(themeChanged);
+      _palette = _theme.palette;
+      _themeSize = _theme.themeSize;
+    }
+
+    final didThemeInputsChange = oldWidget.brightnessMode != widget.brightnessMode ||
+        oldWidget.size != widget.size ||
+        oldWidget.platform != widget.platform;
+
+    if (didThemeInputsChange) {
+      _runAfterFrame(_applyInitialTheme);
+    }
+  }
+
+  @override
+  void dispose() {
+    _theme.removeListener(themeChanged);
+    WidgetsBinding.instance.removeObserver(this);
+    _screenRadiusSubscription?.cancel();
+    _createdTheme?.dispose();
+    super.dispose();
+  }
+
+  void themeChanged() async {
+    final paletteChanged = _palette != _theme.palette;
+    final sizeChanged = _themeSize != _theme.themeSize;
+
+    if (paletteChanged || sizeChanged) {
+      _palette = _theme.palette;
+      _themeSize = _theme.themeSize;
     }
   }
 
@@ -129,46 +208,6 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
       );
     }
     return null;
-  }
-
-  @override
-  void didUpdateWidget(covariant LdThemeProvider oldWidget) {
-    if (oldWidget.theme != widget.theme) {
-      oldWidget.theme?.removeListener(themeChanged);
-      widget.theme?.addListener(themeChanged);
-    }
-
-    if (oldWidget.brightnessMode != widget.brightnessMode) {
-      _applyBrightness();
-    }
-    if (oldWidget.size != widget.size) {
-      _theme.setThemeSize(widget.size!);
-    }
-    if (oldWidget.platform != widget.platform) {
-      if (widget.platform == null) {
-        _theme.platform = widget.platform!;
-      }
-    }
-
-    super.didUpdateWidget(oldWidget);
-  }
-
-  @override
-  dispose() {
-    _createdTheme?.dispose();
-    WidgetsBinding.instance.removeObserver(this);
-
-    _screenRadiusSubscription?.cancel();
-    super.dispose();
-  }
-
-  void themeChanged() async {
-    bool paletteChanged = _palette != _theme.palette;
-    bool sizeChanged = _themeSize != _theme.themeSize;
-
-    if (paletteChanged || sizeChanged) {
-      _palette = _theme.palette;
-    }
   }
 
   @override

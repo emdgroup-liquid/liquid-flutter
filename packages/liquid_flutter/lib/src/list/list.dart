@@ -101,7 +101,7 @@ class LdListWidget<T extends Identifiable<IdType>, IdType> extends StatefulWidge
   /// function
   final Widget Function(
     BuildContext context,
-    Future<void> Function() refresh,
+    Future<void> Function(BuildContext context) refresh,
   )? emptyBuilder;
 
   /// Built when an error occurs while loading data [error] is the error that
@@ -213,7 +213,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
 
   void _initializeRetryController() {
     _retryController = LdRetryController(
-      onRetry: _onRefresh,
+      onRetry: () => _onRefresh(context),
       config: widget.retryConfig ?? LdRetryConfig.unlimitedManualRetries(),
     );
   }
@@ -238,6 +238,11 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
 
     if (widget.header != oldWidget.header) {
       setState(() {});
+    }
+
+    if (widget.paginator.initialOffset != oldWidget.paginator.initialOffset) {
+      _performedInitialScroll = false;
+      _maybePerformInitialScroll();
     }
 
     if (widget.footer != oldWidget.footer) {
@@ -333,9 +338,9 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
     }
   }
 
-  Future<void> _onRefresh() async {
+  Future<void> _onRefresh(BuildContext context) async {
     _retryController.notifyOperationStarted();
-    await widget.paginator.refreshList();
+    await widget.paginator.refreshList(context: context);
   }
 
   void _updateGroupedItems() {
@@ -443,7 +448,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
       return const SizedBox.shrink();
     }
 
-    widget.paginator.fetchPageAtOffset(position);
+    widget.paginator.fetchPageAtOffset(context, position);
 
     return _buildLoader(context, position);
   }
@@ -458,7 +463,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
     _itemKeys[item.value.id] ??= GlobalKey(debugLabel: "list${item.value.id}");
 
     if (listEntry.item!.state == LdPaginatorItemState.pendingRefresh) {
-      widget.paginator.fetchPageAtOffset(listEntry.position!);
+      widget.paginator.fetchPageAtOffset(context, listEntry.position!);
     }
 
     return KeyedSubtree(
@@ -495,7 +500,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
     LdException error,
   ) {
     if (widget.errorBuilder != null) {
-      return widget.errorBuilder!(context, error, _onRefresh);
+      return widget.errorBuilder!(context, error, () => _onRefresh(context));
     }
 
     // return the default error view (LdExceptionView)
@@ -511,6 +516,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
   double _getAverageItemHeight() {
     double totalHeight = 0;
     double count = 0;
+
     for (final item in _itemKeys.values) {
       final height = item.currentContext?.findRenderObject()?.paintBounds.height;
 
@@ -533,7 +539,11 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
   /// based on the initial offset.
   Future<void> _maybePerformInitialScroll() async {
     if (!_scrollController.hasClients) return;
+    // We need to wait for at least the top items to load to calculate
+    // the average height correctly
+    if (_itemKeys.isEmpty) return;
     if (widget.paginator.initialOffset == 0) return;
+
     if (_performedInitialScroll) return;
 
     _performedInitialScroll = true;
@@ -558,7 +568,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
     }
 
     return RefreshIndicator.adaptive(
-      onRefresh: widget.paginator.refreshList,
+      onRefresh: () => widget.paginator.refreshList(context: context),
       child: _buildListView(context),
     );
   }

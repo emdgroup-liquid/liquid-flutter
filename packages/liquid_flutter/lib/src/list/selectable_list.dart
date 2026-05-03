@@ -2,6 +2,7 @@
 
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -52,6 +53,7 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addObserver(this);
     _scrollController = ScrollController();
 
@@ -95,7 +97,7 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
       _selectionController.setMultiSelect(widget.multiSelect);
     }
 
-    if (oldWidget.initialSelectedItems != widget.initialSelectedItems) {
+    if (!setEquals(oldWidget.initialSelectedItems, widget.initialSelectedItems)) {
       _selectionController.updateSelectedItems(widget.initialSelectedItems);
       if (widget.initialSelectedItems.length == 1) {
         _selectionController.getFocusNodeForItem(widget.initialSelectedItems.first).requestFocus();

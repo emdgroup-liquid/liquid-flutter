@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/monkey/intents.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:provider/provider.dart';
 
 class LdSearchInput extends StatefulWidget {
   final LdSearchConfig searchConfig;
@@ -70,11 +70,16 @@ class _LdSearchInputState extends State<LdSearchInput> {
     final hasFocus = _inputWrapperFocusNode.hasFocus;
     final suggestionsHasFocus = _suggestionsFocusNode.hasFocus;
 
+    print('hasFocus: $hasFocus');
+    print('suggestionsHasFocus: $suggestionsHasFocus');
+
     await Future.delayed(const Duration(milliseconds: 50));
 
     if (hasFocus && widget.searchConfig.getSuggestions != null && !suggestionsHasFocus) {
+      print('showing overlay');
       _showSuggestionsOverlay();
     } else if (!hasFocus && !suggestionsHasFocus) {
+      print('closing overlay');
       _closeOverlay();
     }
 
@@ -179,29 +184,19 @@ class _LdSearchInputState extends State<LdSearchInput> {
                   textInputAction: TextInputAction.search,
                   hint: widget.searchConfig.hint ?? LiquidLocalizations.of(context).search,
                   controller: _inputController,
-                  onSubmitted: (text) => widget.searchConfig.onSearch(text),
+                  showClear: true,
+                  onSubmitted: (text) {
+                    widget.searchConfig.onSearch(text);
+                    _inputWrapperFocusNode.unfocus();
+                  },
+                  onCleared: () {
+                    widget.searchConfig.onSearch('');
+                    _inputWrapperFocusNode.unfocus();
+                    _closeOverlay();
+                  },
                 ),
               ),
             ),
-            ValueListenableBuilder(
-                valueListenable: _inputController,
-                builder: (context, value, child) {
-                  return LdReveal(
-                    revealed: _inputController.text.isNotEmpty,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: LdButton.vague(
-                        child: const Icon(LucideIcons.x),
-                        onPressed: () {
-                          _inputController.clear();
-                          widget.searchConfig.onSearch('');
-                          _inputWrapperFocusNode.unfocus();
-                          _closeOverlay();
-                        },
-                      ),
-                    ),
-                  );
-                }),
           ],
         ),
       ),
@@ -329,23 +324,9 @@ class _LdSearchSuggestionsOverlayState extends State<LdSearchSuggestionsOverlay>
                   _placeOverlay(
                     screenSize,
                     inputRect,
-                    Container(
-                      clipBehavior: Clip.hardEdge,
-                      decoration: BoxDecoration(
-                        color: theme.surface.withAlpha(255),
-                        borderRadius: theme.radius(LdSize.m),
-                        border: Border.all(
-                          color: theme.border,
-                          width: theme.borderWidth,
-                        ),
-                        boxShadow: [
-                          ldShadowSticky,
-                        ],
-                      ),
-                      child: FocusScope(
-                        node: widget.suggestionsFocusNode,
-                        child: SingleChildScrollView(child: _buildSuggestionsContent()),
-                      ),
+                    FocusScope(
+                      node: widget.suggestionsFocusNode,
+                      child: _buildSuggestionsContent(),
                     ),
                   ),
                 ],
@@ -395,40 +376,57 @@ class _LdSearchSuggestionsOverlayState extends State<LdSearchSuggestionsOverlay>
             final result = await widget.searchConfig.getSuggestions!(query);
             return result;
           }),
-      child: LdSubmitCenteredBuilder<List<dynamic>, String>(
-        resultBuilder: (context, result, controller) {
-          final suggestions = result;
+      child: Builder(
+        builder: (context) {
+          final controller = context.watch<LdSubmitController<List<dynamic>, String>>();
+          final state = controller.state;
 
-          if (suggestions.isEmpty) {
-            if (_currentQuery.isNotEmpty) {
-              return Container(
-                padding: LdTheme.of(context).pad(size: LdSize.m),
-                child: Text(
-                  'No suggestions found',
-                  style: TextStyle(
-                    color: LdTheme.of(context).textMuted,
-                  ),
-                ),
-              );
-            }
-            return const SizedBox.shrink();
-          }
-          return NotificationListener<LdSearchAcceptSuggestion>(
-            onNotification: (notification) {
-              widget.onSuggestionAccepted(notification.suggestion.toString());
-              return true;
-            },
-            child: FocusTraversalGroup(
+          final result = state.result;
+          final suggestions = result;
+          final theme = LdTheme.of(context);
+
+          return Container(
+            clipBehavior: Clip.hardEdge,
+            decoration: BoxDecoration(
+              color: theme.surface.withAlpha(255),
+              borderRadius: theme.radius(LdSize.m),
+              border: Border.all(
+                color: theme.border,
+                width: theme.borderWidth,
+              ),
+              boxShadow: [
+                ldShadowSticky,
+              ],
+            ),
+            child: NotificationListener<LdSearchAcceptSuggestion>(
+              onNotification: (notification) {
+                widget.onSuggestionAccepted(notification.suggestion.toString());
+                return true;
+              },
+              child: FocusTraversalGroup(
                 policy: OrderedTraversalPolicy(), // This ensures proper order
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  padding: EdgeInsets.zero,
-                  itemCount: suggestions.length,
-                  itemBuilder: (context, index) {
-                    final suggestion = suggestions[index];
-                    return widget.searchConfig.buildSuggestion!.call(context, suggestion);
-                  },
-                )),
+                child: switch (state.type) {
+                  LdSubmitStateType.result => ListView.builder(
+                      shrinkWrap: true,
+                      padding: EdgeInsets.zero,
+                      itemCount: suggestions?.length ?? 0,
+                      itemBuilder: (context, index) {
+                        final suggestion = suggestions?[index];
+                        return widget.searchConfig.buildSuggestion!.call(context, suggestion);
+                      },
+                    ),
+                  LdSubmitStateType.loading => Center(
+                      child: LdLoader().padL(),
+                    ),
+                  LdSubmitStateType.error => LdExceptionView(
+                      exception: state.error!,
+                      direction: Axis.vertical,
+                      retryController: controller.retryController,
+                    ),
+                  LdSubmitStateType.idle => const SizedBox.shrink(),
+                },
+              ),
+            ),
           );
         },
       ),

@@ -15,11 +15,6 @@ void main() {
       _Category.categoryC: (BuildContext context) => const Text('Category C'),
     };
 
-    // Helper to create test items with category
-    TestItem createTestItemWithCategory(int id, String category) {
-      return TestItem(id, 'Item $id', id * 10, true, category);
-    }
-
     group('Serialization', () {
       test('serialize() returns selectedValue.toString() when on', () {
         final filter = LdFilterOneOf<TestItem, int, _Category>(
@@ -29,7 +24,6 @@ void main() {
           allValues: allValues,
           initialSelected: _Category.categoryA,
           isOn: true,
-          optimisticFilter: (item, selected) => selected == _Category.categoryA && item.category == 'A',
         );
 
         expect(filter.serialize(), equals('_Category.categoryA'));
@@ -43,7 +37,6 @@ void main() {
           allValues: allValues,
           initialSelected: _Category.categoryA,
           isOn: false,
-          optimisticFilter: (item, selected) => selected == _Category.categoryA && item.category == 'A',
         );
 
         expect(filter.serialize(), isEmpty);
@@ -56,7 +49,6 @@ void main() {
           icon: (context) => const Icon(Icons.category),
           allValues: allValues,
           isOn: true,
-          optimisticFilter: (item, selected) => selected == _Category.categoryA && item.category == 'A',
         );
 
         expect(filter.serialize(), isEmpty);
@@ -68,7 +60,6 @@ void main() {
           label: (context) => 'Category',
           icon: (context) => const Icon(Icons.category),
           allValues: allValues,
-          optimisticFilter: (item, selected) => selected == _Category.categoryA && item.category == 'A',
         );
 
         final marshaled = filter.marshalSerialized('_Category.categoryB');
@@ -84,7 +75,6 @@ void main() {
           allValues: allValues,
           initialSelected: _Category.categoryA,
           isOn: true,
-          optimisticFilter: (item, selected) => selected == _Category.categoryA && item.category == 'A',
         );
 
         final marshaled = filter.marshalSerialized('');
@@ -100,49 +90,11 @@ void main() {
           allValues: allValues,
           initialSelected: _Category.categoryA,
           isOn: true,
-          optimisticFilter: (item, selected) => selected == _Category.categoryA && item.category == 'A',
         );
 
         final marshaled = filter.marshalSerialized('invalid');
 
         expect(marshaled.isOn, isFalse);
-      });
-    });
-
-    group('Optimistic Filtering', () {
-      test('optimisticFilter() uses selected value', () {
-        final filter = LdFilterOneOf<TestItem, int, _Category>(
-          name: 'category',
-          label: (context) => 'Category',
-          icon: (context) => const Icon(Icons.category),
-          allValues: allValues,
-          initialSelected: _Category.categoryA,
-          isOn: true,
-          optimisticFilter: (item, selected) => selected == _Category.categoryA && item.category == 'A',
-        );
-
-        final matchingItem = createTestItemWithCategory(1, 'A');
-        final nonMatchingItem = createTestItemWithCategory(2, 'B');
-
-        expect(filter.optimisticFilter(matchingItem), isTrue);
-        expect(filter.optimisticFilter(nonMatchingItem), isFalse);
-      });
-
-      test('optimisticFilter() handles null selectedValue', () {
-        final filter = LdFilterOneOf<TestItem, int, _Category>(
-          name: 'category',
-          label: (context) => 'Category',
-          icon: (context) => const Icon(Icons.category),
-          allValues: allValues,
-          isOn: true,
-          optimisticFilter: (item, selected) {
-            if (selected == null) return true;
-            return selected == _Category.categoryA && item.category == 'A';
-          },
-        );
-
-        final item = createTestItemWithCategory(1, 'B');
-        expect(filter.optimisticFilter(item), isTrue);
       });
     });
 
@@ -154,7 +106,6 @@ void main() {
           icon: (context) => const Icon(Icons.category),
           allValues: allValues,
           initialSelected: _Category.categoryA,
-          optimisticFilter: (item, selected) => selected == _Category.categoryA && item.category == 'A',
         );
 
         final newFilter = filter.copyWith(
@@ -166,23 +117,6 @@ void main() {
         expect(newFilter.isOn, isTrue);
         expect(filter.selectedValue, equals(_Category.categoryA));
       });
-
-      test('copyWith() preserves optimisticFilter function', () {
-        final filter = LdFilterOneOf<TestItem, int, _Category>(
-          name: 'category',
-          label: (context) => 'Category',
-          icon: (context) => const Icon(Icons.category),
-          allValues: allValues,
-          initialSelected: _Category.categoryA,
-          isOn: true,
-          optimisticFilter: (item, selected) => selected == _Category.categoryA && item.category == 'A',
-        );
-
-        final newFilter = filter.copyWith(selectedValue: _Category.categoryA);
-        final item = createTestItemWithCategory(1, 'A');
-
-        expect(newFilter.optimisticFilter(item), isTrue);
-      });
     });
 
     group('UI Rendering', () {
@@ -193,7 +127,6 @@ void main() {
           icon: (context) => const Icon(Icons.category),
           allValues: allValues,
           initialSelected: _Category.categoryA,
-          optimisticFilter: (item, selected) => selected == _Category.categoryA && item.category == 'A',
         );
 
         final repository = createTestRepository(filters: {filter});

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -79,6 +81,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
 
   final _listenerKey = GlobalKey();
   FocusNode? _focusNode;
+  Offset? _pointerDownOffset;
 
   bool _createdFocusNode = false;
 
@@ -178,8 +181,9 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
           _safeSetState(() {
             _hovering = false;
             _pressed = false;
-
-            _focusNode?.unfocus();
+            if (_hasFocus) {
+              _focusNode?.unfocus();
+            }
           });
         },
         child: Builder(builder: (context) {
@@ -199,20 +203,34 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
               key: _listenerKey,
               behavior: widget.hitTestBehavior,
               onPointerDown: (d) => _safeSetState(() {
+                _focusNode?.requestFocus();
                 _pressed = true;
+                _pointerDownOffset = d.localPosition;
               }),
               onPointerUp: (details) => _safeSetState(() {
                 _pressed = false;
 
                 final listenerBox = _listenerKey.currentContext?.findRenderObject() as RenderBox?;
                 final size = listenerBox?.size ?? Size.zero;
+                // Make sure the pointer has not moved too far
+                final distanceThreshold = 32;
+
+                final distance = sqrt(
+                  pow(details.localPosition.dx - _pointerDownOffset!.dx, 2) +
+                      pow(details.localPosition.dy - _pointerDownOffset!.dy, 2),
+                );
+
+                if (distance > distanceThreshold) {
+                  return;
+                }
+
                 if (details.localPosition.dx > 0 &&
                     details.localPosition.dx < size.width &&
                     details.localPosition.dy > 0 &&
                     details.localPosition.dy < size.height) {
                   if (!widget.disabled) widget.onPressed();
                   if (!widget.isInput) {
-                    _focusNode?.unfocus();
+                    //_focusNode?.unfocus();
                   }
                 } else {}
               }),

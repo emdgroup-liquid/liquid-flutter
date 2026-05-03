@@ -429,17 +429,24 @@ class _ButtonShape extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
-    double squeezeFactor = disableSqueeze ? 0 : (status.panOffset?.dx.abs() ?? 0);
+    final panDistance = sqrt(pow(status.panOffset?.dx ?? 0, 2) + pow(status.panOffset?.dy ?? 0, 2));
+
+    double squeezeFactor = 0;
+
+    if (!disableSqueeze && status.pressed) {
+      squeezeFactor = panDistance * 0.01 + 0.01;
+    }
+
     return LdSpring(
-      position: status.pressed && !disableSqueeze ? 1 : 0,
-      initialPosition: status.pressed && !disableSqueeze ? 1 : 0,
+      position: squeezeFactor,
+      initialPosition: squeezeFactor,
       builder: (context, state, child) {
         return Transform(
           alignment: Alignment.center,
           transform: Matrix4.identity()
             ..scaleByDouble(
-              state.position * 0.05 + 1 + min(0.2, (squeezeFactor) * 0.001 * state.position),
-              state.position * 0.05 + 1 + min(0.2, (squeezeFactor) * 0.001 * state.position),
+              min(0.05, state.position * 0.01) + 1,
+              min(0.05, state.position * 0.01) + 1,
               1.0,
               1.0,
             ),

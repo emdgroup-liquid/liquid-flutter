@@ -429,7 +429,7 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
     final imply = widget.appBar.implyLeading ?? true;
     if (!imply) return null;
 
-    if (_canPopParentRoute && !_isDrawer && !_isModal && _level() == 0 && !_isInBottomSlot) {
+    if (_canPopParentRoute && !_isDrawer && !_isModal && !_isInBottomSlot) {
       return LdButton.ghost(
         child: const Icon(LucideIcons.chevronLeft),
         onPressed: () => Navigator.of(context).maybePop(),
@@ -480,6 +480,22 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
     final isAttached = _effectivelyAttached();
     final position = _effectivePosition;
     final enableWindowDrag = position == LdAppBarPosition.top && level == 0 && !_isModal;
+
+    final hasSearch = widget.appBar.searchConfig != null;
+    final mobile = LdTheme.of(context).platform.isMobile;
+
+    List<Widget> bottomContent = [
+      if (widget.appBar.bottom != null) widget.appBar.bottom!,
+    ];
+
+    if (hasSearch && mobile) {
+      bottomContent.add(LdSearchInput(
+        searchConfig: widget.appBar.searchConfig!,
+        isBottomNavigationBar: _isInBottomSlot,
+        fullWidth: true,
+      ));
+    }
+
     return LdAppBarScrollWrapper(
       position: position,
       scrollBehavior: widget.appBar.scrollBehavior,
@@ -533,8 +549,6 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           LayoutBuilder(builder: (context, constraints) {
-                            final hasSearch = widget.appBar.searchConfig != null;
-
                             final overflowItems = [
                               if (widget.appBar.title != null)
                                 LdFlexibleChild(
@@ -548,7 +562,7 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
                                     ),
                                   ),
                                 ),
-                              if (hasSearch)
+                              if (hasSearch && !mobile)
                                 LdFlexibleChild(
                                   child: LdSearchInput(
                                     searchConfig: widget.appBar.searchConfig!,
@@ -559,44 +573,47 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
                               ...widget.appBar.actions
                             ];
 
-                            return Row(
-                              children: [
-                                if (widget.appBar.showWindowControls && !_isModal) const MacOSWindowControls(),
-                                OpenDrawerButton(drawerParent: _findDrawerParent(context)),
-                                if (leading != null) ...[leading, ldSpacerM],
-                                if (overflowItems.isNotEmpty)
-                                  Expanded(
-                                    child: LdOverflowView(
-                                      spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      mainAxisAlignment: widget.appBar.title == null
-                                          ? MainAxisAlignment.start
-                                          : MainAxisAlignment.center,
-                                      builder: (context, remainingItemCount) {
-                                        final remainder = overflowItems.sublist(
-                                          overflowItems.length - remainingItemCount,
-                                        );
-                                        return LdAppbarActionOverflowMenu(
-                                          actions: remainder,
-                                          menuProviders: widget.appBar.overflowMenuProviders,
-                                          inMenu: true,
-                                        );
-                                      },
-                                      children: overflowItems,
+                            return Provider<LdAppBarActionRequestedLeading>.value(
+                              value: hasSearch,
+                              child: Row(
+                                children: [
+                                  if (widget.appBar.showWindowControls && !_isModal) const MacOSWindowControls(),
+                                  OpenDrawerButton(drawerParent: _findDrawerParent(context)),
+                                  if (leading != null) ...[leading, ldSpacerM],
+                                  if (overflowItems.isNotEmpty)
+                                    Expanded(
+                                      child: LdOverflowView(
+                                        spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        mainAxisAlignment: widget.appBar.title == null
+                                            ? MainAxisAlignment.start
+                                            : MainAxisAlignment.center,
+                                        builder: (context, remainingItemCount) {
+                                          final remainder = overflowItems.sublist(
+                                            overflowItems.length - remainingItemCount,
+                                          );
+                                          return LdAppbarActionOverflowMenu(
+                                            actions: remainder,
+                                            menuProviders: widget.appBar.overflowMenuProviders,
+                                            inMenu: true,
+                                          );
+                                        },
+                                        children: overflowItems,
+                                      ),
                                     ),
-                                  ),
-                                const CloseDrawerButton(),
-                                if (widget.appBar.trailing != null) widget.appBar.trailing!,
-                                if (_closeModalButton(context) != null) ...[_closeModalButton(context)!],
-                                if (widget.appBar.showWindowControls && !_isModal)
-                                  LdReveal(
-                                    revealed: _showWindowsWindowControls,
-                                    child: const WindowsWindowControls(),
-                                  ),
-                              ],
+                                  const CloseDrawerButton(),
+                                  if (widget.appBar.trailing != null) widget.appBar.trailing!,
+                                  if (_closeModalButton(context) != null) ...[_closeModalButton(context)!],
+                                  if (widget.appBar.showWindowControls && !_isModal)
+                                    LdReveal(
+                                      revealed: _showWindowsWindowControls,
+                                      child: const WindowsWindowControls(),
+                                    ),
+                                ],
+                              ),
                             );
                           }),
-                          if (widget.appBar.bottom != null) ...[
+                          if (bottomContent.isNotEmpty) ...[
                             LdWrapConditional(
                               condition: _hasTopContent,
                               builder: (context, child) => Padding(
@@ -605,7 +622,13 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
                                 ),
                                 child: child,
                               ),
-                              child: widget.appBar.bottom!,
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: bottomContent,
+                                ),
+                              ),
                             ),
                           ],
                         ],

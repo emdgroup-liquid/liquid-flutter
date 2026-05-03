@@ -1,6 +1,7 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/monkey/monkey_router_adapter.dart';
+import 'package:liquid_flutter/src/monkey/monkey_sort_and_filter_state.dart';
 import 'package:provider/provider.dart';
 
 class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
@@ -27,32 +28,31 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
   });
 
   LdFilterSearch<T, IdType, dynamic>? _getSearchFilter(BuildContext context) {
-    final repository = LdRepository.of<T, IdType>(context);
-    final searchFilter = repository.filters.values.firstWhereOrNull((filter) => filter is LdFilterSearch)
-        as LdFilterSearch<T, IdType, dynamic>?;
+    final filterState = context.watch<LdMonkeySortAndFilterState<T, IdType>>();
+    final searchFilter = filterState.filters.whereType<LdFilterSearch<T, IdType, dynamic>>().firstOrNull;
     return searchFilter;
   }
 
   @override
   Widget build(BuildContext context) {
-    context.watch<LdMonkeyShellState<T, IdType>>();
+    context.watch<LdMonkeySelection<T, IdType>>();
 
     final effectiveLayout = context.watch<LdMonkeyEffectiveLayoutMode>();
-    final repository = LdRepository.of<T, IdType>(context);
     final searchFilter = _getSearchFilter(context);
-    final showSearch = searchFilter != null && location == LdMonkeyActionLocation.masterSecondary;
-
-    final actions = ldMonkeyAppBarActionsForLocation<T, IdType>(
-      context,
-      location,
-    );
-    if (showSearch == false && actions.isEmpty && additionalActions.isEmpty && title == null) {
-      return const SizedBox.shrink();
-    }
+    final showSearch = searchFilter != null && location == LdMonkeyActionLocation.masterAppBar;
 
     return Provider.value(
       value: location,
       child: Builder(builder: (context) {
+        final actions = ldMonkeyAppBarActionsForLocation<T, IdType>(
+          context,
+          location,
+        );
+
+        if (showSearch == false && actions.isEmpty && additionalActions.isEmpty && title == null) {
+          return const SizedBox.shrink();
+        }
+
         return LdAppBar(
             debugName: debugName,
             backgroundMode: backgroundMode ?? LdAppBarBackgroundMode.adaptive,
@@ -72,7 +72,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
                     LdAppBarPositionMode.top,
                   LdMonkeyActionLocation.masterSecondary ||
                   LdMonkeyActionLocation.detailSecondary =>
-                    LdAppBarPositionMode.adaptive,
+                    LdAppBarPositionMode.bottom,
                   _ => LdAppBarPositionMode.top,
                 },
             shadowMode: shadowMode ??
@@ -86,25 +86,28 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
               LdMonkeyActionLocation.detailAppBar => effectiveLayout == LdMonkeyEffectiveLayoutMode.detail,
               _ => null,
             },
+            attachedMode: switch (location) {
+              LdMonkeyActionLocation.masterSecondary => LdAppBarAttachedMode.floating,
+              _ => LdAppBarAttachedMode.adaptive,
+            },
             searchConfig: switch (location) {
-              LdMonkeyActionLocation.masterSecondary => searchFilter?.searchConfig((query) {
-                  repository.updateFilter(searchFilter.name, (filter) {
-                    filter as LdFilterSearch<T, IdType, dynamic>;
-                    return filter.copyWith(
+              LdMonkeyActionLocation.masterAppBar => searchFilter?.searchConfig((query) {
+                  searchFilter.update(
+                    context,
+                    searchFilter.copyWith(
                       isOn: query.isNotEmpty,
                       searchText: query,
-                    );
-                  });
+                    ),
+                  );
                 }),
               _ => null,
             },
             title: title,
             overflowMenuProviders: (context) => [
                   ListenableProvider.value(value: LdRepository.of<T, IdType>(context)),
-                  ListenableProvider.value(value: LdMonkeyShellState.of<T, IdType>(context)),
-                  Provider.value(value: context.read<LdMonkeyActionLocation>()),
-                  Provider.value(value: context.read<LdMonkeyEffectiveLayoutMode>()),
-                  Provider.value(value: context.read<LdMonkeySelection<T, IdType>>())
+                  Provider.value(value: context.watch<LdMonkeyActionLocation>()),
+                  Provider.value(value: context.watch<LdMonkeyEffectiveLayoutMode>()),
+                  Provider.value(value: context.watch<LdMonkeySelection<T, IdType>>())
                 ],
             actions: [
               ...actions.map((e) => e.build(context)),

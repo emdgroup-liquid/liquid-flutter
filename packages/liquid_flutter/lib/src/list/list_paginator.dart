@@ -10,14 +10,11 @@ import 'package:mutex/mutex.dart';
 /// The [offset] is the index of the first item to fetch.
 /// The [pageSize] is the number of items to fetch.
 /// The [pageToken] is a token that can be used to fetch the next page of items.
-typedef FetchListFunction<T> = Future<LdListPage<T>> Function({
-  required int offset,
-  required int pageSize,
-  String? pageToken,
-});
+typedef FetchListFunction<T extends Identifiable<IdType>, IdType> = Future<LdListPage<T>> Function(
+    FetchPageParameters<T, IdType> parameters);
 
 class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier {
-  FetchListFunction<T>? fetchListFunction;
+  FetchListFunction<T, IdType>? fetchListFunction;
   final int pageSize;
   int initialOffset;
   final Duration debounceTime;
@@ -30,6 +27,8 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   // The number of pages that are queued for fetching.
   int fetchQueueSize;
 
+  // Internal map of index to LdPaginatorItem<T> is a map because
+  // there might be gaps in the loaded items
   final Map<int, LdPaginatorItem<T>> _items = {};
 
   // Track which ranges have been requested to prevent duplicate fetches
@@ -40,17 +39,23 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
   // Mutex to synchronize the fetching of items.
   final Mutex _mutex = Mutex();
-
   Mutex get mutex => _mutex;
 
+// The current total number of items assumed in the paginator, this number is not the loaded items count.
+// As there might be gaps in the loaded data sets. It is set from a server response (page total) and might be updated
+// by optimistic state changes such as item deletion.
   int totalItems = 0;
 
+  // Tracks whether the paginator is currently fetching an item
   bool _busy = false;
 
   LdException? _error;
 
   Completer? _currentOperation;
+
+  // Offsets that are queued for fetching.
   final List<int> _offsetQueue = List.empty(growable: true);
+
   LdPaginator({
     this.fetchListFunction,
 
@@ -59,7 +64,6 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     /// "normalize" the offset to the nearest page size in the
     /// [fetchPageAtOffset] method.
     this.pageSize = 10,
-    bool autoLoad = true,
 
     /// The initial offset to start fetching items from.
     this.initialOffset = 0,
@@ -74,8 +78,11 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     /// The initial items to add to the paginator.
     List<T>? initialItems,
 
-    /// The number of pages that are queued for fetching. This should roughly be equivalent to 1.5x the number of items that are visible at once.
-    /// If this number is too small the pages might be loaded in the wrong order bottom to top, if the number is too large the app might load more pages than needed.
+    /// The number of pages that are queued for fetching. This should roughly
+    /// be equivalent to 1.5x the number of items that are visible at once.
+    /// If this number is too small the pages might be loaded in the wrong
+    /// order bottom to top, if the number is too large the app might
+    /// load more pages than needed.
     this.fetchQueueSize = 3,
   }) {
     if (initialItems != null) {
@@ -83,30 +90,15 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
         _items[i] = LdPaginatorItem<T>(value: initialItems[i], state: LdPaginatorItemState.loaded);
       }
     }
-
-    if (autoLoad) {
-      for (var i = 0; i < initialOffset; i++) {
-        _items[i] = LdPaginatorItem<T>(
-          value: null,
-          state: LdPaginatorItemState.fetching,
-        );
-      }
-
-      _setBusy(true);
-      fetchItemsAtOffset(initialOffset);
-    }
   }
 
   factory LdPaginator.fromList(List<T> list) {
     return LdPaginator<T, IdType>(
       pageSize: max(list.length, 1),
       debounceTime: const Duration(milliseconds: 0),
-      fetchListFunction: ({
-        required int offset,
-        required int pageSize,
-        String? pageToken,
-      }) async {
-        if (offset == 0) {
+      initialItems: list,
+      fetchListFunction: (parameters) async {
+        if (parameters.offset == 0) {
           return LdListPage<T>(
             newItems: list,
             hasMore: false,
@@ -124,16 +116,17 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
   bool get busy => _busy;
 
+  /// The number of items that are loaded
   int get currentItemCount => _items.values
       .where(
-        (item) => item.state != LdPaginatorItemState.fetching && item.state != LdPaginatorItemState.filteredOut,
+        (item) => item.state != LdPaginatorItemState.fetching,
       )
       .length;
 
   LdException? get error => _error;
-
   bool get hasError => _error != null;
 
+  // Returns a list of all items that are in the paginator, might contain nulls if there are gaps in the loaded items.
   List<T?> get items => List<T?>.generate(totalItems, (i) => _items[i]?.value);
 
   Map<int, LdPaginatorItem<T>> get itemsMap => Map.unmodifiable(_items);
@@ -158,7 +151,11 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
   /// Confirms the deletion of an item.
   /// This will remove the item from the paginator.
-  void confirmItemDeletion(IdType id, {bool refresh = false}) {
+  void confirmItemDeletion({
+    required BuildContext context,
+    bool refresh = false,
+    required IdType id,
+  }) {
     final index = getItemIndexById(id);
     if (index == null) throw Exception('Item with id $id not found');
     _updated(_items[index]!.copyWith(state: LdPaginatorItemState.deleted));
@@ -179,7 +176,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     _items.addAll(newOrder);
 
     if (refresh) {
-      refreshList();
+      refreshList(context: context);
     }
   }
 
@@ -202,18 +199,18 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     _updated(_items[index]);
   }
 
-  void _triggerFetch() async {
-    final newItems = await _fetchItems();
+  void _triggerFetch(BuildContext context) async {
+    final newItems = await _fetchItems(context: context);
     if (newItems.isNotEmpty) {
       notifyListeners();
     }
-    if (_offsetQueue.isNotEmpty) {
-      _triggerFetch();
+    if (_offsetQueue.isNotEmpty && context.mounted) {
+      _triggerFetch(context);
     }
   }
 
   // Fetch items starting at a specific offset
-  Future<void> fetchItemsAtOffset(int offset) async {
+  Future<void> _addToOffsetQueue(BuildContext context, int offset) async {
     if (offset < 0) offset = 0;
 
     if (!_offsetQueue.contains(offset)) {
@@ -225,16 +222,16 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
       }
     }
 
-    return _triggerFetch();
+    return _triggerFetch(context);
   }
 
   /// Fetch items at a specific offset, normalized to the nearest page size
   /// It makes sense to use this strategy in order to avoid fetching items
   /// that are already loaded.
-  Future<void> fetchPageAtOffset(int offset) async {
+  Future<void> fetchPageAtOffset(BuildContext context, int offset) async {
     // normalize position to the nearest page size
     final pagedOffset = (offset ~/ pageSize) * pageSize;
-    return fetchItemsAtOffset(pagedOffset);
+    return _addToOffsetQueue(context, pagedOffset);
   }
 
   // Get all non-null items in order
@@ -264,9 +261,21 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   }
 
   // Refresh List - clear and fetch initial data
-  Future<void> refreshList() async {
+  Future<void> refreshList({
+    required BuildContext context,
+    bool hard = false,
+  }) async {
+    if (hard) {
+      _setBusy(true);
+      _offsetQueue.clear();
+      _reset();
+      await _addToOffsetQueue(context, initialOffset);
+      _setBusy(false);
+      return;
+    }
+
     for (final item in _items.entries) {
-      if (item.value.value != null && item.value.state != LdPaginatorItemState.filteredOut) {
+      if (item.value.value != null) {
         _items[item.key] = item.value.copyWith(state: LdPaginatorItemState.pendingRefresh);
       }
     }
@@ -274,11 +283,11 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
     // The list has not been fetched yet or we filtered out all the items
     // optimistically.
-    if (totalItems == 0 || _items.isEmpty) {
+    if ((totalItems == 0 || _items.isEmpty) && context.mounted) {
       print('fetching initial items');
       _setBusy(true);
       _offsetQueue.clear();
-      await fetchItemsAtOffset(initialOffset);
+      await _addToOffsetQueue(context, initialOffset);
       _setBusy(false);
     }
   }
@@ -447,6 +456,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
   Future<List<T>> _fetchItems({
     bool refresh = false,
+    required BuildContext context,
   }) async {
     await _mutex.acquire();
 
@@ -478,11 +488,22 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
     assert(fetchListFunction != null, 'fetchListFunction is not set. Can not fetch items');
 
+    if (!context.mounted) {
+      _mutex.release();
+      _setBusy(false);
+      return [];
+    }
+
     try {
       final page = await fetchListFunction!(
-        offset: offset,
-        pageSize: pageSize,
-        pageToken: null,
+        FetchPageParameters(
+          context: context,
+          offset: offset,
+          pageSize: pageSize,
+          pageToken: null,
+          filters: null,
+          sortOptions: null,
+        ),
       );
 
       if (refresh) {
@@ -652,7 +673,6 @@ enum LdPaginatorItemState {
   rolledBackCreation,
   deleted,
   pendingRefresh,
-  filteredOut,
 }
 
 class LdPaginatorLoadedItem<T extends Identifiable> extends LdPaginatorItem<T> {

@@ -26,10 +26,11 @@ Future<bool> ldConfirmModal(
               title: title ?? Text(locale.confirm),
             ),
             LdAppBar(
+              attachedMode: LdAppBarAttachedMode.attached,
               positionMode: LdAppBarPositionMode.bottom,
               actions: [
                 LdFlexibleChild(
-                  child: LdButton(
+                  child: LdButton.vague(
                     size: LdSize.l,
                     width: double.infinity,
                     color: cancelColor ?? LdTheme.of(context).error,
@@ -38,7 +39,7 @@ Future<bool> ldConfirmModal(
                   ),
                 ),
                 LdFlexibleChild(
-                  child: LdButton(
+                  child: LdButton.vague(
                     size: LdSize.l,
                     width: double.infinity,
                     color: confirmColor ?? LdTheme.of(context).primary,
@@ -49,21 +50,19 @@ Future<bool> ldConfirmModal(
               ],
             ),
           ],
-          body: LdScaffoldBody(
-            children: [
-              LdAutoSpace(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  if (indicatorType != null)
-                    LdIndicator(
-                      type: indicatorType,
-                      customSize: 24,
-                    ),
-                  if (description != null) LdText.p(description),
-                  if (additionalContent != null) additionalContent,
-                ],
-              ),
-            ],
+          body: LdScaffoldBodyCentered(
+            child: LdAutoSpace(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                if (indicatorType != null)
+                  LdIndicator(
+                    type: indicatorType,
+                    customSize: 24,
+                  ),
+                if (description != null) LdText.p(description),
+                if (additionalContent != null) additionalContent,
+              ],
+            ),
           ),
         );
       }).show(context, useRootNavigator: useRootNavigator);

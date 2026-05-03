@@ -5,8 +5,25 @@ abstract class LdFilterOption<T extends Identifiable<IdType>, IdType> {
   final String Function(BuildContext context) label;
   final Widget Function(BuildContext context) icon;
 
+  final bool Function(BuildContext context)? isEnabled;
+
   final String name;
   final bool isOn;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    return other is LdFilterOption<T, IdType> && other.serialize() == serialize() && other.name == name;
+  }
+
+  @override
+  String toString() {
+    return "LdFilterOption(name: $name, isOn: $isOn, serialize: ${serialize()})";
+  }
+
+  @override
+  int get hashCode => Object.hash(isOn, serialize().hashCode, name);
 
   // Serialize the filter to a string which will be used
   // to create the query string
@@ -14,10 +31,6 @@ abstract class LdFilterOption<T extends Identifiable<IdType>, IdType> {
 
   // Apply the filter to the LdFilterOption and return a new instance
   LdFilterOption<T, IdType> marshalSerialized(String entry);
-
-  /// Returns true if the item should be included in the list, is called
-  /// before the list is re-fetched
-  bool optimisticFilter(T item);
 
   /// Create a copy of this filter option with the given fields replaced
   LdFilterOption<T, IdType> copyWith({
@@ -32,7 +45,12 @@ abstract class LdFilterOption<T extends Identifiable<IdType>, IdType> {
     required this.icon,
     required this.name,
     this.isOn = false,
+    this.isEnabled,
   });
 
-  Widget build(BuildContext context, LdRepository<T, IdType> repository);
+  void update(BuildContext context, LdFilterOption<T, IdType> filter) {
+    LdMonkeySortAndFilterState.updateFilter(context, filter);
+  }
+
+  Widget build(BuildContext context);
 }

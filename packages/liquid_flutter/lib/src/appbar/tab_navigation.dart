@@ -462,48 +462,59 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                                           dampingCoefficient: 20,
                                           mass: 5,
                                           position: _indicatorPosition,
-                                          child: LdSpring(
-                                            position: _dragging ? 1.1 : 1,
-                                            builder: (context, state, child) => Transform.scale(
-                                              scale: state.position.clamp(0, 2),
-                                              child: child!,
-                                            ),
-                                            child: GestureDetector(
-                                              onHorizontalDragStart: (details) {
-                                                _dragStartPosition = details.localPosition.dx;
-                                                _dragStartIndicatorPosition = _indicatorPosition;
-                                                _lastDraggedTabIndex = _getClosestTab(context);
-                                              },
-                                              onHorizontalDragUpdate: _onIndicatorDragUpdate,
-                                              onHorizontalDragCancel: () {
-                                                _dragging = false;
-                                                _updateIndicatorPosition();
-                                              },
-                                              onHorizontalDragEnd: _onIndicatorDragEnd,
-                                              child: Container(
-                                                width: _tabWidth,
-                                                decoration: BoxDecoration(
-                                                  color: theme.primaryColor.withAlpha(26),
-                                                  border: switch (isAttached) {
-                                                    true => switch (_effectivePosition) {
-                                                        LdAppBarPosition.top => Border(
-                                                            bottom: BorderSide(
-                                                              color: theme.primaryColor,
-                                                              width: theme.borderWidth,
-                                                            ),
+                                          child: GestureDetector(
+                                            onHorizontalDragStart: (details) {
+                                              _dragStartPosition = details.localPosition.dx;
+                                              _dragStartIndicatorPosition = _indicatorPosition;
+                                              _lastDraggedTabIndex = _getClosestTab(context);
+                                            },
+                                            onHorizontalDragUpdate: _onIndicatorDragUpdate,
+                                            onHorizontalDragCancel: () {
+                                              _dragging = false;
+                                              _updateIndicatorPosition();
+                                            },
+                                            onHorizontalDragEnd: _onIndicatorDragEnd,
+                                            child: Container(
+                                              width: _tabWidth,
+                                              decoration: BoxDecoration(
+                                                color: !isAttached ? theme.primaryColor.withAlpha(26) : null,
+                                                gradient: isAttached
+                                                    ? LinearGradient(
+                                                        begin: switch (_effectivePosition) {
+                                                          LdAppBarPosition.top => Alignment.bottomCenter,
+                                                          LdAppBarPosition.bottom => Alignment.topCenter,
+                                                        },
+                                                        end: switch (_effectivePosition) {
+                                                          LdAppBarPosition.top => Alignment.topCenter,
+                                                          LdAppBarPosition.bottom => Alignment.bottomCenter,
+                                                        },
+                                                        colors: [
+                                                            theme.primaryColor.withAlpha(26),
+                                                            theme.primaryColor.withAlpha(0),
+                                                          ],
+                                                        stops: [
+                                                            0,
+                                                            0.5
+                                                          ])
+                                                    : null,
+                                                border: switch (isAttached) {
+                                                  true => switch (_effectivePosition) {
+                                                      LdAppBarPosition.top => Border(
+                                                          bottom: BorderSide(
+                                                            color: theme.primaryColor,
+                                                            width: theme.borderWidth,
                                                           ),
-                                                        LdAppBarPosition.bottom => Border(
-                                                            top: BorderSide(
-                                                              color: theme.primaryColor,
-                                                              width: theme.borderWidth,
-                                                            ),
+                                                        ),
+                                                      LdAppBarPosition.bottom => Border(
+                                                          top: BorderSide(
+                                                            color: theme.primaryColor,
+                                                            width: theme.borderWidth,
                                                           ),
-                                                      },
-                                                    false => null,
-                                                  },
-                                                  borderRadius:
-                                                      isAttached ? null : LdTheme.of(context).radius(LdSize.s),
-                                                ),
+                                                        ),
+                                                    },
+                                                  false => null,
+                                                },
+                                                borderRadius: isAttached ? null : LdTheme.of(context).radius(LdSize.s),
                                               ),
                                             ),
                                           ),

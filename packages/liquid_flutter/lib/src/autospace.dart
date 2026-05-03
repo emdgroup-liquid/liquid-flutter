@@ -20,8 +20,6 @@ List<Widget> generateAutoSpacings({
   LdSize defaultSpacing = LdSize.m,
   bool animate = false,
 }) {
-  final theme = LdTheme.of(context, listen: true);
-
   List<Widget> finalChildren = [];
   int index = 0;
   for (var child in children) {

@@ -15,7 +15,6 @@ void main() {
           icon: (context) => const Icon(Icons.search),
           searchText: 'test query',
           isOn: true,
-          optimisticFilter: (item, searchText) => item.name.contains(searchText),
         );
 
         expect(filter.serialize(), equals('test query'));
@@ -28,7 +27,6 @@ void main() {
           icon: (context) => const Icon(Icons.search),
           searchText: 'test query',
           isOn: false,
-          optimisticFilter: (item, searchText) => item.name.contains(searchText),
         );
 
         expect(filter.serialize(), isEmpty);
@@ -41,7 +39,6 @@ void main() {
           icon: (context) => const Icon(Icons.search),
           searchText: '',
           isOn: true,
-          optimisticFilter: (item, searchText) => item.name.contains(searchText),
         );
 
         expect(filter.serialize(), isEmpty);
@@ -54,7 +51,6 @@ void main() {
           icon: (context) => const Icon(Icons.search),
           searchText: '',
           isOn: false,
-          optimisticFilter: (item, searchText) => item.name.contains(searchText),
         );
 
         final marshaled = filter.marshalSerialized('new query');
@@ -69,59 +65,11 @@ void main() {
           icon: (context) => const Icon(Icons.search),
           searchText: 'query',
           isOn: true,
-          optimisticFilter: (item, searchText) => item.name.contains(searchText),
         );
 
         final marshaled = filter.marshalSerialized('');
         expect(marshaled.searchText, isEmpty);
         expect(marshaled.isOn, isFalse);
-      });
-    });
-
-    group('Optimistic Filtering', () {
-      test('optimisticFilter() works correctly with search text', () {
-        final filter = LdFilterSearch<TestItem, int, String>(
-          name: 'search',
-          label: (context) => 'Search',
-          icon: (context) => const Icon(Icons.search),
-          searchText: 'Item 1',
-          isOn: true,
-          optimisticFilter: (item, searchText) => item.name.contains(searchText),
-        );
-
-        final matchingItem = createTestItem(1, name: 'Item 1');
-        final nonMatchingItem = createTestItem(2, name: 'Item 2');
-
-        expect(filter.optimisticFilter(matchingItem), isTrue);
-        expect(filter.optimisticFilter(nonMatchingItem), isFalse);
-      });
-
-      test('optimisticFilter() returns true when filter is off', () {
-        final filter = LdFilterSearch<TestItem, int, String>(
-          name: 'search',
-          label: (context) => 'Search',
-          icon: (context) => const Icon(Icons.search),
-          searchText: 'query',
-          isOn: false,
-          optimisticFilter: (item, searchText) => item.name.contains(searchText),
-        );
-
-        final item = createTestItem(1, name: 'Item 1');
-        expect(filter.optimisticFilter(item), isTrue);
-      });
-
-      test('optimisticFilter() returns true when searchText is empty', () {
-        final filter = LdFilterSearch<TestItem, int, String>(
-          name: 'search',
-          label: (context) => 'Search',
-          icon: (context) => const Icon(Icons.search),
-          searchText: '',
-          isOn: true,
-          optimisticFilter: (item, searchText) => item.name.contains(searchText),
-        );
-
-        final item = createTestItem(1, name: 'Item 1');
-        expect(filter.optimisticFilter(item), isTrue);
       });
     });
 
@@ -134,7 +82,6 @@ void main() {
           searchText: 'query',
           isOn: true,
           hint: 'Enter search',
-          optimisticFilter: (item, searchText) => item.name.contains(searchText),
           debounceDelay: const Duration(milliseconds: 500),
         );
 
@@ -149,22 +96,6 @@ void main() {
         expect(newFilter.hint, equals('Enter search'));
         expect(newFilter.debounceDelay, equals(const Duration(milliseconds: 500)));
       });
-
-      test('copyWith() preserves optimisticFilter function', () {
-        final filter = LdFilterSearch<TestItem, int, String>(
-          name: 'search',
-          label: (context) => 'Search',
-          icon: (context) => const Icon(Icons.search),
-          searchText: 'Item',
-          isOn: true,
-          optimisticFilter: (item, searchText) => item.name.contains(searchText),
-        );
-
-        final newFilter = filter.copyWith(searchText: 'Item 1');
-        final item = createTestItem(1, name: 'Item 1');
-
-        expect(newFilter.optimisticFilter(item), isTrue);
-      });
     });
 
     group('UI Rendering', () {
@@ -175,7 +106,6 @@ void main() {
           icon: (context) => const Icon(Icons.search),
           searchText: 'test',
           isOn: true,
-          optimisticFilter: (item, searchText) => item.name.contains(searchText),
         );
 
         final repository = createTestRepository(filters: {filter});

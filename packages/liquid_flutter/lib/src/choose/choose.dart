@@ -2,6 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:liquid_flutter/src/monkey/monkey_router_adapter.dart';
+import 'package:liquid_flutter/src/monkey/monkey_sort_and_filter_state.dart';
+import 'package:provider/provider.dart';
 
 import '../../liquid_flutter.dart';
 
@@ -193,17 +196,6 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
               name: 'search',
               label: (context) => 'Search',
               icon: (context) => const Icon(Icons.search),
-              optimisticFilter: (item, searchText) {
-                if (item is LdSelectItem<dynamic>) {
-                  return (item as LdSelectItem<dynamic>)
-                          .searchString
-                          ?.toLowerCase()
-                          .contains(searchText.toLowerCase()) ??
-                      false;
-                }
-
-                return item.toString().toLowerCase().contains(searchText.toLowerCase());
-              },
               buildSuggestion: (context, suggestion) {
                 final item = suggestion as LdSelectItem<dynamic>;
                 return LdListItem(
@@ -219,9 +211,20 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
                 }).toList();
               }),
         },
+        filterFunction: (item, activeFilters) {
+          final searchFilter = activeFilters?.whereType<LdFilterSearch<T, IdType, LdSelectItem<dynamic>>>().firstOrNull;
+          if (searchFilter == null || !searchFilter.isOn || searchFilter.searchText.isEmpty) {
+            return true;
+          }
+          final text = searchFilter.searchText.toLowerCase();
+          if (item is LdSelectItem<dynamic>) {
+            return (item as LdSelectItem<dynamic>).searchString?.toLowerCase().contains(text) ?? false;
+          }
+          return item.toString().toLowerCase().contains(text);
+        },
       );
       _repository.initialOffset = 0;
-      _repository.fetchItemsAtOffset(0);
+      _repository.fetchPageAtOffset(context, 0);
       _ownsRepository = true;
     } else {
       _repository = widget.repository!;
@@ -430,7 +433,9 @@ class LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<Ld
 
   @override
   Widget build(BuildContext context) {
-    final searchConfig = widget.repository.getSearchConfig();
+    final filterState = context.watch<LdMonkeySortAndFilterState<T, IdType>>();
+    final searchConfig = filterState.filters.whereType<LdFilterSearch<T, IdType, dynamic>>().firstOrNull;
+
     return LdScaffold(
       debugName: "LdChoosePage",
       appBars: [
@@ -465,7 +470,9 @@ class LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<Ld
           LdAppBar.top(
             order: 1,
             debugName: "LdChoosePageSearchAppBar",
-            searchConfig: searchConfig,
+            searchConfig: searchConfig.searchConfig((query) {
+              // TODO: wire up search
+            }),
           ),
       ],
       body: Builder(builder: (context) {

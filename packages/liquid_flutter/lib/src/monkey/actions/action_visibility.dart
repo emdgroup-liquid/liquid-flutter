@@ -11,13 +11,10 @@ class LdMonkeyActionVisibility {
 
   final bool Function(BuildContext context)? isVisible;
 
-  final Set<String> applyFilters;
-
   LdMonkeyActionVisibility({
     required this.location,
     this.minSelectionCount = 0,
     this.maxSelectionCount,
-    this.applyFilters = const {},
     this.layoutModes = const {
       LdMonkeyEffectiveLayoutMode.master,
       LdMonkeyEffectiveLayoutMode.detail,
@@ -35,39 +32,24 @@ class LdMonkeyActionVisibility {
         return false;
       }
     }
-
-    final shellState = LdMonkeyShellState.of<T, IdType>(context);
-    final repository = LdRepository.of<T, IdType>(context);
-    final selection = LdMonkeySelection.adaptive<T, IdType>(context, location: location);
-    final selectedItems = selection.map((e) => repository.getItemById(e)).whereType<LdPaginatorItem<T>>().toList();
-
     if (location != this.location) {
       return false;
     }
+
+    final selection = LdMonkeySelection.of<T, IdType>(context);
+    final selectedItems = LdMonkeySelection.adaptive<T, IdType>(context, location: location);
 
     if (!layoutModes.contains(context.read<LdMonkeyEffectiveLayoutMode>())) {
       return false;
     }
 
-    if (visibleWhenShowingSelectionControls == false && shellState.showSelectionControls) {
+    if (visibleWhenShowingSelectionControls == false && selection.showSelectionControls) {
       return false;
     }
 
-    if ((maxSelectionCount != null && selection.length > maxSelectionCount!) ||
-        (minSelectionCount != 0 && selection.length < minSelectionCount)) {
+    if ((maxSelectionCount != null && selectedItems.length > maxSelectionCount!) ||
+        (minSelectionCount != 0 && selectedItems.length < minSelectionCount)) {
       return false;
-    }
-
-    if (applyFilters.isNotEmpty) {
-      final filters = applyFilters.map(
-        (filterName) => repository.filters[filterName]!,
-      );
-
-      for (final filter in filters) {
-        if (selectedItems.any((e) => !filter.optimisticFilter(e.value!))) {
-          return false;
-        }
-      }
     }
 
     return true;

@@ -7,6 +7,7 @@ class LdRadio extends StatelessWidget {
     this.size = LdSize.s,
     this.onChanged,
     this.color,
+    this.focusNode,
     this.disabled = false,
     super.key,
   });
@@ -19,6 +20,8 @@ class LdRadio extends StatelessWidget {
 
   final LdSize size;
 
+  final FocusNode? focusNode;
+
   final LdColor? color;
 
   final dynamic Function(bool)? onChanged;
@@ -29,6 +32,7 @@ class LdRadio extends StatelessWidget {
     LdSize size = LdSize.s,
     dynamic Function(bool)? onChanged,
     LdColor? color,
+    FocusNode? focusNode,
     bool disabled = false,
     Key? key,
   }) {
@@ -39,6 +43,7 @@ class LdRadio extends StatelessWidget {
         size: size,
         onChanged: onChanged,
         color: LdTheme.of(context).success,
+        focusNode: focusNode,
         disabled: disabled,
         key: key,
       ),
@@ -51,6 +56,7 @@ class LdRadio extends StatelessWidget {
     LdSize size = LdSize.s,
     dynamic Function(bool)? onChanged,
     LdColor? color,
+    FocusNode? focusNode,
     bool disabled = false,
     Key? key,
   }) {
@@ -61,6 +67,7 @@ class LdRadio extends StatelessWidget {
         size: size,
         onChanged: onChanged,
         color: LdTheme.of(context).warning,
+        focusNode: focusNode,
         disabled: disabled,
         key: key,
       ),
@@ -73,6 +80,7 @@ class LdRadio extends StatelessWidget {
     LdSize size = LdSize.s,
     dynamic Function(bool)? onChanged,
     LdColor? color,
+    FocusNode? focusNode,
     bool disabled = false,
     Key? key,
   }) {
@@ -83,6 +91,7 @@ class LdRadio extends StatelessWidget {
         size: size,
         onChanged: onChanged,
         color: LdTheme.of(context).error,
+        focusNode: focusNode,
         disabled: disabled,
         key: key,
       ),
@@ -97,6 +106,7 @@ class LdRadio extends StatelessWidget {
       size: size,
       onChanged: onChanged,
       color: color,
+      focusNode: focusNode,
       disabled: disabled,
     );
   }
