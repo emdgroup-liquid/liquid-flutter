@@ -9,7 +9,7 @@ LdMonkeyAction<T, IdType> showSelection<T extends Identifiable<IdType>, IdType>(
         final selection = LdMonkeySelection.of<T, IdType>(context);
 
         if (selection.selection.isNotEmpty) {
-          MonkeyRouterAdapter.updateViewingItems<T, IdType>(context, selection.selection);
+          LdMonkeySelection.updateViewing<T, IdType>(context, selection.selection);
         }
       },
       visibility: {
@@ -36,7 +36,7 @@ LdMonkeyAction<T, IdType> showSelection<T extends Identifiable<IdType>, IdType>(
           preferLeadingOnMobile: false,
           child: const Text('Show Selection'),
           onPressed: () async {
-            MonkeyRouterAdapter.updateViewingItems<T, IdType>(context, selection.selection);
+            LdMonkeySelection.updateViewing<T, IdType>(context, selection.selection);
           },
         );
       },

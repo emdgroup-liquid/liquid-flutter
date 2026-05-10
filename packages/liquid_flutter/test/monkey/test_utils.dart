@@ -132,19 +132,23 @@ LdRepository<TestItem, int> createTestRepository({
       ];
 
   return LdRepository<TestItem, int>(
-    fetchListWithParameters: ({required offset, required pageSize, pageToken, filters, sortOptions}) async {
+    fetchListWithParameters: (parameters) async {
       // Simulate a server that returns all items (no server-side filtering in test helper)
-      final paginated = items.skip(offset).take(pageSize).toList();
+      final paginated = items.skip(parameters.offset).take(parameters.pageSize).toList();
       return LdListPage<TestItem>(
         newItems: paginated,
-        hasMore: offset + pageSize < items.length,
+        hasMore: parameters.offset + parameters.pageSize < items.length,
         total: items.length,
       );
     },
     getById: (id) async => items.firstWhere((item) => item.id == id),
-    filters: filters,
-    sortOptions: sortOptions,
-    getOffsetById: getOffsetById,
+    getOffsetById: getOffsetById == null
+        ? null
+        : (parameters) async => getOffsetById(
+              parameters.id,
+              filters: parameters.filters,
+              sortOptions: parameters.sortOptions,
+            ),
     deleteItem: deleteItem,
     updateItem: updateItem,
     createItem: createItem,

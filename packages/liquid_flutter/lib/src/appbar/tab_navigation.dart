@@ -8,6 +8,8 @@ import 'package:liquid_flutter/src/appbar/appbar_registry.dart';
 import 'package:liquid_flutter/src/appbar/appbar_scroll_behavior.dart';
 import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 import 'package:liquid_flutter/src/haptics.dart';
+import 'package:liquid_flutter/src/touchable/ghost_color.dart';
+import 'package:liquid_flutter/src/touchable/neutral_ghost_color.dart';
 
 class LdNavigationTab {
   final String label;
@@ -310,7 +312,8 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                   return LdTouchableSurface(
                     focusNode: _focusNode,
                     onPressed: () {},
-                    builder: (context, colors, status, _) {
+                    builder: (context, status, _) {
+                      final colorBundle = neutralGhostColor(theme, status);
                       return LdTouchableTouchFeedback(
                         status: status,
                         child: AppBarFrame(
@@ -391,15 +394,13 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                                               (tab) => SizedBox(
                                                 width: _tabWidth,
                                                 child: LdTouchableSurface(
-                                                  mode: widget.activeRoute == tab.route
-                                                      ? LdTouchableSurfaceMode.ghost
-                                                      : LdTouchableSurfaceMode.neutralGhost,
-                                                  color: widget.activeRoute == tab.route
-                                                      ? theme.primary
-                                                      : theme.palette.neutral,
                                                   active: widget.activeRoute == tab.route,
                                                   onPressed: () => _onTabTap(tab.route),
-                                                  builder: (context, colors, status, _) {
+                                                  builder: (context, status, _) {
+                                                    final colors = switch (widget.activeRoute == tab.route) {
+                                                      true => ghostColor(theme.primary, theme, status),
+                                                      false => neutralGhostColor(theme, status),
+                                                    };
                                                     return Container(
                                                       decoration: BoxDecoration(
                                                         color: colors.surface,

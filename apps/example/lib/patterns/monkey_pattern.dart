@@ -81,40 +81,26 @@ parseSelected: (selected) {
         LdText.p("Control how your monkey pattern responds to different screen sizes and layouts."),
         CodeBlock(
           language: "dart",
-          code: '''...buildMonkeyRoutes<Task, int>(
-  basePath: "/task-demo",
-  pathParameterName: "task",
-  parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
+          code: '''final taskRouteConfig = LdMonkeyRouteConfig.identifiableInt<Task>(itemName: "task");
+
+...buildMonkeyRoutes<Task, int>(
+  masterPath: "/task-demo",
+  routeConfig: taskRouteConfig,
   masterPage: TaskMasterPage(),
   detailPage: TaskDetailPage(),
-  repositoryBuilder: (context) async => taskRepository,
-  
-  // Layout mode for detail view
-  layoutMode: LdMonkeyLayoutMode.auto, // auto, sideBySide, neverSideBySide
-  
-  // Show detail in a dialog instead of a page
+  repositoryBuilder: (context) => taskRepository(context),
+  filters: taskFilters,
+  sortOptions: taskSortOptions,
+  actions: taskActions,
   detailInDialog: false,
-  
-  // Optional: Custom shell wrapper
-  shellBuilder: (context, state, child) {
-    return LdMonkeyShell<Task, int>(
-      basePath: "/task-demo",
-      layoutMode: LdMonkeyLayoutMode.auto,
-      masterPage: TaskMasterPage(),
-      parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
-      routeState: state,
-      repositoryBuilder: (context) async => taskRepository,
-      pathParameterName: "task",
-      // Breakpoint for responsive reflow (default: 600)
-      reflowBreakpoint: 600,
-      // Flex ratio for detail view in side-by-side layout (default: 2)
-      detailPanelFlex: 2,
-      actions: [
-        // Your actions here
-      ],
-      child: child,
-    );
-  },
+  shellBuilder: (context, state, child) => LdMonkeyShell<Task, int>(
+    layoutMode: LdMonkeyLayoutMode.auto,
+    masterPage: TaskMasterPage(),
+    reflowBreakpoint: 600,
+    detailPanelFlex: 2,
+    actions: [],
+    child: child,
+  ),
 ),''',
         ),
         LdText.hs("4. Actions Configuration"),
@@ -206,13 +192,14 @@ parseSelected: (selected) {
     
     // Add monkey pattern routes using buildMonkeyRoutes
     ...buildMonkeyRoutes<Task, int>(
-      basePath: "/task-demo",
-      pathParameterName: "task",
-      parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
+      masterPath: "/task-demo",
+      routeConfig: LdMonkeyRouteConfig.identifiableInt<Task>(itemName: "task"),
       masterPage: TaskMasterPage(),
       detailPage: TaskDetailPage(),
-      repositoryBuilder: (context) async => taskRepository,
-      layoutMode: LdMonkeyLayoutMode.auto,
+      repositoryBuilder: (context) => taskRepository(context),
+      filters: taskFilters,
+      sortOptions: taskSortOptions,
+      actions: taskActions,
     ),
   ],
 );''',
@@ -270,13 +257,8 @@ class TaskShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyShell<Task, int>(
-      basePath: "/task-demo",
       layoutMode: LdMonkeyLayoutMode.auto,
       masterPage: TaskMasterPage(),
-      parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
-      routeState: state,
-      repositoryBuilder: (context) async => taskRepository,
-      pathParameterName: "task",
       actions: [
         // Your actions here - see Actions documentation for examples
       ],
@@ -289,13 +271,14 @@ class TaskShell extends StatelessWidget {
 final router = GoRouter(
   routes: [
     ...buildMonkeyRoutes<Task, int>(
-      basePath: "/task-demo",
-      pathParameterName: "task",
-      parseSelected: (selected) => selected.split(",").map(int.parse).toSet(),
+      masterPath: "/task-demo",
+      routeConfig: LdMonkeyRouteConfig.identifiableInt<Task>(itemName: "task"),
       masterPage: TaskMasterPage(),
       detailPage: TaskDetailPage(),
-      repositoryBuilder: (context) async => taskRepository,
-      layoutMode: LdMonkeyLayoutMode.auto,
+      repositoryBuilder: (context) => taskRepository(context),
+      filters: taskFilters,
+      sortOptions: taskSortOptions,
+      actions: taskActions,
       shellBuilder: (context, state, child) => TaskShell(
         state: state,
         child: child,

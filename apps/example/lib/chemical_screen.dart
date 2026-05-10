@@ -5,6 +5,32 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:responsive_builder/responsive_builder.dart';
+
+class ReflowHeader extends StatelessWidget {
+  final Widget leading;
+  final Widget child;
+  const ReflowHeader({super.key, required this.leading, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return ResponsiveBuilder(
+      builder: (context, size) {
+        final reflow = size.isDesktop || size.isTablet;
+
+        if (reflow) {
+          return Row(
+            children: [
+              leading,
+              Expanded(child: child),
+            ],
+          ).spaceM();
+        }
+        return LdAutoSpace(children: [leading, child]);
+      },
+    );
+  }
+}
 
 class _Potion {
   String name;
@@ -19,13 +45,6 @@ var potions = [
   _Potion("Pepperup Potion", "Cures the common cold and produces steam coming out of the drinker's ears."),
   _Potion("Polyjuice Potion", "Allows the drinker to assume the form of someone else."),
   _Potion("Amortentia", "The most powerful love potion in existence."),
-  _Potion("Felix Felicis", "Also called Liquid Luck, makes the drinker lucky for a period of time."),
-  _Potion("Skele-Gro", "Potion for regrowing bones."),
-  _Potion("Wolfsbane Potion", "Alleviates the symptoms of lycanthropy."),
-  _Potion("Veritaserum", "A powerful truth serum."),
-  _Potion("Draught of Peace", "Relieves anxiety and soothes agitation."),
-  _Potion("Confusing Concoction", "Causes confusion in the drinker."),
-  _Potion("Invisibility Potion", "Renders the drinker invisible for a short period of time."),
 ];
 
 class ChemicalScreen extends StatefulWidget {
@@ -62,23 +81,11 @@ class _ChemicalScreenState extends State<ChemicalScreen> {
       body: LdScaffoldBody(
         children: [
           LdBreadcrumb.fromStrings(const ["Chemicals", "Polyjuice potion"]),
+
           const _Quantity(),
+          LdDivider(),
           const _ProductKeyInfos(),
-          ldSpacerL,
-          LdAutoSpace(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const LdDivider(),
-              LdButton(
-                child: const Text("Save"),
-                onPressed: () {
-                  LdNotificationsController.of(
-                    context,
-                  ).addNotification(LdNotification(type: LdNotificationType.success, message: "Saved"));
-                },
-              ),
-            ],
-          ),
+
           ldSpacerL,
           LdText.hs("Other potions"),
           ldSpacerM,
@@ -118,29 +125,11 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return LdAutoSpace(
+    final header = LdAutoSpace(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Flexible(
-              child: AnimatedBuilder(
-                animation: _quantityController,
-                builder: (context, child) {
-                  return LdOrb(_quantityController.value, size: 100, paintBackground: true);
-                },
-              ),
-            ),
-            ldSpacerM,
-            Expanded(
-              child: LdAutoSpace(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [LdText.hl("Polyjuice potion"), LdText.l("Made with real human hair")],
-              ),
-            ),
-          ],
-        ),
+        LdText.hl("Polyjuice potion"),
+        LdMute(child: LdText.l("Made with real human hair")),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -207,8 +196,7 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
                 ),
               ),
             ),
-            LdButton(
-              mode: LdButtonMode.vague,
+            LdButton.outline(
               leading: const Icon(LucideIcons.shoppingBag),
               onPressed: () {
                 LdNotificationsController.of(
@@ -217,8 +205,7 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
               },
               child: const Text("Add to cart"),
             ),
-            LdButton(
-              mode: LdButtonMode.vague,
+            LdButton.outline(
               leading: const Icon(LucideIcons.download),
               onPressed: () {
                 LdNotificationsController.of(context).addNotification(
@@ -230,6 +217,16 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
           ],
         ),
       ],
+    );
+
+    return ReflowHeader(
+      leading: AnimatedBuilder(
+        animation: _quantityController,
+        builder: (context, child) {
+          return LdOrb(_quantityController.value, size: 100, paintBackground: true);
+        },
+      ),
+      child: header,
     );
   }
 }
@@ -309,7 +306,7 @@ class _ProductKeyInfosState extends State<_ProductKeyInfos> {
     _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
       setState(() {
         _boilingPoint = Random().nextDouble() * 1000;
-        _brewingPressure = _brewingPressure == 4 ? 100 : 4;
+        _brewingPressure = Random().nextDouble() * 100;
       });
     });
   }
@@ -322,41 +319,39 @@ class _ProductKeyInfosState extends State<_ProductKeyInfos> {
 
   @override
   Widget build(BuildContext context) {
-    return LdCard(
-      padding: LdTheme.of(context).pad(size: LdSize.l),
-      child: Wrap(
-        spacing: 32,
-        children: [
-          Column(
+    return Wrap(
+      spacing: 16,
+      runSpacing: 16,
+      alignment: WrapAlignment.start,
+      children: [
+        LdCard(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               LdText.h("5-4"),
-              LdMute(child: LdText.l("pH")),
+              LdMute(child: LdText.caption("pH")),
             ],
           ),
-          Column(
+        ),
+        LdCard(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               LdCounter(value: _boilingPoint),
-              LdMute(child: LdText.l("Boiling point")),
+              LdMute(child: LdText.caption("Boiling point")),
             ],
           ),
-          Column(
+        ),
+        LdCard(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               LdCounter(value: _brewingPressure, precision: 2),
-              LdMute(child: LdText.l("Brewing pressure")),
+              LdMute(child: LdText.caption("Brewing pressure")),
             ],
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              LdText.h("Very"),
-              LdMute(child: LdText.l("Magic")),
-            ],
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

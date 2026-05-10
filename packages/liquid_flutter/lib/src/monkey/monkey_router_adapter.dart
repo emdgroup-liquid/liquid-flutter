@@ -1,23 +1,44 @@
-import 'dart:async';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/monkey/monkey_deleted_items_guard.dart';
 import 'package:liquid_flutter/src/monkey/monkey_repository_filter_adapter.dart';
-import 'package:liquid_flutter/src/monkey/monkey_sort_and_filter_state.dart';
 import 'package:provider/provider.dart';
 
+/// Centralised contract for all router mutations a monkey component
+/// performs in response to user interaction.
+///
+/// The concrete implementation lives on [LdMonkeyRouterAdapterState] so all
+/// `GoRouter` interaction stays in a single place. Consumers should never
+/// call methods on this directly; instead they use the static facades on
+/// [LdMonkeySelection] and [LdMonkeySortAndFilterState] which look this up
+/// via [BuildContext].
+abstract class LdMonkeyRouterController<T extends Identifiable<IdType>, IdType> {
+  void updateSelection(BuildContext context, Set<IdType> selection);
+
+  void updateViewing(BuildContext context, Set<IdType> viewingItems);
+
+  void updateShowSelectionControls(BuildContext context, bool showSelectionControls);
+
+  void updateFilter(BuildContext context, LdFilterOption<T, IdType> filter);
+
+  void updateSortOptions(BuildContext context, List<LdSortOption<T, IdType>> sortOptions);
+
+  static LdMonkeyRouterController<T, IdType> of<T extends Identifiable<IdType>, IdType>(BuildContext context) {
+    return context.read<LdMonkeyRouterController<T, IdType>>();
+  }
+}
+
 /// Sync the state of the router with the state of the shell.
-class MonkeyRouterAdapter<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
+class LdMonkeyRouterAdapter<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   final Widget child;
   final LdMonkeyRouteConfig<T, IdType> routeConfig;
 
   final List<LdFilterOption<T, IdType>> filters;
   final List<LdSortOption<T, IdType>> sortOptions;
 
-  const MonkeyRouterAdapter({
+  const LdMonkeyRouterAdapter({
     super.key,
     required this.child,
     required this.routeConfig,
@@ -26,10 +47,15 @@ class MonkeyRouterAdapter<T extends Identifiable<IdType>, IdType> extends Statef
   });
 
   @override
-  State<MonkeyRouterAdapter<T, IdType>> createState() => MonkeyRouterAdapterState<T, IdType>();
+  State<LdMonkeyRouterAdapter<T, IdType>> createState() => LdMonkeyRouterAdapterState<T, IdType>();
+}
 
-  /// Updates the selection in the URL query paramter.
-  static void updateSelection<T extends Identifiable<IdType>, IdType>(BuildContext context, Set<IdType> selection) {
+typedef LdMonkeyShowingDetail<T extends Identifiable<IdType>, IdType> = bool;
+
+class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends State<LdMonkeyRouterAdapter<T, IdType>>
+    implements LdMonkeyRouterController<T, IdType> {
+  @override
+  void updateSelection(BuildContext context, Set<IdType> selection) {
     final router = GoRouter.of(context);
     final routeConfig = context.read<LdMonkeyRouteConfig<T, IdType>>();
 
@@ -43,64 +69,142 @@ class MonkeyRouterAdapter<T extends Identifiable<IdType>, IdType> extends Statef
       queryParameters.remove(routeConfig.selectionQueryKey);
     }
 
-    // We can simply update the current urls query parameters
-    router.replace(router.state.uri.replace(queryParameters: queryParameters).toString());
+    router.replace(
+      router.state.uri.replace(queryParameters: queryParameters).toString(),
+    );
   }
 
-  /// Updates the viewing items
-  static void updateViewingItems<T extends Identifiable<IdType>, IdType>(
-    BuildContext context,
-    Set<IdType> viewingItems,
-  ) {
+  @override
+  void updateViewing(BuildContext context, Set<IdType> viewingItems) {
     final router = GoRouter.of(context);
     final routeConfig = context.read<LdMonkeyRouteConfig<T, IdType>>();
-
-    // We should see if we can use the current query parameters, we will
-    // need to filter out the filters and sort options otherwise removing them
-    // will not work
 
     final viewingParam = routeConfig.serialiseIdType(viewingItems);
 
     final showingDetail = context.read<LdMonkeyShowingDetail<T, IdType>>();
 
+    final queryParameters = Map<String, dynamic>.from(router.state.uri.queryParameters);
+    final pathParameters = _pathParametersForDetail(context, routeConfig, viewingParam);
+
     if (showingDetail) {
       if (viewingItems.isEmpty) {
         router.pop();
       } else {
-        router.replace(
-          Uri.parse("${routeConfig.basePath}/$viewingParam")
-              .replace(queryParameters: router.state.uri.queryParameters)
-              .toString(),
+        router.replaceNamed(
+          routeConfig.detailRouteName,
+          pathParameters: pathParameters,
+          queryParameters: queryParameters,
         );
       }
     } else {
       if (viewingItems.isNotEmpty) {
-        router.push(
-          Uri.parse("${routeConfig.basePath}/$viewingParam")
-              .replace(queryParameters: router.state.uri.queryParameters)
-              .toString(),
+        router.pushNamed(
+          routeConfig.detailRouteName,
+          pathParameters: pathParameters,
+          queryParameters: queryParameters,
         );
       }
     }
   }
 
-  static void updateShowSelectionControls<T extends Identifiable<IdType>, IdType>(
-      BuildContext context, bool showSelectionControls) {
+  /// Keeps ancestor path segments (nested monkeys) and sets this monkey's
+  /// [LdMonkeyRouteConfig.viewingParamName].
+  Map<String, String> _pathParametersForDetail(
+    BuildContext context,
+    LdMonkeyRouteConfig<T, IdType> routeConfig,
+    String viewingSerialized,
+  ) {
+    return <String, String>{
+      ...GoRouter.of(context).state.pathParameters,
+      routeConfig.viewingParamName: viewingSerialized,
+    };
+  }
+
+  @override
+  void updateShowSelectionControls(BuildContext context, bool showSelectionControls) {
     final router = GoRouter.of(context);
-    final queryParameters = <String, dynamic>{...router.state.uri.queryParameters};
     final routeConfig = context.read<LdMonkeyRouteConfig<T, IdType>>();
+    final queryParameters = <String, dynamic>{
+      ...router.state.uri.queryParameters,
+    };
     if (showSelectionControls) {
       queryParameters[routeConfig.showSelectionControlsQueryKey] = 'true';
     } else {
       queryParameters.remove(routeConfig.showSelectionControlsQueryKey);
     }
-    router.replace(router.state.uri.replace(queryParameters: queryParameters).toString());
+    router.replace(
+      router.state.uri.replace(queryParameters: queryParameters).toString(),
+    );
   }
-}
 
-typedef LdMonkeyShowingDetail<T extends Identifiable<IdType>, IdType> = bool;
+  @override
+  void updateFilter(BuildContext context, LdFilterOption<T, IdType> filter) {
+    final routeConfig = context.read<LdMonkeyRouteConfig<T, IdType>>();
+    final router = GoRouter.of(context);
+    final queryParameters = _currentQueryParameters();
+    final queryKey = routeConfig.filterQueryKey(filter.name);
+    if (filter.isOn) {
+      queryParameters[queryKey] = filter.serialize();
+    } else {
+      queryParameters.remove(queryKey);
+    }
+    router.replace(
+      router.state.uri.replace(queryParameters: queryParameters).toString(),
+    );
+  }
 
-class MonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends State<MonkeyRouterAdapter<T, IdType>> {
+  @override
+  void updateSortOptions(BuildContext context, List<LdSortOption<T, IdType>> sortOptions) {
+    final routeConfig = context.read<LdMonkeyRouteConfig<T, IdType>>();
+    final router = GoRouter.of(context);
+    final queryParameters = _currentQueryParameters();
+
+    final queryKey = routeConfig.sortQueryKey;
+
+    final sortOptionString =
+        sortOptions.where((sortOption) => sortOption.isOn).map((sortOption) => sortOption.serialize()).join("_");
+
+    if (sortOptionString.isNotEmpty) {
+      queryParameters[queryKey] = sortOptionString;
+    } else {
+      queryParameters.remove(queryKey);
+    }
+
+    router.replace(
+      router.state.uri.replace(queryParameters: queryParameters).toString(),
+    );
+  }
+
+  /// Rebuilds the current query parameter map from the active sort and
+  /// filter state so that subsequent overrides operate on a normalised view.
+  Map<String, dynamic> _currentQueryParameters() {
+    final routeConfig = context.read<LdMonkeyRouteConfig<T, IdType>>();
+    final router = GoRouter.of(context);
+    final sortAndFilterState = context.read<LdMonkeySortAndFilterState<T, IdType>>();
+    final queryParameters = <String, dynamic>{
+      ...router.state.uri.queryParameters,
+    };
+
+    for (final filter in sortAndFilterState.filters) {
+      final queryKey = routeConfig.filterQueryKey(filter.name);
+      if (filter.isOn) {
+        queryParameters[queryKey] = filter.serialize();
+      } else {
+        queryParameters.remove(queryKey);
+      }
+    }
+
+    for (final sortOption in sortAndFilterState.sortOptions) {
+      final queryKey = routeConfig.sortQueryKey;
+      if (sortOption.isOn) {
+        queryParameters[queryKey] = sortOption.serialize();
+      } else {
+        queryParameters.remove(queryKey);
+      }
+    }
+    return queryParameters;
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableProvider.value(
@@ -148,8 +252,9 @@ class MonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends S
                   ?.split("_")
                   .toSet()
                   .map((sortEntry) {
-                    final sortOption =
-                        sortOptionsLeft.firstWhereOrNull((sortOption) => sortOption.name == sortEntry.split("-")[0]);
+                    final sortOption = sortOptionsLeft.firstWhereOrNull(
+                      (sortOption) => sortOption.name == sortEntry.split("-")[0],
+                    );
                     if (sortOption != null) {
                       sortOptionsLeft.remove(sortOption);
                       return sortOption.marshalSerialized(sortEntry);
@@ -162,6 +267,7 @@ class MonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends S
 
           return MultiProvider(
             providers: [
+              Provider<LdMonkeyRouterController<T, IdType>>.value(value: this),
               Provider.value(
                 value: LdMonkeySelection<T, IdType>(
                   selection: parsedSelection,

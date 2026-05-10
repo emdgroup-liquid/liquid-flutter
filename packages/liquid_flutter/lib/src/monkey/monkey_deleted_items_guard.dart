@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/monkey/monkey_router_adapter.dart';
 import 'package:provider/provider.dart';
 
 class LdMonkeyDeletedItemsGuard<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
@@ -48,13 +47,13 @@ class _LdMonkeyDeletedItemsGuardState<T extends Identifiable<IdType>, IdType>
     if (item.state == LdPaginatorItemState.deleted && item.value?.id != null) {
       if (selection != null) {
         if (selection.viewing.contains(item.value?.id!)) {
-          MonkeyRouterAdapter.updateViewingItems<T, IdType>(
+          LdMonkeySelection.updateViewing<T, IdType>(
             context,
             selection.viewing.difference({item.value?.id!}),
           );
         }
         if (selection.selection.contains(item.value?.id!)) {
-          MonkeyRouterAdapter.updateSelection<T, IdType>(
+          LdMonkeySelection.updateSelection<T, IdType>(
             context,
             selection.selection.difference({item.value?.id!}),
           );

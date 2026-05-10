@@ -18,6 +18,8 @@ import 'package:liquid/components/layout/list.dart';
 
 import 'package:liquid/components/feedback/loader.dart';
 import 'package:liquid/components/layout/list_item.dart';
+import 'package:liquid/demos/projects/pages.dart';
+import 'package:liquid/demos/projects/repo.dart';
 import 'package:liquid/patterns/monkey.dart';
 import 'package:liquid/patterns/monkey_repository.dart';
 import 'package:liquid/patterns/monkey_pattern.dart';
@@ -49,6 +51,7 @@ import 'package:liquid/demos/typography_documentation.dart';
 import 'package:liquid/demos/demo_shell.dart';
 import 'package:liquid/home.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:provider/provider.dart';
 
 import 'components/layout/accordion.dart';
 import 'components/feedback/badge.dart';
@@ -65,6 +68,12 @@ import 'components/data_display/tag.dart';
 import 'window/app_scaffold.dart';
 
 import 'components/bento_gallery.dart';
+
+final projectRouteConfig = LdMonkeyRouteConfig.identifiableInt<Project>(itemName: "project");
+
+const projectMasterPath = "/projects";
+
+final fileRouteConfig = LdMonkeyRouteConfig.identifiableString<File>(itemName: "file");
 
 class AppRouter {
   AppRouter();
@@ -83,7 +92,8 @@ class AppRouter {
             initialLocation: "/movie-demo",
             routes: [
               ...buildMonkeyRoutes<MovieDemo, int>(
-                routeConfig: LdMonkeyRouteConfig.identifiableInt<MovieDemo>(itemName: "movie", basePath: "/movie-demo"),
+                masterPath: "/movie-demo",
+                routeConfig: LdMonkeyRouteConfig.identifiableInt<MovieDemo>(itemName: "movie"),
                 sortOptions: [],
                 actions: movieActions,
                 filters: movieFilters,
@@ -98,13 +108,85 @@ class AppRouter {
             initialLocation: "/task-demo?sort-task=due-asc",
             routes: [
               ...buildMonkeyRoutes<Task, int>(
-                routeConfig: LdMonkeyRouteConfig.identifiableInt<Task>(itemName: "task", basePath: "/task-demo"),
+                masterPath: "/task-demo",
+                routeConfig: LdMonkeyRouteConfig.identifiableInt<Task>(itemName: "task"),
                 sortOptions: taskSortOptions,
                 actions: taskActions,
                 filters: taskFilters,
                 detailPage: TaskDetailPage(),
                 masterPage: TaskMasterPage(),
                 repositoryBuilder: (context) => taskRepository(context),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            initialLocation: '/projects',
+            routes: [
+              ShellRoute(
+                builder: (context, state, child) {
+                  return Provider<LdMonkeyRouteConfig<Project, int>>.value(
+                    value: projectRouteConfig,
+                    child: Provider<LdMonkeyActions<Project, int>>.value(
+                      value: [],
+                      child: LdRepositoryProvider<Project, int>(
+                        repositoryBuilder: (context) => projectRepository(),
+                        child: LdMonkeyRouterAdapter<Project, int>(
+                          routeConfig: projectRouteConfig,
+                          filters: [],
+                          sortOptions: [],
+                          child: LdMonkeyShell<Project, int>(masterPage: ProjectMasterPage(), child: child),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                routes: [
+                  GoRoute(
+                    name: projectRouteConfig.masterRouteName,
+                    path: projectMasterPath,
+                    pageBuilder: (context, state) => MaterialPage<void>(child: ProjectMasterPage()),
+                    routes: [
+                      ShellRoute(
+                        routes: [
+                          GoRoute(
+                            name: projectRouteConfig.detailRouteName,
+                            path: ":${projectRouteConfig.viewingParamName}",
+                            pageBuilder: (context, state) => MaterialPage<void>(child: FileMasterPage()),
+                            routes: [
+                              GoRoute(
+                                name: fileRouteConfig.detailRouteName,
+                                path: "files/:${fileRouteConfig.viewingParamName}",
+                                pageBuilder: (context, state) => MaterialPage<void>(child: FileDetailPage()),
+                              ),
+                            ],
+                          ),
+                        ],
+                        builder: (context, state, child) {
+                          final projectId = state.pathParameters[projectRouteConfig.viewingParamName]!;
+
+                          return Provider<LdMonkeyRouteConfig<File, String>>.value(
+                            value: fileRouteConfig,
+                            key: ValueKey(projectId),
+                            child: Provider<LdMonkeyActions<File, String>>.value(
+                              value: [],
+                              child: LdRepositoryProvider<File, String>(
+                                key: ValueKey(state.pathParameters[projectRouteConfig.viewingParamName]!),
+                                repositoryBuilder: (context) =>
+                                    fileRepository(state.pathParameters[projectRouteConfig.viewingParamName]!),
+                                child: LdMonkeyRouterAdapter<File, String>(
+                                  routeConfig: fileRouteConfig,
+                                  filters: [],
+                                  sortOptions: [],
+                                  child: LdMonkeyShell<File, String>(masterPage: FileMasterPage(), child: child),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),

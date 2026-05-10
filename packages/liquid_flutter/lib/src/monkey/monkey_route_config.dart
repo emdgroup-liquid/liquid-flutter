@@ -4,7 +4,6 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 class LdMonkeyRouteConfig<T extends Identifiable<IdType>, IdType> {
   LdMonkeyRouteConfig({
     required this.itemName,
-    required this.basePath,
     required this.serialiseIdType,
     required this.parseIdType,
   });
@@ -17,11 +16,9 @@ class LdMonkeyRouteConfig<T extends Identifiable<IdType>, IdType> {
   /// encoding.
   static LdMonkeyRouteConfig<T, String> identifiableString<T extends Identifiable<String>>({
     required String itemName,
-    required String basePath,
   }) {
     return LdMonkeyRouteConfig<T, String>(
       itemName: itemName,
-      basePath: basePath,
       serialiseIdType: (ids) => ids.join("_"),
       parseIdType: (selected) => selected.split("_").toSet(),
     );
@@ -30,18 +27,15 @@ class LdMonkeyRouteConfig<T extends Identifiable<IdType>, IdType> {
   /// A configuration to be used if your item is identifiable by an integer,
   static LdMonkeyRouteConfig<T, int> identifiableInt<T extends Identifiable<int>>({
     required String itemName,
-    required String basePath,
   }) {
     return LdMonkeyRouteConfig<T, int>(
       itemName: itemName,
-      basePath: basePath,
       serialiseIdType: (ids) => ids.join("_"),
       parseIdType: (selected) => selected.split("_").map(int.tryParse).nonNulls.toSet(),
     );
   }
 
   final String itemName;
-  final String basePath;
 
   final String Function(Set<IdType> ids) serialiseIdType;
   final Set<IdType> Function(String selected) parseIdType;

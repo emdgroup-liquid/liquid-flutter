@@ -501,8 +501,6 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
           offset: offset,
           pageSize: pageSize,
           pageToken: null,
-          filters: null,
-          sortOptions: null,
         ),
       );
 

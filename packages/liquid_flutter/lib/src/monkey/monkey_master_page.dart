@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/monkey/monkey_router_adapter.dart';
 import 'package:provider/provider.dart';
 
 class LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
@@ -37,8 +36,6 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
 
     final selection = LdMonkeySelection.of<T, IdType>(context, listen: true);
 
-    print("Building list with selection: ${selection.selection}");
-
     return LdSelectableList<T, IdType>(
       showSelectionControls: selection.showSelectionControls,
       paginator: repository,
@@ -50,10 +47,10 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
           return;
         }
         if (selected.length > 1 || selection.showSelectionControls) {
-          MonkeyRouterAdapter.updateSelection<T, IdType>(context, selected);
-          MonkeyRouterAdapter.updateShowSelectionControls<T, IdType>(context, true);
+          LdMonkeySelection.updateSelection<T, IdType>(context, selected);
+          LdMonkeySelection.updateShowSelectionControls<T, IdType>(context, true);
         } else {
-          MonkeyRouterAdapter.updateViewingItems<T, IdType>(context, selected);
+          LdMonkeySelection.updateViewing<T, IdType>(context, selected);
         }
       },
       itemBuilder: (context, item, index) => LdMonkeySingleShortcuts<T, IdType>(

@@ -1,19 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:provider/provider.dart';
 
 class FetchPageParameters<T extends Identifiable<IdType>, IdType> {
   BuildContext context;
   final int offset;
   final int pageSize;
   final String? pageToken;
-  final Set<LdFilterOption<T, IdType>>? filters;
-  final List<LdSortOption<T, IdType>>? sortOptions;
+
   FetchPageParameters({
     required this.context,
     required this.offset,
     required this.pageSize,
     required this.pageToken,
-    required this.filters,
-    required this.sortOptions,
   });
+
+  Set<LdFilterOption<T, IdType>> get filters =>
+      context.read<LdMonkeySortAndFilterState<T, IdType>?>()?.filters.where((filter) => filter.isOn).toSet() ?? {};
+
+  List<LdSortOption<T, IdType>> get sortOptions =>
+      context
+          .read<LdMonkeySortAndFilterState<T, IdType>?>()
+          ?.sortOptions
+          .where((sortOption) => sortOption.isOn)
+          .toList() ??
+      [];
+}
+
+class FetchOffsetParameters<T extends Identifiable<IdType>, IdType> {
+  BuildContext context;
+  final IdType id;
+  FetchOffsetParameters({
+    required this.context,
+    required this.id,
+  });
+
+  Set<LdFilterOption<T, IdType>> get filters =>
+      context.read<LdMonkeySortAndFilterState<T, IdType>?>()?.filters.where((filter) => filter.isOn).toSet() ?? {};
+
+  List<LdSortOption<T, IdType>> get sortOptions =>
+      context
+          .read<LdMonkeySortAndFilterState<T, IdType>?>()
+          ?.sortOptions
+          .where((sortOption) => sortOption.isOn)
+          .toList() ??
+      [];
 }

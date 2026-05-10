@@ -52,7 +52,7 @@ List<LdMonkeyAction<Task, int>> taskActions = [
         await Future.delayed(const Duration(milliseconds: 1500));
 
         if (context.mounted) {
-          MonkeyRouterAdapter.updateViewingItems<Task, int>(context, {newTask.id});
+          LdMonkeySelection.updateViewing<Task, int>(context, {newTask.id});
         }
       },
     ),
@@ -170,7 +170,7 @@ List<LdMonkeyAction<Task, int>> taskActions = [
         await Future.delayed(const Duration(milliseconds: 1500));
 
         if (context.mounted) {
-          MonkeyRouterAdapter.updateViewingItems<Task, int>(context, {newItem.id});
+          LdMonkeySelection.updateViewing<Task, int>(context, {newItem.id});
         }
       },
     ),
@@ -250,17 +250,16 @@ class TaskMasterPage extends StatelessWidget {
           item.value!.task,
           style: TextStyle(decoration: item.value!.done ? TextDecoration.lineThrough : TextDecoration.none),
         ),
-        subtitle: Text("Due ${Jiffy.parseFromDateTime(item.value!.due).fromNow()}"),
-        leading: LdAvatar(
-          color: switch (item.value!.done) {
-            true => LdTheme.of(context).success,
-            false => switch (item.value!.due.isBefore(DateTime.now())) {
-              true => LdTheme.of(context).error,
-              false => LdTheme.of(context).primary,
+        subtitle: Text(
+          "Due ${Jiffy.parseFromDateTime(item.value!.due).fromNow()}",
+          style: TextStyle(
+            color: switch (item.value!.due.isBefore(DateTime.now())) {
+              true => LdTheme.of(context).errorColor,
+              _ => null,
             },
-          },
-          child: Icon(item.value!.done ? LucideIcons.squareCheck : LucideIcons.square),
+          ),
         ),
+        leading: Icon(item.value!.done ? LucideIcons.squareCheck : LucideIcons.square),
       ),
     );
   }

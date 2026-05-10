@@ -44,6 +44,7 @@ class DemoShell extends StatelessWidget {
                 route: "/movie-demo",
                 isActive: (context) => GoRouterState.of(context).uri.path.startsWith("/movie-demo"),
               ),
+              LdNavigationTab(label: "Projects", icon: Icon(LucideIcons.folder), route: "/projects"),
               LdNavigationTab(label: "Exit", icon: const Icon(LucideIcons.x), route: "/"),
             ],
             onTabPressed: (route) {
@@ -52,6 +53,7 @@ class DemoShell extends StatelessWidget {
               } else {
                 final branchIndex = switch (route) {
                   "/task-demo" => 1,
+                  "/projects" => 2,
                   "/movie-demo" => 0,
                   _ => throw Exception("Invalid route: $route"),
                 };

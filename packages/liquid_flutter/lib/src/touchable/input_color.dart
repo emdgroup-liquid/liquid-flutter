@@ -6,10 +6,12 @@ import 'package:liquid_flutter/src/touchable/touchable_status.dart';
 LdColorBundle inputColor(
   LdTheme theme,
   LdTouchableStatus status, {
+  LdColor? color,
   bool isValid = true,
   bool onSurface = false,
 }) {
   final surface = onSurface ? theme.background : theme.palette.surface;
+
   final border = theme.border;
   final borderInvalid = theme.palette.error;
 

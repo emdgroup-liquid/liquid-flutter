@@ -1,11 +1,8 @@
-import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
-
-import 'package:sensors_plus/sensors_plus.dart';
 
 /// an animated illustration of an orb filled with liquid that has some waves and a [filling] level.
 class LdOrb extends StatefulWidget {
@@ -24,34 +21,18 @@ class _LdOrbState extends State<LdOrb> with TickerProviderStateMixin {
   final Tween<double> _tween = Tween(begin: 0.0, end: 1);
   Animation<double>? _animation;
 
-  double _angle = 0.0;
-  StreamSubscription<AccelerometerEvent>? _streamSubscription;
   double get _fill => 1 - ((widget.filling * 0.9) + 0.1);
 
   @override
   void initState() {
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 4),
+      duration: const Duration(seconds: 10),
     );
 
     _animation = _tween.animate(_animationController!);
 
-    _animationController!.repeat(reverse: false);
-    if (LdTheme.of(context).platform.isMobile) {
-      _streamSubscription = accelerometerEventStream().listen((AccelerometerEvent event) {
-        setState(() {
-          double x = event.x, y = event.y, z = event.z;
-          // Normalize vector
-          double norm = sqrt(x * x + y * y + z * z);
-
-          // Angle of the phone in x
-          x = event.x / norm;
-
-          _angle = x;
-        });
-      });
-    }
+    _animationController!.repeat();
 
     super.initState();
   }
@@ -59,8 +40,6 @@ class _LdOrbState extends State<LdOrb> with TickerProviderStateMixin {
   @override
   void dispose() {
     _animationController?.dispose();
-    _streamSubscription?.cancel();
-    super.dispose();
   }
 
   @override
@@ -71,32 +50,27 @@ class _LdOrbState extends State<LdOrb> with TickerProviderStateMixin {
     }
     return Stack(
       children: [
-        AnimatedRotation(
-          turns: _angle / pi,
-          // Determines the viscosity of the fluid in the bowl
-          duration: const Duration(milliseconds: 500),
-          child: Container(
-            clipBehavior: Clip.hardEdge,
-            decoration: BoxDecoration(boxShadow: const [], borderRadius: BorderRadius.circular(widget.size / 2)),
-            height: widget.size,
-            width: widget.size,
-            child: LdSpring(
-              position: _fill,
-              initialPosition: 0,
-              builder: (context, spring, _) => AnimatedBuilder(
-                  animation: _animation!,
-                  builder: (context, child) {
-                    return CustomPaint(
-                      painter: _OrbPainter(
-                        Size(widget.size, widget.size),
-                        spring.position,
-                        _animation!.value + spring.velocity,
-                        widget.paintBackground,
-                        theme,
-                      ),
-                    );
-                  }),
-            ),
+        Container(
+          clipBehavior: Clip.hardEdge,
+          decoration: BoxDecoration(boxShadow: const [], borderRadius: BorderRadius.circular(widget.size / 2)),
+          height: widget.size,
+          width: widget.size,
+          child: LdSpring(
+            position: _fill,
+            initialPosition: 0,
+            builder: (context, spring, _) => AnimatedBuilder(
+                animation: _animation!,
+                builder: (context, child) {
+                  return CustomPaint(
+                    painter: _OrbPainter(
+                      Size(widget.size, widget.size),
+                      spring.position,
+                      _animation!.value + spring.velocity,
+                      widget.paintBackground,
+                      theme,
+                    ),
+                  );
+                }),
           ),
         ),
         CustomPaint(painter: ReflectionPainter(theme, Size(widget.size, widget.size)))
@@ -233,7 +207,7 @@ class _OrbPainter extends CustomPainter {
     canvas.drawPath(
         path,
         Paint()
-          ..color = theme.palette.primary.focus(theme.isDark).withAlpha(200)
+          ..color = theme.palette.primary.focus(theme.isDark)
           ..style = PaintingStyle.fill);
 
     Path secondWave = Path();
@@ -262,13 +236,10 @@ class _OrbPainter extends CustomPainter {
 
     secondWave.arcToPoint(waveStart, radius: Radius.circular(height / 2));
 
-    canvas.drawPath(
-      secondWave,
-      Paint()..color = theme.palette.primary.hover(theme.isDark).withAlpha(50),
-    );
+    canvas.drawPath(secondWave, Paint()..color = theme.palette.primary.hover(theme.isDark));
 
     // Grey border
-    var border = Paint()..color = theme.border;
+    var border = Paint()..color = shadZinc.shades[3];
     border.strokeWidth = 2;
     border.style = PaintingStyle.stroke;
 

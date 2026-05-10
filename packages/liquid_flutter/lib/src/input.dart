@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/form_label.dart';
+import 'package:liquid_flutter/src/touchable/input_color.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// An input field
@@ -27,6 +28,7 @@ class LdInput extends StatefulWidget {
   final bool loading;
   final Widget? leading;
   final bool allowTapOutside;
+  final bool selectAllOnFocus;
 
   final Widget? trailingHint;
 
@@ -40,6 +42,7 @@ class LdInput extends StatefulWidget {
     this.label,
     this.obscureText = false,
     this.leading,
+    this.selectAllOnFocus = false,
     this.maxLines = 1,
     this.minLines,
     this.autofocus = false,
@@ -160,22 +163,22 @@ class _LdInputState extends State<LdInput> {
             disabled: widget.disabled,
           ),
           CallbackShortcuts(
-              bindings: {
-                const SingleActivator(LogicalKeyboardKey.escape): () {
-                  _focusScopeNode.unfocus();
-                },
+            bindings: {
+              const SingleActivator(LogicalKeyboardKey.escape): () {
+                _focusScopeNode.unfocus();
               },
-              child: LdTouchableSurface(
-                allowTapOutside: widget.allowTapOutside,
-                mode: LdTouchableSurfaceMode.input,
-                isInput: true,
-                focusNode: _focusScopeNode,
-                onPressed: () {
-                  _focusNode.requestFocus();
-                },
-                active: _focusScopeNode.hasFocus,
-                disabled: widget.disabled,
-                builder: (context, colors, status, _) => Container(
+            },
+            child: LdTouchableSurface(
+              allowTapOutside: widget.allowTapOutside,
+              focusNode: _focusScopeNode,
+              onPressed: () {
+                _focusNode.requestFocus();
+              },
+              active: _focusScopeNode.hasFocus,
+              disabled: widget.disabled,
+              builder: (context, status, _) => Builder(builder: (context) {
+                final colors = inputColor(theme, status, isValid: widget.valid);
+                return Container(
                   clipBehavior: Clip.hardEdge,
                   decoration: BoxDecoration(
                     color: colors.surface,
@@ -214,6 +217,7 @@ class _LdInputState extends State<LdInput> {
                                   cursorColor: theme.palette.primary.idle(
                                     theme.isDark,
                                   ),
+                                  selectAllOnFocus: widget.selectAllOnFocus,
                                   cursorHeight: cursorHeight,
                                   maxLines: widget.maxLines,
                                   autofillHints: widget.autofillHints,
@@ -256,8 +260,10 @@ class _LdInputState extends State<LdInput> {
                         )
                     ],
                   ),
-                ),
-              )),
+                );
+              }),
+            ),
+          )
         ],
       ),
     );

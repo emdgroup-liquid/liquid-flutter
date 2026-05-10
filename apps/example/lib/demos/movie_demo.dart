@@ -75,7 +75,7 @@ LdRepository<MovieDemo, int> movieRepository(BuildContext context) => LdReposito
     await Future.delayed(const Duration(milliseconds: 50));
     final filtered = movieData
         .where(
-          (element) => (parameters.filters ?? {}).all((filter) {
+          (element) => (parameters.filters).all((filter) {
             if (filter is LdFilterRange<MovieDemo, int>) {
               return filter.range.inRange(element.rating);
             }
@@ -228,7 +228,7 @@ List<LdMonkeyAction<MovieDemo, int>> movieActions = [
         await Future.delayed(const Duration(milliseconds: 1500));
 
         if (context.mounted) {
-          MonkeyRouterAdapter.updateViewingItems<MovieDemo, int>(context, {newItem.id});
+          LdMonkeySelection.updateViewing<MovieDemo, int>(context, {newItem.id});
         }
       },
     ),

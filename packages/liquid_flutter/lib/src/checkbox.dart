@@ -3,6 +3,8 @@ import 'package:liquid_flutter/src/color/color.dart';
 import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/haptics.dart';
 import 'package:liquid_flutter/src/preview_wrapper.dart';
+import 'package:liquid_flutter/src/touchable/outline_color.dart';
+import 'package:liquid_flutter/src/touchable/solid_color.dart';
 import 'package:liquid_flutter/src/touchable/touchable.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
@@ -67,7 +69,7 @@ class _LdCheckboxState extends State<_LdCheckboxWidget> {
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
 
-    final reactiveColors = widget.color ?? theme.palette.primary;
+    final color = widget.color ?? theme.palette.primary;
 
     final size = widget.size.clamp(LdSize.s, LdSize.l);
 
@@ -82,8 +84,6 @@ class _LdCheckboxState extends State<_LdCheckboxWidget> {
     return LdTouchableSurface(
       key: const Key('ldCheckbox_touchable'),
       hitTestBehavior: HitTestBehavior.opaque,
-      color: reactiveColors,
-      mode: widget.checked ? LdTouchableSurfaceMode.solid : LdTouchableSurfaceMode.outline,
       disabled: widget.disabled,
       focusNode: widget.focusNode,
       onPressed: () {
@@ -92,40 +92,46 @@ class _LdCheckboxState extends State<_LdCheckboxWidget> {
         }
         LdHaptics.vibrate(HapticsType.selection);
       },
-      builder: (context, colors, status, _) => Semantics(
-        checked: widget.checked,
-        enabled: !widget.disabled,
-        label: widget.label,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              key: const ValueKey("frame"),
-              height: checkboxSize,
-              width: checkboxSize,
-              decoration: BoxDecoration(
-                color: colors.surface,
-                border: Border.all(
-                  color: colors.border,
-                  width: 2,
+      builder: (context, status, _) => Builder(builder: (context) {
+        final colors = switch (widget.checked) {
+          true => solidColor(color, theme, status),
+          false => outlineColor(color, theme, status),
+        };
+        return Semantics(
+          checked: widget.checked,
+          enabled: !widget.disabled,
+          label: widget.label,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                key: const ValueKey("frame"),
+                height: checkboxSize,
+                width: checkboxSize,
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  border: Border.all(
+                    color: colors.border,
+                    width: 2,
+                  ),
+                  borderRadius: LdTheme.of(context).radius(size.adjust(-2)),
                 ),
-                borderRadius: LdTheme.of(context).radius(size.adjust(-2)),
-              ),
-              child: Opacity(
-                opacity: widget.checked ? 1 : 0,
-                child: Icon(
-                  key: const ValueKey("checkmark"),
-                  LucideIcons.check,
-                  color: colors.text,
-                  size: theme.labelSize(widget.size),
+                child: Opacity(
+                  opacity: widget.checked ? 1 : 0,
+                  child: Icon(
+                    key: const ValueKey("checkmark"),
+                    LucideIcons.check,
+                    color: colors.text,
+                    size: theme.labelSize(widget.size),
+                  ),
                 ),
               ),
-            ),
-            Flexible(child: label),
-          ],
-        ),
-      ),
+              Flexible(child: label),
+            ],
+          ),
+        );
+      }),
     );
   }
 }

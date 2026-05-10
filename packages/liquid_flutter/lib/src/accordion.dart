@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/haptics.dart';
+import 'package:liquid_flutter/src/touchable/neutral_ghost_color.dart';
 
 /// a collection of collapsible items in a group.
 class LdAccordion extends StatefulWidget {
@@ -166,42 +167,42 @@ class _LdAccordionChild extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           LdTouchableSurface(
-            onPressed: onPressed,
-            active: !collapsed,
-            mode: LdTouchableSurfaceMode.neutralGhost,
-            color: theme.palette.primary,
-            builder: (contxt, colorBundle, status, _) => Container(
-              padding: headerPadding,
-              decoration: BoxDecoration(
-                color: colorBundle.surface,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: DefaultTextStyle(
-                      style: ldBuildTextStyle(
-                        theme,
-                        LdTextType.label,
-                        size,
-                        color: colorBundle.text,
+              onPressed: onPressed,
+              active: !collapsed,
+              builder: (contxt, status, _) {
+                final colorBundle = neutralGhostColor(theme, status);
+                return Container(
+                  padding: headerPadding,
+                  decoration: BoxDecoration(
+                    color: colorBundle.surface,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: DefaultTextStyle(
+                          style: ldBuildTextStyle(
+                            theme,
+                            LdTextType.label,
+                            size,
+                            color: colorBundle.text,
+                          ),
+                          maxLines: 1,
+                          child: header,
+                        ),
                       ),
-                      maxLines: 1,
-                      child: header,
-                    ),
+                      AnimatedRotation(
+                        duration: const Duration(milliseconds: 150),
+                        turns: !collapsed ? 0.25 : 0,
+                        child: Icon(
+                          Icons.chevron_right_rounded,
+                          size: theme.labelSize(size),
+                          color: colorBundle.icon,
+                        ),
+                      ),
+                    ],
                   ),
-                  AnimatedRotation(
-                    duration: const Duration(milliseconds: 150),
-                    turns: !collapsed ? 0.25 : 0,
-                    child: Icon(
-                      Icons.chevron_right_rounded,
-                      size: theme.labelSize(size),
-                      color: colorBundle.icon,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+                );
+              }),
           LdCollapse(
             collapsed: collapsed,
             child: Container(

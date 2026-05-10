@@ -43,7 +43,7 @@ class LdFilterContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
   @override
   Widget build(BuildContext context) {
     final repository = LdRepository.of<T, IdType>(context);
-    final activeFilters = repository.activeFilters.length;
+    final activeFilters = LdMonkeySortAndFilterState.of<T, IdType>(context).activeFilters.length;
     return LdContextMenu(
       builder: (context, isShuttle, open, isOpen, child) => LdAppBarAction(
         active: activeFilters > 0,
@@ -55,6 +55,7 @@ class LdFilterContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
       ),
       menuProviders: (context) => [
         ListenableProvider.value(value: repository),
+        Provider.value(value: LdMonkeySortAndFilterState.of<T, IdType>(context, listen: true)),
       ],
       menuBuilder: (context) => ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 300),
@@ -71,7 +72,6 @@ class LdFilterModal<T extends Identifiable<IdType>, IdType> extends StatelessWid
 
   @override
   Widget build(BuildContext context) {
-    final repository = LdRepository.of<T, IdType>(context);
     final sortAndFilterState = context.watch<LdMonkeySortAndFilterState<T, IdType>>();
 
     final filters = sortAndFilterState.filters;

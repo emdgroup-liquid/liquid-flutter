@@ -191,26 +191,6 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
     if (widget.items != null && widget.repository == null) {
       _repository = LdRepository.fromList<T, IdType>(
         list: widget.items!,
-        filters: {
-          LdFilterSearch<T, IdType, LdSelectItem<dynamic>>(
-              name: 'search',
-              label: (context) => 'Search',
-              icon: (context) => const Icon(Icons.search),
-              buildSuggestion: (context, suggestion) {
-                final item = suggestion as LdSelectItem<dynamic>;
-                return LdListItem(
-                  title: suggestion.child,
-                  onPressed: () {
-                    LdSearchAcceptSuggestion(suggestion: item.searchString).dispatch(context);
-                  },
-                );
-              },
-              getSuggestions: (searchText) async {
-                return (widget.items! as List<LdSelectItem<dynamic>>).where((item) {
-                  return (item).searchString?.toLowerCase().contains(searchText.toLowerCase()) ?? false;
-                }).toList();
-              }),
-        },
         filterFunction: (item, activeFilters) {
           final searchFilter = activeFilters?.whereType<LdFilterSearch<T, IdType, LdSelectItem<dynamic>>>().firstOrNull;
           if (searchFilter == null || !searchFilter.isOn || searchFilter.searchText.isEmpty) {

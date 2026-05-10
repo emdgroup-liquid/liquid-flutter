@@ -14,7 +14,7 @@ LdMonkeyAction<T, IdType> toggleSelectionControls<T extends Identifiable<IdType>
       },
       onShortcutTrigger: (context) async {
         final selection = LdMonkeySelection.of<T, IdType>(context);
-        MonkeyRouterAdapter.updateShowSelectionControls<T, IdType>(context, !selection.showSelectionControls);
+        LdMonkeySelection.updateShowSelectionControls<T, IdType>(context, !selection.showSelectionControls);
       },
       builder: (context) {
         final selection = LdMonkeySelection.of<T, IdType>(context, listen: true);
@@ -38,8 +38,8 @@ LdMonkeyAction<T, IdType> toggleSelectionControls<T extends Identifiable<IdType>
                 return;
               }
               if (selection.selection.isNotEmpty && selection.showSelectionControls && context.mounted) {
-                MonkeyRouterAdapter.updateViewingItems<T, IdType>(context, {});
-                MonkeyRouterAdapter.updateSelection<T, IdType>(context, {});
+                LdMonkeySelection.updateViewing<T, IdType>(context, {});
+                LdMonkeySelection.updateSelection<T, IdType>(context, {});
               }
             }
 
@@ -49,7 +49,7 @@ LdMonkeyAction<T, IdType> toggleSelectionControls<T extends Identifiable<IdType>
               return;
             }
 
-            MonkeyRouterAdapter.updateShowSelectionControls<T, IdType>(context, !selection.showSelectionControls);
+            LdMonkeySelection.updateShowSelectionControls<T, IdType>(context, !selection.showSelectionControls);
           },
           child: Builder(builder: (context) {
             final showingSelectionControls =

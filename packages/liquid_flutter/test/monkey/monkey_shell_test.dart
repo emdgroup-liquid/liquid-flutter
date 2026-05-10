@@ -143,21 +143,23 @@ void main() {
           },
         );
 
+        final itemRouteConfig = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'item');
         final router = GoRouter(
           initialLocation: '/test/1',
           routes: [
             ...buildMonkeyRoutes<TestItem, int>(
-              basePath: '/test',
-              repositoryBuilder: (context) async => repository,
-              pathParameterName: 'id',
+              masterPath: '/test',
+              routeConfig: itemRouteConfig,
+              repositoryBuilder: (context) => repository,
+              filters: const [],
+              sortOptions: const [],
+              actions: const [],
               detailPage: LdMonkeyDetailPage<TestItem, int>(
                 body: LdMonkeyStackDetailView<TestItem, int>(buildDetail: (context, item) {
                   return Text(item.value.toString());
                 }),
               ),
               masterPage: const SizedBox(),
-              layoutMode: LdMonkeyLayoutMode.auto,
-              parseSelected: (selected) => selected.split('_').map(int.parse).toSet(),
             ),
           ],
         );

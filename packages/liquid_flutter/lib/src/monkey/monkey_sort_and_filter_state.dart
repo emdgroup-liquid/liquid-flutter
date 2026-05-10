@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -24,72 +23,28 @@ class LdMonkeySortAndFilterState<T extends Identifiable<IdType>, IdType> {
     required this.sortOptions,
   });
 
-  Map<String, dynamic> getQueryParamters(BuildContext context) {
-    final routeConfig = context.read<LdMonkeyRouteConfig<T, IdType>>();
-    final router = GoRouter.of(context);
-    final queryParameters = <String, dynamic>{...router.state.uri.queryParameters};
-
-    for (final filter in filters) {
-      final queryKey = routeConfig.filterQueryKey(filter.name);
-      if (filter.isOn) {
-        queryParameters[queryKey] = filter.serialize();
-      } else {
-        queryParameters.remove(queryKey);
-      }
-    }
-
-    final sortOptionsOn = sortOptions.where((sortOption) => sortOption.isOn).toList();
-
-    final sortOptionsSerialized = sortOptionsOn.map((sortOption) => sortOption.serialize()).join("_");
-
-    for (final sortOption in sortOptions) {
-      final queryKey = routeConfig.sortQueryKey;
-      if (sortOption.isOn) {
-        queryParameters[queryKey] = sortOption.serialize();
-      } else {
-        queryParameters.remove(queryKey);
-      }
-    }
-    return queryParameters;
-  }
-
   static void updateFilter<T extends Identifiable<IdType>, IdType>(
-      BuildContext context, LdFilterOption<T, IdType> filter) {
-    final routeConfig = context.read<LdMonkeyRouteConfig<T, IdType>>();
-    final router = GoRouter.of(context);
-    final sortAndFilterState = context.read<LdMonkeySortAndFilterState<T, IdType>>();
-    final queryParameters = sortAndFilterState.getQueryParamters(context);
-    final queryKey = routeConfig.filterQueryKey(filter.name);
-    if (filter.isOn) {
-      queryParameters[queryKey] = filter.serialize();
-    } else {
-      queryParameters.remove(queryKey);
-    }
-    router.replace(router.state.uri.replace(queryParameters: queryParameters).toString());
-  }
+    BuildContext context,
+    LdFilterOption<T, IdType> filter,
+  ) =>
+      LdMonkeyRouterController.of<T, IdType>(context).updateFilter(context, filter);
 
   static void updateSortOptions<T extends Identifiable<IdType>, IdType>(
     BuildContext context,
     List<LdSortOption<T, IdType>> sortOptions,
-  ) {
-    final routeConfig = context.read<LdMonkeyRouteConfig<T, IdType>>();
-    final router = GoRouter.of(context);
-    final sortAndFilterState = context.read<LdMonkeySortAndFilterState<T, IdType>>();
-    final queryParameters = sortAndFilterState.getQueryParamters(context);
+  ) =>
+      LdMonkeyRouterController.of<T, IdType>(context).updateSortOptions(context, sortOptions);
 
-    final queryKey = routeConfig.sortQueryKey;
-
-    print("Sort options: $sortOptions");
-
-    final sortOptionString =
-        sortOptions.where((sortOption) => sortOption.isOn).map((sortOption) => sortOption.serialize()).join("_");
-
-    if (sortOptionString.isNotEmpty) {
-      queryParameters[queryKey] = sortOptionString;
-    } else {
-      queryParameters.remove(queryKey);
+  static LdMonkeySortAndFilterState<T, IdType> of<T extends Identifiable<IdType>, IdType>(
+    BuildContext context, {
+    bool listen = true,
+  }) {
+    if (listen) {
+      return context.watch<LdMonkeySortAndFilterState<T, IdType>>();
     }
-
-    router.replace(router.state.uri.replace(queryParameters: queryParameters).toString());
+    return context.read<LdMonkeySortAndFilterState<T, IdType>>();
   }
+
+  List<LdFilterOption<T, IdType>> get activeFilters => filters.where((filter) => filter.isOn).toList();
+  List<LdSortOption<T, IdType>> get activeSortOptions => sortOptions.where((sortOption) => sortOption.isOn).toList();
 }

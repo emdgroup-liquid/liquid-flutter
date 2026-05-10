@@ -3,7 +3,6 @@ import 'package:liquid/demos/movie_demo.dart';
 import 'package:liquid/demos/task_demo/demo_data.dart';
 import 'package:liquid/demos/task_demo/task.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 List<Task> applyFiltersAndSorting(
   List<Task> data,
@@ -45,55 +44,19 @@ List<Task> applyFiltersAndSorting(
 
 LdRepository<Task, int> taskRepository(BuildContext context) => LdRepository<Task, int>(
   pageSize: 5,
-  getOffsetById: (id, {filters, sortOptions}) async {
+  getOffsetById: (params) async {
     // Apply the same filtering and sorting logic as fetchListWithParameters
 
-    return applyFiltersAndSorting(testData, filters, sortOptions).indexWhere((element) => element.id == id);
+    return applyFiltersAndSorting(
+      testData,
+      params.filters,
+      params.sortOptions,
+    ).indexWhere((element) => element.id == params.id);
   },
   getById: (id) async {
     return testData.firstWhere((element) => element.id == id);
   },
-  sortOptions: [
-    LdSortOption<Task, int>(
-      name: "due",
-      label: (context) => "Due date",
-      isOn: true,
-      icon: (context) => const Icon(LucideIcons.calendar),
-    ),
-    LdSortOption<Task, int>(
-      name: "task",
-      label: (context) => "Task name",
-      icon: (context) => const Icon(LucideIcons.arrowUpZA),
-    ),
-  ],
-  filters: {
-    LdFilterBool<Task, int>(name: "done", label: (context) => "Done", icon: (context) => const Icon(LucideIcons.check)),
-    LdFilterBool<Task, int>(
-      name: "todo",
-      label: (context) => "To do",
-      icon: (context) => const Icon(LucideIcons.hourglass),
-    ),
-    LdFilterSearch<Task, int, String>(
-      name: "search",
-      label: (context) => "Search",
-      icon: (context) => const Icon(LucideIcons.search),
 
-      buildSuggestion: (context, suggestion) {
-        return LdListItem(
-          title: Text(suggestion),
-          onPressed: () {
-            LdSearchAcceptSuggestion(suggestion: suggestion).dispatch(context);
-          },
-        );
-      },
-      getSuggestions: (searchText) async {
-        return testData
-            .where((element) => element.task.toLowerCase().startsWith(searchText.toLowerCase()))
-            .map((e) => e.task)
-            .toList();
-      },
-    ),
-  },
   fetchListWithParameters: (parameters) async {
     await Future.delayed(const Duration(milliseconds: 200));
     final filtered = applyFiltersAndSorting(testData, parameters.filters, parameters.sortOptions);

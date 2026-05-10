@@ -21,6 +21,28 @@ class LdMonkeySelection<T extends Identifiable<IdType>, IdType> {
     return listen ? context.watch<LdMonkeySelection<T, IdType>>() : context.read<LdMonkeySelection<T, IdType>>();
   }
 
+  /// Updates the selection in the URL via the central router controller.
+  static void updateSelection<T extends Identifiable<IdType>, IdType>(
+    BuildContext context,
+    Set<IdType> selection,
+  ) =>
+      LdMonkeyRouterController.of<T, IdType>(context).updateSelection(context, selection);
+
+  /// Updates the viewing items in the URL via the central router controller.
+  static void updateViewing<T extends Identifiable<IdType>, IdType>(
+    BuildContext context,
+    Set<IdType> viewing,
+  ) =>
+      LdMonkeyRouterController.of<T, IdType>(context).updateViewing(context, viewing);
+
+  /// Toggles the selection controls visibility in the URL via the central
+  /// router controller.
+  static void updateShowSelectionControls<T extends Identifiable<IdType>, IdType>(
+    BuildContext context,
+    bool showSelectionControls,
+  ) =>
+      LdMonkeyRouterController.of<T, IdType>(context).updateShowSelectionControls(context, showSelectionControls);
+
   static Set<IdType> adaptive<T extends Identifiable<IdType>, IdType>(
     BuildContext context, {
     bool listen = false,

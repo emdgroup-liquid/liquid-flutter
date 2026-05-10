@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/intersperse.dart';
+import 'package:liquid_flutter/src/touchable/input_color.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class LdChooseInputTrigger<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
@@ -47,10 +48,8 @@ class LdChooseInputTrigger<T extends Identifiable<IdType>, IdType> extends State
           disabled: disabled,
           key: const Key("ldChoose_trigger"),
           onPressed: onTap,
-          mode: LdTouchableSurfaceMode.input,
-          isInput: true,
-          color: theme.palette.primary,
-          builder: (contxt, colorBundle, status, child) {
+          builder: (contxt, status, child) {
+            final colorBundle = inputColor(theme, status, isValid: true);
             return Container(
               padding: theme.balPad(size),
               clipBehavior: Clip.hardEdge,

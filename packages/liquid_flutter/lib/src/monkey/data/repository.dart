@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/monkey/data/fetch_offset_parameters.dart';
-import 'package:liquid_flutter/src/monkey/data/fetch_page_parameters.dart';
 import 'package:provider/provider.dart';
 
 class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T, IdType> {
@@ -17,16 +15,12 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
   final Future<void> Function(Set<IdType> ids)? _deleteBatch;
   final Future<void> Function(Set<T> items)? _updateBatch;
 
-  final Set<LdFilterOption<T, IdType>> _filters;
-  final List<LdSortOption<T, IdType>> _sortOptions;
   IdType? _lastSelectionAnchorId;
 
   LdRepository({
     required Future<LdListPage<T>> Function(FetchPageParameters<T, IdType> parameters) fetchListWithParameters,
     super.pageSize,
     required Future<T> Function(IdType id) getById,
-    Set<LdFilterOption<T, IdType>>? filters,
-    List<LdSortOption<T, IdType>>? sortOptions,
     Future<int?> Function(FetchOffsetParameters<T, IdType> parameters)? getOffsetById,
     Future<void> Function(IdType id)? deleteItem,
     Future<T?> Function(IdType id, T newItem)? updateItem,
@@ -37,9 +31,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
         _getOffsetById = getOffsetById,
         _deleteItem = deleteItem,
         _updateItem = updateItem,
-        _filters = filters ?? {},
         _createItem = createItem,
-        _sortOptions = sortOptions ?? [],
         _deleteBatch = deleteBatch,
         _updateBatch = updateBatch {
     fetchListFunction = (parameters) {
@@ -49,16 +41,10 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
           offset: parameters.offset,
           pageSize: parameters.pageSize,
           pageToken: parameters.pageToken,
-          filters: _filters.where((e) => e.isOn).toSet(),
-          sortOptions: _sortOptions.where((e) => e.isOn).toList(),
         ),
       );
     };
   }
-
-  Iterable<LdFilterOption<T, IdType>> get activeFilters => _filters.where((e) => e.isOn);
-
-  List<LdSortOption<T, IdType>> get sortOptions => List.unmodifiable(_sortOptions);
 
   Future<T?> create(T? newValue, {int? index}) async {
     assert(
@@ -80,21 +66,6 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
       return null;
     }
   }
-
-  /// Updates the filters for the repository.
-  void updateFilters(Set<LdFilterOption<T, IdType>> filters) {
-    print("Updating filters: $filters");
-    _filters.clear();
-    _filters.addAll(filters);
-  }
-
-  /// Updates the sort options for the repository.
-  void updateSortOptions(List<LdSortOption<T, IdType>> sortOptions) {
-    _sortOptions.clear();
-    _sortOptions.addAll(sortOptions);
-  }
-
-  Set<LdFilterOption<T, IdType>> get filters => Set.unmodifiable(_filters);
 
   Future<void> delete({required BuildContext context, required IdType id}) async {
     if (_deleteItem != null) {
@@ -163,14 +134,10 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     if (_getOffsetById == null) {
       return;
     }
-    final currentFilters = activeFilters.toSet();
-    final currentSortOptions = _sortOptions.where((e) => e.isOn).toList();
 
     final firstOffset = await _getOffsetById(FetchOffsetParameters(
       context: context,
       id: selection.first,
-      filters: currentFilters,
-      sortOptions: currentSortOptions,
     ));
 
     initialOffset = firstOffset ?? 0;
@@ -189,16 +156,12 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     IdType? anchorId,
   }) async {
     final effectiveAnchorId = anchorId ?? _resolveDefaultRefreshAnchorId();
-    final currentFilters = activeFilters.toSet();
-    final currentSortOptions = _sortOptions.where((e) => e.isOn).toList();
 
     if (effectiveAnchorId != null && _getOffsetById != null) {
       final anchorOffset = await _getOffsetById(
         FetchOffsetParameters(
           context: context,
           id: effectiveAnchorId,
-          filters: currentFilters,
-          sortOptions: currentSortOptions,
         ),
       );
       if (anchorOffset != null) {
@@ -210,7 +173,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
       return;
     }
 
-    await super.refreshList(context: context, hard: true);
+    await super.refreshList(context: context, hard: hard);
   }
 
   Future<void> update(IdType id, T newValue) async {
@@ -279,24 +242,20 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
 
   static LdRepository<L, IdType> fromList<L extends Identifiable<IdType>, IdType>({
     required List<L> list,
-    Set<LdFilterOption<L, IdType>>? filters,
-    List<LdSortOption<L, IdType>>? sortOptions,
     bool Function(L item, Set<LdFilterOption<L, IdType>>? activeFilters)? filterFunction,
     int Function(L a, L b, List<LdSortOption<L, IdType>>? activeSortOptions)? sortFunction,
   }) {
     return LdRepository<L, IdType>(
-      filters: filters,
-      sortOptions: sortOptions,
       fetchListWithParameters: (parameters) async {
         var filtered = list.toList();
         final filters = parameters.filters;
         final sortOptions = parameters.sortOptions;
 
-        if (filterFunction != null && filters != null && filters.isNotEmpty) {
+        if (filterFunction != null && filters.isNotEmpty) {
           filtered = filtered.where((item) => filterFunction(item, filters)).toList();
         }
 
-        if (sortFunction != null && sortOptions != null && sortOptions.isNotEmpty) {
+        if (sortFunction != null && sortOptions.isNotEmpty) {
           filtered.sort((a, b) => sortFunction(a, b, sortOptions));
         }
 

@@ -6,6 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/touchable/ghost_color.dart';
+import 'package:liquid_flutter/src/touchable/outline_color.dart';
+import 'package:liquid_flutter/src/touchable/solid_color.dart';
+import 'package:liquid_flutter/src/touchable/vague_color.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
@@ -268,77 +272,79 @@ class _LdButtonState extends State<_LdButtonWidget> {
       focusNode: widget.focusNode,
       hitTestBehavior: HitTestBehavior.opaque,
       autoFocus: widget.autoFocus,
-      mode: switch (widget.mode) {
-        (LdButtonMode.filled) => LdTouchableSurfaceMode.solid,
-        (LdButtonMode.ghost) => LdTouchableSurfaceMode.ghost,
-        (LdButtonMode.outline) => LdTouchableSurfaceMode.outline,
-        (LdButtonMode.vague) => LdTouchableSurfaceMode.vague,
-      },
       active: widget.active ?? false,
       disabled: widget.disabled || isLoading,
       onPressed: _onTap,
-      color: colors,
-      builder: (context, colors, status, _) => Semantics(
-        button: true,
-        enabled: !widget.disabled,
-        focused: status.focus,
-        child: _ButtonShape(
-            panOffset: status.panOffset,
-            colors: colors,
-            status: status,
-            center: centerText,
-            circular: _circular,
-            width: widget.width,
-            disableSqueeze: widget.disableSqueeze,
-            mode: widget.mode,
-            borderRadius: widget.borderRadius ?? _theme.radius(LdSize.s),
-            size: widget.size,
-            child: AnimatedSize(
-                duration: 200.ms,
-                child: Stack(alignment: Alignment.center, children: [
-                  AnimatedOpacity(
-                    duration: const Duration(
-                      milliseconds: 200,
+      builder: (context, status, _) => Builder(builder: (context) {
+        final color = widget.color ?? _theme.palette.primary;
+        final colors = switch (widget.mode) {
+          (LdButtonMode.filled) => solidColor(color, _theme, status),
+          (LdButtonMode.ghost) => ghostColor(color, _theme, status),
+          (LdButtonMode.outline) => outlineColor(color, _theme, status),
+          (LdButtonMode.vague) => vagueColor(color, _theme, status),
+        };
+        return Semantics(
+          button: true,
+          enabled: !widget.disabled,
+          focused: status.focus,
+          child: _ButtonShape(
+              panOffset: status.panOffset,
+              colors: colors,
+              status: status,
+              center: centerText,
+              circular: _circular,
+              width: widget.width,
+              disableSqueeze: widget.disableSqueeze,
+              mode: widget.mode,
+              borderRadius: widget.borderRadius ?? _theme.radius(LdSize.s),
+              size: widget.size,
+              child: AnimatedSize(
+                  duration: 200.ms,
+                  child: Stack(alignment: Alignment.center, children: [
+                    AnimatedOpacity(
+                      duration: const Duration(
+                        milliseconds: 200,
+                      ),
+                      opacity: !isLoading && !_failed ? 1 : 0,
+                      child: _buttonContent,
                     ),
-                    opacity: !isLoading && !_failed ? 1 : 0,
-                    child: _buttonContent,
-                  ),
-                  LdSpring(
-                    dampingCoefficient: 5,
-                    position: isLoading ? 0 : 1,
-                    child: isLoading ? _loadingContent(colors) : const SizedBox(),
-                    builder: (context, state, child) {
-                      return Transform.translate(
-                        offset: Offset(0, 20 * state.position),
-                        child: child,
-                      );
-                    },
-                  ),
-                  LdSpring(
-                    position: _failed ? 0 : 1,
-                    builder: (context, state, _) {
-                      if (!_failed) {
-                        return const SizedBox();
-                      }
-
-                      if (_circular) {
-                        return const Icon(
-                          LucideIcons.x,
+                    LdSpring(
+                      dampingCoefficient: 5,
+                      position: isLoading ? 0 : 1,
+                      child: isLoading ? _loadingContent(colors) : const SizedBox(),
+                      builder: (context, state, child) {
+                        return Transform.translate(
+                          offset: Offset(0, 20 * state.position),
+                          child: child,
                         );
-                      }
+                      },
+                    ),
+                    LdSpring(
+                      position: _failed ? 0 : 1,
+                      builder: (context, state, _) {
+                        if (!_failed) {
+                          return const SizedBox();
+                        }
 
-                      final errorText = widget.errorText ??
-                          _error?.localize(context).message ??
-                          LiquidLocalizations.of(context).failed;
+                        if (_circular) {
+                          return const Icon(
+                            LucideIcons.x,
+                          );
+                        }
 
-                      return Transform.translate(
-                        offset: Offset(0, 20 * state.position),
-                        child: Text(errorText),
-                      );
-                    },
-                  ),
-                ]))),
-      ),
+                        final errorText = widget.errorText ??
+                            _error?.localize(context).message ??
+                            LiquidLocalizations.of(context).failed;
+
+                        return Transform.translate(
+                          offset: Offset(0, 20 * state.position),
+                          child: Text(errorText),
+                        );
+                      },
+                    ),
+                  ]))),
+        );
+      }),
     );
   }
 }
@@ -459,10 +465,16 @@ class _ButtonShape extends StatelessWidget {
               border: _border(context),
               borderRadius: circular ? null : borderRadius,
               boxShadow: [
-                if (status.pressed)
+                /*  if (mode == LdButtonMode.filled || mode == LdButtonMode.outline)
                   BoxShadow(
                     color: colors.surface.withAlpha(100),
                     blurRadius: max(0, state.position * 10),
+                    offset: const Offset(0, 0),
+                  ), */
+                if (mode == LdButtonMode.filled || mode == LdButtonMode.outline)
+                  BoxShadow(
+                    color: theme.neutralShade(5).withAlpha(50),
+                    blurRadius: 2,
                     offset: const Offset(0, 0),
                   ),
               ],
