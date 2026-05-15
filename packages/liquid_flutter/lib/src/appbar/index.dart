@@ -2,6 +2,7 @@ export 'appbar.dart';
 export 'appbar_action.dart';
 export 'appbar_system_ui.dart';
 export 'appbar_action_overflow_menu.dart';
+export 'appbar_state.dart';
 export 'bottom_bar.dart';
 export 'drawer_buttons.dart';
 
