@@ -80,6 +80,7 @@ class LdNotificationsController extends ChangeNotifier {
 
     if (notification.duration != null) {
       Future.delayed(notification.duration!, () {
+        _notifications.remove(notification);
         _safeNotifyListeners();
       });
     }

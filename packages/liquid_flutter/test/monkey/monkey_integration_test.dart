@@ -5,82 +5,105 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 import 'test_utils.dart';
 
+class _ChildItem with Identifiable<String> {
+  @override
+  final String id;
+  final String name;
+  _ChildItem(this.id, this.name);
+}
+
 void main() {
-  group('Monkey Integration Tests', () {
-    group('Side-by-Side Layout', () {
-      testWidgets('renders master and detail side-by-side when wide enough', (WidgetTester tester) async {
-        final repository = createTestRepository(
-          initialItems: [
-            createTestItem(1, name: 'Item 1'),
-            createTestItem(2, name: 'Item 2'),
-          ],
-        );
+  group('Monkey route integration', () {
+    final routeConfig = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'item');
 
-        final routes = buildMonkeyRoutes<TestItem, int>(
-          basePath: '/test',
-          detailPage: LdMonkeyDetailPage<TestItem, int>(
-            body: Builder(
-              builder: (context) {
-                final viewing = LdMonkeyShellState.of<TestItem, int>(context).viewingItems;
-                return Text('Viewing: ${viewing.join(", ")}');
-              },
-            ),
+    testWidgets('buildMonkeyRoutes navigates to detail', (WidgetTester tester) async {
+      final repository = createTestRepository(
+        initialItems: [
+          createTestItem(1, name: 'One'),
+        ],
+      );
+
+      final routes = buildMonkeyRoutes<TestItem, int>(
+        masterPath: '/t',
+        routeConfig: routeConfig,
+        masterPage: LdMonkeyMasterPage<TestItem, int>(
+          buildItem: (context, item) => LdListItem(
+            title: Text(item.value?.name ?? ''),
           ),
-          masterPage: LdMonkeyMasterPage<TestItem, int>(
-            buildItem: (context, item) => LdListItem(
-              title: Text(item.value?.name ?? ''),
-            ),
+        ),
+        detailPage: const Text('Detail'),
+        repositoryBuilder: (context, state) => repository,
+        filters: const [],
+        sortOptions: const [],
+        actions: const [],
+        layoutMode: LdMonkeyLayoutMode.neverSideBySide,
+      );
+
+      final router = GoRouter(
+        routes: routes,
+        initialLocation: '/t',
+      );
+
+      await tester.pumpWidget(
+        LdThemeProvider(
+          child: MaterialApp.router(
+            localizationsDelegates: const [
+              ...LiquidLocalizations.localizationsDelegates,
+            ],
+            routerConfig: router,
           ),
-          repositoryBuilder: (context) async => repository,
-          layoutMode: LdMonkeyLayoutMode.sideBySide,
-          parseSelected: (selected) => selected.split('_').map(int.parse).toSet(),
-          pathParameterName: 'id',
-        );
+        ),
+      );
 
-        final router = GoRouter(routes: routes);
+      await tester.pumpAndSettle();
+      router.go('/t/1');
+      await tester.pumpAndSettle();
 
-        await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp.router(
-              localizationsDelegates: const [
-                ...LiquidLocalizations.localizationsDelegates,
-              ],
-              routerConfig: router,
-            ),
-          ),
-        );
-
-        router.go('/test/1');
-        await tester.pumpAndSettle();
-
-        // Both master and detail should be visible in side-by-side mode
-        expect(find.text('Item 1'), findsWidgets);
-        expect(find.textContaining('Viewing'), findsWidgets);
-      });
+      expect(find.text('Detail'), findsOneWidget);
     });
 
-    group('Responsive Behavior', () {
-      testWidgets('switches layout based on screen width in auto mode', (WidgetTester tester) async {
-        final repository = createTestRepository(
-          initialItems: [
-            createTestItem(1),
-          ],
+    testWidgets(
+      'nested tree: child scope is available on parent detail (= child master)',
+      (WidgetTester tester) async {
+        final parentRouteConfig = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'parent');
+        final childRouteConfig = LdMonkeyRouteConfig.identifiableString<_ChildItem>(itemName: 'child');
+
+        final parentRepo = createTestRepository(initialItems: [createTestItem(1)]);
+        final childRepo = LdRepository.fromList<_ChildItem, String>(
+          list: [_ChildItem('a', 'A'), _ChildItem('b', 'B')],
         );
 
-        final routes = buildMonkeyRoutes<TestItem, int>(
-          basePath: '/test',
-          detailPage: const SizedBox(),
-          masterPage: const SizedBox(),
-          repositoryBuilder: (context) async => repository,
-          layoutMode: LdMonkeyLayoutMode.auto,
-          parseSelected: (selected) => selected.split('_').map(int.parse).toSet(),
-          pathParameterName: 'id',
+        final routes = buildMonkeyRouteTree<TestItem, int>(
+          masterPath: '/p',
+          root: MonkeyRouteNode<TestItem, int>(
+            routeConfig: parentRouteConfig,
+            masterPage: LdMonkeyMasterPage<TestItem, int>(
+              buildItem: (context, item) => LdListItem(title: Text(item.value?.name ?? '')),
+            ),
+            // parent detail acts as the child's master page in stacked m-d
+            detailPage: LdMonkeyMasterPage<_ChildItem, String>(
+              buildItem: (context, item) => LdListItem(title: Text(item.value?.name ?? '')),
+            ),
+            repositoryBuilder: (context, state) => parentRepo,
+            filters: const [],
+            sortOptions: const [],
+            actions: const [],
+            layoutMode: LdMonkeyLayoutMode.neverSideBySide,
+            child: MonkeyRouteNode<_ChildItem, String>(
+              detailPathPrefix: 'children',
+              routeConfig: childRouteConfig,
+              masterPage: const SizedBox(),
+              detailPage: const Text('ChildDetail'),
+              repositoryBuilder: (context, state) => childRepo,
+              filters: const [],
+              sortOptions: const [],
+              actions: const [],
+              layoutMode: LdMonkeyLayoutMode.neverSideBySide,
+            ),
+          ),
         );
 
-        final router = GoRouter(
-          routes: routes,
-          initialLocation: '/test',
-        );
+        final router = GoRouter(routes: routes, initialLocation: '/p');
 
         await tester.pumpWidget(
           LdThemeProvider(
@@ -92,170 +115,25 @@ void main() {
             ),
           ),
         );
-
-        router.go('/test');
         await tester.pumpAndSettle();
 
-        // Layout should adapt based on screen size
-        expect(find.byType(LdMonkeyShell<TestItem, int>), findsOneWidget);
-      });
-    });
-
-    group('URL State Sync', () {
-      testWidgets('selection updates URL query parameters', (WidgetTester tester) async {
-        final repository = createTestRepository();
-        final routes = buildMonkeyRoutes<TestItem, int>(
-          basePath: '/test',
-          detailPage: const SizedBox(),
-          masterPage: LdMonkeyMasterPage<TestItem, int>(
-            buildItem: (context, item) => LdListItem(
-              title: Text(item.value?.name ?? ''),
-            ),
-          ),
-          repositoryBuilder: (context) async => repository,
-          layoutMode: LdMonkeyLayoutMode.auto,
-          parseSelected: (selected) => selected.split('_').map(int.parse).toSet(),
-          pathParameterName: 'id',
-        );
-
-        final router = GoRouter(routes: routes);
-
-        await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp.router(
-              localizationsDelegates: const [
-                ...LiquidLocalizations.localizationsDelegates,
-              ],
-              routerConfig: router,
-            ),
-          ),
-        );
-
-        router.go('/test');
+        // Navigating to the parent's detail page used to throw
+        // ProviderNotFoundException for LdMonkeySelection<_ChildItem, String>
+        // because the child scope was only mounted under the deeper detail
+        // route. With the fix, the child scope wraps the parent detail too.
+        router.go('/p/1');
         await tester.pumpAndSettle();
 
-        // Note: Testing URL updates requires more complex setup with actual router state
-        // This test documents expected behavior
-        expect(router.routerDelegate.currentConfiguration.uri.path, equals('/test'));
-      });
+        expect(tester.takeException(), isNull);
+        expect(find.text('A'), findsOneWidget);
+        expect(find.text('B'), findsOneWidget);
 
-      testWidgets('filter changes update URL query parameters', (WidgetTester tester) async {
-        final filter = LdFilterBool<TestItem, int>(
-          name: 'id-active',
-          label: (context) => 'Active',
-          icon: (context) => const Icon(Icons.check),
-          optimisticFilter: (item) => item.active,
-        );
-
-        final repository = createTestRepository(filters: {filter});
-        final routes = buildMonkeyRoutes<TestItem, int>(
-          basePath: '/test',
-          detailPage: const SizedBox(),
-          masterPage: const SizedBox(),
-          repositoryBuilder: (context) async => repository,
-          layoutMode: LdMonkeyLayoutMode.auto,
-          parseSelected: (selected) => selected.split('_').map(int.parse).toSet(),
-          pathParameterName: 'id',
-        );
-
-        final router = GoRouter(routes: routes);
-
-        await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp.router(
-              localizationsDelegates: const [
-                ...LiquidLocalizations.localizationsDelegates,
-              ],
-              routerConfig: router,
-            ),
-          ),
-        );
-
-        router.go('/test?id-active=true');
+        router.go('/p/1/children/a');
         await tester.pumpAndSettle();
 
-        expect(repository.filters['id-active']!.isOn, isTrue);
-      });
-    });
-
-    group('Navigation', () {
-      testWidgets('navigates to detail page when item selected', (WidgetTester tester) async {
-        final repository = createTestRepository(
-          initialItems: [
-            createTestItem(1, name: 'Item 1'),
-          ],
-        );
-
-        final routes = buildMonkeyRoutes<TestItem, int>(
-          basePath: '/test',
-          detailPage: const Text('Detail Page'),
-          masterPage: LdMonkeyMasterPage<TestItem, int>(
-            buildItem: (context, item) => LdListItem(
-              title: Text(item.value?.name ?? ''),
-            ),
-          ),
-          repositoryBuilder: (context) async => repository,
-          layoutMode: LdMonkeyLayoutMode.neverSideBySide,
-          parseSelected: (selected) => selected.split('_').map(int.parse).toSet(),
-          pathParameterName: 'id',
-        );
-
-        final router = GoRouter(routes: routes);
-
-        await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp.router(
-              localizationsDelegates: const [
-                ...LiquidLocalizations.localizationsDelegates,
-              ],
-              routerConfig: router,
-            ),
-          ),
-        );
-
-        router.go('/test');
-        await tester.pumpAndSettle();
-
-        router.go('/test/1');
-        await tester.pumpAndSettle();
-
-        expect(find.text('Detail Page'), findsOneWidget);
-      });
-
-      testWidgets('navigates back to master when detail route cleared', (WidgetTester tester) async {
-        final repository = createTestRepository();
-
-        final routes = buildMonkeyRoutes<TestItem, int>(
-          basePath: '/test',
-          detailPage: const Text('Detail Page'),
-          masterPage: const SizedBox(),
-          repositoryBuilder: (context) async => repository,
-          layoutMode: LdMonkeyLayoutMode.neverSideBySide,
-          parseSelected: (selected) => selected.split('_').map(int.parse).toSet(),
-          pathParameterName: 'id',
-        );
-
-        final router = GoRouter(routes: routes);
-
-        await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp.router(
-              localizationsDelegates: const [
-                ...LiquidLocalizations.localizationsDelegates,
-              ],
-              routerConfig: router,
-            ),
-          ),
-        );
-
-        router.go('/test/1');
-        await tester.pumpAndSettle();
-        expect(find.text('Detail Page'), findsOneWidget);
-
-        router.go('/test');
-        await tester.pumpAndSettle();
-        expect(find.text('Detail Page'), findsNothing);
-      });
-    });
+        expect(tester.takeException(), isNull);
+        expect(find.text('ChildDetail'), findsOneWidget);
+      },
+    );
   });
 }

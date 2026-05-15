@@ -31,7 +31,8 @@ class LdListConfig<T extends Identifiable<IdType>, IdType> {
 
   final double? assumedItemHeight;
 
-  final Widget Function(BuildContext, Future<void> Function())? emptyBuilder;
+  final Widget Function(BuildContext, Future<void> Function(BuildContext))?
+      emptyBuilder;
 
   final Widget Function(BuildContext, Object?, void Function())? errorBuilder;
 
@@ -137,7 +138,8 @@ class LdList<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
   final Widget Function(BuildContext, LdPaginatorLoadedItem<T>, int)?
       itemBuilder;
 
-  final Widget Function(BuildContext, Future<void> Function())? emptyBuilder;
+  final Widget Function(BuildContext, Future<void> Function(BuildContext))?
+      emptyBuilder;
 
   final Widget Function(BuildContext, Object?, void Function())? errorBuilder;
 

@@ -1,111 +1,71 @@
 import 'package:flutter/widgets.dart';
+import 'package:liquid/demos/movie_demo.dart';
 import 'package:liquid/demos/task_demo/demo_data.dart';
 import 'package:liquid/demos/task_demo/task.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-final taskRepository = LdRepository<Task, int>(
-  singularItemTitle: "Task",
-  pluralItemTitle: "Tasks",
-  pageSize: 5,
-  getOffsetById: (id, {filters, sortOptions}) async {
-    // Apply the same filtering and sorting logic as fetchListWithParameters
-    final filtered = testData
-        .where((element) => filters?.every((filter) => filter.optimisticFilter(element)) ?? true)
-        .toList();
+List<Task> applyFiltersAndSorting(
+  List<Task> data,
+  Set<LdFilterOption<Task, int>>? filters,
+  List<LdSortOption<Task, int>>? sortOptions,
+) {
+  final filtered = testData
+      .where(
+        (element) => (filters ?? {}).all((filter) {
+          switch (filter.name) {
+            case "done":
+              return element.done;
+            case "todo":
+              return !element.done;
+            case "search":
+              filter as LdFilterSearch<Task, int, String>;
+              return element.task.toLowerCase().contains(filter.searchText.toLowerCase());
+          }
+          return true;
+        }),
+      )
+      .toList();
 
-    for (final sortOption in sortOptions ?? []) {
-      filtered.sort((a, b) => sortOption.optimisticSort(a, b));
+  for (final sortOption in sortOptions ?? []) {
+    switch (sortOption.name) {
+      case "due":
+        filtered.sort(
+          (a, b) => sortOption.direction == LdSortOptionDirection.asc ? a.due.compareTo(b.due) : b.due.compareTo(a.due),
+        );
+      case "task":
+        filtered.sort(
+          (a, b) =>
+              sortOption.direction == LdSortOptionDirection.asc ? a.task.compareTo(b.task) : b.task.compareTo(a.task),
+        );
     }
+  }
+  return filtered;
+}
 
-    return filtered.indexWhere((element) => element.id == id);
+LdRepository<Task, int> taskRepository(BuildContext context) => LdRepository<Task, int>(
+  pageSize: 5,
+  getOffsetById: (params) async {
+    // Apply the same filtering and sorting logic as fetchListWithParameters
+
+    return applyFiltersAndSorting(
+      testData,
+      params.filters,
+      params.sortOptions,
+    ).indexWhere((element) => element.id == params.id);
   },
   getById: (id) async {
     return testData.firstWhere((element) => element.id == id);
   },
-  sortOptions: [
-    LdSortOption<Task, int>(
-      name: "due",
-      label: (context) => "Due date",
-      isOn: true,
-      icon: (context) => const Icon(LucideIcons.calendar),
-      optimisticSort: (a, b) {
-        return a.due.compareTo(b.due);
-      },
-    ),
-    LdSortOption<Task, int>(
-      name: "task",
-      label: (context) => "Task name",
-      icon: (context) => const Icon(LucideIcons.arrowUpZA),
-      optimisticSort: (a, b) {
-        return a.task.compareTo(b.task);
-      },
-    ),
-  ],
-  filters: {
-    LdFilterBool<Task, int>(
-      name: "done",
-      label: (context) => "Done",
-      icon: (context) => const Icon(LucideIcons.check),
-      optimisticFilter: (item) {
-        return item.done;
-      },
-    ),
-    LdFilterBool<Task, int>(
-      name: "todo",
-      label: (context) => "To do",
-      icon: (context) => const Icon(LucideIcons.hourglass),
-      optimisticFilter: (item) {
-        return !item.done;
-      },
-    ),
-    LdFilterSearch<Task, int, String>(
-      name: "search",
-      label: (context) => "Search",
-      icon: (context) => const Icon(LucideIcons.search),
-      optimisticFilter: (item, searchText) {
-        return item.task.toLowerCase().contains(searchText.toLowerCase());
-      },
-      buildSuggestion: (context, suggestion) {
-        return LdListItem(
-          title: Text(suggestion),
-          onPressed: () {
-            LdSearchAcceptSuggestion(suggestion: suggestion).dispatch(context);
-          },
-        );
-      },
-      getSuggestions: (searchText) async {
-        return testData
-            .where((element) => element.task.toLowerCase().startsWith(searchText.toLowerCase()))
-            .map((e) => e.task)
-            .toList();
-      },
-    ),
+
+  fetchListWithParameters: (parameters) async {
+    await Future.delayed(const Duration(milliseconds: 200));
+    final filtered = applyFiltersAndSorting(testData, parameters.filters, parameters.sortOptions);
+    return LdListPage<Task>(
+      newItems: filtered.skip(parameters.offset).take(parameters.pageSize).toList(),
+      hasMore: parameters.offset + parameters.pageSize < filtered.length,
+      total: filtered.length,
+    );
   },
-  fetchListWithParameters:
-      ({
-        required int offset,
-        required int pageSize,
-        String? pageToken,
-        Set<LdFilterOption<Task, int>>? filters,
-        List<LdSortOption<Task, int>>? sortOptions,
-      }) async {
-        await Future.delayed(const Duration(milliseconds: 200));
-
-        final filtered = testData
-            .where((element) => filters?.every((filter) => filter.optimisticFilter(element)) ?? true)
-            .toList();
-
-        for (final sortOption in sortOptions ?? []) {
-          filtered.sort((a, b) => sortOption.optimisticSort(a, b));
-        }
-
-        return LdListPage<Task>(
-          newItems: filtered.skip(offset).take(pageSize).toList(),
-          hasMore: offset + pageSize < filtered.length,
-          total: filtered.length,
-        );
-      },
   deleteItem: (int id) async {
     testData.removeWhere((element) => element.id == id);
     await Future.delayed(const Duration(milliseconds: 500));

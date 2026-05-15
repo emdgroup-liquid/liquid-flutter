@@ -36,21 +36,27 @@ class _TaskDetailState extends State<TaskDetail> {
     if (widget.task.value == null) {
       return LdCard(child: Center(child: LdLoader()));
     }
+    final selection = LdMonkeySelection.of<Task, int>(context, listen: true);
     return LdWrapConditional(
-      condition: LdMonkeyShellState.of<Task, int>(context).selectedItems.length > 1,
+      condition: selection.viewing.length > 1,
       builder: (context, child) {
-        return LdCard(
-          child: child,
-        );
+        return LdCard(child: child);
       },
       child: LdAutoSpace(
         children: [
-          LdReveal(revealed: widget.task.value?.done == true, child: LdBadge.success(child: Text("Done"))),
+          LdReveal(
+            revealed: widget.task.value?.done == true,
+            initialRevealed: widget.task.value?.done == true,
+            child: LdBadge.success(child: Text("Done")),
+          ),
           LdInput(
             hint: "What do you want to do?",
             maxLines: null,
             controller: _taskController,
             size: LdSize.l,
+            onChanged: (p0) {
+              setState(() {});
+            },
           ),
           LdDatePicker(
             useRootNavigator: true,
@@ -63,13 +69,12 @@ class _TaskDetailState extends State<TaskDetail> {
               });
             },
           ),
-          LdText(
-            "Last updated: ${Jiffy.parseFromDateTime(widget.task.value!.lastUpdate).fromNow()}",
-          ),
+          LdText("Last updated: ${Jiffy.parseFromDateTime(widget.task.value!.lastUpdate).fromNow()}"),
           Row(
             children: [
               LdReveal.quick(
                 revealed: _taskController.text.isNotEmpty && _dueDate != null && _isDirty,
+
                 child: LdSubmit<void, void>(
                   config: LdSubmitConfig<void, void>(
                     submitText: "Save",
@@ -83,10 +88,7 @@ class _TaskDetailState extends State<TaskDetail> {
                         widget.task.value!.lastUpdate,
                       );
                       final repo = LdRepository.of<Task, int>(context);
-                      await repo.update(
-                        widget.task.value!.id,
-                        newTask,
-                      );
+                      await repo.update(widget.task.value!.id, newTask);
                     },
                   ),
                 ),

@@ -4,6 +4,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/haptics.dart';
 import 'package:liquid_flutter/src/touchable/input_color.dart';
+import 'package:liquid_flutter/src/touchable/neutral_ghost_color.dart';
 
 class LdSelectItem<T> with Identifiable<T> {
   @override
@@ -116,14 +117,14 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
         disabled: item.enabled == false,
         active: isActive,
         autoFocus: autoFocus,
-        mode: LdTouchableSurfaceMode.neutralGhost,
         onPressed: () async {
           Navigator.of(context).pop();
           LdHaptics.vibrate(HapticsType.selection);
           _focusNode?.requestFocus();
           widget.onChanged?.call(item.value);
         },
-        builder: (contxt, colorBundle, status, _) {
+        builder: (contxt, status, _) => Builder(builder: (context) {
+          final colorBundle = neutralGhostColor(theme, status);
           return Container(
             padding: theme.balPad(widget.size),
             width: double.infinity,
@@ -152,7 +153,7 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
               ],
             ),
           );
-        },
+        }),
       ),
     );
   }
@@ -215,37 +216,27 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
           _focusNodeChildren?.requestFocus();
         },
         active: isOpen,
-        color: theme.palette.primary,
-        builder: (context, _, status, __) {
-          final colors = inputColor(
-            theme,
-            status,
-            isValid: widget.valid,
-            onSurface: widget.onSurface,
-          );
+        builder: (context, status, _) => Builder(builder: (context) {
+          final colorBundle = inputColor(theme, status, isValid: widget.valid);
           final initialItem = DefaultTextStyle(
             style: defaultTextStyle,
-            child: _buildInitialItem(
-              activeItem,
-              colors.placeholder,
-              theme,
-            ),
+            child: _buildInitialItem(activeItem, colorBundle.placeholder, theme),
           );
           return Container(
             width: double.infinity,
             padding: theme.balPad(widget.size),
             clipBehavior: Clip.hardEdge,
             decoration: BoxDecoration(
-              color: colors.surface,
+              color: colorBundle.surface,
               borderRadius: theme.radius(LdSize.s),
               border: Border.all(
-                color: colors.border,
+                color: colorBundle.border,
                 width: 1.5,
               ),
             ),
             child: initialItem,
           );
-        },
+        }),
       ),
     );
   }

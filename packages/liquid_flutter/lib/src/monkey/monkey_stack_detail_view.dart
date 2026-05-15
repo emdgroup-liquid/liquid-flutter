@@ -27,10 +27,7 @@ class LdMonkeyStackDetailView<T extends Identifiable<IdType>, IdType> extends St
                     ));
               },
               child: switch (e.state) {
-                LdPaginatorItemState.deleting ||
-                LdPaginatorItemState.filteredOut ||
-                LdPaginatorItemState.deleted =>
-                  LdReveal.quick(
+                LdPaginatorItemState.deleting || LdPaginatorItemState.deleted => LdReveal.quick(
                     revealed: false,
                     initialRevealed: true,
                     child: buildDetail(context, e),

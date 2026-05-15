@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -42,6 +43,7 @@ class LdSelectableListSelectionController<T extends Identifiable<IdType>, IdType
 
   void _onSelectionChanged() {
     _changeNotifier.notifyListeners();
+
     notifyListeners();
   }
 
@@ -234,8 +236,10 @@ class LdSelectableListSelectionController<T extends Identifiable<IdType>, IdType
     }
 
     if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.arrowDown) {
+      print('arrow down');
       for (final item in _itemFocusNodes.entries) {
         if (item.value.hasFocus) {
+          print('item: ${item.key}');
           final currentIndex = paginator.getItemIndexById(item.key);
 
           if (currentIndex != null) {
@@ -243,32 +247,36 @@ class LdSelectableListSelectionController<T extends Identifiable<IdType>, IdType
             final nextItem = paginator.getItemAt(nextIndex);
             if (nextItem != null && nextItem.value != null) {
               if (_shiftPressed) {
-                requestFocus(nextItem.value!.id);
                 selectRange(nextItem.value!.id);
               }
+              requestFocus(nextItem.value!.id);
+              return KeyEventResult.handled;
             }
           }
-          return KeyEventResult.handled;
         }
       }
     }
 
     if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.arrowUp) {
+      print('arrow up');
       for (final item in _itemFocusNodes.entries) {
         if (item.value.hasFocus) {
+          print('item: ${item.key}');
           final currentIndex = paginator.getItemIndexById(item.key);
+
           if (currentIndex != null) {
-            final nextIndex = currentIndex - 1;
-            final nextItem = paginator.getItemAt(nextIndex);
-            if (nextItem != null && nextItem.value != null) {
+            final previousIndex = currentIndex - 1;
+            final previousItem = paginator.getItemAt(previousIndex);
+            print('previousItem: $previousItem');
+            if (previousItem != null && previousItem.value != null) {
               if (_shiftPressed) {
-                requestFocus(nextItem.value!.id);
-                selectRange(nextItem.value!.id);
+                selectRange(previousItem.value!.id);
               }
+              requestFocus(previousItem.value!.id);
             }
+            return KeyEventResult.handled;
           }
         }
-        return KeyEventResult.handled;
       }
     }
 
@@ -283,6 +291,7 @@ class LdSelectableListSelectionController<T extends Identifiable<IdType>, IdType
     }
 
     if (isShift || isCtrl) {
+      notifyListeners();
       return KeyEventResult.handled;
     }
 
@@ -319,6 +328,10 @@ class _SetNotifier<T> extends ValueNotifier<Set<T>> {
   bool allowMultiple;
 
   void setValue(Set<T> value) {
+    if (setEquals(value, this.value)) {
+      return;
+    }
+
     this.value = value;
   }
 

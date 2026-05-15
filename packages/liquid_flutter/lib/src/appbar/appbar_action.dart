@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
+typedef LdAppBarActionRequestedLeading = bool;
+
 /// An action button designed for use in app bars that adapts its appearance based on context.
 ///
 /// This widget automatically detects whether it's being rendered in the main app bar or in
@@ -57,6 +59,7 @@ class LdAppBarAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMobile = LdTheme.of(context).platform.isMobile;
+    final requestedLeading = context.read<LdAppBarActionRequestedLeading?>() ?? false;
 
     final isInContextMenu = context.read<LdAppBarActionDisplayMode?>() == LdAppBarActionDisplayMode.contextMenu;
     if (isInContextMenu) {
@@ -95,9 +98,9 @@ class LdAppBarAction extends StatelessWidget {
         loading: loading,
         loadingText: loadingText,
         color: color,
-        leading: isMobile && preferLeadingOnMobile ? null : leading,
+        leading: (isMobile || requestedLeading) && preferLeadingOnMobile ? null : leading,
         trailing: trailing,
-        child: isMobile && preferLeadingOnMobile && leading != null ? leading! : child,
+        child: (isMobile || requestedLeading) && preferLeadingOnMobile && leading != null ? leading! : child,
       ),
     );
   }

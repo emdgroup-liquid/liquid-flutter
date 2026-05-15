@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/touchable/neutral_ghost_color.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
@@ -59,21 +60,25 @@ class LdListItemWidget extends StatelessWidget {
     return Row(
       children: [
         switch (selectionControl) {
-          LdSelectionControl.radio => LdRadio(
-              checked: isSelected,
-              color: color,
-              disabled: disabledState,
-              onChanged: (value) {
-                onSelectionChanged?.call(value);
-              },
+          LdSelectionControl.radio => ExcludeFocus(
+              child: LdRadio(
+                checked: isSelected,
+                color: color,
+                disabled: disabledState,
+                onChanged: (value) {
+                  onSelectionChanged?.call(value);
+                },
+              ),
             ),
-          LdSelectionControl.checkbox => LdCheckbox(
-              checked: isSelected,
-              color: color,
-              disabled: disabledState,
-              onChanged: (value) {
-                onSelectionChanged?.call(value);
-              },
+          LdSelectionControl.checkbox => ExcludeFocus(
+              child: LdCheckbox(
+                checked: isSelected,
+                color: color,
+                disabled: disabledState,
+                onChanged: (value) {
+                  onSelectionChanged?.call(value);
+                },
+              ),
             ),
           LdSelectionControl.none => const SizedBox.shrink(),
         },
@@ -185,49 +190,43 @@ class LdListItemWidget extends StatelessWidget {
       },
       active: active || (selectionControl != LdSelectionControl.none && isSelected),
       disabled: disabledState || (selectionControl == LdSelectionControl.none && onPressed == null),
-      color: color ?? theme.palette.primary,
-      builder: (contxt, colors, status, _) {
-        return IconTheme(
-          data: IconThemeData(
-            color: colors.text,
-            size: theme.labelSize(LdSize.l) * 1.2,
+      builder: (contxt, status, _) {
+        final colorBundle = neutralGhostColor(theme, status);
+        return Container(
+          width: effectiveWidth,
+          padding: padding ?? theme.balPad(LdSize.m),
+          decoration: BoxDecoration(
+            color: colorBundle.surface,
+            borderRadius: borderRadius,
+            border: Border.all(
+              color: colorBundle.border,
+              width: theme.borderWidth,
+            ),
           ),
-          child: Container(
-            width: effectiveWidth,
-            padding: padding ?? theme.balPad(LdSize.m),
-            decoration: BoxDecoration(
-              color: colors.surface,
-              borderRadius: borderRadius,
-              border: Border.all(
-                color: colors.border,
-                width: theme.borderWidth,
+          child: Row(
+            mainAxisSize: effectiveWidth != double.infinity ? MainAxisSize.min : MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              LdReveal.quick(
+                axes: const {Axis.horizontal},
+                revealed: selectionControl != LdSelectionControl.none,
+                initialRevealed: selectionControl != LdSelectionControl.none,
+                child: _buildSelectionControls(context, disabledState),
               ),
-            ),
-            child: Row(
-              mainAxisSize: effectiveWidth != double.infinity ? MainAxisSize.min : MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                LdReveal.quick(
-                  axes: const {Axis.horizontal},
-                  revealed: selectionControl != LdSelectionControl.none,
-                  initialRevealed: selectionControl != LdSelectionControl.none,
-                  child: _buildSelectionControls(context, disabledState),
+              if (leading != null) _buildLeading(context, theme),
+              Flexible(
+                fit: effectiveWidth == double.infinity ? FlexFit.tight : FlexFit.loose,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (title != null) _buildTitle(context, theme),
+                    if (subtitle != null) _buildSubtitle(context, theme),
+                    if (subContent != null) _buildSubContent(context, theme),
+                  ],
                 ),
-                if (leading != null) _buildLeading(context, theme),
-                Flexible(
-                  fit: effectiveWidth == double.infinity ? FlexFit.tight : FlexFit.loose,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (title != null) _buildTitle(context, theme),
-                      if (subtitle != null) _buildSubtitle(context, theme),
-                      if (subContent != null) _buildSubContent(context, theme),
-                    ],
-                  ),
-                ),
-                if (trailing != null) _buildTrailing(context, theme),
-              ],
-            ),
+              ),
+              if (trailing != null) _buildTrailing(context, theme),
+            ],
           ),
         );
       },

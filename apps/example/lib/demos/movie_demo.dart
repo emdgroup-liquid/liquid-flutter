@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class _Movie with Identifiable<int> {
+class MovieDemo with Identifiable<int> {
   @override
   final int id;
   final String title;
   final String genre;
   final int rating; // 1-5
   final DateTime lastUpdate;
-  _Movie(this.id, this.title, this.genre, this.rating, this.lastUpdate);
+  MovieDemo(this.id, this.title, this.genre, this.rating, this.lastUpdate);
 
-  _Movie copyWith({int? id, String? title, String? genre, int? rating, DateTime? lastUpdate}) => _Movie(
+  MovieDemo copyWith({int? id, String? title, String? genre, int? rating, DateTime? lastUpdate}) => MovieDemo(
     id ?? this.id,
     title ?? this.title,
     genre ?? this.genre,
@@ -25,84 +24,74 @@ class _Movie with Identifiable<int> {
 }
 
 var movieData = [
-  _Movie(1, "Inception", "Sci-Fi", 5, DateTime.now()),
-  _Movie(2, "The Godfather", "Crime", 5, DateTime.now()),
-  _Movie(3, "Pulp Fiction", "Crime", 5, DateTime.now()),
-  _Movie(4, "The Dark Knight", "Action", 5, DateTime.now()),
-  _Movie(5, "Forrest Gump", "Drama", 4, DateTime.now()),
-  _Movie(6, "Interstellar", "Sci-Fi", 4, DateTime.now()),
-  _Movie(7, "The Matrix", "Sci-Fi", 5, DateTime.now()),
-  _Movie(8, "Fight Club", "Drama", 4, DateTime.now()),
-  _Movie(9, "The Shawshank Redemption", "Drama", 5, DateTime.now()),
-  _Movie(10, "Gladiator", "Action", 4, DateTime.now()),
-  _Movie(11, "Transformers: Revenge of the Fallen", "Action", 2, DateTime.now()),
-  _Movie(12, "Cats", "Drama", 2, DateTime.now()),
-  _Movie(13, "The Room", "Drama", 1, DateTime.now()),
-  _Movie(14, "Batman & Robin", "Action", 2, DateTime.now()),
-  _Movie(15, "Battlefield Earth", "Sci-Fi", 1, DateTime.now()),
+  MovieDemo(1, "Inception", "Sci-Fi", 5, DateTime.now()),
+  MovieDemo(2, "The Godfather", "Crime", 5, DateTime.now()),
+  MovieDemo(3, "Pulp Fiction", "Crime", 5, DateTime.now()),
+  MovieDemo(4, "The Dark Knight", "Action", 5, DateTime.now()),
+  MovieDemo(5, "Forrest Gump", "Drama", 4, DateTime.now()),
+  MovieDemo(6, "Interstellar", "Sci-Fi", 4, DateTime.now()),
+  MovieDemo(7, "The Matrix", "Sci-Fi", 5, DateTime.now()),
+  MovieDemo(8, "Fight Club", "Drama", 4, DateTime.now()),
+  MovieDemo(9, "The Shawshank Redemption", "Drama", 5, DateTime.now()),
+  MovieDemo(10, "Gladiator", "Action", 4, DateTime.now()),
+  MovieDemo(11, "Transformers: Revenge of the Fallen", "Action", 2, DateTime.now()),
+  MovieDemo(12, "Cats", "Drama", 2, DateTime.now()),
+  MovieDemo(13, "The Room", "Drama", 1, DateTime.now()),
+  MovieDemo(14, "Batman & Robin", "Action", 2, DateTime.now()),
+  MovieDemo(15, "Battlefield Earth", "Sci-Fi", 1, DateTime.now()),
 ];
 
-final movieRepository = LdRepository<_Movie, int>(
-  singularItemTitle: "Movie",
-  pluralItemTitle: "Movies",
+LdRepository<MovieDemo, int> movieRepository(BuildContext context) => LdRepository<MovieDemo, int>(
   pageSize: 5,
-  getOffsetById: (id, {filters, sortOptions}) async {
+  getOffsetById: (parameters, {filters, sortOptions}) async {
     await Future.delayed(const Duration(seconds: 1));
 
     // Apply the same filtering and sorting logic as fetchListWithParameters
     final filtered = movieData
-        .where((element) => filters?.every((filter) => filter.optimisticFilter(element)) ?? true)
+        .where(
+          (element) => (filters ?? {}).all((filter) {
+            if (filter is LdFilterRange<MovieDemo, int>) {
+              return filter.range.inRange(element.rating);
+            }
+            if (filter is LdFilterAnyOf<MovieDemo, int, String>) {
+              return filter.selectedValues.contains(element.genre);
+            }
+            return true;
+          }),
+        )
         .toList();
 
     for (final sortOption in sortOptions ?? []) {
       filtered.sort((a, b) => sortOption.optimisticSort(a, b));
     }
 
-    return filtered.indexWhere((element) => element.id == id);
+    return filtered.indexWhere((element) => element.id == parameters.id);
   },
   getById: (id) async {
     return movieData.firstWhere((element) => element.id == id);
   },
-  filters: {
-    LdFilterRange<_Movie, int>(
-      name: "rating",
-      label: (context) => "Rating",
-      icon: (context) => const Icon(LucideIcons.star),
-      min: 0,
-      max: 5,
-      optimisticFilter: (item, range) => range.inRange(item.rating),
-    ),
-    LdFilterAnyOf<_Movie, int, String>(
-      name: "genre",
-      label: (context) => "Genre",
-      icon: (context) => const Icon(LucideIcons.star),
-      allValues: {
-        "Sci-Fi": (context) => const Text("Sci-Fi"),
-        "Action": (context) => const Text("Action"),
-        "Drama": (context) => const Text("Drama"),
-        "Crime": (context) => const Text("Crime"),
-      },
-      optimisticFilter: (item, value) => value.contains(item.genre),
-    ),
+
+  fetchListWithParameters: (FetchPageParameters<MovieDemo, int> parameters) async {
+    await Future.delayed(const Duration(milliseconds: 50));
+    final filtered = movieData
+        .where(
+          (element) => (parameters.filters).all((filter) {
+            if (filter is LdFilterRange<MovieDemo, int>) {
+              return filter.range.inRange(element.rating);
+            }
+            if (filter is LdFilterAnyOf<MovieDemo, int, String>) {
+              return filter.selectedValues.contains(element.genre);
+            }
+            return true;
+          }),
+        )
+        .toList();
+    return LdListPage<MovieDemo>(
+      newItems: filtered.skip(parameters.offset).take(parameters.pageSize).toList(),
+      hasMore: parameters.offset + parameters.pageSize < filtered.length,
+      total: filtered.length,
+    );
   },
-  fetchListWithParameters:
-      ({
-        required int offset,
-        required int pageSize,
-        String? pageToken,
-        Set<LdFilterOption<_Movie, int>>? filters,
-        List<LdSortOption<_Movie, int>>? sortOptions,
-      }) async {
-        await Future.delayed(const Duration(milliseconds: 50));
-        final filtered = movieData
-            .where((element) => filters?.every((filter) => filter.optimisticFilter(element)) ?? true)
-            .toList();
-        return LdListPage<_Movie>(
-          newItems: filtered.skip(offset).take(pageSize).toList(),
-          hasMore: offset + pageSize < filtered.length,
-          total: filtered.length,
-        );
-      },
   deleteItem: (int id) async {
     movieData.removeWhere((element) => element.id == id);
     await Future.delayed(const Duration(milliseconds: 500));
@@ -126,8 +115,29 @@ final movieRepository = LdRepository<_Movie, int>(
   },
 );
 
+final movieFilters = [
+  LdFilterRange<MovieDemo, int>(
+    name: "rating",
+    label: (context) => "Rating",
+    icon: (context) => const Icon(LucideIcons.star),
+    min: 0,
+    max: 5,
+  ),
+  LdFilterAnyOf<MovieDemo, int, String>(
+    name: "genre",
+    label: (context) => "Genre",
+    icon: (context) => const Icon(LucideIcons.star),
+    allValues: {
+      "Sci-Fi": (context) => const Text("Sci-Fi"),
+      "Action": (context) => const Text("Action"),
+      "Drama": (context) => const Text("Drama"),
+      "Crime": (context) => const Text("Crime"),
+    },
+  ),
+];
+
 class _MovieDetail extends StatefulWidget {
-  final LdPaginatorItem<_Movie> movie;
+  final LdPaginatorItem<MovieDemo> movie;
   const _MovieDetail({required this.movie});
   @override
   State<_MovieDetail> createState() => _MovieDetailState();
@@ -172,14 +182,14 @@ class _MovieDetailState extends State<_MovieDetail> {
                 submitText: "Save",
                 debugLabel: "Save Movie",
                 action: (_) async {
-                  final newMovie = _Movie(
+                  final newMovie = MovieDemo(
                     widget.movie.value!.id,
                     _titleController.text,
                     _genreController.text,
                     int.tryParse(_ratingController.text) ?? 1,
                     widget.movie.value!.lastUpdate,
                   );
-                  final repo = LdRepository.of<_Movie, int>(context);
+                  final repo = LdRepository.of<MovieDemo, int>(context);
                   await repo.update(widget.movie.value!.id, newMovie);
                 },
               ),
@@ -191,113 +201,77 @@ class _MovieDetailState extends State<_MovieDetail> {
   }
 }
 
-class MovieShell extends StatelessWidget {
-  final Widget child;
-  final GoRouterState routeState;
-  final String pathParameterName;
-  final Widget masterPage;
-  final Set<int> Function(String selected) parseSelected;
-  final String basePath;
-  const MovieShell({
-    super.key,
-    required this.child,
-    required this.routeState,
-    required this.pathParameterName,
-    required this.masterPage,
-    required this.basePath,
-    required this.parseSelected,
-  });
-  @override
-  Widget build(BuildContext context) {
-    return LdMonkeyShell<_Movie, int>(
-      pathParameterName: pathParameterName,
-      routeState: routeState,
-      basePath: basePath,
-      parseSelected: parseSelected,
-      layoutMode: LdMonkeyLayoutMode.neverSideBySide,
-      masterPage: masterPage,
+List<LdMonkeyAction<MovieDemo, int>> movieActions = [
+  showFilterContextMenu<MovieDemo, int>(),
+  LdMonkeySubmitAction(
+    tooltip: (context) => "Duplicate selection",
+    visibility: {
+      LdMonkeyActionVisibility(
+        location: LdMonkeyActionLocation.detailSecondary,
+        minSelectionCount: 1,
+        maxSelectionCount: 1,
+      ),
+      LdMonkeyActionVisibility(location: LdMonkeyActionLocation.context, minSelectionCount: 1, maxSelectionCount: 1),
+    },
+    shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyD, meta: true)},
+    config: (context) => LdSubmitConfig(
+      action: (_) async {
+        final selectionItems = LdMonkeySelection.adaptive<MovieDemo, int>(context);
+        final repository = LdRepository.of<MovieDemo, int>(context);
 
-      repositoryBuilder: (context) async => movieRepository,
-      actions: [
-        showFilterContextMenu<_Movie, int>(),
-        LdMonkeySubmitAction(
-          visibility: {
-            LdMonkeyActionVisibility(
-              location: LdMonkeyActionLocation.detailSecondary,
-              minSelectionCount: 1,
-              maxSelectionCount: 1,
-            ),
-            LdMonkeyActionVisibility(
-              location: LdMonkeyActionLocation.context,
-              minSelectionCount: 1,
-              maxSelectionCount: 1,
-            ),
-          },
-          shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyD, meta: true)},
-          config: (context) => LdSubmitConfig(
-            action: (_) async {
-              final selectionItems = LdMonkeySelection.adaptive<_Movie, int>(context);
-              final shellState = LdMonkeyShellState.of<_Movie, int>(context);
-              final item = await movieRepository.getById(selectionItems.first);
+        final item = await repository.getById(selectionItems.first);
 
-              final newItem = item.copyWith(id: movieData.length + 1, title: "${item.title} (copy)");
+        final newItem = item.copyWith(id: movieData.length + 1, title: "${item.title} (copy)");
 
-              await movieRepository.create(newItem);
+        await repository.create(newItem);
 
-              await Future.delayed(const Duration(milliseconds: 1500));
+        await Future.delayed(const Duration(milliseconds: 1500));
 
-              shellState.setSelectedItems({newItem.id});
-            },
-          ),
-          child: Text("Duplicate"),
-          icon: Icon(LucideIcons.copy),
-        ),
-        LdMonkeySubmitAction(
-          visibility: {
-            LdMonkeyActionVisibility(
-              location: LdMonkeyActionLocation.detailSecondary,
-              minSelectionCount: 1,
-              maxSelectionCount: null,
-            ),
-            LdMonkeyActionVisibility(
-              location: LdMonkeyActionLocation.context,
-              minSelectionCount: 1,
-              maxSelectionCount: null,
-            ),
-            LdMonkeyActionVisibility(
-              location: LdMonkeyActionLocation.masterSecondary,
-              minSelectionCount: 1,
-              maxSelectionCount: null,
-              layoutModes: {LdMonkeyEffectiveLayoutMode.sideBySide},
-            ),
-          },
-          shortcutActivators: {
-            SingleActivator(LogicalKeyboardKey.delete),
-            SingleActivator(LogicalKeyboardKey.backspace),
-          },
-          config: (context) => LdSubmitConfig(
-            action: (_) async {
-              final selection = LdMonkeySelection.adaptive<_Movie, int>(context);
-              await movieRepository.deleteBatch(selection);
-            },
-          ),
-          child: Text("Delete"),
-          icon: Icon(LucideIcons.trash2),
-        ),
-        toggleSelectionControls<_Movie, int>(),
-      ],
-      child: child,
-    );
-  }
-}
+        if (context.mounted) {
+          LdMonkeySelection.updateViewing<MovieDemo, int>(context, {newItem.id});
+        }
+      },
+    ),
+    child: Text("Duplicate"),
+    icon: Icon(LucideIcons.copy),
+  ),
+  LdMonkeySubmitAction(
+    tooltip: (context) => "Duplicate selection",
+    visibility: {
+      LdMonkeyActionVisibility(
+        location: LdMonkeyActionLocation.detailSecondary,
+        minSelectionCount: 1,
+        maxSelectionCount: null,
+      ),
+      LdMonkeyActionVisibility(location: LdMonkeyActionLocation.context, minSelectionCount: 1, maxSelectionCount: null),
+      LdMonkeyActionVisibility(
+        location: LdMonkeyActionLocation.masterSecondary,
+        minSelectionCount: 1,
+        maxSelectionCount: null,
+        layoutModes: {LdMonkeyEffectiveLayoutMode.sideBySide},
+      ),
+    },
+    shortcutActivators: {SingleActivator(LogicalKeyboardKey.delete), SingleActivator(LogicalKeyboardKey.backspace)},
+    config: (context) => LdSubmitConfig(
+      action: (_) async {
+        final selection = LdMonkeySelection.adaptive<MovieDemo, int>(context);
+        final repository = LdRepository.of<MovieDemo, int>(context);
+        await repository.deleteBatch(context: context, ids: selection);
+      },
+    ),
+    child: Text("Delete"),
+    icon: Icon(LucideIcons.trash2),
+  ),
+  toggleSelectionControls<MovieDemo, int>(),
+];
 
 class MovieDetailPage extends StatelessWidget {
   const MovieDetailPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return LdMonkeyDetailPage<_Movie, int>.scrollable(
-      primaryAppBar: LdMonkeyAppBar<_Movie, int>(
+    return LdMonkeyDetailPage<MovieDemo, int>.scrollable(
+      primaryAppBar: LdMonkeyAppBar<MovieDemo, int>(
         location: LdMonkeyActionLocation.detailAppBar,
         title: Text("Movie"),
         debugName: "MovieDetailPage",
@@ -312,13 +286,24 @@ class MovieMasterPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LdMonkeyMasterPage<_Movie, int>(
-      appBar: LdMonkeyAppBar<_Movie, int>(location: LdMonkeyActionLocation.masterAppBar, title: Text("Movies")),
+    return LdMonkeyMasterPage<MovieDemo, int>(
+      appBar: LdMonkeyAppBar<MovieDemo, int>(location: LdMonkeyActionLocation.masterAppBar, title: Text("Movies")),
       buildItem: (context, item) => LdListItem(
         title: Text(item.value!.title),
         subtitle: Text(item.value!.genre),
         trailing: Row(children: [for (var i = 0; i < item.value!.rating; i++) Icon(LucideIcons.star)]),
       ),
     );
+  }
+}
+
+extension All<T> on Set<T> {
+  bool all(bool Function(T) test) {
+    for (final element in this) {
+      if (!test(element)) {
+        return false;
+      }
+    }
+    return true;
   }
 }

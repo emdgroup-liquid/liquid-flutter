@@ -29,7 +29,8 @@ LdMonkeyAction<T, IdType> showFilterModal<T extends Identifiable<IdType>, IdType
         ),
       },
       builder: (context) => LdAppBarAction(
-        active: LdRepository.of<T, IdType>(context).activeFilters.isNotEmpty,
+        active: LdMonkeySortAndFilterState.of<T, IdType>(context).activeFilters.isNotEmpty ||
+            LdMonkeySortAndFilterState.of<T, IdType>(context).activeSortOptions.isNotEmpty,
         leading: const Icon(LucideIcons.listFilter),
         onPressed: () {
           Navigator.of(context, rootNavigator: true).push(

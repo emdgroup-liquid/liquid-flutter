@@ -34,10 +34,7 @@ class _DemoCodeDialogState extends State<DemoCodeDialog> {
       return const Center(child: LdLoader());
     }
 
-    final highlighter = Highlighter(
-      language: 'dart',
-      theme: _themeDark!,
-    );
+    final highlighter = Highlighter(language: 'dart', theme: _themeDark!);
 
     var highlightedCode = highlighter.highlight(widget.demoCode);
 
@@ -52,29 +49,25 @@ class _DemoCodeDialogState extends State<DemoCodeDialog> {
       modal: LdModalRoute(
         context: context,
         pageBuilder: (context) => LdScaffold(
-          appBars: [
-            LdAppBar(
-              title: const Text("Code Example"),
-            ),
-          ],
-          body: LdScaffoldBody(
-            children: [
-              SelectableRegion(
-                focusNode: FocusNode(),
-                selectionControls: MaterialTextSelectionControls(),
-                child: Container(
-                  color: shadZinc.shades.last,
-                  child: SingleChildScrollView(
+          body: LdAppBar(
+            title: const Text("Code Example"),
+            child: LdScaffoldBody(
+              children: [
+                SelectableRegion(
+                  focusNode: FocusNode(),
+                  selectionControls: MaterialTextSelectionControls(),
+                  child: Container(
+                    color: shadZinc.shades.last,
+                    child: SingleChildScrollView(
                       child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text.rich(
-                      highlightedCode,
-                      style: TextStyle(color: Colors.white),
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text.rich(highlightedCode, style: TextStyle(color: Colors.white)),
+                      ),
                     ),
-                  )),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

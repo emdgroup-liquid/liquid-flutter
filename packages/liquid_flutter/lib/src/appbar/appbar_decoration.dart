@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 import 'package:provider/provider.dart';
 
 class LdAppBarDecorationBuilder {

@@ -1,13 +1,43 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
+
+/// Wraps [body] inside [bar] when [bar] is a [LdMonkeyAppBar]; otherwise
+/// renders [bar] standalone and places [body] below it in a [Column].
+///
+/// This lets monkey pages work correctly with both:
+/// - The new wrapper-based pattern (LdMonkeyAppBar with child).
+/// - Legacy / test usages that pass arbitrary widgets as bars.
+Widget _wrapBodyWithBar<T extends Identifiable<IdType>, IdType>(Widget bar, Widget body) {
+  if (bar is LdMonkeyAppBar<T, IdType>) {
+    return LdMonkeyAppBar<T, IdType>(
+      key: bar.key,
+      title: bar.title,
+      additionalActions: bar.additionalActions,
+      positionMode: bar.positionMode,
+      location: bar.location,
+      leading: bar.leading,
+      debugName: bar.debugName,
+      backgroundMode: bar.backgroundMode,
+      shadowMode: bar.shadowMode,
+      borderMode: bar.borderMode,
+      implyLeading: bar.implyLeading,
+      child: body,
+    );
+  }
+  // Fallback: stack the bar and body in a Column for non-LdMonkeyAppBar widgets.
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [bar, Expanded(child: body)],
+  );
+}
 
 class LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   const LdMonkeyMasterPage({
     super.key,
     this.buildItem,
     this.appBar,
+    this.allowMultipleSelection = true,
     this.secondaryAppBar,
     this.buildList,
   }) : assert(buildList != null || buildItem != null, "Either buildList or buildItem must be provided");
@@ -18,59 +48,41 @@ class LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType> extends Statefu
   final Widget? appBar;
   final Widget? secondaryAppBar;
 
+  final bool allowMultipleSelection;
+
   @override
   State<LdMonkeyMasterPage<T, IdType>> createState() => _LdMonkeyMasterPageState<T, IdType>();
 }
 
 class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends State<LdMonkeyMasterPage<T, IdType>> {
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  LdSearchConfig? searchConfig;
-
-  @override
-  void initState() {
-    super.initState();
-    final repository = LdRepository.of<T, IdType>(context);
-    final searchFilter = repository.filters.values.firstWhereOrNull((filter) => filter is LdFilterSearch)
-        as LdFilterSearch<T, IdType, dynamic>?;
-
-    if (searchFilter != null) {
-      searchConfig = LdSearchConfig(
-        getSuggestions: searchFilter.getSuggestions,
-        buildSuggestion: searchFilter.buildSuggestion,
-        initialQuery: searchFilter.searchText,
-        hint: searchFilter.hint,
-        onSearch: (query) {
-          repository.updateFilter(searchFilter.name, (filter) {
-            filter as LdFilterSearch<T, IdType, dynamic>;
-            return filter.copyWith(
-              isOn: query.isNotEmpty,
-              searchText: query,
-            );
-          });
-        },
-      );
-    }
-  }
-
   Widget _buildList(
     BuildContext context,
     LdRepository<T, IdType> repository,
-    LdMonkeyShellState<T, IdType> shellState,
     LdMonkeyActions<T, IdType> actions,
   ) {
     if (widget.buildList != null) {
       return widget.buildList!(context, repository);
     }
+
+    final selection = LdMonkeySelection.of<T, IdType>(context, listen: true);
+
     return LdSelectableList<T, IdType>(
-      showSelectionControls: shellState.showSelectionControls,
+      showSelectionControls: selection.showSelectionControls,
       paginator: repository,
-      initialSelectedItems: shellState.selectedItems,
-      multiSelect: shellState.allowMultipleSelection,
-      onSelectionChange: (selected) => shellState.setSelectedItems(selected),
+      initialSelectedItems: selection.showSelectionControls ? selection.selection : selection.viewing,
+      multiSelect: widget.allowMultipleSelection,
+      onSelectionChange: (selected) async {
+        await Future.delayed(Duration.zero);
+        if (!context.mounted) {
+          return;
+        }
+        if (selected.length > 1 || selection.showSelectionControls) {
+          LdMonkeySelection.updateSelection<T, IdType>(context, selected);
+          LdMonkeySelection.updateShowSelectionControls<T, IdType>(context, true);
+        } else {
+          LdMonkeySelection.updateViewing<T, IdType>(context, selected);
+        }
+      },
       itemBuilder: (context, item, index) => LdMonkeySingleShortcuts<T, IdType>(
         item: item.value!.id,
         actions: actions,
@@ -90,43 +102,40 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
 
   @override
   Widget build(BuildContext context) {
-    final shellState = LdMonkeyShellState.of<T, IdType>(context, watch: true);
+    LdMonkeySelection.of<T, IdType>(context, listen: true);
     final repository = LdRepository.of<T, IdType>(context);
     final actions = context.read<LdMonkeyActions<T, IdType>>();
 
     return LdNotificationProvider(
       child: LdNotificationPortal(
-        child: ListenableBuilder(
-          listenable: shellState,
-          builder: (context, _) {
-            return LdMonkeyMultiShortcuts(
-              actions: actions,
-              child: Builder(
-                builder: (context) {
-                  return LdScaffold(
-                    appBars: [
-                      widget.appBar ??
-                          LdMonkeyAppBar<T, IdType>(
-                            location: LdMonkeyActionLocation.masterAppBar,
-                            debugName: "Master App Bar",
-                          ),
-                      widget.secondaryAppBar ??
-                          LdMonkeyAppBar<T, IdType>(
-                            location: LdMonkeyActionLocation.masterSecondary,
-                            debugName: "Master Secondary App Bar",
-                          ),
-                    ],
-                    body: _buildList(
-                      context,
-                      repository,
-                      shellState,
-                      actions,
-                    ),
+        child: LdMonkeyMultiShortcuts(
+          actions: actions,
+          child: Builder(
+            builder: (context) {
+              final body = _buildList(context, repository, actions);
+
+              final primaryBar = widget.appBar ??
+                  LdMonkeyAppBar<T, IdType>(
+                    location: LdMonkeyActionLocation.masterAppBar,
+                    debugName: "Master App Bar",
                   );
-                },
-              ),
-            );
-          },
+
+              final secondaryBar = widget.secondaryAppBar ??
+                  LdMonkeyAppBar<T, IdType>(
+                    location: LdMonkeyActionLocation.masterSecondary,
+                    debugName: "Master Secondary App Bar",
+                  );
+
+              // New wrapper-based composition: secondary bar wraps the body,
+              // then primary bar wraps the secondary+body subtree.
+              final wrapped = _wrapBodyWithBar<T, IdType>(
+                primaryBar,
+                _wrapBodyWithBar<T, IdType>(secondaryBar, body),
+              );
+
+              return LdScaffold(body: wrapped);
+            },
+          ),
         ),
       ),
     );

@@ -29,18 +29,14 @@ class _SelectableListDemoState extends State<SelectableListDemo> {
     });
   }
 
-  Future<LdListPage<SampleItem>> _fetchItems({
-    required int offset,
-    required int pageSize,
-    String? pageToken,
-  }) async {
+  Future<LdListPage<SampleItem>> _fetchItems(FetchPageParameters<SampleItem, String> parameters) async {
     await Future.delayed(const Duration(milliseconds: 200));
 
     // return a list of 10 items for each page, except for the last page
     // in total, there are 95 items
     return LdListPage<SampleItem>(
-      newItems: sampleItems.skip(offset).take(pageSize).toList(),
-      hasMore: offset + pageSize < sampleItems.length,
+      newItems: sampleItems.skip(parameters.offset).take(parameters.pageSize).toList(),
+      hasMore: parameters.offset + parameters.pageSize < sampleItems.length,
       total: sampleItems.length,
     );
   }
@@ -123,9 +119,7 @@ class _SelectableListDemoState extends State<SelectableListDemo> {
             label: "Show selection controls",
           ),
           LdText.p("Selected items"),
-          Wrap(
-            children: _selectedItems.map((e) => LdTag(child: Text(e))).toList(),
-          ).spaceS(),
+          Wrap(children: _selectedItems.map((e) => LdTag(child: Text(e))).toList()).spaceS(),
           LdButton(
             child: const Text("Clear selection"),
             onPressed: () {

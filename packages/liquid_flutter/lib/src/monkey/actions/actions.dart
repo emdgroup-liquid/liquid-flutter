@@ -72,6 +72,7 @@ class LdMonkeySubmitAction<T extends Identifiable<IdType>, IdType, Result> exten
   final Widget? child;
   final Widget? icon;
   final LdColor? color;
+  final String? Function(BuildContext context) tooltip;
   final LdSubmitBuilder<Result, BuildContext>? builder;
 
   LdSubmitController<Result, BuildContext>? controller;
@@ -89,6 +90,7 @@ class LdMonkeySubmitAction<T extends Identifiable<IdType>, IdType, Result> exten
     super.multiSelect = true,
     super.shortcutActivators = const {},
     this.builder,
+    required this.tooltip,
     this.color,
   });
 
@@ -104,6 +106,7 @@ class LdMonkeySubmitAction<T extends Identifiable<IdType>, IdType, Result> exten
                 color: color,
                 loading: controller.state.type == LdSubmitStateType.loading,
                 loadingText: config(context).loadingText,
+                tooltip: tooltip(context),
                 disabled: !controller.canTrigger,
                 onPressed: () async {
                   await maybePopContextMenu(context);

@@ -28,7 +28,6 @@ class LdCard extends StatelessWidget {
     return Container(
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
-          //color: cardColor,
           borderRadius: theme.radius(LdSize.m),
           border: flat
               ? Border.all(
@@ -38,52 +37,46 @@ class LdCard extends StatelessWidget {
                 )
               : null,
           boxShadow: flat ? null : [ldShadowDefault]),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (header != null) ...[
-            LdAutoBackground(
-              child: Container(
-                width: double.infinity,
-                padding: padding ?? theme.pad(size: LdSize.m),
-                child: header,
+      child: LdAutoBackground(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (header != null) ...[
+              LdAutoBackground(
+                child: Container(
+                  padding: padding ?? theme.pad(size: LdSize.m),
+                  child: header,
+                ),
               ),
-            ),
-            const LdDivider(
-              height: 1,
-            )
-          ],
-          expandChild
-              ? Expanded(
-                  child: LdAutoBackground(
-                    child: Container(
+              const LdDivider(
+                height: 1,
+              )
+            ],
+            expandChild
+                ? Expanded(
+                    child: Padding(
                       padding: padding ?? theme.pad(size: LdSize.m),
-                      width: double.infinity,
                       child: child,
                     ),
-                  ),
-                )
-              : LdAutoBackground(
-                  child: Container(
+                  )
+                : Padding(
                     padding: padding ?? theme.pad(size: LdSize.m),
-                    width: double.infinity,
                     child: child,
                   ),
-                ),
-          if (footer != null) ...[
-            const LdDivider(
-              height: 1,
-            ),
-            LdAutoBackground(
-              child: Container(
-                width: double.infinity,
-                padding: padding ?? theme.pad(size: LdSize.m),
-                child: footer,
+            if (footer != null) ...[
+              const LdDivider(
+                height: 1,
               ),
-            ),
-          ]
-        ],
+              LdAutoBackground(
+                child: Container(
+                  padding: padding ?? theme.pad(size: LdSize.m),
+                  child: footer,
+                ),
+              ),
+            ]
+          ],
+        ),
       ),
     );
   }

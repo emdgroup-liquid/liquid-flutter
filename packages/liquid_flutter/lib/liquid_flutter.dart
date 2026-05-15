@@ -111,6 +111,7 @@ export 'src/time_picker.dart';
 export 'src/toggle.dart';
 export 'src/tokens.dart';
 export 'src/touchable/touchable.dart';
+export 'src/touchable/outline_color.dart';
 export 'src/typography.dart';
 export 'src/version.dart';
 export 'src/window_frame.dart';

@@ -3,242 +3,156 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-import 'test_utils.dart';
+class _RouteTestItem with Identifiable<int> {
+  @override
+  final int id;
+  _RouteTestItem(this.id);
+}
 
 void main() {
-  group('buildMonkeyRoutes Tests', () {
-    group('Route Structure', () {
-      test('creates master route', () {
-        final routes = buildMonkeyRoutes<TestItem, int>(
-          basePath: '/test',
-          detailPage: const SizedBox(),
-          masterPage: const SizedBox(),
-          repositoryBuilder: (context) async => createTestRepository(),
-          layoutMode: LdMonkeyLayoutMode.auto,
-          parseSelected: (selected) => selected.split('_').map(int.parse).toSet(),
-          pathParameterName: 'id',
+  group('buildMonkeyRoutes', () {
+    final routeConfig = LdMonkeyRouteConfig.identifiableInt<_RouteTestItem>(itemName: 'item');
+
+    LdRepository<_RouteTestItem, int> testRepository() => LdRepository.fromList<_RouteTestItem, int>(
+          list: [
+            _RouteTestItem(1),
+            _RouteTestItem(2),
+            _RouteTestItem(3),
+          ],
         );
 
-        final shellRoute = routes.firstWhere((route) => route is ShellRoute) as ShellRoute;
-        final masterRoute = (shellRoute.routes.first as GoRoute);
+    test('master route path and name', () {
+      final routes = buildMonkeyRoutes<_RouteTestItem, int>(
+        masterPath: '/test',
+        routeConfig: routeConfig,
+        detailPage: const SizedBox(),
+        masterPage: const SizedBox(),
+        repositoryBuilder: (context, state) => testRepository(),
+        filters: const [],
+        sortOptions: const [],
+        actions: const [],
+      );
 
-        expect(masterRoute.path, equals('/test'));
-        expect(masterRoute.name, equals('/test-master'));
-      });
+      final shellRoute = routes.firstWhere((route) => route is ShellRoute) as ShellRoute;
+      final masterRoute = shellRoute.routes.first as GoRoute;
 
-      test('creates detail route with path parameter', () {
-        final routes = buildMonkeyRoutes<TestItem, int>(
-          basePath: '/test',
-          detailPage: const SizedBox(),
-          masterPage: const SizedBox(),
-          repositoryBuilder: (context) async => createTestRepository(),
-          layoutMode: LdMonkeyLayoutMode.auto,
-          parseSelected: (selected) => selected.split('_').map(int.parse).toSet(),
-          pathParameterName: 'id',
-        );
-
-        final shellRoute = routes.firstWhere((route) => route is ShellRoute) as ShellRoute;
-        final masterRoute = shellRoute.routes.first as GoRoute;
-        final detailRoute = masterRoute.routes.first as GoRoute;
-
-        expect(detailRoute.path, equals('/:selected_id'));
-        expect(detailRoute.name, equals('/test-detail'));
-      });
-
-      test('wraps routes in ShellRoute', () {
-        final routes = buildMonkeyRoutes<TestItem, int>(
-          basePath: '/test',
-          detailPage: const SizedBox(),
-          masterPage: const SizedBox(),
-          repositoryBuilder: (context) async => createTestRepository(),
-          layoutMode: LdMonkeyLayoutMode.auto,
-          parseSelected: (selected) => selected.split('_').map(int.parse).toSet(),
-          pathParameterName: 'id',
-        );
-
-        expect(routes.any((route) => route is ShellRoute), isTrue);
-      });
+      expect(masterRoute.path, '/test');
+      expect(masterRoute.name, 'item-master');
     });
 
-    group('Detail Route', () {
-      testWidgets('detail route renders detail page', (WidgetTester tester) async {
-        final routes = buildMonkeyRoutes<TestItem, int>(
-          basePath: '/test',
-          detailPage: const Text('Detail Page'),
-          masterPage: const SizedBox(),
-          repositoryBuilder: (context) async => createTestRepository(),
-          layoutMode: LdMonkeyLayoutMode.auto,
-          parseSelected: (selected) => selected.split('_').map(int.parse).toSet(),
-          pathParameterName: 'id',
-        );
+    test('detail route path and name', () {
+      final routes = buildMonkeyRoutes<_RouteTestItem, int>(
+        masterPath: '/test',
+        routeConfig: routeConfig,
+        detailPage: const SizedBox(),
+        masterPage: const SizedBox(),
+        repositoryBuilder: (context, state) => testRepository(),
+        filters: const [],
+        sortOptions: const [],
+        actions: const [],
+      );
 
-        final router = GoRouter(routes: routes);
+      final shellRoute = routes.firstWhere((route) => route is ShellRoute) as ShellRoute;
+      final masterRoute = shellRoute.routes.first as GoRoute;
+      final detailRoute = masterRoute.routes.first as GoRoute;
 
-        await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp.router(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              routerConfig: router,
-            ),
-          ),
-        );
-
-        router.go('/test/1');
-        await tester.pumpAndSettle();
-
-        expect(find.text('Detail Page'), findsOneWidget);
-      });
-
-      testWidgets('detail route uses MaterialPage when detailInDialog is false and effectiveLayout is detail',
-          (WidgetTester tester) async {
-        final routes = buildMonkeyRoutes<TestItem, int>(
-          basePath: '/test',
-          detailPage: const Text('Detail Page'),
-          masterPage: const SizedBox(),
-          repositoryBuilder: (context) async => createTestRepository(),
-          layoutMode: LdMonkeyLayoutMode.neverSideBySide,
-          parseSelected: (selected) => selected.split('_').map(int.parse).toSet(),
-          pathParameterName: 'id',
-          detailInDialog: false,
-        );
-
-        final router = GoRouter(routes: routes);
-
-        await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp.router(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              routerConfig: router,
-            ),
-          ),
-        );
-
-        router.go('/test/1');
-        await tester.pumpAndSettle();
-
-        expect(find.text('Detail Page'), findsOneWidget);
-      });
-
-      testWidgets('detail route uses LdModalPage when detailInDialog is true', (WidgetTester tester) async {
-        final routes = buildMonkeyRoutes<TestItem, int>(
-          basePath: '/test',
-          detailPage: const Text('Detail Page'),
-          masterPage: const SizedBox(),
-          repositoryBuilder: (context) async => createTestRepository(),
-          layoutMode: LdMonkeyLayoutMode.neverSideBySide,
-          parseSelected: (selected) => selected.split('_').map(int.parse).toSet(),
-          pathParameterName: 'id',
-          detailInDialog: true,
-        );
-
-        final router = GoRouter(routes: routes);
-
-        await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp.router(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              routerConfig: router,
-            ),
-          ),
-        );
-
-        router.go('/test/1');
-        await tester.pumpAndSettle();
-
-        expect(find.text('Detail Page'), findsOneWidget);
-      });
-    });
-
-    group('Shell Builder', () {
-      testWidgets('uses custom shellBuilder when provided', (WidgetTester tester) async {
-        var customBuilderCalled = false;
-
-        final routes = buildMonkeyRoutes<TestItem, int>(
-          basePath: '/test',
-          detailPage: const SizedBox(),
-          masterPage: const SizedBox(),
-          repositoryBuilder: (context) async => createTestRepository(),
-          layoutMode: LdMonkeyLayoutMode.auto,
-          parseSelected: (selected) => selected.split('_').map(int.parse).toSet(),
-          pathParameterName: 'id',
-          shellBuilder: ({
-            required context,
-            required routeState,
-            required child,
-            required parseSelected,
-            required pathParameterName,
-            required masterPage,
-            required basePath,
-          }) {
-            customBuilderCalled = true;
-            return Container(child: child);
-          },
-        );
-
-        final router = GoRouter(routes: routes);
-
-        await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp.router(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              routerConfig: router,
-            ),
-          ),
-        );
-
-        router.go('/test');
-        await tester.pumpAndSettle();
-
-        expect(customBuilderCalled, isTrue);
-      });
-
-      testWidgets('uses default LdMonkeyShell when shellBuilder not provided', (WidgetTester tester) async {
-        final routes = buildMonkeyRoutes<TestItem, int>(
-          basePath: '/test',
-          detailPage: const SizedBox(),
-          masterPage: const SizedBox(),
-          repositoryBuilder: (context) async => createTestRepository(),
-          layoutMode: LdMonkeyLayoutMode.auto,
-          parseSelected: (selected) => selected.split('_').map(int.parse).toSet(),
-          pathParameterName: 'id',
-        );
-
-        final router = GoRouter(routes: routes);
-
-        await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp.router(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              routerConfig: router,
-            ),
-          ),
-        );
-
-        router.go('/test');
-        await tester.pumpAndSettle();
-
-        expect(find.byType(LdMonkeyShell<TestItem, int>), findsOneWidget);
-      });
-    });
-
-    group('Path Parameter Name', () {
-      test('uses pathParameterName in route paths', () {
-        final routes = buildMonkeyRoutes<TestItem, int>(
-          basePath: '/test',
-          detailPage: const SizedBox(),
-          masterPage: const SizedBox(),
-          repositoryBuilder: (context) async => createTestRepository(),
-          layoutMode: LdMonkeyLayoutMode.auto,
-          parseSelected: (selected) => selected.split('_').map(int.parse).toSet(),
-          pathParameterName: 'itemId',
-        );
-
-        final shellRoute = routes.firstWhere((route) => route is ShellRoute) as ShellRoute;
-        final masterRoute = shellRoute.routes.first as GoRoute;
-        final detailRoute = masterRoute.routes.first as GoRoute;
-
-        expect(detailRoute.path, equals('/:selected_itemId'));
-      });
+      expect(detailRoute.path, ':viewing_item');
+      expect(detailRoute.name, 'item-detail');
     });
   });
+
+  group('buildMonkeyRouteTree', () {
+    final cfgA = LdMonkeyRouteConfig.identifiableInt<_RouteTestItem>(itemName: 'a');
+    final cfgB = LdMonkeyRouteConfig.identifiableInt<_RouteTestItem>(itemName: 'b');
+    final cfgC = LdMonkeyRouteConfig.identifiableInt<_RouteTestItem>(itemName: 'c');
+
+    LdRepository<_RouteTestItem, int> testRepository() => LdRepository.fromList<_RouteTestItem, int>(
+          list: [
+            _RouteTestItem(1),
+            _RouteTestItem(2),
+            _RouteTestItem(3),
+          ],
+        );
+
+    test('two levels: nested detail path uses prefix', () {
+      final routes = buildMonkeyRouteTree<_RouteTestItem, int>(
+        masterPath: '/p',
+        root: MonkeyRouteNode<_RouteTestItem, int>(
+          routeConfig: cfgA,
+          masterPage: const SizedBox(),
+          detailPage: const SizedBox(),
+          repositoryBuilder: (context, state) => testRepository(),
+          filters: const [],
+          sortOptions: const [],
+          actions: const [],
+          child: MonkeyRouteNode<_RouteTestItem, int>(
+            detailPathPrefix: 'files',
+            routeConfig: cfgB,
+            masterPage: const SizedBox(),
+            detailPage: const SizedBox(),
+            repositoryBuilder: (context, state) => testRepository(),
+            filters: const [],
+            sortOptions: const [],
+            actions: const [],
+          ),
+        ),
+      );
+
+      final goRoutes = _collectGoRoutes(routes);
+      final bDetail = goRoutes.firstWhere((r) => r.name == 'b-detail');
+      expect(bDetail.path, 'files/:viewing_b');
+    });
+
+    test('three levels: innermost detail path', () {
+      final routes = buildMonkeyRouteTree<_RouteTestItem, int>(
+        masterPath: '/p',
+        root: MonkeyRouteNode<_RouteTestItem, int>(
+          routeConfig: cfgA,
+          masterPage: const SizedBox(),
+          detailPage: const SizedBox(),
+          repositoryBuilder: (context, state) => testRepository(),
+          filters: const [],
+          sortOptions: const [],
+          actions: const [],
+          child: MonkeyRouteNode<_RouteTestItem, int>(
+            detailPathPrefix: 'b',
+            routeConfig: cfgB,
+            masterPage: const SizedBox(),
+            detailPage: const SizedBox(),
+            repositoryBuilder: (context, state) => testRepository(),
+            filters: const [],
+            sortOptions: const [],
+            actions: const [],
+            child: MonkeyRouteNode<_RouteTestItem, int>(
+              detailPathPrefix: 'c',
+              routeConfig: cfgC,
+              masterPage: const SizedBox(),
+              detailPage: const SizedBox(),
+              repositoryBuilder: (context, state) => testRepository(),
+              filters: const [],
+              sortOptions: const [],
+              actions: const [],
+            ),
+          ),
+        ),
+      );
+
+      final goRoutes = _collectGoRoutes(routes);
+      final cDetail = goRoutes.firstWhere((r) => r.name == 'c-detail');
+      expect(cDetail.path, 'c/:viewing_c');
+    });
+  });
+}
+
+List<GoRoute> _collectGoRoutes(List<RouteBase> routes) {
+  final out = <GoRoute>[];
+  for (final r in routes) {
+    if (r is ShellRoute) {
+      out.addAll(_collectGoRoutes(r.routes));
+    } else if (r is GoRoute) {
+      out.add(r);
+      out.addAll(_collectGoRoutes(r.routes));
+    }
+  }
+  return out;
 }

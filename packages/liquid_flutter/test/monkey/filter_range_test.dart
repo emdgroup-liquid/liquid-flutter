@@ -29,7 +29,6 @@ void main() {
           max: 100,
           step: 0.1,
           range: const RangeValues(10.5, 20.7),
-          optimisticFilter: (item, range) => item.price >= range.start && item.price <= range.end,
         );
 
         final serialized = filter.serialize();
@@ -47,7 +46,6 @@ void main() {
           max: 100,
           step: 1,
           range: const RangeValues(10, 20),
-          optimisticFilter: (item, range) => item.price >= range.start && item.price <= range.end,
         );
 
         final serialized = filter.serialize();
@@ -63,7 +61,6 @@ void main() {
           min: 0,
           max: 100,
           range: const RangeValues(0, 100),
-          optimisticFilter: (item, range) => item.price >= range.start && item.price <= range.end,
         );
 
         final marshaled = filter.marshalSerialized('10.5,20.7');
@@ -80,7 +77,6 @@ void main() {
           min: 0,
           max: 100,
           range: const RangeValues(0, 100),
-          optimisticFilter: (item, range) => item.price >= range.start && item.price <= range.end,
         );
 
         final marshaled = filter.marshalSerialized('150,200');
@@ -95,7 +91,6 @@ void main() {
           min: 0,
           max: 100,
           range: const RangeValues(0, 100),
-          optimisticFilter: (item, range) => item.price >= range.start && item.price <= range.end,
         );
 
         final marshaled1 = filter.marshalSerialized('invalid');
@@ -117,34 +112,10 @@ void main() {
           max: 100,
           range: const RangeValues(10, 20),
           isOn: true,
-          optimisticFilter: (item, range) => item.price >= range.start && item.price <= range.end,
         );
 
         final marshaled = filter.marshalSerialized('');
         expect(marshaled.isOn, isFalse);
-      });
-    });
-
-    group('Optimistic Filtering', () {
-      test('optimisticFilter() uses range values', () {
-        final filter = LdFilterRange<_RangeTestItem, int>(
-          name: 'price',
-          label: (context) => 'Price',
-          icon: (context) => const Icon(Icons.attach_money),
-          min: 0,
-          max: 100,
-          range: const RangeValues(10, 20),
-          isOn: true,
-          optimisticFilter: (item, range) => item.price >= range.start && item.price <= range.end,
-        );
-
-        final matchingItem = _RangeTestItem(1, 'Item 1', 15.0);
-        final belowRangeItem = _RangeTestItem(2, 'Item 2', 5.0);
-        final aboveRangeItem = _RangeTestItem(3, 'Item 3', 25.0);
-
-        expect(filter.optimisticFilter(matchingItem), isTrue);
-        expect(filter.optimisticFilter(belowRangeItem), isFalse);
-        expect(filter.optimisticFilter(aboveRangeItem), isFalse);
       });
     });
 
@@ -157,7 +128,6 @@ void main() {
           min: 0,
           max: 100,
           range: const RangeValues(10, 20),
-          optimisticFilter: (item, range) => item.price >= range.start && item.price <= range.end,
         );
 
         final newFilter = filter.copyWith(
@@ -170,24 +140,6 @@ void main() {
         expect(newFilter.isOn, isTrue);
         expect(filter.range.start, equals(10));
         expect(filter.range.end, equals(20));
-      });
-
-      test('copyWith() preserves optimisticFilter function', () {
-        final filter = LdFilterRange<_RangeTestItem, int>(
-          name: 'price',
-          label: (context) => 'Price',
-          icon: (context) => const Icon(Icons.attach_money),
-          min: 0,
-          max: 100,
-          range: const RangeValues(10, 20),
-          isOn: true,
-          optimisticFilter: (item, range) => item.price >= range.start && item.price <= range.end,
-        );
-
-        final newFilter = filter.copyWith(range: const RangeValues(15, 25));
-        final item = _RangeTestItem(1, 'Item 1', 20.0);
-
-        expect(newFilter.optimisticFilter(item), isTrue);
       });
     });
 
@@ -227,7 +179,6 @@ void main() {
           min: 0,
           max: 100,
           range: const RangeValues(0, 100),
-          optimisticFilter: (item, range) => item.price >= range.start && item.price <= range.end,
         );
 
         final repository = LdRepository<_RangeTestItem, int>(

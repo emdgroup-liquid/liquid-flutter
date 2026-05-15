@@ -4,7 +4,6 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterOption<T, IdType> {
   final Map<E, Widget Function(BuildContext)> allValues;
   final E? selectedValue;
-  final bool Function(T item, E? selected) _optimisticFilter;
 
   LdFilterOneOf({
     required super.name,
@@ -13,9 +12,8 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
     super.isOn = false,
     required this.allValues,
     E? initialSelected,
-    required bool Function(T item, E? selected) optimisticFilter,
-  })  : _optimisticFilter = optimisticFilter,
-        selectedValue = initialSelected;
+    super.isEnabled,
+  }) : selectedValue = initialSelected;
 
   @override
   String serialize() {
@@ -42,11 +40,6 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
   }
 
   @override
-  bool optimisticFilter(T item) {
-    return _optimisticFilter(item, selectedValue);
-  }
-
-  @override
   LdFilterOneOf<T, IdType, E> copyWith({
     String Function(BuildContext context)? label,
     Widget Function(BuildContext context)? icon,
@@ -54,7 +47,7 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
     bool? isOn,
     Map<E, Widget Function(BuildContext)>? allValues,
     E? selectedValue,
-    bool Function(T item, E? selected)? optimisticFilter,
+    bool Function(BuildContext context)? isEnabled,
   }) {
     return LdFilterOneOf<T, IdType, E>(
       name: name ?? this.name,
@@ -63,12 +56,12 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
       isOn: isOn ?? this.isOn,
       allValues: allValues ?? this.allValues,
       initialSelected: selectedValue ?? this.selectedValue,
-      optimisticFilter: optimisticFilter ?? _optimisticFilter,
+      isEnabled: isEnabled ?? this.isEnabled,
     );
   }
 
   @override
-  Widget build(BuildContext context, LdRepository<T, IdType> repository) {
+  Widget build(BuildContext context) {
     return LdFilterOneOfWidget<T, IdType, E>(filter: this);
   }
 }

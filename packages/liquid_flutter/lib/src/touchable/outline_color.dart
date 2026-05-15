@@ -20,11 +20,10 @@ LdColorBundle outlineColor(
         icon: disabledColor.contrastingText(foreground),
       );
     } else {
-      final foreground = disabledColor.idle(theme.isDark);
       return LdColorBundle(
         surface: Colors.transparent,
-        text: foreground,
-        border: foreground,
+        text: theme.textMuted,
+        border: theme.border,
       );
     }
   }
@@ -60,8 +59,8 @@ LdColorBundle outlineColor(
   }
 
   return LdColorBundle(
-    surface: Colors.transparent,
-    text: color.idle(theme.isDark),
-    border: color.idle(theme.isDark),
+    surface: status.onSurface ? theme.background : theme.surface,
+    text: theme.text,
+    border: theme.border,
   );
 }

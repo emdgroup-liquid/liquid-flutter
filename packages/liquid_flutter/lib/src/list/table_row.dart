@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/touchable/neutral_ghost_color.dart';
 
 class LdTableRow extends StatelessWidget {
   final Widget? leading;
@@ -100,8 +101,8 @@ class LdTableRow extends StatelessWidget {
       },
       active: active || (selectionControl != LdSelectionControl.none && isSelected),
       disabled: disabledState || (selectionControl == LdSelectionControl.none && onPressed == null),
-      color: color ?? theme.palette.primary,
-      builder: (contxt, colors, status, _) {
+      builder: (contxt, status, _) {
+        final colors = neutralGhostColor(theme, status);
         return IconTheme(
           data: IconThemeData(
             color: colors.text,

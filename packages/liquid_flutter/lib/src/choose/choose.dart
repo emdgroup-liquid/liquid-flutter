@@ -2,6 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:liquid_flutter/src/monkey/monkey_router_adapter.dart';
+import 'package:liquid_flutter/src/monkey/monkey_sort_and_filter_state.dart';
+import 'package:provider/provider.dart';
 
 import '../../liquid_flutter.dart';
 
@@ -188,40 +191,20 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
     if (widget.items != null && widget.repository == null) {
       _repository = LdRepository.fromList<T, IdType>(
         list: widget.items!,
-        filters: {
-          LdFilterSearch<T, IdType, LdSelectItem<dynamic>>(
-              name: 'search',
-              label: (context) => 'Search',
-              icon: (context) => const Icon(Icons.search),
-              optimisticFilter: (item, searchText) {
-                if (item is LdSelectItem<dynamic>) {
-                  return (item as LdSelectItem<dynamic>)
-                          .searchString
-                          ?.toLowerCase()
-                          .contains(searchText.toLowerCase()) ??
-                      false;
-                }
-
-                return item.toString().toLowerCase().contains(searchText.toLowerCase());
-              },
-              buildSuggestion: (context, suggestion) {
-                final item = suggestion as LdSelectItem<dynamic>;
-                return LdListItem(
-                  title: suggestion.child,
-                  onPressed: () {
-                    LdSearchAcceptSuggestion(suggestion: item.searchString).dispatch(context);
-                  },
-                );
-              },
-              getSuggestions: (searchText) async {
-                return (widget.items! as List<LdSelectItem<dynamic>>).where((item) {
-                  return (item).searchString?.toLowerCase().contains(searchText.toLowerCase()) ?? false;
-                }).toList();
-              }),
+        filterFunction: (item, activeFilters) {
+          final searchFilter = activeFilters?.whereType<LdFilterSearch<T, IdType, LdSelectItem<dynamic>>>().firstOrNull;
+          if (searchFilter == null || !searchFilter.isOn || searchFilter.searchText.isEmpty) {
+            return true;
+          }
+          final text = searchFilter.searchText.toLowerCase();
+          if (item is LdSelectItem<dynamic>) {
+            return (item as LdSelectItem<dynamic>).searchString?.toLowerCase().contains(text) ?? false;
+          }
+          return item.toString().toLowerCase().contains(text);
         },
       );
       _repository.initialOffset = 0;
-      _repository.fetchItemsAtOffset(0);
+      _repository.fetchPageAtOffset(context, 0);
       _ownsRepository = true;
     } else {
       _repository = widget.repository!;
@@ -430,62 +413,65 @@ class LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<Ld
 
   @override
   Widget build(BuildContext context) {
-    final searchConfig = widget.repository.getSearchConfig();
+    final filterState = context.watch<LdMonkeySortAndFilterState<T, IdType>>();
+    final searchConfig = filterState.filters.whereType<LdFilterSearch<T, IdType, dynamic>>().firstOrNull;
+
+    final body = Builder(builder: (context) {
+      return LdSelectableList<T, IdType>(
+          paginator: widget.repository,
+          itemBuilder: widget.itemBuilder,
+          initialSelectedItems: _selectedItems,
+          multiSelect: widget.multiple,
+          showSelectionControls: true,
+          onSelectionChange: _handleSelectionChange,
+          listBuilder: (context, itemBuilder) {
+            return LdList(
+              groupingCriterion: widget.groupingCriterion,
+              groupHeaderBuilder: widget.groupHeaderBuilder,
+              paginator: widget.repository,
+              padding: MediaQuery.paddingOf(context),
+              itemBuilder: itemBuilder,
+            );
+          });
+    });
+
     return LdScaffold(
       debugName: "LdChoosePage",
-      appBars: [
-        LdAppBar(
-          debugName: "LdChoosePageAppBar",
-          title: Text(widget.label),
-          order: 0,
-          implyCloseModalButton: false,
-          actions: [
-            if (widget.allowEmpty)
-              LdButton.ghost(
-                disabled: _selectedItems.isEmpty,
-                onPressed: () {
-                  setState(() {
-                    _selectedItems = {};
-                  });
-                },
-                child: const Text("Clear"),
-              ),
-            LdButton(
-              disabled: _selectedItems.isEmpty && !widget.allowEmpty,
-              key: const Key("ldChoose_done"),
+      body: LdAppBar(
+        debugName: "LdChoosePageAppBar",
+        title: Text(widget.label),
+        implyCloseModalButton: false,
+        actions: [
+          if (widget.allowEmpty)
+            LdButton.ghost(
+              disabled: _selectedItems.isEmpty,
               onPressed: () {
-                maybePopContextMenu(context);
-                Navigator.of(context).pop(_selectedItems);
+                setState(() {
+                  _selectedItems = {};
+                });
               },
-              child: const Text("Done"),
+              child: const Text("Clear"),
             ),
-          ],
-        ),
-        if (searchConfig != null)
-          LdAppBar.top(
-            order: 1,
-            debugName: "LdChoosePageSearchAppBar",
-            searchConfig: searchConfig,
+          LdButton(
+            disabled: _selectedItems.isEmpty && !widget.allowEmpty,
+            key: const Key("ldChoose_done"),
+            onPressed: () {
+              maybePopContextMenu(context);
+              Navigator.of(context).pop(_selectedItems);
+            },
+            child: const Text("Done"),
           ),
-      ],
-      body: Builder(builder: (context) {
-        return LdSelectableList<T, IdType>(
-            paginator: widget.repository,
-            itemBuilder: widget.itemBuilder,
-            initialSelectedItems: _selectedItems,
-            multiSelect: widget.multiple,
-            showSelectionControls: true,
-            onSelectionChange: _handleSelectionChange,
-            listBuilder: (context, itemBuilder) {
-              return LdList(
-                groupingCriterion: widget.groupingCriterion,
-                groupHeaderBuilder: widget.groupHeaderBuilder,
-                paginator: widget.repository,
-                padding: MediaQuery.paddingOf(context),
-                itemBuilder: itemBuilder,
-              );
-            });
-      }),
+        ],
+        child: searchConfig != null
+            ? LdAppBar.top(
+                debugName: "LdChoosePageSearchAppBar",
+                searchConfig: searchConfig.searchConfig((query) {
+                  // TODO: wire up search
+                }),
+                child: body,
+              )
+            : body,
+      ),
     );
   }
 }

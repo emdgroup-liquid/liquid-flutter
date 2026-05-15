@@ -28,59 +28,57 @@ class _AppScaffoldState extends State<AppScaffold> {
   Widget build(BuildContext context) {
     return LdScaffold(
       drawer: MainNavigationDrawer(),
-      appBars: [
-        LdAppBar(
-          shadowMode: LdAppBarShadowMode.hidden,
-          debugName: "Master App Bar",
-          leading: Container(
-            height: 24,
-            decoration: BoxDecoration(borderRadius: LdTheme.of(context).radius(LdSize.m)),
-            clipBehavior: Clip.hardEdge,
-            child: Image.asset("liquid_flutter_icon.jpg"),
-          ),
-          title: widget.title,
-          actions: [
-            LdAppBarAction(
-              tooltip: "GitHub",
-              leading: Icon(LucideIcons.gitFork),
-              onPressed: () {
-                launchUrl(Uri.parse("https://github.com/emdgroup-liquid/liquid-flutter"));
-              },
-              child: const Text("GitHub"),
-            ),
-            LdContextMenu(
-              builder: (context, isShuttle, open, isOpen, child) => LdAppBarAction(
-                tooltip: "Theme",
-                leading: const Icon(LucideIcons.paintBucket),
-                onPressed: open,
-                active: isOpen,
-                child: const Text("Theme"),
-              ),
-              menuBuilder: (context) => ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 300),
-                child: SingleChildScrollView(
-                  child: LdAutoSpace(
-                    children: [
-                      const PlatformSelector(),
-                      ldSpacerM,
-                      const ThemeSelector(),
-                      ldSpacerM,
-                      const SizeSelector(),
-                      ldSpacerM,
-                      const RadiusSelector(),
-                      ldSpacerM,
-                      const FontSelector(),
-                      ldSpacerM,
-                      const HeadlineFontSelector(),
-                    ],
-                  ).padL(),
-                ),
-              ),
-            ),
-          ],
+      body: LdAppBar(
+        shadowMode: LdAppBarShadowMode.hidden,
+        debugName: "Master App Bar",
+        leading: Container(
+          height: 24,
+          decoration: BoxDecoration(borderRadius: LdTheme.of(context).radius(LdSize.m)),
+          clipBehavior: Clip.hardEdge,
+          child: Image.asset("liquid_flutter_icon.jpg"),
         ),
-      ],
-      body: widget.child,
+        title: widget.title,
+        actions: [
+          LdAppBarAction(
+            tooltip: "GitHub",
+            leading: Icon(LucideIcons.gitFork),
+            onPressed: () {
+              launchUrl(Uri.parse("https://github.com/emdgroup-liquid/liquid-flutter"));
+            },
+            child: const Text("GitHub"),
+          ),
+          LdContextMenu(
+            builder: (context, isShuttle, open, isOpen, child) => LdAppBarAction(
+              tooltip: "Theme",
+              leading: const Icon(LucideIcons.paintBucket),
+              onPressed: open,
+              active: isOpen,
+              child: const Text("Theme"),
+            ),
+            menuBuilder: (context) => ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 300),
+              child: SingleChildScrollView(
+                child: LdAutoSpace(
+                  children: [
+                    const PlatformSelector(),
+                    ldSpacerM,
+                    const ThemeSelector(),
+                    ldSpacerM,
+                    const SizeSelector(),
+                    ldSpacerM,
+                    const RadiusSelector(),
+                    ldSpacerM,
+                    const FontSelector(),
+                    ldSpacerM,
+                    const HeadlineFontSelector(),
+                  ],
+                ).padL(),
+              ),
+            ),
+          ),
+        ],
+        child: widget.child,
+      ),
     );
   }
 }

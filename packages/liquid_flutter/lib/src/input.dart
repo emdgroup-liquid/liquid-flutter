@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/form_label.dart';
+import 'package:liquid_flutter/src/touchable/input_color.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// An input field
@@ -16,6 +17,7 @@ class LdInput extends StatefulWidget {
   final Iterable<String>? autofillHints;
   final bool obscureText;
   final bool autofocus;
+  final Widget? trailing;
   final TextInputAction? textInputAction;
   final TextInputType? keyboardType;
   final FocusNode? focusNode;
@@ -26,6 +28,7 @@ class LdInput extends StatefulWidget {
   final bool loading;
   final Widget? leading;
   final bool allowTapOutside;
+  final bool selectAllOnFocus;
 
   final Widget? trailingHint;
 
@@ -35,9 +38,11 @@ class LdInput extends StatefulWidget {
   const LdInput({
     required this.hint,
     this.controller,
+    this.trailing,
     this.label,
     this.obscureText = false,
     this.leading,
+    this.selectAllOnFocus = false,
     this.maxLines = 1,
     this.minLines,
     this.autofocus = false,
@@ -114,7 +119,9 @@ class _LdInputState extends State<LdInput> {
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
 
-    final contentPadding = theme.pad() - EdgeInsets.all(theme.borderWidth);
+    final contentPadding = theme.pad() -
+        EdgeInsets.all(theme.borderWidth) -
+        (widget.showClear ? EdgeInsets.only(top: 4, bottom: 4) : EdgeInsets.zero);
 
     final cursorHeight = theme.labelSize(widget.size);
 
@@ -126,33 +133,23 @@ class _LdInputState extends State<LdInput> {
       height: 1,
     );
 
-    Widget? suffix;
+    var clearButton = widget.showClear
+        ? LdButton.vague(
+            size: widget.size == LdSize.l ? LdSize.s : LdSize.xs,
+            onPressed: () {
+              _controller.clear();
+              widget.onCleared?.call();
+            },
+            child: const Icon(LucideIcons.x))
+        : null;
 
-    var clearButton = LdButton.vague(
-        size: widget.size == LdSize.l ? LdSize.s : LdSize.xs,
-        onPressed: () {
-          _controller.clear();
-          widget.onCleared?.call();
-        },
-        child: const Icon(LucideIcons.x));
-
-    if (widget.trailingHint != null) {
-      final trailingHint = DefaultTextStyle(
-        style: hintStyle,
-        child: widget.trailingHint!,
-      );
-
-      if (widget.showClear) {
-        suffix = AnimatedSwitcher(
-          duration: const Duration(milliseconds: 150),
-          child: _controller.text.isEmpty ? trailingHint : clearButton,
-        );
-      } else {
-        suffix = trailingHint;
-      }
-    } else if (widget.showClear) {
-      suffix = clearButton;
-    }
+    final suffix = AnimatedSwitcher(
+      duration: const Duration(milliseconds: 150),
+      child: switch (_controller.text.isEmpty && widget.trailingHint != null) {
+        true => DefaultTextStyle(style: hintStyle, child: widget.trailingHint!),
+        false => widget.trailing ?? clearButton,
+      },
+    );
 
     return Material(
       type: MaterialType.transparency,
@@ -166,22 +163,22 @@ class _LdInputState extends State<LdInput> {
             disabled: widget.disabled,
           ),
           CallbackShortcuts(
-              bindings: {
-                const SingleActivator(LogicalKeyboardKey.escape): () {
-                  _focusScopeNode.unfocus();
-                },
+            bindings: {
+              const SingleActivator(LogicalKeyboardKey.escape): () {
+                _focusScopeNode.unfocus();
               },
-              child: LdTouchableSurface(
-                allowTapOutside: widget.allowTapOutside,
-                mode: LdTouchableSurfaceMode.input,
-                isInput: true,
-                focusNode: _focusScopeNode,
-                onPressed: () {
-                  _focusNode.requestFocus();
-                },
-                active: _focusScopeNode.hasFocus,
-                disabled: widget.disabled,
-                builder: (context, colors, status, _) => Container(
+            },
+            child: LdTouchableSurface(
+              allowTapOutside: widget.allowTapOutside,
+              focusNode: _focusScopeNode,
+              onPressed: () {
+                _focusNode.requestFocus();
+              },
+              active: _focusScopeNode.hasFocus,
+              disabled: widget.disabled,
+              builder: (context, status, _) => Builder(builder: (context) {
+                final colors = inputColor(theme, status, isValid: widget.valid);
+                return Container(
                   clipBehavior: Clip.hardEdge,
                   decoration: BoxDecoration(
                     color: colors.surface,
@@ -220,6 +217,7 @@ class _LdInputState extends State<LdInput> {
                                   cursorColor: theme.palette.primary.idle(
                                     theme.isDark,
                                   ),
+                                  selectAllOnFocus: widget.selectAllOnFocus,
                                   cursorHeight: cursorHeight,
                                   maxLines: widget.maxLines,
                                   autofillHints: widget.autofillHints,
@@ -262,8 +260,10 @@ class _LdInputState extends State<LdInput> {
                         )
                     ],
                   ),
-                ),
-              )),
+                );
+              }),
+            ),
+          )
         ],
       ),
     );

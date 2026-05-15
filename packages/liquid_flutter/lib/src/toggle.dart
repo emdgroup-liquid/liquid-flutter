@@ -119,12 +119,10 @@ class _LdToggleState extends State<LdToggle> with SingleTickerProviderStateMixin
     );
 
     return LdTouchableSurface(
-      color: _theme.palette.neutral,
-      mode: LdTouchableSurfaceMode.solid,
       onPressed: _onTap,
       disabled: widget.disabled,
       active: widget.checked,
-      builder: (contxt, colorBundle, status, _) {
+      builder: (contxt, status, _) {
         final thumbColor = switch ((widget.checked, status.hovering)) {
           (true, true) => colors.contrastingText(colors.idle(_theme.isDark)),
           (true, false) => colors.contrastingText(colors.idle(_theme.isDark)),

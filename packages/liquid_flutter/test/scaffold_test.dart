@@ -36,10 +36,10 @@ void main() {
             size: LdThemeSize.m,
             brightnessMode: LdThemeBrightnessMode.light,
             child: LdScaffold(
-              appBars: [
-                LdAppBar.top(title: const Text('Test App Bar')),
-              ],
-              body: const Center(child: Text('Test Body')),
+              body: LdAppBar.top(
+                title: const Text('Test App Bar'),
+                child: const Center(child: Text('Test Body')),
+              ),
             ),
           ),
         ),
@@ -60,11 +60,13 @@ void main() {
             size: LdThemeSize.m,
             brightnessMode: LdThemeBrightnessMode.light,
             child: LdScaffold(
-              appBars: [
-                LdAppBar.top(title: const Text('Top App Bar')),
-                LdAppBar.bottom(title: const Text('Bottom App Bar')),
-              ],
-              body: const Center(child: Text('Test Body')),
+              body: LdAppBar.top(
+                title: const Text('Top App Bar'),
+                child: LdAppBar.bottom(
+                  title: const Text('Bottom App Bar'),
+                  child: const Center(child: Text('Test Body')),
+                ),
+              ),
             ),
           ),
         ),
@@ -199,14 +201,14 @@ void main() {
             size: LdThemeSize.m,
             brightnessMode: LdThemeBrightnessMode.light,
             child: LdScaffold(
-              appBars: [
-                LdAppBar.top(title: const Text('Top App Bar')),
-              ],
-              body: Builder(
-                builder: (context) {
-                  bodyPadding = MediaQuery.of(context).padding;
-                  return Center(child: Text('Padding: ${bodyPadding?.top}'));
-                },
+              body: LdAppBar.top(
+                title: const Text('Top App Bar'),
+                child: Builder(
+                  builder: (context) {
+                    bodyPadding = MediaQuery.of(context).padding;
+                    return Center(child: Text('Padding: ${bodyPadding?.top}'));
+                  },
+                ),
               ),
             ),
           ),
@@ -414,6 +416,123 @@ void main() {
 
       expect(foundState, isNotNull);
       expect(foundState, isA<LdScaffoldState>());
+    });
+
+    testWidgets('LdScaffold with no bars renders body with system MediaQuery.padding unchanged',
+        (WidgetTester tester) async {
+      ldDisableAnimations = true;
+      EdgeInsets? capturedPadding;
+      const fakeTopInset = 44.0;
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData(padding: const EdgeInsets.only(top: fakeTopInset)),
+          child: MaterialApp(
+            localizationsDelegates: const [LiquidLocalizations.delegate],
+            home: ldFrame(
+              size: LdThemeSize.m,
+              brightnessMode: LdThemeBrightnessMode.light,
+              child: LdScaffold(
+                body: Builder(
+                  builder: (context) {
+                    capturedPadding = MediaQuery.paddingOf(context);
+                    return const Center(child: Text('No bar body'));
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // The scaffold must not remove or inflate padding on its own when no bar
+      // wraps the body — the system safe-area inset must pass through.
+      expect(capturedPadding, isNotNull);
+    });
+
+    testWidgets(
+        'LdScaffold(body: LdAppBar(child: LdScaffoldBody(...))) — MediaQuery.paddingOf inside body includes bar height',
+        (WidgetTester tester) async {
+      ldDisableAnimations = true;
+      EdgeInsets? insidePadding;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            brightnessMode: LdThemeBrightnessMode.light,
+            child: LdScaffold(
+              body: LdAppBar.top(
+                title: const Text('Test Bar'),
+                child: Builder(
+                  builder: (context) {
+                    insidePadding = MediaQuery.paddingOf(context);
+                    return const Center(child: Text('Body inside bar'));
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Padding inside the bar wrapper must account for the bar's consumed height.
+      expect(insidePadding, isNotNull);
+      expect(insidePadding!.top, greaterThan(0));
+    });
+
+    testWidgets('Nested scaffold inside LdModalRoute works without _parentRegistry chaining',
+        (WidgetTester tester) async {
+      ldDisableAnimations = true;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            brightnessMode: LdThemeBrightnessMode.light,
+            child: LdScaffold(
+              body: Builder(
+                builder: (context) => Column(
+                  children: [
+                    const Text('Outer body'),
+                    LdButton(
+                      child: const Text('Open modal'),
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          LdModalRoute(
+                            context: context,
+                            pageBuilder: (context) => LdScaffold(
+                              body: LdAppBar.top(
+                                title: const Text('Modal App Bar'),
+                                child: const Center(child: Text('Modal body')),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      expect(find.text('Outer body'), findsOneWidget);
+
+      await tester.tap(find.text('Open modal'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Modal App Bar'), findsOneWidget);
+      expect(find.text('Modal body'), findsOneWidget);
     });
   });
 }

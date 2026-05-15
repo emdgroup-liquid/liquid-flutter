@@ -13,7 +13,6 @@ void main() {
           name: 'search',
           label: (context) => 'Search',
           icon: (context) => const Icon(Icons.search),
-          optimisticFilter: (item, query) => item.name.contains(query),
         );
 
         final repository = createTestRepository(filters: {searchFilter});

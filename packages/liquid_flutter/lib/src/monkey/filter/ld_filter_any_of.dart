@@ -4,7 +4,6 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterOption<T, IdType> {
   final Map<E, Widget Function(BuildContext)> allValues;
   final Set<E> selectedValues;
-  final bool Function(T item, List<E> selected) _optimisticFilter;
 
   LdFilterAnyOf({
     required super.name,
@@ -13,9 +12,8 @@ class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
     super.isOn = false,
     required this.allValues,
     Set<E>? initialSelected,
-    required bool Function(T item, List<E> selected) optimisticFilter,
-  })  : _optimisticFilter = optimisticFilter,
-        selectedValues = Set<E>.from(initialSelected ?? {});
+    super.isEnabled,
+  }) : selectedValues = Set<E>.from(initialSelected ?? {});
 
   @override
   String serialize() {
@@ -38,11 +36,6 @@ class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
   }
 
   @override
-  bool optimisticFilter(T item) {
-    return _optimisticFilter(item, selectedValues.toList());
-  }
-
-  @override
   LdFilterAnyOf<T, IdType, E> copyWith({
     String Function(BuildContext context)? label,
     Widget Function(BuildContext context)? icon,
@@ -50,7 +43,7 @@ class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
     bool? isOn,
     Map<E, Widget Function(BuildContext)>? allValues,
     Set<E>? selectedValues,
-    bool Function(T item, List<E> selected)? optimisticFilter,
+    bool Function(BuildContext context)? isEnabled,
   }) {
     return LdFilterAnyOf<T, IdType, E>(
       name: name ?? this.name,
@@ -59,12 +52,12 @@ class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
       isOn: isOn ?? this.isOn,
       allValues: allValues ?? this.allValues,
       initialSelected: selectedValues ?? this.selectedValues,
-      optimisticFilter: optimisticFilter ?? _optimisticFilter,
+      isEnabled: isEnabled ?? this.isEnabled,
     );
   }
 
   @override
-  Widget build(BuildContext context, LdRepository<T, IdType> repository) {
+  Widget build(BuildContext context) {
     return LdFilterAnyOfWidget<T, IdType, E>(filter: this);
   }
 }

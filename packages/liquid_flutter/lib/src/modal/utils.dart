@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 Future<bool> ldConfirmModal(
@@ -21,15 +20,14 @@ Future<bool> ldConfirmModal(
       dialogSize: LdSize.s,
       pageBuilder: (context) {
         return LdScaffold(
-          appBars: [
-            LdAppBar(
-              title: title ?? Text(locale.confirm),
-            ),
-            LdAppBar(
+          body: LdAppBar(
+            title: title ?? Text(locale.confirm),
+            child: LdAppBar(
+              attachedMode: LdAppBarAttachedMode.attached,
               positionMode: LdAppBarPositionMode.bottom,
               actions: [
                 LdFlexibleChild(
-                  child: LdButton(
+                  child: LdButton.vague(
                     size: LdSize.l,
                     width: double.infinity,
                     color: cancelColor ?? LdTheme.of(context).error,
@@ -38,7 +36,7 @@ Future<bool> ldConfirmModal(
                   ),
                 ),
                 LdFlexibleChild(
-                  child: LdButton(
+                  child: LdButton.vague(
                     size: LdSize.l,
                     width: double.infinity,
                     color: confirmColor ?? LdTheme.of(context).primary,
@@ -47,23 +45,21 @@ Future<bool> ldConfirmModal(
                   ),
                 ),
               ],
-            ),
-          ],
-          body: LdScaffoldBody(
-            children: [
-              LdAutoSpace(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  if (indicatorType != null)
-                    LdIndicator(
-                      type: indicatorType,
-                      customSize: 24,
-                    ),
-                  if (description != null) LdText.p(description),
-                  if (additionalContent != null) additionalContent,
-                ],
+              child: LdScaffoldBodyCentered(
+                child: LdAutoSpace(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (indicatorType != null)
+                      LdIndicator(
+                        type: indicatorType,
+                        customSize: 24,
+                      ),
+                    if (description != null) LdText.p(description),
+                    if (additionalContent != null) additionalContent,
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
         );
       }).show(context, useRootNavigator: useRootNavigator);
@@ -80,7 +76,13 @@ Future<String?> ldEnterTextModal({
   String? initialValue,
   String? inputHint,
   String? inputLabel,
+  bool allowEmpty = false,
+  bool obscureText = false,
+  TextInputType? keyboardType,
+  TextInputAction? textInputAction,
+  bool Function(String input)? validate,
   bool allowDismiss = true,
+  bool requireChange = false,
 }) async {
   final res = await LdModalRoute<String?>(
       context: context,
@@ -95,6 +97,12 @@ Future<String?> ldEnterTextModal({
           inputLabel: inputLabel,
           allowDismiss: allowDismiss,
           initialValue: initialValue,
+          allowEmpty: allowEmpty,
+          obscureText: obscureText,
+          keyboardType: keyboardType,
+          textInputAction: textInputAction,
+          validate: validate,
+          requireChange: requireChange,
         );
       }).show(context, useRootNavigator: useRootNavigator);
   return res;
@@ -107,7 +115,13 @@ class _LdEnterTextModal extends StatefulWidget {
   final String? inputHint;
   final String? inputLabel;
   final String? initialValue;
+  final bool allowEmpty;
   final bool allowDismiss;
+  final TextInputType? keyboardType;
+  final bool obscureText;
+  final bool Function(String input)? validate;
+  final TextInputAction? textInputAction;
+  final bool requireChange;
 
   const _LdEnterTextModal({
     required this.description,
@@ -116,7 +130,13 @@ class _LdEnterTextModal extends StatefulWidget {
     required this.inputHint,
     required this.inputLabel,
     required this.allowDismiss,
+    required this.allowEmpty,
+    required this.obscureText,
+    required this.keyboardType,
     required this.initialValue,
+    required this.validate,
+    required this.textInputAction,
+    required this.requireChange,
   });
 
   @override
@@ -125,6 +145,7 @@ class _LdEnterTextModal extends StatefulWidget {
 
 class _LdEnterTextModalState extends State<_LdEnterTextModal> {
   final TextEditingController _controller = TextEditingController();
+  bool _isValid = false;
 
   @override
   dispose() {
@@ -138,14 +159,29 @@ class _LdEnterTextModalState extends State<_LdEnterTextModal> {
     super.initState();
   }
 
+  bool get _didChange => _controller.text != widget.initialValue;
+
+  bool get _canSubmit =>
+      (widget.allowEmpty || _controller.text.isNotEmpty) && _isValid && (_didChange || !widget.requireChange);
+
+  void _onSubmitted(String text) {
+    if (_canSubmit) {
+      Navigator.of(context).pop(text);
+    }
+  }
+
+  void _onChanged(String text) {
+    setState(() {
+      _isValid = widget.validate?.call(text) ?? true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return LdScaffold(
-      appBars: [
-        LdAppBar(
-          title: widget.title ?? Text(LiquidLocalizations.of(context).enterText),
-        ),
-        LdAppBar(
+      body: LdAppBar(
+        title: widget.title ?? Text(LiquidLocalizations.of(context).enterText),
+        child: LdAppBar(
           positionMode: LdAppBarPositionMode.bottom,
           avoidViewInsets: true,
           attachedMode: LdAppBarAttachedMode.attached,
@@ -162,27 +198,33 @@ class _LdEnterTextModalState extends State<_LdEnterTextModal> {
             LdFlexibleChild(
               child: LdButton.filled(
                 width: double.infinity,
+                disabled: !_canSubmit,
                 child: Text(LiquidLocalizations.of(context).done),
-                onPressed: () => Navigator.of(context).pop(_controller.text),
+                onPressed: () => _onSubmitted(_controller.text),
               ),
             ),
           ],
+          child: LdScaffoldBody(
+            children: [
+              LdAutoSpace(children: [
+                if (widget.description != null) LdText.p(widget.description!),
+                if (widget.additionalContent != null) widget.additionalContent!,
+                LdInput(
+                  controller: _controller,
+                  autofocus: true,
+                  keyboardType: widget.keyboardType,
+                  onChanged: _onChanged,
+                  obscureText: widget.obscureText,
+                  valid: _isValid,
+                  textInputAction: widget.textInputAction,
+                  hint: widget.inputHint ?? LiquidLocalizations.of(context).enterText,
+                  label: widget.inputLabel ?? LiquidLocalizations.of(context).enterText,
+                  onSubmitted: (text) => _onSubmitted(text),
+                ),
+              ]),
+            ],
+          ),
         ),
-      ],
-      body: LdScaffoldBody(
-        children: [
-          LdAutoSpace(children: [
-            if (widget.description != null) LdText.p(widget.description!),
-            if (widget.additionalContent != null) widget.additionalContent!,
-            LdInput(
-              controller: _controller,
-              autofocus: true,
-              hint: widget.inputHint ?? LiquidLocalizations.of(context).enterText,
-              label: widget.inputLabel ?? LiquidLocalizations.of(context).enterText,
-              onSubmitted: (text) => Navigator.of(context).pop(text),
-            ),
-          ]),
-        ],
       ),
     );
   }

@@ -68,15 +68,13 @@ void main() {
       "Basic tab navigation": (tester, place) async {
         await place(
           LdScaffold(
-            appBars: [
-              LdTabNavigation(
-                tabs: sampleTabs,
-                activeRoute: '/home',
-                onTabPressed: (route) {},
+            body: LdTabNavigation(
+              tabs: sampleTabs,
+              activeRoute: '/home',
+              onTabPressed: (route) {},
+              child: Center(
+                child: LdText.p("Body Content"),
               ),
-            ],
-            body: Center(
-              child: LdText.p("Body Content"),
             ),
           ),
         );
@@ -84,15 +82,13 @@ void main() {
       "Tab navigation with 3 tabs": (tester, place) async {
         await place(
           LdScaffold(
-            appBars: [
-              LdTabNavigation(
-                tabs: sampleTabs,
-                activeRoute: '/home',
-                onTabPressed: (route) {},
+            body: LdTabNavigation(
+              tabs: sampleTabs,
+              activeRoute: '/home',
+              onTabPressed: (route) {},
+              child: Center(
+                child: LdText.p("Body Content"),
               ),
-            ],
-            body: Center(
-              child: LdText.p("Body Content"),
             ),
           ),
         );
@@ -100,15 +96,13 @@ void main() {
       "Tab navigation with 5 tabs": (tester, place) async {
         await place(
           LdScaffold(
-            appBars: [
-              LdTabNavigation(
-                tabs: fiveTabs,
-                activeRoute: '/home',
-                onTabPressed: (route) {},
+            body: LdTabNavigation(
+              tabs: fiveTabs,
+              activeRoute: '/home',
+              onTabPressed: (route) {},
+              child: Center(
+                child: LdText.p("Body Content"),
               ),
-            ],
-            body: Center(
-              child: LdText.p("Body Content"),
             ),
           ),
         );
@@ -116,16 +110,14 @@ void main() {
       "Tab navigation with overflow": (tester, place) async {
         await place(
           LdScaffold(
-            appBars: [
-              LdTabNavigation(
-                tabs: manyTabs,
-                activeRoute: '/tab0',
-                onTabPressed: (route) {},
-                maxVisibleTabs: 5,
+            body: LdTabNavigation(
+              tabs: manyTabs,
+              activeRoute: '/tab0',
+              onTabPressed: (route) {},
+              maxVisibleTabs: 5,
+              child: Center(
+                child: LdText.p("Body Content"),
               ),
-            ],
-            body: Center(
-              child: LdText.p("Body Content"),
             ),
           ),
         );
@@ -133,15 +125,13 @@ void main() {
       "Tab navigation with active tab": (tester, place) async {
         await place(
           LdScaffold(
-            appBars: [
-              LdTabNavigation(
-                tabs: sampleTabs,
-                activeRoute: '/search',
-                onTabPressed: (route) {},
+            body: LdTabNavigation(
+              tabs: sampleTabs,
+              activeRoute: '/search',
+              onTabPressed: (route) {},
+              child: Center(
+                child: LdText.p("Body Content"),
               ),
-            ],
-            body: Center(
-              child: LdText.p("Body Content"),
             ),
           ),
         );
@@ -149,16 +139,14 @@ void main() {
       "Tab navigation at top position": (tester, place) async {
         await place(
           LdScaffold(
-            appBars: [
-              LdTabNavigation(
-                tabs: sampleTabs,
-                activeRoute: '/home',
-                onTabPressed: (route) {},
-                position: LdAppBarPositionMode.top,
+            body: LdTabNavigation(
+              tabs: sampleTabs,
+              activeRoute: '/home',
+              onTabPressed: (route) {},
+              position: LdAppBarPositionMode.top,
+              child: Center(
+                child: LdText.p("Body Content"),
               ),
-            ],
-            body: Center(
-              child: LdText.p("Body Content"),
             ),
           ),
         );
@@ -166,16 +154,14 @@ void main() {
       "Tab navigation at bottom position": (tester, place) async {
         await place(
           LdScaffold(
-            appBars: [
-              LdTabNavigation(
-                tabs: sampleTabs,
-                activeRoute: '/home',
-                onTabPressed: (route) {},
-                position: LdAppBarPositionMode.bottom,
+            body: LdTabNavigation(
+              tabs: sampleTabs,
+              activeRoute: '/home',
+              onTabPressed: (route) {},
+              position: LdAppBarPositionMode.bottom,
+              child: Center(
+                child: LdText.p("Body Content"),
               ),
-            ],
-            body: Center(
-              child: LdText.p("Body Content"),
             ),
           ),
         );
@@ -183,16 +169,14 @@ void main() {
       "Tab navigation attached": (tester, place) async {
         await place(
           LdScaffold(
-            appBars: [
-              LdTabNavigation(
-                tabs: sampleTabs,
-                activeRoute: '/home',
-                onTabPressed: (route) {},
-                attachedMode: LdAppBarAttachedMode.attached,
+            body: LdTabNavigation(
+              tabs: sampleTabs,
+              activeRoute: '/home',
+              onTabPressed: (route) {},
+              attachedMode: LdAppBarAttachedMode.attached,
+              child: Center(
+                child: LdText.p("Body Content"),
               ),
-            ],
-            body: Center(
-              child: LdText.p("Body Content"),
             ),
           ),
         );
@@ -200,16 +184,14 @@ void main() {
       "Tab navigation floating": (tester, place) async {
         await place(
           LdScaffold(
-            appBars: [
-              LdTabNavigation(
-                tabs: sampleTabs,
-                activeRoute: '/home',
-                onTabPressed: (route) {},
-                attachedMode: LdAppBarAttachedMode.floating,
+            body: LdTabNavigation(
+              tabs: sampleTabs,
+              activeRoute: '/home',
+              onTabPressed: (route) {},
+              attachedMode: LdAppBarAttachedMode.floating,
+              child: Center(
+                child: LdText.p("Body Content"),
               ),
-            ],
-            body: Center(
-              child: LdText.p("Body Content"),
             ),
           ),
         );
@@ -217,16 +199,14 @@ void main() {
       "Tab navigation with background mode visible": (tester, place) async {
         await place(
           LdScaffold(
-            appBars: [
-              LdTabNavigation(
-                tabs: sampleTabs,
-                activeRoute: '/home',
-                onTabPressed: (route) {},
-                backgroundMode: LdAppBarBackgroundMode.visible,
+            body: LdTabNavigation(
+              tabs: sampleTabs,
+              activeRoute: '/home',
+              onTabPressed: (route) {},
+              backgroundMode: LdAppBarBackgroundMode.visible,
+              child: Center(
+                child: LdText.p("Body Content"),
               ),
-            ],
-            body: Center(
-              child: LdText.p("Body Content"),
             ),
           ),
         );
@@ -234,16 +214,14 @@ void main() {
       "Tab navigation with background mode hidden": (tester, place) async {
         await place(
           LdScaffold(
-            appBars: [
-              LdTabNavigation(
-                tabs: sampleTabs,
-                activeRoute: '/home',
-                onTabPressed: (route) {},
-                backgroundMode: LdAppBarBackgroundMode.hidden,
+            body: LdTabNavigation(
+              tabs: sampleTabs,
+              activeRoute: '/home',
+              onTabPressed: (route) {},
+              backgroundMode: LdAppBarBackgroundMode.hidden,
+              child: Center(
+                child: LdText.p("Body Content"),
               ),
-            ],
-            body: Center(
-              child: LdText.p("Body Content"),
             ),
           ),
         );
@@ -251,18 +229,16 @@ void main() {
       "Tab navigation with scrollable body": (tester, place) async {
         await place(
           LdScaffold(
-            appBars: [
-              LdTabNavigation(
-                tabs: sampleTabs,
-                activeRoute: '/home',
-                onTabPressed: (route) {},
-              ),
-            ],
-            body: ListView(
-              children: List.generate(
-                10,
-                (index) => LdListItem(
-                  title: Text("Item ${index + 1}"),
+            body: LdTabNavigation(
+              tabs: sampleTabs,
+              activeRoute: '/home',
+              onTabPressed: (route) {},
+              child: ListView(
+                children: List.generate(
+                  10,
+                  (index) => LdListItem(
+                    title: Text("Item ${index + 1}"),
+                  ),
                 ),
               ),
             ),
@@ -272,16 +248,14 @@ void main() {
       "Tab navigation with enableGradient false": (tester, place) async {
         await place(
           LdScaffold(
-            appBars: [
-              LdTabNavigation(
-                tabs: sampleTabs,
-                activeRoute: '/home',
-                onTabPressed: (route) {},
-                enableGradient: false,
+            body: LdTabNavigation(
+              tabs: sampleTabs,
+              activeRoute: '/home',
+              onTabPressed: (route) {},
+              enableGradient: false,
+              child: Center(
+                child: LdText.p("Body Content"),
               ),
-            ],
-            body: Center(
-              child: LdText.p("Body Content"),
             ),
           ),
         );

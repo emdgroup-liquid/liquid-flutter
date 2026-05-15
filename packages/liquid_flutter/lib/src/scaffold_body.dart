@@ -1,6 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
+class LdScaffoldBodyCentered extends StatelessWidget {
+  final Widget child;
+  final Color? backgroundColor;
+  final EdgeInsets? minimumPadding;
+  final bool addContainer;
+  const LdScaffoldBodyCentered({
+    super.key,
+    required this.child,
+    this.backgroundColor,
+    this.minimumPadding,
+    this.addContainer = false,
+  });
+  @override
+  Widget build(BuildContext context) {
+    final theme = LdTheme.of(context, listen: true);
+
+    final themePadding = minimumPadding ?? theme.pad();
+    var padding = MediaQuery.paddingOf(context).atLeast(MediaQuery.viewPaddingOf(context)).atLeast(themePadding);
+
+    return LayoutBuilder(builder: (context, constraints) {
+      if (addContainer) {
+        final maxWidthPadding = EdgeInsets.only(
+            left: (constraints.maxWidth - theme.sizingConfig.containerMaxWidth) / 2,
+            right: (constraints.maxWidth - theme.sizingConfig.containerMaxWidth) / 2);
+        padding = padding.atLeast(maxWidthPadding);
+      }
+
+      return Container(
+        color: backgroundColor ?? Colors.transparent,
+        padding: padding,
+        child: MediaQuery.removePadding(
+          context: context,
+          removeTop: true,
+          removeBottom: true,
+          child: Center(child: child),
+        ),
+      );
+    });
+  }
+}
+
 class LdScaffoldBody extends StatelessWidget {
   final List<Widget> children;
   final List<Widget> slivers;

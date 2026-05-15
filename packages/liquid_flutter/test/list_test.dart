@@ -140,11 +140,7 @@ void main() {
         },
         "Error State": (tester, place) async {
           final errorProducingPaginator = LdPaginator<_SampleItem, int>(
-            fetchListFunction: ({
-              required offset,
-              required pageSize,
-              pageToken,
-            }) {
+            fetchListFunction: (params) {
               throw Exception('Foo');
             },
             debounceTime: const Duration(milliseconds: 0),

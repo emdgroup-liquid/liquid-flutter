@@ -15,64 +15,85 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
 
     final newSelection = !listSelection.contains(item.value!.id) ? {item.value!.id} : listSelection;
 
-    final shell = LdMonkeyShellState.of<T, IdType>(context);
     final actions = context.read<LdMonkeyActions<T, IdType>>();
 
     return Provider.value(
-      value: LdMonkeySelection<T, IdType>(selection: newSelection, viewing: selection.viewing),
+      value: LdMonkeySelection<T, IdType>(
+        selection: newSelection,
+        viewing: selection.viewing,
+        showSelectionControls: false,
+      ),
       child: Provider.value(
-        value: newSelection,
-        child: Builder(builder: (newContext) {
-          final visibleActions =
-              actions.where((e) => e.isVisible(context, location: LdMonkeyActionLocation.context)).toList();
+        value: LdMonkeyActionLocation.context,
+        child: Provider.value(
+          value: newSelection,
+          child: Builder(builder: (newContext) {
+            final visibleActions = actions
+                .where(
+                  (e) => e.isVisible(
+                    newContext,
+                    location: LdMonkeyActionLocation.context,
+                  ),
+                )
+                .toList();
 
-          return LdContextMenu(
-            disabled: (listSelection.length > 1 && !listSelection.contains(item.value!.id)) || visibleActions.isEmpty,
-            builder: (context, isShuttle, open, isOpen, child) => LdButtonConfigProvider(
-              config: LdButtonConfig(active: isOpen),
-              child: child!,
-            ),
-            menuProviders: (context) => [
-              Provider<LdPaginatorItem<T>>.value(value: item),
-              ChangeNotifierProvider<LdMonkeyShellState<T, IdType>>.value(value: shell),
-              Provider.value(
-                value: context.read<LdMonkeyEffectiveLayoutMode>(),
+            return LdContextMenu(
+              disabled: (listSelection.length > 1 && !listSelection.contains(item.value!.id)) || visibleActions.isEmpty,
+              builder: (context, isShuttle, open, isOpen, child) => LdButtonConfigProvider(
+                config: LdButtonConfig(active: isOpen),
+                child: child!,
               ),
-              Provider<LdMonkeySelection<T, IdType>>.value(
-                value: LdMonkeySelection(selection: newSelection, viewing: selection.viewing),
-              ),
-              ListenableProvider.value(
-                value: LdRepository.of<T, IdType>(context),
-              ),
-              Provider<List<LdMonkeyAction<T, IdType>>>.value(
-                value: visibleActions,
-              ),
-            ],
-            menuBuilder: (context) => ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 300),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: visibleActions
-                    .map(
-                      (action) => LdButtonConfigProvider(
-                          config: const LdButtonConfig(
-                            borderRadius: BorderRadius.zero,
-                            disableSqueeze: true,
-                            alignment: MainAxisAlignment.start,
-                            autoLoading: false,
+              menuProviders: (context) => [
+                Provider<LdPaginatorItem<T>>.value(value: item),
+                Provider.value(
+                  value: context.read<LdMonkeyEffectiveLayoutMode>(),
+                ),
+                Provider.value(
+                  value: LdMonkeyActionLocation.context,
+                ),
+                Provider<LdMonkeySelection<T, IdType>>.value(
+                  value: LdMonkeySelection(
+                    selection: newSelection,
+                    viewing: selection.viewing,
+                    showSelectionControls: selection.showSelectionControls,
+                  ),
+                ),
+                ListenableProvider.value(
+                  value: LdRepository.of<T, IdType>(context),
+                ),
+                Provider<List<LdMonkeyAction<T, IdType>>>.value(
+                  value: visibleActions,
+                ),
+              ],
+              menuBuilder: (context) => ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 300),
+                child: Builder(builder: (context) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: visibleActions
+                        .map(
+                          (action) => LdButtonConfigProvider(
+                            config: const LdButtonConfig(
+                              borderRadius: BorderRadius.zero,
+                              disableSqueeze: true,
+                              alignment: MainAxisAlignment.start,
+                              autoLoading: false,
 
-                            //color: LdTheme.of(context).palette.neutral,
-                            width: double.infinity,
-                            mode: LdButtonMode.ghost,
+                              //color: LdTheme.of(context).palette.neutral,
+                              width: double.infinity,
+                              mode: LdButtonMode.ghost,
+                            ),
+                            child: action.build(context),
                           ),
-                          child: action.build(context)),
-                    )
-                    .toList(),
+                        )
+                        .toList(),
+                  );
+                }),
               ),
-            ),
-            child: child,
-          );
-        }),
+              child: child,
+            );
+          }),
+        ),
       ),
     );
   }

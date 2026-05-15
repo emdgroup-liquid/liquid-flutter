@@ -7,6 +7,9 @@ import 'package:markdown/markdown.dart' as md;
 import 'package:syntax_highlight/syntax_highlight.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+/// Decodes HTML entities produced by the `markdown` package (e.g. `&quot;`).
+final _mdHtmlUnescape = HtmlUnescape();
+
 /// A custom markdown widget that renders markdown using Liquid Flutter components
 class LdMarkdown extends StatelessWidget {
   final String data;
@@ -67,6 +70,7 @@ List<Widget> markdownToWidgets(BuildContext context, List<md.Node> nodes) {
         _ => Wrap(
           alignment: WrapAlignment.start,
           runAlignment: WrapAlignment.start,
+          runSpacing: theme.pad(size: LdSize.xs).vertical,
           children: childrenWidgets,
         ),
       };
@@ -77,48 +81,45 @@ List<Widget> markdownToWidgets(BuildContext context, List<md.Node> nodes) {
         'h3' ||
         'h4' ||
         'h5' ||
-        'h6' => buildText(context, node),
+        'h6' ||
+        'em' ||
+        'i' => buildText(context, node),
 
-        'ul' => SizedBox(
-          width: double.infinity,
-          child: LdBundle(
-            children: childrenWidgets
-                .map(
-                  (e) => Padding(
-                    padding: EdgeInsets.only(left: 4),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('•'),
-                        SizedBox(width: 4),
-                        Expanded(child: e),
-                      ],
-                    ),
+        'ul' => LdBundle(
+          children: childrenWidgets
+              .map(
+                (e) => Padding(
+                  padding: EdgeInsets.only(left: 4),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('•'),
+                      SizedBox(width: 4),
+                      Expanded(child: e),
+                    ],
                   ),
-                )
-                .toList(),
-          ),
+                ),
+              )
+              .toList(),
         ),
 
         'img' => Image.network(node.attributes['src'] ?? ''),
-        'ol' => SizedBox(
-          width: double.infinity,
-          child: LdBundle(
-            children: childrenWidgets
-                .mapIndexed(
-                  (index, e) => Padding(
-                    padding: EdgeInsets.only(left: 4),
-                    child: Row(
-                      children: [
-                        Text('${index + 1}.'),
-                        SizedBox(width: 4),
-                        Flexible(child: e),
-                      ],
-                    ),
+        'ol' => LdBundle(
+          children: childrenWidgets
+              .mapIndexed(
+                (index, e) => Padding(
+                  padding: EdgeInsets.only(left: 4),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('${index + 1}.'),
+                      SizedBox(width: 4),
+                      Flexible(child: e),
+                    ],
                   ),
-                )
-                .toList(),
-          ),
+                ),
+              )
+              .toList(),
         ),
         'br' => ldSpacerL,
         'hr' => LdDivider(),
@@ -129,13 +130,13 @@ List<Widget> markdownToWidgets(BuildContext context, List<md.Node> nodes) {
           style: TextStyle(fontWeight: FontWeight.bold),
           child: child,
         ),
-        'pre' => LdCard(child: child),
+        'pre' => LdBundle(children: [LdCard(child: child)]),
         'code' => _MarkdownCode(
           code: node.textContent,
           language: node.attributes['class']?.split('-').lastOrNull ?? 'text',
         ),
         'blockquote' => LdCard(
-          child: LdBundle(
+          child: LdAutoSpace(
             children: markdownToWidgets(context, node.children ?? []),
           ),
         ),
@@ -178,8 +179,7 @@ List<Widget> markdownToWidgets(BuildContext context, List<md.Node> nodes) {
       });
     } else if (node is md.Text) {
       //print('text: ${node.textContent}');
-      final unescape = HtmlUnescape();
-      widgets.add(Text(unescape.convert(node.textContent)));
+      widgets.add(Text(_mdHtmlUnescape.convert(node.textContent)));
     } else if (node is md.UnparsedContent) {
       // print('unparsedContent: ${node.textContent}');
       widgets.add(Text(node.textContent));
@@ -213,13 +213,18 @@ class _MarkdownCodeState extends State<_MarkdownCode> {
     await Highlighter.initialize([widget.language]);
 
     highlighter = Highlighter(language: widget.language, theme: theme);
-    highlightedCode = highlighter?.highlight(widget.code) ?? TextSpan();
+    highlightedCode =
+        highlighter?.highlight(_mdHtmlUnescape.convert(widget.code)) ??
+        TextSpan();
+    setState(() {});
   }
 
   @override
   void didUpdateWidget(covariant _MarkdownCode oldWidget) {
     if (oldWidget.code != widget.code) {
-      highlightedCode = highlighter?.highlight(widget.code) ?? TextSpan();
+      highlightedCode =
+          highlighter?.highlight(_mdHtmlUnescape.convert(widget.code)) ??
+          TextSpan();
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -258,28 +263,46 @@ extension on md.Node {
 
 Widget buildText(BuildContext context, md.Element text) {
   final theme = LdTheme.of(context);
-  return Text.rich(
-    TextSpan(
-      children: [
-        ...text.children?.map((e) => buildTextSpan(context, e)).toList() ?? [],
-      ],
-      style: switch (text.tag) {
-        'p' => ldBuildTextStyle(theme, LdTextType.paragraph, LdSize.m),
-        'h1' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.l),
-        'h2' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.m),
-        'h3' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.s),
-        'h4' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.xs),
-        'h5' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.xs),
-        'h6' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.xs),
-        _ => throw Exception('Invalid text type: ${text.tag}'),
-      },
+  final (paddingTop, paddingBottom) = switch (text.tag) {
+    'h1' => (LdSize.l, LdSize.s),
+    'h2' => (LdSize.l, LdSize.s),
+    'h3' => (LdSize.m, LdSize.s),
+    'h4' => (LdSize.s, LdSize.xs),
+    'h5' => (LdSize.s, LdSize.xs),
+    'h6' => (LdSize.xs, LdSize.s),
+    _ => (null, null),
+  };
+  final padding = EdgeInsets.only(
+    top: paddingTop != null ? theme.pad(size: paddingTop).top : 0,
+    bottom: paddingBottom != null ? theme.pad(size: paddingBottom).bottom : 0,
+  );
+  return Padding(
+    padding: padding,
+    child: Text.rich(
+      TextSpan(
+        children: [
+          ...text.children?.map((e) => buildTextSpan(context, e)).toList() ??
+              [],
+        ],
+        style: switch (text.tag) {
+          'p' => ldBuildTextStyle(theme, LdTextType.paragraph, LdSize.m),
+          'h1' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.l),
+          'h2' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.m),
+          'h3' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.s),
+          'h4' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.xs),
+          'h5' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.xs),
+          'h6' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.xs),
+          'em' || 'i' => TextStyle(fontStyle: FontStyle.italic),
+          _ => throw Exception('Invalid text type: ${text.tag}'),
+        },
+      ),
     ),
   );
 }
 
 TextSpan buildTextSpan(BuildContext context, md.Node node) {
   if (node is md.Text) {
-    return TextSpan(text: node.textContent);
+    return TextSpan(text: _mdHtmlUnescape.convert(node.textContent));
   } else if (node is md.Element) {
     final theme = LdTheme.of(context);
     final children =
@@ -312,5 +335,5 @@ TextSpan buildTextSpan(BuildContext context, md.Node node) {
       _ => TextSpan(children: children),
     };
   }
-  return TextSpan(text: node.textContent);
+  return TextSpan(text: _mdHtmlUnescape.convert(node.textContent));
 }

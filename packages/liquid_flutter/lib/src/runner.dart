@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/touchable/neutral_ghost_color.dart';
 
 class LdRunnerLog extends StatefulWidget {
   /// The list of messages to display.
@@ -37,12 +38,13 @@ class _LdRunnerLogState extends State<LdRunnerLog> {
 
   Widget buildLine(int index, LdTheme theme) {
     return LdTouchableSurface(
-        onPressed: () {},
-        color: LdTheme.of(context).palette.neutral,
-        builder: (context, colors, status, _) {
+      onPressed: () {},
+      builder: (context, status, _) => Builder(
+        builder: (context) {
+          final colorBundle = neutralGhostColor(theme, status);
           return Container(
             decoration: BoxDecoration(
-              color: colors.surface,
+              color: colorBundle.surface,
             ),
             padding: theme.balPad(LdSize.s) / 2,
             child: Row(
@@ -76,7 +78,9 @@ class _LdRunnerLogState extends State<LdRunnerLog> {
               ],
             ),
           );
-        });
+        },
+      ),
+    );
   }
 
   @override
@@ -172,20 +176,21 @@ class LdRunnerStep extends StatelessWidget {
     final theme = LdTheme.of(context, listen: true);
     return Column(children: [
       LdTouchableSurface(
-          active: isExpanded,
-          disabled: disabled,
-          onPressed: () {
-            if (onPress != null) {
-              onPress!();
-            }
-          },
-          color: theme.primary,
-          builder: (context, colors, status, _) {
+        active: isExpanded,
+        disabled: disabled,
+        onPressed: () {
+          if (onPress != null) {
+            onPress!();
+          }
+        },
+        builder: (context, status, _) => Builder(
+          builder: (context) {
+            final colorBundle = neutralGhostColor(theme, status);
             return Container(
               padding: theme.balPad(LdSize.s),
               decoration: BoxDecoration(
                 borderRadius: theme.radius(LdSize.s),
-                color: (children?.isNotEmpty ?? false) ? colors.surface : null,
+                color: (children?.isNotEmpty ?? false) ? colorBundle.surface : null,
               ),
               child: Row(
                 children: [
@@ -197,7 +202,7 @@ class LdRunnerStep extends StatelessWidget {
                         duration: const Duration(milliseconds: 200),
                         child: Icon(
                           Icons.chevron_right_rounded,
-                          color: colors.icon,
+                          color: colorBundle.icon,
                         ),
                       ),
                     )
@@ -211,7 +216,7 @@ class LdRunnerStep extends StatelessWidget {
                   Expanded(
                     child: DefaultTextStyle(
                       style: TextStyle(
-                        color: colors.text,
+                        color: colorBundle.text,
                         height: 1,
                       ),
                       child: title,
@@ -221,15 +226,17 @@ class LdRunnerStep extends StatelessWidget {
                     DefaultTextStyle(
                       style: TextStyle(
                           fontFamily: "NotoSansMono",
-                          color: colors.text,
+                          color: colorBundle.text,
                           fontSize: LdTheme.of(context).labelSize(LdSize.m)),
                       child: trailing!,
                     ),
                 ],
               ),
             );
-          }),
-      if (children != null)
+          },
+        ),
+      ),
+      if (children != null && children!.isNotEmpty)
         LdReveal.quick(
           transformYOffset: 20,
           revealed: isExpanded,

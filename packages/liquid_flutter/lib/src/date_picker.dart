@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/shrinkwrap_pageview.dart';
+import 'package:liquid_flutter/src/touchable/input_color.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
@@ -81,8 +82,6 @@ class _LdDatePickerState extends State<LdDatePicker> {
           if (widget.label != null) LdText.l(widget.label!),
           LdTouchableSurface(
             allowTapOutside: true,
-            mode: LdTouchableSurfaceMode.input,
-            isInput: true,
             key: const Key("date_picker_button"),
             onPressed: () async {
               await open();
@@ -90,20 +89,23 @@ class _LdDatePickerState extends State<LdDatePicker> {
               widget.onChanged(_selectedDateNotifier.value);
             },
             disabled: widget.disabled,
-            builder: (context, colors, status, _) => Container(
-              clipBehavior: Clip.hardEdge,
-              padding: theme.pad(size: LdSize.s),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: theme.radius(LdSize.s),
-                border: Border.all(
-                  color: colors.border,
-                  width: theme.borderWidth,
+            builder: (context, status, _) => Builder(builder: (context) {
+              final colorBundle = inputColor(theme, status, isValid: true);
+              return Container(
+                clipBehavior: Clip.hardEdge,
+                padding: theme.pad(size: LdSize.s),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: colorBundle.surface,
+                  borderRadius: theme.radius(LdSize.s),
+                  border: Border.all(
+                    color: colorBundle.border,
+                    width: theme.borderWidth,
+                  ),
                 ),
-              ),
-              child: LdText.l(initialDateString),
-            ),
+                child: LdText.l(initialDateString),
+              );
+            }),
           )
         ],
       ),
@@ -341,14 +343,12 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
 
     return LdScaffold(
       key: const Key("date_picker_sheet"),
-      appBars: [
-        LdAppBar(
-          title: Text(widget.label),
-          backgroundMode: LdAppBarBackgroundMode.visible,
-          borderMode: LdAppBarBorderMode.visible,
-          shadowMode: LdAppBarShadowMode.visible,
-        ),
-        LdAppBar(
+      body: LdAppBar(
+        title: Text(widget.label),
+        backgroundMode: LdAppBarBackgroundMode.visible,
+        borderMode: LdAppBarBorderMode.visible,
+        shadowMode: LdAppBarShadowMode.visible,
+        child: LdAppBar(
           positionMode: LdAppBarPositionMode.bottom,
           actions: [
             LdButton(
@@ -378,46 +378,46 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
             },
             child: const Text('Done'),
           ),
-        ),
-      ],
-      body: LdScaffoldBody(
-        children: [
-          LdBundle(
+          child: LdScaffoldBody(
             children: [
-              Row(
+              LdBundle(
                 children: [
-                  Expanded(flex: 2, child: _buildYearSelect()),
-                  previousMonth,
-                  ldSpacerS,
-                  Expanded(flex: 3, child: _buildMonthSelect()),
-                  ldSpacerS,
-                  nextMonth,
+                  Row(
+                    children: [
+                      Expanded(flex: 2, child: _buildYearSelect()),
+                      previousMonth,
+                      ldSpacerS,
+                      Expanded(flex: 3, child: _buildMonthSelect()),
+                      ldSpacerS,
+                      nextMonth,
+                    ],
+                  )
                 ],
-              )
-            ],
-          ),
-          ldSpacerL,
-          LdExpandablePageView(
-            controller: _pageController,
-            itemBuilder: (context, index) {
-              return ValueListenableBuilder<DateTime>(
-                valueListenable: widget.selectedDateNotifier,
-                builder: (context, selectedDate, child) {
-                  return _MonthView(
-                    key: Key("month_view_$index"),
-                    viewDate: Jiffy.parseFromDateTime(DateTime(0)).add(months: index).dateTime,
-                    selectedDate: selectedDate,
-                    minDate: widget.minDate,
-                    maxDate: widget.maxDate,
-                    onSelected: (date) {
-                      widget.selectedDateNotifier.value = date;
+              ),
+              ldSpacerL,
+              LdExpandablePageView(
+                controller: _pageController,
+                itemBuilder: (context, index) {
+                  return ValueListenableBuilder<DateTime>(
+                    valueListenable: widget.selectedDateNotifier,
+                    builder: (context, selectedDate, child) {
+                      return _MonthView(
+                        key: Key("month_view_$index"),
+                        viewDate: Jiffy.parseFromDateTime(DateTime(0)).add(months: index).dateTime,
+                        selectedDate: selectedDate,
+                        minDate: widget.minDate,
+                        maxDate: widget.maxDate,
+                        onSelected: (date) {
+                          widget.selectedDateNotifier.value = date;
+                        },
+                      );
                     },
                   );
                 },
-              );
-            },
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

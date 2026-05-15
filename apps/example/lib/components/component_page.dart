@@ -34,35 +34,33 @@ class ComponentPage extends StatelessWidget {
     return Provider<ComponentPagePath>.value(
       value: ComponentPagePath(path: path),
       child: LdScaffold(
-        appBars: [
-          LdAppBar(
-            scrollBehavior: LdAppBarScrollBehavior.mobileOnly,
-            borderMode: LdAppBarBorderMode.visible,
-            addContainer: true,
-            title: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title),
-                LdBreadcrumb.fromStrings([category, title]),
-              ],
-            ),
-          ),
-        ],
-        body: LdScaffoldBody(
+        body: LdAppBar(
+          scrollBehavior: LdAppBarScrollBehavior.mobileOnly,
+          borderMode: LdAppBarBorderMode.visible,
           addContainer: true,
-          children: [
-            LdText.h(title),
+          title: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title),
+              LdBreadcrumb.fromStrings([category, title]),
+            ],
+          ),
+          child: LdScaffoldBody(
+            addContainer: true,
+            children: [
+              LdText.h(title),
 
-            if (text != null) MarkdownBody(data: text!),
+              if (text != null) MarkdownBody(data: text!),
 
-            // Demo
-            demo ?? Container(),
+              // Demo
+              demo ?? Container(),
 
-            LdText.h("API Reference"),
+              LdText.h("API Reference"),
 
-            ComponentsAccordion(components: apiComponents?.toSet() ?? {title}, initialOpenIndex: {0}),
-          ],
+              ComponentsAccordion(components: apiComponents?.toSet() ?? {title}, initialOpenIndex: {0}),
+            ],
+          ),
         ),
       ),
     );

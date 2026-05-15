@@ -1,116 +1,87 @@
-import 'dart:async';
+import 'dart:core';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:provider/provider.dart';
+import 'package:liquid_flutter/src/monkey/actions/actions.dart';
+import 'package:liquid_flutter/src/monkey/data/identifiable.dart';
+import 'package:liquid_flutter/src/monkey/data/repository.dart';
+import 'package:liquid_flutter/src/monkey/filter/ld_filter_option.dart';
+import 'package:liquid_flutter/src/monkey/monkey_layout_mode.dart';
+import 'package:liquid_flutter/src/monkey/monkey_route_config.dart';
+import 'package:liquid_flutter/src/monkey/monkey_route_tree.dart';
+import 'package:liquid_flutter/src/monkey/sort/sort_option.dart';
 
 /// Builds the routing configuration for a monkey component.
 ///
 /// Creates a set of [GoRoute] instances that handle:
-/// - Master list view at the base [basePath]
-/// - Detail view at [basePath]/:selected_[pathParameterName]
-/// - Filter modal at [basePath]/filters
+/// - Master list view at [masterPath]
+/// - Detail view at `[masterPath]/:viewing_<itemName>`
 ///
 /// The routes are wrapped in a [ShellRoute] that provides the master-detail
 /// layout and handles responsive behavior.
 ///
+/// For nested monkeys, use [buildMonkeyRouteTree] and [MonkeyRouteNode].
+///
 /// ## Parameters
 ///
-/// - [basePath]: The base route path for the master view
-/// - [pathParameterName]: The name of the path parameter for the selected items
-/// - [repositoryBuilder]: Builder function that creates a repository instance asynchronously
-/// - [layoutMode]: Controls the layout behavior of the master-detail interface
-/// - [shellBuilder]: Optional wrapper widget that can be used to wrap the entire monkey shell
-/// - [masterPageBuilder]: Optional builder for the master page (defaults to [LdMonkeyMasterPage])
-/// - [detailPageBuilder]: Optional builder for the detail page (defaults to [LdMonkeyDetailPage])
-/// - [filterModalBuilder]: Optional builder for the filter modal (defaults to [ldFilterModal])
+/// - [routeConfig]: Route naming and id (de)serialization for URL state
+/// - [masterPath]: Full path for the master [GoRoute] (e.g. `/tasks`). Detail
+///   navigation uses [GoRoute.name] from the config, not this string.
+/// - [detailPage]: The detail widget rendered for the detail route
+/// - [masterPage]: The master widget rendered for the master route
+/// - [repositoryBuilder]: Creates the repository; receives [GoRouterState] so
+///   nested routes can read ancestor path parameters.
+/// - [filters]: Available filter options that are synchronized with query params
+/// - [sortOptions]: Available sort options that are synchronized with query params
+/// - [actions]: Monkey actions available in master/detail contexts
+/// - [shellBuilder]: Optional shell wrapper receiving the current [GoRouterState]
+///   and nested route [child]
+/// - [additionalMasterRoutes]: Optional extra routes nested under the master route
+/// - [additionalDetailRoutes]: Optional extra routes nested under the detail route
+/// - [detailInDialog]: Shows detail in an [LdModalRoute] when not side-by-side
 ///
 /// Returns a list of routes that can be added to a [GoRouter] configuration.
 List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
-  required String basePath,
+  required LdMonkeyRouteConfig<T, IdType> routeConfig,
+  required String masterPath,
   required Widget detailPage,
   required Widget masterPage,
-  required Future<LdRepository<T, IdType>> Function(BuildContext context) repositoryBuilder,
-  required LdMonkeyLayoutMode layoutMode,
-  required Set<IdType> Function(String selected) parseSelected,
-  required String pathParameterName,
-  Widget Function({
-    required BuildContext context,
-    required GoRouterState routeState,
-    required Widget child,
-    required String pathParameterName,
-    required Widget masterPage,
-    required String basePath,
-    required Set<IdType> Function(String selected) parseSelected,
-  })? shellBuilder,
-  LdModalRoute Function(BuildContext context)? filterModalBuilder,
+  required LdRepository<T, IdType> Function(
+    BuildContext context,
+    GoRouterState routeState,
+  ) repositoryBuilder,
+  required List<LdFilterOption<T, IdType>> filters,
+  required List<LdSortOption<T, IdType>> sortOptions,
+  required List<LdMonkeyAction<T, IdType>> actions,
+  Widget Function(BuildContext context, GoRouterState state, Widget child)? shellBuilder,
+  List<RouteBase>? additionalDetailRoutes,
+  List<RouteBase>? additionalMasterRoutes,
   bool detailInDialog = false,
+  LdMonkeyLayoutMode layoutMode = LdMonkeyLayoutMode.auto,
+  double? reflowBreakpoint,
+  double? detailPanelFlex,
+  bool? allowMultipleSelection,
+  bool? immediateViewSelection,
 }) {
-  return [
-    ShellRoute(
-      routes: [
-        GoRoute(
-          name: "$basePath-master",
-          path: basePath,
-          pageBuilder: (context, state) => MaterialPage<void>(
-            key: state.pageKey,
-            child: masterPage,
-          ),
-          routes: [
-            GoRoute(
-              name: "$basePath-detail",
-              path: "/:selected_$pathParameterName",
-              pageBuilder: (context, goState) {
-                final effectiveLayout = context.read<LdMonkeyEffectiveLayoutMode>();
-
-                final page = detailPage;
-
-                if (effectiveLayout == LdMonkeyEffectiveLayoutMode.detail) {
-                  if (detailInDialog) {
-                    return LdModalPage(
-                      key: goState.pageKey,
-                      builder: (context) => LdModalRoute(
-                        context: context,
-                        pageBuilder: (context) => page,
-                      ),
-                    );
-                  }
-
-                  return MaterialPage(
-                    child: page,
-                    key: goState.pageKey,
-                  );
-                }
-                return NoTransitionPage<void>(
-                  key: goState.pageKey,
-                  child: page,
-                );
-              },
-            ),
-          ],
-        ),
-      ],
-      builder: (context, routeState, child) => shellBuilder != null
-          ? shellBuilder(
-              context: context,
-              routeState: routeState,
-              child: child,
-              basePath: basePath,
-              masterPage: masterPage,
-              pathParameterName: pathParameterName,
-              parseSelected: parseSelected,
-            )
-          : LdMonkeyShell(
-              basePath: basePath,
-              parseSelected: parseSelected,
-              masterPage: masterPage,
-              repositoryBuilder: repositoryBuilder,
-              layoutMode: layoutMode,
-              routeState: routeState,
-              pathParameterName: pathParameterName,
-              child: child,
-            ),
-    )
-  ];
+  return buildMonkeyRouteTree<T, IdType>(
+    masterPath: masterPath,
+    root: MonkeyRouteNode<T, IdType>(
+      routeConfig: routeConfig,
+      masterPage: masterPage,
+      detailPage: detailPage,
+      repositoryBuilder: repositoryBuilder,
+      filters: filters,
+      sortOptions: sortOptions,
+      actions: actions,
+      detailInDialog: detailInDialog,
+      shellBuilder: shellBuilder,
+      layoutMode: layoutMode,
+      reflowBreakpoint: reflowBreakpoint,
+      detailPanelFlex: detailPanelFlex,
+      allowMultipleSelection: allowMultipleSelection,
+      immediateViewSelection: immediateViewSelection,
+    ),
+    additionalMasterRoutes: additionalMasterRoutes,
+    additionalDetailRoutes: additionalDetailRoutes,
+  );
 }

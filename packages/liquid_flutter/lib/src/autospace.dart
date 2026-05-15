@@ -20,8 +20,6 @@ List<Widget> generateAutoSpacings({
   LdSize defaultSpacing = LdSize.m,
   bool animate = false,
 }) {
-  final theme = LdTheme.of(context, listen: true);
-
   List<Widget> finalChildren = [];
   int index = 0;
   for (var child in children) {
@@ -48,73 +46,49 @@ List<Widget> generateAutoSpacings({
       child = child.child;
     }
 
-    final element = _spacingMatrix[child.runtimeType];
-
     if (next is LdMute) {
       next = next.child;
     }
 
-    if (child is LdText && next is LdText) {
-      final types = (child.type, next.type);
+    _LdSizeItem spacer = switch ((child.runtimeType, next.runtimeType)) {
+      (LdText childText, _) => switch (next.runtimeType) {
+          (LdText nextText) => switch ((childText.type, nextText.type)) {
+              (LdTextType.headline, _) => _LdSizeItem(LdSize.l, 2),
+              (LdTextType.paragraph, LdTextType.headline) => _LdSizeItem(LdSize.l, 3),
+              (LdTextType.paragraph, LdTextType.paragraph) => _LdSizeItem(LdSize.m, 1),
+              (_, LdTextType.label) => _LdSizeItem(LdSize.s, 1),
+              (LdTextType.label, _) => _LdSizeItem(LdSize.s, 1),
+              (_, _) => _LdSizeItem(defaultSpacing, 1)
+            },
+          (_) => _LdSizeItem(LdSize.m, 1)
+        },
+      (LdButton _, LdButton _) => _LdSizeItem(LdSize.s, 1),
+      (LdRadio _, LdRadio _) => _LdSizeItem(LdSize.s, 1),
+      (LdCheckbox _, LdCheckbox _) => _LdSizeItem(LdSize.s, 1),
+      (LdToggle _, LdToggle _) => _LdSizeItem(LdSize.s, 1),
+      (LdBundle _, LdBundle _) => _LdSizeItem(LdSize.l, 2),
+      (LdDivider _, _) => _LdSizeItem(LdSize.l, 1),
+      (LdCard _, LdCard _) => _LdSizeItem(LdSize.l, 2),
+      (LdDrawerItemSection _, LdDrawerItemSection _) => _LdSizeItem(LdSize.xs, 1),
+      (LdSectionHeader _, LdSectionHeader _) => _LdSizeItem(LdSize.l, 1),
+      (_, LdText nextText) => switch (nextText.type) {
+          (LdTextType.headline) => _LdSizeItem(LdSize.l, 2),
+          (_) => _LdSizeItem(defaultSpacing, 1)
+        },
+      (_, _) => _LdSizeItem(defaultSpacing, 1),
+    };
 
-      final (LdSize spacerSize, double multiplier) = switch (types) {
-        (LdTextType.headline, LdTextType.headline) => (LdSize.l, 2),
-        (LdTextType.headline, LdTextType.paragraph) => (LdSize.l, 1),
-        (LdTextType.paragraph, LdTextType.headline) => (LdSize.l, 2),
-        (LdTextType.paragraph, LdTextType.paragraph) => (LdSize.xs, 0.5),
-        (_, LdTextType.label) => (LdSize.s, 1),
-        (LdTextType.label, _) => (LdSize.s, 1),
-        (_, _) => (LdSize.m, 1),
-      };
-
-      finalChildren.add(SizedBox(
-        height: theme.paddingSize(size: spacerSize) * multiplier * 0.5,
-      ));
-
-      continue;
-    }
-
-    // Add an automatic spacer if the next widget is a reveal widget
-    if (next is LdReveal) {
+    for (int i = 0; i < spacer.multiplier; i++) {
       finalChildren.add(
-        LdCollapse(
-          collapsed: !next.revealed,
-          child: LdSpacer(size: defaultSpacing),
+        LdSpacer(
+          size: spacer.size,
         ),
       );
-      continue;
     }
-
-    if (element != null) {
-      if (element[next.runtimeType] != null) {
-        for (int i = 0; i < element[next.runtimeType]!.multiplier; i++) {
-          finalChildren.add(
-            LdSpacer(size: element[next.runtimeType]!.size),
-          );
-        }
-
-        continue;
-      }
-    }
-    final defaultSpacings = _spacingMatrix[_Default]!;
-    if (defaultSpacings[next.runtimeType] != null) {
-      for (int i = 0; i < defaultSpacings[next.runtimeType]!.multiplier; i++) {
-        finalChildren.add(
-          LdSpacer(size: defaultSpacings[next.runtimeType]!.size),
-        );
-      }
-      continue;
-    }
-
-    finalChildren.add(
-      LdSpacer(size: defaultSpacing),
-    );
   }
 
   return finalChildren;
 }
-
-abstract class _Default extends StatelessWidget {}
 
 class _LdSizeItem {
   final LdSize size;
@@ -122,43 +96,6 @@ class _LdSizeItem {
 
   const _LdSizeItem(this.size, this.multiplier);
 }
-
-const Map<Type, Map<Type, _LdSizeItem>> _spacingMatrix = {
-  LdButton: {
-    LdButton: _LdSizeItem(LdSize.s, 1),
-  },
-  LdRadio: {
-    LdRadio: _LdSizeItem(LdSize.s, 1),
-  },
-  LdCheckbox: {
-    LdCheckbox: _LdSizeItem(LdSize.s, 1),
-  },
-  LdToggle: {
-    LdToggle: _LdSizeItem(LdSize.s, 1),
-  },
-  LdBundle: {
-    LdBundle: _LdSizeItem(LdSize.l, 2),
-  },
-  LdDivider: {
-    _Default: _LdSizeItem(LdSize.l, 1),
-  },
-  LdCard: {
-    LdCard: _LdSizeItem(LdSize.l, 2),
-  },
-  LdDrawerItemSection: {
-    LdDrawerItemSection: _LdSizeItem(LdSize.xs, 1),
-    LdSectionHeader: _LdSizeItem(LdSize.l, 1),
-  },
-  LdListItem: {
-    LdListItem: _LdSizeItem(LdSize.s, 1),
-  },
-  _Default: {
-    LdBundle: _LdSizeItem(LdSize.l, 1),
-    LdCard: _LdSizeItem(LdSize.l, 1),
-    LdDivider: _LdSizeItem(LdSize.l, 1),
-    LdButton: _LdSizeItem(LdSize.l, 1),
-  }
-};
 
 extension LdAutoSpaceExt on List<Widget> {
   List<Widget> autoSpace(BuildContext context, {LdSize defaultSpacing = LdSize.m, bool animate = false}) {

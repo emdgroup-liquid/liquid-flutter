@@ -18,6 +18,8 @@ import 'package:liquid/components/layout/list.dart';
 
 import 'package:liquid/components/feedback/loader.dart';
 import 'package:liquid/components/layout/list_item.dart';
+import 'package:liquid/demos/projects/pages.dart';
+import 'package:liquid/demos/projects/repo.dart';
 import 'package:liquid/patterns/monkey.dart';
 import 'package:liquid/patterns/monkey_repository.dart';
 import 'package:liquid/patterns/monkey_pattern.dart';
@@ -66,6 +68,12 @@ import 'window/app_scaffold.dart';
 
 import 'components/bento_gallery.dart';
 
+final projectRouteConfig = LdMonkeyRouteConfig.identifiableInt<Project>(itemName: "project");
+
+const projectMasterPath = "/projects";
+
+final fileRouteConfig = LdMonkeyRouteConfig.identifiableString<File>(itemName: "file");
+
 class AppRouter {
   AppRouter();
 
@@ -82,63 +90,60 @@ class AppRouter {
           StatefulShellBranch(
             initialLocation: "/movie-demo",
             routes: [
-              ...buildMonkeyRoutes(
-                basePath: "/movie-demo",
-                pathParameterName: "movieId",
-                parseSelected: (selected) => selected.split("_").map(int.parse).toSet(),
+              ...buildMonkeyRoutes<MovieDemo, int>(
+                masterPath: "/movie-demo",
+                routeConfig: LdMonkeyRouteConfig.identifiableInt<MovieDemo>(itemName: "movie"),
+                sortOptions: [],
+                actions: movieActions,
+                filters: movieFilters,
                 detailPage: MovieDetailPage(),
                 detailInDialog: true,
                 masterPage: MovieMasterPage(),
-                repositoryBuilder: (context) async => movieRepository,
-                layoutMode: LdMonkeyLayoutMode.neverSideBySide,
-                shellBuilder:
-                    ({
-                      required BuildContext context,
-                      required GoRouterState routeState,
-                      required Widget child,
-                      required String basePath,
-                      required String pathParameterName,
-                      required Widget masterPage,
-                      required Set<int> Function(String selected) parseSelected,
-                    }) => MovieShell(
-                      routeState: routeState,
-                      pathParameterName: pathParameterName,
-                      parseSelected: parseSelected,
-                      masterPage: masterPage,
-                      basePath: basePath,
-                      child: child,
-                    ),
+                repositoryBuilder: (context, state) => movieRepository(context),
               ),
             ],
-          ),  
+          ),
           StatefulShellBranch(
-            initialLocation: "/task-demo",
+            initialLocation: "/task-demo?sort-task=due-asc",
             routes: [
               ...buildMonkeyRoutes<Task, int>(
-                basePath: "/task-demo",
-                pathParameterName: "taskId",
-                parseSelected: (selected) => selected.split("_").map(int.parse).toSet(),
+                masterPath: "/task-demo",
+                routeConfig: LdMonkeyRouteConfig.identifiableInt<Task>(itemName: "task"),
+                sortOptions: taskSortOptions,
+                actions: taskActions,
+                filters: taskFilters,
                 detailPage: TaskDetailPage(),
                 masterPage: TaskMasterPage(),
-                repositoryBuilder: (context) async => taskRepository,
-                layoutMode: LdMonkeyLayoutMode.auto,
-                shellBuilder:
-                    ({
-                      required BuildContext context,
-                      required GoRouterState routeState,
-                      required Widget child,
-                      required String pathParameterName,
-                      required Set<int> Function(String selected) parseSelected,
-                      required Widget masterPage,
-                      required String basePath,
-                    }) => TaskShell(
-                      routeState: routeState,
-                      basePath: basePath,
-                      parseSelected: parseSelected,
-                      pathParameterName: pathParameterName,
-                      masterPage: masterPage,
-                      child: child,
+                repositoryBuilder: (context, state) => taskRepository(context),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            initialLocation: '/projects',
+            routes: [
+              ...buildMonkeyRouteTree<Project, int>(
+                masterPath: projectMasterPath,
+                root: MonkeyRouteNode<Project, int>(
+                  routeConfig: projectRouteConfig,
+                  masterPage: ProjectMasterPage(),
+                  detailPage: FileMasterPage(),
+                  repositoryBuilder: (context, state) => projectRepository(),
+                  filters: const [],
+                  sortOptions: const [],
+                  actions: const [],
+                  child: MonkeyRouteNode<File, String>(
+                    detailPathPrefix: 'files',
+                    routeConfig: fileRouteConfig,
+                    masterPage: FileMasterPage(),
+                    detailPage: FileDetailPage(),
+                    repositoryBuilder: (context, state) => fileRepository(
+                      state.pathParameters[projectRouteConfig.viewingParamName]!,
                     ),
+                    filters: const [],
+                    sortOptions: const [],
+                    actions: const [],
+                  ),
+                ),
               ),
             ],
           ),
@@ -375,8 +380,10 @@ class AppRouter {
                   builder: (context) => LdModalRoute(
                     context: context,
                     pageBuilder: (context) => LdScaffold(
-                      appBars: [LdAppBar(title: const Text("This is a title"))],
-                      body: LdScaffoldBody(children: [LdText("This is modal content")]),
+                      body: LdAppBar(
+                        title: const Text("This is a title"),
+                        child: LdScaffoldBody(children: [LdText("This is modal content")]),
+                      ),
                     ),
                   ),
                 ),
@@ -414,8 +421,7 @@ class AppRouter {
           ),
           GoRoute(
             path: "/components/markdown",
-            pageBuilder: (context, state) =>
-                NoTransitionPage<void>(key: state.pageKey, child: const MarkdownDemo()),
+            pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const MarkdownDemo()),
           ),
         ],
       ),
@@ -430,11 +436,15 @@ class NavTest extends StatelessWidget {
   Widget build(BuildContext context) {
     return LdScaffold(
       drawer: LdScaffold(
-        appBars: [LdAppBar(title: Text("Drawer"))],
-        body: LdButton(child: Text("Pop"), onPressed: () => context.pop()),
+        body: LdAppBar(
+          title: Text("Drawer"),
+          child: LdButton(child: Text("Pop"), onPressed: () => context.pop()),
+        ),
       ),
-      appBars: [LdAppBar(title: Text("Nav Test"))],
-      body: LdText("Nav Test"),
+      body: LdAppBar(
+        title: Text("Nav Test"),
+        child: LdText("Nav Test"),
+      ),
     );
   }
 }

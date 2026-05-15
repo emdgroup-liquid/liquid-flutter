@@ -53,11 +53,9 @@ class LdTimePicker extends StatelessWidget {
         context: context,
         fixedDialogSize: const Size(300, 300),
         pageBuilder: (context) => LdScaffold(
-          appBars: [
-            LdAppBar(
-              title: Text(LiquidLocalizations.of(context).selectTime),
-            ),
-            LdAppBar.bottom(
+          body: LdAppBar(
+            title: Text(LiquidLocalizations.of(context).selectTime),
+            child: LdAppBar.bottom(
               actions: [
                 LdFlexibleChild(
                   child: LdButton.vague(
@@ -67,20 +65,20 @@ class LdTimePicker extends StatelessWidget {
                   ),
                 )
               ],
-            ),
-          ],
-          body: LdScaffoldBody(
-            key: const Key('time_picker_sheet'),
-            children: [
-              LdTimePickerWidget(
-                initialTime: value,
-                onTimeSelected: (time) {
-                  Navigator.pop(context);
-                  onChanged(time);
-                },
-                minutePrecision: minutePrecision,
+              child: LdScaffoldBody(
+                key: const Key('time_picker_sheet'),
+                children: [
+                  LdTimePickerWidget(
+                    initialTime: value,
+                    onTimeSelected: (time) {
+                      Navigator.pop(context);
+                      onChanged(time);
+                    },
+                    minutePrecision: minutePrecision,
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

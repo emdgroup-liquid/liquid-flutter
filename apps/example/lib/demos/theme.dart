@@ -60,46 +60,47 @@ class _ThemeDemoState extends State<ThemeDemo> {
           LdBundle(
             children: [
               LdText.hs("Color names"),
+              LdText.p("Liquid comes with several predefined colors from the popular ShadCN color palette."),
               LdText.p(
-                "Liquid comes with several predefined colors from the popular ShadCN color palette.",
+                "For each color there are different shades available. There is a center color (which is  main shade) for each brightness (dark and light).",
               ),
-              LdText.p(
-                  "For each color there are different shades available. There is a center color (which is  main shade) for each brightness (dark and light)."),
               LdCard(
                 child: LdAutoSpace(
                   children: [
                     ColorSelctor(
-                        active: e,
-                        colors: const {
-                          "shadSky": shadSky,
-                          "shadAmber": shadAmber,
-                          "shadGreen": shadGreen,
-                          "shadRed": shadRed,
-                        },
-                        onChanged: (v) {
-                          setState(() {
-                            e = v;
-                            _selectedShade = null;
-                          });
-                        }),
+                      active: e,
+                      colors: const {
+                        "shadSky": shadSky,
+                        "shadAmber": shadAmber,
+                        "shadGreen": shadGreen,
+                        "shadRed": shadRed,
+                      },
+                      onChanged: (v) {
+                        setState(() {
+                          e = v;
+                          _selectedShade = null;
+                        });
+                      },
+                    ),
                     const LdDivider(),
                     LdText.p("EMD Brand Colors (liquid_flutter_emd_theme package (see notes on license))"),
                     ColorSelctor(
-                        active: e,
-                        colors: const {
-                          "richRed": richRed,
-                          "richGreen": richGreen,
-                          "richBlue": richBlue,
-                          "vibrantYellow": vibrantYellow,
-                          "vibrantCyan": vibrantCyan,
-                          "vibrantMagenta": vibrantMagenta,
-                        },
-                        onChanged: (v) {
-                          setState(() {
-                            e = v;
-                            _selectedShade = null;
-                          });
-                        }),
+                      active: e,
+                      colors: const {
+                        "richRed": richRed,
+                        "richGreen": richGreen,
+                        "richBlue": richBlue,
+                        "vibrantYellow": vibrantYellow,
+                        "vibrantCyan": vibrantCyan,
+                        "vibrantMagenta": vibrantMagenta,
+                      },
+                      onChanged: (v) {
+                        setState(() {
+                          e = v;
+                          _selectedShade = null;
+                        });
+                      },
+                    ),
                     const LdDivider(),
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
@@ -126,10 +127,7 @@ class _ThemeDemoState extends State<ThemeDemo> {
                                 position: e.shades.indexOf(e.center(true)) * 33,
                                 builder: (context, state, child) => Transform.translate(
                                   offset: Offset(state.position, 0),
-                                  child: const SizedBox(
-                                    height: 32,
-                                    child: Icon(LucideIcons.arrowDown),
-                                  ),
+                                  child: const SizedBox(height: 32, child: Icon(LucideIcons.arrowDown)),
                                 ),
                               ),
                               _buildShades(),
@@ -137,10 +135,7 @@ class _ThemeDemoState extends State<ThemeDemo> {
                                 position: e.shades.indexOf(e.center(false)) * 33,
                                 builder: (context, state, child) => Transform.translate(
                                   offset: Offset(state.position, 0),
-                                  child: const SizedBox(
-                                    height: 32,
-                                    child: Icon(LucideIcons.arrowUp),
-                                  ),
+                                  child: const SizedBox(height: 32, child: Icon(LucideIcons.arrowUp)),
                                 ),
                               ),
                             ],
@@ -159,34 +154,31 @@ class _ThemeDemoState extends State<ThemeDemo> {
                           LdText.hs("Relative colors:"),
                           LdText.p("Use the relative methods to get colors depending on the brightness."),
                           const LdHint(
-                              type: LdHintType.warning,
-                              child: Text(
-                                  "To not oversaturate the dark theme it is recommended to use center offsets where possible.")),
+                            type: LdHintType.warning,
+                            child: Text(
+                              "To not oversaturate the dark theme it is recommended to use center offsets where possible.",
+                            ),
+                          ),
                           CodeBlock(
-                            code: "final isDark = false;\n"
+                            code:
+                                "final isDark = false;\n"
                                 "final relativeShade = ${colorNames[e]}.relative(isDark,${e.shades.indexOf(_selectedShade!)});\n"
                                 "final relativeCenterShade = ${colorNames[e]}.relativeFromCenter(isDark,${e.shades.indexOf(_selectedShade!) - e.shades.indexOf(e.center(false))});",
                           ),
                           CodeBlock(
-                            code: "final isDark = true;\n"
+                            code:
+                                "final isDark = true;\n"
                                 "final relativeShade = ${colorNames[e]}.relative(isDark,${e.shades.length - 1 - e.shades.indexOf(_selectedShade!)});\n"
                                 "final relativeCenterShade = ${colorNames[e]}.relativeFromCenter(isDark,${e.shades.indexOf(_selectedShade!) - e.shades.indexOf(e.center(true))});",
                           ),
                         ],
                       )
                     else
-                      const LdHint(
-                        type: LdHintType.info,
-                        child: LdText(
-                          "Select a shade to view more information.",
-                        ),
-                      )
+                      const LdHint(type: LdHintType.info, child: LdText("Select a shade to view more information.")),
                   ],
                 ),
               ),
-              LdColorSwatches(
-                color: e,
-              ),
+              LdColorSwatches(color: e),
             ],
           ),
           LdBundle(
@@ -196,14 +188,16 @@ class _ThemeDemoState extends State<ThemeDemo> {
                 "For common interaction patterns, you can use the "
                 "reactive values for each color.",
               ),
-              CodeBlock(code: """
+              CodeBlock(
+                code: """
                 final theme = LdTheme.of(context);
                 
                 theme.primary.idle(theme.isDark);
                 theme.primary.hover(theme.isDark);
                 theme.primary.active(theme.isDark);
                 theme.primary.focus(theme.isDark);
-              """),
+              """,
+              ),
             ],
           ),
           LdBundle(
@@ -250,10 +244,9 @@ class _ThemeDemoState extends State<ThemeDemo> {
                   "These flags should be set early in your application's lifecycle, ideally before any widgets are built.",
                 ),
               ),
-              LdText.p(
-                "Example usage in your main.dart file:",
-              ),
-              CodeBlock(code: """
+              LdText.p("Example usage in your main.dart file:"),
+              CodeBlock(
+                code: """
                 // Import the liquid_flutter package
                 import 'package:liquid_flutter/liquid_flutter.dart';
                 
@@ -265,7 +258,8 @@ class _ThemeDemoState extends State<ThemeDemo> {
                   
                   runApp(MyApp());
                 }
-              """),
+              """,
+              ),
             ],
           ),
           LdBundle(
@@ -309,8 +303,11 @@ class _ThemeDemoState extends State<ThemeDemo> {
 
   Row _buildShades() {
     final theme = LdTheme.of(context, listen: true);
-    return Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-      ...e.shades.mapIndexed((index, shade) => SizedBox(
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        ...e.shades.mapIndexed(
+          (index, shade) => SizedBox(
             width: 32,
             child: Column(
               children: [
@@ -324,28 +321,26 @@ class _ThemeDemoState extends State<ThemeDemo> {
                         message: "${shade.toString()} \n",
                         child: LdTouchableSurface(
                           active: _selectedShade == shade,
-                          color: e,
+
                           onPressed: () {
                             setState(() {
                               _selectedShade = shade;
                             });
                           },
-                          builder: (context, colors, status, _) => Container(
+                          builder: (context, status, _) => Container(
                             height: 32,
                             width: 32,
                             decoration: BoxDecoration(
                               color: shade,
-                              border: Border.all(
-                                color: status.active ? theme.absolute : theme.border,
-                                width: 2,
-                              ),
+                              border: Border.all(color: status.active ? theme.absolute : theme.border, width: 2),
                             ),
                             child: Center(
                               child: Text(
                                 "A",
                                 style: TextStyle(
-                                    color: e.contrastingText(shade, isDark: theme.isDark, background: theme.background),
-                                    height: 1),
+                                  color: e.contrastingText(shade, isDark: theme.isDark, background: theme.background),
+                                  height: 1,
+                                ),
                               ),
                             ),
                           ),
@@ -354,19 +349,13 @@ class _ThemeDemoState extends State<ThemeDemo> {
                     ],
                   ),
                 ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      height: 32,
-                      width: 32,
-                    ),
-                  ],
-                ),
+                Column(mainAxisAlignment: MainAxisAlignment.center, children: [SizedBox(height: 32, width: 32)]),
                 const LdDivider(),
               ],
             ),
-          )),
-    ]);
+          ),
+        ),
+      ],
+    );
   }
 }

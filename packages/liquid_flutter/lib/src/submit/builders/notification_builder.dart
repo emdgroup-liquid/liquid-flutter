@@ -118,7 +118,8 @@ class _LdSubmitNotificationState<T, Arg> extends State<_LdSubmitNotification<T, 
       builder: (context, snapshot) {
         final state = controller.state;
 
-        return LdAutoSpace(
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (widget.resultBuilder != null && state.type == LdSubmitStateType.result)
               widget.resultBuilder!(context, state.result as T, controller),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/touchable/neutral_ghost_color.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
@@ -93,40 +94,44 @@ class _LdDrawerItemSectionState extends State<LdDrawerItemSection> {
     return LdTouchableSurface(
       active: widget.active == true,
       onPressed: _onTap,
-      color: _theme.palette.primary,
-      builder: (context, colorBundle, status, _) => Container(
-        padding: _theme.pad(size: LdSize.s),
-        decoration: BoxDecoration(
-          color: colorBundle.surface,
-          borderRadius: _theme.radius(LdSize.m),
-        ),
-        child: Row(
-          children: [
-            widget.leading != null
-                ? _leading(colorBundle.icon)
-                : const SizedBox(
-                    height: 10,
-                    width: 10,
-                  ),
-            Expanded(
-              child: DefaultTextStyle(
-                  style: ldBuildTextStyle(
-                    _theme,
-                    LdTextType.label,
-                    LdSize.m,
-                    color: _theme.text,
-                  ),
-                  child: widget.child),
+      builder: (context, status, _) => Builder(
+        builder: (context) {
+          final colorBundle = neutralGhostColor(_theme, status);
+          return Container(
+            padding: _theme.pad(size: LdSize.s),
+            decoration: BoxDecoration(
+              color: colorBundle.surface,
+              borderRadius: _theme.radius(LdSize.m),
             ),
-            IconTheme(
-              data: IconThemeData(
-                color: colorBundle.icon,
-                size: _theme.paragraphSize(LdSize.s),
-              ),
-              child: _trailingItem,
+            child: Row(
+              children: [
+                widget.leading != null
+                    ? _leading(colorBundle.icon)
+                    : const SizedBox(
+                        height: 10,
+                        width: 10,
+                      ),
+                Expanded(
+                  child: DefaultTextStyle(
+                      style: ldBuildTextStyle(
+                        _theme,
+                        LdTextType.label,
+                        LdSize.m,
+                        color: _theme.text,
+                      ),
+                      child: widget.child),
+                ),
+                IconTheme(
+                  data: IconThemeData(
+                    color: colorBundle.icon,
+                    size: _theme.paragraphSize(LdSize.s),
+                  ),
+                  child: _trailingItem,
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

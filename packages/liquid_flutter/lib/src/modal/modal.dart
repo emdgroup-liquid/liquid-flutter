@@ -135,17 +135,32 @@ class LdModalRoute<T> extends PageRoute<T> {
   }
 
   /// Builds content for sheet mode with top gap and rounded corners.
+  ///
+  /// The sheet is bottom-anchored and shrinks to fit its child's intrinsic
+  /// height; if the child wants more vertical space (e.g. an [LdScaffold] or
+  /// any expanding widget) the sheet grows up to the cap derived from
+  /// [topGapRatio] / [sheetAspectRatio].
   Widget _buildSheetContent(BuildContext context, Widget child) {
-    double topPadding = _topPadding(context);
+    final theme = LdTheme.of(context);
+    final mediaQuery = MediaQuery.of(context);
+    final double topPadding = _topPadding(context);
+    final double maxSheetHeight = (mediaQuery.size.height - topPadding).clamp(
+      0.0,
+      mediaQuery.size.height,
+    );
+    final BorderRadius effectiveBorderRadius = sheetBorderRadius ??
+        theme.radius(LdSize.l).copyWith(
+              bottomLeft: Radius.zero,
+              bottomRight: Radius.zero,
+            );
 
-    Widget content = Container(
+    Widget sheet = Container(
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
-        borderRadius: sheetBorderRadius ??
-            LdTheme.of(context).radius(LdSize.l).copyWith(bottomLeft: Radius.zero, bottomRight: Radius.zero),
+        borderRadius: effectiveBorderRadius,
         border: Border.all(
-          color: LdTheme.of(context).border,
-          width: LdTheme.of(context).borderWidth,
+          color: theme.border,
+          width: theme.borderWidth,
           strokeAlign: BorderSide.strokeAlignOutside,
         ),
       ),
@@ -155,9 +170,17 @@ class LdModalRoute<T> extends PageRoute<T> {
       ),
     );
 
-    // Apply aspect ratio constraint if provided
-
-    final mediaQuery = MediaQuery.of(context);
+    // Drag-to-dismiss is wrapped around the actual visible sheet so that
+    // hit-testing and the drag math use the sheet's real rendered height
+    // (instead of the full route area above it).
+    final AnimationController? sheetController = controller;
+    if (barrierDismissible && sheetController != null) {
+      sheet = _LdSheetDragGestureDetector<T>(
+        route: this,
+        controller: sheetController,
+        child: sheet,
+      );
+    }
 
     return MediaQuery(
       data: mediaQuery.copyWith(
@@ -165,10 +188,15 @@ class LdModalRoute<T> extends PageRoute<T> {
         viewPadding: mediaQuery.viewPadding.copyWith(top: 0),
         viewInsets: mediaQuery.viewInsets.copyWith(top: 0),
       ),
-      child: Container(
-        margin: sheetInsets,
-        padding: EdgeInsets.only(top: topPadding),
-        child: content,
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxSheetHeight),
+          child: Container(
+            margin: sheetInsets,
+            child: sheet,
+          ),
+        ),
       ),
     );
   }
@@ -271,21 +299,15 @@ class LdModalRoute<T> extends PageRoute<T> {
     Widget child,
   ) {
     final bool linearTransition = popGestureInProgress;
-    // Drag is enabled only if barrierDismissible is true
-    final bool enableDrag = barrierDismissible;
 
+    // The drag-to-dismiss gesture detector is mounted inside the sheet
+    // content (see [_buildSheetContent]) so it wraps only the visible sheet.
     return LdModalSheetTransition(
       topGap: topGapRatio,
       primaryRouteAnimation: animation,
       secondaryRouteAnimation: secondaryAnimation,
       linearTransition: linearTransition,
-      child: enableDrag
-          ? _LdSheetDragGestureDetector<T>(
-              route: this,
-              controller: controller!, // protected access
-              child: child,
-            )
-          : child,
+      child: child,
     );
   }
 
@@ -494,22 +516,22 @@ class _LdSheetDragGestureDetectorState<T> extends State<_LdSheetDragGestureDetec
   void _handleDragUpdate(DragUpdateDetails details) {
     assert(mounted);
     assert(_dragController != null);
-    if (context.size == null) return;
+    final double sheetHeight = context.size?.height ?? 0;
+    if (sheetHeight <= 0) return;
 
-    final double screenHeight = context.size!.height;
-    final double sheetHeight = screenHeight - (screenHeight * widget.route.topGapRatio);
     _dragController!.dragUpdate(details.primaryDelta! / sheetHeight);
   }
 
   void _handleDragEnd(DragEndDetails details) {
     assert(mounted);
     assert(_dragController != null);
-    if (context.size == null) {
+    final double sheetHeight = context.size?.height ?? 0;
+    if (sheetHeight <= 0) {
       _dragController = null;
       return;
     }
 
-    final double velocity = details.velocity.pixelsPerSecond.dy / context.size!.height;
+    final double velocity = details.velocity.pixelsPerSecond.dy / sheetHeight;
     _dragController!.dragEnd(velocity);
     _dragController = null;
   }

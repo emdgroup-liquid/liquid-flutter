@@ -48,10 +48,8 @@ class LdChooseInputTrigger<T extends Identifiable<IdType>, IdType> extends State
           disabled: disabled,
           key: const Key("ldChoose_trigger"),
           onPressed: onTap,
-          mode: LdTouchableSurfaceMode.input,
-          isInput: true,
-          color: theme.palette.primary,
-          builder: (contxt, colorBundle, status, child) {
+          builder: (contxt, status, child) {
+            final colorBundle = inputColor(theme, status, isValid: true);
             return Container(
               padding: theme.balPad(size),
               clipBehavior: Clip.hardEdge,

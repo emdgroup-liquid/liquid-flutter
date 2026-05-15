@@ -32,7 +32,6 @@ class _TestItem with Identifiable<int> {
 
 // Mock filter option for testing
 class _MockFilterOption<T extends Identifiable<IdType>, IdType> extends LdFilterOption<T, IdType> {
-  final bool Function(T item) _optimisticFilterFunc;
   final String _serializedValue;
 
   _MockFilterOption({
@@ -40,10 +39,8 @@ class _MockFilterOption<T extends Identifiable<IdType>, IdType> extends LdFilter
     required super.label,
     required super.icon,
     super.isOn = false,
-    required bool Function(T item) optimisticFilterFunc,
     String serializedValue = 'mock',
-  })  : _optimisticFilterFunc = optimisticFilterFunc,
-        _serializedValue = serializedValue;
+  }) : _serializedValue = serializedValue;
 
   @override
   String serialize() => _serializedValue;
@@ -52,9 +49,6 @@ class _MockFilterOption<T extends Identifiable<IdType>, IdType> extends LdFilter
   LdFilterOption<T, IdType> marshalSerialized(String entry) {
     return copyWith(isOn: true);
   }
-
-  @override
-  bool optimisticFilter(T item) => _optimisticFilterFunc(item);
 
   @override
   LdFilterOption<T, IdType> copyWith({
@@ -68,7 +62,6 @@ class _MockFilterOption<T extends Identifiable<IdType>, IdType> extends LdFilter
       label: label ?? this.label,
       icon: icon ?? this.icon,
       isOn: isOn ?? this.isOn,
-      optimisticFilterFunc: _optimisticFilterFunc,
       serializedValue: _serializedValue,
     );
   }
@@ -86,7 +79,6 @@ class _MockSortOption<T extends Identifiable<IdType>, IdType> extends LdSortOpti
     required super.label,
     required super.icon,
     super.isOn = false,
-    super.optimisticSort,
   });
 }
 
@@ -182,13 +174,11 @@ void main() {
           name: 'filter1',
           label: (context) => 'Filter 1',
           icon: (context) => const Icon(Icons.filter_list),
-          optimisticFilterFunc: (item) => true,
         );
         final filter2 = _MockFilterOption<_TestItem, int>(
           name: 'filter2',
           label: (context) => 'Filter 2',
           icon: (context) => const Icon(Icons.filter_list),
-          optimisticFilterFunc: (item) => true,
           isOn: true,
         );
 
@@ -610,7 +600,6 @@ void main() {
           name: 'testFilter',
           label: (context) => 'Test Filter',
           icon: (context) => const Icon(Icons.filter_list),
-          optimisticFilterFunc: (item) => item.value > 15,
         );
 
         final repository = createRepository(
@@ -642,14 +631,12 @@ void main() {
           name: 'filter1',
           label: (context) => 'Filter 1',
           icon: (context) => const Icon(Icons.filter_list),
-          optimisticFilterFunc: (item) => true,
           isOn: true,
         );
         final filter2 = _MockFilterOption<_TestItem, int>(
           name: 'filter2',
           label: (context) => 'Filter 2',
           icon: (context) => const Icon(Icons.filter_list),
-          optimisticFilterFunc: (item) => true,
           isOn: false,
         );
 
@@ -666,7 +653,6 @@ void main() {
           name: 'testFilter',
           label: (context) => 'Test Filter',
           icon: (context) => const Icon(Icons.filter_list),
-          optimisticFilterFunc: (item) => true,
           isOn: true,
         );
 
@@ -679,7 +665,9 @@ void main() {
         expect(params['testFilter'], equals('mock'));
       });
 
-      test('applyOptimisticFilterAndSorting filters items correctly', () async {
+      test('updateFilter triggers server fetch with correct filter params', () async {
+        var lastReceivedFilters = <LdFilterOption<_TestItem, int>>{};
+
         final filter = LdFilterRange<_TestItem, int>(
           name: 'valueRange',
           label: (context) => 'Value Range',
@@ -688,10 +676,9 @@ void main() {
           max: 100,
           range: const RangeValues(0, 100),
           isOn: true,
-          optimisticFilter: (item, range) => item.value >= range.start && item.value <= range.end,
         );
 
-        final items = [
+        final serverItems = [
           _TestItem(1, 'Item 1', 10),
           _TestItem(2, 'Item 2', 20),
           _TestItem(3, 'Item 3', 30),
@@ -699,68 +686,48 @@ void main() {
 
         final repository = LdRepository<_TestItem, int>(
           fetchListWithParameters: ({required offset, required pageSize, pageToken, filters, sortOptions}) async {
+            lastReceivedFilters = filters ?? {};
+            final end = (offset + pageSize).clamp(0, serverItems.length);
             return LdListPage<_TestItem>(
-              newItems: items,
-              hasMore: false,
-              total: items.length,
+              newItems: offset < serverItems.length ? serverItems.sublist(offset, end) : [],
+              hasMore: end < serverItems.length,
+              total: serverItems.length,
             );
           },
-          getById: (id) async => items.firstWhere((item) => item.id == id),
+          getById: (id) async => serverItems.firstWhere((item) => item.id == id),
           filters: {filter},
         );
 
-        // Initialize items in repository
         await Future.delayed(const Duration(milliseconds: 100));
 
-        // Add items manually to test filtering
-        repository.replaceItems({
-          0: LdPaginatorItem<_TestItem>(value: items[0], state: LdPaginatorItemState.loaded),
-          1: LdPaginatorItem<_TestItem>(value: items[1], state: LdPaginatorItemState.loaded),
-          2: LdPaginatorItem<_TestItem>(value: items[2], state: LdPaginatorItemState.loaded),
-        });
-        repository.totalItems = 3;
-
-        // NARROWING phase:
-        // tighten the active range filter so only items in [20, 30] remain visible.
+        // Tighten filter — server should receive the updated range
         await repository.updateFilter(
           'valueRange',
           (f) => (f as LdFilterRange<_TestItem, int>).copyWith(range: const RangeValues(20, 30), isOn: true),
         );
+        await Future.delayed(const Duration(milliseconds: 100));
 
-        final narrowedVisibleIds = repository.itemsMap.values
-            .where((item) => item.value != null && item.state != LdPaginatorItemState.filteredOut)
-            .map((item) => item.value!.id)
-            .toSet();
+        final narrowedFilter =
+            lastReceivedFilters.firstWhere((f) => f.name == 'valueRange') as LdFilterRange<_TestItem, int>;
+        expect(narrowedFilter.range.start, equals(20));
+        expect(narrowedFilter.range.end, equals(30));
 
-        // After narrowing, only ids 2 and 3 should still be visible.
-        expect(narrowedVisibleIds, equals({2, 3}));
-
-        // While the filter is still narrowed, a refresh should not resurrect
-        // filtered-out items into the visible range.
-        await repository.refreshList();
-
-        final afterRefreshVisibleIds = repository.itemsMap.values
-            .where((item) => item.value != null && item.state != LdPaginatorItemState.filteredOut)
-            .map((item) => item.value!.id)
-            .toSet();
-
-        expect(afterRefreshVisibleIds, equals({2, 3}));
-
-        // BROADENING phase (regression coverage):
-        // broaden the same active filter again and verify previously filtered-out
-        // items are restored without disabling/removing the filter.
+        // Broaden filter — server should receive the broadened range
         await repository.updateFilter(
           'valueRange',
-          (f) => (f as LdFilterRange<_TestItem, int>).copyWith(range: const RangeValues(0, 30), isOn: true),
+          (f) => (f as LdFilterRange<_TestItem, int>).copyWith(range: const RangeValues(0, 100), isOn: true),
         );
+        await Future.delayed(const Duration(milliseconds: 100));
 
-        final broadenedVisibleIds = repository.itemsMap.values
-            .where((item) => item.value != null && item.state != LdPaginatorItemState.filteredOut)
-            .map((item) => item.value!.id)
-            .toSet();
+        final broadenedFilter =
+            lastReceivedFilters.firstWhere((f) => f.name == 'valueRange') as LdFilterRange<_TestItem, int>;
+        expect(broadenedFilter.range.start, equals(0));
+        expect(broadenedFilter.range.end, equals(100));
 
-        // Item 1 must reappear here. This is the bug we are guarding against.
-        expect(broadenedVisibleIds, equals({1, 2, 3}));
+        // All items should now be visible (server returned them all)
+        final visibleIds =
+            repository.itemsMap.values.where((item) => item.value != null).map((item) => item.value!.id).toSet();
+        expect(visibleIds, equals({1, 2, 3}));
       });
     });
 
@@ -770,7 +737,6 @@ void main() {
           name: 'testSort',
           label: (context) => 'Test Sort',
           icon: (context) => const Icon(Icons.sort),
-          optimisticSort: (a, b) => a.value.compareTo(b.value),
         );
 
         final repository = createRepository(
@@ -843,134 +809,52 @@ void main() {
         expect(params['sort'], equals('testSort'));
       });
 
-      test('applyOptimisticFilterAndSorting sorts items correctly', () async {
+      test('setActiveSortOption triggers server fetch with correct sort option', () async {
+        var lastReceivedSortOptions = <LdSortOption<_TestItem, int>>[];
+
         final sort = _MockSortOption<_TestItem, int>(
           name: 'valueSort',
           label: (context) => 'Value Sort',
           icon: (context) => const Icon(Icons.sort),
-          optimisticSort: (a, b) => b.value.compareTo(a.value), // Descending
-          isOn: true,
+          isOn: false,
         );
 
-        final items = [
-          _TestItem(1, 'Item 1', 10),
+        // Server returns items in descending order when sort is active
+        final itemsDescending = [
           _TestItem(2, 'Item 2', 30),
           _TestItem(3, 'Item 3', 20),
+          _TestItem(1, 'Item 1', 10),
         ];
 
         final repository = LdRepository<_TestItem, int>(
           fetchListWithParameters: ({required offset, required pageSize, pageToken, filters, sortOptions}) async {
+            lastReceivedSortOptions = sortOptions ?? [];
+            final end = (offset + pageSize).clamp(0, itemsDescending.length);
             return LdListPage<_TestItem>(
-              newItems: items,
-              hasMore: false,
-              total: items.length,
+              newItems: offset < itemsDescending.length ? itemsDescending.sublist(offset, end) : [],
+              hasMore: end < itemsDescending.length,
+              total: itemsDescending.length,
             );
           },
-          getById: (id) async => items.firstWhere((item) => item.id == id),
+          getById: (id) async => itemsDescending.firstWhere((item) => item.id == id),
           sortOptions: [sort],
         );
 
         await Future.delayed(const Duration(milliseconds: 100));
-
-        // Add items manually to test sorting
-        repository.replaceItems({
-          0: LdPaginatorItem<_TestItem>(value: items[0], state: LdPaginatorItemState.loaded),
-          1: LdPaginatorItem<_TestItem>(value: items[1], state: LdPaginatorItemState.loaded),
-          2: LdPaginatorItem<_TestItem>(value: items[2], state: LdPaginatorItemState.loaded),
-        });
-        repository.totalItems = 3;
 
         await repository.setActiveSortOption('valueSort');
-        await Future.delayed(const Duration(milliseconds: 600)); // Wait for optimistic sorting delay
-
-        final sortedItems =
-            repository.itemsMap.values.where((item) => item.value != null).map((item) => item.value!).toList();
-
-        expect(sortedItems.length, equals(3));
-        // Should be sorted descending by value
-        expect(sortedItems[0].value, equals(30));
-        expect(sortedItems[1].value, equals(20));
-        expect(sortedItems[2].value, equals(10));
-      });
-    });
-
-    group('Optimistic Filtering and Sorting', () {
-      test('applyOptimisticFilterAndSorting refreshes list when no filters or sorts', () async {
-        var refreshCallCount = 0;
-        final repository = LdRepository<_TestItem, int>(
-          fetchListWithParameters: ({required offset, required pageSize, pageToken, filters, sortOptions}) async {
-            if (offset == 0) refreshCallCount++;
-            return LdListPage<_TestItem>(
-              newItems: [],
-              hasMore: false,
-              total: 0,
-            );
-          },
-          getById: (id) async => _TestItem(id, 'Test', 0),
-        );
-
-        await repository.applyOptimisticFilterAndSorting();
         await Future.delayed(const Duration(milliseconds: 100));
 
-        expect(refreshCallCount, greaterThan(0));
-      });
+        // Server should have been called with the activated sort option
+        expect(lastReceivedSortOptions.any((s) => s.name == 'valueSort' && s.isOn), isTrue);
 
-      test('applyOptimisticFilterAndSorting handles combination of filters and sorts', () async {
-        final filter = _MockFilterOption<_TestItem, int>(
-          name: 'filter',
-          label: (context) => 'Filter',
-          icon: (context) => const Icon(Icons.filter_list),
-          optimisticFilterFunc: (item) => item.value > 15,
-          isOn: true,
-        );
-        final sort = _MockSortOption<_TestItem, int>(
-          name: 'sort',
-          label: (context) => 'Sort',
-          icon: (context) => const Icon(Icons.sort),
-          optimisticSort: (a, b) => b.value.compareTo(a.value),
-          isOn: true,
-        );
-
-        final items = [
-          _TestItem(1, 'Item 1', 10),
-          _TestItem(2, 'Item 2', 30),
-          _TestItem(3, 'Item 3', 20),
-        ];
-
-        final repository = LdRepository<_TestItem, int>(
-          fetchListWithParameters: ({required offset, required pageSize, pageToken, filters, sortOptions}) async {
-            return LdListPage<_TestItem>(
-              newItems: items,
-              hasMore: false,
-              total: items.length,
-            );
-          },
-          getById: (id) async => items.firstWhere((item) => item.id == id),
-          filters: {filter},
-          sortOptions: [sort],
-        );
-
-        repository.replaceItems({
-          0: LdPaginatorItem<_TestItem>(value: items[0], state: LdPaginatorItemState.loaded),
-          1: LdPaginatorItem<_TestItem>(value: items[1], state: LdPaginatorItemState.loaded),
-          2: LdPaginatorItem<_TestItem>(value: items[2], state: LdPaginatorItemState.loaded),
-        });
-        repository.totalItems = 3;
-
-        await repository.applyOptimisticFilterAndSorting();
-        await Future.delayed(const Duration(milliseconds: 600));
-
-        final processedItems = repository.itemsMap.values
-            .where((item) => item.value != null && item.state != LdPaginatorItemState.filteredOut)
-            .map((item) => item.value!)
-            .toList();
-
-        // Should be filtered (value > 15) and sorted descending
-        expect(processedItems.length, greaterThan(0));
-        expect(processedItems.every((item) => item.value > 15), isTrue);
-        if (processedItems.length > 1) {
-          expect(processedItems[0].value, greaterThanOrEqualTo(processedItems[1].value));
-        }
+        // Items should reflect what the server returned
+        final fetchedItems =
+            repository.itemsMap.values.where((item) => item.value != null).map((item) => item.value!).toList();
+        expect(fetchedItems.length, equals(3));
+        expect(fetchedItems[0].value, equals(30));
+        expect(fetchedItems[1].value, equals(20));
+        expect(fetchedItems[2].value, equals(10));
       });
     });
 
@@ -1033,14 +917,12 @@ void main() {
           name: 'filter1',
           label: (context) => 'Filter 1',
           icon: (context) => const Icon(Icons.filter_list),
-          optimisticFilterFunc: (item) => true,
           isOn: true,
         );
         final filter2 = _MockFilterOption<_TestItem, int>(
           name: 'filter2',
           label: (context) => 'Filter 2',
           icon: (context) => const Icon(Icons.filter_list),
-          optimisticFilterFunc: (item) => true,
           isOn: false,
         );
 
@@ -1082,7 +964,6 @@ void main() {
           name: 'filter',
           label: (context) => 'Filter',
           icon: (context) => const Icon(Icons.filter_list),
-          optimisticFilterFunc: (item) => true,
           isOn: true,
         );
         final sort = _MockSortOption<_TestItem, int>(
@@ -1116,7 +997,6 @@ void main() {
           name: 'testFilter',
           label: (context) => 'Test Filter',
           icon: (context) => const Icon(Icons.filter_list),
-          optimisticFilterFunc: (item) => true,
         );
 
         final repository = createRepository(
@@ -1159,7 +1039,6 @@ void main() {
           name: 'testFilter',
           label: (context) => 'Test Filter',
           icon: (context) => const Icon(Icons.filter_list),
-          optimisticFilterFunc: (item) => true,
         );
 
         final repository = createRepository(
@@ -1179,6 +1058,172 @@ void main() {
       });
     });
 
+    group('refresh behavior', () {
+      test('refreshList applies server order after backend reorder', () async {
+        var serverItems = <_TestItem>[
+          _TestItem(1, 'Item 1', 10),
+          _TestItem(2, 'Item 2', 20),
+          _TestItem(3, 'Item 3', 30),
+        ];
+        final repository = createRepository(
+          pageSize: 3,
+          fetchListWithParameters: ({
+            required offset,
+            required pageSize,
+            pageToken,
+            filters,
+            sortOptions,
+          }) async {
+            final end = (offset + pageSize).clamp(0, serverItems.length);
+            return LdListPage<_TestItem>(
+              newItems: offset < serverItems.length ? serverItems.sublist(offset, end) : [],
+              hasMore: end < serverItems.length,
+              total: serverItems.length,
+            );
+          },
+        );
+
+        await repository.refreshList();
+        await Future.delayed(const Duration(milliseconds: 100));
+        final firstOrder = repository.itemsMap.entries.map((e) => e.value.value?.id).toList();
+        expect(firstOrder, equals([1, 2, 3]));
+
+        serverItems = <_TestItem>[
+          _TestItem(3, 'Item 3', 30),
+          _TestItem(1, 'Item 1', 10),
+          _TestItem(2, 'Item 2', 20),
+        ];
+
+        await repository.refreshList();
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        final refreshedOrder = repository.itemsMap.entries.map((e) => e.value.value?.id).toList();
+        expect(refreshedOrder, equals([3, 1, 2]));
+      });
+
+      test('refreshList keeps current anchor by resolving offset', () async {
+        var resolvedOffset = 4;
+        final serverItems = List.generate(12, (index) => _TestItem(index + 1, 'Item ${index + 1}', index + 1));
+        final requestedOffsets = <int>[];
+        final repository = createRepository(
+          pageSize: 2,
+          getOffsetById: (id, {filters, sortOptions}) async => resolvedOffset,
+          fetchListWithParameters: ({
+            required offset,
+            required pageSize,
+            pageToken,
+            filters,
+            sortOptions,
+          }) async {
+            requestedOffsets.add(offset);
+            final end = (offset + pageSize).clamp(0, serverItems.length);
+            return LdListPage<_TestItem>(
+              newItems: offset < serverItems.length ? serverItems.sublist(offset, end) : [],
+              hasMore: end < serverItems.length,
+              total: serverItems.length,
+            );
+          },
+        );
+        repository.initialOffset = 4;
+
+        await repository.refreshList();
+        await Future.delayed(const Duration(milliseconds: 100));
+        expect(requestedOffsets.last, equals(4));
+        expect(repository.getItemAt(4)?.value?.id, equals(5));
+
+        resolvedOffset = 8;
+        await repository.refreshList();
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        expect(repository.initialOffset, equals(8));
+        expect(requestedOffsets.last, equals(8));
+        expect(repository.getItemAt(8)?.value?.id, equals(9));
+      });
+
+      test('refreshList falls back to initialOffset when offset lookup is null', () async {
+        final requestedOffsets = <int>[];
+        final serverItems = List.generate(6, (index) => _TestItem(index + 1, 'Item ${index + 1}', index + 1));
+        final repository = createRepository(
+          pageSize: 2,
+          getOffsetById: (id, {filters, sortOptions}) async => null,
+          fetchListWithParameters: ({
+            required offset,
+            required pageSize,
+            pageToken,
+            filters,
+            sortOptions,
+          }) async {
+            requestedOffsets.add(offset);
+            final end = (offset + pageSize).clamp(0, serverItems.length);
+            return LdListPage<_TestItem>(
+              newItems: offset < serverItems.length ? serverItems.sublist(offset, end) : [],
+              hasMore: end < serverItems.length,
+              total: serverItems.length,
+            );
+          },
+        );
+        repository.initialOffset = 2;
+
+        await repository.refreshList();
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        expect(requestedOffsets.last, equals(2));
+        expect(repository.initialOffset, equals(2));
+      });
+
+      test('refreshList clears stale pages so old page order is not reused', () async {
+        var serverItems = <_TestItem>[
+          _TestItem(1, 'Item 1', 1),
+          _TestItem(2, 'Item 2', 2),
+          _TestItem(3, 'Item 3', 3),
+          _TestItem(4, 'Item 4', 4),
+          _TestItem(5, 'Item 5', 5),
+          _TestItem(6, 'Item 6', 6),
+        ];
+        final repository = createRepository(
+          pageSize: 3,
+          fetchListWithParameters: ({
+            required offset,
+            required pageSize,
+            pageToken,
+            filters,
+            sortOptions,
+          }) async {
+            final end = (offset + pageSize).clamp(0, serverItems.length);
+            return LdListPage<_TestItem>(
+              newItems: offset < serverItems.length ? serverItems.sublist(offset, end) : [],
+              hasMore: end < serverItems.length,
+              total: serverItems.length,
+            );
+          },
+        );
+
+        await repository.refreshList();
+        await Future.delayed(const Duration(milliseconds: 100));
+        await repository.fetchPageAtOffset(3);
+        await Future.delayed(const Duration(milliseconds: 100));
+        final initialSecondPage = [3, 4, 5].map((index) => repository.getItemAt(index)?.value?.id).toList();
+        expect(initialSecondPage, equals([4, 5, 6]));
+
+        serverItems = <_TestItem>[
+          _TestItem(1, 'Item 1', 1),
+          _TestItem(2, 'Item 2', 2),
+          _TestItem(3, 'Item 3', 3),
+          _TestItem(6, 'Item 6', 6),
+          _TestItem(5, 'Item 5', 5),
+          _TestItem(4, 'Item 4', 4),
+        ];
+
+        await repository.refreshList();
+        await Future.delayed(const Duration(milliseconds: 100));
+        await repository.fetchPageAtOffset(3);
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        final refreshedSecondPage = [3, 4, 5].map((index) => repository.getItemAt(index)?.value?.id).toList();
+        expect(refreshedSecondPage, equals([6, 5, 4]));
+      });
+    });
+
     group('Integration with LdPaginator', () {
       test('fetchListWithParameters is called with correct parameters', () async {
         var calledWithFilters = <Set<LdFilterOption<_TestItem, int>>>[];
@@ -1188,7 +1233,6 @@ void main() {
           name: 'testFilter',
           label: (context) => 'Test Filter',
           icon: (context) => const Icon(Icons.filter_list),
-          optimisticFilterFunc: (item) => true,
           isOn: true,
         );
         final sort = _MockSortOption<_TestItem, int>(
@@ -1232,7 +1276,6 @@ void main() {
           name: 'activeFilter',
           label: (context) => 'Active Filter',
           icon: (context) => const Icon(Icons.filter_list),
-          optimisticFilterFunc: (item) => true,
           isOn: false, // Initially off
         );
         final sort = _MockSortOption<_TestItem, int>(

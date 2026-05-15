@@ -9,23 +9,20 @@ class BentoGallery extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdScaffold(
-      appBars: [
-        LdAppBar(
-          addContainer: true,
-          title: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text("Bento Gallery"),
-              LdBreadcrumb.fromStrings([
-                "Components",
-                "Bento Gallery",
-              ]),
-            ],
-          ),
+      body: LdAppBar(
+        addContainer: true,
+        title: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text("Bento Gallery"),
+            LdBreadcrumb.fromStrings([
+              "Components",
+              "Bento Gallery",
+            ]),
+          ],
         ),
-      ],
-      body: CustomScrollView(
+        child: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
             child: SafeArea(
@@ -44,6 +41,7 @@ class BentoGallery extends StatelessWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }

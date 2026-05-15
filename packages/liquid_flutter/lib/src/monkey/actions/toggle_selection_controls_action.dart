@@ -13,35 +13,51 @@ LdMonkeyAction<T, IdType> toggleSelectionControls<T extends Identifiable<IdType>
         ),
       },
       onShortcutTrigger: (context) async {
-        final shellState = LdMonkeyShellState.of<T, IdType>(context);
-        shellState.setShowSelectionControls(!shellState.showSelectionControls);
+        final selection = LdMonkeySelection.of<T, IdType>(context);
+        LdMonkeySelection.updateShowSelectionControls<T, IdType>(context, !selection.showSelectionControls);
       },
       builder: (context) {
-        final shellState = LdMonkeyShellState.of<T, IdType>(context);
+        final selection = LdMonkeySelection.of<T, IdType>(context, listen: true);
         return LdAppBarAction(
           key: const Key('toggle_selection_controls'),
           leading: const Icon(LucideIcons.pen),
-          active: shellState.showSelectionControls,
+          active: selection.showSelectionControls,
           onPressed: () async {
-            final currentlyShowing = shellState.showSelectionControls;
-            final selectedItemCount = shellState.selectedItems.length;
+            final locale = LiquidLocalizations.of(context);
 
-            if (currentlyShowing && selectedItemCount > 1) {
-              if (await ldConfirmModal(
+            if (selection.selection.isNotEmpty && selection.showSelectionControls) {
+              final confirmation = await ldConfirmModal(
                 context: context,
-                title: Text(LiquidLocalizations.of(context).clearSelection),
-                description: LiquidLocalizations.of(context).clearSelectionBody(selectedItemCount),
-                positive: Text(LiquidLocalizations.of(context).confirm),
-                negative: Text(LiquidLocalizations.of(context).cancel),
+                description: locale.clearSelectionBody(selection.selection.length),
+                positive: Text(locale.clearSelection),
+                negative: Text(locale.cancel),
                 useRootNavigator: true,
-              )) {
-                shellState.setShowSelectionControls(false);
+              );
+
+              if (!confirmation) {
+                return;
               }
+              if (selection.selection.isNotEmpty && selection.showSelectionControls && context.mounted) {
+                LdMonkeySelection.updateViewing<T, IdType>(context, {});
+                LdMonkeySelection.updateSelection<T, IdType>(context, {});
+              }
+            }
+
+            await Future.delayed(Duration(milliseconds: 300));
+
+            if (!context.mounted) {
               return;
             }
-            shellState.setShowSelectionControls(!shellState.showSelectionControls);
+
+            LdMonkeySelection.updateShowSelectionControls<T, IdType>(context, !selection.showSelectionControls);
           },
-          child: Text(LiquidLocalizations.of(context).select),
+          child: Builder(builder: (context) {
+            final showingSelectionControls =
+                LdMonkeySelection.of<T, IdType>(context, listen: true).showSelectionControls;
+            return Text(showingSelectionControls
+                ? LiquidLocalizations.of(context).done
+                : LiquidLocalizations.of(context).select);
+          }),
         );
       },
     );

@@ -55,6 +55,9 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
   @override
   initState() {
     super.initState();
+    if (LdTheme.of(context).platform.isDesktop) {
+      _visibleStartIndex = 0;
+    }
   }
 
   void openDrawer() {

@@ -13,7 +13,6 @@ void main() {
           name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
-          optimisticFilter: (item) => item.active,
         );
 
         final repository = createTestRepository(filters: {filter});
@@ -43,7 +42,6 @@ void main() {
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
           isOn: true,
-          optimisticFilter: (item) => item.active,
         );
 
         final inactiveFilter = LdFilterBool<TestItem, int>(
@@ -51,7 +49,6 @@ void main() {
           label: (context) => 'Inactive',
           icon: (context) => const Icon(Icons.close),
           isOn: false,
-          optimisticFilter: (item) => !item.active,
         );
 
         final repository = createTestRepository(
@@ -84,7 +81,6 @@ void main() {
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
           isOn: false,
-          optimisticFilter: (item) => item.active,
         );
 
         final repository = createTestRepository(filters: {filter});
@@ -118,7 +114,6 @@ void main() {
           name: 'name',
           label: (context) => 'Name',
           icon: (context) => const Icon(Icons.sort),
-          optimisticSort: (a, b) => a.name.compareTo(b.name),
         );
 
         final repository = createTestRepository(
