@@ -380,8 +380,10 @@ class AppRouter {
                   builder: (context) => LdModalRoute(
                     context: context,
                     pageBuilder: (context) => LdScaffold(
-                      appBars: [LdAppBar(title: const Text("This is a title"))],
-                      body: LdScaffoldBody(children: [LdText("This is modal content")]),
+                      body: LdAppBar(
+                        title: const Text("This is a title"),
+                        child: LdScaffoldBody(children: [LdText("This is modal content")]),
+                      ),
                     ),
                   ),
                 ),
@@ -434,11 +436,15 @@ class NavTest extends StatelessWidget {
   Widget build(BuildContext context) {
     return LdScaffold(
       drawer: LdScaffold(
-        appBars: [LdAppBar(title: Text("Drawer"))],
-        body: LdButton(child: Text("Pop"), onPressed: () => context.pop()),
+        body: LdAppBar(
+          title: Text("Drawer"),
+          child: LdButton(child: Text("Pop"), onPressed: () => context.pop()),
+        ),
       ),
-      appBars: [LdAppBar(title: Text("Nav Test"))],
-      body: LdText("Nav Test"),
+      body: LdAppBar(
+        title: Text("Nav Test"),
+        child: LdText("Nav Test"),
+      ),
     );
   }
 }

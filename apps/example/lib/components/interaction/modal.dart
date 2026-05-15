@@ -57,36 +57,8 @@ class _DemoSheet extends StatelessWidget {
         fixedDialogSize: fixedDialogSize ? const Size(400, 400) : null,
         sheetInsets: insetValue > 0 ? EdgeInsets.all(insetValue) : EdgeInsets.zero,
         sheetBorderRadius: useScreenRadius ? BorderRadius.circular(LdTheme.of(context).screenRadius / 2) : null,
-        pageBuilder: (context) => LdScaffold(
-          appBars: [
-            if (enableHeader) LdAppBar(title: const Text("Modal")),
-            if (enableFooter)
-              LdAppBar(
-                positionMode: LdAppBarPositionMode.bottom,
-                actions: [
-                  LdFlexibleChild(
-                    child: LdButton.vague(
-                      width: double.infinity,
-                      color: LdTheme.of(context).error,
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text("Cancel"),
-                    ),
-                  ),
-                  LdFlexibleChild(
-                    child: LdButton.vague(
-                      width: double.infinity,
-                      onPressed: () {
-                        Navigator.of(context).pop("Hello world");
-                      },
-                      child: const Text("Confirm"),
-                    ),
-                  ),
-                ],
-              ),
-          ],
-          body: LdScaffoldBody(
+        pageBuilder: (context) {
+          final modalBody = LdScaffoldBody(
             children: [
               LdText.p(
                 "It's about managing expectations tiger team it is all exactly as i said, but i don't like it. Let's unpack that later we should leverage existing asserts that ladder up to the message. We need to socialize the comms with the wider stakeholder community we're building the plane while we're flying it, but if you want to motivate these clowns, try less carrot and more stick, race without a finish line performance review, so what do you feel you would bring to the table if you were hired for this position.",
@@ -130,8 +102,44 @@ class _DemoSheet extends StatelessWidget {
                 ],
               ),
             ],
-          ),
-        ),
+          );
+
+          // Build the footer bar conditionally
+          final Widget bodyWithFooter = enableFooter
+              ? LdAppBar(
+                  positionMode: LdAppBarPositionMode.bottom,
+                  actions: [
+                    LdFlexibleChild(
+                      child: LdButton.vague(
+                        width: double.infinity,
+                        color: LdTheme.of(context).error,
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text("Cancel"),
+                      ),
+                    ),
+                    LdFlexibleChild(
+                      child: LdButton.vague(
+                        width: double.infinity,
+                        onPressed: () {
+                          Navigator.of(context).pop("Hello world");
+                        },
+                        child: const Text("Confirm"),
+                      ),
+                    ),
+                  ],
+                  child: modalBody,
+                )
+              : modalBody;
+
+          // Build the header bar conditionally
+          final Widget scaffoldBody = enableHeader
+              ? LdAppBar(title: const Text("Modal"), child: bodyWithFooter)
+              : bodyWithFooter;
+
+          return LdScaffold(body: scaffoldBody);
+        },
       ),
     );
   }
@@ -621,17 +629,15 @@ class _ModalDemoState extends State<ModalDemo> {
                       builder: (context) => LdModalRoute(
                         context: context,
                         pageBuilder: (context) => LdScaffold(
-                          appBars: [
-                            LdAppBar(
-                              title: const Text("This is a title"),
+                          body: LdAppBar(
+                            title: const Text("This is a title"),
+                            child: LdScaffoldBody(
+                              children: [
+                                LdText("This is modal content"),
+                              ],
                             ),
-                          ],
-                          body: LdScaffoldBody(
-                            children: [
-                              LdText("This is modal content"),
-                            ],
                           ),
-                        ),
+                         ),
                       ),
                     ),
                   )
@@ -695,17 +701,19 @@ class _ModalDemoState extends State<ModalDemo> {
             modal: LdModalRoute(
               context: context,
               pageBuilder: (context) => LdScaffold(
-                appBars: [LdAppBar(title: const Text("This is a modal with action button"))],
-                body: LdScaffoldBody(
-                  children: [
-                    LdText("This is a modal with action button"),
-                    LdButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text("Done"),
-                    ),
-                  ],
+                body: LdAppBar(
+                  title: const Text("This is a modal with action button"),
+                  child: LdScaffoldBody(
+                    children: [
+                      LdText("This is a modal with action button"),
+                      LdButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text("Done"),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -719,24 +727,26 @@ class _ModalDemoState extends State<ModalDemo> {
             modal: LdModalRoute(
               context: context,
               pageBuilder: (context) => LdScaffold(
-                appBars: [LdAppBar(title: const Text("Modal with list items"))],
-                body: LdAutoSpace(
-                  children: [
-                    LdListItem(
-                      title: const Text("Item 1"),
-                      subtitle: const Text("Subtitle"),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                    LdListItem(
-                      title: const Text("Item 2"),
-                      subtitle: const Text("Subtitle"),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ],
+                body: LdAppBar(
+                  title: const Text("Modal with list items"),
+                  child: LdAutoSpace(
+                    children: [
+                      LdListItem(
+                        title: const Text("Item 1"),
+                        subtitle: const Text("Subtitle"),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      LdListItem(
+                        title: const Text("Item 2"),
+                        subtitle: const Text("Subtitle"),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

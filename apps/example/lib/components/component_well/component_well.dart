@@ -113,8 +113,9 @@ class _ComponentWellState extends State<ComponentWell> {
         context: context,
         dialogSize: LdSize.m,
         pageBuilder: (context) => LdScaffold(
-          appBars: [LdAppBar(title: Text("Source Code"))],
-          body: LdScaffoldBody(
+          body: LdAppBar(
+            title: Text("Source Code"),
+            child: LdScaffoldBody(
             children: [
               LdSubmit<String, String>(
                 arg: sourcePath,

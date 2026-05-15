@@ -416,63 +416,62 @@ class LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<Ld
     final filterState = context.watch<LdMonkeySortAndFilterState<T, IdType>>();
     final searchConfig = filterState.filters.whereType<LdFilterSearch<T, IdType, dynamic>>().firstOrNull;
 
+    final body = Builder(builder: (context) {
+      return LdSelectableList<T, IdType>(
+          paginator: widget.repository,
+          itemBuilder: widget.itemBuilder,
+          initialSelectedItems: _selectedItems,
+          multiSelect: widget.multiple,
+          showSelectionControls: true,
+          onSelectionChange: _handleSelectionChange,
+          listBuilder: (context, itemBuilder) {
+            return LdList(
+              groupingCriterion: widget.groupingCriterion,
+              groupHeaderBuilder: widget.groupHeaderBuilder,
+              paginator: widget.repository,
+              padding: MediaQuery.paddingOf(context),
+              itemBuilder: itemBuilder,
+            );
+          });
+    });
+
     return LdScaffold(
       debugName: "LdChoosePage",
-      appBars: [
-        LdAppBar(
-          debugName: "LdChoosePageAppBar",
-          title: Text(widget.label),
-          order: 0,
-          implyCloseModalButton: false,
-          actions: [
-            if (widget.allowEmpty)
-              LdButton.ghost(
-                disabled: _selectedItems.isEmpty,
-                onPressed: () {
-                  setState(() {
-                    _selectedItems = {};
-                  });
-                },
-                child: const Text("Clear"),
-              ),
-            LdButton(
-              disabled: _selectedItems.isEmpty && !widget.allowEmpty,
-              key: const Key("ldChoose_done"),
+      body: LdAppBar(
+        debugName: "LdChoosePageAppBar",
+        title: Text(widget.label),
+        implyCloseModalButton: false,
+        actions: [
+          if (widget.allowEmpty)
+            LdButton.ghost(
+              disabled: _selectedItems.isEmpty,
               onPressed: () {
-                maybePopContextMenu(context);
-                Navigator.of(context).pop(_selectedItems);
+                setState(() {
+                  _selectedItems = {};
+                });
               },
-              child: const Text("Done"),
+              child: const Text("Clear"),
             ),
-          ],
-        ),
-        if (searchConfig != null)
-          LdAppBar.top(
-            order: 1,
-            debugName: "LdChoosePageSearchAppBar",
-            searchConfig: searchConfig.searchConfig((query) {
-              // TODO: wire up search
-            }),
+          LdButton(
+            disabled: _selectedItems.isEmpty && !widget.allowEmpty,
+            key: const Key("ldChoose_done"),
+            onPressed: () {
+              maybePopContextMenu(context);
+              Navigator.of(context).pop(_selectedItems);
+            },
+            child: const Text("Done"),
           ),
-      ],
-      body: Builder(builder: (context) {
-        return LdSelectableList<T, IdType>(
-            paginator: widget.repository,
-            itemBuilder: widget.itemBuilder,
-            initialSelectedItems: _selectedItems,
-            multiSelect: widget.multiple,
-            showSelectionControls: true,
-            onSelectionChange: _handleSelectionChange,
-            listBuilder: (context, itemBuilder) {
-              return LdList(
-                groupingCriterion: widget.groupingCriterion,
-                groupHeaderBuilder: widget.groupHeaderBuilder,
-                paginator: widget.repository,
-                padding: MediaQuery.paddingOf(context),
-                itemBuilder: itemBuilder,
-              );
-            });
-      }),
+        ],
+        child: searchConfig != null
+            ? LdAppBar.top(
+                debugName: "LdChoosePageSearchAppBar",
+                searchConfig: searchConfig.searchConfig((query) {
+                  // TODO: wire up search
+                }),
+                child: body,
+              )
+            : body,
+      ),
     );
   }
 }

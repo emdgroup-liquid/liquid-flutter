@@ -2,6 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
+/// Wraps [body] inside [bar] when [bar] is a [LdMonkeyAppBar]; otherwise
+/// renders [bar] standalone and places [body] below it in a [Column].
+///
+/// This lets monkey pages work correctly with both:
+/// - The new wrapper-based pattern (LdMonkeyAppBar with child).
+/// - Legacy / test usages that pass arbitrary widgets as bars.
+Widget _wrapBodyWithBar<T extends Identifiable<IdType>, IdType>(Widget bar, Widget body) {
+  if (bar is LdMonkeyAppBar<T, IdType>) {
+    return LdMonkeyAppBar<T, IdType>(
+      key: bar.key,
+      title: bar.title,
+      additionalActions: bar.additionalActions,
+      positionMode: bar.positionMode,
+      location: bar.location,
+      leading: bar.leading,
+      debugName: bar.debugName,
+      backgroundMode: bar.backgroundMode,
+      shadowMode: bar.shadowMode,
+      borderMode: bar.borderMode,
+      implyLeading: bar.implyLeading,
+      child: body,
+    );
+  }
+  // Fallback: stack the bar and body in a Column for non-LdMonkeyAppBar widgets.
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [bar, Expanded(child: body)],
+  );
+}
+
 class LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   const LdMonkeyMasterPage({
     super.key,
@@ -82,25 +112,28 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
           actions: actions,
           child: Builder(
             builder: (context) {
-              return LdScaffold(
-                appBars: [
-                  widget.appBar ??
-                      LdMonkeyAppBar<T, IdType>(
-                        location: LdMonkeyActionLocation.masterAppBar,
-                        debugName: "Master App Bar",
-                      ),
-                  widget.secondaryAppBar ??
-                      LdMonkeyAppBar<T, IdType>(
-                        location: LdMonkeyActionLocation.masterSecondary,
-                        debugName: "Master Secondary App Bar",
-                      ),
-                ],
-                body: _buildList(
-                  context,
-                  repository,
-                  actions,
-                ),
+              final body = _buildList(context, repository, actions);
+
+              final primaryBar = widget.appBar ??
+                  LdMonkeyAppBar<T, IdType>(
+                    location: LdMonkeyActionLocation.masterAppBar,
+                    debugName: "Master App Bar",
+                  );
+
+              final secondaryBar = widget.secondaryAppBar ??
+                  LdMonkeyAppBar<T, IdType>(
+                    location: LdMonkeyActionLocation.masterSecondary,
+                    debugName: "Master Secondary App Bar",
+                  );
+
+              // New wrapper-based composition: secondary bar wraps the body,
+              // then primary bar wraps the secondary+body subtree.
+              final wrapped = _wrapBodyWithBar<T, IdType>(
+                primaryBar,
+                _wrapBodyWithBar<T, IdType>(secondaryBar, body),
               );
+
+              return LdScaffold(body: wrapped);
             },
           ),
         ),

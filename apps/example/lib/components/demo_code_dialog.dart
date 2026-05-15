@@ -52,13 +52,10 @@ class _DemoCodeDialogState extends State<DemoCodeDialog> {
       modal: LdModalRoute(
         context: context,
         pageBuilder: (context) => LdScaffold(
-          appBars: [
-            LdAppBar(
-              title: const Text("Code Example"),
-            ),
-          ],
-          body: LdScaffoldBody(
-            children: [
+          body: LdAppBar(
+            title: const Text("Code Example"),
+            child: LdScaffoldBody(
+              children: [
               SelectableRegion(
                 focusNode: FocusNode(),
                 selectionControls: MaterialTextSelectionControls(),

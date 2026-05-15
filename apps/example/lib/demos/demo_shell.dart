@@ -14,21 +14,10 @@ class DemoShell extends StatelessWidget {
     final isMovieDemoRoot = activeRoute == ("/movie-demo");
     final isRoot = isTaskDemoRoot || isMovieDemoRoot;
     final theme = LdTheme.of(context);
-    return LdScaffold(
-      debugName: "Demo Shell Scaffold",
-
-      appBars: [
-        if (theme.platform.isDesktop)
-          LdAppBar(
-            shadowMode: LdAppBarShadowMode.hidden,
-            borderMode: LdAppBarBorderMode.visible,
-            backgroundMode: LdAppBarBackgroundMode.visible,
-            title: const Text("LdMonkey Demos"),
-          ),
-        if (isRoot || theme.platform.isDesktop)
-          LdTabNavigation(
+    // Build the tab navigation (shown conditionally based on platform/route)
+    final tabNav = (isRoot || theme.platform.isDesktop)
+        ? LdTabNavigation(
             position: LdAppBarPositionMode.adaptive,
-            order: 1,
             attachedMode: LdAppBarAttachedMode.attached,
             activeRoute: GoRouterState.of(context).uri.path,
             tabs: [
@@ -57,13 +46,27 @@ class DemoShell extends StatelessWidget {
                   "/movie-demo" => 0,
                   _ => throw Exception("Invalid route: $route"),
                 };
-
                 child.goBranch(branchIndex);
               }
             },
-          ),
-      ],
-      body: child,
+            child: child,
+          )
+        : child as Widget;
+
+    // On desktop, wrap with an app bar above the tab nav + body
+    final body = theme.platform.isDesktop
+        ? LdAppBar(
+            shadowMode: LdAppBarShadowMode.hidden,
+            borderMode: LdAppBarBorderMode.visible,
+            backgroundMode: LdAppBarBackgroundMode.visible,
+            title: const Text("LdMonkey Demos"),
+            child: tabNav,
+          )
+        : tabNav;
+
+    return LdScaffold(
+      debugName: "Demo Shell Scaffold",
+      body: body,
     );
   }
 }

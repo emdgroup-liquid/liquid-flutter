@@ -15,6 +15,15 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
   final bool? implyLeading;
   final LdAppBarShadowMode? shadowMode;
   final LdAppBarBorderMode? borderMode;
+
+  /// The subtree that this app bar wraps.
+  ///
+  /// When provided, the bar uses the new wrapper-based composition model and
+  /// passes [child] down to [LdAppBar]. When null, the bar renders the bar
+  /// surface only (legacy / used when the bar is placed inside
+  /// [LdScaffold.appBars] — deprecated path).
+  final Widget? child;
+
   const LdMonkeyAppBar({
     super.key,
     this.title,
@@ -27,6 +36,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
     this.shadowMode,
     this.borderMode,
     this.implyLeading,
+    this.child,
   });
 
   LdFilterSearch<T, IdType, dynamic>? _getSearchFilter(BuildContext context) {
@@ -52,31 +62,23 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
         );
 
         if (showSearch == false && actions.isEmpty && additionalActions.isEmpty && title == null) {
-          return const SizedBox.shrink();
+          return child ?? const SizedBox.shrink();
         }
+
+        final effectivePositionMode = positionMode ??
+            switch (location) {
+              LdMonkeyActionLocation.masterAppBar || LdMonkeyActionLocation.detailAppBar => LdAppBarPositionMode.top,
+              LdMonkeyActionLocation.masterSecondary || LdMonkeyActionLocation.detailSecondary =>
+                LdAppBarPositionMode.bottom,
+              _ => LdAppBarPositionMode.top,
+            };
 
         return LdAppBar(
             debugName: debugName,
             backgroundMode: backgroundMode ?? LdAppBarBackgroundMode.adaptive,
             borderMode: borderMode ?? LdAppBarBorderMode.adaptive,
             leading: leading,
-            order: switch (location) {
-              LdMonkeyActionLocation.masterAppBar => 1,
-              LdMonkeyActionLocation.masterSecondary => 2,
-              LdMonkeyActionLocation.detailAppBar => 1,
-              LdMonkeyActionLocation.detailSecondary => 2,
-              _ => 0,
-            },
-            positionMode: positionMode ??
-                switch (location) {
-                  LdMonkeyActionLocation.masterAppBar ||
-                  LdMonkeyActionLocation.detailAppBar =>
-                    LdAppBarPositionMode.top,
-                  LdMonkeyActionLocation.masterSecondary ||
-                  LdMonkeyActionLocation.detailSecondary =>
-                    LdAppBarPositionMode.bottom,
-                  _ => LdAppBarPositionMode.top,
-                },
+            positionMode: effectivePositionMode,
             shadowMode: shadowMode ??
                 switch (location) {
                   LdMonkeyActionLocation.masterAppBar ||
@@ -115,7 +117,8 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
             actions: [
               ...actions.map((e) => e.build(context)),
               ...additionalActions,
-            ]);
+            ],
+            child: child);
       }),
     );
   }

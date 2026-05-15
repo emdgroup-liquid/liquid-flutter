@@ -22,13 +22,11 @@ void main() {
       "Scaffold with top app bar": (tester, place) async {
         await place(
           LdScaffold(
-            appBars: [
-              LdAppBar.top(
-                title: const Text("Top App Bar"),
+            body: LdAppBar.top(
+              title: const Text("Top App Bar"),
+              child: Center(
+                child: LdText.p("Body Content"),
               ),
-            ],
-            body: Center(
-              child: LdText.p("Body Content"),
             ),
           ),
         );
@@ -36,13 +34,11 @@ void main() {
       "Scaffold with bottom app bar": (tester, place) async {
         await place(
           LdScaffold(
-            appBars: [
-              LdAppBar.bottom(
-                title: const Text("Bottom App Bar"),
+            body: LdAppBar.bottom(
+              title: const Text("Bottom App Bar"),
+              child: Center(
+                child: LdText.p("Body Content"),
               ),
-            ],
-            body: Center(
-              child: LdText.p("Body Content"),
             ),
           ),
         );
@@ -50,16 +46,14 @@ void main() {
       "Scaffold with both top and bottom app bars": (tester, place) async {
         await place(
           LdScaffold(
-            appBars: [
-              LdAppBar.top(
-                title: const Text("Top App Bar"),
-              ),
-              LdAppBar.bottom(
+            body: LdAppBar.top(
+              title: const Text("Top App Bar"),
+              child: LdAppBar.bottom(
                 title: const Text("Bottom App Bar"),
+                child: Center(
+                  child: LdText.p("Body Content"),
+                ),
               ),
-            ],
-            body: Center(
-              child: LdText.p("Body Content"),
             ),
           ),
         );
@@ -90,18 +84,14 @@ void main() {
       "Scaffold with multiple app bars at same position": (tester, place) async {
         await place(
           LdScaffold(
-            appBars: [
-              LdAppBar.top(
-                title: const Text("First Top App Bar"),
-                order: 0,
-              ),
-              LdAppBar.top(
+            body: LdAppBar.top(
+              title: const Text("First Top App Bar"),
+              child: LdAppBar.top(
                 title: const Text("Second Top App Bar"),
-                order: 1,
+                child: Center(
+                  child: LdText.p("Body Content"),
+                ),
               ),
-            ],
-            body: Center(
-              child: LdText.p("Body Content"),
             ),
           ),
         );
@@ -109,16 +99,14 @@ void main() {
       "Scaffold with scrollable body": (tester, place) async {
         await place(
           LdScaffold(
-            appBars: [
-              LdAppBar.top(
-                title: const Text("Scrollable Content"),
-              ),
-            ],
-            body: ListView(
-              children: List.generate(
-                10,
-                (index) => LdListItem(
-                  title: Text("Item ${index + 1}"),
+            body: LdAppBar.top(
+              title: const Text("Scrollable Content"),
+              child: ListView(
+                children: List.generate(
+                  10,
+                  (index) => LdListItem(
+                    title: Text("Item ${index + 1}"),
+                  ),
                 ),
               ),
             ),
@@ -130,24 +118,22 @@ void main() {
           Builder(
             builder: (context) => LdScaffold(
               extendBodyBehindAppBar: true,
-              appBars: [
-                LdAppBar.top(
-                  title: const Text("Extended Body"),
-                ),
-              ],
-              body: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      LdTheme.of(context).primaryColor.withAlpha(100),
-                      Colors.transparent,
-                    ],
+              body: LdAppBar.top(
+                title: const Text("Extended Body"),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        LdTheme.of(context).primaryColor.withAlpha(100),
+                        Colors.transparent,
+                      ],
+                    ),
                   ),
-                ),
-                child: Center(
-                  child: LdText.p("Body Behind App Bar"),
+                  child: Center(
+                    child: LdText.p("Body Behind App Bar"),
+                  ),
                 ),
               ),
             ),

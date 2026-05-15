@@ -18,50 +18,50 @@ class LdExceptionDialog extends StatelessWidget {
     final localizedError = error.localize(context);
 
     return LdScaffold(
-      appBars: [
-        LdAppBar(
-          title: Text(LiquidLocalizations.of(context).errorDetails),
-        ),
-        LdAppBar.bottom(actions: [
-          primaryButton ??
-              LdButton.ghost(
-                width: double.infinity,
-                child: Text(LiquidLocalizations.of(context).close),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              )
-        ])
-      ],
-      body: LdScaffoldBody(
-        children: [
-          if (localizedError.customIconBuilder != null) ...[
-            localizedError.customIconBuilder!(context),
+      body: LdAppBar(
+        title: Text(LiquidLocalizations.of(context).errorDetails),
+        child: LdAppBar.bottom(
+          actions: [
+            primaryButton ??
+                LdButton.ghost(
+                  width: double.infinity,
+                  child: Text(LiquidLocalizations.of(context).close),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                )
           ],
-          LdText.h(
-            localizedError.message,
-            textAlign: TextAlign.center,
-          ),
-          if (localizedError.moreInfo != null)
-            LdMute(
-              child: LdText.ps(
-                localizedError.moreInfo!,
+          child: LdScaffoldBody(
+            children: [
+              if (localizedError.customIconBuilder != null) ...[
+                localizedError.customIconBuilder!(context),
+              ],
+              LdText.h(
+                localizedError.message,
                 textAlign: TextAlign.center,
               ),
-            ),
-          if (localizedError.additionalDetailsBuilder != null) ...[
-            localizedError.additionalDetailsBuilder!(context),
-          ],
-          if (kDebugMode && localizedError.stackTrace != null) ...[
-            LdHint(
-              type: LdHintType.info,
-              child: Text("Stack trace only visible in debug mode."),
-            ),
-            LdRunnerLog(
-              messages: localizedError.stackTrace.toString().split("\n"),
-            ),
-          ]
-        ],
+              if (localizedError.moreInfo != null)
+                LdMute(
+                  child: LdText.ps(
+                    localizedError.moreInfo!,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              if (localizedError.additionalDetailsBuilder != null) ...[
+                localizedError.additionalDetailsBuilder!(context),
+              ],
+              if (kDebugMode && localizedError.stackTrace != null) ...[
+                LdHint(
+                  type: LdHintType.info,
+                  child: Text("Stack trace only visible in debug mode."),
+                ),
+                LdRunnerLog(
+                  messages: localizedError.stackTrace.toString().split("\n"),
+                ),
+              ]
+            ],
+          ),
+        ),
       ),
     );
   }

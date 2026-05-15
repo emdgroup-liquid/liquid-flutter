@@ -188,79 +188,8 @@ class _AppBarDemoState extends State<AppBarDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return LdScaffold(
-      // Multiple app bars can be added to a single scaffold.
-      // They are positioned based on their positionMode and order.
-      drawer: LdScaffold(
-        appBars: [
-          LdAppBar(
-            title: LdText.l('Drawer'),
-          )
-        ],
-        body: LdText.p('Drawer'),
-      ),
-      appBars: [
-        LdAppBar(
-          positionMode: _primaryAppBarPositionMode,
-          scrollBehavior: _primaryScrollBehavior,
-          title: LdText.l('Primary AppBar'),
-          // All actions are included to demonstrate overflow behavior
-          actions: _actions,
-          order: 0,
-          searchConfig: _primarySearchConfig,
-          shadowMode: _shadowMode,
-          borderMode: _borderMode,
-          backgroundMode: _backgroundMode,
-          attachedMode: _attachedMode,
-        ),
-        LdAppBar(
-          positionMode: _secondaryAppBarPositionMode,
-          scrollBehavior: _secondaryScrollBehavior,
-          title: LdText.l('Secondary AppBar'),
-          // Fewer actions for secondary to show a less crowded example
-          actions: _actions.take(3).toList(),
-          searchConfig: _secondarySearchConfig,
-          shadowMode: _shadowMode,
-          order: 1,
-          borderMode: _borderMode,
-          backgroundMode: _backgroundMode,
-          attachedMode: _attachedMode,
-        ),
-        if (_showTabNavigation)
-          LdTabNavigation(
-            activeRoute: _activeTabRoute,
-            onTabPressed: (route) => setState(() => _activeTabRoute = route),
-            tabs: const [
-              LdNavigationTab(
-                label: 'Home',
-                icon: Icon(LucideIcons.house),
-                route: '/home',
-              ),
-              LdNavigationTab(
-                label: 'Search',
-                icon: Icon(LucideIcons.search),
-                route: '/search',
-              ),
-              LdNavigationTab(
-                label: 'Settings',
-                icon: Icon(LucideIcons.settings),
-                route: '/settings',
-              ),
-              LdNavigationTab(
-                label: 'Profile',
-                icon: Icon(LucideIcons.user),
-                route: '/profile',
-              ),
-            ],
-            attachedMode: _tabAttachedMode,
-            backgroundMode: _tabBackgroundMode,
-            position: _tabPosition,
-            scrollBehavior: _tabScrollBehavior,
-            order: 2,
-          ),
-      ],
-      primaryScrollController: _scrollController,
-      body: LdScaffoldBody(
+    // Build the innermost body content
+    final scaffoldContent = LdScaffoldBody(
         children: [
           LdText.h('LdAppBar Demo'),
           LdButton.vague(
@@ -508,7 +437,80 @@ class _AppBarDemoState extends State<AppBarDemo> {
           // appearance (e.g., shadow and border appearing when scrolled).
           SizedBox(height: 1000, child: LdText.p('Scrollable Content')),
         ],
+      );
+
+    // Wrap with optional tab navigation
+    final Widget bodyWithTab = _showTabNavigation
+        ? LdTabNavigation(
+            activeRoute: _activeTabRoute,
+            onTabPressed: (route) => setState(() => _activeTabRoute = route),
+            tabs: const [
+              LdNavigationTab(
+                label: 'Home',
+                icon: Icon(LucideIcons.house),
+                route: '/home',
+              ),
+              LdNavigationTab(
+                label: 'Search',
+                icon: Icon(LucideIcons.search),
+                route: '/search',
+              ),
+              LdNavigationTab(
+                label: 'Settings',
+                icon: Icon(LucideIcons.settings),
+                route: '/settings',
+              ),
+              LdNavigationTab(
+                label: 'Profile',
+                icon: Icon(LucideIcons.user),
+                route: '/profile',
+              ),
+            ],
+            attachedMode: _tabAttachedMode,
+            backgroundMode: _tabBackgroundMode,
+            position: _tabPosition,
+            scrollBehavior: _tabScrollBehavior,
+            child: scaffoldContent,
+          )
+        : scaffoldContent;
+
+    // Secondary app bar wraps the tab nav + body
+    final Widget bodyWithSecondary = LdAppBar(
+      positionMode: _secondaryAppBarPositionMode,
+      scrollBehavior: _secondaryScrollBehavior,
+      title: LdText.l('Secondary AppBar'),
+      actions: _actions.take(3).toList(),
+      searchConfig: _secondarySearchConfig,
+      shadowMode: _shadowMode,
+      borderMode: _borderMode,
+      backgroundMode: _backgroundMode,
+      attachedMode: _attachedMode,
+      child: bodyWithTab,
+    );
+
+    // Primary app bar wraps secondary + body
+    final Widget bodyWithPrimary = LdAppBar(
+      positionMode: _primaryAppBarPositionMode,
+      scrollBehavior: _primaryScrollBehavior,
+      title: LdText.l('Primary AppBar'),
+      actions: _actions,
+      searchConfig: _primarySearchConfig,
+      shadowMode: _shadowMode,
+      borderMode: _borderMode,
+      backgroundMode: _backgroundMode,
+      attachedMode: _attachedMode,
+      child: bodyWithSecondary,
+    );
+
+    return LdScaffold(
+      drawer: LdScaffold(
+        body: LdAppBar(
+          title: LdText.l('Drawer'),
+          child: LdText.p('Drawer'),
+        ),
       ),
+      primaryScrollController: _scrollController,
+      body: bodyWithPrimary,
     );
   }
 }

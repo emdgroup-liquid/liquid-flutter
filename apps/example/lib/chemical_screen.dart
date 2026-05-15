@@ -146,8 +146,9 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
               modal: LdModalRoute(
                 context: context,
                 pageBuilder: (context) => LdScaffold(
-                  appBars: [LdAppBar(title: const Text("Deduct"))],
-                  body: LdScaffoldBody(
+                  body: LdAppBar(
+                    title: const Text("Deduct"),
+                    child: LdScaffoldBody(
                     minimumPadding: EdgeInsets.zero,
                     children: [
                       LdListItem(
@@ -363,22 +364,20 @@ class ChemicalShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return LdScaffold(
       debugName: "Chemical shell",
-      appBars: [
-        LdTabNavigation(
-          scrollBehavior: LdAppBarScrollBehavior.mobileOnly,
-          activeRoute: GoRouterState.of(context).uri.path,
-          tabs: [
-            LdNavigationTab(label: "Chemical", icon: const Icon(LucideIcons.beaker), route: "/chemical"),
-            LdNavigationTab(label: "Details", icon: const Icon(LucideIcons.book), route: "/chemical-detail"),
-            LdNavigationTab(label: "Usage", icon: const Icon(LucideIcons.book), route: "/chemical-usage"),
-            LdNavigationTab(label: "Exit", icon: const Icon(LucideIcons.x), route: "/"),
-          ],
-          onTabPressed: (route) {
-            context.replace(route);
-          },
-        ),
-      ],
-      body: child,
+      body: LdTabNavigation(
+        scrollBehavior: LdAppBarScrollBehavior.mobileOnly,
+        activeRoute: GoRouterState.of(context).uri.path,
+        tabs: [
+          LdNavigationTab(label: "Chemical", icon: const Icon(LucideIcons.beaker), route: "/chemical"),
+          LdNavigationTab(label: "Details", icon: const Icon(LucideIcons.book), route: "/chemical-detail"),
+          LdNavigationTab(label: "Usage", icon: const Icon(LucideIcons.book), route: "/chemical-usage"),
+          LdNavigationTab(label: "Exit", icon: const Icon(LucideIcons.x), route: "/"),
+        ],
+        onTabPressed: (route) {
+          context.replace(route);
+        },
+        child: child,
+      ),
     );
   }
 }

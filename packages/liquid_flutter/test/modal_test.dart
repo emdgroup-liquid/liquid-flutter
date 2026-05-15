@@ -25,17 +25,15 @@ void main() {
                 },
                 modal: LdModalRoute(
                   context: context,
-                  pageBuilder: (context) => const LdScaffold(
-                    appBars: [
-                      LdAppBar(
-                        title: Text("Dialog title"),
-                      )
-                    ],
-                    body: LdScaffoldBody(children: [
-                      LdText(
-                        "Dialog content",
-                      )
-                    ]),
+                  pageBuilder: (context) => LdScaffold(
+                    body: LdAppBar(
+                      title: Text("Dialog title"),
+                      child: LdScaffoldBody(children: [
+                        LdText(
+                          "Dialog content",
+                        )
+                      ]),
+                    ),
                   ),
                 ),
               ),

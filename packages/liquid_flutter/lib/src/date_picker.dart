@@ -343,14 +343,12 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
 
     return LdScaffold(
       key: const Key("date_picker_sheet"),
-      appBars: [
-        LdAppBar(
-          title: Text(widget.label),
-          backgroundMode: LdAppBarBackgroundMode.visible,
-          borderMode: LdAppBarBorderMode.visible,
-          shadowMode: LdAppBarShadowMode.visible,
-        ),
-        LdAppBar(
+      body: LdAppBar(
+        title: Text(widget.label),
+        backgroundMode: LdAppBarBackgroundMode.visible,
+        borderMode: LdAppBarBorderMode.visible,
+        shadowMode: LdAppBarShadowMode.visible,
+        child: LdAppBar(
           positionMode: LdAppBarPositionMode.bottom,
           actions: [
             LdButton(
@@ -380,46 +378,46 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
             },
             child: const Text('Done'),
           ),
-        ),
-      ],
-      body: LdScaffoldBody(
-        children: [
-          LdBundle(
+          child: LdScaffoldBody(
             children: [
-              Row(
+              LdBundle(
                 children: [
-                  Expanded(flex: 2, child: _buildYearSelect()),
-                  previousMonth,
-                  ldSpacerS,
-                  Expanded(flex: 3, child: _buildMonthSelect()),
-                  ldSpacerS,
-                  nextMonth,
+                  Row(
+                    children: [
+                      Expanded(flex: 2, child: _buildYearSelect()),
+                      previousMonth,
+                      ldSpacerS,
+                      Expanded(flex: 3, child: _buildMonthSelect()),
+                      ldSpacerS,
+                      nextMonth,
+                    ],
+                  )
                 ],
-              )
-            ],
-          ),
-          ldSpacerL,
-          LdExpandablePageView(
-            controller: _pageController,
-            itemBuilder: (context, index) {
-              return ValueListenableBuilder<DateTime>(
-                valueListenable: widget.selectedDateNotifier,
-                builder: (context, selectedDate, child) {
-                  return _MonthView(
-                    key: Key("month_view_$index"),
-                    viewDate: Jiffy.parseFromDateTime(DateTime(0)).add(months: index).dateTime,
-                    selectedDate: selectedDate,
-                    minDate: widget.minDate,
-                    maxDate: widget.maxDate,
-                    onSelected: (date) {
-                      widget.selectedDateNotifier.value = date;
+              ),
+              ldSpacerL,
+              LdExpandablePageView(
+                controller: _pageController,
+                itemBuilder: (context, index) {
+                  return ValueListenableBuilder<DateTime>(
+                    valueListenable: widget.selectedDateNotifier,
+                    builder: (context, selectedDate, child) {
+                      return _MonthView(
+                        key: Key("month_view_$index"),
+                        viewDate: Jiffy.parseFromDateTime(DateTime(0)).add(months: index).dateTime,
+                        selectedDate: selectedDate,
+                        minDate: widget.minDate,
+                        maxDate: widget.maxDate,
+                        onSelected: (date) {
+                          widget.selectedDateNotifier.value = date;
+                        },
+                      );
                     },
                   );
                 },
-              );
-            },
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

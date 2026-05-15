@@ -15,8 +15,10 @@ void main() {
               localizationsDelegates:
                   LiquidLocalizations.localizationsDelegates,
               home: LdScaffold(
-                appBars: [LdAppBar(title: Text('Liquid Flutter Extension'))],
-                body: const LiquidFlutterExtension(),
+                body: LdAppBar(
+                  title: Text('Liquid Flutter Extension'),
+                  child: const LiquidFlutterExtension(),
+                ),
               ),
             );
           },

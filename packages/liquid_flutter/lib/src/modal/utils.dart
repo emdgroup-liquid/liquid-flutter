@@ -20,11 +20,9 @@ Future<bool> ldConfirmModal(
       dialogSize: LdSize.s,
       pageBuilder: (context) {
         return LdScaffold(
-          appBars: [
-            LdAppBar(
-              title: title ?? Text(locale.confirm),
-            ),
-            LdAppBar(
+          body: LdAppBar(
+            title: title ?? Text(locale.confirm),
+            child: LdAppBar(
               attachedMode: LdAppBarAttachedMode.attached,
               positionMode: LdAppBarPositionMode.bottom,
               actions: [
@@ -47,20 +45,20 @@ Future<bool> ldConfirmModal(
                   ),
                 ),
               ],
-            ),
-          ],
-          body: LdScaffoldBodyCentered(
-            child: LdAutoSpace(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                if (indicatorType != null)
-                  LdIndicator(
-                    type: indicatorType,
-                    customSize: 24,
-                  ),
-                if (description != null) LdText.p(description),
-                if (additionalContent != null) additionalContent,
-              ],
+              child: LdScaffoldBodyCentered(
+                child: LdAutoSpace(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (indicatorType != null)
+                      LdIndicator(
+                        type: indicatorType,
+                        customSize: 24,
+                      ),
+                    if (description != null) LdText.p(description),
+                    if (additionalContent != null) additionalContent,
+                  ],
+                ),
+              ),
             ),
           ),
         );
@@ -181,11 +179,9 @@ class _LdEnterTextModalState extends State<_LdEnterTextModal> {
   @override
   Widget build(BuildContext context) {
     return LdScaffold(
-      appBars: [
-        LdAppBar(
-          title: widget.title ?? Text(LiquidLocalizations.of(context).enterText),
-        ),
-        LdAppBar(
+      body: LdAppBar(
+        title: widget.title ?? Text(LiquidLocalizations.of(context).enterText),
+        child: LdAppBar(
           positionMode: LdAppBarPositionMode.bottom,
           avoidViewInsets: true,
           attachedMode: LdAppBarAttachedMode.attached,
@@ -208,27 +204,27 @@ class _LdEnterTextModalState extends State<_LdEnterTextModal> {
               ),
             ),
           ],
+          child: LdScaffoldBody(
+            children: [
+              LdAutoSpace(children: [
+                if (widget.description != null) LdText.p(widget.description!),
+                if (widget.additionalContent != null) widget.additionalContent!,
+                LdInput(
+                  controller: _controller,
+                  autofocus: true,
+                  keyboardType: widget.keyboardType,
+                  onChanged: _onChanged,
+                  obscureText: widget.obscureText,
+                  valid: _isValid,
+                  textInputAction: widget.textInputAction,
+                  hint: widget.inputHint ?? LiquidLocalizations.of(context).enterText,
+                  label: widget.inputLabel ?? LiquidLocalizations.of(context).enterText,
+                  onSubmitted: (text) => _onSubmitted(text),
+                ),
+              ]),
+            ],
+          ),
         ),
-      ],
-      body: LdScaffoldBody(
-        children: [
-          LdAutoSpace(children: [
-            if (widget.description != null) LdText.p(widget.description!),
-            if (widget.additionalContent != null) widget.additionalContent!,
-            LdInput(
-              controller: _controller,
-              autofocus: true,
-              keyboardType: widget.keyboardType,
-              onChanged: _onChanged,
-              obscureText: widget.obscureText,
-              valid: _isValid,
-              textInputAction: widget.textInputAction,
-              hint: widget.inputHint ?? LiquidLocalizations.of(context).enterText,
-              label: widget.inputLabel ?? LiquidLocalizations.of(context).enterText,
-              onSubmitted: (text) => _onSubmitted(text),
-            ),
-          ]),
-        ],
       ),
     );
   }

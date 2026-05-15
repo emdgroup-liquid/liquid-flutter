@@ -7,29 +7,27 @@ LdModalRoute ldFilterModal<T extends Identifiable<IdType>, IdType>(BuildContext 
   return LdModalRoute(
     context: context,
     pageBuilder: (_) => LdScaffold(
-      appBars: [
-        LdAppBar(
-          title: Text(LiquidLocalizations.of(context).filter),
+      body: LdAppBar(
+        title: Text(LiquidLocalizations.of(context).filter),
+        child: LdScaffoldBody(
+          children: [
+            MultiProvider(
+              providers: [
+                Provider<LdMonkeyRouteConfig<T, IdType>>.value(
+                  value: context.watch<LdMonkeyRouteConfig<T, IdType>>(),
+                ),
+                Provider<LdMonkeySortAndFilterState<T, IdType>>.value(
+                  value: context.watch<LdMonkeySortAndFilterState<T, IdType>>(),
+                ),
+                Provider<LdMonkeySelection<T, IdType>>.value(value: context.watch<LdMonkeySelection<T, IdType>>()),
+                ListenableProvider<LdRepository<T, IdType>>.value(
+                  value: context.watch<LdRepository<T, IdType>>(),
+                ),
+              ],
+              child: LdFilterModal<T, IdType>(),
+            ),
+          ],
         ),
-      ],
-      body: LdScaffoldBody(
-        children: [
-          MultiProvider(
-            providers: [
-              Provider<LdMonkeyRouteConfig<T, IdType>>.value(
-                value: context.watch<LdMonkeyRouteConfig<T, IdType>>(),
-              ),
-              Provider<LdMonkeySortAndFilterState<T, IdType>>.value(
-                value: context.watch<LdMonkeySortAndFilterState<T, IdType>>(),
-              ),
-              Provider<LdMonkeySelection<T, IdType>>.value(value: context.watch<LdMonkeySelection<T, IdType>>()),
-              ListenableProvider<LdRepository<T, IdType>>.value(
-                value: context.watch<LdRepository<T, IdType>>(),
-              ),
-            ],
-            child: LdFilterModal<T, IdType>(),
-          ),
-        ],
       ),
     ),
   );

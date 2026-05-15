@@ -185,11 +185,12 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
   Widget build(BuildContext context) {
     return LdScaffold(
       backgroundColor: LdTheme.of(context, listen: true).surface,
-      appBars: [
-        LdAppBar(title: Text("Navigation"), debugName: "Drawer AppBar", backgroundMode: LdAppBarBackgroundMode.visible),
-      ],
-      body: Builder(
-        builder: (context) {
+      body: LdAppBar(
+        title: Text("Navigation"),
+        debugName: "Drawer AppBar",
+        backgroundMode: LdAppBarBackgroundMode.visible,
+        child: Builder(
+          builder: (context) {
           return LdScaffoldBody(
             children: [
               LdDrawerItemSection(
@@ -279,25 +280,13 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                     active: GoRouterState.of(context).uri.path == ("/patterns/monkey/sorting-filtering"),
                     onPressed: () => _showPage(context, "/patterns/monkey/sorting-filtering"),
                     child: const Text("Sorting & Filtering"),
-                  ),
-                ],
-              ),
-              const LdSectionHeader("Components"),
-              LdInput(
-                hint: "Search... ",
-                controller: _search,
-                focusNode: searchFocusNode,
-                showClear: true,
-                trailingHint: const LdShortcutIndicator(shortcut: SingleActivator(LogicalKeyboardKey.keyK, meta: true)),
-                onChanged: (query) {
-                  _onQueryChanged(query);
-                },
-              ),
-              ...ComponentCategory.values.expand((category) {
-                final categoryComponents = _componentsFiltered.where((c) => c.category == category).toList();
-                if (categoryComponents.isEmpty) {
-                  return [];
-                }
+          ),
+        },
+        ),
+      ),
+    );
+  }
+}
                 return [
                   LdSectionHeader(_categoryTitle(category)),
                   ...categoryComponents.map((e) => _renderComponent(context, e)),
