@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/drawer_layout.dart';
 import 'package:liquid_flutter/src/monkey/intents.dart';
-import 'package:liquid_flutter/src/appbar/appbar_registry.dart';
 
 enum LdAppBarScrollBehavior {
   static,
@@ -17,6 +16,16 @@ enum LdAppBarScrollBehavior {
 
 class LdScaffold extends StatefulWidget {
   final Widget body;
+
+  /// Deprecated: pass app bars as parents of the body using
+  /// `LdAppBar(child: ...)` instead of `appBars: [LdAppBar(...)]`.
+  ///
+  /// This parameter is ignored and will be removed in a future release.
+  @Deprecated(
+    'Pass app bars as parents of the body using LdAppBar(child: ...) '
+    'instead of appBars: [LdAppBar(...)]. '
+    'This parameter is ignored and will be removed in a future release.',
+  )
   final List<Widget>? appBars;
 
   final Color? backgroundColor;
@@ -40,7 +49,6 @@ class LdScaffold extends StatefulWidget {
     properties.add(ColorProperty('backgroundColor', backgroundColor));
     properties.add(DoubleProperty('drawerWidth', drawerWidth));
     properties.add(DoubleProperty('reflowBreakpoint', reflowBreakpoint));
-    properties.add(DiagnosticsProperty<List<Widget>?>('appBars', appBars));
     properties.add(DiagnosticsProperty<Widget?>('drawer', drawer));
     properties.add(DiagnosticsProperty<TextEditingController?>('searchController', searchController));
     properties.add(DiagnosticsProperty<ScrollController?>('primaryScrollController', primaryScrollController));
@@ -50,6 +58,12 @@ class LdScaffold extends StatefulWidget {
   const LdScaffold({
     super.key,
     required this.body,
+    // ignore: deprecated_member_use_from_same_package
+    @Deprecated(
+      'Pass app bars as parents of the body using LdAppBar(child: ...) '
+      'instead of appBars: [LdAppBar(...)]. '
+      'This parameter is ignored and will be removed in a future release.',
+    )
     this.appBars,
     this.debugName,
     this.toggleDrawerShortcut,
@@ -184,45 +198,16 @@ class LdScaffoldState extends State<LdScaffold> {
                     body: child,
                     reflowBreakpoint: widget.reflowBreakpoint ?? 900,
                   ),
-                  // Apply the app bar registry to the body
-                  child: AppBarRegistry(
-                    appBars: widget.appBars ?? [],
-                    builder: (context, appBars) => Stack(children: [
-                      // Body
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        // Obtain context with registry.
-                        child: Builder(builder: (context) {
-                          return ValueListenableBuilder(
-                            valueListenable: AppBarRegistry.maybeStateOf(context)!.bodyPadding,
-                            builder: (context, value, child) {
-                              return MediaQuery(
-                                data: MediaQuery.of(context).copyWith(
-                                  padding: value as EdgeInsets?,
-                                ),
-                                child: child!,
-                              );
-                            },
-                            child: ScrollObserver(
-                              position: _bodyScrollOffset,
-                              child: PrimaryScrollController(
-                                controller: effectiveScrollController,
-                                child: LdNotificationPortal(
-                                  debugLabel: "Scaffold Body ${widget.debugName}",
-                                  child: FocusTraversalGroup(child: widget.body),
-                                ),
-                              ),
-                            ),
-                          );
-                        }),
+                  // Body — bars are wrapped around the body using LdAppBar(child: ...).
+                  child: ScrollObserver(
+                    position: _bodyScrollOffset,
+                    child: PrimaryScrollController(
+                      controller: effectiveScrollController,
+                      child: LdNotificationPortal(
+                        debugLabel: "Scaffold Body ${widget.debugName}",
+                        child: FocusTraversalGroup(child: widget.body),
                       ),
-
-                      // App Bars
-                      ...appBars.reversed,
-                    ]),
+                    ),
                   ),
                 ),
               ),
