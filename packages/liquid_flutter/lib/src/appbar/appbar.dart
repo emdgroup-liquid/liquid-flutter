@@ -5,8 +5,8 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_decoration.dart';
 import 'package:liquid_flutter/src/appbar/appbar_frame.dart';
 import 'package:liquid_flutter/src/appbar/appbar_registry.dart';
-import 'package:liquid_flutter/src/appbar/appbar_scroll_behavior.dart';
 import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
+import 'package:liquid_flutter/src/appbar/appbar_state.dart';
 import 'package:liquid_flutter/src/appbar/macos_window_controls.dart';
 import 'package:liquid_flutter/src/appbar/windows_window_controls.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -50,74 +50,47 @@ enum LdAppBarAttachedMode {
   floating,
 }
 
-/// A flexible app bar widget that can be positioned at the top or bottom of a scaffold.
+/// A flexible app bar widget that wraps its [child] content.
 ///
-/// ## Adding App Bars to Scaffolds
+/// ## Usage
 ///
-/// App bars are added to a scaffold by passing them in the `appBars` parameter of [LdScaffold]:
+/// Wrap the scaffold body (or any subtree) with [LdAppBar] to add an app bar:
 ///
 /// ```dart
 /// LdScaffold(
-///   appBars: [
-///     LdAppBar.top(title: Text('My App')),
-///     LdAppBar.bottom(actions: [/* ... */]),
-///   ],
-///   body: MyContent(),
+///   body: LdAppBar.top(
+///     title: Text('My App'),
+///     child: LdScaffoldBody(children: [...]),
+///   ),
 /// )
 /// ```
 ///
-/// Multiple app bars can be added to a single scaffold, and they will be stacked
-/// vertically based on their position and order.
+/// Nest bars for multiple edges:
 ///
-/// ## Utility Constructors and Positioning
+/// ```dart
+/// LdAppBar.top(
+///   title: Text('Title'),
+///   child: LdTabNavigation.bottom(
+///     tabs: [...],
+///     child: LdScaffoldBody(children: [...]),
+///   ),
+/// )
+/// ```
 ///
-/// Use the utility constructors to specify the app bar's position:
+/// ## Positioning
 ///
-/// - [LdAppBar.top] - Places the app bar at the top of the scaffold
-/// - [LdAppBar.bottom] - Places the app bar at the bottom of the scaffold
-/// - [LdAppBar] (default) - Uses [positionMode] to determine position (defaults to top)
-///
-/// The [order] parameter controls the stacking order when multiple app bars are at the same
-/// position. Lower order values appear closer to the content (higher in the visual stack).
-/// For example, an app bar with `order: 0` will be positioned above an app bar with `order: 1`
-/// when both are at the top position.
+/// - [LdAppBar.top] — places the bar at the top
+/// - [LdAppBar.bottom] — places the bar at the bottom
+/// - [LdAppBar] default — uses [positionMode] (defaults to top)
 ///
 /// ## MediaQuery Padding
 ///
-/// The app bar's size is automatically applied to the scaffold body's [MediaQuery] padding.
-/// This ensures that content in the body is not obscured by the app bar. The padding is
-/// calculated based on the app bar's effective height (including margins) and is updated
-/// dynamically as app bars are added, removed, or resized.
-///
-/// The padding is applied separately for top and bottom app bars:
-/// - Top app bars add padding to `MediaQuery.padding.top`
-/// - Bottom app bars add padding to `MediaQuery.padding.bottom`
-///
-/// ## Actions and Overflow Menu
-///
-/// Actions provided in the [actions] list are displayed in the app bar. When there isn't
-/// enough space to display all actions, they automatically overflow into a menu accessible
-/// via an ellipsis button. The overflow menu is implemented using [LdAppbarActionOverflowMenu].
-///
-/// ## Action Behavior in Different Contexts
-///
-/// [LdAppBarAction] widgets behave differently depending on their context:
-///
-/// - **In the app bar**: Actions are rendered as [LdButton] widgets with optional leading/trailing
-///   icons. On mobile, if [preferLeadingOnMobile] is true, the leading icon replaces the child
-///   text to save space.
-///
-/// - **In the overflow menu**: Actions are rendered as [LdListItem] widgets with a more compact
-///   list item appearance. The action automatically detects when it's inside a context menu
-///   (overflow menu) and switches to this presentation.
-///
-/// This dual behavior allows actions to have an appropriate appearance whether they're visible
-/// in the main app bar or hidden in the overflow menu.
+/// The bar automatically patches [MediaQuery.padding] inside [child] so that
+/// descendants can read the correct insets without any additional wiring.
 ///
 /// See also:
-/// - [LdAppBarAction] for creating action buttons
-/// - [LdScaffold] for the scaffold that hosts app bars
-/// - [AppBarRegistry] for the internal registry that manages app bar positioning
+/// - [LdTabNavigation] for tab-based navigation bars
+/// - [LdScaffold] for the scaffold that hosts bars
 class LdAppBar extends StatefulWidget {
   final Widget? title;
   final Widget? leading;
@@ -148,7 +121,20 @@ class LdAppBar extends StatefulWidget {
 
   final LdAppBarPositionMode positionMode;
   final LdAppBarScrollBehavior scrollBehavior;
+
+  @Deprecated('order is no longer used; nest LdAppBar/LdTabNavigation instead.')
   final int order;
+
+  /// The subtree that this bar wraps.
+  ///
+  /// When provided, the bar uses the new wrapper-based composition model:
+  /// the bar surface is pinned at the edge of a [Stack] and [child] fills
+  /// the background. [MediaQuery.padding] inside [child] is patched with the
+  /// bar's consumed insets.
+  ///
+  /// When null the bar falls back to the legacy scaffold-injection behaviour
+  /// (for backwards compatibility while [LdScaffold.appBars] still exists).
+  final Widget? child;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -169,6 +155,7 @@ class LdAppBar extends StatefulWidget {
 
   const LdAppBar({
     super.key,
+    this.child,
     this.actions = const [],
     this.addContainer = false,
     this.attachedMode = LdAppBarAttachedMode.adaptive,
@@ -182,7 +169,7 @@ class LdAppBar extends StatefulWidget {
     this.implyLeading,
     this.avoidViewInsets = false,
     this.leading,
-    this.order = 0,
+    @Deprecated('order is no longer used; nest LdAppBar/LdTabNavigation instead.') this.order = 0,
     this.overflowMenuProviders,
     this.positionMode = LdAppBarPositionMode.top,
     this.scrollBehavior = LdAppBarScrollBehavior.static,
@@ -195,6 +182,7 @@ class LdAppBar extends StatefulWidget {
 
   const LdAppBar.top({
     super.key,
+    this.child,
     this.title,
     this.actions = const [],
     this.leading,
@@ -215,11 +203,12 @@ class LdAppBar extends StatefulWidget {
     this.overflowMenuProviders,
     this.debugName,
     this.scrollBehavior = LdAppBarScrollBehavior.static,
-    this.order = 0,
+    @Deprecated('order is no longer used; nest LdAppBar/LdTabNavigation instead.') this.order = 0,
   }) : positionMode = LdAppBarPositionMode.top;
 
   const LdAppBar.bottom({
     super.key,
+    this.child,
     this.title,
     this.actions = const [],
     this.leading,
@@ -240,46 +229,15 @@ class LdAppBar extends StatefulWidget {
     this.overflowMenuProviders,
     this.debugName,
     this.scrollBehavior = LdAppBarScrollBehavior.static,
-    this.order = 0,
+    @Deprecated('order is no longer used; nest LdAppBar/LdTabNavigation instead.') this.order = 0,
   }) : positionMode = LdAppBarPositionMode.bottom;
-
-  // Note: adaptive constructor cannot be a factory that returns LdAppBar directly
-  // as it needs BuildContext. Use LdAppBar.adaptiveWidget() instead or
-  // determine position manually using LdTheme
 
   @override
   State<LdAppBar> createState() => _LdAppBarState();
 }
 
 class _LdAppBarState extends State<LdAppBar> {
-  @override
-  Widget build(BuildContext context) {
-    return LdAppBarRegistryEntry(
-      debugName: widget.debugName,
-      order: widget.order,
-      child: _LdAppBarInner(appBar: widget),
-    );
-  }
-}
-
-class _LdAppBarInner extends StatefulWidget {
-  final LdAppBar appBar;
-
-  const _LdAppBarInner({required this.appBar});
-
-  @override
-  State<_LdAppBarInner> createState() => _LdAppBarInnerState();
-}
-
-class _LdAppBarInnerState extends State<_LdAppBarInner> {
   final FocusScopeNode _focusScopeNode = FocusScopeNode();
-
-  LdAppBarDecorationBuilder get _decorationBuilder => LdAppBarDecorationBuilder(
-        backgroundColor: widget.appBar.backgroundColor,
-        shadowMode: widget.appBar.shadowMode,
-        borderMode: widget.appBar.borderMode,
-        backgroundMode: widget.appBar.backgroundMode,
-      );
 
   @override
   void dispose() {
@@ -290,12 +248,7 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
   @override
   void initState() {
     super.initState();
-    _focusScopeNode.addListener(
-      _handleFocusChange,
-    );
-    AppBarRegistry.maybeStateOf(context)?.addListener(
-      _handleAppBarRegistryChange,
-    );
+    _focusScopeNode.addListener(_handleFocusChange);
   }
 
   void _handleFocusChange() async {
@@ -305,24 +258,29 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
     }
   }
 
-  void _handleAppBarRegistryChange() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      setState(() {});
-    });
-  }
-
   bool get _isModal {
     final ModalRoute<Object?>? parentRoute = ModalRoute.of(context);
     return parentRoute is LdModalRoute;
   }
 
   Widget? _closeModalButton(BuildContext context) {
-    if (!widget.appBar.implyCloseModalButton) return null;
+    if (!widget.implyCloseModalButton) return null;
     if (!_isModal) return null;
     if (!_canDismissModal) return null;
-    if (!_isInTopSlot) return null;
-    if (_level() > 0) return null;
+
+    // Only show on a top-position bar at level 0.
+    // In stack-mode, LdAppBarMetrics is injected by AppBarFrame into the bar
+    // surface context. In legacy mode (no metrics available) we treat this bar
+    // as level 0 and rely on position to decide.
+    final metrics = context.read<LdAppBarMetrics?>();
+    if (metrics != null) {
+      // Stack-mode: check position and level from metrics.
+      if (metrics.position != LdAppBarPosition.top) return null;
+      if (metrics.level > 0) return null;
+    } else {
+      // Legacy mode: show only if this bar is at the top position.
+      if (_effectivePosition != LdAppBarPosition.top) return null;
+    }
 
     return LdButton.ghost(
       child: const Icon(LucideIcons.x),
@@ -349,7 +307,7 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
   }
 
   LdAppBarPosition get _effectivePosition {
-    return switch (widget.appBar.positionMode) {
+    return switch (widget.positionMode) {
       LdAppBarPositionMode.top => LdAppBarPosition.top,
       LdAppBarPositionMode.bottom => LdAppBarPosition.bottom,
       LdAppBarPositionMode.adaptive => switch (LdTheme.of(context).platform.isMobile) {
@@ -359,26 +317,9 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
     };
   }
 
-  int _level() {
-    final position = _effectivePosition;
-    final key = context.appBarRegistryKey();
-
-    final modalRoute = ModalRoute.of(context);
-
-    BuildContext? limitContext;
-
-    if (modalRoute is LdModalRoute) {
-      limitContext = modalRoute.subtreeContext;
-    }
-
-    final level = AppBarRegistry.maybeStateOf(context)?.getLevel(key, position, limitToChildrenOf: limitContext) ?? 0;
-    return level;
-  }
-
   bool _effectivelyAttached() {
-    final level = _level();
     final position = _effectivePosition;
-    final attached = switch (widget.appBar.attachedMode) {
+    final attached = switch (widget.attachedMode) {
       LdAppBarAttachedMode.attached => true,
 
       /// Adaptive mode means the app bar is floating when in the bottom slot on mobile.
@@ -391,13 +332,19 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
 
     if (attached) return true;
 
-    // Now check if we should auto attach.
-
-    if (widget.appBar.autoAttachToKeyboard && LdTheme.of(context).platform.isMobile) {
-      return _focusScopeNode.hasFocus &&
+    // Auto-attach to keyboard: the level check from the old code was used to
+    // prevent inner bars from floating up. In Stack-mode the inner bar's level
+    // is determined by AppBarFrame (it reads parent LdAppBarMetrics). Since
+    // LdAppBar doesn't have direct access to its own level here, we use a
+    // conservative heuristic: check for a parent LdAppBarMetrics at the same
+    // position as a proxy for level > 0.
+    if (widget.autoAttachToKeyboard && LdTheme.of(context).platform.isMobile) {
+      final parentMetrics = context.read<LdAppBarMetrics?>();
+      final isLevel0 = parentMetrics == null || parentMetrics.position != position;
+      return isLevel0 &&
+          _focusScopeNode.hasFocus &&
           MediaQuery.of(context).viewInsets.bottom > 0 &&
-          position == LdAppBarPosition.bottom &&
-          level == 0;
+          position == LdAppBarPosition.bottom;
     }
 
     return false;
@@ -418,15 +365,9 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
     return null;
   }
 
-  bool get _showWindowsWindowControls {
-    // Calculate level by walking up scaffolds
-    final level = _level();
-    return LdTheme.of(context).platform == LdPlatform.windows && _isInTopSlot && level == 0 && !_isDrawer;
-  }
-
   Widget? _buildLeading(BuildContext context) {
-    if (widget.appBar.leading != null) return widget.appBar.leading;
-    final imply = widget.appBar.implyLeading ?? true;
+    if (widget.leading != null) return widget.leading;
+    final imply = widget.implyLeading ?? true;
     if (!imply) return null;
 
     if (_canPopParentRoute && !_isDrawer && !_isModal && !_isInBottomSlot) {
@@ -466,181 +407,237 @@ class _LdAppBarInnerState extends State<_LdAppBarInner> {
   }
 
   bool get _hasTopContent {
-    return widget.appBar.title != null || widget.appBar.actions.isNotEmpty || widget.appBar.searchConfig != null;
+    return widget.title != null || widget.actions.isNotEmpty || widget.searchConfig != null;
   }
 
   SystemUiOverlayStyle get _systemUiOverlayStyle => appBarSystemUiOverlayStyle(LdTheme.of(context, listen: true));
 
+  // Whether to show Windows window controls.
+  // In stack-mode: level 0 = the bar's own metrics have level 0.
+  // In legacy mode: the parent LdAppBarMetrics is the metrics from an
+  // ancestor bar (if any).
+  bool _showWindowsWindowControls(LdAppBarMetrics? metricsFromBarSurface) {
+    if (!_isInTopSlot || _isModal || _isDrawer) return false;
+    if (LdTheme.of(context).platform != LdPlatform.windows) return false;
+    // In stack-mode the bar surface receives its own metrics (level >= 0).
+    // Show window controls only when level == 0.
+    if (metricsFromBarSurface != null) {
+      return metricsFromBarSurface.level == 0;
+    }
+    // Legacy mode: check parent metrics (metrics from bars above this one).
+    final parentMetrics = context.read<LdAppBarMetrics?>();
+    return parentMetrics == null || parentMetrics.position != LdAppBarPosition.top;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final appBarKey = context.appBarRegistryKey();
-    final leading = _buildLeading(context);
-    final level = _level();
-
-    final isAttached = _effectivelyAttached();
     final position = _effectivePosition;
-    final enableWindowDrag = position == LdAppBarPosition.top && level == 0 && !_isModal;
+    final isAttached = _effectivelyAttached();
 
-    final hasSearch = widget.appBar.searchConfig != null;
+    // Level-0 top bar not in a modal enables window-drag + scroll-to-top.
+    // We compute isLevel0 from the *parent* metrics (bar that wraps this one).
+    // In both legacy and stack-mode this is the metrics provided by an ancestor
+    // AppBarFrame (if any).
+    final parentMetrics = context.read<LdAppBarMetrics?>();
+    final isLevel0 = parentMetrics == null || parentMetrics.position != LdAppBarPosition.top;
+    final enableWindowDrag = position == LdAppBarPosition.top && isLevel0 && !_isModal;
+
+    final hasSearch = widget.searchConfig != null;
     final mobile = LdTheme.of(context).platform.isMobile;
 
-    List<Widget> bottomContent = [
-      if (widget.appBar.bottom != null) widget.appBar.bottom!,
-    ];
+    final decorationBuilder = LdAppBarDecorationBuilder(
+      backgroundColor: widget.backgroundColor,
+      shadowMode: widget.shadowMode,
+      borderMode: widget.borderMode,
+      backgroundMode: widget.backgroundMode,
+    );
 
-    if (hasSearch && mobile) {
-      bottomContent.add(LdSearchInput(
-        searchConfig: widget.appBar.searchConfig!,
-        isBottomNavigationBar: _isInBottomSlot,
-        fullWidth: true,
-      ));
-    }
+    // The bar surface is built as a widget that can read LdAppBarMetrics from
+    // the context injected by AppBarFrame (which wraps the bar child with
+    // Provider<LdAppBarMetrics>.value so the bar surface can react to scroll).
+    Widget barSurface = Builder(
+      builder: (context) {
+        // Read metrics injected by AppBarFrame for the bar surface context.
+        // isScrolledUnder is used via the decoration builders in AppBarFrame,
+        // and metrics is used for level/position checks.
+        final metrics = context.watch<LdAppBarMetrics?>();
 
-    return LdAppBarScrollWrapper(
-      position: position,
-      scrollBehavior: widget.appBar.scrollBehavior,
-      child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: _systemUiOverlayStyle,
-        child: LdWrapConditional(
-          condition: enableWindowDrag,
-          builder: (context, child) => GestureDetector(
-            onPanStart: (details) {
-              LdAppBar.callbacks?.onMove?.call();
-            },
-            onDoubleTap: () {
-              LdScaffoldState.maybeOf(context)?.scrollToTop();
-            },
-            child: child,
-          ),
-          child: FocusScope(
-            node: _focusScopeNode,
-            child: KeyedSubtree(
-              key: ValueKey('appbar_${appBarKey.order}'),
-              child: ScrolledUnderBuilder(builder: (context, isScrolledUnder) {
-                final isSurface =
-                    widget.appBar.backgroundColor == null && (context.read<LdSurfaceInfo?>()?.isSurface ?? false);
-                return Provider.value(
-                  value: LdSurfaceInfo(isSurface: isSurface),
-                  child: AppBarFrame(
-                    avoidViewInsets: widget.appBar.avoidViewInsets,
-                    addContainer: widget.appBar.addContainer,
-                    debugName: widget.appBar.debugName,
-                    position: position,
-                    insetBorderRadius: !_isModal,
-                    attached: isAttached,
-                    insideDecoration: _decorationBuilder.buildInsideDecoration(
-                      context: context,
-                      isScrolledUnder: isScrolledUnder,
-                      isAttached: isAttached,
-                      position: position,
-                    ),
-                    outsideDecoration: _decorationBuilder.buildOutsideDecoration(
-                      context: context,
-                      isScrolledUnder: isScrolledUnder,
-                      isAttached: isAttached,
-                      position: position,
-                    ),
-                    child: LdButtonConfigProvider(
-                      config: const LdButtonConfig(
-                        mode: LdButtonMode.ghost,
+        final leading = _buildLeading(context);
+
+        List<Widget> bottomContent = [
+          if (widget.bottom != null) widget.bottom!,
+        ];
+
+        if (hasSearch && mobile) {
+          bottomContent.add(LdSearchInput(
+            searchConfig: widget.searchConfig!,
+            isBottomNavigationBar: _isInBottomSlot,
+            fullWidth: true,
+          ));
+        }
+
+        final isSurface = widget.backgroundColor == null && (context.read<LdSurfaceInfo?>()?.isSurface ?? false);
+
+        return Provider.value(
+          value: LdSurfaceInfo(isSurface: isSurface),
+          child: LdButtonConfigProvider(
+            config: const LdButtonConfig(
+              mode: LdButtonMode.ghost,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                LayoutBuilder(builder: (context, constraints) {
+                  final overflowItems = [
+                    if (widget.title != null)
+                      LdFlexibleChild(
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: DefaultTextStyle(
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            style: _headerStyle,
+                            child: widget.title!,
+                          ),
+                        ),
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          LayoutBuilder(builder: (context, constraints) {
-                            final overflowItems = [
-                              if (widget.appBar.title != null)
-                                LdFlexibleChild(
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: DefaultTextStyle(
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                      style: _headerStyle,
-                                      child: widget.appBar.title!,
-                                    ),
-                                  ),
-                                ),
-                              if (hasSearch && !mobile)
-                                LdFlexibleChild(
-                                  child: LdSearchInput(
-                                    searchConfig: widget.appBar.searchConfig!,
-                                    isBottomNavigationBar: _isInBottomSlot,
-                                    fullWidth: false,
-                                  ),
-                                ),
-                              ...widget.appBar.actions
-                            ];
+                    if (hasSearch && !mobile)
+                      LdFlexibleChild(
+                        child: LdSearchInput(
+                          searchConfig: widget.searchConfig!,
+                          isBottomNavigationBar: _isInBottomSlot,
+                          fullWidth: false,
+                        ),
+                      ),
+                    ...widget.actions
+                  ];
 
-                            return Provider<LdAppBarActionRequestedLeading>.value(
-                              value: hasSearch,
-                              child: Row(
-                                children: [
-                                  if (widget.appBar.showWindowControls && !_isModal) const MacOSWindowControls(),
-                                  OpenDrawerButton(drawerParent: _findDrawerParent(context)),
-                                  if (leading != null) ...[leading, ldSpacerM],
-                                  if (overflowItems.isNotEmpty)
-                                    Expanded(
-                                      child: LdOverflowView(
-                                        spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        mainAxisAlignment: widget.appBar.title == null
-                                            ? MainAxisAlignment.start
-                                            : MainAxisAlignment.center,
-                                        builder: (context, remainingItemCount) {
-                                          final remainder = overflowItems.sublist(
-                                            overflowItems.length - remainingItemCount,
-                                          );
-                                          return LdAppbarActionOverflowMenu(
-                                            actions: remainder,
-                                            menuProviders: widget.appBar.overflowMenuProviders,
-                                            inMenu: true,
-                                          );
-                                        },
-                                        children: overflowItems,
-                                      ),
-                                    ),
-                                  const CloseDrawerButton(),
-                                  if (widget.appBar.trailing != null) widget.appBar.trailing!,
-                                  if (_closeModalButton(context) != null) ...[_closeModalButton(context)!],
-                                  if (widget.appBar.showWindowControls && !_isModal)
-                                    LdReveal(
-                                      revealed: _showWindowsWindowControls,
-                                      child: const WindowsWindowControls(),
-                                    ),
-                                ],
-                              ),
-                            );
-                          }),
-                          if (bottomContent.isNotEmpty) ...[
-                            LdWrapConditional(
-                              condition: _hasTopContent,
-                              builder: (context, child) => Padding(
-                                padding: EdgeInsets.only(
-                                  top: LdTheme.of(context).pad(size: LdSize.s).top,
-                                ),
-                                child: child,
-                              ),
-                              child: SizedBox(
-                                width: double.infinity,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: bottomContent,
-                                ),
-                              ),
+                  return Provider<LdAppBarActionRequestedLeading>.value(
+                    value: hasSearch,
+                    child: Row(
+                      children: [
+                        if (widget.showWindowControls && !_isModal) const MacOSWindowControls(),
+                        OpenDrawerButton(drawerParent: _findDrawerParent(context)),
+                        if (leading != null) ...[leading, ldSpacerM],
+                        if (overflowItems.isNotEmpty)
+                          Expanded(
+                            child: LdOverflowView(
+                              spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment:
+                                  widget.title == null ? MainAxisAlignment.start : MainAxisAlignment.center,
+                              builder: (context, remainingItemCount) {
+                                final remainder = overflowItems.sublist(
+                                  overflowItems.length - remainingItemCount,
+                                );
+                                return LdAppbarActionOverflowMenu(
+                                  actions: remainder,
+                                  menuProviders: widget.overflowMenuProviders,
+                                  inMenu: true,
+                                );
+                              },
+                              children: overflowItems,
                             ),
-                          ],
-                        ],
+                          ),
+                        const CloseDrawerButton(),
+                        if (widget.trailing != null) widget.trailing!,
+                        if (_closeModalButton(context) != null) ...[_closeModalButton(context)!],
+                        if (widget.showWindowControls && !_isModal)
+                          LdReveal(
+                            revealed: _showWindowsWindowControls(metrics),
+                            child: const WindowsWindowControls(),
+                          ),
+                      ],
+                    ),
+                  );
+                }),
+                if (bottomContent.isNotEmpty) ...[
+                  LdWrapConditional(
+                    condition: _hasTopContent,
+                    builder: (context, child) => Padding(
+                      padding: EdgeInsets.only(
+                        top: LdTheme.of(context).pad(size: LdSize.s).top,
+                      ),
+                      child: child,
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: bottomContent,
                       ),
                     ),
                   ),
-                );
-              }),
+                ],
+              ],
             ),
           ),
-        ),
+        );
+
+      },
+    );
+
+    if (enableWindowDrag) {
+      barSurface = GestureDetector(
+        onPanStart: (details) {
+          LdAppBar.callbacks?.onMove?.call();
+        },
+        onDoubleTap: () {
+          LdScaffoldState.maybeOf(context)?.scrollToTop();
+        },
+        child: barSurface,
+      );
+    }
+
+    barSurface = AnnotatedRegion<SystemUiOverlayStyle>(
+      value: _systemUiOverlayStyle,
+      child: FocusScope(
+        node: _focusScopeNode,
+        child: barSurface,
       ),
     );
+
+    final frame = AppBarFrame(
+      avoidViewInsets: widget.avoidViewInsets,
+      addContainer: widget.addContainer,
+      debugName: widget.debugName,
+      position: position,
+      insetBorderRadius: !_isModal,
+      attached: isAttached,
+      scrollBehavior: widget.scrollBehavior,
+      wrappedChild: widget.child, // null = legacy scaffold-injection mode
+      outsideDecorationBuilder: (isScrolledUnder) => decorationBuilder.buildOutsideDecoration(
+        context: context,
+        isScrolledUnder: isScrolledUnder,
+        isAttached: isAttached,
+        position: position,
+      ),
+      insideDecorationBuilder: (isScrolledUnder) => decorationBuilder.buildInsideDecoration(
+        context: context,
+        isScrolledUnder: isScrolledUnder,
+        isAttached: isAttached,
+        position: position,
+      ),
+      child: barSurface,
+    );
+
+    // Legacy mode: wrap with LdAppBarScrollWrapper so the bar is correctly
+    // positioned in LdScaffold's Stack. In stack-mode (child != null) the bar
+    // is already inside AppBarFrame's own Stack via wrappedChild.
+    if (widget.child == null) {
+      return LdAppBarRegistryEntry(
+        debugName: widget.debugName,
+        // ignore: deprecated_member_use_from_same_package
+        order: widget.order,
+        child: LdAppBarScrollWrapper(
+          position: position,
+          scrollBehavior: widget.scrollBehavior,
+          child: frame,
+        ),
+      );
+    }
+
+    return frame;
   }
 }

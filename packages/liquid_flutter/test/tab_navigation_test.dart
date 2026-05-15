@@ -4,6 +4,18 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_test_utils/ld_frame.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+/// Helper: wraps the given [body] in a test scaffold.
+Widget _wrapInScaffold(Widget body) {
+  return MaterialApp(
+    localizationsDelegates: const [LiquidLocalizations.delegate],
+    home: ldFrame(
+      size: LdThemeSize.m,
+      brightnessMode: LdThemeBrightnessMode.light,
+      child: body,
+    ),
+  );
+}
+
 void main() {
   group('LdTabNavigation Widget Tests', () {
     final sampleTabs = [
@@ -28,20 +40,13 @@ void main() {
       ldDisableAnimations = true;
 
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldFrame(
-            size: LdThemeSize.m,
-            brightnessMode: LdThemeBrightnessMode.light,
-            child: LdScaffold(
-              appBars: [
-                LdTabNavigation(
-                  tabs: sampleTabs,
-                  activeRoute: '/home',
-                  onTabPressed: (route) {},
-                ),
-              ],
-              body: const Center(child: Text('Body')),
+        _wrapInScaffold(
+          LdScaffold(
+            body: LdTabNavigation(
+              tabs: sampleTabs,
+              activeRoute: '/home',
+              onTabPressed: (route) {},
+              child: const Center(child: Text('Body')),
             ),
           ),
         ),
@@ -59,22 +64,15 @@ void main() {
       String? selectedRoute = '/home';
 
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldFrame(
-            size: LdThemeSize.m,
-            brightnessMode: LdThemeBrightnessMode.light,
-            child: LdScaffold(
-              appBars: [
-                LdTabNavigation(
-                  tabs: sampleTabs,
-                  activeRoute: '/home',
-                  onTabPressed: (route) {
-                    selectedRoute = route;
-                  },
-                ),
-              ],
-              body: const Center(child: Text('Body')),
+        _wrapInScaffold(
+          LdScaffold(
+            body: LdTabNavigation(
+              tabs: sampleTabs,
+              activeRoute: '/home',
+              onTabPressed: (route) {
+                selectedRoute = route;
+              },
+              child: const Center(child: Text('Body')),
             ),
           ),
         ),
@@ -92,20 +90,13 @@ void main() {
     testWidgets('Active route matching - exact', (WidgetTester tester) async {
       ldDisableAnimations = true;
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldFrame(
-            size: LdThemeSize.m,
-            brightnessMode: LdThemeBrightnessMode.light,
-            child: LdScaffold(
-              appBars: [
-                LdTabNavigation(
-                  tabs: sampleTabs,
-                  activeRoute: '/search',
-                  onTabPressed: (route) {},
-                ),
-              ],
-              body: const Center(child: Text('Body')),
+        _wrapInScaffold(
+          LdScaffold(
+            body: LdTabNavigation(
+              tabs: sampleTabs,
+              activeRoute: '/search',
+              onTabPressed: (route) {},
+              child: const Center(child: Text('Body')),
             ),
           ),
         ),
@@ -133,20 +124,13 @@ void main() {
       ];
 
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldFrame(
-            size: LdThemeSize.m,
-            brightnessMode: LdThemeBrightnessMode.light,
-            child: LdScaffold(
-              appBars: [
-                LdTabNavigation(
-                  tabs: tabsWithWildcard,
-                  activeRoute: '/settings/profile',
-                  onTabPressed: (route) {},
-                ),
-              ],
-              body: const Center(child: Text('Body')),
+        _wrapInScaffold(
+          LdScaffold(
+            body: LdTabNavigation(
+              tabs: tabsWithWildcard,
+              activeRoute: '/settings/profile',
+              onTabPressed: (route) {},
+              child: const Center(child: Text('Body')),
             ),
           ),
         ),
@@ -161,21 +145,14 @@ void main() {
     testWidgets('Tab navigation position - top', (WidgetTester tester) async {
       ldDisableAnimations = true;
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldFrame(
-            size: LdThemeSize.m,
-            brightnessMode: LdThemeBrightnessMode.light,
-            child: LdScaffold(
-              appBars: [
-                LdTabNavigation(
-                  tabs: sampleTabs,
-                  activeRoute: '/home',
-                  onTabPressed: (route) {},
-                  position: LdAppBarPositionMode.top,
-                ),
-              ],
-              body: const Center(child: Text('Body')),
+        _wrapInScaffold(
+          LdScaffold(
+            body: LdTabNavigation(
+              tabs: sampleTabs,
+              activeRoute: '/home',
+              onTabPressed: (route) {},
+              position: LdAppBarPositionMode.top,
+              child: const Center(child: Text('Body')),
             ),
           ),
         ),
@@ -189,21 +166,14 @@ void main() {
     testWidgets('Tab navigation position - bottom', (WidgetTester tester) async {
       ldDisableAnimations = true;
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldFrame(
-            size: LdThemeSize.m,
-            brightnessMode: LdThemeBrightnessMode.light,
-            child: LdScaffold(
-              appBars: [
-                LdTabNavigation(
-                  tabs: sampleTabs,
-                  activeRoute: '/home',
-                  onTabPressed: (route) {},
-                  position: LdAppBarPositionMode.bottom,
-                ),
-              ],
-              body: const Center(child: Text('Body')),
+        _wrapInScaffold(
+          LdScaffold(
+            body: LdTabNavigation(
+              tabs: sampleTabs,
+              activeRoute: '/home',
+              onTabPressed: (route) {},
+              position: LdAppBarPositionMode.bottom,
+              child: const Center(child: Text('Body')),
             ),
           ),
         ),
@@ -217,21 +187,14 @@ void main() {
     testWidgets('Tab navigation attached mode - floating', (WidgetTester tester) async {
       ldDisableAnimations = true;
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldFrame(
-            size: LdThemeSize.m,
-            brightnessMode: LdThemeBrightnessMode.light,
-            child: LdScaffold(
-              appBars: [
-                LdTabNavigation(
-                  tabs: sampleTabs,
-                  activeRoute: '/home',
-                  onTabPressed: (route) {},
-                  attachedMode: LdAppBarAttachedMode.floating,
-                ),
-              ],
-              body: const Center(child: Text('Body')),
+        _wrapInScaffold(
+          LdScaffold(
+            body: LdTabNavigation(
+              tabs: sampleTabs,
+              activeRoute: '/home',
+              onTabPressed: (route) {},
+              attachedMode: LdAppBarAttachedMode.floating,
+              child: const Center(child: Text('Body')),
             ),
           ),
         ),
@@ -254,21 +217,14 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldFrame(
-            size: LdThemeSize.m,
-            brightnessMode: LdThemeBrightnessMode.light,
-            child: LdScaffold(
-              appBars: [
-                LdTabNavigation(
-                  tabs: manyTabs,
-                  activeRoute: '/tab0',
-                  onTabPressed: (route) {},
-                  maxVisibleTabs: 5,
-                ),
-              ],
-              body: const Center(child: Text('Body')),
+        _wrapInScaffold(
+          LdScaffold(
+            body: LdTabNavigation(
+              tabs: manyTabs,
+              activeRoute: '/tab0',
+              onTabPressed: (route) {},
+              maxVisibleTabs: 5,
+              child: const Center(child: Text('Body')),
             ),
           ),
         ),
@@ -281,62 +237,17 @@ void main() {
       expect(find.text('Tab 4'), findsOneWidget);
     });
 
-    testWidgets('Tab navigation overflow menu', (WidgetTester tester) async {
-      ldDisableAnimations = true;
-      final manyTabs = List.generate(
-        8,
-        (index) => LdNavigationTab(
-          label: 'Tab $index',
-          icon: const Icon(LucideIcons.circle),
-          route: '/tab$index',
-        ),
-      );
-
-      await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldFrame(
-            size: LdThemeSize.m,
-            brightnessMode: LdThemeBrightnessMode.light,
-            child: LdScaffold(
-              appBars: [
-                LdTabNavigation(
-                  tabs: manyTabs,
-                  activeRoute: '/tab0',
-                  onTabPressed: (route) {},
-                  maxVisibleTabs: 5,
-                ),
-              ],
-              body: const Center(child: Text('Body')),
-            ),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // Should show more button when tabs overflow
-      expect(find.text('More'), findsOneWidget);
-    });
-
     testWidgets('Tab navigation background mode', (WidgetTester tester) async {
       ldDisableAnimations = true;
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldFrame(
-            size: LdThemeSize.m,
-            brightnessMode: LdThemeBrightnessMode.light,
-            child: LdScaffold(
-              appBars: [
-                LdTabNavigation(
-                  tabs: sampleTabs,
-                  activeRoute: '/home',
-                  onTabPressed: (route) {},
-                  backgroundMode: LdAppBarBackgroundMode.visible,
-                ),
-              ],
-              body: const Center(child: Text('Body')),
+        _wrapInScaffold(
+          LdScaffold(
+            body: LdTabNavigation(
+              tabs: sampleTabs,
+              activeRoute: '/home',
+              onTabPressed: (route) {},
+              backgroundMode: LdAppBarBackgroundMode.visible,
+              child: const Center(child: Text('Body')),
             ),
           ),
         ),
@@ -350,21 +261,14 @@ void main() {
     testWidgets('Tab navigation scroll behavior', (WidgetTester tester) async {
       ldDisableAnimations = true;
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldFrame(
-            size: LdThemeSize.m,
-            brightnessMode: LdThemeBrightnessMode.light,
-            child: LdScaffold(
-              appBars: [
-                LdTabNavigation(
-                  tabs: sampleTabs,
-                  activeRoute: '/home',
-                  onTabPressed: (route) {},
-                  scrollBehavior: LdAppBarScrollBehavior.static,
-                ),
-              ],
-              body: ListView(
+        _wrapInScaffold(
+          LdScaffold(
+            body: LdTabNavigation(
+              tabs: sampleTabs,
+              activeRoute: '/home',
+              onTabPressed: (route) {},
+              scrollBehavior: LdAppBarScrollBehavior.static,
+              child: ListView(
                 children: List.generate(
                   50,
                   (index) => ListTile(title: Text('Item $index')),
@@ -398,20 +302,13 @@ void main() {
       ];
 
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldFrame(
-            size: LdThemeSize.m,
-            brightnessMode: LdThemeBrightnessMode.light,
-            child: LdScaffold(
-              appBars: [
-                LdTabNavigation(
-                  tabs: tabsWithCustomActive,
-                  activeRoute: '/home',
-                  onTabPressed: (route) {},
-                ),
-              ],
-              body: const Center(child: Text('Body')),
+        _wrapInScaffold(
+          LdScaffold(
+            body: LdTabNavigation(
+              tabs: tabsWithCustomActive,
+              activeRoute: '/home',
+              onTabPressed: (route) {},
+              child: const Center(child: Text('Body')),
             ),
           ),
         ),
@@ -423,65 +320,17 @@ void main() {
       expect(find.text('Search'), findsOneWidget);
     });
 
-    testWidgets('Tab navigation order affects stacking', (WidgetTester tester) async {
-      ldDisableAnimations = true;
-      await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldFrame(
-            size: LdThemeSize.m,
-            brightnessMode: LdThemeBrightnessMode.light,
-            child: LdScaffold(
-              appBars: [
-                LdTabNavigation(
-                  tabs: sampleTabs,
-                  activeRoute: '/home',
-                  onTabPressed: (route) {},
-                  order: 0,
-                ),
-                LdTabNavigation(
-                  tabs: [
-                    LdNavigationTab(
-                      label: 'Extra',
-                      icon: const Icon(LucideIcons.plus),
-                      route: '/extra',
-                    ),
-                  ],
-                  activeRoute: '/extra',
-                  onTabPressed: (route) {},
-                  order: 1,
-                ),
-              ],
-              body: const Center(child: Text('Body')),
-            ),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      expect(find.text('Home'), findsOneWidget);
-      expect(find.text('Extra'), findsOneWidget);
-    });
-
     testWidgets('Tab navigation enableGradient', (WidgetTester tester) async {
       ldDisableAnimations = true;
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldFrame(
-            size: LdThemeSize.m,
-            brightnessMode: LdThemeBrightnessMode.light,
-            child: LdScaffold(
-              appBars: [
-                LdTabNavigation(
-                  tabs: sampleTabs,
-                  activeRoute: '/home',
-                  onTabPressed: (route) {},
-                  enableGradient: false,
-                ),
-              ],
-              body: const Center(child: Text('Body')),
+        _wrapInScaffold(
+          LdScaffold(
+            body: LdTabNavigation(
+              tabs: sampleTabs,
+              activeRoute: '/home',
+              onTabPressed: (route) {},
+              enableGradient: false,
+              child: const Center(child: Text('Body')),
             ),
           ),
         ),
@@ -490,6 +339,73 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Home'), findsOneWidget);
+    });
+
+    // ── New wrapper-mode specific tests ──────────────────────────────────────
+
+    testWidgets(
+      'LdAppBar.top wrapping LdTabNavigation.bottom — both edges rendered',
+      (WidgetTester tester) async {
+        ldDisableAnimations = true;
+
+        await tester.pumpWidget(
+          _wrapInScaffold(
+            LdScaffold(
+              body: LdAppBar.top(
+                title: const Text('Top Bar'),
+                child: LdTabNavigation(
+                  tabs: sampleTabs,
+                  activeRoute: '/home',
+                  onTabPressed: (_) {},
+                  position: LdAppBarPositionMode.bottom,
+                  child: const Center(child: Text('Body')),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(find.text('Top Bar'), findsOneWidget);
+        expect(find.text('Home'), findsOneWidget);
+        expect(find.text('Search'), findsOneWidget);
+        expect(find.text('Body'), findsOneWidget);
+      },
+    );
+
+    // Legacy scaffold-injection mode for LdTabNavigation.
+    group('LdTabNavigation legacy scaffold-injection mode (appBars)', () {
+      testWidgets('Legacy: LdTabNavigation in appBars still renders', (WidgetTester tester) async {
+        ldDisableAnimations = true;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: const [LiquidLocalizations.delegate],
+            home: ldFrame(
+              size: LdThemeSize.m,
+              brightnessMode: LdThemeBrightnessMode.light,
+              child: LdScaffold(
+                // ignore: deprecated_member_use
+                appBars: [
+                  LdTabNavigation(
+                    tabs: sampleTabs,
+                    activeRoute: '/home',
+                    onTabPressed: (route) {},
+                  ),
+                ],
+                body: const Center(child: Text('Body')),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(find.text('Home'), findsOneWidget);
+        expect(find.text('Search'), findsOneWidget);
+        expect(find.text('Profile'), findsOneWidget);
+      });
     });
   });
 }

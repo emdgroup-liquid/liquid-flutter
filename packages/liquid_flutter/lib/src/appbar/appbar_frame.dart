@@ -25,6 +25,11 @@ class AppBarFrame extends StatefulWidget {
 
   final BoxDecoration? insideDecoration;
   final BoxDecoration? outsideDecoration;
+
+  /// Optional builders that override [insideDecoration] / [outsideDecoration]
+  /// when dynamic decoration based on scroll state is needed (stack mode only).
+  final BoxDecoration? Function(bool isScrolledUnder)? insideDecorationBuilder;
+  final BoxDecoration? Function(bool isScrolledUnder)? outsideDecorationBuilder;
   final EdgeInsets? insidePadding;
   final EdgeInsets? outsideMinPadding;
   final bool addContainer;
@@ -49,6 +54,8 @@ class AppBarFrame extends StatefulWidget {
     this.addContainer = false,
     this.insideDecoration,
     this.outsideDecoration,
+    this.insideDecorationBuilder,
+    this.outsideDecorationBuilder,
     this.avoidViewInsets = false,
     this.insetBorderRadius = true,
     this.insidePadding,
@@ -345,21 +352,27 @@ class _AppBarFrameState extends State<AppBarFrame> {
 
   /// The bar surface widget (padding + decorations + child content).
   Widget _buildBarSurface(BoxConstraints constraints) {
+    final outsideDeco = widget.outsideDecorationBuilder != null
+        ? widget.outsideDecorationBuilder!(_isScrolledUnder)
+        : widget.outsideDecoration;
+    final insideDeco = widget.insideDecorationBuilder != null
+        ? widget.insideDecorationBuilder!(_isScrolledUnder)
+        : widget.insideDecoration;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       padding: _outsideContainerPadding(constraints),
-      decoration: widget.outsideDecoration,
+      decoration: outsideDeco,
       // Only clip when there is a decoration; Container asserts if clipBehavior
       // is non-none but decoration is null.
-      clipBehavior: widget.outsideDecoration != null ? Clip.hardEdge : Clip.none,
+      clipBehavior: outsideDeco != null ? Clip.hardEdge : Clip.none,
       key: Key("appbar_frame_outside_${widget.position.name}"),
       child: MeasureSize(
         onSizeChange: _onSizeChange,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          decoration: widget.insideDecoration,
+          decoration: insideDeco,
           padding: _insidePadding(constraints),
-          clipBehavior: widget.insideDecoration != null ? Clip.hardEdge : Clip.none,
+          clipBehavior: insideDeco != null ? Clip.hardEdge : Clip.none,
           key: Key("appbar_frame_inside_${widget.position.name}"),
           child: widget.child,
         ),
@@ -409,9 +422,14 @@ class _AppBarFrameState extends State<AppBarFrame> {
           bottom: widget.position == LdAppBarPosition.bottom ? 0 : null,
           left: 0,
           right: 0,
-          child: Transform.translate(
-            offset: Offset(0, translateY),
-            child: _buildBarSurface(constraints),
+          // Also expose metrics to the bar surface so the bar content can
+          // read isScrolledUnder / level for decoration and button logic.
+          child: Provider<LdAppBarMetrics>.value(
+            value: currentMetrics,
+            child: Transform.translate(
+              offset: Offset(0, translateY),
+              child: _buildBarSurface(constraints),
+            ),
           ),
         );
 
