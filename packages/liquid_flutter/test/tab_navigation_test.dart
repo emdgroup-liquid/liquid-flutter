@@ -375,8 +375,9 @@ void main() {
     );
 
     // Legacy scaffold-injection mode for LdTabNavigation.
+    // The appBars parameter is a deprecated no-op since the registry was removed.
     group('LdTabNavigation legacy scaffold-injection mode (appBars)', () {
-      testWidgets('Legacy: LdTabNavigation in appBars still renders', (WidgetTester tester) async {
+      testWidgets('Legacy: LdTabNavigation in appBars does not crash', (WidgetTester tester) async {
         ldDisableAnimations = true;
 
         await tester.pumpWidget(
@@ -402,9 +403,9 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        expect(find.text('Home'), findsOneWidget);
-        expect(find.text('Search'), findsOneWidget);
-        expect(find.text('Profile'), findsOneWidget);
+        // The deprecated appBars parameter is a no-op; bars are not placed.
+        // The scaffold body should still render.
+        expect(find.text('Body'), findsOneWidget);
       });
     });
   });

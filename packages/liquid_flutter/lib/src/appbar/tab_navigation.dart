@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_frame.dart';
-import 'package:liquid_flutter/src/appbar/appbar_registry.dart';
-import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 import 'package:liquid_flutter/src/haptics.dart';
 import 'package:liquid_flutter/src/touchable/ghost_color.dart';
 import 'package:liquid_flutter/src/touchable/neutral_ghost_color.dart';
@@ -37,7 +35,7 @@ class LdTabNavigation extends StatefulWidget {
   /// The subtree that this tab bar wraps.
   ///
   /// When provided, the tab bar uses the new wrapper-based composition model.
-  /// When null, falls back to the legacy scaffold-injection behaviour.
+  /// When null, the tab bar renders the bar surface only (no subtree wrapping).
   final Widget? child;
 
   const LdTabNavigation({
@@ -544,21 +542,6 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
         child: tabBarSurface,
       ),
     );
-
-    // Legacy mode: wrap with LdAppBarScrollWrapper so the bar is correctly
-    // positioned in LdScaffold's Stack. In stack-mode (child != null) the bar
-    // is already inside AppBarFrame's own Stack via wrappedChild.
-    if (widget.child == null) {
-      return LdAppBarRegistryEntry(
-        // ignore: deprecated_member_use_from_same_package
-        order: widget.order,
-        child: LdAppBarScrollWrapper(
-          position: position,
-          scrollBehavior: widget.scrollBehavior,
-          child: frame,
-        ),
-      );
-    }
 
     return frame;
   }

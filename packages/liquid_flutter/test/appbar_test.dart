@@ -539,8 +539,10 @@ void main() {
   });
 
   // ── Legacy scaffold-injection mode (LdScaffold.appBars) ──────────────────
+  // The appBars parameter is a deprecated no-op since the registry was removed.
+  // Verify that using it does not throw and the body is still rendered.
   group('LdAppBar legacy scaffold-injection mode (appBars)', () {
-    testWidgets('Legacy: LdAppBar in appBars still renders', (WidgetTester tester) async {
+    testWidgets('Legacy: LdAppBar in appBars does not crash', (WidgetTester tester) async {
       ldDisableAnimations = true;
       await tester.pumpWidget(
         MaterialApp(
@@ -561,7 +563,196 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.text('Legacy Bar'), findsOneWidget);
+      // The deprecated appBars parameter is a no-op; bars are not placed.
+      // The scaffold body should still render.
+      expect(find.text('Body'), findsOneWidget);
     });
   });
+
+  // ── Stage 5: ScrolledUnderBuilder and drawer button tests ─────────────────
+
+  group('ScrolledUnderBuilder', () {
+    testWidgets('rebuilds when LdAppBarMetrics.isScrolledUnder changes', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+
+      // We'll use a ValueNotifier to drive isScrolledUnder externally.
+      final metricsNotifier = ValueNotifier<LdAppBarMetrics>(
+        const LdAppBarMetrics(
+          position: LdAppBarPosition.top,
+          barHeight: 56,
+          edgeMargin: 0,
+          hideOffset: 0,
+          isScrolledUnder: false,
+          level: 0,
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ValueListenableBuilder<LdAppBarMetrics>(
+            valueListenable: metricsNotifier,
+            builder: (context, metrics, _) {
+              return Provider<LdAppBarMetrics?>.value(
+                value: metrics,
+                child: Builder(
+                  builder: (context) {
+                    return ScrolledUnderBuilder(
+                      builder: (context, isScrolledUnder) {
+                        return Text(isScrolledUnder ? 'scrolled' : 'not scrolled');
+                      },
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      expect(find.text('not scrolled'), findsOneWidget);
+      expect(find.text('scrolled'), findsNothing);
+
+      // Update metrics so isScrolledUnder becomes true.
+      metricsNotifier.value = const LdAppBarMetrics(
+        position: LdAppBarPosition.top,
+        barHeight: 56,
+        edgeMargin: 0,
+        hideOffset: 0,
+        isScrolledUnder: true,
+        level: 0,
+      );
+      await tester.pump();
+
+      expect(find.text('scrolled'), findsOneWidget);
+      expect(find.text('not scrolled'), findsNothing);
+
+      metricsNotifier.dispose();
+    });
+
+    testWidgets('returns false when no LdAppBarMetrics is in context', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Provider<LdAppBarMetrics?>.value(
+            value: null,
+            child: ScrolledUnderBuilder(
+              builder: (context, isScrolledUnder) {
+                return Text(isScrolledUnder ? 'scrolled' : 'not scrolled');
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('not scrolled'), findsOneWidget);
+    });
+  });
+
+  group('OpenDrawerButton visibility', () {
+    Widget _buildWithMetrics({
+      required LdAppBarMetrics? metrics,
+      required bool drawerOpen,
+      required bool isSideBySide,
+    }) {
+      return MaterialApp(
+        localizationsDelegates: const [LiquidLocalizations.delegate],
+        home: ldFrame(
+          size: LdThemeSize.m,
+          brightnessMode: LdThemeBrightnessMode.light,
+          child: MultiProvider(
+            providers: [
+              Provider<LdAppBarMetrics?>.value(value: metrics),
+              Provider<LdDrawerSlot?>.value(value: LdDrawerSlot.body),
+              Provider<LdDrawerState?>.value(
+                value: LdDrawerState(
+                  isOpen: drawerOpen,
+                  isSideBySide: isSideBySide,
+                ),
+              ),
+            ],
+            child: const _FakeDrawerLayout(
+              child: OpenDrawerButton(),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('is visible in level-0 top bar with closed drawer', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+      await tester.pumpWidget(
+        _buildWithMetrics(
+          metrics: const LdAppBarMetrics(
+            position: LdAppBarPosition.top,
+            barHeight: 56,
+            edgeMargin: 0,
+            hideOffset: 0,
+            isScrolledUnder: false,
+            level: 0,
+          ),
+          drawerOpen: false,
+          isSideBySide: false,
+        ),
+      );
+      await tester.pump();
+
+      // LdReveal wraps the button; check that the icon is not excluded from focus
+      // (which happens when shouldShow is false).
+      final excludeFocus = tester.widget<ExcludeFocus>(find.byType(ExcludeFocus).first);
+      expect(excludeFocus.excluding, isFalse);
+    });
+
+    testWidgets('is hidden in nested (level > 0) top bar', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+      await tester.pumpWidget(
+        _buildWithMetrics(
+          metrics: const LdAppBarMetrics(
+            position: LdAppBarPosition.top,
+            barHeight: 56,
+            edgeMargin: 0,
+            hideOffset: 0,
+            isScrolledUnder: false,
+            level: 1, // nested bar
+          ),
+          drawerOpen: false,
+          isSideBySide: false,
+        ),
+      );
+      await tester.pump();
+
+      final excludeFocus = tester.widget<ExcludeFocus>(find.byType(ExcludeFocus).first);
+      expect(excludeFocus.excluding, isTrue);
+    });
+
+    testWidgets('is hidden in bottom bar', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+      await tester.pumpWidget(
+        _buildWithMetrics(
+          metrics: const LdAppBarMetrics(
+            position: LdAppBarPosition.bottom,
+            barHeight: 56,
+            edgeMargin: 0,
+            hideOffset: 0,
+            isScrolledUnder: false,
+            level: 0,
+          ),
+          drawerOpen: false,
+          isSideBySide: false,
+        ),
+      );
+      await tester.pump();
+
+      final excludeFocus = tester.widget<ExcludeFocus>(find.byType(ExcludeFocus).first);
+      expect(excludeFocus.excluding, isTrue);
+    });
+  });
+}
+
+/// Minimal fake that satisfies LdDrawerLayout ancestor check inside
+/// [OpenDrawerButton._shouldShow].
+class _FakeDrawerLayout extends StatelessWidget {
+  final Widget child;
+  const _FakeDrawerLayout({required this.child});
+
+  @override
+  Widget build(BuildContext context) => child;
 }

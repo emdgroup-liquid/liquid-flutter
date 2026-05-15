@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/appbar/appbar_registry.dart';
 import 'package:liquid_flutter/src/modal/size_notifier.dart';
 import 'package:provider/provider.dart';
 
@@ -71,7 +70,7 @@ class AppBarFrame extends StatefulWidget {
 class _AppBarFrameState extends State<AppBarFrame> {
   final FocusScopeNode _focusScopeNode = FocusScopeNode();
 
-  // ── New Stack-mode state ──────────────────────────────────────────────────
+  // ── Stack-mode state ──────────────────────────────────────────────────────
 
   /// Measured height of the bar surface (pixels).
   double _barHeight = 0.0;
@@ -84,10 +83,6 @@ class _AppBarFrameState extends State<AppBarFrame> {
 
   /// Whether scrollable content has moved under the bar.
   bool _isScrolledUnder = false;
-
-  // ── Legacy registry-mode state (used when wrappedChild is null) ───────────
-
-  late final _registry = AppBarRegistry.maybeStateOf(context);
 
   @override
   debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -105,91 +100,24 @@ class _AppBarFrameState extends State<AppBarFrame> {
     properties.add(StringProperty("child", widget.child.toString()));
   }
 
-  // ── Legacy helpers (registry-based) ──────────────────────────────────────
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.wrappedChild == null) {
-      _registry?.addListener(_onRegistryChange);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _setInitialPosition();
-        }
-      });
-    }
-  }
-
-  void _setInitialPosition() {
-    final key = _getKey();
-    if (key == null) return;
-    final currentInfo = _registry?.getAppBarInfo(key);
-    if (currentInfo == null) return;
-
-    _registry?.updateAppBarInfo(
-      key,
-      currentInfo.copyWith(
-        position: widget.position,
-      ),
-    );
-  }
-
-  void _onRegistryChange() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      setState(() {});
-    });
-  }
-
   @override
   void dispose() {
     _focusScopeNode.dispose();
-    if (widget.wrappedChild == null) {
-      _registry?.removeListener(_onRegistryChange);
-    }
     super.dispose();
   }
 
-  LdAppBarRegistryKey? _getKey() {
-    return context.maybeAppBarRegistryKey();
-  }
-
   double _calculateOtherAppBarHeight(LdAppBarPosition position) {
-    // New Stack-mode: read from outer MediaQuery padding (already accumulated
+    // Read from outer MediaQuery padding (already accumulated
     // by ancestor AppBarFrame instances) — no registry walk needed.
-    if (widget.wrappedChild != null) {
-      final outerPadding = MediaQuery.paddingOf(context);
-      return widget.position == LdAppBarPosition.top ? outerPadding.top : outerPadding.bottom;
-    }
-
-    // Legacy registry-mode.
-    final registry = AppBarRegistry.maybeStateOf(context);
-    final key = _getKey();
-    if (registry == null || key == null) {
-      return 0.0;
-    }
-    final modalRoute = ModalRoute.of(context);
-    if (modalRoute is LdModalRoute) {
-      return registry.getEffectiveHeightOfOthers(key, limitToChildrenOf: modalRoute.subtreeContext);
-    }
-    return registry.getEffectiveHeightOfOthers(key);
+    final outerPadding = MediaQuery.paddingOf(context);
+    return widget.position == LdAppBarPosition.top ? outerPadding.top : outerPadding.bottom;
   }
 
   int _calculateLevel() {
-    // New Stack-mode: read from parent LdAppBarMetrics provider.
-    if (widget.wrappedChild != null) {
-      final parentMetrics = context.watch<LdAppBarMetrics?>();
-      if (parentMetrics == null) return 0;
-      return parentMetrics.position == widget.position ? parentMetrics.level + 1 : 0;
-    }
-
-    // Legacy registry-mode.
-    final registryState = AppBarRegistry.maybeStateOf(context);
-    final key = _getKey();
-    if (registryState == null || key == null) {
-      return 0;
-    }
-    return registryState.getLevel(key, widget.position);
+    // Read from parent LdAppBarMetrics provider.
+    final parentMetrics = context.watch<LdAppBarMetrics?>();
+    if (parentMetrics == null) return 0;
+    return parentMetrics.position == widget.position ? parentMetrics.level + 1 : 0;
   }
 
   EdgeInsets _containerPadding(BoxConstraints constraints) {
@@ -258,55 +186,14 @@ class _AppBarFrameState extends State<AppBarFrame> {
     }
   }
 
-  // ── Legacy registry callbacks ─────────────────────────────────────────────
-
   void _onSizeChange(Size size) {
-    if (widget.wrappedChild != null) {
-      // Stack-mode: store height locally; metrics are exposed via Provider.
-      if (_barHeight != size.height) {
-        setState(() => _barHeight = size.height);
-      }
-      return;
+    // Stack-mode: store height locally; metrics are exposed via Provider.
+    if (_barHeight != size.height) {
+      setState(() => _barHeight = size.height);
     }
-
-    // Legacy registry-mode.
-    final registry = AppBarRegistry.maybeStateOf(context);
-    final key = _getKey();
-    if (registry == null || key == null) return;
-
-    final currentInfo = registry.getAppBarInfo(key) ?? AppBarInfo.initial(widget.position);
-
-    registry.updateAppBarInfo(
-      key,
-      currentInfo.copyWith(
-        position: widget.position,
-        innerHeight: size.height,
-      ),
-    );
   }
 
-  EdgeInsets _previousOutsidePadding = EdgeInsets.zero;
-
-  void _updateMargin(EdgeInsets outsidePadding) {
-    if (widget.wrappedChild != null) return; // Stack-mode: no registry.
-
-    final registry = AppBarRegistry.maybeStateOf(context);
-    final key = _getKey();
-    if (registry == null || key == null) return;
-
-    final verticalMargin = widget.position == LdAppBarPosition.top ? outsidePadding.top : outsidePadding.bottom;
-
-    final currentInfo = registry.getAppBarInfo(key) ?? AppBarInfo.initial(widget.position);
-    registry.updateAppBarInfo(
-      key,
-      currentInfo.copyWith(
-        verticalMargin: verticalMargin,
-        position: widget.position,
-      ),
-    );
-  }
-
-  // ── New scroll-hide logic (Stack-mode only) ───────────────────────────────
+  // ── Scroll-hide logic ────────────────────────────────────────────────────
 
   bool _shouldHideAppBar() {
     final isMobile = LdTheme.of(context).platform.isMobile;
@@ -433,6 +320,15 @@ class _AppBarFrameState extends State<AppBarFrame> {
           ),
         );
 
+        final wrappedChild = widget.wrappedChild;
+        if (wrappedChild == null) {
+          // Bar-only mode: just render the bar surface with metrics exposed.
+          return Provider<LdAppBarMetrics>.value(
+            value: currentMetrics,
+            child: _buildBarSurface(constraints),
+          );
+        }
+
         return NotificationListener<ScrollNotification>(
           onNotification: (notification) {
             _handleScrollNotification(notification);
@@ -449,7 +345,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
                   ),
                   child: Provider<LdAppBarMetrics>.value(
                     value: currentMetrics,
-                    child: widget.wrappedChild!,
+                    child: wrappedChild,
                   ),
                 ),
               ),
@@ -462,56 +358,10 @@ class _AppBarFrameState extends State<AppBarFrame> {
     );
   }
 
-  // ── Legacy scaffold-injection build ──────────────────────────────────────
-
-  Widget _buildLegacyMode(BuildContext context) {
-    MediaQuery.viewInsetsOf(context);
-    return LayoutBuilder(builder: (context, constraints) {
-      final outsidePadding = _outsideContainerPadding(constraints);
-      if (outsidePadding != _previousOutsidePadding) {
-        _previousOutsidePadding = outsidePadding;
-        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-          _updateMargin(outsidePadding);
-        });
-      }
-
-      return ValueListenableBuilder(
-        valueListenable: LdScaffoldState.maybeOf(context)?.bodyScrollOffset ?? ValueNotifier(0.0),
-        builder: (context, value, child) {
-          return FocusScope(
-            node: _focusScopeNode,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              padding: outsidePadding,
-              decoration: widget.outsideDecoration,
-              clipBehavior: widget.outsideDecoration != null ? Clip.hardEdge : Clip.none,
-              key: Key("appbar_frame_outside_${widget.position.name}"),
-              child: MeasureSize(
-                onSizeChange: _onSizeChange,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  decoration: widget.insideDecoration,
-                  padding: _insidePadding(constraints),
-                  clipBehavior: widget.insideDecoration != null ? Clip.hardEdge : Clip.none,
-                  key: Key("appbar_frame_inside_${widget.position.name}"),
-                  child: child,
-                ),
-              ),
-            ),
-          );
-        },
-        child: widget.child,
-      );
-    });
-  }
-
   // ── Main build ────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
-    if (widget.wrappedChild != null) {
-      return _buildStackMode(context);
-    }
-    return _buildLegacyMode(context);
+    return _buildStackMode(context);
   }
 }

@@ -4,9 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_decoration.dart';
 import 'package:liquid_flutter/src/appbar/appbar_frame.dart';
-import 'package:liquid_flutter/src/appbar/appbar_registry.dart';
-import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
-import 'package:liquid_flutter/src/appbar/appbar_state.dart';
 import 'package:liquid_flutter/src/appbar/macos_window_controls.dart';
 import 'package:liquid_flutter/src/appbar/windows_window_controls.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -132,9 +129,8 @@ class LdAppBar extends StatefulWidget {
   /// the background. [MediaQuery.padding] inside [child] is patched with the
   /// bar's consumed insets.
   ///
-  /// When null the bar falls back to the legacy scaffold-injection behaviour
-  /// (for backwards compatibility while [LdScaffold.appBars] still exists).
-  final Widget? child;
+    /// When null the bar renders the bar surface only (no subtree wrapping).
+    final Widget? child;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -621,22 +617,6 @@ class _LdAppBarState extends State<LdAppBar> {
       ),
       child: barSurface,
     );
-
-    // Legacy mode: wrap with LdAppBarScrollWrapper so the bar is correctly
-    // positioned in LdScaffold's Stack. In stack-mode (child != null) the bar
-    // is already inside AppBarFrame's own Stack via wrappedChild.
-    if (widget.child == null) {
-      return LdAppBarRegistryEntry(
-        debugName: widget.debugName,
-        // ignore: deprecated_member_use_from_same_package
-        order: widget.order,
-        child: LdAppBarScrollWrapper(
-          position: position,
-          scrollBehavior: widget.scrollBehavior,
-          child: frame,
-        ),
-      );
-    }
 
     return frame;
   }

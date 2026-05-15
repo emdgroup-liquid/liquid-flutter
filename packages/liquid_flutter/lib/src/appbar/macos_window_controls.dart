@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/appbar/appbar_registry.dart';
-import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart';
 import 'package:provider/provider.dart';
 
 class MacOSWindowControls extends StatelessWidget {
@@ -17,19 +15,8 @@ class MacOSWindowControls extends StatelessWidget {
 
     bool show = false;
 
-    final registry = AppBarRegistry.maybeStateOf(context);
-
-    final appBarKey = context.maybeAppBarRegistryKey();
-
-    int level = 1;
-
-    if (appBarKey != null && registry != null) {
-      final appBarInfo = registry.getAppBarInfo(appBarKey);
-
-      if (appBarInfo != null && appBarInfo.position == LdAppBarPosition.top) {
-        level = registry.getLevel(appBarKey, LdAppBarPosition.top);
-      }
-    }
+    final metrics = context.watch<LdAppBarMetrics?>();
+    final level = (metrics?.position == LdAppBarPosition.top) ? metrics!.level : 1;
 
     final drawerSlot = context.watch<LdDrawerSlot?>();
     final drawerState = context.watch<LdDrawerState?>();

@@ -1,10 +1,9 @@
 import 'package:flutter/widgets.dart';
-import 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart'
-    show LdAppBarPosition;
 
-// Re-export so callers can import LdAppBarPosition from this file too.
-export 'package:liquid_flutter/src/appbar/appbar_scroll_wrapper.dart'
-    show LdAppBarPosition;
+enum LdAppBarPosition {
+  top,
+  bottom,
+}
 
 /// Immutable snapshot of an app-bar's metrics at a point in time.
 ///
