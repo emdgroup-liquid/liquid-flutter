@@ -150,7 +150,7 @@ void main() {
             ...buildMonkeyRoutes<TestItem, int>(
               masterPath: '/test',
               routeConfig: itemRouteConfig,
-              repositoryBuilder: (context) => repository,
+              repositoryBuilder: (context, state) => repository,
               filters: const [],
               sortOptions: const [],
               actions: const [],

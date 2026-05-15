@@ -12,6 +12,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
   final Widget? leading;
   final LdAppBarPositionMode? positionMode;
   final LdAppBarBackgroundMode? backgroundMode;
+  final bool? implyLeading;
   final LdAppBarShadowMode? shadowMode;
   final LdAppBarBorderMode? borderMode;
   const LdMonkeyAppBar({
@@ -25,6 +26,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
     this.backgroundMode,
     this.shadowMode,
     this.borderMode,
+    this.implyLeading,
   });
 
   LdFilterSearch<T, IdType, dynamic>? _getSearchFilter(BuildContext context) {
@@ -82,10 +84,11 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
                     LdAppBarShadowMode.hidden,
                   _ => LdAppBarShadowMode.whenScrolled,
                 },
-            implyLeading: switch (location) {
-              LdMonkeyActionLocation.detailAppBar => effectiveLayout == LdMonkeyEffectiveLayoutMode.detail,
-              _ => null,
-            },
+            implyLeading: implyLeading ??
+                switch (location) {
+                  LdMonkeyActionLocation.detailAppBar => effectiveLayout == LdMonkeyEffectiveLayoutMode.detail,
+                  _ => null,
+                },
             attachedMode: switch (location) {
               LdMonkeyActionLocation.masterSecondary => LdAppBarAttachedMode.floating,
               _ => LdAppBarAttachedMode.adaptive,
