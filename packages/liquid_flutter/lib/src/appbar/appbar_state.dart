@@ -9,8 +9,9 @@ enum LdAppBarPosition {
 ///
 /// [position]        – whether this bar sits at the top or bottom.
 /// [barHeight]       – the full rendered height of the bar (pixels).
-/// [edgeMargin]      – additional spacing between the bar and the screen edge
-///                     (e.g. floating margin), included in consumed insets.
+/// [edgeMargin]      – padding already applied on this edge before this bar
+///                     (safe area and/or ancestor bars), used to compute
+///                     [consumedInsets] without double-counting.
 /// [hideOffset]      – how many pixels the bar has been scrolled off-screen
 ///                     (0 = fully visible, barHeight = fully hidden).
 /// [isScrolledUnder] – true when the scroll content has moved underneath
@@ -33,15 +34,21 @@ class LdAppBarMetrics {
   final bool isScrolledUnder;
   final int level;
 
-  /// The insets consumed by this bar in the current state.
+  /// The insets this bar adds beyond [edgeMargin] for its subtree.
   ///
-  /// For a **top** bar:  `top = barHeight - hideOffset + edgeMargin`, rest 0.
-  /// For a **bottom** bar: `bottom = barHeight - hideOffset + edgeMargin`, rest 0.
+  /// [barHeight] is measured on the full bar surface, including padding for
+  /// bars stacked above ([edgeMargin], which matches outer [MediaQuery.padding]
+  /// on that edge). Only the incremental height is published so nested bars do
+  /// not double-count ancestor space.
+  ///
+  /// For a **top** bar: `top = max(0, barHeight - hideOffset - edgeMargin)`.
+  /// For a **bottom** bar: `bottom = max(0, barHeight - hideOffset - edgeMargin)`.
   EdgeInsets get consumedInsets {
-    final visible = (barHeight - hideOffset + edgeMargin).clamp(0.0, double.infinity);
+    final visible = (barHeight - hideOffset).clamp(0.0, double.infinity);
+    final incremental = (visible - edgeMargin).clamp(0.0, double.infinity);
     return switch (position) {
-      LdAppBarPosition.top => EdgeInsets.only(top: visible),
-      LdAppBarPosition.bottom => EdgeInsets.only(bottom: visible),
+      LdAppBarPosition.top => EdgeInsets.only(top: incremental),
+      LdAppBarPosition.bottom => EdgeInsets.only(bottom: incremental),
     };
   }
 

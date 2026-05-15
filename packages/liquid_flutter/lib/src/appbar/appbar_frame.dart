@@ -245,16 +245,16 @@ class _AppBarFrameState extends State<AppBarFrame> {
     final insideDeco = widget.insideDecorationBuilder != null
         ? widget.insideDecorationBuilder!(_isScrolledUnder)
         : widget.insideDecoration;
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      padding: _outsideContainerPadding(constraints),
-      decoration: outsideDeco,
-      // Only clip when there is a decoration; Container asserts if clipBehavior
-      // is non-none but decoration is null.
-      clipBehavior: outsideDeco != null ? Clip.hardEdge : Clip.none,
-      key: Key("appbar_frame_outside_${widget.position.name}"),
-      child: MeasureSize(
-        onSizeChange: _onSizeChange,
+    return MeasureSize(
+      onSizeChange: _onSizeChange,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: _outsideContainerPadding(constraints),
+        decoration: outsideDeco,
+        // Only clip when there is a decoration; Container asserts if clipBehavior
+        // is non-none but decoration is null.
+        clipBehavior: outsideDeco != null ? Clip.hardEdge : Clip.none,
+        key: Key("appbar_frame_outside_${widget.position.name}"),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           decoration: insideDeco,

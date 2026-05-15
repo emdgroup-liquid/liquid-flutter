@@ -54,26 +54,24 @@ void main() {
     // -------------------------------------------------------------------------
 
     test('consumedInsets for top bar with no hideOffset', () {
-      // barHeight=56, edgeMargin=8, hideOffset=0  =>  top = 64
+      // barHeight=56, edgeMargin=8, hideOffset=0  =>  top = 48
       final insets = base.consumedInsets;
-      expect(insets, equals(const EdgeInsets.only(top: 64.0)));
+      expect(insets, equals(const EdgeInsets.only(top: 48.0)));
     });
 
     test('consumedInsets for top bar with partial hideOffset', () {
       final metrics = base.copyWith(hideOffset: 20.0);
-      // barHeight=56, edgeMargin=8, hideOffset=20  =>  top = 44
-      expect(metrics.consumedInsets, equals(const EdgeInsets.only(top: 44.0)));
+      // barHeight=56, edgeMargin=8, hideOffset=20  =>  top = 28
+      expect(metrics.consumedInsets, equals(const EdgeInsets.only(top: 28.0)));
     });
 
     test('consumedInsets for top bar fully hidden (hideOffset == barHeight)', () {
       final metrics = base.copyWith(hideOffset: 56.0);
-      // barHeight=56, edgeMargin=8, hideOffset=56  =>  top = 8 (edgeMargin remains)
-      expect(metrics.consumedInsets, equals(const EdgeInsets.only(top: 8.0)));
+      expect(metrics.consumedInsets, equals(EdgeInsets.zero));
     });
 
-    test('consumedInsets for top bar fully hidden including margin', () {
-      final metrics = base.copyWith(hideOffset: 64.0); // barHeight + edgeMargin
-      // Result should be clamped to 0, not negative
+    test('consumedInsets for top bar fully hidden beyond bar height', () {
+      final metrics = base.copyWith(hideOffset: 64.0);
       expect(metrics.consumedInsets, equals(EdgeInsets.zero));
     });
 
@@ -90,7 +88,7 @@ void main() {
         isScrolledUnder: false,
         level: 0,
       );
-      expect(bottom.consumedInsets, equals(const EdgeInsets.only(bottom: 64.0)));
+      expect(bottom.consumedInsets, equals(const EdgeInsets.only(bottom: 48.0)));
     });
 
     test('consumedInsets for bottom bar fully hidden', () {
@@ -102,8 +100,7 @@ void main() {
         isScrolledUnder: false,
         level: 0,
       );
-      // barHeight=56, edgeMargin=8, hideOffset=56  =>  bottom = 8
-      expect(bottom.consumedInsets, equals(const EdgeInsets.only(bottom: 8.0)));
+      expect(bottom.consumedInsets, equals(EdgeInsets.zero));
     });
 
     test('consumedInsets for bottom bar: only bottom is non-zero', () {

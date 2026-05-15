@@ -149,50 +149,51 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
                   body: LdAppBar(
                     title: const Text("Deduct"),
                     child: LdScaffoldBody(
-                    minimumPadding: EdgeInsets.zero,
-                    children: [
-                      LdListItem(
-                        title: const Text("Deduct 0.1l"),
-                        leading: const Icon(LucideIcons.arrowDown),
-                        onPressed: () {
-                          _deduct(0.1);
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                      LdListItem(
-                        title: const Text("Deduct 0.2l"),
-                        leading: const Icon(LucideIcons.arrowDown),
-                        onPressed: () {
-                          _deduct(0.2);
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                      LdListItem(
-                        title: const Text("Deduct 0.5l"),
-                        leading: const Icon(LucideIcons.arrowDown),
-                        onPressed: () {
-                          _deduct(0.5);
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                      LdListItem(
-                        title: const Text("Add 0.1l"),
-                        leading: const Icon(LucideIcons.arrowUp),
-                        onPressed: () {
-                          _deduct(-0.1);
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                      LdDivider(),
-                      LdListItem(
-                        title: const Text("Refill entirely"),
-                        leading: const Icon(LucideIcons.arrowUp),
-                        onPressed: () {
-                          _deduct(-1);
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
+                      minimumPadding: EdgeInsets.zero,
+                      children: [
+                        LdListItem(
+                          title: const Text("Deduct 0.1l"),
+                          leading: const Icon(LucideIcons.arrowDown),
+                          onPressed: () {
+                            _deduct(0.1);
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        LdListItem(
+                          title: const Text("Deduct 0.2l"),
+                          leading: const Icon(LucideIcons.arrowDown),
+                          onPressed: () {
+                            _deduct(0.2);
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        LdListItem(
+                          title: const Text("Deduct 0.5l"),
+                          leading: const Icon(LucideIcons.arrowDown),
+                          onPressed: () {
+                            _deduct(0.5);
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        LdListItem(
+                          title: const Text("Add 0.1l"),
+                          leading: const Icon(LucideIcons.arrowUp),
+                          onPressed: () {
+                            _deduct(-0.1);
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        LdDivider(),
+                        LdListItem(
+                          title: const Text("Refill entirely"),
+                          leading: const Icon(LucideIcons.arrowUp),
+                          onPressed: () {
+                            _deduct(-1);
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

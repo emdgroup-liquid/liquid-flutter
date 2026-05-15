@@ -116,25 +116,26 @@ class _ComponentWellState extends State<ComponentWell> {
           body: LdAppBar(
             title: Text("Source Code"),
             child: LdScaffoldBody(
-            children: [
-              LdSubmit<String, String>(
-                arg: sourcePath,
-                config: LdSubmitConfig(
-                  autoTrigger: true,
-                  action: (arg) async {
-                    // Load the source code
-                    return await rootBundle.loadString(arg!);
-                  },
-                ),
-                child: LdSubmitCenteredBuilder<String, String>(
-                  resultBuilder: (context, result, controller) => SourceCodeExtractor(
-                    options: widget.showSourceCodeOptions,
-                    sourceCode: result,
-                    index: instanceIndex,
+              children: [
+                LdSubmit<String, String>(
+                  arg: sourcePath,
+                  config: LdSubmitConfig(
+                    autoTrigger: true,
+                    action: (arg) async {
+                      // Load the source code
+                      return await rootBundle.loadString(arg!);
+                    },
+                  ),
+                  child: LdSubmitCenteredBuilder<String, String>(
+                    resultBuilder: (context, result, controller) => SourceCodeExtractor(
+                      options: widget.showSourceCodeOptions,
+                      sourceCode: result,
+                      index: instanceIndex,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

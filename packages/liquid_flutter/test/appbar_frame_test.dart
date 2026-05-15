@@ -196,6 +196,37 @@ void main() {
       expect(capturedMetrics!.level, 0);
     });
 
+    testWidgets('nested same-position bars stack without a gap before the inner bar', (tester) async {
+      await tester.pumpWidget(
+        _withTheme(
+          AppBarFrame(
+            position: LdAppBarPosition.top,
+            wrappedChild: AppBarFrame(
+              position: LdAppBarPosition.top,
+              wrappedChild: AppBarFrame(
+                position: LdAppBarPosition.top,
+                wrappedChild: const SizedBox.expand(),
+                child: const SizedBox(height: 48, child: Text('Third')),
+              ),
+              child: const SizedBox(height: 40, child: Text('Second')),
+            ),
+            child: const SizedBox(height: 56, child: Text('First')),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      final secondBottom = tester.getBottomLeft(find.text('Second')).dy;
+      final thirdTop = tester.getTopLeft(find.text('Third')).dy;
+
+      // Third bar should sit under the second — only inner padding between them,
+      // not a full extra bar slot (the pre-fix bug added ~one bar of empty space).
+      expect(thirdTop - secondBottom, lessThan(30));
+    });
+
     testWidgets('nested same-position bars report correct level', (tester) async {
       LdAppBarMetrics? innerMetrics;
 
