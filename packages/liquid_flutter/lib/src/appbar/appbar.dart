@@ -247,11 +247,14 @@ class _LdAppBarState extends State<LdAppBar> {
     _focusScopeNode.addListener(_handleFocusChange);
   }
 
-  void _handleFocusChange() async {
-    await Future.delayed(Duration.zero);
-    if (mounted) {
-      setState(() {});
-    }
+  void _handleFocusChange() {
+    // Use addPostFrameCallback instead of Future.delayed(Duration.zero) to
+    // avoid leaving a pending timer that fails widget tests.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   bool get _isModal {
