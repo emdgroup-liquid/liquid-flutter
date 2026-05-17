@@ -89,6 +89,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
       for (var i = 0; i < initialItems.length; i++) {
         _items[i] = LdPaginatorItem<T>(value: initialItems[i], state: LdPaginatorItemState.loaded);
       }
+      totalItems = initialItems.length;
     }
   }
 
