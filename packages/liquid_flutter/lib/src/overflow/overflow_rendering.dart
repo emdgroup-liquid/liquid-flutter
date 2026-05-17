@@ -393,21 +393,11 @@ class LdRenderOverflowView extends RenderBox
     double totalUsedSpace = filledExtent + _spacingExtent(renderedChildren.length);
     double remainder = availableExtent - totalUsedSpace;
 
-    for (var i = 0; i < renderedChildren.length; i++) {
-      final child = renderedChildren[i];
-      child.layout(
-        BoxValueConstraints<int>(
-          value: overflowCount,
-          constraints: BoxConstraints.loose(Size(
-            _isHorizontal ? childrenSizes.elementAt(i) : constraints.maxWidth,
-            _isHorizontal ? constraints.maxHeight : childrenSizes.elementAt(i),
-          )),
-        ),
-        parentUsesSize: true,
-      );
-    }
-
-    // Handle Expanded widgets by distributing the remaining space based on flex ratios
+    // Handle Expanded widgets by distributing the remaining space based on flex ratios.
+    // Compute this BEFORE the per-child layout pass so that flexible children can be
+    // laid out with their final dimensions in a single layout call, avoiding a double
+    // layout that would cause AnimatedSize (and similar) to restart their animations
+    // every frame and never settle.
     final expandedChildren = <MapEntry<int, RenderBox>>[];
     int totalFlex = 0;
 
@@ -420,23 +410,33 @@ class LdRenderOverflowView extends RenderBox
       }
     }
 
+    // Pre-compute final widths for flexible children so they are laid out only once.
+    final Map<int, double> flexChildFinalWidths = {};
     if (expandedChildren.isNotEmpty && remainder > 0) {
       for (final entry in expandedChildren) {
         final i = entry.key;
-        final child = entry.value;
-        final parentData = child.parentData as LdOverflowViewParentData;
+        final parentData = entry.value.parentData as LdOverflowViewParentData;
         final flex = parentData.consumeRemainder!;
         final childMainSize = childrenSizes.elementAt(i);
         final flexRatio = flex / totalFlex;
         final additionalSpace = remainder * flexRatio;
+        flexChildFinalWidths[i] = childMainSize + additionalSpace;
+      }
+      remainder = 0;
+    }
 
+    for (var i = 0; i < renderedChildren.length; i++) {
+      final child = renderedChildren[i];
+      final finalFlexWidth = flexChildFinalWidths[i];
+      if (finalFlexWidth != null) {
+        // Flexible child: lay out once with its final dimensions.
         if (_isHorizontal) {
           child.layout(
             BoxValueConstraints<int>(
               value: overflowCount,
               constraints: BoxConstraints(
-                maxWidth: childMainSize + additionalSpace,
-                minWidth: childMainSize + additionalSpace,
+                maxWidth: finalFlexWidth,
+                minWidth: finalFlexWidth,
                 maxHeight: constraints.maxHeight,
               ),
             ),
@@ -448,15 +448,26 @@ class LdRenderOverflowView extends RenderBox
               value: overflowCount,
               constraints: BoxConstraints(
                 maxWidth: constraints.maxWidth,
-                minHeight: childMainSize + additionalSpace,
-                maxHeight: childMainSize + additionalSpace,
+                minHeight: finalFlexWidth,
+                maxHeight: finalFlexWidth,
               ),
             ),
             parentUsesSize: true,
           );
         }
+      } else {
+        // Non-flexible child: lay out with its intrinsic (minimum) size.
+        child.layout(
+          BoxValueConstraints<int>(
+            value: overflowCount,
+            constraints: BoxConstraints.loose(Size(
+              _isHorizontal ? childrenSizes.elementAt(i) : constraints.maxWidth,
+              _isHorizontal ? constraints.maxHeight : childrenSizes.elementAt(i),
+            )),
+          ),
+          parentUsesSize: true,
+        );
       }
-      remainder = 0;
     }
 
     // We fill the extent based on the offset
