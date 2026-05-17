@@ -39,8 +39,8 @@ class _LdOrbState extends State<LdOrb> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    _animationController?.dispose();
     super.dispose();
+    _animationController?.dispose();
   }
 
   @override
