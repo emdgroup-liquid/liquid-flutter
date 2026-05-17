@@ -9,27 +9,21 @@ void main() {
   group('LdMonkeySelection Tests', () {
     group('Adaptive Selection', () {
       testWidgets('adaptive() returns selection for masterAppBar location', (WidgetTester tester) async {
-        final shellState = LdMonkeyShellState<TestItem, int>(basePath: '/test');
-        shellState.setSelectedItems({1, 2});
-        shellState.setViewingItems({3, 4});
-
         await tester.pumpWidget(
-          ListenableProvider.value(
-            value: shellState,
+          Provider.value(
+            value: LdMonkeyActionLocation.masterAppBar,
             child: Provider.value(
-              value: LdMonkeyActionLocation.masterAppBar,
-              child: Provider.value(
-                value: LdMonkeySelection<TestItem, int>(
-                  selection: {1, 2},
-                  viewing: {3, 4},
-                ),
-                child: Builder(
-                  builder: (context) {
-                    final adaptive = LdMonkeySelection.adaptive<TestItem, int>(context);
-                    expect(adaptive, equals({1, 2}));
-                    return Container();
-                  },
-                ),
+              value: LdMonkeySelection<TestItem, int>(
+                selection: {1, 2},
+                viewing: {3, 4},
+                showSelectionControls: false,
+              ),
+              child: Builder(
+                builder: (context) {
+                  final adaptive = LdMonkeySelection.adaptive<TestItem, int>(context);
+                  expect(adaptive, equals({1, 2}));
+                  return Container();
+                },
               ),
             ),
           ),
@@ -37,27 +31,21 @@ void main() {
       });
 
       testWidgets('adaptive() returns viewing for detailAppBar location', (WidgetTester tester) async {
-        final shellState = LdMonkeyShellState<TestItem, int>(basePath: '/test');
-        shellState.setSelectedItems({1, 2});
-        shellState.setViewingItems({3, 4});
-
         await tester.pumpWidget(
-          ListenableProvider.value(
-            value: shellState,
+          Provider.value(
+            value: LdMonkeyActionLocation.detailAppBar,
             child: Provider.value(
-              value: LdMonkeyActionLocation.detailAppBar,
-              child: Provider.value(
-                value: LdMonkeySelection<TestItem, int>(
-                  selection: {1, 2},
-                  viewing: {3, 4},
-                ),
-                child: Builder(
-                  builder: (context) {
-                    final adaptive = LdMonkeySelection.adaptive<TestItem, int>(context);
-                    expect(adaptive, equals({3, 4}));
-                    return Container();
-                  },
-                ),
+              value: LdMonkeySelection<TestItem, int>(
+                selection: {1, 2},
+                viewing: {3, 4},
+                showSelectionControls: false,
+              ),
+              child: Builder(
+                builder: (context) {
+                  final adaptive = LdMonkeySelection.adaptive<TestItem, int>(context);
+                  expect(adaptive, equals({3, 4}));
+                  return Container();
+                },
               ),
             ),
           ),
@@ -65,27 +53,21 @@ void main() {
       });
 
       testWidgets('adaptive() returns viewing for detailSecondary location', (WidgetTester tester) async {
-        final shellState = LdMonkeyShellState<TestItem, int>(basePath: '/test');
-        shellState.setSelectedItems({1, 2});
-        shellState.setViewingItems({3, 4});
-
         await tester.pumpWidget(
-          ListenableProvider.value(
-            value: shellState,
+          Provider.value(
+            value: LdMonkeyActionLocation.detailSecondary,
             child: Provider.value(
-              value: LdMonkeyActionLocation.detailSecondary,
-              child: Provider.value(
-                value: LdMonkeySelection<TestItem, int>(
-                  selection: {1, 2},
-                  viewing: {3, 4},
-                ),
-                child: Builder(
-                  builder: (context) {
-                    final adaptive = LdMonkeySelection.adaptive<TestItem, int>(context);
-                    expect(adaptive, equals({3, 4}));
-                    return Container();
-                  },
-                ),
+              value: LdMonkeySelection<TestItem, int>(
+                selection: {1, 2},
+                viewing: {3, 4},
+                showSelectionControls: false,
+              ),
+              child: Builder(
+                builder: (context) {
+                  final adaptive = LdMonkeySelection.adaptive<TestItem, int>(context);
+                  expect(adaptive, equals({3, 4}));
+                  return Container();
+                },
               ),
             ),
           ),
@@ -93,27 +75,21 @@ void main() {
       });
 
       testWidgets('adaptive() returns selection for context location', (WidgetTester tester) async {
-        final shellState = LdMonkeyShellState<TestItem, int>(basePath: '/test');
-        shellState.setSelectedItems({1, 2});
-        shellState.setViewingItems({3, 4});
-
         await tester.pumpWidget(
-          ListenableProvider.value(
-            value: shellState,
+          Provider.value(
+            value: LdMonkeyActionLocation.context,
             child: Provider.value(
-              value: LdMonkeyActionLocation.context,
-              child: Provider.value(
-                value: LdMonkeySelection<TestItem, int>(
-                  selection: {1, 2},
-                  viewing: {3, 4},
-                ),
-                child: Builder(
-                  builder: (context) {
-                    final adaptive = LdMonkeySelection.adaptive<TestItem, int>(context);
-                    expect(adaptive, equals({1, 2}));
-                    return Container();
-                  },
-                ),
+              value: LdMonkeySelection<TestItem, int>(
+                selection: {1, 2},
+                viewing: {3, 4},
+                showSelectionControls: false,
+              ),
+              child: Builder(
+                builder: (context) {
+                  final adaptive = LdMonkeySelection.adaptive<TestItem, int>(context);
+                  expect(adaptive, equals({1, 2}));
+                  return Container();
+                },
               ),
             ),
           ),
@@ -121,27 +97,21 @@ void main() {
       });
 
       testWidgets('adaptive() returns selection for masterSecondary location', (WidgetTester tester) async {
-        final shellState = LdMonkeyShellState<TestItem, int>(basePath: '/test');
-        shellState.setSelectedItems({1, 2});
-        shellState.setViewingItems({3, 4});
-
         await tester.pumpWidget(
-          ListenableProvider.value(
-            value: shellState,
+          Provider.value(
+            value: LdMonkeyActionLocation.masterSecondary,
             child: Provider.value(
-              value: LdMonkeyActionLocation.masterSecondary,
-              child: Provider.value(
-                value: LdMonkeySelection<TestItem, int>(
-                  selection: {1, 2},
-                  viewing: {3, 4},
-                ),
-                child: Builder(
-                  builder: (context) {
-                    final adaptive = LdMonkeySelection.adaptive<TestItem, int>(context);
-                    expect(adaptive, equals({1, 2}));
-                    return Container();
-                  },
-                ),
+              value: LdMonkeySelection<TestItem, int>(
+                selection: {1, 2},
+                viewing: {3, 4},
+                showSelectionControls: false,
+              ),
+              child: Builder(
+                builder: (context) {
+                  final adaptive = LdMonkeySelection.adaptive<TestItem, int>(context);
+                  expect(adaptive, equals({1, 2}));
+                  return Container();
+                },
               ),
             ),
           ),
@@ -158,8 +128,6 @@ void main() {
           ],
         );
 
-        // Note: This test requires a proper BuildContext with Provider setup
-        // For now, we test the logic conceptually
         final selection = {1, 2};
         final items = await Future.wait(selection.map((id) => repository.getById(id)));
 
@@ -206,6 +174,7 @@ void main() {
         final selection = LdMonkeySelection<TestItem, int>(
           selection: {1, 2},
           viewing: {3, 4},
+          showSelectionControls: false,
         );
 
         await tester.pumpWidget(
@@ -227,6 +196,7 @@ void main() {
         final selection = LdMonkeySelection<TestItem, int>(
           selection: {1},
           viewing: {},
+          showSelectionControls: false,
         );
 
         await tester.pumpWidget(
@@ -249,10 +219,12 @@ void main() {
         final selection1 = LdMonkeySelection<TestItem, int>(
           selection: {1, 2},
           viewing: {3, 4},
+          showSelectionControls: false,
         );
         final selection2 = LdMonkeySelection<TestItem, int>(
           selection: {1, 2},
           viewing: {3, 4},
+          showSelectionControls: false,
         );
 
         expect(selection1, equals(selection2));
@@ -262,10 +234,12 @@ void main() {
         final selection1 = LdMonkeySelection<TestItem, int>(
           selection: {1, 2},
           viewing: {3, 4},
+          showSelectionControls: false,
         );
         final selection2 = LdMonkeySelection<TestItem, int>(
           selection: {1},
           viewing: {3, 4},
+          showSelectionControls: false,
         );
 
         expect(selection1, isNot(equals(selection2)));
@@ -275,10 +249,12 @@ void main() {
         final selection1 = LdMonkeySelection<TestItem, int>(
           selection: {1, 2},
           viewing: {3, 4},
+          showSelectionControls: false,
         );
         final selection2 = LdMonkeySelection<TestItem, int>(
           selection: {1, 2},
           viewing: {3},
+          showSelectionControls: false,
         );
 
         expect(selection1, isNot(equals(selection2)));

@@ -181,9 +181,10 @@ void main() {
           range: const RangeValues(0, 100),
         );
 
+        final shellState = _RangeShellState(filter);
+
         final repository = LdRepository<_RangeTestItem, int>(
-          filters: {filter},
-          fetchListWithParameters: ({required offset, required pageSize, pageToken, filters, sortOptions}) async {
+          fetchListWithParameters: (parameters) async {
             return LdListPage<_RangeTestItem>(newItems: [], hasMore: false, total: 0);
           },
           getById: (id) async => _RangeTestItem(id, 'Test', 10.0),
@@ -194,9 +195,23 @@ void main() {
             child: MaterialApp(
               localizationsDelegates: LiquidLocalizations.localizationsDelegates,
               home: Scaffold(
-                body: ListenableProvider.value(
+                body: ListenableProvider<LdRepository<_RangeTestItem, int>>.value(
                   value: repository,
-                  child: const LdFilterModal<_RangeTestItem, int>(),
+                  child: ListenableProvider<_RangeShellState>.value(
+                    value: shellState,
+                    child: Provider<LdMonkeyRouterController<_RangeTestItem, int>>.value(
+                      value: shellState.controllerDelegate,
+                      child: Builder(
+                        builder: (context) {
+                          context.watch<_RangeShellState>();
+                          return Provider<LdMonkeySortAndFilterState<_RangeTestItem, int>>.value(
+                            value: shellState.state,
+                            child: const LdFilterModal<_RangeTestItem, int>(),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -207,14 +222,13 @@ void main() {
 
         final priceFilterButton = find.widgetWithText(LdButton, 'Price');
 
-        expect(repository.filters['priceRange']!.isOn, isFalse);
-
+        expect(shellState.filtersMap['priceRange']!.isOn, isFalse);
         expect(priceFilterButton, findsOneWidget);
+
         await tester.tap(priceFilterButton);
         await tester.pumpAndSettle();
 
-        // Check if the filter is now active in the repository's filters
-        expect(repository.filters['priceRange']!.isOn, isTrue);
+        expect(shellState.filtersMap['priceRange']!.isOn, isTrue);
 
         // Find the RangeSlider and interact with it
         final rangeSlider = find.byType(RangeSlider);
@@ -223,40 +237,102 @@ void main() {
         final sliderWidget = tester.widget<RangeSlider>(rangeSlider);
         final initialRange = sliderWidget.values;
 
-        // Drag the slider horizontally to change range values
-        // Drag from left side to right to increase start value
-
         await tester.slideToValue(rangeSlider, 25);
         await tester.pumpAndSettle();
 
-        // Verify the range has been updated
-        final updatedFilter = repository.filters['priceRange'] as LdFilterRange<_RangeTestItem, int>;
-
+        final updatedFilter = shellState.filtersMap['priceRange'] as LdFilterRange<_RangeTestItem, int>;
         expect(updatedFilter.range.start, greaterThan(initialRange.start));
 
         await tester.slideToValue(rangeSlider, 75, fromRight: true);
-
         await tester.pumpAndSettle();
 
-        // Verify the end range has been updated
-        final updatedFilter2 = repository.filters['priceRange'] as LdFilterRange<_RangeTestItem, int>;
+        final updatedFilter2 = shellState.filtersMap['priceRange'] as LdFilterRange<_RangeTestItem, int>;
         expect(updatedFilter2.range.end, lessThan(initialRange.end));
 
-        // Find and tap the X button to deactivate
         final xIconButton = find.widgetWithIcon(LdButton, LucideIcons.x);
         expect(xIconButton, findsOneWidget);
         await tester.tap(xIconButton);
         await tester.pumpAndSettle();
 
-        // Check if the filter is now inactive in the repository's filters
-        expect(repository.filters['priceRange']!.isOn, isFalse);
+        expect(shellState.filtersMap['priceRange']!.isOn, isFalse);
       });
     });
   });
 }
 
+/// Non-Listenable delegate used to provide [_RangeShellState] as
+/// [LdMonkeyRouterController] without triggering Provider's debug assertion.
+class _RangeControllerDelegate implements LdMonkeyRouterController<_RangeTestItem, int> {
+  final _RangeShellState _delegate;
+  _RangeControllerDelegate(this._delegate);
+
+  @override
+  void updateFilter(BuildContext context, LdFilterOption<_RangeTestItem, int> filter) =>
+      _delegate.updateFilter(context, filter);
+
+  @override
+  void updateSortOptions(BuildContext context, List<LdSortOption<_RangeTestItem, int>> sortOptions) =>
+      _delegate.updateSortOptions(context, sortOptions);
+
+  @override
+  void updateSelection(BuildContext context, Set<int> selection) =>
+      _delegate.updateSelection(context, selection);
+
+  @override
+  void updateViewing(BuildContext context, Set<int> viewingItems) =>
+      _delegate.updateViewing(context, viewingItems);
+
+  @override
+  void updateShowSelectionControls(BuildContext context, bool showSelectionControls) =>
+      _delegate.updateShowSelectionControls(context, showSelectionControls);
+}
+
+/// A dedicated [TestSortAndFilterState] subclass for _RangeTestItem so the
+/// type inference is correct in the widget test above.
+class _RangeShellState extends ChangeNotifier
+    implements LdMonkeyRouterController<_RangeTestItem, int> {
+  Set<LdFilterOption<_RangeTestItem, int>> _filters;
+
+  _RangeShellState(LdFilterOption<_RangeTestItem, int> initial) : _filters = {initial};
+
+  /// Non-Listenable delegate for use with Provider<LdMonkeyRouterController>.value.
+  LdMonkeyRouterController<_RangeTestItem, int> get controllerDelegate =>
+      _RangeControllerDelegate(this);
+
+  LdMonkeySortAndFilterState<_RangeTestItem, int> get state =>
+      LdMonkeySortAndFilterState<_RangeTestItem, int>(
+        filters: _filters,
+        sortOptions: const [],
+      );
+
+  Map<String, LdFilterOption<_RangeTestItem, int>> get filtersMap =>
+      {for (final f in _filters) f.name: f};
+
+  @override
+  void updateFilter(BuildContext context, LdFilterOption<_RangeTestItem, int> filter) {
+    _filters = {
+      for (final f in _filters)
+        if (f.name == filter.name) filter else f,
+    };
+    notifyListeners();
+  }
+
+  @override
+  void updateSortOptions(BuildContext context, List<LdSortOption<_RangeTestItem, int>> sortOptions) {}
+
+  @override
+  void updateSelection(BuildContext context, Set<int> selection) {}
+
+  @override
+  void updateViewing(BuildContext context, Set<int> viewingItems) {}
+
+  @override
+  void updateShowSelectionControls(BuildContext context, bool showSelectionControls) {}
+}
+
 extension SlideTo on WidgetTester {
-  Future<void> slideToValue(Finder slider, double value, {double paddingOffset = 24.0, bool fromRight = false}) async {
+  Future<void> slideToValue(Finder slider, double value,
+      {double paddingOffset = 24.0, bool fromRight = false}) async {
     final topRight = getTopRight(slider);
     final topLeft = getTopLeft(slider);
     final centerY = getSize(slider).height / 2 + topRight.dy;

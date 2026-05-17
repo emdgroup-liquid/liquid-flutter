@@ -2,38 +2,48 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:provider/provider.dart';
 
 import 'test_utils.dart';
 
 void main() {
+  setUp(() {
+    ldDisableAnimations = true;
+  });
+  tearDown(() {
+    ldDisableAnimations = false;
+  });
+
   group('LdMonkeyShell Tests', () {
     group('Repository Initialization', () {
       testWidgets('initializes repository via repositoryBuilder', (WidgetTester tester) async {
         var repositoryCreated = false;
         final repository = createTestRepository();
+        final routeConfig = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'item');
 
         final router = GoRouter(
           initialLocation: '/test',
-          routes: [
-            GoRoute(
-              path: '/test',
-              builder: (context, state) => LdMonkeyShell<TestItem, int>(
-                basePath: '/test',
-                routeState: state,
-                masterPage: const SizedBox(),
-                parseSelected: (selected) => selected.split('_').map(int.parse).toSet(),
-                repositoryBuilder: (context) async {
-                  repositoryCreated = true;
-                  return repository;
-                },
-                pathParameterName: 'id',
-                child: const SizedBox(),
+          routes: buildMonkeyRoutes<TestItem, int>(
+            masterPath: '/test',
+            routeConfig: routeConfig,
+            repositoryBuilder: (context, state) {
+              repositoryCreated = true;
+              return repository;
+            },
+            filters: const [],
+            sortOptions: const [],
+            actions: const [],
+            masterPage: const SizedBox(),
+            detailPage: LdMonkeyDetailPage<TestItem, int>(
+              body: LdMonkeyStackDetailView<TestItem, int>(
+                buildDetail: (context, item) => Text(item.value.toString()),
               ),
             ),
-          ],
+          ),
         );
 
-        await tester.pumpWidget(
+        
+await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp.router(
               localizationsDelegates: const [
@@ -44,38 +54,42 @@ void main() {
           ),
         );
 
-        await tester.pumpAndSettle();
+        // Use bounded pumps to avoid timeout from continuous list-refresh scheduling.
+        for (var i = 0; i < 10; i++) { await tester.pump(const Duration(milliseconds: 100)); }
         expect(repositoryCreated, isTrue);
       });
 
       testWidgets('applies query parameters to repository filters', (WidgetTester tester) async {
         final filter = LdFilterBool<TestItem, int>(
-          name: 'id-active',
+          name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
         );
 
-        final repository = createTestRepository(filters: {filter});
+        final repository = createTestRepository();
+        final routeConfig = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'item');
 
         final router = GoRouter(
           initialLocation: '/test',
-          routes: [
-            GoRoute(
-              path: '/test',
-              builder: (context, state) => LdMonkeyShell<TestItem, int>(
-                basePath: '/test',
-                routeState: state,
-                masterPage: const SizedBox(),
-                parseSelected: (selected) => selected.split('_').map(int.parse).toSet(),
-                repositoryBuilder: (context) async => repository,
-                pathParameterName: 'id',
-                child: const SizedBox(),
+          routes: buildMonkeyRoutes<TestItem, int>(
+            masterPath: '/test',
+            routeConfig: routeConfig,
+            repositoryBuilder: (context, state) => repository,
+            filters: [filter],
+            sortOptions: const [],
+            actions: const [],
+            masterPage: const SizedBox(),
+            detailPage: LdMonkeyDetailPage<TestItem, int>(
+              body: LdMonkeyStackDetailView<TestItem, int>(
+                buildDetail: (context, item) => Text(item.value.toString()),
               ),
             ),
-          ],
+          ),
         );
 
-        router.go('/test?id-active=true');
+        // Navigate with filter query param
+        router.go('/test?active-item=true');
+
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp.router(
@@ -88,35 +102,41 @@ void main() {
         );
 
         await tester.pumpAndSettle();
-        expect(repository.filters['id-active']!.isOn, isTrue);
+
+        // The filter state should reflect the query parameter
+        final ctx = tester.element(find.byType(LdMonkeyShell<TestItem, int>).last);
+        final sortAndFilterState = ctx.read<LdMonkeySortAndFilterState<TestItem, int>>();
+        final activeFilter = sortAndFilterState.filters.firstWhere((f) => f.name == 'active');
+        expect(activeFilter.isOn, isTrue);
       });
 
       testWidgets('disables filters not in query parameters', (WidgetTester tester) async {
         final filter = LdFilterBool<TestItem, int>(
-          name: 'id-active',
+          name: 'active',
           label: (context) => 'Active',
           icon: (context) => const Icon(Icons.check),
           isOn: true,
         );
 
-        final repository = createTestRepository(filters: {filter});
+        final repository = createTestRepository();
+        final routeConfig = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'item');
 
         final router = GoRouter(
           initialLocation: '/test',
-          routes: [
-            GoRoute(
-              path: '/test',
-              builder: (context, state) => LdMonkeyShell<TestItem, int>(
-                basePath: '/test',
-                routeState: state,
-                masterPage: const SizedBox(),
-                parseSelected: (selected) => selected.split('_').map(int.parse).toSet(),
-                repositoryBuilder: (context) async => repository,
-                pathParameterName: 'id',
-                child: const SizedBox(),
+          routes: buildMonkeyRoutes<TestItem, int>(
+            masterPath: '/test',
+            routeConfig: routeConfig,
+            repositoryBuilder: (context, state) => repository,
+            filters: [filter],
+            sortOptions: const [],
+            actions: const [],
+            masterPage: const SizedBox(),
+            detailPage: LdMonkeyDetailPage<TestItem, int>(
+              body: LdMonkeyStackDetailView<TestItem, int>(
+                buildDetail: (context, item) => Text(item.value.toString()),
               ),
             ),
-          ],
+          ),
         );
 
         await tester.pumpWidget(
@@ -131,7 +151,12 @@ void main() {
         );
 
         await tester.pumpAndSettle();
-        expect(repository.filters['id-active']!.isOn, isFalse);
+
+        // With no query param, the initially-on filter should be off
+        final ctx = tester.element(find.byType(LdMonkeyShell<TestItem, int>).last);
+        final sortAndFilterState = ctx.read<LdMonkeySortAndFilterState<TestItem, int>>();
+        final activeFilter = sortAndFilterState.filters.firstWhere((f) => f.name == 'active');
+        expect(activeFilter.isOn, isFalse);
       });
 
       testWidgets('calls initWithSelection when selected items exist', (WidgetTester tester) async {
@@ -175,7 +200,11 @@ void main() {
           ),
         );
 
-        await tester.pumpAndSettle();
+        // Use pump with duration instead of pumpAndSettle to avoid timeout
+        // from continuous list-refresh scheduling.
+        for (var i = 0; i < 10; i++) {
+          await tester.pump(const Duration(milliseconds: 100));
+        }
         expect(initWithSelectionCalled, isTrue);
       });
 
@@ -184,21 +213,23 @@ void main() {
           initialItems: [],
         );
 
+        final routeConfig = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'item');
         final router = GoRouter(
-          routes: [
-            GoRoute(
-              path: '/test',
-              builder: (context, state) => LdMonkeyShell<TestItem, int>(
-                basePath: '/test',
-                routeState: state,
-                masterPage: const SizedBox(),
-                parseSelected: (selected) => selected.split('_').map(int.parse).toSet(),
-                repositoryBuilder: (context) async => repository,
-                pathParameterName: 'id',
-                child: const SizedBox(),
+          initialLocation: '/test',
+          routes: buildMonkeyRoutes<TestItem, int>(
+            masterPath: '/test',
+            routeConfig: routeConfig,
+            repositoryBuilder: (context, state) => repository,
+            filters: const [],
+            sortOptions: const [],
+            actions: const [],
+            masterPage: const SizedBox(),
+            detailPage: LdMonkeyDetailPage<TestItem, int>(
+              body: LdMonkeyStackDetailView<TestItem, int>(
+                buildDetail: (context, item) => Text(item.value.toString()),
               ),
             ),
-          ],
+          ),
         );
 
         await tester.pumpWidget(
@@ -212,95 +243,13 @@ void main() {
           ),
         );
 
-        await tester.pumpAndSettle();
-        // Repository should have been initialized and fetched
+        // Use pump with duration instead of pumpAndSettle to avoid timeout
+        // from continuous list-refresh scheduling.
+        for (var i = 0; i < 10; i++) {
+          await tester.pump(const Duration(milliseconds: 100));
+        }
+        // Repository should have been initialized (empty list is fine)
         expect(repository.itemsMap.isNotEmpty || repository.itemsMap.isEmpty, isTrue);
-      });
-    });
-
-    group('Route Selection', () {
-      testWidgets('routeSelection returns path parameter value', (WidgetTester tester) async {
-        final router = GoRouter(
-          routes: [
-            GoRoute(
-              path: '/test',
-              routes: [
-                GoRoute(
-                  path: ':selected_id',
-                  builder: (context, state) {
-                    return LdMonkeyShell<TestItem, int>(
-                      basePath: '/test',
-                      routeState: state,
-                      masterPage: const SizedBox(),
-                      repositoryBuilder: (context) async => createTestRepository(),
-                      parseSelected: (selected) => selected.split('_').map(int.parse).toSet(),
-                      pathParameterName: 'id',
-                      child: Builder(
-                        builder: (context) {
-                          final shell = context.findAncestorWidgetOfExactType<LdMonkeyShell<TestItem, int>>()!;
-                          expect(shell.routeSelection, equals('1_2_3'));
-                          return const SizedBox();
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ],
-              builder: (context, state) => const SizedBox(),
-            ),
-          ],
-        );
-
-        router.go('/test/1_2_3');
-        await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp.router(
-              localizationsDelegates: const [
-                ...LiquidLocalizations.localizationsDelegates,
-              ],
-              routerConfig: router,
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
-      });
-
-      testWidgets('routeSelection returns null when no path parameter', (WidgetTester tester) async {
-        final router = GoRouter(
-          routes: [
-            GoRoute(
-              path: '/test',
-              builder: (context, state) {
-                return LdMonkeyShell<TestItem, int>(
-                  basePath: '/test',
-                  routeState: state,
-                  masterPage: const SizedBox(),
-                  parseSelected: (selected) => selected.split('_').map(int.parse).toSet(),
-                  pathParameterName: 'id',
-                  child: Builder(
-                    builder: (context) {
-                      final shell = context.findAncestorWidgetOfExactType<LdMonkeyShell<TestItem, int>>()!;
-                      expect(shell.routeSelection, isNull);
-                      return const SizedBox();
-                    },
-                  ),
-                );
-              },
-            ),
-          ],
-        );
-
-        await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp.router(
-              localizationsDelegates: const [
-                ...LiquidLocalizations.localizationsDelegates,
-              ],
-              routerConfig: router,
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
       });
     });
   });

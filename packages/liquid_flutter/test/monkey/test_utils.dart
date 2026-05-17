@@ -110,11 +110,120 @@ class MockBuildContext extends BuildContext {
   Widget get widget => throw UnimplementedError();
 }
 
-/// Creates a test repository with default implementations
+/// A thin non-Listenable wrapper around [TestSortAndFilterState] that
+/// satisfies [LdMonkeyRouterController].
+///
+/// Using [TestSortAndFilterState] directly as `Provider<LdMonkeyRouterController>.value`
+/// triggers a Provider debug assertion (because it IS a Listenable). This
+/// delegate class is NOT a Listenable so it can be provided safely.
+class _TestRouterControllerDelegate<T extends Identifiable<IdType>, IdType>
+    implements LdMonkeyRouterController<T, IdType> {
+  final TestSortAndFilterState<T, IdType> _delegate;
+  _TestRouterControllerDelegate(this._delegate);
+
+  @override
+  void updateFilter(BuildContext context, LdFilterOption<T, IdType> filter) =>
+      _delegate.updateFilter(context, filter);
+
+  @override
+  void updateSortOptions(BuildContext context, List<LdSortOption<T, IdType>> sortOptions) =>
+      _delegate.updateSortOptions(context, sortOptions);
+
+  @override
+  void updateSelection(BuildContext context, Set<IdType> selection) =>
+      _delegate.updateSelection(context, selection);
+
+  @override
+  void updateViewing(BuildContext context, Set<IdType> viewingItems) =>
+      _delegate.updateViewing(context, viewingItems);
+
+  @override
+  void updateShowSelectionControls(BuildContext context, bool showSelectionControls) =>
+      _delegate.updateShowSelectionControls(context, showSelectionControls);
+}
+
+/// A ChangeNotifier that holds mutable sort-and-filter state for tests.
+/// Wraps [LdMonkeySortAndFilterState] and exposes mutation helpers so tests
+/// can simulate filter/sort updates without a real GoRouter.
+class TestSortAndFilterState<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
+    implements LdMonkeyRouterController<T, IdType> {
+  Set<LdFilterOption<T, IdType>> _filters;
+  List<LdSortOption<T, IdType>> _sortOptions;
+
+  Set<IdType> _selection = {};
+  Set<IdType> _viewing = {};
+  bool _showSelectionControls = false;
+
+  Set<IdType> get currentSelection => _selection;
+  Set<IdType> get currentViewing => _viewing;
+  bool get currentShowSelectionControls => _showSelectionControls;
+
+  TestSortAndFilterState({
+    Set<LdFilterOption<T, IdType>>? filters,
+    List<LdSortOption<T, IdType>>? sortOptions,
+  })  : _filters = filters ?? {},
+        _sortOptions = sortOptions ?? [];
+
+  /// Returns a non-Listenable delegate suitable for
+  /// `Provider<LdMonkeyRouterController>.value(value: ...)`.
+  LdMonkeyRouterController<T, IdType> get controllerDelegate =>
+      _TestRouterControllerDelegate<T, IdType>(this);
+
+  LdMonkeySortAndFilterState<T, IdType> get state => LdMonkeySortAndFilterState<T, IdType>(
+        filters: _filters,
+        sortOptions: _sortOptions,
+      );
+
+  LdMonkeySelection<T, IdType> get selection => LdMonkeySelection<T, IdType>(
+        selection: _selection,
+        viewing: _viewing,
+        showSelectionControls: _showSelectionControls,
+      );
+
+  /// Direct access to current filter map by name (for test assertions).
+  Map<String, LdFilterOption<T, IdType>> get filtersMap =>
+      {for (final f in _filters) f.name: f};
+
+  @override
+  void updateFilter(BuildContext context, LdFilterOption<T, IdType> filter) {
+    _filters = {
+      for (final f in _filters)
+        if (f.name == filter.name) filter else f,
+    };
+    notifyListeners();
+  }
+
+  @override
+  void updateSortOptions(BuildContext context, List<LdSortOption<T, IdType>> sortOptions) {
+    _sortOptions = sortOptions;
+    notifyListeners();
+  }
+
+  @override
+  void updateSelection(BuildContext context, Set<IdType> selection) {
+    _selection = selection;
+    notifyListeners();
+  }
+
+  @override
+  void updateViewing(BuildContext context, Set<IdType> viewingItems) {
+    _viewing = viewingItems;
+    notifyListeners();
+  }
+
+  @override
+  void updateShowSelectionControls(BuildContext context, bool showSelectionControls) {
+    _showSelectionControls = showSelectionControls;
+    notifyListeners();
+  }
+}
+
+/// Creates a test repository with default implementations.
+/// NOTE: filters and sort options are NOT stored in the repository; they live
+/// in [LdMonkeySortAndFilterState]. Use [TestSortAndFilterState] + a
+/// [Provider] in widget tests that need filter state.
 LdRepository<TestItem, int> createTestRepository({
   List<TestItem>? initialItems,
-  Set<LdFilterOption<TestItem, int>>? filters,
-  List<LdSortOption<TestItem, int>>? sortOptions,
   Future<int?> Function(int id,
           {Set<LdFilterOption<TestItem, int>>? filters, List<LdSortOption<TestItem, int>>? sortOptions})?
       getOffsetById,
@@ -141,6 +250,8 @@ LdRepository<TestItem, int> createTestRepository({
         total: items.length,
       );
     },
+    // Pre-seed the paginator so watchListOfItems can find items immediately.
+    initialItems: initialItems != null ? [...items] : null,
     getById: (id) async => items.firstWhere((item) => item.id == id),
     getOffsetById: getOffsetById == null
         ? null

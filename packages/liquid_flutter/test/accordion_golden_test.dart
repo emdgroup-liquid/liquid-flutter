@@ -5,6 +5,7 @@ import 'package:liquid_flutter_test_utils/liquid_flutter_test_utils.dart';
 
 void main() {
   testGoldens("LdAccordion looks correct", (tester) async {
+    ldDisableAnimations = true;
     await multiGolden(tester, "LdAccordion", {
       "Collapsed": (tester, place) async {
         await place(LdAccordion(

@@ -108,28 +108,33 @@ void main() {
           isOn: true,
         );
 
-        final repository = createTestRepository(filters: {filter});
+        final shellState = TestSortAndFilterState<TestItem, int>(filters: {filter});
+        final repository = createTestRepository();
 
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
               home: Scaffold(
-                body: ListenableProvider.value(
+                body: ListenableProvider<LdRepository<TestItem, int>>.value(
                   value: repository,
-                  child: Row(
-                    children: [
-                      Expanded(child: Text(filter.searchText)),
-                      LdButton.vague(
-                        size: LdSize.s,
-                        onPressed: () {
-                          repository.updateFilter(
-                            filter.name,
-                            (f) => f!.copyWith(isOn: false),
-                          );
-                        },
-                        child: const Icon(Icons.close),
-                      ),
-                    ],
+                  child: Provider<LdMonkeyRouterController<TestItem, int>>.value(
+                    value: shellState.controllerDelegate,
+                    child: Row(
+                      children: [
+                        Expanded(child: Text(filter.searchText)),
+                        LdButton.vague(
+                          size: LdSize.s,
+                          onPressed: () {
+                            // Deactivate search filter via shellState
+                            shellState.updateFilter(
+                              MockBuildContext(),
+                              filter.copyWith(isOn: false),
+                            );
+                          },
+                          child: const Icon(Icons.close),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

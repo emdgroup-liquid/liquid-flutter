@@ -5,7 +5,57 @@ import 'package:provider/provider.dart';
 
 import 'test_utils.dart';
 
+/// Wraps a widget with all providers required by [LdMonkeyDetailPage] and
+/// [LdMonkeyAppBar]: repository, selection, layout mode, sort/filter state,
+/// and actions list.
+Widget _wrapDetail<T extends Identifiable<IdType>, IdType>({
+  required Widget child,
+  required LdRepository<T, IdType> repository,
+  required LdMonkeySelection<T, IdType> selection,
+  LdMonkeyEffectiveLayoutMode layoutMode = LdMonkeyEffectiveLayoutMode.detail,
+  List<LdMonkeyAction<T, IdType>> actions = const [],
+  Set<LdFilterOption<T, IdType>> filters = const {},
+}) {
+  return LdThemeProvider(
+    child: MaterialApp(
+      localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+      home: ListenableProvider<LdRepository<T, IdType>>.value(
+        value: repository,
+        child: Provider<LdMonkeySelection<T, IdType>>.value(
+          value: selection,
+          child: Provider<LdMonkeyEffectiveLayoutMode>.value(
+            value: layoutMode,
+            child: Provider<LdMonkeySortAndFilterState<T, IdType>>.value(
+              value: LdMonkeySortAndFilterState<T, IdType>(
+                filters: filters,
+                sortOptions: [],
+              ),
+              child: Provider<List<LdMonkeyAction<T, IdType>>>.value(
+                value: actions,
+                child: child,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+/// Pump enough frames to flush async* stream delivery and setState rebuilds.
+Future<void> _pumpStream(WidgetTester tester) async {
+  // pump() flushes microtasks + renders 1 frame; repeat to catch setState chain.
+  // async* generators deliver their first element after an await point, so we
+  // need at least one pump() to allow the Dart event loop to run.
+  await tester.pump();
+  await tester.pump();
+  await tester.pump();
+}
+
 void main() {
+  setUp(() => ldDisableAnimations = true);
+  tearDown(() => ldDisableAnimations = false);
+
   group('LdMonkeyDetailPage Tests', () {
     group('Scrollable View', () {
       testWidgets('scrollable() factory creates scrollable detail view', (WidgetTester tester) async {
@@ -15,32 +65,25 @@ void main() {
             createTestItem(2),
           ],
         );
-        final shellState = LdMonkeyShellState<TestItem, int>(basePath: '/test');
-        shellState.setViewingItems({1, 2});
+        final selection = LdMonkeySelection<TestItem, int>(
+          selection: {},
+          viewing: {1, 2},
+          showSelectionControls: false,
+        );
 
         final detailPage = LdMonkeyDetailPage<TestItem, int>.scrollable(
           buildDetail: (context, item) => Text('Detail: ${item.value?.name ?? ''}'),
         );
 
         await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: ListenableProvider.value(
-                value: repository,
-                child: Provider.value(
-                  value: LdMonkeyEffectiveLayoutMode.detail,
-                  child: ListenableProvider.value(
-                    value: shellState,
-                    child: Provider.value(value: const <LdMonkeyAction<TestItem, int>>[], child: detailPage),
-                  ),
-                ),
-              ),
-            ),
+          _wrapDetail(
+            repository: repository,
+            selection: selection,
+            child: detailPage,
           ),
         );
 
-        await tester.pumpAndSettle();
+        await _pumpStream(tester);
         expect(find.text('Detail: Item 1'), findsOneWidget);
         expect(find.text('Detail: Item 2'), findsOneWidget);
       });
@@ -52,32 +95,25 @@ void main() {
             createTestItem(2, name: 'Item 2'),
           ],
         );
-        final shellState = LdMonkeyShellState<TestItem, int>(basePath: '/test');
-        shellState.setViewingItems({1, 2});
+        final selection = LdMonkeySelection<TestItem, int>(
+          selection: {},
+          viewing: {1, 2},
+          showSelectionControls: false,
+        );
 
         final detailPage = LdMonkeyDetailPage<TestItem, int>.scrollable(
           buildDetail: (context, item) => Text('Detail: ${item.value?.name ?? ''}'),
         );
 
         await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: ListenableProvider.value(
-                value: repository,
-                child: Provider.value(
-                  value: LdMonkeyEffectiveLayoutMode.detail,
-                  child: ListenableProvider.value(
-                    value: shellState,
-                    child: Provider.value(value: const <LdMonkeyAction<TestItem, int>>[], child: detailPage),
-                  ),
-                ),
-              ),
-            ),
+          _wrapDetail(
+            repository: repository,
+            selection: selection,
+            child: detailPage,
           ),
         );
 
-        await tester.pumpAndSettle();
+        await _pumpStream(tester);
         expect(find.text('Detail: Item 1'), findsOneWidget);
         expect(find.text('Detail: Item 2'), findsOneWidget);
       });
@@ -91,35 +127,25 @@ void main() {
             createTestItem(2),
           ],
         );
-        final shellState = LdMonkeyShellState<TestItem, int>(basePath: '/test');
-        shellState.setViewingItems({1, 2});
+        final selection = LdMonkeySelection<TestItem, int>(
+          selection: {},
+          viewing: {1, 2},
+          showSelectionControls: false,
+        );
 
         final detailPage = LdMonkeyDetailPage<TestItem, int>.stacked(
           buildDetail: (context, item) => Text('Detail: ${item.value?.name ?? ''}'),
         );
 
         await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: ListenableProvider.value(
-                value: repository,
-                child: Provider.value(
-                  value: LdMonkeyEffectiveLayoutMode.detail,
-                  child: ListenableProvider.value(
-                    value: shellState,
-                    child: Provider.value(
-                      value: const <LdMonkeyAction<TestItem, int>>[],
-                      child: detailPage,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+          _wrapDetail(
+            repository: repository,
+            selection: selection,
+            child: detailPage,
           ),
         );
 
-        await tester.pumpAndSettle();
+        await _pumpStream(tester);
         expect(find.text('Detail: Item 1'), findsOneWidget);
         expect(find.text('Detail: Item 2'), findsOneWidget);
       });
@@ -133,35 +159,42 @@ void main() {
             createTestItem(2, name: 'Item 2'),
           ],
         );
-        final shellState = LdMonkeyShellState<TestItem, int>(basePath: '/test');
-        shellState.setViewingItems({1});
 
-        await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: ListenableProvider.value(
-                value: repository,
-                child: ListenableProvider.value(
-                  value: shellState,
-                  child: LdMonkeyStreamSelection<TestItem, int>(
-                    builder: (context, items) => Column(
-                      children: items.map((item) => Text(item.value?.name ?? '')).toList(),
+        var currentSelection = LdMonkeySelection<TestItem, int>(
+          selection: {},
+          viewing: {1},
+          showSelectionControls: false,
+        );
+
+        Widget buildTree() => LdThemeProvider(
+              child: MaterialApp(
+                localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+                home: ListenableProvider<LdRepository<TestItem, int>>.value(
+                  value: repository,
+                  child: Provider<LdMonkeySelection<TestItem, int>>.value(
+                    value: currentSelection,
+                    child: LdMonkeyStreamSelection<TestItem, int>(
+                      builder: (context, items) => Column(
+                        children: items.map((item) => Text(item.value?.name ?? '')).toList(),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ),
-        );
+            );
 
-        await tester.pumpAndSettle();
+        await tester.pumpWidget(buildTree());
+        await _pumpStream(tester);
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 2'), findsNothing);
 
-        // Update viewing items
-        shellState.setViewingItems({2});
-        await tester.pumpAndSettle();
+        currentSelection = LdMonkeySelection<TestItem, int>(
+          selection: {},
+          viewing: {2},
+          showSelectionControls: false,
+        );
+        await tester.pumpWidget(buildTree());
+        await _pumpStream(tester);
 
         expect(find.text('Item 1'), findsNothing);
         expect(find.text('Item 2'), findsOneWidget);
@@ -169,16 +202,20 @@ void main() {
 
       testWidgets('LdMonkeyStreamSelection handles empty viewing items', (WidgetTester tester) async {
         final repository = createTestRepository();
-        final shellState = LdMonkeyShellState<TestItem, int>(basePath: '/test');
+        final selection = LdMonkeySelection<TestItem, int>(
+          selection: {},
+          viewing: {},
+          showSelectionControls: false,
+        );
 
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
               localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: ListenableProvider.value(
+              home: ListenableProvider<LdRepository<TestItem, int>>.value(
                 value: repository,
-                child: ListenableProvider.value(
-                  value: shellState,
+                child: Provider<LdMonkeySelection<TestItem, int>>.value(
+                  value: selection,
                   child: LdMonkeyStreamSelection<TestItem, int>(
                     builder: (context, items) => Column(
                       children: items.map((item) => Text(item.value?.name ?? '')).toList(),
@@ -190,8 +227,7 @@ void main() {
           ),
         );
 
-        await tester.pumpAndSettle();
-        // Should render empty list
+        await _pumpStream(tester);
         expect(find.byType(Column), findsOneWidget);
       });
     });
@@ -199,7 +235,11 @@ void main() {
     group('App Bars', () {
       testWidgets('uses custom primaryAppBar when provided', (WidgetTester tester) async {
         final repository = createTestRepository();
-        final shellState = LdMonkeyShellState<TestItem, int>(basePath: '/test');
+        final selection = LdMonkeySelection<TestItem, int>(
+          selection: {},
+          viewing: {},
+          showSelectionControls: false,
+        );
 
         final detailPage = LdMonkeyDetailPage<TestItem, int>(
           primaryAppBar: const Text('Custom Primary App Bar'),
@@ -207,23 +247,10 @@ void main() {
         );
 
         await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: ListenableProvider.value(
-                value: repository,
-                child: ListenableProvider.value(
-                  value: shellState,
-                  child: Provider.value(
-                    value: LdMonkeyEffectiveLayoutMode.detail,
-                    child: Provider.value(
-                      value: const <LdMonkeyAction<TestItem, int>>[],
-                      child: detailPage,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+          _wrapDetail(
+            repository: repository,
+            selection: selection,
+            child: detailPage,
           ),
         );
 
@@ -233,30 +260,21 @@ void main() {
 
       testWidgets('uses default LdMonkeyAppBar when primaryAppBar not provided', (WidgetTester tester) async {
         final repository = createTestRepository();
-        final shellState = LdMonkeyShellState<TestItem, int>(basePath: '/test');
+        final selection = LdMonkeySelection<TestItem, int>(
+          selection: {},
+          viewing: {},
+          showSelectionControls: false,
+        );
 
         final detailPage = LdMonkeyDetailPage<TestItem, int>(
           body: Container(),
         );
 
         await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: ListenableProvider.value(
-                value: repository,
-                child: ListenableProvider.value(
-                  value: shellState,
-                  child: Provider.value(
-                    value: LdMonkeyEffectiveLayoutMode.detail,
-                    child: Provider.value(
-                      value: const <LdMonkeyAction<TestItem, int>>[],
-                      child: detailPage,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+          _wrapDetail(
+            repository: repository,
+            selection: selection,
+            child: detailPage,
           ),
         );
 
@@ -266,7 +284,11 @@ void main() {
 
       testWidgets('uses custom secondaryAppBar when provided', (WidgetTester tester) async {
         final repository = createTestRepository();
-        final shellState = LdMonkeyShellState<TestItem, int>(basePath: '/test');
+        final selection = LdMonkeySelection<TestItem, int>(
+          selection: {},
+          viewing: {},
+          showSelectionControls: false,
+        );
 
         final detailPage = LdMonkeyDetailPage<TestItem, int>(
           secondaryAppBar: const Text('Custom Secondary App Bar'),
@@ -274,23 +296,10 @@ void main() {
         );
 
         await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: ListenableProvider.value(
-                value: repository,
-                child: ListenableProvider.value(
-                  value: shellState,
-                  child: Provider.value(
-                    value: LdMonkeyEffectiveLayoutMode.detail,
-                    child: Provider.value(
-                      value: const <LdMonkeyAction<TestItem, int>>[],
-                      child: detailPage,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+          _wrapDetail(
+            repository: repository,
+            selection: selection,
+            child: detailPage,
           ),
         );
 
@@ -307,40 +316,35 @@ void main() {
             createTestItem(2, name: 'Item 2'),
           ],
         );
-        final shellState = LdMonkeyShellState<TestItem, int>(basePath: '/test');
-        shellState.setViewingItems({1});
+
+        var currentSelection = LdMonkeySelection<TestItem, int>(
+          selection: {},
+          viewing: {1},
+          showSelectionControls: false,
+        );
 
         final detailPage = LdMonkeyDetailPage<TestItem, int>.scrollable(
           buildDetail: (context, item) => Text('Detail: ${item.value?.name ?? ''}'),
         );
 
-        await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: ListenableProvider.value(
-                value: repository,
-                child: Provider.value(
-                  value: LdMonkeyEffectiveLayoutMode.detail,
-                  child: ListenableProvider.value(
-                    value: shellState,
-                    child: Provider.value(
-                      value: const <LdMonkeyAction<TestItem, int>>[],
-                      child: detailPage,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
+        Widget buildTree() => _wrapDetail(
+              repository: repository,
+              selection: currentSelection,
+              child: detailPage,
+            );
 
-        await tester.pumpAndSettle();
+        await tester.pumpWidget(buildTree());
+        await _pumpStream(tester);
         expect(find.text('Detail: Item 1'), findsOneWidget);
 
-        // Update viewing items
-        shellState.setViewingItems({2});
-        await tester.pumpAndSettle();
+        currentSelection = LdMonkeySelection<TestItem, int>(
+          selection: {},
+          viewing: {2},
+          showSelectionControls: false,
+        );
+
+        await tester.pumpWidget(buildTree());
+        await _pumpStream(tester);
 
         expect(find.text('Detail: Item 2'), findsOneWidget);
         expect(find.text('Detail: Item 1'), findsNothing);
