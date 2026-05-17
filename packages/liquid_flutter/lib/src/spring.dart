@@ -133,7 +133,7 @@ class _LdSpringState extends State<LdSpring> with SingleTickerProviderStateMixin
 
     if (oldWidget.position != widget.position) {
       if (ldDisableAnimations) {
-        Future.delayed(Duration.zero, () {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
           if (widget.onAnimationEnd != null && mounted) {
             widget.onAnimationEnd!(
               context,
@@ -179,14 +179,16 @@ class _LdSpringState extends State<LdSpring> with SingleTickerProviderStateMixin
 
   @override
   void initState() {
-    _ticker ??= createTicker((elapsed) {
-      update(elapsed.inMilliseconds);
+    if (!ldDisableAnimations) {
+      _ticker ??= createTicker((elapsed) {
+        update(elapsed.inMilliseconds);
 
-      setState(() {});
-    });
+        setState(() {});
+      });
 
-    if (_ticker?.isActive != true) {
-      _ticker?.start();
+      if (_ticker?.isActive != true) {
+        _ticker?.start();
+      }
     }
 
     super.initState();
@@ -266,14 +268,17 @@ class _LdChainedSpringsState extends State<LdChainedSprings> with SingleTickerPr
   @override
   void initState() {
     _createSprings();
-    _ticker ??= createTicker((elapsed) {
-      update(elapsed.inMilliseconds);
 
-      setState(() {});
-    });
+    if (!ldDisableAnimations) {
+      _ticker ??= createTicker((elapsed) {
+        update(elapsed.inMilliseconds);
 
-    if (_ticker?.isActive != true) {
-      _ticker?.start();
+        setState(() {});
+      });
+
+      if (_ticker?.isActive != true) {
+        _ticker?.start();
+      }
     }
 
     super.initState();
@@ -322,8 +327,14 @@ class _LdChainedSpringsState extends State<LdChainedSprings> with SingleTickerPr
     }
 
     if (oldWidget.targetPosition != widget.targetPosition) {
-      if (_ticker?.isActive != true) {
-        _ticker?.start();
+      if (!ldDisableAnimations) {
+        _ticker ??= createTicker((elapsed) {
+          update(elapsed.inMilliseconds);
+          setState(() {});
+        });
+        if (_ticker?.isActive != true) {
+          _ticker?.start();
+        }
       }
     }
 
