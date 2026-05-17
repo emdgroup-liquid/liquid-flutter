@@ -19,7 +19,7 @@ class LdDatePicker extends StatefulWidget {
   final LdButtonMode buttonMode;
   final bool disabled;
   final bool useRootNavigator;
-  final void Function(DateTime?) onChanged;
+  final void Function(DateTime) onChanged;
 
   const LdDatePicker({
     super.key,
