@@ -130,7 +130,7 @@ class _LdTimePickerModalState extends State<LdTimePickerModal> {
                 },
                 minutePrecision: widget.minutePrecision,
               ),
-            ),
+            ],
           ),
         ),
       ),
