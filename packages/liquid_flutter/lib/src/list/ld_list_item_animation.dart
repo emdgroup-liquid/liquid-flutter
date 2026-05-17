@@ -10,6 +10,22 @@ class LdListItemAnimation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (ldDisableAnimations) {
+      return switch (state) {
+        LdPaginatorItemState.deleting => LdReveal.quick(
+            revealed: false,
+            initialRevealed: true,
+            child: child,
+          ),
+        LdPaginatorItemState.rolledBackDeletion => LdReveal.quick(
+            revealed: true,
+            initialRevealed: false,
+            child: child,
+          ),
+        _ => child,
+      };
+    }
+
     return switch (state) {
       LdPaginatorItemState.fetching || LdPaginatorItemState.pendingRefresh => child
           .animate(

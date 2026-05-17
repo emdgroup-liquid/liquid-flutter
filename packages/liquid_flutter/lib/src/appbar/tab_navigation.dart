@@ -191,11 +191,15 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
         )
         .toDouble();
 
-    _scrollController.animateTo(
-      targetOffset,
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeOut,
-    );
+    if (ldDisableAnimations) {
+      _scrollController.jumpTo(targetOffset);
+    } else {
+      _scrollController.animateTo(
+        targetOffset,
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   int _fillOpacity(bool isScrolledUnder) {
