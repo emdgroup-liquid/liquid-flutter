@@ -195,12 +195,14 @@ class _PreventAutoFocusState extends State<PreventAutoFocus> {
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      if (!mounted) return;
-      setState(() {
-        _excluding = false;
+    if (_excluding) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        if (!mounted) return;
+        setState(() {
+          _excluding = false;
+        });
       });
-    });
+    }
     return ExcludeFocus(
       excluding: _excluding,
       child: widget.child,

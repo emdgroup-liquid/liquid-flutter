@@ -38,6 +38,9 @@ class LdSortOption<T extends Identifiable<IdType>, IdType> {
   }
 
   @override
+  int get hashCode => Object.hash(name, isOn, direction);
+
+  @override
   String toString() {
     return "LdSortOption(name: $name, isOn: $isOn, direction: $direction, serialize: $serialize())";
   }
