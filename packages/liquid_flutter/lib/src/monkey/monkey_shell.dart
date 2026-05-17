@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/monkey/intents.dart';
-import 'package:liquid_flutter/src/monkey/monkey_sort_and_filter_state.dart';
 
 import 'package:provider/provider.dart';
 

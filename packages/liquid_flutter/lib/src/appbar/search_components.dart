@@ -70,16 +70,11 @@ class _LdSearchInputState extends State<LdSearchInput> {
     final hasFocus = _inputWrapperFocusNode.hasFocus;
     final suggestionsHasFocus = _suggestionsFocusNode.hasFocus;
 
-    print('hasFocus: $hasFocus');
-    print('suggestionsHasFocus: $suggestionsHasFocus');
-
     await Future.delayed(const Duration(milliseconds: 50));
 
     if (hasFocus && widget.searchConfig.getSuggestions != null && !suggestionsHasFocus) {
-      print('showing overlay');
       _showSuggestionsOverlay();
     } else if (!hasFocus && !suggestionsHasFocus) {
-      print('closing overlay');
       _closeOverlay();
     }
 
@@ -301,7 +296,6 @@ class _LdSearchSuggestionsOverlayState extends State<LdSearchSuggestionsOverlay>
 
   @override
   Widget build(BuildContext context) {
-    final theme = LdTheme.of(context);
     final screenSize = MediaQuery.of(context).size;
     final inputRect = widget.inputRectNotifier.value;
 

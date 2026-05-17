@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/touchable/ghost_color.dart';
-import 'package:liquid_flutter/src/touchable/outline_color.dart';
 import 'package:liquid_flutter/src/touchable/solid_color.dart';
 import 'package:liquid_flutter/src/touchable/vague_color.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -256,16 +255,16 @@ class _LdButtonState extends State<_LdButtonWidget> {
   Widget build(BuildContext context) {
     var isLoading = widget.loading || (_loading && widget.autoLoading);
 
-    LdColor colors;
+    LdColor color;
 
     if (widget.color != null) {
-      colors = widget.color!;
+      color = widget.color!;
     } else {
-      colors = _theme.palette.primary;
+      color = _theme.palette.primary;
     }
 
     if (_failed) {
-      colors = _theme.error;
+      color = _theme.error;
     }
 
     return LdTouchableSurface(
@@ -276,7 +275,6 @@ class _LdButtonState extends State<_LdButtonWidget> {
       disabled: widget.disabled || isLoading,
       onPressed: _onTap,
       builder: (context, status, _) => Builder(builder: (context) {
-        final color = widget.color ?? _theme.palette.primary;
         final colors = switch (widget.mode) {
           (LdButtonMode.filled) => solidColor(color, _theme, status),
           (LdButtonMode.ghost) => ghostColor(color, _theme, status),

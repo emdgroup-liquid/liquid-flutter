@@ -31,7 +31,6 @@ class _LdRepositoryProviderState<T extends Identifiable<IdType>, IdType>
   @override
   initState() {
     super.initState();
-    print("Creating repository");
     _repository = widget.repositoryBuilder(context);
     WidgetsBinding.instance.addPostFrameCallback(_initRepository);
   }
@@ -39,14 +38,12 @@ class _LdRepositoryProviderState<T extends Identifiable<IdType>, IdType>
   @override
   void dispose() {
     super.dispose();
-    print("Disposing repository");
     _repository.dispose();
   }
 
   // Reads sort and filters from the context and initializes the repository
 
   void _initRepository(Duration _) {
-    print("Initializing repository");
     final selection = context.read<LdMonkeySelection<T, IdType>?>();
     if (selection != null && selection.viewing.isNotEmpty) {
       _repository.initWithSelection(context, selection.viewing);

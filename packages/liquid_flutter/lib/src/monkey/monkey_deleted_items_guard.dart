@@ -36,7 +36,6 @@ class _LdMonkeyDeletedItemsGuardState<T extends Identifiable<IdType>, IdType>
 
   @override
   void dispose() {
-    print("Disposing deleted items guard");
     _itemsSubscription?.cancel();
     super.dispose();
   }

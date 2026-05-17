@@ -1,11 +1,8 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/haptics.dart';
-import 'package:liquid_flutter/src/touchable/outline_color.dart';
 import 'package:liquid_flutter/src/touchable/solid_color.dart';
 
 part 'radio.variants.g.dart';

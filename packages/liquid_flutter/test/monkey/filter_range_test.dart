@@ -275,12 +275,10 @@ class _RangeControllerDelegate implements LdMonkeyRouterController<_RangeTestIte
       _delegate.updateSortOptions(context, sortOptions);
 
   @override
-  void updateSelection(BuildContext context, Set<int> selection) =>
-      _delegate.updateSelection(context, selection);
+  void updateSelection(BuildContext context, Set<int> selection) => _delegate.updateSelection(context, selection);
 
   @override
-  void updateViewing(BuildContext context, Set<int> viewingItems) =>
-      _delegate.updateViewing(context, viewingItems);
+  void updateViewing(BuildContext context, Set<int> viewingItems) => _delegate.updateViewing(context, viewingItems);
 
   @override
   void updateShowSelectionControls(BuildContext context, bool showSelectionControls) =>
@@ -289,24 +287,20 @@ class _RangeControllerDelegate implements LdMonkeyRouterController<_RangeTestIte
 
 /// A dedicated [TestSortAndFilterState] subclass for _RangeTestItem so the
 /// type inference is correct in the widget test above.
-class _RangeShellState extends ChangeNotifier
-    implements LdMonkeyRouterController<_RangeTestItem, int> {
+class _RangeShellState extends ChangeNotifier implements LdMonkeyRouterController<_RangeTestItem, int> {
   Set<LdFilterOption<_RangeTestItem, int>> _filters;
 
   _RangeShellState(LdFilterOption<_RangeTestItem, int> initial) : _filters = {initial};
 
-  /// Non-Listenable delegate for use with Provider<LdMonkeyRouterController>.value.
-  LdMonkeyRouterController<_RangeTestItem, int> get controllerDelegate =>
-      _RangeControllerDelegate(this);
+  /// Non-Listenable delegate for use with Provider\<LdMonkeyRouterController\>.value.
+  LdMonkeyRouterController<_RangeTestItem, int> get controllerDelegate => _RangeControllerDelegate(this);
 
-  LdMonkeySortAndFilterState<_RangeTestItem, int> get state =>
-      LdMonkeySortAndFilterState<_RangeTestItem, int>(
+  LdMonkeySortAndFilterState<_RangeTestItem, int> get state => LdMonkeySortAndFilterState<_RangeTestItem, int>(
         filters: _filters,
         sortOptions: const [],
       );
 
-  Map<String, LdFilterOption<_RangeTestItem, int>> get filtersMap =>
-      {for (final f in _filters) f.name: f};
+  Map<String, LdFilterOption<_RangeTestItem, int>> get filtersMap => {for (final f in _filters) f.name: f};
 
   @override
   void updateFilter(BuildContext context, LdFilterOption<_RangeTestItem, int> filter) {
@@ -331,8 +325,7 @@ class _RangeShellState extends ChangeNotifier
 }
 
 extension SlideTo on WidgetTester {
-  Future<void> slideToValue(Finder slider, double value,
-      {double paddingOffset = 24.0, bool fromRight = false}) async {
+  Future<void> slideToValue(Finder slider, double value, {double paddingOffset = 24.0, bool fromRight = false}) async {
     final topRight = getTopRight(slider);
     final topLeft = getTopLeft(slider);
     final centerY = getSize(slider).height / 2 + topRight.dy;

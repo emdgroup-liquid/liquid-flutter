@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/monkey/monkey_router_adapter.dart';
-import 'package:liquid_flutter/src/monkey/monkey_sort_and_filter_state.dart';
 import 'package:provider/provider.dart';
 
 class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
@@ -68,7 +66,8 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
         final effectivePositionMode = positionMode ??
             switch (location) {
               LdMonkeyActionLocation.masterAppBar || LdMonkeyActionLocation.detailAppBar => LdAppBarPositionMode.top,
-              LdMonkeyActionLocation.masterSecondary || LdMonkeyActionLocation.detailSecondary =>
+              LdMonkeyActionLocation.masterSecondary ||
+              LdMonkeyActionLocation.detailSecondary =>
                 LdAppBarPositionMode.bottom,
               _ => LdAppBarPositionMode.top,
             };

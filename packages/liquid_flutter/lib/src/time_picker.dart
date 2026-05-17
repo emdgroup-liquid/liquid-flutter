@@ -161,8 +161,8 @@ class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
   final _hourControllerText = TextEditingController();
   final _minuteControllerText = TextEditingController();
 
-  FocusNode _hourFocusNode = FocusScopeNode();
-  FocusNode _minuteFocusNode = FocusScopeNode();
+  final _hourFocusNode = FocusNode();
+  final _minuteFocusNode = FocusNode();
 
   late TimeOfDay? _time = widget.initialTime;
 

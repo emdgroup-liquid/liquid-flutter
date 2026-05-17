@@ -282,10 +282,14 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                   ],
                 ),
 
+                LdInput(hint: "Search", onChanged: _onQueryChanged, controller: _search),
+
                 for (var category in ComponentCategory.values) ...[
-                  LdSectionHeader(_categoryTitle(category)),
-                  for (var component in _componentsFiltered.where((e) => e.category == category))
-                    _renderComponent(context, component),
+                  if (_componentsFiltered.where((e) => e.category == category).isNotEmpty) ...[
+                    LdSectionHeader(_categoryTitle(category)),
+                    for (var component in _componentsFiltered.where((e) => e.category == category))
+                      _renderComponent(context, component),
+                  ],
                 ],
 
                 LdDrawerItemSection(

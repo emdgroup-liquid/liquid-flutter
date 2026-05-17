@@ -42,7 +42,6 @@ void main() async {
   LiquidFlutterWindowUtils.instance.windowReadyStream.listen((isReady) async {
     if (isReady) {
       // You can perform any initialization here that requires the window to be ready
-      print('window ready');
       await LiquidFlutterWindowUtils.instance.configureWindow();
     }
   });

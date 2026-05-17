@@ -30,58 +30,6 @@ class _TestItem with Identifiable<int> {
   String toString() => '_TestItem(id: $id, name: $name, value: $value, active: $active)';
 }
 
-// Mock filter option for testing
-class _MockFilterOption<T extends Identifiable<IdType>, IdType> extends LdFilterOption<T, IdType> {
-  final String _serializedValue;
-
-  _MockFilterOption({
-    required super.name,
-    required super.label,
-    required super.icon,
-    super.isOn = false,
-    String serializedValue = 'mock',
-  }) : _serializedValue = serializedValue;
-
-  @override
-  String serialize() => _serializedValue;
-
-  @override
-  LdFilterOption<T, IdType> marshalSerialized(String entry) {
-    return copyWith(isOn: true);
-  }
-
-  @override
-  LdFilterOption<T, IdType> copyWith({
-    String Function(BuildContext context)? label,
-    Widget Function(BuildContext context)? icon,
-    String? name,
-    bool? isOn,
-  }) {
-    return _MockFilterOption<T, IdType>(
-      name: name ?? this.name,
-      label: label ?? this.label,
-      icon: icon ?? this.icon,
-      isOn: isOn ?? this.isOn,
-      serializedValue: _serializedValue,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox();
-  }
-}
-
-// Mock sort option for testing
-class _MockSortOption<T extends Identifiable<IdType>, IdType> extends LdSortOption<T, IdType> {
-  _MockSortOption({
-    required super.name,
-    required super.label,
-    required super.icon,
-    super.isOn = false,
-  });
-}
-
 // Helper to build a minimal widget and get a BuildContext
 Widget _buildTestWidget(Widget child) {
   return MaterialApp(
@@ -143,9 +91,7 @@ void main() {
         fetchListWithParameters: fetchListWithParameters ??
             (parameters) async {
               final start = parameters.offset;
-              final end = (start + parameters.pageSize < items.length)
-                  ? start + parameters.pageSize
-                  : items.length;
+              final end = (start + parameters.pageSize < items.length) ? start + parameters.pageSize : items.length;
               return LdListPage<_TestItem>(
                 newItems: start < items.length ? items.sublist(start, end) : [],
                 hasMore: end < items.length,
@@ -559,9 +505,7 @@ void main() {
           fetchListWithParameters: (parameters) async {
             final end = (parameters.offset + parameters.pageSize).clamp(0, serverItems.length);
             return LdListPage<_TestItem>(
-              newItems: parameters.offset < serverItems.length
-                  ? serverItems.sublist(parameters.offset, end)
-                  : [],
+              newItems: parameters.offset < serverItems.length ? serverItems.sublist(parameters.offset, end) : [],
               hasMore: end < serverItems.length,
               total: serverItems.length,
             );
@@ -600,9 +544,7 @@ void main() {
             requestedOffsets.add(parameters.offset);
             final end = (parameters.offset + parameters.pageSize).clamp(0, serverItems.length);
             return LdListPage<_TestItem>(
-              newItems: parameters.offset < serverItems.length
-                  ? serverItems.sublist(parameters.offset, end)
-                  : [],
+              newItems: parameters.offset < serverItems.length ? serverItems.sublist(parameters.offset, end) : [],
               hasMore: end < serverItems.length,
               total: serverItems.length,
             );
@@ -637,9 +579,7 @@ void main() {
             requestedOffsets.add(parameters.offset);
             final end = (parameters.offset + parameters.pageSize).clamp(0, serverItems.length);
             return LdListPage<_TestItem>(
-              newItems: parameters.offset < serverItems.length
-                  ? serverItems.sublist(parameters.offset, end)
-                  : [],
+              newItems: parameters.offset < serverItems.length ? serverItems.sublist(parameters.offset, end) : [],
               hasMore: end < serverItems.length,
               total: serverItems.length,
             );
@@ -670,9 +610,7 @@ void main() {
           fetchListWithParameters: (parameters) async {
             final end = (parameters.offset + parameters.pageSize).clamp(0, serverItems.length);
             return LdListPage<_TestItem>(
-              newItems: parameters.offset < serverItems.length
-                  ? serverItems.sublist(parameters.offset, end)
-                  : [],
+              newItems: parameters.offset < serverItems.length ? serverItems.sublist(parameters.offset, end) : [],
               hasMore: end < serverItems.length,
               total: serverItems.length,
             );
