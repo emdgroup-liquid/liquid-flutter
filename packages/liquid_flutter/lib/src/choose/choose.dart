@@ -413,8 +413,8 @@ class LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<Ld
 
   @override
   Widget build(BuildContext context) {
-    final filterState = context.watch<LdMonkeySortAndFilterState<T, IdType>>();
-    final searchConfig = filterState.filters.whereType<LdFilterSearch<T, IdType, dynamic>>().firstOrNull;
+    final filterState = context.watch<LdMonkeySortAndFilterState<T, IdType>?>();
+    final searchConfig = filterState?.filters.whereType<LdFilterSearch<T, IdType, dynamic>>().firstOrNull;
 
     final body = Builder(builder: (context) {
       return LdSelectableList<T, IdType>(
