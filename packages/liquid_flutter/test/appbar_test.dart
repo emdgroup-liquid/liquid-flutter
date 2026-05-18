@@ -648,7 +648,7 @@ void main() {
   });
 
   group('OpenDrawerButton visibility', () {
-    Widget _buildWithMetrics({
+    Widget buildWithMetrics({
       required LdAppBarMetrics? metrics,
       required bool drawerOpen,
       required bool isSideBySide,
@@ -680,7 +680,7 @@ void main() {
     testWidgets('is visible in level-0 top bar with closed drawer', (WidgetTester tester) async {
       ldDisableAnimations = true;
       await tester.pumpWidget(
-        _buildWithMetrics(
+        buildWithMetrics(
           metrics: const LdAppBarMetrics(
             position: LdAppBarPosition.top,
             barHeight: 56,
@@ -704,7 +704,7 @@ void main() {
     testWidgets('is hidden in nested (level > 0) top bar', (WidgetTester tester) async {
       ldDisableAnimations = true;
       await tester.pumpWidget(
-        _buildWithMetrics(
+        buildWithMetrics(
           metrics: const LdAppBarMetrics(
             position: LdAppBarPosition.top,
             barHeight: 56,
@@ -726,7 +726,7 @@ void main() {
     testWidgets('is hidden in bottom bar', (WidgetTester tester) async {
       ldDisableAnimations = true;
       await tester.pumpWidget(
-        _buildWithMetrics(
+        buildWithMetrics(
           metrics: const LdAppBarMetrics(
             position: LdAppBarPosition.bottom,
             barHeight: 56,

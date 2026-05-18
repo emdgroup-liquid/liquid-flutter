@@ -3,15 +3,17 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/touchable/input_color.dart';
 
 class LdTimePicker extends StatelessWidget {
   final bool useRootNavigator;
   final bool disabled;
   final String? label;
   final TimeOfDay? value;
-  final void Function(TimeOfDay?) onChanged;
+  final void Function(TimeOfDay) onChanged;
   final int minutePrecision;
   final LdButtonMode buttonMode;
+  final FocusNode? focusNode;
 
   const LdTimePicker({
     super.key,
@@ -22,11 +24,13 @@ class LdTimePicker extends StatelessWidget {
     this.buttonMode = LdButtonMode.filled,
     this.value,
     this.minutePrecision = 15,
+    this.focusNode,
   });
 
   @override
   Widget build(BuildContext context) {
     final locale = LiquidLocalizations.of(context);
+    final theme = LdTheme.of(context);
 
     var initialTimeString = locale.selectTime;
 
@@ -34,51 +38,99 @@ class LdTimePicker extends StatelessWidget {
       initialTimeString = '${value!.hour}:${value!.minute.toString().padLeft(2, '0')}';
     }
 
-    return LdModalBuilder(
-      useRootNavigator: useRootNavigator,
-      builder: (context, open) => LdBundle(
-        children: [
-          if (label != null) LdText.l(label!),
-          LdButton(
-            key: const Key("time_picker_button"),
-            onPressed: open,
-            mode: buttonMode,
-            disabled: disabled,
-            child: Text(initialTimeString),
-          )
-        ],
-      ),
-      modal: LdModalRoute(
-        topGapRatio: 0.5,
-        context: context,
-        fixedDialogSize: const Size(300, 300),
-        pageBuilder: (context) => LdScaffold(
-          body: LdAppBar(
-            title: Text(LiquidLocalizations.of(context).selectTime),
-            child: LdAppBar.bottom(
-              actions: [
-                LdFlexibleChild(
-                  child: LdButton.vague(
-                    width: double.infinity,
-                    child: Text(LiquidLocalizations.of(context).done),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                )
-              ],
-              child: LdScaffoldBody(
-                key: const Key('time_picker_sheet'),
-                children: [
-                  LdTimePickerWidget(
-                    initialTime: value,
-                    onTimeSelected: (time) {
-                      Navigator.pop(context);
-                      onChanged(time);
-                    },
-                    minutePrecision: minutePrecision,
-                  ),
-                ],
+    return LdBundle(
+      children: [
+        if (label != null) LdText.l(label!),
+        LdTouchableSurface(
+          allowTapOutside: true,
+          disabled: disabled,
+          focusNode: focusNode,
+          key: const Key("time_picker_button"),
+          onPressed: () async {
+            final navigator = useRootNavigator ? Navigator.of(context, rootNavigator: true) : Navigator.of(context);
+            final newTime = await navigator.push(LdModalRoute(
+              context: context,
+              pageBuilder: (context) => LdTimePickerModal(initialTime: value, minutePrecision: minutePrecision),
+            )) as TimeOfDay?;
+
+            if (newTime != null) {
+              onChanged(newTime);
+            }
+          },
+          builder: (context, status, _) => Builder(builder: (context) {
+            final colorBundle = inputColor(theme, status, isValid: true);
+            return Container(
+              clipBehavior: Clip.hardEdge,
+              padding: theme.pad(size: LdSize.s),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: colorBundle.surface,
+                borderRadius: theme.radius(LdSize.s),
+                border: Border.all(
+                  color: colorBundle.border,
+                  width: theme.borderWidth,
+                ),
               ),
-            ),
+              child: LdText.l(initialTimeString),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+}
+
+class LdTimePickerModal extends StatefulWidget {
+  const LdTimePickerModal({
+    super.key,
+    this.initialTime,
+    this.minutePrecision = 15,
+  });
+
+  final TimeOfDay? initialTime;
+  final int minutePrecision;
+
+  @override
+  State<LdTimePickerModal> createState() => _LdTimePickerModalState();
+}
+
+class _LdTimePickerModalState extends State<LdTimePickerModal> {
+  late TimeOfDay? _time = widget.initialTime;
+
+  @override
+  void initState() {
+    super.initState();
+    _time = widget.initialTime ?? TimeOfDay.now();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LdScaffold(
+      key: const Key('time_picker_sheet'),
+      body: LdAppBar(
+        title: Text(LiquidLocalizations.of(context).selectTime),
+        child: LdAppBar.bottom(
+          actions: [
+            LdFlexibleChild(
+              child: LdButton.vague(
+                width: double.infinity,
+                child: Text(LiquidLocalizations.of(context).done),
+                onPressed: () => Navigator.pop(context, _time),
+              ),
+            )
+          ],
+          child: LdScaffoldBody(
+            children: [
+              LdTimePickerWidget(
+                initialTime: _time,
+                onTimeSelected: (time) {
+                  setState(() {
+                    _time = time;
+                  });
+                },
+                minutePrecision: widget.minutePrecision,
+              ),
+            ],
           ),
         ),
       ),
@@ -105,10 +157,12 @@ class LdTimePickerWidget extends StatefulWidget {
 class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
   final _hourController = FixedExtentScrollController();
   final _minuteController = FixedExtentScrollController();
-  final _hourFocusNode = FocusScopeNode();
 
   final _hourControllerText = TextEditingController();
   final _minuteControllerText = TextEditingController();
+
+  final _hourFocusNode = FocusNode();
+  final _minuteFocusNode = FocusNode();
 
   late TimeOfDay? _time = widget.initialTime;
 
@@ -128,6 +182,8 @@ class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
     _minuteController.dispose();
     _hourControllerText.dispose();
     _minuteControllerText.dispose();
+    _hourFocusNode.dispose();
+    _minuteFocusNode.dispose();
     super.dispose();
   }
 
@@ -163,6 +219,7 @@ class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
     if (hour != null && hour >= 0 && hour <= 23) {
       _time = TimeOfDay(hour: hour, minute: _time?.minute ?? 0);
       _applyWheels();
+      widget.onTimeSelected(_time!);
     }
   }
 
@@ -174,6 +231,7 @@ class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
         minute: ((minute / widget.minutePrecision).round() * widget.minutePrecision).clamp(0, 59),
       );
       _applyWheels();
+      widget.onTimeSelected(_time!);
     }
   }
 
@@ -210,12 +268,16 @@ class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
                   itemExtent: 32,
                   useMagnifier: true,
                   onSelectedItemChanged: (value) {
+                    if (_hourFocusNode.hasFocus) {
+                      return;
+                    }
                     _time = TimeOfDay(
                       hour: value,
                       minute: _time?.minute ?? 0,
                     );
                     _applyText();
                     _applyWheels();
+                    _submit();
                   },
                   children: List.generate(24, (index) {
                     return Container(
@@ -256,12 +318,16 @@ class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
                   itemExtent: 32,
                   useMagnifier: true,
                   onSelectedItemChanged: (value) {
+                    if (_minuteFocusNode.hasFocus) {
+                      return;
+                    }
                     _time = TimeOfDay(
                       hour: _time?.hour ?? 0,
                       minute: value * widget.minutePrecision,
                     );
                     _applyText();
                     _applyWheels();
+                    _submit();
                   },
                   children: List.generate(60 ~/ widget.minutePrecision, (index) {
                     return Container(
@@ -292,11 +358,9 @@ class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
                 controller: _hourControllerText,
                 size: LdSize.l,
                 keyboardType: TextInputType.number,
-                onSubmitted: (p0) {
+                onChanged: (p0) {
                   _hourTextChanged(p0);
-                  _submit();
                 },
-                onBlurred: (p0) => _hourTextChanged(p0),
               ),
             ),
             ldSpacerM,
@@ -304,15 +368,12 @@ class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
             ldSpacerM,
             Expanded(
               child: LdInput(
+                focusNode: _minuteFocusNode,
                 hint: 'MM',
                 controller: _minuteControllerText,
                 keyboardType: TextInputType.number,
-                onBlurred: (p0) {
+                onChanged: (p0) {
                   _minuteTextChanged(p0);
-                },
-                onSubmitted: (p0) {
-                  _minuteTextChanged(p0);
-                  _submit();
                 },
                 size: LdSize.l,
               ),

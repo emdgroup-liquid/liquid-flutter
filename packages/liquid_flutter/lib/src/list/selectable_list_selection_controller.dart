@@ -236,10 +236,8 @@ class LdSelectableListSelectionController<T extends Identifiable<IdType>, IdType
     }
 
     if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.arrowDown) {
-      print('arrow down');
       for (final item in _itemFocusNodes.entries) {
         if (item.value.hasFocus) {
-          print('item: ${item.key}');
           final currentIndex = paginator.getItemIndexById(item.key);
 
           if (currentIndex != null) {
@@ -258,16 +256,13 @@ class LdSelectableListSelectionController<T extends Identifiable<IdType>, IdType
     }
 
     if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.arrowUp) {
-      print('arrow up');
       for (final item in _itemFocusNodes.entries) {
         if (item.value.hasFocus) {
-          print('item: ${item.key}');
           final currentIndex = paginator.getItemIndexById(item.key);
 
           if (currentIndex != null) {
             final previousIndex = currentIndex - 1;
             final previousItem = paginator.getItemAt(previousIndex);
-            print('previousItem: $previousItem');
             if (previousItem != null && previousItem.value != null) {
               if (_shiftPressed) {
                 selectRange(previousItem.value!.id);

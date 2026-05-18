@@ -17,9 +17,9 @@ class LdOrb extends StatefulWidget {
 }
 
 class _LdOrbState extends State<LdOrb> with TickerProviderStateMixin {
-  AnimationController? _animationController;
+  late AnimationController _animationController;
   final Tween<double> _tween = Tween(begin: 0.0, end: 1);
-  Animation<double>? _animation;
+  late Animation<double> _animation;
 
   double get _fill => 1 - ((widget.filling * 0.9) + 0.1);
 
@@ -30,25 +30,23 @@ class _LdOrbState extends State<LdOrb> with TickerProviderStateMixin {
       duration: const Duration(seconds: 10),
     );
 
-    _animation = _tween.animate(_animationController!);
+    _animation = _tween.animate(_animationController);
 
-    _animationController!.repeat();
+    _animationController.repeat();
 
     super.initState();
   }
 
   @override
   void dispose() {
+    _animationController.dispose();
     super.dispose();
-    _animationController?.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    var theme = Provider.of<LdTheme>(context, listen: false);
-    if (_animation == null) {
-      return Container();
-    }
+    var theme = Provider.of<LdTheme>(context, listen: true);
+
     return Stack(
       children: [
         Container(
@@ -60,13 +58,13 @@ class _LdOrbState extends State<LdOrb> with TickerProviderStateMixin {
             position: _fill,
             initialPosition: 0,
             builder: (context, spring, _) => AnimatedBuilder(
-                animation: _animation!,
+                animation: _animation,
                 builder: (context, child) {
                   return CustomPaint(
                     painter: _OrbPainter(
                       Size(widget.size, widget.size),
                       spring.position,
-                      _animation!.value + spring.velocity,
+                      _animation.value + spring.velocity,
                       widget.paintBackground,
                       theme,
                     ),

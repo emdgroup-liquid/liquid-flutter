@@ -224,6 +224,21 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Trigger an initial fetch if the paginator has no items and is not already
+    // fetching. This handles the case where LdList is mounted with a fresh
+    // paginator that has no initialItems (totalItems == 0).
+    if (widget.paginator.totalItems == 0 && !widget.paginator.busy) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          widget.paginator.refreshList(context: context);
+        }
+      });
+    }
+  }
+
+  @override
   void didUpdateWidget(covariant LdListWidget<T, IdType> oldWidget) {
     super.didUpdateWidget(oldWidget);
 

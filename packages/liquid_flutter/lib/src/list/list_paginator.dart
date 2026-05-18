@@ -89,6 +89,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
       for (var i = 0; i < initialItems.length; i++) {
         _items[i] = LdPaginatorItem<T>(value: initialItems[i], state: LdPaginatorItemState.loaded);
       }
+      totalItems = initialItems.length;
     }
   }
 
@@ -284,7 +285,6 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     // The list has not been fetched yet or we filtered out all the items
     // optimistically.
     if ((totalItems == 0 || _items.isEmpty) && context.mounted) {
-      print('fetching initial items');
       _setBusy(true);
       _offsetQueue.clear();
       await _addToOffsetQueue(context, initialOffset);

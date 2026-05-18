@@ -5,6 +5,47 @@ import 'package:provider/provider.dart';
 
 import 'test_utils.dart';
 
+/// Minimal provider wrapper for [LdMonkeyMasterPage] tests.
+Widget _wrapMasterPage<T extends Identifiable<IdType>, IdType>({
+  required Widget child,
+  required LdRepository<T, IdType> repository,
+  TestSortAndFilterState<T, IdType>? shellState,
+  LdMonkeySelection<T, IdType>? selection,
+  LdMonkeyEffectiveLayoutMode layoutMode = LdMonkeyEffectiveLayoutMode.master,
+  List<LdMonkeyAction<T, IdType>> actions = const [],
+}) {
+  shellState ??= TestSortAndFilterState<T, IdType>();
+  selection ??= LdMonkeySelection<T, IdType>(
+    selection: {},
+    viewing: {},
+    showSelectionControls: false,
+  );
+  return LdThemeProvider(
+    child: MaterialApp(
+      localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+      home: ListenableProvider<LdRepository<T, IdType>>.value(
+        value: repository,
+        child: Provider<LdMonkeyRouterController<T, IdType>>.value(
+          value: shellState.controllerDelegate,
+          child: Provider<LdMonkeySortAndFilterState<T, IdType>>.value(
+            value: shellState.state,
+            child: Provider<LdMonkeySelection<T, IdType>>.value(
+              value: selection,
+              child: Provider<List<LdMonkeyAction<T, IdType>>>.value(
+                value: actions,
+                child: Provider<LdMonkeyEffectiveLayoutMode>.value(
+                  value: layoutMode,
+                  child: child,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 void main() {
   group('LdMonkeyMasterPage Tests', () {
     group('Search Integration', () {
@@ -15,38 +56,22 @@ void main() {
           icon: (context) => const Icon(Icons.search),
         );
 
-        final repository = createTestRepository(filters: {searchFilter});
+        final repository = createTestRepository();
+        final shellState = TestSortAndFilterState<TestItem, int>(filters: {searchFilter});
 
         await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: ListenableProvider.value(
-                value: repository,
-                child: ListenableProvider.value(
-                  value: LdMonkeyShellState<TestItem, int>(basePath: "/test"),
-                  child: Provider.value(
-                    value: const <LdMonkeyAction<TestItem, int>>[],
-                    child: Provider.value(
-                      value: LdMonkeySelection<TestItem, int>(selection: {}, viewing: {}),
-                      child: Provider.value(
-                        value: LdMonkeyEffectiveLayoutMode.master,
-                        child: LdMonkeyMasterPage<TestItem, int>(
-                          buildItem: (context, item) => LdListItem(
-                            title: Text(item.value?.name ?? ''),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+          _wrapMasterPage(
+            repository: repository,
+            shellState: shellState,
+            child: LdMonkeyMasterPage<TestItem, int>(
+              buildItem: (context, item) => LdListItem(
+                title: Text(item.value?.name ?? ''),
               ),
             ),
           ),
         );
 
         await tester.pumpAndSettle();
-        // Search config should be initialized
         expect(find.byType(LdSearchInput), findsOneWidget);
         expect(find.byType(LdMonkeyMasterPage<TestItem, int>), findsOneWidget);
       });
@@ -55,28 +80,11 @@ void main() {
         final repository = createTestRepository();
 
         await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: ListenableProvider.value(
-                value: repository,
-                child: ListenableProvider.value(
-                  value: LdMonkeyShellState<TestItem, int>(basePath: "/test"),
-                  child: Provider.value(
-                    value: const <LdMonkeyAction<TestItem, int>>[],
-                    child: Provider.value(
-                      value: LdMonkeySelection<TestItem, int>(selection: {}, viewing: {}),
-                      child: Provider.value(
-                        value: LdMonkeyEffectiveLayoutMode.master,
-                        child: LdMonkeyMasterPage<TestItem, int>(
-                          buildItem: (context, item) => LdListItem(
-                            title: Text(item.value?.name ?? ''),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+          _wrapMasterPage(
+            repository: repository,
+            child: LdMonkeyMasterPage<TestItem, int>(
+              buildItem: (context, item) => LdListItem(
+                title: Text(item.value?.name ?? ''),
               ),
             ),
           ),
@@ -97,29 +105,14 @@ void main() {
         );
 
         await tester.pumpWidget(
-          LdThemeProvider(
-              child: MaterialApp(
-                  localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-                  home: ListenableProvider.value(
-                    value: repository,
-                    child: ListenableProvider.value(
-                      value: LdMonkeyShellState<TestItem, int>(basePath: "/test"),
-                      child: Provider.value(
-                        value: const <LdMonkeyAction<TestItem, int>>[],
-                        child: Provider.value(
-                          value: LdMonkeySelection<TestItem, int>(selection: {}, viewing: {}),
-                          child: Provider.value(
-                            value: LdMonkeyEffectiveLayoutMode.master,
-                            child: LdMonkeyMasterPage<TestItem, int>(
-                              buildItem: (context, item) => LdListItem(
-                                title: Text('Custom: ${item.value?.name ?? ''}'),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ))),
+          _wrapMasterPage(
+            repository: repository,
+            child: LdMonkeyMasterPage<TestItem, int>(
+              buildItem: (context, item) => LdListItem(
+                title: Text('Custom: ${item.value?.name ?? ''}'),
+              ),
+            ),
+          ),
         );
 
         await tester.pumpAndSettle();
@@ -129,28 +122,14 @@ void main() {
       testWidgets('uses buildList when provided', (WidgetTester tester) async {
         final repository = createTestRepository();
 
-        await tester.pumpWidget(LdThemeProvider(
-            child: MaterialApp(
-          localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-          home: ListenableProvider.value(
-            value: repository,
-            child: ListenableProvider.value(
-              value: LdMonkeyShellState<TestItem, int>(basePath: "/test"),
-              child: Provider.value(
-                value: const <LdMonkeyAction<TestItem, int>>[],
-                child: Provider.value(
-                  value: LdMonkeySelection<TestItem, int>(selection: {}, viewing: {}),
-                  child: Provider.value(
-                    value: LdMonkeyEffectiveLayoutMode.master,
-                    child: LdMonkeyMasterPage<TestItem, int>(
-                      buildList: (context, repository) => const Text('Custom List'),
-                    ),
-                  ),
-                ),
-              ),
+        await tester.pumpWidget(
+          _wrapMasterPage(
+            repository: repository,
+            child: LdMonkeyMasterPage<TestItem, int>(
+              buildList: (context, repository) => const Text('Custom List'),
             ),
           ),
-        )));
+        );
 
         await tester.pumpAndSettle();
         expect(find.text('Custom List'), findsOneWidget);
@@ -165,33 +144,17 @@ void main() {
         );
 
         await tester.pumpWidget(
-          LdThemeProvider(
-              child: MaterialApp(
-                  localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-                  home: ListenableProvider.value(
-                    value: repository,
-                    child: ListenableProvider.value(
-                      value: LdMonkeyShellState<TestItem, int>(basePath: "/test"),
-                      child: Provider.value(
-                        value: const <LdMonkeyAction<TestItem, int>>[],
-                        child: Provider.value(
-                          value: LdMonkeySelection<TestItem, int>(selection: {}, viewing: {}),
-                          child: Provider.value(
-                            value: LdMonkeyEffectiveLayoutMode.master,
-                            child: LdMonkeyMasterPage<TestItem, int>(
-                              buildItem: (context, item) => LdListItem(
-                                title: Text(item.value?.toString() ?? ''),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ))),
+          _wrapMasterPage(
+            repository: repository,
+            child: LdMonkeyMasterPage<TestItem, int>(
+              buildItem: (context, item) => LdListItem(
+                title: Text(item.value?.toString() ?? ''),
+              ),
+            ),
+          ),
         );
 
         await tester.pumpAndSettle();
-        // Should render the item using toString()
         expect(find.textContaining('TestItem'), findsWidgets);
       });
     });
@@ -201,37 +164,20 @@ void main() {
         final repository = createTestRepository();
 
         await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: ListenableProvider.value(
-                value: repository,
-                child: ListenableProvider.value(
-                  value: LdMonkeyShellState<TestItem, int>(basePath: "/test"),
-                  child: Provider.value(
-                    value: const <LdMonkeyAction<TestItem, int>>[],
-                    child: Provider.value(
-                      value: LdMonkeySelection<TestItem, int>(selection: {}, viewing: {}),
-                      child: Provider.value(
-                        value: LdMonkeyEffectiveLayoutMode.master,
-                        child: LdMonkeyMasterPage<TestItem, int>(
-                          buildItem: (context, item) => LdListItem(
-                            title: Text(item.value?.name ?? ''),
-                          ),
-                          appBar: const LdMonkeyAppBar<TestItem, int>(
-                              location: LdMonkeyActionLocation.masterAppBar,
-                              title: Text(
-                                'Custom App Bar',
-                              )),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+          _wrapMasterPage(
+            repository: repository,
+            child: LdMonkeyMasterPage<TestItem, int>(
+              buildItem: (context, item) => LdListItem(
+                title: Text(item.value?.name ?? ''),
+              ),
+              appBar: const LdMonkeyAppBar<TestItem, int>(
+                location: LdMonkeyActionLocation.masterAppBar,
+                title: Text('Custom App Bar'),
               ),
             ),
           ),
         );
+
         await tester.pumpAndSettle();
         expect(find.text('Custom App Bar'), findsOneWidget);
       });
@@ -240,28 +186,11 @@ void main() {
         final repository = createTestRepository();
 
         await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: ListenableProvider.value(
-                value: repository,
-                child: ListenableProvider.value(
-                  value: LdMonkeyShellState<TestItem, int>(basePath: "/test"),
-                  child: Provider.value(
-                    value: const <LdMonkeyAction<TestItem, int>>[],
-                    child: Provider.value(
-                      value: LdMonkeySelection<TestItem, int>(selection: {}, viewing: {}),
-                      child: Provider.value(
-                        value: LdMonkeyEffectiveLayoutMode.master,
-                        child: LdMonkeyMasterPage<TestItem, int>(
-                          buildItem: (context, item) => LdListItem(
-                            title: Text(item.value?.name ?? ''),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+          _wrapMasterPage(
+            repository: repository,
+            child: LdMonkeyMasterPage<TestItem, int>(
+              buildItem: (context, item) => LdListItem(
+                title: Text(item.value?.name ?? ''),
               ),
             ),
           ),
@@ -275,32 +204,15 @@ void main() {
         final repository = createTestRepository();
 
         await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: ListenableProvider.value(
-                value: repository,
-                child: ListenableProvider.value(
-                  value: LdMonkeyShellState<TestItem, int>(basePath: "/test"),
-                  child: Provider.value(
-                    value: const <LdMonkeyAction<TestItem, int>>[],
-                    child: Provider.value(
-                      value: LdMonkeySelection<TestItem, int>(selection: {}, viewing: {}),
-                      child: Provider.value(
-                        value: LdMonkeyEffectiveLayoutMode.master,
-                        child: LdMonkeyMasterPage<TestItem, int>(
-                          secondaryAppBar: const LdMonkeyAppBar<TestItem, int>(
-                            location: LdMonkeyActionLocation.masterSecondary,
-                            title: Text('Custom Secondary App Bar'),
-                          ),
-                          buildItem: (context, item) => LdListItem(
-                            title: Text(item.value?.name ?? ''),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+          _wrapMasterPage(
+            repository: repository,
+            child: LdMonkeyMasterPage<TestItem, int>(
+              secondaryAppBar: const LdMonkeyAppBar<TestItem, int>(
+                location: LdMonkeyActionLocation.masterSecondary,
+                title: Text('Custom Secondary App Bar'),
+              ),
+              buildItem: (context, item) => LdListItem(
+                title: Text(item.value?.name ?? ''),
               ),
             ),
           ),
@@ -319,32 +231,17 @@ void main() {
             createTestItem(2),
           ],
         );
-        final shellState = LdMonkeyShellState<TestItem, int>(basePath: "/test");
+        final shellState = TestSortAndFilterState<TestItem, int>();
 
         await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp(
-                localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-                home: ListenableProvider.value(
-                  value: repository,
-                  child: ListenableProvider.value(
-                    value: shellState,
-                    child: Provider.value(
-                      value: const <LdMonkeyAction<TestItem, int>>[],
-                      child: Provider.value(
-                        value: LdMonkeySelection<TestItem, int>(selection: {}, viewing: {}),
-                        child: Provider.value(
-                          value: LdMonkeyEffectiveLayoutMode.master,
-                          child: LdMonkeyMasterPage<TestItem, int>(
-                            buildItem: (context, item) => LdListItem(
-                              title: Text(item.value?.name ?? ''),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                )),
+          _wrapMasterPage(
+            repository: repository,
+            shellState: shellState,
+            child: LdMonkeyMasterPage<TestItem, int>(
+              buildItem: (context, item) => LdListItem(
+                title: Text(item.value?.name ?? ''),
+              ),
+            ),
           ),
         );
 
@@ -354,9 +251,10 @@ void main() {
         expect(find.byType(LdSelectableList<TestItem, int>), findsOneWidget);
 
         await tester.tap(find.byType(LdListItem).first);
-
         await tester.pumpAndSettle();
-        expect(shellState.viewingItems, {1});
+
+        // After tapping, viewing should be updated via the router controller
+        expect(shellState.currentViewing, equals({1}));
       });
     });
 
@@ -368,32 +266,18 @@ void main() {
           ],
         );
 
-        await tester.pumpWidget(LdThemeProvider(
-            child: MaterialApp(
-                localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-                home: ListenableProvider.value(
-                  value: repository,
-                  child: ListenableProvider.value(
-                    value: LdMonkeyShellState<TestItem, int>(basePath: "/test"),
-                    child: Provider.value(
-                      value: const <LdMonkeyAction<TestItem, int>>[],
-                      child: Provider.value(
-                        value: LdMonkeySelection<TestItem, int>(selection: {}, viewing: {}),
-                        child: Provider.value(
-                          value: LdMonkeyEffectiveLayoutMode.master,
-                          child: LdMonkeyMasterPage<TestItem, int>(
-                            buildItem: (context, item) => LdListItem(
-                              title: Text(item.value?.name ?? ''),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ))));
+        await tester.pumpWidget(
+          _wrapMasterPage(
+            repository: repository,
+            child: LdMonkeyMasterPage<TestItem, int>(
+              buildItem: (context, item) => LdListItem(
+                title: Text(item.value?.name ?? ''),
+              ),
+            ),
+          ),
+        );
 
         await tester.pumpAndSettle();
-        // Items should be wrapped in animation widgets
         expect(find.byType(LdListItemAnimation), findsWidgets);
       });
     });

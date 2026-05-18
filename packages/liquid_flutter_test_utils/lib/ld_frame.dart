@@ -34,9 +34,6 @@ Widget ldFrame({
   }
 
   return KeyedSubtree(
-    // force a new subtree each time a new frame is created in order to avoid
-    // state issues
-    key: UniqueKey(),
     child: LdThemeProvider(
       size: size,
       platform: ldFrameOptions.platform,
@@ -79,10 +76,8 @@ Widget ldFrame({
                         orientation,
                         switch (style) {
                           null => switch (brightnessMode) {
-                              LdThemeBrightnessMode.light =>
-                                SystemUiOverlayStyle.dark,
-                              LdThemeBrightnessMode.dark =>
-                                SystemUiOverlayStyle.light,
+                              LdThemeBrightnessMode.light => SystemUiOverlayStyle.dark,
+                              LdThemeBrightnessMode.dark => SystemUiOverlayStyle.light,
                               _ => null
                             },
                           _ => style,

@@ -129,16 +129,29 @@ void main() {
           initialSelected: _Category.categoryA,
         );
 
-        final repository = createTestRepository(filters: {filter});
+        final shellState = TestSortAndFilterState<TestItem, int>(filters: {filter});
+        final repository = createTestRepository();
 
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
               home: Scaffold(
-                body: ListenableProvider.value(
+                body: ListenableProvider<LdRepository<TestItem, int>>.value(
                   value: repository,
-                  child: LdFilterOneOfWidget<TestItem, int, _Category>(
-                    filter: filter,
+                  child: ChangeNotifierProvider<TestSortAndFilterState<TestItem, int>>.value(
+                    value: shellState,
+                    child: Provider<LdMonkeyRouterController>.value(
+                      value: shellState.controllerDelegate,
+                        child: Provider<LdMonkeySortAndFilterState<TestItem, int>>.value(
+                        value: LdMonkeySortAndFilterState<TestItem, int>(
+                          filters: shellState.filtersMap.values.toSet(),
+                          sortOptions: [],
+                        ),
+                        child: LdFilterOneOfWidget<TestItem, int, _Category>(
+                          filter: filter,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),

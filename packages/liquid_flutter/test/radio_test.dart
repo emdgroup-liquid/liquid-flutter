@@ -50,6 +50,7 @@ void main() {
 
   testWidgets('LdRadio with color', (WidgetTester test) async {
     var theme = LdTheme();
+    ldDisableAnimations = true;
 
     await test.pumpWidget(LdThemeProvider(
       theme: theme,
@@ -71,7 +72,7 @@ void main() {
 
     expect(
       radio.border?.top.color,
-      shadAmber.idle(false),
+      shadAmber.active(false),
     );
     // check if color is correct by finding the box decoration
   });

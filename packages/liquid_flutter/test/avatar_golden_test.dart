@@ -11,19 +11,25 @@ void main() {
     (WidgetTester tester) async {
       await multiGolden(tester, "LdAvatar", {
         'default': (tester, place) async {
-          await place(const LdAvatar(
-            child: Text('A'),
+          await place(Center(
+            child: const LdAvatar(
+              child: Text('A'),
+            ),
           ));
         },
         'with_icon': (tester, place) async {
-          await place(const LdAvatar(
-            child: Icon(LucideIcons.user),
+          await place(Center(
+            child: const LdAvatar(
+              child: Icon(LucideIcons.user),
+            ),
           ));
         },
         'with_custom_color': (tester, place) async {
-          await place(const LdAvatar(
-            color: shadRed,
-            child: Text('E'),
+          await place(Center(
+            child: const LdAvatar(
+              color: shadRed,
+              child: Text('E'),
+            ),
           ));
         },
       });

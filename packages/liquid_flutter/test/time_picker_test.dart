@@ -36,7 +36,7 @@ void main() {
     );
 
     // Open the time picker
-    await tester.tap(find.byType(LdButton));
+    await tester.tap(find.byType(LdTouchableSurface));
     await tester.pumpAndSettle();
 
     // Check if the time picker sheet is opened
@@ -120,7 +120,7 @@ void main() {
     );
 
     // Verify the button is disabled
-    final button = tester.widget<LdButton>(
+    final button = tester.widget<LdTouchableSurface>(
       find.byKey(const Key('time_picker_button')),
     );
     expect(button.disabled, isTrue);

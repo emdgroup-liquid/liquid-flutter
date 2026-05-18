@@ -20,6 +20,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
   LdRepository({
     required Future<LdListPage<T>> Function(FetchPageParameters<T, IdType> parameters) fetchListWithParameters,
     super.pageSize,
+    super.initialItems,
     required Future<T> Function(IdType id) getById,
     Future<int?> Function(FetchOffsetParameters<T, IdType> parameters)? getOffsetById,
     Future<void> Function(IdType id)? deleteItem,

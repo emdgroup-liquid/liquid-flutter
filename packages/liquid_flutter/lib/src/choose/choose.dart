@@ -2,8 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:liquid_flutter/src/monkey/monkey_router_adapter.dart';
-import 'package:liquid_flutter/src/monkey/monkey_sort_and_filter_state.dart';
 import 'package:provider/provider.dart';
 
 import '../../liquid_flutter.dart';
@@ -413,8 +411,8 @@ class LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<Ld
 
   @override
   Widget build(BuildContext context) {
-    final filterState = context.watch<LdMonkeySortAndFilterState<T, IdType>>();
-    final searchConfig = filterState.filters.whereType<LdFilterSearch<T, IdType, dynamic>>().firstOrNull;
+    final filterState = context.watch<LdMonkeySortAndFilterState<T, IdType>?>();
+    final searchConfig = filterState?.filters.whereType<LdFilterSearch<T, IdType, dynamic>>().firstOrNull;
 
     final body = Builder(builder: (context) {
       return LdSelectableList<T, IdType>(

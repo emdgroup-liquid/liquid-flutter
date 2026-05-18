@@ -8,11 +8,6 @@ import 'test_utils.dart';
 
 void main() {
   group('LdFilterBoolOption Tests', () {
-    // Helper to create test items
-    TestItem createTestItem(int id, {bool? active}) {
-      return TestItem(id, 'Item $id', id * 10, active ?? true);
-    }
-
     group('Serialization', () {
       test('serialize() returns "true" when filter is on', () {
         final filter = LdFilterBool<TestItem, int>(
@@ -155,16 +150,23 @@ void main() {
           isOn: false,
         );
 
-        final repository = createTestRepository(filters: {filter});
+        final shellState = TestSortAndFilterState<TestItem, int>(filters: {filter});
+        final repository = createTestRepository();
 
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
               home: Scaffold(
-                body: ListenableProvider.value(
+                body: ListenableProvider<LdRepository<TestItem, int>>.value(
                   value: repository,
-                  child: Builder(
-                    builder: (context) => filter.build(context, repository),
+                  child: Provider<LdMonkeyRouterController<TestItem, int>>.value(
+                    value: shellState.controllerDelegate,
+                    child: Provider<LdMonkeySortAndFilterState<TestItem, int>>.value(
+                      value: shellState.state,
+                      child: Builder(
+                        builder: (context) => filter.build(context),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -186,16 +188,23 @@ void main() {
           isOn: true,
         );
 
-        final repository = createTestRepository(filters: {filter});
+        final shellState = TestSortAndFilterState<TestItem, int>(filters: {filter});
+        final repository = createTestRepository();
 
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
               home: Scaffold(
-                body: ListenableProvider.value(
+                body: ListenableProvider<LdRepository<TestItem, int>>.value(
                   value: repository,
-                  child: Builder(
-                    builder: (context) => filter.build(context, repository),
+                  child: Provider<LdMonkeyRouterController<TestItem, int>>.value(
+                    value: shellState.controllerDelegate,
+                    child: Provider<LdMonkeySortAndFilterState<TestItem, int>>.value(
+                      value: shellState.state,
+                      child: Builder(
+                        builder: (context) => filter.build(context),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -217,16 +226,23 @@ void main() {
           isOn: true,
         );
 
-        final repository = createTestRepository(filters: {filter});
+        final shellState = TestSortAndFilterState<TestItem, int>(filters: {filter});
+        final repository = createTestRepository();
 
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
               home: Scaffold(
-                body: ListenableProvider.value(
+                body: ListenableProvider<LdRepository<TestItem, int>>.value(
                   value: repository,
-                  child: Builder(
-                    builder: (context) => filter.build(context, repository),
+                  child: Provider<LdMonkeyRouterController<TestItem, int>>.value(
+                    value: shellState.controllerDelegate,
+                    child: Provider<LdMonkeySortAndFilterState<TestItem, int>>.value(
+                      value: shellState.state,
+                      child: Builder(
+                        builder: (context) => filter.build(context),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -247,16 +263,32 @@ void main() {
           isOn: true,
         );
 
-        final repository = createTestRepository(filters: {filter});
+        final shellState = TestSortAndFilterState<TestItem, int>(filters: {filter});
+        final repository = createTestRepository();
 
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
               home: Scaffold(
-                body: ListenableProvider.value(
+                body: ListenableProvider<LdRepository<TestItem, int>>.value(
                   value: repository,
-                  child: Builder(
-                    builder: (context) => filter.build(context, repository),
+                  child: ListenableProvider<TestSortAndFilterState<TestItem, int>>.value(
+                    value: shellState,
+                    child: Provider<LdMonkeyRouterController<TestItem, int>>.value(
+                      value: shellState.controllerDelegate,
+                      child: Builder(
+                        builder: (context) {
+                          // Watch shellState so rebuild happens on filter change
+                          context.watch<TestSortAndFilterState<TestItem, int>>();
+                          final currentFilter =
+                              shellState.filtersMap['active'] as LdFilterBool<TestItem, int>;
+                          return Provider<LdMonkeySortAndFilterState<TestItem, int>>.value(
+                            value: shellState.state,
+                            child: currentFilter.build(context),
+                          );
+                        },
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -266,14 +298,14 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        expect(repository.filters['active']!.isOn, isTrue);
+        expect(shellState.filtersMap['active']!.isOn, isTrue);
 
         final xButton = find.widgetWithIcon(LdButton, LucideIcons.x);
         expect(xButton, findsOneWidget);
         await tester.tap(xButton);
         await tester.pumpAndSettle();
 
-        expect(repository.filters['active']!.isOn, isFalse);
+        expect(shellState.filtersMap['active']!.isOn, isFalse);
       });
 
       testWidgets('renders in LdFilterModal and can be activated/deactivated', (WidgetTester tester) async {
@@ -284,16 +316,31 @@ void main() {
           isOn: false,
         );
 
-        final repository = createTestRepository(filters: {filter});
+        final shellState = TestSortAndFilterState<TestItem, int>(filters: {filter});
+        final repository = createTestRepository();
 
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
               localizationsDelegates: LiquidLocalizations.localizationsDelegates,
               home: Scaffold(
-                body: ListenableProvider.value(
+                body: ListenableProvider<LdRepository<TestItem, int>>.value(
                   value: repository,
-                  child: const LdFilterModal<TestItem, int>(),
+                  child: ListenableProvider<TestSortAndFilterState<TestItem, int>>.value(
+                    value: shellState,
+                    child: Provider<LdMonkeyRouterController<TestItem, int>>.value(
+                      value: shellState.controllerDelegate,
+                      child: Builder(
+                        builder: (context) {
+                          context.watch<TestSortAndFilterState<TestItem, int>>();
+                          return Provider<LdMonkeySortAndFilterState<TestItem, int>>.value(
+                            value: shellState.state,
+                            child: const LdFilterModal<TestItem, int>(),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -304,20 +351,20 @@ void main() {
 
         final activeFilterButton = find.widgetWithText(LdButton, 'Active');
 
-        expect(repository.filters['active']!.isOn, isFalse);
-
+        expect(shellState.filtersMap['active']!.isOn, isFalse);
         expect(activeFilterButton, findsOneWidget);
+
         await tester.tap(activeFilterButton);
         await tester.pumpAndSettle();
 
-        expect(repository.filters['active']!.isOn, isTrue);
+        expect(shellState.filtersMap['active']!.isOn, isTrue);
 
         final xIconButton = find.widgetWithIcon(LdButton, LucideIcons.x);
         expect(xIconButton, findsOneWidget);
         await tester.tap(xIconButton);
         await tester.pumpAndSettle();
 
-        expect(repository.filters['active']!.isOn, isFalse);
+        expect(shellState.filtersMap['active']!.isOn, isFalse);
       });
     });
   });

@@ -63,7 +63,6 @@ class _TaskDetailState extends State<TaskDetail> {
             label: "Due date",
             value: _dueDate,
             onChanged: (date) {
-              if (date == null) return;
               setState(() {
                 _dueDate = date;
               });

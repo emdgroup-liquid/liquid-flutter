@@ -5,6 +5,41 @@ import 'package:provider/provider.dart';
 
 import 'test_utils.dart';
 
+/// Wraps a [LdFilterModal] (or [LdFilterContextMenu]) with the providers it
+/// needs: repository, router-controller, and sort-and-filter state.
+Widget _wrapFilterModal<T extends Identifiable<IdType>, IdType>({
+  required Widget child,
+  required LdRepository<T, IdType> repository,
+  required TestSortAndFilterState<T, IdType> shellState,
+}) {
+  return LdThemeProvider(
+    child: MaterialApp(
+      localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+      locale: const Locale('en'),
+      home: Scaffold(
+        body: ListenableProvider<LdRepository<T, IdType>>.value(
+          value: repository,
+          child: ListenableProvider<TestSortAndFilterState<T, IdType>>.value(
+            value: shellState,
+            child: Provider<LdMonkeyRouterController<T, IdType>>.value(
+              value: shellState.controllerDelegate,
+              child: Builder(
+                builder: (context) {
+                  context.watch<TestSortAndFilterState<T, IdType>>();
+                  return Provider<LdMonkeySortAndFilterState<T, IdType>>.value(
+                    value: shellState.state,
+                    child: child,
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 void main() {
   group('Filter Modal Tests', () {
     group('LdFilterModal Widget', () {
@@ -15,19 +50,14 @@ void main() {
           icon: (context) => const Icon(Icons.check),
         );
 
-        final repository = createTestRepository(filters: {filter});
+        final shellState = TestSortAndFilterState<TestItem, int>(filters: {filter});
+        final repository = createTestRepository();
 
         await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: Scaffold(
-                body: ListenableProvider.value(
-                  value: repository,
-                  child: const LdFilterModal<TestItem, int>(),
-                ),
-              ),
-            ),
+          _wrapFilterModal(
+            repository: repository,
+            shellState: shellState,
+            child: const LdFilterModal<TestItem, int>(),
           ),
         );
 
@@ -51,21 +81,16 @@ void main() {
           isOn: false,
         );
 
-        final repository = createTestRepository(
+        final shellState = TestSortAndFilterState<TestItem, int>(
           filters: {activeFilter, inactiveFilter},
         );
+        final repository = createTestRepository();
 
         await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: Scaffold(
-                body: ListenableProvider.value(
-                  value: repository,
-                  child: const LdFilterModal<TestItem, int>(),
-                ),
-              ),
-            ),
+          _wrapFilterModal(
+            repository: repository,
+            shellState: shellState,
+            child: const LdFilterModal<TestItem, int>(),
           ),
         );
 
@@ -75,7 +100,7 @@ void main() {
         expect(find.text('Inactive'), findsWidgets);
       });
 
-      testWidgets('updates when filter stream emits', (WidgetTester tester) async {
+      testWidgets('updates when filter is toggled via shellState', (WidgetTester tester) async {
         final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
@@ -83,30 +108,24 @@ void main() {
           isOn: false,
         );
 
-        final repository = createTestRepository(filters: {filter});
+        final shellState = TestSortAndFilterState<TestItem, int>(filters: {filter});
+        final repository = createTestRepository();
 
         await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: Scaffold(
-                body: ListenableProvider.value(
-                  value: repository,
-                  child: const LdFilterModal<TestItem, int>(),
-                ),
-              ),
-            ),
+          _wrapFilterModal(
+            repository: repository,
+            shellState: shellState,
+            child: const LdFilterModal<TestItem, int>(),
           ),
         );
 
         await tester.pumpAndSettle();
 
-        // Update filter
-        repository.updateFilter('active', (f) => f!.copyWith(isOn: true));
+        // Update filter programmatically
+        shellState.updateFilter(MockBuildContext(), filter.copyWith(isOn: true));
         await tester.pumpAndSettle();
 
-        // Modal should reflect the update
-        expect(repository.filters['active']!.isOn, isTrue);
+        expect(shellState.filtersMap['active']!.isOn, isTrue);
       });
 
       testWidgets('shows sort options', (WidgetTester tester) async {
@@ -116,21 +135,16 @@ void main() {
           icon: (context) => const Icon(Icons.sort),
         );
 
-        final repository = createTestRepository(
+        final shellState = TestSortAndFilterState<TestItem, int>(
           sortOptions: [sortOption],
         );
+        final repository = createTestRepository();
 
         await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: Scaffold(
-                body: ListenableProvider.value(
-                  value: repository,
-                  child: const LdFilterModal<TestItem, int>(),
-                ),
-              ),
-            ),
+          _wrapFilterModal(
+            repository: repository,
+            shellState: shellState,
+            child: const LdFilterModal<TestItem, int>(),
           ),
         );
 
@@ -142,20 +156,14 @@ void main() {
 
     group('LdFilterContextMenu Widget', () {
       testWidgets('renders filter button', (WidgetTester tester) async {
+        final shellState = TestSortAndFilterState<TestItem, int>();
         final repository = createTestRepository();
 
         await tester.pumpWidget(
-          LdThemeProvider(
-            child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              locale: const Locale('en'),
-              home: Scaffold(
-                body: ListenableProvider.value(
-                  value: repository,
-                  child: const LdFilterContextMenu<TestItem, int>(),
-                ),
-              ),
-            ),
+          _wrapFilterModal(
+            repository: repository,
+            shellState: shellState,
+            child: const LdFilterContextMenu<TestItem, int>(),
           ),
         );
 

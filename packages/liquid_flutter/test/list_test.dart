@@ -256,7 +256,7 @@ void main() {
       // Create a custom paginator with multiple pages
       final fiveItemsPerPagePaginator = LdPaginator<_SampleItem, int>(
         pageSize: 5,
-        fetchListFunction: ({required offset, required pageSize, pageToken}) async {
+        fetchListFunction: (params) async {
           // Simulate a delay for network request
           await Future.delayed(const Duration(milliseconds: 100));
 
@@ -264,8 +264,8 @@ void main() {
           final totalItems = sampleItems.length;
 
           // Calculate start and end indices
-          final startIndex = offset;
-          final endIndex = (startIndex + pageSize < totalItems) ? startIndex + pageSize : totalItems;
+          final startIndex = params.offset;
+          final endIndex = (startIndex + params.pageSize < totalItems) ? startIndex + params.pageSize : totalItems;
 
           // Return results if valid range
           if (startIndex < totalItems) {
@@ -317,9 +317,15 @@ void main() {
       );
 
       // Build our widget
+      late BuildContext capturedContext;
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          buildBasicListWidget(data: paginator),
+          Builder(
+            builder: (context) {
+              capturedContext = context;
+              return buildBasicListWidget(data: paginator);
+            },
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -338,8 +344,8 @@ void main() {
         expect(find.text('Item ${i + 1}'), findsNothing);
       }
 
-      // Refresh the list.
-      await paginator.refreshList();
+      // Refresh the list using the captured context.
+      await paginator.refreshList(context: capturedContext);
       await tester.pumpAndSettle();
 
       // Verify that each item is displayed

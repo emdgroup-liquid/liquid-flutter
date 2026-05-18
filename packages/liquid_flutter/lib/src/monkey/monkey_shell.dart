@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/monkey/intents.dart';
-import 'package:liquid_flutter/src/monkey/monkey_sort_and_filter_state.dart';
 
 import 'package:provider/provider.dart';
 
@@ -195,12 +194,14 @@ class _PreventAutoFocusState extends State<PreventAutoFocus> {
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      if (!mounted) return;
-      setState(() {
-        _excluding = false;
+    if (_excluding) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        if (!mounted) return;
+        setState(() {
+          _excluding = false;
+        });
       });
-    });
+    }
     return ExcludeFocus(
       excluding: _excluding,
       child: widget.child,

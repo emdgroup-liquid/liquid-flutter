@@ -5,8 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:path/path.dart' as path;
+import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_test_utils/golden_utils.dart';
 import 'package:liquid_flutter_test_utils/ld_frame_options.dart';
 import 'package:liquid_flutter_test_utils/ld_frame.dart';
@@ -28,6 +28,44 @@ typedef GoldenWidgetBuilder = Future<void> Function(
   WidgetTester tester,
   Future<void> Function(Widget widget) placeWidget,
 );
+
+/// Renders [finder] to a PNG at [pngPath] for widget-tree golden failures.
+///
+/// Uses the same [captureImage] + [WidgetTester.runAsync] pattern as Flutter's
+/// golden matchers. Calling [RenderRepaintBoundary.toImage] / [Image.toByteData]
+/// directly in a widget test can block the test process indefinitely.
+Future<void> writeFailureScreenshot(
+  WidgetTester tester,
+  Finder finder,
+  String pngPath,
+) async {
+  await tester.pumpAndSettle();
+  final element = tester.element(finder);
+  await tester.runAsync(() async {
+    final image = await _captureElementImage(element);
+    try {
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData != null) {
+        final pngFile = File(pngPath);
+        pngFile.parent.createSync(recursive: true);
+        pngFile.writeAsBytesSync(byteData.buffer.asUint8List());
+      }
+    } finally {
+      image.dispose();
+    }
+  });
+}
+
+/// Same approach as [captureImage] in `package:flutter_test` (`_matchers_io.dart`).
+Future<ui.Image> _captureElementImage(Element element) {
+  RenderObject renderObject = element.renderObject!;
+  while (!renderObject.isRepaintBoundary) {
+    renderObject = renderObject.parent!;
+  }
+  assert(!renderObject.debugNeedsPaint);
+  final layer = renderObject.debugLayer! as OffsetLayer;
+  return layer.toImage(renderObject.paintBounds);
+}
 
 /// Resets the [tester] to a clean state to prevent test contamination.
 ///
@@ -71,6 +109,13 @@ Future<void> multiGolden(
 
   /// Whether to clip the screen to the screen radius.
   bool clipScreenToRadius = true,
+
+  /// Optional per-scenario [WidgetTreeOptions] overrides.
+  ///
+  /// Keys must match the keys in [widgets]. When a scenario key is present
+  /// here, these options are merged on top of the default options (only
+  /// [goldenName] is always derived from the slug and cannot be overridden).
+  Map<String, WidgetTreeOptions> widgetTreeOptionsOverrides = const {},
 }) async {
   // Save global state to restore on exit (prevents test contamination)
   final savedDebugDisableShadows = debugDisableShadows;
@@ -105,8 +150,7 @@ Future<void> multiGolden(
 
               // Apply target platform from ldFrameOptions
               if (ldFrameOptions.platform != null) {
-                debugDefaultTargetPlatformOverride =
-                    ldFrameOptions.targetPlatform;
+                debugDefaultTargetPlatformOverride = ldFrameOptions.targetPlatform;
               }
 
               // If we dont have a specified height, we start as a square
@@ -130,8 +174,15 @@ Future<void> multiGolden(
 
               final key = ValueKey(slug);
 
-              // Place the widget
+              // placedWidget is set by the placeWidget callback so we can
+              // capture the golden AFTER the full builder has run (including
+              // any post-placement interactions such as tapping to open a modal).
+              Widget? placedWidget;
+
+              // Place the widget — only pumps it; golden capture happens below.
               await entry.value(tester, (widget) async {
+                placedWidget = widget;
+
                 final frame = RepaintBoundary(
                   key: key,
                   child: ClipRRect(
@@ -169,54 +220,48 @@ Future<void> multiGolden(
                     duration: Duration(milliseconds: 100),
                   );
                 }
-
-                if (performWidgetTreeTests) {
-                  try {
-                    await widgetTreeMatchesGolden(
-                      tester,
-                      widget: widget,
-                      options: WidgetTreeOptions(goldenName: '$name/$slug'),
-                    );
-                  } catch (e) {
-                    // Capture screenshot for visual debugging when XML mismatches
-                    try {
-                      await tester.pumpAndSettle();
-                      final element = tester.element(find.byKey(key));
-                      final renderObject = element.renderObject;
-                      if (renderObject is RenderRepaintBoundary) {
-                        final image = await renderObject.toImage(
-                          pixelRatio: tester.view.devicePixelRatio,
-                        );
-                        final byteData = await image.toByteData(
-                          format: ui.ImageByteFormat.png,
-                        );
-                        if (byteData != null) {
-                          const failurePath =
-                              'test/failures/golden_widget_trees';
-                          final pngFile = File(
-                            path.join(
-                              failurePath,
-                              name,
-                              '$slug.png',
-                            ),
-                          );
-                          pngFile.parent.createSync(recursive: true);
-                          pngFile.writeAsBytesSync(
-                            byteData.buffer.asUint8List(),
-                          );
-                        }
-                      }
-                    } catch (_) {
-                      // Ignore screenshot failures; the XML failure is the main error
-                    }
-                    failureMessages.add(
-                      'Widget tree test failed for $name/$slug: ${e.toString()}',
-                    );
-                  }
-                }
+                // Settle after pumping so GoRouter finishes its initial routing
+                // and all widgets are ready before the scenario builder proceeds
+                // to do interactions (e.g. tapping to open a modal).
+                await tester.pumpAndSettle();
               });
 
-              await tester.pumpAndSettle();
+              // Capture the golden AFTER the full builder has run so that any
+              // post-placement interactions (e.g. opening a modal) are reflected.
+              if (performWidgetTreeTests && placedWidget != null) {
+                try {
+                  final scenarioOverride = widgetTreeOptionsOverrides[entry.key];
+                  await widgetTreeMatchesGolden(
+                    tester,
+                    widget: placedWidget!,
+                    options: WidgetTreeOptions(
+                      goldenName: '$name/$slug',
+                      findWidget: scenarioOverride?.findWidget,
+                      strippedWidgets: scenarioOverride?.strippedWidgets ?? defaultIgnoredWidgets,
+                      stripPrivateWidgets: scenarioOverride?.stripPrivateWidgets ?? true,
+                      includeWidgetBounds: scenarioOverride?.includeWidgetBounds ?? IncludeWidgetBounds.relative,
+                      boundsPrecision: scenarioOverride?.boundsPrecision ?? 0,
+                    ),
+                  );
+                } catch (e) {
+                  try {
+                    await writeFailureScreenshot(
+                      tester,
+                      find.byKey(key),
+                      path.join(
+                        'test/failures/golden_widget_trees',
+                        name,
+                        '$slug.png',
+                      ),
+                    );
+                  } catch (_) {
+                    // Ignore screenshot failures; the XML failure is the main error
+                  }
+                  failureMessages.add(
+                    'Widget tree test failed for $name/$slug: ${e.toString()}',
+                  );
+                }
+              }
 
               debugDefaultTargetPlatformOverride = null;
             }

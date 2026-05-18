@@ -115,7 +115,11 @@ class _AppBarFrameState extends State<AppBarFrame> {
 
   int _calculateLevel() {
     // Read from parent LdAppBarMetrics provider.
-    final parentMetrics = context.watch<LdAppBarMetrics?>();
+    // Use context.read (not watch): level is a structural property determined by
+    // nesting depth and doesn't change reactively during a frame; watching would
+    // cause this frame to rebuild whenever any parent-bar metric (e.g. barHeight,
+    // isScrolledUnder) changes, creating an unbounded rebuild cascade.
+    final parentMetrics = context.read<LdAppBarMetrics?>();
     if (parentMetrics == null) return 0;
     return parentMetrics.position == widget.position ? parentMetrics.level + 1 : 0;
   }
@@ -247,16 +251,14 @@ class _AppBarFrameState extends State<AppBarFrame> {
         : widget.insideDecoration;
     return MeasureSize(
       onSizeChange: _onSizeChange,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
+      child: Container(
         padding: _outsideContainerPadding(constraints),
         decoration: outsideDeco,
         // Only clip when there is a decoration; Container asserts if clipBehavior
         // is non-none but decoration is null.
         clipBehavior: outsideDeco != null ? Clip.hardEdge : Clip.none,
         key: Key("appbar_frame_outside_${widget.position.name}"),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
+        child: Container(
           decoration: insideDeco,
           padding: _insidePadding(constraints),
           clipBehavior: insideDeco != null ? Clip.hardEdge : Clip.none,

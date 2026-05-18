@@ -136,18 +136,31 @@ void main() {
           initialSelected: {},
         );
 
-        final repository = createTestRepository(
-          filters: {filter},
-        );
+        final shellState = TestSortAndFilterState<TestItem, int>(filters: {filter});
+        final repository = createTestRepository();
 
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
               localizationsDelegates: LiquidLocalizations.localizationsDelegates,
               home: Scaffold(
-                body: ListenableProvider.value(
+                body: ListenableProvider<LdRepository<TestItem, int>>.value(
                   value: repository,
-                  child: const LdFilterModal<TestItem, int>(),
+                  child: ListenableProvider<TestSortAndFilterState<TestItem, int>>.value(
+                    value: shellState,
+                    child: Provider<LdMonkeyRouterController<TestItem, int>>.value(
+                      value: shellState.controllerDelegate,
+                      child: Builder(
+                        builder: (context) {
+                          context.watch<TestSortAndFilterState<TestItem, int>>();
+                          return Provider<LdMonkeySortAndFilterState<TestItem, int>>.value(
+                            value: shellState.state,
+                            child: const LdFilterModal<TestItem, int>(),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -172,21 +185,16 @@ void main() {
 
         final categoriesFilterButton = find.widgetWithText(LdButton, 'Categories');
 
-        expect(repository.filters['categories']!.isOn, isFalse);
-
+        expect(shellState.filtersMap['categories']!.isOn, isFalse);
         expect(categoriesFilterButton, findsOneWidget);
+
         await tester.tap(categoriesFilterButton);
         await tester.pumpAndSettle();
 
-        // Check if the filter is now active in the repository's filters
-        expect(repository.filters['categories']!.isOn, isTrue);
+        expect(shellState.filtersMap['categories']!.isOn, isTrue);
 
-        // Find the LdChoose widget and interact with it
-        // LdChoose shows a button that opens a modal/page with selectable items
-        // Find the LdTouchableSurface that triggers the choose menu
         await openChooseMenu(tester);
 
-        // Now find and tap Category A in the modal
         final categoryAItem = find.widgetWithText(LdListItem, 'Category A');
         expect(categoryAItem, findsOneWidget);
 
@@ -195,25 +203,22 @@ void main() {
 
         await doneChooseMenu(tester);
 
-        // Verify Category A is selected
-        final updatedFilter = repository.filters['categories'] as LdFilterAnyOf<TestItem, int, _Category>;
+        final updatedFilter = shellState.filtersMap['categories'] as LdFilterAnyOf<TestItem, int, _Category>;
         expect(updatedFilter.selectedValues, contains(_Category.categoryA));
         expect(updatedFilter.isOn, isTrue);
 
-        //await debugCaptureImage(tester, 'filter_any_of_test_3');
-        // Open the choose menu again to select Category B
         await openChooseMenu(tester);
         await tester.pumpAndSettle();
 
         final categoryBItem = find.widgetWithText(LdListItem, 'Category B');
         expect(categoryBItem, findsOneWidget);
+
         await tester.tap(categoryBItem);
         await tester.pumpAndSettle();
 
         await doneChooseMenu(tester);
 
-        // Verify both categories are selected
-        final updatedFilter2 = repository.filters['categories'] as LdFilterAnyOf<TestItem, int, _Category>;
+        final updatedFilter2 = shellState.filtersMap['categories'] as LdFilterAnyOf<TestItem, int, _Category>;
         expect(updatedFilter2.selectedValues, contains(_Category.categoryA));
         expect(updatedFilter2.selectedValues, contains(_Category.categoryB));
         expect(updatedFilter2.isOn, isTrue);
@@ -227,20 +232,17 @@ void main() {
 
         await doneChooseMenu(tester);
 
-        // Verify only Category B is selected
-        final updatedFilter3 = repository.filters['categories'] as LdFilterAnyOf<TestItem, int, _Category>;
+        final updatedFilter3 = shellState.filtersMap['categories'] as LdFilterAnyOf<TestItem, int, _Category>;
         expect(updatedFilter3.selectedValues, isNot(contains(_Category.categoryA)));
         expect(updatedFilter3.selectedValues, contains(_Category.categoryB));
         expect(updatedFilter3.isOn, isTrue);
 
-        // Find and tap the X button to deactivate
         final xIconButton = find.widgetWithIcon(LdButton, LucideIcons.x);
         expect(xIconButton, findsOneWidget);
         await tester.tap(xIconButton);
         await tester.pumpAndSettle();
 
-        // Check if the filter is now inactive in the repository's filters
-        expect(repository.filters['categories']!.isOn, isFalse);
+        expect(shellState.filtersMap['categories']!.isOn, isFalse);
       });
     });
   });

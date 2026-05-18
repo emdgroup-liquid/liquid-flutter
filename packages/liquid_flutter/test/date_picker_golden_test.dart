@@ -41,6 +41,14 @@ void main() {
         },
       },
       frameScenarios: const [LdFrameOptions(width: 800, height: 800)],
+      widgetTreeOptionsOverrides: {
+        // The date picker sheet is rendered in a Navigator overlay, outside
+        // the LdDatePicker widget subtree. Root the golden at the sheet itself
+        // so the opened dialog is captured rather than the background picker.
+        "Open": WidgetTreeOptions(
+          findWidget: (tester, _) => find.byKey(const Key('date_picker_sheet')),
+        ),
+      },
     );
   });
 }
