@@ -77,7 +77,7 @@ class _LdCheckboxState extends State<_LdCheckboxWidget> {
 
     final label = LdFormLabel(
       label: widget.label,
-      size: size,
+      size: widget.size,
       direction: Axis.horizontal,
     );
 

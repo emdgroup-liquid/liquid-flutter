@@ -80,9 +80,9 @@ class _SourceCodeState extends State<SourceCode> {
 
     final code = reduceIndent(widget.code);
 
-    var highlighter = Highlighter(
+    final highlighter = Highlighter(
       language: widget.language,
-      theme: LdTheme.of(context).isDark ? themeDark! : themeLight!,
+      theme: LdTheme.of(context, listen: true).isDark ? themeDark! : themeLight!,
     );
 
     final highlightedCode = highlighter.highlight(code);

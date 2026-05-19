@@ -53,6 +53,7 @@ List<Widget> generateAutoSpacings({
     _LdSizeItem spacer = switch ((child.runtimeType, next.runtimeType)) {
       (LdText childText, _) => switch (next.runtimeType) {
           (LdText nextText) => switch ((childText.type, nextText.type)) {
+              (LdTextType.headline, LdTextType.label) => _LdSizeItem(LdSize.s, 1),
               (LdTextType.headline, _) => _LdSizeItem(LdSize.l, 2),
               (LdTextType.paragraph, LdTextType.headline) => _LdSizeItem(LdSize.l, 3),
               (LdTextType.paragraph, LdTextType.paragraph) => _LdSizeItem(LdSize.m, 1),
