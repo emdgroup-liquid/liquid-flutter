@@ -29,7 +29,6 @@ class _AppScaffoldState extends State<AppScaffold> {
     return LdScaffold(
       drawer: MainNavigationDrawer(),
       body: LdAppBar(
-        shadowMode: LdAppBarShadowMode.hidden,
         debugName: "Master App Bar",
         leading: Container(
           height: 24,

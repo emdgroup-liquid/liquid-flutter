@@ -136,9 +136,8 @@ class AppRouter {
                     routeConfig: fileRouteConfig,
                     masterPage: FileMasterPage(),
                     detailPage: FileDetailPage(),
-                    repositoryBuilder: (context, state) => fileRepository(
-                      state.pathParameters[projectRouteConfig.viewingParamName]!,
-                    ),
+                    repositoryBuilder: (context, state) =>
+                        fileRepository(state.pathParameters[projectRouteConfig.viewingParamName]!),
                     filters: const [],
                     sortOptions: const [],
                     actions: const [],
@@ -148,38 +147,27 @@ class AppRouter {
             ],
           ),
         ],
-        builder: (context, state, navigationShell) => DemoShell(child: navigationShell),
+        pageBuilder: (context, state, child) => NoTransitionPage<void>(
+          key: state.pageKey,
+          child: DemoShell(child: child),
+        ),
       ),
       GoRoute(
         path: "/components/appbar",
         pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const AppBarDemo()),
       ),
       ShellRoute(
-        builder: (context, state, child) {
-          return AppScaffold(title: const Text("Liquid Flutter"), state: state, child: child);
-        },
+        pageBuilder: (context, state, child) => NoTransitionPage<void>(
+          key: state.pageKey,
+          child: AppScaffold(title: const Text("Liquid Flutter"), state: state, child: child),
+        ),
+
         routes: [
-          ShellRoute(
-            pageBuilder: (context, state, child) => NoTransitionPage<void>(
-              key: state.pageKey,
-              child: ChemicalShell(child: child),
-            ),
-            routes: [
-              GoRoute(
-                path: "/chemical",
-                pageBuilder: (context, state) =>
-                    NoTransitionPage<void>(key: state.pageKey, child: const ChemicalScreen()),
-              ),
-              GoRoute(
-                path: "/chemical-detail",
-                pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const ThemeDemo()),
-              ),
-              GoRoute(
-                path: "/chemical-usage",
-                pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const ThemeDemo()),
-              ),
-            ],
+          GoRoute(
+            path: "/chemical",
+            pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const ChemicalScreen()),
           ),
+
           GoRoute(
             path: "/",
             pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const Home()),
@@ -441,10 +429,7 @@ class NavTest extends StatelessWidget {
           child: LdButton(child: Text("Pop"), onPressed: () => context.pop()),
         ),
       ),
-      body: LdAppBar(
-        title: Text("Nav Test"),
-        child: LdText("Nav Test"),
-      ),
+      body: LdAppBar(title: Text("Nav Test"), child: LdText("Nav Test")),
     );
   }
 }
