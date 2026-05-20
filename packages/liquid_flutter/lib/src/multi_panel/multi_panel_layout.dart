@@ -714,13 +714,49 @@ class LdMultiPanelChildState {
   final bool onScreen;
   final bool isDragging;
   final double dragOffset;
+  final LdPanelRole role;
+
   LdMultiPanelChildState({
     required this.left,
     required this.width,
     required this.onScreen,
     required this.isDragging,
     required this.dragOffset,
+    this.role = LdPanelRole.body,
   });
+
+  LdMultiPanelChildState copyWith({
+    double? left,
+    double? width,
+    bool? onScreen,
+    bool? isDragging,
+    double? dragOffset,
+    LdPanelRole? role,
+  }) {
+    return LdMultiPanelChildState(
+      left: left ?? this.left,
+      width: width ?? this.width,
+      onScreen: onScreen ?? this.onScreen,
+      isDragging: isDragging ?? this.isDragging,
+      dragOffset: dragOffset ?? this.dragOffset,
+      role: role ?? this.role,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is LdMultiPanelChildState &&
+        other.left == left &&
+        other.width == width &&
+        other.onScreen == onScreen &&
+        other.isDragging == isDragging &&
+        other.dragOffset == dragOffset &&
+        other.role == role;
+  }
+
+  @override
+  int get hashCode => Object.hash(left, width, onScreen, isDragging, dragOffset, role);
 
   static LdMultiPanelChildState of(BuildContext context) {
     return context.read<LdMultiPanelChildState>();
