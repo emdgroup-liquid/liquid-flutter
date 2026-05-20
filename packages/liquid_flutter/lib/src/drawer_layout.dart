@@ -47,8 +47,7 @@ class LdDrawerLayout extends StatefulWidget {
 class LdDrawerLayoutState extends State<LdDrawerLayout> {
   LocalHistoryEntry? _historyEntry;
 
-  int _visibleStartIndex = 1; // Start with only body visible (closed)
-  int _visibleEndIndex = 1;
+  bool _panelVisible = false;
   double _effectiveDrawerWidth = 0;
   bool _isSideBySide = false;
 
@@ -56,7 +55,7 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
   initState() {
     super.initState();
     if (LdTheme.of(context).platform.isDesktop) {
-      _visibleStartIndex = 0;
+      _panelVisible = true;
     }
   }
 
@@ -69,7 +68,7 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
   }
 
   void toggleDrawer() {
-    if (_isDrawerOpen) {
+    if (_panelVisible) {
       _hideDrawer();
     } else {
       _showDrawer();
@@ -82,20 +81,13 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
     super.dispose();
   }
 
-  void _onVisibleRangeChanged(int startIndex, int endIndex) {
-    final wasOpen = _isDrawerOpen;
-    setState(() {
-      _visibleStartIndex = startIndex;
-      _visibleEndIndex = endIndex;
-    });
-
-    if (_isDrawerOpen && !wasOpen) {
+  void _onPanelVisibilityChanged(bool visible) {
+    if (visible) {
       _ensureHistoryEntry();
-    } else if (!_isDrawerOpen && wasOpen) {
+    } else {
       _historyEntry?.remove();
       _historyEntry = null;
     }
-
     _onStateChange();
   }
 
@@ -113,7 +105,7 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
   }
 
   void _onStateChange() {
-    widget.onStateChange(LdDrawerState(isOpen: _isDrawerOpen, isSideBySide: _isSideBySide));
+    widget.onStateChange(LdDrawerState(isOpen: _panelVisible, isSideBySide: _isSideBySide));
   }
 
   void _handleHistoryEntryRemoved() {
@@ -122,8 +114,7 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
 
   void _showDrawer() {
     setState(() {
-      _visibleStartIndex = 0;
-      _visibleEndIndex = 1;
+      _panelVisible = true;
     });
     _ensureHistoryEntry();
     _onStateChange();
@@ -132,8 +123,7 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
 
   void _hideDrawer() {
     setState(() {
-      _visibleStartIndex = 1;
-      _visibleEndIndex = 1;
+      _panelVisible = false;
     });
     _historyEntry?.remove();
     _historyEntry = null;
@@ -141,7 +131,7 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
     LdHaptics.vibrate(HapticsType.light);
   }
 
-  bool get _isDrawerOpen => _visibleStartIndex == 0;
+  bool get _isDrawerOpen => _panelVisible;
 
   Border? get _drawerBorder {
     return Border(
@@ -191,54 +181,47 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
               children: [
                 LdMultiPanelLayout(
                   enableScaling: widget.enableScaling,
-                  widths: [
-                    PanelWidth.fixed(_effectiveDrawerWidth),
-                    const PanelWidth.fill(),
-                  ],
                   mode: mode,
-                  visibleStartIndex: _visibleStartIndex,
-                  visibleEndIndex: _visibleEndIndex,
-                  onVisibleRangeChanged: _onVisibleRangeChanged,
+                  panelVisible: _panelVisible,
+                  onPanelVisibilityChanged: _onPanelVisibilityChanged,
+                  initialPanelWidth: _effectiveDrawerWidth,
+                  panelPosition: LdPanelPosition.left,
+                  allowResize: false,
                   mass: 1,
                   springConstant: 12,
                   dampingCoefficient: 9,
-                  spacing: 0,
-                  children: [
-                    // Drawer panel (index 0)
-                    Provider.value(
-                      value: LdDrawerSlot.drawer,
-                      child: Provider.value(
-                        value: LdDrawerState(
-                          isOpen: _isDrawerOpen,
-                          isSideBySide: _isSideBySide,
+                  panel: Provider.value(
+                    value: LdDrawerSlot.drawer,
+                    child: Provider.value(
+                      value: LdDrawerState(
+                        isOpen: _isDrawerOpen,
+                        isSideBySide: _isSideBySide,
+                      ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: _drawerBorder,
+                          color: LdTheme.of(context).background,
                         ),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: _drawerBorder,
-                            color: LdTheme.of(context).background,
-                          ),
-                          child: widget.drawer,
-                        ),
+                        child: widget.drawer,
                       ),
                     ),
-                    // Body panel (index 1)
-                    Provider.value(
-                      value: LdDrawerSlot.body,
-                      child: Provider.value(
-                        value: LdDrawerState(
-                          isOpen: _isDrawerOpen,
-                          isSideBySide: _isSideBySide,
+                  ),
+                  body: Provider.value(
+                    value: LdDrawerSlot.body,
+                    child: Provider.value(
+                      value: LdDrawerState(
+                        isOpen: _isDrawerOpen,
+                        isSideBySide: _isSideBySide,
+                      ),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          boxShadow: [ldShadowSticky],
+                          color: LdTheme.of(context).background,
                         ),
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            boxShadow: [ldShadowSticky],
-                            color: LdTheme.of(context).background,
-                          ),
-                          child: widget.body,
-                        ),
+                        child: widget.body,
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ],
             );
