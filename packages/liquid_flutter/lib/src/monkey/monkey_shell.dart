@@ -149,6 +149,7 @@ class _MonkeyShellLayoutBuilder<T extends Identifiable<IdType>, IdType> extends 
               child: LdMultiPanelLayout(
                 mode: LdMultiPanelLayoutMode.sideBySide,
                 panelVisible: showingDetail,
+                allowResize: true,
                 panelPosition: LdPanelPosition.right,
                 initialPanelFraction: detailPanelFlex / (1 + detailPanelFlex),
                 body: Provider.value(

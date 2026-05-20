@@ -11,43 +11,74 @@ class MultiPanelLayoutDemo extends StatefulWidget {
 }
 
 class _MultiPanelLayoutDemoState extends State<MultiPanelLayoutDemo> {
-  LdMultiPanelLayoutMode _mode = LdMultiPanelLayoutMode.stacked;
-  bool _panelVisible = true;
+  LdMultiPanelLayoutMode _mode = LdMultiPanelLayoutMode.sideBySide;
   LdPanelPosition _panelPosition = LdPanelPosition.left;
   bool _allowResize = false;
+  bool _panelVisible = true;
 
-  Widget _buildPanel(String title, Color color, LdPanelRole role) {
-    return Builder(builder: (context) {
-      final state = LdMultiPanelChildState.watch(context);
-      return Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: LdTheme.of(context).border),
-          color: color.withAlpha(51),
-        ),
-        child: Center(
+  Widget _buildChildInfo(BuildContext context, LdMultiPanelChildState state) {
+    final theme = LdTheme.of(context);
+    return Container(
+      decoration: BoxDecoration(
+        color: state.role == LdPanelRole.panel
+            ? theme.palette.primary.idle(theme.isDark).withAlpha(40)
+            : theme.palette.secondary.idle(theme.isDark).withAlpha(40),
+        border: Border.all(color: theme.border),
+      ),
+      child: Center(
+        child: Padding(
+          padding: theme.pad(size: LdSize.m),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              LdText.hs(title),
+              LdText.hs(
+                state.role == LdPanelRole.panel ? "Panel" : "Body",
+              ),
+              ldSpacerS,
               LdText.p(
-                "Role: ${state.role.name}, On Screen: ${state.onScreen}",
+                "Role: ${state.role.name}",
                 textAlign: TextAlign.center,
               ),
               LdText.p(
-                "Width: ${state.width.toStringAsFixed(0)}px",
+                "Left: ${state.left.toStringAsFixed(0)} px",
+                textAlign: TextAlign.center,
+              ),
+              LdText.p(
+                "Width: ${state.width.toStringAsFixed(0)} px",
+                textAlign: TextAlign.center,
+              ),
+              LdText.p(
+                "Dragging: ${state.isDragging}",
                 textAlign: TextAlign.center,
               ),
             ],
           ),
         ),
-      );
-    });
+      ),
+    );
+  }
+
+  Widget _buildPanel() {
+    return Builder(
+      builder: (context) {
+        final state = LdMultiPanelChildState.watch(context);
+        return _buildChildInfo(context, state);
+      },
+    );
+  }
+
+  Widget _buildBody() {
+    return Builder(
+      builder: (context) {
+        final state = LdMultiPanelChildState.watch(context);
+        return _buildChildInfo(context, state);
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = LdTheme.of(context);
-    final isDark = theme.isDark;
     return ComponentPage(
       path: "lib/components/layout/multi_panel_layout.dart",
       title: "LdMultiPanelLayout",
@@ -56,108 +87,102 @@ class _MultiPanelLayoutDemoState extends State<MultiPanelLayoutDemo> {
         "LdMultiPanelLayoutMode",
         "LdPanelPosition",
         "LdPanelRole",
+        "LdMultiPanelChildState",
       ],
       demo: LdAutoSpace(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          LdBundle(
-            children: [
-              LdCard(
-                padding: EdgeInsets.zero,
-                child: SizedBox(
-                  height: 250,
-                  child: LdMultiPanelLayout(
-                    mode: _mode,
-                    panelVisible: _panelVisible,
-                    panelPosition: _panelPosition,
-                    allowResize: _allowResize,
-                    initialPanelWidth: 200,
-                    onPanelVisibilityChanged: (visible) {
-                      setState(() {
-                        _panelVisible = visible;
-                      });
-                    },
-                    panel: _buildPanel(
-                      "Panel",
-                      theme.palette.primary.idle(isDark),
-                      LdPanelRole.panel,
+          // Live preview
+          LdCard(
+            padding: EdgeInsets.zero,
+            child: SizedBox(
+              height: 400,
+              child: LdMultiPanelLayout(
+                mode: _mode,
+                panelPosition: _panelPosition,
+                allowResize: _allowResize,
+                panelVisible: _panelVisible,
+                initialPanelWidth: 200,
+                onPanelVisibilityChanged: (visible) {
+                  setState(() {
+                    _panelVisible = visible;
+                  });
+                },
+                panel: _buildPanel(),
+                body: _buildBody(),
+              ),
+            ),
+          ),
+          // Controls
+          LdCard(
+            child: LdAutoSpace(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                LdText.hs("Controls"),
+                LdSelect<LdMultiPanelLayoutMode>(
+                  value: _mode,
+                  label: "Mode",
+                  items: const [
+                    LdSelectItem(
+                      value: LdMultiPanelLayoutMode.sideBySide,
+                      child: Text("Side by Side"),
                     ),
-                    body: _buildPanel(
-                      "Body",
-                      theme.palette.secondary.idle(isDark),
-                      LdPanelRole.body,
+                    LdSelectItem(
+                      value: LdMultiPanelLayoutMode.stacked,
+                      child: Text("Stacked"),
                     ),
-                  ),
+                  ],
+                  onChanged: (mode) => setState(() => _mode = mode),
                 ),
-              ),
-              LdBundle(
-                children: [
-                  LdSelect<LdMultiPanelLayoutMode>(
-                    value: _mode,
-                    label: "Layout Mode",
-                    items: const [
-                      LdSelectItem(
-                        child: Text("Side by Side"),
-                        value: LdMultiPanelLayoutMode.sideBySide,
-                      ),
-                      LdSelectItem(
-                        child: Text("Stacked"),
-                        value: LdMultiPanelLayoutMode.stacked,
-                      ),
-                    ],
-                    onChanged: (mode) {
-                      setState(() {
-                        _mode = mode;
-                      });
-                    },
-                  ),
-                  LdSelect<LdPanelPosition>(
-                    value: _panelPosition,
-                    label: "Panel Position",
-                    items: const [
-                      LdSelectItem(
-                        child: Text("Left"),
-                        value: LdPanelPosition.left,
-                      ),
-                      LdSelectItem(
-                        child: Text("Right"),
-                        value: LdPanelPosition.right,
-                      ),
-                    ],
-                    onChanged: (pos) {
-                      setState(() {
-                        _panelPosition = pos;
-                      });
-                    },
-                  ),
-                ],
-              ),
-              LdToggle(
-                checked: _panelVisible,
-                onChanged: (v) => setState(() => _panelVisible = v),
-                label: "Panel Visible",
-              ),
-              LdToggle(
-                checked: _allowResize,
-                onChanged: (v) => setState(() => _allowResize = v),
-                label: "Allow Resize (side-by-side only)",
-              ),
-              Row(
-                children: [
-                  LdButton(
-                    onPressed: () => setState(() => _panelVisible = !_panelVisible),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(_panelVisible ? LucideIcons.panelLeftClose : LucideIcons.panelLeftOpen),
-                        const SizedBox(width: 8),
-                        Text(_panelVisible ? "Hide Panel" : "Show Panel"),
-                      ],
+                LdSelect<LdPanelPosition>(
+                  value: _panelPosition,
+                  label: "Panel Position",
+                  items: const [
+                    LdSelectItem(
+                      value: LdPanelPosition.left,
+                      child: Text("Left"),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    LdSelectItem(
+                      value: LdPanelPosition.right,
+                      child: Text("Right"),
+                    ),
+                  ],
+                  onChanged: (pos) => setState(() => _panelPosition = pos),
+                ),
+                LdToggle(
+                  label: "Allow Resize (side-by-side only)",
+                  checked: _allowResize,
+                  onChanged: (v) => setState(() => _allowResize = v),
+                ),
+                LdToggle(
+                  label: "Panel Visible",
+                  checked: _panelVisible,
+                  onChanged: (v) => setState(() => _panelVisible = v),
+                ),
+                Row(
+                  children: [
+                    LdButton(
+                      onPressed: () =>
+                          setState(() => _panelVisible = !_panelVisible),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _panelVisible
+                                ? LucideIcons.panelLeftClose
+                                : LucideIcons.panelLeftOpen,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            _panelVisible ? "Hide Panel" : "Show Panel",
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),

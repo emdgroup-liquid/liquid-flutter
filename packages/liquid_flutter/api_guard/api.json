@@ -3,7 +3,6 @@
     "packageName": "liquid_flutter",
     "packageVersion": "23.0.0",
     "sdkVersion": ">=3.5.0 <4.0.0",
-    "flutterVersion": null,
     "dependencies": [
       {
         "packageName": "flutter",
@@ -121924,7 +121923,7 @@
       "filePath": "lib/src/multi_panel/multi_panel_layout.dart",
       "entryPoint": "lib/liquid_flutter.dart",
       "name": "LdMultiPanelLayout",
-      "description": "",
+      "description": " A layout widget that displays a [body] and a [panel] side-by-side or stacked.\n\n In [LdMultiPanelLayoutMode.sideBySide] mode, the [panel] and [body] are shown\n next to each other. In [LdMultiPanelLayoutMode.stacked] mode, the [panel]\n slides over the [body] from the edge.",
       "constructors": [
         {
           "name": "new",
@@ -121945,44 +121944,6 @@
               "annotations": []
             },
             {
-              "name": "children",
-              "description": "",
-              "type": {
-                "name": "List<Widget>",
-                "superTypes": [
-                  "Object",
-                  "Iterable",
-                  "_ListIterable",
-                  "EfficientLengthIterable",
-                  "HideEfficientLengthIterable"
-                ],
-                "isNullable": false
-              },
-              "named": true,
-              "required": true,
-              "defaultValue": null,
-              "annotations": []
-            },
-            {
-              "name": "widths",
-              "description": "",
-              "type": {
-                "name": "List<PanelWidth>",
-                "superTypes": [
-                  "Object",
-                  "Iterable",
-                  "_ListIterable",
-                  "EfficientLengthIterable",
-                  "HideEfficientLengthIterable"
-                ],
-                "isNullable": false
-              },
-              "named": true,
-              "required": true,
-              "defaultValue": null,
-              "annotations": []
-            },
-            {
               "name": "mode",
               "description": "",
               "type": {
@@ -121999,24 +121960,57 @@
               "annotations": []
             },
             {
-              "name": "visibleStartIndex",
+              "name": "body",
               "description": "",
               "type": {
-                "name": "int",
+                "name": "Widget",
                 "superTypes": [
-                  "num",
+                  "DiagnosticableTree",
                   "Object",
-                  "Comparable"
+                  "Diagnosticable"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "panel",
+              "description": "",
+              "type": {
+                "name": "Widget",
+                "superTypes": [
+                  "DiagnosticableTree",
+                  "Object",
+                  "Diagnosticable"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "panelPosition",
+              "description": "",
+              "type": {
+                "name": "LdPanelPosition",
+                "superTypes": [
+                  "Enum",
+                  "Object"
                 ],
                 "isNullable": false
               },
               "named": true,
               "required": false,
-              "defaultValue": "0",
+              "defaultValue": "LdPanelPosition.left",
               "annotations": []
             },
             {
-              "name": "enableBorders",
+              "name": "allowResize",
               "description": "",
               "type": {
                 "name": "bool",
@@ -122031,10 +122025,44 @@
               "annotations": []
             },
             {
-              "name": "visibleEndIndex",
+              "name": "initialPanelWidth",
               "description": "",
               "type": {
-                "name": "int",
+                "name": "double?",
+                "superTypes": [
+                  "num",
+                  "Object",
+                  "Comparable"
+                ],
+                "isNullable": true
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "initialPanelFraction",
+              "description": "",
+              "type": {
+                "name": "double?",
+                "superTypes": [
+                  "num",
+                  "Object",
+                  "Comparable"
+                ],
+                "isNullable": true
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "minPanelWidth",
+              "description": "",
+              "type": {
+                "name": "double",
                 "superTypes": [
                   "num",
                   "Object",
@@ -122044,14 +122072,74 @@
               },
               "named": true,
               "required": false,
-              "defaultValue": "1",
+              "defaultValue": "80",
               "annotations": []
             },
             {
-              "name": "onVisibleRangeChanged",
+              "name": "initialPanelVisible",
               "description": "",
               "type": {
-                "name": "void Function(int, int)?",
+                "name": "bool?",
+                "superTypes": [
+                  "Object"
+                ],
+                "isNullable": true
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "panelVisible",
+              "description": "",
+              "type": {
+                "name": "bool?",
+                "superTypes": [
+                  "Object"
+                ],
+                "isNullable": true
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "onPanelVisibilityChanged",
+              "description": "",
+              "type": {
+                "name": "void Function(bool)?",
+                "superTypes": [],
+                "isNullable": true
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "panelWidth",
+              "description": "",
+              "type": {
+                "name": "double?",
+                "superTypes": [
+                  "num",
+                  "Object",
+                  "Comparable"
+                ],
+                "isNullable": true
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "onPanelWidthChanged",
+              "description": "",
+              "type": {
+                "name": "void Function(double)?",
                 "superTypes": [],
                 "isNullable": true
               },
@@ -122092,23 +122180,6 @@
               "named": true,
               "required": false,
               "defaultValue": "3",
-              "annotations": []
-            },
-            {
-              "name": "spacing",
-              "description": "",
-              "type": {
-                "name": "double",
-                "superTypes": [
-                  "num",
-                  "Object",
-                  "Comparable"
-                ],
-                "isNullable": false
-              },
-              "named": true,
-              "required": false,
-              "defaultValue": "0",
               "annotations": []
             },
             {
@@ -122182,44 +122253,6 @@
           "annotations": []
         },
         {
-          "name": "children",
-          "type": {
-            "name": "List<Widget>",
-            "superTypes": [
-              "Object",
-              "Iterable",
-              "_ListIterable",
-              "EfficientLengthIterable",
-              "HideEfficientLengthIterable"
-            ],
-            "isNullable": false
-          },
-          "description": "",
-          "features": [
-            "final"
-          ],
-          "annotations": []
-        },
-        {
-          "name": "widths",
-          "type": {
-            "name": "List<PanelWidth>",
-            "superTypes": [
-              "Object",
-              "Iterable",
-              "_ListIterable",
-              "EfficientLengthIterable",
-              "HideEfficientLengthIterable"
-            ],
-            "isNullable": false
-          },
-          "description": "",
-          "features": [
-            "final"
-          ],
-          "annotations": []
-        },
-        {
           "name": "mode",
           "type": {
             "name": "LdMultiPanelLayoutMode",
@@ -122229,61 +122262,64 @@
             ],
             "isNullable": false
           },
-          "description": "",
+          "description": " The layout mode.",
           "features": [
             "final"
           ],
           "annotations": []
         },
         {
-          "name": "visibleStartIndex",
+          "name": "body",
           "type": {
-            "name": "int",
+            "name": "Widget",
             "superTypes": [
-              "num",
+              "DiagnosticableTree",
               "Object",
-              "Comparable"
+              "Diagnosticable"
             ],
             "isNullable": false
           },
-          "description": "",
+          "description": " The main body content, filling the remaining space.",
           "features": [
             "final"
           ],
           "annotations": []
         },
         {
-          "name": "visibleEndIndex",
+          "name": "panel",
           "type": {
-            "name": "int",
+            "name": "Widget",
             "superTypes": [
-              "num",
+              "DiagnosticableTree",
               "Object",
-              "Comparable"
+              "Diagnosticable"
             ],
             "isNullable": false
           },
-          "description": "",
+          "description": " The side panel.",
           "features": [
             "final"
           ],
           "annotations": []
         },
         {
-          "name": "onVisibleRangeChanged",
+          "name": "panelPosition",
           "type": {
-            "name": "void Function(int, int)?",
-            "superTypes": [],
-            "isNullable": true
+            "name": "LdPanelPosition",
+            "superTypes": [
+              "Enum",
+              "Object"
+            ],
+            "isNullable": false
           },
-          "description": "",
+          "description": " Which side the panel appears on.",
           "features": [
             "final"
           ],
           "annotations": []
         },
         {
-          "name": "enableBorders",
+          "name": "allowResize",
           "type": {
             "name": "bool",
             "superTypes": [
@@ -122291,7 +122327,131 @@
             ],
             "isNullable": false
           },
-          "description": "",
+          "description": " When true, a drag handle is shown between panel and body in sideBySide mode.",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "initialPanelWidth",
+          "type": {
+            "name": "double?",
+            "superTypes": [
+              "num",
+              "Object",
+              "Comparable"
+            ],
+            "isNullable": true
+          },
+          "description": " One-time seed for panel width in pixels. Mutually exclusive with [initialPanelFraction].",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "initialPanelFraction",
+          "type": {
+            "name": "double?",
+            "superTypes": [
+              "num",
+              "Object",
+              "Comparable"
+            ],
+            "isNullable": true
+          },
+          "description": " One-time seed for panel width as a fraction of total width. Mutually exclusive\n with [initialPanelWidth].",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "minPanelWidth",
+          "type": {
+            "name": "double",
+            "superTypes": [
+              "num",
+              "Object",
+              "Comparable"
+            ],
+            "isNullable": false
+          },
+          "description": " Minimum panel width when resizing.",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "initialPanelVisible",
+          "type": {
+            "name": "bool?",
+            "superTypes": [
+              "Object"
+            ],
+            "isNullable": true
+          },
+          "description": " One-time seed for panel visibility. Null means the internal default (false).",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "panelVisible",
+          "type": {
+            "name": "bool?",
+            "superTypes": [
+              "Object"
+            ],
+            "isNullable": true
+          },
+          "description": " Reactive visibility override. When non-null, controls visibility externally.",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "onPanelVisibilityChanged",
+          "type": {
+            "name": "void Function(bool)?",
+            "superTypes": [],
+            "isNullable": true
+          },
+          "description": " Called when the panel's visibility changes.",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "panelWidth",
+          "type": {
+            "name": "double?",
+            "superTypes": [
+              "num",
+              "Object",
+              "Comparable"
+            ],
+            "isNullable": true
+          },
+          "description": " Controlled panel width. When non-null, this value is used directly (no spring for width).",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "onPanelWidthChanged",
+          "type": {
+            "name": "void Function(double)?",
+            "superTypes": [],
+            "isNullable": true
+          },
+          "description": " Called when the panel width changes during a resize drag.",
           "features": [
             "final"
           ],
@@ -122308,7 +122468,7 @@
             ],
             "isNullable": false
           },
-          "description": "",
+          "description": " Spring mass.",
           "features": [
             "final"
           ],
@@ -122325,7 +122485,7 @@
             ],
             "isNullable": false
           },
-          "description": "",
+          "description": " Spring constant.",
           "features": [
             "final"
           ],
@@ -122342,24 +122502,7 @@
             ],
             "isNullable": false
           },
-          "description": "",
-          "features": [
-            "final"
-          ],
-          "annotations": []
-        },
-        {
-          "name": "spacing",
-          "type": {
-            "name": "double",
-            "superTypes": [
-              "num",
-              "Object",
-              "Comparable"
-            ],
-            "isNullable": false
-          },
-          "description": "",
+          "description": " Spring damping coefficient.",
           "features": [
             "final"
           ],
@@ -122374,7 +122517,7 @@
             ],
             "isNullable": false
           },
-          "description": "",
+          "description": " Whether to enable scaling effect in stacked mode.",
           "features": [
             "final"
           ],
@@ -122859,24 +123002,24 @@
           "annotations": []
         },
         {
-          "name": "_positions",
+          "name": "_internalPanelWidth",
           "type": {
-            "name": "List<double>",
+            "name": "double",
             "superTypes": [
+              "num",
               "Object",
-              "Iterable",
-              "_ListIterable",
-              "EfficientLengthIterable",
-              "HideEfficientLengthIterable"
+              "Comparable"
             ],
             "isNullable": false
           },
-          "description": "",
-          "features": [],
+          "description": " Current panel width in uncontrolled mode.",
+          "features": [
+            "late"
+          ],
           "annotations": []
         },
         {
-          "name": "_isDragging",
+          "name": "_panelVisible",
           "type": {
             "name": "bool",
             "superTypes": [
@@ -122884,12 +123027,27 @@
             ],
             "isNullable": false
           },
-          "description": "",
+          "description": " Current visibility state (internal).",
+          "features": [
+            "late"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "_isResizing",
+          "type": {
+            "name": "bool",
+            "superTypes": [
+              "Object"
+            ],
+            "isNullable": false
+          },
+          "description": " Whether a resize gesture is active.",
           "features": [],
           "annotations": []
         },
         {
-          "name": "_dragStartX",
+          "name": "_swipeDragOffset",
           "type": {
             "name": "double",
             "superTypes": [
@@ -122899,22 +123057,7 @@
             ],
             "isNullable": false
           },
-          "description": "",
-          "features": [],
-          "annotations": []
-        },
-        {
-          "name": "_dragOffset",
-          "type": {
-            "name": "double",
-            "superTypes": [
-              "num",
-              "Object",
-              "Comparable"
-            ],
-            "isNullable": false
-          },
-          "description": "",
+          "description": " Swipe drag offset in stacked mode (for show/hide gesture).",
           "features": [],
           "annotations": []
         },
@@ -122929,45 +123072,12 @@
             ],
             "isNullable": false
           },
-          "description": "",
+          "description": " Total layout width from the most recent LayoutBuilder frame.",
           "features": [],
           "annotations": []
         },
         {
-          "name": "_widths",
-          "type": {
-            "name": "List<double>",
-            "superTypes": [
-              "Object",
-              "Iterable",
-              "_ListIterable",
-              "EfficientLengthIterable",
-              "HideEfficientLengthIterable"
-            ],
-            "isNullable": false
-          },
-          "description": "",
-          "features": [],
-          "annotations": []
-        },
-        {
-          "name": "_layoutKey",
-          "type": {
-            "name": "GlobalKey<State<StatefulWidget>>",
-            "superTypes": [
-              "Key",
-              "Object"
-            ],
-            "isNullable": false
-          },
-          "description": "",
-          "features": [
-            "final"
-          ],
-          "annotations": []
-        },
-        {
-          "name": "_dragFromLeft",
+          "name": "_fractionApplied",
           "type": {
             "name": "bool",
             "superTypes": [
@@ -122975,20 +123085,7 @@
             ],
             "isNullable": false
           },
-          "description": "",
-          "features": [],
-          "annotations": []
-        },
-        {
-          "name": "_dragFromRight",
-          "type": {
-            "name": "bool",
-            "superTypes": [
-              "Object"
-            ],
-            "isNullable": false
-          },
-          "description": "",
+          "description": " Guard to defer fraction-based width calculation to first layout frame.",
           "features": [],
           "annotations": []
         }
@@ -123356,64 +123453,19 @@
           "typeParameters": []
         },
         {
-          "name": "_initializePositions",
+          "name": "_effectivePanelWidth",
           "returnType": {
-            "name": "void",
-            "superTypes": [],
-            "isNullable": false
-          },
-          "signature": [],
-          "features": [],
-          "description": "",
-          "annotations": [],
-          "typeParameters": []
-        },
-        {
-          "name": "_nearNr",
-          "returnType": {
-            "name": "bool",
+            "name": "double",
             "superTypes": [
-              "Object"
+              "num",
+              "Object",
+              "Comparable"
             ],
             "isNullable": false
           },
           "signature": [
             {
-              "name": "position",
-              "description": "",
-              "type": {
-                "name": "double",
-                "superTypes": [
-                  "num",
-                  "Object",
-                  "Comparable"
-                ],
-                "isNullable": false
-              },
-              "named": false,
-              "required": true,
-              "defaultValue": null,
-              "annotations": []
-            },
-            {
-              "name": "value",
-              "description": "",
-              "type": {
-                "name": "double",
-                "superTypes": [
-                  "num",
-                  "Object",
-                  "Comparable"
-                ],
-                "isNullable": false
-              },
-              "named": false,
-              "required": true,
-              "defaultValue": null,
-              "annotations": []
-            },
-            {
-              "name": "threshold",
+              "name": "totalWidth",
               "description": "",
               "type": {
                 "name": "double",
@@ -123431,12 +123483,12 @@
             }
           ],
           "features": [],
-          "description": "",
+          "description": " Returns the effective panel width to use for layout.",
           "annotations": [],
           "typeParameters": []
         },
         {
-          "name": "_onDragStart",
+          "name": "_setVisibility",
           "returnType": {
             "name": "void",
             "superTypes": [],
@@ -123444,128 +123496,16 @@
           },
           "signature": [
             {
-              "name": "details",
+              "name": "visible",
               "description": "",
               "type": {
-                "name": "DragStartDetails",
+                "name": "bool",
                 "superTypes": [
-                  "Object",
-                  "PositionedGestureDetails",
-                  "Diagnosticable"
+                  "Object"
                 ],
                 "isNullable": false
               },
               "named": false,
-              "required": true,
-              "defaultValue": null,
-              "annotations": []
-            }
-          ],
-          "features": [],
-          "description": "",
-          "annotations": [],
-          "typeParameters": []
-        },
-        {
-          "name": "_onDragUpdate",
-          "returnType": {
-            "name": "void",
-            "superTypes": [],
-            "isNullable": false
-          },
-          "signature": [
-            {
-              "name": "details",
-              "description": "",
-              "type": {
-                "name": "DragUpdateDetails",
-                "superTypes": [
-                  "Object",
-                  "PositionedGestureDetails",
-                  "Diagnosticable"
-                ],
-                "isNullable": false
-              },
-              "named": false,
-              "required": true,
-              "defaultValue": null,
-              "annotations": []
-            }
-          ],
-          "features": [],
-          "description": "",
-          "annotations": [],
-          "typeParameters": []
-        },
-        {
-          "name": "_onDragEnd",
-          "returnType": {
-            "name": "void",
-            "superTypes": [],
-            "isNullable": false
-          },
-          "signature": [
-            {
-              "name": "details",
-              "description": "",
-              "type": {
-                "name": "DragEndDetails",
-                "superTypes": [
-                  "Object",
-                  "PositionedGestureDetails",
-                  "Diagnosticable"
-                ],
-                "isNullable": false
-              },
-              "named": false,
-              "required": true,
-              "defaultValue": null,
-              "annotations": []
-            }
-          ],
-          "features": [],
-          "description": "",
-          "annotations": [],
-          "typeParameters": []
-        },
-        {
-          "name": "_calculateLayout",
-          "returnType": {
-            "name": "({List<double> positions, List<double> widths})",
-            "superTypes": [],
-            "isNullable": false
-          },
-          "signature": [
-            {
-              "name": "availableWidth",
-              "description": "",
-              "type": {
-                "name": "double",
-                "superTypes": [
-                  "num",
-                  "Object",
-                  "Comparable"
-                ],
-                "isNullable": false
-              },
-              "named": false,
-              "required": true,
-              "defaultValue": null,
-              "annotations": []
-            },
-            {
-              "name": "dragOffset",
-              "description": "",
-              "type": {
-                "name": "double",
-                "superTypes": [
-                  "num",
-                  "Object",
-                  "Comparable"
-                ],
-                "isNullable": false
-              },
-              "named": true,
               "required": true,
               "defaultValue": null,
               "annotations": []
@@ -123589,52 +123529,13 @@
           },
           "signature": [
             {
-              "name": "targetPositions",
+              "name": "constraints",
               "description": "",
               "type": {
-                "name": "List<double>",
+                "name": "BoxConstraints",
                 "superTypes": [
-                  "Object",
-                  "Iterable",
-                  "_ListIterable",
-                  "EfficientLengthIterable",
-                  "HideEfficientLengthIterable"
-                ],
-                "isNullable": false
-              },
-              "named": false,
-              "required": true,
-              "defaultValue": null,
-              "annotations": []
-            },
-            {
-              "name": "widths",
-              "description": "",
-              "type": {
-                "name": "List<double>",
-                "superTypes": [
-                  "Object",
-                  "Iterable",
-                  "_ListIterable",
-                  "EfficientLengthIterable",
-                  "HideEfficientLengthIterable"
-                ],
-                "isNullable": false
-              },
-              "named": false,
-              "required": true,
-              "defaultValue": null,
-              "annotations": []
-            },
-            {
-              "name": "availableWidth",
-              "description": "",
-              "type": {
-                "name": "double",
-                "superTypes": [
-                  "num",
-                  "Object",
-                  "Comparable"
+                  "Constraints",
+                  "Object"
                 ],
                 "isNullable": false
               },
@@ -123662,14 +123563,13 @@
           },
           "signature": [
             {
-              "name": "availableWidth",
+              "name": "constraints",
               "description": "",
               "type": {
-                "name": "double",
+                "name": "BoxConstraints",
                 "superTypes": [
-                  "num",
-                  "Object",
-                  "Comparable"
+                  "Constraints",
+                  "Object"
                 ],
                 "isNullable": false
               },
@@ -123692,6 +123592,536 @@
         "State"
       ],
       "superClassPackages": [
+        "flutter"
+      ],
+      "interfaces": [],
+      "mixins": [],
+      "typeParameters": []
+    },
+    {
+      "filePath": "lib/src/multi_panel/multi_panel_layout.dart",
+      "entryPoint": "lib/liquid_flutter.dart",
+      "name": "_LdPanelResizeHandle",
+      "description": "",
+      "constructors": [
+        {
+          "name": "new",
+          "signature": [
+            {
+              "name": "isLeft",
+              "description": "",
+              "type": {
+                "name": "bool",
+                "superTypes": [
+                  "Object"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "onDragUpdate",
+              "description": "",
+              "type": {
+                "name": "void Function(double)",
+                "superTypes": [],
+                "isNullable": false
+              },
+              "named": true,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "onDragEnd",
+              "description": "",
+              "type": {
+                "name": "void Function()",
+                "superTypes": [],
+                "isNullable": false
+              },
+              "named": true,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            }
+          ],
+          "features": [
+            "const"
+          ],
+          "annotations": []
+        }
+      ],
+      "properties": [
+        {
+          "name": "key",
+          "type": {
+            "name": "Key?",
+            "superTypes": [
+              "Object"
+            ],
+            "isNullable": true
+          },
+          "description": " Controls how one widget replaces another widget in the tree.\n\n If the [runtimeType] and [key] properties of the two widgets are\n [operator==], respectively, then the new widget replaces the old widget by\n updating the underlying element (i.e., by calling [Element.update] with the\n new widget). Otherwise, the old element is removed from the tree, the new\n widget is inflated into an element, and the new element is inserted into the\n tree.\n\n In addition, using a [GlobalKey] as the widget's [key] allows the element\n to be moved around the tree (changing parent) without losing state. When a\n new widget is found (its key and type do not match a previous widget in\n the same location), but there was a widget with that same global key\n elsewhere in the tree in the previous frame, then that widget's element is\n moved to the new location.\n\n Generally, a widget that is the only child of another widget does not need\n an explicit key.\n\n See also:\n\n  * The discussions at [Key] and [GlobalKey].",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "hashCode",
+          "type": {
+            "name": "int",
+            "superTypes": [
+              "num",
+              "Object",
+              "Comparable"
+            ],
+            "isNullable": false
+          },
+          "description": "",
+          "features": [],
+          "annotations": []
+        },
+        {
+          "name": "isLeft",
+          "type": {
+            "name": "bool",
+            "superTypes": [
+              "Object"
+            ],
+            "isNullable": false
+          },
+          "description": "",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "onDragUpdate",
+          "type": {
+            "name": "void Function(double)",
+            "superTypes": [],
+            "isNullable": false
+          },
+          "description": "",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "onDragEnd",
+          "type": {
+            "name": "void Function()",
+            "superTypes": [],
+            "isNullable": false
+          },
+          "description": "",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        }
+      ],
+      "methods": [
+        {
+          "name": "createElement",
+          "returnType": {
+            "name": "Element",
+            "superTypes": [
+              "DiagnosticableTree",
+              "Object",
+              "Diagnosticable",
+              "BuildContext"
+            ],
+            "isNullable": false
+          },
+          "signature": [],
+          "features": [
+            "abstract"
+          ],
+          "description": " Inflates this configuration to a concrete instance.\n\n A given widget can be included in the tree zero or more times. In particular\n a given widget can be placed in the tree multiple times. Each time a widget\n is placed in the tree, it is inflated into an [Element], which means a\n widget that is incorporated into the tree multiple times will be inflated\n multiple times.",
+          "annotations": [
+            "@protected",
+            "@factory"
+          ],
+          "typeParameters": []
+        },
+        {
+          "name": "build",
+          "returnType": {
+            "name": "Widget",
+            "superTypes": [
+              "DiagnosticableTree",
+              "Object",
+              "Diagnosticable"
+            ],
+            "isNullable": false
+          },
+          "signature": [
+            {
+              "name": "context",
+              "description": "",
+              "type": {
+                "name": "BuildContext",
+                "superTypes": [
+                  "Object"
+                ],
+                "isNullable": false
+              },
+              "named": false,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            }
+          ],
+          "features": [],
+          "description": "",
+          "annotations": [
+            "@override"
+          ],
+          "typeParameters": []
+        },
+        {
+          "name": "toStringShort",
+          "returnType": {
+            "name": "String",
+            "superTypes": [
+              "Object",
+              "Comparable",
+              "Pattern"
+            ],
+            "isNullable": false
+          },
+          "signature": [],
+          "features": [],
+          "description": " A brief description of this object, usually just the [runtimeType] and the\n [hashCode].\n\n See also:\n\n  * [toString], for a detailed description of the object.",
+          "annotations": [],
+          "typeParameters": []
+        },
+        {
+          "name": "debugFillProperties",
+          "returnType": {
+            "name": "void",
+            "superTypes": [],
+            "isNullable": false
+          },
+          "signature": [
+            {
+              "name": "properties",
+              "description": "",
+              "type": {
+                "name": "DiagnosticPropertiesBuilder",
+                "superTypes": [
+                  "Object"
+                ],
+                "isNullable": false
+              },
+              "named": false,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            }
+          ],
+          "features": [],
+          "description": " Add additional properties associated with the node.\n\n {@youtube 560 315 https://www.youtube.com/watch?v=DnC7eT-vh1k}\n\n Use the most specific [DiagnosticsProperty] existing subclass to describe\n each property instead of the [DiagnosticsProperty] base class. There are\n only a small number of [DiagnosticsProperty] subclasses each covering a\n common use case. Consider what values a property is relevant for users\n debugging as users debugging large trees are overloaded with information.\n Common named parameters in [DiagnosticsNode] subclasses help filter when\n and how properties are displayed.\n\n `defaultValue`, `showName`, `showSeparator`, and `level` keep string\n representations of diagnostics terse and hide properties when they are not\n very useful.\n\n  * Use `defaultValue` any time the default value of a property is\n    uninteresting. For example, specify a default value of null any time\n    a property being null does not indicate an error.\n  * Avoid specifying the `level` parameter unless the result you want\n    cannot be achieved by using the `defaultValue` parameter or using\n    the [ObjectFlagProperty] class to conditionally display the property\n    as a flag.\n  * Specify `showName` and `showSeparator` in rare cases where the string\n    output would look clumsy if they were not set.\n    ```dart\n    DiagnosticsProperty<Object>('child(3, 4)', null, ifNull: 'is null', showSeparator: false).toString()\n    ```\n    Shows using `showSeparator` to get output `child(3, 4) is null` which\n    is more polished than `child(3, 4): is null`.\n    ```dart\n    DiagnosticsProperty<IconData>('icon', icon, ifNull: '<empty>', showName: false).toString()\n    ```\n    Shows using `showName` to omit the property name as in this context the\n    property name does not add useful information.\n\n `ifNull`, `ifEmpty`, `unit`, and `tooltip` make property\n descriptions clearer. The examples in the code sample below illustrate\n good uses of all of these parameters.\n\n ## DiagnosticsProperty subclasses for primitive types\n\n  * [StringProperty], which supports automatically enclosing a [String]\n    value in quotes.\n  * [DoubleProperty], which supports specifying a unit of measurement for\n    a [double] value.\n  * [PercentProperty], which clamps a [double] to between 0 and 1 and\n    formats it as a percentage.\n  * [IntProperty], which supports specifying a unit of measurement for an\n    [int] value.\n  * [FlagProperty], which formats a [bool] value as one or more flags.\n    Depending on the use case it is better to format a bool as\n    `DiagnosticsProperty<bool>` instead of using [FlagProperty] as the\n    output is more verbose but unambiguous.\n\n ## Other important [DiagnosticsProperty] variants\n\n  * [EnumProperty], which provides terse descriptions of enum values\n    working around limitations of the `toString` implementation for Dart\n    enum types.\n  * [IterableProperty], which handles iterable values with display\n    customizable depending on the [DiagnosticsTreeStyle] used.\n  * [ObjectFlagProperty], which provides terse descriptions of whether a\n    property value is present or not. For example, whether an `onClick`\n    callback is specified or an animation is in progress.\n  * [ColorProperty], which must be used if the property value is\n    a [Color] or one of its subclasses.\n  * [IconDataProperty], which must be used if the property value\n    is of type [IconData].\n\n If none of these subclasses apply, use the [DiagnosticsProperty]\n constructor or in rare cases create your own [DiagnosticsProperty]\n subclass as in the case for [TransformProperty] which handles [Matrix4]\n that represent transforms. Generally any property value with a good\n `toString` method implementation works fine using [DiagnosticsProperty]\n directly.\n\n {@tool snippet}\n\n This example shows best practices for implementing [debugFillProperties]\n illustrating use of all common [DiagnosticsProperty] subclasses and all\n common [DiagnosticsProperty] parameters.\n\n ```dart\n class ExampleObject extends ExampleSuperclass {\n\n   // ...various members and properties...\n\n   @override\n   void debugFillProperties(DiagnosticPropertiesBuilder properties) {\n     // Always add properties from the base class first.\n     super.debugFillProperties(properties);\n\n     // Omit the property name 'message' when displaying this String property\n     // as it would just add visual noise.\n     properties.add(StringProperty('message', message, showName: false));\n\n     properties.add(DoubleProperty('stepWidth', stepWidth));\n\n     // A scale of 1.0 does nothing so should be hidden.\n     properties.add(DoubleProperty('scale', scale, defaultValue: 1.0));\n\n     // If the hitTestExtent matches the paintExtent, it is just set to its\n     // default value so is not relevant.\n     properties.add(DoubleProperty('hitTestExtent', hitTestExtent, defaultValue: paintExtent));\n\n     // maxWidth of double.infinity indicates the width is unconstrained and\n     // so maxWidth has no impact.\n     properties.add(DoubleProperty('maxWidth', maxWidth, defaultValue: double.infinity));\n\n     // Progress is a value between 0 and 1 or null. Showing it as a\n     // percentage makes the meaning clear enough that the name can be\n     // hidden.\n     properties.add(PercentProperty(\n       'progress',\n       progress,\n       showName: false,\n       ifNull: '<indeterminate>',\n     ));\n\n     // Most text fields have maxLines set to 1.\n     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));\n\n     // Specify the unit as otherwise it would be unclear that time is in\n     // milliseconds.\n     properties.add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));\n\n     // Tooltip is used instead of unit for this case as a unit should be a\n     // terse description appropriate to display directly after a number\n     // without a space.\n     properties.add(DoubleProperty(\n       'device pixel ratio',\n       devicePixelRatio,\n       tooltip: 'physical pixels per logical pixel',\n     ));\n\n     // Displaying the depth value would be distracting. Instead only display\n     // if the depth value is missing.\n     properties.add(ObjectFlagProperty<int>('depth', depth, ifNull: 'no depth'));\n\n     // bool flag that is only shown when the value is true.\n     properties.add(FlagProperty('using primary controller', value: primary));\n\n     properties.add(FlagProperty(\n       'isCurrent',\n       value: isCurrent,\n       ifTrue: 'active',\n       ifFalse: 'inactive',\n     ));\n\n     properties.add(DiagnosticsProperty<bool>('keepAlive', keepAlive));\n\n     // FlagProperty could have also been used in this case.\n     // This option results in the text \"obscureText: true\" instead\n     // of \"obscureText\" which is a bit more verbose but a bit clearer.\n     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));\n\n     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));\n     properties.add(EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));\n\n     // Warn users when the widget is missing but do not show the value.\n     properties.add(ObjectFlagProperty<Widget>('widget', widget, ifNull: 'no widget'));\n\n     properties.add(IterableProperty<BoxShadow>(\n       'boxShadow',\n       boxShadow,\n       defaultValue: null,\n       style: style,\n     ));\n\n     // Getting the value of size throws an exception unless hasSize is true.\n     properties.add(DiagnosticsProperty<Size>.lazy(\n       'size',\n       () => size,\n       description: '${ hasSize ? size : \"MISSING\" }',\n     ));\n\n     // If the `toString` method for the property value does not provide a\n     // good terse description, write a DiagnosticsProperty subclass as in\n     // the case of TransformProperty which displays a nice debugging view\n     // of a Matrix4 that represents a transform.\n     properties.add(TransformProperty('transform', transform));\n\n     // If the value class has a good `toString` method, use\n     // DiagnosticsProperty<YourValueType>. Specifying the value type ensures\n     // that debugging tools always know the type of the field and so can\n     // provide the right UI affordances. For example, in this case even\n     // if color is null, a debugging tool still knows the value is a Color\n     // and can display relevant color related UI.\n     properties.add(DiagnosticsProperty<Color>('color', color));\n\n     // Use a custom description to generate a more terse summary than the\n     // `toString` method on the map class.\n     properties.add(DiagnosticsProperty<Map<Listenable, VoidCallback>>(\n       'handles',\n       handles,\n       description: handles != null\n         ? '${handles!.length} active client${ handles!.length == 1 ? \"\" : \"s\" }'\n         : null,\n       ifNull: 'no notifications ever received',\n       showName: false,\n     ));\n   }\n }\n ```\n {@end-tool}\n\n Used by [toDiagnosticsNode] and [toString].\n\n Do not add values that have lifetime shorter than the object.",
+          "annotations": [
+            "@protected",
+            "@mustCallSuper"
+          ],
+          "typeParameters": []
+        },
+        {
+          "name": "==",
+          "returnType": {
+            "name": "bool",
+            "superTypes": [
+              "Object"
+            ],
+            "isNullable": false
+          },
+          "signature": [
+            {
+              "name": "other",
+              "description": "",
+              "type": {
+                "name": "Object",
+                "superTypes": [],
+                "isNullable": false
+              },
+              "named": false,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            }
+          ],
+          "features": [],
+          "description": "",
+          "annotations": [
+            "@override",
+            "@nonVirtual"
+          ],
+          "typeParameters": []
+        },
+        {
+          "name": "toStringShallow",
+          "returnType": {
+            "name": "String",
+            "superTypes": [
+              "Object",
+              "Comparable",
+              "Pattern"
+            ],
+            "isNullable": false
+          },
+          "signature": [
+            {
+              "name": "joiner",
+              "description": "",
+              "type": {
+                "name": "String",
+                "superTypes": [
+                  "Object",
+                  "Comparable",
+                  "Pattern"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "', '",
+              "annotations": []
+            },
+            {
+              "name": "minLevel",
+              "description": "",
+              "type": {
+                "name": "DiagnosticLevel",
+                "superTypes": [
+                  "Enum",
+                  "Object"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "DiagnosticLevel.debug",
+              "annotations": []
+            }
+          ],
+          "features": [],
+          "description": " Returns a one-line detailed description of the object.\n\n This description is often somewhat long. This includes the same\n information given by [toStringDeep], but does not recurse to any children.\n\n `joiner` specifies the string which is place between each part obtained\n from [debugFillProperties]. Passing a string such as `'\\n '` will result\n in a multiline string that indents the properties of the object below its\n name (as per [toString]).\n\n `minLevel` specifies the minimum [DiagnosticLevel] for properties included\n in the output.\n\n See also:\n\n  * [toString], for a brief description of the object.\n  * [toStringDeep], for a description of the subtree rooted at this object.",
+          "annotations": [],
+          "typeParameters": []
+        },
+        {
+          "name": "toStringDeep",
+          "returnType": {
+            "name": "String",
+            "superTypes": [
+              "Object",
+              "Comparable",
+              "Pattern"
+            ],
+            "isNullable": false
+          },
+          "signature": [
+            {
+              "name": "prefixLineOne",
+              "description": "",
+              "type": {
+                "name": "String",
+                "superTypes": [
+                  "Object",
+                  "Comparable",
+                  "Pattern"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "''",
+              "annotations": []
+            },
+            {
+              "name": "prefixOtherLines",
+              "description": "",
+              "type": {
+                "name": "String?",
+                "superTypes": [
+                  "Object",
+                  "Comparable",
+                  "Pattern"
+                ],
+                "isNullable": true
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "minLevel",
+              "description": "",
+              "type": {
+                "name": "DiagnosticLevel",
+                "superTypes": [
+                  "Enum",
+                  "Object"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "DiagnosticLevel.debug",
+              "annotations": []
+            },
+            {
+              "name": "wrapWidth",
+              "description": "",
+              "type": {
+                "name": "int",
+                "superTypes": [
+                  "num",
+                  "Object",
+                  "Comparable"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "65",
+              "annotations": []
+            }
+          ],
+          "features": [],
+          "description": " Returns a string representation of this node and its descendants.\n\n `prefixLineOne` will be added to the front of the first line of the\n output. `prefixOtherLines` will be added to the front of each other line.\n If `prefixOtherLines` is null, the `prefixLineOne` is used for every line.\n By default, there is no prefix.\n\n `minLevel` specifies the minimum [DiagnosticLevel] for properties included\n in the output.\n\n `wrapWidth` specifies the column number where word wrapping will be\n applied.\n\n The [toStringDeep] method takes other arguments, but those are intended\n for internal use when recursing to the descendants, and so can be ignored.\n\n See also:\n\n  * [toString], for a brief description of the object but not its children.\n  * [toStringShallow], for a detailed description of the object but not its\n    children.",
+          "annotations": [],
+          "typeParameters": []
+        },
+        {
+          "name": "toDiagnosticsNode",
+          "returnType": {
+            "name": "DiagnosticsNode",
+            "superTypes": [
+              "Object"
+            ],
+            "isNullable": false
+          },
+          "signature": [
+            {
+              "name": "name",
+              "description": "",
+              "type": {
+                "name": "String?",
+                "superTypes": [
+                  "Object",
+                  "Comparable",
+                  "Pattern"
+                ],
+                "isNullable": true
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "style",
+              "description": "",
+              "type": {
+                "name": "DiagnosticsTreeStyle?",
+                "superTypes": [
+                  "Enum",
+                  "Object"
+                ],
+                "isNullable": true
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": null,
+              "annotations": []
+            }
+          ],
+          "features": [],
+          "description": " Returns a debug representation of the object that is used by debugging\n tools and by [DiagnosticsNode.toStringDeep].\n\n Leave [name] as null if there is not a meaningful description of the\n relationship between the this node and its parent.\n\n Typically the [style] argument is only specified to indicate an atypical\n relationship between the parent and the node. For example, pass\n [DiagnosticsTreeStyle.offstage] to indicate that a node is offstage.",
+          "annotations": [],
+          "typeParameters": []
+        },
+        {
+          "name": "debugDescribeChildren",
+          "returnType": {
+            "name": "List<DiagnosticsNode>",
+            "superTypes": [
+              "Object",
+              "Iterable",
+              "_ListIterable",
+              "EfficientLengthIterable",
+              "HideEfficientLengthIterable"
+            ],
+            "isNullable": false
+          },
+          "signature": [],
+          "features": [],
+          "description": " Returns a list of [DiagnosticsNode] objects describing this node's\n children.\n\n Children that are offstage should be added with `style` set to\n [DiagnosticsTreeStyle.offstage] to indicate that they are offstage.\n\n The list must not contain any null entries. If there are explicit null\n children to report, consider [DiagnosticsNode.message] or\n [DiagnosticsProperty<Object>] as possible [DiagnosticsNode] objects to\n provide.\n\n Used by [toStringDeep], [toDiagnosticsNode] and [toStringShallow].\n\n See also:\n\n  * [RenderTable.debugDescribeChildren], which provides high quality custom\n    descriptions for its child nodes.",
+          "annotations": [
+            "@protected"
+          ],
+          "typeParameters": []
+        },
+        {
+          "name": "toString",
+          "returnType": {
+            "name": "String",
+            "superTypes": [
+              "Object",
+              "Comparable",
+              "Pattern"
+            ],
+            "isNullable": false
+          },
+          "signature": [
+            {
+              "name": "minLevel",
+              "description": "",
+              "type": {
+                "name": "DiagnosticLevel",
+                "superTypes": [
+                  "Enum",
+                  "Object"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "DiagnosticLevel.info",
+              "annotations": []
+            }
+          ],
+          "features": [],
+          "description": "",
+          "annotations": [
+            "@override"
+          ],
+          "typeParameters": []
+        }
+      ],
+      "type": "class",
+      "aliasedType": null,
+      "annotations": [],
+      "superClasses": [
+        "StatelessWidget",
+        "Widget",
+        "DiagnosticableTree"
+      ],
+      "superClassPackages": [
+        "flutter",
+        "flutter",
         "flutter"
       ],
       "interfaces": [],
@@ -124217,605 +124647,6 @@
       ],
       "methods": [],
       "type": "enum",
-      "aliasedType": null,
-      "annotations": [],
-      "superClasses": [],
-      "superClassPackages": [],
-      "interfaces": [],
-      "mixins": [],
-      "typeParameters": []
-    },
-    {
-      "filePath": "lib/src/multi_panel/panel_width.dart",
-      "entryPoint": "lib/liquid_flutter.dart",
-      "name": "PanelWidth",
-      "description": " Configuration for panel width in LdMultiPanelLayout",
-      "constructors": [
-        {
-          "name": "_",
-          "signature": [
-            {
-              "name": "fixed",
-              "description": "",
-              "type": {
-                "name": "double?",
-                "superTypes": [
-                  "num",
-                  "Object",
-                  "Comparable"
-                ],
-                "isNullable": true
-              },
-              "named": true,
-              "required": false,
-              "defaultValue": null,
-              "annotations": []
-            },
-            {
-              "name": "numerator",
-              "description": "",
-              "type": {
-                "name": "int?",
-                "superTypes": [
-                  "num",
-                  "Object",
-                  "Comparable"
-                ],
-                "isNullable": true
-              },
-              "named": true,
-              "required": false,
-              "defaultValue": null,
-              "annotations": []
-            },
-            {
-              "name": "denominator",
-              "description": "",
-              "type": {
-                "name": "int?",
-                "superTypes": [
-                  "num",
-                  "Object",
-                  "Comparable"
-                ],
-                "isNullable": true
-              },
-              "named": true,
-              "required": false,
-              "defaultValue": null,
-              "annotations": []
-            },
-            {
-              "name": "isFill",
-              "description": "",
-              "type": {
-                "name": "bool",
-                "superTypes": [
-                  "Object"
-                ],
-                "isNullable": false
-              },
-              "named": true,
-              "required": false,
-              "defaultValue": "false",
-              "annotations": []
-            },
-            {
-              "name": "fillFlex",
-              "description": "",
-              "type": {
-                "name": "double?",
-                "superTypes": [
-                  "num",
-                  "Object",
-                  "Comparable"
-                ],
-                "isNullable": true
-              },
-              "named": true,
-              "required": false,
-              "defaultValue": null,
-              "annotations": []
-            }
-          ],
-          "features": [
-            "const"
-          ],
-          "annotations": []
-        },
-        {
-          "name": "fixed",
-          "signature": [
-            {
-              "name": "width",
-              "description": "",
-              "type": {
-                "name": "double",
-                "superTypes": [
-                  "num",
-                  "Object",
-                  "Comparable"
-                ],
-                "isNullable": false
-              },
-              "named": false,
-              "required": true,
-              "defaultValue": null,
-              "annotations": []
-            }
-          ],
-          "features": [
-            "const"
-          ],
-          "annotations": []
-        },
-        {
-          "name": "fraction",
-          "signature": [
-            {
-              "name": "numerator",
-              "description": "",
-              "type": {
-                "name": "int",
-                "superTypes": [
-                  "num",
-                  "Object",
-                  "Comparable"
-                ],
-                "isNullable": false
-              },
-              "named": false,
-              "required": true,
-              "defaultValue": null,
-              "annotations": []
-            },
-            {
-              "name": "denominator",
-              "description": "",
-              "type": {
-                "name": "int",
-                "superTypes": [
-                  "num",
-                  "Object",
-                  "Comparable"
-                ],
-                "isNullable": false
-              },
-              "named": false,
-              "required": true,
-              "defaultValue": null,
-              "annotations": []
-            }
-          ],
-          "features": [
-            "const"
-          ],
-          "annotations": []
-        },
-        {
-          "name": "half",
-          "signature": [],
-          "features": [
-            "const"
-          ],
-          "annotations": []
-        },
-        {
-          "name": "third",
-          "signature": [],
-          "features": [
-            "const"
-          ],
-          "annotations": []
-        },
-        {
-          "name": "twoThirds",
-          "signature": [],
-          "features": [
-            "const"
-          ],
-          "annotations": []
-        },
-        {
-          "name": "quarter",
-          "signature": [],
-          "features": [
-            "const"
-          ],
-          "annotations": []
-        },
-        {
-          "name": "threeQuarters",
-          "signature": [],
-          "features": [
-            "const"
-          ],
-          "annotations": []
-        },
-        {
-          "name": "fill",
-          "signature": [
-            {
-              "name": "fillFlex",
-              "description": "",
-              "type": {
-                "name": "double",
-                "superTypes": [
-                  "num",
-                  "Object",
-                  "Comparable"
-                ],
-                "isNullable": false
-              },
-              "named": true,
-              "required": false,
-              "defaultValue": "1",
-              "annotations": []
-            }
-          ],
-          "features": [
-            "const"
-          ],
-          "annotations": []
-        }
-      ],
-      "properties": [
-        {
-          "name": "_fixed",
-          "type": {
-            "name": "double?",
-            "superTypes": [
-              "num",
-              "Object",
-              "Comparable"
-            ],
-            "isNullable": true
-          },
-          "description": "",
-          "features": [
-            "final"
-          ],
-          "annotations": []
-        },
-        {
-          "name": "_numerator",
-          "type": {
-            "name": "int?",
-            "superTypes": [
-              "num",
-              "Object",
-              "Comparable"
-            ],
-            "isNullable": true
-          },
-          "description": "",
-          "features": [
-            "final"
-          ],
-          "annotations": []
-        },
-        {
-          "name": "_denominator",
-          "type": {
-            "name": "int?",
-            "superTypes": [
-              "num",
-              "Object",
-              "Comparable"
-            ],
-            "isNullable": true
-          },
-          "description": "",
-          "features": [
-            "final"
-          ],
-          "annotations": []
-        },
-        {
-          "name": "_isFill",
-          "type": {
-            "name": "bool",
-            "superTypes": [
-              "Object"
-            ],
-            "isNullable": false
-          },
-          "description": "",
-          "features": [
-            "final"
-          ],
-          "annotations": []
-        },
-        {
-          "name": "_fillFlex",
-          "type": {
-            "name": "double",
-            "superTypes": [
-              "num",
-              "Object",
-              "Comparable"
-            ],
-            "isNullable": false
-          },
-          "description": "",
-          "features": [
-            "final"
-          ],
-          "annotations": []
-        },
-        {
-          "name": "isFixed",
-          "type": {
-            "name": "bool",
-            "superTypes": [
-              "Object"
-            ],
-            "isNullable": false
-          },
-          "description": "",
-          "features": [],
-          "annotations": []
-        },
-        {
-          "name": "isFraction",
-          "type": {
-            "name": "bool",
-            "superTypes": [
-              "Object"
-            ],
-            "isNullable": false
-          },
-          "description": "",
-          "features": [],
-          "annotations": []
-        },
-        {
-          "name": "isFill",
-          "type": {
-            "name": "bool",
-            "superTypes": [
-              "Object"
-            ],
-            "isNullable": false
-          },
-          "description": "",
-          "features": [],
-          "annotations": []
-        },
-        {
-          "name": "fixedValue",
-          "type": {
-            "name": "double?",
-            "superTypes": [
-              "num",
-              "Object",
-              "Comparable"
-            ],
-            "isNullable": true
-          },
-          "description": "",
-          "features": [],
-          "annotations": []
-        },
-        {
-          "name": "fractionNumerator",
-          "type": {
-            "name": "int?",
-            "superTypes": [
-              "num",
-              "Object",
-              "Comparable"
-            ],
-            "isNullable": true
-          },
-          "description": "",
-          "features": [],
-          "annotations": []
-        },
-        {
-          "name": "fractionDenominator",
-          "type": {
-            "name": "int?",
-            "superTypes": [
-              "num",
-              "Object",
-              "Comparable"
-            ],
-            "isNullable": true
-          },
-          "description": "",
-          "features": [],
-          "annotations": []
-        },
-        {
-          "name": "fillFlex",
-          "type": {
-            "name": "double",
-            "superTypes": [
-              "num",
-              "Object",
-              "Comparable"
-            ],
-            "isNullable": false
-          },
-          "description": "",
-          "features": [],
-          "annotations": []
-        }
-      ],
-      "methods": [
-        {
-          "name": "calculateWidth",
-          "returnType": {
-            "name": "double?",
-            "superTypes": [
-              "num",
-              "Object",
-              "Comparable"
-            ],
-            "isNullable": true
-          },
-          "signature": [
-            {
-              "name": "availableWidth",
-              "description": "",
-              "type": {
-                "name": "double",
-                "superTypes": [
-                  "num",
-                  "Object",
-                  "Comparable"
-                ],
-                "isNullable": false
-              },
-              "named": false,
-              "required": true,
-              "defaultValue": null,
-              "annotations": []
-            }
-          ],
-          "features": [],
-          "description": "",
-          "annotations": [],
-          "typeParameters": []
-        },
-        {
-          "name": "calculateSideBySideWidths",
-          "returnType": {
-            "name": "(List<double>, double)",
-            "superTypes": [],
-            "isNullable": false
-          },
-          "signature": [
-            {
-              "name": "widths",
-              "description": "",
-              "type": {
-                "name": "List<PanelWidth>",
-                "superTypes": [
-                  "Object",
-                  "Iterable",
-                  "_ListIterable",
-                  "EfficientLengthIterable",
-                  "HideEfficientLengthIterable"
-                ],
-                "isNullable": false
-              },
-              "named": true,
-              "required": true,
-              "defaultValue": null,
-              "annotations": []
-            },
-            {
-              "name": "availableWidth",
-              "description": "",
-              "type": {
-                "name": "double",
-                "superTypes": [
-                  "num",
-                  "Object",
-                  "Comparable"
-                ],
-                "isNullable": false
-              },
-              "named": true,
-              "required": true,
-              "defaultValue": null,
-              "annotations": []
-            },
-            {
-              "name": "visibleStartIndex",
-              "description": "",
-              "type": {
-                "name": "int",
-                "superTypes": [
-                  "num",
-                  "Object",
-                  "Comparable"
-                ],
-                "isNullable": false
-              },
-              "named": true,
-              "required": true,
-              "defaultValue": null,
-              "annotations": []
-            },
-            {
-              "name": "visibleEndIndex",
-              "description": "",
-              "type": {
-                "name": "int",
-                "superTypes": [
-                  "num",
-                  "Object",
-                  "Comparable"
-                ],
-                "isNullable": false
-              },
-              "named": true,
-              "required": true,
-              "defaultValue": null,
-              "annotations": []
-            },
-            {
-              "name": "dragOffset",
-              "description": "",
-              "type": {
-                "name": "double",
-                "superTypes": [
-                  "num",
-                  "Object",
-                  "Comparable"
-                ],
-                "isNullable": false
-              },
-              "named": true,
-              "required": true,
-              "defaultValue": null,
-              "annotations": []
-            },
-            {
-              "name": "dragFromLeft",
-              "description": "",
-              "type": {
-                "name": "bool",
-                "superTypes": [
-                  "Object"
-                ],
-                "isNullable": false
-              },
-              "named": true,
-              "required": true,
-              "defaultValue": null,
-              "annotations": []
-            },
-            {
-              "name": "spacing",
-              "description": "",
-              "type": {
-                "name": "double",
-                "superTypes": [
-                  "num",
-                  "Object",
-                  "Comparable"
-                ],
-                "isNullable": false
-              },
-              "named": true,
-              "required": true,
-              "defaultValue": null,
-              "annotations": []
-            }
-          ],
-          "features": [
-            "static"
-          ],
-          "description": " Calculate actual width based on available space and other panels",
-          "annotations": [],
-          "typeParameters": []
-        }
-      ],
-      "type": "class",
       "aliasedType": null,
       "annotations": [],
       "superClasses": [],

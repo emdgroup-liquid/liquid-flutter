@@ -109,7 +109,9 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
   }
 
   void _handleHistoryEntryRemoved() {
-    _hideDrawer();
+    if (mounted) {
+      _hideDrawer();
+    }
   }
 
   void _showDrawer() {
