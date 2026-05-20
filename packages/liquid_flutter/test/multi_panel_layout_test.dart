@@ -523,7 +523,140 @@ void main() {
     });
 
     // -------------------------------------------------------------------------
-    // 14. Regression: panelVisible prop seeds initial visibility in initState
+    // 14. Stage 1 regression: Key('panel') spring element survives mode switch
+    // -------------------------------------------------------------------------
+    testWidgets(
+        'panel spring element is preserved across sideBySide → stacked → sideBySide switch',
+        (WidgetTester tester) async {
+      // _ModeController is a ValueNotifier so we can flip the mode from outside
+      // the build method without replacing the widget tree root.
+      final modeNotifier =
+          ValueNotifier<LdMultiPanelLayoutMode>(LdMultiPanelLayoutMode.sideBySide);
+
+      await tester.pumpWidget(
+        _wrap(
+          ValueListenableBuilder<LdMultiPanelLayoutMode>(
+            valueListenable: modeNotifier,
+            builder: (context, mode, _) {
+              return LdMultiPanelLayout(
+                mode: mode,
+                panelPosition: LdPanelPosition.left,
+                initialPanelWidth: 200,
+                initialPanelVisible: true,
+                body: _placeholder('body', Colors.blue),
+                panel: _placeholder('panel', Colors.red),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Capture the element for the Key('panel') LdSpring before any switch.
+      final elementBefore = tester.element(find.byKey(const Key('panel')));
+
+      // Switch to stacked mode.
+      modeNotifier.value = LdMultiPanelLayoutMode.stacked;
+      await tester.pumpAndSettle();
+
+      final elementAfterStacked =
+          tester.element(find.byKey(const Key('panel')));
+
+      // The element must be the same instance — no teardown.
+      expect(
+        identical(elementBefore, elementAfterStacked),
+        isTrue,
+        reason:
+            'Key("panel") element should survive sideBySide → stacked without teardown',
+      );
+
+      // Switch back to sideBySide.
+      modeNotifier.value = LdMultiPanelLayoutMode.sideBySide;
+      await tester.pumpAndSettle();
+
+      final elementAfterSideBySide =
+          tester.element(find.byKey(const Key('panel')));
+
+      expect(
+        identical(elementBefore, elementAfterSideBySide),
+        isTrue,
+        reason:
+            'Key("panel") element should survive stacked → sideBySide without teardown',
+      );
+
+      modeNotifier.dispose();
+    });
+
+    // -------------------------------------------------------------------------
+    // 15. Stage 2: spring target stays fixed at snapped value during drag
+    // -------------------------------------------------------------------------
+    testWidgets(
+        'stacked – 50px drag does not change spring target; Positioned.left reflects offset',
+        (WidgetTester tester) async {
+      // Panel starts visible on the left, width = 200px.
+      // Snapped target = 0.0 (visible).
+      // After a 50px leftward swipe the effective offset is -50 (closing swipe)
+      // and Positioned.left must be 0 + (-50) = -50, while the spring's
+      // position prop must still be 0.0 (the unchanged snapped target).
+
+      // Capture the LdSpring widget that is rendered for the panel so we can
+      // inspect its `position` prop after the drag.
+      LdSpring? capturedSpring;
+
+      await tester.pumpWidget(
+        _wrap(
+          LdMultiPanelLayout(
+            mode: LdMultiPanelLayoutMode.stacked,
+            panelPosition: LdPanelPosition.left,
+            initialPanelWidth: 200,
+            initialPanelVisible: true,
+            body: _placeholder('body', Colors.blue),
+            panel: Builder(builder: (context) {
+              // Walk up to find the enclosing LdSpring and capture it.
+              capturedSpring = context.findAncestorWidgetOfExactType<LdSpring>();
+              return _placeholder('panel', Colors.red);
+            }),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Confirm the spring's position prop is at the snapped value before drag.
+      expect(capturedSpring?.position, equals(0.0),
+          reason: 'Spring target should start at snapped value 0.0 (visible)');
+
+      // Perform a 50px leftward drag on the panel (closing swipe).
+      // The swipe-to-close GestureDetector covers the panel area (left=0, width=200).
+      await performPanGesture(
+        tester,
+        startPosition: const Offset(100, 400),
+        offset: const Offset(-50, 0),
+        steps: 5,
+      );
+      // Pump exactly one frame — spring physics should NOT have moved.
+      await tester.pump();
+
+      // Spring target must still be 0.0 — the snapped (visible) value.
+      expect(capturedSpring?.position, equals(0.0),
+          reason:
+              'Spring target must remain at snapped value 0.0 during drag; '
+              'effectiveOffset should be applied additively in the builder only');
+
+      // The panel widget's left edge in global coordinates should reflect the
+      // -50px drag offset: rendered left = state.position(-50 from offset) = -50.
+      // (ldDisableAnimations=true → state.position == widget.position == 0.0)
+      // Rendered left = 0.0 + (-50) = -50.
+      final panelBox = tester.getTopLeft(find.text('panel'));
+      // The panel Text is centered within its 200px container starting at x=-50.
+      // Centre x = -50 + 100 = 50. So panelBox.dx should be < 50 (offset applied).
+      expect(panelBox.dx, lessThan(100),
+          reason:
+              'Panel should have shifted left due to the 50px drag offset being '
+              'applied additively in the builder');
+    });
+
+    // -------------------------------------------------------------------------
+    // 16. Regression: panelVisible prop seeds initial visibility in initState (was 15)
     // -------------------------------------------------------------------------
     testWidgets('panelVisible prop is honoured as initial visibility seed',
         (WidgetTester tester) async {
@@ -547,6 +680,57 @@ void main() {
       final panelBox = tester.getTopLeft(find.text('panel'));
       expect(panelBox.dx, greaterThanOrEqualTo(0),
           reason: 'Panel should be visible when panelVisible: true is passed');
+    });
+
+    // -------------------------------------------------------------------------
+    // 17. Stage 3: widget.body and widget.panel elements survive a resize drag
+    // -------------------------------------------------------------------------
+    testWidgets(
+        'sideBySide – widget.body and widget.panel element identity preserved across resize drag',
+        (WidgetTester tester) async {
+      // Use a stable GlobalKey so we can find the exact Element for body/panel.
+      final bodyKey = GlobalKey();
+      final panelKey = GlobalKey();
+
+      await tester.pumpWidget(
+        _wrap(
+          LdMultiPanelLayout(
+            mode: LdMultiPanelLayoutMode.sideBySide,
+            panelPosition: LdPanelPosition.left,
+            allowResize: true,
+            initialPanelWidth: 200,
+            initialPanelVisible: true,
+            body: SizedBox.expand(key: bodyKey),
+            panel: SizedBox.expand(key: panelKey),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Capture element identity before the resize gesture.
+      final bodyElementBefore = bodyKey.currentContext!;
+      final panelElementBefore = panelKey.currentContext!;
+
+      // The resize handle is an 8px strip centred at x ≈ panelW - 4 = 196.
+      // Drag rightward by 50px to simulate a resize.
+      await performPanGesture(
+        tester,
+        startPosition: const Offset(200, 400), // centre of handle strip
+        offset: const Offset(50, 0),
+      );
+      await tester.pumpAndSettle();
+
+      // Element identity must be preserved — no remount of body or panel.
+      expect(
+        identical(bodyElementBefore, bodyKey.currentContext!),
+        isTrue,
+        reason: 'widget.body must not be remounted during a resize drag',
+      );
+      expect(
+        identical(panelElementBefore, panelKey.currentContext!),
+        isTrue,
+        reason: 'widget.panel must not be remounted during a resize drag',
+      );
     });
   });
 }
