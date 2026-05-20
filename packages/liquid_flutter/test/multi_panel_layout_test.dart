@@ -492,5 +492,61 @@ void main() {
       await tester.pumpAndSettle();
       expect(navigator.canPop(), isFalse);
     });
+    // -------------------------------------------------------------------------
+    // 13. Regression: tapping the scrim closes the panel in stacked mode
+    // -------------------------------------------------------------------------
+    testWidgets('stacked – tapping scrim closes the panel',
+        (WidgetTester tester) async {
+      final callbacks = <bool>[];
+
+      await tester.pumpWidget(
+        _wrap(
+          LdMultiPanelLayout(
+            mode: LdMultiPanelLayoutMode.stacked,
+            panelPosition: LdPanelPosition.left,
+            initialPanelWidth: 200,
+            initialPanelVisible: true,
+            onPanelVisibilityChanged: callbacks.add,
+            body: _placeholder('body', Colors.blue),
+            panel: _placeholder('panel', Colors.red),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tap on the body area (x=600, well outside the 200px panel).
+      await tester.tapAt(const Offset(600, 400));
+      await tester.pumpAndSettle();
+
+      expect(callbacks, [false],
+          reason: 'Tapping the scrim should close the panel');
+    });
+
+    // -------------------------------------------------------------------------
+    // 14. Regression: panelVisible prop seeds initial visibility in initState
+    // -------------------------------------------------------------------------
+    testWidgets('panelVisible prop is honoured as initial visibility seed',
+        (WidgetTester tester) async {
+      // Pass panelVisible: true with no initialPanelVisible — the panel must
+      // start visible (regression for desktop auto-open via LdDrawerLayout).
+      await tester.pumpWidget(
+        _wrap(
+          LdMultiPanelLayout(
+            mode: LdMultiPanelLayoutMode.sideBySide,
+            panelPosition: LdPanelPosition.left,
+            initialPanelWidth: 200,
+            panelVisible: true, // controlled prop only — no initialPanelVisible
+            body: _placeholder('body', Colors.blue),
+            panel: _placeholder('panel', Colors.red),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Panel must be on-screen: its left edge should be >= 0.
+      final panelBox = tester.getTopLeft(find.text('panel'));
+      expect(panelBox.dx, greaterThanOrEqualTo(0),
+          reason: 'Panel should be visible when panelVisible: true is passed');
+    });
   });
 }

@@ -112,7 +112,10 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
   @override
   void initState() {
     super.initState();
-    _panelVisible = widget.initialPanelVisible ?? false;
+    // panelVisible (controlled prop) takes priority as the initial seed so that
+    // callers who set it in their own initState (e.g. LdDrawerLayout opening on
+    // desktop) don't get ignored. Falls back to initialPanelVisible, then false.
+    _panelVisible = widget.panelVisible ?? widget.initialPanelVisible ?? false;
     _internalPanelWidth = widget.initialPanelWidth ?? 300;
     // If fraction is specified we can't resolve it yet — deferred to first build.
   }
@@ -371,14 +374,18 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
           ),
         ),
         // Scrim / modal barrier.
+        // ModalBarrier is used directly (dismissible: true) so it absorbs taps
+        // and calls onDismiss — a wrapping GestureDetector would be swallowed
+        // by the barrier's own hit-test before reaching onTap.
         if (scrimOpacity > 0)
           Positioned.fill(
-            child: GestureDetector(
-              onTap: () => _setVisibility(false),
-              child: AnimatedOpacity(
-                opacity: scrimOpacity,
-                duration: Duration.zero,
-                child: const ModalBarrier(dismissible: false, color: Colors.black),
+            child: AnimatedOpacity(
+              opacity: scrimOpacity,
+              duration: Duration.zero,
+              child: ModalBarrier(
+                dismissible: true,
+                onDismiss: () => _setVisibility(false),
+                color: Colors.black,
               ),
             ),
           ),
