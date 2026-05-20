@@ -24,6 +24,9 @@ class LdSpring extends StatefulWidget {
   final double initialPosition;
   final bool paused;
 
+  /// If true, the spring will not be animated and the position will be set to the target position.
+  final bool overriden;
+
   final Widget? child;
 
   final void Function(BuildContext context, LdSpringState state)? onAnimationEnd;
@@ -43,6 +46,7 @@ class LdSpring extends StatefulWidget {
     this.paused = false,
     this.position = 1.0,
     this.initialPosition = 1.0,
+    this.overriden = false,
     this.onAnimationEnd,
     this.child,
   });
@@ -131,8 +135,12 @@ class _LdSpringState extends State<LdSpring> with SingleTickerProviderStateMixin
     _spring.springConstant = widget.springConstant;
     _spring.dampingCoefficient = widget.dampingCoefficient;
 
+    if (widget.overriden) {
+      _spring.position = widget.position;
+    }
+
     if (oldWidget.position != widget.position) {
-      if (ldDisableAnimations) {
+      if (ldDisableAnimations || widget.overriden) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (widget.onAnimationEnd != null && mounted) {
             widget.onAnimationEnd!(
@@ -202,7 +210,7 @@ class _LdSpringState extends State<LdSpring> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    if (ldDisableAnimations) {
+    if (ldDisableAnimations || widget.overriden) {
       return widget.builder(
         context,
         LdSpringState(

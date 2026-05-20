@@ -523,7 +523,130 @@ void main() {
     });
 
     // -------------------------------------------------------------------------
-    // 14. Regression: panelVisible prop seeds initial visibility in initState
+    // 14. Stage 1 regression: Key('panel') spring element survives mode switch
+    // -------------------------------------------------------------------------
+    testWidgets(
+        'panel spring element is preserved across sideBySide → stacked → sideBySide switch',
+        (WidgetTester tester) async {
+      // _ModeController is a ValueNotifier so we can flip the mode from outside
+      // the build method without replacing the widget tree root.
+      final modeNotifier =
+          ValueNotifier<LdMultiPanelLayoutMode>(LdMultiPanelLayoutMode.sideBySide);
+
+      await tester.pumpWidget(
+        _wrap(
+          ValueListenableBuilder<LdMultiPanelLayoutMode>(
+            valueListenable: modeNotifier,
+            builder: (context, mode, _) {
+              return LdMultiPanelLayout(
+                mode: mode,
+                panelPosition: LdPanelPosition.left,
+                initialPanelWidth: 200,
+                initialPanelVisible: true,
+                body: _placeholder('body', Colors.blue),
+                panel: _placeholder('panel', Colors.red),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Capture the element for the Key('panel') LdSpring before any switch.
+      final elementBefore = tester.element(find.byKey(const Key('panel')));
+
+      // Switch to stacked mode.
+      modeNotifier.value = LdMultiPanelLayoutMode.stacked;
+      await tester.pumpAndSettle();
+
+      final elementAfterStacked =
+          tester.element(find.byKey(const Key('panel')));
+
+      // The element must be the same instance — no teardown.
+      expect(
+        identical(elementBefore, elementAfterStacked),
+        isTrue,
+        reason:
+            'Key("panel") element should survive sideBySide → stacked without teardown',
+      );
+
+      // Switch back to sideBySide.
+      modeNotifier.value = LdMultiPanelLayoutMode.sideBySide;
+      await tester.pumpAndSettle();
+
+      final elementAfterSideBySide =
+          tester.element(find.byKey(const Key('panel')));
+
+      expect(
+        identical(elementBefore, elementAfterSideBySide),
+        isTrue,
+        reason:
+            'Key("panel") element should survive stacked → sideBySide without teardown',
+      );
+
+      modeNotifier.dispose();
+    });
+
+    // -------------------------------------------------------------------------
+    // 15. Stage 2: during drag the panel renders at the dragged position
+    // -------------------------------------------------------------------------
+    testWidgets(
+        'stacked – mid-drag panel tracks finger 1:1 (overriden=true during drag)',
+        (WidgetTester tester) async {
+      // Panel starts visible on the left, width = 200px.
+      // During a leftward drag, overriden=true forces the spring to track the
+      // finger position immediately (no spring catch-up lag).
+      // After gesture ends, overriden=false and spring snaps/animates back.
+
+      await tester.pumpWidget(
+        _wrap(
+          LdMultiPanelLayout(
+            mode: LdMultiPanelLayoutMode.stacked,
+            panelPosition: LdPanelPosition.left,
+            initialPanelWidth: 200,
+            initialPanelVisible: true,
+            body: _placeholder('body', Colors.blue),
+            panel: _placeholder('panel', Colors.red),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Record the panel's starting left edge.
+      final panelBoxBefore = tester.getTopLeft(find.text('panel'));
+      expect(panelBoxBefore.dx, greaterThanOrEqualTo(0),
+          reason: 'Panel should start fully on-screen');
+
+      // Begin a closing swipe but do NOT end it — check mid-drag state.
+      final gesture = await tester.startGesture(
+        const Offset(100, 400),
+      );
+      await tester.pump();
+
+      // Drag 50px to the left in 5 steps.
+      for (var i = 0; i < 5; i++) {
+        await gesture.moveBy(const Offset(-10, 0));
+        await tester.pump();
+      }
+
+      // Mid-drag: panel should have shifted left by ~50px.
+      final panelBoxDuring = tester.getTopLeft(find.text('panel'));
+      expect(panelBoxDuring.dx, lessThan(panelBoxBefore.dx),
+          reason: 'Panel should shift left during a closing drag');
+      expect(panelBoxDuring.dx, closeTo(panelBoxBefore.dx - 50, 5),
+          reason: 'Panel should track finger 1:1 with overriden=true (±5px)');
+
+      // End the gesture and settle — panel springs back to visible position.
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      final panelBoxAfter = tester.getTopLeft(find.text('panel'));
+      expect(panelBoxAfter.dx, closeTo(panelBoxBefore.dx, 1),
+          reason: 'Panel should snap back to visible position after gesture ends');
+    });
+
+    // -------------------------------------------------------------------------
+    // 16. Regression: panelVisible prop seeds initial visibility in initState (was 15)
     // -------------------------------------------------------------------------
     testWidgets('panelVisible prop is honoured as initial visibility seed',
         (WidgetTester tester) async {
@@ -547,6 +670,57 @@ void main() {
       final panelBox = tester.getTopLeft(find.text('panel'));
       expect(panelBox.dx, greaterThanOrEqualTo(0),
           reason: 'Panel should be visible when panelVisible: true is passed');
+    });
+
+    // -------------------------------------------------------------------------
+    // 17. Stage 3: widget.body and widget.panel elements survive a resize drag
+    // -------------------------------------------------------------------------
+    testWidgets(
+        'sideBySide – widget.body and widget.panel element identity preserved across resize drag',
+        (WidgetTester tester) async {
+      // Use a stable GlobalKey so we can find the exact Element for body/panel.
+      final bodyKey = GlobalKey();
+      final panelKey = GlobalKey();
+
+      await tester.pumpWidget(
+        _wrap(
+          LdMultiPanelLayout(
+            mode: LdMultiPanelLayoutMode.sideBySide,
+            panelPosition: LdPanelPosition.left,
+            allowResize: true,
+            initialPanelWidth: 200,
+            initialPanelVisible: true,
+            body: SizedBox.expand(key: bodyKey),
+            panel: SizedBox.expand(key: panelKey),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Capture element identity before the resize gesture.
+      final bodyElementBefore = bodyKey.currentContext!;
+      final panelElementBefore = panelKey.currentContext!;
+
+      // The resize handle is an 8px strip centred at x ≈ panelW - 4 = 196.
+      // Drag rightward by 50px to simulate a resize.
+      await performPanGesture(
+        tester,
+        startPosition: const Offset(200, 400), // centre of handle strip
+        offset: const Offset(50, 0),
+      );
+      await tester.pumpAndSettle();
+
+      // Element identity must be preserved — no remount of body or panel.
+      expect(
+        identical(bodyElementBefore, bodyKey.currentContext!),
+        isTrue,
+        reason: 'widget.body must not be remounted during a resize drag',
+      );
+      expect(
+        identical(panelElementBefore, panelKey.currentContext!),
+        isTrue,
+        reason: 'widget.panel must not be remounted during a resize drag',
+      );
     });
   });
 }

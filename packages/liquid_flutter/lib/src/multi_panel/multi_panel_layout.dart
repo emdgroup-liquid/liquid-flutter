@@ -60,6 +60,7 @@ class LdMultiPanelLayout extends StatefulWidget {
   final double dampingCoefficient;
 
   /// Whether to enable scaling effect in stacked mode.
+  // TODO(enableScaling): implement body-scale effect
   final bool enableScaling;
 
   const LdMultiPanelLayout({
@@ -97,8 +98,14 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
   /// Current visibility state (internal).
   late bool _panelVisible;
 
-  /// Whether a resize gesture is active.
+  /// Whether a resize gesture is active (kept for cursor / UX feedback only;
+  /// does NOT gate spring tree construction in [_buildSideBySide]).
   bool _isResizing = false;
+
+  /// Cumulative resize delta (in pixels) accumulated during the current resize
+  /// drag. Positive = panel has grown. Reset to 0 on drag end after the stable
+  /// width is committed to [_internalPanelWidth].
+  double _resizeDelta = 0;
 
   /// Swipe drag offset in stacked mode (for show/hide gesture).
   double _swipeDragOffset = 0;
@@ -164,6 +171,32 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
   }
 
   // ---------------------------------------------------------------------------
+  // Shared spring helpers
+  // ---------------------------------------------------------------------------
+
+  /// Builds the panel [LdSpring] with a stable [Key('panel')] so that the
+  /// underlying [State] is reused across `sideBySide` ↔ `stacked` mode
+  /// switches, preventing teardown flicker.
+  Widget _buildPanelSpring({
+    required double position,
+    required double initialPosition,
+    required Widget Function(BuildContext context, LdSpringState state) builder,
+    bool overriden = false,
+  }) {
+    return LdSpring(
+      key: const Key('panel'),
+      mass: widget.mass,
+      springConstant: widget.springConstant,
+      dampingCoefficient: widget.dampingCoefficient,
+      initialPosition: initialPosition,
+      position: position,
+      overriden: overriden,
+      builder: (context, state, child) => builder(context, state),
+      child: widget.panel,
+    );
+  }
+
+  // ---------------------------------------------------------------------------
   // Side-by-side layout
   // ---------------------------------------------------------------------------
 
@@ -185,13 +218,15 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
     final bodyLeft = _panelVisible ? bodyLeftWhenVisible : 0.0;
     final bodyRight = _panelVisible ? bodyRightWhenVisible : 0.0;
 
-    // Resize handle position (boundary between panel and body).
-    final double resizeHandleLeft = isLeft
-        ? (_panelVisible ? panelW - 4 : -4)
-        : (_panelVisible ? _totalWidth - panelW - 4 : _totalWidth - 4);
+    // Compute the effective panel width that accounts for any in-progress resize
+    // delta. Springs use [panelW] (stable) as their target; the delta is applied
+    // additively inside each builder so the rendered positions track the pointer
+    // 1:1 without spring physics lag.
+    final double effectivePanelW = (panelW + _resizeDelta).clamp(
+      widget.minPanelWidth,
+      _totalWidth - widget.minPanelWidth,
+    );
 
-    // During a resize drag, bypass spring animations so the panel tracks
-    // the pointer 1:1 with no lag or overshoot.
     Widget buildBody({required double left, required double right}) {
       return Positioned(
         left: left,
@@ -212,16 +247,22 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
       );
     }
 
+    // Resize handle position (boundary between panel and body).
+    // Uses effectivePanelW so the handle tracks the pointer during a resize drag.
+    final double resizeHandleLeft = isLeft
+        ? (_panelVisible ? effectivePanelW - 4 : -4)
+        : (_panelVisible ? _totalWidth - effectivePanelW - 4 : _totalWidth - 4);
+
     Widget buildPanel({required double panelLeft}) {
       return Positioned(
         left: panelLeft,
         top: 0,
         bottom: 0,
-        width: panelW,
+        width: effectivePanelW,
         child: Provider.value(
           value: LdMultiPanelChildState(
             left: panelLeft,
-            width: panelW,
+            width: effectivePanelW,
             onScreen: _panelVisible,
             isDragging: _isResizing,
             dragOffset: 0,
@@ -232,62 +273,58 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
       );
     }
 
+    // Actual body left/right positions accounting for any in-progress resize.
+    // During resize, overriden=true forces springs to track pointer 1:1.
+    // After resize ends, overriden=false and springs animate to the new target.
+    final double actualBodyLeft = bodyLeft + (isLeft ? _resizeDelta : 0.0);
+    final double actualBodyRight = bodyRight + (isLeft ? 0.0 : _resizeDelta);
+
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Body
-        if (_isResizing)
-          buildBody(left: bodyLeft, right: bodyRight)
-        else
-          LdSpring(
-            key: const Key('body_left'),
-            mass: widget.mass,
-            springConstant: widget.springConstant,
-            dampingCoefficient: widget.dampingCoefficient,
-            initialPosition: bodyLeft,
-            position: bodyLeft,
-            builder: (context, leftState, child) {
-              return LdSpring(
-                key: const Key('body_right'),
-                mass: widget.mass,
-                springConstant: widget.springConstant,
-                dampingCoefficient: widget.dampingCoefficient,
-                initialPosition: bodyRight,
-                position: bodyRight,
-                builder: (context, rightState, child) {
-                  return buildBody(
-                    left: leftState.position,
-                    right: rightState.position,
-                  );
-                },
-                child: widget.body,
-              );
-            },
-            child: widget.body,
-          ),
-        // Panel
-        if (_isResizing)
-          buildPanel(
-            panelLeft: isLeft ? 0.0 : (_totalWidth - panelW),
-          )
-        else
-          LdSpring(
-            key: const Key('panel_translation'),
-            mass: widget.mass,
-            springConstant: widget.springConstant,
-            dampingCoefficient: widget.dampingCoefficient,
-            initialPosition: panelTranslation,
-            position: panelTranslation,
-            builder: (context, transState, child) {
-              // For left panel: transState.position slides from 0 (visible) to -panelW (hidden).
-              // For right panel: transState.position slides from 0 (visible) to +panelW (hidden).
-              final double panelActualLeft = isLeft
-                  ? transState.position
-                  : (_totalWidth - panelW + transState.position);
-              return buildPanel(panelLeft: panelActualLeft);
-            },
-            child: widget.panel,
-          ),
+        // Body — LdSpring nodes stay in the tree at all times so widget.body
+        // is never remounted. overriden=true during resize so springs track
+        // the pointer 1:1; on drag end the spring animates to the new stable size.
+        LdSpring(
+          key: const Key('body_left'),
+          mass: widget.mass,
+          springConstant: widget.springConstant,
+          dampingCoefficient: widget.dampingCoefficient,
+          initialPosition: actualBodyLeft,
+          position: actualBodyLeft,
+          overriden: _isResizing,
+          builder: (context, leftState, child) {
+            return LdSpring(
+              key: const Key('body_right'),
+              mass: widget.mass,
+              springConstant: widget.springConstant,
+              dampingCoefficient: widget.dampingCoefficient,
+              initialPosition: actualBodyRight,
+              position: actualBodyRight,
+              overriden: _isResizing,
+              builder: (context, rightState, child) {
+                return buildBody(
+                  left: leftState.position,
+                  right: rightState.position,
+                );
+              },
+              child: widget.body,
+            );
+          },
+          child: widget.body,
+        ),
+        // Panel — same overriden pattern during resize.
+        _buildPanelSpring(
+          initialPosition: panelTranslation,
+          position: panelTranslation,
+          overriden: _isResizing,
+          builder: (context, transState) {
+            // transState.position slides from 0 (visible) to ±panelW (hidden).
+            final double panelActualLeft =
+                isLeft ? transState.position : (_totalWidth - effectivePanelW + transState.position);
+            return buildPanel(panelLeft: panelActualLeft);
+          },
+        ),
         // Resize handle overlay
         if (widget.allowResize && _panelVisible)
           Positioned(
@@ -308,16 +345,20 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
                 } else {
                   setState(() {
                     _isResizing = true;
-                    _internalPanelWidth = (_internalPanelWidth + (isLeft ? delta : -delta)).clamp(
-                      widget.minPanelWidth,
-                      _totalWidth - widget.minPanelWidth,
-                    );
+                    // Accumulate the resize delta; do NOT update _internalPanelWidth
+                    // here so that the spring targets remain stable during the drag.
+                    // Clamping is enforced in [effectivePanelW] above.
+                    _resizeDelta += (isLeft ? delta : -delta);
                   });
-                  widget.onPanelWidthChanged?.call(_internalPanelWidth);
+                  // Notify with the clamped effective width.
+                  widget.onPanelWidthChanged?.call(effectivePanelW);
                 }
               },
               onDragEnd: () {
                 setState(() {
+                  // Commit the accumulated delta into the stable width and reset.
+                  _internalPanelWidth = effectivePanelW;
+                  _resizeDelta = 0;
                   _isResizing = false;
                 });
               },
@@ -344,8 +385,16 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
         ? _swipeDragOffset.clamp(-panelW, 0.0) // closing swipe
         : _swipeDragOffset.clamp(0.0, panelW); // opening swipe
 
-    // Panel target translation: 0 = fully visible, ±panelW = fully off-screen.
-    final panelTarget = _panelVisible ? effectiveOffset : (isLeft ? -panelW + effectiveOffset : panelW + effectiveOffset);
+    // Spring target: the snapped value (where the panel should rest).
+    // During a drag, overriden=true forces the spring to track position 1:1.
+    // After drag ends, overriden=false and the spring animates from the
+    // mid-drag position back to the snapped target.
+    final panelTarget = _panelVisible ? 0.0 : (isLeft ? -panelW : panelW);
+
+    // The spring's reported position equals the drag-adjusted visual position
+    // while dragging, and the snapped target when at rest.
+    final panelSpringPosition = panelTarget + effectiveOffset;
+    final isDragging = _swipeDragOffset != 0;
 
     // Scrim opacity: 0 = no scrim, 0.5 = fully visible panel.
     final scrimOpacity = _panelVisible
@@ -389,15 +438,14 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
               ),
             ),
           ),
-        // Panel.
-        LdSpring(
-          key: const Key('stacked_panel'),
-          mass: widget.mass,
-          springConstant: widget.springConstant,
-          dampingCoefficient: widget.dampingCoefficient,
-          initialPosition: panelTarget,
-          position: panelTarget,
-          builder: (context, state, child) {
+        // Panel — overriden=true during a drag so the spring tracks the finger
+        // 1:1 with no physics lag. When the finger lifts, overriden goes false
+        // and the spring animates from the mid-drag position to panelTarget.
+        _buildPanelSpring(
+          initialPosition: panelSpringPosition,
+          position: panelSpringPosition,
+          overriden: isDragging,
+          builder: (context, state) {
             final left = isLeft ? state.position : (_totalWidth - panelW + state.position);
             return Positioned(
               left: left,
@@ -409,15 +457,14 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
                   left: left,
                   width: panelW,
                   onScreen: _panelVisible,
-                  isDragging: _swipeDragOffset != 0,
-                  dragOffset: _swipeDragOffset,
+                  isDragging: isDragging,
+                  dragOffset: effectiveOffset,
                   role: LdPanelRole.panel,
                 ),
-                child: child!,
+                child: widget.panel,
               ),
             );
           },
-          child: widget.panel,
         ),
         // 20px edge swipe zone — show panel.
         if (!_panelVisible)
