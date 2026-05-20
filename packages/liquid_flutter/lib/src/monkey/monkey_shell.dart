@@ -147,14 +147,29 @@ class _MonkeyShellLayoutBuilder<T extends Identifiable<IdType>, IdType> extends 
                 isSideBySide: true,
               ),
               child: LdMultiPanelLayout(
-                enableBorders: true,
-                visibleStartIndex: 0,
-                visibleEndIndex: showingDetail ? 1 : 0,
-                widths: [PanelWidth.fill(), PanelWidth.fill(fillFlex: detailPanelFlex)],
-                children: [
-                  Provider.value(value: LdDrawerSlot.drawer, child: masterPage),
-                  Provider.value(value: LdDrawerSlot.body, child: PreventAutoFocus(child: wrappedChild)),
-                ],
+                mode: LdMultiPanelLayoutMode.sideBySide,
+                panelVisible: showingDetail,
+                allowResize: true,
+                panelPosition: LdPanelPosition.right,
+                initialPanelFraction: detailPanelFlex / (1 + detailPanelFlex),
+                body: Provider.value(
+                  value: LdDrawerSlot.drawer,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        right: BorderSide(
+                          color: LdTheme.of(context).border,
+                          width: LdTheme.of(context).borderWidth,
+                        ),
+                      ),
+                    ),
+                    child: masterPage,
+                  ),
+                ),
+                panel: Provider.value(
+                  value: LdDrawerSlot.body,
+                  child: PreventAutoFocus(child: wrappedChild),
+                ),
               ),
             ),
           ),

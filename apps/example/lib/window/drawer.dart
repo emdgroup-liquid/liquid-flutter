@@ -205,17 +205,31 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                   child: const Text("Magic"),
                 ),
                 LdDrawerItemSection(
-                  active: GoRouterState.of(context).uri.path == "/task-demo",
-                  leading: const Icon(LucideIcons.check),
-                  onPressed: () => _showPage(context, "/task-demo"),
-                  child: const Text("Task"),
+                  leading: const Text("🐵"),
+                  child: const Text("Monkey Demos"),
+                  initiallyExpanded: true,
+                  children: [
+                    LdDrawerItemSection(
+                      active: GoRouterState.of(context).uri.path == "/task-demo",
+                      leading: const Icon(LucideIcons.check),
+                      onPressed: () => _showPage(context, "/task-demo"),
+                      child: const Text("Task"),
+                    ),
+                    LdDrawerItemSection(
+                      active: GoRouterState.of(context).uri.path == "/movie-demo",
+                      leading: const Icon(LucideIcons.film),
+                      onPressed: () => _showPage(context, "/movie-demo"),
+                      child: const Text("Movie"),
+                    ),
+                    LdDrawerItemSection(
+                      active: GoRouterState.of(context).uri.path == "/projects",
+                      leading: const Icon(LucideIcons.folder),
+                      onPressed: () => _showPage(context, "/projects"),
+                      child: const Text("Movie"),
+                    ),
+                  ],
                 ),
-                LdDrawerItemSection(
-                  active: GoRouterState.of(context).uri.path == "/movie-demo",
-                  leading: const Icon(LucideIcons.film),
-                  onPressed: () => _showPage(context, "/movie-demo"),
-                  child: const Text("Movie"),
-                ),
+
                 const LdSectionHeader("Documentation"),
                 LdDrawerItemSection(
                   active: GoRouterState.of(context).uri.path == "/theme",
