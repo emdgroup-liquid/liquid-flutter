@@ -154,21 +154,23 @@ class _MonkeyShellLayoutBuilder<T extends Identifiable<IdType>, IdType> extends 
                 initialPanelFraction: detailPanelFlex / (1 + detailPanelFlex),
                 body: Provider.value(
                   value: LdDrawerSlot.drawer,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        right: BorderSide(
-                          color: LdTheme.of(context).border,
-                          width: LdTheme.of(context).borderWidth,
-                        ),
-                      ),
-                    ),
-                    child: masterPage,
-                  ),
+                  child: masterPage,
                 ),
                 panel: Provider.value(
                   value: LdDrawerSlot.body,
-                  child: PreventAutoFocus(child: wrappedChild),
+                  child: PreventAutoFocus(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        border: Border(
+                          left: BorderSide(
+                            color: LdTheme.of(context).border,
+                            width: LdTheme.of(context).borderWidth,
+                          ),
+                        ),
+                      ),
+                      child: wrappedChild,
+                    ),
+                  ),
                 ),
               ),
             ),

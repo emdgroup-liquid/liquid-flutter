@@ -136,6 +136,7 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
   bool get _isDrawerOpen => _panelVisible;
 
   Border? get _drawerBorder {
+    if (!_isSideBySide) return null;
     return Border(
       right: BorderSide(
         color: LdTheme.of(context).border,
@@ -199,13 +200,7 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
                         isOpen: _isDrawerOpen,
                         isSideBySide: _isSideBySide,
                       ),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: _drawerBorder,
-                          color: LdTheme.of(context).background,
-                        ),
-                        child: widget.drawer,
-                      ),
+                      child: widget.drawer,
                     ),
                   ),
                   body: Provider.value(

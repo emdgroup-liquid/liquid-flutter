@@ -213,8 +213,8 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
     final panelTranslation = _panelVisible ? 0.0 : (isLeft ? -panelW : panelW);
 
     // Body left/right offset when panel is visible.
-    final bodyLeftWhenVisible = isLeft ? panelW : 0.0;
-    final bodyRightWhenVisible = isLeft ? 0.0 : panelW;
+    final bodyLeftWhenVisible = isLeft ? panelW + 1 : 0.0;
+    final bodyRightWhenVisible = isLeft ? 0.0 : panelW - 1;
     final bodyLeft = _panelVisible ? bodyLeftWhenVisible : 0.0;
     final bodyRight = _panelVisible ? bodyRightWhenVisible : 0.0;
 
@@ -253,6 +253,11 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
         ? (_panelVisible ? effectivePanelW - 4 : -4)
         : (_panelVisible ? _totalWidth - effectivePanelW - 4 : _totalWidth - 4);
 
+    final border = BorderSide(
+      color: LdTheme.of(context).border,
+      width: LdTheme.of(context).borderWidth,
+    );
+
     Widget buildPanel({required double panelLeft}) {
       return Positioned(
         left: panelLeft,
@@ -268,7 +273,15 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
             dragOffset: 0,
             role: LdPanelRole.panel,
           ),
-          child: widget.panel,
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border(
+                right: isLeft ? border : BorderSide.none,
+                left: isLeft ? BorderSide.none : border,
+              ),
+            ),
+            child: widget.panel,
+          ),
         ),
       );
     }
