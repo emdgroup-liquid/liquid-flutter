@@ -588,20 +588,15 @@ void main() {
     });
 
     // -------------------------------------------------------------------------
-    // 15. Stage 2: spring target stays fixed at snapped value during drag
+    // 15. Stage 2: during drag the panel renders at the dragged position
     // -------------------------------------------------------------------------
     testWidgets(
-        'stacked – 50px drag does not change spring target; Positioned.left reflects offset',
+        'stacked – mid-drag panel tracks finger 1:1 (overriden=true during drag)',
         (WidgetTester tester) async {
       // Panel starts visible on the left, width = 200px.
-      // Snapped target = 0.0 (visible).
-      // After a 50px leftward swipe the effective offset is -50 (closing swipe)
-      // and Positioned.left must be 0 + (-50) = -50, while the spring's
-      // position prop must still be 0.0 (the unchanged snapped target).
-
-      // Capture the LdSpring widget that is rendered for the panel so we can
-      // inspect its `position` prop after the drag.
-      LdSpring? capturedSpring;
+      // During a leftward drag, overriden=true forces the spring to track the
+      // finger position immediately (no spring catch-up lag).
+      // After gesture ends, overriden=false and spring snaps/animates back.
 
       await tester.pumpWidget(
         _wrap(
@@ -611,48 +606,43 @@ void main() {
             initialPanelWidth: 200,
             initialPanelVisible: true,
             body: _placeholder('body', Colors.blue),
-            panel: Builder(builder: (context) {
-              // Walk up to find the enclosing LdSpring and capture it.
-              capturedSpring = context.findAncestorWidgetOfExactType<LdSpring>();
-              return _placeholder('panel', Colors.red);
-            }),
+            panel: _placeholder('panel', Colors.red),
           ),
         ),
       );
       await tester.pumpAndSettle();
 
-      // Confirm the spring's position prop is at the snapped value before drag.
-      expect(capturedSpring?.position, equals(0.0),
-          reason: 'Spring target should start at snapped value 0.0 (visible)');
+      // Record the panel's starting left edge.
+      final panelBoxBefore = tester.getTopLeft(find.text('panel'));
+      expect(panelBoxBefore.dx, greaterThanOrEqualTo(0),
+          reason: 'Panel should start fully on-screen');
 
-      // Perform a 50px leftward drag on the panel (closing swipe).
-      // The swipe-to-close GestureDetector covers the panel area (left=0, width=200).
-      await performPanGesture(
-        tester,
-        startPosition: const Offset(100, 400),
-        offset: const Offset(-50, 0),
-        steps: 5,
+      // Begin a closing swipe but do NOT end it — check mid-drag state.
+      final gesture = await tester.startGesture(
+        const Offset(100, 400),
       );
-      // Pump exactly one frame — spring physics should NOT have moved.
       await tester.pump();
 
-      // Spring target must still be 0.0 — the snapped (visible) value.
-      expect(capturedSpring?.position, equals(0.0),
-          reason:
-              'Spring target must remain at snapped value 0.0 during drag; '
-              'effectiveOffset should be applied additively in the builder only');
+      // Drag 50px to the left in 5 steps.
+      for (var i = 0; i < 5; i++) {
+        await gesture.moveBy(const Offset(-10, 0));
+        await tester.pump();
+      }
 
-      // The panel widget's left edge in global coordinates should reflect the
-      // -50px drag offset: rendered left = state.position(-50 from offset) = -50.
-      // (ldDisableAnimations=true → state.position == widget.position == 0.0)
-      // Rendered left = 0.0 + (-50) = -50.
-      final panelBox = tester.getTopLeft(find.text('panel'));
-      // The panel Text is centered within its 200px container starting at x=-50.
-      // Centre x = -50 + 100 = 50. So panelBox.dx should be < 50 (offset applied).
-      expect(panelBox.dx, lessThan(100),
-          reason:
-              'Panel should have shifted left due to the 50px drag offset being '
-              'applied additively in the builder');
+      // Mid-drag: panel should have shifted left by ~50px.
+      final panelBoxDuring = tester.getTopLeft(find.text('panel'));
+      expect(panelBoxDuring.dx, lessThan(panelBoxBefore.dx),
+          reason: 'Panel should shift left during a closing drag');
+      expect(panelBoxDuring.dx, closeTo(panelBoxBefore.dx - 50, 5),
+          reason: 'Panel should track finger 1:1 with overriden=true (±5px)');
+
+      // End the gesture and settle — panel springs back to visible position.
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      final panelBoxAfter = tester.getTopLeft(find.text('panel'));
+      expect(panelBoxAfter.dx, closeTo(panelBoxBefore.dx, 1),
+          reason: 'Panel should snap back to visible position after gesture ends');
     });
 
     // -------------------------------------------------------------------------
