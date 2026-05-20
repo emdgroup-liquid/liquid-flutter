@@ -548,5 +548,69 @@ void main() {
       expect(panelBox.dx, greaterThanOrEqualTo(0),
           reason: 'Panel should be visible when panelVisible: true is passed');
     });
+
+    // -------------------------------------------------------------------------
+    // 15. Regression: LdDrawerLayout renders at correct width after zero-width
+    //     first frame (release-mode / physical device scenario – issue #106).
+    //
+    //     The fix switches from `initialPanelWidth` (one-time seed, sticks at 0)
+    //     to `panelWidth` (reactive / controlled) so that when the LayoutBuilder
+    //     re-fires with the real constraints, the drawer panel tracks the new
+    //     effective width.
+    // -------------------------------------------------------------------------
+    testWidgets(
+        'LdDrawerLayout: drawer renders at correct width after zero-width first frame',
+        (WidgetTester tester) async {
+      // Capture injected LdMultiPanelChildState from inside the drawer slot.
+      LdMultiPanelChildState? capturedState;
+
+      Widget buildDrawer(Size size) => _wrap(
+            LdDrawerLayout(
+              reflowBreakpoint: 1200, // force stacked mode at 800 px
+              drawerWidth: 250,
+              onStateChange: (_) {},
+              drawer: Builder(
+                builder: (context) {
+                  capturedState =
+                      Provider.of<LdMultiPanelChildState>(context, listen: false);
+                  return _placeholder('drawer', Colors.green);
+                },
+              ),
+              body: _placeholder('body', Colors.blue),
+            ),
+            size: size,
+          );
+
+      // Phase 1: narrow first frame — simulates release mode on a physical
+      // device where the outer LayoutBuilder fires with a very small maxWidth
+      // before real layout resolves (the effective drawer width is ~82 px,
+      // well below the configured 250 px).
+      //
+      // With the old `initialPanelWidth` (one-time seed), this small value
+      // would be seeded into `_internalPanelWidth` and never updated, so the
+      // drawer would remain narrow for the widget's lifetime.  With the fix
+      // (`panelWidth`, reactive), the correct width is picked up on the next
+      // frame.
+      await tester.pumpWidget(buildDrawer(const Size(110, 800)));
+      await tester.pumpAndSettle();
+
+      // Phase 2: resize to real dimensions — the LayoutBuilder re-fires with
+      // the actual constraints.  With `panelWidth` (reactive), the drawer width
+      // must update; with the old `initialPanelWidth` (one-time seed) it would
+      // stay stuck at ~82 px (min(110 * 0.75, 250) = 82.5).
+      await tester.pumpWidget(buildDrawer(const Size(800, 800)));
+      await tester.pumpAndSettle();
+
+      // The effective drawer width = min(800 * 0.75, 250) = 250.
+      // capturedState is null only if the drawer Builder never ran (layout error).
+      expect(capturedState, isNotNull,
+          reason: 'Builder inside drawer should have been called');
+      expect(
+        capturedState!.width,
+        closeTo(250, 1),
+        reason: 'Drawer panel width must reflect real layout constraints (250 px), '
+            'not the narrow first-frame seed (~82 px).',
+      );
+    });
   });
 }

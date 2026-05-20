@@ -186,7 +186,7 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
                   mode: mode,
                   panelVisible: _panelVisible,
                   onPanelVisibilityChanged: _onPanelVisibilityChanged,
-                  initialPanelWidth: _effectiveDrawerWidth,
+                  panelWidth: _effectiveDrawerWidth,
                   panelPosition: LdPanelPosition.left,
                   allowResize: false,
                   mass: 1,
