@@ -270,14 +270,7 @@ class MovieDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LdMonkeyDetailPage<MovieDemo, int>.scrollable(
-      primaryAppBar: LdMonkeyAppBar<MovieDemo, int>(
-        location: LdMonkeyActionLocation.detailAppBar,
-        title: Text("Movie"),
-        debugName: "MovieDetailPage",
-      ),
-      buildDetail: (context, item) => _MovieDetail(movie: item),
-    );
+    return LdMonkeyDetailPage<MovieDemo, int>.scrollable(buildDetail: (context, item) => _MovieDetail(movie: item));
   }
 }
 
