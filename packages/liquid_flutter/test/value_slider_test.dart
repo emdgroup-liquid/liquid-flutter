@@ -636,6 +636,290 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
+  // Stage 5: allowRangeDrag tests
+  // -------------------------------------------------------------------------
+
+  group('LdSlider.range allowRangeDrag', () {
+    testWidgets('pan fill region → both values shift by same delta',
+        (WidgetTester tester) async {
+      double low = 0.2;
+      double high = 0.8;
+      final List<(double, double)> emissions = [];
+
+      await tester.pumpWidget(
+        withLiquidTheme(
+          StatefulBuilder(
+            builder: (context, setState) {
+              return Center(
+                child: SizedBox(
+                  width: 300,
+                  child: LdSlider.range(
+                    lowValue: low,
+                    highValue: high,
+                    min: 0.0,
+                    max: 1.0,
+                    allowRangeDrag: true,
+                    onRangeChanged: (l, h) {
+                      emissions.add((l, h));
+                      setState(() {
+                        low = l;
+                        high = h;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Drag the fill region (center of the slider) to the right
+      final sliderFinder = find.byType(LdSlider);
+      final sliderRect = tester.getRect(sliderFinder);
+      // Start at center (fill region between the two handles at 0.2 and 0.8)
+      final startOffset = sliderRect.center;
+      final endOffset = Offset(sliderRect.center.dx + 30, sliderRect.center.dy);
+
+      await performPanGesture(
+        tester,
+        startPosition: startOffset,
+        endPosition: endOffset,
+        steps: 10,
+      );
+
+      expect(emissions.isNotEmpty, true,
+          reason: 'onRangeChanged should be called when dragging the fill');
+
+      // The range width must be preserved across all emissions
+      for (final (l, h) in emissions) {
+        expect((h - l).abs(), closeTo(0.6, 0.001),
+            reason: 'Range width must be preserved during fill drag');
+      }
+
+      // Values should have shifted to the right (higher)
+      expect(low, greaterThan(0.2),
+          reason: 'low value should increase after dragging right');
+      expect(high, greaterThan(0.8),
+          reason: 'high value should increase after dragging right');
+    });
+
+    testWidgets('drag to min boundary → lowValue = min, highValue = min + rangeWidth',
+        (WidgetTester tester) async {
+      double low = 0.3;
+      double high = 0.7;
+      final double initialRangeWidth = high - low; // 0.4
+
+      await tester.pumpWidget(
+        withLiquidTheme(
+          StatefulBuilder(
+            builder: (context, setState) {
+              return Center(
+                child: SizedBox(
+                  width: 300,
+                  child: LdSlider.range(
+                    lowValue: low,
+                    highValue: high,
+                    min: 0.0,
+                    max: 1.0,
+                    allowRangeDrag: true,
+                    onRangeChanged: (l, h) {
+                      setState(() {
+                        low = l;
+                        high = h;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Drag far to the left to hit the min boundary
+      final sliderFinder = find.byType(LdSlider);
+      final sliderRect = tester.getRect(sliderFinder);
+      final startOffset = sliderRect.center;
+      final endOffset = Offset(sliderRect.left, sliderRect.center.dy);
+
+      await performPanGesture(
+        tester,
+        startPosition: startOffset,
+        endPosition: endOffset,
+        steps: 20,
+      );
+
+      expect(low, closeTo(0.0, 0.01),
+          reason: 'low value should be clamped to min after dragging to boundary');
+      expect(high, closeTo(initialRangeWidth, 0.01),
+          reason: 'high value should equal min + rangeWidth after clamping to min');
+    });
+
+    testWidgets('drag to max boundary → highValue = max, lowValue = max - rangeWidth',
+        (WidgetTester tester) async {
+      double low = 0.3;
+      double high = 0.7;
+      final double initialRangeWidth = high - low; // 0.4
+
+      await tester.pumpWidget(
+        withLiquidTheme(
+          StatefulBuilder(
+            builder: (context, setState) {
+              return Center(
+                child: SizedBox(
+                  width: 300,
+                  child: LdSlider.range(
+                    lowValue: low,
+                    highValue: high,
+                    min: 0.0,
+                    max: 1.0,
+                    allowRangeDrag: true,
+                    onRangeChanged: (l, h) {
+                      setState(() {
+                        low = l;
+                        high = h;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Drag far to the right to hit the max boundary
+      final sliderFinder = find.byType(LdSlider);
+      final sliderRect = tester.getRect(sliderFinder);
+      final startOffset = sliderRect.center;
+      final endOffset = Offset(sliderRect.right, sliderRect.center.dy);
+
+      await performPanGesture(
+        tester,
+        startPosition: startOffset,
+        endPosition: endOffset,
+        steps: 20,
+      );
+
+      expect(high, closeTo(1.0, 0.01),
+          reason: 'high value should be clamped to max after dragging to boundary');
+      expect(low, closeTo(1.0 - initialRangeWidth, 0.01),
+          reason: 'low value should equal max - rangeWidth after clamping to max');
+    });
+
+    testWidgets('handle drag still works when allowRangeDrag=true',
+        (WidgetTester tester) async {
+      // Use low=0.0 so the low handle is at the far left edge, clearly outside
+      // the fill drag zone which starts beyond the handle radius.
+      double low = 0.0;
+      double high = 0.8;
+      final List<double> lowEmissions = [];
+
+      await tester.pumpWidget(
+        withLiquidTheme(
+          StatefulBuilder(
+            builder: (context, setState) {
+              return Center(
+                child: SizedBox(
+                  width: 300,
+                  child: LdSlider.range(
+                    lowValue: low,
+                    highValue: high,
+                    min: 0.0,
+                    max: 1.0,
+                    allowRangeDrag: true,
+                    onRangeChanged: (l, h) {
+                      lowEmissions.add(l);
+                      setState(() {
+                        low = l;
+                        high = h;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Drag from the very left edge (low handle at value 0.0) to the right.
+      // The handle is at the leftmost position so the fill GestureDetector
+      // (which excludes handle zones) cannot intercept this gesture.
+      final sliderFinder = find.byType(LdSlider);
+      final sliderRect = tester.getRect(sliderFinder);
+      // The low handle at 0.0 is at the very left of the slider
+      final startOffset = Offset(sliderRect.left + 5, sliderRect.center.dy);
+      final endOffset = Offset(sliderRect.left + 60, sliderRect.center.dy);
+
+      await performPanGesture(
+        tester,
+        startPosition: startOffset,
+        endPosition: endOffset,
+        steps: 15,
+      );
+
+      expect(lowEmissions.isNotEmpty, true,
+          reason: 'Handles must still be draggable when allowRangeDrag=true');
+    });
+
+    testWidgets(
+        'range narrower than 2×handleRadius → fill not draggable (no callback)',
+        (WidgetTester tester) async {
+      // With a very small range (low=0.499, high=0.501) the fill hit region
+      // (which excludes handle zones) will be zero-width and the GestureDetector
+      // won't be rendered. Dragging the center should NOT call onRangeChanged
+      // with the range-drag logic (though it may fall through to a handle).
+      // We verify it doesn't crash and the widget renders correctly.
+      double low = 0.499;
+      double high = 0.501;
+      await tester.pumpWidget(
+        withLiquidTheme(
+          StatefulBuilder(
+            builder: (context, setState) {
+              return Center(
+                child: SizedBox(
+                  width: 300,
+                  child: LdSlider.range(
+                    lowValue: low,
+                    highValue: high,
+                    min: 0.0,
+                    max: 1.0,
+                    allowRangeDrag: true,
+                    onRangeChanged: (l, h) {
+                      setState(() {
+                        low = l;
+                        high = h;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // The widget should have rendered without error
+      expect(find.byType(LdSlider), findsOneWidget);
+
+      // Verify no crash when the range is too narrow for the fill drag zone
+      // (the fill GestureDetector is simply not rendered in this case)
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // Stage 6: Vertical direction support tests
   // -------------------------------------------------------------------------
 

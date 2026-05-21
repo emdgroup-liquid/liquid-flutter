@@ -24,6 +24,21 @@ double _fractionToValue(double fraction, double min, double max) {
   return min + fraction * (max - min);
 }
 
+/// Translates a [low, high] range by [deltaFraction] while preserving range
+/// width and clamping to [min, max].
+({double low, double high}) _translateRange({
+  required double low,
+  required double high,
+  required double deltaFraction,
+  required double min,
+  required double max,
+}) {
+  final rangeWidth = high - low;
+  final newLow = (low + deltaFraction).clamp(min, max - rangeWidth);
+  final newHigh = newLow + rangeWidth;
+  return (low: newLow, high: newHigh);
+}
+
 // ---------------------------------------------------------------------------
 // _LdSliderHandle
 // ---------------------------------------------------------------------------
@@ -200,7 +215,8 @@ class LdSlider extends StatefulWidget {
   final void Function(double low, double high)? onRangeChanged;
 
   /// Whether the entire filled region between the two handles can be dragged
-  /// as a unit. Accepted in the constructor; behavior implemented in Stage 5.
+  /// as a unit, translating both values by the same delta while preserving
+  /// range width. Only has effect in range mode when the slider is not disabled.
   final bool allowRangeDrag;
 
   // ---- Shared fields -----------------------------------------------------
@@ -302,6 +318,7 @@ class _LdSliderState extends State<LdSlider> {
   // ---- Range-mode drag state ---------------------------------------------
   bool _isDraggingLow = false;
   bool _isDraggingHigh = false;
+  bool _isDraggingRange = false;
 
   /// Step-index tracking for haptics — low handle.
   int? _prevLowStepIndex;
@@ -534,6 +551,44 @@ class _LdSliderState extends State<LdSlider> {
       _isDraggingHigh = false;
       _prevHighStepIndex = null;
     });
+  }
+
+  // ---- Range fill drag helpers -------------------------------------------
+
+  void _onRangeDragStart(DragStartDetails details) {
+    if (widget.disabled) return;
+    HapticFeedback.mediumImpact();
+    setState(() => _isDraggingRange = true);
+  }
+
+  void _onRangeDragUpdate(DragUpdateDetails details, double trackPx) {
+    if (widget.disabled) return;
+    if (trackPx <= 0) return;
+
+    final double deltaFraction;
+    if (_isVertical) {
+      // Inverted: drag up (negative dy) increases value.
+      deltaFraction = -details.delta.dy / trackPx;
+    } else {
+      deltaFraction = details.delta.dx / trackPx;
+    }
+
+    final result = _translateRange(
+      low: _clampedLow,
+      high: _clampedHigh,
+      deltaFraction: deltaFraction * (widget.max - widget.min),
+      min: widget.min,
+      max: widget.max,
+    );
+
+    if (result.low != widget.lowValue || result.high != widget.highValue) {
+      widget.onRangeChanged!(result.low, result.high);
+    }
+  }
+
+  void _onRangeDragEnd(DragEndDetails details) {
+    if (!mounted) return;
+    setState(() => _isDraggingRange = false);
   }
 
   // ---- Build ------------------------------------------------------------
@@ -786,7 +841,7 @@ class _LdSliderState extends State<LdSlider> {
                 LdSpring(
                   position: lowFraction,
                   initialPosition: lowFraction,
-                  overriden: _isDraggingLow,
+                  overriden: _isDraggingRange || _isDraggingLow || _isDraggingHigh,
                   builder: (context, lowSpringState, _) {
                     final lowSpringFraction =
                         lowSpringState.position.clamp(0.0, 1.0);
@@ -797,7 +852,7 @@ class _LdSliderState extends State<LdSlider> {
                     return LdSpring(
                       position: highFraction,
                       initialPosition: highFraction,
-                      overriden: _isDraggingHigh,
+                      overriden: _isDraggingRange || _isDraggingLow || _isDraggingHigh,
                       builder: (context, highSpringState, _) {
                         final highSpringFraction =
                             highSpringState.position.clamp(0.0, 1.0);
@@ -807,6 +862,17 @@ class _LdSliderState extends State<LdSlider> {
                         final fillTop = handleDiameter / 2 + highTopOffset;
                         final fillBottom = handleDiameter / 2 + lowTopOffset;
                         final fillHeight = (fillBottom - fillTop).clamp(0.0, double.infinity);
+
+                        // Vertical handle centers (Y from top of the Stack container)
+                        final handleRadius = handleDiameter / 2;
+                        final highHandleCenter = highTopOffset + handleRadius;
+                        final lowHandleCenter = lowTopOffset + handleRadius;
+
+                        // Fill hit region (vertical): from highHandleCenter+handleRadius
+                        // (below high handle) to lowHandleCenter-handleRadius (above low handle)
+                        final fillHitTop = highHandleCenter + handleRadius;
+                        final fillHitBottom = lowHandleCenter - handleRadius;
+                        final fillHitHeight = fillHitBottom - fillHitTop;
 
                         return Stack(
                           alignment: Alignment.topCenter,
@@ -824,6 +890,29 @@ class _LdSliderState extends State<LdSlider> {
                                 ),
                               ),
                             ),
+
+                            // Fill drag overlay (allowRangeDrag, vertical)
+                            // Rendered BEFORE handles so handles are above in Z-order.
+                            if (widget.allowRangeDrag &&
+                                !widget.disabled &&
+                                fillHitHeight > 0)
+                              Positioned(
+                                top: fillHitTop,
+                                height: fillHitHeight,
+                                left: 0,
+                                right: 0,
+                                child: MouseRegion(
+                                  cursor: _isDraggingRange
+                                      ? SystemMouseCursors.grabbing
+                                      : SystemMouseCursors.grab,
+                                  child: GestureDetector(
+                                    onVerticalDragStart: _onRangeDragStart,
+                                    onVerticalDragUpdate: (details) =>
+                                        _onRangeDragUpdate(details, usableLength),
+                                    onVerticalDragEnd: _onRangeDragEnd,
+                                  ),
+                                ),
+                              ),
 
                             // Low handle gesture detector (lower on screen = lower value)
                             Positioned(
@@ -902,7 +991,7 @@ class _LdSliderState extends State<LdSlider> {
                 LdSpring(
                   position: lowFraction,
                   initialPosition: lowFraction,
-                  overriden: _isDraggingLow,
+                  overriden: _isDraggingRange || _isDraggingLow || _isDraggingHigh,
                   builder: (context, lowSpringState, _) {
                     final lowSpringFraction =
                         lowSpringState.position.clamp(0.0, 1.0);
@@ -912,7 +1001,7 @@ class _LdSliderState extends State<LdSlider> {
                     return LdSpring(
                       position: highFraction,
                       initialPosition: highFraction,
-                      overriden: _isDraggingHigh,
+                      overriden: _isDraggingRange || _isDraggingLow || _isDraggingHigh,
                       builder: (context, highSpringState, _) {
                         final highSpringFraction =
                             highSpringState.position.clamp(0.0, 1.0);
@@ -925,6 +1014,20 @@ class _LdSliderState extends State<LdSlider> {
                             handleDiameter / 2 + highOffset;
                         final fillWidth =
                             (fillRight - fillLeft).clamp(0.0, double.infinity);
+
+                        // Handle centers in the Stack coordinate space
+                        final handleRadius = handleDiameter / 2;
+                        // lowHandleCenter and highHandleCenter are the x positions
+                        // of the centers of the low and high handles.
+                        final lowHandleCenter = lowOffset + handleRadius;
+                        final highHandleCenter = highOffset + handleRadius;
+
+                        // Fill hit region: from lowHandleCenter+handleRadius to
+                        // highHandleCenter-handleRadius. If the range is narrower
+                        // than 2×handleRadius, the fill is not interactive.
+                        final fillHitLeft = lowHandleCenter + handleRadius;
+                        final fillHitRight = highHandleCenter - handleRadius;
+                        final fillHitWidth = fillHitRight - fillHitLeft;
 
                         return Stack(
                           alignment: Alignment.centerLeft,
@@ -942,6 +1045,29 @@ class _LdSliderState extends State<LdSlider> {
                                 ),
                               ),
                             ),
+
+                            // Fill drag overlay (allowRangeDrag, horizontal)
+                            // Rendered BEFORE handles so handles are above in Z-order.
+                            if (widget.allowRangeDrag &&
+                                !widget.disabled &&
+                                fillHitWidth > 0)
+                              Positioned(
+                                left: fillHitLeft,
+                                width: fillHitWidth,
+                                top: 0,
+                                bottom: 0,
+                                child: MouseRegion(
+                                  cursor: _isDraggingRange
+                                      ? SystemMouseCursors.grabbing
+                                      : SystemMouseCursors.grab,
+                                  child: GestureDetector(
+                                    onHorizontalDragStart: _onRangeDragStart,
+                                    onHorizontalDragUpdate: (details) =>
+                                        _onRangeDragUpdate(details, usableLength),
+                                    onHorizontalDragEnd: _onRangeDragEnd,
+                                  ),
+                                ),
+                              ),
 
                             // Low handle gesture detector
                             Positioned(

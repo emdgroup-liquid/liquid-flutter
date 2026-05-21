@@ -154640,7 +154640,7 @@
             },
             {
               "name": "allowRangeDrag",
-              "description": "Whether the entire filled region between the two handles can be dragged as a unit. Behavior implemented in Stage 5.",
+                "description": "Whether the entire filled region between the two handles can be dragged as a unit, translating both values by the same delta while preserving range width.",
               "type": {
                 "name": "bool",
                 "superTypes": [
