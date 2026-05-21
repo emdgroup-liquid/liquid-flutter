@@ -163,6 +163,7 @@ class _LdTextWidget extends StatelessWidget {
       textAlign: textAlign,
       maxLines: maxLines,
       overflow: overflow,
+      textHeightBehavior: TextHeightBehavior(applyHeightToFirstAscent: false),
       textDirection: TextDirection.ltr,
     );
   }
