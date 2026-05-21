@@ -35,12 +35,16 @@ class _LdSliderHandle extends StatefulWidget {
   final LdSize size;
   final LdColor? color;
   final Axis direction;
+  final String tooltipMessage;
+  final GlobalKey<TooltipState> tooltipKey;
 
   const _LdSliderHandle({
     required this.fraction,
     required this.isDragging,
     required this.disabled,
     required this.size,
+    required this.tooltipMessage,
+    required this.tooltipKey,
     this.color,
     this.direction = Axis.horizontal,
   });
@@ -72,6 +76,22 @@ class _LdSliderHandleState extends State<_LdSliderHandle> {
   }
 
   @override
+  void didUpdateWidget(covariant _LdSliderHandle oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!oldWidget.isDragging && widget.isDragging) {
+      // Drag started — show tooltip immediately
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          widget.tooltipKey.currentState?.ensureTooltipVisible();
+        }
+      });
+    } else if (oldWidget.isDragging && !widget.isDragging) {
+      // Drag ended — dismiss tooltip
+      widget.tooltipKey.currentState?.deactivate();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
     final effectiveColor = widget.color ?? theme.palette.primary;
@@ -99,38 +119,43 @@ class _LdSliderHandleState extends State<_LdSliderHandle> {
       borderColor = theme.border;
     }
 
-    return MouseRegion(
-      cursor: widget.disabled
-          ? SystemMouseCursors.forbidden
-          : SystemMouseCursors.resizeLeftRight,
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() {
-        _isHovered = false;
-        _isPressed = false;
-      }),
-      child: GestureDetector(
-        onTapDown: (_) => setState(() => _isPressed = true),
-        onTapUp: (_) => setState(() => _isPressed = false),
-        onTapCancel: () => setState(() => _isPressed = false),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 100),
-          width: diameter,
-          height: diameter,
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: borderColor,
-              width: theme.borderWidth,
-              strokeAlign: BorderSide.strokeAlignInside,
+    return Tooltip(
+      key: widget.tooltipKey,
+      message: widget.tooltipMessage,
+      triggerMode: TooltipTriggerMode.manual,
+      child: MouseRegion(
+        cursor: widget.disabled
+            ? SystemMouseCursors.forbidden
+            : SystemMouseCursors.resizeLeftRight,
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() {
+          _isHovered = false;
+          _isPressed = false;
+        }),
+        child: GestureDetector(
+          onTapDown: (_) => setState(() => _isPressed = true),
+          onTapUp: (_) => setState(() => _isPressed = false),
+          onTapCancel: () => setState(() => _isPressed = false),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 100),
+            width: diameter,
+            height: diameter,
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: borderColor,
+                width: theme.borderWidth,
+                strokeAlign: BorderSide.strokeAlignInside,
+              ),
+              boxShadow: [ldShadowDefault],
             ),
-            boxShadow: [ldShadowDefault],
-          ),
-          child: Center(
-            child: Icon(
-              LucideIcons.gripVertical,
-              size: _iconSize(theme),
-              color: iconColor,
+            child: Center(
+              child: Icon(
+                LucideIcons.gripVertical,
+                size: _iconSize(theme),
+                color: iconColor,
+              ),
             ),
           ),
         ),
@@ -202,7 +227,20 @@ class _LdSliderState extends State<LdSlider> {
   /// Previous step index used for haptic feedback on step change.
   int? _prevStepIndex;
 
+  // Tooltip keys — defined now for forward compatibility with range mode (Stage 4).
+  // Only _lowTooltipKey is used in single mode.
+  final _lowTooltipKey = GlobalKey<TooltipState>();
+  // ignore: unused_field
+  final _highTooltipKey = GlobalKey<TooltipState>(); // used in Stage 4 (range mode)
+
   double get _clampedValue => widget.value.clamp(widget.min, widget.max);
+
+  String get _formattedValue {
+    final v = _clampedValue;
+    // Show integer if the value is whole, otherwise up to 2 decimal places.
+    if (v == v.roundToDouble()) return v.toInt().toString();
+    return v.toStringAsFixed(2);
+  }
 
   // Track and handle geometry ------------------------------------------------
 
@@ -304,59 +342,73 @@ class _LdSliderState extends State<LdSlider> {
           builder: (context, constraints) {
             final trackWidth = constraints.maxWidth;
             final usableWidth = trackWidth - handleDiameter;
-            final handleOffset = fraction * usableWidth;
 
             return GestureDetector(
               onHorizontalDragStart: _onDragStart,
               onHorizontalDragUpdate: (details) =>
                   _onDragUpdate(details, trackWidth),
               onHorizontalDragEnd: _onDragEnd,
-              child: SizedBox(
-                height: totalHeight,
-                width: trackWidth,
-                child: Stack(
-                  alignment: Alignment.centerLeft,
-                  children: [
-                    // Background track
-                    Positioned(
-                      left: handleDiameter / 2,
-                      right: handleDiameter / 2,
-                      child: Container(
-                        height: trackHeight,
-                        decoration: BoxDecoration(
-                          color: inactiveColor,
-                          borderRadius:
-                              BorderRadius.circular(trackHeight / 2),
+              child: LdSpring(
+                position: fraction,
+                initialPosition: fraction,
+                // When dragging, override the spring so the handle tracks the
+                // pointer 1:1. When not dragging, let the spring animate toward
+                // the programmatic target value.
+                overriden: _isDragging,
+                builder: (context, springState, _) {
+                  final springFraction = springState.position.clamp(0.0, 1.0);
+                  final handleOffset = springFraction * usableWidth;
+
+                  return SizedBox(
+                    height: totalHeight,
+                    width: trackWidth,
+                    child: Stack(
+                      alignment: Alignment.centerLeft,
+                      children: [
+                        // Background track
+                        Positioned(
+                          left: handleDiameter / 2,
+                          right: handleDiameter / 2,
+                          child: Container(
+                            height: trackHeight,
+                            decoration: BoxDecoration(
+                              color: inactiveColor,
+                              borderRadius:
+                                  BorderRadius.circular(trackHeight / 2),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    // Active (filled) portion of track
-                    Positioned(
-                      left: handleDiameter / 2,
-                      width: handleOffset,
-                      child: Container(
-                        height: trackHeight,
-                        decoration: BoxDecoration(
-                          color: activeColor,
-                          borderRadius:
-                              BorderRadius.circular(trackHeight / 2),
+                        // Active (filled) portion of track
+                        Positioned(
+                          left: handleDiameter / 2,
+                          width: handleOffset,
+                          child: Container(
+                            height: trackHeight,
+                            decoration: BoxDecoration(
+                              color: activeColor,
+                              borderRadius:
+                                  BorderRadius.circular(trackHeight / 2),
+                            ),
+                          ),
                         ),
-                      ),
+                        // Handle
+                        Positioned(
+                          left: handleOffset,
+                          child: _LdSliderHandle(
+                            fraction: springFraction,
+                            isDragging: _isDragging,
+                            disabled: widget.disabled,
+                            size: widget.size,
+                            color: widget.color,
+                            direction: widget.direction,
+                            tooltipMessage: _formattedValue,
+                            tooltipKey: _lowTooltipKey,
+                          ),
+                        ),
+                      ],
                     ),
-                    // Handle
-                    Positioned(
-                      left: handleOffset,
-                      child: _LdSliderHandle(
-                        fraction: fraction,
-                        isDragging: _isDragging,
-                        disabled: widget.disabled,
-                        size: widget.size,
-                        color: widget.color,
-                        direction: widget.direction,
-                      ),
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
             );
           },
