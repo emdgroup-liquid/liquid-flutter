@@ -24,7 +24,7 @@ class _LdSliderDemoState extends State<LdSliderDemo> {
           ComponentWell(
             child: LdAutoSpace(
               children: [
-                LdSlider(
+                LdConfirmationSlider(
                   hint: "Swipe right...",
                   label: "Confirm account deletion",
                   disabled: _disabled,
@@ -37,7 +37,7 @@ class _LdSliderDemoState extends State<LdSliderDemo> {
                   },
                 ),
                 ldSpacerL,
-                LdSlider(
+                LdConfirmationSlider(
                   hint: "Swipe right...",
                   label: "Confirm account deletion",
                   disabled: _disabled,
@@ -51,7 +51,7 @@ class _LdSliderDemoState extends State<LdSliderDemo> {
                   },
                 ),
                 ldSpacerL,
-                LdSlider(
+                LdConfirmationSlider(
                   hint: "Swipe right...",
                   label: "Confirm account deletion",
                   disabled: _disabled,

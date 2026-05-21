@@ -153786,7 +153786,7 @@
     {
       "filePath": "lib/src/slider.dart",
       "entryPoint": "lib/liquid_flutter.dart",
-      "name": "LdSlider",
+      "name": "LdConfirmationSlider",
       "description": "",
       "constructors": [
         {
@@ -154027,7 +154027,7 @@
         {
           "name": "createState",
           "returnType": {
-            "name": "State<LdSlider>",
+            "name": "State<LdConfirmationSlider>",
             "superTypes": [
               "Object",
               "Diagnosticable"
@@ -154386,7 +154386,7 @@
     {
       "filePath": "lib/src/slider.dart",
       "entryPoint": "lib/liquid_flutter.dart",
-      "name": "_LdSliderState",
+      "name": "_LdConfirmationSliderState",
       "description": "",
       "constructors": [
         {
@@ -154711,7 +154711,7 @@
               "name": "oldWidget",
               "description": "",
               "type": {
-                "name": "LdSlider",
+                "name": "LdConfirmationSlider",
                 "superTypes": [
                   "StatefulWidget",
                   "Widget",

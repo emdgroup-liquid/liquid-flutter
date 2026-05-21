@@ -5,7 +5,7 @@ import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/haptics.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class LdSlider extends StatefulWidget {
+class LdConfirmationSlider extends StatefulWidget {
   final VoidCallback onSlideComplete;
 
   final LdColor? color;
@@ -14,13 +14,13 @@ class LdSlider extends StatefulWidget {
   final String? label;
   final bool disabled;
 
-  const LdSlider({super.key, required this.onSlideComplete, this.hint, this.color, this.label, this.disabled = false});
+  const LdConfirmationSlider({super.key, required this.onSlideComplete, this.hint, this.color, this.label, this.disabled = false});
 
   @override
-  State<LdSlider> createState() => _LdSliderState();
+  State<LdConfirmationSlider> createState() => _LdConfirmationSliderState();
 }
 
-class _LdSliderState extends State<LdSlider> with TickerProviderStateMixin {
+class _LdConfirmationSliderState extends State<LdConfirmationSlider> with TickerProviderStateMixin {
   double _value = 0;
   double _max = 0;
   final double _threshold = 0.8;
