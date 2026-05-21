@@ -4,54 +4,20 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-/// Wraps [body] inside [bar] when [bar] is a [LdMonkeyAppBar]; otherwise
-/// renders [bar] standalone and places [body] below it in a [Column].
-Widget _wrapBodyWithBar<T extends Identifiable<IdType>, IdType>(Widget bar, Widget body) {
-  if (bar is LdMonkeyAppBar<T, IdType>) {
-    return LdMonkeyAppBar<T, IdType>(
-      key: bar.key,
-      title: bar.title,
-      additionalActions: bar.additionalActions,
-      positionMode: bar.positionMode,
-      location: bar.location,
-      leading: bar.leading,
-      debugName: bar.debugName,
-      backgroundMode: bar.backgroundMode,
-      shadowMode: bar.shadowMode,
-      borderMode: bar.borderMode,
-      implyLeading: bar.implyLeading,
-      child: body,
-    );
-  }
-  // Fallback: stack the bar and body in a Column for non-LdMonkeyAppBar widgets.
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [bar, Expanded(child: body)],
-  );
-}
-
 /// The page rendered by [LdMonkey] to show the detail of the selected
 /// items
 class LdMonkeyDetailPage<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
-  final Widget? primaryAppBar;
-  final Widget? secondaryAppBar;
   final Widget body;
 
   const LdMonkeyDetailPage({
-    this.primaryAppBar,
-    this.secondaryAppBar,
     required this.body,
     super.key,
   });
 
   factory LdMonkeyDetailPage.scrollable({
-    Widget? primaryAppBar,
-    Widget? secondaryAppBar,
     required Widget Function(BuildContext context, LdPaginatorItem<T> item) buildDetail,
   }) {
     return LdMonkeyDetailPage(
-      primaryAppBar: primaryAppBar,
-      secondaryAppBar: secondaryAppBar,
       body: LdMonkeyScrollableDetailView<T, IdType>(
         buildDetail: buildDetail,
       ),
@@ -59,13 +25,9 @@ class LdMonkeyDetailPage<T extends Identifiable<IdType>, IdType> extends Statele
   }
 
   factory LdMonkeyDetailPage.stacked({
-    Widget? primaryAppBar,
-    Widget? secondaryAppBar,
     required Widget Function(BuildContext context, LdPaginatorItem<T> item) buildDetail,
   }) {
     return LdMonkeyDetailPage(
-      primaryAppBar: primaryAppBar,
-      secondaryAppBar: secondaryAppBar,
       body: LdMonkeyStackDetailView<T, IdType>(
         buildDetail: buildDetail,
       ),
@@ -74,19 +36,13 @@ class LdMonkeyDetailPage<T extends Identifiable<IdType>, IdType> extends Statele
 
   @override
   Widget build(BuildContext context) {
-    final effectivePrimary =
-        primaryAppBar ?? LdMonkeyAppBar<T, IdType>(location: LdMonkeyActionLocation.detailAppBar);
-    final effectiveSecondary =
-        secondaryAppBar ?? LdMonkeyAppBar<T, IdType>(location: LdMonkeyActionLocation.detailSecondary);
-
-    // New wrapper-based composition: secondary bar wraps the body,
-    // primary bar wraps the secondary+body subtree.
-    final wrapped = _wrapBodyWithBar<T, IdType>(
-      effectivePrimary,
-      _wrapBodyWithBar<T, IdType>(effectiveSecondary, body),
+    return LdMonkeyAppBar<T, IdType>(
+      location: LdMonkeyActionLocation.detailAppBar,
+      child: LdMonkeyAppBar<T, IdType>(
+        location: LdMonkeyActionLocation.detailSecondary,
+        child: body,
+      ),
     );
-
-    return LdScaffold(body: wrapped);
   }
 }
 
