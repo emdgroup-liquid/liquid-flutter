@@ -176,6 +176,7 @@ class _LdInputState extends State<LdInput> {
               },
               active: _focusScopeNode.hasFocus,
               disabled: widget.disabled,
+              onPressedKeys: {},
               builder: (context, status, _) => Builder(builder: (context) {
                 final colors = inputColor(theme, status, isValid: widget.valid);
                 return Container(
