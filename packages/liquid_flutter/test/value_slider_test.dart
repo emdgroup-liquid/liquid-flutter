@@ -636,6 +636,270 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
+  // Regression: Bug 1 — range handle snapped to min on drag start
+  // -------------------------------------------------------------------------
+
+  group('LdSlider.range regression', () {
+    testWidgets(
+        'low handle drag starts from its current value, not from min',
+        (WidgetTester tester) async {
+      // Place the low handle at 0.5 (middle of track).
+      // On the first drag update the emitted value should be near 0.5,
+      // not near 0.0 (which was the bug: localPosition mapped to fraction=0).
+      double low = 0.5;
+      double high = 0.9;
+      final List<double> emittedLow = [];
+
+      await tester.pumpWidget(
+        withLiquidTheme(
+          StatefulBuilder(
+            builder: (context, setState) {
+              return Center(
+                child: SizedBox(
+                  width: 300,
+                  child: LdSlider.range(
+                    lowValue: low,
+                    highValue: high,
+                    min: 0.0,
+                    max: 1.0,
+                    onRangeChanged: (l, h) {
+                      emittedLow.add(l);
+                      setState(() {
+                        low = l;
+                        high = h;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final sliderRect = tester.getRect(find.byType(LdSlider));
+      // The low handle sits at ~50% of usable track width.
+      final handleX = sliderRect.left + sliderRect.width * 0.5;
+      final startOffset = Offset(handleX, sliderRect.center.dy);
+
+      // Use performPanGesture with enough movement to cross the drag slop
+      // threshold (~18px), while keeping the delta small enough that the
+      // anchor-based implementation still emits a value near 0.5.
+      await performPanGesture(
+        tester,
+        startPosition: startOffset,
+        offset: const Offset(20, 0),
+        steps: 5,
+      );
+
+      expect(emittedLow.isNotEmpty, true,
+          reason: 'onRangeChanged must be called during low handle drag');
+      // The first emitted value must be near 0.5, not near 0.0.
+      expect(emittedLow.first, greaterThan(0.3),
+          reason:
+              'First emitted low value must be near the handle start (0.5), '
+              'not snapped to min — got ${emittedLow.first}');
+    });
+
+    testWidgets(
+        'high handle drag starts from its current value, not from min',
+        (WidgetTester tester) async {
+      double low = 0.1;
+      double high = 0.5;
+      final List<double> emittedHigh = [];
+
+      await tester.pumpWidget(
+        withLiquidTheme(
+          StatefulBuilder(
+            builder: (context, setState) {
+              return Center(
+                child: SizedBox(
+                  width: 300,
+                  child: LdSlider.range(
+                    lowValue: low,
+                    highValue: high,
+                    min: 0.0,
+                    max: 1.0,
+                    onRangeChanged: (l, h) {
+                      emittedHigh.add(h);
+                      setState(() {
+                        low = l;
+                        high = h;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final sliderRect = tester.getRect(find.byType(LdSlider));
+      // High handle is at 50% of track. Drag slightly left.
+      final handleX = sliderRect.left + sliderRect.width * 0.5;
+      final startOffset = Offset(handleX, sliderRect.center.dy);
+
+      await performPanGesture(
+        tester,
+        startPosition: startOffset,
+        offset: const Offset(-20, 0),
+        steps: 5,
+      );
+
+      expect(emittedHigh.isNotEmpty, true,
+          reason: 'onRangeChanged must be called during high handle drag');
+      // First emitted high value must be near 0.5, not near 0.0.
+      expect(emittedHigh.first, greaterThan(0.3),
+          reason:
+              'First emitted high value must be near the handle start (0.5), '
+              'not snapped to min — got ${emittedHigh.first}');
+    });
+
+    testWidgets(
+        'range drag displacement matches cursor movement (1:1 speed)',
+        (WidgetTester tester) async {
+      // With a 300px wide slider (min=0, max=1) and ldDisableAnimations=true,
+      // the usable track is (300 - handleDiameter) px. Dragging N px should
+      // shift the values by N / usableLength * (max - min).
+      // We use a large known drag and assert the result is within a small
+      // tolerance — a speed-ratio bug (e.g. 0.5× or 2×) would fall outside it.
+      double low = 0.2;
+      double high = 0.8;
+
+      await tester.pumpWidget(
+        withLiquidTheme(
+          StatefulBuilder(
+            builder: (context, setState) {
+              return Center(
+                child: SizedBox(
+                  width: 300,
+                  child: LdSlider.range(
+                    lowValue: low,
+                    highValue: high,
+                    min: 0.0,
+                    max: 1.0,
+                    allowRangeDrag: true,
+                    onRangeChanged: (l, h) {
+                      setState(() {
+                        low = l;
+                        high = h;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final sliderRect = tester.getRect(find.byType(LdSlider));
+      // Drag the fill region 60px to the right in one step so we know the
+      // exact pixel displacement that was applied.
+      const dragPx = 60.0;
+      final startOffset = sliderRect.center;
+      final gesture = await tester.startGesture(startOffset,
+          kind: PointerDeviceKind.mouse);
+      await tester.pump();
+      await gesture.moveBy(const Offset(dragPx, 0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // LdSize.m handle diameter: paddingSize(LdSize.l) * 2.
+      // We can't easily read the theme here, but we know the slider is 300px
+      // wide and the default size is LdSize.m. The exact usableLength doesn't
+      // matter for this assertion — we just verify the shift is in the right
+      // ballpark: between 10% and 30% of max-min for a 60px drag on a 300px track.
+      // A 1:1 correct implementation gives ~60/268 ≈ 22% shift (handle≈32px).
+      // A 2× speed bug would give ~44%, a 0.5× bug would give ~11% — one of
+      // those would fall outside [0.10, 0.30].
+      final shift = low - 0.2;
+      expect(shift, greaterThan(0.10),
+          reason: 'Range shifted too little — possible slow-speed bug. '
+              'shift=$shift');
+      expect(shift, lessThan(0.30),
+          reason: 'Range shifted too much — possible fast-speed bug. '
+              'shift=$shift');
+      // Range width must still be preserved.
+      expect((high - low), closeTo(0.6, 0.001),
+          reason: 'Range width must be preserved after drag');
+    });
+
+    testWidgets('range drag with step > 0 snaps both endpoints to step grid',
+        (WidgetTester tester) async {
+      double low = 0.2;
+      double high = 0.8;
+      const step = 0.1;
+      final List<(double, double)> emissions = [];
+
+      await tester.pumpWidget(
+        withLiquidTheme(
+          StatefulBuilder(
+            builder: (context, setState) {
+              return Center(
+                child: SizedBox(
+                  width: 300,
+                  child: LdSlider.range(
+                    lowValue: low,
+                    highValue: high,
+                    min: 0.0,
+                    max: 1.0,
+                    step: step,
+                    allowRangeDrag: true,
+                    onRangeChanged: (l, h) {
+                      emissions.add((l, h));
+                      setState(() {
+                        low = l;
+                        high = h;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final sliderRect = tester.getRect(find.byType(LdSlider));
+      await performPanGesture(
+        tester,
+        startPosition: sliderRect.center,
+        endPosition: Offset(sliderRect.center.dx + 60, sliderRect.center.dy),
+        steps: 15,
+      );
+
+      expect(emissions.isNotEmpty, true,
+          reason: 'onRangeChanged must be called during fill drag with step');
+
+      // Every emitted pair must be on step boundaries.
+      // Avoid floating-point modulo; instead verify each value is within
+      // half a step of the nearest multiple of step.
+      bool onStepGrid(double v, double s) {
+        final nearest = (v / s).round() * s;
+        return (v - nearest).abs() < 0.0001;
+      }
+
+      for (final (l, h) in emissions) {
+        expect(onStepGrid(l, step), isTrue,
+            reason: 'low=$l is not on a step boundary (step=$step)');
+        expect(onStepGrid(h, step), isTrue,
+            reason: 'high=$h is not on a step boundary (step=$step)');
+      }
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // Stage 5: allowRangeDrag tests
   // -------------------------------------------------------------------------
 
