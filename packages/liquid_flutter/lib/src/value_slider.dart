@@ -172,12 +172,33 @@ class _LdSliderHandleState extends State<_LdSliderHandle> {
 ///
 /// Displays a horizontal track with a draggable handle that maps to a [double]
 /// value in the range [[min], [max]].
+///
+/// Use [LdSlider.range] to create a range slider with two handles.
 class LdSlider extends StatefulWidget {
-  /// The current value of the slider.
-  final double value;
+  // ---- Single-mode fields ------------------------------------------------
 
-  /// Called when the value changes via user interaction.
-  final ValueChanged<double> onChanged;
+  /// The current value of the slider (single mode only).
+  final double? value;
+
+  /// Called when the value changes via user interaction (single mode only).
+  final ValueChanged<double>? onChanged;
+
+  // ---- Range-mode fields -------------------------------------------------
+
+  /// The current low value of the range (range mode only).
+  final double? lowValue;
+
+  /// The current high value of the range (range mode only).
+  final double? highValue;
+
+  /// Called when the range changes via user interaction (range mode only).
+  final void Function(double low, double high)? onRangeChanged;
+
+  /// Whether the entire filled region between the two handles can be dragged
+  /// as a unit. Accepted in the constructor; behavior implemented in Stage 5.
+  final bool allowRangeDrag;
+
+  // ---- Shared fields -----------------------------------------------------
 
   /// Minimum value. Defaults to 0.0.
   final double min;
@@ -203,10 +224,13 @@ class LdSlider extends StatefulWidget {
   /// Optional label shown above the track.
   final String? label;
 
+  /// Whether this is a range slider (two handles).
+  final bool _isRange;
+
   const LdSlider({
     super.key,
-    required this.value,
-    required this.onChanged,
+    required double value,
+    required ValueChanged<double> onChanged,
     this.min = 0.0,
     this.max = 1.0,
     this.step = 0.0,
@@ -215,34 +239,107 @@ class LdSlider extends StatefulWidget {
     this.color,
     this.disabled = false,
     this.label,
-  });
+  })  : _isRange = false,
+        // ignore: prefer_initializing_formals
+        value = value,
+        // ignore: prefer_initializing_formals
+        onChanged = onChanged,
+        lowValue = null,
+        highValue = null,
+        onRangeChanged = null,
+        allowRangeDrag = false;
+
+  /// Creates a range slider with two independent handles.
+  ///
+  /// [lowValue] must be <= [highValue] in debug mode; in release mode the
+  /// values are clamped gracefully.
+  const LdSlider.range({
+    super.key,
+    required double lowValue,
+    required double highValue,
+    required void Function(double low, double high) onRangeChanged,
+    bool allowRangeDrag = false,
+    this.min = 0.0,
+    this.max = 1.0,
+    this.step = 0.0,
+    this.direction = Axis.horizontal,
+    this.size = LdSize.m,
+    this.color,
+    this.disabled = false,
+    this.label,
+  })  : _isRange = true,
+        value = null,
+        onChanged = null,
+        // ignore: prefer_initializing_formals
+        lowValue = lowValue,
+        // ignore: prefer_initializing_formals
+        highValue = highValue,
+        // ignore: prefer_initializing_formals
+        onRangeChanged = onRangeChanged,
+        // ignore: prefer_initializing_formals
+        allowRangeDrag = allowRangeDrag;
 
   @override
   State<LdSlider> createState() => _LdSliderState();
 }
 
 class _LdSliderState extends State<LdSlider> {
+  // ---- Single-mode drag state --------------------------------------------
   bool _isDragging = false;
 
-  /// Previous step index used for haptic feedback on step change.
+  /// Previous step index used for haptic feedback on step change (single mode).
   int? _prevStepIndex;
 
-  // Tooltip keys — defined now for forward compatibility with range mode (Stage 4).
-  // Only _lowTooltipKey is used in single mode.
-  final _lowTooltipKey = GlobalKey<TooltipState>();
-  // ignore: unused_field
-  final _highTooltipKey = GlobalKey<TooltipState>(); // used in Stage 4 (range mode)
+  // ---- Range-mode drag state ---------------------------------------------
+  bool _isDraggingLow = false;
+  bool _isDraggingHigh = false;
 
-  double get _clampedValue => widget.value.clamp(widget.min, widget.max);
+  /// Step-index tracking for haptics — low handle.
+  int? _prevLowStepIndex;
+
+  /// Step-index tracking for haptics — high handle.
+  int? _prevHighStepIndex;
+
+  // ---- Tooltip keys ------------------------------------------------------
+  // _lowTooltipKey used in both single and range mode.
+  final _lowTooltipKey = GlobalKey<TooltipState>();
+  final _highTooltipKey = GlobalKey<TooltipState>();
+
+  // ---- Single-mode helpers -----------------------------------------------
+
+  double get _clampedValue => widget.value!.clamp(widget.min, widget.max);
 
   String get _formattedValue {
     final v = _clampedValue;
-    // Show integer if the value is whole, otherwise up to 2 decimal places.
     if (v == v.roundToDouble()) return v.toInt().toString();
     return v.toStringAsFixed(2);
   }
 
-  // Track and handle geometry ------------------------------------------------
+  // ---- Range-mode helpers ------------------------------------------------
+
+  /// A small epsilon to ensure the low handle never equals the high handle.
+  double get _epsilon => 0.001 * (widget.max - widget.min);
+
+  double get _minSeparation => widget.step > 0 ? widget.step : _epsilon;
+
+  double get _clampedLow {
+    final raw = widget.lowValue!.clamp(widget.min, widget.max);
+    final ceiling = widget.highValue!.clamp(widget.min, widget.max) - _minSeparation;
+    return raw.clamp(widget.min, ceiling);
+  }
+
+  double get _clampedHigh {
+    final raw = widget.highValue!.clamp(widget.min, widget.max);
+    final floor = widget.lowValue!.clamp(widget.min, widget.max) + _minSeparation;
+    return raw.clamp(floor, widget.max);
+  }
+
+  String _formatValue(double v) {
+    if (v == v.roundToDouble()) return v.toInt().toString();
+    return v.toStringAsFixed(2);
+  }
+
+  // ---- Track and handle geometry -----------------------------------------
 
   double _trackHeight(LdTheme theme) {
     return switch (widget.size) {
@@ -262,7 +359,7 @@ class _LdSliderState extends State<LdSlider> {
     };
   }
 
-  // Drag helpers -------------------------------------------------------------
+  // ---- Single-mode drag helpers ------------------------------------------
 
   void _onDragStart(DragStartDetails details) {
     if (widget.disabled) return;
@@ -298,7 +395,7 @@ class _LdSliderState extends State<LdSlider> {
     }
 
     if (snapped != widget.value) {
-      widget.onChanged(snapped);
+      widget.onChanged!(snapped);
     }
   }
 
@@ -310,10 +407,117 @@ class _LdSliderState extends State<LdSlider> {
     });
   }
 
-  // Build --------------------------------------------------------------------
+  // ---- Range-mode drag helpers -------------------------------------------
+
+  void _onLowDragStart(DragStartDetails details) {
+    if (widget.disabled) return;
+    HapticFeedback.mediumImpact();
+    setState(() {
+      _isDraggingLow = true;
+      _prevLowStepIndex = widget.step > 0
+          ? (_clampedLow / widget.step).round()
+          : null;
+    });
+  }
+
+  void _onLowDragUpdate(DragUpdateDetails details, double trackWidth) {
+    if (widget.disabled) return;
+
+    final handleDiameter = _handleDiameter(LdTheme.of(context));
+    final usableWidth = trackWidth - handleDiameter;
+    if (usableWidth <= 0) return;
+
+    final fraction = ((details.localPosition.dx - handleDiameter / 2) / usableWidth)
+        .clamp(0.0, 1.0);
+    final raw = _fractionToValue(fraction, widget.min, widget.max);
+
+    // Clamp so low handle stays below high handle
+    final ceiling = _clampedHigh - _minSeparation;
+    final clamped = raw.clamp(widget.min, ceiling);
+    final snapped = _snapToStep(clamped, widget.min, ceiling, widget.step);
+
+    // Haptics
+    if (widget.step > 0) {
+      final currentStepIndex = (snapped / widget.step).round();
+      if (_prevLowStepIndex != null && currentStepIndex != _prevLowStepIndex) {
+        LdHaptics.vibrate(HapticsType.selection);
+      }
+      _prevLowStepIndex = currentStepIndex;
+    }
+
+    if (snapped != widget.lowValue) {
+      widget.onRangeChanged!(snapped, widget.highValue!);
+    }
+  }
+
+  void _onLowDragEnd(DragEndDetails details) {
+    if (!mounted) return;
+    setState(() {
+      _isDraggingLow = false;
+      _prevLowStepIndex = null;
+    });
+  }
+
+  void _onHighDragStart(DragStartDetails details) {
+    if (widget.disabled) return;
+    HapticFeedback.mediumImpact();
+    setState(() {
+      _isDraggingHigh = true;
+      _prevHighStepIndex = widget.step > 0
+          ? (_clampedHigh / widget.step).round()
+          : null;
+    });
+  }
+
+  void _onHighDragUpdate(DragUpdateDetails details, double trackWidth) {
+    if (widget.disabled) return;
+
+    final handleDiameter = _handleDiameter(LdTheme.of(context));
+    final usableWidth = trackWidth - handleDiameter;
+    if (usableWidth <= 0) return;
+
+    final fraction = ((details.localPosition.dx - handleDiameter / 2) / usableWidth)
+        .clamp(0.0, 1.0);
+    final raw = _fractionToValue(fraction, widget.min, widget.max);
+
+    // Clamp so high handle stays above low handle
+    final floor = _clampedLow + _minSeparation;
+    final clamped = raw.clamp(floor, widget.max);
+    final snapped = _snapToStep(clamped, floor, widget.max, widget.step);
+
+    // Haptics
+    if (widget.step > 0) {
+      final currentStepIndex = (snapped / widget.step).round();
+      if (_prevHighStepIndex != null && currentStepIndex != _prevHighStepIndex) {
+        LdHaptics.vibrate(HapticsType.selection);
+      }
+      _prevHighStepIndex = currentStepIndex;
+    }
+
+    if (snapped != widget.highValue) {
+      widget.onRangeChanged!(widget.lowValue!, snapped);
+    }
+  }
+
+  void _onHighDragEnd(DragEndDetails details) {
+    if (!mounted) return;
+    setState(() {
+      _isDraggingHigh = false;
+      _prevHighStepIndex = null;
+    });
+  }
+
+  // ---- Build ------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
+    if (widget._isRange) {
+      return _buildRange(context);
+    }
+    return _buildSingle(context);
+  }
+
+  Widget _buildSingle(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
     final effectiveColor = widget.color ?? theme.palette.primary;
 
@@ -409,6 +613,171 @@ class _LdSliderState extends State<LdSlider> {
                     ),
                   );
                 },
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRange(BuildContext context) {
+    assert(() {
+      if (widget.lowValue! > widget.highValue!) {
+        throw FlutterError(
+          'LdSlider.range: lowValue (${widget.lowValue}) must be <= highValue (${widget.highValue}). '
+          'Swap the values or ensure the correct order.',
+        );
+      }
+      return true;
+    }());
+
+    final theme = LdTheme.of(context, listen: true);
+    final effectiveColor = widget.color ?? theme.palette.primary;
+
+    final clampedLow = _clampedLow;
+    final clampedHigh = _clampedHigh;
+
+    final lowFraction = _valueToFraction(clampedLow, widget.min, widget.max);
+    final highFraction = _valueToFraction(clampedHigh, widget.min, widget.max);
+
+    final handleDiameter = _handleDiameter(theme);
+    final trackHeight = _trackHeight(theme);
+    final totalHeight = handleDiameter;
+
+    final activeColor = widget.disabled
+        ? theme.neutralShade(4)
+        : effectiveColor.idle(theme.isDark);
+    final inactiveColor = theme.neutralShade(3);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        LdFormLabel(
+          label: widget.label,
+          size: widget.size,
+          disabled: widget.disabled,
+        ),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final trackWidth = constraints.maxWidth;
+            final usableWidth = trackWidth - handleDiameter;
+
+            return SizedBox(
+              height: totalHeight,
+              width: trackWidth,
+              child: Stack(
+                alignment: Alignment.centerLeft,
+                children: [
+                  // --- Background track ---
+                  Positioned(
+                    left: handleDiameter / 2,
+                    right: handleDiameter / 2,
+                    child: Container(
+                      height: trackHeight,
+                      decoration: BoxDecoration(
+                        color: inactiveColor,
+                        borderRadius: BorderRadius.circular(trackHeight / 2),
+                      ),
+                    ),
+                  ),
+
+                  // --- Low handle spring ---
+                  LdSpring(
+                    position: lowFraction,
+                    initialPosition: lowFraction,
+                    overriden: _isDraggingLow,
+                    builder: (context, lowSpringState, _) {
+                      final lowSpringFraction =
+                          lowSpringState.position.clamp(0.0, 1.0);
+                      final lowOffset = lowSpringFraction * usableWidth;
+
+                      // --- High handle spring (nested so we have both positions) ---
+                      return LdSpring(
+                        position: highFraction,
+                        initialPosition: highFraction,
+                        overriden: _isDraggingHigh,
+                        builder: (context, highSpringState, _) {
+                          final highSpringFraction =
+                              highSpringState.position.clamp(0.0, 1.0);
+                          final highOffset = highSpringFraction * usableWidth;
+
+                          // Fill width between low and high handle centers
+                          final fillLeft =
+                              handleDiameter / 2 + lowOffset;
+                          final fillRight =
+                              handleDiameter / 2 + highOffset;
+                          final fillWidth =
+                              (fillRight - fillLeft).clamp(0.0, double.infinity);
+
+                          return Stack(
+                            alignment: Alignment.centerLeft,
+                            children: [
+                              // Active fill between handles
+                              Positioned(
+                                left: fillLeft,
+                                width: fillWidth,
+                                child: Container(
+                                  height: trackHeight,
+                                  decoration: BoxDecoration(
+                                    color: activeColor,
+                                    borderRadius:
+                                        BorderRadius.circular(trackHeight / 2),
+                                  ),
+                                ),
+                              ),
+
+                              // Low handle gesture detector
+                              Positioned(
+                                left: lowOffset,
+                                child: GestureDetector(
+                                  onHorizontalDragStart: _onLowDragStart,
+                                  onHorizontalDragUpdate: (details) =>
+                                      _onLowDragUpdate(details, trackWidth),
+                                  onHorizontalDragEnd: _onLowDragEnd,
+                                  child: _LdSliderHandle(
+                                    fraction: lowSpringFraction,
+                                    isDragging: _isDraggingLow,
+                                    disabled: widget.disabled,
+                                    size: widget.size,
+                                    color: widget.color,
+                                    direction: widget.direction,
+                                    tooltipMessage:
+                                        _formatValue(clampedLow),
+                                    tooltipKey: _lowTooltipKey,
+                                  ),
+                                ),
+                              ),
+
+                              // High handle gesture detector
+                              Positioned(
+                                left: highOffset,
+                                child: GestureDetector(
+                                  onHorizontalDragStart: _onHighDragStart,
+                                  onHorizontalDragUpdate: (details) =>
+                                      _onHighDragUpdate(details, trackWidth),
+                                  onHorizontalDragEnd: _onHighDragEnd,
+                                  child: _LdSliderHandle(
+                                    fraction: highSpringFraction,
+                                    isDragging: _isDraggingHigh,
+                                    disabled: widget.disabled,
+                                    size: widget.size,
+                                    color: widget.color,
+                                    direction: widget.direction,
+                                    tooltipMessage:
+                                        _formatValue(clampedHigh),
+                                    tooltipKey: _highTooltipKey,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ],
               ),
             );
           },

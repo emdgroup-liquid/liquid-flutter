@@ -154387,7 +154387,7 @@
       "filePath": "lib/src/value_slider.dart",
       "entryPoint": "lib/liquid_flutter.dart",
       "name": "LdSlider",
-      "description": "A value-input slider widget. Displays a horizontal track with a draggable handle that maps to a double value in the range [min, max].",
+      "description": "A value-input slider widget. Displays a horizontal track with a draggable handle that maps to a double value in the range [min, max]. Use LdSlider.range to create a range slider with two handles.",
       "constructors": [
         {
           "name": "new",
@@ -154572,6 +154572,222 @@
             "const"
           ],
           "annotations": []
+        },
+        {
+          "name": "range",
+          "signature": [
+            {
+              "name": "key",
+              "description": "",
+              "type": {
+                "name": "Key?",
+                "superTypes": [
+                  "Object"
+                ],
+                "isNullable": true
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "lowValue",
+              "description": "The current low value of the range.",
+              "type": {
+                "name": "double",
+                "superTypes": [
+                  "num",
+                  "Object",
+                  "Comparable"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "highValue",
+              "description": "The current high value of the range.",
+              "type": {
+                "name": "double",
+                "superTypes": [
+                  "num",
+                  "Object",
+                  "Comparable"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "onRangeChanged",
+              "description": "Called when the range changes via user interaction.",
+              "type": {
+                "name": "void Function(double, double)",
+                "superTypes": [],
+                "isNullable": false
+              },
+              "named": true,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "allowRangeDrag",
+              "description": "Whether the entire filled region between the two handles can be dragged as a unit. Behavior implemented in Stage 5.",
+              "type": {
+                "name": "bool",
+                "superTypes": [
+                  "Object"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "false",
+              "annotations": []
+            },
+            {
+              "name": "min",
+              "description": "Minimum value.",
+              "type": {
+                "name": "double",
+                "superTypes": [
+                  "num",
+                  "Object",
+                  "Comparable"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "0.0",
+              "annotations": []
+            },
+            {
+              "name": "max",
+              "description": "Maximum value.",
+              "type": {
+                "name": "double",
+                "superTypes": [
+                  "num",
+                  "Object",
+                  "Comparable"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "1.0",
+              "annotations": []
+            },
+            {
+              "name": "step",
+              "description": "Snap step. 0 means continuous.",
+              "type": {
+                "name": "double",
+                "superTypes": [
+                  "num",
+                  "Object",
+                  "Comparable"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "0.0",
+              "annotations": []
+            },
+            {
+              "name": "direction",
+              "description": "Orientation of the slider.",
+              "type": {
+                "name": "Axis",
+                "superTypes": [
+                  "Object",
+                  "Enum"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "Axis.horizontal",
+              "annotations": []
+            },
+            {
+              "name": "size",
+              "description": "Size of the slider and its handle.",
+              "type": {
+                "name": "LdSize",
+                "superTypes": [
+                  "Object",
+                  "Enum"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "LdSize.m",
+              "annotations": []
+            },
+            {
+              "name": "color",
+              "description": "Optional accent color. Falls back to theme primary.",
+              "type": {
+                "name": "LdColor?",
+                "superTypes": [
+                  "Object"
+                ],
+                "isNullable": true
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "disabled",
+              "description": "Whether the slider is disabled.",
+              "type": {
+                "name": "bool",
+                "superTypes": [
+                  "Object"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "false",
+              "annotations": []
+            },
+            {
+              "name": "label",
+              "description": "Optional label shown above the track.",
+              "type": {
+                "name": "String?",
+                "superTypes": [
+                  "Object",
+                  "Comparable",
+                  "Pattern"
+                ],
+                "isNullable": true
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": null,
+              "annotations": []
+            }
+          ],
+          "features": [
+            "const"
+          ],
+          "annotations": []
         }
       ],
       "properties": [
@@ -154593,15 +154809,15 @@
         {
           "name": "value",
           "type": {
-            "name": "double",
+            "name": "double?",
             "superTypes": [
               "num",
               "Object",
               "Comparable"
             ],
-            "isNullable": false
+            "isNullable": true
           },
-          "description": "The current value of the slider.",
+          "description": "The current value of the slider (single mode only).",
           "features": [
             "final"
           ],
@@ -154610,11 +154826,73 @@
         {
           "name": "onChanged",
           "type": {
-            "name": "void Function(double)",
+            "name": "void Function(double)?",
             "superTypes": [],
+            "isNullable": true
+          },
+          "description": "Called when the value changes via user interaction (single mode only).",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "lowValue",
+          "type": {
+            "name": "double?",
+            "superTypes": [
+              "num",
+              "Object",
+              "Comparable"
+            ],
+            "isNullable": true
+          },
+          "description": "The current low value of the range (range mode only).",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "highValue",
+          "type": {
+            "name": "double?",
+            "superTypes": [
+              "num",
+              "Object",
+              "Comparable"
+            ],
+            "isNullable": true
+          },
+          "description": "The current high value of the range (range mode only).",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "onRangeChanged",
+          "type": {
+            "name": "void Function(double, double)?",
+            "superTypes": [],
+            "isNullable": true
+          },
+          "description": "Called when the range changes via user interaction (range mode only).",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "allowRangeDrag",
+          "type": {
+            "name": "bool",
+            "superTypes": [
+              "Object"
+            ],
             "isNullable": false
           },
-          "description": "Called when the value changes via user interaction.",
+          "description": "Whether the entire filled region between the two handles can be dragged as a unit.",
           "features": [
             "final"
           ],
