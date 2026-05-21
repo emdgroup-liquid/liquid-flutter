@@ -338,6 +338,15 @@ class _LdSliderState extends State<LdSlider> {
   /// Accumulated pixel delta since high-handle drag started (Bug 1 fix).
   double _highDragAccumPx = 0.0;
 
+  /// Anchor low value at the start of a range drag.
+  double? _rangeDragAnchorLow;
+
+  /// Anchor high value at the start of a range drag.
+  double? _rangeDragAnchorHigh;
+
+  /// Global pointer position when the range drag started, in screen pixels.
+  Offset? _rangeDragStartGlobal;
+
   // ---- Tooltip keys ------------------------------------------------------
   // _lowTooltipKey used in both single and range mode.
   final _lowTooltipKey = GlobalKey<TooltipState>();
@@ -581,27 +590,39 @@ class _LdSliderState extends State<LdSlider> {
   void _onRangeDragStart(DragStartDetails details) {
     if (widget.disabled) return;
     HapticFeedback.mediumImpact();
-    setState(() => _isDraggingRange = true);
+    setState(() {
+      _isDraggingRange = true;
+      _rangeDragAnchorLow = _clampedLow;
+      _rangeDragAnchorHigh = _clampedHigh;
+      _rangeDragStartGlobal = details.globalPosition;
+    });
   }
 
   void _onRangeDragUpdate(DragUpdateDetails details, double trackPx) {
     if (widget.disabled) return;
     if (trackPx <= 0) return;
+    if (_rangeDragStartGlobal == null) return;
 
-    final double pixelDelta;
+    // Use the total displacement from the drag-start global position rather than
+    // details.delta. Because the fill GestureDetector is inside a Positioned
+    // widget that shifts as the range moves, details.delta is computed in the
+    // moving widget's local coordinate space and is therefore smaller than the
+    // actual pointer movement (the widget's own movement is subtracted).
+    // Anchoring to globalPosition avoids this entirely.
+    final double totalPixelDelta;
     if (_isVertical) {
       // Inverted: drag up (negative dy) increases value.
-      pixelDelta = -details.delta.dy;
+      totalPixelDelta = -(_rangeDragStartGlobal!.dy - details.globalPosition.dy);
     } else {
-      pixelDelta = details.delta.dx;
+      totalPixelDelta = details.globalPosition.dx - _rangeDragStartGlobal!.dx;
     }
 
-    // Convert pixel delta to value delta (1:1 cursor-to-range mapping).
-    final valueDelta = (pixelDelta / trackPx) * (widget.max - widget.min);
+    // Convert total pixel displacement to total value delta (1:1 mapping).
+    final valueDelta = (totalPixelDelta / trackPx) * (widget.max - widget.min);
 
     var result = _translateRange(
-      low: _clampedLow,
-      high: _clampedHigh,
+      low: _rangeDragAnchorLow!,
+      high: _rangeDragAnchorHigh!,
       valueDelta: valueDelta,
       min: widget.min,
       max: widget.max,
@@ -628,7 +649,12 @@ class _LdSliderState extends State<LdSlider> {
 
   void _onRangeDragEnd(DragEndDetails details) {
     if (!mounted) return;
-    setState(() => _isDraggingRange = false);
+    setState(() {
+      _isDraggingRange = false;
+      _rangeDragAnchorLow = null;
+      _rangeDragAnchorHigh = null;
+      _rangeDragStartGlobal = null;
+    });
   }
 
   // ---- Build ------------------------------------------------------------
