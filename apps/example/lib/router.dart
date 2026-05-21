@@ -35,6 +35,7 @@ import 'package:liquid/components/interaction/action_runner.dart';
 import 'package:liquid/components/form_elements/select.dart';
 import 'package:liquid/components/interaction/speed_reader.dart';
 import 'package:liquid/components/form_elements/slider.dart';
+import 'package:liquid/components/form_elements/value_slider.dart';
 import 'package:liquid/components/layout/spring.dart';
 import 'package:liquid/components/form_elements/submit.dart';
 import 'package:liquid/components/form_elements/switch.dart';
@@ -253,6 +254,11 @@ class AppRouter {
           GoRoute(
             path: "/components/slider",
             pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const LdSliderDemo()),
+          ),
+          GoRoute(
+            path: "/components/value-slider",
+            pageBuilder: (context, state) =>
+                NoTransitionPage<void>(key: state.pageKey, child: const LdValueSliderDemo()),
           ),
           GoRoute(
             path: "/components/switch",

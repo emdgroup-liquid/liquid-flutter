@@ -18,7 +18,7 @@ class _LdSliderDemoState extends State<LdSliderDemo> {
   Widget build(BuildContext context) {
     return ComponentPage(
       path: "lib/components/form_elements/slider.dart",
-      title: "LdSlider",
+      title: "LdConfirmationSlider",
       demo: LdAutoSpace(
         children: [
           ComponentWell(
