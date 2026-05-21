@@ -119,14 +119,18 @@ class _LdSliderHandleState extends State<_LdSliderHandle> {
       borderColor = theme.border;
     }
 
+    final cursor = widget.disabled
+        ? SystemMouseCursors.forbidden
+        : widget.direction == Axis.vertical
+            ? SystemMouseCursors.resizeUpDown
+            : SystemMouseCursors.resizeLeftRight;
+
     return Tooltip(
       key: widget.tooltipKey,
       message: widget.tooltipMessage,
       triggerMode: TooltipTriggerMode.manual,
       child: MouseRegion(
-        cursor: widget.disabled
-            ? SystemMouseCursors.forbidden
-            : SystemMouseCursors.resizeLeftRight,
+        cursor: cursor,
         onEnter: (_) => setState(() => _isHovered = true),
         onExit: (_) => setState(() {
           _isHovered = false;
@@ -170,10 +174,11 @@ class _LdSliderHandleState extends State<_LdSliderHandle> {
 
 /// A value-input slider widget.
 ///
-/// Displays a horizontal track with a draggable handle that maps to a [double]
+/// Displays a track with a draggable handle that maps to a [double]
 /// value in the range [[min], [max]].
 ///
 /// Use [LdSlider.range] to create a range slider with two handles.
+/// Use [direction] to switch between horizontal and vertical orientation.
 class LdSlider extends StatefulWidget {
   // ---- Single-mode fields ------------------------------------------------
 
@@ -209,7 +214,7 @@ class LdSlider extends StatefulWidget {
   /// Snap step. 0 means continuous. Defaults to 0.0.
   final double step;
 
-  /// Orientation of the slider. Currently only horizontal is fully supported.
+  /// Orientation of the slider. Defaults to [Axis.horizontal].
   final Axis direction;
 
   /// Size of the slider and its handle. Defaults to [LdSize.m].
@@ -221,7 +226,7 @@ class LdSlider extends StatefulWidget {
   /// Whether the slider is disabled.
   final bool disabled;
 
-  /// Optional label shown above the track.
+  /// Optional label shown above the widget regardless of axis.
   final String? label;
 
   /// Whether this is a range slider (two handles).
@@ -284,6 +289,10 @@ class LdSlider extends StatefulWidget {
 }
 
 class _LdSliderState extends State<LdSlider> {
+  // ---- Axis helper --------------------------------------------------------
+
+  bool get _isVertical => widget.direction == Axis.vertical;
+
   // ---- Single-mode drag state --------------------------------------------
   bool _isDragging = false;
 
@@ -341,7 +350,7 @@ class _LdSliderState extends State<LdSlider> {
 
   // ---- Track and handle geometry -----------------------------------------
 
-  double _trackHeight(LdTheme theme) {
+  double _trackThickness(LdTheme theme) {
     return switch (widget.size) {
       LdSize.xs => 4.0,
       LdSize.s => 6.0,
@@ -372,16 +381,24 @@ class _LdSliderState extends State<LdSlider> {
     });
   }
 
-  void _onDragUpdate(DragUpdateDetails details, double trackWidth) {
+  void _onDragUpdate(DragUpdateDetails details, double trackLength) {
     if (widget.disabled) return;
 
     final handleDiameter = _handleDiameter(LdTheme.of(context));
-    final usableWidth = trackWidth - handleDiameter;
-    if (usableWidth <= 0) return;
+    final usableLength = trackLength - handleDiameter;
+    if (usableLength <= 0) return;
 
-    // Map pointer x relative to the left edge of the track
-    final fraction = ((details.localPosition.dx - handleDiameter / 2) / usableWidth)
-        .clamp(0.0, 1.0);
+    double fraction;
+    if (_isVertical) {
+      // Vertical: value 0 is at bottom, value max is at top.
+      // localPosition.dy increases downward; invert so dragging up increases value.
+      fraction = (1.0 - (details.localPosition.dy - handleDiameter / 2) / usableLength)
+          .clamp(0.0, 1.0);
+    } else {
+      fraction = ((details.localPosition.dx - handleDiameter / 2) / usableLength)
+          .clamp(0.0, 1.0);
+    }
+
     final raw = _fractionToValue(fraction, widget.min, widget.max);
     final snapped = _snapToStep(raw, widget.min, widget.max, widget.step);
 
@@ -420,15 +437,21 @@ class _LdSliderState extends State<LdSlider> {
     });
   }
 
-  void _onLowDragUpdate(DragUpdateDetails details, double trackWidth) {
+  void _onLowDragUpdate(DragUpdateDetails details, double trackLength) {
     if (widget.disabled) return;
 
     final handleDiameter = _handleDiameter(LdTheme.of(context));
-    final usableWidth = trackWidth - handleDiameter;
-    if (usableWidth <= 0) return;
+    final usableLength = trackLength - handleDiameter;
+    if (usableLength <= 0) return;
 
-    final fraction = ((details.localPosition.dx - handleDiameter / 2) / usableWidth)
-        .clamp(0.0, 1.0);
+    double fraction;
+    if (_isVertical) {
+      fraction = (1.0 - (details.localPosition.dy - handleDiameter / 2) / usableLength)
+          .clamp(0.0, 1.0);
+    } else {
+      fraction = ((details.localPosition.dx - handleDiameter / 2) / usableLength)
+          .clamp(0.0, 1.0);
+    }
     final raw = _fractionToValue(fraction, widget.min, widget.max);
 
     // Clamp so low handle stays below high handle
@@ -469,15 +492,21 @@ class _LdSliderState extends State<LdSlider> {
     });
   }
 
-  void _onHighDragUpdate(DragUpdateDetails details, double trackWidth) {
+  void _onHighDragUpdate(DragUpdateDetails details, double trackLength) {
     if (widget.disabled) return;
 
     final handleDiameter = _handleDiameter(LdTheme.of(context));
-    final usableWidth = trackWidth - handleDiameter;
-    if (usableWidth <= 0) return;
+    final usableLength = trackLength - handleDiameter;
+    if (usableLength <= 0) return;
 
-    final fraction = ((details.localPosition.dx - handleDiameter / 2) / usableWidth)
-        .clamp(0.0, 1.0);
+    double fraction;
+    if (_isVertical) {
+      fraction = (1.0 - (details.localPosition.dy - handleDiameter / 2) / usableLength)
+          .clamp(0.0, 1.0);
+    } else {
+      fraction = ((details.localPosition.dx - handleDiameter / 2) / usableLength)
+          .clamp(0.0, 1.0);
+    }
     final raw = _fractionToValue(fraction, widget.min, widget.max);
 
     // Clamp so high handle stays above low handle
@@ -523,8 +552,8 @@ class _LdSliderState extends State<LdSlider> {
 
     final fraction = _valueToFraction(_clampedValue, widget.min, widget.max);
     final handleDiameter = _handleDiameter(theme);
-    final trackHeight = _trackHeight(theme);
-    final totalHeight = handleDiameter;
+    final trackThickness = _trackThickness(theme);
+    final totalCrossAxis = handleDiameter;
 
     // Active track color
     final activeColor = widget.disabled
@@ -533,90 +562,161 @@ class _LdSliderState extends State<LdSlider> {
 
     final inactiveColor = theme.neutralShade(3);
 
+    // Label always sits above the slider widget
+    final label = LdFormLabel(
+      label: widget.label,
+      size: widget.size,
+      disabled: widget.disabled,
+    );
+
+    final track = LayoutBuilder(
+      builder: (context, constraints) {
+        final trackLength = _isVertical ? constraints.maxHeight : constraints.maxWidth;
+        final usableLength = trackLength - handleDiameter;
+
+        final gestureDetector = GestureDetector(
+          onHorizontalDragStart: _isVertical ? null : _onDragStart,
+          onHorizontalDragUpdate: _isVertical
+              ? null
+              : (details) => _onDragUpdate(details, trackLength),
+          onHorizontalDragEnd: _isVertical ? null : _onDragEnd,
+          onVerticalDragStart: _isVertical ? _onDragStart : null,
+          onVerticalDragUpdate: _isVertical
+              ? (details) => _onDragUpdate(details, trackLength)
+              : null,
+          onVerticalDragEnd: _isVertical ? _onDragEnd : null,
+          child: LdSpring(
+            position: fraction,
+            initialPosition: fraction,
+            // When dragging, override the spring so the handle tracks the
+            // pointer 1:1. When not dragging, let the spring animate toward
+            // the programmatic target value.
+            overriden: _isDragging,
+            builder: (context, springState, _) {
+              final springFraction = springState.position.clamp(0.0, 1.0);
+
+              if (_isVertical) {
+                // Vertical layout: value 0 at bottom, value max at top.
+                // handleOffset is measured from the TOP of the track container.
+                final handleOffset = (1.0 - springFraction) * usableLength;
+
+                return SizedBox(
+                  width: totalCrossAxis,
+                  height: trackLength,
+                  child: Stack(
+                    alignment: Alignment.topCenter,
+                    children: [
+                      // Background track (full height between half-handle margins)
+                      Positioned(
+                        top: handleDiameter / 2,
+                        bottom: handleDiameter / 2,
+                        child: Container(
+                          width: trackThickness,
+                          decoration: BoxDecoration(
+                            color: inactiveColor,
+                            borderRadius:
+                                BorderRadius.circular(trackThickness / 2),
+                          ),
+                        ),
+                      ),
+                      // Active (filled) portion — from current handle down to bottom
+                      Positioned(
+                        top: handleDiameter / 2 + handleOffset,
+                        bottom: handleDiameter / 2,
+                        child: Container(
+                          width: trackThickness,
+                          decoration: BoxDecoration(
+                            color: activeColor,
+                            borderRadius:
+                                BorderRadius.circular(trackThickness / 2),
+                          ),
+                        ),
+                      ),
+                      // Handle
+                      Positioned(
+                        top: handleOffset,
+                        child: _LdSliderHandle(
+                          fraction: springFraction,
+                          isDragging: _isDragging,
+                          disabled: widget.disabled,
+                          size: widget.size,
+                          color: widget.color,
+                          direction: widget.direction,
+                          tooltipMessage: _formattedValue,
+                          tooltipKey: _lowTooltipKey,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              } else {
+                // Horizontal layout (original behavior)
+                final handleOffset = springFraction * usableLength;
+
+                return SizedBox(
+                  height: totalCrossAxis,
+                  width: trackLength,
+                  child: Stack(
+                    alignment: Alignment.centerLeft,
+                    children: [
+                      // Background track
+                      Positioned(
+                        left: handleDiameter / 2,
+                        right: handleDiameter / 2,
+                        child: Container(
+                          height: trackThickness,
+                          decoration: BoxDecoration(
+                            color: inactiveColor,
+                            borderRadius:
+                                BorderRadius.circular(trackThickness / 2),
+                          ),
+                        ),
+                      ),
+                      // Active (filled) portion of track
+                      Positioned(
+                        left: handleDiameter / 2,
+                        width: handleOffset,
+                        child: Container(
+                          height: trackThickness,
+                          decoration: BoxDecoration(
+                            color: activeColor,
+                            borderRadius:
+                                BorderRadius.circular(trackThickness / 2),
+                          ),
+                        ),
+                      ),
+                      // Handle
+                      Positioned(
+                        left: handleOffset,
+                        child: _LdSliderHandle(
+                          fraction: springFraction,
+                          isDragging: _isDragging,
+                          disabled: widget.disabled,
+                          size: widget.size,
+                          color: widget.color,
+                          direction: widget.direction,
+                          tooltipMessage: _formattedValue,
+                          tooltipKey: _lowTooltipKey,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            },
+          ),
+        );
+
+        return gestureDetector;
+      },
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        LdFormLabel(
-          label: widget.label,
-          size: widget.size,
-          disabled: widget.disabled,
-        ),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final trackWidth = constraints.maxWidth;
-            final usableWidth = trackWidth - handleDiameter;
-
-            return GestureDetector(
-              onHorizontalDragStart: _onDragStart,
-              onHorizontalDragUpdate: (details) =>
-                  _onDragUpdate(details, trackWidth),
-              onHorizontalDragEnd: _onDragEnd,
-              child: LdSpring(
-                position: fraction,
-                initialPosition: fraction,
-                // When dragging, override the spring so the handle tracks the
-                // pointer 1:1. When not dragging, let the spring animate toward
-                // the programmatic target value.
-                overriden: _isDragging,
-                builder: (context, springState, _) {
-                  final springFraction = springState.position.clamp(0.0, 1.0);
-                  final handleOffset = springFraction * usableWidth;
-
-                  return SizedBox(
-                    height: totalHeight,
-                    width: trackWidth,
-                    child: Stack(
-                      alignment: Alignment.centerLeft,
-                      children: [
-                        // Background track
-                        Positioned(
-                          left: handleDiameter / 2,
-                          right: handleDiameter / 2,
-                          child: Container(
-                            height: trackHeight,
-                            decoration: BoxDecoration(
-                              color: inactiveColor,
-                              borderRadius:
-                                  BorderRadius.circular(trackHeight / 2),
-                            ),
-                          ),
-                        ),
-                        // Active (filled) portion of track
-                        Positioned(
-                          left: handleDiameter / 2,
-                          width: handleOffset,
-                          child: Container(
-                            height: trackHeight,
-                            decoration: BoxDecoration(
-                              color: activeColor,
-                              borderRadius:
-                                  BorderRadius.circular(trackHeight / 2),
-                            ),
-                          ),
-                        ),
-                        // Handle
-                        Positioned(
-                          left: handleOffset,
-                          child: _LdSliderHandle(
-                            fraction: springFraction,
-                            isDragging: _isDragging,
-                            disabled: widget.disabled,
-                            size: widget.size,
-                            color: widget.color,
-                            direction: widget.direction,
-                            tooltipMessage: _formattedValue,
-                            tooltipKey: _lowTooltipKey,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            );
-          },
-        ),
+        label,
+        if (_isVertical) Expanded(child: track) else track,
       ],
     );
   }
@@ -642,146 +742,269 @@ class _LdSliderState extends State<LdSlider> {
     final highFraction = _valueToFraction(clampedHigh, widget.min, widget.max);
 
     final handleDiameter = _handleDiameter(theme);
-    final trackHeight = _trackHeight(theme);
-    final totalHeight = handleDiameter;
+    final trackThickness = _trackThickness(theme);
+    final totalCrossAxis = handleDiameter;
 
     final activeColor = widget.disabled
         ? theme.neutralShade(4)
         : effectiveColor.idle(theme.isDark);
     final inactiveColor = theme.neutralShade(3);
 
+    // Label always sits above the slider widget
+    final label = LdFormLabel(
+      label: widget.label,
+      size: widget.size,
+      disabled: widget.disabled,
+    );
+
+    final track = LayoutBuilder(
+      builder: (context, constraints) {
+        final trackLength = _isVertical ? constraints.maxHeight : constraints.maxWidth;
+        final usableLength = trackLength - handleDiameter;
+
+        if (_isVertical) {
+          return SizedBox(
+            width: totalCrossAxis,
+            height: trackLength,
+            child: Stack(
+              alignment: Alignment.topCenter,
+              children: [
+                // --- Background track ---
+                Positioned(
+                  top: handleDiameter / 2,
+                  bottom: handleDiameter / 2,
+                  child: Container(
+                    width: trackThickness,
+                    decoration: BoxDecoration(
+                      color: inactiveColor,
+                      borderRadius: BorderRadius.circular(trackThickness / 2),
+                    ),
+                  ),
+                ),
+
+                // --- Low handle spring ---
+                LdSpring(
+                  position: lowFraction,
+                  initialPosition: lowFraction,
+                  overriden: _isDraggingLow,
+                  builder: (context, lowSpringState, _) {
+                    final lowSpringFraction =
+                        lowSpringState.position.clamp(0.0, 1.0);
+                    // In vertical mode, offset from top = (1 - fraction) * usableLength
+                    final lowTopOffset = (1.0 - lowSpringFraction) * usableLength;
+
+                    // --- High handle spring (nested so we have both positions) ---
+                    return LdSpring(
+                      position: highFraction,
+                      initialPosition: highFraction,
+                      overriden: _isDraggingHigh,
+                      builder: (context, highSpringState, _) {
+                        final highSpringFraction =
+                            highSpringState.position.clamp(0.0, 1.0);
+                        final highTopOffset = (1.0 - highSpringFraction) * usableLength;
+
+                        // Fill: from high handle top (higher on screen) to low handle bottom
+                        final fillTop = handleDiameter / 2 + highTopOffset;
+                        final fillBottom = handleDiameter / 2 + lowTopOffset;
+                        final fillHeight = (fillBottom - fillTop).clamp(0.0, double.infinity);
+
+                        return Stack(
+                          alignment: Alignment.topCenter,
+                          children: [
+                            // Active fill between handles
+                            Positioned(
+                              top: fillTop,
+                              height: fillHeight,
+                              child: Container(
+                                width: trackThickness,
+                                decoration: BoxDecoration(
+                                  color: activeColor,
+                                  borderRadius:
+                                      BorderRadius.circular(trackThickness / 2),
+                                ),
+                              ),
+                            ),
+
+                            // Low handle gesture detector (lower on screen = lower value)
+                            Positioned(
+                              top: lowTopOffset,
+                              child: GestureDetector(
+                                onVerticalDragStart: _onLowDragStart,
+                                onVerticalDragUpdate: (details) =>
+                                    _onLowDragUpdate(details, trackLength),
+                                onVerticalDragEnd: _onLowDragEnd,
+                                child: _LdSliderHandle(
+                                  fraction: lowSpringFraction,
+                                  isDragging: _isDraggingLow,
+                                  disabled: widget.disabled,
+                                  size: widget.size,
+                                  color: widget.color,
+                                  direction: widget.direction,
+                                  tooltipMessage:
+                                      _formatValue(clampedLow),
+                                  tooltipKey: _lowTooltipKey,
+                                ),
+                              ),
+                            ),
+
+                            // High handle gesture detector (higher on screen = higher value)
+                            Positioned(
+                              top: highTopOffset,
+                              child: GestureDetector(
+                                onVerticalDragStart: _onHighDragStart,
+                                onVerticalDragUpdate: (details) =>
+                                    _onHighDragUpdate(details, trackLength),
+                                onVerticalDragEnd: _onHighDragEnd,
+                                child: _LdSliderHandle(
+                                  fraction: highSpringFraction,
+                                  isDragging: _isDraggingHigh,
+                                  disabled: widget.disabled,
+                                  size: widget.size,
+                                  color: widget.color,
+                                  direction: widget.direction,
+                                  tooltipMessage:
+                                      _formatValue(clampedHigh),
+                                  tooltipKey: _highTooltipKey,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+          );
+        } else {
+          // Horizontal range slider (original behavior)
+          return SizedBox(
+            height: totalCrossAxis,
+            width: trackLength,
+            child: Stack(
+              alignment: Alignment.centerLeft,
+              children: [
+                // --- Background track ---
+                Positioned(
+                  left: handleDiameter / 2,
+                  right: handleDiameter / 2,
+                  child: Container(
+                    height: trackThickness,
+                    decoration: BoxDecoration(
+                      color: inactiveColor,
+                      borderRadius: BorderRadius.circular(trackThickness / 2),
+                    ),
+                  ),
+                ),
+
+                // --- Low handle spring ---
+                LdSpring(
+                  position: lowFraction,
+                  initialPosition: lowFraction,
+                  overriden: _isDraggingLow,
+                  builder: (context, lowSpringState, _) {
+                    final lowSpringFraction =
+                        lowSpringState.position.clamp(0.0, 1.0);
+                    final lowOffset = lowSpringFraction * usableLength;
+
+                    // --- High handle spring (nested so we have both positions) ---
+                    return LdSpring(
+                      position: highFraction,
+                      initialPosition: highFraction,
+                      overriden: _isDraggingHigh,
+                      builder: (context, highSpringState, _) {
+                        final highSpringFraction =
+                            highSpringState.position.clamp(0.0, 1.0);
+                        final highOffset = highSpringFraction * usableLength;
+
+                        // Fill width between low and high handle centers
+                        final fillLeft =
+                            handleDiameter / 2 + lowOffset;
+                        final fillRight =
+                            handleDiameter / 2 + highOffset;
+                        final fillWidth =
+                            (fillRight - fillLeft).clamp(0.0, double.infinity);
+
+                        return Stack(
+                          alignment: Alignment.centerLeft,
+                          children: [
+                            // Active fill between handles
+                            Positioned(
+                              left: fillLeft,
+                              width: fillWidth,
+                              child: Container(
+                                height: trackThickness,
+                                decoration: BoxDecoration(
+                                  color: activeColor,
+                                  borderRadius:
+                                      BorderRadius.circular(trackThickness / 2),
+                                ),
+                              ),
+                            ),
+
+                            // Low handle gesture detector
+                            Positioned(
+                              left: lowOffset,
+                              child: GestureDetector(
+                                onHorizontalDragStart: _onLowDragStart,
+                                onHorizontalDragUpdate: (details) =>
+                                    _onLowDragUpdate(details, trackLength),
+                                onHorizontalDragEnd: _onLowDragEnd,
+                                child: _LdSliderHandle(
+                                  fraction: lowSpringFraction,
+                                  isDragging: _isDraggingLow,
+                                  disabled: widget.disabled,
+                                  size: widget.size,
+                                  color: widget.color,
+                                  direction: widget.direction,
+                                  tooltipMessage:
+                                      _formatValue(clampedLow),
+                                  tooltipKey: _lowTooltipKey,
+                                ),
+                              ),
+                            ),
+
+                            // High handle gesture detector
+                            Positioned(
+                              left: highOffset,
+                              child: GestureDetector(
+                                onHorizontalDragStart: _onHighDragStart,
+                                onHorizontalDragUpdate: (details) =>
+                                    _onHighDragUpdate(details, trackLength),
+                                onHorizontalDragEnd: _onHighDragEnd,
+                                child: _LdSliderHandle(
+                                  fraction: highSpringFraction,
+                                  isDragging: _isDraggingHigh,
+                                  disabled: widget.disabled,
+                                  size: widget.size,
+                                  color: widget.color,
+                                  direction: widget.direction,
+                                  tooltipMessage:
+                                      _formatValue(clampedHigh),
+                                  tooltipKey: _highTooltipKey,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+          );
+        }
+      },
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        LdFormLabel(
-          label: widget.label,
-          size: widget.size,
-          disabled: widget.disabled,
-        ),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final trackWidth = constraints.maxWidth;
-            final usableWidth = trackWidth - handleDiameter;
-
-            return SizedBox(
-              height: totalHeight,
-              width: trackWidth,
-              child: Stack(
-                alignment: Alignment.centerLeft,
-                children: [
-                  // --- Background track ---
-                  Positioned(
-                    left: handleDiameter / 2,
-                    right: handleDiameter / 2,
-                    child: Container(
-                      height: trackHeight,
-                      decoration: BoxDecoration(
-                        color: inactiveColor,
-                        borderRadius: BorderRadius.circular(trackHeight / 2),
-                      ),
-                    ),
-                  ),
-
-                  // --- Low handle spring ---
-                  LdSpring(
-                    position: lowFraction,
-                    initialPosition: lowFraction,
-                    overriden: _isDraggingLow,
-                    builder: (context, lowSpringState, _) {
-                      final lowSpringFraction =
-                          lowSpringState.position.clamp(0.0, 1.0);
-                      final lowOffset = lowSpringFraction * usableWidth;
-
-                      // --- High handle spring (nested so we have both positions) ---
-                      return LdSpring(
-                        position: highFraction,
-                        initialPosition: highFraction,
-                        overriden: _isDraggingHigh,
-                        builder: (context, highSpringState, _) {
-                          final highSpringFraction =
-                              highSpringState.position.clamp(0.0, 1.0);
-                          final highOffset = highSpringFraction * usableWidth;
-
-                          // Fill width between low and high handle centers
-                          final fillLeft =
-                              handleDiameter / 2 + lowOffset;
-                          final fillRight =
-                              handleDiameter / 2 + highOffset;
-                          final fillWidth =
-                              (fillRight - fillLeft).clamp(0.0, double.infinity);
-
-                          return Stack(
-                            alignment: Alignment.centerLeft,
-                            children: [
-                              // Active fill between handles
-                              Positioned(
-                                left: fillLeft,
-                                width: fillWidth,
-                                child: Container(
-                                  height: trackHeight,
-                                  decoration: BoxDecoration(
-                                    color: activeColor,
-                                    borderRadius:
-                                        BorderRadius.circular(trackHeight / 2),
-                                  ),
-                                ),
-                              ),
-
-                              // Low handle gesture detector
-                              Positioned(
-                                left: lowOffset,
-                                child: GestureDetector(
-                                  onHorizontalDragStart: _onLowDragStart,
-                                  onHorizontalDragUpdate: (details) =>
-                                      _onLowDragUpdate(details, trackWidth),
-                                  onHorizontalDragEnd: _onLowDragEnd,
-                                  child: _LdSliderHandle(
-                                    fraction: lowSpringFraction,
-                                    isDragging: _isDraggingLow,
-                                    disabled: widget.disabled,
-                                    size: widget.size,
-                                    color: widget.color,
-                                    direction: widget.direction,
-                                    tooltipMessage:
-                                        _formatValue(clampedLow),
-                                    tooltipKey: _lowTooltipKey,
-                                  ),
-                                ),
-                              ),
-
-                              // High handle gesture detector
-                              Positioned(
-                                left: highOffset,
-                                child: GestureDetector(
-                                  onHorizontalDragStart: _onHighDragStart,
-                                  onHorizontalDragUpdate: (details) =>
-                                      _onHighDragUpdate(details, trackWidth),
-                                  onHorizontalDragEnd: _onHighDragEnd,
-                                  child: _LdSliderHandle(
-                                    fraction: highSpringFraction,
-                                    isDragging: _isDraggingHigh,
-                                    disabled: widget.disabled,
-                                    size: widget.size,
-                                    color: widget.color,
-                                    direction: widget.direction,
-                                    tooltipMessage:
-                                        _formatValue(clampedHigh),
-                                    tooltipKey: _highTooltipKey,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
+        label,
+        if (_isVertical) Expanded(child: track) else track,
       ],
     );
   }

@@ -634,4 +634,226 @@ void main() {
       expect(find.byType(LdSlider), findsOneWidget);
     });
   });
+
+  // -------------------------------------------------------------------------
+  // Stage 6: Vertical direction support tests
+  // -------------------------------------------------------------------------
+
+  group('LdSlider vertical direction', () {
+    testWidgets('Axis.vertical: drag up → value increases',
+        (WidgetTester tester) async {
+      double currentValue = 0.0;
+      final List<double> emittedValues = [];
+
+      await tester.pumpWidget(
+        withLiquidTheme(
+          StatefulBuilder(
+            builder: (context, setState) {
+              return Center(
+                child: SizedBox(
+                  width: 60,
+                  height: 300,
+                  child: LdSlider(
+                    value: currentValue,
+                    min: 0.0,
+                    max: 1.0,
+                    direction: Axis.vertical,
+                    onChanged: (v) {
+                      emittedValues.add(v);
+                      setState(() => currentValue = v);
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      expect(find.byType(LdSlider), findsOneWidget);
+
+      // Drag upward (from bottom toward top) — value should increase
+      final sliderFinder = find.byType(LdSlider);
+      final sliderRect = tester.getRect(sliderFinder);
+      // Start near the bottom (where value=0 is)
+      final startOffset = Offset(sliderRect.center.dx, sliderRect.bottom - 20);
+      // End near the top (where value=1 is)
+      final endOffset = Offset(sliderRect.center.dx, sliderRect.top + 20);
+
+      await performPanGesture(
+        tester,
+        startPosition: startOffset,
+        endPosition: endOffset,
+        steps: 20,
+      );
+
+      expect(emittedValues.isNotEmpty, true,
+          reason: 'onChanged should have been called during upward drag');
+      expect(emittedValues.last, greaterThan(emittedValues.first),
+          reason: 'Dragging up should increase the value in vertical mode');
+    });
+
+    testWidgets('Axis.vertical: drag down → value decreases',
+        (WidgetTester tester) async {
+      double currentValue = 1.0;
+      final List<double> emittedValues = [];
+
+      await tester.pumpWidget(
+        withLiquidTheme(
+          StatefulBuilder(
+            builder: (context, setState) {
+              return Center(
+                child: SizedBox(
+                  width: 60,
+                  height: 300,
+                  child: LdSlider(
+                    value: currentValue,
+                    min: 0.0,
+                    max: 1.0,
+                    direction: Axis.vertical,
+                    onChanged: (v) {
+                      emittedValues.add(v);
+                      setState(() => currentValue = v);
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Drag downward (from top toward bottom) — value should decrease
+      final sliderFinder = find.byType(LdSlider);
+      final sliderRect = tester.getRect(sliderFinder);
+      // Start near the top (where value=1 is)
+      final startOffset = Offset(sliderRect.center.dx, sliderRect.top + 20);
+      // End near the bottom (where value=0 is)
+      final endOffset = Offset(sliderRect.center.dx, sliderRect.bottom - 20);
+
+      await performPanGesture(
+        tester,
+        startPosition: startOffset,
+        endPosition: endOffset,
+        steps: 20,
+      );
+
+      expect(emittedValues.isNotEmpty, true,
+          reason: 'onChanged should have been called during downward drag');
+      expect(emittedValues.last, lessThan(emittedValues.first),
+          reason: 'Dragging down should decrease the value in vertical mode');
+    });
+
+    testWidgets('Axis.vertical range mode: handles constrained correctly',
+        (WidgetTester tester) async {
+      double low = 0.2;
+      double high = 0.8;
+      final List<double> emittedLow = [];
+
+      await tester.pumpWidget(
+        withLiquidTheme(
+          StatefulBuilder(
+            builder: (context, setState) {
+              return Center(
+                child: SizedBox(
+                  width: 60,
+                  height: 300,
+                  child: LdSlider.range(
+                    lowValue: low,
+                    highValue: high,
+                    min: 0.0,
+                    max: 1.0,
+                    direction: Axis.vertical,
+                    onRangeChanged: (l, h) {
+                      emittedLow.add(l);
+                      setState(() {
+                        low = l;
+                        high = h;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      expect(find.byType(LdSlider), findsOneWidget);
+      // Range mode: two springs
+      expect(find.byType(LdSpring), findsNWidgets(2));
+
+      // Drag the low handle upward (toward high handle) — it should be clamped
+      final sliderFinder = find.byType(LdSlider);
+      final sliderRect = tester.getRect(sliderFinder);
+      // Low handle is near the bottom (value 0.2 → about 80% from top)
+      final startOffset = Offset(sliderRect.center.dx, sliderRect.bottom - 30);
+      final endOffset = Offset(sliderRect.center.dx, sliderRect.top + 10);
+
+      await performPanGesture(
+        tester,
+        startPosition: startOffset,
+        endPosition: endOffset,
+        steps: 30,
+      );
+
+      // Low handle must never exceed high handle
+      expect(low, lessThan(high),
+          reason: 'Low handle must always stay below high handle');
+    });
+
+    testWidgets('Axis.horizontal behavior unchanged after refactor (regression)',
+        (WidgetTester tester) async {
+      double currentValue = 0.0;
+      final List<double> emittedValues = [];
+
+      await tester.pumpWidget(
+        withLiquidTheme(
+          StatefulBuilder(
+            builder: (context, setState) {
+              return Center(
+                child: SizedBox(
+                  width: 300,
+                  child: LdSlider(
+                    value: currentValue,
+                    min: 0.0,
+                    max: 1.0,
+                    direction: Axis.horizontal,
+                    onChanged: (v) {
+                      emittedValues.add(v);
+                      setState(() => currentValue = v);
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      expect(find.byType(LdSlider), findsOneWidget);
+
+      final sliderFinder = find.byType(LdSlider);
+      final sliderRect = tester.getRect(sliderFinder);
+      final startOffset = Offset(sliderRect.left + 20, sliderRect.center.dy);
+      final endOffset = Offset(sliderRect.right - 20, sliderRect.center.dy);
+
+      await performPanGesture(
+        tester,
+        startPosition: startOffset,
+        endPosition: endOffset,
+        steps: 20,
+      );
+
+      expect(emittedValues.isNotEmpty, true,
+          reason: 'Horizontal slider must still emit onChanged after refactor');
+      expect(emittedValues.last, greaterThan(emittedValues.first),
+          reason: 'Horizontal drag right must still increase value after refactor');
+    });
+  });
 }
