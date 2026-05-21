@@ -29,6 +29,9 @@ enum LdContextPositionMode {
   relativeCursor,
 }
 
+typedef LdContextMenuBuilder = Widget Function(
+    BuildContext context, bool isShuttle, VoidCallback trigger, bool isOpen, Widget? child);
+
 class LdContextMenuDissmissNotification extends Notification {}
 
 class LdContextMenu extends StatefulWidget {
@@ -73,13 +76,7 @@ class LdContextMenu extends StatefulWidget {
 
   final Widget? child;
 
-  final Widget Function(
-    BuildContext context,
-    bool isShuttle,
-    VoidCallback trigger,
-    bool isOpen,
-    Widget? child,
-  ) builder;
+  final LdContextMenuBuilder builder;
 
   final Widget Function(
     BuildContext context,
