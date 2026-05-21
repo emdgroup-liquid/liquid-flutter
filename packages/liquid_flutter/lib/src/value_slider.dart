@@ -24,17 +24,17 @@ double _fractionToValue(double fraction, double min, double max) {
   return min + fraction * (max - min);
 }
 
-/// Translates a [low, high] range by [deltaFraction] while preserving range
-/// width and clamping to [min, max].
+/// Translates a [low, high] range by [valueDelta] (in value-space) while
+/// preserving range width and clamping to [min, max].
 ({double low, double high}) _translateRange({
   required double low,
   required double high,
-  required double deltaFraction,
+  required double valueDelta,
   required double min,
   required double max,
 }) {
   final rangeWidth = high - low;
-  final newLow = (low + deltaFraction).clamp(min, max - rangeWidth);
+  final newLow = (low + valueDelta).clamp(min, max - rangeWidth);
   final newHigh = newLow + rangeWidth;
   return (low: newLow, high: newHigh);
 }
@@ -326,6 +326,18 @@ class _LdSliderState extends State<LdSlider> {
   /// Step-index tracking for haptics — high handle.
   int? _prevHighStepIndex;
 
+  /// Anchor value at the start of a low-handle drag (Bug 1 fix).
+  double? _lowDragAnchorValue;
+
+  /// Accumulated pixel delta since low-handle drag started (Bug 1 fix).
+  double _lowDragAccumPx = 0.0;
+
+  /// Anchor value at the start of a high-handle drag (Bug 1 fix).
+  double? _highDragAnchorValue;
+
+  /// Accumulated pixel delta since high-handle drag started (Bug 1 fix).
+  double _highDragAccumPx = 0.0;
+
   // ---- Tooltip keys ------------------------------------------------------
   // _lowTooltipKey used in both single and range mode.
   final _lowTooltipKey = GlobalKey<TooltipState>();
@@ -448,6 +460,8 @@ class _LdSliderState extends State<LdSlider> {
     HapticFeedback.mediumImpact();
     setState(() {
       _isDraggingLow = true;
+      _lowDragAnchorValue = _clampedLow;
+      _lowDragAccumPx = 0.0;
       _prevLowStepIndex = widget.step > 0
           ? (_clampedLow / widget.step).round()
           : null;
@@ -461,14 +475,16 @@ class _LdSliderState extends State<LdSlider> {
     final usableLength = trackLength - handleDiameter;
     if (usableLength <= 0) return;
 
-    double fraction;
+    // Accumulate pixel delta from drag start; convert to value via anchor.
     if (_isVertical) {
-      fraction = (1.0 - (details.localPosition.dy - handleDiameter / 2) / usableLength)
-          .clamp(0.0, 1.0);
+      // Inverted: drag up (negative dy) increases value.
+      _lowDragAccumPx -= details.delta.dy;
     } else {
-      fraction = ((details.localPosition.dx - handleDiameter / 2) / usableLength)
-          .clamp(0.0, 1.0);
+      _lowDragAccumPx += details.delta.dx;
     }
+
+    final anchorFraction = _valueToFraction(_lowDragAnchorValue!, widget.min, widget.max);
+    final fraction = (anchorFraction + _lowDragAccumPx / usableLength).clamp(0.0, 1.0);
     final raw = _fractionToValue(fraction, widget.min, widget.max);
 
     // Clamp so low handle stays below high handle
@@ -495,6 +511,8 @@ class _LdSliderState extends State<LdSlider> {
     setState(() {
       _isDraggingLow = false;
       _prevLowStepIndex = null;
+      _lowDragAnchorValue = null;
+      _lowDragAccumPx = 0.0;
     });
   }
 
@@ -503,6 +521,8 @@ class _LdSliderState extends State<LdSlider> {
     HapticFeedback.mediumImpact();
     setState(() {
       _isDraggingHigh = true;
+      _highDragAnchorValue = _clampedHigh;
+      _highDragAccumPx = 0.0;
       _prevHighStepIndex = widget.step > 0
           ? (_clampedHigh / widget.step).round()
           : null;
@@ -516,14 +536,15 @@ class _LdSliderState extends State<LdSlider> {
     final usableLength = trackLength - handleDiameter;
     if (usableLength <= 0) return;
 
-    double fraction;
+    // Accumulate pixel delta from drag start; convert to value via anchor.
     if (_isVertical) {
-      fraction = (1.0 - (details.localPosition.dy - handleDiameter / 2) / usableLength)
-          .clamp(0.0, 1.0);
+      _highDragAccumPx -= details.delta.dy;
     } else {
-      fraction = ((details.localPosition.dx - handleDiameter / 2) / usableLength)
-          .clamp(0.0, 1.0);
+      _highDragAccumPx += details.delta.dx;
     }
+
+    final anchorFraction = _valueToFraction(_highDragAnchorValue!, widget.min, widget.max);
+    final fraction = (anchorFraction + _highDragAccumPx / usableLength).clamp(0.0, 1.0);
     final raw = _fractionToValue(fraction, widget.min, widget.max);
 
     // Clamp so high handle stays above low handle
@@ -550,6 +571,8 @@ class _LdSliderState extends State<LdSlider> {
     setState(() {
       _isDraggingHigh = false;
       _prevHighStepIndex = null;
+      _highDragAnchorValue = null;
+      _highDragAccumPx = 0.0;
     });
   }
 
@@ -565,21 +588,38 @@ class _LdSliderState extends State<LdSlider> {
     if (widget.disabled) return;
     if (trackPx <= 0) return;
 
-    final double deltaFraction;
+    final double pixelDelta;
     if (_isVertical) {
       // Inverted: drag up (negative dy) increases value.
-      deltaFraction = -details.delta.dy / trackPx;
+      pixelDelta = -details.delta.dy;
     } else {
-      deltaFraction = details.delta.dx / trackPx;
+      pixelDelta = details.delta.dx;
     }
 
-    final result = _translateRange(
+    // Convert pixel delta to value delta (1:1 cursor-to-range mapping).
+    final valueDelta = (pixelDelta / trackPx) * (widget.max - widget.min);
+
+    var result = _translateRange(
       low: _clampedLow,
       high: _clampedHigh,
-      deltaFraction: deltaFraction * (widget.max - widget.min),
+      valueDelta: valueDelta,
       min: widget.min,
       max: widget.max,
     );
+
+    // Apply step snapping: snap both endpoints to the step grid independently.
+    // newLow is snapped first, then newHigh is snapped while preserving that
+    // newHigh >= newLow + minSeparation.
+    if (widget.step > 0) {
+      final snappedLow = _snapToStep(result.low, widget.min, widget.max, widget.step);
+      final snappedHigh = _snapToStep(
+        result.high,
+        snappedLow + _minSeparation,
+        widget.max,
+        widget.step,
+      );
+      result = (low: snappedLow, high: snappedHigh);
+    }
 
     if (result.low != widget.lowValue || result.high != widget.highValue) {
       widget.onRangeChanged!(result.low, result.high);
