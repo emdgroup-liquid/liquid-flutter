@@ -1,0 +1,130 @@
+---
+name: liquid_flutter-app-root
+description: Use when setting up or modifying the root of a Liquid Flutter application — covers main() initialization, root widget tree structure, LdThemeProvider, LdNotificationProvider, LdThemedAppBuilder, and router setup.
+---
+
+# App Root Setup
+
+This skill applies when setting up the root of a Liquid Flutter application, including `main()` function initialization and the root widget tree structure.
+
+The root of a Liquid Flutter application requires proper initialization and widget tree setup. Follow this pattern to ensure all systems are configured correctly.
+
+## Main Function Setup
+
+In your `main()` function, perform the following initialization steps:
+
+```dart
+void main() async {
+  // 1. Ensure Flutter binding is initialized
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 2. Configure GoRouter (if using go_router)
+  GoRouter.optionURLReflectsImperativeAPIs = true;
+
+  // 3. Set up window callbacks for desktop platforms
+  LdAppBar.callbacks = LdWindowCallbacks(
+    onClose: () => LiquidFlutterWindowUtils.instance.closeWindow(),
+    onMinimize: () => LiquidFlutterWindowUtils.instance.minimizeWindow(),
+    onMaximize: () => LiquidFlutterWindowUtils.instance.maximizeWindow(),
+    onMove: () => LiquidFlutterWindowUtils.instance.startDragging(),
+  );
+
+  // 4. Listen for window ready events and configure window
+  LiquidFlutterWindowUtils.instance.windowReadyStream.listen((isReady) async {
+    if (isReady) {
+      await LiquidFlutterWindowUtils.instance.configureWindow();
+    }
+  });
+
+  // 5. Run the app
+  runApp(const MyApp());
+}
+```
+
+## Root Widget Tree Structure
+
+The root widget tree must follow this exact hierarchy:
+
+```dart
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  Widget build(BuildContext context) {
+    return Provider<AppRouter>(
+      create: (context) => AppRouter(),
+      child: Builder(
+        builder: (BuildContext context) {
+          return LdNotificationProvider(
+              child: LdNotificationPortal(
+                child: LdThemeProvider(
+                screenRadiusStream: LiquidFlutterWindowUtils.instance.screenRadiusStream,
+                child: LdThemedAppBuilder(
+                  appBuilder: (context, theme) {
+                    final router = context.read<AppRouter>().router;
+                    return MaterialApp.router(
+                      localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+                      title: 'Your App Name',
+                      debugShowCheckedModeBanner: false,
+                      theme: theme,
+                      routerConfig: router,
+                    );
+                  },
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+```
+
+## Required Components
+
+1. **Provider<AppRouter>**: Provides the router instance to the widget tree. The `AppRouter` class should contain a `GoRouter` instance.
+
+2. **Builder**: Required to access the context after the Provider is created.
+
+3. **CallbackShortcuts**: Optional but recommended for keyboard shortcuts. Can be omitted if not needed.
+
+4. **LdNotificationProvider**: Sets up the `LdNotificationsController` in the widget tree. To actually render notification toasts on screen, also wrap the content with **`LdNotificationPortal`**.
+
+5. **LdThemeProvider**: Required for theme management. Must pass `screenRadiusStream` from `LiquidFlutterWindowUtils.instance.screenRadiusStream` for proper window radius handling on desktop platforms.
+
+6. **LdThemedAppBuilder**: Builds the MaterialApp with the theme. The `appBuilder` callback receives the context and theme.
+
+7. **MaterialApp.router**: Use `MaterialApp.router` (not `MaterialApp`) with `routerConfig` set to your GoRouter instance. Retrieve the router using `context.read<AppRouter>().router`.
+
+## Router Setup
+
+Create an `AppRouter` class that provides a `GoRouter` instance:
+
+```dart
+class AppRouter {
+  AppRouter();
+
+  late final router = GoRouter(
+    debugLogDiagnostics: true, // Set to false in production
+    initialLocation: "/",
+    routes: [
+      // Your routes here
+    ],
+  );
+}
+```
+
+## Key Points
+
+- **Always use `MaterialApp.router`** with `routerConfig` for navigation
+- **Always pass `screenRadiusStream`** to `LdThemeProvider` for desktop window radius support
+- **Always set `LdAppBar.callbacks`** in `main()` before `runApp()` for desktop window controls
+- **Always listen to `windowReadyStream`** and call `configureWindow()` when ready
+- **Use `Provider`** to provide the router instance, not a singleton
+- **Use `context.read<AppRouter>()`** inside `LdThemedAppBuilder` to access the router
