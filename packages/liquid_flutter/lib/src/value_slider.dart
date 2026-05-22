@@ -326,16 +326,16 @@ class _LdSliderState extends State<LdSlider> {
   /// Step-index tracking for haptics — high handle.
   int? _prevHighStepIndex;
 
-  /// Anchor value at the start of a low-handle drag (Bug 1 fix).
+  /// Anchor value at the start of a low-handle drag.
   double? _lowDragAnchorValue;
 
-  /// Accumulated pixel delta since low-handle drag started (Bug 1 fix).
+  /// Accumulated pixel delta since low-handle drag started.
   double _lowDragAccumPx = 0.0;
 
-  /// Anchor value at the start of a high-handle drag (Bug 1 fix).
+  /// Anchor value at the start of a high-handle drag.
   double? _highDragAnchorValue;
 
-  /// Accumulated pixel delta since high-handle drag started (Bug 1 fix).
+  /// Accumulated pixel delta since high-handle drag started.
   double _highDragAccumPx = 0.0;
 
   /// Anchor low value at the start of a range drag.
@@ -834,7 +834,7 @@ class _LdSliderState extends State<LdSlider> {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: _isVertical ? MainAxisSize.max : MainAxisSize.min,
       children: [
         label,
         if (_isVertical) Expanded(child: track) else track,
@@ -1193,7 +1193,7 @@ class _LdSliderState extends State<LdSlider> {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: _isVertical ? MainAxisSize.max : MainAxisSize.min,
       children: [
         label,
         if (_isVertical) Expanded(child: track) else track,

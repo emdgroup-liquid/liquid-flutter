@@ -606,21 +606,20 @@ void main() {
           reason: 'onRangeChanged must not be called when slider is disabled');
     });
 
-    testWidgets('lowValue > highValue in release mode → clamped gracefully (no crash)',
+    testWidgets('lowValue > highValue in debug mode → FlutterError thrown',
         (WidgetTester tester) async {
-      // In release mode (assertions disabled) the widget should clamp gracefully.
-      // We test this by ensuring the widget builds without error with inverted values.
-      // (In debug mode this would throw; we skip the assertion by using a try/catch
-      // approach — but since tests run in debug mode, we just verify clamping works
-      // when values are within range.)
+      // The widget asserts lowValue <= highValue in debug mode. Passing inverted
+      // values must throw a FlutterError during the build phase.
+      // In widget tests, Flutter catches the error and rethrows it so we must
+      // pump first and then retrieve it via tester.takeException().
       await tester.pumpWidget(
         withLiquidTheme(
           Center(
             child: SizedBox(
               width: 300,
               child: LdSlider.range(
-                lowValue: 0.3,
-                highValue: 0.7,
+                lowValue: 0.7,
+                highValue: 0.3,
                 min: 0.0,
                 max: 1.0,
                 onRangeChanged: (_, __) {},
@@ -630,8 +629,10 @@ void main() {
         ),
       );
 
-      await tester.pumpAndSettle();
-      expect(find.byType(LdSlider), findsOneWidget);
+      final exception = tester.takeException();
+      expect(exception, isA<FlutterError>(),
+          reason:
+              'Expected a FlutterError when lowValue > highValue, got $exception');
     });
   });
 
@@ -1137,6 +1138,76 @@ void main() {
     });
 
     testWidgets(
+        'Axis.vertical allowRangeDrag: drag fill region → onRangeChanged called, range width preserved',
+        (WidgetTester tester) async {
+      double low = 0.2;
+      double high = 0.8;
+      final List<(double, double)> emissions = [];
+
+      await tester.pumpWidget(
+        withLiquidTheme(
+          StatefulBuilder(
+            builder: (context, setState) {
+              return Center(
+                child: SizedBox(
+                  width: 60,
+                  height: 300,
+                  child: LdSlider.range(
+                    lowValue: low,
+                    highValue: high,
+                    min: 0.0,
+                    max: 1.0,
+                    direction: Axis.vertical,
+                    allowRangeDrag: true,
+                    onRangeChanged: (l, h) {
+                      emissions.add((l, h));
+                      setState(() {
+                        low = l;
+                        high = h;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // In vertical mode value=0 is at the bottom and value=1 is at the top.
+      // For low=0.2 and high=0.8 the fill hit zone covers the center of the slider.
+      // Drag from the center of the slider; both handles must shift and range width
+      // must be preserved regardless of direction.
+      final sliderRect = tester.getRect(find.byType(LdSlider));
+      final startOffset = sliderRect.center;
+
+      final gesture = await tester.startGesture(startOffset,
+          kind: PointerDeviceKind.touch);
+      await tester.pump();
+      // Drag 60px downward — clearly within the fill hit zone and exceeds slop.
+      await gesture.moveBy(const Offset(0, 60));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(emissions.isNotEmpty, true,
+          reason:
+              'onRangeChanged should be called when dragging the vertical fill region');
+
+      // Range width must be preserved across all emissions.
+      for (final (l, h) in emissions) {
+        expect((h - l).abs(), closeTo(0.6, 0.001),
+            reason: 'Range width must be preserved during vertical fill drag');
+      }
+
+      // The range must have shifted (low != initial value).
+      expect(low, isNot(equals(0.2)),
+          reason: 'Vertical fill drag must shift the range from its initial position');
+    });
+
+    testWidgets(
         'range narrower than 2×handleRadius → fill not draggable (no callback)',
         (WidgetTester tester) async {
       // With a very small range (low=0.499, high=0.501) the fill hit region
@@ -1180,6 +1251,206 @@ void main() {
 
       // Verify no crash when the range is too narrow for the fill drag zone
       // (the fill GestureDetector is simply not rendered in this case)
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Non-zero min tests: _fractionToValue / _valueToFraction offset coverage
+  // -------------------------------------------------------------------------
+
+  group('LdSlider non-zero min', () {
+    testWidgets('single slider with non-zero min: drag right → values stay in [min, max]',
+        (WidgetTester tester) async {
+      const double min = 50.0;
+      const double max = 150.0;
+      double currentValue = 50.0;
+      final List<double> emittedValues = [];
+
+      await tester.pumpWidget(
+        withLiquidTheme(
+          StatefulBuilder(
+            builder: (context, setState) {
+              return Center(
+                child: SizedBox(
+                  width: 300,
+                  child: LdSlider(
+                    value: currentValue,
+                    min: min,
+                    max: max,
+                    onChanged: (v) {
+                      emittedValues.add(v);
+                      setState(() => currentValue = v);
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final sliderRect = tester.getRect(find.byType(LdSlider));
+      final startOffset = Offset(sliderRect.left + 10, sliderRect.center.dy);
+      final endOffset = Offset(sliderRect.right - 10, sliderRect.center.dy);
+
+      await performPanGesture(
+        tester,
+        startPosition: startOffset,
+        endPosition: endOffset,
+        steps: 20,
+      );
+
+      expect(emittedValues.isNotEmpty, true,
+          reason: 'onChanged must be called during drag with non-zero min');
+
+      for (final v in emittedValues) {
+        expect(v, greaterThanOrEqualTo(min),
+            reason: 'Emitted value $v must be >= min ($min)');
+        expect(v, lessThanOrEqualTo(max),
+            reason: 'Emitted value $v must be <= max ($max)');
+      }
+
+      // Dragging from left to right from min should increase the value.
+      expect(emittedValues.last, greaterThan(min),
+          reason: 'Dragging right from min should produce values above min');
+    });
+
+    testWidgets('single slider with non-zero min: step snapping respects offset',
+        (WidgetTester tester) async {
+      // min=50, max=60, step=2 → valid snapped values: 50, 52, 54, 56, 58, 60
+      const double min = 50.0;
+      const double max = 60.0;
+      const double step = 2.0;
+      double currentValue = 50.0;
+      final List<double> emittedValues = [];
+
+      await tester.pumpWidget(
+        withLiquidTheme(
+          StatefulBuilder(
+            builder: (context, setState) {
+              return Center(
+                child: SizedBox(
+                  width: 300,
+                  child: LdSlider(
+                    value: currentValue,
+                    min: min,
+                    max: max,
+                    step: step,
+                    onChanged: (v) {
+                      emittedValues.add(v);
+                      setState(() => currentValue = v);
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final sliderRect = tester.getRect(find.byType(LdSlider));
+      final startOffset = Offset(sliderRect.left + 10, sliderRect.center.dy);
+      final endOffset = Offset(sliderRect.right - 10, sliderRect.center.dy);
+
+      await performPanGesture(
+        tester,
+        startPosition: startOffset,
+        endPosition: endOffset,
+        steps: 30,
+      );
+
+      expect(emittedValues.isNotEmpty, true,
+          reason: 'onChanged must be called during drag with non-zero min + step');
+
+      for (final v in emittedValues) {
+        expect(v, greaterThanOrEqualTo(min),
+            reason: 'Emitted value $v must be >= min ($min)');
+        expect(v, lessThanOrEqualTo(max),
+            reason: 'Emitted value $v must be <= max ($max)');
+        // Each emitted value must be on the step grid (multiples of step).
+        final nearest = (v / step).round() * step;
+        expect((v - nearest).abs(), lessThan(0.001),
+            reason: 'Value $v is not on step grid (step=$step)');
+      }
+    });
+
+    testWidgets('range slider with non-zero min: handles stay within [min, max]',
+        (WidgetTester tester) async {
+      const double min = 100.0;
+      const double max = 200.0;
+      // Use low=0.0 fraction (at min) so the low handle is at the far left
+      // and easy to target with a drag gesture.
+      double low = 100.0;
+      double high = 180.0;
+      final List<double> emittedLow = [];
+      final List<double> emittedHigh = [];
+
+      await tester.pumpWidget(
+        withLiquidTheme(
+          StatefulBuilder(
+            builder: (context, setState) {
+              return Center(
+                child: SizedBox(
+                  width: 300,
+                  child: LdSlider.range(
+                    lowValue: low,
+                    highValue: high,
+                    min: min,
+                    max: max,
+                    onRangeChanged: (l, h) {
+                      emittedLow.add(l);
+                      emittedHigh.add(h);
+                      setState(() {
+                        low = l;
+                        high = h;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final sliderRect = tester.getRect(find.byType(LdSlider));
+      // Low handle at fraction 0.0 → leftmost position of the slider.
+      // Start near the left edge and drag rightward.
+      final startOffset = Offset(sliderRect.left + 8, sliderRect.center.dy);
+      final endOffset = Offset(sliderRect.left + 80, sliderRect.center.dy);
+
+      await performPanGesture(
+        tester,
+        startPosition: startOffset,
+        endPosition: endOffset,
+        steps: 20,
+      );
+
+      expect(emittedLow.isNotEmpty, true,
+          reason: 'onRangeChanged must be called with non-zero min');
+
+      for (final v in emittedLow) {
+        expect(v, greaterThanOrEqualTo(min),
+            reason: 'Low handle $v must be >= min ($min)');
+        expect(v, lessThanOrEqualTo(max),
+            reason: 'Low handle $v must be <= max ($max)');
+      }
+      for (final v in emittedHigh) {
+        expect(v, greaterThanOrEqualTo(min),
+            reason: 'High handle $v must be >= min ($min)');
+        expect(v, lessThanOrEqualTo(max),
+            reason: 'High handle $v must be <= max ($max)');
+      }
+
+      // Low must remain below high
+      expect(low, lessThan(high),
+          reason: 'Low must stay below high with non-zero min');
     });
   });
 
