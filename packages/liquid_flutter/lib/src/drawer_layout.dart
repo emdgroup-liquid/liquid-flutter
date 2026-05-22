@@ -135,16 +135,6 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
 
   bool get _isDrawerOpen => _panelVisible;
 
-  Border? get _drawerBorder {
-    if (!_isSideBySide) return null;
-    return Border(
-      right: BorderSide(
-        color: LdTheme.of(context).border,
-        width: 1,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Material(
