@@ -228,7 +228,7 @@ class _ListDemoState extends State<ListDemo> {
             child: LdCard(
               expandChild: true,
               child: LdListEmpty(
-                onRefresh: () {
+                onRefresh: () async {
                   LdNotificationsController.of(
                     context,
                   ).addNotification(LdNotification(message: "Refreshed", type: LdNotificationType.success));
