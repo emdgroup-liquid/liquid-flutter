@@ -8,14 +8,15 @@ enum LdAppBarPosition {
 /// Immutable snapshot of an app-bar's metrics at a point in time.
 ///
 /// [position]        – whether this bar sits at the top or bottom.
-/// [barHeight]       – the full rendered height of the bar (pixels).
-/// [edgeMargin]      – padding already applied on this edge before this bar
-///                     (safe area and/or ancestor bars), used to compute
-///                     [consumedInsets] without double-counting.
+/// [barHeight]       – full rendered height of the bar surface, including the
+///                     outside safe-area / ancestor-bar padding. Equals the
+///                     height that MeasureSize measures on the outer container.
+/// [edgeMargin]      – the outer padding already applied on this edge before
+///                     this bar (device safe-area + ancestor bars' net heights).
+///                     Equals [MediaQuery.paddingOf] on that edge at build time.
 /// [hideOffset]      – how many pixels the bar has been scrolled off-screen
-///                     (0 = fully visible, barHeight = fully hidden).
-/// [isScrolledUnder] – true when the scroll content has moved underneath
-///                     the bar.
+///                     (0 = fully visible, barHeight = fully hidden). Animated.
+/// [isScrolledUnder] – true when scroll content has moved underneath the bar.
 /// [level]           – stacking index among bars at the same position (0 = outermost).
 class LdAppBarMetrics {
   const LdAppBarMetrics({
@@ -25,24 +26,50 @@ class LdAppBarMetrics {
     required this.hideOffset,
     required this.isScrolledUnder,
     required this.level,
+    this.accumulatedHideOffset = 0.0,
   });
 
   final LdAppBarPosition position;
+
+  /// Full outer-container height: edgeMargin + own inner content.
   final double barHeight;
+
+  /// Outer padding already on this edge before this bar (device safe-area +
+  /// all ancestor bars' stable net heights). Used to compute [stableConsumedInsets]
+  /// without double-counting.
   final double edgeMargin;
+
+  /// Animated scroll-hide offset (0 = fully visible, barHeight = fully hidden).
   final double hideOffset;
+
+  /// Cumulative hide offset from all ancestor bars at the same position.
+  /// 0 for the outermost bar. Used by nested bars to compute their translate
+  /// so they follow ancestor bars as they hide.
+  final double accumulatedHideOffset;
+
   final bool isScrolledUnder;
   final int level;
 
-  /// The insets this bar adds beyond [edgeMargin] for its subtree.
+  /// Net insets this bar contributes to its subtree, stable (never animated).
   ///
-  /// [barHeight] is measured on the full bar surface, including padding for
-  /// bars stacked above ([edgeMargin], which matches outer [MediaQuery.padding]
-  /// on that edge). Only the incremental height is published so nested bars do
-  /// not double-count ancestor space.
+  /// = max(0, barHeight - edgeMargin)
   ///
-  /// For a **top** bar: `top = max(0, barHeight - hideOffset - edgeMargin)`.
-  /// For a **bottom** bar: `bottom = max(0, barHeight - hideOffset - edgeMargin)`.
+  /// Used to patch [MediaQuery.padding] for the body subtree so the
+  /// scroll-content floor never shifts while the bar animates.
+  EdgeInsets get stableConsumedInsets {
+    final incremental = (barHeight - edgeMargin).clamp(0.0, double.infinity);
+    return switch (position) {
+      LdAppBarPosition.top => EdgeInsets.only(top: incremental),
+      LdAppBarPosition.bottom => EdgeInsets.only(bottom: incremental),
+    };
+  }
+
+  /// Net insets currently visible — animated, shrinks as bar hides.
+  ///
+  /// = max(0, barHeight - hideOffset - edgeMargin)
+  ///
+  /// NOT used for the scroll-content padding (that uses [stableConsumedInsets])
+  /// but kept for external consumers that want to know the live visible height.
   EdgeInsets get consumedInsets {
     final visible = (barHeight - hideOffset).clamp(0.0, double.infinity);
     final incremental = (visible - edgeMargin).clamp(0.0, double.infinity);
@@ -57,6 +84,7 @@ class LdAppBarMetrics {
     double? barHeight,
     double? edgeMargin,
     double? hideOffset,
+    double? accumulatedHideOffset,
     bool? isScrolledUnder,
     int? level,
   }) {
@@ -65,6 +93,7 @@ class LdAppBarMetrics {
       barHeight: barHeight ?? this.barHeight,
       edgeMargin: edgeMargin ?? this.edgeMargin,
       hideOffset: hideOffset ?? this.hideOffset,
+      accumulatedHideOffset: accumulatedHideOffset ?? this.accumulatedHideOffset,
       isScrolledUnder: isScrolledUnder ?? this.isScrolledUnder,
       level: level ?? this.level,
     );
@@ -78,6 +107,7 @@ class LdAppBarMetrics {
         other.barHeight == barHeight &&
         other.edgeMargin == edgeMargin &&
         other.hideOffset == hideOffset &&
+        other.accumulatedHideOffset == accumulatedHideOffset &&
         other.isScrolledUnder == isScrolledUnder &&
         other.level == level;
   }
@@ -88,6 +118,7 @@ class LdAppBarMetrics {
         barHeight,
         edgeMargin,
         hideOffset,
+        accumulatedHideOffset,
         isScrolledUnder,
         level,
       );
@@ -98,6 +129,7 @@ class LdAppBarMetrics {
       'barHeight: $barHeight, '
       'edgeMargin: $edgeMargin, '
       'hideOffset: $hideOffset, '
+      'accumulatedHideOffset: $accumulatedHideOffset, '
       'isScrolledUnder: $isScrolledUnder, '
       'level: $level)';
 }
