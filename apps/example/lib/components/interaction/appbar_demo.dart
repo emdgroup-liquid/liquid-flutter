@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-/// A comprehensive demo showcasing [LdAppBar] features and capabilities.
+/// A comprehensive demo showcasing [LdAppBarWidget] features and capabilities.
 ///
 /// This demo allows you to interactively explore:
 ///
@@ -20,7 +20,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 /// they automatically move to an overflow menu accessible via an ellipsis button.
 ///
 /// See also:
-/// - [LdAppBar] for the app bar widget being demonstrated
+/// - [LdAppBarWidget] for the app bar widget being demonstrated
 /// - [LdAppBarAction] for action buttons that adapt to overflow menus
 class AppBarDemo extends StatefulWidget {
   const AppBarDemo({super.key});
@@ -80,14 +80,14 @@ class _AppBarDemoState extends State<AppBarDemo> {
         },
         getSuggestions: (query) async {
           // Mock suggestions for primary
-          return ['Primary Suggestion 1', 'Primary Suggestion 2', 'Primary Suggestion 3']
-              .where((s) => s.toLowerCase().contains(query.toLowerCase()))
-              .toList();
+          return [
+            'Primary Suggestion 1',
+            'Primary Suggestion 2',
+            'Primary Suggestion 3',
+          ].where((s) => s.toLowerCase().contains(query.toLowerCase())).toList();
         },
         buildSuggestion: (context, suggestion) {
-          return LdListItem(
-            title: Text(suggestion.toString()),
-          );
+          return LdListItem(title: Text(suggestion.toString()));
         },
       );
     } else {
@@ -102,14 +102,14 @@ class _AppBarDemoState extends State<AppBarDemo> {
         onSearch: (query) {},
         getSuggestions: (query) async {
           // Mock suggestions for secondary
-          return ['Secondary Suggestion 1', 'Secondary Suggestion 2', 'Secondary Suggestion 3']
-              .where((s) => s.toLowerCase().contains(query.toLowerCase()))
-              .toList();
+          return [
+            'Secondary Suggestion 1',
+            'Secondary Suggestion 2',
+            'Secondary Suggestion 3',
+          ].where((s) => s.toLowerCase().contains(query.toLowerCase())).toList();
         },
         buildSuggestion: (context, suggestion) {
-          return LdListItem(
-            title: Text(suggestion.toString()),
-          );
+          return LdListItem(title: Text(suggestion.toString()));
         },
       );
     } else {
@@ -124,320 +124,320 @@ class _AppBarDemoState extends State<AppBarDemo> {
   /// overflow into a menu. The primary app bar uses all actions, while
   /// the secondary app bar uses only the first 3 to show a less crowded example.
   List<Widget> get _actions => [
-        LdAppBarAction(
-          leading: const Icon(LucideIcons.settings),
-          onPressed: () {
-            // Show settings dialog
-          },
-          child: const Text('Settings'),
-        ),
-        LdContextMenu(
-            builder: (context, isShuttle, open, isOpen, child) => LdAppBarAction(
-                  leading: const Icon(LucideIcons.expand),
-                  onPressed: () {
-                    open();
-                  },
-                  child: const Text('Options'),
-                ),
-            menuBuilder: (context) => Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    LdListItem(
-                      width: 200,
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        // Action 1
-                      },
-                      title: LdText.p('Action 1'),
-                    ),
-                    LdListItem(
-                      width: 200,
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        // Action 2
-                      },
-                      title: LdText.p('Action 2'),
-                    ),
-                    LdListItem(
-                      width: 200,
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        // Action 3
-                      },
-                      title: LdText.p('Action 3'),
-                    ),
-                  ],
-                )),
-        LdAppBarAction(
-          leading: const Icon(LucideIcons.bell),
-          onPressed: () {
-            // This will show notification
-            Future.delayed(const Duration(seconds: 1));
-          },
-          child: const Text('Notification'),
-        ),
-        LdAppBarAction(
-          leading: const Icon(LucideIcons.trash2),
-          onPressed: () {
-            // This will show notification
-            Future.delayed(const Duration(seconds: 1));
-          },
-          child: const Text('Delete'),
-        ),
-      ];
+    LdAppBarAction(
+      leading: const Icon(LucideIcons.settings),
+      onPressed: () {
+        // Show settings dialog
+      },
+      child: const Text('Settings'),
+    ),
+    LdContextMenu(
+      builder: (context, isShuttle, open, isOpen, child) => LdAppBarAction(
+        leading: const Icon(LucideIcons.expand),
+        onPressed: () {
+          open();
+        },
+        child: const Text('Options'),
+      ),
+      menuBuilder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          LdListItem(
+            width: 200,
+            onPressed: () {
+              Navigator.of(context).pop();
+              // Action 1
+            },
+            title: LdText.p('Action 1'),
+          ),
+          LdListItem(
+            width: 200,
+            onPressed: () {
+              Navigator.of(context).pop();
+              // Action 2
+            },
+            title: LdText.p('Action 2'),
+          ),
+          LdListItem(
+            width: 200,
+            onPressed: () {
+              Navigator.of(context).pop();
+              // Action 3
+            },
+            title: LdText.p('Action 3'),
+          ),
+        ],
+      ),
+    ),
+    LdAppBarAction(
+      leading: const Icon(LucideIcons.bell),
+      onPressed: () {
+        // This will show notification
+        Future.delayed(const Duration(seconds: 1));
+      },
+      child: const Text('Notification'),
+    ),
+    LdAppBarAction(
+      leading: const Icon(LucideIcons.trash2),
+      onPressed: () {
+        // This will show notification
+        Future.delayed(const Duration(seconds: 1));
+      },
+      child: const Text('Delete'),
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
     // Build the innermost body content
     final scaffoldContent = LdScaffoldBody(
-        children: [
-          LdText.h('LdAppBar Demo'),
-          LdButton.vague(
-              child: Text("Leave demo"),
-              onPressed: () {
-                context.go('/');
-              }),
-          LdAutoSpace(
-            children: [
-              LdText.p(
-                'This demo shows how to add one or more LdAppBars to an LdScaffold using the appBars parameter.',
-              ),
-              LdText.p(
-                'Use LdAppBar.top or LdAppBar.bottom to pin an app bar to the top or bottom. When multiple app bars share the same position, the order property controls their stacking.',
-              ),
-              LdText.p(
-                'The combined height of all app bars is applied to MediaQuery padding so the body content is never hidden behind them.',
-              ),
-              LdText.p(
-                'Actions that do not fit on the bar automatically overflow into a context menu. In the bar, actions are rendered as buttons; in the overflow menu they are rendered as list items (via LdAppBarAction).',
-              ),
-            ],
-          ),
-          LdDivider(),
+      children: [
+        LdText.h('LdAppBar Demo'),
+        LdButton.vague(
+          child: Text("Leave demo"),
+          onPressed: () {
+            context.go('/');
+          },
+        ),
+        LdAutoSpace(
+          children: [
+            LdText.p('This demo shows how to add one or more LdAppBars to an LdScaffold using the appBars parameter.'),
+            LdText.p(
+              'Use LdAppBar.top or LdAppBar.bottom to pin an app bar to the top or bottom. When multiple app bars share the same position, the order property controls their stacking.',
+            ),
+            LdText.p(
+              'The combined height of all app bars is applied to MediaQuery padding so the body content is never hidden behind them.',
+            ),
+            LdText.p(
+              'Actions that do not fit on the bar automatically overflow into a context menu. In the bar, actions are rendered as buttons; in the overflow menu they are rendered as list items (via LdAppBarAction).',
+            ),
+          ],
+        ),
+        LdDivider(),
 
-          LdAutoSpace(
-            children: [
-              // Primary AppBar Controls
-              // These controls allow you to toggle the primary app bar and configure
-              // its position, scroll behavior, and search functionality.
-              Row(
-                children: [
-                  Expanded(
-                    child: LdAutoSpace(
-                      children: [
-                        LdText.caption('Primary AppBar'),
-                        LdCard(
-                          child: LdAutoSpace(
-                            children: [
-                              LdToggle(
-                                label: 'Enable Search',
-                                checked: _hasPrimarySearchConfig,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _hasPrimarySearchConfig = value;
-                                    _updatePrimarySearchConfig();
-                                  });
-                                },
-                              ),
-                              LdSwitch<LdAppBarPositionMode>(
-                                // Position of the primary app bar in the scaffold.
-                                label: 'Position (LdAppBarPositionMode)',
-                                value: _primaryAppBarPositionMode,
-                                onChanged: (value) => setState(() => _primaryAppBarPositionMode = value),
-                                children: {
-                                  LdAppBarPositionMode.top: const Text('.top'),
-                                  LdAppBarPositionMode.bottom: const Text('.bottom'),
-                                  LdAppBarPositionMode.adaptive: const Text('.adaptive'),
-                                },
-                              ),
-                              LdSwitch<LdAppBarScrollBehavior>(
-                                // How the primary app bar responds to scroll.
-                                label: 'Scroll Behavior (LdAppBarScrollBehavior)',
-                                value: _primaryScrollBehavior,
-                                onChanged: (value) => setState(() => _primaryScrollBehavior = value),
-                                children: {
-                                  LdAppBarScrollBehavior.static: const Text('.static'),
-                                  LdAppBarScrollBehavior.mobileOnly: const Text('.mobileOnly'),
-                                  LdAppBarScrollBehavior.always: const Text('.always'),
-                                },
-                              ),
-                            ],
-                          ),
+        LdAutoSpace(
+          children: [
+            // Primary AppBar Controls
+            // These controls allow you to toggle the primary app bar and configure
+            // its position, scroll behavior, and search functionality.
+            Row(
+              children: [
+                Expanded(
+                  child: LdAutoSpace(
+                    children: [
+                      LdText.caption('Primary AppBar'),
+                      LdCard(
+                        child: LdAutoSpace(
+                          children: [
+                            LdToggle(
+                              label: 'Enable Search',
+                              checked: _hasPrimarySearchConfig,
+                              onChanged: (value) {
+                                setState(() {
+                                  _hasPrimarySearchConfig = value;
+                                  _updatePrimarySearchConfig();
+                                });
+                              },
+                            ),
+                            LdSwitch<LdAppBarPositionMode>(
+                              // Position of the primary app bar in the scaffold.
+                              label: 'Position (LdAppBarPositionMode)',
+                              value: _primaryAppBarPositionMode,
+                              onChanged: (value) => setState(() => _primaryAppBarPositionMode = value),
+                              children: {
+                                LdAppBarPositionMode.top: const Text('.top'),
+                                LdAppBarPositionMode.bottom: const Text('.bottom'),
+                                LdAppBarPositionMode.adaptive: const Text('.adaptive'),
+                              },
+                            ),
+                            LdSwitch<LdAppBarScrollBehavior>(
+                              // How the primary app bar responds to scroll.
+                              label: 'Scroll Behavior (LdAppBarScrollBehavior)',
+                              value: _primaryScrollBehavior,
+                              onChanged: (value) => setState(() => _primaryScrollBehavior = value),
+                              children: {
+                                LdAppBarScrollBehavior.static: const Text('.static'),
+                                LdAppBarScrollBehavior.mobileOnly: const Text('.mobileOnly'),
+                                LdAppBarScrollBehavior.always: const Text('.always'),
+                              },
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  Expanded(
-                    child: LdAutoSpace(
-                      children: [
-                        LdText.caption('Secondary AppBar'),
-                        LdCard(
-                          child: LdAutoSpace(
-                            children: [
-                              LdToggle(
-                                label: 'Enable Search',
-                                checked: _hasSecondarySearchConfig,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _hasSecondarySearchConfig = value;
-                                    _updateSecondarySearchConfig();
-                                  });
-                                },
-                              ),
-                              LdSwitch<LdAppBarPositionMode>(
-                                // Position of the secondary app bar.
-                                label: 'Position (LdAppBarPositionMode)',
-                                value: _secondaryAppBarPositionMode,
-                                onChanged: (value) => setState(() => _secondaryAppBarPositionMode = value),
-                                children: {
-                                  LdAppBarPositionMode.top: const Text('.top'),
-                                  LdAppBarPositionMode.bottom: const Text('.bottom'),
-                                  LdAppBarPositionMode.adaptive: const Text('.adaptive'),
-                                },
-                              ),
-                              LdSwitch<LdAppBarScrollBehavior>(
-                                // How the secondary app bar responds to scroll.
-                                label: 'Scroll Behavior (LdAppBarScrollBehavior)',
-                                value: _secondaryScrollBehavior,
-                                onChanged: (value) => setState(() => _secondaryScrollBehavior = value),
-                                children: {
-                                  LdAppBarScrollBehavior.static: const Text('.static'),
-                                  LdAppBarScrollBehavior.mobileOnly: const Text('.mobileOnly'),
-                                  LdAppBarScrollBehavior.always: const Text('.always'),
-                                },
-                              ),
-                            ],
-                          ),
+                ),
+                Expanded(
+                  child: LdAutoSpace(
+                    children: [
+                      LdText.caption('Secondary AppBar'),
+                      LdCard(
+                        child: LdAutoSpace(
+                          children: [
+                            LdToggle(
+                              label: 'Enable Search',
+                              checked: _hasSecondarySearchConfig,
+                              onChanged: (value) {
+                                setState(() {
+                                  _hasSecondarySearchConfig = value;
+                                  _updateSecondarySearchConfig();
+                                });
+                              },
+                            ),
+                            LdSwitch<LdAppBarPositionMode>(
+                              // Position of the secondary app bar.
+                              label: 'Position (LdAppBarPositionMode)',
+                              value: _secondaryAppBarPositionMode,
+                              onChanged: (value) => setState(() => _secondaryAppBarPositionMode = value),
+                              children: {
+                                LdAppBarPositionMode.top: const Text('.top'),
+                                LdAppBarPositionMode.bottom: const Text('.bottom'),
+                                LdAppBarPositionMode.adaptive: const Text('.adaptive'),
+                              },
+                            ),
+                            LdSwitch<LdAppBarScrollBehavior>(
+                              // How the secondary app bar responds to scroll.
+                              label: 'Scroll Behavior (LdAppBarScrollBehavior)',
+                              value: _secondaryScrollBehavior,
+                              onChanged: (value) => setState(() => _secondaryScrollBehavior = value),
+                              children: {
+                                LdAppBarScrollBehavior.static: const Text('.static'),
+                                LdAppBarScrollBehavior.mobileOnly: const Text('.mobileOnly'),
+                                LdAppBarScrollBehavior.always: const Text('.always'),
+                              },
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ).spaceM(),
+
+            LdText.caption('Visual Appearance (Applied to Both AppBars)'),
+            LdText.p(
+              'Tune how both app bars look: shadow controls elevation, border controls separators, background controls how much of the surface color is visible, and attached mode controls whether the app bar is attached to the scaffold or floating.',
+            ),
+
+            LdCard(
+              child: LdAutoSpace(
+                children: [
+                  LdSwitch<LdAppBarAttachedMode>(
+                    value: _attachedMode,
+                    label: 'Attached Mode (LdAppBarAttachedMode)',
+                    onChanged: (value) => setState(() => _attachedMode = value),
+                    children: {
+                      LdAppBarAttachedMode.attached: const Text('.attached'),
+                      LdAppBarAttachedMode.adaptive: const Text('.adaptive'),
+                      LdAppBarAttachedMode.floating: const Text('.floating'),
+                    },
+                  ),
+                  LdSwitch<LdAppBarShadowMode>(
+                    label: 'Shadow Mode (LdAppBarShadowMode)',
+                    value: _shadowMode,
+                    onChanged: (value) => setState(() => _shadowMode = value),
+                    children: {
+                      LdAppBarShadowMode.visible: const Text('.visible'),
+                      LdAppBarShadowMode.whenScrolled: const Text('.whenScrolled'),
+                      LdAppBarShadowMode.hidden: const Text('.hidden'),
+                      LdAppBarShadowMode.adaptive: const Text('.adaptive'),
+                    },
+                  ),
+                  LdSwitch<LdAppBarBorderMode>(
+                    value: _borderMode,
+                    label: 'Border Mode (LdAppBarBorderMode)',
+                    onChanged: (value) => setState(() => _borderMode = value),
+                    children: {
+                      LdAppBarBorderMode.visible: const Text('.visible'),
+                      LdAppBarBorderMode.whenScrolled: const Text('.whenScrolled'),
+                      LdAppBarBorderMode.hidden: const Text('.hidden'),
+                      LdAppBarBorderMode.adaptive: const Text('.adaptive'),
+                    },
+                  ),
+                  LdSwitch<LdAppBarBackgroundMode>(
+                    value: _backgroundMode,
+                    label: 'Background Mode (LdAppBarBackgroundMode)',
+                    onChanged: (value) => setState(() => _backgroundMode = value),
+                    children: {
+                      LdAppBarBackgroundMode.visible: const Text('.visible'),
+                      LdAppBarBackgroundMode.whenScrolled: const Text('.whenScrolled'),
+                      LdAppBarBackgroundMode.hidden: const Text('.hidden'),
+                      LdAppBarBackgroundMode.adaptive: const Text('.adaptive'),
+                    },
                   ),
                 ],
-              ).spaceM(),
-
-              LdText.caption('Visual Appearance (Applied to Both AppBars)'),
-              LdText.p(
-                'Tune how both app bars look: shadow controls elevation, border controls separators, background controls how much of the surface color is visible, and attached mode controls whether the app bar is attached to the scaffold or floating.',
               ),
+            ),
 
-              LdCard(
-                child: LdAutoSpace(
-                  children: [
-                    LdSwitch<LdAppBarAttachedMode>(
-                      value: _attachedMode,
-                      label: 'Attached Mode (LdAppBarAttachedMode)',
-                      onChanged: (value) => setState(() => _attachedMode = value),
-                      children: {
-                        LdAppBarAttachedMode.attached: const Text('.attached'),
-                        LdAppBarAttachedMode.adaptive: const Text('.adaptive'),
-                        LdAppBarAttachedMode.floating: const Text('.floating'),
-                      },
-                    ),
-                    LdSwitch<LdAppBarShadowMode>(
-                      label: 'Shadow Mode (LdAppBarShadowMode)',
-                      value: _shadowMode,
-                      onChanged: (value) => setState(() => _shadowMode = value),
-                      children: {
-                        LdAppBarShadowMode.visible: const Text('.visible'),
-                        LdAppBarShadowMode.whenScrolled: const Text('.whenScrolled'),
-                        LdAppBarShadowMode.hidden: const Text('.hidden'),
-                        LdAppBarShadowMode.adaptive: const Text('.adaptive'),
-                      },
-                    ),
-                    LdSwitch<LdAppBarBorderMode>(
-                      value: _borderMode,
-                      label: 'Border Mode (LdAppBarBorderMode)',
-                      onChanged: (value) => setState(() => _borderMode = value),
-                      children: {
-                        LdAppBarBorderMode.visible: const Text('.visible'),
-                        LdAppBarBorderMode.whenScrolled: const Text('.whenScrolled'),
-                        LdAppBarBorderMode.hidden: const Text('.hidden'),
-                        LdAppBarBorderMode.adaptive: const Text('.adaptive'),
-                      },
-                    ),
-                    LdSwitch<LdAppBarBackgroundMode>(
-                      value: _backgroundMode,
-                      label: 'Background Mode (LdAppBarBackgroundMode)',
-                      onChanged: (value) => setState(() => _backgroundMode = value),
-                      children: {
-                        LdAppBarBackgroundMode.visible: const Text('.visible'),
-                        LdAppBarBackgroundMode.whenScrolled: const Text('.whenScrolled'),
-                        LdAppBarBackgroundMode.hidden: const Text('.hidden'),
-                        LdAppBarBackgroundMode.adaptive: const Text('.adaptive'),
-                      },
-                    ),
-                  ],
-                ),
+            LdDivider(),
+
+            LdText.caption('Tab Navigation'),
+            LdText.p(
+              'Tab navigation provides a bottom navigation bar that can be positioned at the top or bottom of the scaffold. It integrates with the app bar registry system and supports various attached modes and scroll behaviors.',
+            ),
+
+            LdCard(
+              child: LdAutoSpace(
+                children: [
+                  LdToggle(
+                    label: 'Show Tab Navigation',
+                    checked: _showTabNavigation,
+                    onChanged: (value) => setState(() => _showTabNavigation = value),
+                  ),
+                  LdSwitch<LdAppBarAttachedMode>(
+                    value: _tabAttachedMode,
+                    label: 'Attached Mode (LdAppBarAttachedMode)',
+                    onChanged: (value) => setState(() => _tabAttachedMode = value),
+                    children: {
+                      LdAppBarAttachedMode.attached: const Text('.attached'),
+                      LdAppBarAttachedMode.adaptive: const Text('.adaptive'),
+                      LdAppBarAttachedMode.floating: const Text('.floating'),
+                    },
+                  ),
+                  LdSwitch<LdAppBarBackgroundMode>(
+                    value: _tabBackgroundMode,
+                    label: 'Background Mode (LdAppBarBackgroundMode)',
+                    onChanged: (value) => setState(() => _tabBackgroundMode = value),
+                    children: {
+                      LdAppBarBackgroundMode.visible: const Text('.visible'),
+                      LdAppBarBackgroundMode.whenScrolled: const Text('.whenScrolled'),
+                      LdAppBarBackgroundMode.hidden: const Text('.hidden'),
+                      LdAppBarBackgroundMode.adaptive: const Text('.adaptive'),
+                    },
+                  ),
+                  LdSwitch<LdAppBarPositionMode>(
+                    value: _tabPosition,
+                    label: 'Position (LdAppBarPositionMode)',
+                    onChanged: (value) => setState(() => _tabPosition = value),
+                    children: {
+                      LdAppBarPositionMode.top: const Text('.top'),
+                      LdAppBarPositionMode.bottom: const Text('.bottom'),
+                      LdAppBarPositionMode.adaptive: const Text('.adaptive'),
+                    },
+                  ),
+                  LdSwitch<LdAppBarScrollBehavior>(
+                    value: _tabScrollBehavior,
+                    label: 'Scroll Behavior (LdAppBarScrollBehavior)',
+                    onChanged: (value) => setState(() => _tabScrollBehavior = value),
+                    children: {
+                      LdAppBarScrollBehavior.static: const Text('.static'),
+                      LdAppBarScrollBehavior.mobileOnly: const Text('.mobileOnly'),
+                      LdAppBarScrollBehavior.always: const Text('.always'),
+                    },
+                  ),
+                ],
               ),
+            ),
+          ],
+        ),
 
-              LdDivider(),
-
-              LdText.caption('Tab Navigation'),
-              LdText.p(
-                'Tab navigation provides a bottom navigation bar that can be positioned at the top or bottom of the scaffold. It integrates with the app bar registry system and supports various attached modes and scroll behaviors.',
-              ),
-
-              LdCard(
-                child: LdAutoSpace(
-                  children: [
-                    LdToggle(
-                      label: 'Show Tab Navigation',
-                      checked: _showTabNavigation,
-                      onChanged: (value) => setState(() => _showTabNavigation = value),
-                    ),
-                    LdSwitch<LdAppBarAttachedMode>(
-                      value: _tabAttachedMode,
-                      label: 'Attached Mode (LdAppBarAttachedMode)',
-                      onChanged: (value) => setState(() => _tabAttachedMode = value),
-                      children: {
-                        LdAppBarAttachedMode.attached: const Text('.attached'),
-                        LdAppBarAttachedMode.adaptive: const Text('.adaptive'),
-                        LdAppBarAttachedMode.floating: const Text('.floating'),
-                      },
-                    ),
-                    LdSwitch<LdAppBarBackgroundMode>(
-                      value: _tabBackgroundMode,
-                      label: 'Background Mode (LdAppBarBackgroundMode)',
-                      onChanged: (value) => setState(() => _tabBackgroundMode = value),
-                      children: {
-                        LdAppBarBackgroundMode.visible: const Text('.visible'),
-                        LdAppBarBackgroundMode.whenScrolled: const Text('.whenScrolled'),
-                        LdAppBarBackgroundMode.hidden: const Text('.hidden'),
-                        LdAppBarBackgroundMode.adaptive: const Text('.adaptive'),
-                      },
-                    ),
-                    LdSwitch<LdAppBarPositionMode>(
-                      value: _tabPosition,
-                      label: 'Position (LdAppBarPositionMode)',
-                      onChanged: (value) => setState(() => _tabPosition = value),
-                      children: {
-                        LdAppBarPositionMode.top: const Text('.top'),
-                        LdAppBarPositionMode.bottom: const Text('.bottom'),
-                        LdAppBarPositionMode.adaptive: const Text('.adaptive'),
-                      },
-                    ),
-                    LdSwitch<LdAppBarScrollBehavior>(
-                      value: _tabScrollBehavior,
-                      label: 'Scroll Behavior (LdAppBarScrollBehavior)',
-                      onChanged: (value) => setState(() => _tabScrollBehavior = value),
-                      children: {
-                        LdAppBarScrollBehavior.static: const Text('.static'),
-                        LdAppBarScrollBehavior.mobileOnly: const Text('.mobileOnly'),
-                        LdAppBarScrollBehavior.always: const Text('.always'),
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          // Scrollable content to demonstrate scroll behaviors
-          // Scroll this content to see how different scroll behaviors affect the app bar's
-          // appearance (e.g., shadow and border appearing when scrolled).
-          SizedBox(height: 1000, child: LdText.p('Scrollable Content')),
-        ],
-      );
+        // Scrollable content to demonstrate scroll behaviors
+        // Scroll this content to see how different scroll behaviors affect the app bar's
+        // appearance (e.g., shadow and border appearing when scrolled).
+        SizedBox(height: 1000, child: LdText.p('Scrollable Content')),
+      ],
+    );
 
     // Wrap with optional tab navigation
     final Widget bodyWithTab = _showTabNavigation
@@ -445,26 +445,10 @@ class _AppBarDemoState extends State<AppBarDemo> {
             activeRoute: _activeTabRoute,
             onTabPressed: (route) => setState(() => _activeTabRoute = route),
             tabs: const [
-              LdNavigationTab(
-                label: 'Home',
-                icon: Icon(LucideIcons.house),
-                route: '/home',
-              ),
-              LdNavigationTab(
-                label: 'Search',
-                icon: Icon(LucideIcons.search),
-                route: '/search',
-              ),
-              LdNavigationTab(
-                label: 'Settings',
-                icon: Icon(LucideIcons.settings),
-                route: '/settings',
-              ),
-              LdNavigationTab(
-                label: 'Profile',
-                icon: Icon(LucideIcons.user),
-                route: '/profile',
-              ),
+              LdNavigationTab(label: 'Home', icon: Icon(LucideIcons.house), route: '/home'),
+              LdNavigationTab(label: 'Search', icon: Icon(LucideIcons.search), route: '/search'),
+              LdNavigationTab(label: 'Settings', icon: Icon(LucideIcons.settings), route: '/settings'),
+              LdNavigationTab(label: 'Profile', icon: Icon(LucideIcons.user), route: '/profile'),
             ],
             attachedMode: _tabAttachedMode,
             backgroundMode: _tabBackgroundMode,
@@ -475,7 +459,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
         : scaffoldContent;
 
     // Secondary app bar wraps the tab nav + body
-    final Widget bodyWithSecondary = LdAppBar(
+    final Widget bodyWithSecondary = LdAppBarWidget(
       positionMode: _secondaryAppBarPositionMode,
       scrollBehavior: _secondaryScrollBehavior,
       title: LdText.l('Secondary AppBar'),
@@ -489,7 +473,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
     );
 
     // Primary app bar wraps secondary + body
-    final Widget bodyWithPrimary = LdAppBar(
+    final Widget bodyWithPrimary = LdAppBarWidget(
       positionMode: _primaryAppBarPositionMode,
       scrollBehavior: _primaryScrollBehavior,
       title: LdText.l('Primary AppBar'),
@@ -504,10 +488,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
 
     return LdScaffold(
       drawer: LdScaffold(
-        body: LdAppBar(
-          title: LdText.l('Drawer'),
-          child: LdText.p('Drawer'),
-        ),
+        body: LdAppBarWidget(title: LdText.l('Drawer'), child: LdText.p('Drawer')),
       ),
       primaryScrollController: _scrollController,
       body: bodyWithPrimary,

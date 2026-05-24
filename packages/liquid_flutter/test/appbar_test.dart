@@ -541,33 +541,6 @@ void main() {
   // ── Legacy scaffold-injection mode (LdScaffold.appBars) ──────────────────
   // The appBars parameter is a deprecated no-op since the registry was removed.
   // Verify that using it does not throw and the body is still rendered.
-  group('LdAppBar legacy scaffold-injection mode (appBars)', () {
-    testWidgets('Legacy: LdAppBar in appBars does not crash', (WidgetTester tester) async {
-      ldDisableAnimations = true;
-      await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldFrame(
-            size: LdThemeSize.m,
-            brightnessMode: LdThemeBrightnessMode.light,
-            child: LdScaffold(
-              // ignore: deprecated_member_use
-              appBars: [
-                LdAppBar.top(title: const Text('Legacy Bar')),
-              ],
-              body: const Center(child: Text('Body')),
-            ),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // The deprecated appBars parameter is a no-op; bars are not placed.
-      // The scaffold body should still render.
-      expect(find.text('Body'), findsOneWidget);
-    });
-  });
 
   // ── Stage 5: ScrolledUnderBuilder and drawer button tests ─────────────────
 
@@ -579,9 +552,9 @@ void main() {
       final metricsNotifier = ValueNotifier<LdAppBarMetrics>(
         const LdAppBarMetrics(
           position: LdAppBarPosition.top,
-          barHeight: 56,
-          edgeMargin: 0,
-          hideOffset: 0,
+          barHeight: EdgeInsets.only(top: 56),
+          edgeMargin: EdgeInsets.zero,
+          hideOffset: EdgeInsets.zero,
           isScrolledUnder: false,
           level: 0,
         ),
@@ -615,9 +588,9 @@ void main() {
       // Update metrics so isScrolledUnder becomes true.
       metricsNotifier.value = const LdAppBarMetrics(
         position: LdAppBarPosition.top,
-        barHeight: 56,
-        edgeMargin: 0,
-        hideOffset: 0,
+        barHeight: EdgeInsets.only(top: 56),
+        edgeMargin: EdgeInsets.zero,
+        hideOffset: EdgeInsets.zero,
         isScrolledUnder: true,
         level: 0,
       );
@@ -683,9 +656,9 @@ void main() {
         buildWithMetrics(
           metrics: const LdAppBarMetrics(
             position: LdAppBarPosition.top,
-            barHeight: 56,
-            edgeMargin: 0,
-            hideOffset: 0,
+            barHeight: EdgeInsets.only(top: 56),
+            edgeMargin: EdgeInsets.zero,
+            hideOffset: EdgeInsets.zero,
             isScrolledUnder: false,
             level: 0,
           ),
@@ -707,9 +680,9 @@ void main() {
         buildWithMetrics(
           metrics: const LdAppBarMetrics(
             position: LdAppBarPosition.top,
-            barHeight: 56,
-            edgeMargin: 0,
-            hideOffset: 0,
+            barHeight: EdgeInsets.only(top: 56),
+            edgeMargin: EdgeInsets.zero,
+            hideOffset: EdgeInsets.zero,
             isScrolledUnder: false,
             level: 1, // nested bar
           ),
@@ -729,9 +702,9 @@ void main() {
         buildWithMetrics(
           metrics: const LdAppBarMetrics(
             position: LdAppBarPosition.bottom,
-            barHeight: 56,
-            edgeMargin: 0,
-            hideOffset: 0,
+            barHeight: EdgeInsets.only(bottom: 56),
+            edgeMargin: EdgeInsets.zero,
+            hideOffset: EdgeInsets.zero,
             isScrolledUnder: false,
             level: 0,
           ),

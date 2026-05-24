@@ -48,7 +48,7 @@ class LdInput extends StatefulWidget {
     this.autofocus = false,
     this.showClear = false,
     this.size = LdSize.m,
-    this.allowTapOutside = true,
+    this.allowTapOutside = false,
     this.onBlurred,
     this.valid = true,
     this.loading = false,

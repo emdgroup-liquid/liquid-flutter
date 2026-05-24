@@ -13,21 +13,21 @@ class WindowsWindowControls extends StatelessWidget {
           size: LdSize.s,
           child: const Icon(LucideIcons.minus),
           onPressed: () {
-            LdAppBar.callbacks?.onMinimize?.call();
+            LdAppBarWidget.callbacks?.onMinimize?.call();
           },
         ),
         LdButton.vague(
           size: LdSize.s,
           child: const Icon(LucideIcons.square),
           onPressed: () {
-            LdAppBar.callbacks?.onMaximize?.call();
+            LdAppBarWidget.callbacks?.onMaximize?.call();
           },
         ),
         LdButton.vague(
           size: LdSize.s,
           child: const Icon(LucideIcons.x),
           onPressed: () {
-            LdAppBar.callbacks?.onClose?.call();
+            LdAppBarWidget.callbacks?.onClose?.call();
           },
         ),
       ],

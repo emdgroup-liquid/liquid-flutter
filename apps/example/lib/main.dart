@@ -23,7 +23,7 @@ void main() async {
   await Highlighter.initialize(['dart', 'yaml', 'sql']);
 
   // Window callbacks for macOS
-  LdAppBar.callbacks = LdWindowCallbacks(
+  LdAppBarWidget.callbacks = LdWindowCallbacks(
     onClose: () {
       LiquidFlutterWindowUtils.instance.closeWindow();
     },
