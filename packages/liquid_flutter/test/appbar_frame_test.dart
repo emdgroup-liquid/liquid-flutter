@@ -409,9 +409,9 @@ void main() {
       await fakeScroll(tester, startOffset: 300, endOffset: 300 + barH * 4);
       await tester.pumpAndSettle();
 
-      // The bar should have moved upward by barH (fully hidden).
+      // The bar should have moved upward by barH+1 (fully hidden + 1px border bleed).
       final barTopAfter = tester.getTopLeft(find.text('Bar')).dy;
-      expect(barTopAfter, closeTo(barTopBefore - barH, 1.0));
+      expect(barTopAfter, closeTo(barTopBefore - (barH + 1), 1.0));
     });
 
     // -----------------------------------------------------------------------

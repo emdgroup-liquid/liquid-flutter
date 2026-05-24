@@ -225,11 +225,14 @@ class _AppBarFrameState extends State<AppBarFrame> {
     }
 
     if (notification is ScrollEndNotification) {
+      // Snap target is barHeight + 1 so the bar travels 1 extra pixel off-screen,
+      // ensuring any bottom border/shadow is fully clipped and not visible.
+      final double fullyHiddenTarget = _barHeight + 1;
       final double target;
       if (scrollOffset < 100) {
         target = 0.0;
       } else if (_hideOffset >= _barHeight * 0.5) {
-        target = _barHeight;
+        target = fullyHiddenTarget;
       } else {
         target = 0.0;
       }
@@ -249,7 +252,9 @@ class _AppBarFrameState extends State<AppBarFrame> {
       final isScrollingDown = scrollDelta > 0 && scrollOffset > 100;
       final isScrollingUp = scrollDelta < 0;
 
-      final maxOffset = _barHeight;
+      // +1 so the scroll drag can also reach the fully-hidden+1 position,
+      // consistent with the snap target above.
+      final maxOffset = _barHeight + 1;
 
       double newHideOffset;
       if (isScrollingDown) {
@@ -407,7 +412,11 @@ class _AppBarFrameState extends State<AppBarFrame> {
             overriden: _snapOverriding,
             builder: (springContext, springState, child) {
               _springLivePosition = springState.position;
-              final animatedHideOffset = springState.position;
+              // Clamp so the spring can neither pull the bar below its resting
+              // position (negative = detaches from edge) nor push it past
+              // barHeight+1 (the fully-hidden-plus-border-bleed target).
+              final animatedHideOffset =
+                  springState.position.clamp(0.0, _barHeight + 1);
 
               // The cumulative hide offset for children of this bar:
               // = parent's accumulatedHideOffset + this bar's own hideOffset.
