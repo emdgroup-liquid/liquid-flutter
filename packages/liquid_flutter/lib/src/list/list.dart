@@ -495,7 +495,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
       return widget.emptyBuilder!(context, _onRefresh);
     }
 
-    return LdListEmpty(onRefresh: _onRefresh);
+    return LdListEmpty(onRefresh: () => _onRefresh(context));
   }
 
   /// Builds a loader to indicate that an item is being loaded.

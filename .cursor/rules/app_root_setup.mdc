@@ -21,7 +21,7 @@ void main() async {
   GoRouter.optionURLReflectsImperativeAPIs = true;
 
   // 3. Set up window callbacks for desktop platforms
-  LdAppBar.callbacks = LdWindowCallbacks(
+  LdAppBarWidget.callbacks = LdWindowCallbacks(
     onClose: () => LiquidFlutterWindowUtils.instance.closeWindow(),
     onMinimize: () => LiquidFlutterWindowUtils.instance.minimizeWindow(),
     onMaximize: () => LiquidFlutterWindowUtils.instance.maximizeWindow(),
@@ -121,7 +121,7 @@ class AppRouter {
 
 - **Always use `MaterialApp.router`** with `routerConfig` for navigation
 - **Always pass `screenRadiusStream`** to `LdThemeProvider` for desktop window radius support
-- **Always set `LdAppBar.callbacks`** in `main()` before `runApp()` for desktop window controls
+- **Always set `LdAppBarWidget.callbacks`** in `main()` before `runApp()` for desktop window controls
 - **Always listen to `windowReadyStream`** and call `configureWindow()` when ready
 - **Use `Provider`** to provide the router instance, not a singleton
 - **Use `context.read<AppRouter>()`** inside `LdThemedAppBuilder` to access the router

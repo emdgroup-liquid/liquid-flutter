@@ -13,7 +13,7 @@ Cursor loads detailed rules from [`.cursor/rules/`](.cursor/rules/). This file i
 - **Layout**: Organize `lib/` by feature / widget tree (screen folders, colocated components), not by technical layers only.
 - **Services**: Stateless helpers may be global singletons; anything with mutable state belongs in the tree via `Provider` / `ChangeNotifier`. Do not store references to other services—resolve dependencies with `BuildContext` when you need them (e.g. `context.read<T>()` / `context.watch<T>()` in widgets and callbacks).
 - **Testing**: Favor widget tests for UI-coupled behavior; unit-test pure logic that does not depend on Flutter.
-- **Scaffold**: Use `LdScaffold` with `appBars: [LdAppBar(...)]` and `LdScaffoldBody` (use `addContainer: true` when you want standard page padding).
+- **Scaffold**: Use `LdScaffold` with `LdAppBar.top(child: LdScaffoldBody(...))` (use `addContainer: true` when you want standard page padding).
 - **Text**: Use `LdText` for standalone labels and body copy; plain `Text` is fine inside components that own the label (e.g. buttons).
 - **Spacing & layout**: Use `LdAutoSpace` in `Column`s unless you intentionally need tight stacking; use `LdTheme.of(context).pad(...)` or `.padS()` / `.padM()` / `.padL()` (and `ldSpacerS` / `ldSpacerM` / `ldSpacerL` when you need explicit gaps).
 - **Shape**: Use `LdTheme.of(context).radius(LdSize.*)` for corners.

@@ -8,45 +8,41 @@ This rule applies when working with error handling in `LdSubmit` widgets or asyn
 
 ## Error Handling
 
-`LdSubmit` automatically handles exceptions and displays them using `LdExceptionView`. Exceptions are mapped to user-friendly messages via `LdExceptionMapper`.
+`LdSubmit` automatically handles exceptions and displays them using `LdExceptionView`. User-facing text is produced when the `LdException` is localized via `LdExceptionLocalizer` (see [LdSubmit best practices](ldsubmit_best_practices.mdc)).
 
-**✅ Recommended: Throw regular exceptions and use LdExceptionMapper**
+**✅ Recommended: Throw typed exceptions and use `LdExceptionLocalizer`**
 
-The default mapper handles common exceptions (`SocketException`, `TimeoutException`, `FormatException`) automatically. For custom exceptions, provide a custom mapper:
+The default localizer handles common exceptions (`SocketException`, `TimeoutException`, `FormatException`) automatically. For custom exceptions, wrap the relevant subtree:
 
 ```dart
-// In your app root or feature widget
 Widget build(BuildContext context) {
-  // Capture localizations when creating the mapper
-  final localizations = LiquidLocalizations.of(context);
-  
-  return LdExceptionMapperProvider(
-    exceptionMapper: LdExceptionMapper(
-      localizations: localizations,
-      onException: (e, {stackTrace}) {
-        // Use captured localizations for custom exception types
-        if (e is NetworkException) {
-          return LdLocalizedException(
-            message: localizations.networkError,
-            moreInfo: localizations.moreInfo,
-          );
-        }
-        if (e is AuthenticationException) {
-          return LdLocalizedException(
-            message: localizations.errorOccurred,
-            moreInfo: localizations.moreInfo, // Use localized strings
-            canRetry: false,
-          );
-        }
-        // Return null to use default mapper
-        return null;
-      },
-    ),
+  return LdExceptionLocalizer(
+    onException: (context, e) {
+      final l10n = LiquidLocalizations.of(context);
+
+      if (e.exception is NetworkException) {
+        return LdLocalizedException(
+          message: l10n.networkError,
+          moreInfo: l10n.moreInfo,
+          exception: e.exception,
+          stackTrace: e.stackTrace,
+        );
+      }
+      if (e.exception is AuthenticationException) {
+        return LdLocalizedException(
+          message: l10n.errorOccurred,
+          moreInfo: l10n.moreInfo,
+          canRetry: false,
+          exception: e.exception,
+          stackTrace: e.stackTrace,
+        );
+      }
+      return null; // parent localizer or built-in defaults
+    },
     child: LdSubmit<User, void>(
       config: LdSubmitConfig<User, void>(
         action: (_) async {
-          // Just throw regular exceptions - mapper handles them
-          return await ApiService.instance.getUser();
+          throw const AuthenticationException(); // typed, not localized here
         },
       ),
       builder: LdSubmitInlineBuilder<User, void>(),
@@ -55,14 +51,16 @@ Widget build(BuildContext context) {
 }
 ```
 
-**❌ Not recommended: Throwing LdLocalizedException directly**
+Place `LdExceptionLocalizer` at the app or feature root when the same exception types appear in many places; co-locate with a single `LdSubmit` when the error is local to that form.
+
+**❌ Not recommended: Throwing `LdLocalizedException` from actions**
 
 ```dart
-// Don't do this - use LdExceptionMapper instead
+// Don't do this — use LdExceptionLocalizer instead
 throw LdLocalizedException(
   message: 'Network error',
   moreInfo: 'Please check your internet connection',
 );
 ```
 
-The mapper approach centralizes error handling, makes exceptions easier to test, and allows for consistent error messages across your app.
+Typed exceptions plus a localizer centralize copy, respect locale changes, and keep actions easy to test.

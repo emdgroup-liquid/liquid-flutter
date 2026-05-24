@@ -224,11 +224,7 @@ class TaskDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyDetailPage<Task, int>.scrollable(
-      primaryAppBar: LdMonkeyAppBar<Task, int>(
-        debugName: "Detail App Bar Task",
-        location: LdMonkeyActionLocation.detailAppBar,
-        title: Text("Task"),
-      ),
+      primaryAppBarConfig: LdAppBarConfig(debugName: "Detail App Bar Task", title: Text("Task")),
       buildDetail: (context, item) => TaskDetail(task: item),
     );
   }

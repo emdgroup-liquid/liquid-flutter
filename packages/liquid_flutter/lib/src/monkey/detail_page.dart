@@ -8,29 +8,41 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 /// items
 class LdMonkeyDetailPage<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
   final Widget body;
+  final LdAppBarConfig? secondaryAppBarConfig;
+  final LdAppBarConfig? primaryAppBarConfig;
 
   const LdMonkeyDetailPage({
     required this.body,
+    this.secondaryAppBarConfig,
+    this.primaryAppBarConfig,
     super.key,
   });
 
   factory LdMonkeyDetailPage.scrollable({
     required Widget Function(BuildContext context, LdPaginatorItem<T> item) buildDetail,
+    LdAppBarConfig? secondaryAppBarConfig,
+    LdAppBarConfig? primaryAppBarConfig,
   }) {
     return LdMonkeyDetailPage(
       body: LdMonkeyScrollableDetailView<T, IdType>(
         buildDetail: buildDetail,
       ),
+      secondaryAppBarConfig: secondaryAppBarConfig,
+      primaryAppBarConfig: primaryAppBarConfig,
     );
   }
 
   factory LdMonkeyDetailPage.stacked({
     required Widget Function(BuildContext context, LdPaginatorItem<T> item) buildDetail,
+    LdAppBarConfig? secondaryAppBarConfig,
+    LdAppBarConfig? primaryAppBarConfig,
   }) {
     return LdMonkeyDetailPage(
       body: LdMonkeyStackDetailView<T, IdType>(
         buildDetail: buildDetail,
       ),
+      secondaryAppBarConfig: secondaryAppBarConfig,
+      primaryAppBarConfig: primaryAppBarConfig,
     );
   }
 

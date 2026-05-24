@@ -398,7 +398,7 @@ void main() {
       await tester.pump(); // MeasureSize callback fires → barHeight is set
 
       expect(bodyMetrics, isNotNull);
-      final barH = bodyMetrics!.barHeight;
+      final barH = bodyMetrics!.barHeightForPosition;
       expect(barH, greaterThan(0)); // ensure bar is measured
 
       // Record the bar's initial top position.
@@ -628,7 +628,7 @@ void main() {
       await tester.pump(); // MeasureSize callback
 
       expect(bodyMetrics, isNotNull);
-      final barH = bodyMetrics!.barHeight;
+      final barH = bodyMetrics!.barHeightForPosition;
       expect(barH, greaterThan(0));
 
       // First scroll: fully hide the bar using a very large delta.
@@ -1088,7 +1088,7 @@ void main() {
 
       // The outer metrics hideOffset should equal barHeight (fully hidden).
       expect(outerMetrics, isNotNull);
-      expect(outerMetrics!.hideOffset, closeTo(outerMetrics!.barHeight, 1.0));
+      expect(outerMetrics!.hideOffsetForPosition, closeTo(outerMetrics!.barHeightForPosition, 1.0));
     });
   });
 
@@ -1369,7 +1369,7 @@ void main() {
       expect(capturedViewPadding, isNotNull);
       expect(capturedMetrics, isNotNull);
 
-      final barH = capturedMetrics!.barHeight;
+      final barH = capturedMetrics!.barHeightForPosition;
       expect(barH, greaterThan(0));
 
       // MediaQuery.padding is patched to the stable floor = barHeight.
@@ -1381,7 +1381,7 @@ void main() {
       expect(capturedViewPadding!.top, closeTo(topSafeArea, 0.5));
 
       // Bar starts fully visible → hideOffset = 0.
-      expect(capturedMetrics!.hideOffset, 0.0);
+      expect(capturedMetrics!.hideOffsetForPosition, 0.0);
     });
   });
 
@@ -1737,7 +1737,7 @@ void main() {
       expect(capturedPadding, isNotNull);
       expect(capturedMetrics, isNotNull);
       final paddingBeforeScroll = capturedPadding!;
-      final barH = capturedMetrics!.barHeight;
+      final barH = capturedMetrics!.barHeightForPosition;
       expect(barH, greaterThan(0));
 
       // Record bar's initial top position.

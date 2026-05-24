@@ -10,6 +10,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
+part 'appbar.variants.g.dart';
+
 enum LdAppBarShadowMode {
   visible,
   whenScrolled,
@@ -88,22 +90,39 @@ enum LdAppBarAttachedMode {
 /// See also:
 /// - [LdTabNavigation] for tab-based navigation bars
 /// - [LdScaffold] for the scaffold that hosts bars
-class LdAppBar extends StatefulWidget {
+@Variants([
+  Variant('top', defaults: {'positionMode': 'LdAppBarPositionMode.top'}),
+  Variant('bottom', defaults: {'positionMode': 'LdAppBarPositionMode.bottom'}),
+])
+class LdAppBarWidget extends StatefulWidget {
   final Widget? title;
+
   final Widget? leading;
+
   final Widget? trailing;
 
   final Color? backgroundColor;
+
   final bool? implyLeading;
+
   final bool addContainer;
+
   final Widget? bottom;
+
   final LdAppBarShadowMode shadowMode;
+
   final LdAppBarBorderMode borderMode;
+
   final LdAppBarBackgroundMode backgroundMode;
+
   final LdAppBarAttachedMode attachedMode;
+
   final bool showWindowControls;
+
   final bool implyCloseModalButton;
+
   final bool avoidViewInsets;
+
   final bool autoAttachToKeyboard;
 
   final List<Widget> actions;
@@ -117,10 +136,8 @@ class LdAppBar extends StatefulWidget {
   final String? debugName;
 
   final LdAppBarPositionMode positionMode;
-  final LdAppBarScrollBehavior scrollBehavior;
 
-  @Deprecated('order is no longer used; nest LdAppBar/LdTabNavigation instead.')
-  final int order;
+  final LdAppBarScrollBehavior scrollBehavior;
 
   /// The subtree that this bar wraps.
   ///
@@ -129,8 +146,8 @@ class LdAppBar extends StatefulWidget {
   /// the background. [MediaQuery.padding] inside [child] is patched with the
   /// bar's consumed insets.
   ///
-    /// When null the bar renders the bar surface only (no subtree wrapping).
-    final Widget? child;
+  /// When null the bar renders the bar surface only (no subtree wrapping).
+  final Widget? child;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -149,7 +166,8 @@ class LdAppBar extends StatefulWidget {
     properties.add(DiagnosticsProperty<LdSearchConfig?>('searchConfig', searchConfig));
   }
 
-  const LdAppBar({
+  @ContextConfigurable()
+  const LdAppBarWidget({
     super.key,
     this.child,
     this.actions = const [],
@@ -165,7 +183,6 @@ class LdAppBar extends StatefulWidget {
     this.implyLeading,
     this.avoidViewInsets = false,
     this.leading,
-    @Deprecated('order is no longer used; nest LdAppBar/LdTabNavigation instead.') this.order = 0,
     this.overflowMenuProviders,
     this.positionMode = LdAppBarPositionMode.top,
     this.scrollBehavior = LdAppBarScrollBehavior.static,
@@ -176,63 +193,11 @@ class LdAppBar extends StatefulWidget {
     this.trailing,
   });
 
-  const LdAppBar.top({
-    super.key,
-    this.child,
-    this.title,
-    this.actions = const [],
-    this.leading,
-    this.autoAttachToKeyboard = true,
-    this.trailing,
-    this.avoidViewInsets = false,
-    this.showWindowControls = true,
-    this.backgroundColor,
-    this.searchConfig,
-    this.addContainer = false,
-    this.implyCloseModalButton = true,
-    this.implyLeading,
-    this.bottom,
-    this.attachedMode = LdAppBarAttachedMode.adaptive,
-    this.shadowMode = LdAppBarShadowMode.adaptive,
-    this.borderMode = LdAppBarBorderMode.adaptive,
-    this.backgroundMode = LdAppBarBackgroundMode.adaptive,
-    this.overflowMenuProviders,
-    this.debugName,
-    this.scrollBehavior = LdAppBarScrollBehavior.static,
-    @Deprecated('order is no longer used; nest LdAppBar/LdTabNavigation instead.') this.order = 0,
-  }) : positionMode = LdAppBarPositionMode.top;
-
-  const LdAppBar.bottom({
-    super.key,
-    this.child,
-    this.title,
-    this.actions = const [],
-    this.leading,
-    this.trailing,
-    this.addContainer = false,
-    this.showWindowControls = true,
-    this.avoidViewInsets = false,
-    this.attachedMode = LdAppBarAttachedMode.adaptive,
-    this.autoAttachToKeyboard = true,
-    this.backgroundColor,
-    this.searchConfig,
-    this.implyCloseModalButton = true,
-    this.implyLeading,
-    this.bottom,
-    this.shadowMode = LdAppBarShadowMode.adaptive,
-    this.borderMode = LdAppBarBorderMode.adaptive,
-    this.backgroundMode = LdAppBarBackgroundMode.adaptive,
-    this.overflowMenuProviders,
-    this.debugName,
-    this.scrollBehavior = LdAppBarScrollBehavior.static,
-    @Deprecated('order is no longer used; nest LdAppBar/LdTabNavigation instead.') this.order = 0,
-  }) : positionMode = LdAppBarPositionMode.bottom;
-
   @override
-  State<LdAppBar> createState() => _LdAppBarState();
+  State<LdAppBarWidget> createState() => _LdAppBarWidgetState();
 }
 
-class _LdAppBarState extends State<LdAppBar> {
+class _LdAppBarWidgetState extends State<LdAppBarWidget> {
   final FocusScopeNode _focusScopeNode = FocusScopeNode();
 
   @override
@@ -573,14 +538,13 @@ class _LdAppBarState extends State<LdAppBar> {
             ),
           ),
         );
-
       },
     );
 
     if (enableWindowDrag) {
       barSurface = GestureDetector(
         onPanStart: (details) {
-          LdAppBar.callbacks?.onMove?.call();
+          LdAppBarWidget.callbacks?.onMove?.call();
         },
         onDoubleTap: () {
           LdScaffoldState.maybeOf(context)?.scrollToTop();

@@ -11,8 +11,8 @@ The Liquid Flutter design system provides a comprehensive set of components and 
 ## Core Components for General Tasks
 
 ### Layout Components
-- **LdScaffold**: Main page scaffold with app bars and drawer support. Use `appBars` parameter (List) to pass app bars.
-- **LdAppBar**: App bar component. Pass as a List to LdScaffold's `appBars` parameter.
+- **LdScaffold**: Main page scaffold with drawer support. Wrap the body with `LdAppBar` to add app bars.
+- **LdAppBar**: App bar that wraps its `child`. Use `LdAppBar.top` / `LdAppBar.bottom` or nest bars for multiple edges.
 - **LdScaffoldBody**: Body wrapper for scaffold content. Use `addContainer: true` for automatic container padding.
 - **LdAutoSpace**: Automatically spaces children in a Column based on component types. Use for arranging items vertically with proper spacing.
 - **LdBundle**: Wrapper that applies LdAutoSpace to its children. Use for grouping related content.
@@ -262,7 +262,7 @@ Prefer Lucide icons over `Icons` / `CupertinoIcons` where applicable. The `lucid
 3. **Apply padding** using extension methods (`.padM()`) or `LdTheme.of(context).pad()`
 4. **Use spacer constants** (`ldSpacerM`) for manual spacing when needed
 5. **Set Card padding to zero** when containing ListItems
-6. **Use LdScaffold and LdAppBar** for page structure
+6. **Use LdScaffold with LdAppBar wrapping the body** for page structure
 7. **Use LdModalRoute** for dialogs, modals, and sheets
 8. **Retrieve colors** from `LdTheme.of(context)` rather than hardcoding
 9. **Apply radius** using `LdTheme.of(context).radius()` for consistency

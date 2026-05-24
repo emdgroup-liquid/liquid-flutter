@@ -5,19 +5,32 @@ enum LdAppBarPosition {
   bottom,
 }
 
-/// Immutable snapshot of an app-bar's metrics at a point in time.
+/// Immutable snapshot of the combined app-bar state at a point in time.
 ///
-/// [position]        – whether this bar sits at the top or bottom.
-/// [barHeight]       – full rendered height of the bar surface, including the
-///                     outside safe-area / ancestor-bar padding. Equals the
-///                     height that MeasureSize measures on the outer container.
-/// [edgeMargin]      – the outer padding already applied on this edge before
-///                     this bar (device safe-area + ancestor bars' net heights).
-///                     Equals [MediaQuery.paddingOf] on that edge at build time.
-/// [hideOffset]      – how many pixels the bar has been scrolled off-screen
-///                     (0 = fully visible, barHeight = fully hidden). Animated.
-/// [isScrolledUnder] – true when scroll content has moved underneath the bar.
-/// [level]           – stacking index among bars at the same position (0 = outermost).
+/// All per-edge values are stored as [EdgeInsets] so the same object covers
+/// both positions simultaneously.  A top bar sets only the `top` component of
+/// each inset; a bottom bar sets only `bottom`.  When bars at *both* edges are
+/// present the fields accumulate so any descendant can read the correct value
+/// for its own edge without knowing which ancestor wrote it.
+///
+/// [barHeight]              – full rendered height of each bar surface,
+///                            including the outer safe-area / ancestor-bar
+///                            padding (EdgeInsets, relevant edge non-zero).
+/// [edgeMargin]             – outer padding already on each edge before this
+///                            bar (device safe-area + ancestor bars' net
+///                            heights, EdgeInsets).
+/// [hideOffset]             – how many pixels each bar has been scrolled
+///                            off-screen (0 = fully visible, EdgeInsets).
+///                            Animated.
+/// [accumulatedHideOffset]  – cumulative hide from all ancestor bars, per
+///                            edge (EdgeInsets).
+/// [isScrolledUnder]        – true when scroll content is under any bar.
+/// [level]                  – stacking index among bars at the same position
+///                            (0 = outermost).
+/// [position]               – the position of the bar that last wrote these
+///                            metrics.  Kept for callers that need to know
+///                            which edge this bar occupies (e.g. level/window-
+///                            controls checks).
 class LdAppBarMetrics {
   const LdAppBarMetrics({
     required this.position,
@@ -26,65 +39,84 @@ class LdAppBarMetrics {
     required this.hideOffset,
     required this.isScrolledUnder,
     required this.level,
-    this.accumulatedHideOffset = 0.0,
+    this.accumulatedHideOffset = EdgeInsets.zero,
   });
 
   final LdAppBarPosition position;
 
-  /// Full outer-container height: edgeMargin + own inner content.
-  final double barHeight;
+  /// Full outer-container height per edge: edgeMargin + own inner content.
+  final EdgeInsets barHeight;
 
-  /// Outer padding already on this edge before this bar (device safe-area +
-  /// all ancestor bars' stable net heights). Used to compute [stableConsumedInsets]
-  /// without double-counting.
-  final double edgeMargin;
+  /// Outer padding already on each edge before this bar (device safe-area +
+  /// all ancestor bars' stable net heights).
+  final EdgeInsets edgeMargin;
 
-  /// Animated scroll-hide offset (0 = fully visible, barHeight = fully hidden).
-  final double hideOffset;
+  /// Animated scroll-hide offset per edge (0 = fully visible).
+  final EdgeInsets hideOffset;
 
-  /// Cumulative hide offset from all ancestor bars at the same position.
-  /// 0 for the outermost bar. Used by nested bars to compute their translate
-  /// so they follow ancestor bars as they hide.
-  final double accumulatedHideOffset;
+  /// Cumulative hide offset from all ancestor bars, per edge.
+  /// Zero for the outermost bar.
+  final EdgeInsets accumulatedHideOffset;
 
   final bool isScrolledUnder;
   final int level;
 
+  // ── Convenience helpers ────────────────────────────────────────────────────
+
+  /// Scalar bar height for [position]'s edge.
+  double get barHeightForPosition =>
+      position == LdAppBarPosition.top ? barHeight.top : barHeight.bottom;
+
+  /// Scalar edge margin for [position]'s edge.
+  double get edgeMarginForPosition =>
+      position == LdAppBarPosition.top ? edgeMargin.top : edgeMargin.bottom;
+
+  /// Scalar hide offset for [position]'s edge.
+  double get hideOffsetForPosition =>
+      position == LdAppBarPosition.top ? hideOffset.top : hideOffset.bottom;
+
+  /// Scalar accumulated hide offset for [position]'s edge.
+  double get accumulatedHideOffsetForPosition =>
+      position == LdAppBarPosition.top
+          ? accumulatedHideOffset.top
+          : accumulatedHideOffset.bottom;
+
+  // ── Consumed-insets helpers ────────────────────────────────────────────────
+
   /// Net insets this bar contributes to its subtree, stable (never animated).
   ///
-  /// = max(0, barHeight - edgeMargin)
+  /// For each edge: max(0, barHeight - edgeMargin).
   ///
   /// Used to patch [MediaQuery.padding] for the body subtree so the
   /// scroll-content floor never shifts while the bar animates.
   EdgeInsets get stableConsumedInsets {
-    final incremental = (barHeight - edgeMargin).clamp(0.0, double.infinity);
-    return switch (position) {
-      LdAppBarPosition.top => EdgeInsets.only(top: incremental),
-      LdAppBarPosition.bottom => EdgeInsets.only(bottom: incremental),
-    };
+    return EdgeInsets.only(
+      top: (barHeight.top - edgeMargin.top).clamp(0.0, double.infinity),
+      bottom: (barHeight.bottom - edgeMargin.bottom).clamp(0.0, double.infinity),
+    );
   }
 
-  /// Net insets currently visible — animated, shrinks as bar hides.
+  /// Net insets currently visible — animated, shrinks as bars hide.
   ///
-  /// = max(0, barHeight - hideOffset - edgeMargin)
+  /// For each edge: max(0, barHeight - hideOffset - edgeMargin).
   ///
   /// NOT used for the scroll-content padding (that uses [stableConsumedInsets])
   /// but kept for external consumers that want to know the live visible height.
   EdgeInsets get consumedInsets {
-    final visible = (barHeight - hideOffset).clamp(0.0, double.infinity);
-    final incremental = (visible - edgeMargin).clamp(0.0, double.infinity);
-    return switch (position) {
-      LdAppBarPosition.top => EdgeInsets.only(top: incremental),
-      LdAppBarPosition.bottom => EdgeInsets.only(bottom: incremental),
-    };
+    final visibleTop = (barHeight.top - hideOffset.top).clamp(0.0, double.infinity);
+    final visibleBottom = (barHeight.bottom - hideOffset.bottom).clamp(0.0, double.infinity);
+    return EdgeInsets.only(
+      top: (visibleTop - edgeMargin.top).clamp(0.0, double.infinity),
+      bottom: (visibleBottom - edgeMargin.bottom).clamp(0.0, double.infinity),
+    );
   }
 
   LdAppBarMetrics copyWith({
     LdAppBarPosition? position,
-    double? barHeight,
-    double? edgeMargin,
-    double? hideOffset,
-    double? accumulatedHideOffset,
+    EdgeInsets? barHeight,
+    EdgeInsets? edgeMargin,
+    EdgeInsets? hideOffset,
+    EdgeInsets? accumulatedHideOffset,
     bool? isScrolledUnder,
     int? level,
   }) {

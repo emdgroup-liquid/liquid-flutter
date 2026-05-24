@@ -373,40 +373,5 @@ void main() {
         expect(find.text('Body'), findsOneWidget);
       },
     );
-
-    // Legacy scaffold-injection mode for LdTabNavigation.
-    // The appBars parameter is a deprecated no-op since the registry was removed.
-    group('LdTabNavigation legacy scaffold-injection mode (appBars)', () {
-      testWidgets('Legacy: LdTabNavigation in appBars does not crash', (WidgetTester tester) async {
-        ldDisableAnimations = true;
-
-        await tester.pumpWidget(
-          MaterialApp(
-            localizationsDelegates: const [LiquidLocalizations.delegate],
-            home: ldFrame(
-              size: LdThemeSize.m,
-              brightnessMode: LdThemeBrightnessMode.light,
-              child: LdScaffold(
-                // ignore: deprecated_member_use
-                appBars: [
-                  LdTabNavigation(
-                    tabs: sampleTabs,
-                    activeRoute: '/home',
-                    onTabPressed: (route) {},
-                  ),
-                ],
-                body: const Center(child: Text('Body')),
-              ),
-            ),
-          ),
-        );
-
-        await tester.pumpAndSettle();
-
-        // The deprecated appBars parameter is a no-op; bars are not placed.
-        // The scaffold body should still render.
-        expect(find.text('Body'), findsOneWidget);
-      });
-    });
   });
 }

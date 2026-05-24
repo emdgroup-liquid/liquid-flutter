@@ -17,7 +17,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
   /// The subtree that this app bar wraps.
   ///
   /// When provided, the bar uses the new wrapper-based composition model and
-  /// passes [child] down to [LdAppBar]. When null, the bar renders the bar
+  /// passes [child] down to [LdAppBarWidget]. When null, the bar renders the bar
   /// surface only (legacy / used when the bar is placed inside
   /// [LdScaffold.appBars] — deprecated path).
   final Widget? child;
@@ -72,7 +72,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
               _ => LdAppBarPositionMode.top,
             };
 
-        return LdAppBar(
+        return LdAppBarWidget(
             debugName: debugName,
             backgroundMode: backgroundMode ?? LdAppBarBackgroundMode.adaptive,
             borderMode: borderMode ?? LdAppBarBorderMode.adaptive,

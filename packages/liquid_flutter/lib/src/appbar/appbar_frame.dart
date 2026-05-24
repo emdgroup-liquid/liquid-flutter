@@ -341,6 +341,21 @@ class _AppBarFrameState extends State<AppBarFrame> {
     );
   }
 
+  // ── Helpers for EdgeInsets-based metrics ─────────────────────────────────
+
+  /// Returns the scalar value from [insets] for [widget.position]'s edge.
+  double _edgeValue(EdgeInsets insets) {
+    return widget.position == LdAppBarPosition.top ? insets.top : insets.bottom;
+  }
+
+  /// Returns a copy of [insets] with this bar's [widget.position] edge set to
+  /// [value], leaving the opposite edge unchanged.
+  EdgeInsets _withEdge(EdgeInsets insets, double value) {
+    return widget.position == LdAppBarPosition.top
+        ? insets.copyWith(top: value)
+        : insets.copyWith(bottom: value);
+  }
+
   // ── Stack-mode build ──────────────────────────────────────────────────────
 
   Widget _buildStackMode(BuildContext context) {
@@ -364,14 +379,25 @@ class _AppBarFrameState extends State<AppBarFrame> {
     // surface stays flush with the parent's bottom edge as it hides.
     // Floor: parentMetrics.edgeMargin (= the parent's own stableEdgeMargin,
     // i.e. the device safe-area portion that must always be preserved).
-    final parentAtSamePositionGlobal =
-        parentMetrics != null && parentMetrics.position == widget.position;
+    //
+    // Because barHeight/hideOffset/edgeMargin are now EdgeInsets we can look up
+    // the correct edge even when the immediate parent is at the opposite position.
+    final parentBarHeight = parentMetrics != null ? _edgeValue(parentMetrics.barHeight) : 0.0;
+    final parentHideOffset = parentMetrics != null ? _edgeValue(parentMetrics.hideOffset) : 0.0;
+    final parentEdgeMargin = parentMetrics != null ? _edgeValue(parentMetrics.edgeMargin) : 0.0;
+    final parentAccumulatedHide =
+        parentMetrics != null ? _edgeValue(parentMetrics.accumulatedHideOffset) : 0.0;
+
+    // A "same-position" parent is one where the relevant edge has a non-zero
+    // barHeight — meaning an ancestor bar at this edge has already written into
+    // the metrics.
+    final hasAncestorAtSameEdge = parentBarHeight > 0.0;
+
     final double animatedEdgeMarginBase;
-    if (parentAtSamePositionGlobal) {
-      // parentMetrics.hideOffset is the parent bar's own animated hide (0=visible,
-      // barHeight=fully hidden). Subtract only this to get the parent's visible height.
-      final parentVisibleHeight = (parentMetrics!.barHeight - parentMetrics.hideOffset)
-          .clamp(parentMetrics.edgeMargin, double.infinity);
+    if (hasAncestorAtSameEdge) {
+      // Use the live visible height of the nearest ancestor at this edge.
+      final parentVisibleHeight =
+          (parentBarHeight - parentHideOffset).clamp(parentEdgeMargin, double.infinity);
       animatedEdgeMarginBase = parentVisibleHeight;
     } else {
       animatedEdgeMarginBase = stableEdgeMargin;
@@ -400,15 +426,12 @@ class _AppBarFrameState extends State<AppBarFrame> {
 
         // Legacy mode (no wrappedChild): just render the bar surface.
         if (wrappedChild == null) {
-          final parentAccumulatedHide =
-              parentAtSamePositionGlobal ? parentMetrics!.accumulatedHideOffset : 0.0;
-          final barMetrics = LdAppBarMetrics(
-            position: widget.position,
-            barHeight: barHeightWithGap,
-            edgeMargin: stableEdgeMargin,
-            hideOffset: 0.0,
-            accumulatedHideOffset: parentAccumulatedHide,
-            isScrolledUnder: _isScrolledUnder,
+          final barMetrics = _buildMetrics(
+            parentMetrics: parentMetrics,
+            barHeightWithGap: barHeightWithGap,
+            stableEdgeMargin: stableEdgeMargin,
+            animatedHideOffset: 0.0,
+            parentAccumulatedHide: parentAccumulatedHide,
             level: level,
           );
           return Provider<LdAppBarMetrics>.value(
@@ -436,34 +459,25 @@ class _AppBarFrameState extends State<AppBarFrame> {
               final animatedHideOffset =
                   springState.position.clamp(0.0, _barHeight + 1);
 
-              // The cumulative hide offset for children of this bar:
-              // = parent's accumulatedHideOffset + this bar's own hideOffset.
-              // This lets nested bars add the right translation to follow
-              // all ancestors as they hide.
-              final parentAccumulatedHide =
-                  parentAtSamePositionGlobal ? parentMetrics!.accumulatedHideOffset : 0.0;
-              final childAccumulatedHide = parentAccumulatedHide + animatedHideOffset;
-
               // animatedEdgeMargin for the bar surface this frame:
-              // same logic as above — use parent's own hideOffset (not accumulated)
-              // so we only subtract the parent's own hide, not grandparent's.
+              // same logic as above — use the live visible height of the nearest
+              // ancestor at this edge (not accumulated) so we only subtract the
+              // nearest ancestor's hide, not grandparent's.
               final double animatedEdgeMargin;
-              if (parentAtSamePositionGlobal) {
+              if (hasAncestorAtSameEdge) {
                 final parentVisibleHeight =
-                    (parentMetrics!.barHeight - parentMetrics.hideOffset)
-                        .clamp(parentMetrics.edgeMargin, double.infinity);
+                    (parentBarHeight - parentHideOffset).clamp(parentEdgeMargin, double.infinity);
                 animatedEdgeMargin = parentVisibleHeight;
               } else {
                 animatedEdgeMargin = stableEdgeMargin;
               }
 
-              final animatedMetrics = LdAppBarMetrics(
-                position: widget.position,
-                barHeight: barHeightWithGap,
-                edgeMargin: stableEdgeMargin,
-                hideOffset: animatedHideOffset,
-                accumulatedHideOffset: childAccumulatedHide,
-                isScrolledUnder: _isScrolledUnder,
+              final animatedMetrics = _buildMetrics(
+                parentMetrics: parentMetrics,
+                barHeightWithGap: barHeightWithGap,
+                stableEdgeMargin: stableEdgeMargin,
+                animatedHideOffset: animatedHideOffset,
+                parentAccumulatedHide: parentAccumulatedHide,
                 level: level,
               );
 
@@ -509,6 +523,37 @@ class _AppBarFrameState extends State<AppBarFrame> {
           ),
         );
       },
+    );
+  }
+
+  /// Builds an [LdAppBarMetrics] that merges this bar's values into the parent
+  /// metrics (if any) so every edge accumulates correctly as bars nest.
+  LdAppBarMetrics _buildMetrics({
+    required LdAppBarMetrics? parentMetrics,
+    required double barHeightWithGap,
+    required double stableEdgeMargin,
+    required double animatedHideOffset,
+    required double parentAccumulatedHide,
+    required int level,
+  }) {
+    final childAccumulatedHide = parentAccumulatedHide + animatedHideOffset;
+
+    // Merge: start from parent's EdgeInsets values (which cover both edges) and
+    // overwrite only this bar's edge.  That way the opposite edge's data is
+    // preserved and visible to deeper descendants regardless of position mixing.
+    final parentBarHeight = parentMetrics?.barHeight ?? EdgeInsets.zero;
+    final parentEdgeMarginInsets = parentMetrics?.edgeMargin ?? EdgeInsets.zero;
+    final parentHideOffsetInsets = parentMetrics?.hideOffset ?? EdgeInsets.zero;
+    final parentAccumulatedInsets = parentMetrics?.accumulatedHideOffset ?? EdgeInsets.zero;
+
+    return LdAppBarMetrics(
+      position: widget.position,
+      barHeight: _withEdge(parentBarHeight, barHeightWithGap),
+      edgeMargin: _withEdge(parentEdgeMarginInsets, stableEdgeMargin),
+      hideOffset: _withEdge(parentHideOffsetInsets, animatedHideOffset),
+      accumulatedHideOffset: _withEdge(parentAccumulatedInsets, childAccumulatedHide),
+      isScrolledUnder: _isScrolledUnder,
+      level: level,
     );
   }
 

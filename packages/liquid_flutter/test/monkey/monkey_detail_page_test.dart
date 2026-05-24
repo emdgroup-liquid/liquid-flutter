@@ -242,7 +242,7 @@ void main() {
         );
 
         final detailPage = LdMonkeyDetailPage<TestItem, int>(
-          primaryAppBar: const Text('Custom Primary App Bar'),
+          primaryAppBarConfig: LdAppBarConfig(title: const Text('Custom Primary App Bar')),
           body: Container(),
         );
 
@@ -291,7 +291,7 @@ void main() {
         );
 
         final detailPage = LdMonkeyDetailPage<TestItem, int>(
-          secondaryAppBar: const Text('Custom Secondary App Bar'),
+          secondaryAppBarConfig: LdAppBarConfig(title: const Text('Custom Secondary App Bar')),
           body: Container(),
         );
 

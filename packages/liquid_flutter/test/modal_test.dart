@@ -26,7 +26,7 @@ void main() {
                 modal: LdModalRoute(
                   context: context,
                   pageBuilder: (context) => LdScaffold(
-                    body: LdAppBar(
+                    body: LdAppBarWidget(
                       title: Text("Dialog title"),
                       child: LdScaffoldBody(children: [
                         LdText(
