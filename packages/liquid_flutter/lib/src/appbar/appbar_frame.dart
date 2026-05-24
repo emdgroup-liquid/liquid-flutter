@@ -166,7 +166,14 @@ class _AppBarFrameState extends State<AppBarFrame> {
                   _containerPadding(constraints),
                 ));
 
-    EdgeInsets result = edgePadding.atLeast(sideViewPadding).atLeast(extraPadding).atLeast(trimmedViewInsets);
+    // For floating bars, extra padding is ADDED to the edge margin (not just
+    // clamped) so the gap between the parent bar and the floating surface is
+    // preserved. For attached bars extraPadding is zero so the + is a no-op.
+    final edgePaddingWithExtra = widget.position == LdAppBarPosition.top
+        ? edgePadding.copyWith(top: edgePadding.top + extraPadding.top)
+        : edgePadding.copyWith(bottom: edgePadding.bottom + extraPadding.bottom);
+
+    EdgeInsets result = edgePaddingWithExtra.atLeast(sideViewPadding).atLeast(extraPadding).atLeast(trimmedViewInsets);
     if (level == 0 && widget.insetBorderRadius) {
       final inset = widget.position == LdAppBarPosition.top ? result.top : result.bottom;
       return result.atLeast(EdgeInsets.symmetric(horizontal: (theme.screenRadius) / 2 - inset));
