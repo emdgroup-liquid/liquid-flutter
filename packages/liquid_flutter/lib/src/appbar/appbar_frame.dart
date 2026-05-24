@@ -136,6 +136,21 @@ class _AppBarFrameState extends State<AppBarFrame> {
   /// all ancestor bars' stable net heights). This is read from the *patched*
   /// MediaQuery provided by ancestor AppBarFrames, so nested bars automatically
   /// sit below their parents without any extra bookkeeping.
+  /// The extra padding added on the edge axis for floating bars.
+  /// Zero for attached bars. This is the gap between the parent bar (or screen
+  /// edge) and the floating bar's visual surface.
+  double _floatingEdgeGap(BoxConstraints constraints) {
+    if (widget.outsideMinPadding != null) {
+      return widget.position == LdAppBarPosition.top
+          ? widget.outsideMinPadding!.top
+          : widget.outsideMinPadding!.bottom;
+    }
+    if (widget.attached) return 0.0;
+    final theme = LdTheme.of(context);
+    final extra = theme.pad(size: LdSize.s).atLeast(_containerPadding(constraints));
+    return widget.position == LdAppBarPosition.top ? extra.top : extra.bottom;
+  }
+
   EdgeInsets _outsideContainerPadding(BoxConstraints constraints, {required double edgeMargin}) {
     final theme = LdTheme.of(context);
     final level = _calculateLevel(context.read<LdAppBarMetrics?>());
@@ -341,27 +356,6 @@ class _AppBarFrameState extends State<AppBarFrame> {
     final outerPadding = MediaQuery.paddingOf(context);
     final stableEdgeMargin = widget.position == LdAppBarPosition.top ? outerPadding.top : outerPadding.bottom;
 
-    // barHeight = stableEdgeMargin + inner content height.
-    // Using _innerHeight (measured from inner container only) keeps barHeight
-    // stable while the outer padding animates. Cached in _barHeight so the
-    // scroll handler can use it without a BuildContext.
-    final barHeight = stableEdgeMargin + _innerHeight;
-    _barHeight = barHeight;
-
-    // Stable padding patch for the body subtree.
-    //
-    // stableIncrementalInset = _innerHeight (own inner content height).
-    // We add this on top of the existing stableEdgeMargin so LdScaffoldBody's
-    //   padding.atLeast(viewPadding)
-    // produces a scroll-content floor that never shifts while this bar hides.
-    final stableIncrementalInset = _innerHeight;
-    final stablePadding = switch (widget.position) {
-      LdAppBarPosition.top =>
-        outerPadding.copyWith(top: outerPadding.top + stableIncrementalInset),
-      LdAppBarPosition.bottom =>
-        outerPadding.copyWith(bottom: outerPadding.bottom + stableIncrementalInset),
-    };
-
     final outerMediaQuery = MediaQuery.of(context);
 
     // animatedEdgeMargin (for bar surface outer padding):
@@ -385,6 +379,23 @@ class _AppBarFrameState extends State<AppBarFrame> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        // floatingEdgeGap: the extra outer padding on the edge axis for floating
+        // bars (zero for attached). Must be included in barHeight and stablePadding
+        // so nested bars know the true bottom of this bar's outer container.
+        final floatingGap = _floatingEdgeGap(constraints);
+
+        // Recalculate barHeight and stablePadding with the floating gap included.
+        final barHeightWithGap = stableEdgeMargin + floatingGap + _innerHeight;
+        _barHeight = barHeightWithGap;
+
+        final stableIncrementalInsetWithGap = floatingGap + _innerHeight;
+        final stablePaddingWithGap = switch (widget.position) {
+          LdAppBarPosition.top => outerPadding.copyWith(
+              top: outerPadding.top + stableIncrementalInsetWithGap),
+          LdAppBarPosition.bottom => outerPadding.copyWith(
+              bottom: outerPadding.bottom + stableIncrementalInsetWithGap),
+        };
+
         final wrappedChild = widget.wrappedChild;
 
         // Legacy mode (no wrappedChild): just render the bar surface.
@@ -393,7 +404,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
               parentAtSamePositionGlobal ? parentMetrics!.accumulatedHideOffset : 0.0;
           final barMetrics = LdAppBarMetrics(
             position: widget.position,
-            barHeight: barHeight,
+            barHeight: barHeightWithGap,
             edgeMargin: stableEdgeMargin,
             hideOffset: 0.0,
             accumulatedHideOffset: parentAccumulatedHide,
@@ -448,7 +459,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
 
               final animatedMetrics = LdAppBarMetrics(
                 position: widget.position,
-                barHeight: barHeight,
+                barHeight: barHeightWithGap,
                 edgeMargin: stableEdgeMargin,
                 hideOffset: animatedHideOffset,
                 accumulatedHideOffset: childAccumulatedHide,
@@ -468,7 +479,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
               // so child bars and other consumers see live hideOffset/barHeight.
               final bodySubtree = Positioned.fill(
                 child: MediaQuery(
-                  data: outerMediaQuery.copyWith(padding: stablePadding),
+                  data: outerMediaQuery.copyWith(padding: stablePaddingWithGap),
                   child: Provider<LdAppBarMetrics>.value(
                     value: animatedMetrics,
                     child: wrappedChild,
