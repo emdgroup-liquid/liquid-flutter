@@ -141,7 +141,7 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
   void updateFilter(BuildContext context, LdFilterOption<T, IdType> filter) {
     final routeConfig = context.read<LdMonkeyRouteConfig<T, IdType>>();
     final router = GoRouter.of(context);
-    final queryParameters = _currentQueryParameters();
+    final queryParameters = _currentQueryParameters(context);
     final queryKey = routeConfig.filterQueryKey(filter.name);
     if (filter.isOn) {
       queryParameters[queryKey] = filter.serialize();
@@ -157,7 +157,7 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
   void updateSortOptions(BuildContext context, List<LdSortOption<T, IdType>> sortOptions) {
     final routeConfig = context.read<LdMonkeyRouteConfig<T, IdType>>();
     final router = GoRouter.of(context);
-    final queryParameters = _currentQueryParameters();
+    final queryParameters = _currentQueryParameters(context);
 
     final queryKey = routeConfig.sortQueryKey;
 
@@ -177,7 +177,7 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
 
   /// Rebuilds the current query parameter map from the active sort and
   /// filter state so that subsequent overrides operate on a normalised view.
-  Map<String, dynamic> _currentQueryParameters() {
+  Map<String, dynamic> _currentQueryParameters(BuildContext context) {
     final routeConfig = context.read<LdMonkeyRouteConfig<T, IdType>>();
     final router = GoRouter.of(context);
     final sortAndFilterState = context.read<LdMonkeySortAndFilterState<T, IdType>>();
