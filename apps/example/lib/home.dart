@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:liquid/code_block.dart';
-
 import 'package:go_router/go_router.dart';
+import 'package:liquid/code_block.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -227,7 +226,7 @@ class _HomeState extends State<Home> {
                                     child: Text("SSO"),
                                   ),
                                   LdButton.outline(
-                                    leading: Icon(LucideIcons.github),
+                                    leading: Icon(LucideIcons.computer),
                                     onPressed: () {},
                                     alignment: MainAxisAlignment.center,
                                     width: double.infinity,

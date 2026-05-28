@@ -31,7 +31,7 @@
 
 ### UI & Animation
 - `flutter_animate: ^4.1.1` - Animation library
-- `lucide_icons_flutter: ^3.1.9` - Icon library
+- `lucide_icons_flutter: ^3.1.14` - Icon library
 - `flutter_svg: ^2.0.10+1` - SVG rendering
 - `responsive_builder: ^0.7.0` - Responsive layout
 - `google_fonts: ^8.0.1` - Typography (example app)
