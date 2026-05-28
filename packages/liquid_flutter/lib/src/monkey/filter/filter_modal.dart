@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/monkey/monkey_route_state_parser.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
@@ -19,46 +20,21 @@ LdModalRoute ldFilterModal<T extends Identifiable<IdType>, IdType>(BuildContext 
     pageBuilder: (modalContext) => ListenableBuilder(
       listenable: routerDelegate,
       builder: (modalContext, _) {
-        final query = routerDelegate.state.uri.queryParameters;
-
-        Set<IdType> parseIdsOrEmpty(String? value) => value == null ? <IdType>{} : routeConfig.parseIdType(value);
+        final state = routerDelegate.state;
+        final query = state.uri.queryParameters;
 
         // Keep selection/viewing in sync with the URL-backed router state.
-        final selection = LdMonkeySelection<T, IdType>(
-          selection: parseIdsOrEmpty(query[routeConfig.selectionQueryKey]),
-          viewing: parseIdsOrEmpty(routerDelegate.state.pathParameters[routeConfig.viewingParamName]),
-          showSelectionControls: query[routeConfig.showSelectionControlsQueryKey] == 'true',
+        final selection = LdMonkeyRouteStateParser.parseSelection<T, IdType>(
+          routeConfig: routeConfig,
+          query: query,
+          pathParameters: state.pathParameters,
         );
 
-        final filters = baseFilters.map((filter) {
-          final queryKey = routeConfig.filterQueryKey(filter.name);
-          final serializedFilter = query[queryKey];
-          if (serializedFilter == null) {
-            return filter.copyWith(isOn: false);
-          }
-          return filter.marshalSerialized(serializedFilter);
-        }).toSet();
-
-        final sortOptionsLeft = baseSortOptions.map((sortOption) => sortOption.copyWith(isOn: false)).toList();
-        final parsedSortOptions = <LdSortOption<T, IdType>>[];
-
-        final sortQuery = query[routeConfig.sortQueryKey];
-        if (sortQuery != null && sortQuery.isNotEmpty) {
-          for (final sortEntry in sortQuery.split("_").toSet()) {
-            final sortName = sortEntry.split("-")[0];
-            final matchIndex = sortOptionsLeft.indexWhere((sortOption) => sortOption.name == sortName);
-            if (matchIndex == -1) {
-              continue;
-            }
-
-            final sortOption = sortOptionsLeft.removeAt(matchIndex);
-            parsedSortOptions.add(sortOption.marshalSerialized(sortEntry));
-          }
-        }
-
-        final sortAndFilterState = LdMonkeySortAndFilterState<T, IdType>(
-          filters: filters,
-          sortOptions: [...parsedSortOptions, ...sortOptionsLeft],
+        final sortAndFilterState = LdMonkeyRouteStateParser.parseSortAndFilter<T, IdType>(
+          routeConfig: routeConfig,
+          baseFilters: baseFilters,
+          baseSortOptions: baseSortOptions,
+          query: query,
         );
 
         return LdScaffold(
