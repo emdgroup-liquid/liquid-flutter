@@ -194,14 +194,18 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
       }
     }
 
-    for (final sortOption in sortAndFilterState.sortOptions) {
-      final queryKey = routeConfig.sortQueryKey;
-      if (sortOption.isOn) {
-        queryParameters[queryKey] = sortOption.serialize();
-      } else {
-        queryParameters.remove(queryKey);
-      }
+    final sortKey = routeConfig.sortQueryKey;
+    final sortOptionString = sortAndFilterState.sortOptions
+        .where((sortOption) => sortOption.isOn)
+        .map((sortOption) => sortOption.serialize())
+        .join("_");
+
+    if (sortOptionString.isNotEmpty) {
+      queryParameters[sortKey] = sortOptionString;
+    } else {
+      queryParameters.remove(sortKey);
     }
+
     return queryParameters;
   }
 
