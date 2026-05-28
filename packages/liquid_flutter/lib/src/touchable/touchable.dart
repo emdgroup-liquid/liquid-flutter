@@ -151,7 +151,9 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
               behavior: widget.hitTestBehavior,
               onPointerDown: (d) => _safeSetState(() {
                 if (!widget.disabled) {
-                  _focusNode?.requestFocus();
+                  if (widget.focusNode != null) {
+                    _focusNode?.requestFocus();
+                  }
                   _pressed = true;
                   _pointerDownOffset = d.localPosition;
                 }
