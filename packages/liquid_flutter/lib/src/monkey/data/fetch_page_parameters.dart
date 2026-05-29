@@ -16,7 +16,14 @@ class FetchPageParameters<T extends Identifiable<IdType>, IdType> {
   });
 
   Set<LdFilterOption<T, IdType>> get filters =>
-      context.read<LdMonkeySortAndFilterState<T, IdType>?>()?.filters.where((filter) => filter.isOn).toSet() ?? {};
+      context
+          .read<LdMonkeySortAndFilterState<T, IdType>?>()
+          ?.filters
+          // Empty serialized values represent "All" for some filters, so they
+          // should not constrain repository queries.
+          .where((filter) => filter.isOn && filter.serialize().isNotEmpty)
+          .toSet() ??
+      {};
 
   List<LdSortOption<T, IdType>> get sortOptions =>
       context
@@ -36,7 +43,12 @@ class FetchOffsetParameters<T extends Identifiable<IdType>, IdType> {
   });
 
   Set<LdFilterOption<T, IdType>> get filters =>
-      context.read<LdMonkeySortAndFilterState<T, IdType>?>()?.filters.where((filter) => filter.isOn).toSet() ?? {};
+      context
+          .read<LdMonkeySortAndFilterState<T, IdType>?>()
+          ?.filters
+          .where((filter) => filter.isOn && filter.serialize().isNotEmpty)
+          .toSet() ??
+      {};
 
   List<LdSortOption<T, IdType>> get sortOptions =>
       context

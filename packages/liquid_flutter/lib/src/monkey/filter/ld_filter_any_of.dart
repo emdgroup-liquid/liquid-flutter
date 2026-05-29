@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterOption<T, IdType> {
+class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E>
+    extends LdFilterOption<T, IdType> {
   final Map<E, Widget Function(BuildContext)> allValues;
   final Set<E> selectedValues;
 
@@ -24,10 +25,15 @@ class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
   @override
   LdFilterAnyOf<T, IdType, E> marshalSerialized(String value) {
     if (value.isEmpty) {
-      return copyWith(isOn: false, selectedValues: {});
+      // Keep empty query values as an active filter with no preselection so
+      // users can select values from the modal.
+      return copyWith(isOn: true, selectedValues: {});
     }
 
-    final selectedValues = allValues.keys.where((e) => value.contains(e.toString())).cast<E>().toSet();
+    final selectedValues = allValues.keys
+        .where((e) => value.contains(e.toString()))
+        .cast<E>()
+        .toSet();
 
     return copyWith(
       selectedValues: selectedValues,

@@ -24,7 +24,12 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
   @override
   LdFilterOneOf<T, IdType, E> marshalSerialized(String value) {
     if (value.isEmpty) {
-      return copyWith(isOn: false);
+      // Keep empty query values as an active-but-unselected filter so users can
+      // open and choose a value from the modal.
+      return copyWith(
+        isOn: true,
+        clearSelectedValue: true,
+      );
     }
 
     final values = value.split(',');
@@ -35,6 +40,7 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
 
     return copyWith(
       selectedValue: selectedValue,
+      clearSelectedValue: selectedValue == null,
       isOn: selectedValue != null,
     );
   }
@@ -47,6 +53,7 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
     bool? isOn,
     Map<E, Widget Function(BuildContext)>? allValues,
     E? selectedValue,
+    bool clearSelectedValue = false,
     bool Function(BuildContext context)? isEnabled,
   }) {
     return LdFilterOneOf<T, IdType, E>(
@@ -55,7 +62,7 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
       icon: icon ?? this.icon,
       isOn: isOn ?? this.isOn,
       allValues: allValues ?? this.allValues,
-      initialSelected: selectedValue ?? this.selectedValue,
+      initialSelected: clearSelectedValue ? null : (selectedValue ?? this.selectedValue),
       isEnabled: isEnabled ?? this.isEnabled,
     );
   }
