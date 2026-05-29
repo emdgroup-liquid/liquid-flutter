@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:liquid/demos/movie_demo.dart';
 import 'package:liquid/demos/task_demo/demo_data.dart';
 import 'package:liquid/demos/task_demo/task.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -11,7 +10,7 @@ List<Task> applyFiltersAndSorting(
 ) {
   final filtered = testData
       .where(
-        (element) => (filters ?? {}).all((filter) {
+        (element) => (filters ?? <LdFilterOption<Task, int>>{}).every((filter) {
           switch (filter.name) {
             case "done":
               return element.done;

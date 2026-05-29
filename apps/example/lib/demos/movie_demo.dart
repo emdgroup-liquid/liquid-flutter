@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class MovieDemo with Identifiable<int> {
@@ -43,13 +42,13 @@ var movieData = [
 
 LdRepository<MovieDemo, int> movieRepository(BuildContext context) => LdRepository<MovieDemo, int>(
   pageSize: 5,
-  getOffsetById: (parameters, {filters, sortOptions}) async {
+  getOffsetById: (parameters) async {
     await Future.delayed(const Duration(seconds: 1));
 
     // Apply the same filtering and sorting logic as fetchListWithParameters
     final filtered = movieData
         .where(
-          (element) => (filters ?? {}).all((filter) {
+          (element) => parameters.filters.every((filter) {
             if (filter is LdFilterRange<MovieDemo, int>) {
               return filter.range.inRange(element.rating);
             }
@@ -61,10 +60,6 @@ LdRepository<MovieDemo, int> movieRepository(BuildContext context) => LdReposito
         )
         .toList();
 
-    for (final sortOption in sortOptions ?? []) {
-      filtered.sort((a, b) => sortOption.optimisticSort(a, b));
-    }
-
     return filtered.indexWhere((element) => element.id == parameters.id);
   },
   getById: (id) async {
@@ -75,7 +70,7 @@ LdRepository<MovieDemo, int> movieRepository(BuildContext context) => LdReposito
     await Future.delayed(const Duration(milliseconds: 50));
     final filtered = movieData
         .where(
-          (element) => (parameters.filters).all((filter) {
+          (element) => parameters.filters.every((filter) {
             if (filter is LdFilterRange<MovieDemo, int>) {
               return filter.range.inRange(element.rating);
             }
@@ -290,16 +285,5 @@ class MovieMasterPage extends StatelessWidget {
         trailing: Row(children: [for (var i = 0; i < item.value!.rating; i++) Icon(LucideIcons.star)]),
       ),
     );
-  }
-}
-
-extension All<T> on Set<T> {
-  bool all(bool Function(T) test) {
-    for (final element in this) {
-      if (!test(element)) {
-        return false;
-      }
-    }
-    return true;
   }
 }
