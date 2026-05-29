@@ -58,15 +58,15 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
   // This keeps UI updates responsive while the router delegate catches up.
   LdMonkeySortAndFilterState<T, IdType>? _latestSortAndFilterState;
 
-  bool _hasSameFilterDefinitions(
+  bool _hasSameFilterStructure(
     Iterable<LdFilterOption<T, IdType>> left,
     Iterable<LdFilterOption<T, IdType>> right,
   ) {
     final leftByName = {
-      for (final filter in left) filter.name: _filterDefinitionSignature(filter),
+      for (final filter in left) filter.name: _filterStructureSignature(filter),
     };
     final rightByName = {
-      for (final filter in right) filter.name: _filterDefinitionSignature(filter),
+      for (final filter in right) filter.name: _filterStructureSignature(filter),
     };
 
     if (leftByName.length != rightByName.length) {
@@ -82,35 +82,10 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
     return true;
   }
 
-  bool _hasSameSortDefinitions(
-    Iterable<LdSortOption<T, IdType>> left,
-    Iterable<LdSortOption<T, IdType>> right,
-  ) {
-    final leftByName = {
-      for (final sortOption in left) sortOption.name: _sortDefinitionSignature(sortOption),
-    };
-    final rightByName = {
-      for (final sortOption in right) sortOption.name: _sortDefinitionSignature(sortOption),
-    };
-
-    if (leftByName.length != rightByName.length) {
-      return false;
-    }
-
-    for (final entry in leftByName.entries) {
-      if (rightByName[entry.key] != entry.value) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  Object _filterDefinitionSignature(LdFilterOption<T, IdType> filter) {
+  Object _filterStructureSignature(LdFilterOption<T, IdType> filter) {
     if (filter is LdFilterOneOf<T, IdType, dynamic>) {
       return Object.hash(
         filter.runtimeType,
-        filter.name,
         _stableKeySignature(filter.allValues.keys),
       );
     }
@@ -118,26 +93,11 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
     if (filter is LdFilterAnyOf<T, IdType, dynamic>) {
       return Object.hash(
         filter.runtimeType,
-        filter.name,
         _stableKeySignature(filter.allValues.keys),
       );
     }
 
-    if (filter is LdFilterRange<T, IdType>) {
-      return Object.hash(
-        filter.runtimeType,
-        filter.name,
-        filter.min,
-        filter.max,
-        filter.step,
-      );
-    }
-
-    return Object.hash(filter.runtimeType, filter.name);
-  }
-
-  Object _sortDefinitionSignature(LdSortOption<T, IdType> sortOption) {
-    return Object.hash(sortOption.runtimeType, sortOption.name);
+    return filter.runtimeType;
   }
 
   String _stableKeySignature(Iterable<dynamic> values) {
@@ -145,40 +105,28 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
     return keys.join('|');
   }
 
-  LdMonkeySortAndFilterState<T, IdType> _mergeCachedStateWithDefinitions({
-    required LdMonkeySortAndFilterState<T, IdType> latestState,
-    required Iterable<LdFilterOption<T, IdType>> nextFilters,
-    required Iterable<LdSortOption<T, IdType>> nextSortOptions,
-  }) {
-    final cachedFiltersByName = {
-      for (final filter in latestState.filters) filter.name: filter,
+  bool _hasSameSortStructure(
+    Iterable<LdSortOption<T, IdType>> left,
+    Iterable<LdSortOption<T, IdType>> right,
+  ) {
+    final leftByName = {
+      for (final sortOption in left) sortOption.name: sortOption.runtimeType,
     };
-    final cachedSortOptionsByName = {
-      for (final sortOption in latestState.sortOptions) sortOption.name: sortOption,
+    final rightByName = {
+      for (final sortOption in right) sortOption.name: sortOption.runtimeType,
     };
 
-    final mergedFilters = nextFilters.map((filterDefinition) {
-      final cachedFilter = cachedFiltersByName[filterDefinition.name];
-      if (cachedFilter == null || !cachedFilter.isOn) {
-        return filterDefinition.copyWith(isOn: false);
+    if (leftByName.length != rightByName.length) {
+      return false;
+    }
+
+    for (final entry in leftByName.entries) {
+      if (rightByName[entry.key] != entry.value) {
+        return false;
       }
+    }
 
-      return filterDefinition.marshalSerialized(cachedFilter.serialize());
-    }).toSet();
-
-    final mergedSortOptions = nextSortOptions.map((sortDefinition) {
-      final cachedSortOption = cachedSortOptionsByName[sortDefinition.name];
-      if (cachedSortOption == null || !cachedSortOption.isOn) {
-        return sortDefinition.copyWith(isOn: false);
-      }
-
-      return sortDefinition.marshalSerialized(cachedSortOption.serialize());
-    }).toList();
-
-    return LdMonkeySortAndFilterState<T, IdType>(
-      filters: mergedFilters,
-      sortOptions: mergedSortOptions,
-    );
+    return true;
   }
 
   @override
@@ -190,21 +138,16 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
       return;
     }
 
-    final filterDefinitionsChanged = !_hasSameFilterDefinitions(oldWidget.filters, widget.filters);
-    final sortDefinitionsChanged = !_hasSameSortDefinitions(oldWidget.sortOptions, widget.sortOptions);
+    final filterDefinitionsChanged = !_hasSameFilterStructure(oldWidget.filters, widget.filters);
+    final sortDefinitionsChanged = !_hasSameSortStructure(oldWidget.sortOptions, widget.sortOptions);
 
     if (!filterDefinitionsChanged && !sortDefinitionsChanged) {
       return;
     }
 
-    // Parent widgets can swap filter definitions at runtime (for example when
-    // options are loaded from an API). Rebase cached values onto the new
-    // definitions so removed options do not linger in local state.
-    _latestSortAndFilterState = _mergeCachedStateWithDefinitions(
-      latestState: latestState,
-      nextFilters: widget.filters,
-      nextSortOptions: widget.sortOptions,
-    );
+    // Structural filter/sort definition changes mean cached state may reference
+    // stale objects. Drop cache and rebuild from fresh route definitions.
+    _latestSortAndFilterState = null;
   }
 
   Set<LdFilterOption<T, IdType>> _replaceFilterByName(
@@ -419,14 +362,7 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
             query: query,
             pathParameters: state.pathParameters,
           );
-          final latestState = _latestSortAndFilterState;
-          final baseSortAndFilterState = latestState == null
-              ? null
-              : _mergeCachedStateWithDefinitions(
-                  latestState: latestState,
-                  nextFilters: widget.filters,
-                  nextSortOptions: widget.sortOptions,
-                );
+          final baseSortAndFilterState = _latestSortAndFilterState;
           final sortAndFilterState = LdMonkeyRouteStateParser.parseSortAndFilter<T, IdType>(
             routeConfig: widget.routeConfig,
             baseFilters: baseSortAndFilterState?.filters ?? widget.filters,
