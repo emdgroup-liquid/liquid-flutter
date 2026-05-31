@@ -62,6 +62,7 @@ import 'components/form_elements/checkbox.dart';
 import 'components/form_elements/form.dart';
 import 'components/form_elements/input.dart';
 import 'components/interaction/breadcrumb.dart';
+import 'components/interaction/timeline.dart';
 import 'components/layout/accordion.dart';
 import 'components/layout/divider.dart';
 import 'window/app_scaffold.dart';
@@ -267,6 +268,10 @@ class AppRouter {
           GoRoute(
             path: "/components/breadcrumb",
             pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const BreadcrumbDemo()),
+          ),
+          GoRoute(
+            path: "/components/timeline",
+            pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const TimelineDemo()),
           ),
           GoRoute(
             path: "/components/checkbox",

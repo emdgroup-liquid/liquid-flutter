@@ -70,6 +70,7 @@ const components = [
   // Navigation & Interaction
   _Component("Action Runner", "/components/action-runner", LucideIcons.tableOfContents, ComponentCategory.interaction),
   _Component("Breadcrumb", "/components/breadcrumb", LucideIcons.arrowRight, ComponentCategory.interaction),
+  _Component("Timeline", "/components/timeline", LucideIcons.listOrdered, ComponentCategory.interaction),
   _Component("Button", "/components/button", LucideIcons.pointer, ComponentCategory.interaction),
   _Component("Context Menu", "/components/context-menu", LucideIcons.squareMousePointer, ComponentCategory.interaction),
   _Component("Modal", "/components/modal", LucideIcons.messageSquare, ComponentCategory.interaction),

@@ -242,6 +242,14 @@ class BentoGallery extends StatelessWidget {
       colorIndex: 0,
     ),
     _BentoItem(
+      title: "Timeline",
+      description: "Vertical steps with duration-proportional segments",
+      icon: LucideIcons.listOrdered,
+      route: "/components/timeline",
+      category: "Interaction",
+      colorIndex: 3,
+    ),
+    _BentoItem(
       title: "Orb",
       description: "Floating action element",
       icon: LucideIcons.droplet,
@@ -461,6 +469,28 @@ class _BentoCard extends StatelessWidget {
 
       case "Breadcrumb":
         return LdBreadcrumb.fromStrings(["Home", "Preview"]);
+
+      case "Timeline":
+        return LdTimeline(
+          durationScale: 0.05,
+          now: const Duration(minutes: 15),
+          entries: [
+            LdTimelineEntry.fromStrings(
+              title: 'Done',
+              subtitle: '10 min',
+              icon: const Icon(LucideIcons.check),
+              duration: const Duration(minutes: 10),
+              state: LdTimelineEntryState.completed,
+            ),
+            LdTimelineEntry.fromStrings(
+              title: 'Active',
+              subtitle: 'In progress',
+              icon: const Icon(LucideIcons.play),
+              duration: const Duration(minutes: 30),
+              state: LdTimelineEntryState.active,
+            ),
+          ],
+        );
 
       case "Orb":
         return LdOrb(0.5, size: 140);

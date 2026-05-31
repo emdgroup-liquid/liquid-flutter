@@ -63,6 +63,7 @@ The Liquid Flutter design system provides a comprehensive set of components and 
 - **LdDivider**: Divider component
 - **LdAccordion**: Accordion/collapsible component
 - **LdBreadcrumb**: Breadcrumb navigation
+- **LdTimeline**: Vertical timeline with duration-proportional segments, fixed-height dashed [LdTimelineGap]s, entry states, optional `now` indicator with `nowLabel`, and active-segment progress (from `now` or `LdTimelineEntry.progress`)
 - **LdTable**: Table component
 
 ## Spacing

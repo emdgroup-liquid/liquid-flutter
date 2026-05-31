@@ -88,42 +88,47 @@ class LdScaffoldBody extends StatelessWidget {
         horizontalPadding = horizontalPadding.atLeast(maxWidthPadding);
       }
 
-      return ColoredBox(
-        color: backgroundColor ?? Colors.transparent,
-        child: MediaQuery.removePadding(
-          context: context,
-          removeTop: true,
-          removeBottom: true,
-          child: CustomScrollView(
-            controller: effectiveController,
-            slivers: [
-              if (effectiveChildren.isNotEmpty)
-                SliverPadding(
-                  padding: horizontalPadding.copyWith(
-                    top: (themePadding.top + padding.top),
-                    bottom: (themePadding.bottom + padding.bottom),
-                  ),
-                  sliver: SliverList.builder(
-                    itemCount: effectiveChildren.length,
-                    itemBuilder: (context, index) => effectiveChildren[index],
-                  ),
-                ),
-              if (slivers.isNotEmpty)
-                ...slivers.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final sliver = entry.value;
-                  final isFirst = index == 0;
-                  final isLast = index == slivers.length - 1;
-
-                  return SliverPadding(
+      return LdListItemConfigProvider(
+        config: LdListItemConfig(
+          borderRadius: LdTheme.of(context).radius(LdSize.m),
+        ),
+        child: ColoredBox(
+          color: backgroundColor ?? Colors.transparent,
+          child: MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            removeBottom: true,
+            child: CustomScrollView(
+              controller: effectiveController,
+              slivers: [
+                if (effectiveChildren.isNotEmpty)
+                  SliverPadding(
                     padding: horizontalPadding.copyWith(
-                      top: isFirst ? padding.top + themePadding.top : 0,
-                      bottom: isLast ? padding.bottom + themePadding.bottom : 0,
+                      top: (themePadding.top + padding.top),
+                      bottom: (themePadding.bottom + padding.bottom),
                     ),
-                    sliver: sliver,
-                  );
-                }),
-            ],
+                    sliver: SliverList.builder(
+                      itemCount: effectiveChildren.length,
+                      itemBuilder: (context, index) => effectiveChildren[index],
+                    ),
+                  ),
+                if (slivers.isNotEmpty)
+                  ...slivers.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final sliver = entry.value;
+                    final isFirst = index == 0;
+                    final isLast = index == slivers.length - 1;
+
+                    return SliverPadding(
+                      padding: horizontalPadding.copyWith(
+                        top: isFirst ? padding.top + themePadding.top : 0,
+                        bottom: isLast ? padding.bottom + themePadding.bottom : 0,
+                      ),
+                      sliver: sliver,
+                    );
+                  }),
+              ],
+            ),
           ),
         ),
       );

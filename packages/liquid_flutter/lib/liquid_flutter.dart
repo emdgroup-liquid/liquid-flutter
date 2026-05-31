@@ -109,6 +109,7 @@ export 'src/theme/theme.dart';
 export 'src/theme/theme_provider.dart';
 export 'src/theme/themed_material_app_builder.dart';
 export 'src/time_picker.dart';
+export 'src/timeline/timeline.dart';
 export 'src/toggle.dart';
 export 'src/tokens.dart';
 export 'src/touchable/touchable.dart';

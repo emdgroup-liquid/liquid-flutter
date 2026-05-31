@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/modal/sheet_transition.dart';
+import 'package:provider/provider.dart';
 
 /// A Page implementation for use with GoRouter that displays an LdModal.
 ///
@@ -273,6 +274,16 @@ class LdModalRoute<T> extends PageRoute<T> {
     return pageBuilder(context);
   }
 
+  /// Blocks [LdAppBarMetrics] inherited from ancestor routes (e.g. a shell
+  /// [LdAppBar] wrapping the navigator). Without this, modal bars are treated
+  /// as nested level-1 bars and pick up incorrect outer padding.
+  Widget _isolateAppBarMetrics(Widget child) {
+    return Provider<LdAppBarMetrics?>.value(
+      value: null,
+      child: child,
+    );
+  }
+
   @override
   Widget buildPage(
     BuildContext context,
@@ -281,7 +292,7 @@ class LdModalRoute<T> extends PageRoute<T> {
   ) {
     return LayoutBuilder(builder: (context, constraints) {
       final bool isSheet = _shouldBeSheet(constraints);
-      final Widget content = _wrapContent(context);
+      final Widget content = _isolateAppBarMetrics(_wrapContent(context));
 
       if (isSheet) {
         return _buildSheetContent(context, content);
