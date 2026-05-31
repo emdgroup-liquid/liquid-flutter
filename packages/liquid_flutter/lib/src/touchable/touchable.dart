@@ -21,6 +21,11 @@ class LdTouchableSurface extends StatefulWidget {
   final FocusNode? focusNode;
   final Function() onPressed;
   final bool allowTapOutside;
+
+  /// When true, uses [TextFieldTapRegion] so taps on text selection handles and
+  /// toolbars do not trigger [onTapOutside] / unfocus (same group as [TextField]).
+  final bool textFieldTapRegion;
+
   final Widget? child;
   final Set<LogicalKeyboardKey>? onPressedKeys;
 
@@ -35,6 +40,7 @@ class LdTouchableSurface extends StatefulWidget {
     this.hitTestBehavior = HitTestBehavior.opaque,
     required this.builder,
     this.allowTapOutside = false,
+    this.textFieldTapRegion = false,
     this.focusNode,
     this.active = false,
     this.disabled = false,
@@ -120,7 +126,8 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
 
         return KeyEventResult.ignored;
       },
-      child: TapRegion(
+      child: _TapRegionWrapper(
+        textFieldTapRegion: widget.textFieldTapRegion,
         onTapOutside: (details) {
           if (widget.allowTapOutside) {
             return;
@@ -205,6 +212,32 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
           );
         }),
       ),
+    );
+  }
+}
+
+class _TapRegionWrapper extends StatelessWidget {
+  const _TapRegionWrapper({
+    required this.textFieldTapRegion,
+    required this.onTapOutside,
+    required this.child,
+  });
+
+  final bool textFieldTapRegion;
+  final TapRegionCallback onTapOutside;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (textFieldTapRegion) {
+      return TextFieldTapRegion(
+        onTapOutside: onTapOutside,
+        child: child,
+      );
+    }
+    return TapRegion(
+      onTapOutside: onTapOutside,
+      child: child,
     );
   }
 }

@@ -170,6 +170,7 @@ class _LdInputState extends State<LdInput> {
             },
             child: LdTouchableSurface(
               allowTapOutside: widget.allowTapOutside,
+              textFieldTapRegion: true,
               focusNode: _focusScopeNode,
               onPressed: () {
                 _focusNode.requestFocus();
