@@ -197,11 +197,14 @@ class LdAppBarWidget extends StatefulWidget {
   State<LdAppBarWidget> createState() => _LdAppBarWidgetState();
 }
 
-class _LdAppBarWidgetState extends State<LdAppBarWidget> {
+class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObserver {
   final FocusScopeNode _focusScopeNode = FocusScopeNode();
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _focusScopeNode.removeListener(_handleFocusChange);
+    FocusManager.instance.removeListener(_handleFocusChange);
     _focusScopeNode.dispose();
     super.dispose();
   }
@@ -209,18 +212,25 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _focusScopeNode.addListener(_handleFocusChange);
+    FocusManager.instance.addListener(_handleFocusChange);
+  }
+
+  @override
+  void didChangeMetrics() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void _handleFocusChange() {
-    // Use addPostFrameCallback instead of Future.delayed(Duration.zero) to
-    // avoid leaving a pending timer that fails widget tests.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        setState(() {});
-      }
-    });
+    if (mounted) {
+      setState(() {});
+    }
   }
+
+  bool get _barHasFocusedInput => ldAppBarFocusScopeHasInputFocus(_focusScopeNode);
 
   bool get _isModal {
     final ModalRoute<Object?>? parentRoute = ModalRoute.of(context);
@@ -306,8 +316,8 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> {
       final parentMetrics = context.read<LdAppBarMetrics?>();
       final isLevel0 = parentMetrics == null || parentMetrics.position != position;
       return isLevel0 &&
-          _focusScopeNode.hasFocus &&
-          MediaQuery.of(context).viewInsets.bottom > 0 &&
+          _barHasFocusedInput &&
+          MediaQuery.viewInsetsOf(context).bottom > 0 &&
           position == LdAppBarPosition.bottom;
     }
 
@@ -395,6 +405,9 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // Rebuild when the keyboard opens/closes (autoAttachToKeyboard).
+    MediaQuery.viewInsetsOf(context);
+
     final position = _effectivePosition;
     final isAttached = _effectivelyAttached();
 
@@ -555,13 +568,11 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> {
 
     barSurface = AnnotatedRegion<SystemUiOverlayStyle>(
       value: _systemUiOverlayStyle,
-      child: FocusScope(
-        node: _focusScopeNode,
-        child: barSurface,
-      ),
+      child: barSurface,
     );
 
     final frame = AppBarFrame(
+      focusScopeNode: _focusScopeNode,
       avoidViewInsets: widget.avoidViewInsets,
       addContainer: widget.addContainer,
       debugName: widget.debugName,

@@ -6,6 +6,24 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/modal/size_notifier.dart';
 import 'package:provider/provider.dart';
 
+/// Whether [scope] currently contains the primary focus, including inputs in
+/// nested scopes (e.g. [LdSearchInput]).
+bool ldAppBarFocusScopeHasInputFocus(FocusScopeNode scope) {
+  if (scope.hasFocus) {
+    return true;
+  }
+  final primary = FocusManager.instance.primaryFocus;
+  if (primary == null) {
+    return false;
+  }
+  for (FocusNode? node = primary; node != null; node = node.parent) {
+    if (node == scope) {
+      return true;
+    }
+  }
+  return false;
+}
+
 class AppBarFrame extends StatefulWidget {
   /// The bar surface content (the visual bar widget).
   final Widget child;
@@ -33,6 +51,13 @@ class AppBarFrame extends StatefulWidget {
   final bool addContainer;
   final bool insetBorderRadius;
   final bool avoidViewInsets;
+
+  /// Tracks focus inside the bar surface for keyboard/view-inset padding.
+  ///
+  /// When omitted, [AppBarFrame] creates and owns an internal scope. When
+  /// provided (e.g. by [LdAppBarWidget]), the caller owns disposal.
+  final FocusScopeNode? focusScopeNode;
+
   final String? debugName;
 
   /// Scroll-hide behaviour. Only meaningful when [wrappedChild] is provided.
@@ -53,6 +78,7 @@ class AppBarFrame extends StatefulWidget {
     this.insideDecorationBuilder,
     this.outsideDecorationBuilder,
     this.avoidViewInsets = false,
+    this.focusScopeNode,
     this.insetBorderRadius = true,
     this.insidePadding,
     this.outsideMinPadding,
@@ -65,7 +91,8 @@ class AppBarFrame extends StatefulWidget {
 }
 
 class _AppBarFrameState extends State<AppBarFrame> {
-  final FocusScopeNode _focusScopeNode = FocusScopeNode();
+  late final FocusScopeNode _focusScopeNode;
+  late final bool _ownsFocusScopeNode;
 
   // ── Stack-mode state ──────────────────────────────────────────────────────
 
@@ -109,8 +136,27 @@ class _AppBarFrameState extends State<AppBarFrame> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _ownsFocusScopeNode = widget.focusScopeNode == null;
+    _focusScopeNode = widget.focusScopeNode ?? FocusScopeNode();
+    _focusScopeNode.addListener(_handleFocusChange);
+    FocusManager.instance.addListener(_handleFocusChange);
+  }
+
+  void _handleFocusChange() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
   void dispose() {
-    _focusScopeNode.dispose();
+    _focusScopeNode.removeListener(_handleFocusChange);
+    FocusManager.instance.removeListener(_handleFocusChange);
+    if (_ownsFocusScopeNode) {
+      _focusScopeNode.dispose();
+    }
     super.dispose();
   }
 
@@ -151,7 +197,18 @@ class _AppBarFrameState extends State<AppBarFrame> {
     return widget.position == LdAppBarPosition.top ? extra.top : extra.bottom;
   }
 
-  EdgeInsets _outsideContainerPadding(BoxConstraints constraints, {required double edgeMargin}) {
+  bool _shouldApplyViewInsets() {
+    if (widget.avoidViewInsets) {
+      return true;
+    }
+    return ldAppBarFocusScopeHasInputFocus(_focusScopeNode);
+  }
+
+  EdgeInsets _outsideContainerPadding(
+    BoxConstraints constraints, {
+    required double edgeMargin,
+    required bool shouldApplyViewInsets,
+  }) {
     final theme = LdTheme.of(context);
     final level = _calculateLevel(context.read<LdAppBarMetrics?>());
 
@@ -160,8 +217,9 @@ class _AppBarFrameState extends State<AppBarFrame> {
         : EdgeInsets.only(bottom: edgeMargin);
 
     // Keyboard inset when bar is focused.
-    final viewInsets =
-        _focusScopeNode.hasFocus || widget.avoidViewInsets ? MediaQuery.of(context).viewInsets : EdgeInsets.zero;
+    final viewInsets = shouldApplyViewInsets
+        ? MediaQuery.of(context).viewInsets
+        : EdgeInsets.zero;
     final trimmedViewInsets = widget.position == LdAppBarPosition.top
         ? EdgeInsets.only(top: viewInsets.top)
         : EdgeInsets.only(bottom: viewInsets.bottom);
@@ -323,19 +381,28 @@ class _AppBarFrameState extends State<AppBarFrame> {
         ? widget.insideDecorationBuilder!(_isScrolledUnder)
         : widget.insideDecoration;
 
-    return Container(
-      padding: _outsideContainerPadding(constraints, edgeMargin: animatedEdgeMargin),
-      decoration: outsideDeco,
-      clipBehavior: outsideDeco != null ? Clip.hardEdge : Clip.none,
-      key: Key("appbar_frame_outside_${widget.position.name}"),
-      child: MeasureSize(
-        onSizeChange: _onInnerSizeChange,
-        child: Container(
-          decoration: insideDeco,
-          padding: _insidePadding(constraints),
-          clipBehavior: insideDeco != null ? Clip.hardEdge : Clip.none,
-          key: Key("appbar_frame_inside_${widget.position.name}"),
-          child: widget.child,
+    final shouldApplyViewInsets = _shouldApplyViewInsets();
+
+    return FocusScope(
+      node: _focusScopeNode,
+      child: Container(
+        padding: _outsideContainerPadding(
+          constraints,
+          edgeMargin: animatedEdgeMargin,
+          shouldApplyViewInsets: shouldApplyViewInsets,
+        ),
+        decoration: outsideDeco,
+        clipBehavior: outsideDeco != null ? Clip.hardEdge : Clip.none,
+        key: Key("appbar_frame_outside_${widget.position.name}"),
+        child: MeasureSize(
+          onSizeChange: _onInnerSizeChange,
+          child: Container(
+            decoration: insideDeco,
+            padding: _insidePadding(constraints),
+            clipBehavior: insideDeco != null ? Clip.hardEdge : Clip.none,
+            key: Key("appbar_frame_inside_${widget.position.name}"),
+            child: widget.child,
+          ),
         ),
       ),
     );
