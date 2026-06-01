@@ -91,9 +91,10 @@ class LdScaffoldBody extends StatelessWidget {
 
     final effectiveChildren = autoSpaceChildren ? children.autoSpace(context) : children;
 
-    // Get the scroll controller from the scaffold if none provided
-    final effectiveController =
-        scrollController ?? (context.findAncestorStateOfType<LdScaffoldState>()?.effectiveScrollController);
+    // Only pass an explicit [scrollController] when the caller provides one.
+    // [LdScaffold] already wraps the body in [PrimaryScrollController]; attaching
+    // the same controller here too can leave two scroll views on it during rebuilds
+    // (e.g. when [ThemeData.platform] changes).
 
     return LayoutBuilder(builder: (context, constraints) {
       final basePadding = themePadding + padding;
@@ -107,7 +108,7 @@ class LdScaffoldBody extends StatelessWidget {
       }
 
       final scrollView = CustomScrollView(
-        controller: effectiveController,
+        controller: scrollController,
         slivers: [
           if (effectiveChildren.isNotEmpty)
             SliverPadding(

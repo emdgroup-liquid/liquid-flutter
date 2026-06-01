@@ -660,5 +660,49 @@ void main() {
       expect(find.text('Modal App Bar'), findsOneWidget);
       expect(find.text('Modal body'), findsOneWidget);
     });
+
+    testWidgets(
+      'LdScaffoldBody survives LdTheme platform change without scroll controller assert',
+      (WidgetTester tester) async {
+        ldDisableAnimations = true;
+        await tester.binding.setSurfaceSize(const Size(400, 600));
+
+        final theme = LdTheme()..platform = LdPlatform.ios;
+
+        await tester.pumpWidget(
+          LdThemeProvider(
+            theme: theme,
+            child: LdThemedAppBuilder(
+              appBuilder: (context, themeData) => MaterialApp(
+                theme: themeData,
+                localizationsDelegates: const [LiquidLocalizations.delegate],
+                home: LdScaffold(
+                  body: LdAppBar.top(
+                    title: const Text('Platform switch'),
+                    child: LdScaffoldBody(
+                      children: List.generate(
+                        30,
+                        (index) => SizedBox(
+                          height: 80,
+                          child: Center(child: Text('Row $index')),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        theme.platform = LdPlatform.android;
+        await tester.pump();
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+      },
+    );
   });
 }

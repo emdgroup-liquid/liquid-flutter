@@ -67,9 +67,17 @@ class _LdScrollEdgeFadeState extends State<LdScrollEdgeFade> {
 
   void _readMetricsFromPrimaryController() {
     final controller = PrimaryScrollController.maybeOf(context);
-    if (controller != null && controller.hasClients) {
-      _updateFromMetrics(controller.position);
+    if (controller == null || !controller.hasClients) {
+      return;
     }
+
+    // During rebuilds the primary controller can briefly have multiple clients.
+    final positions = controller.positions;
+    if (positions.isEmpty) {
+      return;
+    }
+
+    _updateFromMetrics(positions.first);
   }
 
   void _updateFromMetrics(ScrollMetrics metrics) {
