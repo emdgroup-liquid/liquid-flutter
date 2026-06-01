@@ -38,6 +38,8 @@ public class LiquidFlutterWindowUtilsPlugin: NSObject, FlutterPlugin, WindowUtil
     guard let window = LiquidFlutterWindowUtilsPlugin.getCurrentWindow() else {
       throw FlutterError(code: "WINDOW_NOT_AVAILABLE", message: "No window is currently available for configuration", details: nil)
     }
+
+    ensureWindowHasUsableFrame(window: window)
     
     
     
@@ -64,6 +66,14 @@ public class LiquidFlutterWindowUtilsPlugin: NSObject, FlutterPlugin, WindowUtil
     // Force the window to update its appearance
     window.invalidateShadow()
     window.display()
+
+    if window.isMiniaturized {
+      window.deminiaturize(nil)
+    }
+
+    NSApplication.shared.activate(ignoringOtherApps: true)
+    window.makeKeyAndOrderFront(nil)
+    window.orderFrontRegardless()
     
     // Also set the Flutter view controller background to clear
     if let flutterViewController = getFlutterViewController() {
@@ -383,5 +393,44 @@ public class LiquidFlutterWindowUtilsPlugin: NSObject, FlutterPlugin, WindowUtil
     }
     
     return nil
+  }
+
+  private func ensureWindowHasUsableFrame(window: NSWindow) {
+    let minWidth: CGFloat = 900
+    let minHeight: CGFloat = 600
+
+    var frame = window.frame
+    var frameChanged = false
+
+    if frame.width < 200 || frame.height < 200 {
+      if let screen = window.screen ?? NSScreen.main {
+        let visibleFrame = screen.visibleFrame
+        let width = min(max(minWidth, frame.width), visibleFrame.width)
+        let height = min(max(minHeight, frame.height), visibleFrame.height)
+        frame = NSRect(
+          x: visibleFrame.midX - (width / 2),
+          y: visibleFrame.midY - (height / 2),
+          width: width,
+          height: height
+        )
+      } else {
+        frame.size = NSSize(width: max(minWidth, frame.width), height: max(minHeight, frame.height))
+      }
+      frameChanged = true
+    }
+
+    if let screen = window.screen ?? NSScreen.main {
+      let visibleFrame = screen.visibleFrame
+      if !frame.intersects(visibleFrame) {
+        frame.origin.x = visibleFrame.midX - (frame.width / 2)
+        frame.origin.y = visibleFrame.midY - (frame.height / 2)
+        frameChanged = true
+      }
+    }
+
+    if frameChanged {
+      window.setFrame(frame, display: true, animate: false)
+      window.layoutIfNeeded()
+    }
   }
 }
