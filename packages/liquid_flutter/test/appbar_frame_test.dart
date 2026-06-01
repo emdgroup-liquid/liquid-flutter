@@ -600,6 +600,43 @@ void main() {
       expect(barTopAfter, closeTo(barTopBefore, 1.0));
     });
 
+    testWidgets('static scroll behavior: isScrolledUnder updates for decoration', (tester) async {
+      ldDisableAnimations = true;
+
+      LdAppBarMetrics? bodyMetrics;
+
+      await tester.pumpWidget(
+        _withTheme(
+          AppBarFrame(
+            position: LdAppBarPosition.top,
+            scrollBehavior: LdAppBarScrollBehavior.static,
+            wrappedChild: Builder(builder: (context) {
+              bodyMetrics = context.watch<LdAppBarMetrics?>();
+              return ListView.builder(
+                itemCount: 50,
+                itemBuilder: (_, i) => SizedBox(height: 40, child: Text('item $i')),
+              );
+            }),
+            child: const SizedBox(height: 60, child: Text('Bar')),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(bodyMetrics?.isScrolledUnder, isFalse);
+
+      await fakeScroll(tester, startOffset: 0, endOffset: 50);
+      await tester.pumpAndSettle();
+
+      expect(bodyMetrics?.isScrolledUnder, isTrue);
+
+      await fakeScroll(tester, startOffset: 50, endOffset: 0);
+      await tester.pumpAndSettle();
+
+      expect(bodyMetrics?.isScrolledUnder, isFalse);
+    });
+
     // -----------------------------------------------------------------------
     // Test 6: mid-snap re-grab does not jump (continuous position)
     // -----------------------------------------------------------------------

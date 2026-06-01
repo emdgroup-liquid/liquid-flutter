@@ -285,13 +285,21 @@ class _AppBarFrameState extends State<AppBarFrame> {
   }
 
   void _handleScrollNotification(ScrollNotification notification) {
-    if (!_shouldHideAppBar()) return;
-
     if (notification.depth != 0) return;
     if (notification.metrics.axis != Axis.vertical) return;
 
     final scrollOffset = notification.metrics.pixels;
     final isScrolledUnder = scrollOffset > 10;
+
+    if (!_shouldHideAppBar()) {
+      if (isScrolledUnder != _isScrolledUnder &&
+          (notification is ScrollStartNotification ||
+              notification is ScrollUpdateNotification ||
+              notification is ScrollEndNotification)) {
+        setState(() => _isScrolledUnder = isScrolledUnder);
+      }
+      return;
+    }
 
     if (notification is ScrollStartNotification) {
       _lastScrollOffset = scrollOffset;
