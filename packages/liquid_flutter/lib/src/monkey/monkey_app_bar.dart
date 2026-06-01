@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
-class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType>
-    extends StatelessWidget {
+class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
   final Widget? title;
   final LdMonkeyActionLocation location;
   final String? debugName;
@@ -40,9 +39,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType>
 
   LdFilterSearch<T, IdType, dynamic>? _getSearchFilter(BuildContext context) {
     final filterState = context.watch<LdMonkeySortAndFilterState<T, IdType>>();
-    final searchFilter = filterState.filters
-        .whereType<LdFilterSearch<T, IdType, dynamic>>()
-        .firstOrNull;
+    final searchFilter = filterState.filters.whereType<LdFilterSearch<T, IdType, dynamic>>().firstOrNull;
     return searchFilter;
   }
 
@@ -53,8 +50,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType>
     final effectiveLayout = context.watch<LdMonkeyEffectiveLayoutMode>();
     final appBarConfig = context.watch<LdAppBarConfig?>();
     final searchFilter = _getSearchFilter(context);
-    final showSearch =
-        searchFilter != null && location == LdMonkeyActionLocation.masterAppBar;
+    final showSearch = searchFilter != null && location == LdMonkeyActionLocation.masterAppBar;
 
     return Provider.value(
       value: location,
@@ -64,18 +60,13 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType>
           location,
         );
 
-        if (showSearch == false &&
-            actions.isEmpty &&
-            additionalActions.isEmpty &&
-            title == null) {
+        if (showSearch == false && actions.isEmpty && additionalActions.isEmpty && title == null) {
           return child ?? const SizedBox.shrink();
         }
 
         final effectivePositionMode = positionMode ??
             switch (location) {
-              LdMonkeyActionLocation.masterAppBar ||
-              LdMonkeyActionLocation.detailAppBar =>
-                LdAppBarPositionMode.top,
+              LdMonkeyActionLocation.masterAppBar || LdMonkeyActionLocation.detailAppBar => LdAppBarPositionMode.top,
               LdMonkeyActionLocation.masterSecondary ||
               LdMonkeyActionLocation.detailSecondary =>
                 LdAppBarPositionMode.bottom,
@@ -89,6 +80,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType>
             showWindowControls: appBarConfig?.showWindowControls ?? true,
             leading: leading,
             positionMode: effectivePositionMode,
+            autoAttachToKeyboard: true,
             shadowMode: shadowMode ??
                 switch (location) {
                   LdMonkeyActionLocation.masterAppBar ||
@@ -98,18 +90,15 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType>
                 },
             implyLeading: implyLeading ??
                 switch (location) {
-                  LdMonkeyActionLocation.detailAppBar =>
-                    effectiveLayout == LdMonkeyEffectiveLayoutMode.detail,
+                  LdMonkeyActionLocation.detailAppBar => effectiveLayout == LdMonkeyEffectiveLayoutMode.detail,
                   _ => null,
                 },
             attachedMode: switch (location) {
-              LdMonkeyActionLocation.masterSecondary =>
-                LdAppBarAttachedMode.floating,
+              LdMonkeyActionLocation.masterSecondary => LdAppBarAttachedMode.floating,
               _ => LdAppBarAttachedMode.adaptive,
             },
             searchConfig: switch (location) {
-              LdMonkeyActionLocation.masterAppBar =>
-                searchFilter?.searchConfig((query) {
+              LdMonkeyActionLocation.masterAppBar => searchFilter?.searchConfig((query) {
                   searchFilter.update(
                     context,
                     searchFilter.copyWith(
@@ -122,14 +111,10 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType>
             },
             title: title,
             overflowMenuProviders: (context) => [
-                  ListenableProvider.value(
-                      value: LdRepository.of<T, IdType>(context)),
-                  Provider.value(
-                      value: context.watch<LdMonkeyActionLocation>()),
-                  Provider.value(
-                      value: context.watch<LdMonkeyEffectiveLayoutMode>()),
-                  Provider.value(
-                      value: context.watch<LdMonkeySelection<T, IdType>>())
+                  ListenableProvider.value(value: LdRepository.of<T, IdType>(context)),
+                  Provider.value(value: context.watch<LdMonkeyActionLocation>()),
+                  Provider.value(value: context.watch<LdMonkeyEffectiveLayoutMode>()),
+                  Provider.value(value: context.watch<LdMonkeySelection<T, IdType>>())
                 ],
             actions: [
               ...actions.map((e) => e.build(context)),
