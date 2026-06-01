@@ -1,6 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
+/// Strips vertical [MediaQueryData.padding] for scroll content without touching
+/// [MediaQueryData.viewPadding] (unlike [MediaQuery.removePadding]).
+Widget _mediaQueryWithoutVerticalPadding(BuildContext context, Widget child) {
+  final mediaQuery = MediaQuery.of(context);
+  return MediaQuery(
+    data: mediaQuery.copyWith(
+      padding: mediaQuery.padding.copyWith(top: 0, bottom: 0),
+    ),
+    child: child,
+  );
+}
+
 class LdScaffoldBodyCentered extends StatelessWidget {
   final Widget child;
   final Color? backgroundColor;
@@ -31,11 +43,9 @@ class LdScaffoldBodyCentered extends StatelessWidget {
       return Container(
         color: backgroundColor ?? Colors.transparent,
         padding: padding,
-        child: MediaQuery.removePadding(
-          context: context,
-          removeTop: true,
-          removeBottom: true,
-          child: Center(child: child),
+        child: _mediaQueryWithoutVerticalPadding(
+          context,
+          Center(child: child),
         ),
       );
     });
@@ -50,6 +60,12 @@ class LdScaffoldBody extends StatelessWidget {
   final ScrollController? scrollController;
   final bool autoSpaceChildren;
   final bool addContainer;
+
+  /// When true, fades the top and bottom edges when more content is scrollable.
+  final bool scrollEdgeFade;
+
+  /// Height of each scroll-edge fade band. Uses theme sizing when null.
+  final double? scrollEdgeFadeExtent;
   const LdScaffoldBody({
     super.key,
     this.children = const [],
@@ -61,6 +77,8 @@ class LdScaffoldBody extends StatelessWidget {
     this.backgroundColor,
     this.autoSpaceChildren = true,
     this.addContainer = false,
+    this.scrollEdgeFade = true,
+    this.scrollEdgeFadeExtent,
   });
 
   @override
@@ -88,43 +106,51 @@ class LdScaffoldBody extends StatelessWidget {
         horizontalPadding = horizontalPadding.atLeast(maxWidthPadding);
       }
 
+      final scrollView = CustomScrollView(
+        controller: effectiveController,
+        slivers: [
+          if (effectiveChildren.isNotEmpty)
+            SliverPadding(
+              padding: horizontalPadding.copyWith(
+                top: (themePadding.top + padding.top),
+                bottom: (themePadding.bottom + padding.bottom),
+              ),
+              sliver: SliverList.builder(
+                itemCount: effectiveChildren.length,
+                itemBuilder: (context, index) => effectiveChildren[index],
+              ),
+            ),
+          if (slivers.isNotEmpty)
+            ...slivers.asMap().entries.map((entry) {
+              final index = entry.key;
+              final sliver = entry.value;
+              final isFirst = index == 0;
+              final isLast = index == slivers.length - 1;
+
+              return SliverPadding(
+                padding: horizontalPadding.copyWith(
+                  top: isFirst ? padding.top + themePadding.top : 0,
+                  bottom: isLast ? padding.bottom + themePadding.bottom : 0,
+                ),
+                sliver: sliver,
+              );
+            }),
+        ],
+      );
+
+      final fadeColor = backgroundColor ?? theme.background;
+
       return ColoredBox(
         color: backgroundColor ?? Colors.transparent,
-        child: MediaQuery.removePadding(
-          context: context,
-          removeTop: true,
-          removeBottom: true,
-          child: CustomScrollView(
-            controller: effectiveController,
-            slivers: [
-              if (effectiveChildren.isNotEmpty)
-                SliverPadding(
-                  padding: horizontalPadding.copyWith(
-                    top: (themePadding.top + padding.top),
-                    bottom: (themePadding.bottom + padding.bottom),
-                  ),
-                  sliver: SliverList.builder(
-                    itemCount: effectiveChildren.length,
-                    itemBuilder: (context, index) => effectiveChildren[index],
-                  ),
-                ),
-              if (slivers.isNotEmpty)
-                ...slivers.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final sliver = entry.value;
-                  final isFirst = index == 0;
-                  final isLast = index == slivers.length - 1;
-
-                  return SliverPadding(
-                    padding: horizontalPadding.copyWith(
-                      top: isFirst ? padding.top + themePadding.top : 0,
-                      bottom: isLast ? padding.bottom + themePadding.bottom : 0,
-                    ),
-                    sliver: sliver,
-                  );
-                }),
-            ],
-          ),
+        child: _mediaQueryWithoutVerticalPadding(
+          context,
+          scrollEdgeFade
+              ? LdScrollEdgeFade(
+                  fadeColor: fadeColor,
+                  fadeExtent: scrollEdgeFadeExtent,
+                  child: scrollView,
+                )
+              : scrollView,
         ),
       );
     });

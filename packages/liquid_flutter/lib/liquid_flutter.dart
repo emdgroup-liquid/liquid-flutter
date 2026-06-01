@@ -78,6 +78,7 @@ export 'src/reveal.dart';
 export 'src/runner.dart';
 export 'src/scaffold.dart';
 export 'src/scaffold_body.dart';
+export 'src/scroll_edge_fade.dart';
 export 'src/select.dart';
 export 'src/slider.dart';
 export 'src/speed_reader.dart';
