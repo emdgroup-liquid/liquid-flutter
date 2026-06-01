@@ -410,14 +410,9 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
 
     final position = _effectivePosition;
     final isAttached = _effectivelyAttached();
-
-    // Level-0 top bar not in a modal enables window-drag + scroll-to-top.
-    // We compute isLevel0 from the *parent* metrics (bar that wraps this one).
-    // In both legacy and stack-mode this is the metrics provided by an ancestor
-    // AppBarFrame (if any).
-    final parentMetrics = context.read<LdAppBarMetrics?>();
-    final isLevel0 = parentMetrics == null || parentMetrics.position != LdAppBarPosition.top;
-    final enableWindowDrag = position == LdAppBarPosition.top && isLevel0 && !_isModal;
+    // Keep drag tied to the visible top bar surface, not parent metrics,
+    // because wrapper/stack composition can make parent-level checks stale.
+    final enableWindowDrag = _isInTopSlot && !_isModal && !_isDrawer && widget.showWindowControls;
 
     final hasSearch = widget.searchConfig != null;
     final mobile = LdTheme.of(context).platform.isMobile;
@@ -556,6 +551,9 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
 
     if (enableWindowDrag) {
       barSurface = GestureDetector(
+        // Capture drags across transparent spacing between controls so the
+        // title bar behaves like a native draggable region.
+        behavior: HitTestBehavior.translucent,
         onPanStart: (details) {
           LdAppBarWidget.callbacks?.onMove?.call();
         },
