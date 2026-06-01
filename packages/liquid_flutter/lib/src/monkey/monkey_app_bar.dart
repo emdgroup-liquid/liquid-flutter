@@ -45,7 +45,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
 
   @override
   Widget build(BuildContext context) {
-    context.watch<LdMonkeySelection<T, IdType>>();
+    final selection = context.watch<LdMonkeySelection<T, IdType>>();
 
     final effectiveLayout = context.watch<LdMonkeyEffectiveLayoutMode>();
     final appBarConfig = context.watch<LdAppBarConfig?>();
@@ -112,9 +112,9 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
             title: title,
             overflowMenuProviders: (context) => [
                   ListenableProvider.value(value: LdRepository.of<T, IdType>(context)),
-                  Provider.value(value: context.watch<LdMonkeyActionLocation>()),
-                  Provider.value(value: context.watch<LdMonkeyEffectiveLayoutMode>()),
-                  Provider.value(value: context.watch<LdMonkeySelection<T, IdType>>())
+                  Provider.value(value: location),
+                  Provider.value(value: effectiveLayout),
+                  Provider.value(value: selection)
                 ],
             actions: [
               ...actions.map((e) => e.build(context)),
