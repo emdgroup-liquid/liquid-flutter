@@ -14,6 +14,8 @@ The root of a Liquid Flutter application requires proper initialization and widg
 In your `main()` function, perform the following initialization steps:
 
 ```dart
+import 'package:liquid_flutter_window_utils/screen_radius_defaults.dart';
+
 void main() async {
   // 1. Ensure Flutter binding is initialized
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,8 +38,11 @@ void main() async {
     }
   });
 
-  // 5. Run the app
-  runApp(const MyApp());
+  // 5. Resolve screen radius once before the first frame (optional but avoids a flash at 0)
+  final screenRadius = await getScreenRadius();
+
+  // 6. Run the app
+  runApp(MyApp(screenRadius: screenRadius));
 }
 ```
 
@@ -47,7 +52,9 @@ The root widget tree must follow this exact hierarchy:
 
 ```dart
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  const MyApp({required this.screenRadius, super.key});
+
+  final double screenRadius;
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -63,7 +70,9 @@ class _MyAppState extends State<MyApp> {
           return LdNotificationProvider(
               child: LdNotificationPortal(
                 child: LdThemeProvider(
-                screenRadiusStream: LiquidFlutterWindowUtils.instance.screenRadiusStream,
+                screenRadius: Future.value(widget.screenRadius),
+                windowMaximizedStream:
+                    LiquidFlutterWindowUtils.instance.windowMaximizedStream,
                 child: LdThemedAppBuilder(
                   appBuilder: (context, theme) {
                     final router = context.read<AppRouter>().router;
@@ -96,7 +105,7 @@ class _MyAppState extends State<MyApp> {
 
 4. **LdNotificationProvider**: Sets up the `LdNotificationsController` in the widget tree. To actually render notification toasts on screen, also wrap the content with **`LdNotificationPortal`**.
 
-5. **LdThemeProvider**: Required for theme management. Must pass `screenRadiusStream` from `LiquidFlutterWindowUtils.instance.screenRadiusStream` for proper window radius handling on desktop platforms.
+5. **LdThemeProvider**: Required for theme management. Pass `screenRadius: getScreenRadius()` (from `liquid_flutter_window_utils`) for device/window corner radius. On macOS, also pass `windowMaximizedStream` so radius becomes `0` when the window is maximized.
 
 6. **LdThemedAppBuilder**: Builds the MaterialApp with the theme. The `appBuilder` callback receives the context and theme.
 
@@ -123,7 +132,7 @@ class AppRouter {
 ## Key Points
 
 - **Always use `MaterialApp.router`** with `routerConfig` for navigation
-- **Always pass `screenRadiusStream`** to `LdThemeProvider` for desktop window radius support
+- **Pass `screenRadius` and `windowMaximizedStream`** to `LdThemeProvider` when using `liquid_flutter_window_utils` on desktop (radius clears while maximized)
 - **Always set `LdAppBarWidget.callbacks`** in `main()` before `runApp()` for desktop window controls
 - **Always listen to `windowReadyStream`** and call `configureWindow()` when ready
 - **Use `Provider`** to provide the router instance, not a singleton

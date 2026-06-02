@@ -6,7 +6,7 @@ import 'package:liquid/router.dart';
 
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_window_utils/liquid_flutter_window_utils.dart';
-//import 'package:liquid_flutter_window_utils/liquid_flutter_window_utils.dart';
+import 'package:liquid_flutter_window_utils/screen_radius_defaults.dart';
 
 import 'package:provider/provider.dart';
 import 'package:syntax_highlight/syntax_highlight.dart';
@@ -17,9 +17,7 @@ final searchFocusNode = FocusNode();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   GoRouter.optionURLReflectsImperativeAPIs = true;
-
   await Highlighter.initialize(['dart', 'yaml', 'sql']);
 
   // Window callbacks for macOS
@@ -46,11 +44,15 @@ void main() async {
     }
   });
 
-  runApp(const LiquidExample());
+  final screenRadius = await getScreenRadius();
+
+  runApp(LiquidExample(screenRadius: screenRadius));
 }
 
 class LiquidExample extends StatefulWidget {
-  const LiquidExample({super.key});
+  const LiquidExample({required this.screenRadius, super.key});
+
+  final double screenRadius;
 
   @override
   State<LiquidExample> createState() => _LiquidExampleState();
@@ -85,7 +87,8 @@ class _LiquidExampleState extends State<LiquidExample> {
             },
             child: LdNotificationProvider(
               child: LdThemeProvider(
-                screenRadiusStream: LiquidFlutterWindowUtils.instance.screenRadiusStream,
+                screenRadius: Future.value(widget.screenRadius),
+                windowMaximizedStream: LiquidFlutterWindowUtils.instance.windowMaximizedStream,
                 child: LdThemedAppBuilder(
                   appBuilder: (context, theme) {
                     // We use a root navigator because else our nested navigation will not work

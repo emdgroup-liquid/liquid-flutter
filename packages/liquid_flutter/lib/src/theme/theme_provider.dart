@@ -31,7 +31,11 @@ class LdThemeProvider extends StatefulWidget {
   /// If true the theme will change based on the type of the device
   /// will use LdThemeSize.m on mobile and LdThemeSize.s on desktop
 
-  final Stream<double>? screenRadiusStream;
+  /// Screen corner radius in logical pixels for device or window chrome.
+  final Future<double>? screenRadius;
+
+  /// When this stream emits `true`, [screenRadius] is overridden to `0` (e.g. maximized desktop window).
+  final Stream<bool>? windowMaximizedStream;
 
   const LdThemeProvider({
     required this.child,
@@ -40,7 +44,8 @@ class LdThemeProvider extends StatefulWidget {
     this.brightnessMode = LdThemeBrightnessMode.auto,
     this.darkPalette,
     this.lightPalette,
-    this.screenRadiusStream,
+    this.screenRadius,
+    this.windowMaximizedStream,
     this.size,
     this.platform,
   });
@@ -59,7 +64,9 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
   LdPalette get _lightPalette => widget.lightPalette ?? shadDefault;
   LdTheme get _theme => widget.theme ?? _createdTheme!;
 
-  StreamSubscription<double>? _screenRadiusSubscription;
+  double? _baseScreenRadius;
+  bool _isWindowMaximized = false;
+  StreamSubscription<bool>? _windowMaximizedSubscription;
 
   @override
   void initState() {
@@ -73,7 +80,8 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
     _theme.addListener(themeChanged);
     WidgetsBinding.instance.addObserver(this);
 
-    _listenToScreenRadiusStream();
+    _applyScreenRadius();
+    _listenToWindowMaximizedStream();
     _runAfterFrame(_applyInitialTheme);
   }
 
@@ -107,14 +115,47 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
     _applyThemeSize();
   }
 
-  void _listenToScreenRadiusStream() {
-    _screenRadiusSubscription = widget.screenRadiusStream?.listen((radius) {
-      _runAfterFrame(() {
-        if (_theme.screenRadius == radius) {
-          return;
-        }
-        _theme.screenRadius = radius;
-      });
+  void _applyScreenRadius() {
+    final screenRadius = widget.screenRadius;
+    if (screenRadius == null) {
+      return;
+    }
+    screenRadius.then((radius) {
+      if (!mounted) {
+        return;
+      }
+      _baseScreenRadius = radius;
+      _updateEffectiveScreenRadius();
+    });
+  }
+
+  void _listenToWindowMaximizedStream() {
+    final stream = widget.windowMaximizedStream;
+    if (stream == null) {
+      return;
+    }
+    _windowMaximizedSubscription = stream.listen((isMaximized) {
+      if (!mounted) {
+        return;
+      }
+      _isWindowMaximized = isMaximized;
+      _updateEffectiveScreenRadius();
+    });
+  }
+
+  void _updateEffectiveScreenRadius() {
+    final base = _baseScreenRadius;
+    if (base == null) {
+      return;
+    }
+    final effective = _isWindowMaximized ? 0.0 : base;
+    _runAfterFrame(() {
+      if (_theme.screenRadius == effective) {
+        return;
+      }
+      _theme.screenRadius = effective;
+      // [_windowDecoration] lives in this State's build; theme listeners alone do not rebuild it.
+      setState(() {});
     });
   }
 
@@ -179,13 +220,25 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
     if (didThemeInputsChange) {
       _runAfterFrame(_applyInitialTheme);
     }
+
+    if (oldWidget.screenRadius != widget.screenRadius) {
+      _baseScreenRadius = null;
+      _applyScreenRadius();
+    }
+
+    if (oldWidget.windowMaximizedStream != widget.windowMaximizedStream) {
+      _windowMaximizedSubscription?.cancel();
+      _isWindowMaximized = false;
+      _listenToWindowMaximizedStream();
+      _updateEffectiveScreenRadius();
+    }
   }
 
   @override
   void dispose() {
     _theme.removeListener(themeChanged);
     WidgetsBinding.instance.removeObserver(this);
-    _screenRadiusSubscription?.cancel();
+    _windowMaximizedSubscription?.cancel();
     _createdTheme?.dispose();
     super.dispose();
   }
