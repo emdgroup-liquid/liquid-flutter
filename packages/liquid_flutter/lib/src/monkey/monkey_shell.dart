@@ -131,7 +131,7 @@ class _MonkeyShellLayoutBuilder<T extends Identifiable<IdType>, IdType> extends 
       final wrappedChild = Provider.value(
         value: LdListItemConfig(
           trailing: switch (effectiveLayout) {
-            LdMonkeyEffectiveLayoutMode.sideBySide => LdListDefaultTrailingForward(),
+            LdMonkeyEffectiveLayoutMode.master || LdMonkeyEffectiveLayoutMode.detail => LdListDefaultTrailingForward(),
             _ => null,
           },
         ),
@@ -175,7 +175,13 @@ class _MonkeyShellLayoutBuilder<T extends Identifiable<IdType>, IdType> extends 
               ),
             ),
           ),
-        _ => Provider.value(value: LdMonkeyEffectiveLayoutMode.detail, child: wrappedChild),
+        _ => Provider.value(
+            value: switch (showingDetail) {
+              true => LdMonkeyEffectiveLayoutMode.detail,
+              false => LdMonkeyEffectiveLayoutMode.master,
+            },
+            child: wrappedChild,
+          ),
       };
     });
   }

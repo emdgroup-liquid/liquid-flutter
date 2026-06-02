@@ -563,36 +563,33 @@ class _AppBarFrameState extends State<AppBarFrame> {
               final translateY =
                   widget.position == LdAppBarPosition.top ? -animatedHideOffset : animatedHideOffset;
 
-              // Body subtree: MediaQuery.padding is patched with the stable
-              // floor (never shrinks). The provider carries animatedMetrics
-              // so child bars and other consumers see live hideOffset/barHeight.
-              final bodySubtree = Positioned.fill(
-                child: MediaQuery(
-                  data: outerMediaQuery.copyWith(padding: stablePaddingWithGap),
-                  child: Provider<LdAppBarMetrics>.value(
-                    value: animatedMetrics,
-                    child: wrappedChild,
-                  ),
-                ),
-              );
-
-              return Stack(
-                children: [
-                  bodySubtree,
-                  Positioned(
-                    top: widget.position == LdAppBarPosition.top ? 0 : null,
-                    bottom: widget.position == LdAppBarPosition.bottom ? 0 : null,
-                    left: 0,
-                    right: 0,
-                    child: Provider<LdAppBarMetrics>.value(
-                      value: animatedMetrics,
+              // Single metrics provider for body + bar so dependents are not
+              // split across two InheritedElements (avoids stale watches during
+              // route teardown while LdSpring is still ticking).
+              return Provider<LdAppBarMetrics>.value(
+                value: animatedMetrics,
+                child: Stack(
+                  children: [
+                    // Body subtree: MediaQuery.padding is patched with the stable
+                    // floor (never shrinks). Metrics carry live hideOffset/barHeight.
+                    Positioned.fill(
+                      child: MediaQuery(
+                        data: outerMediaQuery.copyWith(padding: stablePaddingWithGap),
+                        child: wrappedChild,
+                      ),
+                    ),
+                    Positioned(
+                      top: widget.position == LdAppBarPosition.top ? 0 : null,
+                      bottom: widget.position == LdAppBarPosition.bottom ? 0 : null,
+                      left: 0,
+                      right: 0,
                       child: Transform.translate(
                         offset: Offset(0, translateY),
                         child: _buildBarSurface(constraints, animatedEdgeMargin: animatedEdgeMargin),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               );
             },
           ),

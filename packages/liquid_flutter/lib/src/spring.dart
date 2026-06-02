@@ -191,7 +191,9 @@ class _LdSpringState extends State<LdSpring> with SingleTickerProviderStateMixin
       _ticker ??= createTicker((elapsed) {
         update(elapsed.inMilliseconds);
 
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       });
 
       if (_ticker?.isActive != true) {
@@ -281,7 +283,9 @@ class _LdChainedSpringsState extends State<LdChainedSprings> with SingleTickerPr
       _ticker ??= createTicker((elapsed) {
         update(elapsed.inMilliseconds);
 
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       });
 
       if (_ticker?.isActive != true) {
@@ -338,7 +342,9 @@ class _LdChainedSpringsState extends State<LdChainedSprings> with SingleTickerPr
       if (!ldDisableAnimations) {
         _ticker ??= createTicker((elapsed) {
           update(elapsed.inMilliseconds);
-          setState(() {});
+          if (mounted) {
+            setState(() {});
+          }
         });
         if (_ticker?.isActive != true) {
           _ticker?.start();
@@ -386,7 +392,9 @@ class _LdChainedSpringsState extends State<LdChainedSprings> with SingleTickerPr
       }
     }
 
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override

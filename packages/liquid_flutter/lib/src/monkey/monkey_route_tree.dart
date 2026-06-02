@@ -275,9 +275,7 @@ String defaultMonkeyScopeStorageKey(
   if (path.isNotEmpty) {
     path.removeLast();
   }
-  return path
-      .map((n) => state.pathParameters[n.routeConfig.viewingParamName] ?? '')
-      .join('|');
+  return path.map((n) => state.pathParameters[n.routeConfig.viewingParamName] ?? '').join('|');
 }
 
 bool _collectPathTo(

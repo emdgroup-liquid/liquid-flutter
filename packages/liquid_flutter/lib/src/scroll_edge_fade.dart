@@ -56,16 +56,14 @@ class _LdScrollEdgeFadeState extends State<LdScrollEdgeFade> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _readMetricsFromPrimaryController());
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _readMetricsFromPrimaryController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _readMetricsFromPrimaryController();
+    });
   }
 
   void _readMetricsFromPrimaryController() {
+    if (!mounted) return;
     final controller = PrimaryScrollController.maybeOf(context);
     if (controller == null || !controller.hasClients) {
       return;
@@ -92,6 +90,8 @@ class _LdScrollEdgeFadeState extends State<LdScrollEdgeFade> {
     if (showTop == _showTop && showBottom == _showBottom) {
       return;
     }
+
+    if (!mounted) return;
 
     setState(() {
       _showTop = showTop;

@@ -142,7 +142,7 @@ class LdScaffoldBody extends StatelessWidget {
       final fadeColor = backgroundColor ?? theme.background;
 
       return ColoredBox(
-        color: backgroundColor ?? Colors.transparent,
+        color: backgroundColor ?? theme.background,
         child: _mediaQueryWithoutVerticalPadding(
           context,
           scrollEdgeFade
