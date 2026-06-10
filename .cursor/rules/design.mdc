@@ -30,7 +30,8 @@ The Liquid Flutter design system provides a comprehensive set of components and 
 - **LdButton**: Button component with variants
   - Mode variants: `LdButton.filled`, `LdButton.outline`, `LdButton.ghost`, `LdButton.vague`
     - To build an icon button you can simply pass an icon as child.
-  - Color variants: `LdButton.warning`, `LdButton.error`, `LdButton.success` 
+  - Color variants: `LdButton.warning`, `LdButton.error`, `LdButton.success`
+  - **Rule**: Do not set icon sizes (`Icon.size`) or text sizes (`Text.style` / `fontSize`) on widgets passed as `child`, `leading`, or `trailing`. Use the button's `size: LdSize.*` parameter; `LdButton` sizes icons and label text from that.
 - **LdCheckbox**: Checkbox input
 - **LdRadio**: Radio button input
 - **LdSwitch**: Toggle switch
@@ -257,3 +258,4 @@ Most components accept a `size` parameter using `LdSize`.
 9. **Apply radius** using `LdTheme.of(context).radius()` for consistency
 10. Use Lucide icons wherever possible instead of the default Icons or CupertinoIcons.
 11. To build a screen that navigates to sub-screens place the links to sub pages in LdListItem.trailingForward and group them in an LdCard. You can then add a group name using LdText.caption above the LdCard.
+12. **LdButton content sizing**: Never pass manual `Icon.size` or `Text` font sizes into `LdButton` children, leading, or trailing; control scale with `LdButton`'s `size` only.

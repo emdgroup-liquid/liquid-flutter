@@ -19,6 +19,7 @@ Cursor loads detailed rules from [`.cursor/rules/`](.cursor/rules/). This file i
 - **Shape**: Use `LdTheme.of(context).radius(LdSize.*)` for corners.
 - **Modals**: Use `LdModalRoute` for dialogs, modals, and sheets.
 - **Icons**: Prefer Lucide icons over `Icons` / `CupertinoIcons` where applicable.
+- **Buttons**: Do not set `Icon.size` or `Text` font sizes on `LdButton` `child` / `leading` / `trailing`; use `LdButton`'s `size: LdSize.*` only.
 - **Lists in cards**: `LdCard` with `padding: EdgeInsets.zero` and a `Column` of `LdListItem`s when building grouped settings-style lists.
 
 ## Before pushing
