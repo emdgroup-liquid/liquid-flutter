@@ -48,11 +48,23 @@ class LdMonkeyDetailPage<T extends Identifiable<IdType>, IdType> extends Statele
 
   @override
   Widget build(BuildContext context) {
-    return LdMonkeyAppBar<T, IdType>(
-      location: LdMonkeyActionLocation.detailAppBar,
+    return LdWrapConditional(
+      condition: primaryAppBarConfig != null,
+      builder: (context, child) => LdAppBarConfigProvider(config: primaryAppBarConfig!, child: child),
       child: LdMonkeyAppBar<T, IdType>(
-        location: LdMonkeyActionLocation.detailSecondary,
-        child: body,
+        location: LdMonkeyActionLocation.detailAppBar,
+        title: primaryAppBarConfig?.title,
+        bottom: primaryAppBarConfig?.bottom,
+        child: LdWrapConditional(
+          condition: secondaryAppBarConfig != null,
+          builder: (context, child) => LdAppBarConfigProvider(config: secondaryAppBarConfig!, child: child),
+          child: LdMonkeyAppBar<T, IdType>(
+            location: LdMonkeyActionLocation.detailSecondary,
+            title: secondaryAppBarConfig?.title,
+            bottom: secondaryAppBarConfig?.bottom,
+            child: body,
+          ),
+        ),
       ),
     );
   }

@@ -39,6 +39,80 @@ Widget _wrapForVisibility<T extends Identifiable<IdType>, IdType>({
   );
 }
 
+/// Wraps a widget with providers needed for action build/trigger tests.
+Widget _wrapForActionBuild<T extends Identifiable<IdType>, IdType>({
+  required Widget child,
+  required LdRepository<T, IdType> repository,
+  required TestSortAndFilterState<T, IdType> shellState,
+  required LdMonkeyActionLocation location,
+  LdMonkeyEffectiveLayoutMode layoutMode = LdMonkeyEffectiveLayoutMode.master,
+  LdMonkeySelection<T, IdType>? selection,
+  List<LdMonkeyAction<T, IdType>> actions = const [],
+}) {
+  selection ??= LdMonkeySelection<T, IdType>(
+    selection: shellState.currentSelection,
+    viewing: shellState.currentViewing,
+    showSelectionControls: shellState.currentShowSelectionControls,
+  );
+  return Provider<LdMonkeyActionScope<T, IdType>>(
+    create: (_) => LdMonkeyActionScope<T, IdType>(),
+    child: ListenableProvider<LdRepository<T, IdType>>.value(
+      value: repository,
+      child: Provider<LdMonkeyRouterController<T, IdType>>.value(
+        value: shellState.controllerDelegate,
+        child: Provider<LdMonkeySelection<T, IdType>>.value(
+          value: selection,
+          child: Provider<LdMonkeyActionLocation>.value(
+            value: location,
+            child: Provider<LdMonkeyEffectiveLayoutMode>.value(
+              value: layoutMode,
+              child: LdMonkeyActionHost<T, IdType>(
+                actions: actions,
+                child: child,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+/// Wraps a widget with providers needed for keyboard shortcut tests.
+Widget _wrapForShortcuts<T extends Identifiable<IdType>, IdType>({
+  required Widget child,
+  required LdRepository<T, IdType> repository,
+  required TestSortAndFilterState<T, IdType> shellState,
+  required LdMonkeySelection<T, IdType> selection,
+  LdMonkeyActionLocation location = LdMonkeyActionLocation.masterAppBar,
+  LdMonkeyEffectiveLayoutMode layoutMode = LdMonkeyEffectiveLayoutMode.master,
+}) {
+  return ListenableProvider<LdRepository<T, IdType>>.value(
+    value: repository,
+    child: Provider<LdMonkeyActionScope<T, IdType>>(
+      create: (_) => LdMonkeyActionScope<T, IdType>(),
+      child: Provider<LdMonkeyRouterController<T, IdType>>.value(
+        value: shellState.controllerDelegate,
+        child: Provider<LdMonkeySelection<T, IdType>>.value(
+          value: selection,
+          child: Provider<LdMonkeyActionLocation>.value(
+            value: location,
+            child: Provider<LdMonkeyEffectiveLayoutMode>.value(
+              value: layoutMode,
+              child: Builder(
+                builder: (context) {
+                  LdMonkeyActionScope.of<T, IdType>(context).appContext = context;
+                  return child;
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 void main() {
   group('LdMonkeyAction Tests', () {
     group('Action Visibility', () {
@@ -53,8 +127,8 @@ void main() {
               minSelectionCount: 0,
             ),
           },
-          builder: (context) => Container(),
-          onShortcutTrigger: (context) async {},
+          builder: (ctx, trigger) => Container(),
+          onTrigger: (ctx) async {},
         );
 
         await tester.pumpWidget(
@@ -83,8 +157,8 @@ void main() {
               minSelectionCount: 0,
             ),
           },
-          builder: (context) => Container(),
-          onShortcutTrigger: (context) async {},
+          builder: (ctx, trigger) => Container(),
+          onTrigger: (ctx) async {},
         );
 
         await tester.pumpWidget(
@@ -118,8 +192,8 @@ void main() {
               minSelectionCount: 2,
             ),
           },
-          builder: (context) => Container(),
-          onShortcutTrigger: (context) async {},
+          builder: (ctx, trigger) => Container(),
+          onTrigger: (ctx) async {},
         );
 
         await tester.pumpWidget(
@@ -155,8 +229,8 @@ void main() {
               maxSelectionCount: 2,
             ),
           },
-          builder: (context) => Container(),
-          onShortcutTrigger: (context) async {},
+          builder: (ctx, trigger) => Container(),
+          onTrigger: (ctx) async {},
         );
 
         await tester.pumpWidget(
@@ -187,8 +261,8 @@ void main() {
               layoutModes: {LdMonkeyEffectiveLayoutMode.sideBySide},
             ),
           },
-          builder: (context) => Container(),
-          onShortcutTrigger: (context) async {},
+          builder: (ctx, trigger) => Container(),
+          onTrigger: (ctx) async {},
         );
 
         await tester.pumpWidget(
@@ -224,8 +298,8 @@ void main() {
               visibleWhenShowingSelectionControls: false,
             ),
           },
-          builder: (context) => Container(),
-          onShortcutTrigger: (context) async {},
+          builder: (ctx, trigger) => Container(),
+          onTrigger: (ctx) async {},
         );
 
         await tester.pumpWidget(
@@ -256,8 +330,8 @@ void main() {
               isVisible: (context) => false,
             ),
           },
-          builder: (context) => Container(),
-          onShortcutTrigger: (context) async {},
+          builder: (ctx, trigger) => Container(),
+          onTrigger: (ctx) async {},
         );
 
         await tester.pumpWidget(
@@ -287,8 +361,8 @@ void main() {
               isVisible: (context) => true,
             ),
           },
-          builder: (context) => Container(),
-          onShortcutTrigger: (context) async {},
+          builder: (ctx, trigger) => Container(),
+          onTrigger: (ctx) async {},
         );
 
         await tester.pumpWidget(
@@ -311,55 +385,22 @@ void main() {
       testWidgets('build() returns widget from builder', (WidgetTester tester) async {
         final action = LdMonkeyBareChildAction<TestItem, int>(
           visibility: const {},
-          builder: (context) => const Text('Test Action'),
-          onShortcutTrigger: (context) async {},
+          builder: (ctx, trigger) => const Text('Test Action'),
+          onTrigger: (ctx) async {},
         );
 
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Builder(
-              builder: (context) => action.build(context),
-            ),
-          ),
-        );
-
-        expect(find.text('Test Action'), findsOneWidget);
-      });
-
-      test('onShortcutPressed calls onShortcutTrigger', () async {
-        var called = false;
-        final action = LdMonkeyBareChildAction<TestItem, int>(
-          visibility: const {},
-          builder: (context) => Container(),
-          onShortcutTrigger: (context) async {
-            called = true;
-          },
-        );
-
-        final context = MockBuildContext();
-        await action.onShortcutPressed(context);
-
-        expect(called, isTrue);
-      });
-    });
-
-    group('LdMonkeySubmitAction', () {
-      testWidgets('build() creates LdSubmit widget', (WidgetTester tester) async {
-        final action = LdMonkeySubmitAction<TestItem, int, String>(
-          visibility: const {},
-          tooltip: (_) => 'Submit',
-          config: (context) => LdSubmitConfig(
-            action: (_) async => 'result',
-          ),
-          child: const Text('Submit'),
-        );
+        final repository = createTestRepository();
+        final shellState = TestSortAndFilterState<TestItem, int>();
 
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
               localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: LdScaffold(
-                body: Builder(
+              home: _wrapForActionBuild(
+                repository: repository,
+                shellState: shellState,
+                location: LdMonkeyActionLocation.masterAppBar,
+                child: Builder(
                   builder: (context) => action.build(context),
                 ),
               ),
@@ -367,6 +408,78 @@ void main() {
           ),
         );
 
+        await tester.pumpAndSettle();
+        expect(find.text('Test Action'), findsOneWidget);
+      });
+
+      testWidgets('onShortcutPressed calls onTrigger', (WidgetTester tester) async {
+        var called = false;
+        final action = LdMonkeyBareChildAction<TestItem, int>(
+          visibility: const {},
+          builder: (ctx, trigger) => Container(),
+          onTrigger: (ctx) async {
+            called = true;
+          },
+        );
+
+        final repository = createTestRepository();
+        final shellState = TestSortAndFilterState<TestItem, int>();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: _wrapForActionBuild(
+              repository: repository,
+              shellState: shellState,
+              location: LdMonkeyActionLocation.masterAppBar,
+              child: Builder(
+                builder: (context) {
+                  action.onShortcutPressed(context, LdMonkeyActionScope.of(context));
+                  return Container();
+                },
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(called, isTrue);
+      });
+    });
+
+    group('LdMonkeySubmitAction', () {
+      testWidgets('buildTrigger renders submit button', (WidgetTester tester) async {
+        final action = LdMonkeySubmitAction<TestItem, int, String>(
+          id: 'test-submit',
+          visibility: const {},
+          tooltip: (_) => 'Submit',
+          submitConfig: (_) => const LdMonkeySubmitConfig(),
+          onSubmit: (ctx) async => 'result',
+          child: const Text('Submit'),
+        );
+
+        final repository = createTestRepository();
+        final shellState = TestSortAndFilterState<TestItem, int>();
+
+        await tester.pumpWidget(
+          LdThemeProvider(
+            child: MaterialApp(
+              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+              home: LdScaffold(
+                body: _wrapForActionBuild(
+                  repository: repository,
+                  shellState: shellState,
+                  location: LdMonkeyActionLocation.masterAppBar,
+                  actions: [action],
+                  child: Builder(
+                    builder: (context) => action.build(context),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
         expect(find.text('Submit'), findsOneWidget);
       });
     });
@@ -377,11 +490,11 @@ void main() {
         var shortcutPressed = false;
         final action = LdMonkeyBareChildAction<TestItem, int>(
           visibility: const {},
-          builder: (context) => Container(),
+          builder: (ctx, trigger) => Container(),
           shortcutActivators: {
             const SingleActivator(LogicalKeyboardKey.keyD, meta: true),
           },
-          onShortcutTrigger: (context) async {
+          onTrigger: (ctx) async {
             shortcutPressed = true;
           },
         );
@@ -393,18 +506,18 @@ void main() {
           showSelectionControls: false,
         );
         final focusNode = FocusNode();
+        final repository = createTestRepository();
 
         await tester.pumpWidget(
-          Provider<LdMonkeyRouterController<TestItem, int>>.value(
-            value: shellState.controllerDelegate,
-            child: Provider<LdMonkeySelection<TestItem, int>>.value(
-              value: selection,
-              child: LdMonkeyMultiShortcuts<TestItem, int>(
-                actions: [action],
-                child: Focus(
-                  focusNode: focusNode,
-                  child: const SizedBox(),
-                ),
+          _wrapForShortcuts(
+            repository: repository,
+            shellState: shellState,
+            selection: selection,
+            child: LdMonkeyMultiShortcuts<TestItem, int>(
+              actions: [action],
+              child: Focus(
+                focusNode: focusNode,
+                child: const SizedBox(),
               ),
             ),
           ),
@@ -427,11 +540,11 @@ void main() {
         var shortcutPressed = false;
         final action = LdMonkeyBareChildAction<TestItem, int>(
           visibility: const {},
-          builder: (context) => Container(),
+          builder: (ctx, trigger) => Container(),
           shortcutActivators: {
             const SingleActivator(LogicalKeyboardKey.keyD, meta: true),
           },
-          onShortcutTrigger: (context) async {
+          onTrigger: (ctx) async {
             shortcutPressed = true;
           },
         );
@@ -442,16 +555,16 @@ void main() {
           viewing: {},
           showSelectionControls: false,
         );
+        final repository = createTestRepository();
 
         await tester.pumpWidget(
-          Provider<LdMonkeyRouterController<TestItem, int>>.value(
-            value: shellState.controllerDelegate,
-            child: Provider<LdMonkeySelection<TestItem, int>>.value(
-              value: selection,
-              child: LdMonkeyMultiShortcuts<TestItem, int>(
-                actions: [action],
-                child: const SizedBox(),
-              ),
+          _wrapForShortcuts(
+            repository: repository,
+            shellState: shellState,
+            selection: selection,
+            child: LdMonkeyMultiShortcuts<TestItem, int>(
+              actions: [action],
+              child: const SizedBox(),
             ),
           ),
         );
@@ -469,11 +582,11 @@ void main() {
         var shortcutPressed = false;
         final action = LdMonkeyBareChildAction<TestItem, int>(
           visibility: const {},
-          builder: (context) => Container(),
+          builder: (ctx, trigger) => Container(),
           shortcutActivators: {
             const SingleActivator(LogicalKeyboardKey.keyD, meta: true),
           },
-          onShortcutTrigger: (context) async {
+          onTrigger: (ctx) async {
             shortcutPressed = true;
           },
         );
@@ -485,18 +598,18 @@ void main() {
           showSelectionControls: false,
         );
         final focusNode = FocusNode();
+        final repository = createTestRepository();
         await tester.pumpWidget(
-          Provider<LdMonkeyRouterController<TestItem, int>>.value(
-            value: shellState.controllerDelegate,
-            child: Provider<LdMonkeySelection<TestItem, int>>.value(
-              value: selection,
-              child: LdMonkeySingleShortcuts<TestItem, int>(
-                actions: [action],
-                item: 1,
-                child: Focus(
-                  focusNode: focusNode,
-                  child: const SizedBox(),
-                ),
+          _wrapForShortcuts(
+            repository: repository,
+            shellState: shellState,
+            selection: selection,
+            child: LdMonkeySingleShortcuts<TestItem, int>(
+              actions: [action],
+              item: 1,
+              child: Focus(
+                focusNode: focusNode,
+                child: const SizedBox(),
               ),
             ),
           ),
@@ -518,11 +631,11 @@ void main() {
         var shortcutPressed = false;
         final action = LdMonkeyBareChildAction<TestItem, int>(
           visibility: const {},
-          builder: (context) => Container(),
+          builder: (ctx, trigger) => Container(),
           shortcutActivators: {
             const SingleActivator(LogicalKeyboardKey.keyD, meta: true),
           },
-          onShortcutTrigger: (context) async {
+          onTrigger: (ctx) async {
             shortcutPressed = true;
           },
         );
@@ -534,19 +647,19 @@ void main() {
           showSelectionControls: false,
         );
         final focusNode = FocusNode();
+        final repository = createTestRepository();
 
         await tester.pumpWidget(
-          Provider<LdMonkeyRouterController<TestItem, int>>.value(
-            value: shellState.controllerDelegate,
-            child: Provider<LdMonkeySelection<TestItem, int>>.value(
-              value: selection,
-              child: LdMonkeySingleShortcuts<TestItem, int>(
-                actions: [action],
-                item: 1,
-                child: Focus(
-                  focusNode: focusNode,
-                  child: const SizedBox(),
-                ),
+          _wrapForShortcuts(
+            repository: repository,
+            shellState: shellState,
+            selection: selection,
+            child: LdMonkeySingleShortcuts<TestItem, int>(
+              actions: [action],
+              item: 1,
+              child: Focus(
+                focusNode: focusNode,
+                child: const SizedBox(),
               ),
             ),
           ),
@@ -565,42 +678,184 @@ void main() {
       });
     });
 
-    group('Built-in Actions', () {
-      testWidgets('toggleFilters() creates filter toggle action', (WidgetTester tester) async {
+    group('LdMonkeyActionContext', () {
+      testWidgets('of() uses adaptive selection for app bar location', (WidgetTester tester) async {
         final repository = createTestRepository();
         final shellState = TestSortAndFilterState<TestItem, int>();
         final selection = LdMonkeySelection<TestItem, int>(
-          selection: {},
+          selection: {1, 2},
           viewing: {},
           showSelectionControls: false,
         );
 
-        final action = showFilterContextMenu<TestItem, int>();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: _wrapForActionBuild(
+              repository: repository,
+              shellState: shellState,
+              location: LdMonkeyActionLocation.masterAppBar,
+              selection: selection,
+              child: Builder(
+                builder: (context) {
+                  final scope = LdMonkeyActionScope.of<TestItem, int>(context);
+                  scope.appContext = context;
+                  final ctx = LdMonkeyActionContext.of<TestItem, int>(
+                    context,
+                    appContext: context,
+                  );
+                  expect(ctx.selectedIds, {1, 2});
+                  expect(ctx.location, LdMonkeyActionLocation.masterAppBar);
+                  return Container();
+                },
+              ),
+            ),
+          ),
+        );
+      });
+
+      testWidgets('of() uses item-scoped selection from context menu override', (WidgetTester tester) async {
+        final repository = createTestRepository();
+        final shellState = TestSortAndFilterState<TestItem, int>();
+        // Context menu overrides selection to the right-clicked item when it is not selected.
+        final selection = LdMonkeySelection<TestItem, int>(
+          selection: {3},
+          viewing: {},
+          showSelectionControls: false,
+        );
+        final item = LdPaginatorItem<TestItem>(
+          value: createTestItem(3),
+          state: LdPaginatorItemState.loaded,
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: _wrapForActionBuild(
+              repository: repository,
+              shellState: shellState,
+              location: LdMonkeyActionLocation.context,
+              selection: selection,
+              child: Provider<LdPaginatorItem<TestItem>>.value(
+                value: item,
+                child: Builder(
+                  builder: (context) {
+                    final scope = LdMonkeyActionScope.of<TestItem, int>(context);
+                    scope.appContext = context;
+                    final ctx = LdMonkeyActionContext.of<TestItem, int>(
+                      context,
+                      appContext: context,
+                    );
+                    expect(ctx.selectedIds, {3});
+                    expect(ctx.contextItem, item);
+                    return Container();
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+      });
+
+      testWidgets('trigger callback passes fresh snapshot at press time', (WidgetTester tester) async {
+        Set<int>? triggerSelectedIds;
+        final action = LdMonkeyBareChildAction<TestItem, int>(
+          visibility: const {},
+          builder: (ctx, trigger) => LdAppBarAction(
+            onPressed: trigger,
+            child: const Text('Press'),
+          ),
+          onTrigger: (ctx) async {
+            triggerSelectedIds = ctx.selectedIds;
+          },
+        );
+
+        final repository = createTestRepository();
+        final shellState = TestSortAndFilterState<TestItem, int>();
+        final selection = LdMonkeySelection<TestItem, int>(
+          selection: {1},
+          viewing: {},
+          showSelectionControls: false,
+        );
 
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
               localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: ListenableProvider<LdRepository<TestItem, int>>.value(
-                value: repository,
-                child: Provider<LdMonkeyRouterController<TestItem, int>>.value(
-                  value: shellState.controllerDelegate,
-                  child: Provider<LdMonkeySortAndFilterState<TestItem, int>>.value(
-                    value: shellState.state,
-                    child: Provider<LdMonkeySelection<TestItem, int>>.value(
-                      value: selection,
-                      child: Provider<LdMonkeyActionLocation>.value(
-                        value: LdMonkeyActionLocation.masterAppBar,
-                        child: Provider<LdMonkeyEffectiveLayoutMode>.value(
-                          value: LdMonkeyEffectiveLayoutMode.master,
-                          child: Builder(
-                            builder: (context) => action.build(context),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+              home: _wrapForActionBuild(
+                repository: repository,
+                shellState: shellState,
+                location: LdMonkeyActionLocation.masterAppBar,
+                selection: selection,
+                child: Builder(
+                  builder: (context) => action.build(context),
                 ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Press'));
+        await tester.pumpAndSettle();
+
+        expect(triggerSelectedIds, {1});
+      });
+
+      testWidgets('onTrigger reads app provider from ctx.appContext', (WidgetTester tester) async {
+        const marker = 'app-provider-marker';
+        var readValue = '';
+
+        final action = LdMonkeyBareChildAction<TestItem, int>(
+          visibility: const {},
+          builder: (ctx, trigger) => Container(),
+          onTrigger: (ctx) async {
+            readValue = ctx.appContext.read<String>();
+          },
+        );
+
+        final repository = createTestRepository();
+        final shellState = TestSortAndFilterState<TestItem, int>();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Provider<String>.value(
+              value: marker,
+              child: _wrapForActionBuild(
+                repository: repository,
+                shellState: shellState,
+                location: LdMonkeyActionLocation.masterAppBar,
+                child: Builder(
+                  builder: (context) {
+                    action.onShortcutPressed(context, LdMonkeyActionScope.of(context));
+                    return Container();
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(readValue, marker);
+      });
+    });
+
+    group('Built-in Actions', () {
+      testWidgets('toggleFilters() creates filter toggle action', (WidgetTester tester) async {
+        final repository = createTestRepository();
+        final shellState = TestSortAndFilterState<TestItem, int>();
+
+        final action = showFilterContextMenu<TestItem, int>();
+
+        await tester.pumpWidget(
+          wrapMonkeyFilterTestContext<TestItem, int>(
+            repository: repository,
+            shellState: shellState,
+            child: _wrapForActionBuild<TestItem, int>(
+              repository: repository,
+              shellState: shellState,
+              location: LdMonkeyActionLocation.masterAppBar,
+              child: Builder(
+                builder: (context) => action.build(context),
               ),
             ),
           ),
@@ -613,11 +868,6 @@ void main() {
       testWidgets('toggleSelectionControls() creates selection controls toggle action', (WidgetTester tester) async {
         final repository = createTestRepository();
         final shellState = TestSortAndFilterState<TestItem, int>();
-        final selection = LdMonkeySelection<TestItem, int>(
-          selection: {},
-          viewing: {},
-          showSelectionControls: false,
-        );
 
         final action = toggleSelectionControls<TestItem, int>();
 
@@ -625,22 +875,12 @@ void main() {
           LdThemeProvider(
             child: MaterialApp(
               localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: ListenableProvider<LdRepository<TestItem, int>>.value(
-                value: repository,
-                child: Provider<LdMonkeyRouterController<TestItem, int>>.value(
-                  value: shellState.controllerDelegate,
-                  child: Provider<LdMonkeySelection<TestItem, int>>.value(
-                    value: selection,
-                    child: Provider<LdMonkeyActionLocation>.value(
-                      value: LdMonkeyActionLocation.masterAppBar,
-                      child: Provider<LdMonkeyEffectiveLayoutMode>.value(
-                        value: LdMonkeyEffectiveLayoutMode.master,
-                        child: Builder(
-                          builder: (context) => action.build(context),
-                        ),
-                      ),
-                    ),
-                  ),
+              home: _wrapForActionBuild(
+                repository: repository,
+                shellState: shellState,
+                location: LdMonkeyActionLocation.masterAppBar,
+                child: Builder(
+                  builder: (context) => action.build(context),
                 ),
               ),
             ),
@@ -666,22 +906,13 @@ void main() {
           LdThemeProvider(
             child: MaterialApp(
               localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: ListenableProvider<LdRepository<TestItem, int>>.value(
-                value: repository,
-                child: Provider<LdMonkeyRouterController<TestItem, int>>.value(
-                  value: shellState.controllerDelegate,
-                  child: Provider<LdMonkeySelection<TestItem, int>>.value(
-                    value: selection,
-                    child: Provider<LdMonkeyActionLocation>.value(
-                      value: LdMonkeyActionLocation.masterAppBar,
-                      child: Provider<LdMonkeyEffectiveLayoutMode>.value(
-                        value: LdMonkeyEffectiveLayoutMode.master,
-                        child: Builder(
-                          builder: (context) => action.build(context),
-                        ),
-                      ),
-                    ),
-                  ),
+              home: _wrapForActionBuild(
+                repository: repository,
+                shellState: shellState,
+                location: LdMonkeyActionLocation.masterSecondary,
+                selection: selection,
+                child: Builder(
+                  builder: (context) => action.build(context),
                 ),
               ),
             ),
@@ -707,22 +938,13 @@ void main() {
           LdThemeProvider(
             child: MaterialApp(
               localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: ListenableProvider<LdRepository<TestItem, int>>.value(
-                value: repository,
-                child: Provider<LdMonkeyRouterController<TestItem, int>>.value(
-                  value: shellState.controllerDelegate,
-                  child: Provider<LdMonkeySelection<TestItem, int>>.value(
-                    value: selection,
-                    child: Provider<LdMonkeyActionLocation>.value(
-                      value: LdMonkeyActionLocation.masterAppBar,
-                      child: Provider<LdMonkeyEffectiveLayoutMode>.value(
-                        value: LdMonkeyEffectiveLayoutMode.master,
-                        child: Builder(
-                          builder: (context) => action.build(context),
-                        ),
-                      ),
-                    ),
-                  ),
+              home: _wrapForActionBuild(
+                repository: repository,
+                shellState: shellState,
+                location: LdMonkeyActionLocation.masterSecondary,
+                selection: selection,
+                child: Builder(
+                  builder: (context) => action.build(context),
                 ),
               ),
             ),

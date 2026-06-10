@@ -4,12 +4,11 @@ import 'package:liquid_flutter/src/modal/modal.dart';
 import 'package:liquid_flutter/src/monkey/actions/actions.dart';
 import 'package:liquid_flutter/src/monkey/data/identifiable.dart';
 import 'package:liquid_flutter/src/monkey/data/repository.dart';
-import 'package:liquid_flutter/src/monkey/filter/ld_filter_option.dart';
+import 'package:liquid_flutter/src/monkey/ld_monkey_route_definitions.dart';
 import 'package:liquid_flutter/src/monkey/monkey_effective_layout_mode.dart';
 import 'package:liquid_flutter/src/monkey/monkey_layout_mode.dart';
 import 'package:liquid_flutter/src/monkey/monkey_route_config.dart';
 import 'package:liquid_flutter/src/monkey/monkey_route_scope.dart';
-import 'package:liquid_flutter/src/monkey/sort/sort_option.dart';
 import 'package:provider/provider.dart';
 
 /// One level in a stacked monkey route tree (parent detail hosts the next
@@ -24,9 +23,10 @@ class MonkeyRouteNode<T extends Identifiable<IdType>, IdType> {
     required this.masterPage,
     required this.detailPage,
     required this.repositoryBuilder,
-    required this.filters,
-    required this.sortOptions,
+    required this.filtersBuilder,
+    required this.sortOptionsBuilder,
     required this.actions,
+    this.routeDefinitionsLoadingText,
     this.detailInDialog = false,
     this.shellBuilder,
     this.child,
@@ -45,9 +45,11 @@ class MonkeyRouteNode<T extends Identifiable<IdType>, IdType> {
 
   final Widget detailPage;
 
-  final List<LdFilterOption<T, IdType>> filters;
+  final LdMonkeyFiltersBuilder<T, IdType> filtersBuilder;
 
-  final List<LdSortOption<T, IdType>> sortOptions;
+  final LdMonkeySortOptionsBuilder<T, IdType> sortOptionsBuilder;
+
+  final LdMonkeyRouteDefinitionsLoadingTextBuilder? routeDefinitionsLoadingText;
 
   final List<LdMonkeyAction<T, IdType>> actions;
 
@@ -98,8 +100,9 @@ class MonkeyRouteNode<T extends Identifiable<IdType>, IdType> {
         routeState: routeState,
         routeConfig: routeConfig,
         actions: actions,
-        filters: filters,
-        sortOptions: sortOptions,
+        filtersBuilder: filtersBuilder,
+        sortOptionsBuilder: sortOptionsBuilder,
+        routeDefinitionsLoadingText: routeDefinitionsLoadingText,
         repositoryBuilder: repositoryBuilder,
         masterPage: masterPage,
         shellBuilder: shellBuilder,
@@ -155,8 +158,9 @@ List<RouteBase> buildMonkeyRouteTree<T extends Identifiable<IdType>, IdType>({
           routeState: routeState,
           routeConfig: root.routeConfig,
           actions: root.actions,
-          filters: root.filters,
-          sortOptions: root.sortOptions,
+          filtersBuilder: root.filtersBuilder,
+          sortOptionsBuilder: root.sortOptionsBuilder,
+          routeDefinitionsLoadingText: root.routeDefinitionsLoadingText,
           repositoryBuilder: root.repositoryBuilder,
           masterPage: root.masterPage,
           shellBuilder: root.shellBuilder,

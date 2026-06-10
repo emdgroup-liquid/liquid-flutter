@@ -5,11 +5,9 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 LdMonkeyAction<T, IdType> showSelection<T extends Identifiable<IdType>, IdType>() => LdMonkeyBareChildAction<T, IdType>(
-      onShortcutTrigger: (context) async {
-        final selection = LdMonkeySelection.of<T, IdType>(context);
-
-        if (selection.selection.isNotEmpty) {
-          LdMonkeySelection.updateViewing<T, IdType>(context, selection.selection);
+      onTrigger: (ctx) async {
+        if (ctx.selection.selection.isNotEmpty) {
+          ctx.updateViewing(ctx.selection.selection);
         }
       },
       visibility: {
@@ -19,11 +17,9 @@ LdMonkeyAction<T, IdType> showSelection<T extends Identifiable<IdType>, IdType>(
           maxSelectionCount: null,
         ),
       },
-      builder: (context) {
-        final selection = LdMonkeySelection.of<T, IdType>(context);
-
-        // Only show if selection exists and is different from viewing
-        final shouldShow = selection.selection.isNotEmpty && !setEquals(selection.selection, selection.viewing);
+      builder: (ctx, trigger) {
+        final shouldShow =
+            ctx.selection.selection.isNotEmpty && !setEquals(ctx.selection.selection, ctx.selection.viewing);
 
         if (!shouldShow) {
           return const SizedBox.shrink();
@@ -33,11 +29,9 @@ LdMonkeyAction<T, IdType> showSelection<T extends Identifiable<IdType>, IdType>(
           key: const Key('show_selection'),
           buttonMode: LdButtonMode.filled,
           leading: const Icon(LucideIcons.eye),
-          preferLeadingOnMobile: false,
+          compactMode: LdAppBarActionCompactMode.never,
           child: const Text('Show Selection'),
-          onPressed: () async {
-            LdMonkeySelection.updateViewing<T, IdType>(context, selection.selection);
-          },
+          onPressed: trigger,
         );
       },
     );

@@ -22,6 +22,7 @@ Widget _wrapBodyWithBar<T extends Identifiable<IdType>, IdType>(Widget bar, Widg
       shadowMode: bar.shadowMode,
       borderMode: bar.borderMode,
       implyLeading: bar.implyLeading,
+      bottom: bar.bottom,
       child: body,
     );
   }

@@ -80,6 +80,9 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
   String get loading => 'Laden...';
 
   @override
+  String get loadingRouteDefinitions => 'Filter und Sortierung werden geladen...';
+
+  @override
   String get networkError => 'Netzwerkfehler. Bitte stellen Sie sicher, dass Sie mit dem Internet verbunden sind und versuchen Sie es erneut.';
 
   @override

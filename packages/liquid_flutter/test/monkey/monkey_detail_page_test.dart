@@ -30,7 +30,7 @@ Widget _wrapDetail<T extends Identifiable<IdType>, IdType>({
                 filters: filters,
                 sortOptions: [],
               ),
-              child: Provider<List<LdMonkeyAction<T, IdType>>>.value(
+              child: Provider<LdMonkeyActions<T, IdType>>.value(
                 value: actions,
                 child: child,
               ),
@@ -255,7 +255,13 @@ void main() {
         );
 
         await tester.pumpAndSettle();
-        expect(find.text('Custom Primary App Bar'), findsOneWidget);
+        final appBars = tester.widgetList<LdAppBarWidget>(find.byType(LdAppBarWidget));
+        expect(
+          appBars.any(
+            (bar) => bar.title is Text && (bar.title! as Text).data == 'Custom Primary App Bar',
+          ),
+          isTrue,
+        );
       });
 
       testWidgets('uses default LdMonkeyAppBar when primaryAppBar not provided', (WidgetTester tester) async {

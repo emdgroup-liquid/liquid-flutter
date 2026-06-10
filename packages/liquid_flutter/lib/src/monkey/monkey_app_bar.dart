@@ -14,6 +14,9 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
   final LdAppBarShadowMode? shadowMode;
   final LdAppBarBorderMode? borderMode;
 
+  /// Optional content below the app bar title row (e.g. filter chips).
+  final Widget? bottom;
+
   /// The subtree that this app bar wraps.
   ///
   /// When provided, the bar uses the new wrapper-based composition model and
@@ -34,6 +37,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
     this.shadowMode,
     this.borderMode,
     this.implyLeading,
+    this.bottom,
     this.child,
   });
 
@@ -48,7 +52,9 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
     final selection = context.watch<LdMonkeySelection<T, IdType>>();
 
     final effectiveLayout = context.watch<LdMonkeyEffectiveLayoutMode>();
-    final appBarConfig = context.watch<LdAppBarConfig?>();
+    final appBarConfig = Provider.of<LdAppBarConfig?>(context, listen: true);
+    final effectiveTitle = title ?? appBarConfig?.title;
+    final effectiveBottom = bottom ?? appBarConfig?.bottom;
     final searchFilter = _getSearchFilter(context);
     final showSearch = searchFilter != null && location == LdMonkeyActionLocation.masterAppBar;
 
@@ -60,7 +66,11 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
           location,
         );
 
-        if (showSearch == false && actions.isEmpty && additionalActions.isEmpty && title == null) {
+        if (showSearch == false &&
+            actions.isEmpty &&
+            additionalActions.isEmpty &&
+            effectiveTitle == null &&
+            effectiveBottom == null) {
           return child ?? const SizedBox.shrink();
         }
 
@@ -73,7 +83,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
               _ => LdAppBarPositionMode.top,
             };
 
-        return LdAppBarWidget(
+        return LdAppBar(
             debugName: debugName,
             backgroundMode: backgroundMode ?? LdAppBarBackgroundMode.adaptive,
             borderMode: borderMode ?? LdAppBarBorderMode.adaptive,
@@ -109,7 +119,8 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
                 }),
               _ => null,
             },
-            title: title,
+            title: effectiveTitle,
+            bottom: effectiveBottom,
             overflowMenuProviders: (context) => [
                   ListenableProvider.value(value: LdRepository.of<T, IdType>(context)),
                   Provider.value(value: location),
@@ -117,7 +128,12 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
                   Provider.value(value: selection)
                 ],
             actions: [
-              ...actions.map((e) => e.build(context)),
+              ...actions.map(
+                (e) => e.buildTrigger(
+                  context,
+                  LdMonkeyActionScope.of<T, IdType>(context),
+                ),
+              ),
               ...additionalActions,
             ],
             child: child);

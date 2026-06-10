@@ -233,6 +233,12 @@ abstract class LiquidLocalizations {
   /// **'Loading...'**
   String get loading;
 
+  /// No description provided for @loadingRouteDefinitions.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading filters and sort options...'**
+  String get loadingRouteDefinitions;
+
   /// No description provided for @networkError.
   ///
   /// In en, this message translates to:

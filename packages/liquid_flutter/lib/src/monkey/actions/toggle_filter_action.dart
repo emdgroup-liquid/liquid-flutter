@@ -5,7 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 LdMonkeyAction<T, IdType> showFilterContextMenu<T extends Identifiable<IdType>, IdType>() =>
     LdMonkeyBareChildAction<T, IdType>(
-      onShortcutTrigger: (context) {},
+      onTrigger: (_) async {},
       visibility: {
         LdMonkeyActionVisibility(
           location: LdMonkeyActionLocation.masterAppBar,
@@ -13,14 +13,14 @@ LdMonkeyAction<T, IdType> showFilterContextMenu<T extends Identifiable<IdType>, 
           maxSelectionCount: null,
         ),
       },
-      builder: (context) {
+      builder: (ctx, trigger) {
         return LdFilterContextMenu<T, IdType>();
       },
     );
 
 LdMonkeyAction<T, IdType> showFilterModal<T extends Identifiable<IdType>, IdType>() =>
     LdMonkeyBareChildAction<T, IdType>(
-      onShortcutTrigger: (context) {},
+      onTrigger: (_) async {},
       visibility: {
         LdMonkeyActionVisibility(
           location: LdMonkeyActionLocation.masterAppBar,
@@ -28,15 +28,17 @@ LdMonkeyAction<T, IdType> showFilterModal<T extends Identifiable<IdType>, IdType
           maxSelectionCount: null,
         ),
       },
-      builder: (context) => LdAppBarAction(
-        active: LdMonkeySortAndFilterState.of<T, IdType>(context).activeFilters.isNotEmpty ||
-            LdMonkeySortAndFilterState.of<T, IdType>(context).activeSortOptions.isNotEmpty,
-        leading: const Icon(LucideIcons.listFilter),
-        onPressed: () {
-          Navigator.of(context, rootNavigator: true).push(
-            ldFilterModal<T, IdType>(context),
-          );
-        },
-        child: Text(LiquidLocalizations.of(context).filter),
-      ),
+      builder: (ctx, trigger) {
+        final filterState = LdMonkeySortAndFilterState.of<T, IdType>(ctx.appContext);
+        return LdAppBarAction(
+          active: filterState.activeFilters.isNotEmpty || filterState.activeSortOptions.isNotEmpty,
+          leading: const Icon(LucideIcons.listFilter),
+          onPressed: () {
+            Navigator.of(ctx.appContext, rootNavigator: true).push(
+              ldFilterModal<T, IdType>(ctx.appContext),
+            );
+          },
+          child: Text(LiquidLocalizations.of(ctx.appContext).filter),
+        );
+      },
     );

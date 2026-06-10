@@ -1,7 +1,11 @@
+export 'action_context.dart';
+export 'action_host.dart';
+export 'action_scope.dart';
 export 'action_visibility.dart';
 export 'actions.dart';
 export 'context_menu.dart';
 export 'keyboard_shortcuts.dart';
+export 'monkey_submit_config.dart';
 export 'toggle_filter_action.dart';
 export 'toggle_selection_controls_action.dart';
 export 'app_bar_actions.dart';

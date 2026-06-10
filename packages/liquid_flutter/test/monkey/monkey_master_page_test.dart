@@ -23,19 +23,25 @@ Widget _wrapMasterPage<T extends Identifiable<IdType>, IdType>({
   return LdThemeProvider(
     child: MaterialApp(
       localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-      home: ListenableProvider<LdRepository<T, IdType>>.value(
-        value: repository,
-        child: Provider<LdMonkeyRouterController<T, IdType>>.value(
-          value: shellState.controllerDelegate,
-          child: Provider<LdMonkeySortAndFilterState<T, IdType>>.value(
-            value: shellState.state,
-            child: Provider<LdMonkeySelection<T, IdType>>.value(
-              value: selection,
-              child: Provider<List<LdMonkeyAction<T, IdType>>>.value(
-                value: actions,
-                child: Provider<LdMonkeyEffectiveLayoutMode>.value(
-                  value: layoutMode,
-                  child: child,
+      home: Provider<LdMonkeyActionScope<T, IdType>>(
+        create: (_) => LdMonkeyActionScope<T, IdType>(),
+        child: ListenableProvider<LdRepository<T, IdType>>.value(
+          value: repository,
+          child: Provider<LdMonkeyRouterController<T, IdType>>.value(
+            value: shellState.controllerDelegate,
+            child: Provider<LdMonkeySortAndFilterState<T, IdType>>.value(
+              value: shellState.state,
+              child: Provider<LdMonkeySelection<T, IdType>>.value(
+                value: selection,
+                child: Provider<LdMonkeyActions<T, IdType>>.value(
+                  value: actions,
+                  child: Provider<LdMonkeyEffectiveLayoutMode>.value(
+                    value: layoutMode,
+                    child: LdMonkeyActionHost<T, IdType>(
+                      actions: actions,
+                      child: child,
+                    ),
+                  ),
                 ),
               ),
             ),
