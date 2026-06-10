@@ -131,10 +131,11 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
   void didUpdateWidget(LdMultiPanelLayout oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Sync visibility from controlled prop.
-    if (widget.panelVisible != null && widget.panelVisible != oldWidget.panelVisible) {
+    // Sync visibility from controlled prop (also heals desync after gestures).
+    if (widget.panelVisible != null && _panelVisible != widget.panelVisible) {
       setState(() {
         _panelVisible = widget.panelVisible!;
+        _swipeDragOffset = 0;
       });
     }
 

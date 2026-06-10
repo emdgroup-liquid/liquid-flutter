@@ -475,53 +475,47 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
                         ),
                       ),
                     if (hasSearch && !mobile)
-                      LdFlexibleChild(
-                        child: LdSearchInput(
-                          searchConfig: widget.searchConfig!,
-                          isBottomNavigationBar: _isInBottomSlot,
-                          fullWidth: false,
-                        ),
+                      LdSearchInput(
+                        searchConfig: widget.searchConfig!,
+                        isBottomNavigationBar: _isInBottomSlot,
+                        fullWidth: false,
                       ),
                     ...widget.actions
                   ];
 
-                  return Provider<LdAppBarActionRequestedLeading>.value(
-                    value: hasSearch,
-                    child: Row(
-                      children: [
-                        if (widget.showWindowControls && !_isModal) const MacOSWindowControls(),
-                        OpenDrawerButton(drawerParent: _findDrawerParent(context)),
-                        if (leading != null) ...[leading, ldSpacerM],
-                        if (overflowItems.isNotEmpty)
-                          Expanded(
-                            child: LdOverflowView(
-                              spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment:
-                                  widget.title == null ? MainAxisAlignment.start : MainAxisAlignment.center,
-                              builder: (context, remainingItemCount) {
-                                final remainder = overflowItems.sublist(
-                                  overflowItems.length - remainingItemCount,
-                                );
-                                return LdAppbarActionOverflowMenu(
-                                  actions: remainder,
-                                  menuProviders: widget.overflowMenuProviders,
-                                  inMenu: true,
-                                );
-                              },
-                              children: overflowItems,
-                            ),
+                  return Row(
+                    children: [
+                      if (widget.showWindowControls && !_isModal) const MacOSWindowControls(),
+                      OpenDrawerButton(drawerParent: _findDrawerParent(context)),
+                      if (leading != null) ...[leading, ldSpacerM],
+                      if (overflowItems.isNotEmpty)
+                        Expanded(
+                          child: LdOverflowView(
+                            spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            builder: (context, remainingItemCount) {
+                              final remainder = overflowItems.sublist(
+                                overflowItems.length - remainingItemCount,
+                              );
+                              return LdAppbarActionOverflowMenu(
+                                actions: remainder,
+                                menuProviders: widget.overflowMenuProviders,
+                                inMenu: true,
+                              );
+                            },
+                            children: overflowItems,
                           ),
-                        const CloseDrawerButton(),
-                        if (widget.trailing != null) widget.trailing!,
-                        if (_closeModalButton(context) != null) ...[_closeModalButton(context)!],
-                        if (widget.showWindowControls && !_isModal)
-                          LdReveal(
-                            revealed: _showWindowsWindowControls(metrics),
-                            child: const WindowsWindowControls(),
-                          ),
-                      ],
-                    ),
+                        ),
+                      const CloseDrawerButton(),
+                      if (widget.trailing != null) widget.trailing!,
+                      if (_closeModalButton(context) != null) ...[_closeModalButton(context)!],
+                      if (widget.showWindowControls && !_isModal)
+                        LdReveal(
+                          revealed: _showWindowsWindowControls(metrics),
+                          child: const WindowsWindowControls(),
+                        ),
+                    ],
                   );
                 }),
                 if (bottomContent.isNotEmpty) ...[

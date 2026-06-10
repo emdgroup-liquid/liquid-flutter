@@ -1,14 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
+/// Whether the keyboard (or another UI) is obscuring part of the viewport.
+bool _hasKeyboardViewInsets(MediaQueryData mediaQuery) {
+  return mediaQuery.viewInsets.bottom > 0 || mediaQuery.viewInsets.top > 0;
+}
+
 /// Strips vertical [MediaQueryData.padding] for scroll content without touching
 /// [MediaQueryData.viewPadding] (unlike [MediaQuery.removePadding]).
-Widget _mediaQueryWithoutVerticalPadding(BuildContext context, Widget child) {
+///
+/// When the keyboard is open we keep vertical padding on the scroll subtree so
+/// [Scrollable] / [Scrollable.ensureVisible] respect [LdAppBar] insets.
+Widget _mediaQueryForScrollChild(BuildContext context, Widget child) {
   final mediaQuery = MediaQuery.of(context);
+  // Always wrap in [MediaQuery] so the scroll subtree keeps a stable widget
+  // structure when the keyboard opens. Toggling between a wrapper and a bare
+  // [child] remounts scroll content and drops body input focus.
+  final verticalPadding = _hasKeyboardViewInsets(mediaQuery)
+      ? mediaQuery.padding
+      : mediaQuery.padding.copyWith(top: 0, bottom: 0);
   return MediaQuery(
-    data: mediaQuery.copyWith(
-      padding: mediaQuery.padding.copyWith(top: 0, bottom: 0),
-    ),
+    data: mediaQuery.copyWith(padding: verticalPadding),
     child: child,
   );
 }
@@ -43,7 +55,7 @@ class LdScaffoldBodyCentered extends StatelessWidget {
       return Container(
         color: backgroundColor ?? Colors.transparent,
         padding: padding,
-        child: _mediaQueryWithoutVerticalPadding(
+        child: _mediaQueryForScrollChild(
           context,
           Center(child: child),
         ),
@@ -83,11 +95,16 @@ class LdScaffoldBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final padding = MediaQuery.paddingOf(context).atLeast(MediaQuery.viewPaddingOf(context));
+    final mediaQuery = MediaQuery.of(context);
+    final padding = mediaQuery.padding.atLeast(mediaQuery.viewPadding);
 
     final theme = LdTheme.of(context, listen: true);
 
     final themePadding = minimumPadding ?? theme.pad();
+    final verticalSliverPadding = EdgeInsets.only(
+      top: themePadding.top + padding.top,
+      bottom: themePadding.bottom + padding.bottom,
+    );
 
     final effectiveChildren = autoSpaceChildren ? children.autoSpace(context) : children;
 
@@ -113,8 +130,8 @@ class LdScaffoldBody extends StatelessWidget {
           if (effectiveChildren.isNotEmpty)
             SliverPadding(
               padding: horizontalPadding.copyWith(
-                top: (themePadding.top + padding.top),
-                bottom: (themePadding.bottom + padding.bottom),
+                top: verticalSliverPadding.top,
+                bottom: verticalSliverPadding.bottom,
               ),
               sliver: SliverList.builder(
                 itemCount: effectiveChildren.length,
@@ -130,8 +147,8 @@ class LdScaffoldBody extends StatelessWidget {
 
               return SliverPadding(
                 padding: horizontalPadding.copyWith(
-                  top: isFirst ? padding.top + themePadding.top : 0,
-                  bottom: isLast ? padding.bottom + themePadding.bottom : 0,
+                  top: isFirst ? verticalSliverPadding.top : 0,
+                  bottom: isLast ? verticalSliverPadding.bottom : 0,
                 ),
                 sliver: sliver,
               );
@@ -143,7 +160,7 @@ class LdScaffoldBody extends StatelessWidget {
 
       return ColoredBox(
         color: backgroundColor ?? theme.background,
-        child: _mediaQueryWithoutVerticalPadding(
+        child: _mediaQueryForScrollChild(
           context,
           scrollEdgeFade
               ? LdScrollEdgeFade(

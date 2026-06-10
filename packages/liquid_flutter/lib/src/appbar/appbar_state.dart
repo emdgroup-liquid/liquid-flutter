@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 
 enum LdAppBarPosition {
   top,
@@ -41,6 +42,20 @@ class LdAppBarMetrics {
     required this.level,
     this.accumulatedHideOffset = EdgeInsets.zero,
   });
+
+  /// Sentinel placed at [LdModalRoute] boundaries so nested bars do not inherit
+  /// shell/tab app-bar metrics. [isModalReset] is true; treat as no parent.
+  static const modalReset = LdAppBarMetrics(
+    position: LdAppBarPosition.top,
+    barHeight: EdgeInsets.zero,
+    edgeMargin: EdgeInsets.zero,
+    hideOffset: EdgeInsets.zero,
+    isScrolledUnder: false,
+    level: -1,
+  );
+
+  /// True for [modalReset] and other modal-scope baseline values.
+  bool get isModalReset => level < 0;
 
   final LdAppBarPosition position;
 
@@ -164,4 +179,34 @@ class LdAppBarMetrics {
       'accumulatedHideOffset: $accumulatedHideOffset, '
       'isScrolledUnder: $isScrolledUnder, '
       'level: $level)';
+}
+
+/// Resolves ancestor [LdAppBarMetrics], treating [LdAppBarMetrics.modalReset] as absent.
+LdAppBarMetrics? ldAppBarParentMetrics(BuildContext context) {
+  final metrics = Provider.of<LdAppBarMetrics?>(context, listen: true);
+  if (metrics != null && metrics.isModalReset) {
+    return null;
+  }
+  return metrics;
+}
+
+/// Zeros inherited app-bar metrics for [LdModalRoute] page content.
+///
+/// Wrap [LdModalRoute.pageBuilder] output (or let [LdModalRoute] apply this
+/// automatically) so the first [LdAppBar] in a sheet/dialog starts at level 0.
+class LdModalAppBarMetricsScope extends StatelessWidget {
+  const LdModalAppBarMetricsScope({
+    required this.child,
+    super.key,
+  });
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Provider<LdAppBarMetrics>.value(
+      value: LdAppBarMetrics.modalReset,
+      child: child,
+    );
+  }
 }

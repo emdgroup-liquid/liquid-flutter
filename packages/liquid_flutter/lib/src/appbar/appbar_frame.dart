@@ -210,7 +210,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
     required bool shouldApplyViewInsets,
   }) {
     final theme = LdTheme.of(context);
-    final level = _calculateLevel(context.read<LdAppBarMetrics?>());
+    final level = _calculateLevel(ldAppBarParentMetrics(context));
 
     final edgePadding = widget.position == LdAppBarPosition.top
         ? EdgeInsets.only(top: edgeMargin)
@@ -434,8 +434,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
   // ── Stack-mode build ──────────────────────────────────────────────────────
 
   Widget _buildStackMode(BuildContext context) {
-    // Read (watch) parent metrics so nested bars rebuild when the parent hides.
-    final parentMetrics = context.watch<LdAppBarMetrics?>();
+    final parentMetrics = ldAppBarParentMetrics(context);
     final level = _calculateLevel(parentMetrics);
 
     // stableEdgeMargin: the accumulated padding on this edge from the *patched*
@@ -444,7 +443,8 @@ class _AppBarFrameState extends State<AppBarFrame> {
     // device safe-area + sum of all ancestor inner heights. It never shrinks
     // while bars are hiding.
     final outerPadding = MediaQuery.paddingOf(context);
-    final stableEdgeMargin = widget.position == LdAppBarPosition.top ? outerPadding.top : outerPadding.bottom;
+    final stableEdgeMargin =
+        widget.position == LdAppBarPosition.top ? outerPadding.top : outerPadding.bottom;
 
     final outerMediaQuery = MediaQuery.of(context);
 

@@ -124,9 +124,10 @@ class _LdButtonState extends State<_LdButtonWidget> {
   LdTheme get _theme => Provider.of<LdTheme>(context, listen: true);
 
   Widget get _child {
-    var child = widget.child;
-
-    return Flexible(child: child);
+    return Flexible(
+      fit: FlexFit.loose,
+      child: widget.child,
+    );
   }
 
   Widget? get _trailing {
@@ -134,14 +135,7 @@ class _LdButtonState extends State<_LdButtonWidget> {
   }
 
   MainAxisAlignment get _alignment {
-    if (widget.alignment != null) {
-      return widget.alignment!;
-    }
-
-    final hasAddons = widget.leading != null || widget.trailing != null;
-
-    // Center if there are addons
-    return (hasAddons ? MainAxisAlignment.spaceBetween : MainAxisAlignment.center);
+    return MainAxisAlignment.center;
   }
 
   bool get centerText {
@@ -149,11 +143,12 @@ class _LdButtonState extends State<_LdButtonWidget> {
   }
 
   Widget get _buttonContent {
+    final theme = LdTheme.of(context);
     return Row(
       mainAxisSize: widget.width == double.infinity ? MainAxisSize.max : MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: _alignment,
-      spacing: _theme.paddingSize(size: LdSize.s),
+      spacing: theme.labelSize(widget.size) / 2,
       children: [
         if (widget.leading != null) _leading!,
         _child,
@@ -427,7 +422,14 @@ class _ButtonShape extends StatelessWidget {
       return theme.pad(size: size) - EdgeInsets.all(_circularSizeBump);
     }
 
-    return theme.balPad(size) - borderWidth;
+    // Compact buttons use symmetric padding so label/icons sit centered in the pill.
+    final inset = switch (size) {
+      (LdSize.xs) => theme.pad(size: size),
+      (LdSize.s) => theme.pad(size: size),
+      (LdSize.m) => theme.balPad(size),
+      (LdSize.l) => theme.balPad(size),
+    };
+    return inset - borderWidth;
   }
 
   @override
@@ -494,12 +496,14 @@ class _ButtonShape extends StatelessWidget {
                 package: theme.fontFamilyPackage,
                 fontFamily: theme.fontFamily,
                 fontSize: theme.labelSize(size),
-                height: 1,
+                height: 1.1,
+                leadingDistribution: TextLeadingDistribution.even,
                 fontWeight: FontWeight.bold,
               ),
               child: IconTheme(
                 data: IconThemeData(
                   color: colors.text,
+                  opticalSize: theme.labelSize(size) + _circularSizeBump,
                   size: theme.labelSize(size) + _circularSizeBump,
                 ),
                 child: child,

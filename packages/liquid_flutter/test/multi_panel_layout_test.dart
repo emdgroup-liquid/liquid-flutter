@@ -523,6 +523,49 @@ void main() {
     });
 
     // -------------------------------------------------------------------------
+    // 13b. Regression: scrim dismiss keeps LdDrawerLayout state in sync
+    // -------------------------------------------------------------------------
+    testWidgets(
+        'LdDrawerLayout: scrim dismiss reports isOpen false and openDrawer works again',
+        (WidgetTester tester) async {
+      LdDrawerState? lastState;
+      final drawerKey = GlobalKey<LdDrawerLayoutState>();
+
+      await tester.pumpWidget(
+        _wrap(
+          LdDrawerLayout(
+            key: drawerKey,
+            reflowBreakpoint: 1200,
+            drawerWidth: 250,
+            onStateChange: (s) => lastState = s,
+            drawer: _placeholder('drawer', Colors.green),
+            body: _placeholder('body', Colors.blue),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      drawerKey.currentState!.openDrawer();
+      await tester.pumpAndSettle();
+      expect(lastState?.isOpen, isTrue);
+
+      await tester.tapAt(const Offset(600, 400));
+      await tester.pumpAndSettle();
+
+      expect(lastState?.isOpen, isFalse,
+          reason: 'Dismiss via scrim must sync LdDrawerLayout._panelVisible');
+
+      drawerKey.currentState!.openDrawer();
+      await tester.pumpAndSettle();
+
+      expect(lastState?.isOpen, isTrue);
+      expect(find.text('drawer'), findsOneWidget);
+
+      drawerKey.currentState!.closeDrawer();
+      await tester.pumpAndSettle();
+    });
+
+    // -------------------------------------------------------------------------
     // 14. Stage 1 regression: Key('panel') spring element survives mode switch
     // -------------------------------------------------------------------------
     testWidgets(

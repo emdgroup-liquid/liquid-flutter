@@ -57,6 +57,11 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
     if (LdTheme.of(context).platform.isDesktop) {
       _panelVisible = true;
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _onStateChange();
+      }
+    });
   }
 
   void openDrawer() {
@@ -82,6 +87,11 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
   }
 
   void _onPanelVisibilityChanged(bool visible) {
+    if (_panelVisible != visible) {
+      setState(() {
+        _panelVisible = visible;
+      });
+    }
     if (visible) {
       _ensureHistoryEntry();
     } else {
