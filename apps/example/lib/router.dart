@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid/chemical_screen.dart';
 import 'package:liquid/components/data_display/avatar.dart';
+import 'package:liquid/components/data_display/counter.dart';
 import 'package:liquid/components/data_display/icon.dart';
 import 'package:liquid/components/feedback/exception.dart';
 import 'package:liquid/components/feedback/indicator.dart';
@@ -91,9 +92,9 @@ class AppRouter {
               ...buildMonkeyRoutes<MovieDemo, int>(
                 masterPath: "/movie-demo",
                 routeConfig: LdMonkeyRouteConfig.identifiableInt<MovieDemo>(itemName: "movie"),
-                sortOptions: [],
+                sortOptionsBuilder: (_) async => [],
                 actions: movieActions,
-                filters: movieFilters,
+                filtersBuilder: buildMovieFilters,
                 detailPage: MovieDetailPage(),
                 detailInDialog: true,
                 masterPage: MovieMasterPage(),
@@ -107,9 +108,9 @@ class AppRouter {
               ...buildMonkeyRoutes<Task, int>(
                 masterPath: "/task-demo",
                 routeConfig: LdMonkeyRouteConfig.identifiableInt<Task>(itemName: "task"),
-                sortOptions: taskSortOptions,
+                sortOptionsBuilder: (_) async => taskSortOptions,
                 actions: taskActions,
-                filters: taskFilters,
+                filtersBuilder: (_) async => taskFilters,
                 detailPage: TaskDetailPage(),
                 masterPage: TaskMasterPage(),
                 repositoryBuilder: (context, state) => taskRepository(context),
@@ -126,8 +127,8 @@ class AppRouter {
                   masterPage: ProjectMasterPage(),
                   detailPage: FileMasterPage(),
                   repositoryBuilder: (context, state) => projectRepository(),
-                  filters: const [],
-                  sortOptions: const [],
+                  filtersBuilder: (_) async => [],
+                  sortOptionsBuilder: (_) async => [],
                   actions: const [],
                   child: MonkeyRouteNode<File, String>(
                     detailPathPrefix: 'files',
@@ -136,8 +137,8 @@ class AppRouter {
                     detailPage: FileDetailPage(),
                     repositoryBuilder: (context, state) =>
                         fileRepository(state.pathParameters[projectRouteConfig.viewingParamName]!),
-                    filters: const [],
-                    sortOptions: const [],
+                    filtersBuilder: (_) async => [],
+                    sortOptionsBuilder: (_) async => [],
                     actions: const [],
                   ),
                 ),
@@ -379,6 +380,10 @@ class AppRouter {
           GoRoute(
             path: "/components/table",
             pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const TableDemo()),
+          ),
+          GoRoute(
+            path: "/components/counter",
+            pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const CounterDemo()),
           ),
           GoRoute(
             path: "/components/tag",

@@ -89,8 +89,8 @@ parseSelected: (selected) {
   masterPage: TaskMasterPage(),
   detailPage: TaskDetailPage(),
   repositoryBuilder: (context, state) => taskRepository(context),
-  filters: taskFilters,
-  sortOptions: taskSortOptions,
+  filtersBuilder: (_) async => taskFilters,
+  sortOptionsBuilder: (_) async => taskSortOptions,
   actions: taskActions,
   detailInDialog: false,
   shellBuilder: (context, state, child) => LdMonkeyShell<Task, int>(
@@ -108,10 +108,10 @@ parseSelected: (selected) {
             "Define actions that users can perform on items. Actions are passed to LdMonkeyShell. See the Actions documentation for detailed examples."),
         CodeBlock(
           language: "dart",
-          code: '''LdMonkeyShell<Task, int>(
-  // ... other configuration
-  actions: [
+          code: '''actions: [
     LdMonkeySubmitAction(
+      id: 'create-task',
+      tooltip: (_) => 'Create new task',
       visibility: {
         LdMonkeyActionVisibility(
           location: LdMonkeyActionLocation.masterAppBar,
@@ -119,16 +119,14 @@ parseSelected: (selected) {
       },
       child: Text("New Task"),
       icon: Icon(LucideIcons.plus),
-      config: (context) => LdSubmitConfig(
+      submitConfig: (_) => const LdMonkeySubmitConfig(
         loadingText: "Creating new task",
-        action: (_) async {
-          // Your action implementation
-        },
       ),
+      onSubmit: (ctx) async {
+        // Your action implementation
+      },
     ),
-    // See Actions documentation for more examples
-  ],
-),''',
+  ],''',
         ),
         LdText.hs("5. Master Page Configuration"),
         LdText.p(
@@ -197,8 +195,8 @@ parseSelected: (selected) {
       masterPage: TaskMasterPage(),
       detailPage: TaskDetailPage(),
       repositoryBuilder: (context, state) => taskRepository(context),
-      filters: taskFilters,
-      sortOptions: taskSortOptions,
+      filtersBuilder: (_) async => taskFilters,
+      sortOptionsBuilder: (_) async => taskSortOptions,
       actions: taskActions,
     ),
   ],
@@ -276,8 +274,8 @@ final router = GoRouter(
       masterPage: TaskMasterPage(),
       detailPage: TaskDetailPage(),
       repositoryBuilder: (context, state) => taskRepository(context),
-      filters: taskFilters,
-      sortOptions: taskSortOptions,
+      filtersBuilder: (_) async => taskFilters,
+      sortOptionsBuilder: (_) async => taskSortOptions,
       actions: taskActions,
       shellBuilder: (context, state, child) => TaskShell(
         state: state,

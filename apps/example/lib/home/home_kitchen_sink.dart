@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:liquid/home/widgets/chat_card.dart';
 import 'package:liquid/home/widgets/download_card.dart';
 import 'package:liquid/home/widgets/molecule_card.dart';
-import 'package:liquid/home/widgets/payments_card.dart';
 import 'package:liquid/home/widgets/report_issue_card.dart';
 import 'package:liquid/home/widgets/sales_card.dart';
 import 'package:liquid/home/widgets/scanner_card.dart';
 import 'package:liquid/home/widgets/sign_in_card.dart';
-import 'package:liquid/home/widgets/stock_card.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 

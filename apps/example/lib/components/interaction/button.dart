@@ -16,6 +16,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
   LdSize _size = LdSize.m;
   bool _disabled = false;
   bool _active = false;
+  bool _showIcon = true;
   LdButtonMode _mode = LdButtonMode.filled;
 
   late LdColor _color;
@@ -24,6 +25,12 @@ class _ButtonDemoState extends State<ButtonDemo> {
   void initState() {
     _color = LdTheme.of(context).palette.primary;
     super.initState();
+  }
+
+  void _changeShowIcon(bool? showIcon) {
+    setState(() {
+      _showIcon = showIcon ?? true;
+    });
   }
 
   void _changeSize(LdSize? size) {
@@ -72,7 +79,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                         mode: _mode,
                         active: _active,
                         disabled: _disabled,
-                        leading: const Icon(LucideIcons.donut),
+                        leading: _showIcon ? const Icon(LucideIcons.donut) : null,
                         size: _size,
                         onPressed: () async {
                           await Future.delayed(const Duration(seconds: 1));
@@ -136,6 +143,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
               ),
               LdToggle(checked: _disabled, onChanged: _changeDisabled, label: "Disabled"),
               LdToggle(checked: _active, onChanged: _changeActive, label: "Active"),
+              LdToggle(checked: _showIcon, onChanged: _changeShowIcon, label: "Show Icon"),
             ],
           ),
           LdBundle(
@@ -250,7 +258,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                             await Future.delayed(const Duration(seconds: 1));
                           },
                         ),
-                        ldSpacerM,
+
                         LdButton(
                           child: const Icon(LucideIcons.x),
                           onPressed: () async {
@@ -258,9 +266,9 @@ class _ButtonDemoState extends State<ButtonDemo> {
                             throw Exception("I'm an error");
                           },
                         ),
-                        ldSpacerM,
+
                         LdButton(
-                          leading: Icon(LucideIcons.x),
+                          trailing: Icon(LucideIcons.x),
                           onPressed: () async {
                             await Future.delayed(const Duration(seconds: 1));
                           },
@@ -276,7 +284,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                           },
                         ),
                       ],
-                    ),
+                    ).spaceM(),
                     /*end demo:LdButtonCircular*/
                   ],
                 ),

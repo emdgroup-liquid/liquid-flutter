@@ -322,7 +322,7 @@ class _ProductKeyInfosState extends State<_ProductKeyInfos> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 100,
+      height: 50,
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.all(1),

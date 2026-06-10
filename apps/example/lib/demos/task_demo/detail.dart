@@ -87,7 +87,7 @@ class _TaskDetailState extends State<TaskDetail> {
                         widget.task.value!.lastUpdate,
                       );
                       final repo = LdRepository.of<Task, int>(context);
-                      await repo.update(widget.task.value!.id, newTask);
+                      await repo.update(context, widget.task.value!.id, newTask);
                     },
                   ),
                 ),

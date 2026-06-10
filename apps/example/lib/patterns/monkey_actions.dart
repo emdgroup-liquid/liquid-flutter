@@ -20,34 +20,28 @@ class MonkeyActionsDemo extends StatelessWidget {
         ComponentsAccordion(components: {"LdMonkeyAction", "LdMonkeyActionVisibility"}),
         LdText.hs("1. Basic Action Structure"),
         LdText.p(
-            "Actions are defined using LdMonkeySubmitAction (for submit-based actions) or LdMonkeyBareChildAction (for custom widgets). Actions have visibility conditions, labels, icons, and action logic."),
+            "Actions use [LdMonkeyActionContext] for selection, repository, and app-level providers. Use `ctx.appContext` for modals and feature providers; use `ctx.selectedIds` and `ctx.repository` for monkey data."),
         CodeBlock(
           language: "dart",
           code: '''LdMonkeySubmitAction(
-  // Where the action should appear
+  id: 'create-task',
+  tooltip: (_) => 'Create new task',
   visibility: {
     LdMonkeyActionVisibility(
       location: LdMonkeyActionLocation.masterAppBar,
     ),
   },
-  
-  // Keyboard shortcuts
   shortcutActivators: {
     SingleActivator(LogicalKeyboardKey.keyN, meta: true),
   },
-  
-  // UI elements
   child: Text("New Task"),
   icon: Icon(LucideIcons.plus),
-  
-  // The actual action logic
-  config: (context) => LdSubmitConfig(
+  submitConfig: (_) => const LdMonkeySubmitConfig(
     loadingText: "Creating new task",
-    action: (_) async {
-      // Your action implementation here
-      // Access selection using: LdMonkeySelection.of<Task, int>(context).items
-    },
   ),
+  onSubmit: (ctx) async {
+    // ctx.selectedIds, ctx.repository, app providers via ctx.appContext
+  },
 )''',
         ),
         LdText.hs("2. Action Locations"),
@@ -103,6 +97,8 @@ class MonkeyActionsDemo extends StatelessWidget {
         CodeBlock(
           language: "dart",
           code: '''LdMonkeySubmitAction(
+  id: 'create-task',
+  tooltip: (_) => 'Create new task',
   visibility: {
     LdMonkeyActionVisibility(
       location: LdMonkeyActionLocation.masterAppBar,
@@ -113,37 +109,24 @@ class MonkeyActionsDemo extends StatelessWidget {
   },
   child: Text("New Task"),
   icon: Icon(LucideIcons.plus),
-  config: (context) => LdSubmitConfig(
+  submitConfig: (_) => const LdMonkeySubmitConfig(
     loadingText: "Creating new task",
-    action: (_) async {
-      final shellState = LdMonkeyShellState.of<Task, int>(context);
-      
-      // Show input dialog
-      final newTaskText = await ldEnterTextModal(
-        context: context,
-        initialValue: "New task",
-        inputHint: "New Task",
-        inputLabel: "Task",
-        useRootNavigator: true,
-      );
-      
-      if (newTaskText == null) return;
-      
-      // Create the new item
-      final newTask = Task(
-        testData.length + 1,
-        newTaskText,
-        DateTime.now().add(const Duration(days: 1)),
-        false,
-        DateTime.now(),
-      );
-      
-      await taskRepository.create(newTask);
-      
-      // Select the new item
-      shellState.setSelectedItems({newTask.id});
-    },
   ),
+  onSubmit: (ctx) async {
+    final newTaskText = await ldEnterTextModal(
+      context: ctx.appContext,
+      initialValue: "New task",
+      inputHint: "New Task",
+      inputLabel: "Task",
+      useRootNavigator: true,
+    );
+    if (newTaskText == null) return;
+    final newTask = Task(/* ... */);
+    await ctx.repository.create(ctx.appContext, newTask);
+    if (ctx.appContext.mounted) {
+      ctx.updateViewing({newTask.id});
+    }
+  },
 )''',
         ),
         LdText.hs("5. Delete Action Example"),
@@ -151,46 +134,31 @@ class MonkeyActionsDemo extends StatelessWidget {
         CodeBlock(
           language: "dart",
           code: '''LdMonkeySubmitAction(
+  id: 'delete',
+  tooltip: (_) => 'Delete',
   visibility: {
-    // Show in detail app bar when items are selected
     LdMonkeyActionVisibility(
       location: LdMonkeyActionLocation.detailAppBar,
       minSelectionCount: 1,
-      maxSelectionCount: null,
     ),
-    // Show in context menu when items are selected
     LdMonkeyActionVisibility(
       location: LdMonkeyActionLocation.context,
       minSelectionCount: 1,
-      maxSelectionCount: null,
-    ),
-    // Show in master secondary when items are selected (only in master layout)
-    LdMonkeyActionVisibility(
-      location: LdMonkeyActionLocation.masterSecondary,
-      minSelectionCount: 1,
-      maxSelectionCount: null,
-      layoutModes: {LdMonkeyEffectiveLayoutMode.master},
     ),
   },
   shortcutActivators: {
     SingleActivator(LogicalKeyboardKey.delete),
-    SingleActivator(LogicalKeyboardKey.backspace),
   },
-  color: LdTheme.of(context).error, // Use error color for destructive actions
-  child: Builder(builder: (context) {
-    final selection = LdMonkeySelection.of<Task, int>(context);
-    return Text(
-      LiquidLocalizations.of(context).deleteNItems(selection.items.length),
-    );
-  }),
+  color: LdColor.error,
+  childBuilder: (context) {
+    final count = LdMonkeySelection.adaptive<Task, int>(context).length;
+    return Text(LiquidLocalizations.of(context).deleteNItems(count));
+  },
   icon: Icon(LucideIcons.trash2),
-  config: (context) => LdSubmitConfig(
-    loadingText: "Deleting",
-    action: (_) async {
-      final selection = LdMonkeySelection.of<Task, int>(context);
-      await taskRepository.deleteBatch(selection.items);
-    },
-  ),
+  submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Deleting"),
+  onSubmit: (ctx) async {
+    await ctx.repository.deleteBatch(context: ctx.appContext, ids: ctx.selectedIds);
+  },
 )''',
         ),
         LdText.hs("6. Conditional Actions"),
@@ -198,41 +166,28 @@ class MonkeyActionsDemo extends StatelessWidget {
         CodeBlock(
           language: "dart",
           code: '''LdMonkeySubmitAction(
+  id: 'mark-done',
+  tooltip: (_) => 'Mark as done',
   visibility: {
-    // Only show for todo items
     LdMonkeyActionVisibility(
       location: LdMonkeyActionLocation.detailAppBar,
       minSelectionCount: 1,
-      maxSelectionCount: null,
-      applyFilters: {"todo"}, // Only when "todo" filter is active
-    ),
-    LdMonkeyActionVisibility(
-      location: LdMonkeyActionLocation.context,
-      minSelectionCount: 1,
-      maxSelectionCount: null,
       applyFilters: {"todo"},
     ),
   },
-  shortcutActivators: {
-    SingleActivator(LogicalKeyboardKey.keyD),
-  },
   child: Text("Done"),
   icon: Icon(LucideIcons.check),
-  config: (context) => LdSubmitConfig(
+  submitConfig: (_) => const LdMonkeySubmitConfig(
     loadingText: "Marking as done",
     allowResubmit: true,
-    action: (_) async {
-      final updatedItems = <Task>{};
-      final selection = LdMonkeySelection.of<Task, int>(context);
-      
-      for (final id in selection.items) {
-        final item = await taskRepository.getById(id);
-        updatedItems.add(item.copyWith(done: true));
-      }
-      
-      await taskRepository.updateBatch(updatedItems);
-    },
   ),
+  onSubmit: (ctx) async {
+    final items = await ctx.getSelectedItems();
+    await ctx.repository.updateBatch(
+      ctx.appContext,
+      items.map((item) => item.copyWith(done: true)).toSet(),
+    );
+  },
 )''',
         ),
         LdText.hs("7. Single Item Actions"),
@@ -240,40 +195,27 @@ class MonkeyActionsDemo extends StatelessWidget {
         CodeBlock(
           language: "dart",
           code: '''LdMonkeySubmitAction(
+  id: 'duplicate',
+  tooltip: (_) => 'Duplicate',
   visibility: {
     LdMonkeyActionVisibility(
       location: LdMonkeyActionLocation.detailAppBar,
       minSelectionCount: 1,
-      maxSelectionCount: 1, // Exactly one item
-    ),
-    LdMonkeyActionVisibility(
-      location: LdMonkeyActionLocation.context,
-      minSelectionCount: 1,
       maxSelectionCount: 1,
     ),
   },
-  shortcutActivators: {
-    SingleActivator(LogicalKeyboardKey.keyD, meta: true),
-  },
+  multiSelect: false,
   child: Text("Duplicate"),
   icon: Icon(LucideIcons.copy),
-  multiSelect: false, // Explicitly disable multi-select
-  config: (context) => LdSubmitConfig(
-    loadingText: "Duplicating",
-    action: (_) async {
-      final shellState = LdMonkeyShellState.of<Task, int>(context);
-      final selection = LdMonkeySelection.of<Task, int>(context);
-      final item = await taskRepository.getById(selection.items.first);
-      
-      final newItem = item.copyWith(
-        id: testData.length + 1,
-        task: "\${item.task} (copy)",
-      );
-      
-      await taskRepository.create(newItem);
-      shellState.setSelectedItems({newItem.id});
-    },
-  ),
+  submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Duplicating"),
+  onSubmit: (ctx) async {
+    final item = (await ctx.getSelectedItems()).first;
+    final newItem = item.copyWith(id: testData.length + 1);
+    await ctx.repository.create(ctx.appContext, newItem);
+    if (ctx.appContext.mounted) {
+      ctx.updateViewing({newItem.id});
+    }
+  },
 )''',
         ),
         LdText.hs("8. Built-in Actions"),
@@ -335,83 +277,47 @@ class MonkeyActionsDemo extends StatelessWidget {
         CodeBlock(
           language: "dart",
           code: '''actions: [
-  // Create new task
   LdMonkeySubmitAction(
+    id: 'create-task',
+    tooltip: (_) => 'New Task',
     visibility: {
-      LdMonkeyActionVisibility(
-        location: LdMonkeyActionLocation.masterAppBar,
-      ),
-    },
-    shortcutActivators: {
-      SingleActivator(LogicalKeyboardKey.keyN, meta: true),
+      LdMonkeyActionVisibility(location: LdMonkeyActionLocation.masterAppBar),
     },
     child: Text("New Task"),
     icon: Icon(LucideIcons.plus),
-    config: (context) => LdSubmitConfig(
-      loadingText: "Creating new task",
-      action: (_) async {
-        final shellState = LdMonkeyShellState.of<Task, int>(context);
-        // Create logic
-      },
-    ),
+    submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Creating new task"),
+    onSubmit: (ctx) async { /* create logic */ },
   ),
-  
-  // Mark as done (only for todo items)
   LdMonkeySubmitAction(
+    id: 'mark-done',
+    tooltip: (_) => 'Done',
     visibility: {
       LdMonkeyActionVisibility(
         location: LdMonkeyActionLocation.detailAppBar,
         minSelectionCount: 1,
         applyFilters: {"todo"},
       ),
-      LdMonkeyActionVisibility(
-        location: LdMonkeyActionLocation.context,
-        minSelectionCount: 1,
-        applyFilters: {"todo"},
-      ),
-    },
-    shortcutActivators: {
-      SingleActivator(LogicalKeyboardKey.keyD),
     },
     child: Text("Done"),
     icon: Icon(LucideIcons.check),
-    config: (context) => LdSubmitConfig(
-      loadingText: "Marking as done",
-      action: (_) async {
-        final selection = LdMonkeySelection.of<Task, int>(context);
-        // Mark as done logic
-      },
-    ),
+    submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Marking as done"),
+    onSubmit: (ctx) async { /* mark done logic */ },
   ),
-  
-  // Delete action
   LdMonkeySubmitAction(
+    id: 'delete',
+    tooltip: (_) => 'Delete',
     visibility: {
       LdMonkeyActionVisibility(
         location: LdMonkeyActionLocation.detailAppBar,
         minSelectionCount: 1,
       ),
-      LdMonkeyActionVisibility(
-        location: LdMonkeyActionLocation.context,
-        minSelectionCount: 1,
-      ),
-    },
-    shortcutActivators: {
-      SingleActivator(LogicalKeyboardKey.delete),
     },
     child: Text("Delete"),
     icon: Icon(LucideIcons.trash2),
-    color: LdTheme.of(context).error,
-    config: (context) => LdSubmitConfig(
-      loadingText: "Deleting",
-      action: (_) async {
-        final selection = LdMonkeySelection.of<Task, int>(context);
-        // Delete logic
-      },
-    ),
+    color: LdColor.error,
+    submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Deleting"),
+    onSubmit: (ctx) async { /* delete logic */ },
   ),
-  
-  // Built-in actions
   toggleSelectionControls<Task, int>(),
   toggleFilters<Task, int>(),
 ],''',
