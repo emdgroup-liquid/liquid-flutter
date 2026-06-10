@@ -52,6 +52,7 @@ export 'src/list/list_loading.dart';
 export 'src/list/list_page.dart';
 export 'src/list/list_paginator.dart';
 export 'src/list/list_seperator.dart';
+export 'src/list/slidable_list_item.dart';
 export 'src/list/selectable_list.dart';
 export 'src/list/ld_list_item_animation.dart';
 export 'src/loading.dart';
