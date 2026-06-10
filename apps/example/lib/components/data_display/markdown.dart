@@ -74,6 +74,22 @@ class _MarkdownDemoState extends State<MarkdownDemo> {
           LdInput(controller: _controller, hint: "Enter markdown...", minLines: 6, maxLines: 12),
           LdText.l("Preview"),
           LdMarkdown(data: _controller.text, padding: padding),
+          LdText.l("Tree (for debugging)"),
+          LdCard(
+            child: SingleChildScrollView(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SelectableText(
+                  formatMarkdownTree(_controller.text),
+                  style: TextStyle(
+                    fontFamily: 'NotoSansMono',
+                    fontSize: theme.paragraphSize(LdSize.s),
+                    color: theme.textMuted,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
