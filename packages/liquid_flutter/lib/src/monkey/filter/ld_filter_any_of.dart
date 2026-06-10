@@ -14,6 +14,7 @@ class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E>
     required this.allValues,
     Set<E>? initialSelected,
     super.isEnabled,
+    super.mutationAffectsCache,
   }) : selectedValues = Set<E>.from(initialSelected ?? {});
 
   @override
@@ -50,6 +51,7 @@ class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E>
     Map<E, Widget Function(BuildContext)>? allValues,
     Set<E>? selectedValues,
     bool Function(BuildContext context)? isEnabled,
+    LdMutationAffectsCache<T>? mutationAffectsCache,
   }) {
     return LdFilterAnyOf<T, IdType, E>(
       name: name ?? this.name,
@@ -57,8 +59,31 @@ class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E>
       icon: icon ?? this.icon,
       isOn: isOn ?? this.isOn,
       allValues: allValues ?? this.allValues,
-      initialSelected: selectedValues ?? this.selectedValues,
+      initialSelected: selectedValues != null
+          ? Set<E>.from(selectedValues)
+          : this.selectedValues,
       isEnabled: isEnabled ?? this.isEnabled,
+      mutationAffectsCache: mutationAffectsCache ?? this.mutationAffectsCache,
+    );
+  }
+
+  /// Toggles [value] in [selectedValues] and persists via [update].
+  ///
+  /// Use this from UI that holds [LdFilterAnyOf] with an erased option type
+  /// (e.g. chips bar) so [copyWith] always receives a [Set<E>].
+  void toggleSelectedValue(BuildContext context, Object value) {
+    final next = Set<E>.from(selectedValues);
+    if (next.contains(value)) {
+      next.remove(value);
+    } else {
+      next.add(value as E);
+    }
+    update(
+      context,
+      copyWith(
+        selectedValues: next,
+        isOn: next.isNotEmpty,
+      ),
     );
   }
 

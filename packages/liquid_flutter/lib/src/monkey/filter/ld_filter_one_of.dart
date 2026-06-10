@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
@@ -13,7 +14,35 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
     required this.allValues,
     E? initialSelected,
     super.isEnabled,
+    super.mutationAffectsCache,
   }) : selectedValue = initialSelected;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! LdFilterOneOf<T, IdType, E>) {
+      return false;
+    }
+    return name == other.name &&
+        isOn == other.isOn &&
+        serialize() == other.serialize() &&
+        selectedValue == other.selectedValue &&
+        const DeepCollectionEquality().equals(
+          allValues.keys.map((key) => key.toString()).toList()..sort(),
+          other.allValues.keys.map((key) => key.toString()).toList()..sort(),
+        );
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        name,
+        isOn,
+        serialize(),
+        selectedValue,
+        Object.hashAllUnordered(allValues.keys.map((key) => key.toString())),
+      );
 
   @override
   String serialize() {
@@ -55,6 +84,7 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
     E? selectedValue,
     bool clearSelectedValue = false,
     bool Function(BuildContext context)? isEnabled,
+    LdMutationAffectsCache<T>? mutationAffectsCache,
   }) {
     return LdFilterOneOf<T, IdType, E>(
       name: name ?? this.name,
@@ -64,6 +94,7 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
       allValues: allValues ?? this.allValues,
       initialSelected: clearSelectedValue ? null : (selectedValue ?? this.selectedValue),
       isEnabled: isEnabled ?? this.isEnabled,
+      mutationAffectsCache: mutationAffectsCache ?? this.mutationAffectsCache,
     );
   }
 

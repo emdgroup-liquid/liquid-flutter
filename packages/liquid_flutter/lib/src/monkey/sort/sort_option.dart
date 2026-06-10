@@ -51,17 +51,21 @@ class LdSortOption<T extends Identifiable<IdType>, IdType> {
 
   final String name;
 
+  final LdMutationAffectsCache<T>? mutationAffectsCache;
+
   LdSortOption({
     required this.label,
     required this.icon,
     required this.name,
     this.isOn = false,
     this.direction = LdSortOptionDirection.asc,
+    this.mutationAffectsCache,
   });
 
   LdSortOption<T, IdType> copyWith({
     bool? isOn,
     LdSortOptionDirection? direction,
+    LdMutationAffectsCache<T>? mutationAffectsCache,
   }) {
     return LdSortOption<T, IdType>(
       name: name,
@@ -69,6 +73,7 @@ class LdSortOption<T extends Identifiable<IdType>, IdType> {
       icon: icon,
       isOn: isOn ?? this.isOn,
       direction: direction ?? this.direction,
+      mutationAffectsCache: mutationAffectsCache ?? this.mutationAffectsCache,
     );
   }
 }

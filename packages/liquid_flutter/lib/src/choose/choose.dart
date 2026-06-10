@@ -202,7 +202,7 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
         },
       );
       _repository.initialOffset = 0;
-      _repository.fetchPageAtOffset(context, 0);
+      _repository.ensureGreedyLoaded(context);
       _ownsRepository = true;
     } else {
       _repository = widget.repository!;

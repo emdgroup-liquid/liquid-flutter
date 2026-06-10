@@ -7,6 +7,8 @@ abstract class LdFilterOption<T extends Identifiable<IdType>, IdType> {
 
   final bool Function(BuildContext context)? isEnabled;
 
+  final LdMutationAffectsCache<T>? mutationAffectsCache;
+
   final String name;
   final bool isOn;
 
@@ -38,6 +40,7 @@ abstract class LdFilterOption<T extends Identifiable<IdType>, IdType> {
     Widget Function(BuildContext context)? icon,
     String? name,
     bool? isOn,
+    LdMutationAffectsCache<T>? mutationAffectsCache,
   });
 
   LdFilterOption({
@@ -46,6 +49,7 @@ abstract class LdFilterOption<T extends Identifiable<IdType>, IdType> {
     required this.name,
     this.isOn = false,
     this.isEnabled,
+    this.mutationAffectsCache,
   });
 
   void update(BuildContext context, LdFilterOption<T, IdType> filter) {
