@@ -101,6 +101,24 @@ void main() {
       });
     });
 
+    group('Equality', () {
+      test('differs when allValues keys change', () {
+        final empty = LdFilterOneOf<TestItem, int, String>(
+          name: 'category',
+          label: (context) => 'Category',
+          icon: (context) => const Icon(Icons.category),
+          allValues: {},
+        );
+        final populated = empty.copyWith(
+          allValues: {
+            'Gold': (context) => const Text('Gold'),
+          },
+        );
+
+        expect(empty, isNot(equals(populated)));
+      });
+    });
+
     group('CopyWith', () {
       test('copyWith() updates selectedValue correctly', () {
         final filter = LdFilterOneOf<TestItem, int, _Category>(

@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -57,6 +58,33 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
     implements LdMonkeyRouterController<T, IdType> {
   // This keeps UI updates responsive while the router delegate catches up.
   LdMonkeySortAndFilterState<T, IdType>? _latestSortAndFilterState;
+  Set<IdType> _lastHydratedViewing = {};
+  int _selectionHydrationRequest = 0;
+
+  void _scheduleSelectionHydration(
+    BuildContext context,
+    Set<IdType> viewing,
+  ) {
+    if (setEquals(_lastHydratedViewing, viewing)) {
+      return;
+    }
+    _lastHydratedViewing = {...viewing};
+    final request = ++_selectionHydrationRequest;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || request != _selectionHydrationRequest || viewing.isEmpty) {
+        return;
+      }
+      final repository = LdRepository.maybeOf<T, IdType>(context);
+      if (repository == null) {
+        return;
+      }
+      await repository.ensureSelectionLoaded(
+        context,
+        viewing,
+      );
+    });
+  }
 
   bool _hasSameFilterStructure(
     Iterable<LdFilterOption<T, IdType>> left,
@@ -361,6 +389,10 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
             routeConfig: widget.routeConfig,
             query: query,
             pathParameters: state.pathParameters,
+          );
+          _scheduleSelectionHydration(
+            context,
+            selection.viewing,
           );
           final baseSortAndFilterState = _latestSortAndFilterState;
           final sortAndFilterState = LdMonkeyRouteStateParser.parseSortAndFilter<T, IdType>(

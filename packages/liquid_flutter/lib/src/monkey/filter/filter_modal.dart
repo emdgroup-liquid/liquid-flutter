@@ -1,53 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/monkey/monkey_route_state_parser.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
-
-/// Rebuilds monkey filter providers from the current router URL so filter UI
-/// stays in sync while an open sheet/context menu remains mounted.
-Widget _buildFilterStateScope<T extends Identifiable<IdType>, IdType>({
-  required GoRouterDelegate routerDelegate,
-  required LdMonkeyRouteConfig<T, IdType> routeConfig,
-  required LdMonkeyRouterController<T, IdType> routerController,
-  required LdRepository<T, IdType> repository,
-  required Iterable<LdFilterOption<T, IdType>> baseFilters,
-  required Iterable<LdSortOption<T, IdType>> baseSortOptions,
-  required Widget child,
-}) {
-  return ListenableBuilder(
-    listenable: routerDelegate,
-    builder: (context, _) {
-      final state = routerDelegate.state;
-      final query = state.uri.queryParameters;
-
-      final selection = LdMonkeyRouteStateParser.parseSelection<T, IdType>(
-        routeConfig: routeConfig,
-        query: query,
-        pathParameters: state.pathParameters,
-      );
-
-      final sortAndFilterState = LdMonkeyRouteStateParser.parseSortAndFilter<T, IdType>(
-        routeConfig: routeConfig,
-        baseFilters: baseFilters,
-        baseSortOptions: baseSortOptions,
-        query: query,
-      );
-
-      return MultiProvider(
-        providers: [
-          Provider<LdMonkeyRouteConfig<T, IdType>>.value(value: routeConfig),
-          Provider<LdMonkeyRouterController<T, IdType>>.value(value: routerController),
-          Provider<LdMonkeySortAndFilterState<T, IdType>>.value(value: sortAndFilterState),
-          Provider<LdMonkeySelection<T, IdType>>.value(value: selection),
-          ListenableProvider<LdRepository<T, IdType>>.value(value: repository),
-        ],
-        child: child,
-      );
-    },
-  );
-}
 
 LdModalRoute ldFilterModal<T extends Identifiable<IdType>, IdType>(BuildContext sourceContext) {
   final routerDelegate = GoRouter.of(sourceContext).routerDelegate;
@@ -63,11 +18,11 @@ LdModalRoute ldFilterModal<T extends Identifiable<IdType>, IdType>(BuildContext 
   return LdModalRoute(
     context: sourceContext,
     pageBuilder: (modalContext) => LdScaffold(
-      body: LdAppBar(
+      body: LdAppBar.top(
         title: Text(LiquidLocalizations.of(modalContext).filter),
         child: LdScaffoldBody(
           children: [
-            _buildFilterStateScope<T, IdType>(
+            ldFilterStateScope<T, IdType>(
               routerDelegate: routerDelegate,
               routeConfig: routeConfig,
               routerController: routerController,
@@ -111,7 +66,7 @@ class LdFilterContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
       ),
       menuBuilder: (context) => ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 300),
-        child: _buildFilterStateScope<T, IdType>(
+        child: ldFilterStateScope<T, IdType>(
           routerDelegate: routerDelegate,
           routeConfig: routeConfig,
           routerController: routerController,
