@@ -8,6 +8,7 @@ import 'package:value_layout_builder/value_layout_builder.dart';
 class LdOverflowViewParentData extends ContainerBoxParentData<RenderBox> {
   bool? offstage;
   int? consumeRemainder;
+  bool pinnedFromOverflow = false;
 }
 
 class LdRenderOverflowView extends RenderBox
@@ -407,6 +408,147 @@ class LdRenderOverflowView extends RenderBox
     return parentData.consumeRemainder != null && parentData.consumeRemainder! > 0;
   }
 
+  bool _isPinnedChild(LdOverflowViewParentData parentData) {
+    return parentData.pinnedFromOverflow;
+  }
+
+  bool _mustShowChild(LdOverflowViewParentData parentData) {
+    return _isFlexChild(parentData) || _isPinnedChild(parentData);
+  }
+
+  int _offStageOverflowableCount(
+    List<RenderBox> children,
+    List<bool> onStage,
+  ) {
+    var count = 0;
+    for (var i = 0; i < children.length; i++) {
+      if (onStage[i]) {
+        continue;
+      }
+      final parentData = children[i].parentData as LdOverflowViewParentData;
+      if (!_mustShowChild(parentData)) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  double _projectedOnStageExtentForMask(
+    List<RenderBox> children,
+    List<double> childrenSizes,
+    List<bool> onStage,
+  ) {
+    var onStageCount = 0;
+    var total = 0.0;
+    for (var i = 0; i < children.length; i++) {
+      if (!onStage[i]) {
+        continue;
+      }
+      if (onStageCount > 0) {
+        total += spacing;
+      }
+      final parentData = children[i].parentData as LdOverflowViewParentData;
+      if (_isFlexChild(parentData)) {
+        total += _flexChildMinMainSize(children[i]);
+      } else {
+        total += childrenSizes[i];
+      }
+      onStageCount++;
+    }
+    return total;
+  }
+
+  double _projectedOnStageExtentForMaskWithIndicator(
+    List<RenderBox> children,
+    List<double> childrenSizes,
+    List<bool> onStage,
+    RenderBox overflowIndicator,
+    int overflowCount,
+  ) {
+    var projected = _projectedOnStageExtentForMask(children, childrenSizes, onStage);
+    if (overflowCount > 0) {
+      _layoutOverflowIndicator(overflowCount);
+      projected += _getIndicatorSize(overflowIndicator) + spacing;
+    }
+    return projected;
+  }
+
+  /// Resolves which content children are on stage when pinned children must stay visible.
+  List<bool> _resolveOnStageMask(
+    List<RenderBox> children,
+    List<double> childrenSizes,
+    double availableExtent,
+    RenderBox overflowIndicator,
+  ) {
+    final onStage = List<bool>.filled(children.length, false);
+
+    for (var i = 0; i < children.length; i++) {
+      final parentData = children[i].parentData as LdOverflowViewParentData;
+      onStage[i] = _mustShowChild(parentData);
+    }
+
+    for (var i = 0; i < children.length; i++) {
+      if (onStage[i]) {
+        continue;
+      }
+      onStage[i] = true;
+      final overflowCount = _offStageOverflowableCount(children, onStage);
+      final projected = _projectedOnStageExtentForMaskWithIndicator(
+        children,
+        childrenSizes,
+        onStage,
+        overflowIndicator,
+        overflowCount,
+      );
+      if (projected > availableExtent) {
+        onStage[i] = false;
+      }
+    }
+
+    while (true) {
+      final overflowCount = _offStageOverflowableCount(children, onStage);
+      final projected = _projectedOnStageExtentForMaskWithIndicator(
+        children,
+        childrenSizes,
+        onStage,
+        overflowIndicator,
+        overflowCount,
+      );
+      if (projected <= availableExtent) {
+        break;
+      }
+
+      var removed = false;
+      for (var i = children.length - 1; i >= 0; i--) {
+        if (!onStage[i]) {
+          continue;
+        }
+        final parentData = children[i].parentData as LdOverflowViewParentData;
+        if (_mustShowChild(parentData)) {
+          continue;
+        }
+        onStage[i] = false;
+        removed = true;
+        break;
+      }
+      if (!removed) {
+        break;
+      }
+    }
+
+    return onStage;
+  }
+
+  bool _hasPinnedChildren(List<RenderBox> children) {
+    for (final child in children) {
+      final parentData = child.parentData as LdOverflowViewParentData;
+      if (_isPinnedChild(parentData)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   double _flexChildMinMainSize(RenderBox child) {
     return _isHorizontal ? child.getMinIntrinsicWidth(constraints.maxHeight) : child.getMinIntrinsicHeight(constraints.maxWidth);
   }
@@ -526,7 +668,7 @@ class LdRenderOverflowView extends RenderBox
       var lastNonFlexIndex = fitting - 1;
       while (lastNonFlexIndex >= 0) {
         final parentData = children[lastNonFlexIndex].parentData as LdOverflowViewParentData;
-        if (!_isFlexChild(parentData)) {
+        if (!_isFlexChild(parentData) && !_isPinnedChild(parentData)) {
           break;
         }
         lastNonFlexIndex--;
@@ -653,27 +795,52 @@ class LdRenderOverflowView extends RenderBox
         ? _resolveAdaptiveCompaction(children, availableExtent)
         : _getChildrenMainSizes(children, preferExpanded: true);
 
-    var fit = _computeFit(childrenSizes, extentBudgetForNonFlex);
-    var filledExtent = fit.filledExtent;
-    var fittingChildren = fit.fittingChildren;
-    showOverflowIndicator = fit.showOverflowIndicator;
+    final hasPinnedChildren = _hasPinnedChildren(children);
+    late final List<bool> onStageMask;
+    late final List<int> onStageIndices;
+    late final List<RenderBox> renderedChildren;
+    late final int overflowCount;
 
-    final onStageFit = _fitOnStageChildren(
-      children,
-      childrenSizes,
-      availableExtent,
-      fittingChildren,
-      showOverflowIndicator,
-      filledExtent,
-    );
-    fittingChildren = onStageFit.fittingChildren;
-    showOverflowIndicator = onStageFit.showOverflowIndicator;
-    filledExtent = onStageFit.filledExtent;
+    if (hasPinnedChildren) {
+      onStageMask = _resolveOnStageMask(
+        children,
+        childrenSizes,
+        availableExtent,
+        overflowIndicator,
+      );
+      onStageIndices = <int>[
+        for (var i = 0; i < children.length; i++)
+          if (onStageMask[i]) i,
+      ];
+      overflowCount = _offStageOverflowableCount(children, onStageMask);
+      showOverflowIndicator = overflowCount > 0;
+      renderedChildren = onStageIndices.map((i) => children[i]).toList();
+    } else {
+      onStageMask = List<bool>.filled(children.length, false);
+      var fit = _computeFit(childrenSizes, extentBudgetForNonFlex);
+      var filledExtent = fit.filledExtent;
+      var fittingChildren = fit.fittingChildren;
+      showOverflowIndicator = fit.showOverflowIndicator;
 
-    final renderedChildren = children.sublist(0, fittingChildren);
+      final onStageFit = _fitOnStageChildren(
+        children,
+        childrenSizes,
+        availableExtent,
+        fittingChildren,
+        showOverflowIndicator,
+        filledExtent,
+      );
+      fittingChildren = onStageFit.fittingChildren;
+      showOverflowIndicator = onStageFit.showOverflowIndicator;
 
-    var overflowCount = childCount - fittingChildren - 1;
-    showOverflowIndicator = showOverflowIndicator && overflowCount > 0;
+      for (var i = 0; i < fittingChildren; i++) {
+        onStageMask[i] = true;
+      }
+      onStageIndices = List<int>.generate(fittingChildren, (i) => i);
+      overflowCount = childCount - fittingChildren - 1;
+      showOverflowIndicator = showOverflowIndicator && overflowCount > 0;
+      renderedChildren = children.sublist(0, fittingChildren);
+    }
 
     if (showOverflowIndicator) {
       _layoutOverflowIndicator(overflowCount);
@@ -686,7 +853,12 @@ class LdRenderOverflowView extends RenderBox
     }
     final indicatorCrossSize = getCrossSize(overflowIndicator.size);
 
-    var totalUsedSpace = _projectedOnStageExtent(children, fittingChildren, childrenSizes);
+    for (var i = 0; i < children.length; i++) {
+      final parentData = children[i].parentData as LdOverflowViewParentData;
+      parentData.offstage = !onStageMask[i];
+    }
+
+    var totalUsedSpace = _projectedOnStageExtentForMask(children, childrenSizes, onStageMask);
     if (showOverflowIndicator && overflowCount > 0) {
       totalUsedSpace += _getMainSizeOfRenderBox(overflowIndicator) + spacing;
     }
@@ -700,11 +872,11 @@ class LdRenderOverflowView extends RenderBox
     final expandedChildren = <MapEntry<int, RenderBox>>[];
     int totalFlex = 0;
 
-    for (var i = 0; i < renderedChildren.length; i++) {
-      final child = renderedChildren[i];
+    for (var renderedIndex = 0; renderedIndex < renderedChildren.length; renderedIndex++) {
+      final child = renderedChildren[renderedIndex];
       final parentData = child.parentData as LdOverflowViewParentData;
       if (parentData.consumeRemainder != null && parentData.consumeRemainder! > 0) {
-        expandedChildren.add(MapEntry(i, child));
+        expandedChildren.add(MapEntry(renderedIndex, child));
         totalFlex += parentData.consumeRemainder!;
       }
     }
@@ -713,19 +885,22 @@ class LdRenderOverflowView extends RenderBox
     final Map<int, double> flexChildFinalWidths = {};
     if (expandedChildren.isNotEmpty && remainder > 0) {
       for (final entry in expandedChildren) {
-        final i = entry.key;
+        final renderedIndex = entry.key;
         final child = entry.value;
         final parentData = child.parentData as LdOverflowViewParentData;
         final flex = parentData.consumeRemainder!;
         final flexRatio = flex / totalFlex;
         final additionalSpace = remainder * flexRatio;
         final minFlexExtent = _flexChildMinMainSize(child);
-        flexChildFinalWidths[i] = minFlexExtent + additionalSpace;
+        flexChildFinalWidths[renderedIndex] = minFlexExtent + additionalSpace;
       }
       remainder = 0;
     } else if (expandedChildren.isNotEmpty) {
       var nonFlexOnStage = 0.0;
-      for (var i = 0; i < fittingChildren; i++) {
+      for (var i = 0; i < children.length; i++) {
+        if (!onStageMask[i]) {
+          continue;
+        }
         final parentData = children[i].parentData as LdOverflowViewParentData;
         if (!_isFlexChild(parentData)) {
           nonFlexOnStage += childrenSizes[i];
@@ -737,23 +912,27 @@ class LdRenderOverflowView extends RenderBox
       final flexSpacing = _spacingExtent(renderedChildren.length);
       var flexBudget = math.max(0, availableExtent - nonFlexOnStage - flexSpacing);
       for (final entry in expandedChildren) {
-        final i = entry.key;
+        final renderedIndex = entry.key;
         final child = entry.value;
         final parentData = child.parentData as LdOverflowViewParentData;
         final flex = parentData.consumeRemainder!;
         final flexRatio = flex / totalFlex;
         final minFlexExtent = _flexChildMinMainSize(child);
         final flexShare = flexBudget * flexRatio;
-        flexChildFinalWidths[i] = math.min(
+        flexChildFinalWidths[renderedIndex] = math.min(
           flexBudget,
           math.max(minFlexExtent, flexShare),
         ).toDouble();
       }
     }
 
-    for (var i = 0; i < renderedChildren.length; i++) {
-      final child = renderedChildren[i];
-      final finalFlexWidth = flexChildFinalWidths[i];
+    for (var renderedIndex = 0; renderedIndex < renderedChildren.length; renderedIndex++) {
+      final child = renderedChildren[renderedIndex];
+      if (identical(child, overflowIndicator)) {
+        continue;
+      }
+      final childIndex = onStageIndices[renderedIndex];
+      final finalFlexWidth = flexChildFinalWidths[renderedIndex];
       if (finalFlexWidth != null) {
         // Flexible child: lay out once with its final dimensions.
         if (_isHorizontal) {
@@ -787,8 +966,8 @@ class LdRenderOverflowView extends RenderBox
           BoxValueConstraints<int>(
             value: overflowCount,
             constraints: BoxConstraints.loose(Size(
-              _isHorizontal ? childrenSizes.elementAt(i) : constraints.maxWidth,
-              _isHorizontal ? constraints.maxHeight : childrenSizes.elementAt(i),
+              _isHorizontal ? childrenSizes[childIndex] : constraints.maxWidth,
+              _isHorizontal ? constraints.maxHeight : childrenSizes[childIndex],
             )),
           ),
           parentUsesSize: true,
