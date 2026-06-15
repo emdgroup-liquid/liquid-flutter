@@ -49,6 +49,10 @@ enum LdAppBarAttachedMode {
   floating,
 }
 
+/// When the app bar is narrower than this, search moves to a row below the title
+/// (same as mobile) instead of sharing the title row.
+const kLdAppBarInlineSearchMinWidth = 560.0;
+
 /// A flexible app bar widget that wraps its [child] content.
 ///
 /// ## Usage
@@ -380,10 +384,6 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
     return _effectivePosition == LdAppBarPosition.bottom;
   }
 
-  bool get _hasTopContent {
-    return widget.title != null || widget.actions.isNotEmpty || widget.searchConfig != null;
-  }
-
   SystemUiOverlayStyle get _systemUiOverlayStyle => appBarSystemUiOverlayStyle(LdTheme.of(context, listen: true));
 
   // Whether to show Windows window controls.
@@ -436,18 +436,6 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
 
         final leading = _buildLeading(context);
 
-        List<Widget> bottomContent = [
-          if (widget.bottom != null) widget.bottom!,
-        ];
-
-        if (hasSearch && mobile) {
-          bottomContent.add(LdSearchInput(
-            searchConfig: widget.searchConfig!,
-            isBottomNavigationBar: _isInBottomSlot,
-            fullWidth: true,
-          ));
-        }
-
         final isSurface = widget.backgroundColor == null && (context.read<LdSurfaceInfo?>()?.isSurface ?? false);
 
         return Provider.value(
@@ -456,87 +444,84 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
             config: const LdButtonConfig(
               mode: LdButtonMode.ghost,
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                LayoutBuilder(builder: (context, constraints) {
-                  final overflowItems = [
-                    if (widget.title != null)
-                      LdFlexibleChild(
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: DefaultTextStyle(
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                            style: _headerStyle,
-                            child: widget.title!,
-                          ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final barWidth = constraints.maxWidth;
+                final isNarrowBar =
+                    barWidth.isFinite && barWidth < kLdAppBarInlineSearchMinWidth;
+                final searchBelowBar = mobile || (hasSearch && isNarrowBar);
+
+                final overflowItems = [
+                  if (widget.title != null)
+                    LdFlexibleChild(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: DefaultTextStyle(
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          style: _headerStyle,
+                          child: widget.title!,
                         ),
                       ),
-                    if (hasSearch && !mobile)
+                    ),
+                  if (hasSearch && !searchBelowBar)
+                    LdFlexibleChild(
+                      child: LdSearchInput(
+                        searchConfig: widget.searchConfig!,
+                        isBottomNavigationBar: _isInBottomSlot,
+                        fullWidth: true,
+                      ),
+                    ),
+                  ...widget.actions,
+                ];
+
+                return LdAutoSpace(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      children: [
+                        if (widget.showWindowControls && !_isModal) const MacOSWindowControls(),
+                        OpenDrawerButton(drawerParent: _findDrawerParent(context)),
+                        if (leading != null) ...[leading, ldSpacerM],
+                        if (overflowItems.isNotEmpty)
+                          Expanded(
+                            child: LdOverflowView(
+                              spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              builder: (context, remainingItemCount) {
+                                final remainder = overflowItems.sublist(
+                                  overflowItems.length - remainingItemCount,
+                                );
+                                return LdAppbarActionOverflowMenu(
+                                  actions: remainder,
+                                  menuProviders: widget.overflowMenuProviders,
+                                  inMenu: true,
+                                );
+                              },
+                              children: overflowItems,
+                            ),
+                          ),
+                        const CloseDrawerButton(),
+                        if (widget.trailing != null) widget.trailing!,
+                        if (_closeModalButton(context) != null) ...[_closeModalButton(context)!],
+                        if (widget.showWindowControls && !_isModal)
+                          LdReveal(
+                            revealed: _showWindowsWindowControls(metrics),
+                            child: const WindowsWindowControls(),
+                          ),
+                      ],
+                    ),
+                    if (hasSearch && searchBelowBar)
                       LdSearchInput(
                         searchConfig: widget.searchConfig!,
                         isBottomNavigationBar: _isInBottomSlot,
-                        fullWidth: false,
+                        fullWidth: true,
                       ),
-                    ...widget.actions
-                  ];
-
-                  return Row(
-                    children: [
-                      if (widget.showWindowControls && !_isModal) const MacOSWindowControls(),
-                      OpenDrawerButton(drawerParent: _findDrawerParent(context)),
-                      if (leading != null) ...[leading, ldSpacerM],
-                      if (overflowItems.isNotEmpty)
-                        Expanded(
-                          child: LdOverflowView(
-                            spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            builder: (context, remainingItemCount) {
-                              final remainder = overflowItems.sublist(
-                                overflowItems.length - remainingItemCount,
-                              );
-                              return LdAppbarActionOverflowMenu(
-                                actions: remainder,
-                                menuProviders: widget.overflowMenuProviders,
-                                inMenu: true,
-                              );
-                            },
-                            children: overflowItems,
-                          ),
-                        ),
-                      const CloseDrawerButton(),
-                      if (widget.trailing != null) widget.trailing!,
-                      if (_closeModalButton(context) != null) ...[_closeModalButton(context)!],
-                      if (widget.showWindowControls && !_isModal)
-                        LdReveal(
-                          revealed: _showWindowsWindowControls(metrics),
-                          child: const WindowsWindowControls(),
-                        ),
-                    ],
-                  );
-                }),
-                if (bottomContent.isNotEmpty) ...[
-                  LdWrapConditional(
-                    condition: _hasTopContent,
-                    builder: (context, child) => Padding(
-                      padding: EdgeInsets.only(
-                        top: LdTheme.of(context).pad(size: LdSize.s).top,
-                      ),
-                      child: child,
-                    ),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: bottomContent,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
+                    if (widget.bottom != null) widget.bottom!,
+                  ],
+                );
+              },
             ),
           ),
         );

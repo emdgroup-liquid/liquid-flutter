@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_test_utils/ld_frame.dart';
+import 'package:liquid_flutter_test_utils/ld_frame_options.dart';
 import 'package:liquid_flutter_test_utils/system_ui/iphone_16_pro.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
@@ -259,6 +260,45 @@ void main() {
       expect(indicatorLeft - titleRight, lessThan(20));
     });
 
+    testWidgets('App bar keeps pinned actions visible when overflowable actions overflow', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            child: SizedBox(
+              width: 320,
+              child: LdScaffold(
+                body: LdAppBar.top(
+                  title: const Text('Very Long Page Title That Should Not Hide Actions'),
+                  actions: [
+                    LdAppBarAction(
+                      leading: const Icon(LucideIcons.listFilter),
+                      onPressed: () {},
+                      child: const Text('Filter'),
+                    ),
+                    LdAppBarAction(
+                      overflowMode: LdAppBarActionOverflowMode.pinned,
+                      onPressed: () {},
+                      child: const Text('Done'),
+                    ),
+                  ],
+                  child: const Center(child: Text('Body')),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(LucideIcons.ellipsisVertical), findsOneWidget);
+      expect(find.text('Filter'), findsNothing);
+      expect(find.text('Done'), findsOneWidget);
+    });
+
     testWidgets('App bar actions compact when row is tight', (WidgetTester tester) async {
       ldDisableAnimations = true;
 
@@ -378,6 +418,57 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Filter'), findsOneWidget);
+    });
+
+    testWidgets('App bar keeps search visible on narrow desktop width', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            ldFrameOptions: const LdFrameOptions(platform: LdPlatform.macos),
+            child: LdScaffold(
+              body: LdAppBar.top(
+                title: const Text('Tasks'),
+                searchConfig: LdSearchConfig(onSearch: (_) {}, hint: 'Search tasks'),
+                actions: [
+                  LdAppBarAction(
+                    leading: const Icon(LucideIcons.refreshCw),
+                    onPressed: () {},
+                    child: const Text('Refresh'),
+                  ),
+                  LdAppBarAction(
+                    leading: const Icon(LucideIcons.listFilter),
+                    onPressed: () {},
+                    child: const Text('Filter'),
+                  ),
+                  LdAppBarAction(
+                    overflowMode: LdAppBarActionOverflowMode.pinned,
+                    onPressed: () {},
+                    child: const Text('Select'),
+                  ),
+                ],
+                child: const Center(child: Text('Body')),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final searchBox = tester.renderObject<RenderBox>(find.byType(LdSearchInput));
+      expect(searchBox.hasSize, isTrue);
+      expect(searchBox.size.width, greaterThan(200));
+      expect(
+        find.descendant(of: find.byType(LdOverflowView), matching: find.byType(LdSearchInput)),
+        findsNothing,
+      );
     });
 
     testWidgets('App bar action compactMode never does not use adaptive wrapper', (WidgetTester tester) async {
