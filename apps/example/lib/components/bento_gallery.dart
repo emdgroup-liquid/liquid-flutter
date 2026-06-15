@@ -511,7 +511,7 @@ class _BentoCard extends StatelessWidget {
         );
 
       case "Slider":
-        return LdSlider(
+        return LdConfirmationSlider(
           onSlideComplete: () {},
           hint: "Slide to complete",
         );

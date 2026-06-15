@@ -2745,7 +2745,7 @@
       "filePath": "lib/src/appbar/appbar.dart",
       "entryPoint": "lib/liquid_flutter.dart",
       "name": "LdAppBar",
-      "description": " A flexible app bar widget that wraps its [child] content.\n\n ## Usage\n\n Wrap the scaffold body (or any subtree) with [LdAppBar] to add an app bar:\n\n ```dart\n LdScaffold(\n   body: LdAppBar.top(\n     title: Text('My App'),\n     child: LdScaffoldBody(children: [...]),\n   ),\n )\n ```\n\n Nest bars for multiple edges:\n\n ```dart\n LdAppBar.top(\n   title: Text('Title'),\n   child: LdTabNavigation.bottom(\n     tabs: [...],\n     child: LdScaffoldBody(children: [...]),\n   ),\n )\n ```\n\n ## Positioning\n\n - [LdAppBar.top] — places the bar at the top\n - [LdAppBar.bottom] — places the bar at the bottom\n - [LdAppBar] default — uses [positionMode] (defaults to top)\n\n ## MediaQuery Padding\n\n The bar automatically patches [MediaQuery.padding] inside [child] so that\n descendants can read the correct insets without any additional wiring.\n\n See also:\n - [LdTabNavigation] for tab-based navigation bars\n - [LdScaffold] for the scaffold that hosts bars",
+      "description": " A flexible app bar widget that wraps its [child] content.\n\n ## Usage\n\n Wrap the scaffold body (or any subtree) with [LdAppBar] to add an app bar:\n\n ```dart\n LdScaffold(\n   body: LdAppBar.top(\n     title: Text('My App'),\n     child: LdScaffoldBody(children: [...]),\n   ),\n )\n ```\n\n Nest bars for multiple edges:\n\n ```dart\n LdAppBar.top(\n   title: Text('Title'),\n   child: LdTabNavigation.bottom(\n     tabs: [...],\n     child: LdScaffoldBody(children: [...]),\n   ),\n )\n ```\n\n ## Positioning\n\n - [LdAppBar.top] \u2014 places the bar at the top\n - [LdAppBar.bottom] \u2014 places the bar at the bottom\n - [LdAppBar] default \u2014 uses [positionMode] (defaults to top)\n\n ## MediaQuery Padding\n\n The bar automatically patches [MediaQuery.padding] inside [child] so that\n descendants can read the correct insets without any additional wiring.\n\n See also:\n - [LdTabNavigation] for tab-based navigation bars\n - [LdScaffold] for the scaffold that hosts bars",
       "constructors": [
         {
           "name": "new",
@@ -8074,7 +8074,7 @@
       "filePath": "lib/src/appbar/appbar_state.dart",
       "entryPoint": "lib/liquid_flutter.dart",
       "name": "LdAppBarMetrics",
-      "description": " Immutable snapshot of an app-bar's metrics at a point in time.\n\n [position]        – whether this bar sits at the top or bottom.\n [barHeight]       – the full rendered height of the bar (pixels).\n [edgeMargin]      – padding already applied on this edge before this bar\n                     (safe area and/or ancestor bars), used to compute\n                     [consumedInsets] without double-counting.\n [hideOffset]      – how many pixels the bar has been scrolled off-screen\n                     (0 = fully visible, barHeight = fully hidden).\n [isScrolledUnder] – true when the scroll content has moved underneath\n                     the bar.\n [level]           – stacking index among bars at the same position (0 = outermost).",
+      "description": " Immutable snapshot of an app-bar's metrics at a point in time.\n\n [position]        \u2013 whether this bar sits at the top or bottom.\n [barHeight]       \u2013 the full rendered height of the bar (pixels).\n [edgeMargin]      \u2013 padding already applied on this edge before this bar\n                     (safe area and/or ancestor bars), used to compute\n                     [consumedInsets] without double-counting.\n [hideOffset]      \u2013 how many pixels the bar has been scrolled off-screen\n                     (0 = fully visible, barHeight = fully hidden).\n [isScrolledUnder] \u2013 true when the scroll content has moved underneath\n                     the bar.\n [level]           \u2013 stacking index among bars at the same position (0 = outermost).",
       "constructors": [
         {
           "name": "new",
@@ -69749,7 +69749,7 @@
       "filePath": "lib/src/l10n/generated/liquid_localizations.dart",
       "entryPoint": "lib/liquid_flutter.dart",
       "name": "LiquidLocalizations",
-      "description": " Callers can lookup localized strings with an instance of LiquidLocalizations\n returned by `LiquidLocalizations.of(context)`.\n\n Applications need to include `LiquidLocalizations.delegate()` in their app's\n `localizationDelegates` list, and the locales they support in the app's\n `supportedLocales` list. For example:\n\n ```dart\n import 'generated/liquid_localizations.dart';\n\n return MaterialApp(\n   localizationsDelegates: LiquidLocalizations.localizationsDelegates,\n   supportedLocales: LiquidLocalizations.supportedLocales,\n   home: MyApplicationHome(),\n );\n ```\n\n ## Update pubspec.yaml\n\n Please make sure to update your pubspec.yaml to include the following\n packages:\n\n ```yaml\n dependencies:\n   # Internationalization support.\n   flutter_localizations:\n     sdk: flutter\n   intl: any # Use the pinned version from flutter_localizations\n\n   # Rest of dependencies\n ```\n\n ## iOS Applications\n\n iOS applications define key application metadata, including supported\n locales, in an Info.plist file that is built into the application bundle.\n To configure the locales supported by your app, you’ll need to edit this\n file.\n\n First, open your project’s ios/Runner.xcworkspace Xcode workspace file.\n Then, in the Project Navigator, open the Info.plist file under the Runner\n project’s Runner folder.\n\n Next, select the Information Property List item, select Add Item from the\n Editor menu, then select Localizations from the pop-up menu.\n\n Select and expand the newly-created Localizations item then, for each\n locale your application supports, add a new item and select the locale\n you wish to add from the pop-up menu in the Value field. This list should\n be consistent with the languages listed in the LiquidLocalizations.supportedLocales\n property.",
+      "description": " Callers can lookup localized strings with an instance of LiquidLocalizations\n returned by `LiquidLocalizations.of(context)`.\n\n Applications need to include `LiquidLocalizations.delegate()` in their app's\n `localizationDelegates` list, and the locales they support in the app's\n `supportedLocales` list. For example:\n\n ```dart\n import 'generated/liquid_localizations.dart';\n\n return MaterialApp(\n   localizationsDelegates: LiquidLocalizations.localizationsDelegates,\n   supportedLocales: LiquidLocalizations.supportedLocales,\n   home: MyApplicationHome(),\n );\n ```\n\n ## Update pubspec.yaml\n\n Please make sure to update your pubspec.yaml to include the following\n packages:\n\n ```yaml\n dependencies:\n   # Internationalization support.\n   flutter_localizations:\n     sdk: flutter\n   intl: any # Use the pinned version from flutter_localizations\n\n   # Rest of dependencies\n ```\n\n ## iOS Applications\n\n iOS applications define key application metadata, including supported\n locales, in an Info.plist file that is built into the application bundle.\n To configure the locales supported by your app, you\u2019ll need to edit this\n file.\n\n First, open your project\u2019s ios/Runner.xcworkspace Xcode workspace file.\n Then, in the Project Navigator, open the Info.plist file under the Runner\n project\u2019s Runner folder.\n\n Next, select the Information Property List item, select Add Item from the\n Editor menu, then select Localizations from the pop-up menu.\n\n Select and expand the newly-created Localizations item then, for each\n locale your application supports, add a new item and select the locale\n you wish to add from the pop-up menu in the Value field. This list should\n be consistent with the languages listed in the LiquidLocalizations.supportedLocales\n property.",
       "constructors": [
         {
           "name": "new",
@@ -109409,7 +109409,7 @@
             ],
             "isNullable": true
           },
-          "description": " Static segment before `:viewing_<itemName>` for this level's detail route\n (no slashes), e.g. `files` → `files/:viewing_file`.",
+          "description": " Static segment before `:viewing_<itemName>` for this level's detail route\n (no slashes), e.g. `files` \u2192 `files/:viewing_file`.",
           "features": [
             "final"
           ],
@@ -109592,7 +109592,7 @@
       "filePath": "lib/src/monkey/monkey_route_tree.dart",
       "entryPoint": null,
       "name": "buildMonkeyRouteTree",
-      "description": " Builds a [ShellRoute] list for a stacked monkey tree of arbitrary depth.\n\n URLs look like: `[masterPath]/:[viewing_root](/[prefix_i]/:[viewing_i])*`.\n\n In a stacked master‑detail tree the parent's [MonkeyRouteNode.detailPage]\n is rendered as the next level's master page. To make that work each\n [LdMonkeyRouteScope] must already be active at the parent's detail\n position, so each detail [GoRoute] is wrapped in a [ShellRoute] that\n provides the child level's scope (when a child exists).",
+      "description": " Builds a [ShellRoute] list for a stacked monkey tree of arbitrary depth.\n\n URLs look like: `[masterPath]/:[viewing_root](/[prefix_i]/:[viewing_i])*`.\n\n In a stacked master\u2011detail tree the parent's [MonkeyRouteNode.detailPage]\n is rendered as the next level's master page. To make that work each\n [LdMonkeyRouteScope] must already be active at the parent's detail\n position, so each detail [GoRoute] is wrapped in a [ShellRoute] that\n provides the child level's scope (when a child exists).",
       "constructors": [],
       "properties": [],
       "methods": [
@@ -109684,7 +109684,7 @@
           "features": [
             "static"
           ],
-          "description": " Builds a [ShellRoute] list for a stacked monkey tree of arbitrary depth.\n\n URLs look like: `[masterPath]/:[viewing_root](/[prefix_i]/:[viewing_i])*`.\n\n In a stacked master‑detail tree the parent's [MonkeyRouteNode.detailPage]\n is rendered as the next level's master page. To make that work each\n [LdMonkeyRouteScope] must already be active at the parent's detail\n position, so each detail [GoRoute] is wrapped in a [ShellRoute] that\n provides the child level's scope (when a child exists).",
+          "description": " Builds a [ShellRoute] list for a stacked monkey tree of arbitrary depth.\n\n URLs look like: `[masterPath]/:[viewing_root](/[prefix_i]/:[viewing_i])*`.\n\n In a stacked master\u2011detail tree the parent's [MonkeyRouteNode.detailPage]\n is rendered as the next level's master page. To make that work each\n [LdMonkeyRouteScope] must already be active at the parent's detail\n position, so each detail [GoRoute] is wrapped in a [ShellRoute] that\n provides the child level's scope (when a child exists).",
           "annotations": [],
           "typeParameters": [
             "T extends Identifiable<IdType>",
@@ -109792,7 +109792,7 @@
       "filePath": "lib/src/monkey/monkey_route_tree.dart",
       "entryPoint": null,
       "name": "_buildDetailRoutes",
-      "description": " Builds the detail [GoRoute] for [node] and, when [node] has a child,\n wraps it in a [ShellRoute] that provides the child level's\n [LdMonkeyRouteScope].\n\n The child's scope must be active at [node]'s detail position because the\n parent's detail page is also rendered as the child's master page in the\n stacked master‑detail layout.",
+      "description": " Builds the detail [GoRoute] for [node] and, when [node] has a child,\n wraps it in a [ShellRoute] that provides the child level's\n [LdMonkeyRouteScope].\n\n The child's scope must be active at [node]'s detail position because the\n parent's detail page is also rendered as the child's master page in the\n stacked master\u2011detail layout.",
       "constructors": [],
       "properties": [],
       "methods": [
@@ -109880,7 +109880,7 @@
           "features": [
             "static"
           ],
-          "description": " Builds the detail [GoRoute] for [node] and, when [node] has a child,\n wraps it in a [ShellRoute] that provides the child level's\n [LdMonkeyRouteScope].\n\n The child's scope must be active at [node]'s detail position because the\n parent's detail page is also rendered as the child's master page in the\n stacked master‑detail layout.",
+          "description": " Builds the detail [GoRoute] for [node] and, when [node] has a child,\n wraps it in a [ShellRoute] that provides the child level's\n [LdMonkeyRouteScope].\n\n The child's scope must be active at [node]'s detail position because the\n parent's detail page is also rendered as the child's master page in the\n stacked master\u2011detail layout.",
           "annotations": [],
           "typeParameters": []
         }
@@ -109951,7 +109951,7 @@
       "filePath": "lib/src/monkey/monkey_route_tree.dart",
       "entryPoint": null,
       "name": "defaultMonkeyScopeStorageKey",
-      "description": " Default scope key: `|`‑joined values of the ancestor `viewing_*` path\n params from [root] up to (but not including) [scope], in tree order.\n\n [scope]'s own `viewing_*` param identifies the currently selected item\n within this scope, not the scope itself, so excluding it keeps the scope\n (and its repository) stable while navigating between sibling items.",
+      "description": " Default scope key: `|`\u2011joined values of the ancestor `viewing_*` path\n params from [root] up to (but not including) [scope], in tree order.\n\n [scope]'s own `viewing_*` param identifies the currently selected item\n within this scope, not the scope itself, so excluding it keeps the scope\n (and its repository) stable while navigating between sibling items.",
       "constructors": [],
       "properties": [],
       "methods": [
@@ -110016,7 +110016,7 @@
           "features": [
             "static"
           ],
-          "description": " Default scope key: `|`‑joined values of the ancestor `viewing_*` path\n params from [root] up to (but not including) [scope], in tree order.\n\n [scope]'s own `viewing_*` param identifies the currently selected item\n within this scope, not the scope itself, so excluding it keeps the scope\n (and its repository) stable while navigating between sibling items.",
+          "description": " Default scope key: `|`\u2011joined values of the ancestor `viewing_*` path\n params from [root] up to (but not including) [scope], in tree order.\n\n [scope]'s own `viewing_*` param identifies the currently selected item\n within this scope, not the scope itself, so excluding it keeps the scope\n (and its repository) stable while navigating between sibling items.",
           "annotations": [],
           "typeParameters": []
         }
@@ -118752,7 +118752,7 @@
             ],
             "isNullable": true
           },
-          "description": " The subtree that this app bar wraps.\n\n When provided, the bar uses the new wrapper-based composition model and\n passes [child] down to [LdAppBar]. When null, the bar renders the bar\n surface only (legacy / used when the bar is placed inside\n [LdScaffold.appBars] — deprecated path).",
+          "description": " The subtree that this app bar wraps.\n\n When provided, the bar uses the new wrapper-based composition model and\n passes [child] down to [LdAppBar]. When null, the bar renders the bar\n surface only (legacy / used when the bar is placed inside\n [LdScaffold.appBars] \u2014 deprecated path).",
           "features": [
             "final"
           ],
@@ -138599,7 +138599,7 @@
             }
           ],
           "features": [],
-          "description": " Compare two widgets for equality.\n\n When a widget is rebuilt with another that compares equal according\n to `operator ==`, it is assumed that the update is redundant and the\n work to update that branch of the tree is skipped.\n\n It is generally discouraged to override `operator ==` on any widget that\n has children, since a correct implementation would have to defer to the\n children's equality operator also, and that is an O(N²) operation: each\n child would need to itself walk all its children, each step of the tree.\n\n It is sometimes reasonable for a leaf widget (one with no children) to\n implement this method, if rebuilding the widget is known to be much more\n expensive than checking the widgets' parameters for equality and if the\n widget is expected to often be rebuilt with identical parameters.\n\n In general, however, it is more efficient to cache the widgets used\n in a build method if it is known that they will not change.",
+          "description": " Compare two widgets for equality.\n\n When a widget is rebuilt with another that compares equal according\n to `operator ==`, it is assumed that the update is redundant and the\n work to update that branch of the tree is skipped.\n\n It is generally discouraged to override `operator ==` on any widget that\n has children, since a correct implementation would have to defer to the\n children's equality operator also, and that is an O(N\u00b2) operation: each\n child would need to itself walk all its children, each step of the tree.\n\n It is sometimes reasonable for a leaf widget (one with no children) to\n implement this method, if rebuilding the widget is known to be much more\n expensive than checking the widgets' parameters for equality and if the\n widget is expected to often be rebuilt with identical parameters.\n\n In general, however, it is more efficient to cache the widgets used\n in a build method if it is known that they will not change.",
           "annotations": [
             "@nonVirtual",
             "@override"
@@ -140037,7 +140037,7 @@
             }
           ],
           "features": [],
-          "description": " Cause the widget to update itself. In debug builds, also verify various\n invariants.\n\n Called by the [BuildOwner] when [BuildOwner.scheduleBuildFor] has been\n called to mark this element dirty, by [mount] when the element is first\n built, and by [update] when the widget has changed.\n\n The method will only rebuild if [dirty] is true. To rebuild regardless\n of the [dirty] flag, set `force` to true. Forcing a rebuild is convenient\n from [update], during which [dirty] is false.\n\n ## When rebuilds happen\n\n ### Terminology\n\n [Widget]s represent the configuration of [Element]s. Each [Element] has a\n widget, specified in [Element.widget]. The term \"widget\" is often used\n when strictly speaking \"element\" would be more correct.\n\n While an [Element] has a current [Widget], over time, that widget may be\n replaced by others. For example, the element backing a [ColoredBox] may\n first have as its widget a [ColoredBox] whose [ColoredBox.color] is blue,\n then later be given a new [ColoredBox] whose color is green.\n\n At any particular time, multiple [Element]s in the same tree may have the\n same [Widget]. For example, the same [ColoredBox] with the green color may\n be used in multiple places in the widget tree at the same time, each being\n backed by a different [Element].\n\n ### Marking an element dirty\n\n An [Element] can be marked dirty between frames. This can happen for various\n reasons, including the following:\n\n * The [State] of a [StatefulWidget] can cause its [Element] to be marked\n   dirty by calling the [State.setState] method.\n\n * When an [InheritedWidget] changes, descendants that have previously\n   subscribed to it will be marked dirty.\n\n * During a hot reload, every element is marked dirty (using [Element.reassemble]).\n\n ### Rebuilding\n\n Dirty elements are rebuilt during the next frame. Precisely how this is\n done depends on the kind of element. A [StatelessElement] rebuilds by\n using its widget's [StatelessWidget.build] method. A [StatefulElement]\n rebuilds by using its widget's state's [State.build] method. A\n [RenderObjectElement] rebuilds by updating its [RenderObject].\n\n In many cases, the end result of rebuilding is a single child widget\n or (for [MultiChildRenderObjectElement]s) a list of children widgets.\n\n These child widgets are used to update the [widget] property of the\n element's child (or children) elements. The new [Widget] is considered to\n correspond to an existing [Element] if it has the same [Type] and [Key].\n (In the case of [MultiChildRenderObjectElement]s, some effort is put into\n tracking widgets even when they change order; see\n [RenderObjectElement.updateChildren].)\n\n If there was no corresponding previous child, this results in a new\n [Element] being created (using [Widget.createElement]); that element is\n then itself built, recursively.\n\n If there was a child previously but the build did not provide a\n corresponding child to update it, then the old child is discarded (or, in\n cases involving [GlobalKey] reparenting, reused elsewhere in the element\n tree).\n\n The most common case, however, is that there was a corresponding previous\n child. This is handled by asking the child [Element] to update itself\n using the new child [Widget]. In the case of [StatefulElement]s, this\n is what triggers [State.didUpdateWidget].\n\n ### Not rebuilding\n\n Before an [Element] is told to update itself with a new [Widget], the old\n and new objects are compared using `operator ==`.\n\n In general, this is equivalent to doing a comparison using [identical] to\n see if the two objects are in fact the exact same instance. If they are,\n and if the element is not already marked dirty for other reasons, then the\n element skips updating itself as it can determine with certainty that\n there would be no value in updating itself or its descendants.\n\n It is strongly advised to avoid overriding `operator ==` on [Widget]\n objects. While doing so seems like it could improve performance, in\n practice, for non-leaf widgets, it results in O(N²) behavior. This is\n because by necessity the comparison would have to include comparing child\n widgets, and if those child widgets also implement `operator ==`, it\n ultimately results in a complete walk of the widget tree... which is then\n repeated at each level of the tree. In practice, just rebuilding is\n cheaper. (Additionally, if _any_ subclass of [Widget] used in an\n application implements `operator ==`, then the compiler cannot inline the\n comparison anywhere, because it has to treat the call as virtual just in\n case the instance happens to be one that has an overridden operator.)\n\n Instead, the best way to avoid unnecessary rebuilds is to cache the\n widgets that are returned from [State.build], so that each frame the same\n widgets are used until such time as they change. Several mechanisms exist\n to encourage this: `const` widgets, for example, are a form of automatic\n caching (if a widget is constructed using the `const` keyword, the same\n instance is returned each time it is constructed with the same arguments).\n\n Another example is the [AnimatedBuilder.child] property, which allows the\n non-animating parts of a subtree to remain static even as the\n [AnimatedBuilder.builder] callback recreates the other components.",
+          "description": " Cause the widget to update itself. In debug builds, also verify various\n invariants.\n\n Called by the [BuildOwner] when [BuildOwner.scheduleBuildFor] has been\n called to mark this element dirty, by [mount] when the element is first\n built, and by [update] when the widget has changed.\n\n The method will only rebuild if [dirty] is true. To rebuild regardless\n of the [dirty] flag, set `force` to true. Forcing a rebuild is convenient\n from [update], during which [dirty] is false.\n\n ## When rebuilds happen\n\n ### Terminology\n\n [Widget]s represent the configuration of [Element]s. Each [Element] has a\n widget, specified in [Element.widget]. The term \"widget\" is often used\n when strictly speaking \"element\" would be more correct.\n\n While an [Element] has a current [Widget], over time, that widget may be\n replaced by others. For example, the element backing a [ColoredBox] may\n first have as its widget a [ColoredBox] whose [ColoredBox.color] is blue,\n then later be given a new [ColoredBox] whose color is green.\n\n At any particular time, multiple [Element]s in the same tree may have the\n same [Widget]. For example, the same [ColoredBox] with the green color may\n be used in multiple places in the widget tree at the same time, each being\n backed by a different [Element].\n\n ### Marking an element dirty\n\n An [Element] can be marked dirty between frames. This can happen for various\n reasons, including the following:\n\n * The [State] of a [StatefulWidget] can cause its [Element] to be marked\n   dirty by calling the [State.setState] method.\n\n * When an [InheritedWidget] changes, descendants that have previously\n   subscribed to it will be marked dirty.\n\n * During a hot reload, every element is marked dirty (using [Element.reassemble]).\n\n ### Rebuilding\n\n Dirty elements are rebuilt during the next frame. Precisely how this is\n done depends on the kind of element. A [StatelessElement] rebuilds by\n using its widget's [StatelessWidget.build] method. A [StatefulElement]\n rebuilds by using its widget's state's [State.build] method. A\n [RenderObjectElement] rebuilds by updating its [RenderObject].\n\n In many cases, the end result of rebuilding is a single child widget\n or (for [MultiChildRenderObjectElement]s) a list of children widgets.\n\n These child widgets are used to update the [widget] property of the\n element's child (or children) elements. The new [Widget] is considered to\n correspond to an existing [Element] if it has the same [Type] and [Key].\n (In the case of [MultiChildRenderObjectElement]s, some effort is put into\n tracking widgets even when they change order; see\n [RenderObjectElement.updateChildren].)\n\n If there was no corresponding previous child, this results in a new\n [Element] being created (using [Widget.createElement]); that element is\n then itself built, recursively.\n\n If there was a child previously but the build did not provide a\n corresponding child to update it, then the old child is discarded (or, in\n cases involving [GlobalKey] reparenting, reused elsewhere in the element\n tree).\n\n The most common case, however, is that there was a corresponding previous\n child. This is handled by asking the child [Element] to update itself\n using the new child [Widget]. In the case of [StatefulElement]s, this\n is what triggers [State.didUpdateWidget].\n\n ### Not rebuilding\n\n Before an [Element] is told to update itself with a new [Widget], the old\n and new objects are compared using `operator ==`.\n\n In general, this is equivalent to doing a comparison using [identical] to\n see if the two objects are in fact the exact same instance. If they are,\n and if the element is not already marked dirty for other reasons, then the\n element skips updating itself as it can determine with certainty that\n there would be no value in updating itself or its descendants.\n\n It is strongly advised to avoid overriding `operator ==` on [Widget]\n objects. While doing so seems like it could improve performance, in\n practice, for non-leaf widgets, it results in O(N\u00b2) behavior. This is\n because by necessity the comparison would have to include comparing child\n widgets, and if those child widgets also implement `operator ==`, it\n ultimately results in a complete walk of the widget tree... which is then\n repeated at each level of the tree. In practice, just rebuilding is\n cheaper. (Additionally, if _any_ subclass of [Widget] used in an\n application implements `operator ==`, then the compiler cannot inline the\n comparison anywhere, because it has to treat the call as virtual just in\n case the instance happens to be one that has an overridden operator.)\n\n Instead, the best way to avoid unnecessary rebuilds is to cache the\n widgets that are returned from [State.build], so that each frame the same\n widgets are used until such time as they change. Several mechanisms exist\n to encourage this: `const` widgets, for example, are a form of automatic\n caching (if a widget is constructed using the `const` keyword, the same\n instance is returned each time it is constructed with the same arguments).\n\n Another example is the [AnimatedBuilder.child] property, which allows the\n non-animating parts of a subtree to remain static even as the\n [AnimatedBuilder.builder] callback recreates the other components.",
           "annotations": [
             "@pragma('dart2js:tryInline')",
             "@pragma('vm:prefer-inline')",
@@ -153786,7 +153786,7 @@
     {
       "filePath": "lib/src/slider.dart",
       "entryPoint": "lib/liquid_flutter.dart",
-      "name": "LdSlider",
+      "name": "LdConfirmationSlider",
       "description": "",
       "constructors": [
         {
@@ -154027,7 +154027,7 @@
         {
           "name": "createState",
           "returnType": {
-            "name": "State<LdSlider>",
+            "name": "State<LdConfirmationSlider>",
             "superTypes": [
               "Object",
               "Diagnosticable"
@@ -154384,9 +154384,674 @@
       "typeParameters": []
     },
     {
+      "filePath": "lib/src/value_slider.dart",
+      "entryPoint": "lib/liquid_flutter.dart",
+      "name": "LdSlider",
+      "description": "A value-input slider widget. Displays a horizontal track with a draggable handle that maps to a double value in the range [min, max]. Use LdSlider.range to create a range slider with two handles.",
+      "constructors": [
+        {
+          "name": "new",
+          "signature": [
+            {
+              "name": "key",
+              "description": "",
+              "type": {
+                "name": "Key?",
+                "superTypes": [
+                  "Object"
+                ],
+                "isNullable": true
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "value",
+              "description": "The current value of the slider.",
+              "type": {
+                "name": "double",
+                "superTypes": [
+                  "num",
+                  "Object",
+                  "Comparable"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "onChanged",
+              "description": "Called when the value changes via user interaction.",
+              "type": {
+                "name": "void Function(double)",
+                "superTypes": [],
+                "isNullable": false
+              },
+              "named": true,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "min",
+              "description": "Minimum value.",
+              "type": {
+                "name": "double",
+                "superTypes": [
+                  "num",
+                  "Object",
+                  "Comparable"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "0.0",
+              "annotations": []
+            },
+            {
+              "name": "max",
+              "description": "Maximum value.",
+              "type": {
+                "name": "double",
+                "superTypes": [
+                  "num",
+                  "Object",
+                  "Comparable"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "1.0",
+              "annotations": []
+            },
+            {
+              "name": "step",
+              "description": "Snap step. 0 means continuous.",
+              "type": {
+                "name": "double",
+                "superTypes": [
+                  "num",
+                  "Object",
+                  "Comparable"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "0.0",
+              "annotations": []
+            },
+            {
+              "name": "direction",
+              "description": "Orientation of the slider.",
+              "type": {
+                "name": "Axis",
+                "superTypes": [
+                  "Object",
+                  "Enum"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "Axis.horizontal",
+              "annotations": []
+            },
+            {
+              "name": "size",
+              "description": "Size of the slider and its handle.",
+              "type": {
+                "name": "LdSize",
+                "superTypes": [
+                  "Object",
+                  "Enum"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "LdSize.m",
+              "annotations": []
+            },
+            {
+              "name": "color",
+              "description": "Optional accent color. Falls back to theme primary.",
+              "type": {
+                "name": "LdColor?",
+                "superTypes": [
+                  "Object"
+                ],
+                "isNullable": true
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "disabled",
+              "description": "Whether the slider is disabled.",
+              "type": {
+                "name": "bool",
+                "superTypes": [
+                  "Object"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "false",
+              "annotations": []
+            },
+            {
+              "name": "label",
+              "description": "Optional label shown above the track.",
+              "type": {
+                "name": "String?",
+                "superTypes": [
+                  "Object",
+                  "Comparable",
+                  "Pattern"
+                ],
+                "isNullable": true
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": null,
+              "annotations": []
+            }
+          ],
+          "features": [
+            "const"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "range",
+          "signature": [
+            {
+              "name": "key",
+              "description": "",
+              "type": {
+                "name": "Key?",
+                "superTypes": [
+                  "Object"
+                ],
+                "isNullable": true
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "lowValue",
+              "description": "The current low value of the range.",
+              "type": {
+                "name": "double",
+                "superTypes": [
+                  "num",
+                  "Object",
+                  "Comparable"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "highValue",
+              "description": "The current high value of the range.",
+              "type": {
+                "name": "double",
+                "superTypes": [
+                  "num",
+                  "Object",
+                  "Comparable"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "onRangeChanged",
+              "description": "Called when the range changes via user interaction.",
+              "type": {
+                "name": "void Function(double, double)",
+                "superTypes": [],
+                "isNullable": false
+              },
+              "named": true,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "allowRangeDrag",
+                "description": "Whether the entire filled region between the two handles can be dragged as a unit, translating both values by the same delta while preserving range width.",
+              "type": {
+                "name": "bool",
+                "superTypes": [
+                  "Object"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "false",
+              "annotations": []
+            },
+            {
+              "name": "min",
+              "description": "Minimum value.",
+              "type": {
+                "name": "double",
+                "superTypes": [
+                  "num",
+                  "Object",
+                  "Comparable"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "0.0",
+              "annotations": []
+            },
+            {
+              "name": "max",
+              "description": "Maximum value.",
+              "type": {
+                "name": "double",
+                "superTypes": [
+                  "num",
+                  "Object",
+                  "Comparable"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "1.0",
+              "annotations": []
+            },
+            {
+              "name": "step",
+              "description": "Snap step. 0 means continuous.",
+              "type": {
+                "name": "double",
+                "superTypes": [
+                  "num",
+                  "Object",
+                  "Comparable"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "0.0",
+              "annotations": []
+            },
+            {
+              "name": "direction",
+              "description": "Orientation of the slider.",
+              "type": {
+                "name": "Axis",
+                "superTypes": [
+                  "Object",
+                  "Enum"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "Axis.horizontal",
+              "annotations": []
+            },
+            {
+              "name": "size",
+              "description": "Size of the slider and its handle.",
+              "type": {
+                "name": "LdSize",
+                "superTypes": [
+                  "Object",
+                  "Enum"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "LdSize.m",
+              "annotations": []
+            },
+            {
+              "name": "color",
+              "description": "Optional accent color. Falls back to theme primary.",
+              "type": {
+                "name": "LdColor?",
+                "superTypes": [
+                  "Object"
+                ],
+                "isNullable": true
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "disabled",
+              "description": "Whether the slider is disabled.",
+              "type": {
+                "name": "bool",
+                "superTypes": [
+                  "Object"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": "false",
+              "annotations": []
+            },
+            {
+              "name": "label",
+              "description": "Optional label shown above the track.",
+              "type": {
+                "name": "String?",
+                "superTypes": [
+                  "Object",
+                  "Comparable",
+                  "Pattern"
+                ],
+                "isNullable": true
+              },
+              "named": true,
+              "required": false,
+              "defaultValue": null,
+              "annotations": []
+            }
+          ],
+          "features": [
+            "const"
+          ],
+          "annotations": []
+        }
+      ],
+      "properties": [
+        {
+          "name": "key",
+          "type": {
+            "name": "Key?",
+            "superTypes": [
+              "Object"
+            ],
+            "isNullable": true
+          },
+          "description": "",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "value",
+          "type": {
+            "name": "double?",
+            "superTypes": [
+              "num",
+              "Object",
+              "Comparable"
+            ],
+            "isNullable": true
+          },
+          "description": "The current value of the slider (single mode only).",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "onChanged",
+          "type": {
+            "name": "void Function(double)?",
+            "superTypes": [],
+            "isNullable": true
+          },
+          "description": "Called when the value changes via user interaction (single mode only).",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "lowValue",
+          "type": {
+            "name": "double?",
+            "superTypes": [
+              "num",
+              "Object",
+              "Comparable"
+            ],
+            "isNullable": true
+          },
+          "description": "The current low value of the range (range mode only).",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "highValue",
+          "type": {
+            "name": "double?",
+            "superTypes": [
+              "num",
+              "Object",
+              "Comparable"
+            ],
+            "isNullable": true
+          },
+          "description": "The current high value of the range (range mode only).",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "onRangeChanged",
+          "type": {
+            "name": "void Function(double, double)?",
+            "superTypes": [],
+            "isNullable": true
+          },
+          "description": "Called when the range changes via user interaction (range mode only).",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "allowRangeDrag",
+          "type": {
+            "name": "bool",
+            "superTypes": [
+              "Object"
+            ],
+            "isNullable": false
+          },
+          "description": "Whether the entire filled region between the two handles can be dragged as a unit.",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "min",
+          "type": {
+            "name": "double",
+            "superTypes": [
+              "num",
+              "Object",
+              "Comparable"
+            ],
+            "isNullable": false
+          },
+          "description": "Minimum value.",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "max",
+          "type": {
+            "name": "double",
+            "superTypes": [
+              "num",
+              "Object",
+              "Comparable"
+            ],
+            "isNullable": false
+          },
+          "description": "Maximum value.",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "step",
+          "type": {
+            "name": "double",
+            "superTypes": [
+              "num",
+              "Object",
+              "Comparable"
+            ],
+            "isNullable": false
+          },
+          "description": "Snap step. 0 means continuous.",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "direction",
+          "type": {
+            "name": "Axis",
+            "superTypes": [
+              "Object",
+              "Enum"
+            ],
+            "isNullable": false
+          },
+          "description": "Orientation of the slider.",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "size",
+          "type": {
+            "name": "LdSize",
+            "superTypes": [
+              "Object",
+              "Enum"
+            ],
+            "isNullable": false
+          },
+          "description": "Size of the slider and its handle.",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "color",
+          "type": {
+            "name": "LdColor?",
+            "superTypes": [
+              "Object"
+            ],
+            "isNullable": true
+          },
+          "description": "Optional accent color. Falls back to theme primary.",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "disabled",
+          "type": {
+            "name": "bool",
+            "superTypes": [
+              "Object"
+            ],
+            "isNullable": false
+          },
+          "description": "Whether the slider is disabled.",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "label",
+          "type": {
+            "name": "String?",
+            "superTypes": [
+              "Object",
+              "Comparable",
+              "Pattern"
+            ],
+            "isNullable": true
+          },
+          "description": "Optional label shown above the track.",
+          "features": [
+            "final"
+          ],
+          "annotations": []
+        },
+        {
+          "name": "hashCode",
+          "type": {
+            "name": "int",
+            "superTypes": [
+              "num",
+              "Object",
+              "Comparable"
+            ],
+            "isNullable": false
+          },
+          "description": "",
+          "features": [],
+          "annotations": []
+        }
+      ],
+      "methods": [],
+      "features": [],
+      "annotations": []
+    },
+    {
       "filePath": "lib/src/slider.dart",
       "entryPoint": "lib/liquid_flutter.dart",
-      "name": "_LdSliderState",
+      "name": "_LdConfirmationSliderState",
       "description": "",
       "constructors": [
         {
@@ -154711,7 +155376,7 @@
               "name": "oldWidget",
               "description": "",
               "type": {
-                "name": "LdSlider",
+                "name": "LdConfirmationSlider",
                 "superTypes": [
                   "StatefulWidget",
                   "Widget",

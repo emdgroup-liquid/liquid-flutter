@@ -13,6 +13,7 @@ import 'package:liquid/components/form_elements/date_time_pickers.dart';
 import 'package:liquid/components/form_elements/radio.dart';
 import 'package:liquid/components/form_elements/select.dart';
 import 'package:liquid/components/form_elements/slider.dart';
+import 'package:liquid/components/form_elements/value_slider.dart';
 import 'package:liquid/components/form_elements/submit.dart';
 import 'package:liquid/components/form_elements/switch.dart';
 import 'package:liquid/components/form_elements/toggle.dart';
@@ -252,6 +253,11 @@ class AppRouter {
           GoRoute(
             path: "/components/slider",
             pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const LdSliderDemo()),
+          ),
+          GoRoute(
+            path: "/components/value-slider",
+            pageBuilder: (context, state) =>
+                NoTransitionPage<void>(key: state.pageKey, child: const LdValueSliderDemo()),
           ),
           GoRoute(
             path: "/components/switch",

@@ -18,13 +18,13 @@ class _LdSliderDemoState extends State<LdSliderDemo> {
   Widget build(BuildContext context) {
     return ComponentPage(
       path: "lib/components/form_elements/slider.dart",
-      title: "LdSlider",
+      title: "LdConfirmationSlider",
       demo: LdAutoSpace(
         children: [
           ComponentWell(
             child: LdAutoSpace(
               children: [
-                LdSlider(
+                LdConfirmationSlider(
                   hint: "Swipe right...",
                   label: "Confirm account deletion",
                   disabled: _disabled,
@@ -37,7 +37,7 @@ class _LdSliderDemoState extends State<LdSliderDemo> {
                   },
                 ),
                 ldSpacerL,
-                LdSlider(
+                LdConfirmationSlider(
                   hint: "Swipe right...",
                   label: "Confirm account deletion",
                   disabled: _disabled,
@@ -51,7 +51,7 @@ class _LdSliderDemoState extends State<LdSliderDemo> {
                   },
                 ),
                 ldSpacerL,
-                LdSlider(
+                LdConfirmationSlider(
                   hint: "Swipe right...",
                   label: "Confirm account deletion",
                   disabled: _disabled,
