@@ -747,6 +747,12 @@ class VariantBuilder implements Builder {
         ..type = const Reference('Widget')
         ..modifier = FieldModifier.final$));
 
+      // When true, skip merging with an ancestor config provider.
+      builder.fields.add(Field((fb) => fb
+        ..name = 'ignoreParent'
+        ..type = const Reference('bool')
+        ..modifier = FieldModifier.final$));
+
       // Constructor
       builder.constructors.add(Constructor((cb) {
         cb.constant = true;
@@ -761,6 +767,12 @@ class VariantBuilder implements Builder {
             ..toThis = true
             ..named = true
             ..required = true),
+          Parameter((pb) => pb
+            ..name = 'ignoreParent'
+            ..toThis = true
+            ..named = true
+            ..required = false
+            ..defaultTo = const Code('false')),
           Parameter((pb) => pb
             ..name = 'key'
             ..named = true
@@ -785,6 +797,15 @@ class VariantBuilder implements Builder {
         final typeArgsString = typeParameters.isNotEmpty
             ? '<${typeParameters.map((tp) => tp.symbol).join(', ')}>'
             : '';
+
+        bodyStatements.add(
+          Code('if (ignoreParent) {'
+              'return Provider<$configClassName$typeArgsString>.value('
+              'value: config, '
+              'child: child,'
+              ');'
+              '}'),
+        );
 
         // Read parent config
         bodyStatements.add(

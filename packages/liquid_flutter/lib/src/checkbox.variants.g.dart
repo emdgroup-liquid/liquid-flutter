@@ -27,6 +27,7 @@ class LdCheckboxConfigProvider extends StatelessWidget {
   const LdCheckboxConfigProvider({
     required this.config,
     required this.child,
+    this.ignoreParent = false,
     super.key,
   });
 
@@ -34,8 +35,16 @@ class LdCheckboxConfigProvider extends StatelessWidget {
 
   final Widget child;
 
+  final bool ignoreParent;
+
   @override
   Widget build(BuildContext context) {
+    if (ignoreParent) {
+      return Provider<LdCheckboxConfig>.value(
+        value: config,
+        child: child,
+      );
+    }
     final parentConfig = Provider.of<LdCheckboxConfig?>(context, listen: true);
     final mergedConfig = parentConfig != null
         ? LdCheckboxConfig(

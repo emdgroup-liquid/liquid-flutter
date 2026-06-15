@@ -42,6 +42,7 @@ class LdListItemConfigProvider extends StatelessWidget {
   const LdListItemConfigProvider({
     required this.config,
     required this.child,
+    this.ignoreParent = false,
     super.key,
   });
 
@@ -49,8 +50,16 @@ class LdListItemConfigProvider extends StatelessWidget {
 
   final Widget child;
 
+  final bool ignoreParent;
+
   @override
   Widget build(BuildContext context) {
+    if (ignoreParent) {
+      return Provider<LdListItemConfig>.value(
+        value: config,
+        child: child,
+      );
+    }
     final parentConfig = Provider.of<LdListItemConfig?>(context, listen: true);
     final mergedConfig = parentConfig != null
         ? LdListItemConfig(

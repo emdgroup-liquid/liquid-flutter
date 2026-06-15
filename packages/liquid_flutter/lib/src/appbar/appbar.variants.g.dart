@@ -75,6 +75,7 @@ class LdAppBarConfigProvider extends StatelessWidget {
   const LdAppBarConfigProvider({
     required this.config,
     required this.child,
+    this.ignoreParent = false,
     super.key,
   });
 
@@ -82,8 +83,16 @@ class LdAppBarConfigProvider extends StatelessWidget {
 
   final Widget child;
 
+  final bool ignoreParent;
+
   @override
   Widget build(BuildContext context) {
+    if (ignoreParent) {
+      return Provider<LdAppBarConfig>.value(
+        value: config,
+        child: child,
+      );
+    }
     final parentConfig = Provider.of<LdAppBarConfig?>(context, listen: true);
     final mergedConfig = parentConfig != null
         ? LdAppBarConfig(

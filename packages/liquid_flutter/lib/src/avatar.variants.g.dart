@@ -18,6 +18,7 @@ class LdAvatarConfigProvider extends StatelessWidget {
   const LdAvatarConfigProvider({
     required this.config,
     required this.child,
+    this.ignoreParent = false,
     super.key,
   });
 
@@ -25,8 +26,16 @@ class LdAvatarConfigProvider extends StatelessWidget {
 
   final Widget child;
 
+  final bool ignoreParent;
+
   @override
   Widget build(BuildContext context) {
+    if (ignoreParent) {
+      return Provider<LdAvatarConfig>.value(
+        value: config,
+        child: child,
+      );
+    }
     final parentConfig = Provider.of<LdAvatarConfig?>(context, listen: true);
     final mergedConfig = parentConfig != null
         ? LdAvatarConfig(

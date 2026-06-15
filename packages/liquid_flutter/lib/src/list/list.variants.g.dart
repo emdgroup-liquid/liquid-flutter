@@ -67,6 +67,7 @@ class LdListConfigProvider<T extends Identifiable<IdType>, IdType>
   const LdListConfigProvider({
     required this.config,
     required this.child,
+    this.ignoreParent = false,
     super.key,
   });
 
@@ -74,8 +75,16 @@ class LdListConfigProvider<T extends Identifiable<IdType>, IdType>
 
   final Widget child;
 
+  final bool ignoreParent;
+
   @override
   Widget build(BuildContext context) {
+    if (ignoreParent) {
+      return Provider<LdListConfig<T, IdType>>.value(
+        value: config,
+        child: child,
+      );
+    }
     final parentConfig =
         Provider.of<LdListConfig<T, IdType>?>(context, listen: true);
     final mergedConfig = parentConfig != null

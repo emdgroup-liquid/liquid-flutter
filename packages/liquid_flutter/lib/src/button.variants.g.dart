@@ -45,6 +45,7 @@ class LdButtonConfigProvider extends StatelessWidget {
   const LdButtonConfigProvider({
     required this.config,
     required this.child,
+    this.ignoreParent = false,
     super.key,
   });
 
@@ -52,8 +53,16 @@ class LdButtonConfigProvider extends StatelessWidget {
 
   final Widget child;
 
+  final bool ignoreParent;
+
   @override
   Widget build(BuildContext context) {
+    if (ignoreParent) {
+      return Provider<LdButtonConfig>.value(
+        value: config,
+        child: child,
+      );
+    }
     final parentConfig = Provider.of<LdButtonConfig?>(context, listen: true);
     final mergedConfig = parentConfig != null
         ? LdButtonConfig(
