@@ -49,6 +49,7 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
   final GlobalKey _rootKey = GlobalKey(debugLabel: "Root Key");
 
   bool _isMobile = false;
+  bool _suppressSelectionChange = false;
 
   @override
   void initState() {
@@ -69,7 +70,9 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
   }
 
   void _onSelectionControllerChanged() {
-    widget.onSelectionChange?.call(_selectionController.selectedItems);
+    if (!_suppressSelectionChange) {
+      widget.onSelectionChange?.call(_selectionController.selectedItems);
+    }
     if (mounted) {
       setState(() {});
     }
@@ -98,7 +101,9 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
     }
 
     if (!setEquals(oldWidget.initialSelectedItems, widget.initialSelectedItems)) {
+      _suppressSelectionChange = true;
       _selectionController.updateSelectedItems(widget.initialSelectedItems);
+      _suppressSelectionChange = false;
       if (widget.initialSelectedItems.length == 1) {
         _selectionController.getFocusNodeForItem(widget.initialSelectedItems.first).requestFocus();
       }
