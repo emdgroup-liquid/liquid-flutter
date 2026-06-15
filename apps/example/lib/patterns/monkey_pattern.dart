@@ -30,10 +30,7 @@ class TaskMasterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyMasterPage<Task, int>(
-      appBar: LdMonkeyAppBar<Task, int>(
-        location: LdMonkeyActionLocation.masterAppBar,
-        title: Text("Tasks"),
-      ),
+      primaryAppBarConfig: LdAppBarConfig(title: Text("Tasks")),
       buildItem: (context, item) => LdListItem(
         title: Text(item.value!.task),
         subtitle: Text("Due: \${item.value!.due}"),
@@ -49,10 +46,7 @@ class TaskDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyDetailPage<Task, int>.scrollable(
-      primaryAppBar: LdMonkeyAppBar<Task, int>(
-        location: LdMonkeyActionLocation.detailAppBar,
-        title: Text("Task"),
-      ),
+      primaryAppBarConfig: LdAppBarConfig(title: Text("Task")),
       buildDetail: (context, item) => TaskDetail(task: item),
     );
   }
@@ -139,10 +133,7 @@ parseSelected: (selected) {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyMasterPage<Task, int>(
-      appBar: LdMonkeyAppBar<Task, int>(
-        location: LdMonkeyActionLocation.masterAppBar,
-        title: Text("Tasks"),
-      ),
+      primaryAppBarConfig: LdAppBarConfig(title: Text("Tasks")),
       buildItem: (context, item) {
         return LdListItem(
           title: Text(item.value!.task),
@@ -169,10 +160,7 @@ parseSelected: (selected) {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyDetailPage<Task, int>.scrollable(
-      primaryAppBar: LdMonkeyAppBar<Task, int>(
-        location: LdMonkeyActionLocation.detailAppBar,
-        title: Text("Task"),
-      ),
+      primaryAppBarConfig: LdAppBarConfig(title: Text("Task")),
       buildDetail: (context, item) {
         return TaskDetail(task: item);
       },
@@ -213,10 +201,7 @@ class TaskMasterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyMasterPage<Task, int>(
-      appBar: LdMonkeyAppBar<Task, int>(
-        location: LdMonkeyActionLocation.masterAppBar,
-        title: Text("Tasks"),
-      ),
+      primaryAppBarConfig: LdAppBarConfig(title: Text("Tasks")),
       buildItem: (context, item) => LdListItem(
         title: Text(item.value!.task),
         subtitle: Text("Due: \${item.value!.due}"),
@@ -232,10 +217,7 @@ class TaskDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyDetailPage<Task, int>.scrollable(
-      primaryAppBar: LdMonkeyAppBar<Task, int>(
-        location: LdMonkeyActionLocation.detailAppBar,
-        title: Text("Task"),
-      ),
+      primaryAppBarConfig: LdAppBarConfig(title: Text("Task")),
       buildDetail: (context, item) => TaskDetail(task: item),
     );
   }

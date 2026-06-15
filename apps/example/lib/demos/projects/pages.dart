@@ -8,7 +8,7 @@ class ProjectMasterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyMasterPage<Project, int>(
-      appBar: LdMonkeyAppBar<Project, int>(location: LdMonkeyActionLocation.masterAppBar, title: Text("Projects")),
+      primaryAppBarConfig: LdAppBarConfig(title: Text("Projects")),
       buildItem: (context, item) => LdListItem(title: Text(item.value!.name), subtitle: Text(item.value!.description)),
     );
   }
@@ -23,7 +23,7 @@ class FileMasterPage extends StatelessWidget {
       buildItem: (context, item) {
         return LdListItem(title: Text(item.value!.name), subtitle: Text(item.value!.description));
       },
-      appBar: LdMonkeyAppBar<File, String>(location: LdMonkeyActionLocation.masterAppBar, title: Text("Files")),
+      primaryAppBarConfig: LdAppBarConfig(title: Text("Files")),
     );
   }
 }

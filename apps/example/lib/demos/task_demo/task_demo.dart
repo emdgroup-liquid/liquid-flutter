@@ -9,13 +9,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
-enum TaskActionId {
-  create,
-  markDone,
-  markUndone,
-  duplicate,
-  delete,
-}
+enum TaskActionId { create, markDone, markUndone, duplicate, delete }
 
 List<LdMonkeyAction<Task, int>> taskActions = [
   refreshAction<Task, int>(),
@@ -29,9 +23,7 @@ List<LdMonkeyAction<Task, int>> taskActions = [
     },
     tooltip: (context) => "Create new task",
     shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyN, meta: true)},
-    submitConfig: (_) => const LdMonkeySubmitConfig(
-      loadingText: "Creating new task",
-    ),
+    submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Creating new task"),
     onSubmit: (ctx) async {
       final newTaskText = await ldEnterTextModal(
         context: ctx.appContext,
@@ -106,10 +98,7 @@ List<LdMonkeyAction<Task, int>> taskActions = [
       ),
     },
     shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyD)},
-    submitConfig: (_) => const LdMonkeySubmitConfig(
-      loadingText: "Marking as done",
-      allowResubmit: true,
-    ),
+    submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Marking as done", allowResubmit: true),
     onSubmit: (ctx) async {
       final updatedItems = <Task>{};
       for (final id in ctx.selectedIds) {
@@ -133,10 +122,7 @@ List<LdMonkeyAction<Task, int>> taskActions = [
       LdMonkeyActionVisibility(location: LdMonkeyActionLocation.context, minSelectionCount: 1, maxSelectionCount: null),
     },
     shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyU)},
-    submitConfig: (_) => const LdMonkeySubmitConfig(
-      loadingText: "Marking as undone",
-      allowResubmit: true,
-    ),
+    submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Marking as undone", allowResubmit: true),
     onSubmit: (ctx) async {
       final updatedItems = <Task>{};
       for (final id in ctx.selectedIds) {
@@ -160,9 +146,7 @@ List<LdMonkeyAction<Task, int>> taskActions = [
       LdMonkeyActionVisibility(location: LdMonkeyActionLocation.context, minSelectionCount: 1, maxSelectionCount: 1),
     },
     shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyD, meta: true)},
-    submitConfig: (_) => const LdMonkeySubmitConfig(
-      loadingText: "Duplicating",
-    ),
+    submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Duplicating"),
     onSubmit: (ctx) async {
       final item = await ctx.repository.getById(ctx.selectedIds.first);
 
@@ -197,9 +181,7 @@ List<LdMonkeyAction<Task, int>> taskActions = [
       ),
     },
     shortcutActivators: {SingleActivator(LogicalKeyboardKey.delete), SingleActivator(LogicalKeyboardKey.backspace)},
-    submitConfig: (appContext) => LdMonkeySubmitConfig(
-      loadingText: LiquidLocalizations.of(appContext).loading,
-    ),
+    submitConfig: (appContext) => LdMonkeySubmitConfig(loadingText: LiquidLocalizations.of(appContext).loading),
     onSubmit: (ctx) async {
       await ctx.repository.deleteBatch(context: ctx.appContext, ids: ctx.selectedIds);
     },
@@ -212,7 +194,7 @@ List<LdMonkeyAction<Task, int>> taskActions = [
     },
     icon: Icon(LucideIcons.trash2),
   ),
-  toggleSelectionControls<Task, int>(),
+  showSelectionControlsAction<Task, int>(),
   showFilterModal<Task, int>(),
   showSelection<Task, int>(),
 ];
@@ -235,11 +217,7 @@ class TaskMasterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyMasterPage<Task, int>(
-      appBar: LdMonkeyAppBar<Task, int>(
-        location: LdMonkeyActionLocation.masterAppBar,
-        title: Text("Tasks"),
-        debugName: "Master App Bar Tasks",
-      ),
+      primaryAppBarConfig: LdAppBarConfig(debugName: "Master App Bar Tasks", title: Text("Tasks")),
       buildItem: (context, item) => LdListItem(
         title: Text(
           item.value!.task,

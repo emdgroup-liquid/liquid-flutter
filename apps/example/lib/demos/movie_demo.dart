@@ -40,28 +40,35 @@ var movieData = [
   MovieDemo(15, "Battlefield Earth", "Sci-Fi", 1, DateTime.now()),
 ];
 
+String movieSearchText(MovieDemo movie) => '${movie.title} ${movie.genre}';
+
+List<MovieDemo> applyMovieFilters(List<MovieDemo> data, Set<LdFilterOption<MovieDemo, int>> filters) {
+  final filtered = data
+      .where(
+        (element) => filters.every((filter) {
+          if (filter is LdFilterRange<MovieDemo, int>) {
+            return filter.range.inRange(element.rating);
+          }
+          if (filter is LdFilterAnyOf<MovieDemo, int, String>) {
+            if (!filter.isOn || filter.selectedValues.isEmpty) {
+              return true;
+            }
+            return filter.selectedValues.contains(element.genre);
+          }
+          return true;
+        }),
+      )
+      .toList();
+
+  return ldFuzzySearchFromFilters<MovieDemo, int>(items: filtered, filters: filters, searchText: movieSearchText);
+}
+
 LdRepository<MovieDemo, int> movieRepository(BuildContext context) => LdRepository<MovieDemo, int>(
   pageSize: 5,
   getOffsetById: (parameters) async {
     await Future.delayed(const Duration(seconds: 1));
 
-    // Apply the same filtering and sorting logic as fetchListWithParameters
-    final filtered = movieData
-        .where(
-          (element) => parameters.filters.every((filter) {
-            if (filter is LdFilterRange<MovieDemo, int>) {
-              return filter.range.inRange(element.rating);
-            }
-            if (filter is LdFilterAnyOf<MovieDemo, int, String>) {
-              if (!filter.isOn || filter.selectedValues.isEmpty) {
-                return true;
-              }
-              return filter.selectedValues.contains(element.genre);
-            }
-            return true;
-          }),
-        )
-        .toList();
+    final filtered = applyMovieFilters(movieData, parameters.filters);
 
     return filtered.indexWhere((element) => element.id == parameters.id);
   },
@@ -71,22 +78,7 @@ LdRepository<MovieDemo, int> movieRepository(BuildContext context) => LdReposito
 
   fetchListWithParameters: (FetchPageParameters<MovieDemo, int> parameters) async {
     await Future.delayed(const Duration(milliseconds: 50));
-    final filtered = movieData
-        .where(
-          (element) => parameters.filters.every((filter) {
-            if (filter is LdFilterRange<MovieDemo, int>) {
-              return filter.range.inRange(element.rating);
-            }
-            if (filter is LdFilterAnyOf<MovieDemo, int, String>) {
-              if (!filter.isOn || filter.selectedValues.isEmpty) {
-                return true;
-              }
-              return filter.selectedValues.contains(element.genre);
-            }
-            return true;
-          }),
-        )
-        .toList();
+    final filtered = applyMovieFilters(movieData, parameters.filters);
     return LdListPage<MovieDemo>(
       newItems: filtered.skip(parameters.offset).take(parameters.pageSize).toList(),
       hasMore: parameters.offset + parameters.pageSize < filtered.length,
@@ -119,6 +111,28 @@ LdRepository<MovieDemo, int> movieRepository(BuildContext context) => LdReposito
 Future<List<LdFilterOption<MovieDemo, int>>> buildMovieFilters(BuildContext context) async {
   final genres = await loadMovieGenres(context);
   return [
+    LdFilterSearch<MovieDemo, int, String>(
+      name: 'search',
+      label: (context) => 'Search',
+      icon: (context) => const Icon(LucideIcons.search),
+      hint: 'Search movies',
+      getSuggestions: (searchText) async {
+        await Future.delayed(const Duration(milliseconds: 200));
+        return ldFuzzySearchItems(
+          items: movieData,
+          query: searchText,
+          searchText: movieSearchText,
+        ).map((movie) => movie.title).toList();
+      },
+      buildSuggestion: (context, suggestion) {
+        return LdListItem(
+          title: Text(suggestion),
+          onPressed: () {
+            LdSearchAcceptSuggestion(suggestion: suggestion).dispatch(context);
+          },
+        );
+      },
+    ),
     LdFilterRange<MovieDemo, int>(
       name: "rating",
       label: (context) => "Rating",
@@ -130,10 +144,7 @@ Future<List<LdFilterOption<MovieDemo, int>>> buildMovieFilters(BuildContext cont
       name: "genre",
       label: (context) => "Genre",
       icon: (context) => const Icon(LucideIcons.film),
-      allValues: {
-        for (final genre in genres)
-          genre: (context) => Text(genre),
-      },
+      allValues: {for (final genre in genres) genre: (context) => Text(genre)},
     ),
   ];
 }
@@ -222,9 +233,7 @@ List<LdMonkeyAction<MovieDemo, int>> movieActions = [
       LdMonkeyActionVisibility(location: LdMonkeyActionLocation.context, minSelectionCount: 1, maxSelectionCount: 1),
     },
     shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyD, meta: true)},
-    submitConfig: (_) => const LdMonkeySubmitConfig(
-      loadingText: "Duplicating",
-    ),
+    submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Duplicating"),
     onSubmit: (ctx) async {
       final item = await ctx.repository.getById(ctx.selectedIds.first);
 
@@ -259,16 +268,14 @@ List<LdMonkeyAction<MovieDemo, int>> movieActions = [
       ),
     },
     shortcutActivators: {SingleActivator(LogicalKeyboardKey.delete), SingleActivator(LogicalKeyboardKey.backspace)},
-    submitConfig: (_) => const LdMonkeySubmitConfig(
-      loadingText: "Deleting",
-    ),
+    submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Deleting"),
     onSubmit: (ctx) async {
       await ctx.repository.deleteBatch(context: ctx.appContext, ids: ctx.selectedIds);
     },
     child: Text("Delete"),
     icon: Icon(LucideIcons.trash2),
   ),
-  toggleSelectionControls<MovieDemo, int>(),
+  showSelectionControlsAction<MovieDemo, int>(),
 ];
 
 class MovieDetailPage extends StatelessWidget {
@@ -289,8 +296,7 @@ class MovieMasterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyMasterPage<MovieDemo, int>(
-      appBar: LdMonkeyAppBar<MovieDemo, int>(
-        location: LdMonkeyActionLocation.masterAppBar,
+      primaryAppBarConfig: LdAppBarConfig(
         title: LdText.h('Movies'),
         bottom: LdFilterChipsBar<MovieDemo, int>(
           configs: [
