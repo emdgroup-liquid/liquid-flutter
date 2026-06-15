@@ -56,7 +56,7 @@ class _ChooseDemoState extends State<ChooseDemo> {
                   truncateDisplay: 3,
                   mode: _mode,
                   onChanged: _onChange,
-                  // List of LdSelectItem
+                  searchText: _enableSearch ? (item) => item.searchString ?? '' : null,
                   items: pies,
                 ),
                 LdText.p("List item trigger"),
