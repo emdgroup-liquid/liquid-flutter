@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:provider/provider.dart';
 
 // Test item class
 class TestItem with Identifiable<int> {
@@ -227,11 +229,11 @@ LdRepository<TestItem, int> createTestRepository({
   Future<int?> Function(int id,
           {Set<LdFilterOption<TestItem, int>>? filters, List<LdSortOption<TestItem, int>>? sortOptions})?
       getOffsetById,
-  Future<void> Function(int id)? deleteItem,
-  Future<TestItem?> Function(int id, TestItem newItem)? updateItem,
-  Future<TestItem?> Function(TestItem? newItem)? createItem,
-  Future<void> Function(Set<int> ids)? deleteBatch,
-  Future<void> Function(Set<TestItem> items)? updateBatch,
+  Future<void> Function(BuildContext context, int id)? deleteItem,
+  Future<TestItem?> Function(BuildContext context, int id, TestItem newItem)? updateItem,
+  Future<TestItem?> Function(BuildContext context, TestItem? newItem)? createItem,
+  Future<void> Function(BuildContext context, Set<int> ids)? deleteBatch,
+  Future<void> Function(BuildContext context, Set<TestItem> items)? updateBatch,
 }) {
   final items = initialItems ??
       [
@@ -279,5 +281,58 @@ TestItem createTestItem(int id, {String? name, int? value, bool? active, String?
   );
 }
 
-// Note: GoRouterState is not easily mockable, so tests should use real GoRouter instances
-// This helper is kept for reference but tests should create GoRouter directly
+/// Wraps filter modal / context menu widgets with GoRouter and monkey providers.
+Widget wrapMonkeyFilterTestContext<T extends Identifiable<IdType>, IdType>({
+  required Widget child,
+  required LdRepository<T, IdType> repository,
+  required TestSortAndFilterState<T, IdType> shellState,
+  LdMonkeyRouteConfig<T, IdType>? routeConfig,
+}) {
+  final LdMonkeyRouteConfig<T, IdType> config;
+  if (routeConfig != null) {
+    config = routeConfig;
+  } else if (T == TestItem && IdType == int) {
+    config = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'item')
+        as LdMonkeyRouteConfig<T, IdType>;
+  } else {
+    throw ArgumentError(
+      'wrapMonkeyFilterTestContext requires routeConfig for $T/$IdType',
+    );
+  }
+  final router = GoRouter(
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (context, state) => Provider<LdMonkeyRouteConfig<T, IdType>>.value(
+          value: config,
+          child: ListenableProvider<LdRepository<T, IdType>>.value(
+            value: repository,
+            child: ListenableProvider<TestSortAndFilterState<T, IdType>>.value(
+              value: shellState,
+              child: Provider<LdMonkeyRouterController<T, IdType>>.value(
+                value: shellState.controllerDelegate,
+                child: Builder(
+                  builder: (context) {
+                    context.watch<TestSortAndFilterState<T, IdType>>();
+                    return Provider<LdMonkeySortAndFilterState<T, IdType>>.value(
+                      value: shellState.state,
+                      child: child,
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
+
+  return LdThemeProvider(
+    child: MaterialApp.router(
+      localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+      locale: const Locale('en'),
+      routerConfig: router,
+    ),
+  );
+}

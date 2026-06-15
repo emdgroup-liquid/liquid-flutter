@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:liquid/demos/movie_demo.dart';
 import 'package:liquid/demos/task_demo/demo_data.dart';
 import 'package:liquid/demos/task_demo/task.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -11,7 +10,7 @@ List<Task> applyFiltersAndSorting(
 ) {
   final filtered = testData
       .where(
-        (element) => (filters ?? {}).all((filter) {
+        (element) => (filters ?? <LdFilterOption<Task, int>>{}).every((filter) {
           switch (filter.name) {
             case "done":
               return element.done;
@@ -59,6 +58,7 @@ LdRepository<Task, int> taskRepository(BuildContext context) => LdRepository<Tas
 
   fetchListWithParameters: (parameters) async {
     await Future.delayed(const Duration(milliseconds: 200));
+
     final filtered = applyFiltersAndSorting(testData, parameters.filters, parameters.sortOptions);
     return LdListPage<Task>(
       newItems: filtered.skip(parameters.offset).take(parameters.pageSize).toList(),
@@ -66,18 +66,18 @@ LdRepository<Task, int> taskRepository(BuildContext context) => LdRepository<Tas
       total: filtered.length,
     );
   },
-  deleteItem: (int id) async {
+  deleteItem: (context, id) async {
     testData.removeWhere((element) => element.id == id);
     await Future.delayed(const Duration(milliseconds: 500));
   },
-  updateItem: (id, newItem) async {
+  updateItem: (context, id, newItem) async {
     final index = testData.indexWhere((element) => element.id == id);
     newItem = newItem.copyWith(lastUpdate: DateTime.now());
     testData[index] = newItem;
     await Future.delayed(const Duration(milliseconds: 500));
     return newItem;
   },
-  createItem: (item) async {
+  createItem: (context, item) async {
     testData.add(item!);
 
     return item;

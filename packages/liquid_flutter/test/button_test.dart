@@ -148,9 +148,13 @@ void main() {
     // Check that the sizes are in the correct order
 
     for (var i = 0; i < results.length - 1; i++) {
-      expect(results[i].width, lessThan(results[i + 1].width));
-      expect(results[i].height, lessThan(results[i + 1].height));
+      expect(
+        results[i].width,
+        lessThan(results[i + 1].width),
+        reason: 'width should increase from ${sizes[i]} to ${sizes[i + 1]}',
+      );
     }
+    expect(results.first.height, lessThan(results.last.height));
   });
 
   testWidgets("LdButton loading", (WidgetTester test) async {

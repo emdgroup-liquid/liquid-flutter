@@ -43,12 +43,25 @@ class _LdRepositoryProviderState<T extends Identifiable<IdType>, IdType>
 
   // Reads sort and filters from the context and initializes the repository
 
-  void _initRepository(Duration _) {
+  Future<void> _initRepository(Duration _) async {
+    if (_repository.isGreedy) {
+      await _repository.ensureGreedyLoaded(context);
+      if (!context.mounted) {
+        return;
+      }
+    }
+
     final selection = context.read<LdMonkeySelection<T, IdType>?>();
     if (selection != null && selection.viewing.isNotEmpty) {
-      _repository.initWithSelection(context, selection.viewing);
-    } else {
-      _repository.fetchPageAtOffset(context, 0);
+      if (!_repository.isGreedy) {
+        await _repository.initWithSelection(context, selection.viewing);
+      }
+    } else if (!_repository.isGreedy) {
+      await _repository.fetchPageAtOffset(
+        context,
+        0,
+        reason: LdFetchReason.initial,
+      );
     }
   }
 

@@ -321,39 +321,53 @@ class _ProductKeyInfosState extends State<_ProductKeyInfos> {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 16,
-      runSpacing: 16,
-      alignment: WrapAlignment.start,
-      children: [
-        LdCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              LdText.h("5-4"),
-              LdMute(child: LdText.caption("pH")),
-            ],
+    return SizedBox(
+      height: 50,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.all(1),
+
+        children: [
+          SizedBox(
+            width: 200,
+            child: LdCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  LdText.h("5-4"),
+                  LdMute(child: LdText.caption("pH")),
+                ],
+              ),
+            ),
           ),
-        ),
-        LdCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              LdCounter(value: _boilingPoint),
-              LdMute(child: LdText.caption("Boiling point")),
-            ],
+          ldSpacerM,
+          SizedBox(
+            width: 200,
+            child: LdCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  LdCounter(value: _boilingPoint),
+                  LdMute(child: LdText.caption("Boiling point")),
+                ],
+              ),
+            ),
           ),
-        ),
-        LdCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              LdCounter(value: _brewingPressure, precision: 2),
-              LdMute(child: LdText.caption("Brewing pressure")),
-            ],
+          ldSpacerM,
+          SizedBox(
+            width: 200,
+            child: LdCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  LdCounter(value: _brewingPressure, precision: 2),
+                  LdMute(child: LdText.caption("Brewing pressure")),
+                ],
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -14,6 +14,7 @@ class LdMonkeyMultiShortcuts<T extends Identifiable<IdType>, IdType> extends Sta
     final bindings = <ShortcutActivator, VoidCallback>{};
 
     final selection = LdMonkeySelection.of<T, IdType>(context);
+    final scope = LdMonkeyActionScope.of<T, IdType>(context);
 
     for (final action in actions) {
       for (final activator in action.shortcutActivators) {
@@ -25,7 +26,7 @@ class LdMonkeyMultiShortcuts<T extends Identifiable<IdType>, IdType> extends Sta
 
         if (selection.selection.length > 1 && action.multiSelect) {
           bindings[activator] = () {
-            action.onShortcutPressed(context);
+            action.onShortcutPressed(context, scope);
           };
         }
       }
@@ -51,6 +52,7 @@ class LdMonkeySingleShortcuts<T extends Identifiable<IdType>, IdType> extends St
   Widget build(BuildContext context) {
     final bindings = <ShortcutActivator, VoidCallback>{};
     final selection = LdMonkeySelection.of<T, IdType>(context);
+    final scope = LdMonkeyActionScope.of<T, IdType>(context);
 
     if (selection.selection.length > 1) {
       return child;
@@ -65,7 +67,7 @@ class LdMonkeySingleShortcuts<T extends Identifiable<IdType>, IdType> extends St
         }
 
         bindings[activator] = () {
-          action.onShortcutPressed(context);
+          action.onShortcutPressed(context, scope);
         };
       }
     }

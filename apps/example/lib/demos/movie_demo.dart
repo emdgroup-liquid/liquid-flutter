@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class MovieDemo with Identifiable<int> {
@@ -41,29 +40,35 @@ var movieData = [
   MovieDemo(15, "Battlefield Earth", "Sci-Fi", 1, DateTime.now()),
 ];
 
+String movieSearchText(MovieDemo movie) => '${movie.title} ${movie.genre}';
+
+List<MovieDemo> applyMovieFilters(List<MovieDemo> data, Set<LdFilterOption<MovieDemo, int>> filters) {
+  final filtered = data
+      .where(
+        (element) => filters.every((filter) {
+          if (filter is LdFilterRange<MovieDemo, int>) {
+            return filter.range.inRange(element.rating);
+          }
+          if (filter is LdFilterAnyOf<MovieDemo, int, String>) {
+            if (!filter.isOn || filter.selectedValues.isEmpty) {
+              return true;
+            }
+            return filter.selectedValues.contains(element.genre);
+          }
+          return true;
+        }),
+      )
+      .toList();
+
+  return ldFuzzySearchFromFilters<MovieDemo, int>(items: filtered, filters: filters, searchText: movieSearchText);
+}
+
 LdRepository<MovieDemo, int> movieRepository(BuildContext context) => LdRepository<MovieDemo, int>(
   pageSize: 5,
-  getOffsetById: (parameters, {filters, sortOptions}) async {
+  getOffsetById: (parameters) async {
     await Future.delayed(const Duration(seconds: 1));
 
-    // Apply the same filtering and sorting logic as fetchListWithParameters
-    final filtered = movieData
-        .where(
-          (element) => (filters ?? {}).all((filter) {
-            if (filter is LdFilterRange<MovieDemo, int>) {
-              return filter.range.inRange(element.rating);
-            }
-            if (filter is LdFilterAnyOf<MovieDemo, int, String>) {
-              return filter.selectedValues.contains(element.genre);
-            }
-            return true;
-          }),
-        )
-        .toList();
-
-    for (final sortOption in sortOptions ?? []) {
-      filtered.sort((a, b) => sortOption.optimisticSort(a, b));
-    }
+    final filtered = applyMovieFilters(movieData, parameters.filters);
 
     return filtered.indexWhere((element) => element.id == parameters.id);
   },
@@ -73,68 +78,81 @@ LdRepository<MovieDemo, int> movieRepository(BuildContext context) => LdReposito
 
   fetchListWithParameters: (FetchPageParameters<MovieDemo, int> parameters) async {
     await Future.delayed(const Duration(milliseconds: 50));
-    final filtered = movieData
-        .where(
-          (element) => (parameters.filters).all((filter) {
-            if (filter is LdFilterRange<MovieDemo, int>) {
-              return filter.range.inRange(element.rating);
-            }
-            if (filter is LdFilterAnyOf<MovieDemo, int, String>) {
-              return filter.selectedValues.contains(element.genre);
-            }
-            return true;
-          }),
-        )
-        .toList();
+    final filtered = applyMovieFilters(movieData, parameters.filters);
     return LdListPage<MovieDemo>(
       newItems: filtered.skip(parameters.offset).take(parameters.pageSize).toList(),
       hasMore: parameters.offset + parameters.pageSize < filtered.length,
       total: filtered.length,
     );
   },
-  deleteItem: (int id) async {
+  deleteItem: (context, id) async {
     movieData.removeWhere((element) => element.id == id);
     await Future.delayed(const Duration(milliseconds: 500));
   },
-  deleteBatch: (ids) async {
+  deleteBatch: (context, ids) async {
     for (final id in ids) {
       movieData.removeWhere((element) => element.id == id);
     }
     await Future.delayed(const Duration(milliseconds: 500));
   },
-  updateItem: (id, newItem) async {
+  updateItem: (context, id, newItem) async {
     final index = movieData.indexWhere((element) => element.id == id);
     newItem = newItem.copyWith(lastUpdate: DateTime.now());
     movieData[index] = newItem;
     await Future.delayed(const Duration(milliseconds: 500));
     return newItem;
   },
-  createItem: (item) async {
+  createItem: (context, item) async {
     movieData.add(item!);
     return item;
   },
 );
 
-final movieFilters = [
-  LdFilterRange<MovieDemo, int>(
-    name: "rating",
-    label: (context) => "Rating",
-    icon: (context) => const Icon(LucideIcons.star),
-    min: 0,
-    max: 5,
-  ),
-  LdFilterAnyOf<MovieDemo, int, String>(
-    name: "genre",
-    label: (context) => "Genre",
-    icon: (context) => const Icon(LucideIcons.star),
-    allValues: {
-      "Sci-Fi": (context) => const Text("Sci-Fi"),
-      "Action": (context) => const Text("Action"),
-      "Drama": (context) => const Text("Drama"),
-      "Crime": (context) => const Text("Crime"),
-    },
-  ),
-];
+Future<List<LdFilterOption<MovieDemo, int>>> buildMovieFilters(BuildContext context) async {
+  final genres = await loadMovieGenres(context);
+  return [
+    LdFilterSearch<MovieDemo, int, String>(
+      name: 'search',
+      label: (context) => 'Search',
+      icon: (context) => const Icon(LucideIcons.search),
+      hint: 'Search movies',
+      getSuggestions: (searchText) async {
+        await Future.delayed(const Duration(milliseconds: 200));
+        return ldFuzzySearchItems(
+          items: movieData,
+          query: searchText,
+          searchText: movieSearchText,
+        ).map((movie) => movie.title).toList();
+      },
+      buildSuggestion: (context, suggestion) {
+        return LdListItem(
+          title: Text(suggestion),
+          onPressed: () {
+            LdSearchAcceptSuggestion(suggestion: suggestion).dispatch(context);
+          },
+        );
+      },
+    ),
+    LdFilterRange<MovieDemo, int>(
+      name: "rating",
+      label: (context) => "Rating",
+      icon: (context) => const Icon(LucideIcons.star),
+      min: 0,
+      max: 5,
+    ),
+    LdFilterAnyOf<MovieDemo, int, String>(
+      name: "genre",
+      label: (context) => "Genre",
+      icon: (context) => const Icon(LucideIcons.film),
+      allValues: {for (final genre in genres) genre: (context) => Text(genre)},
+    ),
+  ];
+}
+
+Future<List<String>> loadMovieGenres(BuildContext context) async {
+  await Future.delayed(const Duration(milliseconds: 400));
+  return movieData.map((movie) => movie.genre).toSet().toList()..sort();
+}
 
 class _MovieDetail extends StatefulWidget {
   final LdPaginatorItem<MovieDemo> movie;
@@ -190,7 +208,7 @@ class _MovieDetailState extends State<_MovieDetail> {
                     widget.movie.value!.lastUpdate,
                   );
                   final repo = LdRepository.of<MovieDemo, int>(context);
-                  await repo.update(widget.movie.value!.id, newMovie);
+                  await repo.update(context, widget.movie.value!.id, newMovie);
                 },
               ),
             ),
@@ -204,6 +222,7 @@ class _MovieDetailState extends State<_MovieDetail> {
 List<LdMonkeyAction<MovieDemo, int>> movieActions = [
   showFilterContextMenu<MovieDemo, int>(),
   LdMonkeySubmitAction(
+    id: 'duplicate',
     tooltip: (context) => "Duplicate selection",
     visibility: {
       LdMonkeyActionVisibility(
@@ -214,29 +233,26 @@ List<LdMonkeyAction<MovieDemo, int>> movieActions = [
       LdMonkeyActionVisibility(location: LdMonkeyActionLocation.context, minSelectionCount: 1, maxSelectionCount: 1),
     },
     shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyD, meta: true)},
-    config: (context) => LdSubmitConfig(
-      action: (_) async {
-        final selectionItems = LdMonkeySelection.adaptive<MovieDemo, int>(context);
-        final repository = LdRepository.of<MovieDemo, int>(context);
+    submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Duplicating"),
+    onSubmit: (ctx) async {
+      final item = await ctx.repository.getById(ctx.selectedIds.first);
 
-        final item = await repository.getById(selectionItems.first);
+      final newItem = item.copyWith(id: movieData.length + 1, title: "${item.title} (copy)");
 
-        final newItem = item.copyWith(id: movieData.length + 1, title: "${item.title} (copy)");
+      await ctx.repository.create(ctx.appContext, newItem);
 
-        await repository.create(newItem);
+      await Future.delayed(const Duration(milliseconds: 1500));
 
-        await Future.delayed(const Duration(milliseconds: 1500));
-
-        if (context.mounted) {
-          LdMonkeySelection.updateViewing<MovieDemo, int>(context, {newItem.id});
-        }
-      },
-    ),
+      if (ctx.appContext.mounted) {
+        ctx.updateViewing({newItem.id});
+      }
+    },
     child: Text("Duplicate"),
     icon: Icon(LucideIcons.copy),
   ),
   LdMonkeySubmitAction(
-    tooltip: (context) => "Duplicate selection",
+    id: 'delete',
+    tooltip: (context) => "Delete selection",
     visibility: {
       LdMonkeyActionVisibility(
         location: LdMonkeyActionLocation.detailSecondary,
@@ -252,17 +268,14 @@ List<LdMonkeyAction<MovieDemo, int>> movieActions = [
       ),
     },
     shortcutActivators: {SingleActivator(LogicalKeyboardKey.delete), SingleActivator(LogicalKeyboardKey.backspace)},
-    config: (context) => LdSubmitConfig(
-      action: (_) async {
-        final selection = LdMonkeySelection.adaptive<MovieDemo, int>(context);
-        final repository = LdRepository.of<MovieDemo, int>(context);
-        await repository.deleteBatch(context: context, ids: selection);
-      },
-    ),
+    submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Deleting"),
+    onSubmit: (ctx) async {
+      await ctx.repository.deleteBatch(context: ctx.appContext, ids: ctx.selectedIds);
+    },
     child: Text("Delete"),
     icon: Icon(LucideIcons.trash2),
   ),
-  toggleSelectionControls<MovieDemo, int>(),
+  showSelectionControlsAction<MovieDemo, int>(),
 ];
 
 class MovieDetailPage extends StatelessWidget {
@@ -270,7 +283,10 @@ class MovieDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LdMonkeyDetailPage<MovieDemo, int>.scrollable(buildDetail: (context, item) => _MovieDetail(movie: item));
+    return LdMonkeyDetailPage<MovieDemo, int>.scrollable(
+      primaryAppBarConfig: LdAppBarConfig(title: Text("Movie"), debugName: "MovieDetailPage"),
+      buildDetail: (context, item) => _MovieDetail(movie: item),
+    );
   }
 }
 
@@ -280,23 +296,32 @@ class MovieMasterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyMasterPage<MovieDemo, int>(
-      appBar: LdMonkeyAppBar<MovieDemo, int>(location: LdMonkeyActionLocation.masterAppBar, title: Text("Movies")),
+      primaryAppBarConfig: LdAppBarConfig(
+        title: LdText.h('Movies'),
+        bottom: LdFilterChipsBar<MovieDemo, int>(
+          configs: [
+            LdFilterChipConfig.range(filterName: 'rating', presentation: LdFilterChipPresentation.sheet),
+            LdFilterChipConfig.anyOf(
+              filterName: 'genre',
+              groupLabel: (context) => 'Genre',
+              presentation: LdFilterChipPresentation.inline,
+              optionChild: (context, genre) => Text(genre as String),
+            ),
+          ],
+        ),
+      ),
       buildItem: (context, item) => LdListItem(
         title: Text(item.value!.title),
         subtitle: Text(item.value!.genre),
-        trailing: Row(children: [for (var i = 0; i < item.value!.rating; i++) Icon(LucideIcons.star)]),
+        trailing: LdTag(
+          color: switch (item.value!.rating) {
+            1 => LdTheme.of(context).error,
+            2 || 3 => LdTheme.of(context).warning,
+            _ => LdTheme.of(context).success,
+          },
+          child: Row(children: [Text("${item.value!.rating}"), Icon(LucideIcons.star)]).spaceXS(),
+        ),
       ),
     );
-  }
-}
-
-extension All<T> on Set<T> {
-  bool all(bool Function(T) test) {
-    for (final element in this) {
-      if (!test(element)) {
-        return false;
-      }
-    }
-    return true;
   }
 }

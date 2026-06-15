@@ -117,7 +117,6 @@ void main() {
         await place(
           Builder(
             builder: (context) => LdScaffold(
-              extendBodyBehindAppBar: true,
               body: LdAppBar.top(
                 title: const Text("Extended Body"),
                 child: Container(

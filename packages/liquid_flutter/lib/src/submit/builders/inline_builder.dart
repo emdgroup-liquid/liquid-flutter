@@ -26,7 +26,7 @@ class LdSubmitInlineBuilder<T, Arg> extends LdSubmitBuilder<T, Arg> {
       builder: (context, snapshot) {
         final state = controller.state;
 
-        return LdAutoSpace(
+        return Column(
           children: [
             if (resultBuilder != null && state.type == LdSubmitStateType.result)
               resultBuilder!(context, state.result as T, controller),
@@ -39,14 +39,11 @@ class LdSubmitInlineBuilder<T, Arg> extends LdSubmitBuilder<T, Arg> {
                 )
             else if (submitButtonBuilder != null)
               submitButtonBuilder!(context, controller)
-            else if (showSubmitButton == true || controller.config.autoTrigger == false)
+            else if ((showSubmitButton == true || controller.config.autoTrigger == false))
               LdSubmitButton<T, Arg>(),
-            LdReveal.quick(
-              revealed: controller.canCancel,
-              child: LdSubmitCancelButton<T, Arg>(),
-            )
+            if (controller.canCancel) LdSubmitCancelButton<T, Arg>(),
           ],
-        );
+        ).spaceM();
       },
     );
   }

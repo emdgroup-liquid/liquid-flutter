@@ -140,7 +140,14 @@ class LdModalRoute<T> extends PageRoute<T> {
   /// height; if the child wants more vertical space (e.g. an [LdScaffold] or
   /// any expanding widget) the sheet grows up to the cap derived from
   /// [topGapRatio] / [sheetAspectRatio].
-  Widget _buildSheetContent(BuildContext context, Widget child) {
+  ///
+  /// [pageBuilder] runs under [LdModalAppBarMetricsScope] and a reset
+  /// [MediaQuery] (padding cleared) so sheet content does not inherit shell/tab
+  /// app-bar metrics or patched padding from nested navigators.
+  Widget _buildSheetContent(
+    BuildContext context,
+    Widget Function(BuildContext context) pageBuilder,
+  ) {
     final theme = LdTheme.of(context);
     final mediaQuery = MediaQuery.of(context);
     final double topPadding = _topPadding(context);
@@ -166,7 +173,9 @@ class LdModalRoute<T> extends PageRoute<T> {
       ),
       child: CupertinoUserInterfaceLevel(
         data: CupertinoUserInterfaceLevelData.elevated,
-        child: child,
+        child: LdModalAppBarMetricsScope(
+          child: Builder(builder: pageBuilder),
+        ),
       ),
     );
 
@@ -184,7 +193,7 @@ class LdModalRoute<T> extends PageRoute<T> {
 
     return MediaQuery(
       data: mediaQuery.copyWith(
-        padding: mediaQuery.padding.copyWith(top: 0),
+        padding: EdgeInsets.zero,
         viewPadding: mediaQuery.viewPadding.copyWith(top: 0),
         viewInsets: mediaQuery.viewInsets.copyWith(top: 0),
       ),
@@ -202,7 +211,10 @@ class LdModalRoute<T> extends PageRoute<T> {
   }
 
   /// Builds content for dialog mode with centered positioning.
-  Widget _buildDialogContent(BuildContext context, Widget child) {
+  Widget _buildDialogContent(
+    BuildContext context,
+    Widget Function(BuildContext context) pageBuilder,
+  ) {
     final theme = LdTheme.of(context);
     final availableSize = MediaQuery.sizeOf(context);
     late Size configuredSize;
@@ -262,15 +274,13 @@ class LdModalRoute<T> extends PageRoute<T> {
               ),
             ),
             clipBehavior: Clip.hardEdge,
-            child: child,
+            child: LdModalAppBarMetricsScope(
+              child: Builder(builder: pageBuilder),
+            ),
           ),
         ),
       ),
     );
-  }
-
-  Widget _wrapContent(BuildContext context) {
-    return pageBuilder(context);
   }
 
   @override
@@ -281,12 +291,11 @@ class LdModalRoute<T> extends PageRoute<T> {
   ) {
     return LayoutBuilder(builder: (context, constraints) {
       final bool isSheet = _shouldBeSheet(constraints);
-      final Widget content = _wrapContent(context);
 
       if (isSheet) {
-        return _buildSheetContent(context, content);
+        return _buildSheetContent(context, pageBuilder);
       } else {
-        return _buildDialogContent(context, content);
+        return _buildDialogContent(context, pageBuilder);
       }
     });
   }

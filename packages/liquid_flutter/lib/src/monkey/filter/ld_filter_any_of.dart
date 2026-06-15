@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterOption<T, IdType> {
+class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E>
+    extends LdFilterOption<T, IdType> {
   final Map<E, Widget Function(BuildContext)> allValues;
   final Set<E> selectedValues;
 
@@ -13,6 +14,7 @@ class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
     required this.allValues,
     Set<E>? initialSelected,
     super.isEnabled,
+    super.mutationAffectsCache,
   }) : selectedValues = Set<E>.from(initialSelected ?? {});
 
   @override
@@ -24,10 +26,15 @@ class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
   @override
   LdFilterAnyOf<T, IdType, E> marshalSerialized(String value) {
     if (value.isEmpty) {
-      return copyWith(isOn: false, selectedValues: {});
+      // Keep empty query values as an active filter with no preselection so
+      // users can select values from the modal.
+      return copyWith(isOn: true, selectedValues: {});
     }
 
-    final selectedValues = allValues.keys.where((e) => value.contains(e.toString())).cast<E>().toSet();
+    final selectedValues = allValues.keys
+        .where((e) => value.contains(e.toString()))
+        .cast<E>()
+        .toSet();
 
     return copyWith(
       selectedValues: selectedValues,
@@ -44,6 +51,7 @@ class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
     Map<E, Widget Function(BuildContext)>? allValues,
     Set<E>? selectedValues,
     bool Function(BuildContext context)? isEnabled,
+    LdMutationAffectsCache<T>? mutationAffectsCache,
   }) {
     return LdFilterAnyOf<T, IdType, E>(
       name: name ?? this.name,
@@ -51,8 +59,31 @@ class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
       icon: icon ?? this.icon,
       isOn: isOn ?? this.isOn,
       allValues: allValues ?? this.allValues,
-      initialSelected: selectedValues ?? this.selectedValues,
+      initialSelected: selectedValues != null
+          ? Set<E>.from(selectedValues)
+          : this.selectedValues,
       isEnabled: isEnabled ?? this.isEnabled,
+      mutationAffectsCache: mutationAffectsCache ?? this.mutationAffectsCache,
+    );
+  }
+
+  /// Toggles [value] in [selectedValues] and persists via [update].
+  ///
+  /// Use this from UI that holds [LdFilterAnyOf] with an erased option type
+  /// (e.g. chips bar) so [copyWith] always receives a [Set<E>].
+  void toggleSelectedValue(BuildContext context, Object value) {
+    final next = Set<E>.from(selectedValues);
+    if (next.contains(value)) {
+      next.remove(value);
+    } else {
+      next.add(value as E);
+    }
+    update(
+      context,
+      copyWith(
+        selectedValues: next,
+        isOn: next.isNotEmpty,
+      ),
     );
   }
 

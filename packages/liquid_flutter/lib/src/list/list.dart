@@ -355,7 +355,10 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
 
   Future<void> _onRefresh(BuildContext context) async {
     _retryController.notifyOperationStarted();
-    await widget.paginator.refreshList(context: context);
+    await widget.paginator.refreshList(
+      context: context,
+      reason: LdFetchReason.refresh,
+    );
   }
 
   void _updateGroupedItems() {
@@ -495,7 +498,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
       return widget.emptyBuilder!(context, _onRefresh);
     }
 
-    return LdListEmpty(onRefresh: _onRefresh);
+    return LdListEmpty(onRefresh: () => _onRefresh(context));
   }
 
   /// Builds a loader to indicate that an item is being loaded.
@@ -583,7 +586,11 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
     }
 
     return RefreshIndicator.adaptive(
-      onRefresh: () => widget.paginator.refreshList(context: context),
+      edgeOffset: MediaQuery.of(context).padding.top,
+      onRefresh: () => widget.paginator.refreshList(
+        context: context,
+        reason: LdFetchReason.refresh,
+      ),
       child: _buildListView(context),
     );
   }

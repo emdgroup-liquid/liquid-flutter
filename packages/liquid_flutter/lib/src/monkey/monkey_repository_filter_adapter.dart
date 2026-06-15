@@ -41,10 +41,14 @@ class _LdMonkeyRepositoryFilterAdapterState<T extends Identifiable<IdType>, IdTy
 
       _lastSortAndFilterState = sortAndFilterState;
 
-      if (context.mounted && (!filtersEqual || !sortOptionsEqual)) {
+      if (context.mounted && !filtersEqual) {
         final repository = context.read<LdRepository<T, IdType>>();
+        await repository.refreshList(context: context, reason: LdFetchReason.filter);
+      }
 
-        repository.refreshList(context: context, hard: true);
+      if (context.mounted && !sortOptionsEqual) {
+        final repository = context.read<LdRepository<T, IdType>>();
+        await repository.refreshList(context: context, reason: LdFetchReason.sort);
       }
     }
   }

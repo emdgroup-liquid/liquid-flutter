@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
@@ -13,7 +14,35 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
     required this.allValues,
     E? initialSelected,
     super.isEnabled,
+    super.mutationAffectsCache,
   }) : selectedValue = initialSelected;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! LdFilterOneOf<T, IdType, E>) {
+      return false;
+    }
+    return name == other.name &&
+        isOn == other.isOn &&
+        serialize() == other.serialize() &&
+        selectedValue == other.selectedValue &&
+        const DeepCollectionEquality().equals(
+          allValues.keys.map((key) => key.toString()).toList()..sort(),
+          other.allValues.keys.map((key) => key.toString()).toList()..sort(),
+        );
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        name,
+        isOn,
+        serialize(),
+        selectedValue,
+        Object.hashAllUnordered(allValues.keys.map((key) => key.toString())),
+      );
 
   @override
   String serialize() {
@@ -24,7 +53,12 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
   @override
   LdFilterOneOf<T, IdType, E> marshalSerialized(String value) {
     if (value.isEmpty) {
-      return copyWith(isOn: false);
+      // Keep empty query values as an active-but-unselected filter so users can
+      // open and choose a value from the modal.
+      return copyWith(
+        isOn: true,
+        clearSelectedValue: true,
+      );
     }
 
     final values = value.split(',');
@@ -35,6 +69,7 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
 
     return copyWith(
       selectedValue: selectedValue,
+      clearSelectedValue: selectedValue == null,
       isOn: selectedValue != null,
     );
   }
@@ -47,7 +82,9 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
     bool? isOn,
     Map<E, Widget Function(BuildContext)>? allValues,
     E? selectedValue,
+    bool clearSelectedValue = false,
     bool Function(BuildContext context)? isEnabled,
+    LdMutationAffectsCache<T>? mutationAffectsCache,
   }) {
     return LdFilterOneOf<T, IdType, E>(
       name: name ?? this.name,
@@ -55,8 +92,9 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
       icon: icon ?? this.icon,
       isOn: isOn ?? this.isOn,
       allValues: allValues ?? this.allValues,
-      initialSelected: selectedValue ?? this.selectedValue,
+      initialSelected: clearSelectedValue ? null : (selectedValue ?? this.selectedValue),
       isEnabled: isEnabled ?? this.isEnabled,
+      mutationAffectsCache: mutationAffectsCache ?? this.mutationAffectsCache,
     );
   }
 

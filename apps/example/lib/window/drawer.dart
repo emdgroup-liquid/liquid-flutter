@@ -79,6 +79,7 @@ const components = [
   _Component("Tab Navigation", "/components/tab", LucideIcons.betweenVerticalEnd, ComponentCategory.interaction),
 
   // Data Display
+  _Component("Counter", "/components/counter", LucideIcons.hash, ComponentCategory.dataDisplay),
   _Component("Avatar", "/components/avatar", LucideIcons.user, ComponentCategory.dataDisplay),
   _Component("Icon", "/components/icon", LucideIcons.image, ComponentCategory.dataDisplay),
   _Component("Markdown", "/components/markdown", LucideIcons.fileText, ComponentCategory.dataDisplay),

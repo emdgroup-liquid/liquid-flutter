@@ -1,42 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:provider/provider.dart';
-
 import 'test_utils.dart';
 
-/// Wraps a [LdFilterModal] (or [LdFilterContextMenu]) with the providers it
-/// needs: repository, router-controller, and sort-and-filter state.
 Widget _wrapFilterModal<T extends Identifiable<IdType>, IdType>({
   required Widget child,
   required LdRepository<T, IdType> repository,
   required TestSortAndFilterState<T, IdType> shellState,
 }) {
-  return LdThemeProvider(
-    child: MaterialApp(
-      localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-      locale: const Locale('en'),
-      home: Scaffold(
-        body: ListenableProvider<LdRepository<T, IdType>>.value(
-          value: repository,
-          child: ListenableProvider<TestSortAndFilterState<T, IdType>>.value(
-            value: shellState,
-            child: Provider<LdMonkeyRouterController<T, IdType>>.value(
-              value: shellState.controllerDelegate,
-              child: Builder(
-                builder: (context) {
-                  context.watch<TestSortAndFilterState<T, IdType>>();
-                  return Provider<LdMonkeySortAndFilterState<T, IdType>>.value(
-                    value: shellState.state,
-                    child: child,
-                  );
-                },
-              ),
-            ),
-          ),
-        ),
-      ),
-    ),
+  return wrapMonkeyFilterTestContext<T, IdType>(
+    repository: repository,
+    shellState: shellState,
+    child: Scaffold(body: child),
   );
 }
 

@@ -67,7 +67,7 @@ void main() {
         expect(marshaled.isOn, isTrue);
       });
 
-      test('marshalSerialized() handles empty string', () {
+      test('marshalSerialized() keeps empty string as active All state', () {
         final filter = LdFilterOneOf<TestItem, int, _Category>(
           name: 'category',
           label: (context) => 'Category',
@@ -79,7 +79,9 @@ void main() {
 
         final marshaled = filter.marshalSerialized('');
 
-        expect(marshaled.isOn, isFalse);
+        expect(marshaled.isOn, isTrue);
+        expect(marshaled.selectedValue, isNull);
+        expect(marshaled.serialize(), isEmpty);
       });
 
       test('marshalSerialized() handles invalid value', () {
@@ -95,6 +97,25 @@ void main() {
         final marshaled = filter.marshalSerialized('invalid');
 
         expect(marshaled.isOn, isFalse);
+        expect(marshaled.selectedValue, isNull);
+      });
+    });
+
+    group('Equality', () {
+      test('differs when allValues keys change', () {
+        final empty = LdFilterOneOf<TestItem, int, String>(
+          name: 'category',
+          label: (context) => 'Category',
+          icon: (context) => const Icon(Icons.category),
+          allValues: {},
+        );
+        final populated = empty.copyWith(
+          allValues: {
+            'Gold': (context) => const Text('Gold'),
+          },
+        );
+
+        expect(empty, isNot(equals(populated)));
       });
     });
 
@@ -142,7 +163,7 @@ void main() {
                     value: shellState,
                     child: Provider<LdMonkeyRouterController>.value(
                       value: shellState.controllerDelegate,
-                        child: Provider<LdMonkeySortAndFilterState<TestItem, int>>.value(
+                      child: Provider<LdMonkeySortAndFilterState<TestItem, int>>.value(
                         value: LdMonkeySortAndFilterState<TestItem, int>(
                           filters: shellState.filtersMap.values.toSet(),
                           sortOptions: [],

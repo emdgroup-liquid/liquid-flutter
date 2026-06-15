@@ -35,6 +35,10 @@ class LdInput extends StatefulWidget {
   final int? maxLines;
   final int? minLines;
 
+  /// When set, paste (keyboard and context menu) tries this first. Return true
+  /// when paste was handled (e.g. image attachment). Otherwise plain text is pasted.
+  final Future<bool> Function()? onCustomPaste;
+
   const LdInput({
     required this.hint,
     this.controller,
@@ -48,7 +52,7 @@ class LdInput extends StatefulWidget {
     this.autofocus = false,
     this.showClear = false,
     this.size = LdSize.m,
-    this.allowTapOutside = true,
+    this.allowTapOutside = false,
     this.onBlurred,
     this.valid = true,
     this.loading = false,
@@ -61,6 +65,7 @@ class LdInput extends StatefulWidget {
     this.onChanged,
     this.trailingHint,
     this.onCleared,
+    this.onCustomPaste,
     super.key,
   });
 
@@ -103,6 +108,53 @@ class _LdInputState extends State<LdInput> {
     super.dispose();
   }
 
+  void _onPasteShortcut() {
+    _runCustomPaste();
+  }
+
+  Map<ShortcutActivator, VoidCallback> get _shortcutBindings {
+    final bindings = <ShortcutActivator, VoidCallback>{
+      const SingleActivator(LogicalKeyboardKey.escape): () {
+        _focusScopeNode.unfocus();
+      },
+    };
+    if (widget.onCustomPaste != null) {
+      bindings[const SingleActivator(LogicalKeyboardKey.keyV, control: true)] =
+          _onPasteShortcut;
+      bindings[const SingleActivator(LogicalKeyboardKey.keyV, meta: true)] =
+          _onPasteShortcut;
+    }
+    return bindings;
+  }
+
+  Future<void> _runCustomPaste() async {
+    final onCustomPaste = widget.onCustomPaste;
+    if (onCustomPaste == null) {
+      return;
+    }
+    final handled = await onCustomPaste();
+    if (!handled && mounted) {
+      await _pastePlainTextFallback();
+    }
+  }
+
+  Future<void> _pastePlainTextFallback() async {
+    final clipboard = await Clipboard.getData(Clipboard.kTextPlain);
+    final text = clipboard?.text;
+    if (text == null || text.isEmpty) {
+      return;
+    }
+    final selection = _controller.selection;
+    final start = selection.start >= 0 ? selection.start : _controller.text.length;
+    final end = selection.end >= 0 ? selection.end : _controller.text.length;
+    final newText = _controller.text.replaceRange(start, end, text);
+    _controller.value = _controller.value.copyWith(
+      text: newText,
+      selection: TextSelection.collapsed(offset: start + text.length),
+      composing: TextRange.empty,
+    );
+  }
+
   void _onTextChange() {
     widget.onChanged?.call(_controller.text);
     setState(() {});
@@ -113,6 +165,27 @@ class _LdInputState extends State<LdInput> {
       widget.onBlurred?.call(widget.controller?.text ?? '');
     }
     setState(() {});
+  }
+
+  Widget _buildContextMenu(
+    BuildContext context,
+    EditableTextState editableTextState,
+  ) {
+    final buttonItems = editableTextState.contextMenuButtonItems.map((item) {
+      if (item.type != ContextMenuButtonType.paste) {
+        return item;
+      }
+      return ContextMenuButtonItem(
+        label: item.label,
+        onPressed: () {
+          _runCustomPaste();
+        },
+      );
+    }).toList();
+    return AdaptiveTextSelectionToolbar.buttonItems(
+      buttonItems: buttonItems,
+      anchors: editableTextState.contextMenuAnchors,
+    );
   }
 
   @override
@@ -163,13 +236,10 @@ class _LdInputState extends State<LdInput> {
             disabled: widget.disabled,
           ),
           CallbackShortcuts(
-            bindings: {
-              const SingleActivator(LogicalKeyboardKey.escape): () {
-                _focusScopeNode.unfocus();
-              },
-            },
+            bindings: _shortcutBindings,
             child: LdTouchableSurface(
               allowTapOutside: widget.allowTapOutside,
+              textFieldTapRegion: true,
               focusNode: _focusScopeNode,
               onPressed: () {
                 _focusNode.requestFocus();
@@ -213,6 +283,9 @@ class _LdInputState extends State<LdInput> {
                               Flexible(
                                 child: TextField(
                                   focusNode: _focusNode,
+                                  contextMenuBuilder: widget.onCustomPaste == null
+                                      ? null
+                                      : _buildContextMenu,
                                   enabled: !widget.disabled,
                                   controller: _controller,
                                   cursorColor: theme.palette.primary.idle(

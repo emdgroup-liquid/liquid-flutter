@@ -216,7 +216,7 @@ void main() {
     expect(find.text("Custom exception"), findsOneWidget);
     expect(
       find.byType(LdButton),
-      findsNWidgets(3),
+      findsNWidgets(2),
     ); // Retry + More Info buttons
   });
 

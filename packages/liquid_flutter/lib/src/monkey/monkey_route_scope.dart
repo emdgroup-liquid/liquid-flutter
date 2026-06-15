@@ -4,11 +4,13 @@ import 'package:liquid_flutter/src/monkey/actions/actions.dart';
 import 'package:liquid_flutter/src/monkey/data/identifiable.dart';
 import 'package:liquid_flutter/src/monkey/data/repository.dart';
 import 'package:liquid_flutter/src/monkey/data/repository_provider.dart';
-import 'package:liquid_flutter/src/monkey/filter/ld_filter_option.dart';
+import 'package:liquid_flutter/src/monkey/ld_monkey_route_definitions.dart';
+import 'package:liquid_flutter/src/monkey/ld_monkey_route_definitions_resolver.dart';
 import 'package:liquid_flutter/src/monkey/monkey_layout_mode.dart';
-import 'package:liquid_flutter/src/monkey/sort/sort_option.dart';
 import 'package:liquid_flutter/src/monkey/monkey_route_config.dart';
 import 'package:liquid_flutter/src/monkey/monkey_router_adapter.dart';
+import 'package:liquid_flutter/src/monkey/actions/action_host.dart';
+import 'package:liquid_flutter/src/monkey/actions/action_scope.dart';
 import 'package:liquid_flutter/src/monkey/monkey_shell.dart';
 import 'package:provider/provider.dart';
 
@@ -23,11 +25,12 @@ class LdMonkeyRouteScope<T extends Identifiable<IdType>, IdType> extends Statele
     required this.routeState,
     required this.routeConfig,
     required this.actions,
-    required this.filters,
-    required this.sortOptions,
+    required this.filtersBuilder,
+    required this.sortOptionsBuilder,
     required this.repositoryBuilder,
     required this.masterPage,
     required this.child,
+    this.routeDefinitionsLoadingText,
     this.shellBuilder,
     this.layoutMode = LdMonkeyLayoutMode.auto,
     this.reflowBreakpoint,
@@ -42,9 +45,11 @@ class LdMonkeyRouteScope<T extends Identifiable<IdType>, IdType> extends Statele
 
   final List<LdMonkeyAction<T, IdType>> actions;
 
-  final List<LdFilterOption<T, IdType>> filters;
+  final LdMonkeyFiltersBuilder<T, IdType> filtersBuilder;
 
-  final List<LdSortOption<T, IdType>> sortOptions;
+  final LdMonkeySortOptionsBuilder<T, IdType> sortOptionsBuilder;
+
+  final LdMonkeyRouteDefinitionsLoadingTextBuilder? routeDefinitionsLoadingText;
 
   /// Called when the repository is created; [routeState] is the shell state
   /// at build time (updates when navigation changes).
@@ -75,22 +80,33 @@ class LdMonkeyRouteScope<T extends Identifiable<IdType>, IdType> extends Statele
       value: routeConfig,
       child: Provider<LdMonkeyActions<T, IdType>>.value(
         value: actions,
-        child: LdRepositoryProvider<T, IdType>(
-          repositoryBuilder: (context) => repositoryBuilder(context, routeState),
-          child: LdMonkeyRouterAdapter<T, IdType>(
-            routeConfig: routeConfig,
-            filters: filters,
-            sortOptions: sortOptions,
-            child: shellBuilder?.call(context, routeState, child) ??
-                LdMonkeyShell<T, IdType>(
-                  masterPage: masterPage,
-                  layoutMode: layoutMode,
-                  reflowBreakpoint: reflowBreakpoint ?? 600,
-                  detailPanelFlex: detailPanelFlex ?? 2,
-                  allowMultipleSelection: allowMultipleSelection ?? true,
-                  immediateViewSelection: immediateViewSelection,
-                  child: child,
+        child: Provider<LdMonkeyActionScope<T, IdType>>(
+          create: (_) => LdMonkeyActionScope<T, IdType>(),
+          child: LdRepositoryProvider<T, IdType>(
+            repositoryBuilder: (context) => repositoryBuilder(context, routeState),
+            child: LdMonkeyRouteDefinitionsResolver<T, IdType>(
+              filtersBuilder: filtersBuilder,
+              sortOptionsBuilder: sortOptionsBuilder,
+              routeDefinitionsLoadingText: routeDefinitionsLoadingText,
+              child: (context, resolved) => LdMonkeyRouterAdapter<T, IdType>(
+                routeConfig: routeConfig,
+                filters: resolved.filters.toList(),
+                sortOptions: resolved.sortOptions,
+                child: LdMonkeyActionHost<T, IdType>(
+                  actions: actions,
+                  child: shellBuilder?.call(context, routeState, child) ??
+                      LdMonkeyShell<T, IdType>(
+                        masterPage: masterPage,
+                        layoutMode: layoutMode,
+                        reflowBreakpoint: reflowBreakpoint ?? 600,
+                        detailPanelFlex: detailPanelFlex ?? 2,
+                        allowMultipleSelection: allowMultipleSelection ?? true,
+                        immediateViewSelection: immediateViewSelection,
+                        child: child,
+                      ),
                 ),
+              ),
+            ),
           ),
         ),
       ),

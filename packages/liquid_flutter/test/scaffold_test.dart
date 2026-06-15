@@ -486,6 +486,132 @@ void main() {
       expect(insidePadding!.top, greaterThan(0));
     });
 
+    testWidgets('LdScaffoldBody shows bottom scroll edge fade when content overflows',
+        (WidgetTester tester) async {
+      ldDisableAnimations = true;
+      await tester.binding.setSurfaceSize(const Size(400, 600));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            brightnessMode: LdThemeBrightnessMode.light,
+            child: LdScaffold(
+              body: LdAppBar.top(
+                title: const Text('Scroll fade'),
+                child: LdScaffoldBody(
+                  children: List.generate(
+                    30,
+                    (index) => SizedBox(
+                      height: 80,
+                      child: Center(child: Text('Row $index')),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LdScrollEdgeFade), findsOneWidget);
+
+      AnimatedOpacity fadeOpacity(Key fadeKey) {
+        return tester.widget<AnimatedOpacity>(
+          find.descendant(
+            of: find.byKey(fadeKey),
+            matching: find.byType(AnimatedOpacity),
+          ),
+        );
+      }
+
+      expect(fadeOpacity(LdScrollEdgeFade.topFadeKey).opacity, 0);
+      expect(fadeOpacity(LdScrollEdgeFade.bottomFadeKey).opacity, 1);
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -400));
+      await tester.pumpAndSettle();
+
+      expect(fadeOpacity(LdScrollEdgeFade.topFadeKey).opacity, 1);
+    });
+
+    testWidgets(
+        'LdScaffoldBody scroll fade keeps status-bar scrim when padding is inflated by app bar',
+        (WidgetTester tester) async {
+      ldDisableAnimations = true;
+      const statusBar = 48.0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            brightnessMode: LdThemeBrightnessMode.light,
+            child: MediaQuery(
+              data: const MediaQueryData(
+                padding: EdgeInsets.only(top: 120, bottom: 34),
+                viewPadding: EdgeInsets.only(top: statusBar, bottom: 34),
+              ),
+              child: LdScaffold(
+                body: LdAppBar.top(
+                  title: const Text('Insets'),
+                  child: LdScaffoldBody(
+                    children: List.generate(
+                      30,
+                      (index) => SizedBox(
+                        height: 80,
+                        child: Center(child: Text('Row $index')),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.getSize(find.byKey(LdScrollEdgeFade.topFadeKey)).height,
+        greaterThan(statusBar),
+      );
+    });
+
+    testWidgets('LdScaffoldBody hides scroll edge fade when disabled', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+      await tester.binding.setSurfaceSize(const Size(400, 600));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            brightnessMode: LdThemeBrightnessMode.light,
+            child: LdScaffold(
+              body: LdScaffoldBody(
+                scrollEdgeFade: false,
+                children: List.generate(
+                  30,
+                  (index) => SizedBox(
+                    height: 80,
+                    child: Center(child: Text('Row $index')),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LdScrollEdgeFade), findsNothing);
+    });
+
     testWidgets('Nested scaffold inside LdModalRoute works without _parentRegistry chaining',
         (WidgetTester tester) async {
       ldDisableAnimations = true;
@@ -534,5 +660,49 @@ void main() {
       expect(find.text('Modal App Bar'), findsOneWidget);
       expect(find.text('Modal body'), findsOneWidget);
     });
+
+    testWidgets(
+      'LdScaffoldBody survives LdTheme platform change without scroll controller assert',
+      (WidgetTester tester) async {
+        ldDisableAnimations = true;
+        await tester.binding.setSurfaceSize(const Size(400, 600));
+
+        final theme = LdTheme()..platform = LdPlatform.ios;
+
+        await tester.pumpWidget(
+          LdThemeProvider(
+            theme: theme,
+            child: LdThemedAppBuilder(
+              appBuilder: (context, themeData) => MaterialApp(
+                theme: themeData,
+                localizationsDelegates: const [LiquidLocalizations.delegate],
+                home: LdScaffold(
+                  body: LdAppBar.top(
+                    title: const Text('Platform switch'),
+                    child: LdScaffoldBody(
+                      children: List.generate(
+                        30,
+                        (index) => SizedBox(
+                          height: 80,
+                          child: Center(child: Text('Row $index')),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        theme.platform = LdPlatform.android;
+        await tester.pump();
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+      },
+    );
   });
 }

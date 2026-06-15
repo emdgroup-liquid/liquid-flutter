@@ -18,7 +18,9 @@
     "maximize",
     "showDrawer",
     "hideDrawer",
+    "nItemsSelected",
     "clearSelection",
+    "clearSelectionDialogHeader",
     "clearSelectionBody",
     "openDrawer",
     "closeDrawer",
@@ -26,6 +28,7 @@
     "listHidden",
     "shiftListExplanation",
     "copy",
+    "showSelection",
     "copiedToClipboard"
   ]
 }

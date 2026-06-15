@@ -1,6 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
+/// Whether the keyboard (or another UI) is obscuring part of the viewport.
+bool _hasKeyboardViewInsets(MediaQueryData mediaQuery) {
+  return mediaQuery.viewInsets.bottom > 0 || mediaQuery.viewInsets.top > 0;
+}
+
+/// Strips vertical [MediaQueryData.padding] for scroll content without touching
+/// [MediaQueryData.viewPadding] (unlike [MediaQuery.removePadding]).
+///
+/// When the keyboard is open we keep vertical padding on the scroll subtree so
+/// [Scrollable] / [Scrollable.ensureVisible] respect [LdAppBar] insets.
+Widget _mediaQueryForScrollChild(BuildContext context, Widget child) {
+  final mediaQuery = MediaQuery.of(context);
+  // Always wrap in [MediaQuery] so the scroll subtree keeps a stable widget
+  // structure when the keyboard opens. Toggling between a wrapper and a bare
+  // [child] remounts scroll content and drops body input focus.
+  final verticalPadding = _hasKeyboardViewInsets(mediaQuery)
+      ? mediaQuery.padding
+      : mediaQuery.padding.copyWith(top: 0, bottom: 0);
+  return MediaQuery(
+    data: mediaQuery.copyWith(padding: verticalPadding),
+    child: child,
+  );
+}
+
 class LdScaffoldBodyCentered extends StatelessWidget {
   final Widget child;
   final Color? backgroundColor;
@@ -31,11 +55,9 @@ class LdScaffoldBodyCentered extends StatelessWidget {
       return Container(
         color: backgroundColor ?? Colors.transparent,
         padding: padding,
-        child: MediaQuery.removePadding(
-          context: context,
-          removeTop: true,
-          removeBottom: true,
-          child: Center(child: child),
+        child: _mediaQueryForScrollChild(
+          context,
+          Center(child: child),
         ),
       );
     });
@@ -50,6 +72,12 @@ class LdScaffoldBody extends StatelessWidget {
   final ScrollController? scrollController;
   final bool autoSpaceChildren;
   final bool addContainer;
+
+  /// When true, fades the top and bottom edges when more content is scrollable.
+  final bool scrollEdgeFade;
+
+  /// Height of each scroll-edge fade band. Uses theme sizing when null.
+  final double? scrollEdgeFadeExtent;
   const LdScaffoldBody({
     super.key,
     this.children = const [],
@@ -61,21 +89,29 @@ class LdScaffoldBody extends StatelessWidget {
     this.backgroundColor,
     this.autoSpaceChildren = true,
     this.addContainer = false,
+    this.scrollEdgeFade = true,
+    this.scrollEdgeFadeExtent,
   });
 
   @override
   Widget build(BuildContext context) {
-    final padding = MediaQuery.paddingOf(context).atLeast(MediaQuery.viewPaddingOf(context));
+    final mediaQuery = MediaQuery.of(context);
+    final padding = mediaQuery.padding.atLeast(mediaQuery.viewPadding);
 
     final theme = LdTheme.of(context, listen: true);
 
     final themePadding = minimumPadding ?? theme.pad();
+    final verticalSliverPadding = EdgeInsets.only(
+      top: themePadding.top + padding.top,
+      bottom: themePadding.bottom + padding.bottom,
+    );
 
     final effectiveChildren = autoSpaceChildren ? children.autoSpace(context) : children;
 
-    // Get the scroll controller from the scaffold if none provided
-    final effectiveController =
-        scrollController ?? (context.findAncestorStateOfType<LdScaffoldState>()?.effectiveScrollController);
+    // Only pass an explicit [scrollController] when the caller provides one.
+    // [LdScaffold] already wraps the body in [PrimaryScrollController]; attaching
+    // the same controller here too can leave two scroll views on it during rebuilds
+    // (e.g. when [ThemeData.platform] changes).
 
     return LayoutBuilder(builder: (context, constraints) {
       final basePadding = themePadding + padding;
@@ -88,43 +124,51 @@ class LdScaffoldBody extends StatelessWidget {
         horizontalPadding = horizontalPadding.atLeast(maxWidthPadding);
       }
 
-      return ColoredBox(
-        color: backgroundColor ?? Colors.transparent,
-        child: MediaQuery.removePadding(
-          context: context,
-          removeTop: true,
-          removeBottom: true,
-          child: CustomScrollView(
-            controller: effectiveController,
-            slivers: [
-              if (effectiveChildren.isNotEmpty)
-                SliverPadding(
-                  padding: horizontalPadding.copyWith(
-                    top: (themePadding.top + padding.top),
-                    bottom: (themePadding.bottom + padding.bottom),
-                  ),
-                  sliver: SliverList.builder(
-                    itemCount: effectiveChildren.length,
-                    itemBuilder: (context, index) => effectiveChildren[index],
-                  ),
-                ),
-              if (slivers.isNotEmpty)
-                ...slivers.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final sliver = entry.value;
-                  final isFirst = index == 0;
-                  final isLast = index == slivers.length - 1;
+      final scrollView = CustomScrollView(
+        controller: scrollController,
+        slivers: [
+          if (effectiveChildren.isNotEmpty)
+            SliverPadding(
+              padding: horizontalPadding.copyWith(
+                top: verticalSliverPadding.top,
+                bottom: verticalSliverPadding.bottom,
+              ),
+              sliver: SliverList.builder(
+                itemCount: effectiveChildren.length,
+                itemBuilder: (context, index) => effectiveChildren[index],
+              ),
+            ),
+          if (slivers.isNotEmpty)
+            ...slivers.asMap().entries.map((entry) {
+              final index = entry.key;
+              final sliver = entry.value;
+              final isFirst = index == 0;
+              final isLast = index == slivers.length - 1;
 
-                  return SliverPadding(
-                    padding: horizontalPadding.copyWith(
-                      top: isFirst ? padding.top + themePadding.top : 0,
-                      bottom: isLast ? padding.bottom + themePadding.bottom : 0,
-                    ),
-                    sliver: sliver,
-                  );
-                }),
-            ],
-          ),
+              return SliverPadding(
+                padding: horizontalPadding.copyWith(
+                  top: isFirst ? verticalSliverPadding.top : 0,
+                  bottom: isLast ? verticalSliverPadding.bottom : 0,
+                ),
+                sliver: sliver,
+              );
+            }),
+        ],
+      );
+
+      final fadeColor = backgroundColor ?? theme.background;
+
+      return ColoredBox(
+        color: backgroundColor ?? theme.background,
+        child: _mediaQueryForScrollChild(
+          context,
+          scrollEdgeFade
+              ? LdScrollEdgeFade(
+                  fadeColor: fadeColor,
+                  fadeExtent: scrollEdgeFadeExtent,
+                  child: scrollView,
+                )
+              : scrollView,
         ),
       );
     });

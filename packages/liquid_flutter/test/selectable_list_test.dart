@@ -61,6 +61,7 @@ void main() {
 
     setUp(() {
       selected = {};
+      _ParentSyncedSelectableList.lastReportedSelection = {};
     });
 
     testWidgets('selects an item on tap', (WidgetTester tester) async {
@@ -139,5 +140,75 @@ void main() {
       expect(selected.contains('B'), isTrue);
       expect(selected.contains('A'), isFalse);
     });
+
+    testWidgets('parent selection sync does not notify onSelectionChange', (tester) async {
+      await tester.pumpWidget(
+        LdThemeProvider(
+          theme: LdTheme()..platform = LdPlatform.macos,
+          child: MaterialApp(
+            localizationsDelegates: const [LiquidLocalizations.delegate],
+            home: const Scaffold(
+              body: _ParentSyncedSelectableList(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(_ParentSyncedSelectableList.lastReportedSelection, isEmpty);
+
+      await tester.tap(find.text('Clear parent'));
+      await tester.pump();
+
+      expect(_ParentSyncedSelectableList.lastReportedSelection, isEmpty);
+    });
   });
+}
+
+class _ParentSyncedSelectableList extends StatefulWidget {
+  const _ParentSyncedSelectableList();
+
+  static Set<String> lastReportedSelection = {};
+
+  @override
+  State<_ParentSyncedSelectableList> createState() => _ParentSyncedSelectableListState();
+}
+
+class _ParentSyncedSelectableListState extends State<_ParentSyncedSelectableList> {
+  Set<String> _externalSelection = {'A'};
+  late final LdPaginator<_SampleStringItem, String> _paginator;
+
+  @override
+  void initState() {
+    super.initState();
+    _paginator = LdPaginator<_SampleStringItem, String>.fromList([
+      _SampleStringItem('A'),
+      _SampleStringItem('B'),
+    ]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        LdButton(
+          onPressed: () => setState(() => _externalSelection = {}),
+          child: const Text('Clear parent'),
+        ),
+        Expanded(
+          child: LdSelectableList<_SampleStringItem, String>(
+            paginator: _paginator,
+            initialSelectedItems: _externalSelection,
+            multiSelect: true,
+            onSelectionChange: (selection) {
+              _ParentSyncedSelectableList.lastReportedSelection = Set.from(selection);
+            },
+            itemBuilder: (context, item, index) {
+              return LdListItem(title: Text(item.value?.value ?? ''));
+            },
+          ),
+        ),
+      ],
+    );
+  }
 }

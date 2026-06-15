@@ -107,19 +107,19 @@ class MonkeyRepositoryDemo extends StatelessWidget {
             child: CodeBlock(
               code: '''
   // Optional: Delete a single item
-  deleteItem: (int id) async {
+  deleteItem: (context, id) async {
     testData.removeWhere((element) => element.id == id);
     await Future.delayed(const Duration(milliseconds: 500));
   },
   
   // Optional: Delete multiple items
-  deleteBatch: (Set<int> ids) async {
+  deleteBatch: (context, ids) async {
     testData.removeWhere((element) => ids.contains(element.id));
     await Future.delayed(const Duration(milliseconds: 500));
   },
   
   // Optional: Update a single item
-  updateItem: (int id, Task newItem) async {
+  updateItem: (context, id, Task newItem) async {
     final index = testData.indexWhere((element) => element.id == id);
     final updatedItem = newItem.copyWith(lastUpdate: DateTime.now());
     testData[index] = updatedItem;
@@ -128,7 +128,7 @@ class MonkeyRepositoryDemo extends StatelessWidget {
   },
   
   // Optional: Create a new item (no id parameter - id is part of the item)
-  createItem: (Task? item) async {
+  createItem: (context, Task? item) async {
     testData.add(item!);
     await Future.delayed(const Duration(milliseconds: 500));
     return item;

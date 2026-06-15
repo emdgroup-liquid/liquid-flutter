@@ -30,8 +30,8 @@ void main() {
               repositoryCreated = true;
               return repository;
             },
-            filters: const [],
-            sortOptions: const [],
+            filtersBuilder: (_) async => [],
+            sortOptionsBuilder: (_) async => [],
             actions: const [],
             masterPage: const SizedBox(),
             detailPage: LdMonkeyDetailPage<TestItem, int>(
@@ -75,8 +75,8 @@ await tester.pumpWidget(
             masterPath: '/test',
             routeConfig: routeConfig,
             repositoryBuilder: (context, state) => repository,
-            filters: [filter],
-            sortOptions: const [],
+            filtersBuilder: (_) async => [filter],
+            sortOptionsBuilder: (_) async => [],
             actions: const [],
             masterPage: const SizedBox(),
             detailPage: LdMonkeyDetailPage<TestItem, int>(
@@ -127,8 +127,8 @@ await tester.pumpWidget(
             masterPath: '/test',
             routeConfig: routeConfig,
             repositoryBuilder: (context, state) => repository,
-            filters: [filter],
-            sortOptions: const [],
+            filtersBuilder: (_) async => [filter],
+            sortOptionsBuilder: (_) async => [],
             actions: const [],
             masterPage: const SizedBox(),
             detailPage: LdMonkeyDetailPage<TestItem, int>(
@@ -176,8 +176,8 @@ await tester.pumpWidget(
               masterPath: '/test',
               routeConfig: itemRouteConfig,
               repositoryBuilder: (context, state) => repository,
-              filters: const [],
-              sortOptions: const [],
+              filtersBuilder: (_) async => [],
+              sortOptionsBuilder: (_) async => [],
               actions: const [],
               detailPage: LdMonkeyDetailPage<TestItem, int>(
                 body: LdMonkeyStackDetailView<TestItem, int>(buildDetail: (context, item) {
@@ -220,8 +220,8 @@ await tester.pumpWidget(
             masterPath: '/test',
             routeConfig: routeConfig,
             repositoryBuilder: (context, state) => repository,
-            filters: const [],
-            sortOptions: const [],
+            filtersBuilder: (_) async => [],
+            sortOptionsBuilder: (_) async => [],
             actions: const [],
             masterPage: const SizedBox(),
             detailPage: LdMonkeyDetailPage<TestItem, int>(

@@ -317,34 +317,34 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
               final tabSpacing = isAttached ? 0.0 : spacingSize;
               final compactMode = constraints.maxWidth < 500;
 
+              final tabCount = widget.tabs.length;
+              final horizontalPadding = isAttached ? 0.0 : 2 * spacingSize;
               final widthWithoutSpacing =
-                  constraints.maxWidth - (tabSpacing * (widget.tabs.length - 1)) - 2 * spacingSize;
+                  constraints.maxWidth - (tabSpacing * (tabCount - 1)) - horizontalPadding;
 
-              double tabWidth = (widthWithoutSpacing ~/
-                      max(
-                        1,
-                        min(widget.tabs.length, widget.maxVisibleTabs),
-                      ))
-                  .toDouble();
+              final overflowTabWidth =
+                  widthWithoutSpacing / max(1, min(tabCount, widget.maxVisibleTabs));
+              final hasOverflow = widthWithoutSpacing < overflowTabWidth * tabCount;
 
-              final hasOverflow = widthWithoutSpacing < tabWidth * widget.tabs.length;
-
-              // Ensure that the overflow is cutting off the
-              // last tab, so the user knows that there are more tabs.
-              if (hasOverflow) {
-                final remainder = widthWithoutSpacing % tabWidth;
-
-                if (remainder < tabWidth / 2) {
-                  tabWidth += tabWidth * 0.2;
-                }
-              }
+              final tabWidth = switch (hasOverflow) {
+                true => () {
+                    var width = overflowTabWidth;
+                    // Cut off the last visible tab so the user knows there are more.
+                    final remainder = widthWithoutSpacing - (widthWithoutSpacing / width).floor() * width;
+                    if (remainder < width / 2) {
+                      width += width * 0.2;
+                    }
+                    return width;
+                  }(),
+                false => widthWithoutSpacing / max(1, tabCount),
+              };
 
               if (constraints.maxWidth != _navWidth || tabWidth != _tabWidth) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (mounted) {
                     setState(() {
                       _navWidth = constraints.maxWidth;
-                      _tabWidth = tabWidth.toDouble();
+                      _tabWidth = tabWidth;
                       final activeIndex = _activeIndex().clamp(0, _tabCount - 1);
                       _indicatorPosition = activeIndex * _tabStride;
                     });
@@ -364,11 +364,10 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                       children: [
                         Row(
                           spacing: tabSpacing,
-                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             ...widget.tabs.map(
                               (tab) => SizedBox(
-                                width: _tabWidth,
+                                width: tabWidth,
                                 child: LdTouchableSurface(
                                   active: widget.activeRoute == tab.route,
                                   onPressed: () => _onTabTap(tab.route),
@@ -450,7 +449,7 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                             },
                             onHorizontalDragEnd: _onIndicatorDragEnd,
                             child: Container(
-                              width: _tabWidth,
+                              width: tabWidth,
                               decoration: BoxDecoration(
                                 color: !isAttached ? theme.primaryColor.withAlpha(26) : null,
                                 gradient: isAttached

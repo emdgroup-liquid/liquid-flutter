@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/src/haptics.dart';
 import 'package:liquid_flutter/src/notifications/notification.dart';
@@ -32,13 +33,15 @@ class LdNotificationsController extends ChangeNotifier {
     bool canDismiss = true,
     String? subMessage,
   }) {
-    return addNotification(LdNotification(
-      message: message,
-      duration: duration,
-      type: LdNotificationType.error,
-      canDismiss: canDismiss,
-      subMessage: subMessage,
-    ));
+    return addNotification(
+      LdNotification(
+        message: message,
+        duration: duration,
+        type: LdNotificationType.error,
+        canDismiss: canDismiss,
+        subMessage: subMessage,
+      ),
+    );
   }
 
   LdNotification success(
@@ -47,13 +50,15 @@ class LdNotificationsController extends ChangeNotifier {
     bool canDismiss = true,
     String? subMessage,
   }) {
-    return addNotification(LdNotification(
-      message: message,
-      duration: duration,
-      type: LdNotificationType.success,
-      canDismiss: canDismiss,
-      subMessage: subMessage,
-    ));
+    return addNotification(
+      LdNotification(
+        message: message,
+        duration: duration,
+        type: LdNotificationType.success,
+        canDismiss: canDismiss,
+        subMessage: subMessage,
+      ),
+    );
   }
 
   LdNotification warning(
@@ -62,13 +67,15 @@ class LdNotificationsController extends ChangeNotifier {
     bool canDismiss = true,
     String? subMessage,
   }) {
-    return addNotification(LdNotification(
-      message: message,
-      duration: duration,
-      type: LdNotificationType.warning,
-      canDismiss: canDismiss,
-      subMessage: subMessage,
-    ));
+    return addNotification(
+      LdNotification(
+        message: message,
+        duration: duration,
+        type: LdNotificationType.warning,
+        canDismiss: canDismiss,
+        subMessage: subMessage,
+      ),
+    );
   }
 
   LdNotification addNotification(LdNotification notification) {
@@ -80,29 +87,40 @@ class LdNotificationsController extends ChangeNotifier {
 
     if (notification.duration != null) {
       Future.delayed(notification.duration!, () {
-        _notifications.remove(notification);
-        _safeNotifyListeners();
+        if (notification.removing) {
+          return;
+        }
+        final removed = _notifications.remove(notification);
+        if (removed) {
+          _safeNotifyListeners();
+        }
       });
     }
     return notification;
   }
 
   Future<void> onDismissNotification(LdNotification notification) async {
-    assert(_notifications.contains(notification), "Notification not found in list");
+    if (notification.removing) {
+      return;
+    }
+    if (!_notifications.contains(notification)) {
+      return;
+    }
     notification.removing = true;
 
     await Future.delayed(const Duration(milliseconds: 0));
 
     _safeNotifyListeners();
     await Future.delayed(const Duration(milliseconds: 300));
-    _notifications.remove(notification);
-
-    _safeNotifyListeners();
+    final removed = _notifications.remove(notification);
+    if (removed) {
+      _safeNotifyListeners();
+    }
   }
 
   void clearNotifications() {
-    for (final notification in _notifications) {
-      onDismissNotification(notification);
+    for (final notification in List<LdNotification>.of(_notifications)) {
+      unawaited(onDismissNotification(notification));
     }
     _safeNotifyListeners();
   }

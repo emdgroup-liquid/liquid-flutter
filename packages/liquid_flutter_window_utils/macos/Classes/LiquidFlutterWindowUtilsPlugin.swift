@@ -9,6 +9,7 @@ public class LiquidFlutterWindowUtilsPlugin: NSObject, FlutterPlugin, WindowUtil
   private var registrar: FlutterPluginRegistrar?
   private var eventApi: WindowStateEventApi?
   private var currentWindow: NSWindow?
+  private var frameBeforeMaximize: NSRect?
   
   public static func register(with registrar: FlutterPluginRegistrar) {
     let instance = LiquidFlutterWindowUtilsPlugin()
@@ -38,6 +39,8 @@ public class LiquidFlutterWindowUtilsPlugin: NSObject, FlutterPlugin, WindowUtil
     guard let window = LiquidFlutterWindowUtilsPlugin.getCurrentWindow() else {
       throw FlutterError(code: "WINDOW_NOT_AVAILABLE", message: "No window is currently available for configuration", details: nil)
     }
+
+    ensureWindowHasUsableFrame(window: window)
     
     
     
@@ -64,13 +67,21 @@ public class LiquidFlutterWindowUtilsPlugin: NSObject, FlutterPlugin, WindowUtil
     // Force the window to update its appearance
     window.invalidateShadow()
     window.display()
+
+    if window.isMiniaturized {
+      window.deminiaturize(nil)
+    }
+
+    NSApplication.shared.activate(ignoringOtherApps: true)
+    window.makeKeyAndOrderFront(nil)
+    window.orderFrontRegardless()
     
     // Also set the Flutter view controller background to clear
     if let flutterViewController = getFlutterViewController() {
       flutterViewController.backgroundColor = .clear
     }
     
-  
+    emitWindowStateChange()
   }
   
   public func setWindowSize(width: Int64, height: Int64) throws -> Bool {
@@ -140,11 +151,23 @@ public class LiquidFlutterWindowUtilsPlugin: NSObject, FlutterPlugin, WindowUtil
       return
     }
     
-    if window.isZoomed {
-      window.zoom(nil)
+    if isWindowEffectivelyMaximized(window) {
+      if let savedFrame = frameBeforeMaximize {
+        window.setFrame(savedFrame, display: true, animate: true)
+        frameBeforeMaximize = nil
+      } else {
+        window.zoom(nil)
+      }
     } else {
-      window.zoom(nil)
+      frameBeforeMaximize = window.frame
+      if let screen = window.screen ?? NSScreen.main {
+        window.setFrame(screen.visibleFrame, display: true, animate: true)
+      } else {
+        window.zoom(nil)
+      }
     }
+    
+    emitWindowStateChange()
   }
   
   public func isWindowMaximized() throws -> Bool {
@@ -152,7 +175,7 @@ public class LiquidFlutterWindowUtilsPlugin: NSObject, FlutterPlugin, WindowUtil
       return false
     }
     
-    return window.isZoomed
+    return isWindowEffectivelyMaximized(window)
   }
   
   public func getScreenRadius() throws -> Double {
@@ -186,7 +209,7 @@ public class LiquidFlutterWindowUtilsPlugin: NSObject, FlutterPlugin, WindowUtil
         y: Int64(Int(frame.origin.y)),
         width: Int64(Int(frame.width)),
         height: Int64(Int(frame.height)),
-      isMaximized: window.isZoomed,
+      isMaximized: isWindowEffectivelyMaximized(window),
       isMinimized: window.isMiniaturized
     )
   }
@@ -313,10 +336,6 @@ public class LiquidFlutterWindowUtilsPlugin: NSObject, FlutterPlugin, WindowUtil
     emitWindowStateChange()
   }
   
-  @objc private func windowDidZoom(_ notification: Notification) {
-    emitWindowStateChange()
-  }
-  
   private func emitWindowStateChange() {
     guard let window = currentWindow else { 
       return 
@@ -328,11 +347,28 @@ public class LiquidFlutterWindowUtilsPlugin: NSObject, FlutterPlugin, WindowUtil
       y: Int64(frame.origin.y),
       width: Int64(frame.width),
       height: Int64(frame.height),
-      isMaximized: window.isZoomed,
+      isMaximized: isWindowEffectivelyMaximized(window),
       isMinimized: window.isMiniaturized
     )
     
     eventApi?.onWindowStateChanged(state: state) { _ in }
+  }
+  
+  /// Borderless windows may fill the screen without setting [NSWindow.isZoomed].
+  private func isWindowEffectivelyMaximized(_ window: NSWindow) -> Bool {
+    if window.isZoomed {
+      return true
+    }
+    guard let screen = window.screen ?? NSScreen.main else {
+      return false
+    }
+    let visible = screen.visibleFrame
+    let frame = window.frame
+    let tolerance: CGFloat = 4.0
+    return abs(frame.width - visible.width) <= tolerance
+      && abs(frame.height - visible.height) <= tolerance
+      && abs(frame.origin.x - visible.origin.x) <= tolerance
+      && abs(frame.origin.y - visible.origin.y) <= tolerance
   }
   
   deinit {
@@ -383,5 +419,44 @@ public class LiquidFlutterWindowUtilsPlugin: NSObject, FlutterPlugin, WindowUtil
     }
     
     return nil
+  }
+
+  private func ensureWindowHasUsableFrame(window: NSWindow) {
+    let minWidth: CGFloat = 900
+    let minHeight: CGFloat = 600
+
+    var frame = window.frame
+    var frameChanged = false
+
+    if frame.width < 200 || frame.height < 200 {
+      if let screen = window.screen ?? NSScreen.main {
+        let visibleFrame = screen.visibleFrame
+        let width = min(max(minWidth, frame.width), visibleFrame.width)
+        let height = min(max(minHeight, frame.height), visibleFrame.height)
+        frame = NSRect(
+          x: visibleFrame.midX - (width / 2),
+          y: visibleFrame.midY - (height / 2),
+          width: width,
+          height: height
+        )
+      } else {
+        frame.size = NSSize(width: max(minWidth, frame.width), height: max(minHeight, frame.height))
+      }
+      frameChanged = true
+    }
+
+    if let screen = window.screen ?? NSScreen.main {
+      let visibleFrame = screen.visibleFrame
+      if !frame.intersects(visibleFrame) {
+        frame.origin.x = visibleFrame.midX - (frame.width / 2)
+        frame.origin.y = visibleFrame.midY - (frame.height / 2)
+        frameChanged = true
+      }
+    }
+
+    if frameChanged {
+      window.setFrame(frame, display: true, animate: false)
+      window.layoutIfNeeded()
+    }
   }
 }

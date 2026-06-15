@@ -39,9 +39,12 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
 
             return LdContextMenu(
               disabled: (listSelection.length > 1 && !listSelection.contains(item.value!.id)) || visibleActions.isEmpty,
-              builder: (context, isShuttle, open, isOpen, child) => LdButtonConfigProvider(
-                config: LdButtonConfig(active: isOpen),
-                child: child!,
+              builder: (context, isShuttle, open, isOpen, child) => LdListItemConfigProvider(
+                config: LdListItemConfig(active: isOpen),
+                child: LdButtonConfigProvider(
+                  config: LdButtonConfig(active: isOpen),
+                  child: child!,
+                ),
               ),
               menuProviders: (context) => [
                 Provider<LdPaginatorItem<T>>.value(value: item),
@@ -64,8 +67,11 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
                 Provider<List<LdMonkeyAction<T, IdType>>>.value(
                   value: visibleActions,
                 ),
+                Provider<LdMonkeyActionScope<T, IdType>>.value(
+                  value: context.read<LdMonkeyActionScope<T, IdType>>(),
+                ),
               ],
-              menuBuilder: (context) => ConstrainedBox(
+              menuBuilder: (menuContext) => ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 300),
                 child: Builder(builder: (context) {
                   return Column(
@@ -78,12 +84,13 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
                               disableSqueeze: true,
                               alignment: MainAxisAlignment.start,
                               autoLoading: false,
-
-                              //color: LdTheme.of(context).palette.neutral,
                               width: double.infinity,
                               mode: LdButtonMode.ghost,
                             ),
-                            child: action.build(context),
+                            child: action.buildTrigger(
+                              context,
+                              context.read<LdMonkeyActionScope<T, IdType>>(),
+                            ),
                           ),
                         )
                         .toList(),

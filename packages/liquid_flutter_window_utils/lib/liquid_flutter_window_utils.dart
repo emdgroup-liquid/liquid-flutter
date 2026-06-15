@@ -30,17 +30,6 @@ class LiquidFlutterWindowUtils implements WindowStateEventApi {
     );
   }
 
-  Stream<double> get screenRadiusStream {
-    return _screenRadiusController.stream;
-  }
-
-  late final StreamController<double> _screenRadiusController =
-      StreamController<double>.broadcast(
-    onListen: () async {
-      _screenRadiusController.add(await getScreenRadius());
-    },
-  );
-
   static LiquidFlutterWindowUtils get instance => _instance;
 
   Future<bool> setWindowSize(int width, int height) async {
@@ -101,24 +90,28 @@ class LiquidFlutterWindowUtils implements WindowStateEventApi {
     }
   }
 
-  /// Stream of window state changes
+  /// Stream of window state changes. Emits the current state when first listened to.
   Stream<WindowState> get windowStateStream {
     return _windowStateController.stream;
   }
 
-  static final StreamController<WindowState> _windowStateController =
-      StreamController<WindowState>.broadcast();
+  /// Whether the window is maximized. Emits the current state when first listened to.
+  Stream<bool> get windowMaximizedStream {
+    return windowStateStream.map((state) => state.isMaximized);
+  }
+
+  late final StreamController<WindowState> _windowStateController =
+      StreamController<WindowState>.broadcast(
+    onListen: () async {
+      _windowStateController.add(await getWindowState());
+    },
+  );
 
   // MARK: - WindowStateEventApi Implementation
 
   @override
-  void onWindowStateChanged(WindowState state) async {
+  void onWindowStateChanged(WindowState state) {
     _windowStateController.add(state);
-    if (state.isMaximized) {
-      _screenRadiusController.add(0);
-    } else {
-      _screenRadiusController.add(await getScreenRadius());
-    }
   }
 
   @override

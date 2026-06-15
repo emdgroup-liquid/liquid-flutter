@@ -17,9 +17,12 @@ Released on: 5/20/2026, changelog automatically generated.
 - **submit:** use LdAutoSpace in vertical loading indicator layout ([f4903ce](commit/f4903ce))
 ### Features
 
+- **LdRepository:** add LdFetchReason, LdRepositoryCache, and LdRepository.greedy for eager full-dataset loading
+- **LdRepository:** add `cacheKey`, page-aware cache (`readPage`/`writePage`/`all`), and auto-cache/auto-invalidate wrappers (default on)
 - **liquid_flutter_md:** add markdown package and example demo ([#73](issues/73)) ([ef9eaa3](commit/ef9eaa3))
 - **modal:** make topGapRatio configurable on LdModalRoute ([28c41f0](commit/28c41f0))
 - **appbar:** rework LdAppBar with wrapper-based composition (Issue [#91](issues/91)) ([#98](issues/98)) ([f3ebc89](commit/f3ebc89))
+- **monkey:** add LdMonkeyActionContext, action host/scope split for submit actions; context menu actions use appContext for providers
 - **multi_panel:** Stage 1 - add LdPanelPosition, LdPanelRole enums and extend LdMultiPanelChildState ([9285455](commit/9285455))
 - Monkey API  ([#90](issues/90)) ([3478bf5](commit/3478bf5))
 
@@ -886,6 +889,16 @@ Released on: 5/20/2026, changelog automatically generated.
 
 **`class` LdMonkeySubmitAction<T extends Identifiable<IdType>, IdType, Result>** ([lib/src/monkey/actions/actions.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/v22.0.4..9285455ad3c034825185634381dbe83eaba70ac2#diff-250ba08dbbe05925449c761878d3265c71d99d63e119d34feda97f183532dd30))
 - ❇️ Class added: `LdMonkeySubmitAction`
+- 🔄 Required param added: `id`
+- 🔄 Param replaced: `config` → `submitConfig` + `onSubmit(LdMonkeyActionContext)`
+- 🔄 Submit host/trigger split: one offstage `LdSubmit` per action id per route
+
+**`class` LdMonkeyBareChildAction<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/actions/actions.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/v22.0.4..9285455ad3c034825185634381dbe83eaba70ac2#diff-250ba08dbbe05925449c761878d3265c71d99d63e119d34feda97f183532dd30))
+- 🔄 Param renamed: `onShortcutTrigger` → `onTrigger(LdMonkeyActionContext)`
+- 🔄 `builder` signature: `(BuildContext)` → `(LdMonkeyActionContext, trigger)`
+
+**`class` LdMonkeyActionContext<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/actions/action_context.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/v22.0.4..HEAD#diff-action-context))
+- ❇️ Class added: `LdMonkeyActionContext`
 
 **`class` LdMultiPanelChildState** ([lib/src/multi_panel/multi_panel_layout.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/v22.0.4..9285455ad3c034825185634381dbe83eaba70ac2#diff-dcf83dd1348efc710dbc6957e505c08eb421234a466c65f2b9630f2f41b83750))
 - ❇️ Class added: `LdMultiPanelChildState`

@@ -1,29 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
-LdModalRoute ldFilterModal<T extends Identifiable<IdType>, IdType>(BuildContext context) {
+LdModalRoute ldFilterModal<T extends Identifiable<IdType>, IdType>(BuildContext sourceContext) {
+  final routerDelegate = GoRouter.of(sourceContext).routerDelegate;
+  final routeConfig = sourceContext.read<LdMonkeyRouteConfig<T, IdType>>();
+  final routerController = sourceContext.read<LdMonkeyRouterController<T, IdType>>();
+  final repository = sourceContext.read<LdRepository<T, IdType>>();
+  final baseSortAndFilterState = sourceContext.read<LdMonkeySortAndFilterState<T, IdType>>();
+  // Freeze current filter/sort definitions so URL updates can re-parse state
+  // without dropping runtime-only metadata while this modal is open.
+  final baseFilters = baseSortAndFilterState.filters.toList(growable: false);
+  final baseSortOptions = baseSortAndFilterState.sortOptions.toList(growable: false);
+
   return LdModalRoute(
-    context: context,
-    pageBuilder: (_) => LdScaffold(
-      body: LdAppBar(
-        title: Text(LiquidLocalizations.of(context).filter),
+    context: sourceContext,
+    pageBuilder: (modalContext) => LdScaffold(
+      body: LdAppBar.top(
+        title: Text(LiquidLocalizations.of(modalContext).filter),
         child: LdScaffoldBody(
           children: [
-            MultiProvider(
-              providers: [
-                Provider<LdMonkeyRouteConfig<T, IdType>>.value(
-                  value: context.watch<LdMonkeyRouteConfig<T, IdType>>(),
-                ),
-                Provider<LdMonkeySortAndFilterState<T, IdType>>.value(
-                  value: context.watch<LdMonkeySortAndFilterState<T, IdType>>(),
-                ),
-                Provider<LdMonkeySelection<T, IdType>>.value(value: context.watch<LdMonkeySelection<T, IdType>>()),
-                ListenableProvider<LdRepository<T, IdType>>.value(
-                  value: context.watch<LdRepository<T, IdType>>(),
-                ),
-              ],
+            ldFilterStateScope<T, IdType>(
+              routerDelegate: routerDelegate,
+              routeConfig: routeConfig,
+              routerController: routerController,
+              repository: repository,
+              baseFilters: baseFilters,
+              baseSortOptions: baseSortOptions,
               child: LdFilterModal<T, IdType>(),
             ),
           ],
@@ -40,7 +45,15 @@ class LdFilterContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
 
   @override
   Widget build(BuildContext context) {
+    final routerDelegate = GoRouter.of(context).routerDelegate;
     final repository = LdRepository.of<T, IdType>(context);
+    final routeConfig = context.read<LdMonkeyRouteConfig<T, IdType>>();
+    final routerController = context.read<LdMonkeyRouterController<T, IdType>>();
+    final baseSortAndFilterState = context.read<LdMonkeySortAndFilterState<T, IdType>>();
+    // Same snapshot strategy as the modal route; keeps context-menu content
+    // stable while router query/path changes trigger rebuilds.
+    final baseFilters = baseSortAndFilterState.filters.toList(growable: false);
+    final baseSortOptions = baseSortAndFilterState.sortOptions.toList(growable: false);
     final activeFilters = LdMonkeySortAndFilterState.of<T, IdType>(context).activeFilters.length;
     return LdContextMenu(
       builder: (context, isShuttle, open, isOpen, child) => LdAppBarAction(
@@ -51,13 +64,17 @@ class LdFilterContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
           open();
         },
       ),
-      menuProviders: (context) => [
-        ListenableProvider.value(value: repository),
-        Provider.value(value: LdMonkeySortAndFilterState.of<T, IdType>(context, listen: true)),
-      ],
       menuBuilder: (context) => ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 300),
-        child: LdFilterModal<T, IdType>().padM(),
+        child: ldFilterStateScope<T, IdType>(
+          routerDelegate: routerDelegate,
+          routeConfig: routeConfig,
+          routerController: routerController,
+          repository: repository,
+          baseFilters: baseFilters,
+          baseSortOptions: baseSortOptions,
+          child: LdFilterModal<T, IdType>().padM(),
+        ),
       ),
     );
   }
@@ -165,8 +182,11 @@ class LdFilterModal<T extends Identifiable<IdType>, IdType> extends StatelessWid
         ),
         const LdDivider(),
       ],
+      // Keep sections visible on first build when parsed state already has
+      // active/inactive filters, instead of waiting for an animation tick.
       LdReveal.quick(
         revealed: activeFilters.isNotEmpty,
+        initialRevealed: activeFilters.isNotEmpty,
         child: LdAutoSpace(
           children: [
             LdText.caption(LiquidLocalizations.of(context).activeFilters),
@@ -186,10 +206,12 @@ class LdFilterModal<T extends Identifiable<IdType>, IdType> extends StatelessWid
       if (inactiveFilters.isNotEmpty)
         LdReveal.quick(
           revealed: inactiveFilters.isNotEmpty,
+          initialRevealed: inactiveFilters.isNotEmpty,
           child: LdText.caption(LiquidLocalizations.of(context).filter),
         ),
       LdReveal.quick(
         revealed: inactiveFilters.isNotEmpty,
+        initialRevealed: inactiveFilters.isNotEmpty,
         child: Wrap(
           children: inactiveFilters.map((e) {
             final isEnabled = e.isEnabled?.call(context) ?? true;

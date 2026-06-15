@@ -90,6 +90,24 @@ class VariantBuilder implements Builder {
     return false;
   }
 
+  /// Returns true if the given constructor is annotated with @ContextConfigurable().
+  /// When the constructor itself carries the annotation, every parameter is treated
+  /// as context-configurable without needing per-parameter annotations.
+  bool _constructorHasContextConfigurableAnnotation(
+      ConstructorElement constructor) {
+    for (final annotation in constructor.metadata) {
+      try {
+        final reader = ConstantReader(annotation.computeConstantValue());
+        if (reader.objectValue.type?.element?.name == 'ContextConfigurable') {
+          return true;
+        }
+      } catch (e) {
+        // Ignore errors when reading annotation
+      }
+    }
+    return false;
+  }
+
   /// Checks if a type string represents a nullable type
   bool _isNullableType(String typeString) {
     return typeString.trim().endsWith('?');
@@ -235,10 +253,16 @@ class VariantBuilder implements Builder {
         .where((p) => p.name != 'key')
         .toList();
 
-    // Detect context-configurable parameters
+    // Detect context-configurable parameters.
+    // If the constructor itself is annotated with @ContextConfigurable(), treat
+    // all optional parameters as context-configurable without requiring
+    // per-parameter annotations.
+    final constructorIsConfigurable =
+        _constructorHasContextConfigurableAnnotation(constructor);
     final contextConfigurableParams = <ParameterElement>[];
     for (final param in optionalParams) {
-      if (_hasContextConfigurableAnnotation(param)) {
+      if (constructorIsConfigurable ||
+          _hasContextConfigurableAnnotation(param)) {
         contextConfigurableParams.add(param);
       }
     }
@@ -297,7 +321,7 @@ class VariantBuilder implements Builder {
         }
 
         final isContextConfigurable = matchingParam != null &&
-            _hasContextConfigurableAnnotation(matchingParam);
+            contextConfigurableParams.contains(matchingParam);
 
         String fieldType;
 
@@ -723,6 +747,12 @@ class VariantBuilder implements Builder {
         ..type = const Reference('Widget')
         ..modifier = FieldModifier.final$));
 
+      // When true, skip merging with an ancestor config provider.
+      builder.fields.add(Field((fb) => fb
+        ..name = 'ignoreParent'
+        ..type = const Reference('bool')
+        ..modifier = FieldModifier.final$));
+
       // Constructor
       builder.constructors.add(Constructor((cb) {
         cb.constant = true;
@@ -737,6 +767,12 @@ class VariantBuilder implements Builder {
             ..toThis = true
             ..named = true
             ..required = true),
+          Parameter((pb) => pb
+            ..name = 'ignoreParent'
+            ..toThis = true
+            ..named = true
+            ..required = false
+            ..defaultTo = const Code('false')),
           Parameter((pb) => pb
             ..name = 'key'
             ..named = true
@@ -761,6 +797,15 @@ class VariantBuilder implements Builder {
         final typeArgsString = typeParameters.isNotEmpty
             ? '<${typeParameters.map((tp) => tp.symbol).join(', ')}>'
             : '';
+
+        bodyStatements.add(
+          Code('if (ignoreParent) {'
+              'return Provider<$configClassName$typeArgsString>.value('
+              'value: config, '
+              'child: child,'
+              ');'
+              '}'),
+        );
 
         // Read parent config
         bodyStatements.add(

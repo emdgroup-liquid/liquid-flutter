@@ -73,7 +73,7 @@ void main() {
         expect(marshaled.isOn, isTrue);
       });
 
-      test('marshalSerialized() handles empty string', () {
+      test('marshalSerialized() keeps empty string as active All state', () {
         final filter = LdFilterAnyOf<TestItem, int, _Category>(
           name: 'categories',
           label: (context) => 'Categories',
@@ -85,7 +85,8 @@ void main() {
 
         final marshaled = filter.marshalSerialized('');
         expect(marshaled.selectedValues, isEmpty);
-        expect(marshaled.isOn, isFalse);
+        expect(marshaled.isOn, isTrue);
+        expect(marshaled.serialize(), isEmpty);
       });
 
       test('marshalSerialized() handles invalid values', () {

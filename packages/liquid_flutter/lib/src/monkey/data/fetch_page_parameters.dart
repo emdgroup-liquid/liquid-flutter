@@ -7,16 +7,27 @@ class FetchPageParameters<T extends Identifiable<IdType>, IdType> {
   final int offset;
   final int pageSize;
   final String? pageToken;
+  final LdFetchReason reason;
+  final LdRepositoryCache<T, IdType> cache;
 
   FetchPageParameters({
     required this.context,
     required this.offset,
     required this.pageSize,
     required this.pageToken,
+    required this.reason,
+    required this.cache,
   });
 
   Set<LdFilterOption<T, IdType>> get filters =>
-      context.read<LdMonkeySortAndFilterState<T, IdType>?>()?.filters.where((filter) => filter.isOn).toSet() ?? {};
+      context
+          .read<LdMonkeySortAndFilterState<T, IdType>?>()
+          ?.filters
+          // Empty serialized values represent "All" for some filters, so they
+          // should not constrain repository queries.
+          .where((filter) => filter.isOn && filter.serialize().isNotEmpty)
+          .toSet() ??
+      {};
 
   List<LdSortOption<T, IdType>> get sortOptions =>
       context
@@ -25,18 +36,35 @@ class FetchPageParameters<T extends Identifiable<IdType>, IdType> {
           .where((sortOption) => sortOption.isOn)
           .toList() ??
       [];
+
+  /// Deterministic cache key for the active filter and sort query.
+  String get cacheKey => ldRepositoryCacheKey<T, IdType>(
+        filters: filters,
+        sortOptions: sortOptions,
+        pageToken: pageToken,
+      );
 }
 
 class FetchOffsetParameters<T extends Identifiable<IdType>, IdType> {
   BuildContext context;
   final IdType id;
+  final LdFetchReason reason;
+  final LdRepositoryCache<T, IdType> cache;
+
   FetchOffsetParameters({
     required this.context,
     required this.id,
+    required this.reason,
+    required this.cache,
   });
 
   Set<LdFilterOption<T, IdType>> get filters =>
-      context.read<LdMonkeySortAndFilterState<T, IdType>?>()?.filters.where((filter) => filter.isOn).toSet() ?? {};
+      context
+          .read<LdMonkeySortAndFilterState<T, IdType>?>()
+          ?.filters
+          .where((filter) => filter.isOn && filter.serialize().isNotEmpty)
+          .toSet() ??
+      {};
 
   List<LdSortOption<T, IdType>> get sortOptions =>
       context
@@ -45,4 +73,10 @@ class FetchOffsetParameters<T extends Identifiable<IdType>, IdType> {
           .where((sortOption) => sortOption.isOn)
           .toList() ??
       [];
+
+  /// Deterministic cache key for the active filter and sort query.
+  String get cacheKey => ldRepositoryCacheKey<T, IdType>(
+        filters: filters,
+        sortOptions: sortOptions,
+      );
 }

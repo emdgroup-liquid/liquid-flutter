@@ -121,6 +121,7 @@ class _LdSearchInputState extends State<LdSearchInput> {
           onSuggestionAccepted: _onSuggestionAccepted,
           inputRectNotifier: _inputRectNotifier,
           suggestionsFocusNode: _suggestionsFocusNode,
+          inputFocusNode: _inputWrapperFocusNode,
           isBottomNavigationBar: widget.isBottomNavigationBar,
           onDismiss: _closeOverlay,
         );
@@ -139,7 +140,7 @@ class _LdSearchInputState extends State<LdSearchInput> {
     _inputController.text = suggestion;
     widget.searchConfig.onSearch(suggestion);
     _closeOverlay();
-    _inputWrapperFocusNode.nextFocus();
+    _inputWrapperFocusNode.unfocus();
   }
 
   KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
@@ -165,34 +166,28 @@ class _LdSearchInputState extends State<LdSearchInput> {
       child: LdWrapConditional(
         condition: !widget.fullWidth,
         builder: (context, child) => ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 200),
+          constraints: const BoxConstraints(maxWidth: 250, minWidth: 200),
           child: child,
         ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Focus(
-                focusNode: _inputWrapperFocusNode,
-                onKeyEvent: _onKeyEvent,
-                child: LdInput(
-                  key: _inputKey,
-                  textInputAction: TextInputAction.search,
-                  hint: widget.searchConfig.hint ?? LiquidLocalizations.of(context).search,
-                  controller: _inputController,
-                  showClear: true,
-                  onSubmitted: (text) {
-                    widget.searchConfig.onSearch(text);
-                    _inputWrapperFocusNode.unfocus();
-                  },
-                  onCleared: () {
-                    widget.searchConfig.onSearch('');
-                    _inputWrapperFocusNode.unfocus();
-                    _closeOverlay();
-                  },
-                ),
-              ),
-            ),
-          ],
+        child: Focus(
+          focusNode: _inputWrapperFocusNode,
+          onKeyEvent: _onKeyEvent,
+          child: LdInput(
+            key: _inputKey,
+            textInputAction: TextInputAction.search,
+            hint: widget.searchConfig.hint ?? LiquidLocalizations.of(context).search,
+            controller: _inputController,
+            showClear: true,
+            onSubmitted: (text) {
+              widget.searchConfig.onSearch(text);
+              _inputWrapperFocusNode.unfocus();
+            },
+            onCleared: () {
+              widget.searchConfig.onSearch('');
+              _inputWrapperFocusNode.unfocus();
+              _closeOverlay();
+            },
+          ),
         ),
       ),
     );
@@ -205,6 +200,7 @@ class LdSearchSuggestionsOverlay extends StatefulWidget {
   final bool isBottomNavigationBar;
   final VoidCallback onDismiss;
   final FocusScopeNode suggestionsFocusNode;
+  final FocusNode inputFocusNode;
   final void Function(String suggestion) onSuggestionAccepted;
   final TextEditingController inputController;
 
@@ -215,6 +211,7 @@ class LdSearchSuggestionsOverlay extends StatefulWidget {
     required this.isBottomNavigationBar,
     required this.onDismiss,
     required this.suggestionsFocusNode,
+    required this.inputFocusNode,
     required this.onSuggestionAccepted,
     required this.inputController,
   });
@@ -287,6 +284,7 @@ class _LdSearchSuggestionsOverlayState extends State<LdSearchSuggestionsOverlay>
   }
 
   void _close() {
+    widget.inputFocusNode.unfocus();
     _fadeController.reverse().then((_) {
       if (mounted) {
         widget.onDismiss();
@@ -304,28 +302,29 @@ class _LdSearchSuggestionsOverlayState extends State<LdSearchSuggestionsOverlay>
     }
 
     return Stack(
+      fit: StackFit.expand,
       children: [
         FadeTransition(
           opacity: _fadeAnimation,
-          child: Material(
-            type: MaterialType.transparency,
-            child: GestureDetector(
-              onTap: _close,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  // Suggestions container
-                  _placeOverlay(
-                    screenSize,
-                    inputRect,
-                    FocusScope(
-                      node: widget.suggestionsFocusNode,
-                      child: _buildSuggestionsContent(),
-                    ),
-                  ),
-                ],
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned.fill(
+                child: ModalBarrier(
+                  dismissible: true,
+                  onDismiss: _close,
+                  color: Colors.transparent,
+                ),
               ),
-            ),
+              _placeOverlay(
+                screenSize,
+                inputRect,
+                FocusScope(
+                  node: widget.suggestionsFocusNode,
+                  child: _buildSuggestionsContent(),
+                ),
+              ),
+            ],
           ),
         ),
       ],

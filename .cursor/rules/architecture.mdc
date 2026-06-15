@@ -208,13 +208,15 @@ class TodosScreen extends StatelessWidget {
     return Provider<TodosProvider>(
       create: (_) => TodosProvider(),
       child: LdScaffold(
-        appBars: [LdAppBar(title: LdText.h('Todos'))],
-        body: LdScaffoldBody(
-          addContainer: true,
-          children: [
-            TodosList(),
-            AddTodoButton(),
-          ],
+        body: LdAppBar.top(
+          title: LdText.h('Todos'),
+          child: LdScaffoldBody(
+            addContainer: true,
+            children: [
+              TodosList(),
+              AddTodoButton(),
+            ],
+          ),
         ),
       ),
     );

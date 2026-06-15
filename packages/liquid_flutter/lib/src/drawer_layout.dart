@@ -57,6 +57,11 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
     if (LdTheme.of(context).platform.isDesktop) {
       _panelVisible = true;
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _onStateChange();
+      }
+    });
   }
 
   void openDrawer() {
@@ -82,6 +87,11 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
   }
 
   void _onPanelVisibilityChanged(bool visible) {
+    if (_panelVisible != visible) {
+      setState(() {
+        _panelVisible = visible;
+      });
+    }
     if (visible) {
       _ensureHistoryEntry();
     } else {
@@ -134,16 +144,6 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
   }
 
   bool get _isDrawerOpen => _panelVisible;
-
-  Border? get _drawerBorder {
-    if (!_isSideBySide) return null;
-    return Border(
-      right: BorderSide(
-        color: LdTheme.of(context).border,
-        width: 1,
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {

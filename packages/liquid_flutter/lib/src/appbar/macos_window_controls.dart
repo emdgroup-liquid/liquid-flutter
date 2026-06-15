@@ -48,7 +48,7 @@ class MacOSWindowControls extends StatelessWidget {
                 color: LdTheme.of(context).error,
                 child: const Icon(Icons.circle, size: 14),
                 onPressed: () {
-                  LdAppBar.callbacks?.onClose?.call();
+                  LdAppBarWidget.callbacks?.onClose?.call();
                 },
               ),
             ),
@@ -59,7 +59,7 @@ class MacOSWindowControls extends StatelessWidget {
                 color: LdTheme.of(context).warning,
                 child: const Icon(Icons.circle, size: 14),
                 onPressed: () {
-                  LdAppBar.callbacks?.onMinimize?.call();
+                  LdAppBarWidget.callbacks?.onMinimize?.call();
                 },
               ),
             ),
@@ -70,7 +70,7 @@ class MacOSWindowControls extends StatelessWidget {
                 color: LdTheme.of(context).success,
                 child: const Icon(Icons.circle, size: 14),
                 onPressed: () {
-                  LdAppBar.callbacks?.onMaximize?.call();
+                  LdAppBarWidget.callbacks?.onMaximize?.call();
                 },
               ),
             ),

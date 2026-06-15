@@ -5,11 +5,10 @@ import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/src/monkey/actions/actions.dart';
 import 'package:liquid_flutter/src/monkey/data/identifiable.dart';
 import 'package:liquid_flutter/src/monkey/data/repository.dart';
-import 'package:liquid_flutter/src/monkey/filter/ld_filter_option.dart';
+import 'package:liquid_flutter/src/monkey/ld_monkey_route_definitions.dart';
 import 'package:liquid_flutter/src/monkey/monkey_layout_mode.dart';
 import 'package:liquid_flutter/src/monkey/monkey_route_config.dart';
 import 'package:liquid_flutter/src/monkey/monkey_route_tree.dart';
-import 'package:liquid_flutter/src/monkey/sort/sort_option.dart';
 
 /// Builds the routing configuration for a monkey component.
 ///
@@ -31,8 +30,8 @@ import 'package:liquid_flutter/src/monkey/sort/sort_option.dart';
 /// - [masterPage]: The master widget rendered for the master route
 /// - [repositoryBuilder]: Creates the repository; receives [GoRouterState] so
 ///   nested routes can read ancestor path parameters.
-/// - [filters]: Available filter options that are synchronized with query params
-/// - [sortOptions]: Available sort options that are synchronized with query params
+/// - [filtersBuilder]: Loads filter definitions (async; may call server)
+/// - [sortOptionsBuilder]: Loads sort options (async; may call server)
 /// - [actions]: Monkey actions available in master/detail contexts
 /// - [shellBuilder]: Optional shell wrapper receiving the current [GoRouterState]
 ///   and nested route [child]
@@ -50,8 +49,9 @@ List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
     BuildContext context,
     GoRouterState routeState,
   ) repositoryBuilder,
-  required List<LdFilterOption<T, IdType>> filters,
-  required List<LdSortOption<T, IdType>> sortOptions,
+  required LdMonkeyFiltersBuilder<T, IdType> filtersBuilder,
+  required LdMonkeySortOptionsBuilder<T, IdType> sortOptionsBuilder,
+  LdMonkeyRouteDefinitionsLoadingTextBuilder? routeDefinitionsLoadingText,
   required List<LdMonkeyAction<T, IdType>> actions,
   Widget Function(BuildContext context, GoRouterState state, Widget child)? shellBuilder,
   List<RouteBase>? additionalDetailRoutes,
@@ -70,8 +70,9 @@ List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
       masterPage: masterPage,
       detailPage: detailPage,
       repositoryBuilder: repositoryBuilder,
-      filters: filters,
-      sortOptions: sortOptions,
+      filtersBuilder: filtersBuilder,
+      sortOptionsBuilder: sortOptionsBuilder,
+      routeDefinitionsLoadingText: routeDefinitionsLoadingText,
       actions: actions,
       detailInDialog: detailInDialog,
       shellBuilder: shellBuilder,

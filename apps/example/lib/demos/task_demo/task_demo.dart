@@ -9,9 +9,12 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+enum TaskActionId { create, markDone, markUndone, duplicate, delete }
+
 List<LdMonkeyAction<Task, int>> taskActions = [
   refreshAction<Task, int>(),
   LdMonkeySubmitAction(
+    id: TaskActionId.create,
     visibility: {
       LdMonkeyActionVisibility(
         location: LdMonkeyActionLocation.masterAppBar,
@@ -20,46 +23,43 @@ List<LdMonkeyAction<Task, int>> taskActions = [
     },
     tooltip: (context) => "Create new task",
     shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyN, meta: true)},
-    config: (context) => LdSubmitConfig(
-      loadingText: "Creating new task",
-      action: (_) async {
-        final newTaskText = await ldEnterTextModal(
-          context: context,
-          initialValue: "New tasks",
-          inputHint: "New Task",
-          inputLabel: "Task",
-          useRootNavigator: true,
-        );
+    submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Creating new task"),
+    onSubmit: (ctx) async {
+      final newTaskText = await ldEnterTextModal(
+        context: ctx.appContext,
+        initialValue: "New tasks",
+        inputHint: "New Task",
+        inputLabel: "Task",
+        useRootNavigator: true,
+      );
 
-        if (newTaskText == null) {
-          return;
-        }
+      if (newTaskText == null) {
+        return;
+      }
 
-        final newTask = Task(
-          testData.length + 1,
-          newTaskText,
-          DateTime.now().add(const Duration(days: 1)),
-          false,
-          DateTime.now(),
-        );
-        if (context.mounted) {
-          final repository = LdRepository.of<Task, int>(context);
-          await repository.create(newTask);
-        } else {
-          return;
-        }
+      final newTask = Task(
+        testData.length + 1,
+        newTaskText,
+        DateTime.now().add(const Duration(days: 1)),
+        false,
+        DateTime.now(),
+      );
+      if (!ctx.appContext.mounted) {
+        return;
+      }
+      await ctx.repository.create(ctx.appContext, newTask);
 
-        await Future.delayed(const Duration(milliseconds: 1500));
+      await Future.delayed(const Duration(milliseconds: 1500));
 
-        if (context.mounted) {
-          LdMonkeySelection.updateViewing<Task, int>(context, {newTask.id});
-        }
-      },
-    ),
+      if (ctx.appContext.mounted) {
+        ctx.updateViewing({newTask.id});
+      }
+    },
     child: Text("New Task"),
     icon: Icon(LucideIcons.plus),
   ),
   LdMonkeySubmitAction(
+    id: TaskActionId.markDone,
     tooltip: (context) => "Mark as done",
     visibility: {
       LdMonkeyActionVisibility(
@@ -98,24 +98,20 @@ List<LdMonkeyAction<Task, int>> taskActions = [
       ),
     },
     shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyD)},
-    config: (context) => LdSubmitConfig(
-      loadingText: "Marking as done",
-      allowResubmit: true,
-      action: (_) async {
-        final updatedItems = <Task>{};
-        final selection = LdMonkeySelection.adaptive<Task, int>(context);
-        final repository = LdRepository.of<Task, int>(context);
-        for (final id in selection) {
-          final item = await repository.getById(id);
-          updatedItems.add(item.copyWith(done: true));
-        }
-        await repository.updateBatch(updatedItems);
-      },
-    ),
+    submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Marking as done", allowResubmit: true),
+    onSubmit: (ctx) async {
+      final updatedItems = <Task>{};
+      for (final id in ctx.selectedIds) {
+        final item = await ctx.repository.getById(id);
+        updatedItems.add(item.copyWith(done: true));
+      }
+      await ctx.repository.updateBatch(ctx.appContext, updatedItems);
+    },
     child: Text("Done"),
     icon: Icon(LucideIcons.check),
   ),
   LdMonkeySubmitAction(
+    id: TaskActionId.markUndone,
     tooltip: (context) => "Mark as undone",
     visibility: {
       LdMonkeyActionVisibility(
@@ -126,26 +122,20 @@ List<LdMonkeyAction<Task, int>> taskActions = [
       LdMonkeyActionVisibility(location: LdMonkeyActionLocation.context, minSelectionCount: 1, maxSelectionCount: null),
     },
     shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyU)},
-    config: (context) => LdSubmitConfig(
-      loadingText: "Marking as undone",
-      allowResubmit: true,
-      action: (_) async {
-        final updatedItems = <Task>{};
-        final selection = LdMonkeySelection.adaptive<Task, int>(context);
-        final repository = LdRepository.of<Task, int>(context);
-
-        for (final id in selection) {
-          final item = await repository.getById(id);
-          updatedItems.add(item.copyWith(done: false));
-        }
-        await repository.updateBatch(updatedItems);
-      },
-    ),
+    submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Marking as undone", allowResubmit: true),
+    onSubmit: (ctx) async {
+      final updatedItems = <Task>{};
+      for (final id in ctx.selectedIds) {
+        final item = await ctx.repository.getById(id);
+        updatedItems.add(item.copyWith(done: false));
+      }
+      await ctx.repository.updateBatch(ctx.appContext, updatedItems);
+    },
     child: Text("To do"),
-
     icon: Icon(LucideIcons.hourglass),
   ),
   LdMonkeySubmitAction(
+    id: TaskActionId.duplicate,
     tooltip: (context) => "Duplicate selection",
     visibility: {
       LdMonkeyActionVisibility(
@@ -156,28 +146,25 @@ List<LdMonkeyAction<Task, int>> taskActions = [
       LdMonkeyActionVisibility(location: LdMonkeyActionLocation.context, minSelectionCount: 1, maxSelectionCount: 1),
     },
     shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyD, meta: true)},
-    config: (context) => LdSubmitConfig(
-      loadingText: "Duplicating",
-      action: (_) async {
-        final selection = LdMonkeySelection.adaptive<Task, int>(context);
-        final repository = LdRepository.of<Task, int>(context);
-        final item = await repository.getById(selection.first);
+    submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Duplicating"),
+    onSubmit: (ctx) async {
+      final item = await ctx.repository.getById(ctx.selectedIds.first);
 
-        final newItem = item.copyWith(id: testData.length + 1, task: "${item.task} (copy)");
+      final newItem = item.copyWith(id: testData.length + 1, task: "${item.task} (copy)");
 
-        await repository.create(newItem);
+      await ctx.repository.create(ctx.appContext, newItem);
 
-        await Future.delayed(const Duration(milliseconds: 1500));
+      await Future.delayed(const Duration(milliseconds: 1500));
 
-        if (context.mounted) {
-          LdMonkeySelection.updateViewing<Task, int>(context, {newItem.id});
-        }
-      },
-    ),
+      if (ctx.appContext.mounted) {
+        ctx.updateViewing({newItem.id});
+      }
+    },
     child: Text("Duplicate"),
     icon: Icon(LucideIcons.copy),
   ),
   LdMonkeySubmitAction(
+    id: TaskActionId.delete,
     tooltip: (context) => "Delete selection",
     visibility: {
       LdMonkeyActionVisibility(
@@ -194,26 +181,20 @@ List<LdMonkeyAction<Task, int>> taskActions = [
       ),
     },
     shortcutActivators: {SingleActivator(LogicalKeyboardKey.delete), SingleActivator(LogicalKeyboardKey.backspace)},
-    config: (context) => LdSubmitConfig(
-      loadingText: "Deleting",
-      action: (_) async {
-        final selection = LdMonkeySelection.adaptive<Task, int>(context);
-        final repository = LdRepository.of<Task, int>(context);
-        await repository.deleteBatch(context: context, ids: selection);
-      },
-    ),
-    child: Builder(
-      builder: (context) {
-        return Text(
-          LiquidLocalizations.of(
-            context,
-          ).deleteNItems(LdMonkeySelection.adaptive<Task, int>(context, listen: true).length),
-        );
-      },
-    ),
+    submitConfig: (appContext) => LdMonkeySubmitConfig(loadingText: LiquidLocalizations.of(appContext).loading),
+    onSubmit: (ctx) async {
+      await ctx.repository.deleteBatch(context: ctx.appContext, ids: ctx.selectedIds);
+    },
+    childBuilder: (context) {
+      return Text(
+        LiquidLocalizations.of(
+          context,
+        ).deleteNItems(LdMonkeySelection.adaptive<Task, int>(context, listen: true).length),
+      );
+    },
     icon: Icon(LucideIcons.trash2),
   ),
-  toggleSelectionControls<Task, int>(),
+  showSelectionControlsAction<Task, int>(),
   showFilterModal<Task, int>(),
   showSelection<Task, int>(),
 ];
@@ -223,7 +204,10 @@ class TaskDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LdMonkeyDetailPage<Task, int>.scrollable(buildDetail: (context, item) => TaskDetail(task: item));
+    return LdMonkeyDetailPage<Task, int>.scrollable(
+      primaryAppBarConfig: LdAppBarConfig(debugName: "Detail App Bar Task", title: Text("Task")),
+      buildDetail: (context, item) => TaskDetail(task: item),
+    );
   }
 }
 
@@ -233,11 +217,7 @@ class TaskMasterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyMasterPage<Task, int>(
-      appBar: LdMonkeyAppBar<Task, int>(
-        location: LdMonkeyActionLocation.masterAppBar,
-        title: Text("Tasks"),
-        debugName: "Master App Bar Tasks",
-      ),
+      primaryAppBarConfig: LdAppBarConfig(debugName: "Master App Bar Tasks", title: Text("Tasks")),
       buildItem: (context, item) => LdListItem(
         title: Text(
           item.value!.task,
@@ -291,7 +271,7 @@ List<LdFilterOption<Task, int>> taskFilters = [
   ),
   LdFilterBool<Task, int>(
     isEnabled: (context) {
-      final filters = context.watch<LdMonkeySortAndFilterState<Task, int>>();
+      final filters = Provider.of<LdMonkeySortAndFilterState<Task, int>>(context);
       return !filters.filters.any((e) => e.name == "todo" && e.isOn);
     },
     name: "done",
@@ -300,7 +280,7 @@ List<LdFilterOption<Task, int>> taskFilters = [
   ),
   LdFilterBool<Task, int>(
     isEnabled: (context) {
-      final filters = context.watch<LdMonkeySortAndFilterState<Task, int>>();
+      final filters = Provider.of<LdMonkeySortAndFilterState<Task, int>>(context);
 
       return !filters.filters.any((e) => e.name == "done" && e.isOn);
     },

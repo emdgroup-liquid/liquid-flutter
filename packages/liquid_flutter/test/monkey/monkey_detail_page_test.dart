@@ -30,7 +30,7 @@ Widget _wrapDetail<T extends Identifiable<IdType>, IdType>({
                 filters: filters,
                 sortOptions: [],
               ),
-              child: Provider<List<LdMonkeyAction<T, IdType>>>.value(
+              child: Provider<LdMonkeyActions<T, IdType>>.value(
                 value: actions,
                 child: child,
               ),
@@ -233,6 +233,37 @@ void main() {
     });
 
     group('App Bars', () {
+      testWidgets('uses custom primaryAppBar when provided', (WidgetTester tester) async {
+        final repository = createTestRepository();
+        final selection = LdMonkeySelection<TestItem, int>(
+          selection: {},
+          viewing: {},
+          showSelectionControls: false,
+        );
+
+        final detailPage = LdMonkeyDetailPage<TestItem, int>(
+          primaryAppBarConfig: LdAppBarConfig(title: const Text('Custom Primary App Bar')),
+          body: Container(),
+        );
+
+        await tester.pumpWidget(
+          _wrapDetail(
+            repository: repository,
+            selection: selection,
+            child: detailPage,
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        final appBars = tester.widgetList<LdAppBarWidget>(find.byType(LdAppBarWidget));
+        expect(
+          appBars.any(
+            (bar) => bar.title is Text && (bar.title! as Text).data == 'Custom Primary App Bar',
+          ),
+          isTrue,
+        );
+      });
+
       testWidgets('uses default LdMonkeyAppBar when primaryAppBar not provided', (WidgetTester tester) async {
         final repository = createTestRepository();
         final selection = LdMonkeySelection<TestItem, int>(
@@ -255,6 +286,56 @@ void main() {
 
         await tester.pumpAndSettle();
         expect(find.byType(LdMonkeyAppBar<TestItem, int>), findsWidgets);
+      });
+
+      testWidgets('secondary app bar does not inherit primary app bar title', (WidgetTester tester) async {
+        final repository = createTestRepository();
+        final selection = LdMonkeySelection<TestItem, int>(
+          selection: {},
+          viewing: {},
+          showSelectionControls: false,
+        );
+
+        final detailPage = LdMonkeyDetailPage<TestItem, int>(
+          primaryAppBarConfig: LdAppBarConfig(title: const Text('Primary Only Title')),
+          body: Container(),
+        );
+
+        await tester.pumpWidget(
+          _wrapDetail(
+            repository: repository,
+            selection: selection,
+            child: detailPage,
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(find.text('Primary Only Title'), findsOneWidget);
+      });
+
+      testWidgets('uses custom secondaryAppBar when provided', (WidgetTester tester) async {
+        final repository = createTestRepository();
+        final selection = LdMonkeySelection<TestItem, int>(
+          selection: {},
+          viewing: {},
+          showSelectionControls: false,
+        );
+
+        final detailPage = LdMonkeyDetailPage<TestItem, int>(
+          secondaryAppBarConfig: LdAppBarConfig(title: const Text('Custom Secondary App Bar')),
+          body: Container(),
+        );
+
+        await tester.pumpWidget(
+          _wrapDetail(
+            repository: repository,
+            selection: selection,
+            child: detailPage,
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(find.text('Custom Secondary App Bar'), findsOneWidget);
       });
     });
 

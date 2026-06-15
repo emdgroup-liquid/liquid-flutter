@@ -115,7 +115,7 @@ class LdTheme extends ChangeNotifier {
   EdgeInsets balPad(LdSize size) {
     return EdgeInsets.symmetric(
       horizontal: themeSize.paddingSize(size.adjust(0)),
-      vertical: themeSize.paddingSize(size.adjust(-1)),
+      vertical: themeSize.paddingSize(size) * (2 / 3),
     );
   }
 

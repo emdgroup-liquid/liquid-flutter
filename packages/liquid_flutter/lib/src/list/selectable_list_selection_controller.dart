@@ -59,6 +59,9 @@ class LdSelectableListSelectionController<T extends Identifiable<IdType>, IdType
   bool get ctrlPressed => _ctrlPressed;
 
   void updateSelectedItems(Set<IdType> items) {
+    if (setEquals(_selectedItems.value, items)) {
+      return;
+    }
     _selectedItems.setValue(items);
   }
 

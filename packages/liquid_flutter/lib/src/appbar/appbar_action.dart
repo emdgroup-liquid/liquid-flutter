@@ -4,7 +4,27 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
-typedef LdAppBarActionRequestedLeading = bool;
+/// Controls whether an [LdAppBarAction] may move into the overflow menu when
+/// the app bar row is tight.
+enum LdAppBarActionOverflowMode {
+  /// May move into the overflow menu when there is not enough space.
+  overflowable,
+
+  /// Stays visible in the app bar; other overflowable siblings move first.
+  pinned,
+}
+
+/// Controls how an [LdAppBarAction] compacts when space in the app bar is tight.
+enum LdAppBarActionCompactMode {
+  /// Prefer text with a leading icon; fall back to icon-only via [LdOverflowAdaptiveChild].
+  auto,
+
+  /// Always render icon-only when [LdAppBarAction.leading] is set.
+  always,
+
+  /// Always render text with a leading icon.
+  never,
+}
 
 /// An action button designed for use in app bars that adapts its appearance based on context.
 ///
@@ -12,8 +32,9 @@ typedef LdAppBarActionRequestedLeading = bool;
 /// an overflow menu (context menu) and adjusts its appearance accordingly:
 ///
 /// - **In the app bar**: Renders as a [LdButton] with the provided [child], [leading],
-///   and [trailing] widgets. On mobile devices, if [preferLeadingOnMobile] is true and a
-///   [leading] widget is provided, the leading icon replaces the child text to save space.
+///   and [trailing] widgets. When [compactMode] is [LdAppBarActionCompactMode.auto] and a
+///   [leading] widget is provided, the overflow layout prefers text with the leading icon
+///   and falls back to icon-only when the app bar row is tight.
 ///
 /// - **In the overflow menu**: Renders as a [LdListItem] with a more compact list item
 ///   appearance. The leading widget (if provided) is wrapped in an [LdAvatar], and the
@@ -21,7 +42,11 @@ typedef LdAppBarActionRequestedLeading = bool;
 ///   is shown in the avatar, and [loadingText] (if provided) appears as the subtitle.
 ///
 /// Actions that overflow from the app bar are automatically moved to the overflow menu
-/// by the app bar's overflow handling system.
+/// by the app bar's overflow handling system unless [overflowMode] is
+/// [LdAppBarActionOverflowMode.pinned].
+///
+/// [overflowMode] controls menu overflow; [compactMode] controls icon-only compaction.
+/// Both can apply independently.
 ///
 /// See also:
 /// - [LdAppBar] for the app bar that hosts these actions
@@ -32,7 +57,8 @@ class LdAppBarAction extends StatelessWidget {
   final Widget child;
   final bool active;
   final FutureOr<void> Function() onPressed;
-  final bool preferLeadingOnMobile;
+  final LdAppBarActionCompactMode compactMode;
+  final LdAppBarActionOverflowMode overflowMode;
   final LdButtonMode? buttonMode;
   final bool disabled;
   final String? loadingText;
@@ -46,7 +72,8 @@ class LdAppBarAction extends StatelessWidget {
     this.trailing,
     this.tooltip,
     this.active = false,
-    this.preferLeadingOnMobile = true,
+    this.compactMode = LdAppBarActionCompactMode.auto,
+    this.overflowMode = LdAppBarActionOverflowMode.overflowable,
     this.disabled = false,
     this.color,
     this.loadingText,
@@ -58,9 +85,6 @@ class LdAppBarAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = LdTheme.of(context).platform.isMobile;
-    final requestedLeading = context.read<LdAppBarActionRequestedLeading?>() ?? false;
-
     final isInContextMenu = context.read<LdAppBarActionDisplayMode?>() == LdAppBarActionDisplayMode.contextMenu;
     if (isInContextMenu) {
       return LdListItem(
@@ -84,24 +108,53 @@ class LdAppBarAction extends StatelessWidget {
         subtitle: loadingText != null && loading ? Text(loadingText!) : null,
       );
     }
+
+    final useAdaptiveChild = compactMode == LdAppBarActionCompactMode.auto && leading != null;
+
+    final Widget action;
+    if (useAdaptiveChild) {
+      action = LdOverflowAdaptiveChild(
+        expanded: _wrapTooltip(_buildButton(context, compact: false)),
+        compact: _wrapTooltip(_buildButton(context, compact: true)),
+      );
+    } else {
+      action = _wrapTooltip(
+        _buildButton(
+          context,
+          compact: compactMode == LdAppBarActionCompactMode.always && leading != null,
+        ),
+      );
+    }
+
+    return switch (overflowMode) {
+      LdAppBarActionOverflowMode.overflowable => action,
+      LdAppBarActionOverflowMode.pinned => LdOverflowPinnedChild(child: action),
+    };
+  }
+
+  Widget _wrapTooltip(Widget child) {
     return LdWrapConditional(
       condition: tooltip != null,
-      builder: (context, child) => Tooltip(
+      builder: (context, wrappedChild) => Tooltip(
         message: tooltip!,
-        child: child,
+        child: wrappedChild,
       ),
-      child: LdButton(
-        active: active,
-        onPressed: onPressed,
-        mode: buttonMode,
-        disabled: disabled,
-        loading: loading,
-        loadingText: loadingText,
-        color: color,
-        leading: (isMobile || requestedLeading) && preferLeadingOnMobile ? null : leading,
-        trailing: trailing,
-        child: (isMobile || requestedLeading) && preferLeadingOnMobile && leading != null ? leading! : child,
-      ),
+      child: child,
+    );
+  }
+
+  Widget _buildButton(BuildContext context, {required bool compact}) {
+    return LdButton(
+      active: active,
+      onPressed: onPressed,
+      mode: buttonMode,
+      disabled: disabled,
+      loading: loading,
+      loadingText: loadingText,
+      color: color,
+      leading: compact ? null : leading,
+      trailing: trailing,
+      child: compact && leading != null ? leading! : child,
     );
   }
 }

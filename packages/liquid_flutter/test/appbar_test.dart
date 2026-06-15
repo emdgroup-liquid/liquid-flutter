@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_test_utils/ld_frame.dart';
+import 'package:liquid_flutter_test_utils/ld_frame_options.dart';
+import 'package:liquid_flutter_test_utils/system_ui/iphone_16_pro.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
@@ -128,6 +130,402 @@ void main() {
       expect(actionPressed, isTrue);
     });
 
+    testWidgets('App bar actions show labels on wide mobile when leading is set', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            ldFrameOptions: iPhone16Pro,
+            child: LdScaffold(
+              body: LdAppBar.top(
+                title: const Text('Items'),
+                actions: [
+                  LdAppBarAction(
+                    leading: const Icon(LucideIcons.listFilter),
+                    onPressed: () {},
+                    child: const Text('Filter'),
+                  ),
+                ],
+                child: const Center(child: Text('Body')),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Filter'), findsOneWidget);
+    });
+
+    testWidgets('App bar title keeps width before actions compact', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            child: SizedBox(
+              width: 200,
+              child: LdScaffold(
+                body: LdAppBar.top(
+                  title: const Text('Example Page'),
+                  actions: [
+                    LdAppBarAction(
+                      leading: const Icon(LucideIcons.gitFork),
+                      onPressed: () {},
+                      child: const Text('GitHub'),
+                    ),
+                    LdContextMenu(
+                      builder: (context, isShuttle, open, isOpen, child) => LdAppBarAction(
+                        tooltip: 'Theme',
+                        leading: const Icon(LucideIcons.paintBucket),
+                        onPressed: open,
+                        active: isOpen,
+                        child: const Text('Theme'),
+                      ),
+                      menuBuilder: (context) => const SizedBox.shrink(),
+                    ),
+                  ],
+                  child: const Center(child: Text('Body')),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(
+        tester.renderObject<RenderBox>(find.text('Example Page')).size.width,
+        greaterThan(48),
+      );
+    });
+
+    testWidgets('App bar shows overflow menu when long title crowds actions', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            child: SizedBox(
+              width: 320,
+              child: LdScaffold(
+                body: LdAppBar.top(
+                  title: const Text('Very Long Page Title That Should Not Hide Actions'),
+                  actions: [
+                    LdAppBarAction(
+                      leading: const Icon(LucideIcons.listFilter),
+                      onPressed: () {},
+                      child: const Text('Filter'),
+                    ),
+                    LdAppBarAction(
+                      leading: const Icon(LucideIcons.save),
+                      onPressed: () {},
+                      child: const Text('Save'),
+                    ),
+                  ],
+                  child: const Center(child: Text('Body')),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(LucideIcons.ellipsisVertical), findsOneWidget);
+      expect(find.text('Filter'), findsNothing);
+      expect(find.text('Save'), findsNothing);
+
+      final titleBox = tester.renderObject<RenderBox>(
+        find.text('Very Long Page Title That Should Not Hide Actions'),
+      );
+      final overflowView = tester.renderObject<RenderBox>(find.byType(LdOverflowView));
+      final indicatorBox = tester.renderObject<RenderBox>(find.byIcon(LucideIcons.ellipsisVertical));
+      expect(titleBox.size.width, lessThan(overflowView.size.width));
+      expect(
+        titleBox.localToGlobal(Offset.zero).dx,
+        closeTo(overflowView.localToGlobal(Offset.zero).dx, 1),
+      );
+
+      final titleRight = titleBox.localToGlobal(titleBox.size.bottomRight(Offset.zero)).dx;
+      final indicatorLeft = indicatorBox.localToGlobal(Offset.zero).dx;
+      expect(indicatorLeft - titleRight, lessThan(20));
+    });
+
+    testWidgets('App bar keeps pinned actions visible when overflowable actions overflow', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            child: SizedBox(
+              width: 320,
+              child: LdScaffold(
+                body: LdAppBar.top(
+                  title: const Text('Very Long Page Title That Should Not Hide Actions'),
+                  actions: [
+                    LdAppBarAction(
+                      leading: const Icon(LucideIcons.listFilter),
+                      onPressed: () {},
+                      child: const Text('Filter'),
+                    ),
+                    LdAppBarAction(
+                      overflowMode: LdAppBarActionOverflowMode.pinned,
+                      onPressed: () {},
+                      child: const Text('Done'),
+                    ),
+                  ],
+                  child: const Center(child: Text('Body')),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(LucideIcons.ellipsisVertical), findsOneWidget);
+      expect(find.text('Filter'), findsNothing);
+      expect(find.text('Done'), findsOneWidget);
+    });
+
+    testWidgets('App bar actions compact when row is tight', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            child: Center(
+              child: SizedBox(
+                width: 130,
+                child: LdOverflowView(
+                  spacing: 8,
+                  builder: (context, remainingItemCount) => const SizedBox(
+                    width: 32,
+                    height: 32,
+                  ),
+                  children: [
+                    LdAppBarAction(
+                      leading: const Icon(LucideIcons.listFilter),
+                      onPressed: () {},
+                      child: const Text('Filter items'),
+                    ),
+                    LdAppBarAction(
+                      leading: const Icon(LucideIcons.save),
+                      onPressed: () {},
+                      child: const Text('Save all changes'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.renderObject<RenderBox>(find.text('Filter items')).hasSize, isFalse);
+      expect(tester.renderObject<RenderBox>(find.text('Save all changes')).hasSize, isFalse);
+    });
+
+    testWidgets('App bar actions compact when wrapped in LdContextMenu', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            child: Center(
+              child: SizedBox(
+                width: 120,
+                child: LdOverflowView(
+                  spacing: 8,
+                  builder: (context, remainingItemCount) => const SizedBox(
+                    width: 32,
+                    height: 32,
+                  ),
+                  children: [
+                    LdAppBarAction(
+                      leading: const Icon(LucideIcons.gitFork),
+                      onPressed: () {},
+                      child: const Text('GitHub'),
+                    ),
+                    LdContextMenu(
+                      builder: (context, isShuttle, open, isOpen, child) => LdAppBarAction(
+                        tooltip: 'Theme',
+                        leading: const Icon(LucideIcons.paintBucket),
+                        onPressed: open,
+                        active: isOpen,
+                        child: const Text('Theme'),
+                      ),
+                      menuBuilder: (context) => const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(tester.renderObject<RenderBox>(find.text('Theme')).hasSize, isFalse);
+      expect(tester.renderObject<RenderBox>(find.text('GitHub')).hasSize, isFalse);
+      expect(find.byIcon(LucideIcons.paintBucket), findsWidgets);
+    });
+
+    testWidgets('App bar actions keep labels with mobile search below the bar', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            ldFrameOptions: iPhone16Pro,
+            child: Builder(
+              builder: (context) => LdScaffold(
+                body: LdAppBar.top(
+                  searchConfig: LdSearchConfig(onSearch: (_) {}, hint: 'Search items'),
+                  actions: [
+                    LdAppBarAction(
+                      leading: const Icon(LucideIcons.listFilter),
+                      onPressed: () {},
+                      child: const Text('Filter'),
+                    ),
+                  ],
+                  child: const Center(child: Text('Body')),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Filter'), findsOneWidget);
+    });
+
+    testWidgets('App bar keeps search visible on narrow desktop width', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            ldFrameOptions: const LdFrameOptions(platform: LdPlatform.macos),
+            child: LdScaffold(
+              body: LdAppBar.top(
+                title: const Text('Tasks'),
+                searchConfig: LdSearchConfig(onSearch: (_) {}, hint: 'Search tasks'),
+                actions: [
+                  LdAppBarAction(
+                    leading: const Icon(LucideIcons.refreshCw),
+                    onPressed: () {},
+                    child: const Text('Refresh'),
+                  ),
+                  LdAppBarAction(
+                    leading: const Icon(LucideIcons.listFilter),
+                    onPressed: () {},
+                    child: const Text('Filter'),
+                  ),
+                  LdAppBarAction(
+                    overflowMode: LdAppBarActionOverflowMode.pinned,
+                    onPressed: () {},
+                    child: const Text('Select'),
+                  ),
+                ],
+                child: const Center(child: Text('Body')),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final searchBox = tester.renderObject<RenderBox>(find.byType(LdSearchInput));
+      expect(searchBox.hasSize, isTrue);
+      expect(searchBox.size.width, greaterThan(200));
+      expect(
+        find.descendant(of: find.byType(LdOverflowView), matching: find.byType(LdSearchInput)),
+        findsNothing,
+      );
+    });
+
+    testWidgets('App bar action compactMode never does not use adaptive wrapper', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            child: LdAppBarAction(
+              leading: const Icon(LucideIcons.eye),
+              compactMode: LdAppBarActionCompactMode.never,
+              onPressed: () {},
+              child: const Text('Never Label'),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LdOverflowAdaptiveChild), findsNothing);
+      expect(find.text('Never Label'), findsOneWidget);
+    });
+
+    testWidgets('App bar action compactMode always uses icon-only', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            ldFrameOptions: iPhone16Pro,
+            child: LdScaffold(
+              body: LdAppBar.top(
+                title: const Text('Items'),
+                actions: [
+                  LdAppBarAction(
+                    leading: const Icon(LucideIcons.listFilter),
+                    compactMode: LdAppBarActionCompactMode.always,
+                    onPressed: () {},
+                    child: const Text('Filter'),
+                  ),
+                ],
+                child: const Center(child: Text('Body')),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Filter'), findsNothing);
+      expect(find.byIcon(LucideIcons.listFilter), findsOneWidget);
+    });
+
     testWidgets('App bar scroll behavior - static', (WidgetTester tester) async {
       ldDisableAnimations = true;
       await tester.pumpWidget(
@@ -252,6 +650,44 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(LdSearchInput), findsOneWidget);
+    });
+
+    testWidgets('search suggestions overlay dismisses on outside tap', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+
+      await tester.pumpWidget(
+        _wrapInScaffold(
+          LdScaffold(
+            body: LdAppBar.top(
+              searchConfig: LdSearchConfig(
+                onSearch: (_) {},
+                getSuggestions: (query) async => ['alpha', 'beta'].where((s) => s.contains(query)).toList(),
+                buildSuggestion: (context, suggestion) => LdListItem(title: Text('$suggestion')),
+              ),
+              child: const Center(child: Text('Body')),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(LdInput));
+      await tester.pump();
+      await tester.enterText(find.byType(TextField), 'a');
+      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LdSearchSuggestionsOverlay), findsOneWidget);
+
+      final overlayBarrier = find.byWidgetPredicate(
+        (widget) => widget is ModalBarrier && widget.onDismiss != null,
+      );
+      expect(overlayBarrier, findsOneWidget);
+      await tester.tap(overlayBarrier);
+      await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+      expect(find.byType(LdSearchSuggestionsOverlay), findsNothing);
     });
 
     testWidgets('App bar with bottom widget', (WidgetTester tester) async {
@@ -541,33 +977,6 @@ void main() {
   // ── Legacy scaffold-injection mode (LdScaffold.appBars) ──────────────────
   // The appBars parameter is a deprecated no-op since the registry was removed.
   // Verify that using it does not throw and the body is still rendered.
-  group('LdAppBar legacy scaffold-injection mode (appBars)', () {
-    testWidgets('Legacy: LdAppBar in appBars does not crash', (WidgetTester tester) async {
-      ldDisableAnimations = true;
-      await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldFrame(
-            size: LdThemeSize.m,
-            brightnessMode: LdThemeBrightnessMode.light,
-            child: LdScaffold(
-              // ignore: deprecated_member_use
-              appBars: [
-                LdAppBar.top(title: const Text('Legacy Bar')),
-              ],
-              body: const Center(child: Text('Body')),
-            ),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // The deprecated appBars parameter is a no-op; bars are not placed.
-      // The scaffold body should still render.
-      expect(find.text('Body'), findsOneWidget);
-    });
-  });
 
   // ── Stage 5: ScrolledUnderBuilder and drawer button tests ─────────────────
 
@@ -579,9 +988,9 @@ void main() {
       final metricsNotifier = ValueNotifier<LdAppBarMetrics>(
         const LdAppBarMetrics(
           position: LdAppBarPosition.top,
-          barHeight: 56,
-          edgeMargin: 0,
-          hideOffset: 0,
+          barHeight: EdgeInsets.only(top: 56),
+          edgeMargin: EdgeInsets.zero,
+          hideOffset: EdgeInsets.zero,
           isScrolledUnder: false,
           level: 0,
         ),
@@ -615,9 +1024,9 @@ void main() {
       // Update metrics so isScrolledUnder becomes true.
       metricsNotifier.value = const LdAppBarMetrics(
         position: LdAppBarPosition.top,
-        barHeight: 56,
-        edgeMargin: 0,
-        hideOffset: 0,
+        barHeight: EdgeInsets.only(top: 56),
+        edgeMargin: EdgeInsets.zero,
+        hideOffset: EdgeInsets.zero,
         isScrolledUnder: true,
         level: 0,
       );
@@ -683,9 +1092,9 @@ void main() {
         buildWithMetrics(
           metrics: const LdAppBarMetrics(
             position: LdAppBarPosition.top,
-            barHeight: 56,
-            edgeMargin: 0,
-            hideOffset: 0,
+            barHeight: EdgeInsets.only(top: 56),
+            edgeMargin: EdgeInsets.zero,
+            hideOffset: EdgeInsets.zero,
             isScrolledUnder: false,
             level: 0,
           ),
@@ -707,9 +1116,9 @@ void main() {
         buildWithMetrics(
           metrics: const LdAppBarMetrics(
             position: LdAppBarPosition.top,
-            barHeight: 56,
-            edgeMargin: 0,
-            hideOffset: 0,
+            barHeight: EdgeInsets.only(top: 56),
+            edgeMargin: EdgeInsets.zero,
+            hideOffset: EdgeInsets.zero,
             isScrolledUnder: false,
             level: 1, // nested bar
           ),
@@ -729,9 +1138,9 @@ void main() {
         buildWithMetrics(
           metrics: const LdAppBarMetrics(
             position: LdAppBarPosition.bottom,
-            barHeight: 56,
-            edgeMargin: 0,
-            hideOffset: 0,
+            barHeight: EdgeInsets.only(bottom: 56),
+            edgeMargin: EdgeInsets.zero,
+            hideOffset: EdgeInsets.zero,
             isScrolledUnder: false,
             level: 0,
           ),

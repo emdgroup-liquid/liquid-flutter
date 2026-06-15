@@ -102,7 +102,10 @@ class _ListDemoState extends State<ListDemo> {
                 Wrap(
                   children: [
                     LdButton(
-                      onPressed: () => _paginator.refreshList(context: context, hard: true),
+                      onPressed: () => _paginator.refreshList(
+                            context: context,
+                            reason: LdFetchReason.refresh,
+                          ),
                       child: const Text("Refresh list"),
                     ),
                     LdButton(
@@ -228,7 +231,7 @@ class _ListDemoState extends State<ListDemo> {
             child: LdCard(
               expandChild: true,
               child: LdListEmpty(
-                onRefresh: () {
+                onRefresh: () async {
                   LdNotificationsController.of(
                     context,
                   ).addNotification(LdNotification(message: "Refreshed", type: LdNotificationType.success));

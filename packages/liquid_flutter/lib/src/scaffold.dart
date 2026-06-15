@@ -17,22 +17,10 @@ enum LdAppBarScrollBehavior {
 class LdScaffold extends StatefulWidget {
   final Widget body;
 
-  /// Deprecated: pass app bars as parents of the body using
-  /// `LdAppBar(child: ...)` instead of `appBars: [LdAppBar(...)]`.
-  ///
-  /// This parameter is ignored and will be removed in a future release.
-  @Deprecated(
-    'Pass app bars as parents of the body using LdAppBar(child: ...) '
-    'instead of appBars: [LdAppBar(...)]. '
-    'This parameter is ignored and will be removed in a future release.',
-  )
-  final List<Widget>? appBars;
-
   final Color? backgroundColor;
   final Widget? drawer;
   final String? debugName;
 
-  final bool extendBodyBehindAppBar;
   final double drawerWidth;
 
   final double? reflowBreakpoint;
@@ -45,7 +33,7 @@ class LdScaffold extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('debugName', debugName));
-    properties.add(FlagProperty('extendBodyBehindAppBar', value: extendBodyBehindAppBar, ifTrue: 'enabled'));
+
     properties.add(ColorProperty('backgroundColor', backgroundColor));
     properties.add(DoubleProperty('drawerWidth', drawerWidth));
     properties.add(DoubleProperty('reflowBreakpoint', reflowBreakpoint));
@@ -59,15 +47,9 @@ class LdScaffold extends StatefulWidget {
     super.key,
     required this.body,
     // ignore: deprecated_member_use_from_same_package
-    @Deprecated(
-      'Pass app bars as parents of the body using LdAppBar(child: ...) '
-      'instead of appBars: [LdAppBar(...)]. '
-      'This parameter is ignored and will be removed in a future release.',
-    )
-    this.appBars,
+
     this.debugName,
     this.toggleDrawerShortcut,
-    this.extendBodyBehindAppBar = false,
     this.backgroundColor,
     this.drawer,
     this.drawerWidth = 304,

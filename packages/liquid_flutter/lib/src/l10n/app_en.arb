@@ -22,6 +22,7 @@
   "close": "Close",
   "clearError": "Clear error",
   "loading": "Loading...",
+  "loadingRouteDefinitions": "Loading filters and sort options...",
   "networkError": "A network error occurred. Please make sure you are connected to the internet and try again.",
   "timeoutError": "The request timed out. Please try again.",
   "formatError": "An error occurred while processing the request. Please try again.",
@@ -44,7 +45,9 @@
   "maximize": "Maximize",
   "showDrawer": "Show Sidebar",
   "hideDrawer": "Hide Sidebar", 
-  "clearSelection": "Clear selection?", 
+  "nItemsSelected": "{items} {items,plural, =1{item}other{items}} selected",
+  "clearSelection": "Clear selection",
+  "clearSelectionDialogHeader": "Clear selection?", 
   "clearSelectionBody": "Are you sure you want to discard your selection of {n} items?",
   "openDrawer": "Open Sidebar",
   "closeDrawer": "Close Sidebar",
@@ -52,5 +55,6 @@
   "listHidden": "The list was hidden",
   "shiftListExplanation": "Select a range of items while holding shift",
   "copy": "Copy",
+  "showSelection": "Show",
   "copiedToClipboard": "Copied to clipboard"
 }

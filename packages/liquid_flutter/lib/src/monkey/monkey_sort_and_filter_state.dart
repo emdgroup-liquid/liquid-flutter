@@ -23,6 +23,29 @@ class LdMonkeySortAndFilterState<T extends Identifiable<IdType>, IdType> {
     required this.sortOptions,
   });
 
+  static LdSubmitController<LdMonkeyResolvedRouteDefinitions<T, IdType>, void>
+      routeDefinitionsSubmitController<T extends Identifiable<IdType>, IdType>(
+    BuildContext context,
+  ) =>
+          context.read<LdSubmitController<LdMonkeyResolvedRouteDefinitions<T, IdType>, void>>();
+
+  /// Re-fetches filter/sort definitions and option catalogs from the server.
+  static Future<void> refreshFilterDefinitions<T extends Identifiable<IdType>, IdType>(
+    BuildContext context,
+  ) =>
+      routeDefinitionsSubmitController<T, IdType>(context).trigger();
+
+  /// True while route definitions are being refreshed (shell already mounted).
+  static bool isRefreshingFilterDefinitions<T extends Identifiable<IdType>, IdType>(
+    BuildContext context,
+  ) {
+    final submit = routeDefinitionsSubmitController<T, IdType>(context);
+    if (submit.state.type != LdSubmitStateType.loading) {
+      return false;
+    }
+    return Provider.of<LdMonkeySortAndFilterState<T, IdType>?>(context, listen: false) != null;
+  }
+
   static void updateFilter<T extends Identifiable<IdType>, IdType>(
     BuildContext context,
     LdFilterOption<T, IdType> filter,

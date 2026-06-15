@@ -80,6 +80,9 @@ class LiquidLocalizationsEn extends LiquidLocalizations {
   String get loading => 'Loading...';
 
   @override
+  String get loadingRouteDefinitions => 'Loading filters and sort options...';
+
+  @override
   String get networkError => 'A network error occurred. Please make sure you are connected to the internet and try again.';
 
   @override
@@ -139,7 +142,21 @@ class LiquidLocalizationsEn extends LiquidLocalizations {
   String get hideDrawer => 'Hide Sidebar';
 
   @override
-  String get clearSelection => 'Clear selection?';
+  String nItemsSelected(num items) {
+    String _temp0 = intl.Intl.pluralLogic(
+      items,
+      locale: localeName,
+      other: 'items',
+      one: 'item',
+    );
+    return '$items $_temp0 selected';
+  }
+
+  @override
+  String get clearSelection => 'Clear selection';
+
+  @override
+  String get clearSelectionDialogHeader => 'Clear selection?';
 
   @override
   String clearSelectionBody(Object n) {
@@ -163,6 +180,9 @@ class LiquidLocalizationsEn extends LiquidLocalizations {
 
   @override
   String get copy => 'Copy';
+
+  @override
+  String get showSelection => 'Show';
 
   @override
   String get copiedToClipboard => 'Copied to clipboard';

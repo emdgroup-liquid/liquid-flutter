@@ -2,51 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
-/// Wraps [body] inside [bar] when [bar] is a [LdMonkeyAppBar]; otherwise
-/// renders [bar] standalone and places [body] below it in a [Column].
-///
-/// This lets monkey pages work correctly with both:
-/// - The new wrapper-based pattern (LdMonkeyAppBar with child).
-/// - Legacy / test usages that pass arbitrary widgets as bars.
-Widget _wrapBodyWithBar<T extends Identifiable<IdType>, IdType>(Widget bar, Widget body) {
-  if (bar is LdMonkeyAppBar<T, IdType>) {
-    return LdMonkeyAppBar<T, IdType>(
-      key: bar.key,
-      title: bar.title,
-      additionalActions: bar.additionalActions,
-      positionMode: bar.positionMode,
-      location: bar.location,
-      leading: bar.leading,
-      debugName: bar.debugName,
-      backgroundMode: bar.backgroundMode,
-      shadowMode: bar.shadowMode,
-      borderMode: bar.borderMode,
-      implyLeading: bar.implyLeading,
-      child: body,
-    );
-  }
-  // Fallback: stack the bar and body in a Column for non-LdMonkeyAppBar widgets.
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [bar, Expanded(child: body)],
-  );
-}
-
 class LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   const LdMonkeyMasterPage({
     super.key,
     this.buildItem,
-    this.appBar,
+    this.primaryAppBarConfig,
+    this.primaryAppBarAdditionalActions = const [],
     this.allowMultipleSelection = true,
-    this.secondaryAppBar,
+    this.secondaryAppBarConfig,
     this.buildList,
   }) : assert(buildList != null || buildItem != null, "Either buildList or buildItem must be provided");
 
   final Widget Function(BuildContext context, LdRepository<T, IdType> repository)? buildList;
   final Widget Function(BuildContext context, LdPaginatorItem<T> item)? buildItem;
 
-  final Widget? appBar;
-  final Widget? secondaryAppBar;
+  final LdAppBarConfig? primaryAppBarConfig;
+  final LdAppBarConfig? secondaryAppBarConfig;
+  final List<Widget> primaryAppBarAdditionalActions;
 
   final bool allowMultipleSelection;
 
@@ -55,6 +27,13 @@ class LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType> extends Statefu
 }
 
 class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends State<LdMonkeyMasterPage<T, IdType>> {
+  final _listKey = GlobalKey(debugLabel: 'master_page_list');
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   Widget _buildList(
     BuildContext context,
     LdRepository<T, IdType> repository,
@@ -66,7 +45,10 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
 
     final selection = LdMonkeySelection.of<T, IdType>(context, listen: true);
 
+    final interactionMode = context.read<LdMonkeyInteractionMode?>() ?? LdMonkeyInteractionMode.browse;
+
     return LdSelectableList<T, IdType>(
+      key: _listKey,
       showSelectionControls: selection.showSelectionControls,
       paginator: repository,
       initialSelectedItems: selection.showSelectionControls ? selection.selection : selection.viewing,
@@ -76,7 +58,7 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
         if (!context.mounted) {
           return;
         }
-        if (selected.length > 1 || selection.showSelectionControls) {
+        if (interactionMode == LdMonkeyInteractionMode.pick || selected.length > 1 || selection.showSelectionControls) {
           LdMonkeySelection.updateSelection<T, IdType>(context, selected);
           LdMonkeySelection.updateShowSelectionControls<T, IdType>(context, true);
         } else {
@@ -100,6 +82,28 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
     );
   }
 
+  Widget _buildAppBarWrappedBody(Widget body) {
+    return LdWrapConditional(
+      condition: widget.primaryAppBarConfig != null,
+      builder: (context, child) => LdAppBarConfigProvider(
+        config: widget.primaryAppBarConfig!,
+        child: child,
+      ),
+      child: LdMonkeyAppBar<T, IdType>(
+        location: LdMonkeyActionLocation.masterAppBar,
+        additionalActions: widget.primaryAppBarAdditionalActions,
+        child: LdAppBarConfigProvider(
+          config: widget.secondaryAppBarConfig ?? const LdAppBarConfig(),
+          ignoreParent: true,
+          child: LdMonkeyAppBar<T, IdType>(
+            location: LdMonkeyActionLocation.masterSecondary,
+            child: body,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     LdMonkeySelection.of<T, IdType>(context, listen: true);
@@ -110,31 +114,10 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
       child: LdNotificationPortal(
         child: LdMonkeyMultiShortcuts(
           actions: actions,
-          child: Builder(
-            builder: (context) {
-              final body = _buildList(context, repository, actions);
-
-              final primaryBar = widget.appBar ??
-                  LdMonkeyAppBar<T, IdType>(
-                    location: LdMonkeyActionLocation.masterAppBar,
-                    debugName: "Master App Bar",
-                  );
-
-              final secondaryBar = widget.secondaryAppBar ??
-                  LdMonkeyAppBar<T, IdType>(
-                    location: LdMonkeyActionLocation.masterSecondary,
-                    debugName: "Master Secondary App Bar",
-                  );
-
-              // New wrapper-based composition: secondary bar wraps the body,
-              // then primary bar wraps the secondary+body subtree.
-              final wrapped = _wrapBodyWithBar<T, IdType>(
-                primaryBar,
-                _wrapBodyWithBar<T, IdType>(secondaryBar, body),
-              );
-
-              return LdScaffold(body: wrapped);
-            },
+          child: LdScaffold(
+            body: _buildAppBarWrappedBody(
+              _buildList(context, repository, actions),
+            ),
           ),
         ),
       ),
