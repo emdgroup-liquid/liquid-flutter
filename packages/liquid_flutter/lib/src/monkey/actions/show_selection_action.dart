@@ -5,6 +5,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 LdMonkeyAction<T, IdType> showSelection<T extends Identifiable<IdType>, IdType>() => LdMonkeyBareChildAction<T, IdType>(
+      appBarOverflowMode: LdAppBarActionOverflowMode.pinned,
       onTrigger: (ctx) async {
         if (ctx.selection.selection.isNotEmpty) {
           ctx.updateViewing(ctx.selection.selection);
@@ -30,8 +31,8 @@ LdMonkeyAction<T, IdType> showSelection<T extends Identifiable<IdType>, IdType>(
           buttonMode: LdButtonMode.filled,
           leading: const Icon(LucideIcons.eye),
           compactMode: LdAppBarActionCompactMode.never,
-          child: const Text('Show Selection'),
           onPressed: trigger,
+          child: Text(LiquidLocalizations.of(ctx.appContext).showSelection),
         );
       },
     );

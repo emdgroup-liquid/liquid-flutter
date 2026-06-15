@@ -271,13 +271,12 @@ LdMonkeyMasterPage<Task, int>(
 
 ```dart
 LdMonkeyMasterPage<Task, int>(
-  appBar: LdMonkeyAppBar<Task, int>(
-    location: LdMonkeyActionLocation.masterAppBar,
+  primaryAppBarConfig: LdAppBarConfig(
     title: Text('Tasks'),
-    additionalActions: [MyCustomAction()],
   ),
-  secondaryAppBar: LdMonkeyAppBar<Task, int>(
-    location: LdMonkeyActionLocation.masterSecondary,
+  primaryAppBarAdditionalActions: [MyCustomAction()],
+  secondaryAppBarConfig: LdAppBarConfig(
+    bottom: LdFilterChipsBar<Task, int>(configs: [...]),
   ),
 )
 ```
@@ -313,6 +312,7 @@ LdMonkeyDetailPage(
 
 ```dart
 LdMonkeyDetailPage.scrollable(
+  primaryAppBarConfig: LdAppBarConfig(title: Text('Task')),
   buildDetail: (context, item) => TaskDetailCard(item: item),
 )
 ```
@@ -327,13 +327,12 @@ LdMonkeyDetailPage.stacked(
 
 ## LdMonkeyAppBar
 
-The LdMonkeyAppBar automatically injects actions based on the `LdMonkeyActionLocation`. It wraps content using the new wrapper-based composition model (child parameter).
+The LdMonkeyAppBar automatically injects actions based on the `LdMonkeyActionLocation`. Customize title, bottom, and other bar properties via `LdAppBarConfig` on `LdMonkeyMasterPage` or `LdMonkeyDetailPage`.
 
 ```dart
-LdMonkeyAppBar<Task, int>(
-  location: LdMonkeyActionLocation.masterAppBar,
-  title: Text('Tasks'),
-  child: /* body wrapped by this app bar */,
+LdMonkeyMasterPage<Task, int>(
+  primaryAppBarConfig: LdAppBarConfig(title: Text('Tasks')),
+  buildItem: (context, item) => LdListItem(title: Text(item.value?.title ?? '')),
 )
 ```
 

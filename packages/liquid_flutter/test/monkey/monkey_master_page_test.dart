@@ -166,7 +166,7 @@ void main() {
     });
 
     group('App Bars', () {
-      testWidgets('uses custom appBar when provided', (WidgetTester tester) async {
+      testWidgets('uses custom primaryAppBarConfig when provided', (WidgetTester tester) async {
         final repository = createTestRepository();
 
         await tester.pumpWidget(
@@ -176,19 +176,22 @@ void main() {
               buildItem: (context, item) => LdListItem(
                 title: Text(item.value?.name ?? ''),
               ),
-              appBar: const LdMonkeyAppBar<TestItem, int>(
-                location: LdMonkeyActionLocation.masterAppBar,
-                title: Text('Custom App Bar'),
-              ),
+              primaryAppBarConfig: LdAppBarConfig(title: const Text('Custom App Bar')),
             ),
           ),
         );
 
         await tester.pumpAndSettle();
-        expect(find.text('Custom App Bar'), findsOneWidget);
+        final appBars = tester.widgetList<LdAppBarWidget>(find.byType(LdAppBarWidget));
+        expect(
+          appBars.any(
+            (bar) => bar.title is Text && (bar.title! as Text).data == 'Custom App Bar',
+          ),
+          isTrue,
+        );
       });
 
-      testWidgets('uses default LdMonkeyAppBar when appBar not provided', (WidgetTester tester) async {
+      testWidgets('uses default LdMonkeyAppBar when primaryAppBarConfig not provided', (WidgetTester tester) async {
         final repository = createTestRepository();
 
         await tester.pumpWidget(
@@ -206,17 +209,14 @@ void main() {
         expect(find.byType(LdMonkeyAppBar<TestItem, int>), findsWidgets);
       });
 
-      testWidgets('uses custom secondaryAppBar when provided', (WidgetTester tester) async {
+      testWidgets('uses custom secondaryAppBarConfig when provided', (WidgetTester tester) async {
         final repository = createTestRepository();
 
         await tester.pumpWidget(
           _wrapMasterPage(
             repository: repository,
             child: LdMonkeyMasterPage<TestItem, int>(
-              secondaryAppBar: const LdMonkeyAppBar<TestItem, int>(
-                location: LdMonkeyActionLocation.masterSecondary,
-                title: Text('Custom Secondary App Bar'),
-              ),
+              secondaryAppBarConfig: LdAppBarConfig(title: const Text('Custom Secondary App Bar')),
               buildItem: (context, item) => LdListItem(
                 title: Text(item.value?.name ?? ''),
               ),

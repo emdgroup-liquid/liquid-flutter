@@ -865,11 +865,11 @@ void main() {
         expect(find.byType(LdContextMenu), findsOneWidget);
       });
 
-      testWidgets('toggleSelectionControls() creates selection controls toggle action', (WidgetTester tester) async {
+      testWidgets('showSelectionControlsAction() creates selection controls action', (WidgetTester tester) async {
         final repository = createTestRepository();
         final shellState = TestSortAndFilterState<TestItem, int>();
 
-        final action = toggleSelectionControls<TestItem, int>();
+        final action = showSelectionControlsAction<TestItem, int>();
 
         await tester.pumpWidget(
           LdThemeProvider(
@@ -888,7 +888,7 @@ void main() {
         );
 
         await tester.pumpAndSettle();
-        expect(find.byKey(const Key('toggle_selection_controls')), findsOneWidget);
+        expect(find.byKey(const Key('show_selection_controls')), findsOneWidget);
       });
 
       testWidgets('showSelection() creates show selection action', (WidgetTester tester) async {

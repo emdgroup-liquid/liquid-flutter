@@ -288,6 +288,31 @@ void main() {
         expect(find.byType(LdMonkeyAppBar<TestItem, int>), findsWidgets);
       });
 
+      testWidgets('secondary app bar does not inherit primary app bar title', (WidgetTester tester) async {
+        final repository = createTestRepository();
+        final selection = LdMonkeySelection<TestItem, int>(
+          selection: {},
+          viewing: {},
+          showSelectionControls: false,
+        );
+
+        final detailPage = LdMonkeyDetailPage<TestItem, int>(
+          primaryAppBarConfig: LdAppBarConfig(title: const Text('Primary Only Title')),
+          body: Container(),
+        );
+
+        await tester.pumpWidget(
+          _wrapDetail(
+            repository: repository,
+            selection: selection,
+            child: detailPage,
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(find.text('Primary Only Title'), findsOneWidget);
+      });
+
       testWidgets('uses custom secondaryAppBar when provided', (WidgetTester tester) async {
         final repository = createTestRepository();
         final selection = LdMonkeySelection<TestItem, int>(

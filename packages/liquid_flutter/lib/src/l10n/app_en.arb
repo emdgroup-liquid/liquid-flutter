@@ -45,7 +45,9 @@
   "maximize": "Maximize",
   "showDrawer": "Show Sidebar",
   "hideDrawer": "Hide Sidebar", 
-  "clearSelection": "Clear selection?", 
+  "nItemsSelected": "{items} {items,plural, =1{item}other{items}} selected",
+  "clearSelection": "Clear selection",
+  "clearSelectionDialogHeader": "Clear selection?", 
   "clearSelectionBody": "Are you sure you want to discard your selection of {n} items?",
   "openDrawer": "Open Sidebar",
   "closeDrawer": "Close Sidebar",
@@ -53,5 +55,6 @@
   "listHidden": "The list was hidden",
   "shiftListExplanation": "Select a range of items while holding shift",
   "copy": "Copy",
+  "showSelection": "Show",
   "copiedToClipboard": "Copied to clipboard"
 }

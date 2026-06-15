@@ -341,11 +341,23 @@ abstract class LiquidLocalizations {
   /// **'Hide Sidebar'**
   String get hideDrawer;
 
+  /// No description provided for @nItemsSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{items} {items,plural, =1{item}other{items}} selected'**
+  String nItemsSelected(num items);
+
   /// No description provided for @clearSelection.
   ///
   /// In en, this message translates to:
-  /// **'Clear selection?'**
+  /// **'Clear selection'**
   String get clearSelection;
+
+  /// No description provided for @clearSelectionDialogHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection?'**
+  String get clearSelectionDialogHeader;
 
   /// No description provided for @clearSelectionBody.
   ///
@@ -388,6 +400,12 @@ abstract class LiquidLocalizations {
   /// In en, this message translates to:
   /// **'Copy'**
   String get copy;
+
+  /// No description provided for @showSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get showSelection;
 
   /// No description provided for @copiedToClipboard.
   ///

@@ -21,10 +21,16 @@ abstract class LdMonkeyAction<T extends Identifiable<IdType>, IdType> {
 
   final Set<ShortcutActivator> shortcutActivators;
 
+  /// Whether this action's app bar trigger may move into the overflow menu.
+  ///
+  /// See [LdAppBarActionOverflowMode].
+  final LdAppBarActionOverflowMode appBarOverflowMode;
+
   LdMonkeyAction({
     required this.visibility,
     this.multiSelect = true,
     this.shortcutActivators = const {},
+    this.appBarOverflowMode = LdAppBarActionOverflowMode.overflowable,
   });
 
   bool isVisible(BuildContext context, {LdMonkeyActionLocation? location}) {
@@ -56,6 +62,7 @@ class LdMonkeyBareChildAction<T extends Identifiable<IdType>, IdType> extends Ld
     super.visibility = const {},
     super.multiSelect = true,
     super.shortcutActivators = const {},
+    super.appBarOverflowMode = LdAppBarActionOverflowMode.overflowable,
     required this.onTrigger,
   });
 
@@ -122,6 +129,7 @@ class LdMonkeySubmitAction<T extends Identifiable<IdType>, IdType, Result> exten
     super.visibility = const {},
     super.multiSelect = true,
     super.shortcutActivators = const {},
+    super.appBarOverflowMode = LdAppBarActionOverflowMode.overflowable,
     this.builder,
     required this.tooltip,
     this.color,

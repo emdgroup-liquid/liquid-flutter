@@ -1,21 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
-  final Widget? title;
   final LdMonkeyActionLocation location;
   final String? debugName;
   final List<Widget> additionalActions;
-  final Widget? leading;
-  final LdAppBarPositionMode? positionMode;
-  final LdAppBarBackgroundMode? backgroundMode;
   final bool? implyLeading;
-  final LdAppBarShadowMode? shadowMode;
-  final LdAppBarBorderMode? borderMode;
-
-  /// Optional content below the app bar title row (e.g. filter chips).
-  final Widget? bottom;
 
   /// The subtree that this app bar wraps.
   ///
@@ -27,17 +19,10 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
 
   const LdMonkeyAppBar({
     super.key,
-    this.title,
     this.additionalActions = const [],
-    this.positionMode,
     required this.location,
-    this.leading,
     this.debugName,
-    this.backgroundMode,
-    this.shadowMode,
-    this.borderMode,
     this.implyLeading,
-    this.bottom,
     this.child,
   });
 
@@ -53,28 +38,30 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
 
     final effectiveLayout = context.watch<LdMonkeyEffectiveLayoutMode>();
     final appBarConfig = Provider.of<LdAppBarConfig?>(context, listen: true);
-    final effectiveTitle = title ?? appBarConfig?.title;
-    final effectiveBottom = bottom ?? appBarConfig?.bottom;
     final searchFilter = _getSearchFilter(context);
-    final showSearch = searchFilter != null && location == LdMonkeyActionLocation.masterAppBar;
+
+    final selectionControlsVisible = selection.showSelectionControls;
+
+    final showClearSelectionButton = selectionControlsVisible && location == LdMonkeyActionLocation.masterSecondary;
 
     return Provider.value(
       value: location,
-      child: Builder(builder: (context) {
+      child: Builder(builder: (innerCtx) {
         final actions = ldMonkeyAppBarActionsForLocation<T, IdType>(
-          context,
+          innerCtx,
           location,
         );
 
-        if (showSearch == false &&
+        if ((searchFilter == null || location != LdMonkeyActionLocation.masterAppBar) &&
             actions.isEmpty &&
             additionalActions.isEmpty &&
-            effectiveTitle == null &&
-            effectiveBottom == null) {
+            appBarConfig?.title == null &&
+            appBarConfig?.bottom == null &&
+            !showClearSelectionButton) {
           return child ?? const SizedBox.shrink();
         }
 
-        final effectivePositionMode = positionMode ??
+        final effectivePositionMode = appBarConfig?.positionMode ??
             switch (location) {
               LdMonkeyActionLocation.masterAppBar || LdMonkeyActionLocation.detailAppBar => LdAppBarPositionMode.top,
               LdMonkeyActionLocation.masterSecondary ||
@@ -84,29 +71,27 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
             };
 
         return LdAppBar(
-            debugName: debugName,
-            backgroundMode: backgroundMode ?? LdAppBarBackgroundMode.adaptive,
-            borderMode: borderMode ?? LdAppBarBorderMode.adaptive,
+            leading: showClearSelectionButton
+                ? LdButton.ghost(
+                    child: const Icon(LucideIcons.x),
+                    onPressed: () {
+                      LdMonkeySelection.maybeClearSelection<T, IdType>(context);
+                    },
+                  )
+                : null,
+            title: showClearSelectionButton
+                ? Text(LiquidLocalizations.of(context).nItemsSelected(selection.selection.length))
+                : null,
+            debugName: debugName ?? appBarConfig?.debugName,
             showWindowControls: appBarConfig?.showWindowControls ?? true,
-            leading: leading,
             positionMode: effectivePositionMode,
             autoAttachToKeyboard: true,
-            shadowMode: shadowMode ??
-                switch (location) {
-                  LdMonkeyActionLocation.masterAppBar ||
-                  LdMonkeyActionLocation.masterSecondary =>
-                    LdAppBarShadowMode.hidden,
-                  _ => LdAppBarShadowMode.whenScrolled,
-                },
             implyLeading: implyLeading ??
+                appBarConfig?.implyLeading ??
                 switch (location) {
                   LdMonkeyActionLocation.detailAppBar => effectiveLayout == LdMonkeyEffectiveLayoutMode.detail,
                   _ => null,
                 },
-            attachedMode: switch (location) {
-              LdMonkeyActionLocation.masterSecondary => LdAppBarAttachedMode.floating,
-              _ => LdAppBarAttachedMode.adaptive,
-            },
             searchConfig: switch (location) {
               LdMonkeyActionLocation.masterAppBar => searchFilter?.searchConfig((query) {
                   searchFilter.update(
@@ -119,8 +104,6 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
                 }),
               _ => null,
             },
-            title: effectiveTitle,
-            bottom: effectiveBottom,
             overflowMenuProviders: (context) => [
                   ListenableProvider.value(value: LdRepository.of<T, IdType>(context)),
                   Provider.value(value: location),
@@ -129,10 +112,16 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
                 ],
             actions: [
               ...actions.map(
-                (e) => e.buildTrigger(
-                  context,
-                  LdMonkeyActionScope.of<T, IdType>(context),
-                ),
+                (e) {
+                  final trigger = e.buildTrigger(
+                    innerCtx,
+                    LdMonkeyActionScope.of<T, IdType>(innerCtx),
+                  );
+                  return switch (e.appBarOverflowMode) {
+                    LdAppBarActionOverflowMode.pinned => LdOverflowPinnedChild(child: trigger),
+                    LdAppBarActionOverflowMode.overflowable => trigger,
+                  };
+                },
               ),
               ...additionalActions,
             ],

@@ -76,6 +76,10 @@ class LdMonkeyActionContext<T extends Identifiable<IdType>, IdType> {
     LdMonkeySelection.updateSelection<T, IdType>(appContext, selectionIds);
   }
 
+  void maybeClearSelection() {
+    LdMonkeySelection.maybeClearSelection<T, IdType>(appContext);
+  }
+
   void updateShowSelectionControls(bool showSelectionControls) {
     LdMonkeySelection.updateShowSelectionControls<T, IdType>(appContext, showSelectionControls);
   }

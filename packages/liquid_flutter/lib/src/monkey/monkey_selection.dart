@@ -28,6 +28,23 @@ class LdMonkeySelection<T extends Identifiable<IdType>, IdType> {
   ) =>
       LdMonkeyRouterController.of<T, IdType>(context).updateSelection(context, selection);
 
+  /// Maybe clear selection if the user confirms
+  static void maybeClearSelection<T extends Identifiable<IdType>, IdType>(BuildContext context) async {
+    final selection = of<T, IdType>(context);
+    if (selection.selection.isNotEmpty) {
+      final confirmation = await ldConfirmModal(
+        context: context,
+        description: LiquidLocalizations.of(context).clearSelectionBody(selection.selection.length),
+      );
+      if (confirmation && context.mounted) {
+        updateSelection<T, IdType>(context, {});
+      }
+    }
+    if (context.mounted) {
+      updateShowSelectionControls<T, IdType>(context, false);
+    }
+  }
+
   /// Updates the viewing items in the URL via the central router controller.
   static void updateViewing<T extends Identifiable<IdType>, IdType>(
     BuildContext context,
