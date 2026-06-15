@@ -6,3 +6,4 @@ export 'repository.dart';
 export 'repository_provider.dart';
 
 export 'fetch_page_parameters.dart';
+export 'ld_greedy_fuzzy_search.dart';
