@@ -95,16 +95,23 @@ extension InRange on RangeValues {
 
 class LdFilterRangeWidget<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
   final LdFilterRange<T, IdType> filter;
+  final String? title;
 
-  const LdFilterRangeWidget({super.key, required this.filter});
+  const LdFilterRangeWidget({
+    super.key,
+    required this.filter,
+    this.title,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final header = title ?? filter.label(context);
+
     return LdAutoSpace(
       children: [
         Row(
           children: [
-            Expanded(child: LdText.l(filter.label(context))),
+            Expanded(child: LdText.l(header)),
             LdButton.vague(
               size: LdSize.s,
               onPressed: () {
@@ -114,30 +121,28 @@ class LdFilterRangeWidget<T extends Identifiable<IdType>, IdType> extends Statel
                     isOn: false,
                   ),
                 );
+                maybePopContextMenu(context);
               },
               child: const Icon(LucideIcons.x),
             ),
           ],
         ),
-        SliderTheme(
-          data: SliderTheme.of(context).copyWith(showValueIndicator: ShowValueIndicator.never),
-          child: RangeSlider(
-              activeColor: LdTheme.of(context).primaryColor,
-              padding: EdgeInsets.zero,
-              min: filter.min,
-              max: filter.max,
-              divisions: (filter.max - filter.min) ~/ filter.step,
-              values: filter.range,
-              onChanged: (values) {
-                filter.update(
-                  context,
-                  filter.copyWith(
-                    range: values,
-                    isOn: true,
-                  ),
-                );
-              }),
-        )
+        LdSlider.range(
+          lowValue: filter.range.start,
+          highValue: filter.range.end,
+          min: filter.min,
+          max: filter.max,
+          step: filter.step,
+          onRangeChanged: (low, high) {
+            filter.update(
+              context,
+              filter.copyWith(
+                range: RangeValues(low, high),
+                isOn: true,
+              ),
+            );
+          },
+        ),
       ],
     ).padM();
   }

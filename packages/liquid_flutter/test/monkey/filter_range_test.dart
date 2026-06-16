@@ -4,6 +4,8 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../utils.dart';
+
 // Test item class for range tests (needs price field)
 class _RangeTestItem with Identifiable<int> {
   @override
@@ -230,12 +232,10 @@ void main() {
 
         expect(shellState.filtersMap['priceRange']!.isOn, isTrue);
 
-        // Find the RangeSlider and interact with it
-        final rangeSlider = find.byType(RangeSlider);
+        final rangeSlider = find.byType(LdSlider);
         expect(rangeSlider, findsOneWidget);
 
-        final sliderWidget = tester.widget<RangeSlider>(rangeSlider);
-        final initialRange = sliderWidget.values;
+        final initialRange = (shellState.filtersMap['priceRange'] as LdFilterRange<_RangeTestItem, int>).range;
 
         await tester.slideToValue(rangeSlider, 25);
         await tester.pumpAndSettle();
@@ -325,18 +325,31 @@ class _RangeShellState extends ChangeNotifier implements LdMonkeyRouterControlle
 }
 
 extension SlideTo on WidgetTester {
-  Future<void> slideToValue(Finder slider, double value, {double paddingOffset = 24.0, bool fromRight = false}) async {
-    final topRight = getTopRight(slider);
-    final topLeft = getTopLeft(slider);
-    final centerY = getSize(slider).height / 2 + topRight.dy;
-    final startPoint = Offset(topLeft.dx + paddingOffset, centerY);
-    final endPoint = Offset(topRight.dx - paddingOffset, centerY);
-    final totalWidth = getSize(slider).width - (2 * paddingOffset);
-    final calculatdOffset = value * (totalWidth / 100);
+  Future<void> slideToValue(
+    Finder slider,
+    double value, {
+    double handleInset = 20.0,
+    bool fromRight = false,
+  }) async {
+    final sliderRect = getRect(slider);
+    final centerY = sliderRect.center.dy;
+    final totalWidth = sliderRect.width - (2 * handleInset);
+    final dragDistance = value * (totalWidth / 100);
+
     if (fromRight) {
-      await dragFrom(endPoint, Offset(-calculatdOffset, 0));
+      await performPanGesture(
+        this,
+        startPosition: Offset(sliderRect.right - handleInset, centerY),
+        offset: Offset(-dragDistance, 0),
+        steps: 30,
+      );
     } else {
-      await dragFrom(startPoint, Offset(calculatdOffset, 0));
+      await performPanGesture(
+        this,
+        startPosition: Offset(sliderRect.left + handleInset, centerY),
+        offset: Offset(dragDistance, 0),
+        steps: 30,
+      );
     }
   }
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:provider/provider.dart';
 
 part 'ld_filter_chips_bar_any_of_chip.dart';
 part 'ld_filter_chips_bar_bool_chip.dart';
@@ -18,42 +20,42 @@ class LdFilterChipsBar<T extends Identifiable<IdType>, IdType> extends Stateless
 
   @override
   Widget build(BuildContext context) {
-    final groups = <Widget>[];
+    final children = <Widget>[];
+
     for (final config in configs) {
-      final group = switch (config) {
-        LdFilterChipBoolConfig<T, IdType> c => _BoolChip<T, IdType>(config: c),
-        LdFilterChipRangeConfig<T, IdType> c => _RangeChip<T, IdType>(config: c),
-        LdFilterChipOneOfConfig<T, IdType> c => _OneOfChip<T, IdType>(config: c),
-        LdFilterChipAnyOfConfig<T, IdType> c => _AnyOfChip<T, IdType>(config: c),
+      final chips = switch (config) {
+        LdFilterChipBoolConfig<T, IdType> c => _buildBoolChips(context, c),
+        LdFilterChipRangeConfig<T, IdType> c => _buildRangeChips(context, c),
+        LdFilterChipOneOfConfig<T, IdType> c => _buildOneOfChips(context, c),
+        LdFilterChipAnyOfConfig<T, IdType> c => _buildAnyOfChips(context, c),
       };
-      if (!isEmptyFilterChipGroup(group)) {
-        groups.add(
-          _FilterChipGroup<T, IdType>(
-            config: config,
-            child: group,
-          ),
-        );
+
+      if (chips.isEmpty) {
+        continue;
       }
+
+      if (children.isNotEmpty) {
+        children.add(const _FilterChipGroupDivider());
+      }
+
+      final groupLabel = config.groupLabel?.call(context);
+      if (groupLabel != null) {
+        children.add(_FilterChipGroupLabel(text: groupLabel));
+      }
+
+      children.addAll(chips);
     }
 
-    if (groups.isEmpty) {
+    if (children.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    final children = <Widget>[];
-    for (var i = 0; i < groups.length; i++) {
-      if (i > 0) {
-        children.add(const _FilterChipGroupDivider());
-      }
-      children.add(groups[i]);
-    }
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: children,
-      ).spaceS(),
+    return LdHorizontalScroll(
+      //hint: LdHorizontalScrollHint.none,
+      edgeBleed: EdgeInsets.symmetric(
+        horizontal: LdTheme.of(context).pad(size: LdSize.m).horizontal,
+      ),
+      children: children,
     );
   }
 }

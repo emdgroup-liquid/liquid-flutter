@@ -193,7 +193,7 @@ class LdModalRoute<T> extends PageRoute<T> {
 
     return MediaQuery(
       data: mediaQuery.copyWith(
-        padding: EdgeInsets.zero,
+        padding: mediaQuery.padding.copyWith(top: 0),
         viewPadding: mediaQuery.viewPadding.copyWith(top: 0),
         viewInsets: mediaQuery.viewInsets.copyWith(top: 0),
       ),

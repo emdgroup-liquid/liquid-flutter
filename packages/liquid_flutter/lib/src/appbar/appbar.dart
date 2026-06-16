@@ -151,7 +151,7 @@ class LdAppBarWidget extends StatefulWidget {
   /// bar's consumed insets.
   ///
   /// When null the bar renders the bar surface only (no subtree wrapping).
-  final Widget? child;
+  final Widget child;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -173,7 +173,7 @@ class LdAppBarWidget extends StatefulWidget {
   @ContextConfigurable()
   const LdAppBarWidget({
     super.key,
-    this.child,
+    required this.child,
     this.actions = const [],
     this.addContainer = false,
     this.attachedMode = LdAppBarAttachedMode.adaptive,
@@ -447,8 +447,7 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final barWidth = constraints.maxWidth;
-                final isNarrowBar =
-                    barWidth.isFinite && barWidth < kLdAppBarInlineSearchMinWidth;
+                final isNarrowBar = barWidth.isFinite && barWidth < kLdAppBarInlineSearchMinWidth;
                 final searchBelowBar = mobile || (hasSearch && isNarrowBar);
 
                 final overflowItems = [
@@ -557,7 +556,7 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
       insetBorderRadius: !_isModal,
       attached: isAttached,
       scrollBehavior: widget.scrollBehavior,
-      wrappedChild: widget.child, // null = legacy scaffold-injection mode
+      wrappedChild: widget.child,
       outsideDecorationBuilder: (isScrolledUnder) => decorationBuilder.buildOutsideDecoration(
         context: context,
         isScrolledUnder: isScrolledUnder,
@@ -570,7 +569,9 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
         isAttached: isAttached,
         position: position,
       ),
-      child: barSurface,
+      child: Builder(builder: (context) {
+        return Padding(padding: MediaQuery.of(context).padding, child: barSurface);
+      }),
     );
 
     return frame;

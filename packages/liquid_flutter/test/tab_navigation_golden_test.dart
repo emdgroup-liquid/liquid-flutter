@@ -114,7 +114,7 @@ void main() {
               tabs: manyTabs,
               activeRoute: '/tab0',
               onTabPressed: (route) {},
-              maxVisibleTabs: 5,
+              minTabWidth: 100,
               child: Center(
                 child: LdText.p("Body Content"),
               ),

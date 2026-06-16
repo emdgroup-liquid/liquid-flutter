@@ -35,11 +35,14 @@ class LdMonkeySelection<T extends Identifiable<IdType>, IdType> {
       final confirmation = await ldConfirmModal(
         context: context,
         description: LiquidLocalizations.of(context).clearSelectionBody(selection.selection.length),
+        useRootNavigator: true,
       );
-      if (confirmation && context.mounted) {
-        updateSelection<T, IdType>(context, {});
+      if (confirmation != true || !context.mounted) {
+        return;
       }
+      updateSelection<T, IdType>(context, {});
     }
+
     if (context.mounted) {
       updateShowSelectionControls<T, IdType>(context, false);
     }

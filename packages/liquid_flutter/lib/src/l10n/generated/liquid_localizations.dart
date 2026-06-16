@@ -344,7 +344,7 @@ abstract class LiquidLocalizations {
   /// No description provided for @nItemsSelected.
   ///
   /// In en, this message translates to:
-  /// **'{items} {items,plural, =1{item}other{items}} selected'**
+  /// **'%value% {items,plural, =1{item}other{items}} selected'**
   String nItemsSelected(num items);
 
   /// No description provided for @clearSelection.

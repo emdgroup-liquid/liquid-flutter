@@ -30,7 +30,6 @@ class DrawerDemo extends StatelessWidget {
                 child: const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    LdAppBarWidget(title: Text("Header")),
                     ldSpacerS,
                     LdSectionHeader("Section 1"),
                     ldSpacerS,

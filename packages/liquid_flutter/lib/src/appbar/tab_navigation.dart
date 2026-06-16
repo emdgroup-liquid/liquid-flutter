@@ -27,31 +27,25 @@ class LdTabNavigation extends StatefulWidget {
   final LdAppBarScrollBehavior scrollBehavior;
   final bool addContainer;
   final bool enableGradient;
-  @Deprecated('Overflow is now handled via horizontal scrolling.')
-  final int maxVisibleTabs;
-  @Deprecated('order is no longer used; nest LdAppBar/LdTabNavigation instead.')
-  final int order;
+
+  final double minTabWidth;
 
   /// The subtree that this tab bar wraps.
-  ///
-  /// When provided, the tab bar uses the new wrapper-based composition model.
-  /// When null, the tab bar renders the bar surface only (no subtree wrapping).
-  final Widget? child;
+  final Widget child;
 
   const LdTabNavigation({
     super.key,
     required this.activeRoute,
     required this.tabs,
     required this.onTabPressed,
-    this.child,
+    required this.child,
     this.addContainer = false,
     this.enableGradient = true,
     this.attachedMode = LdAppBarAttachedMode.adaptive,
     this.backgroundMode = LdAppBarBackgroundMode.adaptive,
     this.position = LdAppBarPositionMode.adaptive,
     this.scrollBehavior = LdAppBarScrollBehavior.static,
-    @Deprecated('order is no longer used; nest LdAppBar/LdTabNavigation instead.') this.order = 0,
-    this.maxVisibleTabs = 5,
+    this.minTabWidth = 75,
   });
 
   @override
@@ -126,13 +120,19 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
 
   int get _tabCount => max(1, widget.tabs.length);
 
-  double get _tabSpacing => _effectivelyAttached(context) ? 0 : LdTheme.of(context).paddingSize(size: LdSize.s);
+  double get _tabSpacing => LdTheme.of(context).paddingSize(size: LdSize.s);
 
   double get _tabStride => _tabWidth + _tabSpacing;
 
-  double get _contentWidth => _tabCount * _tabWidth + _tabSpacing * (_tabCount - 1);
+  double get _contentWidth => _totalSpacing + _tabCount * _tabWidth;
 
-  double _tabWidth = 0;
+  double get _tabWidth => max(widget.minTabWidth, (_availableWidth - _totalSpacing) / _tabCount);
+
+  double get _availableWidth => _navWidth - _tabSpacing * 2;
+
+  double get _totalSpacing => _tabSpacing * (_tabCount - 1);
+
+  bool get _compactMode => _navWidth < 500;
 
   double _dragStartPosition = 0;
   int _lastDraggedTabIndex = 0;
@@ -305,209 +305,149 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
     final position = _effectivePosition;
 
     // The tab bar surface widget — passed as [child] to AppBarFrame.
-    final tabBarSurface = LdTouchableSurface(
-      focusNode: _focusNode,
-      onPressed: () {},
-      builder: (context, status, _) {
-        return LdTouchableTouchFeedback(
-          status: status,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final spacingSize = LdTheme.of(context).paddingSize(size: LdSize.s);
-              final tabSpacing = isAttached ? 0.0 : spacingSize;
-              final compactMode = constraints.maxWidth < 500;
+    final tabBarSurface = LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth != _navWidth) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() {
+                _navWidth = constraints.maxWidth;
 
-              final tabCount = widget.tabs.length;
-              final horizontalPadding = isAttached ? 0.0 : 2 * spacingSize;
-              final widthWithoutSpacing =
-                  constraints.maxWidth - (tabSpacing * (tabCount - 1)) - horizontalPadding;
+                final activeIndex = _activeIndex().clamp(0, _tabCount - 1);
+                _indicatorPosition = activeIndex * _tabStride;
+              });
+              _scrollToIndicator();
+            }
+          });
+        }
 
-              final overflowTabWidth =
-                  widthWithoutSpacing / max(1, min(tabCount, widget.maxVisibleTabs));
-              final hasOverflow = widthWithoutSpacing < overflowTabWidth * tabCount;
-
-              final tabWidth = switch (hasOverflow) {
-                true => () {
-                    var width = overflowTabWidth;
-                    // Cut off the last visible tab so the user knows there are more.
-                    final remainder = widthWithoutSpacing - (widthWithoutSpacing / width).floor() * width;
-                    if (remainder < width / 2) {
-                      width += width * 0.2;
-                    }
-                    return width;
-                  }(),
-                false => widthWithoutSpacing / max(1, tabCount),
-              };
-
-              if (constraints.maxWidth != _navWidth || tabWidth != _tabWidth) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (mounted) {
-                    setState(() {
-                      _navWidth = constraints.maxWidth;
-                      _tabWidth = tabWidth;
-                      final activeIndex = _activeIndex().clamp(0, _tabCount - 1);
-                      _indicatorPosition = activeIndex * _tabStride;
-                    });
-                    _scrollToIndicator();
-                  }
-                });
-              }
-
-              return SingleChildScrollView(
-                controller: _scrollController,
-                scrollDirection: Axis.horizontal,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: constraints.maxWidth),
-                  child: Padding(
-                    padding: isAttached ? EdgeInsets.zero : LdTheme.of(context).pad(size: LdSize.s),
-                    child: Stack(
+        return LdScrollEdgeFade(
+          axis: Axis.horizontal,
+          fadeColor: context.surfaceColor,
+          controller: _scrollController,
+          child: Builder(builder: (context) {
+            return SingleChildScrollView(
+              padding: MediaQuery.of(context).padding,
+              controller: _scrollController,
+              scrollDirection: Axis.horizontal,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                child: Stack(
+                  children: [
+                    Row(
+                      spacing: _tabSpacing,
                       children: [
-                        Row(
-                          spacing: tabSpacing,
-                          children: [
-                            ...widget.tabs.map(
-                              (tab) => SizedBox(
-                                width: tabWidth,
-                                child: LdTouchableSurface(
-                                  active: widget.activeRoute == tab.route,
-                                  onPressed: () => _onTabTap(tab.route),
-                                  builder: (context, status, _) {
-                                    final colors = switch (widget.activeRoute == tab.route) {
-                                      true => ghostColor(theme.primary, theme, status),
-                                      false => neutralGhostColor(theme, status),
-                                    };
-                                    return Container(
-                                      decoration: BoxDecoration(
-                                        color: colors.surface,
-                                        borderRadius: isAttached ? null : LdTheme.of(context).radius(LdSize.s),
-                                      ),
-                                      child: Builder(
-                                        builder: (context) {
-                                          final iconColor = colors.icon;
-                                          final textColor = colors.text;
-                                          final icon = IconTheme(
-                                            data: IconThemeData(
-                                              color: iconColor,
-                                              size: theme.labelSize(LdSize.l),
-                                            ),
-                                            child: tab.icon,
-                                          );
+                        ...widget.tabs.map(
+                          (tab) => SizedBox(
+                            width: _tabWidth,
+                            child: LdTouchableSurface(
+                              active: widget.activeRoute == tab.route,
+                              onPressed: () => _onTabTap(tab.route),
+                              builder: (context, status, _) {
+                                final colors = switch (widget.activeRoute == tab.route) {
+                                  true => ghostColor(theme.primary, theme, status),
+                                  false => neutralGhostColor(theme, status),
+                                };
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    color: colors.surface,
+                                    borderRadius: LdTheme.of(context).radius(LdSize.s),
+                                  ),
+                                  child: Builder(
+                                    builder: (context) {
+                                      final iconColor = colors.icon;
+                                      final textColor = colors.text;
+                                      final icon = IconTheme(
+                                        data: IconThemeData(
+                                          color: iconColor,
+                                          size: theme.labelSize(LdSize.l),
+                                        ),
+                                        child: tab.icon,
+                                      );
 
-                                          if (compactMode) {
-                                            return Column(
-                                              crossAxisAlignment: CrossAxisAlignment.center,
-                                              children: [
-                                                icon,
-                                                ldSpacerXS,
-                                                LdText.ls(
-                                                  tab.label,
-                                                  color: textColor,
-                                                  maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
-                                                ),
-                                              ],
-                                            ).padXS();
-                                          }
-                                          return Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              icon,
-                                              ldSpacerS,
-                                              Flexible(
-                                                child: LdText.l(
-                                                  tab.label,
-                                                  color: textColor,
-                                                  maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
-                                                ),
-                                              ),
-                                            ],
-                                          ).padS();
-                                        },
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        LdSpring(
-                          springConstant: 20,
-                          dampingCoefficient: 20,
-                          mass: 5,
-                          position: _indicatorPosition,
-                          child: GestureDetector(
-                            onHorizontalDragStart: (details) {
-                              _dragStartPosition = details.localPosition.dx;
-                              _dragStartIndicatorPosition = _indicatorPosition;
-                              _lastDraggedTabIndex = _getClosestTab(context);
-                            },
-                            onHorizontalDragUpdate: _onIndicatorDragUpdate,
-                            onHorizontalDragCancel: () {
-                              _updateIndicatorPosition();
-                            },
-                            onHorizontalDragEnd: _onIndicatorDragEnd,
-                            child: Container(
-                              width: tabWidth,
-                              decoration: BoxDecoration(
-                                color: !isAttached ? theme.primaryColor.withAlpha(26) : null,
-                                gradient: isAttached
-                                    ? LinearGradient(
-                                        begin: switch (_effectivePosition) {
-                                          LdAppBarPosition.top => Alignment.bottomCenter,
-                                          LdAppBarPosition.bottom => Alignment.topCenter,
-                                        },
-                                        end: switch (_effectivePosition) {
-                                          LdAppBarPosition.top => Alignment.topCenter,
-                                          LdAppBarPosition.bottom => Alignment.bottomCenter,
-                                        },
-                                        colors: [
-                                            theme.primaryColor.withAlpha(26),
-                                            theme.primaryColor.withAlpha(0),
+                                      if (_compactMode) {
+                                        return Column(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            icon,
+                                            ldSpacerXS,
+                                            LdText.ls(
+                                              tab.label,
+                                              color: textColor,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
                                           ],
-                                        stops: [
-                                            0,
-                                            0.5
-                                          ])
-                                    : null,
-                                border: switch (isAttached) {
-                                  true => switch (_effectivePosition) {
-                                      LdAppBarPosition.top => Border(
-                                          bottom: BorderSide(
-                                            color: theme.primaryColor,
-                                            width: theme.borderWidth,
+                                        ).padXS();
+                                      }
+                                      return Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          icon,
+                                          ldSpacerS,
+                                          Flexible(
+                                            child: LdText.l(
+                                              tab.label,
+                                              color: textColor,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
                                           ),
-                                        ),
-                                      LdAppBarPosition.bottom => Border(
-                                          top: BorderSide(
-                                            color: theme.primaryColor,
-                                            width: theme.borderWidth,
-                                          ),
-                                        ),
+                                        ],
+                                      ).padS();
                                     },
-                                  false => null,
-                                },
-                                borderRadius: isAttached ? null : LdTheme.of(context).radius(LdSize.s),
-                              ),
+                                  ),
+                                );
+                              },
                             ),
                           ),
-                          builder: (context, state, child) {
-                            return Positioned(
-                              bottom: 0,
-                              top: 0,
-                              left: state.position,
-                              child: child!,
-                            );
-                          },
                         ),
                       ],
                     ),
-                  ),
+                    LdSpring(
+                      springConstant: 20,
+                      dampingCoefficient: 20,
+                      mass: 5,
+                      position: _indicatorPosition,
+                      child: GestureDetector(
+                        onHorizontalDragStart: (details) {
+                          _dragStartPosition = details.localPosition.dx;
+                          _dragStartIndicatorPosition = _indicatorPosition;
+                          _lastDraggedTabIndex = _getClosestTab(context);
+                        },
+                        onHorizontalDragUpdate: _onIndicatorDragUpdate,
+                        onHorizontalDragCancel: () {
+                          _updateIndicatorPosition();
+                        },
+                        onHorizontalDragEnd: _onIndicatorDragEnd,
+                        child: LdTouchableSurface(
+                          onPressed: () {},
+                          builder: (context, status, _) => LdTouchableTouchFeedback(
+                              scaleFactor: 100,
+                              status: status,
+                              child: Container(
+                                width: _tabWidth,
+                                decoration: BoxDecoration(
+                                  color: theme.primaryColor.withAlpha(26),
+                                  borderRadius: LdTheme.of(context).radius(LdSize.s),
+                                ),
+                              )),
+                        ),
+                      ),
+                      builder: (context, state, child) {
+                        return Positioned(
+                          bottom: 0,
+                          top: 0,
+                          left: state.position,
+                          child: child!,
+                        );
+                      },
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          }),
         );
       },
     );
@@ -517,17 +457,16 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
       child: AppBarFrame(
         position: position,
         attached: isAttached,
+        insidePadding: LdTheme.of(context).pad(size: LdSize.s),
         addContainer: widget.addContainer,
-        insidePadding: EdgeInsets.zero,
         scrollBehavior: widget.scrollBehavior,
-        wrappedChild: widget.child, // null = legacy scaffold-injection mode
+        wrappedChild: widget.child,
         outsideDecorationBuilder: (isScrolledUnder) => _buildOutsideDecoration(
           context: context,
           isScrolledUnder: isScrolledUnder,
           isAttached: isAttached,
           position: position,
         ),
-        outsideMinPadding: isAttached ? EdgeInsets.zero : null,
         insideDecorationBuilder: (isScrolledUnder) => _buildInsideDecoration(
           context: context,
           isScrolledUnder: isScrolledUnder,

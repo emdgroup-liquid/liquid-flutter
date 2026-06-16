@@ -245,7 +245,8 @@ class _TapRegionWrapper extends StatelessWidget {
 class LdTouchableTouchFeedback extends StatelessWidget {
   final Widget child;
   final LdTouchableStatus status;
-  const LdTouchableTouchFeedback({super.key, required this.child, required this.status});
+  final double scaleFactor;
+  const LdTouchableTouchFeedback({super.key, required this.child, required this.status, this.scaleFactor = 1.0});
 
   @override
   Widget build(BuildContext context) {
@@ -256,7 +257,7 @@ class LdTouchableTouchFeedback extends StatelessWidget {
         initialPosition: status.pressed ? 1 : 0,
         position: status.pressed ? 1 : 0,
         builder: (context, state, child) {
-          double squeezeFactor = (status.panOffset?.dx.abs() ?? 0) * 0.00001 * state.position;
+          double squeezeFactor = (status.panOffset?.dx.abs() ?? 0) * 0.00001 * scaleFactor * state.position;
 
           final scale = 1 + squeezeFactor;
 

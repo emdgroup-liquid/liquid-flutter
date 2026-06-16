@@ -9,7 +9,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
-enum TaskActionId { create, markDone, markUndone, duplicate, delete }
+enum TaskActionId { create, markDone, markUndone, duplicate }
 
 List<LdMonkeyAction<Task, int>> taskActions = [
   refreshAction<Task, int>(),
@@ -163,37 +163,7 @@ List<LdMonkeyAction<Task, int>> taskActions = [
     child: Text("Duplicate"),
     icon: Icon(LucideIcons.copy),
   ),
-  LdMonkeySubmitAction(
-    id: TaskActionId.delete,
-    tooltip: (context) => "Delete selection",
-    visibility: {
-      LdMonkeyActionVisibility(
-        location: LdMonkeyActionLocation.detailAppBar,
-        minSelectionCount: 1,
-        maxSelectionCount: null,
-      ),
-      LdMonkeyActionVisibility(location: LdMonkeyActionLocation.context, minSelectionCount: 1, maxSelectionCount: null),
-      LdMonkeyActionVisibility(
-        location: LdMonkeyActionLocation.masterSecondary,
-        minSelectionCount: 1,
-        maxSelectionCount: null,
-        layoutModes: {LdMonkeyEffectiveLayoutMode.sideBySide},
-      ),
-    },
-    shortcutActivators: {SingleActivator(LogicalKeyboardKey.delete), SingleActivator(LogicalKeyboardKey.backspace)},
-    submitConfig: (appContext) => LdMonkeySubmitConfig(loadingText: LiquidLocalizations.of(appContext).loading),
-    onSubmit: (ctx) async {
-      await ctx.repository.deleteBatch(context: ctx.appContext, ids: ctx.selectedIds);
-    },
-    childBuilder: (context) {
-      return Text(
-        LiquidLocalizations.of(
-          context,
-        ).deleteNItems(LdMonkeySelection.adaptive<Task, int>(context, listen: true).length),
-      );
-    },
-    icon: Icon(LucideIcons.trash2),
-  ),
+  deleteAction<Task, int>(),
   showSelectionControlsAction<Task, int>(),
   showFilterModal<Task, int>(),
   showSelection<Task, int>(),

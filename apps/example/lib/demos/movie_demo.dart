@@ -250,31 +250,7 @@ List<LdMonkeyAction<MovieDemo, int>> movieActions = [
     child: Text("Duplicate"),
     icon: Icon(LucideIcons.copy),
   ),
-  LdMonkeySubmitAction(
-    id: 'delete',
-    tooltip: (context) => "Delete selection",
-    visibility: {
-      LdMonkeyActionVisibility(
-        location: LdMonkeyActionLocation.detailSecondary,
-        minSelectionCount: 1,
-        maxSelectionCount: null,
-      ),
-      LdMonkeyActionVisibility(location: LdMonkeyActionLocation.context, minSelectionCount: 1, maxSelectionCount: null),
-      LdMonkeyActionVisibility(
-        location: LdMonkeyActionLocation.masterSecondary,
-        minSelectionCount: 1,
-        maxSelectionCount: null,
-        layoutModes: {LdMonkeyEffectiveLayoutMode.sideBySide},
-      ),
-    },
-    shortcutActivators: {SingleActivator(LogicalKeyboardKey.delete), SingleActivator(LogicalKeyboardKey.backspace)},
-    submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Deleting"),
-    onSubmit: (ctx) async {
-      await ctx.repository.deleteBatch(context: ctx.appContext, ids: ctx.selectedIds);
-    },
-    child: Text("Delete"),
-    icon: Icon(LucideIcons.trash2),
-  ),
+  deleteAction<MovieDemo, int>(detailLocation: LdMonkeyActionLocation.detailSecondary),
   showSelectionControlsAction<MovieDemo, int>(),
 ];
 
@@ -300,11 +276,11 @@ class MovieMasterPage extends StatelessWidget {
         title: LdText.h('Movies'),
         bottom: LdFilterChipsBar<MovieDemo, int>(
           configs: [
-            LdFilterChipConfig.range(filterName: 'rating', presentation: LdFilterChipPresentation.sheet),
+            LdFilterChipConfig.range(filterName: 'rating'),
             LdFilterChipConfig.anyOf(
               filterName: 'genre',
               groupLabel: (context) => 'Genre',
-              presentation: LdFilterChipPresentation.inline,
+              presentation: LdFilterChipChoicePresentation.inline,
               optionChild: (context, genre) => Text(genre as String),
             ),
           ],

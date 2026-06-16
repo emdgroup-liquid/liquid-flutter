@@ -227,8 +227,7 @@ class _LdCounterDigitState extends State<_LdCounterDigit> {
 
   List<Widget> _buildDigitColumn(double height) {
     return [
-      for (var i = 0; i < 10; i++)
-        _buildDigitCell('$i', height: height),
+      for (var i = 0; i < 10; i++) _buildDigitCell('$i', height: height),
       _buildDigitCell('.', height: height),
       _buildDigitCell('-', height: height),
     ];
@@ -360,7 +359,7 @@ class LdCounterText extends StatelessWidget {
     super.key,
   });
 
-  /// Splits [template] on `{value}` and builds an [LdCounterText].
+  /// Splits [template] on `%value%` and builds an [LdCounterText].
   factory LdCounterText.template(
     String template, {
     required double value,
@@ -376,13 +375,13 @@ class LdCounterText extends StatelessWidget {
     TextOverflow? overflow,
     Key? key,
   }) {
-    const placeholder = '{value}';
+    const placeholder = '%value%';
     final index = template.indexOf(placeholder);
     if (index == -1) {
       throw ArgumentError.value(
         template,
         'template',
-        'Must contain exactly one {value} placeholder',
+        'Must contain exactly one %value% placeholder',
       );
     }
 

@@ -40,7 +40,7 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
             return LdContextMenu(
               disabled: (listSelection.length > 1 && !listSelection.contains(item.value!.id)) || visibleActions.isEmpty,
               builder: (context, isShuttle, open, isOpen, child) => LdListItemConfigProvider(
-                config: LdListItemConfig(active: isOpen),
+                config: LdListItemConfig(active: isOpen ? true : null),
                 child: LdButtonConfigProvider(
                   config: LdButtonConfig(active: isOpen),
                   child: child!,

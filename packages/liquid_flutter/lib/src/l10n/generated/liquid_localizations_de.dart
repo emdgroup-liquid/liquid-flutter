@@ -149,7 +149,7 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
       other: 'items',
       one: 'item',
     );
-    return '$items $_temp0 selected';
+    return '%value% $_temp0 selected';
   }
 
   @override

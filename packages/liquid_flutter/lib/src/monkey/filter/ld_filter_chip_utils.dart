@@ -57,12 +57,3 @@ Widget ldFilterChipButton({
           child: child,
         );
 }
-
-bool isEmptyFilterChipGroup(Widget widget) {
-  if (widget is! SizedBox) {
-    return false;
-  }
-  final width = widget.width;
-  final height = widget.height;
-  return (width == null || width == 0) && (height == null || height == 0);
-}

@@ -35,7 +35,7 @@ class AppBarFrame extends StatefulWidget {
   /// When null the legacy scaffold-injection behaviour is used (bar surface
   /// only, no Stack). This keeps the old [LdScaffold.appBars] API compiling
   /// until Stage 3/4 removes it.
-  final Widget? wrappedChild;
+  final Widget wrappedChild;
 
   final LdAppBarPosition position;
 
@@ -70,7 +70,7 @@ class AppBarFrame extends StatefulWidget {
     super.key,
     required this.child,
     required this.position,
-    this.wrappedChild,
+    required this.wrappedChild,
     this.attached = true,
     this.addContainer = false,
     this.insideDecoration,
@@ -187,9 +187,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
   /// edge) and the floating bar's visual surface.
   double _floatingEdgeGap(BoxConstraints constraints) {
     if (widget.outsideMinPadding != null) {
-      return widget.position == LdAppBarPosition.top
-          ? widget.outsideMinPadding!.top
-          : widget.outsideMinPadding!.bottom;
+      return widget.position == LdAppBarPosition.top ? widget.outsideMinPadding!.top : widget.outsideMinPadding!.bottom;
     }
     if (widget.attached) return 0.0;
     final theme = LdTheme.of(context);
@@ -217,9 +215,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
         : EdgeInsets.only(bottom: edgeMargin);
 
     // Keyboard inset when bar is focused.
-    final viewInsets = shouldApplyViewInsets
-        ? MediaQuery.of(context).viewInsets
-        : EdgeInsets.zero;
+    final viewInsets = shouldApplyViewInsets ? MediaQuery.of(context).viewInsets : EdgeInsets.zero;
     final trimmedViewInsets = widget.position == LdAppBarPosition.top
         ? EdgeInsets.only(top: viewInsets.top)
         : EdgeInsets.only(bottom: viewInsets.bottom);
@@ -232,10 +228,10 @@ class _AppBarFrameState extends State<AppBarFrame> {
       right: viewPadding.right,
     );
 
-    final extraPadding = widget.outsideMinPadding ??
-        (widget.attached
-            ? EdgeInsets.zero
-            : theme.pad(size: LdSize.s).atLeast(
+    final extraPadding = (widget.attached
+        ? EdgeInsets.zero
+        : widget.outsideMinPadding ??
+            theme.pad(size: LdSize.s).atLeast(
                   _containerPadding(constraints),
                 ));
 
@@ -256,15 +252,17 @@ class _AppBarFrameState extends State<AppBarFrame> {
   }
 
   EdgeInsets _insidePadding(BoxConstraints constraints) {
+    EdgeInsets result = EdgeInsets.zero;
     if (widget.insidePadding != null) {
-      return widget.insidePadding!;
+      result = widget.insidePadding!;
     }
     final theme = LdTheme.of(context);
     if (widget.attached) {
-      return theme.pad(size: LdSize.s).atLeast(_containerPadding(constraints));
+      result = theme.pad(size: LdSize.s).atLeast(_containerPadding(constraints));
     } else {
-      return theme.pad(size: LdSize.s);
+      result = theme.pad(size: LdSize.s);
     }
+    return result;
   }
 
   void _onInnerSizeChange(Size size) {
@@ -406,10 +404,14 @@ class _AppBarFrameState extends State<AppBarFrame> {
           onSizeChange: _onInnerSizeChange,
           child: Container(
             decoration: insideDeco,
-            padding: _insidePadding(constraints),
-            clipBehavior: insideDeco != null ? Clip.hardEdge : Clip.none,
+            //clipBehavior: insideDeco != null ? Clip.hardEdge : Clip.none,
             key: Key("appbar_frame_inside_${widget.position.name}"),
-            child: widget.child,
+            child: MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                padding: _insidePadding(constraints),
+              ),
+              child: widget.child,
+            ),
           ),
         ),
       ),
@@ -426,9 +428,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
   /// Returns a copy of [insets] with this bar's [widget.position] edge set to
   /// [value], leaving the opposite edge unchanged.
   EdgeInsets _withEdge(EdgeInsets insets, double value) {
-    return widget.position == LdAppBarPosition.top
-        ? insets.copyWith(top: value)
-        : insets.copyWith(bottom: value);
+    return widget.position == LdAppBarPosition.top ? insets.copyWith(top: value) : insets.copyWith(bottom: value);
   }
 
   // ── Stack-mode build ──────────────────────────────────────────────────────
@@ -443,8 +443,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
     // device safe-area + sum of all ancestor inner heights. It never shrinks
     // while bars are hiding.
     final outerPadding = MediaQuery.paddingOf(context);
-    final stableEdgeMargin =
-        widget.position == LdAppBarPosition.top ? outerPadding.top : outerPadding.bottom;
+    final stableEdgeMargin = widget.position == LdAppBarPosition.top ? outerPadding.top : outerPadding.bottom;
 
     final outerMediaQuery = MediaQuery.of(context);
 
@@ -460,8 +459,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
     final parentBarHeight = parentMetrics != null ? _edgeValue(parentMetrics.barHeight) : 0.0;
     final parentHideOffset = parentMetrics != null ? _edgeValue(parentMetrics.hideOffset) : 0.0;
     final parentEdgeMargin = parentMetrics != null ? _edgeValue(parentMetrics.edgeMargin) : 0.0;
-    final parentAccumulatedHide =
-        parentMetrics != null ? _edgeValue(parentMetrics.accumulatedHideOffset) : 0.0;
+    final parentAccumulatedHide = parentMetrics != null ? _edgeValue(parentMetrics.accumulatedHideOffset) : 0.0;
 
     // A "same-position" parent is one where the relevant edge has a non-zero
     // barHeight — meaning an ancestor bar at this edge has already written into
@@ -471,8 +469,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
     final double animatedEdgeMarginBase;
     if (hasAncestorAtSameEdge) {
       // Use the live visible height of the nearest ancestor at this edge.
-      final parentVisibleHeight =
-          (parentBarHeight - parentHideOffset).clamp(parentEdgeMargin, double.infinity);
+      final parentVisibleHeight = (parentBarHeight - parentHideOffset).clamp(parentEdgeMargin, double.infinity);
       animatedEdgeMarginBase = parentVisibleHeight;
     } else {
       animatedEdgeMarginBase = stableEdgeMargin;
@@ -491,29 +488,13 @@ class _AppBarFrameState extends State<AppBarFrame> {
 
         final stableIncrementalInsetWithGap = floatingGap + _innerHeight;
         final stablePaddingWithGap = switch (widget.position) {
-          LdAppBarPosition.top => outerPadding.copyWith(
-              top: outerPadding.top + stableIncrementalInsetWithGap),
-          LdAppBarPosition.bottom => outerPadding.copyWith(
-              bottom: outerPadding.bottom + stableIncrementalInsetWithGap),
+          LdAppBarPosition.top => outerPadding.copyWith(top: outerPadding.top + stableIncrementalInsetWithGap),
+          LdAppBarPosition.bottom => outerPadding.copyWith(bottom: outerPadding.bottom + stableIncrementalInsetWithGap),
         };
 
         final wrappedChild = widget.wrappedChild;
 
         // Legacy mode (no wrappedChild): just render the bar surface.
-        if (wrappedChild == null) {
-          final barMetrics = _buildMetrics(
-            parentMetrics: parentMetrics,
-            barHeightWithGap: barHeightWithGap,
-            stableEdgeMargin: stableEdgeMargin,
-            animatedHideOffset: 0.0,
-            parentAccumulatedHide: parentAccumulatedHide,
-            level: level,
-          );
-          return Provider<LdAppBarMetrics>.value(
-            value: barMetrics,
-            child: _buildBarSurface(constraints, animatedEdgeMargin: animatedEdgeMarginBase),
-          );
-        }
 
         // Stack mode.
         return NotificationListener<ScrollNotification>(
@@ -531,8 +512,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
               // Clamp so the spring can neither pull the bar below its resting
               // position (negative = detaches from edge) nor push it past
               // barHeight+1 (the fully-hidden-plus-border-bleed target).
-              final animatedHideOffset =
-                  springState.position.clamp(0.0, _barHeight + 1);
+              final animatedHideOffset = springState.position.clamp(0.0, _barHeight + 1);
 
               // animatedEdgeMargin for the bar surface this frame:
               // same logic as above — use the live visible height of the nearest
@@ -560,8 +540,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
               // Tracking the parent bar's position is handled by animatedEdgeMargin
               // (the outer padding shrinks as the parent hides), so we must NOT add
               // parentAccumulatedHide here — that would double-count the parent's hide.
-              final translateY =
-                  widget.position == LdAppBarPosition.top ? -animatedHideOffset : animatedHideOffset;
+              final translateY = widget.position == LdAppBarPosition.top ? -animatedHideOffset : animatedHideOffset;
 
               // Single metrics provider for body + bar so dependents are not
               // split across two InheritedElements (avoids stale watches during

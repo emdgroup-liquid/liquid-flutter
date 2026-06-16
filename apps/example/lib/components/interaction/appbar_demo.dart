@@ -462,21 +462,21 @@ class _AppBarDemoState extends State<AppBarDemo> {
     final Widget bodyWithSecondary = LdAppBarWidget(
       positionMode: _secondaryAppBarPositionMode,
       scrollBehavior: _secondaryScrollBehavior,
-      title: LdText.l('Secondary AppBar'),
+      title: Text('Secondary AppBar'),
       actions: _actions.take(3).toList(),
       searchConfig: _secondarySearchConfig,
       shadowMode: _shadowMode,
       borderMode: _borderMode,
       backgroundMode: _backgroundMode,
       attachedMode: _attachedMode,
-      child: bodyWithTab,
+      child: LdAppBar.top(scrollBehavior: LdAppBarScrollBehavior.always, title: Text("Remove me"), child: bodyWithTab),
     );
 
     // Primary app bar wraps secondary + body
     final Widget bodyWithPrimary = LdAppBarWidget(
       positionMode: _primaryAppBarPositionMode,
       scrollBehavior: _primaryScrollBehavior,
-      title: LdText.l('Primary AppBar'),
+      title: Text('Primary AppBar'),
       actions: _actions,
       searchConfig: _primarySearchConfig,
       shadowMode: _shadowMode,
@@ -488,7 +488,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
 
     return LdScaffold(
       drawer: LdScaffold(
-        body: LdAppBarWidget(title: LdText.l('Drawer'), child: LdText.p('Drawer')),
+        body: LdAppBarWidget(title: Text('Drawer'), child: Text('Drawer')),
       ),
       primaryScrollController: _scrollController,
       body: bodyWithPrimary,

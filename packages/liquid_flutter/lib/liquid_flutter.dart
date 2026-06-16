@@ -39,6 +39,7 @@ export 'src/exception/model/retry_config.dart';
 export 'src/exception/retry_controller.dart';
 export 'src/exception/retry_indicator.dart';
 export 'src/form.dart';
+export 'src/horizontal_scroll.dart';
 export 'src/hint.dart';
 export 'src/indicators.dart';
 export 'src/input.dart';

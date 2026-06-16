@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-enum LdFilterChipPresentation { inline, sheet }
+enum LdFilterChipChoicePresentation { inline, choose }
 
 sealed class LdFilterChipConfig<T extends Identifiable<IdType>, IdType> {
   const LdFilterChipConfig({
@@ -22,27 +22,26 @@ sealed class LdFilterChipConfig<T extends Identifiable<IdType>, IdType> {
 
   factory LdFilterChipConfig.range({
     required String filterName,
-    required LdFilterChipPresentation presentation,
     String Function(BuildContext context)? groupLabel,
     String Function(BuildContext context, LdFilterRange<T, IdType> filter)? summaryLabel,
-    String Function(BuildContext context)? sheetTitle,
+    String Function(BuildContext context)? menuTitle,
   }) = LdFilterChipRangeConfig<T, IdType>;
 
   factory LdFilterChipConfig.oneOf({
     required String filterName,
-    required LdFilterChipPresentation presentation,
+    required LdFilterChipChoicePresentation presentation,
     required bool showAllOption,
     String Function(BuildContext context)? groupLabel,
     String Function(BuildContext context)? allLabel,
-    String Function(BuildContext context)? sheetTitle,
+    String Function(BuildContext context)? chooseTitle,
     Widget Function(BuildContext context, dynamic option)? optionChild,
   }) = LdFilterChipOneOfConfig<T, IdType>;
 
   factory LdFilterChipConfig.anyOf({
     required String filterName,
-    required LdFilterChipPresentation presentation,
+    required LdFilterChipChoicePresentation presentation,
     String Function(BuildContext context)? groupLabel,
-    String Function(BuildContext context)? sheetTitle,
+    String Function(BuildContext context)? chooseTitle,
     Widget Function(BuildContext context, dynamic option)? optionChild,
   }) = LdFilterChipAnyOfConfig<T, IdType>;
 }
@@ -61,31 +60,29 @@ final class LdFilterChipRangeConfig<T extends Identifiable<IdType>, IdType> exte
   const LdFilterChipRangeConfig({
     required super.filterName,
     super.groupLabel,
-    this.presentation = LdFilterChipPresentation.sheet,
     this.summaryLabel,
-    this.sheetTitle,
+    this.menuTitle,
   });
 
-  final LdFilterChipPresentation presentation;
   final String Function(BuildContext context, LdFilterRange<T, IdType> filter)? summaryLabel;
-  final String Function(BuildContext context)? sheetTitle;
+  final String Function(BuildContext context)? menuTitle;
 }
 
 final class LdFilterChipOneOfConfig<T extends Identifiable<IdType>, IdType> extends LdFilterChipConfig<T, IdType> {
   const LdFilterChipOneOfConfig({
     required super.filterName,
     super.groupLabel,
-    this.presentation = LdFilterChipPresentation.inline,
+    this.presentation = LdFilterChipChoicePresentation.inline,
     this.showAllOption = true,
     this.allLabel,
-    this.sheetTitle,
+    this.chooseTitle,
     this.optionChild,
   });
 
-  final LdFilterChipPresentation presentation;
+  final LdFilterChipChoicePresentation presentation;
   final bool showAllOption;
   final String Function(BuildContext context)? allLabel;
-  final String Function(BuildContext context)? sheetTitle;
+  final String Function(BuildContext context)? chooseTitle;
   final Widget Function(BuildContext context, dynamic option)? optionChild;
 }
 
@@ -93,12 +90,12 @@ final class LdFilterChipAnyOfConfig<T extends Identifiable<IdType>, IdType> exte
   const LdFilterChipAnyOfConfig({
     required super.filterName,
     super.groupLabel,
-    this.presentation = LdFilterChipPresentation.sheet,
-    this.sheetTitle,
+    this.presentation = LdFilterChipChoicePresentation.choose,
+    this.chooseTitle,
     this.optionChild,
   });
 
-  final LdFilterChipPresentation presentation;
-  final String Function(BuildContext context)? sheetTitle;
+  final LdFilterChipChoicePresentation presentation;
+  final String Function(BuildContext context)? chooseTitle;
   final Widget Function(BuildContext context, dynamic option)? optionChild;
 }

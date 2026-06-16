@@ -133,33 +133,7 @@ class MonkeyActionsDemo extends StatelessWidget {
         LdText.p("A delete action that appears in multiple locations with different conditions:"),
         CodeBlock(
           language: "dart",
-          code: '''LdMonkeySubmitAction(
-  id: 'delete',
-  tooltip: (_) => 'Delete',
-  visibility: {
-    LdMonkeyActionVisibility(
-      location: LdMonkeyActionLocation.detailAppBar,
-      minSelectionCount: 1,
-    ),
-    LdMonkeyActionVisibility(
-      location: LdMonkeyActionLocation.context,
-      minSelectionCount: 1,
-    ),
-  },
-  shortcutActivators: {
-    SingleActivator(LogicalKeyboardKey.delete),
-  },
-  color: LdColor.error,
-  childBuilder: (context) {
-    final count = LdMonkeySelection.adaptive<Task, int>(context).length;
-    return Text(LiquidLocalizations.of(context).deleteNItems(count));
-  },
-  icon: Icon(LucideIcons.trash2),
-  submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Deleting"),
-  onSubmit: (ctx) async {
-    await ctx.repository.deleteBatch(context: ctx.appContext, ids: ctx.selectedIds);
-  },
-)''',
+          code: '''deleteAction<Task, int>()''',
         ),
         LdText.hs("6. Conditional Actions"),
         LdText.p("Actions that only appear under certain conditions, like when specific filters are active:"),

@@ -205,38 +205,6 @@ void main() {
       expect(find.text('Home'), findsOneWidget);
     });
 
-    testWidgets('Tab navigation max visible tabs', (WidgetTester tester) async {
-      ldDisableAnimations = true;
-      final manyTabs = List.generate(
-        10,
-        (index) => LdNavigationTab(
-          label: 'Tab $index',
-          icon: const Icon(LucideIcons.circle),
-          route: '/tab$index',
-        ),
-      );
-
-      await tester.pumpWidget(
-        _wrapInScaffold(
-          LdScaffold(
-            body: LdTabNavigation(
-              tabs: manyTabs,
-              activeRoute: '/tab0',
-              onTabPressed: (route) {},
-              maxVisibleTabs: 5,
-              child: const Center(child: Text('Body')),
-            ),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // Should show first 5 tabs + more button
-      expect(find.text('Tab 0'), findsOneWidget);
-      expect(find.text('Tab 4'), findsOneWidget);
-    });
-
     testWidgets('Tab navigation background mode', (WidgetTester tester) async {
       ldDisableAnimations = true;
       await tester.pumpWidget(

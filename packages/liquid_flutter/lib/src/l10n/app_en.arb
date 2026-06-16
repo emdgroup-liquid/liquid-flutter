@@ -45,7 +45,7 @@
   "maximize": "Maximize",
   "showDrawer": "Show Sidebar",
   "hideDrawer": "Hide Sidebar", 
-  "nItemsSelected": "{items} {items,plural, =1{item}other{items}} selected",
+  "nItemsSelected": "%value% {items,plural, =1{item}other{items}} selected",
   "clearSelection": "Clear selection",
   "clearSelectionDialogHeader": "Clear selection?", 
   "clearSelectionBody": "Are you sure you want to discard your selection of {n} items?",

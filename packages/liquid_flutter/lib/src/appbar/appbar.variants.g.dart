@@ -162,7 +162,7 @@ class LdAppBar extends StatelessWidget {
   });
 
   factory LdAppBar.top({
-    Widget? child,
+    required Widget child,
     List<Widget>? actions,
     bool? addContainer,
     LdAppBarAttachedMode? attachedMode,
@@ -214,7 +214,7 @@ class LdAppBar extends StatelessWidget {
   }
 
   factory LdAppBar.bottom({
-    Widget? child,
+    required Widget child,
     List<Widget>? actions,
     bool? addContainer,
     LdAppBarAttachedMode? attachedMode,
@@ -312,8 +312,10 @@ class LdAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final config = Provider.of<LdAppBarConfig?>(context, listen: true);
+    assert(config?.child != null || child != null,
+        "Parameter child is required and it was neither provided nor directly passed");
     return LdAppBarWidget(
-      child: child ?? config?.child,
+      child: child ?? config!.child!,
       actions: actions ?? config?.actions ?? const [],
       addContainer: addContainer ?? config?.addContainer ?? false,
       attachedMode:

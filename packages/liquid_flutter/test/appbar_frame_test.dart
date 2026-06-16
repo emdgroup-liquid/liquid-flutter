@@ -292,25 +292,6 @@ void main() {
     // -----------------------------------------------------------------------
     // 5. wrappedChild = null falls back to legacy mode without throwing
     // -----------------------------------------------------------------------
-
-    testWidgets('legacy mode (no wrappedChild) renders bar child without Positioned.fill', (tester) async {
-      await tester.pumpWidget(
-        _withTheme(
-          // Legacy mode: wrappedChild is null; AppBarFrame just renders its
-          // child with the outside/inside padding containers.
-          const AppBarFrame(
-            position: LdAppBarPosition.top,
-            // wrappedChild is null → legacy mode
-            child: Text('LegacyBar'),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('LegacyBar'), findsOneWidget);
-      // In legacy mode there is no Stack → no Positioned.fill.
-      expect(find.byType(Positioned), findsNothing);
-    });
   });
 
   // =========================================================================
@@ -824,9 +805,7 @@ void main() {
     // LdScaffoldBody uses padding.atLeast(viewPadding) for scroll-content
     // padding, so that value never changes.
     // -----------------------------------------------------------------------
-    testWidgets(
-        'viewPadding (scroll-content floor) stays constant during continuous scroll drag',
-        (tester) async {
+    testWidgets('viewPadding (scroll-content floor) stays constant during continuous scroll drag', (tester) async {
       ldDisableAnimations = true;
 
       final List<EdgeInsets> capturedViewPaddings = [];
@@ -840,8 +819,7 @@ void main() {
               capturedViewPaddings.add(MediaQuery.viewPaddingOf(context));
               return ListView.builder(
                 itemCount: 50,
-                itemBuilder: (_, i) =>
-                    SizedBox(height: 40, child: Text('item $i')),
+                itemBuilder: (_, i) => SizedBox(height: 40, child: Text('item $i')),
               );
             }),
             child: const SizedBox(height: 60, child: Text('Bar')),
@@ -863,17 +841,14 @@ void main() {
 
       // viewPadding (the stable floor) must never change during scroll.
       for (int i = 0; i < capturedViewPaddings.length; i++) {
-        expect(capturedViewPaddings[i], equals(baseline),
-            reason: 'viewPadding changed at scroll frame $i');
+        expect(capturedViewPaddings[i], equals(baseline), reason: 'viewPadding changed at scroll frame $i');
       }
     });
 
     // -----------------------------------------------------------------------
     // 2. viewPadding remains constant after bar snaps to hidden
     // -----------------------------------------------------------------------
-    testWidgets(
-        'viewPadding (scroll-content floor) stays constant after bar snaps to hidden',
-        (tester) async {
+    testWidgets('viewPadding (scroll-content floor) stays constant after bar snaps to hidden', (tester) async {
       ldDisableAnimations = true;
 
       EdgeInsets? capturedViewPadding;
@@ -887,8 +862,7 @@ void main() {
               capturedViewPadding = MediaQuery.viewPaddingOf(context);
               return ListView.builder(
                 itemCount: 50,
-                itemBuilder: (_, i) =>
-                    SizedBox(height: 40, child: Text('item $i')),
+                itemBuilder: (_, i) => SizedBox(height: 40, child: Text('item $i')),
               );
             }),
             child: const SizedBox(height: 60, child: Text('Bar')),
@@ -913,9 +887,7 @@ void main() {
     // -----------------------------------------------------------------------
     // 3. viewPadding remains constant after bar snaps back to visible
     // -----------------------------------------------------------------------
-    testWidgets(
-        'viewPadding (scroll-content floor) stays constant after bar snaps back to visible',
-        (tester) async {
+    testWidgets('viewPadding (scroll-content floor) stays constant after bar snaps back to visible', (tester) async {
       ldDisableAnimations = true;
 
       EdgeInsets? capturedViewPadding;
@@ -929,8 +901,7 @@ void main() {
               capturedViewPadding = MediaQuery.viewPaddingOf(context);
               return ListView.builder(
                 itemCount: 50,
-                itemBuilder: (_, i) =>
-                    SizedBox(height: 40, child: Text('item $i')),
+                itemBuilder: (_, i) => SizedBox(height: 40, child: Text('item $i')),
               );
             }),
             child: const SizedBox(height: 60, child: Text('Bar')),
@@ -964,9 +935,7 @@ void main() {
     //    padding is the stable scroll-content floor; viewPadding is the raw
     //    device safe-area which is always smaller.
     // -----------------------------------------------------------------------
-    testWidgets(
-        'padding (stable floor) is always >= viewPadding (device safe-area)',
-        (tester) async {
+    testWidgets('padding (stable floor) is always >= viewPadding (device safe-area)', (tester) async {
       ldDisableAnimations = true;
 
       EdgeInsets? capturedPadding;
@@ -982,8 +951,7 @@ void main() {
               capturedViewPadding = MediaQuery.viewPaddingOf(context);
               return ListView.builder(
                 itemCount: 50,
-                itemBuilder: (_, i) =>
-                    SizedBox(height: 40, child: Text('item $i')),
+                itemBuilder: (_, i) => SizedBox(height: 40, child: Text('item $i')),
               );
             }),
             child: const SizedBox(height: 60, child: Text('Bar')),
@@ -1030,9 +998,7 @@ void main() {
     //    (inner bar's outside padding tracks animated outer height, so inner
     //    bar moves up together with outer, not leaving a gap)
     // -----------------------------------------------------------------------
-    testWidgets(
-        'nested bars: inner bar slides up with outer bar and stops at safe-area floor',
-        (tester) async {
+    testWidgets('nested bars: inner bar slides up with outer bar and stops at safe-area floor', (tester) async {
       ldDisableAnimations = true;
 
       LdAppBarMetrics? outerMetrics;
@@ -1051,8 +1017,7 @@ void main() {
                   context.watch<LdAppBarMetrics?>();
                   return ListView.builder(
                     itemCount: 50,
-                    itemBuilder: (_, i) =>
-                        SizedBox(height: 40, child: Text('item $i')),
+                    itemBuilder: (_, i) => SizedBox(height: 40, child: Text('item $i')),
                   );
                 }),
                 child: const SizedBox(height: 48, child: Text('InnerBar')),
@@ -1490,9 +1455,7 @@ void main() {
     // -----------------------------------------------------------------------
     // 1. avoidViewInsets=true: body padding stable when keyboard opens
     // -----------------------------------------------------------------------
-    testWidgets(
-        'avoidViewInsets=true: body padding stable when keyboard opens',
-        (tester) async {
+    testWidgets('avoidViewInsets=true: body padding stable when keyboard opens', (tester) async {
       const baseData = MediaQueryData(
         size: Size(400, 800),
         padding: EdgeInsets.only(top: 44, bottom: 34),
@@ -1565,9 +1528,7 @@ void main() {
     // -----------------------------------------------------------------------
     // 2. avoidViewInsets=false (default): keyboard does not affect body padding
     // -----------------------------------------------------------------------
-    testWidgets(
-        'avoidViewInsets=false (default): keyboard does not affect body padding',
-        (tester) async {
+    testWidgets('avoidViewInsets=false (default): keyboard does not affect body padding', (tester) async {
       const baseData = MediaQueryData(
         size: Size(400, 800),
         padding: EdgeInsets.only(top: 44, bottom: 34),
@@ -1640,16 +1601,13 @@ void main() {
       final settledBottom = capturedPadding!.bottom;
       await tester.pump();
       await tester.pump();
-      expect(capturedPadding!.bottom, settledBottom,
-          reason: 'Body padding.bottom must not oscillate after settling');
+      expect(capturedPadding!.bottom, settledBottom, reason: 'Body padding.bottom must not oscillate after settling');
     });
 
     // -----------------------------------------------------------------------
     // 3. Bar height change from focus causes stable body padding update
     // -----------------------------------------------------------------------
-    testWidgets(
-        'bar height change from focus causes stable body padding update',
-        (tester) async {
+    testWidgets('bar height change from focus causes stable body padding update', (tester) async {
       const baseData = MediaQueryData(
         size: Size(400, 800),
         padding: EdgeInsets.only(top: 44, bottom: 34),
@@ -1730,9 +1688,7 @@ void main() {
     // -----------------------------------------------------------------------
     // 4. Scroll hide still works correctly with avoidViewInsets=true
     // -----------------------------------------------------------------------
-    testWidgets(
-        'scroll hide still works correctly with avoidViewInsets=true',
-        (tester) async {
+    testWidgets('scroll hide still works correctly with avoidViewInsets=true', (tester) async {
       const baseData = MediaQueryData(
         size: Size(400, 800),
         padding: EdgeInsets.only(top: 44, bottom: 34),
@@ -1753,8 +1709,7 @@ void main() {
               capturedMetrics = context.watch<LdAppBarMetrics?>();
               return ListView.builder(
                 itemCount: 50,
-                itemBuilder: (_, i) =>
-                    SizedBox(height: 40, child: Text('item $i')),
+                itemBuilder: (_, i) => SizedBox(height: 40, child: Text('item $i')),
               );
             }),
             child: const TextField(

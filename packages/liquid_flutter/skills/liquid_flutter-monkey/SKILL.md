@@ -412,13 +412,12 @@ Wire `onPressed: trigger` so press-time snapshots stay fresh. `onTrigger` is als
 
 For async operations with loading state, error handling, and notifications. Requires a unique `id` (String or enum). One offstage `LdSubmit` host is mounted per route; app bar and context menu share loading state.
 
-```dart
-enum TaskActionId { delete }
+For standard delete, use `deleteAction<Task, int>()` instead (see Built-in Action Factories below).
 
+```dart
 LdMonkeySubmitAction<Task, int, void>(
-  id: TaskActionId.delete,
-  tooltip: (context) => 'Delete selected tasks',
-  color: LdColor.error,
+  id: 'archive',
+  tooltip: (context) => 'Archive selected tasks',
   visibility: {
     LdMonkeyActionVisibility(
       location: LdMonkeyActionLocation.masterAppBar,
@@ -426,16 +425,13 @@ LdMonkeySubmitAction<Task, int, void>(
     ),
   },
   submitConfig: (appContext) => const LdMonkeySubmitConfig(
-    loadingText: 'Deleting...',
+    loadingText: 'Archiving...',
   ),
   onSubmit: (ctx) async {
-    await ctx.repository.deleteBatch(
-      context: ctx.appContext,
-      ids: ctx.selectedIds,
-    );
+    await archiveSelected(ctx);
   },
-  child: const Text('Delete'),
-  icon: const Icon(LucideIcons.trash),
+  child: const Text('Archive'),
+  icon: const Icon(LucideIcons.archive),
 )
 ```
 
@@ -452,6 +448,7 @@ The monkey system provides several pre-built actions:
 | `showFilterContextMenu<T, IdType>()` | `masterAppBar` | Dropdown filter menu |
 | `showFilterModal<T, IdType>()` | `masterAppBar` | Modal filter dialog |
 | `refreshAction<T, IdType>()` | `masterAppBar` | Desktop-only refresh button |
+| `deleteAction<T, IdType>()` | `detailAppBar`, `context`, `masterSecondary` | Deletes selected items via repository |
 
 Include them in the `actions` list:
 
@@ -461,6 +458,7 @@ actions: [
   showSelection<Task, int>(),
   showFilterContextMenu<Task, int>(),
   refreshAction<Task, int>(),
+  deleteAction<Task, int>(),
   // Custom actions...
 ]
 ```
@@ -553,7 +551,7 @@ The monkey will automatically:
 
 Re-fetch definitions from the server: **`LdMonkeySortAndFilterState.refreshFilterDefinitions(context)`** (uses the resolver's `LdSubmitController`).
 
-For filter chips on the master bar, use **`LdFilterChipsBar`** on **`LdMonkeyAppBar.bottom`** (bool toggle, range/oneOf/anyOf inline or sheet). Optional **`groupLabel`** on each config shows a muted label before that filter's chips (e.g. inline any-of genres).
+For filter chips on the master bar, use **`LdFilterChipsBar`** on **`LdMonkeyAppBar.bottom`** (bool toggle, range/oneOf/anyOf inline or sheet). Optional **`groupLabel`** on each config shows a muted label before that filter's chips (e.g. inline any-of genres). The bar flattens each filter into individual chip widgets so **`LdHorizontalScroll`** can scroll them on mobile/tablet or **`Wrap`** them on desktop without clipping wide inline groups. Edge fades, one-time peek, and **`edgeBleed`** (matching app bar inside padding) apply in scroll layout.
 
 ### Accessing Active Filters
 
@@ -716,7 +714,7 @@ The provider stack is:
 2. **Use `buildMonkeyRouteTree` and `MonkeyRouteNode` for nested master-detail** — the child's scope is automatically available at the parent's detail position.
 3. **Always use `LdMonkeyRouteConfig.identifiableString` or `.identifiableInt`** — custom serialization only when IDs contain underscores or special characters.
 4. **Keep `itemName` unique across the entire monkey tree** to avoid URL parameter collisions.
-5. **Use the built-in action factories** (`toggleSelectionControls`, `showSelection`, `showFilterContextMenu`, `refreshAction`) before writing custom ones.
+5. **Use the built-in action factories** (`toggleSelectionControls`, `showSelection`, `showFilterContextMenu`, `refreshAction`, `deleteAction`) before writing custom ones.
 6. **Prefer `LdMonkeyBareChildAction` for simple buttons** and `LdMonkeySubmitAction` for async operations.
 7. **Use `LdMonkeyActionVisibility` to control action placement** — set the `location`, `minSelectionCount`, and `layoutModes` to match your UX requirements.
 8. **Add `LdFilterSearch` to enable search** — it automatically adds a search bar to the master app bar and syncs with URL query params.

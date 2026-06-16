@@ -11,3 +11,4 @@ export 'toggle_selection_controls_action.dart';
 export 'app_bar_actions.dart';
 export 'show_selection_action.dart';
 export 'refresh_action.dart';
+export 'delete_action.dart';

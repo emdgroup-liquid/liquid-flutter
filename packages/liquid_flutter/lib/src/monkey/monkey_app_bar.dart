@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
@@ -72,15 +73,18 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
 
         return LdAppBar(
             leading: showClearSelectionButton
-                ? LdButton.ghost(
+                ? LdButton.vague(
                     child: const Icon(LucideIcons.x),
                     onPressed: () {
                       LdMonkeySelection.maybeClearSelection<T, IdType>(context);
                     },
-                  )
+                  ).animate().scaleXY()
                 : null,
             title: showClearSelectionButton
-                ? Text(LiquidLocalizations.of(context).nItemsSelected(selection.selection.length))
+                ? LdCounterText.template(
+                    LiquidLocalizations.of(context).nItemsSelected(selection.selection.length),
+                    value: selection.selection.length.toDouble(),
+                  )
                 : null,
             debugName: debugName ?? appBarConfig?.debugName,
             showWindowControls: appBarConfig?.showWindowControls ?? true,

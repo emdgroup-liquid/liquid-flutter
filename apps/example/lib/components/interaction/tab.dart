@@ -66,6 +66,7 @@ class _TabsDemoState extends State<TabsDemo> with SingleTickerProviderStateMixin
                     scrollBehavior: _scrollBehavior,
                     enableGradient: _enableGradient,
                     onTabPressed: (route) => setState(() => _activeRoute = route),
+                    child: Placeholder(),
                   ),
                 ],
               ),

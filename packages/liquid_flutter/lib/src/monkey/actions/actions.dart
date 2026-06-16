@@ -115,7 +115,7 @@ class LdMonkeySubmitAction<T extends Identifiable<IdType>, IdType, Result> exten
   final Widget? child;
   final Widget Function(BuildContext triggerContext)? childBuilder;
   final Widget? icon;
-  final LdColor? color;
+  final LdColor Function(BuildContext context)? color;
   final String? Function(BuildContext context) tooltip;
   final LdSubmitBuilder<Result, LdMonkeyActionContext<T, IdType>>? builder;
 
@@ -168,7 +168,8 @@ class LdMonkeySubmitAction<T extends Identifiable<IdType>, IdType, Result> exten
 
   @override
   Widget buildTrigger(BuildContext triggerContext, LdMonkeyActionScope<T, IdType> scope) {
-    assert(builder != null || (child != null || childBuilder != null), "You must provide a builder, child, or childBuilder");
+    assert(builder != null || (child != null || childBuilder != null),
+        "You must provide a builder, child, or childBuilder");
     final controller = scope.submitController<Result>(id);
     if (controller == null) {
       return const SizedBox.shrink();
@@ -178,7 +179,7 @@ class LdMonkeySubmitAction<T extends Identifiable<IdType>, IdType, Result> exten
       listenable: controller,
       builder: (context, _) {
         return LdAppBarAction(
-          color: color,
+          color: color?.call(triggerContext),
           loading: controller.state.type == LdSubmitStateType.loading,
           loadingText: controller.config.loadingText,
           tooltip: tooltip(triggerContext),

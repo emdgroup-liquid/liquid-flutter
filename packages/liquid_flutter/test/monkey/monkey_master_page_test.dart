@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/touchable/touchable.dart';
 import 'package:provider/provider.dart';
 
 import 'test_utils.dart';
@@ -10,16 +11,10 @@ Widget _wrapMasterPage<T extends Identifiable<IdType>, IdType>({
   required Widget child,
   required LdRepository<T, IdType> repository,
   TestSortAndFilterState<T, IdType>? shellState,
-  LdMonkeySelection<T, IdType>? selection,
   LdMonkeyEffectiveLayoutMode layoutMode = LdMonkeyEffectiveLayoutMode.master,
   List<LdMonkeyAction<T, IdType>> actions = const [],
 }) {
   shellState ??= TestSortAndFilterState<T, IdType>();
-  selection ??= LdMonkeySelection<T, IdType>(
-    selection: {},
-    viewing: {},
-    showSelectionControls: false,
-  );
   return LdThemeProvider(
     child: MaterialApp(
       localizationsDelegates: LiquidLocalizations.localizationsDelegates,
@@ -29,27 +24,42 @@ Widget _wrapMasterPage<T extends Identifiable<IdType>, IdType>({
           value: repository,
           child: Provider<LdMonkeyRouterController<T, IdType>>.value(
             value: shellState.controllerDelegate,
-            child: Provider<LdMonkeySortAndFilterState<T, IdType>>.value(
-              value: shellState.state,
-              child: Provider<LdMonkeySelection<T, IdType>>.value(
-                value: selection,
-                child: Provider<LdMonkeyActions<T, IdType>>.value(
-                  value: actions,
-                  child: Provider<LdMonkeyEffectiveLayoutMode>.value(
-                    value: layoutMode,
-                    child: LdMonkeyActionHost<T, IdType>(
-                      actions: actions,
-                      child: child,
+            child: ListenableBuilder(
+              listenable: shellState,
+              builder: (context, _) {
+                return Provider<LdMonkeySortAndFilterState<T, IdType>>.value(
+                  value: shellState!.state,
+                  child: Provider<LdMonkeySelection<T, IdType>>.value(
+                    value: shellState.selection,
+                    child: Provider<LdMonkeyActions<T, IdType>>.value(
+                      value: actions,
+                      child: Provider<LdMonkeyEffectiveLayoutMode>.value(
+                        value: layoutMode,
+                        child: LdMonkeyActionHost<T, IdType>(
+                          actions: actions,
+                          child: child,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ),
         ),
       ),
     ),
   );
+}
+
+bool _isListItemActive(WidgetTester tester, String itemLabel) {
+  final touchable = tester.widget<LdTouchableSurface>(
+    find.descendant(
+      of: find.widgetWithText(LdListItem, itemLabel),
+      matching: find.byType(LdTouchableSurface),
+    ),
+  );
+  return touchable.active;
 }
 
 void main() {
@@ -230,6 +240,35 @@ void main() {
     });
 
     group('Selection Handling', () {
+      testWidgets('viewing item is indicated as active in the master list', (WidgetTester tester) async {
+        final repository = createTestRepository(
+          initialItems: [
+            createTestItem(1, name: 'Item 1'),
+            createTestItem(2, name: 'Item 2'),
+          ],
+        );
+        final shellState = TestSortAndFilterState<TestItem, int>();
+        shellState.updateViewing(MockBuildContext(), {1});
+
+        await tester.pumpWidget(
+          _wrapMasterPage(
+            repository: repository,
+            shellState: shellState,
+            layoutMode: LdMonkeyEffectiveLayoutMode.sideBySide,
+            child: LdMonkeyMasterPage<TestItem, int>(
+              buildItem: (context, item) => LdListItem(
+                title: Text(item.value?.name ?? ''),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(_isListItemActive(tester, 'Item 1'), isTrue);
+        expect(_isListItemActive(tester, 'Item 2'), isFalse);
+      });
+
       testWidgets('onSelectionChange updates shell state', (WidgetTester tester) async {
         final repository = createTestRepository(
           initialItems: [

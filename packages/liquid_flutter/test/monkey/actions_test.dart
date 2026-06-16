@@ -923,6 +923,41 @@ void main() {
         expect(find.byKey(const Key('show_selection')), findsOneWidget);
       });
 
+      testWidgets('deleteAction() creates delete action', (WidgetTester tester) async {
+        final repository = createTestRepository();
+        final shellState = TestSortAndFilterState<TestItem, int>();
+        final selection = LdMonkeySelection<TestItem, int>(
+          selection: {1},
+          viewing: {1},
+          showSelectionControls: false,
+        );
+
+        final action = deleteAction<TestItem, int>();
+
+        await tester.pumpWidget(
+          LdThemeProvider(
+            child: MaterialApp(
+              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+              home: LdScaffold(
+                body: _wrapForActionBuild(
+                  repository: repository,
+                  shellState: shellState,
+                  location: LdMonkeyActionLocation.detailAppBar,
+                  selection: selection,
+                  actions: [action],
+                  child: Builder(
+                    builder: (context) => action.build(context),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(find.text('Delete 1 item'), findsOneWidget);
+      });
+
       testWidgets('showSelection() hides when selection matches viewing', (WidgetTester tester) async {
         final repository = createTestRepository();
         final shellState = TestSortAndFilterState<TestItem, int>();
