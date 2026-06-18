@@ -14,7 +14,8 @@ class LdConfirmationSlider extends StatefulWidget {
   final String? label;
   final bool disabled;
 
-  const LdConfirmationSlider({super.key, required this.onSlideComplete, this.hint, this.color, this.label, this.disabled = false});
+  const LdConfirmationSlider(
+      {super.key, required this.onSlideComplete, this.hint, this.color, this.label, this.disabled = false});
 
   @override
   State<LdConfirmationSlider> createState() => _LdConfirmationSliderState();
@@ -157,9 +158,7 @@ class _LdConfirmationSliderState extends State<LdConfirmationSlider> with Ticker
               width: theme.borderWidth,
               strokeAlign: BorderSide.strokeAlignInside,
             ),
-            borderRadius: BorderRadius.circular(
-              theme.sizingConfig.radiusM - 3,
-            ),
+            borderRadius: BorderRadius.circular(theme.radiusSize(LdSize.m) - _thumbPadding),
           ),
           child: Icon(LucideIcons.arrowRight, size: 24, color: iconColor),
         ),

@@ -1,5 +1,15 @@
 import 'package:flutter/widgets.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
+
+// An app bar is a widget that is placed either at the top or bottom of the screen, in the future potentially on the
+// left or right side too.
+// The difference between an app bar and a normal widget is that an app bar is animated as the user scrolls the content
+// This means that it affects the position of other app bars that are nested lower.
+// The content however behaves independently of the app bar, meaning it is is not affected by the app bars visibility.
+// The outermost app bars also have the job of padding correctly to avoid system bars and other safe areas.
+// The challenge is that the parent might be scrolling so far off screen that the current app bar now has the job of
+// padding for the screen
 
 enum LdAppBarPosition {
   top,
@@ -35,114 +45,135 @@ enum LdAppBarPosition {
 class LdAppBarMetrics {
   const LdAppBarMetrics({
     required this.position,
-    required this.barHeight,
-    required this.edgeMargin,
-    required this.hideOffset,
+    required this.innerHeight,
+    required this.configuredInsets,
     required this.isScrolledUnder,
+    required this.appbarLayerMediaQuery,
     required this.level,
-    this.accumulatedHideOffset = EdgeInsets.zero,
+    required this.willHide,
+    required this.scrollOffset,
+    required this.systemInsets,
+    this.parentMetrics,
   });
-
-  /// Sentinel placed at [LdModalRoute] boundaries so nested bars do not inherit
-  /// shell/tab app-bar metrics. [isModalReset] is true; treat as no parent.
-  static const modalReset = LdAppBarMetrics(
-    position: LdAppBarPosition.top,
-    barHeight: EdgeInsets.zero,
-    edgeMargin: EdgeInsets.zero,
-    hideOffset: EdgeInsets.zero,
-    isScrolledUnder: false,
-    level: -1,
-  );
 
   /// True for [modalReset] and other modal-scope baseline values.
   bool get isModalReset => level < 0;
 
+  // Currently either top or bottom.
   final LdAppBarPosition position;
 
-  /// Full outer-container height per edge: edgeMargin + own inner content.
-  final EdgeInsets barHeight;
+  /// The parent metrics. If this is the outermost app bar, this will be null.
+  final LdAppBarMetrics? parentMetrics;
 
-  /// Outer padding already on each edge before this bar (device safe-area +
-  /// all ancestor bars' stable net heights).
-  final EdgeInsets edgeMargin;
+  /// Full inner height of the app bar including the inner padding.
+  final EdgeInsets innerHeight;
 
-  /// Animated scroll-hide offset per edge (0 = fully visible).
-  final EdgeInsets hideOffset;
+  /// The margin that this app bar contributes to the total margin that is not inherited from ancestors.
+  /// This is not affected by the scroll offset
+  final EdgeInsets configuredInsets;
 
-  /// Cumulative hide offset from all ancestor bars, per edge.
-  /// Zero for the outermost bar.
-  final EdgeInsets accumulatedHideOffset;
+  /// The system insets that this app bar is affected by.
+  final EdgeInsets systemInsets;
+
+  /// The margin that this app bar inherited not affected by the scroll offset
+  EdgeInsets get cumulatedPlainSizes {
+    if (isModalReset) {
+      return EdgeInsets.zero;
+    }
+    // This is just the sum of the inner heights of the ancestors.
+    return (innerHeight + configuredInsets) + (parentMetrics?.cumulatedPlainSizes ?? EdgeInsets.zero);
+  }
+
+  EdgeInsets get accumulatedEffectiveSizes {
+    if (isModalReset) {
+      return EdgeInsets.zero;
+    }
+    final ownSize = (innerHeight + configuredInsets) - scrollOffset;
+
+    return ownSize.atLeast(EdgeInsets.zero) + (parentMetrics?.accumulatedEffectiveSizes ?? EdgeInsets.zero);
+  }
+
+  EdgeInsets get accumulatedScrollOffset {
+    if (isModalReset) {
+      return EdgeInsets.zero;
+    }
+    return scrollOffset + (parentMetrics?.accumulatedScrollOffset ?? EdgeInsets.zero);
+  }
+
+  /// The scroll offset of the app bar. This is the offset that the appbar is currently scrolled. This includes
+  /// all margins and the inner height of the app bar.
+  final EdgeInsets scrollOffset;
+
+  bool finishedScrolling(LdAppBarPosition position, bool scrollingDown) {
+    if (willHide && position == this.position) {
+      if (scrollingDown) {
+        final didFinish = scrollOffset.atPosition(position) >= maximumSize.atPosition(position);
+
+        return didFinish;
+      }
+      return scrollOffset.atPosition(position) <= 0;
+    }
+    return true;
+  }
+
+  bool ancestorFinishedScrolling(LdAppBarPosition position, bool scrollingDown) {
+    if (finishedScrolling(position, scrollingDown)) {
+      if (parentMetrics?.isModalReset ?? false) {
+        return true;
+      }
+      return parentMetrics?.ancestorFinishedScrolling(position, scrollingDown) ?? true;
+    }
+    return false;
+  }
+
+  final bool willHide;
+
+  EdgeInsets cumulatedPositionedSizes(LdAppBarPosition position) {
+    if (isModalReset) {
+      return EdgeInsets.zero;
+    }
+    return (innerHeight + configuredInsets).inDirection(position) +
+        (parentMetrics?.cumulatedPositionedSizes(position) ?? EdgeInsets.zero);
+  }
+
+  EdgeInsets get bodyPadding {
+    return systemInsets.inDirection(position) + cumulatedPositionedSizes(position);
+  }
+
+  /// The maximum size this appbar takes up.
+  EdgeInsets get maximumSize => cumulatedPlainSizes + systemInsets;
+
+  /// The size this appbar takes up:
+  EdgeInsets get effectiveSize => maximumSize - scrollOffset;
+
+  final MediaQueryData appbarLayerMediaQuery;
 
   final bool isScrolledUnder;
   final int level;
 
-  // ── Convenience helpers ────────────────────────────────────────────────────
-
-  /// Scalar bar height for [position]'s edge.
-  double get barHeightForPosition =>
-      position == LdAppBarPosition.top ? barHeight.top : barHeight.bottom;
-
-  /// Scalar edge margin for [position]'s edge.
-  double get edgeMarginForPosition =>
-      position == LdAppBarPosition.top ? edgeMargin.top : edgeMargin.bottom;
-
-  /// Scalar hide offset for [position]'s edge.
-  double get hideOffsetForPosition =>
-      position == LdAppBarPosition.top ? hideOffset.top : hideOffset.bottom;
-
-  /// Scalar accumulated hide offset for [position]'s edge.
-  double get accumulatedHideOffsetForPosition =>
-      position == LdAppBarPosition.top
-          ? accumulatedHideOffset.top
-          : accumulatedHideOffset.bottom;
-
-  // ── Consumed-insets helpers ────────────────────────────────────────────────
-
-  /// Net insets this bar contributes to its subtree, stable (never animated).
-  ///
-  /// For each edge: max(0, barHeight - edgeMargin).
-  ///
-  /// Used to patch [MediaQuery.padding] for the body subtree so the
-  /// scroll-content floor never shifts while the bar animates.
-  EdgeInsets get stableConsumedInsets {
-    return EdgeInsets.only(
-      top: (barHeight.top - edgeMargin.top).clamp(0.0, double.infinity),
-      bottom: (barHeight.bottom - edgeMargin.bottom).clamp(0.0, double.infinity),
-    );
-  }
-
-  /// Net insets currently visible — animated, shrinks as bars hide.
-  ///
-  /// For each edge: max(0, barHeight - hideOffset - edgeMargin).
-  ///
-  /// NOT used for the scroll-content padding (that uses [stableConsumedInsets])
-  /// but kept for external consumers that want to know the live visible height.
-  EdgeInsets get consumedInsets {
-    final visibleTop = (barHeight.top - hideOffset.top).clamp(0.0, double.infinity);
-    final visibleBottom = (barHeight.bottom - hideOffset.bottom).clamp(0.0, double.infinity);
-    return EdgeInsets.only(
-      top: (visibleTop - edgeMargin.top).clamp(0.0, double.infinity),
-      bottom: (visibleBottom - edgeMargin.bottom).clamp(0.0, double.infinity),
-    );
-  }
-
   LdAppBarMetrics copyWith({
     LdAppBarPosition? position,
-    EdgeInsets? barHeight,
-    EdgeInsets? edgeMargin,
-    EdgeInsets? hideOffset,
-    EdgeInsets? accumulatedHideOffset,
+    EdgeInsets? innerHeight,
+    EdgeInsets? ownMargin,
+    EdgeInsets? scrollOffset,
     bool? isScrolledUnder,
     int? level,
+    bool? willHide,
+    EdgeInsets? systemInsets,
+    LdAppBarMetrics? parentMetrics,
+    MediaQueryData? appbarLayerMediaQuery,
   }) {
     return LdAppBarMetrics(
       position: position ?? this.position,
-      barHeight: barHeight ?? this.barHeight,
-      edgeMargin: edgeMargin ?? this.edgeMargin,
-      hideOffset: hideOffset ?? this.hideOffset,
-      accumulatedHideOffset: accumulatedHideOffset ?? this.accumulatedHideOffset,
+      willHide: willHide ?? this.willHide,
+      innerHeight: innerHeight ?? this.innerHeight,
+      systemInsets: systemInsets ?? this.systemInsets,
+      configuredInsets: ownMargin ?? configuredInsets,
+      scrollOffset: scrollOffset ?? this.scrollOffset,
       isScrolledUnder: isScrolledUnder ?? this.isScrolledUnder,
       level: level ?? this.level,
+      parentMetrics: parentMetrics ?? this.parentMetrics,
+      appbarLayerMediaQuery: appbarLayerMediaQuery ?? this.appbarLayerMediaQuery,
     );
   }
 
@@ -151,34 +182,45 @@ class LdAppBarMetrics {
     if (identical(this, other)) return true;
     return other is LdAppBarMetrics &&
         other.position == position &&
-        other.barHeight == barHeight &&
-        other.edgeMargin == edgeMargin &&
-        other.hideOffset == hideOffset &&
-        other.accumulatedHideOffset == accumulatedHideOffset &&
+        other.innerHeight == innerHeight &&
+        other.configuredInsets == configuredInsets &&
+        other.scrollOffset == scrollOffset &&
         other.isScrolledUnder == isScrolledUnder &&
-        other.level == level;
+        other.willHide == willHide &&
+        other.level == level &&
+        other.parentMetrics == parentMetrics &&
+        other.systemInsets == systemInsets &&
+        other.appbarLayerMediaQuery == appbarLayerMediaQuery;
   }
 
   @override
   int get hashCode => Object.hash(
         position,
-        barHeight,
-        edgeMargin,
-        hideOffset,
-        accumulatedHideOffset,
+        innerHeight,
+        configuredInsets,
+        scrollOffset,
         isScrolledUnder,
         level,
+        systemInsets,
+        willHide,
+        parentMetrics,
+        appbarLayerMediaQuery,
       );
 
   @override
   String toString() => 'LdAppBarMetrics('
-      'position: $position, '
-      'barHeight: $barHeight, '
-      'edgeMargin: $edgeMargin, '
-      'hideOffset: $hideOffset, '
-      'accumulatedHideOffset: $accumulatedHideOffset, '
-      'isScrolledUnder: $isScrolledUnder, '
-      'level: $level)';
+      'level: $level, \n'
+      'position: $position, \n'
+      'innerHeight: $innerHeight, \n'
+      'ownMargin: $configuredInsets, \n'
+      'scrollOffset: $scrollOffset, \n'
+      'isScrolledUnder: $isScrolledUnder, \n'
+      'systemInsets: $systemInsets, \n'
+      'willHide: $willHide, \n'
+      'parentMetrics: ${parentMetrics?.toString().split('\n').map((e) {
+        return '  $e';
+      }).join('\n')}\n'
+      'appbarLayerMediaQuery: $appbarLayerMediaQuery)';
 }
 
 /// Resolves ancestor [LdAppBarMetrics], treating [LdAppBarMetrics.modalReset] as absent.
@@ -190,23 +232,15 @@ LdAppBarMetrics? ldAppBarParentMetrics(BuildContext context) {
   return metrics;
 }
 
-/// Zeros inherited app-bar metrics for [LdModalRoute] page content.
-///
-/// Wrap [LdModalRoute.pageBuilder] output (or let [LdModalRoute] apply this
-/// automatically) so the first [LdAppBar] in a sheet/dialog starts at level 0.
-class LdModalAppBarMetricsScope extends StatelessWidget {
-  const LdModalAppBarMetricsScope({
-    required this.child,
-    super.key,
-  });
+extension ScalarAtPosition on EdgeInsets {
+  double atPosition(LdAppBarPosition position) {
+    return switch (position) {
+      LdAppBarPosition.top => top,
+      LdAppBarPosition.bottom => bottom,
+    };
+  }
 
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Provider<LdAppBarMetrics>.value(
-      value: LdAppBarMetrics.modalReset,
-      child: child,
-    );
+  EdgeInsets inDirection(LdAppBarPosition position) {
+    return switch (position) { LdAppBarPosition.top || LdAppBarPosition.bottom => copyWith(left: 0, right: 0) };
   }
 }

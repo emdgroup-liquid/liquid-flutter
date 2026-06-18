@@ -52,9 +52,7 @@ class LdFilterChipsBar<T extends Identifiable<IdType>, IdType> extends Stateless
 
     return LdHorizontalScroll(
       //hint: LdHorizontalScrollHint.none,
-      edgeBleed: EdgeInsets.symmetric(
-        horizontal: LdTheme.of(context).pad(size: LdSize.m).horizontal,
-      ),
+
       children: children,
     );
   }

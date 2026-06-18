@@ -307,7 +307,7 @@ class LdContextMenuRoute extends ModalRoute<void> {
     // Calculate available screen space accounting for keyboard/insets
     // Add theme padding to ensure menu doesn't touch screen edges
     final themePadding = LdTheme.of(context).pad(size: LdSize.m);
-    final viewInsets = mediaQuery.viewInsets + themePadding;
+    final viewInsets = mediaQuery.viewPadding.atLeast(mediaQuery.viewInsets) + themePadding;
 
     final screenSize = mediaQuery.size;
 

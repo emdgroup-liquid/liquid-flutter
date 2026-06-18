@@ -79,7 +79,7 @@ class AppRouter {
 
   late final router = GoRouter(
     debugLogDiagnostics: true,
-    initialLocation: "/",
+    initialLocation: "/components/modal",
     routes: [
       GoRoute(
         path: "/nav-test",

@@ -20,8 +20,7 @@ Future<double> getScreenRadius() async {
 
   if (Platform.isAndroid) {
     try {
-      final devicePixelRatio = PlatformDispatcher.instance.views.first.devicePixelRatio;
-      return await LiquidFlutterWindowUtils.instance.getScreenRadius() / devicePixelRatio;
+      return await LiquidFlutterWindowUtils.instance.getScreenRadius();
     } catch (e) {
       // Fallback to 0.0 if API call fails
       return 0.0;

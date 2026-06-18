@@ -416,7 +416,8 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
       SliverSafeArea(
         top: widget.header == null,
         bottom: widget.footer == null,
-        minimum: widget.padding,
+        left: false,
+        right: false,
         sliver: _buildListItems(),
       ),
       if (widget.footer != null)

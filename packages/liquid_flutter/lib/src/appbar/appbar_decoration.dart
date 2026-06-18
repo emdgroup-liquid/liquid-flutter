@@ -43,10 +43,12 @@ class LdAppBarDecorationBuilder {
     };
   }
 
-  int fillOpacity(bool isScrolledUnder, bool isInBottomSlot) {
+  int fillOpacity(
+    bool isScrolledUnder,
+  ) {
     int opacity = 0;
 
-    if (isScrolledUnder || isInBottomSlot) {
+    if (isScrolledUnder) {
       opacity = 255;
     }
 
@@ -63,12 +65,12 @@ class LdAppBarDecorationBuilder {
       LdAppBarBackgroundMode.hidden => Colors.transparent,
       LdAppBarBackgroundMode.visible => color,
       LdAppBarBackgroundMode.whenScrolled => Color.alphaBlend(
-          color.withAlpha(fillOpacity(isScrolledUnder, isInBottomSlot)),
+          color.withAlpha(fillOpacity(isScrolledUnder)),
           autoSurfaceColor,
         ),
       LdAppBarBackgroundMode.adaptive => switch (theme.platform.isDesktop) {
           false => Color.alphaBlend(
-              color.withAlpha(fillOpacity(isScrolledUnder, isInBottomSlot)),
+              color.withAlpha(fillOpacity(isScrolledUnder)),
               LdTheme.of(context).background,
             ),
           true => color,
@@ -90,24 +92,7 @@ class LdAppBarDecorationBuilder {
   }) {
     return BoxDecoration(
       color:
-          isAttached ? fillColor(context, isScrolledUnder, isInBottomSlot: position == LdAppBarPosition.bottom) : null,
-      gradient: !isAttached
-          ? LinearGradient(
-              begin: switch (position) {
-                LdAppBarPosition.bottom => Alignment.topCenter,
-                LdAppBarPosition.top => Alignment.bottomCenter,
-              },
-              end: switch (position) {
-                LdAppBarPosition.bottom => Alignment.bottomCenter,
-                LdAppBarPosition.top => Alignment.topCenter,
-              },
-              stops: const [0, 0.3],
-              colors: [
-                LdTheme.of(context).absolute.withAlpha(0),
-                LdTheme.of(context).absolute.withAlpha(200),
-              ],
-            )
-          : null,
+          !isAttached ? null : fillColor(context, isScrolledUnder, isInBottomSlot: position == LdAppBarPosition.bottom),
       boxShadow: [
         if (isAttached)
           ldShadowSticky.copyWith(

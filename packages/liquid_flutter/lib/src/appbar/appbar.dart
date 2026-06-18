@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_decoration.dart';
 import 'package:liquid_flutter/src/appbar/appbar_frame.dart';
@@ -272,8 +273,7 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
   }
 
   bool get _canPopParentRoute {
-    final parentRoute = ModalRoute.of(context);
-    return parentRoute?.canPop ?? false;
+    return context.canPop();
   }
 
   LdDrawerSlot? get _drawerSlot {
@@ -351,7 +351,7 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
     if (_canPopParentRoute && !_isDrawer && !_isModal && !_isInBottomSlot) {
       return LdButton.ghost(
         child: const Icon(LucideIcons.chevronLeft),
-        onPressed: () => Navigator.of(context).maybePop(),
+        onPressed: () => context.pop(),
       );
     }
 
@@ -555,6 +555,7 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
       position: position,
       insetBorderRadius: !_isModal,
       attached: isAttached,
+      outsideAdditionalPadding: isAttached ? EdgeInsets.zero : LdTheme.of(context).pad(size: LdSize.s),
       scrollBehavior: widget.scrollBehavior,
       wrappedChild: widget.child,
       outsideDecorationBuilder: (isScrolledUnder) => decorationBuilder.buildOutsideDecoration(

@@ -61,7 +61,7 @@ void main() {
           LdMultiPanelLayout(
             mode: LdMultiPanelLayoutMode.sideBySide,
             panelPosition: LdPanelPosition.left,
-            initialPanelWidth: 200,
+            panelWidth: 200,
             initialPanelVisible: true,
             body: _placeholder('body', Colors.blue),
             panel: _placeholder('panel', Colors.red),
@@ -94,7 +94,7 @@ void main() {
           LdMultiPanelLayout(
             mode: LdMultiPanelLayoutMode.sideBySide,
             panelPosition: LdPanelPosition.left,
-            initialPanelWidth: 200,
+            panelWidth: 200,
             initialPanelVisible: false,
             body: _placeholder('body', Colors.blue),
             panel: _placeholder('panel', Colors.red),
@@ -123,7 +123,7 @@ void main() {
           LdMultiPanelLayout(
             mode: LdMultiPanelLayoutMode.sideBySide,
             panelPosition: LdPanelPosition.right,
-            initialPanelWidth: panelWidth,
+            panelWidth: panelWidth,
             initialPanelVisible: true,
             body: _placeholder('body', Colors.blue),
             panel: _placeholder('panel', Colors.red),
@@ -152,7 +152,7 @@ void main() {
           LdMultiPanelLayout(
             mode: LdMultiPanelLayoutMode.stacked,
             panelPosition: LdPanelPosition.left,
-            initialPanelWidth: 200,
+            panelWidth: 200,
             initialPanelVisible: true,
             body: _placeholder('body', Colors.blue),
             panel: _placeholder('panel', Colors.red),
@@ -181,7 +181,7 @@ void main() {
             key: const ValueKey('stacked-visible'),
             mode: LdMultiPanelLayoutMode.stacked,
             panelPosition: LdPanelPosition.left,
-            initialPanelWidth: 200,
+            panelWidth: 200,
             initialPanelVisible: true,
             body: _placeholder('body', Colors.blue),
             panel: _placeholder('panel', Colors.red),
@@ -199,7 +199,7 @@ void main() {
             key: const ValueKey('stacked-hidden'),
             mode: LdMultiPanelLayoutMode.stacked,
             panelPosition: LdPanelPosition.left,
-            initialPanelWidth: 200,
+            panelWidth: 200,
             initialPanelVisible: false,
             body: _placeholder('body', Colors.blue),
             panel: _placeholder('panel', Colors.red),
@@ -227,7 +227,7 @@ void main() {
           LdMultiPanelLayout(
             mode: LdMultiPanelLayoutMode.stacked,
             panelPosition: LdPanelPosition.left,
-            initialPanelWidth: 200,
+            panelWidth: 200,
             initialPanelVisible: true,
             onPanelVisibilityChanged: (v) => callbacks.add(v),
             body: _placeholder('body', Colors.blue),
@@ -255,7 +255,7 @@ void main() {
     // 7. resize handle drag increases panel width
     // -------------------------------------------------------------------------
     testWidgets('resize handle drag increases panel width', (WidgetTester tester) async {
-      const initialWidth = 200.0;
+      const initialWidth = 300.0;
       final reportedWidths = <double>[];
 
       await tester.pumpWidget(
@@ -264,7 +264,6 @@ void main() {
             mode: LdMultiPanelLayoutMode.sideBySide,
             panelPosition: LdPanelPosition.left,
             allowResize: true,
-            initialPanelWidth: initialWidth,
             initialPanelVisible: true,
             onPanelWidthChanged: reportedWidths.add,
             body: _placeholder('body', Colors.blue),
@@ -274,11 +273,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // The resize handle occupies an 8px-wide strip at x ≈ panelW - 4 = 196.
-      // We drag from the centre of that strip (x=200, y=400) rightward by 50px.
+      // The resize handle occupies an 8px-wide strip at x ≈ panelW - 4 = 296.
+      // We drag from the centre of that strip (x=300, y=400) rightward by 50px.
       await performPanGesture(
         tester,
-        startPosition: const Offset(200, 400),
+        startPosition: const Offset(300, 400),
         offset: const Offset(50, 0),
       );
 
@@ -291,7 +290,7 @@ void main() {
     // 8. minPanelWidth clamp: drag to 0 → width == minPanelWidth
     // -------------------------------------------------------------------------
     testWidgets('resize handle drag clamps to minPanelWidth', (WidgetTester tester) async {
-      const initialWidth = 200.0;
+      const initialWidth = 300.0;
       const minWidth = 80.0;
       final reportedWidths = <double>[];
 
@@ -301,7 +300,6 @@ void main() {
             mode: LdMultiPanelLayoutMode.sideBySide,
             panelPosition: LdPanelPosition.left,
             allowResize: true,
-            initialPanelWidth: initialWidth,
             minPanelWidth: minWidth,
             initialPanelVisible: true,
             onPanelWidthChanged: reportedWidths.add,
@@ -316,7 +314,7 @@ void main() {
       // panel width negative / below minimum.
       await performPanGesture(
         tester,
-        startPosition: const Offset(200, 400),
+        startPosition: const Offset(300, 400),
         offset: const Offset(-300, 0),
       );
 
@@ -342,7 +340,7 @@ void main() {
           LdMultiPanelLayout(
             mode: LdMultiPanelLayoutMode.sideBySide,
             panelPosition: LdPanelPosition.left,
-            initialPanelWidth: 200,
+            panelWidth: 200,
             initialPanelVisible: true,
             panel: Builder(
               builder: (context) {
@@ -504,7 +502,7 @@ void main() {
           LdMultiPanelLayout(
             mode: LdMultiPanelLayoutMode.stacked,
             panelPosition: LdPanelPosition.left,
-            initialPanelWidth: 200,
+            panelWidth: 200,
             initialPanelVisible: true,
             onPanelVisibilityChanged: callbacks.add,
             body: _placeholder('body', Colors.blue),
@@ -584,7 +582,7 @@ void main() {
               return LdMultiPanelLayout(
                 mode: mode,
                 panelPosition: LdPanelPosition.left,
-                initialPanelWidth: 200,
+                panelWidth: 200,
                 initialPanelVisible: true,
                 body: _placeholder('body', Colors.blue),
                 panel: _placeholder('panel', Colors.red),
@@ -646,7 +644,7 @@ void main() {
           LdMultiPanelLayout(
             mode: LdMultiPanelLayoutMode.stacked,
             panelPosition: LdPanelPosition.left,
-            initialPanelWidth: 200,
+            panelWidth: 200,
             initialPanelVisible: true,
             body: _placeholder('body', Colors.blue),
             panel: _placeholder('panel', Colors.red),
@@ -700,7 +698,7 @@ void main() {
           LdMultiPanelLayout(
             mode: LdMultiPanelLayoutMode.sideBySide,
             panelPosition: LdPanelPosition.left,
-            initialPanelWidth: 200,
+            panelWidth: 200,
             panelVisible: true, // controlled prop only — no initialPanelVisible
             body: _placeholder('body', Colors.blue),
             panel: _placeholder('panel', Colors.red),
@@ -731,7 +729,7 @@ void main() {
             mode: LdMultiPanelLayoutMode.sideBySide,
             panelPosition: LdPanelPosition.left,
             allowResize: true,
-            initialPanelWidth: 200,
+            panelWidth: 200,
             initialPanelVisible: true,
             body: SizedBox.expand(key: bodyKey),
             panel: SizedBox.expand(key: panelKey),
@@ -764,6 +762,58 @@ void main() {
         isTrue,
         reason: 'widget.panel must not be remounted during a resize drag',
       );
+    });
+
+    // -------------------------------------------------------------------------
+    // Regression: panelWidth updates when parent layout constraints change
+    // -------------------------------------------------------------------------
+    testWidgets('panelWidth from parent updates reactively across layout passes',
+        (WidgetTester tester) async {
+      const narrowWidth = 40.0;
+      const fullWidth = 800.0;
+      const drawerWidth = 250.0;
+
+      await tester.pumpWidget(
+        _wrap(
+          SizedBox(
+            width: narrowWidth,
+            child: LdDrawerLayout(
+              reflowBreakpoint: 1200,
+              drawerWidth: drawerWidth,
+              onStateChange: (_) {},
+              drawer: _placeholder('drawer', Colors.green),
+              body: _placeholder('body', Colors.blue),
+            ),
+          ),
+          size: const Size(narrowWidth, 800),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Should not throw during the narrow first pass.
+      expect(find.text('drawer'), findsOneWidget);
+
+      await tester.pumpWidget(
+        _wrap(
+          SizedBox(
+            width: fullWidth,
+            child: LdDrawerLayout(
+              reflowBreakpoint: 1200,
+              drawerWidth: drawerWidth,
+              onStateChange: (_) {},
+              drawer: _placeholder('drawer', Colors.green),
+              body: _placeholder('body', Colors.blue),
+            ),
+          ),
+          size: const Size(fullWidth, 800),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final panelState = LdMultiPanelChildState.of(
+        tester.element(find.text('drawer')),
+      );
+      expect(panelState.width, drawerWidth);
     });
   });
 }

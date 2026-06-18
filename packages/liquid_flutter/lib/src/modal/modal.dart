@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/modal/sheet_transition.dart';
+import 'package:provider/provider.dart';
 
 /// A Page implementation for use with GoRouter that displays an LdModal.
 ///
@@ -173,7 +174,19 @@ class LdModalRoute<T> extends PageRoute<T> {
       ),
       child: CupertinoUserInterfaceLevel(
         data: CupertinoUserInterfaceLevelData.elevated,
-        child: LdModalAppBarMetricsScope(
+        child: Provider.value(
+          value: LdAppBarMetrics(
+            position: LdAppBarPosition.bottom,
+            willHide: false,
+            innerHeight: EdgeInsets.zero,
+            systemInsets: EdgeInsets.zero,
+            configuredInsets: EdgeInsets.zero,
+            scrollOffset: EdgeInsets.zero,
+            appbarLayerMediaQuery: mediaQuery,
+            isScrolledUnder: false,
+            parentMetrics: null,
+            level: -1,
+          ),
           child: Builder(builder: pageBuilder),
         ),
       ),
@@ -274,7 +287,19 @@ class LdModalRoute<T> extends PageRoute<T> {
               ),
             ),
             clipBehavior: Clip.hardEdge,
-            child: LdModalAppBarMetricsScope(
+            child: Provider.value(
+              value: LdAppBarMetrics(
+                position: LdAppBarPosition.bottom,
+                systemInsets: EdgeInsets.zero,
+                willHide: false,
+                innerHeight: EdgeInsets.zero,
+                configuredInsets: EdgeInsets.zero,
+                isScrolledUnder: false,
+                appbarLayerMediaQuery: MediaQuery.of(context),
+                parentMetrics: null,
+                level: -1,
+                scrollOffset: EdgeInsets.zero,
+              ),
               child: Builder(builder: pageBuilder),
             ),
           ),

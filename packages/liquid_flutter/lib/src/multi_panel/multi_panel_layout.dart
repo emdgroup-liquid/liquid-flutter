@@ -25,11 +25,7 @@ class LdMultiPanelLayout extends StatefulWidget {
   /// When true, a drag handle is shown between panel and body in sideBySide mode.
   final bool allowResize;
 
-  /// One-time seed for panel width in pixels. Mutually exclusive with [initialPanelFraction].
-  final double? initialPanelWidth;
-
-  /// One-time seed for panel width as a fraction of total width. Mutually exclusive
-  /// with [initialPanelWidth].
+  /// One-time seed for panel width as a fraction of total width.
   final double? initialPanelFraction;
 
   /// Minimum panel width when resizing.
@@ -44,7 +40,8 @@ class LdMultiPanelLayout extends StatefulWidget {
   /// Called when the panel's visibility changes.
   final void Function(bool visible)? onPanelVisibilityChanged;
 
-  /// Controlled panel width. When non-null, this value is used directly (no spring for width).
+  /// Controlled panel width. When non-null, this value is used directly and updates
+  /// reactively when changed (e.g. parent layout constraints).
   final double? panelWidth;
 
   /// Called when the panel width changes during a resize drag.
@@ -70,7 +67,6 @@ class LdMultiPanelLayout extends StatefulWidget {
     required this.panel,
     this.panelPosition = LdPanelPosition.left,
     this.allowResize = false,
-    this.initialPanelWidth,
     this.initialPanelFraction,
     this.minPanelWidth = 80,
     this.initialPanelVisible,
@@ -82,10 +78,7 @@ class LdMultiPanelLayout extends StatefulWidget {
     this.springConstant = 3,
     this.dampingCoefficient = 9,
     this.enableScaling = true,
-  }) : assert(
-          initialPanelWidth == null || initialPanelFraction == null,
-          'initialPanelWidth and initialPanelFraction are mutually exclusive',
-        );
+  });
 
   @override
   State<LdMultiPanelLayout> createState() => _LdMultiPanelLayoutState();
@@ -123,7 +116,7 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
     // callers who set it in their own initState (e.g. LdDrawerLayout opening on
     // desktop) don't get ignored. Falls back to initialPanelVisible, then false.
     _panelVisible = widget.panelVisible ?? widget.initialPanelVisible ?? false;
-    _internalPanelWidth = widget.initialPanelWidth ?? 300;
+    _internalPanelWidth = widget.panelWidth ?? 300;
     // If fraction is specified we can't resolve it yet — deferred to first build.
   }
 
@@ -161,6 +154,23 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
       return widget.initialPanelFraction! * totalWidth;
     }
     return _internalPanelWidth;
+  }
+
+  /// Clamps [width] to valid panel bounds for the current [totalWidth].
+  ///
+  /// Avoids [double.clamp] throwing when [totalWidth] is still zero or smaller
+  /// than [minPanelWidth] during the first layout pass.
+  double _clampPanelWidth(
+    double width,
+    double totalWidth, {
+    required bool stacked,
+  }) {
+    if (totalWidth <= 0) return width;
+    final maxWidth = stacked ? totalWidth : totalWidth - widget.minPanelWidth;
+    if (maxWidth < widget.minPanelWidth) {
+      return width.clamp(0, totalWidth);
+    }
+    return width.clamp(widget.minPanelWidth, maxWidth);
   }
 
   void _setVisibility(bool visible) {
@@ -203,9 +213,10 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
 
   Widget _buildSideBySide(BoxConstraints constraints) {
     _totalWidth = constraints.maxWidth;
-    final panelW = _effectivePanelWidth(_totalWidth).clamp(
-      widget.minPanelWidth,
-      _totalWidth - widget.minPanelWidth,
+    final panelW = _clampPanelWidth(
+      _effectivePanelWidth(_totalWidth),
+      _totalWidth,
+      stacked: false,
     );
     final isLeft = widget.panelPosition == LdPanelPosition.left;
 
@@ -389,9 +400,10 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
   Widget _buildStacked(BoxConstraints constraints) {
     _totalWidth = constraints.maxWidth;
     final isLeft = widget.panelPosition == LdPanelPosition.left;
-    final panelW = _effectivePanelWidth(_totalWidth).clamp(
-      widget.minPanelWidth,
+    final panelW = _clampPanelWidth(
+      _effectivePanelWidth(_totalWidth),
       _totalWidth,
+      stacked: true,
     );
 
     // Clamp swipe offset so panel cannot go further than its width.

@@ -119,6 +119,7 @@ class LdFilterRangeWidget<T extends Identifiable<IdType>, IdType> extends Statel
                   context,
                   filter.copyWith(
                     isOn: false,
+                    range: RangeValues(filter.min, filter.max),
                   ),
                 );
                 maybePopContextMenu(context);

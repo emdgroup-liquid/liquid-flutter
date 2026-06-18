@@ -180,7 +180,6 @@ class LdScaffoldState extends State<LdScaffold> {
                     body: child,
                     reflowBreakpoint: widget.reflowBreakpoint ?? 900,
                   ),
-                  // Body — bars are wrapped around the body using LdAppBar(child: ...).
                   child: ScrollObserver(
                     position: _bodyScrollOffset,
                     child: PrimaryScrollController(

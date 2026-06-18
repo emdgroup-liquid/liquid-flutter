@@ -41,16 +41,15 @@ class LdNotificationPortal extends StatelessWidget {
 
     final theme = LdTheme.of(context, listen: true);
     return Stack(
+      fit: StackFit.loose,
       children: [
-        Positioned.fill(child: child),
-        Align(
-          alignment: Alignment.bottomCenter,
+        child,
+        Positioned(
+          left: MediaQuery.paddingOf(context).left + theme.pad(size: LdSize.m).left,
+          right: MediaQuery.paddingOf(context).right + theme.pad(size: LdSize.m).right,
+          bottom: MediaQuery.paddingOf(context).bottom + theme.pad(size: LdSize.m).bottom,
           child: Padding(
-            padding: EdgeInsets.only(
-              left: MediaQuery.paddingOf(context).left + theme.pad(size: LdSize.m).left,
-              right: MediaQuery.paddingOf(context).right + theme.pad(size: LdSize.m).right,
-              bottom: MediaQuery.paddingOf(context).bottom + theme.pad(size: LdSize.m).bottom,
-            ),
+            padding: EdgeInsets.only(),
             child: LdContainer(
               maxWidth: theme.sizingConfig.containerMaxWidth / 2,
               child: Stack(

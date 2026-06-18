@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid/code_block.dart';
@@ -112,6 +114,7 @@ class _DemoSheet extends StatelessWidget {
                     LdFlexibleChild(
                       child: LdButton.vague(
                         width: double.infinity,
+                        size: LdSize.l,
                         color: LdTheme.of(context).error,
                         onPressed: () {
                           Navigator.of(context).pop();
@@ -121,6 +124,7 @@ class _DemoSheet extends StatelessWidget {
                     ),
                     LdFlexibleChild(
                       child: LdButton.vague(
+                        size: LdSize.l,
                         width: double.infinity,
                         onPressed: () {
                           Navigator.of(context).pop("Hello world");
@@ -686,9 +690,9 @@ class _ModalDemoState extends State<ModalDemo> {
             modal: LdModalRoute(
               context: context,
               scaleParent: false,
-              sheetAspectRatio: 1.1,
-              sheetInsets: const EdgeInsets.all(10),
-              sheetBorderRadius: BorderRadius.circular(LdTheme.of(context).screenRadius / 2 - 5),
+              sheetAspectRatio: 1,
+              sheetInsets: const EdgeInsets.all(4),
+              sheetBorderRadius: BorderRadius.circular(LdTheme.of(context).screenRadius * 2 - 4),
               pageBuilder: (context2) => LdScaffold(body: Center(child: LdText("This is a modal with screen radius"))),
             ),
           ),
@@ -729,7 +733,9 @@ class _ModalDemoState extends State<ModalDemo> {
               pageBuilder: (context) => LdScaffold(
                 body: LdAppBar(
                   title: const Text("Modal with list items"),
-                  child: LdAutoSpace(
+                  child: LdScaffoldBody(
+                    shrinkWrap: true,
+                    minimumPadding: EdgeInsets.zero,
                     children: [
                       LdListItem(
                         title: const Text("Item 1"),

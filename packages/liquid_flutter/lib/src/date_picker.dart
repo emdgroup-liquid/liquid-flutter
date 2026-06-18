@@ -379,6 +379,7 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
             child: const Text('Done'),
           ),
           child: LdScaffoldBody(
+            shrinkWrap: true,
             children: [
               LdBundle(
                 children: [

@@ -102,7 +102,7 @@ class _MultiPanelLayoutDemoState extends State<MultiPanelLayoutDemo> {
                 panelPosition: _panelPosition,
                 allowResize: _allowResize,
                 panelVisible: _panelVisible,
-                initialPanelWidth: 200,
+                panelWidth: 200,
                 onPanelVisibilityChanged: (visible) {
                   setState(() {
                     _panelVisible = visible;

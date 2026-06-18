@@ -57,7 +57,14 @@ abstract class WindowUtilsApi {
   void maximizeWindow();
   bool isWindowMaximized();
   WindowState getWindowState();
+  /// Display corner radius in logical pixels (Flutter layout units).
+  ///
+  /// On Android API 31+, the native [RoundedCorner] radius is divided by
+  /// [displayMetrics.density] before returning.
   double getScreenRadius();
+  /// Detailed corner readout for debugging. Values are in physical pixels unless
+  /// noted as logical.
+  String getScreenCornerRadiiDebugLog();
   void setSystemGestureExclusionRects(List<Rect> rects);
 }
 

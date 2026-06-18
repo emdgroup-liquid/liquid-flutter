@@ -151,7 +151,7 @@ class _LdScrollEdgeFadeState extends State<LdScrollEdgeFade> {
     });
   }
 
-  bool _onScrollNotification(ScrollNotification notification) {
+  bool _onScrollNotification(ScrollMetricsNotification notification) {
     if (notification.depth != 0) {
       return false;
     }
@@ -160,11 +160,7 @@ class _LdScrollEdgeFadeState extends State<LdScrollEdgeFade> {
       return false;
     }
 
-    if (notification is ScrollUpdateNotification ||
-        notification is ScrollMetricsNotification ||
-        notification is ScrollEndNotification) {
-      _updateFromMetrics(notification.metrics);
-    }
+    _updateFromMetrics(notification.metrics);
 
     return false;
   }
@@ -185,16 +181,10 @@ class _LdScrollEdgeFadeState extends State<LdScrollEdgeFade> {
     final fadeColor = widget.fadeColor ?? theme.absolute;
     final viewPadding = MediaQuery.viewPaddingOf(context);
 
-    final stackFit = switch (widget.axis) {
-      Axis.vertical => StackFit.expand,
-      Axis.horizontal => StackFit.passthrough,
-    };
-
-    return NotificationListener<ScrollNotification>(
+    return NotificationListener<ScrollMetricsNotification>(
       onNotification: _onScrollNotification,
       child: Stack(
         clipBehavior: Clip.none,
-        fit: stackFit,
         children: [
           widget.child,
           ...switch (widget.axis) {

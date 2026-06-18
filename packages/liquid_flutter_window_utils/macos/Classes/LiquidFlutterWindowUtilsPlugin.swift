@@ -190,6 +190,10 @@ public class LiquidFlutterWindowUtilsPlugin: NSObject, FlutterPlugin, WindowUtil
     // Standard corner radius for macOS versions prior to 26
     return 10.0
   }
+
+  public func getScreenCornerRadiiDebugLog() throws -> String {
+    return "Screen corner radii debug log is only available on Android API 31+."
+  }
   
   internal func getWindowState() throws -> WindowState {
     guard let window = LiquidFlutterWindowUtilsPlugin.getCurrentWindow() else {

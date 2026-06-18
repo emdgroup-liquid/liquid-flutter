@@ -16,9 +16,8 @@ Widget _mediaQueryForScrollChild(BuildContext context, Widget child) {
   // Always wrap in [MediaQuery] so the scroll subtree keeps a stable widget
   // structure when the keyboard opens. Toggling between a wrapper and a bare
   // [child] remounts scroll content and drops body input focus.
-  final verticalPadding = _hasKeyboardViewInsets(mediaQuery)
-      ? mediaQuery.padding
-      : mediaQuery.padding.copyWith(top: 0, bottom: 0);
+  final verticalPadding =
+      _hasKeyboardViewInsets(mediaQuery) ? mediaQuery.padding : mediaQuery.padding.copyWith(top: 0, bottom: 0);
   return MediaQuery(
     data: mediaQuery.copyWith(padding: verticalPadding),
     child: child,
@@ -72,6 +71,7 @@ class LdScaffoldBody extends StatelessWidget {
   final ScrollController? scrollController;
   final bool autoSpaceChildren;
   final bool addContainer;
+  final bool shrinkWrap;
 
   /// When true, fades the top and bottom edges when more content is scrollable.
   final bool scrollEdgeFade;
@@ -90,6 +90,7 @@ class LdScaffoldBody extends StatelessWidget {
     this.autoSpaceChildren = true,
     this.addContainer = false,
     this.scrollEdgeFade = true,
+    this.shrinkWrap = false,
     this.scrollEdgeFadeExtent,
   });
 
@@ -126,6 +127,7 @@ class LdScaffoldBody extends StatelessWidget {
 
       final scrollView = CustomScrollView(
         controller: scrollController,
+        shrinkWrap: shrinkWrap,
         slivers: [
           if (effectiveChildren.isNotEmpty)
             SliverPadding(

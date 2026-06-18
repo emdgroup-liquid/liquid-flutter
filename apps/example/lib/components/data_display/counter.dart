@@ -108,13 +108,7 @@ class _CounterDemoState extends State<CounterDemo> {
                   child: Column(
                     children: [
                       /*begin demo:LdCounter*/
-                      LdCounter(
-                        value: _value,
-                        size: _size,
-                        type: _type,
-                        precision: _precision,
-                        minDigits: _minDigits,
-                      ),
+                      LdCounter(value: _value, size: _size, type: _type, precision: _precision, minDigits: _minDigits),
                       /*end demo:LdCounter*/
                       ldSpacerM,
                       Row(
@@ -199,10 +193,7 @@ class _CounterDemoState extends State<CounterDemo> {
                 child: LdAutoSpace(
                   children: [
                     /*begin demo:LdCounterText*/
-                    LdCounterText.template(
-                      'You changed {value} files',
-                      value: _inlineValue,
-                    ),
+                    LdCounterText.template('You changed %value% files', value: _inlineValue),
                     LdCounterText(
                       before: 'Temperature is ',
                       after: ' °C and rising',

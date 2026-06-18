@@ -22,6 +22,9 @@ Future<bool> ldConfirmModal(
         return LdScaffold(
           body: LdAppBar(
             title: title ?? Text(locale.confirm),
+            backgroundMode: LdAppBarBackgroundMode.whenScrolled,
+            borderMode: LdAppBarBorderMode.whenScrolled,
+            shadowMode: LdAppBarShadowMode.whenScrolled,
             child: LdAppBar(
               attachedMode: LdAppBarAttachedMode.attached,
               positionMode: LdAppBarPositionMode.bottom,
@@ -45,19 +48,16 @@ Future<bool> ldConfirmModal(
                   ),
                 ),
               ],
-              child: LdScaffoldBodyCentered(
-                child: LdAutoSpace(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    if (indicatorType != null)
-                      LdIndicator(
-                        type: indicatorType,
-                        customSize: 24,
-                      ),
-                    if (description != null) LdText.p(description),
-                    if (additionalContent != null) additionalContent,
-                  ],
-                ),
+              child: LdScaffoldBody(
+                children: [
+                  if (indicatorType != null)
+                    LdIndicator(
+                      type: indicatorType,
+                      customSize: 24,
+                    ).padVertical(size: LdSize.l),
+                  if (description != null) LdText.p(description, textAlign: TextAlign.center),
+                  if (additionalContent != null) additionalContent,
+                ],
               ),
             ),
           ),
@@ -191,12 +191,14 @@ class _LdEnterTextModalState extends State<_LdEnterTextModal> {
                 child: LdButton.vague(
                   color: LdTheme.of(context).error,
                   width: double.infinity,
+                  size: LdSize.l,
                   child: Text(LiquidLocalizations.of(context).cancel),
                   onPressed: () => Navigator.of(context).pop(null),
                 ),
               ),
             LdFlexibleChild(
               child: LdButton.filled(
+                size: LdSize.l,
                 width: double.infinity,
                 disabled: !_canSubmit,
                 child: Text(LiquidLocalizations.of(context).done),
@@ -205,6 +207,7 @@ class _LdEnterTextModalState extends State<_LdEnterTextModal> {
             ),
           ],
           child: LdScaffoldBody(
+            shrinkWrap: true,
             children: [
               LdAutoSpace(children: [
                 if (widget.description != null) LdText.p(widget.description!),

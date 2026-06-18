@@ -4,8 +4,10 @@ import android.app.Activity
 import android.graphics.Rect as AndroidRect
 import android.os.Build
 import android.util.Log
+import android.view.RoundedCorner
 import android.view.View
 import android.view.WindowInsets
+import kotlin.math.min
 import androidx.core.view.ViewCompat
 import androidx.annotation.RequiresApi
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -108,33 +110,132 @@ class LiquidFlutterWindowUtilsPlugin :
         return getScreenRadiusApi31(currentActivity)
     }
 
+    override fun getScreenCornerRadiiDebugLog(): String {
+        val currentActivity = activity
+            ?: return "activity is null"
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            return "RoundedCorner API requires Android 12 (API 31+), current: ${Build.VERSION.SDK_INT}"
+        }
+
+        return buildScreenCornerRadiiDebugLog(currentActivity)
+    }
+
     @RequiresApi(Build.VERSION_CODES.S)
     private fun getScreenRadiusApi31(activity: Activity): Double {
         return try {
-            val rootView = activity.window.decorView.rootView
-            val insets = rootView.rootWindowInsets ?: return 0.0
-
-            var maxRadius = 0.0
-
-            // Check all four corners using position constants (0-3)
-            // POSITION_TOP_LEFT = 0, POSITION_TOP_RIGHT = 1,
-            // POSITION_BOTTOM_RIGHT = 2, POSITION_BOTTOM_LEFT = 3
-            val cornerPositions = listOf(0, 1, 2, 3)
-
-            for (position in cornerPositions) {
-                val roundedCorner = insets.getRoundedCorner(position)
-                roundedCorner?.let {
-                    val radius = it.radius.toDouble()
-                    if (radius > maxRadius) {
-                        maxRadius = radius
-                    }
-                }
-            }
-
-            maxRadius
+            readMaxRadiusLogical(activity)
         } catch (e: Exception) {
             Log.e("LiquidFlutterWindowUtils", "Failed to get screen radius", e)
             0.0
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun readMaxRadiusLogical(activity: Activity): Double {
+        val insets = activity.window.decorView.rootView.rootWindowInsets ?: return 0.0
+        val density = activity.resources.displayMetrics.density
+        if (density <= 0f) {
+            return 0.0
+        }
+
+        val positions = listOf(
+            RoundedCorner.POSITION_TOP_LEFT,
+            RoundedCorner.POSITION_TOP_RIGHT,
+            RoundedCorner.POSITION_BOTTOM_RIGHT,
+            RoundedCorner.POSITION_BOTTOM_LEFT,
+        )
+        var maxRadiusPx = 0.0
+        for (position in positions) {
+            val radiusPx = insets.getRoundedCorner(position)?.radius?.toDouble() ?: 0.0
+            if (radiusPx > maxRadiusPx) {
+                maxRadiusPx = radiusPx
+            }
+        }
+        return maxRadiusPx / density
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun buildScreenCornerRadiiDebugLog(activity: Activity): String {
+        val rootView = activity.window.decorView.rootView
+        val insets = rootView.rootWindowInsets
+            ?: return "rootWindowInsets is null (try after first frame)"
+
+        val metrics = activity.resources.displayMetrics
+        val density = metrics.density
+        val densityDpi = metrics.densityDpi
+
+        val cornerNames = listOf(
+            "TOP_LEFT" to RoundedCorner.POSITION_TOP_LEFT,
+            "TOP_RIGHT" to RoundedCorner.POSITION_TOP_RIGHT,
+            "BOTTOM_RIGHT" to RoundedCorner.POSITION_BOTTOM_RIGHT,
+            "BOTTOM_LEFT" to RoundedCorner.POSITION_BOTTOM_LEFT,
+        )
+
+        val lines = mutableListOf<String>()
+        lines += "displayMetrics.density: $density"
+        lines += "displayMetrics.densityDpi: $densityDpi"
+        lines += "decorView size (px): ${rootView.width}x${rootView.height}"
+
+        var maxRadiusPx = 0
+        val viewWidth = rootView.width
+        val viewHeight = rootView.height
+
+        for ((name, position) in cornerNames) {
+            val corner = insets.getRoundedCorner(position)
+            if (corner == null) {
+                lines += "$name: null"
+                continue
+            }
+
+            val radiusPx = corner.radius
+            val centerX = corner.center.x
+            val centerY = corner.center.y
+            val effectiveCornerPx = effectiveCornerInsetPx(
+                position = position,
+                centerX = centerX,
+                centerY = centerY,
+                viewWidth = viewWidth,
+                viewHeight = viewHeight,
+            )
+
+            if (radiusPx > maxRadiusPx) {
+                maxRadiusPx = radiusPx
+            }
+
+            lines += "$name:"
+            lines += "  radiusPx: $radiusPx"
+            lines += "  centerPx: ($centerX, $centerY)"
+            lines += "  effectiveCornerPx (edge-to-center): $effectiveCornerPx"
+            lines += "  radiusLogical (÷ density): ${radiusPx / density}"
+            lines += "  centerLogical (÷ density): (${centerX / density}, ${centerY / density})"
+            lines += "  effectiveCornerLogical (÷ density): ${effectiveCornerPx / density}"
+        }
+
+        lines += "getScreenRadius() max radiusPx: $maxRadiusPx"
+        lines += "getScreenRadius() returns logical (max radiusPx ÷ density): ${maxRadiusPx / density}"
+
+        return lines.joinToString("\n")
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun effectiveCornerInsetPx(
+        position: Int,
+        centerX: Int,
+        centerY: Int,
+        viewWidth: Int,
+        viewHeight: Int,
+    ): Int {
+        return when (position) {
+            RoundedCorner.POSITION_TOP_LEFT ->
+                min(centerX, centerY)
+            RoundedCorner.POSITION_TOP_RIGHT ->
+                min(viewWidth - centerX, centerY)
+            RoundedCorner.POSITION_BOTTOM_RIGHT ->
+                min(viewWidth - centerX, viewHeight - centerY)
+            RoundedCorner.POSITION_BOTTOM_LEFT ->
+                min(centerX, viewHeight - centerY)
+            else -> 0
         }
     }
 

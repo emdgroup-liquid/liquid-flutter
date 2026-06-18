@@ -94,7 +94,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
                 appBarConfig?.implyLeading ??
                 switch (location) {
                   LdMonkeyActionLocation.detailAppBar => effectiveLayout == LdMonkeyEffectiveLayoutMode.detail,
-                  _ => null,
+                  _ => true,
                 },
             searchConfig: switch (location) {
               LdMonkeyActionLocation.masterAppBar => searchFilter?.searchConfig((query) {

@@ -24,7 +24,7 @@ class LiquidFlutterWindowUtils implements WindowStateEventApi {
 
   void _setupFlutterApi() {
     // Set up the FlutterApi to receive window state changes from Swift
-    WindowStateEventApi.setup(
+    WindowStateEventApi.setUp(
       this,
       binaryMessenger: ServicesBinding.instance.defaultBinaryMessenger,
     );
@@ -82,6 +82,11 @@ class LiquidFlutterWindowUtils implements WindowStateEventApi {
 
   Future<double> getScreenRadius() async {
     return await _api?.getScreenRadius() ?? 0.0;
+  }
+
+  Future<String> getScreenCornerRadiiDebugLog() async {
+    return await _api?.getScreenCornerRadiiDebugLog() ??
+        'Screen corner radii debug log is not available on this platform.';
   }
 
   Future<void> setSystemGestureExclusionRects(List<Rect> rects) async {
