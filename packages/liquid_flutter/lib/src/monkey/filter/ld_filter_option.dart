@@ -7,7 +7,13 @@ abstract class LdFilterOption<T extends Identifiable<IdType>, IdType> {
 
   final bool Function(BuildContext context)? isEnabled;
 
-  final LdMutationAffectsCache<T>? mutationAffectsCache;
+  /// Whether an item update may change list membership for this filter.
+  ///
+  /// Used for cache invalidation and paginator layout decisions.
+  final LdAffectedByUpdate<T>? affectedByUpdate;
+
+  @Deprecated('Use affectedByUpdate')
+  LdAffectedByUpdate<T>? get mutationAffectsCache => affectedByUpdate;
 
   final String name;
   final bool isOn;
@@ -40,7 +46,8 @@ abstract class LdFilterOption<T extends Identifiable<IdType>, IdType> {
     Widget Function(BuildContext context)? icon,
     String? name,
     bool? isOn,
-    LdMutationAffectsCache<T>? mutationAffectsCache,
+    LdAffectedByUpdate<T>? affectedByUpdate,
+    @Deprecated('Use affectedByUpdate') LdAffectedByUpdate<T>? mutationAffectsCache,
   });
 
   LdFilterOption({
@@ -49,8 +56,9 @@ abstract class LdFilterOption<T extends Identifiable<IdType>, IdType> {
     required this.name,
     this.isOn = false,
     this.isEnabled,
-    this.mutationAffectsCache,
-  });
+    LdAffectedByUpdate<T>? affectedByUpdate,
+    @Deprecated('Use affectedByUpdate') LdAffectedByUpdate<T>? mutationAffectsCache,
+  }) : affectedByUpdate = affectedByUpdate ?? mutationAffectsCache;
 
   void update(BuildContext context, LdFilterOption<T, IdType> filter) {
     LdMonkeySortAndFilterState.updateFilter(context, filter);

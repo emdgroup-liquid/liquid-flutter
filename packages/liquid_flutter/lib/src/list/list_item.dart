@@ -194,7 +194,7 @@ class LdListItemWidget extends StatelessWidget {
         final colorBundle = neutralGhostColor(theme, status);
         return Container(
           width: effectiveWidth,
-          padding: padding ?? MediaQuery.of(context).padding + theme.balPad(LdSize.m),
+          padding: padding ?? MediaQuery.of(context).padding + theme.balPad(LdSize.s),
           decoration: BoxDecoration(
             color: colorBundle.surface,
             borderRadius: borderRadius,

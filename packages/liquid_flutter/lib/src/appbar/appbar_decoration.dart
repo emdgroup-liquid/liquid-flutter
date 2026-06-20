@@ -43,36 +43,18 @@ class LdAppBarDecorationBuilder {
     };
   }
 
-  int fillOpacity(
-    bool isScrolledUnder,
-  ) {
-    int opacity = 0;
-
-    if (isScrolledUnder) {
-      opacity = 255;
-    }
-
-    return opacity;
-  }
-
   Color fillColor(BuildContext context, bool isScrolledUnder, {bool isInBottomSlot = false}) {
     final theme = LdTheme.of(context);
-    final parentIsSurface = context.read<LdSurfaceInfo?>()?.isSurface ?? false;
-    final autoSurfaceColor = parentIsSurface ? LdTheme.of(context).background : LdTheme.of(context).surface;
+    final surfaceInfo = context.read<LdSurfaceInfo>();
+    final autoSurfaceColor = surfaceInfo.isSurface ? theme.background : theme.surface;
     final color = backgroundColor ?? autoSurfaceColor;
 
     return switch (backgroundMode) {
       LdAppBarBackgroundMode.hidden => Colors.transparent,
       LdAppBarBackgroundMode.visible => color,
-      LdAppBarBackgroundMode.whenScrolled => Color.alphaBlend(
-          color.withAlpha(fillOpacity(isScrolledUnder)),
-          autoSurfaceColor,
-        ),
+      LdAppBarBackgroundMode.whenScrolled => isScrolledUnder ? color : Colors.transparent,
       LdAppBarBackgroundMode.adaptive => switch (theme.platform.isDesktop) {
-          false => Color.alphaBlend(
-              color.withAlpha(fillOpacity(isScrolledUnder)),
-              LdTheme.of(context).background,
-            ),
+          false => isScrolledUnder ? color : Colors.transparent,
           true => color,
         },
     };

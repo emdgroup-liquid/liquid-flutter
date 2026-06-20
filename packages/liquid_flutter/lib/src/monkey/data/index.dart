@@ -1,4 +1,5 @@
 export 'identifiable.dart';
+export 'ld_affected_by_update.dart';
 export 'ld_fetch_reason.dart';
 export 'ld_repository_cache.dart';
 export 'ld_repository_cache_key.dart';

@@ -57,6 +57,7 @@ LdRepository<Task, int> taskRepository(BuildContext context) => LdRepository<Tas
   },
 
   fetchListWithParameters: (parameters) async {
+    print(parameters);
     await Future.delayed(const Duration(milliseconds: 200));
 
     final filtered = applyFiltersAndSorting(testData, parameters.filters, parameters.sortOptions);

@@ -11,6 +11,10 @@ import 'package:provider/provider.dart';
 
 enum TaskActionId { create, markDone, markUndone, duplicate }
 
+int _nextTaskId() {
+  return testData.fold<int>(0, (max, task) => task.id > max ? task.id : max) + 1;
+}
+
 List<LdMonkeyAction<Task, int>> taskActions = [
   refreshAction<Task, int>(),
   LdMonkeySubmitAction(
@@ -38,7 +42,7 @@ List<LdMonkeyAction<Task, int>> taskActions = [
       }
 
       final newTask = Task(
-        testData.length + 1,
+        _nextTaskId(),
         newTaskText,
         DateTime.now().add(const Duration(days: 1)),
         false,
@@ -67,7 +71,7 @@ List<LdMonkeyAction<Task, int>> taskActions = [
         minSelectionCount: 1,
         maxSelectionCount: null,
         isVisible: (context) {
-          final selection = LdMonkeySelection.adaptive<Task, int>(context);
+          final selection = LdMonkeySelection.adaptive<Task, int>(context, listen: true);
           bool hasTodo = false;
           for (final id in selection) {
             final item = LdRepository.of<Task, int>(context).getItemById(id);
@@ -84,7 +88,7 @@ List<LdMonkeyAction<Task, int>> taskActions = [
         minSelectionCount: 1,
         maxSelectionCount: null,
         isVisible: (context) {
-          final selection = LdMonkeySelection.adaptive<Task, int>(context);
+          final selection = LdMonkeySelection.adaptive<Task, int>(context, listen: true);
           bool hasTodo = false;
           for (final id in selection) {
             final item = LdRepository.of<Task, int>(context).getItemById(id);
@@ -150,7 +154,7 @@ List<LdMonkeyAction<Task, int>> taskActions = [
     onSubmit: (ctx) async {
       final item = await ctx.repository.getById(ctx.selectedIds.first);
 
-      final newItem = item.copyWith(id: testData.length + 1, task: "${item.task} (copy)");
+      final newItem = item.copyWith(id: _nextTaskId(), task: "${item.task} (copy)");
 
       await ctx.repository.create(ctx.appContext, newItem);
 
@@ -202,19 +206,25 @@ class TaskMasterPage extends StatelessWidget {
             },
           ),
         ),
-        leading: Icon(item.value!.done ? LucideIcons.squareCheck : LucideIcons.square),
+        leading: LdAvatar(emoji: true, child: LdText(item.value!.emoji)),
       ),
     );
   }
 }
 
 List<LdSortOption<Task, int>> taskSortOptions = [
-  LdSortOption<Task, int>(name: "due", label: (context) => "Due date", icon: (context) => Icon(LucideIcons.calendar)),
+  LdSortOption<Task, int>(
+    name: "due",
+    label: (context) => "Due date",
+    icon: (context) => Icon(LucideIcons.calendar),
+    affectedByUpdate: (before, after) => before?.due != after?.due,
+  ),
 
   LdSortOption<Task, int>(
     name: "task",
     label: (context) => "Task name",
     icon: (context) => Icon(LucideIcons.arrowUpZA),
+    affectedByUpdate: (before, after) => before?.task != after?.task,
   ),
 ];
 
@@ -247,6 +257,7 @@ List<LdFilterOption<Task, int>> taskFilters = [
     name: "done",
     label: (context) => "Done",
     icon: (context) => Icon(LucideIcons.check),
+    affectedByUpdate: (before, after) => before?.done != after?.done,
   ),
   LdFilterBool<Task, int>(
     isEnabled: (context) {
@@ -257,5 +268,6 @@ List<LdFilterOption<Task, int>> taskFilters = [
     name: "todo",
     label: (context) => "To do",
     icon: (context) => Icon(LucideIcons.hourglass),
+    affectedByUpdate: (before, after) => before?.done != after?.done,
   ),
 ];

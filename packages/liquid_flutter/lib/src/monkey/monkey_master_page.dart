@@ -10,11 +10,13 @@ class LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType> extends Statefu
     this.primaryAppBarAdditionalActions = const [],
     this.allowMultipleSelection = true,
     this.secondaryAppBarConfig,
+    this.filterBarConfig,
     this.buildList,
   }) : assert(buildList != null || buildItem != null, "Either buildList or buildItem must be provided");
 
   final Widget Function(BuildContext context, LdRepository<T, IdType> repository)? buildList;
   final Widget Function(BuildContext context, LdPaginatorItem<T> item)? buildItem;
+  final List<LdFilterChipConfig<T, IdType>>? filterBarConfig;
 
   final LdAppBarConfig? primaryAppBarConfig;
   final LdAppBarConfig? secondaryAppBarConfig;
@@ -95,9 +97,20 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
         child: LdAppBarConfigProvider(
           config: widget.secondaryAppBarConfig ?? const LdAppBarConfig(),
           ignoreParent: true,
-          child: LdMonkeyAppBar<T, IdType>(
-            location: LdMonkeyActionLocation.masterSecondary,
-            child: body,
+          child: LdWrapConditional(
+            condition: widget.filterBarConfig != null,
+            builder: (context, child) => LdAppBar(
+              leading: Expanded(
+                child: LdFilterChipsBar<T, IdType>(
+                  configs: widget.filterBarConfig!,
+                ),
+              ),
+              child: child,
+            ),
+            child: LdMonkeyAppBar<T, IdType>(
+              location: LdMonkeyActionLocation.masterSecondary,
+              child: body,
+            ),
           ),
         ),
       ),

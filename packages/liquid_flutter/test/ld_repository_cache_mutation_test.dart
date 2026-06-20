@@ -156,14 +156,14 @@ void main() {
           label: _label,
           icon: _icon,
           isOn: true,
-          mutationAffectsCache: (before, after) => before?.title != after?.title,
+          affectedByUpdate: (before, after) => before?.title != after?.title,
         ),
         LdSortOption<_MutationItem, int>(
           name: 'updated',
           label: _label,
           icon: _icon,
           isOn: true,
-          mutationAffectsCache: (before, after) => before?.updatedAt != after?.updatedAt,
+          affectedByUpdate: (before, after) => before?.updatedAt != after?.updatedAt,
         ),
       ];
       final context = await _pumpContext(
@@ -205,7 +205,7 @@ void main() {
           label: _label,
           icon: _icon,
           isOn: true,
-          mutationAffectsCache: (before, after) => before?.title != after?.title,
+          affectedByUpdate: (before, after) => before?.title != after?.title,
         ),
       ];
       final context = await _pumpContext(
@@ -244,7 +244,7 @@ void main() {
           name: 'updated',
           label: _label,
           icon: _icon,
-          mutationAffectsCache: (before, after) => before?.updatedAt != after?.updatedAt,
+          affectedByUpdate: (before, after) => before?.updatedAt != after?.updatedAt,
         ),
       ];
       final context = await _pumpContext(

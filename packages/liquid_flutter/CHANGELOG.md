@@ -1,3 +1,15 @@
+## Unreleased
+
+### Features
+
+- **LdRepository:** add `affectedByUpdate` on filter/sort options (replaces deprecated `mutationAffectsCache`) for shared cache invalidation and paginator layout decisions
+- **LdPaginator:** add `repositionItemById`, safe delete compaction (`canCompactIndicesAfterDeletion` / `compactIndicesAfterDeletion`), and reposition-or-refresh mutation flows in `LdRepository`
+
+### Deprecations
+
+- `mutationAffectsCache` on `LdFilterOption` / `LdSortOption` — use `affectedByUpdate` instead
+- `LdMutationAffectsCache` typedef — use `LdAffectedByUpdate` instead
+
 ## 23.0.0
 Released on: 5/20/2026, changelog automatically generated.
 

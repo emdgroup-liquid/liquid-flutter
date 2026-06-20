@@ -261,6 +261,10 @@ class MovieDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return LdMonkeyDetailPage<MovieDemo, int>.scrollable(
       primaryAppBarConfig: LdAppBarConfig(title: Text("Movie"), debugName: "MovieDetailPage"),
+      secondaryAppBarConfig: LdAppBarConfig(
+        positionMode: LdAppBarPositionMode.top,
+        borderMode: LdAppBarBorderMode.visible,
+      ),
       buildDetail: (context, item) => _MovieDetail(movie: item),
     );
   }
@@ -272,20 +276,16 @@ class MovieMasterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyMasterPage<MovieDemo, int>(
-      primaryAppBarConfig: LdAppBarConfig(
-        title: LdText.h('Movies'),
-        bottom: LdFilterChipsBar<MovieDemo, int>(
-          configs: [
-            LdFilterChipConfig.range(filterName: 'rating'),
-            LdFilterChipConfig.anyOf(
-              filterName: 'genre',
-              groupLabel: (context) => 'Genre',
-              presentation: LdFilterChipChoicePresentation.inline,
-              optionChild: (context, genre) => Text(genre as String),
-            ),
-          ],
+      filterBarConfig: [
+        LdFilterChipConfig.range(filterName: 'rating'),
+        LdFilterChipConfig.anyOf(
+          filterName: 'genre',
+          groupLabel: (context) => 'Genre',
+          presentation: LdFilterChipChoicePresentation.inline,
+          optionChild: (context, genre) => Text(genre as String),
         ),
-      ),
+      ],
+      primaryAppBarConfig: LdAppBarConfig(title: LdText.h('Movies')),
       buildItem: (context, item) => LdListItem(
         title: Text(item.value!.title),
         subtitle: Text(item.value!.genre),

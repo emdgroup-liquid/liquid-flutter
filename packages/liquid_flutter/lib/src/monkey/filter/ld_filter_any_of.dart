@@ -14,7 +14,8 @@ class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E>
     required this.allValues,
     Set<E>? initialSelected,
     super.isEnabled,
-    super.mutationAffectsCache,
+    super.affectedByUpdate,
+    @Deprecated('Use affectedByUpdate') super.mutationAffectsCache,
   }) : selectedValues = Set<E>.from(initialSelected ?? {});
 
   @override
@@ -51,7 +52,8 @@ class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E>
     Map<E, Widget Function(BuildContext)>? allValues,
     Set<E>? selectedValues,
     bool Function(BuildContext context)? isEnabled,
-    LdMutationAffectsCache<T>? mutationAffectsCache,
+    LdAffectedByUpdate<T>? affectedByUpdate,
+    @Deprecated('Use affectedByUpdate') LdAffectedByUpdate<T>? mutationAffectsCache,
   }) {
     return LdFilterAnyOf<T, IdType, E>(
       name: name ?? this.name,
@@ -63,7 +65,7 @@ class LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E>
           ? Set<E>.from(selectedValues)
           : this.selectedValues,
       isEnabled: isEnabled ?? this.isEnabled,
-      mutationAffectsCache: mutationAffectsCache ?? this.mutationAffectsCache,
+      affectedByUpdate: affectedByUpdate ?? mutationAffectsCache ?? this.affectedByUpdate,
     );
   }
 

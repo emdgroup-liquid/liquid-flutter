@@ -189,10 +189,28 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
       before: null,
       after: newValue,
     );
-    final newIndex = scheduleItemCreation(newValue, index: index);
+    final tempIndex = scheduleItemCreation(newValue, index: index);
     try {
       final newItem = await _createItem!(context, newValue);
-      confirmItemCreation(newIndex, newValue: newItem);
+      if (!context.mounted) {
+        return newItem;
+      }
+      if (newItem == null) {
+        rollbackItemCreation(tempIndex);
+        return null;
+      }
+
+      if (_getOffsetById != null) {
+        await _finalizeCreateWithOffset(context, newItem: newItem, tempIndex: tempIndex);
+      } else {
+        rollbackItemCreation(tempIndex);
+        removeItemAtIndex(tempIndex);
+        await refreshList(
+          context: context,
+          reason: LdFetchReason.invalidate,
+          anchorId: newItem.id,
+        );
+      }
       return newItem;
     } catch (e, stackTrace) {
       if (ldPrintDebugMessages) {
@@ -200,9 +218,47 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
         debugPrint(stackTrace.toString());
       }
 
-      rollbackItemCreation(newIndex);
+      rollbackItemCreation(tempIndex);
       return null;
     }
+  }
+
+  Future<void> _finalizeCreateWithOffset(
+    BuildContext context, {
+    required T newItem,
+    required int tempIndex,
+  }) async {
+    final offset = await _getOffsetById!(
+      FetchOffsetParameters(
+        context: context,
+        id: newItem.id,
+        reason: LdFetchReason.invalidate,
+        cache: cache,
+      ),
+    );
+
+    if (!context.mounted) {
+      return;
+    }
+
+    if (offset != null && offset >= 0) {
+      removeItemAtIndex(tempIndex);
+      repositionItemById(
+        newItem.id,
+        newIndex: offset,
+        value: newItem,
+      );
+      requestScrollToItem(newItem.id);
+      return;
+    }
+
+    rollbackItemCreation(tempIndex);
+    removeItemAtIndex(tempIndex);
+    await refreshList(
+      context: context,
+      reason: LdFetchReason.invalidate,
+      anchorId: newItem.id,
+    );
   }
 
   Future<void> delete({required BuildContext context, required IdType id}) async {
@@ -258,12 +314,35 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     }
 
     if (getItemIndexById(id) != null) {
-      confirmItemDeletion(
-        context: context,
-        refresh: refresh,
-        id: id,
-      );
+      unawaited(_confirmPagedDeletion(context, id: id, refresh: refresh));
     }
+  }
+
+  Future<void> _confirmPagedDeletion(
+    BuildContext context, {
+    required IdType id,
+    required bool refresh,
+  }) async {
+    final compacted = confirmItemDeletion(
+      context: context,
+      refresh: refresh,
+      id: id,
+    );
+
+    if (compacted || refresh || !context.mounted) {
+      return;
+    }
+
+    if (_isGreedy && isDataComplete) {
+      await eagerFetchAllPages(context);
+      return;
+    }
+
+    await refreshList(
+      context: context,
+      reason: LdFetchReason.invalidate,
+      anchorId: _resolveDeletionAnchorId(id),
+    );
   }
 
   void _rollbackDeletionForId(IdType id) {
@@ -288,13 +367,13 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
   }
 
   @override
-  void confirmItemDeletion({
+  bool confirmItemDeletion({
     required BuildContext context,
     bool refresh = false,
     required IdType id,
   }) {
     _detachedItemsById.remove(id);
-    super.confirmItemDeletion(
+    return super.confirmItemDeletion(
       context: context,
       refresh: refresh,
       id: id,
@@ -467,9 +546,24 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     }
 
     if (effectiveReason == LdFetchReason.filter ||
-        effectiveReason == LdFetchReason.sort ||
-        effectiveReason == LdFetchReason.invalidate) {
+        effectiveReason == LdFetchReason.sort) {
       initialOffset = 0;
+    } else if (effectiveReason == LdFetchReason.invalidate) {
+      final effectiveAnchorId = anchorId ?? _resolveDefaultRefreshAnchorId();
+
+      if (effectiveAnchorId != null && _getOffsetById != null) {
+        final anchorOffset = await _getOffsetById(
+          FetchOffsetParameters(
+            context: context,
+            id: effectiveAnchorId,
+            reason: effectiveReason,
+            cache: cache,
+          ),
+        );
+        initialOffset = anchorOffset != null && anchorOffset >= 0 ? anchorOffset : 0;
+      } else {
+        initialOffset = 0;
+      }
     } else if (effectiveReason == LdFetchReason.refresh) {
       final effectiveAnchorId = anchorId ?? _resolveDefaultRefreshAnchorId();
 
@@ -513,17 +607,27 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
 
   Future<void> update(BuildContext context, IdType id, T newValue) async {
     if (_updateItem != null) {
+      final before = getItemById(id)?.value;
       _maybeInvalidateOnMutation(
         context,
         kind: LdRepositoryMutationKind.update,
-        before: getItemById(id)?.value,
+        before: before,
         after: newValue,
       );
       scheduleItemUpdate(id, newValue);
       try {
         final newItemFromServer = await _updateItem(context, id, newValue);
         final newItem = newItemFromServer ?? newValue;
+        if (!context.mounted) {
+          return;
+        }
         confirmItemUpdate(id, newItem);
+        await _applyPostUpdateLayout(
+          context,
+          id: id,
+          before: before,
+          after: newItem,
+        );
       } catch (e) {
         await rollbackItemUpdate(id);
         rethrow;
@@ -532,11 +636,14 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
   }
 
   Future<void> updateBatch(BuildContext context, Set<T> items) async {
+    final layoutChecks = <IdType, ({T? before, T after})>{};
     for (final item in items) {
+      final before = getItemById(item.id)?.value;
+      layoutChecks[item.id] = (before: before, after: item);
       _maybeInvalidateOnMutation(
         context,
         kind: LdRepositoryMutationKind.update,
-        before: getItemById(item.id)?.value,
+        before: before,
         after: item,
       );
       scheduleItemUpdate(item.id, item);
@@ -546,6 +653,9 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
         await _updateBatch(context, items);
         for (final item in items) {
           confirmItemUpdate(item.id, item);
+        }
+        if (context.mounted) {
+          await _applyPostUpdateLayoutBatch(context, layoutChecks);
         }
       } catch (e) {
         for (final item in items) {
@@ -558,7 +668,12 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
       for (final item in items) {
         try {
           final newItem = await _updateItem!(context, item.id, item);
-          confirmItemUpdate(item.id, newItem ?? item);
+          final resolved = newItem ?? item;
+          confirmItemUpdate(item.id, resolved);
+          layoutChecks[item.id] = (
+            before: layoutChecks[item.id]!.before,
+            after: resolved,
+          );
         } catch (e) {
           await rollbackItemUpdate(item.id);
           exceptions.add(e);
@@ -568,7 +683,134 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
       if (exceptions.isNotEmpty) {
         throw Exception(exceptions);
       }
+
+      if (context.mounted) {
+        await _applyPostUpdateLayoutBatch(context, layoutChecks);
+      }
     }
+  }
+
+  Future<void> _applyPostUpdateLayoutBatch(
+    BuildContext context,
+    Map<IdType, ({T? before, T after})> layoutChecks,
+  ) async {
+    var needsRefresh = false;
+    IdType? refreshAnchorId;
+
+    for (final entry in layoutChecks.entries) {
+      if (!isLayoutAffectedByUpdate<T, IdType>(
+        context: context,
+        before: entry.value.before,
+        after: entry.value.after,
+      )) {
+        continue;
+      }
+
+      if (_getOffsetById != null) {
+        await _applyPostUpdateLayout(
+          context,
+          id: entry.key,
+          before: entry.value.before,
+          after: entry.value.after,
+        );
+      } else {
+        needsRefresh = true;
+        refreshAnchorId ??= entry.key;
+      }
+    }
+
+    if (needsRefresh && context.mounted) {
+      await refreshList(
+        context: context,
+        reason: LdFetchReason.invalidate,
+        anchorId: refreshAnchorId,
+      );
+    }
+  }
+
+  Future<void> _applyPostUpdateLayout(
+    BuildContext context, {
+    required IdType id,
+    required T? before,
+    required T after,
+  }) async {
+    final layoutAffected = isLayoutAffectedByUpdate<T, IdType>(
+      context: context,
+      before: before,
+      after: after,
+    );
+    // #region agent log
+    debugPrint(
+      '[DEBUG-c191e8] H2,H4 repository:_applyPostUpdateLayout:entry '
+      'id=$id layoutAffected=$layoutAffected indexBefore=${getItemIndexById(id)} '
+      'initialOffset=$initialOffset hasGetOffsetById=${_getOffsetById != null}',
+    );
+    // #endregion
+    if (!layoutAffected) {
+      return;
+    }
+
+    final getOffsetById = _getOffsetById;
+    if (getOffsetById != null) {
+      final offset = await getOffsetById(
+        FetchOffsetParameters(
+          context: context,
+          id: id,
+          reason: LdFetchReason.invalidate,
+          cache: cache,
+        ),
+      );
+
+      if (!context.mounted) {
+        return;
+      }
+
+      // #region agent log
+      debugPrint(
+        '[DEBUG-c191e8] H2,H3 repository:_applyPostUpdateLayout:offset '
+        'id=$id offset=$offset indexBeforeReposition=${getItemIndexById(id)}',
+      );
+      // #endregion
+
+      if (offset != null && offset >= 0) {
+        repositionItemById(
+          id,
+          newIndex: offset,
+          value: after,
+        );
+        // #region agent log
+        debugPrint(
+          '[DEBUG-c191e8] H1,H3 repository:_applyPostUpdateLayout:repositioned '
+          'id=$id newIndex=$offset indexAfter=${getItemIndexById(id)} '
+          'loadedKeys=${itemsMap.keys.toList()} totalItems=$totalItems',
+        );
+        // #endregion
+        requestScrollToItem(id);
+      } else {
+        final index = getItemIndexById(id);
+        if (index != null) {
+          removeItemAtIndex(index);
+        }
+      }
+      return;
+    }
+
+    await refreshList(
+      context: context,
+      reason: LdFetchReason.invalidate,
+      anchorId: id,
+    );
+  }
+
+  IdType? _resolveDeletionAnchorId(IdType deletedId) {
+    if (_lastSelectionAnchorId != null && _lastSelectionAnchorId != deletedId) {
+      return _lastSelectionAnchorId;
+    }
+
+    return itemsMap.entries
+        .where((entry) => entry.value.value != null && entry.value.value!.id != deletedId)
+        .map((entry) => entry.value.value!.id)
+        .firstOrNull;
   }
 
   IdType? _resolveDefaultRefreshAnchorId() {

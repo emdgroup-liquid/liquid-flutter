@@ -175,6 +175,7 @@ class _LdSearchInputState extends State<LdSearchInput> {
           child: LdInput(
             key: _inputKey,
             textInputAction: TextInputAction.search,
+            size: LdSize.s,
             hint: widget.searchConfig.hint ?? LiquidLocalizations.of(context).search,
             controller: _inputController,
             showClear: true,

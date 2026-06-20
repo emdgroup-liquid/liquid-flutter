@@ -14,7 +14,8 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
     required this.allValues,
     E? initialSelected,
     super.isEnabled,
-    super.mutationAffectsCache,
+    super.affectedByUpdate,
+    @Deprecated('Use affectedByUpdate') super.mutationAffectsCache,
   }) : selectedValue = initialSelected;
 
   @override
@@ -84,7 +85,8 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
     E? selectedValue,
     bool clearSelectedValue = false,
     bool Function(BuildContext context)? isEnabled,
-    LdMutationAffectsCache<T>? mutationAffectsCache,
+    LdAffectedByUpdate<T>? affectedByUpdate,
+    @Deprecated('Use affectedByUpdate') LdAffectedByUpdate<T>? mutationAffectsCache,
   }) {
     return LdFilterOneOf<T, IdType, E>(
       name: name ?? this.name,
@@ -94,7 +96,7 @@ class LdFilterOneOf<T extends Identifiable<IdType>, IdType, E> extends LdFilterO
       allValues: allValues ?? this.allValues,
       initialSelected: clearSelectedValue ? null : (selectedValue ?? this.selectedValue),
       isEnabled: isEnabled ?? this.isEnabled,
-      mutationAffectsCache: mutationAffectsCache ?? this.mutationAffectsCache,
+      affectedByUpdate: affectedByUpdate ?? mutationAffectsCache ?? this.affectedByUpdate,
     );
   }
 

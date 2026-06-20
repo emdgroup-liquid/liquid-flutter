@@ -12,6 +12,7 @@ enum LdAppBarScrollBehavior {
   static,
   mobileOnly,
   always,
+  hidden,
 }
 
 class LdScaffold extends StatefulWidget {

@@ -13,7 +13,8 @@ class LdSurfaceInfo {
 
 extension LdSurfaceInfoExtension on BuildContext {
   bool get isSurface => LdSurfaceInfo.of(this).isSurface;
-  Color get surfaceColor => LdSurfaceInfo.of(this).isSurface ? LdTheme.of(this).surface : LdTheme.of(this).background;
+  Color get surfaceColor =>
+      LdSurfaceInfo.of(this, listen: true).isSurface ? LdTheme.of(this).surface : LdTheme.of(this).background;
 }
 
 /// A widget that will change its background color based on the parent surface

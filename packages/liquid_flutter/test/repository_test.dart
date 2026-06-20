@@ -961,19 +961,20 @@ void main() {
               label: (_) => 'Title',
               icon: (_) => const SizedBox.shrink(),
               isOn: true,
-              mutationAffectsCache: (before, after) => before?.name != after?.name,
+              affectedByUpdate: (before, after) => before?.name != after?.name,
             ),
             LdSortOption<_TestItem, int>(
               name: 'value',
               label: (_) => 'Value',
               icon: (_) => const SizedBox.shrink(),
               isOn: true,
-              mutationAffectsCache: (before, after) => before?.value != after?.value,
+              affectedByUpdate: (before, after) => before?.value != after?.value,
             ),
           ],
         );
 
         final repository = createRepository(
+          getOffsetById: (params) async => params.id - 1,
           updateItem: (context, id, newItem) async => newItem,
         );
 
@@ -1009,15 +1010,16 @@ void main() {
         final ctx = await _pumpAndGetContext(tester);
         await _loadRepository(tester, repository, ctx);
         repository.cache.writePage(
-          '',
+          'stale',
           offset: 0,
           items: defaultItems,
           total: defaultItems.length,
         );
 
         await repository.create(ctx, _TestItem(0, 'New Item', 50));
+        await tester.pumpAndSettle(const Duration(seconds: 1));
 
-        expect(repository.cache.keys, isEmpty);
+        expect(repository.cache.readPage('stale', 0), isNull);
       });
     });
 
@@ -1065,6 +1067,252 @@ void main() {
         expect(repository.isGreedy, isTrue);
         expect(repository.isDataComplete, isTrue);
         expect(repository.totalItems, equals(3));
+      });
+    });
+
+    group('mutation layout', () {
+      testWidgets('create repositions item when getOffsetById is configured', (tester) async {
+        final items = List.generate(10, (i) => _TestItem(i + 1, 'Item ${i + 1}', i + 1));
+        final repository = LdRepository<_TestItem, int>(
+          pageSize: 5,
+          getOffsetById: (params) async => items.indexWhere((item) => item.id == params.id),
+          createItem: (context, item) async {
+            final created = _TestItem(11, 'New Item', 11);
+            items.add(created);
+            items.sort((a, b) => a.value.compareTo(b.value));
+            return created;
+          },
+          fetchListWithParameters: (parameters) async {
+            final start = parameters.offset;
+            final end = (start + parameters.pageSize).clamp(0, items.length);
+            return LdListPage<_TestItem>(
+              newItems: start < items.length ? items.sublist(start, end) : <_TestItem>[],
+              hasMore: end < items.length,
+              total: items.length,
+            );
+          },
+          getById: (id) async => items.firstWhere((item) => item.id == id),
+        );
+
+        final ctx = await _pumpAndGetContext(tester);
+        await _loadRepository(tester, repository, ctx);
+
+        await repository.create(ctx, _TestItem(0, 'New Item', 11));
+        await tester.pumpAndSettle(const Duration(seconds: 1));
+
+        final expectedIndex = items.indexWhere((item) => item.id == 11);
+        expect(repository.getItemIndexById(11), equals(expectedIndex));
+      });
+
+      test('canCompactIndicesAfterDeletion requires contiguous loaded indices', () {
+        final repository = LdRepository<_TestItem, int>(
+          fetchListWithParameters: (_) async => LdListPage<_TestItem>(
+            newItems: const [],
+            hasMore: false,
+            total: 0,
+          ),
+          getById: (id) async => _TestItem(id, 'Item $id', id),
+        );
+
+        repository.replaceItems({
+          0: LdPaginatorItem(value: _TestItem(1, 'Item 1', 1), state: LdPaginatorItemState.loaded),
+          1: LdPaginatorItem(value: _TestItem(2, 'Item 2', 2), state: LdPaginatorItemState.loaded),
+          2: LdPaginatorItem(value: _TestItem(3, 'Item 3', 3), state: LdPaginatorItemState.loaded),
+          10: LdPaginatorItem(value: _TestItem(11, 'Item 11', 11), state: LdPaginatorItemState.loaded),
+        });
+        repository.totalItems = 15;
+
+        expect(repository.canCompactIndicesAfterDeletion(1), isFalse);
+        expect(repository.canCompactIndicesAfterDeletion(9), isTrue);
+      });
+
+      testWidgets('update keeps index when layout is not affected', (tester) async {
+        final sortAndFilterState = LdMonkeySortAndFilterState<_TestItem, int>(
+          filters: {},
+          sortOptions: [
+            LdSortOption<_TestItem, int>(
+              name: 'value',
+              label: (_) => 'Value',
+              icon: (_) => const SizedBox.shrink(),
+              isOn: true,
+              affectedByUpdate: (before, after) => before?.value != after?.value,
+            ),
+          ],
+        );
+
+        late BuildContext ctx;
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: const [LiquidLocalizations.delegate],
+            home: LdThemeProvider(
+              child: Provider<LdMonkeySortAndFilterState<_TestItem, int>>.value(
+                value: sortAndFilterState,
+                child: Builder(
+                  builder: (context) {
+                    ctx = context;
+                    return const SizedBox();
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final repository = createRepository(
+          getOffsetById: (params) async => params.id - 1,
+          updateItem: (context, id, newItem) async => newItem,
+        );
+        await _loadRepository(tester, repository, ctx);
+
+        const indexBefore = 0;
+        expect(repository.getItemIndexById(1), equals(indexBefore));
+
+        await repository.update(
+          ctx,
+          1,
+          _TestItem(1, 'Renamed Item 1', 10),
+        );
+        await tester.pumpAndSettle();
+
+        expect(repository.getItemIndexById(1), equals(indexBefore));
+        expect(repository.getItemById(1)?.value?.name, equals('Renamed Item 1'));
+      });
+
+      testWidgets('update repositions item when sort layout is affected', (tester) async {
+        final items = List.generate(5, (i) => _TestItem(i + 1, 'Item ${i + 1}', i + 1));
+        final sortAndFilterState = LdMonkeySortAndFilterState<_TestItem, int>(
+          filters: {},
+          sortOptions: [
+            LdSortOption<_TestItem, int>(
+              name: 'value',
+              label: (_) => 'Value',
+              icon: (_) => const SizedBox.shrink(),
+              isOn: true,
+              affectedByUpdate: (before, after) => before?.value != after?.value,
+            ),
+          ],
+        );
+
+        late BuildContext ctx;
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: const [LiquidLocalizations.delegate],
+            home: LdThemeProvider(
+              child: Provider<LdMonkeySortAndFilterState<_TestItem, int>>.value(
+                value: sortAndFilterState,
+                child: Builder(
+                  builder: (context) {
+                    ctx = context;
+                    return const SizedBox();
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final repository = LdRepository<_TestItem, int>(
+          pageSize: 5,
+          getOffsetById: (params) async => items.indexWhere((item) => item.id == params.id),
+          updateItem: (context, id, newItem) async {
+            final index = items.indexWhere((item) => item.id == id);
+            items[index] = newItem;
+            items.sort((a, b) => a.value.compareTo(b.value));
+            return newItem;
+          },
+          fetchListWithParameters: (parameters) async {
+            final start = parameters.offset;
+            final end = (start + parameters.pageSize).clamp(0, items.length);
+            return LdListPage<_TestItem>(
+              newItems: start < items.length ? items.sublist(start, end) : <_TestItem>[],
+              hasMore: end < items.length,
+              total: items.length,
+            );
+          },
+          getById: (id) async => items.firstWhere((item) => item.id == id),
+        );
+
+        await _loadRepository(tester, repository, ctx);
+
+        await repository.update(ctx, 1, _TestItem(1, 'Item 1', 99));
+        await tester.pumpAndSettle();
+
+        expect(repository.getItemIndexById(1), equals(items.length - 1));
+      });
+
+      testWidgets('create refreshes list when getOffsetById is not configured', (tester) async {
+        final items = defaultItems.toList();
+        final fetchReasons = <LdFetchReason>[];
+
+        final repository = createRepository(
+          createItem: (context, item) async {
+            final created = _TestItem(4, 'New Item', 40);
+            items.add(created);
+            return created;
+          },
+          fetchListWithParameters: (parameters) async {
+            fetchReasons.add(parameters.reason);
+            final start = parameters.offset;
+            final end = (start + parameters.pageSize < items.length)
+                ? start + parameters.pageSize
+                : items.length;
+            return LdListPage<_TestItem>(
+              newItems: start < items.length ? items.sublist(start, end) : [],
+              hasMore: end < items.length,
+              total: items.length,
+            );
+          },
+        );
+
+        final ctx = await _pumpAndGetContext(tester);
+        await _loadRepository(tester, repository, ctx);
+        fetchReasons.clear();
+
+        await repository.create(ctx, _TestItem(0, 'New Item', 40));
+        await tester.pumpAndSettle(const Duration(seconds: 1));
+
+        expect(fetchReasons, contains(LdFetchReason.invalidate));
+        expect(repository.getItemById(4)?.value?.name, equals('New Item'));
+      });
+
+      testWidgets('delete with sparse map gaps refreshes instead of shifting', (tester) async {
+        final items = defaultItems.toList();
+        final fetchReasons = <LdFetchReason>[];
+        final repository = createRepository(
+          deleteItem: (context, id) async {
+            items.removeWhere((item) => item.id == id);
+          },
+          fetchListWithParameters: (parameters) async {
+            fetchReasons.add(parameters.reason);
+            final start = parameters.offset;
+            final end = (start + parameters.pageSize < items.length)
+                ? start + parameters.pageSize
+                : items.length;
+            return LdListPage<_TestItem>(
+              newItems: start < items.length ? items.sublist(start, end) : [],
+              hasMore: end < items.length,
+              total: items.length,
+            );
+          },
+        );
+
+        final ctx = await _pumpAndGetContext(tester);
+        repository.replaceItems({
+          0: LdPaginatorItem(value: defaultItems[0], state: LdPaginatorItemState.loaded),
+          1: LdPaginatorItem(value: defaultItems[1], state: LdPaginatorItemState.loaded),
+          2: LdPaginatorItem(value: defaultItems[2], state: LdPaginatorItemState.loaded),
+          10: LdPaginatorItem(value: _TestItem(11, 'Item 11', 11), state: LdPaginatorItemState.loaded),
+        });
+        repository.totalItems = 12;
+        fetchReasons.clear();
+
+        await repository.delete(context: ctx, id: 2);
+        await tester.pumpAndSettle(const Duration(seconds: 1));
+
+        expect(fetchReasons, contains(LdFetchReason.invalidate));
+        expect(repository.getItemById(2), isNull);
       });
     });
   });

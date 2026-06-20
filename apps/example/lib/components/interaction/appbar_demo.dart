@@ -212,6 +212,7 @@ class _AppBarConfigModalState extends State<_AppBarConfigModal> {
                     LdAppBarScrollBehavior.static: const Text('.static'),
                     LdAppBarScrollBehavior.mobileOnly: const Text('.mobileOnly'),
                     LdAppBarScrollBehavior.always: const Text('.always'),
+                    LdAppBarScrollBehavior.hidden: const Text('.hidden'),
                   },
                 ),
                 LdSwitch<LdAppBarAttachedMode>(
@@ -437,6 +438,7 @@ class _TabNavConfigModalState extends State<_TabNavConfigModal> {
                     LdAppBarScrollBehavior.static: const Text('.static'),
                     LdAppBarScrollBehavior.mobileOnly: const Text('.mobileOnly'),
                     LdAppBarScrollBehavior.always: const Text('.always'),
+                    LdAppBarScrollBehavior.hidden: const Text('.hidden'),
                   },
                 ),
               ],

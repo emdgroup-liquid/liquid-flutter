@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -194,6 +196,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
   late final LdRetryController _retryController;
 
   final Map<IdType, GlobalKey> _itemKeys = {};
+  final Set<int> _pendingGapOffsets = {};
 
   @override
   void initState() {
@@ -338,9 +341,19 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
     await Future.delayed(Duration.zero);
     if (!mounted) return;
 
+    _pendingGapOffsets.clear();
     _updateRetryControllerState();
     _updateGroupedItems();
+    // #region agent log
+    final scrollOffset = _scrollController.hasClients ? _scrollController.offset : null;
+    debugPrint(
+      '[DEBUG-c191e8] H1,H4,H5 list:_onDataChange '
+      'initialOffset=${widget.paginator.initialOffset} performedInitialScroll=$_performedInitialScroll '
+      'scrollOffset=$scrollOffset itemKeyCount=${_itemKeys.length} totalItems=${widget.paginator.totalItems}',
+    );
+    // #endregion
     _maybePerformInitialScroll();
+    _maybeScrollToPendingItem();
   }
 
   void _updateRetryControllerState() {
@@ -467,7 +480,11 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
       return const SizedBox.shrink();
     }
 
-    widget.paginator.fetchPageAtOffset(context, position);
+    final pageSize = widget.paginator.pageSize;
+    final normalizedOffset = (position ~/ pageSize) * pageSize;
+    if (_pendingGapOffsets.add(normalizedOffset)) {
+      widget.paginator.fetchPageAtOffset(context, position);
+    }
 
     return _buildLoader(context, position);
   }
@@ -554,6 +571,111 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
 
   bool _performedInitialScroll = false;
 
+  void _maybeScrollToPendingItem() {
+    final scrollToId = widget.paginator.pendingScrollToItemId;
+    if (scrollToId == null) {
+      return;
+    }
+
+    final index = widget.paginator.getItemIndexById(scrollToId);
+    // #region agent log
+    debugPrint(
+      '[DEBUG-c191e8] FIX list:_maybeScrollToPendingItem scheduled '
+      'id=$scrollToId index=$index hasClients=${_scrollController.hasClients} '
+      'scrollOffset=${_scrollController.hasClients ? _scrollController.offset : null}',
+    );
+    // #endregion
+    if (index == null || !_scrollController.hasClients) {
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_scrollPendingItemIntoView(scrollToId, index));
+    });
+  }
+
+  Future<void> _scrollPendingItemIntoView(IdType id, int index) async {
+    if (!mounted || !_scrollController.hasClients) {
+      return;
+    }
+    if (widget.paginator.pendingScrollToItemId != id) {
+      return;
+    }
+
+    await widget.paginator.fetchPageAtOffset(context, index);
+    if (!mounted || !_scrollController.hasClients) {
+      return;
+    }
+    if (widget.paginator.pendingScrollToItemId != id) {
+      return;
+    }
+
+    final averageHeight = _getAverageItemHeight();
+    if (averageHeight <= 0) {
+      // #region agent log
+      debugPrint('[DEBUG-c191e8] FIX list:_scrollPendingItemIntoView abort no averageHeight id=$id');
+      // #endregion
+      return;
+    }
+
+    final target = (averageHeight * index).clamp(
+      0.0,
+      _scrollController.position.maxScrollExtent,
+    );
+    final scrollBefore = _scrollController.offset;
+    final viewportHeight = _scrollController.position.viewportDimension;
+    final firstVisibleIndex = (scrollBefore / averageHeight).floor();
+    final lastVisibleIndex = ((scrollBefore + viewportHeight) / averageHeight).ceil();
+    final isVisible = index >= firstVisibleIndex && index <= lastVisibleIndex;
+
+    if (isVisible) {
+      // #region agent log
+      debugPrint(
+        '[DEBUG-c191e8] FIX list:_scrollPendingItemIntoView skip visible '
+        'id=$id index=$index visibleRange=$firstVisibleIndex-$lastVisibleIndex scrollOffset=$scrollBefore',
+      );
+      // #endregion
+      return;
+    }
+
+    // #region agent log
+    debugPrint(
+      '[DEBUG-c191e8] FIX list:_scrollPendingItemIntoView animateTo '
+      'id=$id index=$index target=$target scrollBefore=$scrollBefore',
+    );
+    // #endregion
+    await _scrollController.animateTo(
+      target,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    await WidgetsBinding.instance.endOfFrame;
+
+    final itemContext = _itemKeys[id]?.currentContext;
+    if (itemContext != null && itemContext.mounted) {
+      await Scrollable.ensureVisible(
+        itemContext,
+        alignment: 0.5,
+        duration: const Duration(milliseconds: 150),
+      );
+    }
+
+    if (widget.paginator.pendingScrollToItemId == id) {
+      widget.paginator.clearPendingScrollToItem();
+    }
+    // #region agent log
+    debugPrint(
+      '[DEBUG-c191e8] FIX list:_scrollPendingItemIntoView done '
+      'id=$id scrollAfter=${_scrollController.hasClients ? _scrollController.offset : null}',
+    );
+    // #endregion
+  }
+
   /// Helper method to perform the initial scroll to the correct position
   /// based on the initial offset.
   Future<void> _maybePerformInitialScroll() async {
@@ -570,6 +692,14 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
     final averageHeight = _getAverageItemHeight();
 
     final offset = averageHeight * widget.paginator.initialOffset;
+
+    // #region agent log
+    debugPrint(
+      '[DEBUG-c191e8] H1,H4 list:_maybePerformInitialScroll '
+      'initialOffset=${widget.paginator.initialOffset} averageHeight=$averageHeight '
+      'targetScrollOffset=$offset currentScrollOffset=${_scrollController.offset}',
+    );
+    // #endregion
 
     _scrollController.animateTo(offset, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
   }

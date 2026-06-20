@@ -49,6 +49,7 @@ Future<bool> ldConfirmModal(
                 ),
               ],
               child: LdScaffoldBody(
+                shrinkWrap: true,
                 children: [
                   if (indicatorType != null)
                     LdIndicator(

@@ -399,10 +399,7 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
       return [];
     }
 
-    return widget.items!
-        .where((item) => value.contains(item.id))
-        .take(_getDisplayItems(value.toList()))
-        .toList();
+    return widget.items!.where((item) => value.contains(item.id)).take(_getDisplayItems(value.toList())).toList();
   }
 
   Widget _buildTrigger({
@@ -552,49 +549,44 @@ class LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<Ld
       child: LdScaffold(
         debugName: 'LdChoosePage',
         body: LdAppBar(
-        debugName: 'LdChoosePageAppBar',
-        title: Text(widget.label),
-        implyCloseModalButton: false,
-        actions: [
-          if (widget.allowEmpty)
+          debugName: 'LdChoosePageAppBar',
+          title: Text(widget.label),
+          implyCloseModalButton: false,
+          searchConfig: searchFilter?.searchConfig((query) {
+            searchFilter.update(
+              context,
+              searchFilter.copyWith(
+                isOn: query.isNotEmpty,
+                searchText: query,
+              ),
+            );
+          }),
+          actions: [
+            if (widget.allowEmpty)
+              LdAppBarAction(
+                overflowMode: LdAppBarActionOverflowMode.pinned,
+                buttonMode: LdButtonMode.ghost,
+                disabled: selectedItems.isEmpty,
+                onPressed: () {
+                  LdMonkeySelection.updateSelection<T, IdType>(context, {});
+                },
+                child: const Text('Clear'),
+              ),
             LdAppBarAction(
               overflowMode: LdAppBarActionOverflowMode.pinned,
-              buttonMode: LdButtonMode.ghost,
-              disabled: selectedItems.isEmpty,
+              disabled: !ldChooseCanConfirmSelection<IdType>(
+                current: selectedItems,
+                initial: widget.initialSelectedItems,
+              ),
+              key: const Key('ldChoose_done'),
               onPressed: () {
-                LdMonkeySelection.updateSelection<T, IdType>(context, {});
+                maybePopContextMenu(context);
+                Navigator.of(context).pop(selectedItems);
               },
-              child: const Text('Clear'),
+              child: const Text('Done'),
             ),
-          LdAppBarAction(
-            overflowMode: LdAppBarActionOverflowMode.pinned,
-            disabled: !ldChooseCanConfirmSelection<IdType>(
-              current: selectedItems,
-              initial: widget.initialSelectedItems,
-            ),
-            key: const Key('ldChoose_done'),
-            onPressed: () {
-              maybePopContextMenu(context);
-              Navigator.of(context).pop(selectedItems);
-            },
-            child: const Text('Done'),
-          ),
-        ],
-        child: searchFilter != null
-            ? LdAppBar.top(
-                debugName: 'LdChoosePageSearchAppBar',
-                searchConfig: searchFilter.searchConfig((query) {
-                  searchFilter.update(
-                    context,
-                    searchFilter.copyWith(
-                      isOn: query.isNotEmpty,
-                      searchText: query,
-                    ),
-                  );
-                }),
-                child: body,
-              )
-            : body,
+          ],
+          child: body,
         ),
       ),
     );

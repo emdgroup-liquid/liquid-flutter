@@ -51,7 +51,13 @@ class LdSortOption<T extends Identifiable<IdType>, IdType> {
 
   final String name;
 
-  final LdMutationAffectsCache<T>? mutationAffectsCache;
+  /// Whether an item update may change sort order for this sort option.
+  ///
+  /// Used for cache invalidation and paginator layout decisions.
+  final LdAffectedByUpdate<T>? affectedByUpdate;
+
+  @Deprecated('Use affectedByUpdate')
+  LdAffectedByUpdate<T>? get mutationAffectsCache => affectedByUpdate;
 
   LdSortOption({
     required this.label,
@@ -59,13 +65,15 @@ class LdSortOption<T extends Identifiable<IdType>, IdType> {
     required this.name,
     this.isOn = false,
     this.direction = LdSortOptionDirection.asc,
-    this.mutationAffectsCache,
-  });
+    LdAffectedByUpdate<T>? affectedByUpdate,
+    @Deprecated('Use affectedByUpdate') LdAffectedByUpdate<T>? mutationAffectsCache,
+  }) : affectedByUpdate = affectedByUpdate ?? mutationAffectsCache;
 
   LdSortOption<T, IdType> copyWith({
     bool? isOn,
     LdSortOptionDirection? direction,
-    LdMutationAffectsCache<T>? mutationAffectsCache,
+    LdAffectedByUpdate<T>? affectedByUpdate,
+    @Deprecated('Use affectedByUpdate') LdAffectedByUpdate<T>? mutationAffectsCache,
   }) {
     return LdSortOption<T, IdType>(
       name: name,
@@ -73,7 +81,7 @@ class LdSortOption<T extends Identifiable<IdType>, IdType> {
       icon: icon,
       isOn: isOn ?? this.isOn,
       direction: direction ?? this.direction,
-      mutationAffectsCache: mutationAffectsCache ?? this.mutationAffectsCache,
+      affectedByUpdate: affectedByUpdate ?? mutationAffectsCache ?? this.affectedByUpdate,
     );
   }
 }

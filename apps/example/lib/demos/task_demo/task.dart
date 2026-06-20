@@ -5,14 +5,16 @@ class Task with Identifiable<int> {
   final int id;
 
   final String task;
+  final String emoji;
   final DateTime due;
   final bool done;
   final DateTime lastUpdate;
-  Task(this.id, this.task, this.due, this.done, this.lastUpdate);
+  Task(this.id, this.task, this.due, this.done, this.lastUpdate, {this.emoji = "📋"});
 
   Task copyWith({
     int? id,
     String? task,
+    String? emoji,
     DateTime? due,
     bool? done,
     DateTime? lastUpdate,
@@ -23,5 +25,6 @@ class Task with Identifiable<int> {
         due ?? this.due,
         done ?? this.done,
         lastUpdate ?? this.lastUpdate,
+        emoji: emoji ?? this.emoji,
       );
 }

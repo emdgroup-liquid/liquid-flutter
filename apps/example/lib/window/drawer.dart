@@ -198,7 +198,7 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
       body: LdAppBar(
         title: Text("Navigation"),
         debugName: "Drawer AppBar",
-        backgroundMode: LdAppBarBackgroundMode.visible,
+        //backgroundMode: LdAppBarBackgroundMode.visible,
         child: Builder(
           builder: (context) {
             return LdScaffoldBody(

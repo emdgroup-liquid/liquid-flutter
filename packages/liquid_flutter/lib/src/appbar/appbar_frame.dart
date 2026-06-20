@@ -245,6 +245,20 @@ class _AppBarFrameState extends State<AppBarFrame> {
     return result;
   }
 
+  @override
+  void didUpdateWidget(AppBarFrame oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.scrollBehavior == LdAppBarScrollBehavior.hidden &&
+        widget.scrollBehavior != LdAppBarScrollBehavior.hidden) {
+      setState(() {
+        _visualTarget = 0;
+        _snapOverriding = false;
+        _hideOffset = 0;
+      });
+    }
+  }
+
   void _onInnerSizeChange(Size size) {
     if (_innerHeight != size.height) {
       setState(() => _innerHeight = size.height);
@@ -259,6 +273,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
       LdAppBarScrollBehavior.static => false,
       LdAppBarScrollBehavior.mobileOnly => isMobile,
       LdAppBarScrollBehavior.always => true,
+      LdAppBarScrollBehavior.hidden => false,
     };
   }
 
@@ -272,6 +287,14 @@ class _AppBarFrameState extends State<AppBarFrame> {
       LdAppBarPosition.top => metrics.extentBefore > 0,
       LdAppBarPosition.bottom => metrics.extentAfter > 0,
     };
+
+    if (metrics.extentBefore == 0 && _visualTarget != 0) {
+      setState(() {
+        _visualTarget = 0;
+        _snapOverriding = false;
+        _hideOffset = 0;
+      });
+    }
 
     if (isScrolledUnder != _isScrolledUnder) {
       setState(() => _isScrolledUnder = isScrolledUnder);
@@ -388,23 +411,33 @@ class _AppBarFrameState extends State<AppBarFrame> {
         ? widget.insideDecorationBuilder!(_isScrolledUnder)
         : widget.insideDecoration;
 
+    final theme = LdTheme.of(context);
+
     return FocusScope(
       node: _focusScopeNode,
       child: Container(
         padding: outerMargin.trimToAppBarPosition(widget.position),
         decoration: outsideDeco,
         key: Key("appbar_frame_outside_${widget.position.name}"),
-        child: MeasureSize(
-          onSizeChange: _onInnerSizeChange,
-          child: Container(
-            decoration: insideDeco,
-            clipBehavior: insideDeco != null ? Clip.hardEdge : Clip.none,
-            key: Key("appbar_frame_inside_${widget.position.name}"),
-            child: MediaQuery(
-              data: MediaQuery.of(context).copyWith(
-                padding: _insidePadding(constraints),
+        child: Provider.value(
+          value: LdSurfaceInfo(isSurface: outsideDeco?.color == theme.surface),
+          child: MeasureSize(
+            onSizeChange: _onInnerSizeChange,
+            child: Container(
+              decoration: insideDeco,
+              clipBehavior: insideDeco != null ? Clip.hardEdge : Clip.none,
+              key: Key("appbar_frame_inside_${widget.position.name}"),
+              child: Provider.value(
+                value: LdSurfaceInfo(
+                    isSurface: insideDeco?.color == theme.surface ||
+                        (outsideDeco?.color == theme.surface && insideDeco?.color == null)),
+                child: MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    padding: _insidePadding(constraints),
+                  ),
+                  child: widget.child,
+                ),
               ),
-              child: widget.child,
             ),
           ),
         ),
@@ -422,16 +455,17 @@ class _AppBarFrameState extends State<AppBarFrame> {
     required EdgeInsets systemInsets,
   }) {
     return LdAppBarMetrics(
+      appbarLayerMediaQuery: _buildAppBarMediaQuery(),
+      configuredInsets: ownMargin,
+      innerHeight: _innerHeight.toEdgeInsetsUsingPosition(widget.position),
+      isScrolledUnder: _isScrolledUnder,
       level: _calculateLevel(parentMetrics),
+      parentMetrics: parentMetrics,
       position: widget.position,
+      scrollBehavior: widget.scrollBehavior,
+      scrollOffset: scrollOffset,
       systemInsets: systemInsets,
       willHide: _shouldHideAppBar(),
-      innerHeight: _innerHeight.toEdgeInsetsUsingPosition(widget.position),
-      configuredInsets: ownMargin,
-      scrollOffset: scrollOffset,
-      isScrolledUnder: _isScrolledUnder,
-      parentMetrics: parentMetrics,
-      appbarLayerMediaQuery: _buildAppBarMediaQuery(),
     );
   }
 
@@ -516,6 +550,12 @@ class _AppBarFrameState extends State<AppBarFrame> {
           } +
           _innerHeight;
 
+      if (widget.scrollBehavior == LdAppBarScrollBehavior.hidden) {
+        _visualTarget = _barHeight;
+        _snapOverriding = false;
+        _hideOffset = _barHeight;
+      }
+
       return NotificationListener<ScrollMetricsNotification>(
         onNotification: (notification) {
           _handleScrollNotification(notification, constraints);
@@ -524,7 +564,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
         child: LdSpring(
           key: const Key('appbar_snap_spring'),
           position: _visualTarget,
-          initialPosition: _hideOffset,
+          initialPosition: _visualTarget,
           overriden: _snapOverriding,
           springConstant: 10,
           builder: (springContext, springState, child) {

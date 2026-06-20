@@ -56,10 +56,25 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   // Offsets that are queued for fetching.
   final List<int> _offsetQueue = List.empty(growable: true);
 
+  bool _fetchInProgress = false;
+
   /// Cache exposed to [FetchPageParameters] during fetches.
   final LdRepositoryCache<T, IdType> repositoryCache;
 
   LdFetchReason _pendingFetchReason = LdFetchReason.pagination;
+
+  /// When set, [LdList] scrolls this item into view after the next rebuild.
+  IdType? pendingScrollToItemId;
+
+  /// Requests that mounted [LdList] widgets scroll [id] into view.
+  void requestScrollToItem(IdType id) {
+    pendingScrollToItemId = id;
+    notifyListeners();
+  }
+
+  void clearPendingScrollToItem() {
+    pendingScrollToItemId = null;
+  }
 
   LdPaginator({
     this.fetchListFunction,
@@ -164,8 +179,11 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   }
 
   /// Confirms the deletion of an item.
-  /// This will remove the item from the paginator.
-  void confirmItemDeletion({
+  ///
+  /// Returns `true` when indices above [id] were compacted locally. Returns
+  /// `false` when the sparse map could not be safely compacted and the caller
+  /// should refresh list data.
+  bool confirmItemDeletion({
     required BuildContext context,
     bool refresh = false,
     required IdType id,
@@ -176,10 +194,42 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
     _items.remove(index);
     totalItems--;
+
+    final compacted = canCompactIndicesAfterDeletion(index);
+    if (compacted) {
+      compactIndicesAfterDeletion(index);
+    }
+
+    if (refresh) {
+      refreshList(context: context);
+    }
+
+    return compacted;
+  }
+
+  /// Whether loaded indices above [deletedIndex] are contiguous and safe to
+  /// shift down after a deletion.
+  bool canCompactIndicesAfterDeletion(int deletedIndex) {
+    final keysAbove = _items.keys.where((key) => key > deletedIndex).toList()..sort();
+    if (keysAbove.isEmpty) {
+      return true;
+    }
+
+    for (var i = 0; i < keysAbove.length; i++) {
+      if (keysAbove[i] != deletedIndex + 1 + i) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /// Shifts loaded items above [deletedIndex] down by one position.
+  void compactIndicesAfterDeletion(int deletedIndex) {
     final newOrder = <int, LdPaginatorItem<T>>{};
 
     for (final item in _items.entries) {
-      if (item.key > index) {
+      if (item.key > deletedIndex) {
         newOrder[item.key - 1] = item.value;
       } else {
         newOrder[item.key] = item.value;
@@ -188,17 +238,63 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
     _items.clear();
     _items.addAll(newOrder);
+    _updated(null);
+  }
 
-    if (refresh) {
-      refreshList(context: context);
+  /// Moves [id] to [newIndex], removing duplicate entries for the same id.
+  void repositionItemById(
+    IdType id, {
+    required int newIndex,
+    T? value,
+    LdPaginatorItemState state = LdPaginatorItemState.loaded,
+  }) {
+    final currentIndex = getItemIndexById(id);
+    final resolvedValue = value ?? (currentIndex != null ? _items[currentIndex]?.value : null);
+
+    if (currentIndex != null) {
+      _items.remove(currentIndex);
     }
+
+    for (final entry in _items.entries.toList()) {
+      if (entry.value.value?.id == id) {
+        _items.remove(entry.key);
+      }
+    }
+
+    if (newIndex >= totalItems) {
+      totalItems = newIndex + 1;
+    }
+
+    _items[newIndex] = LdPaginatorItem<T>(
+      value: resolvedValue,
+      state: state,
+    );
+    // #region agent log
+    debugPrint(
+      '[DEBUG-c191e8] H3,H5 list_paginator:repositionItemById '
+      'id=$id currentIndex=$currentIndex newIndex=$newIndex totalItems=$totalItems '
+      'loadedKeys=${_items.keys.toList()}',
+    );
+    // #endregion
+    _updated(_items[newIndex]);
+  }
+
+  void removeItemAtIndex(int index) {
+    _items.remove(index);
+    _updated(null);
   }
 
   /// Confirms the update of an item.
   /// This will apply [newValue] to the item. Otherwise the optimistic
   /// value previously set will be applied.
   void confirmItemUpdate(IdType id, T? newValue) {
-    final index = _items.entries.firstWhereOrNull((e) => e.value.previousValue?.id == id)?.key;
+    final index = _items.entries.firstWhereOrNull((e) {
+      final item = e.value;
+      if (item.state != LdPaginatorItemState.updating) {
+        return false;
+      }
+      return item.value?.id == id || item.previousValue?.id == id;
+    })?.key;
 
     if (index == null) throw Exception('Item with id $id not found');
 
@@ -214,12 +310,20 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   }
 
   Future<void> _triggerFetch(BuildContext context) async {
-    final newItems = await _fetchItems(context: context);
-    if (newItems.isNotEmpty) {
-      notifyListeners();
+    if (_fetchInProgress) {
+      return;
     }
-    if (_offsetQueue.isNotEmpty && context.mounted) {
-      await _triggerFetch(context);
+
+    _fetchInProgress = true;
+    try {
+      while (_offsetQueue.isNotEmpty && context.mounted) {
+        final newItems = await _fetchItems(context: context);
+        if (newItems.isNotEmpty) {
+          notifyListeners();
+        }
+      }
+    } finally {
+      _fetchInProgress = false;
     }
   }
 
@@ -227,16 +331,28 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   Future<void> _addToOffsetQueue(BuildContext context, int offset) async {
     if (offset < 0) offset = 0;
 
-    if (!_offsetQueue.contains(offset)) {
-      if (_offsetQueue.length < fetchQueueSize) {
-        _offsetQueue.add(offset);
-      } else {
-        _offsetQueue.removeAt(0);
-        _offsetQueue.add(offset);
+    final normalizedOffset = offset;
+    final pageOffset = (normalizedOffset ~/ pageSize) * pageSize;
+
+    if (_offsetQueue.contains(normalizedOffset)) {
+      if (!_fetchInProgress) {
+        await _triggerFetch(context);
       }
+      return;
     }
 
-    return _triggerFetch(context);
+    if (_requestedOffsets.contains(pageOffset)) {
+      return;
+    }
+
+    if (_offsetQueue.length < fetchQueueSize) {
+      _offsetQueue.add(normalizedOffset);
+    } else {
+      _offsetQueue.removeAt(0);
+      _offsetQueue.add(normalizedOffset);
+    }
+
+    await _triggerFetch(context);
   }
 
   /// Fetch items at a specific offset, normalized to the nearest page size
@@ -407,7 +523,13 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   /// Rolls back the update of an item.x
   /// This will restore the item to its previous state.
   Future<void> rollbackItemUpdate(IdType id, {T? newValue}) async {
-    final index = _items.entries.firstWhereOrNull((e) => e.value.previousValue?.id == id)?.key;
+    final index = _items.entries.firstWhereOrNull((e) {
+      final item = e.value;
+      if (item.state != LdPaginatorItemState.updating) {
+        return false;
+      }
+      return item.value?.id == id || item.previousValue?.id == id;
+    })?.key;
 
     if (index == null) {
       throw Exception('Unable to roll back. Item with id $id not found');
@@ -581,6 +703,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
       totalItems = page.total;
       loadedItems.addAll(_insertPageItems(page, offset));
+      _requestedOffsets.remove(offset);
       _setError(null);
     } catch (e, s) {
       _setError(LdException(

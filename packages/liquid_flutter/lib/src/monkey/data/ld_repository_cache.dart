@@ -129,8 +129,8 @@ class LdRepositoryCache<T extends Identifiable<IdType>, IdType> {
   /// Invalidates cached pages after a repository mutation.
   ///
   /// [create] and [delete] always clear the full cache. [update] removes cache
-  /// keys whose filter/sort parts report affected via [LdFilterOption.mutationAffectsCache]
-  /// or [LdSortOption.mutationAffectsCache], read from [LdMonkeySortAndFilterState].
+  /// keys whose filter/sort parts report affected via [LdFilterOption.affectedByUpdate]
+  /// or [LdSortOption.affectedByUpdate], read from [LdMonkeySortAndFilterState].
   void invalidateOnMutation({
     required BuildContext context,
     required LdRepositoryMutationKind kind,
@@ -151,8 +151,8 @@ class LdRepositoryCache<T extends Identifiable<IdType>, IdType> {
     final filtersByName = {for (final filter in state.filters) filter.name: filter};
     final sortsByName = {for (final sort in state.sortOptions) sort.name: sort};
 
-    final hasAnyPredicate = state.filters.any((filter) => filter.mutationAffectsCache != null) ||
-        state.sortOptions.any((sort) => sort.mutationAffectsCache != null);
+    final hasAnyPredicate = state.filters.any((filter) => filter.affectedByUpdate != null) ||
+        state.sortOptions.any((sort) => sort.affectedByUpdate != null);
 
     if (!hasAnyPredicate) {
       clear();
@@ -161,8 +161,8 @@ class LdRepositoryCache<T extends Identifiable<IdType>, IdType> {
 
     final keysToRemove = <String>[];
     for (final key in List<String>.from(_entries.keys)) {
-      if (_isCacheKeyAffectedByUpdate(
-        key: key,
+      if (isCacheKeyAffectedByUpdate<T, IdType>(
+        cacheKey: key,
         before: before,
         after: after,
         filtersByName: filtersByName,
@@ -175,38 +175,5 @@ class LdRepositoryCache<T extends Identifiable<IdType>, IdType> {
     for (final key in keysToRemove) {
       remove(key);
     }
-  }
-
-  bool _isCacheKeyAffectedByUpdate({
-    required String key,
-    required T? before,
-    required T? after,
-    required Map<String, LdFilterOption<T, IdType>> filtersByName,
-    required Map<String, LdSortOption<T, IdType>> sortsByName,
-  }) {
-    for (final part in parseLdRepositoryCacheKey(key)) {
-      switch (part.kind) {
-        case 'filter':
-          final filter = filtersByName[part.name];
-          if (filter == null) {
-            return true;
-          }
-          if (filter.mutationAffectsCache?.call(before, after) ?? true) {
-            return true;
-          }
-        case 'sort':
-          final sort = sortsByName[part.name];
-          if (sort == null) {
-            return true;
-          }
-          if (sort.mutationAffectsCache?.call(before, after) ?? true) {
-            return true;
-          }
-        case 'token':
-          break;
-      }
-    }
-
-    return false;
   }
 }

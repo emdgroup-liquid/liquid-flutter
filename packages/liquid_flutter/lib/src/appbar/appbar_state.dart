@@ -53,6 +53,7 @@ class LdAppBarMetrics {
     required this.willHide,
     required this.scrollOffset,
     required this.systemInsets,
+    required this.scrollBehavior,
     this.parentMetrics,
   });
 
@@ -64,6 +65,8 @@ class LdAppBarMetrics {
 
   /// The parent metrics. If this is the outermost app bar, this will be null.
   final LdAppBarMetrics? parentMetrics;
+
+  final LdAppBarScrollBehavior scrollBehavior;
 
   /// Full inner height of the app bar including the inner padding.
   final EdgeInsets innerHeight;
@@ -132,8 +135,14 @@ class LdAppBarMetrics {
     if (isModalReset) {
       return EdgeInsets.zero;
     }
-    return (innerHeight + configuredInsets).inDirection(position) +
-        (parentMetrics?.cumulatedPositionedSizes(position) ?? EdgeInsets.zero);
+
+    EdgeInsets own = (innerHeight + configuredInsets).inDirection(position);
+
+    if (scrollBehavior == LdAppBarScrollBehavior.hidden) {
+      own = EdgeInsets.zero;
+    }
+
+    return own + (parentMetrics?.cumulatedPositionedSizes(position) ?? EdgeInsets.zero);
   }
 
   EdgeInsets get bodyPadding {
@@ -164,6 +173,7 @@ class LdAppBarMetrics {
     MediaQueryData? appbarLayerMediaQuery,
   }) {
     return LdAppBarMetrics(
+      scrollBehavior: scrollBehavior ?? this.scrollBehavior,
       position: position ?? this.position,
       willHide: willHide ?? this.willHide,
       innerHeight: innerHeight ?? this.innerHeight,
@@ -186,6 +196,7 @@ class LdAppBarMetrics {
         other.configuredInsets == configuredInsets &&
         other.scrollOffset == scrollOffset &&
         other.isScrolledUnder == isScrolledUnder &&
+        other.scrollBehavior == scrollBehavior &&
         other.willHide == willHide &&
         other.level == level &&
         other.parentMetrics == parentMetrics &&
@@ -201,6 +212,7 @@ class LdAppBarMetrics {
         scrollOffset,
         isScrolledUnder,
         level,
+        scrollBehavior,
         systemInsets,
         willHide,
         parentMetrics,
@@ -217,6 +229,7 @@ class LdAppBarMetrics {
       'isScrolledUnder: $isScrolledUnder, \n'
       'systemInsets: $systemInsets, \n'
       'willHide: $willHide, \n'
+      'scrollBehavior: $scrollBehavior, \n'
       'parentMetrics: ${parentMetrics?.toString().split('\n').map((e) {
         return '  $e';
       }).join('\n')}\n'

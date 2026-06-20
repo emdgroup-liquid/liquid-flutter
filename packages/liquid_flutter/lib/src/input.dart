@@ -119,10 +119,8 @@ class _LdInputState extends State<LdInput> {
       },
     };
     if (widget.onCustomPaste != null) {
-      bindings[const SingleActivator(LogicalKeyboardKey.keyV, control: true)] =
-          _onPasteShortcut;
-      bindings[const SingleActivator(LogicalKeyboardKey.keyV, meta: true)] =
-          _onPasteShortcut;
+      bindings[const SingleActivator(LogicalKeyboardKey.keyV, control: true)] = _onPasteShortcut;
+      bindings[const SingleActivator(LogicalKeyboardKey.keyV, meta: true)] = _onPasteShortcut;
     }
     return bindings;
   }
@@ -203,17 +201,16 @@ class _LdInputState extends State<LdInput> {
       package: theme.fontFamilyPackage,
       fontFamily: theme.fontFamily,
       fontSize: theme.labelSize(widget.size),
-      height: 1,
+      height: 1.2,
     );
 
     var clearButton = widget.showClear
-        ? LdButton.vague(
-            size: widget.size == LdSize.l ? LdSize.s : LdSize.xs,
-            onPressed: () {
+        ? GestureDetector(
+            onTap: () {
               _controller.clear();
               widget.onCleared?.call();
             },
-            child: const Icon(LucideIcons.x))
+            child: Icon(LucideIcons.x, size: theme.labelSize(widget.size), color: theme.primaryColor))
         : null;
 
     final suffix = AnimatedSwitcher(
@@ -283,9 +280,7 @@ class _LdInputState extends State<LdInput> {
                               Flexible(
                                 child: TextField(
                                   focusNode: _focusNode,
-                                  contextMenuBuilder: widget.onCustomPaste == null
-                                      ? null
-                                      : _buildContextMenu,
+                                  contextMenuBuilder: widget.onCustomPaste == null ? null : _buildContextMenu,
                                   enabled: !widget.disabled,
                                   controller: _controller,
                                   cursorColor: theme.palette.primary.idle(
@@ -305,7 +300,6 @@ class _LdInputState extends State<LdInput> {
                                     isCollapsed: true,
                                     filled: false,
                                     isDense: true,
-                                    suffix: suffix,
                                   ),
                                   obscureText: widget.obscureText,
                                   autofocus: widget.autofocus,
@@ -318,10 +312,11 @@ class _LdInputState extends State<LdInput> {
                                     package: theme.fontFamilyPackage,
                                     fontFamily: theme.fontFamily,
                                     fontSize: theme.labelSize(widget.size),
-                                    height: 1,
+                                    height: 1.2,
                                   ),
                                 ),
                               ),
+                              suffix,
                             ],
                           ),
                         ),

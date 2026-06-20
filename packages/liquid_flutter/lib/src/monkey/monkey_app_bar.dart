@@ -53,14 +53,12 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
           location,
         );
 
-        if ((searchFilter == null || location != LdMonkeyActionLocation.masterAppBar) &&
+        final barEmpty = (searchFilter == null || location != LdMonkeyActionLocation.masterAppBar) &&
             actions.isEmpty &&
             additionalActions.isEmpty &&
             appBarConfig?.title == null &&
             appBarConfig?.bottom == null &&
-            !showClearSelectionButton) {
-          return child ?? const SizedBox.shrink();
-        }
+            !showClearSelectionButton;
 
         final effectivePositionMode = appBarConfig?.positionMode ??
             switch (location) {
@@ -89,6 +87,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
             debugName: debugName ?? appBarConfig?.debugName,
             showWindowControls: appBarConfig?.showWindowControls ?? true,
             positionMode: effectivePositionMode,
+            scrollBehavior: barEmpty ? LdAppBarScrollBehavior.hidden : null,
             autoAttachToKeyboard: true,
             implyLeading: implyLeading ??
                 appBarConfig?.implyLeading ??

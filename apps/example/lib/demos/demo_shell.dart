@@ -19,43 +19,32 @@ class DemoShell extends StatelessWidget {
 
     return LdScaffold(
       debugName: "Demo Shell Scaffold",
-      body: LdWrapConditional(
-        condition: isRoot || theme.platform.isDesktop,
-        builder: (context, child) => LdTabNavigation(
-          position: LdAppBarPositionMode.adaptive,
-          attachedMode: LdAppBarAttachedMode.attached,
-          activeRoute: GoRouterState.of(context).uri.path,
-          tabs: [
-            LdNavigationTab(
-              label: "Tasks",
-              icon: const Icon(LucideIcons.check),
-              route: "/task-demo",
-              isActive: (context) => GoRouterState.of(context).uri.path.startsWith("/task-demo"),
-            ),
-            LdNavigationTab(
-              label: "Movies",
-              icon: const Icon(LucideIcons.film),
-              route: "/movie-demo",
-              isActive: (context) => GoRouterState.of(context).uri.path.startsWith("/movie-demo"),
-            ),
-            LdNavigationTab(label: "Projects", icon: Icon(LucideIcons.folder), route: "/projects"),
-            LdNavigationTab(label: "Exit", icon: const Icon(LucideIcons.x), route: "/"),
-          ],
-          onTabPressed: (route) {
-            if (route == "/") {
-              context.go("/");
-            } else {
-              final branchIndex = switch (route) {
-                "/task-demo" => 1,
-                "/projects" => 2,
-                "/movie-demo" => 0,
-                _ => throw Exception("Invalid route: $route"),
-              };
-              this.child.goBranch(branchIndex);
-            }
-          },
-          child: child,
-        ),
+      body: LdTabNavigation(
+        position: LdAppBarPositionMode.adaptive,
+        attachedMode: LdAppBarAttachedMode.attached,
+        activeRoute: GoRouterState.of(context).uri.path,
+        scrollBehavior: isRoot || theme.platform.isDesktop
+            ? LdAppBarScrollBehavior.static
+            : LdAppBarScrollBehavior.hidden,
+        tabs: [
+          LdNavigationTab(label: "Tasks", icon: const Icon(LucideIcons.check), route: "/task-demo*"),
+          LdNavigationTab(label: "Movies", icon: const Icon(LucideIcons.film), route: "/movie-demo*"),
+          LdNavigationTab(label: "Projects", icon: Icon(LucideIcons.folder), route: "/projects*"),
+          LdNavigationTab(label: "Exit", icon: const Icon(LucideIcons.x), route: "/"),
+        ],
+        onTabPressed: (route) {
+          if (route == "/") {
+            context.go("/");
+          } else {
+            final branchIndex = switch (route) {
+              "/task-demo*" => 1,
+              "/projects*" => 2,
+              "/movie-demo*" => 0,
+              _ => throw Exception("Invalid route: $route"),
+            };
+            child.goBranch(branchIndex);
+          }
+        },
 
         child: LdWrapConditional(
           condition: theme.platform.isDesktop,

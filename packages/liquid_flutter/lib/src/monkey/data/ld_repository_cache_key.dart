@@ -1,11 +1,5 @@
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-/// Returns whether changing [before] to [after] might invalidate cached list
-/// pages for views that use this filter or sort option.
-///
-/// Bias toward `true` — false negatives cause visible glitches.
-typedef LdMutationAffectsCache<T> = bool Function(T? before, T? after);
-
 enum LdRepositoryMutationKind {
   create,
   update,

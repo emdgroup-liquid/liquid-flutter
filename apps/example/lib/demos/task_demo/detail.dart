@@ -85,6 +85,7 @@ class _TaskDetailState extends State<TaskDetail> {
                         _dueDate ?? DateTime.now(),
                         widget.task.value!.done,
                         widget.task.value!.lastUpdate,
+                        emoji: widget.task.value!.emoji,
                       );
                       final repo = LdRepository.of<Task, int>(context);
                       await repo.update(context, widget.task.value!.id, newTask);

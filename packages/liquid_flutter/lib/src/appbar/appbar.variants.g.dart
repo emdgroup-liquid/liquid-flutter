@@ -341,10 +341,9 @@ class LdAppBar extends StatelessWidget {
           positionMode ?? config?.positionMode ?? LdAppBarPositionMode.top,
       scrollBehavior: scrollBehavior ??
           config?.scrollBehavior ??
-          LdAppBarScrollBehavior.static,
+          LdAppBarScrollBehavior.mobileOnly,
       searchConfig: searchConfig ?? config?.searchConfig,
-      shadowMode:
-          shadowMode ?? config?.shadowMode ?? LdAppBarShadowMode.adaptive,
+      shadowMode: shadowMode ?? config?.shadowMode ?? LdAppBarShadowMode.hidden,
       showWindowControls:
           showWindowControls ?? config?.showWindowControls ?? true,
       title: title ?? config?.title,

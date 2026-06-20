@@ -18,7 +18,8 @@ class LdFilterRange<T extends Identifiable<IdType>, IdType> extends LdFilterOpti
     required this.max,
     RangeValues? range,
     super.isEnabled,
-    super.mutationAffectsCache,
+    super.affectedByUpdate,
+    @Deprecated('Use affectedByUpdate') super.mutationAffectsCache,
   }) : range = range ?? RangeValues(min, max);
 
   @override
@@ -65,7 +66,8 @@ class LdFilterRange<T extends Identifiable<IdType>, IdType> extends LdFilterOpti
     double? max,
     double? step,
     bool Function(BuildContext context)? isEnabled,
-    LdMutationAffectsCache<T>? mutationAffectsCache,
+    LdAffectedByUpdate<T>? affectedByUpdate,
+    @Deprecated('Use affectedByUpdate') LdAffectedByUpdate<T>? mutationAffectsCache,
   }) {
     return LdFilterRange<T, IdType>(
       name: name ?? this.name,
@@ -77,7 +79,7 @@ class LdFilterRange<T extends Identifiable<IdType>, IdType> extends LdFilterOpti
       step: step ?? this.step,
       range: range ?? this.range,
       isEnabled: isEnabled ?? this.isEnabled,
-      mutationAffectsCache: mutationAffectsCache ?? this.mutationAffectsCache,
+      affectedByUpdate: affectedByUpdate ?? mutationAffectsCache ?? this.affectedByUpdate,
     );
   }
 

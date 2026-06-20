@@ -177,6 +177,7 @@ class LdModalRoute<T> extends PageRoute<T> {
         child: Provider.value(
           value: LdAppBarMetrics(
             position: LdAppBarPosition.bottom,
+            scrollBehavior: LdAppBarScrollBehavior.static,
             willHide: false,
             innerHeight: EdgeInsets.zero,
             systemInsets: EdgeInsets.zero,
@@ -289,16 +290,17 @@ class LdModalRoute<T> extends PageRoute<T> {
             clipBehavior: Clip.hardEdge,
             child: Provider.value(
               value: LdAppBarMetrics(
+                appbarLayerMediaQuery: MediaQuery.of(context),
+                configuredInsets: EdgeInsets.zero,
+                innerHeight: EdgeInsets.zero,
+                isScrolledUnder: false,
+                level: -1,
+                parentMetrics: null,
                 position: LdAppBarPosition.bottom,
+                scrollBehavior: LdAppBarScrollBehavior.static,
+                scrollOffset: EdgeInsets.zero,
                 systemInsets: EdgeInsets.zero,
                 willHide: false,
-                innerHeight: EdgeInsets.zero,
-                configuredInsets: EdgeInsets.zero,
-                isScrolledUnder: false,
-                appbarLayerMediaQuery: MediaQuery.of(context),
-                parentMetrics: null,
-                level: -1,
-                scrollOffset: EdgeInsets.zero,
               ),
               child: Builder(builder: pageBuilder),
             ),
