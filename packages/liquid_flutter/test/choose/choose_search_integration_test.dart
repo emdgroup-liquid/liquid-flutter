@@ -57,12 +57,18 @@ void main() {
               controller: controller,
               child: Builder(
                 builder: (context) {
-                  return LdSelectableList<_SearchItem, int>(
-                    paginator: repository,
-                    showSelectionControls: true,
-                    itemBuilder: (context, item, index) {
-                      return LdListItem(title: Text(item.value!.label));
-                    },
+                  return LdListConfigProvider<_SearchItem, int>(
+                    config: LdListConfig<_SearchItem, int>(
+                      paginator: repository,
+                      itemBuilder: (context, item, index) {
+                        return LdListItem(title: Text(item.value.label));
+                      },
+                    ),
+                    child: LdSelectableList<_SearchItem, int>(
+                      paginator: repository,
+                      showSelectionControls: true,
+                      child: LdList<_SearchItem, int>(),
+                    ),
                   );
                 },
               ),

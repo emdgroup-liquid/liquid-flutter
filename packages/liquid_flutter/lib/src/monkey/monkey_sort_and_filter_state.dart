@@ -70,4 +70,8 @@ class LdMonkeySortAndFilterState<T extends Identifiable<IdType>, IdType> {
 
   List<LdFilterOption<T, IdType>> get activeFilters => filters.where((filter) => filter.isOn).toList();
   List<LdSortOption<T, IdType>> get activeSortOptions => sortOptions.where((sortOption) => sortOption.isOn).toList();
+
+  /// True when exactly one active sort option supports drag-to-reorder.
+  bool get canReorder =>
+      activeSortOptions.length == 1 && activeSortOptions.first.supportsReorder;
 }

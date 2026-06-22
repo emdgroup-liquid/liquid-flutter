@@ -6,6 +6,32 @@ bool _hasKeyboardViewInsets(MediaQueryData mediaQuery) {
   return mediaQuery.viewInsets.bottom > 0 || mediaQuery.viewInsets.top > 0;
 }
 
+/// Shrinks the scroll viewport above the keyboard without changing [MediaQuery]
+/// above this subtree (so [LdAppBar] metrics stay stable).
+///
+/// Matches Material [Scaffold.resizeToAvoidBottomInset] but scoped to the body
+/// scroll area only.
+Widget _scrollViewportForKeyboard(
+  BuildContext context,
+  Widget scrollChild, {
+  bool enabled = true,
+}) {
+  if (!enabled) {
+    return _mediaQueryForScrollChild(context, scrollChild);
+  }
+
+  final mediaQuery = MediaQuery.of(context);
+  final bottomInset = mediaQuery.viewInsets.bottom;
+
+  // Stable structure when the keyboard opens — do not toggle wrappers.
+  return MediaQuery(
+    data: mediaQuery.removeViewInsets(removeBottom: true),
+    child: Padding(
+      padding: EdgeInsets.only(bottom: bottomInset),
+      child: _mediaQueryForScrollChild(context, scrollChild),
+    ),
+  );
+}
 /// Strips vertical [MediaQueryData.padding] for scroll content without touching
 /// [MediaQueryData.viewPadding] (unlike [MediaQuery.removePadding]).
 ///
@@ -54,7 +80,7 @@ class LdScaffoldBodyCentered extends StatelessWidget {
       return Container(
         color: backgroundColor ?? Colors.transparent,
         padding: padding,
-        child: _mediaQueryForScrollChild(
+        child: _scrollViewportForKeyboard(
           context,
           Center(child: child),
         ),
@@ -78,6 +104,10 @@ class LdScaffoldBody extends StatelessWidget {
 
   /// Height of each scroll-edge fade band. Uses theme sizing when null.
   final double? scrollEdgeFadeExtent;
+
+  /// When true, the scroll viewport shrinks above the keyboard.
+  final bool resizeToAvoidBottomInset;
+
   const LdScaffoldBody({
     super.key,
     this.children = const [],
@@ -92,12 +122,13 @@ class LdScaffoldBody extends StatelessWidget {
     this.scrollEdgeFade = true,
     this.shrinkWrap = false,
     this.scrollEdgeFadeExtent,
+    this.resizeToAvoidBottomInset = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    final padding = mediaQuery.padding.atLeast(mediaQuery.viewPadding).atLeast(mediaQuery.viewInsets);
+    final padding = mediaQuery.padding.atLeast(mediaQuery.viewPadding);
 
     final theme = LdTheme.of(context, listen: true);
 
@@ -162,15 +193,21 @@ class LdScaffoldBody extends StatelessWidget {
 
       final effectiveColor = backgroundColor ?? (context.isSurface ? theme.surface : theme.background);
 
+      final scrollContent = scrollEdgeFade
+          ? LdScrollEdgeFade(
+              fadeColor: effectiveColor,
+              fadeExtent: scrollEdgeFadeExtent,
+              child: scrollView,
+            )
+          : scrollView;
+
       return ColoredBox(
         color: effectiveColor,
-        child: scrollEdgeFade
-            ? LdScrollEdgeFade(
-                fadeColor: effectiveColor,
-                fadeExtent: scrollEdgeFadeExtent,
-                child: scrollView,
-              )
-            : scrollView,
+        child: _scrollViewportForKeyboard(
+          context,
+          scrollContent,
+          enabled: resizeToAvoidBottomInset,
+        ),
       );
     });
   }

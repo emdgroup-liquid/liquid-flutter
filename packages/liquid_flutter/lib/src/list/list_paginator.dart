@@ -58,6 +58,10 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
   bool _fetchInProgress = false;
 
+  /// True while [refreshList] is marking items [LdPaginatorItemState.pendingRefresh],
+  /// fetching replacement pages in the background, and waiting to commit state.
+  bool _isControlledRefresh = false;
+
   /// Cache exposed to [FetchPageParameters] during fetches.
   final LdRepositoryCache<T, IdType> repositoryCache;
 
@@ -138,6 +142,9 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   }
 
   bool get busy => _busy;
+
+  /// Whether a controlled [refreshList] is in progress (see [_isControlledRefresh]).
+  bool get isControlledRefresh => _isControlledRefresh;
 
   /// The number of items that are loaded
   int get currentItemCount => _items.values
@@ -238,6 +245,35 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
     _items.clear();
     _items.addAll(newOrder);
+    _updated(null);
+  }
+
+  /// Shifts sparse indices after moving the item at [fromIndex] to [toIndex].
+  void reorderIndices(int fromIndex, int toIndex) {
+    if (fromIndex == toIndex) {
+      return;
+    }
+
+    final movedItem = _items.remove(fromIndex);
+    final newOrder = <int, LdPaginatorItem<T>>{};
+
+    for (final entry in _items.entries) {
+      final key = entry.key;
+      final shiftedKey = switch (fromIndex.compareTo(toIndex)) {
+        < 0 when key > fromIndex && key <= toIndex => key - 1,
+        > 0 when key >= toIndex && key < fromIndex => key + 1,
+        _ => key,
+      };
+      newOrder[shiftedKey] = entry.value;
+    }
+
+    if (movedItem != null) {
+      newOrder[toIndex] = movedItem;
+    }
+
+    _items
+      ..clear()
+      ..addAll(newOrder);
     _updated(null);
   }
 
@@ -356,6 +392,9 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     int offset, {
     LdFetchReason reason = LdFetchReason.pagination,
   }) async {
+    if (_isControlledRefresh) {
+      return;
+    }
     _pendingFetchReason = reason;
     // normalize position to the nearest page size
     final pagedOffset = (offset ~/ pageSize) * pageSize;
@@ -388,7 +427,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     return _items[position]?.state != LdPaginatorItemState.fetching;
   }
 
-  // Refresh List - clear and fetch initial data
+  // Refresh List - mark items pending, fetch in the background, then commit.
   Future<void> refreshList({
     required BuildContext context,
     LdFetchReason reason = LdFetchReason.refresh,
@@ -400,21 +439,193 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
       return;
     }
 
-    _setBusy(true);
     _offsetQueue.clear();
     _pendingFetchReason = effectiveReason;
+
+    final hasVisibleItems = _items.values.any(
+      (item) => item.value != null && item.state != LdPaginatorItemState.fetching,
+    );
+    if (!hasVisibleItems) {
+      await _refreshFromEmpty(context, effectiveReason);
+      return;
+    }
+
+    await _refreshWithPendingState(context, effectiveReason);
+  }
+
+  Future<void> _refreshFromEmpty(
+    BuildContext context,
+    LdFetchReason effectiveReason,
+  ) async {
+    _setBusy(true);
     _reset();
 
-    final fetchOffset = switch (effectiveReason) {
-      LdFetchReason.initial => initialOffset,
-      LdFetchReason.filter || LdFetchReason.sort || LdFetchReason.invalidate => 0,
-      LdFetchReason.refresh || LdFetchReason.pagination => initialOffset,
-    };
+    final fetchOffset = _refreshBaseOffset(effectiveReason);
 
     if (context.mounted) {
       await _addToOffsetQueue(context, fetchOffset);
     }
     _setBusy(false);
+  }
+
+  Future<void> _refreshWithPendingState(
+    BuildContext context,
+    LdFetchReason effectiveReason,
+  ) async {
+    assert(fetchListFunction != null, 'fetchListFunction is not set. Can not refresh items');
+
+    _isControlledRefresh = true;
+    _setBusy(true);
+    _markItemsPendingRefresh();
+    _requestedOffsets.clear();
+
+    if (!context.mounted) {
+      _revertControlledRefresh();
+      return;
+    }
+
+    final fetchOffsets = _refreshFetchOffsets(effectiveReason);
+
+    try {
+      final pages = await _fetchRefreshPages(
+        context: context,
+        reason: effectiveReason,
+        offsets: fetchOffsets,
+      );
+
+      if (!context.mounted) {
+        _revertControlledRefresh();
+        return;
+      }
+
+      _commitRefreshState(pages);
+    } catch (e, s) {
+      _setError(
+        LdException(
+          exception: e,
+          stackTrace: s,
+        ),
+      );
+      _revertControlledRefresh();
+    }
+  }
+
+  int _refreshBaseOffset(LdFetchReason reason) {
+    return switch (reason) {
+      LdFetchReason.initial => initialOffset,
+      LdFetchReason.filter || LdFetchReason.sort || LdFetchReason.invalidate => 0,
+      LdFetchReason.refresh || LdFetchReason.pagination => initialOffset,
+    };
+  }
+
+  int _normalizePageOffset(int offset) {
+    if (offset < 0) {
+      return 0;
+    }
+    return (offset ~/ pageSize) * pageSize;
+  }
+
+  List<int> _refreshFetchOffsets(LdFetchReason reason) {
+    final pageOffset = _normalizePageOffset(_refreshBaseOffset(reason));
+
+    if (reason == LdFetchReason.filter || reason == LdFetchReason.sort || reason == LdFetchReason.invalidate) {
+      return [pageOffset];
+    }
+
+    if (pageOffset == 0) {
+      return [0];
+    }
+
+    final offsets = <int>{
+      pageOffset,
+      pageOffset - pageSize,
+      pageOffset + pageSize,
+    };
+    return offsets.toList()..sort();
+  }
+
+  void _markItemsPendingRefresh() {
+    for (final entry in _items.entries.toList()) {
+      final item = entry.value;
+      if (item.value == null) {
+        continue;
+      }
+      if (item.state == LdPaginatorItemState.loaded) {
+        _items[entry.key] = item.copyWith(state: LdPaginatorItemState.pendingRefresh);
+      }
+    }
+    _updated(null);
+  }
+
+  void _revertControlledRefresh() {
+    for (final entry in _items.entries.toList()) {
+      if (entry.value.state == LdPaginatorItemState.pendingRefresh) {
+        _items[entry.key] = entry.value.copyWith(state: LdPaginatorItemState.loaded);
+      }
+    }
+    _isControlledRefresh = false;
+    _setBusy(false);
+    _updated(null);
+  }
+
+  Future<List<({int offset, LdListPage<T> page})>> _fetchRefreshPages({
+    required BuildContext context,
+    required LdFetchReason reason,
+    required List<int> offsets,
+  }) async {
+    final results = <({int offset, LdListPage<T> page})>[];
+
+    for (final offset in offsets) {
+      if (!context.mounted) {
+        break;
+      }
+
+      final page = await fetchListFunction!(
+        FetchPageParameters(
+          context: context,
+          offset: offset,
+          pageSize: pageSize,
+          pageToken: null,
+          reason: reason,
+          cache: repositoryCache,
+        ),
+      );
+      results.add((offset: offset, page: page));
+    }
+
+    return results;
+  }
+
+  void _commitRefreshState(List<({int offset, LdListPage<T> page})> pages) {
+    final newItems = <int, LdPaginatorItem<T>>{};
+    var newTotal = totalItems;
+
+    for (final entry in pages) {
+      newTotal = entry.page.total;
+      for (var i = 0; i < entry.page.newItems.length; i++) {
+        final item = entry.page.newItems[i];
+        final index = entry.offset + i;
+        newItems[index] = LdPaginatorItem<T>(
+          value: item,
+          state: LdPaginatorItemState.loaded,
+        );
+      }
+    }
+
+    _items
+      ..clear()
+      ..addAll(newItems);
+    totalItems = newTotal;
+    _requestedOffsets
+      ..clear()
+      ..addAll(
+        pages.where((entry) => entry.page.newItems.isNotEmpty).map((entry) => entry.offset),
+      );
+    _error = null;
+    _pendingFetchReason = LdFetchReason.pagination;
+    _isControlledRefresh = false;
+    _setBusy(false);
+    _updated(null);
   }
 
   /// Loads every page by calling [fetchListFunction] until [LdListPage.hasMore]

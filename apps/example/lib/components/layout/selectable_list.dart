@@ -86,17 +86,23 @@ class _SelectableListDemoState extends State<SelectableListDemo> {
             title: LdText.hs("Demo list"),
             child: SizedBox(
               height: 500,
-              child: LdSelectableList<SampleItem, String>(
-                multiSelect: _multiSelect,
-                paginator: _paginator,
-                onSelectionChange: _onSelectionChange,
-                itemBuilder: (context, item, int index) {
-                  return LdListItem(
-                    leading: LdAvatar(child: Text(item.value!.formula)),
-                    subtitle: Text(item.value!.subtitle),
-                    title: Text(item.value!.title),
-                  );
-                },
+              child: LdListConfigProvider<SampleItem, String>(
+                config: LdListConfig<SampleItem, String>(
+                  paginator: _paginator,
+                  itemBuilder: (context, item, index) {
+                    return LdListItem(
+                      leading: LdAvatar(child: Text(item.value.formula)),
+                      subtitle: Text(item.value.subtitle),
+                      title: Text(item.value.title),
+                    );
+                  },
+                ),
+                child: LdSelectableList<SampleItem, String>(
+                  multiSelect: _multiSelect,
+                  paginator: _paginator,
+                  onSelectionChange: _onSelectionChange,
+                  child: LdList<SampleItem, String>(),
+                ),
               ),
             ),
           ),

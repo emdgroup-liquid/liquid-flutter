@@ -644,7 +644,8 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 1));
 
         expect(repository.initialOffset, equals(8));
-        expect(requestedOffsets.last, equals(8));
+        expect(requestedOffsets, contains(8));
+        expect(requestedOffsets, containsAll([6, 8, 10]));
         expect(repository.getItemAt(8)?.value?.id, equals(9));
       });
 
@@ -1314,6 +1315,57 @@ void main() {
 
         expect(fetchReasons, contains(LdFetchReason.invalidate));
         expect(repository.getItemById(2), isNull);
+      });
+    });
+
+    group('reorder', () {
+      testWidgets('reorder shuffles indices and updates without getOffsetById', (tester) async {
+        final items = List.generate(4, (index) => _TestItem(index + 1, 'Item ${index + 1}', index + 1));
+        var updateCalls = 0;
+        var getOffsetCalls = 0;
+
+        final repository = LdRepository<_TestItem, int>(
+          pageSize: 10,
+          initialItems: items,
+          getOffsetById: (params) async {
+            getOffsetCalls++;
+            return items.indexWhere((item) => item.id == params.id);
+          },
+          updateItem: (context, id, newItem) async {
+            updateCalls++;
+            final index = items.indexWhere((item) => item.id == id);
+            items[index] = newItem;
+            return newItem;
+          },
+          fetchListWithParameters: (parameters) async {
+            final start = parameters.offset;
+            final end = (start + parameters.pageSize).clamp(0, items.length);
+            return LdListPage<_TestItem>(
+              newItems: start < items.length ? items.sublist(start, end) : <_TestItem>[],
+              hasMore: end < items.length,
+              total: items.length,
+            );
+          },
+          getById: (id) async => items.firstWhere((item) => item.id == id),
+        );
+
+        final ctx = await _pumpAndGetContext(tester);
+
+        await repository.reorder(
+          ctx,
+          id: 2,
+          fromIndex: 1,
+          toIndex: 3,
+          reorderHandler: (context, item, from, to) async => item.copyWith(value: to),
+        );
+        await tester.pump();
+
+        expect(updateCalls, equals(1));
+        expect(getOffsetCalls, equals(0));
+        expect(repository.getItemAt(0)?.value?.id, equals(1));
+        expect(repository.getItemAt(1)?.value?.id, equals(3));
+        expect(repository.getItemAt(2)?.value?.id, equals(4));
+        expect(repository.getItemAt(3)?.value?.id, equals(2));
       });
     });
   });

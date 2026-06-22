@@ -5,18 +5,12 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/list/shuttle_safe_key.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'selectable_list_selection_controller.dart';
 
 class LdSelectableList<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
-  final Widget Function(BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder;
-
-  final Widget Function(
-    BuildContext context,
-    LdListItemBuilder<T> itemBuilder,
-  )? listBuilder;
-
   final Set<IdType> initialSelectedItems;
   final bool multiSelect;
 
@@ -26,15 +20,21 @@ class LdSelectableList<T extends Identifiable<IdType>, IdType> extends StatefulW
 
   final bool showSelectionControls;
 
+  /// When true, marquee/box selection drag gestures are disabled.
+  final bool disableDragGestures;
+
+  /// List subtree; defaults to [LdList] configured via context.
+  final Widget? child;
+
   const LdSelectableList({
     super.key,
-    required this.itemBuilder,
-    this.listBuilder,
+    this.child,
     this.onSelectionChange,
     this.multiSelect = false,
     required this.paginator,
     this.showSelectionControls = false,
     this.initialSelectedItems = const {},
+    this.disableDragGestures = false,
   });
 
   @override
@@ -189,8 +189,7 @@ class LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Stat
     }
 
     if (!setEquals(oldWidget.initialSelectedItems, widget.initialSelectedItems)) {
-      final hadExternalChange =
-          !setEquals(_selectionController.selectedItems, widget.initialSelectedItems);
+      final hadExternalChange = !setEquals(_selectionController.selectedItems, widget.initialSelectedItems);
       syncSelection(widget.initialSelectedItems);
       if (hadExternalChange && widget.initialSelectedItems.length == 1) {
         _selectionController.getFocusNodeForItem(widget.initialSelectedItems.first).requestFocus();
@@ -248,40 +247,47 @@ class LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Stat
     );
   }
 
-  LdList<T, IdType> _defaultListBuilder(BuildContext context, LdListItemBuilder<T> itemBuilder) {
-    return LdList(
-      paginator: widget.paginator,
-      itemBuilder: itemBuilder,
+  LdListItemConfig _selectionConfigFor(IdType itemId) {
+    return LdListItemConfig(
+      focusNode: _selectionController.getFocusNodeForItem(itemId),
+      isSelected: _selectionController.isSelected(itemId),
+      selectionControl: switch (widget.showSelectionControls) {
+        true => switch (widget.multiSelect) {
+            true => LdSelectionControl.checkbox,
+            false => LdSelectionControl.radio,
+          },
+        false => LdSelectionControl.none,
+      },
+      active: _selectionController.isSelected(itemId),
+      onSelectionChanged: (selected) => _selectionController.onSelectionChange(
+        itemId,
+        selected,
+      ),
+      onPressed: () => _selectionController.onTap(itemId),
     );
   }
 
-  Widget _wrapListItem(BuildContext context, LdPaginatorItem<T> item, int index) {
-    final itemId = item.value!.id;
+  Widget _buildListConfigLayer(BuildContext context) {
+    return Builder(
+      builder: (ctx) {
+        final chainedItemBuilder = ldChainListItemBuilder<T, IdType>(ctx, (context, item, index, parent) {
+          final itemId = item.value.id;
+          return LdListItemConfigProvider(
+            config: _selectionConfigFor(itemId),
+            child: LdShuttleSafeKey(
+              childKey: _selectionController.getKeyForItem(itemId),
+              child: parent(context, item, index),
+            ),
+          );
+        });
 
-    return AnimatedBuilder(
-      animation: _selectionController.changeNotifier,
-      key: _selectionController.getKeyForItem(itemId),
-      builder: (context, child) {
-        final config = LdListItemConfig(
-          focusNode: _selectionController.getFocusNodeForItem(itemId),
-          isSelected: _selectionController.isSelected(itemId),
-          selectionControl: switch (widget.showSelectionControls) {
-            true => switch (widget.multiSelect) {
-                true => LdSelectionControl.checkbox,
-                false => LdSelectionControl.radio,
-              },
-            false => LdSelectionControl.none,
-          },
-          active: _selectionController.isSelected(itemId),
-          onSelectionChanged: (selected) => _selectionController.onSelectionChange(
-            itemId,
-            selected,
+        return LdListConfigProvider<T, IdType>(
+          config: LdListConfig<T, IdType>(
+            paginator: widget.paginator,
+            scrollController: _scrollController,
+            itemBuilder: chainedItemBuilder,
           ),
-          onPressed: () => _selectionController.onTap(itemId),
-        );
-        return LdListItemConfigProvider(
-          config: config,
-          child: widget.itemBuilder(context, item, index),
+          child: widget.child ?? LdList<T, IdType>(),
         );
       },
     );
@@ -291,19 +297,13 @@ class LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Stat
   Widget build(BuildContext context) {
     _isMobile = LdTheme.of(context).platform.isMobile;
 
-    final list = LdListConfigProvider(
-      config: LdListConfig(
-        paginator: widget.paginator,
-        scrollController: _scrollController,
-      ),
-      child: widget.listBuilder?.call(context, _wrapListItem) ?? _defaultListBuilder(context, _wrapListItem),
-    );
+    final list = _buildListConfigLayer(context);
 
     if (_isMobile) {
       return Stack(
         children: [
           list,
-          if (widget.showSelectionControls)
+          if (widget.showSelectionControls && !widget.disableDragGestures)
             Positioned(
               left: 0,
               top: 0,
@@ -339,7 +339,7 @@ class LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Stat
     }
 
     return LdWrapConditional(
-      condition: widget.multiSelect,
+      condition: widget.multiSelect && !widget.disableDragGestures,
       builder: (context, child) => _DragRect(
         onTapOutside: () {
           if (!_selectionController.isDragging) {

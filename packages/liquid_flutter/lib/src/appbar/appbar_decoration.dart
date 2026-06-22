@@ -36,59 +36,33 @@ class LdAppBarDecorationBuilder {
     this.backgroundMode = LdAppBarBackgroundMode.adaptive,
   });
 
-  bool shouldShowShadow(BuildContext context, bool isScrolledUnder) {
+  bool shouldShowShadow(BuildContext context, bool isScrolledUnder, bool isInBottomSlot) {
     final theme = LdTheme.of(context);
     return switch (shadowMode) {
       LdAppBarShadowMode.visible => true,
       LdAppBarShadowMode.whenScrolled => isScrolledUnder,
       LdAppBarShadowMode.hidden => false,
       LdAppBarShadowMode.adaptive => switch (theme.platform.isDesktop) {
-          false => isScrolledUnder,
+          false => isScrolledUnder || isInBottomSlot,
           true => true,
         },
     };
   }
 
-  bool shouldShowBorder(BuildContext context, bool isScrolledUnder) {
+  bool shouldShowBorder(BuildContext context, bool isScrolledUnder, bool isInBottomSlot) {
     final theme = LdTheme.of(context);
     return switch (borderMode) {
       LdAppBarBorderMode.visible => true,
       LdAppBarBorderMode.whenScrolled => isScrolledUnder,
       LdAppBarBorderMode.hidden => false,
       LdAppBarBorderMode.adaptive => switch (theme.platform.isDesktop) {
-          false => isScrolledUnder,
+          false => isScrolledUnder || isInBottomSlot,
           true => true,
         },
     };
   }
 
-  /// Resolves fill color, opacity, and child [LdSurfaceInfo] in one place.
-  LdAppBarAppearance resolveAppearance(
-    BuildContext context, {
-    required bool isScrolledUnder,
-    required LdAppBarPosition position,
-  }) {
-    final theme = LdTheme.of(context);
-    final parentIsSurface = context.read<LdSurfaceInfo>().isSurface;
-    final baseColor = backgroundColor ?? (parentIsSurface ? theme.surface : theme.background);
-    final showsFill = showsBackground(
-      context,
-      isScrolledUnder,
-      isInBottomSlot: position == LdAppBarPosition.bottom,
-    );
-    final childIsSurface = switch (backgroundColor) {
-      null => showsFill ? !parentIsSurface : parentIsSurface,
-      _ => false,
-    };
-
-    return LdAppBarAppearance(
-      baseColor: baseColor,
-      showsFill: showsFill,
-      childIsSurface: childIsSurface,
-    );
-  }
-
-  bool showsBackground(
+  bool shouldShowBackground(
     BuildContext context,
     bool isScrolledUnder, {
     bool isInBottomSlot = false,
@@ -103,6 +77,32 @@ class LdAppBarDecorationBuilder {
           true => true,
         },
     };
+  }
+
+  /// Resolves fill color, opacity, and child [LdSurfaceInfo] in one place.
+  LdAppBarAppearance resolveAppearance(
+    BuildContext context, {
+    required bool isScrolledUnder,
+    required LdAppBarPosition position,
+  }) {
+    final theme = LdTheme.of(context);
+    final parentIsSurface = context.read<LdSurfaceInfo>().isSurface;
+    final baseColor = backgroundColor ?? theme.surface;
+    final showsFill = shouldShowBackground(
+      context,
+      isScrolledUnder,
+      isInBottomSlot: position == LdAppBarPosition.bottom,
+    );
+    final childIsSurface = switch (backgroundColor) {
+      null => showsFill ? !parentIsSurface : parentIsSurface,
+      _ => false,
+    };
+
+    return LdAppBarAppearance(
+      baseColor: baseColor,
+      showsFill: showsFill,
+      childIsSurface: childIsSurface,
+    );
   }
 
   double borderRadius(BuildContext context) {
@@ -123,28 +123,32 @@ class LdAppBarDecorationBuilder {
       position: position,
     );
 
+    final isInBottomSlot = position == LdAppBarPosition.bottom;
+
     return BoxDecoration(
       color: !isAttached ? null : appearance.paintedColor,
       boxShadow: [
         if (isAttached)
           ldShadowSticky.copyWith(
-            color: shouldShowShadow(context, isScrolledUnder)
-                ? ldShadowSticky.color.withAlpha(isScrolledUnder ? 50 : 0)
-                : Colors.transparent,
-          ),
+              color:
+                  ldShadowSticky.color.withAlpha(shouldShowShadow(context, isScrolledUnder, isInBottomSlot) ? 50 : 0)),
       ],
       border: isAttached
           ? Border(
               bottom: switch (position) {
                 LdAppBarPosition.top => BorderSide(
-                    color: shouldShowBorder(context, isScrolledUnder) ? LdTheme.of(context).border : Colors.transparent,
+                    color: LdTheme.of(context)
+                        .border
+                        .withAlpha(shouldShowBorder(context, isScrolledUnder, isInBottomSlot) ? 255 : 0),
                     width: LdTheme.of(context).borderWidth,
                   ),
                 LdAppBarPosition.bottom => BorderSide.none,
               },
               top: switch (position) {
                 LdAppBarPosition.bottom => BorderSide(
-                    color: shouldShowBorder(context, isScrolledUnder) ? LdTheme.of(context).border : Colors.transparent,
+                    color: LdTheme.of(context)
+                        .border
+                        .withAlpha(shouldShowBorder(context, isScrolledUnder, isInBottomSlot) ? 255 : 0),
                     width: LdTheme.of(context).borderWidth,
                   ),
                 LdAppBarPosition.top => BorderSide.none,
@@ -170,12 +174,13 @@ class LdAppBarDecorationBuilder {
       position: position,
     );
 
+    final isInBottomSlot = position == LdAppBarPosition.bottom;
     return BoxDecoration(
       borderRadius: BorderRadius.circular(borderRadius(context)),
       color: appearance.paintedColor,
       boxShadow: [
         ldShadowSticky.copyWith(
-          color: shouldShowShadow(context, isScrolledUnder) ? ldShadowSticky.color : Colors.transparent,
+          color: ldShadowSticky.color.withAlpha(shouldShowShadow(context, isScrolledUnder, isInBottomSlot) ? 50 : 0),
         ),
       ],
       border: Border.all(

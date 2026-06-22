@@ -600,7 +600,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     super.confirmItemUpdate(id, newValue);
   }
 
-  Future<void> update(BuildContext context, IdType id, T newValue) async {
+  Future<void> update(BuildContext context, IdType id, T newValue, {bool skipLayout = false}) async {
     if (_updateItem != null) {
       final before = getItemById(id)?.value;
       _maybeInvalidateOnMutation(
@@ -617,17 +617,43 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
           return;
         }
         confirmItemUpdate(id, newItem);
-        await _applyPostUpdateLayout(
-          context,
-          id: id,
-          before: before,
-          after: newItem,
-        );
+        if (!skipLayout) {
+          await _applyPostUpdateLayout(
+            context,
+            id: id,
+            before: before,
+            after: newItem,
+          );
+        }
       } catch (e) {
         await rollbackItemUpdate(id);
         rethrow;
       }
     }
+  }
+
+  /// Optimistically shuffles indices, then persists the moved item via [reorderHandler].
+  ///
+  /// Layout is already applied by [reorderIndices]; post-update reposition is skipped.
+  Future<void> reorder(
+    BuildContext context, {
+    required IdType id,
+    required int fromIndex,
+    required int toIndex,
+    required LdMonkeyReorderHandler<T, IdType> reorderHandler,
+  }) async {
+    if (fromIndex == toIndex) {
+      return;
+    }
+
+    reorderIndices(fromIndex, toIndex);
+
+    final item = getItemById(id)?.value ?? await getById(id);
+    final updated = await reorderHandler(context, item, fromIndex, toIndex);
+    if (!context.mounted) {
+      return;
+    }
+    await update(context, id, updated, skipLayout: true);
   }
 
   Future<void> updateBatch(BuildContext context, Set<T> items) async {

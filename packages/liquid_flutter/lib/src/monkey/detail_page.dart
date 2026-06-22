@@ -68,14 +68,22 @@ class LdMonkeyDetailPage<T extends Identifiable<IdType>, IdType> extends Statele
 
 class LdMonkeyStreamSelection<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
   final Widget Function(BuildContext context, List<LdPaginatorItem<T>> items) builder;
+  final bool showLoaderWhileEmpty;
 
-  const LdMonkeyStreamSelection({super.key, required this.builder});
+  const LdMonkeyStreamSelection({super.key, required this.builder, this.showLoaderWhileEmpty = false});
 
   @override
   build(BuildContext context) {
     return _RepostoryWatchItems<T, IdType>(
       viewing: LdMonkeySelection.of<T, IdType>(context, listen: true).viewing,
-      builder: builder,
+      builder: (context, items) {
+        if (showLoaderWhileEmpty && items.isEmpty) {
+          return LdScaffold(
+            body: LdScaffoldBodyCentered(child: const Center(child: LdLoader())),
+          );
+        }
+        return builder(context, items);
+      },
     );
   }
 }

@@ -368,24 +368,28 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
         buildList: widget.groupingCriterion == null
             ? null
             : (context, repository) {
-                return LdSelectableList<T, IdType>(
-                  paginator: repository,
-                  itemBuilder: widget.itemBuilder,
-                  initialSelectedItems: widget.value ?? <IdType>{},
-                  multiSelect: widget.multiple,
-                  showSelectionControls: true,
-                  onSelectionChange: (selected) {
-                    LdMonkeySelection.updateSelection<T, IdType>(context, selected);
-                  },
-                  listBuilder: (context, itemBuilder) {
-                    return LdList(
-                      groupingCriterion: widget.groupingCriterion,
-                      groupHeaderBuilder: widget.groupHeaderBuilder,
-                      paginator: repository,
-                      padding: MediaQuery.paddingOf(context),
-                      itemBuilder: itemBuilder,
-                    );
-                  },
+                return LdListConfigProvider<T, IdType>(
+                  config: LdListConfig<T, IdType>(
+                    paginator: repository,
+                    itemBuilder: (ctx, item, index) => widget.itemBuilder(
+                      ctx,
+                      LdPaginatorItem(value: item.value, state: item.state),
+                      index,
+                    ),
+                    groupingCriterion: widget.groupingCriterion,
+                    groupHeaderBuilder: widget.groupHeaderBuilder,
+                    padding: MediaQuery.paddingOf(context),
+                  ),
+                  child: LdSelectableList<T, IdType>(
+                    paginator: repository,
+                    initialSelectedItems: widget.value ?? <IdType>{},
+                    multiSelect: widget.multiple,
+                    showSelectionControls: true,
+                    onSelectionChange: (selected) {
+                      LdMonkeySelection.updateSelection<T, IdType>(context, selected);
+                    },
+                    child: LdList<T, IdType>(),
+                  ),
                 );
               },
       );
@@ -595,27 +599,29 @@ class LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<Ld
       allowEmpty: widget.allowEmpty,
     );
 
-    final body = LdSelectableList<T, IdType>(
-      key: _listKey,
-      paginator: widget.repository,
-      itemBuilder: widget.itemBuilder,
-      initialSelectedItems: widget.initialSelectedItems,
-      multiSelect: widget.multiple,
-      showSelectionControls: true,
-      onSelectionChange: (items) {
-        LdMonkeySelection.updateSelection<T, IdType>(context, items);
-      },
-      listBuilder: widget.groupingCriterion == null
-          ? null
-          : (context, itemBuilder) {
-              return LdList(
-                groupingCriterion: widget.groupingCriterion,
-                groupHeaderBuilder: widget.groupHeaderBuilder,
-                paginator: widget.repository,
-                padding: MediaQuery.paddingOf(context),
-                itemBuilder: itemBuilder,
-              );
-            },
+    final body = LdListConfigProvider<T, IdType>(
+      config: LdListConfig<T, IdType>(
+        paginator: widget.repository,
+        itemBuilder: (ctx, item, index) => widget.itemBuilder(
+          ctx,
+          LdPaginatorItem(value: item.value, state: item.state),
+          index,
+        ),
+        groupingCriterion: widget.groupingCriterion,
+        groupHeaderBuilder: widget.groupHeaderBuilder,
+        padding: widget.groupingCriterion == null ? null : MediaQuery.paddingOf(context),
+      ),
+      child: LdSelectableList<T, IdType>(
+        key: _listKey,
+        paginator: widget.repository,
+        initialSelectedItems: widget.initialSelectedItems,
+        multiSelect: widget.multiple,
+        showSelectionControls: true,
+        onSelectionChange: (items) {
+          LdMonkeySelection.updateSelection<T, IdType>(context, items);
+        },
+        child: LdList<T, IdType>(),
+      ),
     );
 
     return PopScope(

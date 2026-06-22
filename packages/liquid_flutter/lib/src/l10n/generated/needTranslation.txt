@@ -8,6 +8,7 @@
     "delete",
     "deleteSelected",
     "deleteNItems",
+    "deleteConfirmBody",
     "edit",
     "select",
     "filter",

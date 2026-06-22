@@ -34,11 +34,15 @@ class LdSortOption<T extends Identifiable<IdType>, IdType> {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other.runtimeType != runtimeType) return false;
-    return other is LdSortOption<T, IdType> && other.isOn == isOn && other.name == name && other.direction == direction;
+    return other is LdSortOption<T, IdType> &&
+        other.isOn == isOn &&
+        other.name == name &&
+        other.direction == direction &&
+        other.supportsReorder == supportsReorder;
   }
 
   @override
-  int get hashCode => Object.hash(name, isOn, direction);
+  int get hashCode => Object.hash(name, isOn, direction, supportsReorder);
 
   @override
   String toString() {
@@ -50,6 +54,9 @@ class LdSortOption<T extends Identifiable<IdType>, IdType> {
   final LdSortOptionDirection direction;
 
   final String name;
+
+  /// When [isOn], drag-to-reorder is enabled for lists using this sort option.
+  final bool supportsReorder;
 
   /// Whether an item update may change sort order for this sort option.
   ///
@@ -65,6 +72,7 @@ class LdSortOption<T extends Identifiable<IdType>, IdType> {
     required this.name,
     this.isOn = false,
     this.direction = LdSortOptionDirection.asc,
+    this.supportsReorder = false,
     LdAffectedByUpdate<T>? affectedByUpdate,
     @Deprecated('Use affectedByUpdate') LdAffectedByUpdate<T>? mutationAffectsCache,
   }) : affectedByUpdate = affectedByUpdate ?? mutationAffectsCache;
@@ -72,6 +80,7 @@ class LdSortOption<T extends Identifiable<IdType>, IdType> {
   LdSortOption<T, IdType> copyWith({
     bool? isOn,
     LdSortOptionDirection? direction,
+    bool? supportsReorder,
     LdAffectedByUpdate<T>? affectedByUpdate,
     @Deprecated('Use affectedByUpdate') LdAffectedByUpdate<T>? mutationAffectsCache,
   }) {
@@ -81,6 +90,7 @@ class LdSortOption<T extends Identifiable<IdType>, IdType> {
       icon: icon,
       isOn: isOn ?? this.isOn,
       direction: direction ?? this.direction,
+      supportsReorder: supportsReorder ?? this.supportsReorder,
       affectedByUpdate: affectedByUpdate ?? mutationAffectsCache ?? this.affectedByUpdate,
     );
   }

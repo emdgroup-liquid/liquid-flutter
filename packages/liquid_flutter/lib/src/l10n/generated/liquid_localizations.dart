@@ -281,6 +281,12 @@ abstract class LiquidLocalizations {
   /// **'Delete {items} {items,plural, =1{item}other{items}}'**
   String deleteNItems(num items);
 
+  /// No description provided for @deleteConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete {items} {items,plural, =1{item}other{items}}?'**
+  String deleteConfirmBody(num items);
+
   /// No description provided for @edit.
   ///
   /// In en, this message translates to:

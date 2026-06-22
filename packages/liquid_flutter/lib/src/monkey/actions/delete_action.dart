@@ -38,6 +38,22 @@ LdMonkeyAction<T, IdType> deleteAction<T extends Identifiable<IdType>, IdType>({
         final nextViewing = ctx.selection.viewing.difference(deletedIds);
         final nextSelection = ctx.selection.selection.difference(deletedIds);
 
+        final confirmed = await ldConfirmModal(
+          context: ctx.appContext,
+          title: Text(LiquidLocalizations.of(ctx.appContext).deleteSelected),
+          description: LiquidLocalizations.of(ctx.appContext).deleteConfirmBody(deletedIds.length),
+          confirmColor: LdTheme.of(ctx.appContext).error,
+          cancelColor: LdTheme.of(ctx.appContext).primary,
+          indicatorType: LdIndicatorType.error,
+          positive: Text(LiquidLocalizations.of(ctx.appContext).delete),
+          negative: Text(LiquidLocalizations.of(ctx.appContext).cancel),
+          useRootNavigator: true,
+          allowDismiss: true,
+        );
+        if (confirmed != true) {
+          return;
+        }
+
         // Update route state first so hydration and detail routing do not
         // target items that are about to be removed.
         ctx.updateViewing(nextViewing);

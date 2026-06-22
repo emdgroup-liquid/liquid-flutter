@@ -36,6 +36,7 @@ class MonkeyRouteNode<T extends Identifiable<IdType>, IdType> {
     this.detailPanelFlex,
     this.allowMultipleSelection,
     this.immediateViewSelection,
+    this.reorderHandler,
     this.scopeStorageKey,
   });
 
@@ -83,6 +84,8 @@ class MonkeyRouteNode<T extends Identifiable<IdType>, IdType> {
 
   final bool? immediateViewSelection;
 
+  final LdMonkeyReorderHandler<T, IdType>? reorderHandler;
+
   /// Overrides [defaultMonkeyScopeStorageKey] for this subtree.
   final String Function(MonkeyRouteNode<dynamic, dynamic> root, GoRouterState state)? scopeStorageKey;
 
@@ -111,6 +114,7 @@ class MonkeyRouteNode<T extends Identifiable<IdType>, IdType> {
         detailPanelFlex: detailPanelFlex,
         allowMultipleSelection: allowMultipleSelection,
         immediateViewSelection: immediateViewSelection,
+        reorderHandler: reorderHandler,
         child: child,
       ),
     );
@@ -169,6 +173,7 @@ List<RouteBase> buildMonkeyRouteTree<T extends Identifiable<IdType>, IdType>({
           detailPanelFlex: root.detailPanelFlex,
           allowMultipleSelection: root.allowMultipleSelection,
           immediateViewSelection: root.immediateViewSelection,
+          reorderHandler: root.reorderHandler,
           child: child,
         );
       },

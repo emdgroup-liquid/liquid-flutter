@@ -115,6 +115,7 @@ class AppRouter {
                 detailPage: TaskDetailPage(),
                 masterPage: TaskMasterPage(),
                 repositoryBuilder: (context, state) => taskRepository(context),
+                reorderHandler: taskReorderHandler,
               ),
             ],
           ),

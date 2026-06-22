@@ -561,13 +561,29 @@ class _AppBarFrameState extends State<AppBarFrame> {
   }
 
   Widget _buildScrim(LdAppBarMetrics metrics) {
+    final appearance = LdAppBarDecorationBuilder()
+        .resolveAppearance(context, isScrolledUnder: metrics.isScrolledUnder, position: widget.position);
+
+    final baseColor = appearance.baseColor;
+
+    var height = (metrics.systemInsets + metrics.configuredInsets).atPosition(widget.position);
+
+    final visiblePortion = (metrics.maximumSize - metrics.scrollOffset).atPosition(widget.position);
+
+    height = visiblePortion.clamp(0, height);
+
+    if (!metrics.willHide) {
+      height = 0;
+    }
+
     return Positioned(
         left: 0,
         right: 0,
         top: widget.position == LdAppBarPosition.top ? 0 : null,
         bottom: widget.position == LdAppBarPosition.bottom ? 0 : null,
-        child: Container(
-          height: (metrics.systemInsets + metrics.configuredInsets).atPosition(widget.position),
+        child: AnimatedContainer(
+          duration: Duration(milliseconds: 100),
+          height: height,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: switch (widget.position) {
@@ -578,9 +594,11 @@ class _AppBarFrameState extends State<AppBarFrame> {
                 LdAppBarPosition.top => Alignment.bottomCenter,
                 LdAppBarPosition.bottom => Alignment.topCenter,
               },
+              stops: [0, 0.7, 1],
               colors: [
-                LdTheme.of(context).absolute.withAlpha(200),
-                LdTheme.of(context).absolute.withAlpha(0),
+                baseColor,
+                baseColor.withAlpha((255 * (appearance.showsFill ? 0.9 : 0)).toInt()),
+                baseColor.withAlpha(0),
               ],
             ),
           ),

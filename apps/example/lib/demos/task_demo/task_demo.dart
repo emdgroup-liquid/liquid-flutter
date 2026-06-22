@@ -214,6 +214,13 @@ class TaskMasterPage extends StatelessWidget {
 
 List<LdSortOption<Task, int>> taskSortOptions = [
   LdSortOption<Task, int>(
+    name: "order",
+    label: (context) => "Manual order",
+    icon: (context) => const Icon(LucideIcons.gripVertical),
+    supportsReorder: true,
+    affectedByUpdate: (before, after) => before?.order != after?.order,
+  ),
+  LdSortOption<Task, int>(
     name: "due",
     label: (context) => "Due date",
     icon: (context) => Icon(LucideIcons.calendar),
@@ -227,6 +234,18 @@ List<LdSortOption<Task, int>> taskSortOptions = [
     affectedByUpdate: (before, after) => before?.task != after?.task,
   ),
 ];
+
+Future<Task> taskReorderHandler(
+  BuildContext context,
+  Task item,
+  int fromIndex,
+  int toIndex,
+) async {
+  return item.copyWith(
+    order: toIndex,
+    lastUpdate: DateTime.now(),
+  );
+}
 
 List<LdFilterOption<Task, int>> taskFilters = [
   LdFilterSearch<Task, int, String>(

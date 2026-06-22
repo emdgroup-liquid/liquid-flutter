@@ -9,6 +9,13 @@ typedef LdMonkeyFiltersBuilder<T extends Identifiable<IdType>, IdType> =
 typedef LdMonkeySortOptionsBuilder<T extends Identifiable<IdType>, IdType> =
     Future<List<LdSortOption<T, IdType>>> Function(BuildContext context);
 
+typedef LdMonkeyReorderHandler<T extends Identifiable<IdType>, IdType> = Future<T> Function(
+  BuildContext context,
+  T item,
+  int fromIndex,
+  int toIndex,
+);
+
 typedef LdMonkeyRouteDefinitionsLoadingTextBuilder = String Function(BuildContext context);
 
 /// Resolved filter and sort definitions passed to [LdMonkeyRouterAdapter].

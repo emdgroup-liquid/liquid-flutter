@@ -112,6 +112,17 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
   }
 
   @override
+  String deleteConfirmBody(num items) {
+    String _temp0 = intl.Intl.pluralLogic(
+      items,
+      locale: localeName,
+      other: 'items',
+      one: 'item',
+    );
+    return 'Are you sure you want to delete $items $_temp0?';
+  }
+
+  @override
   String get edit => 'Edit';
 
   @override

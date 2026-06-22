@@ -27,6 +27,11 @@ List<Task> applyFiltersAndSorting(
 
   for (final sortOption in sortOptions ?? []) {
     switch (sortOption.name) {
+      case "order":
+        filtered.sort(
+          (a, b) =>
+              sortOption.direction == LdSortOptionDirection.asc ? a.order.compareTo(b.order) : b.order.compareTo(a.order),
+        );
       case "due":
         filtered.sort(
           (a, b) => sortOption.direction == LdSortOptionDirection.asc ? a.due.compareTo(b.due) : b.due.compareTo(a.due),
@@ -73,7 +78,27 @@ LdRepository<Task, int> taskRepository(BuildContext context) => LdRepository<Tas
   },
   updateItem: (context, id, newItem) async {
     final index = testData.indexWhere((element) => element.id == id);
+    final previous = testData[index];
     newItem = newItem.copyWith(lastUpdate: DateTime.now());
+
+    if (previous.order != newItem.order) {
+      if (newItem.order < previous.order) {
+        for (final task in testData) {
+          if (task.id != id && task.order >= newItem.order && task.order < previous.order) {
+            testData[testData.indexWhere((element) => element.id == task.id)] =
+                task.copyWith(order: task.order + 1);
+          }
+        }
+      } else {
+        for (final task in testData) {
+          if (task.id != id && task.order > previous.order && task.order <= newItem.order) {
+            testData[testData.indexWhere((element) => element.id == task.id)] =
+                task.copyWith(order: task.order - 1);
+          }
+        }
+      }
+    }
+
     testData[index] = newItem;
     await Future.delayed(const Duration(milliseconds: 500));
     return newItem;

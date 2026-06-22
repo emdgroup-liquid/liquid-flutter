@@ -9,7 +9,17 @@ class Task with Identifiable<int> {
   final DateTime due;
   final bool done;
   final DateTime lastUpdate;
-  Task(this.id, this.task, this.due, this.done, this.lastUpdate, {this.emoji = "📋"});
+  final int order;
+
+  Task(
+    this.id,
+    this.task,
+    this.due,
+    this.done,
+    this.lastUpdate, {
+    this.emoji = "📋",
+    int? order,
+  }) : order = order ?? id;
 
   Task copyWith({
     int? id,
@@ -18,6 +28,7 @@ class Task with Identifiable<int> {
     DateTime? due,
     bool? done,
     DateTime? lastUpdate,
+    int? order,
   }) =>
       Task(
         id ?? this.id,
@@ -26,5 +37,6 @@ class Task with Identifiable<int> {
         done ?? this.done,
         lastUpdate ?? this.lastUpdate,
         emoji: emoji ?? this.emoji,
+        order: order ?? this.order,
       );
 }

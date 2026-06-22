@@ -30,6 +30,8 @@
   "delete": "Delete",
   "deleteSelected": "Delete selected",
   "deleteNItems": "Delete {items} {items,plural, =1{item}other{items}}",
+  "deleteConfirmBody": "Are you sure you want to delete {items} {items,plural, =1{item}other{items}}?",
+
   "@deleteNItems": {
     "placeholders" : { 
       "items": {}

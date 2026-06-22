@@ -731,7 +731,6 @@ class _MockSystemUiScope extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          child,
           if (mockSafeArea && viewPadding.top > 0)
             Positioned(
               top: 0,
@@ -765,6 +764,7 @@ class _MockSystemUiScope extends StatelessWidget {
                 color: theme.warningColor.withValues(alpha: 0.22),
               ),
             ),
+          child,
         ],
       ),
     );

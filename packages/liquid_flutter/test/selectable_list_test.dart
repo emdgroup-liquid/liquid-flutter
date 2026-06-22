@@ -19,19 +19,11 @@ void main() {
     late Set<String> selected;
     final items = [_SampleStringItem('A'), _SampleStringItem('B'), _SampleStringItem('C'), _SampleStringItem('D')];
 
-    Widget buildTestWidget({bool multiSelect = false}) {
+    Widget buildTestWidget({
+      bool multiSelect = false,
+      bool disableDragGestures = false,
+    }) {
       final paginator = LdPaginator<_SampleStringItem, String>.fromList(items);
-
-      LdList<_SampleStringItem, String> listBuilder(
-        BuildContext context,
-        ScrollController controller,
-        LdListItemBuilder<_SampleStringItem> itemBuilder,
-      ) {
-        return LdList<_SampleStringItem, String>(
-          paginator: paginator,
-          itemBuilder: itemBuilder,
-        );
-      }
 
       final theme = LdTheme();
       theme.platform = LdPlatform.macos;
@@ -42,19 +34,25 @@ void main() {
             LiquidLocalizations.delegate,
           ],
           home: Scaffold(
-            body: LdSelectableList<_SampleStringItem, String>(
-              itemBuilder: (context, item, index) {
-                return LdListItem(
-                  title: Text(item.value?.value ?? ''),
-                );
-              },
-              listBuilder: (context, itemBuilder) => listBuilder(context, ScrollController(), itemBuilder),
-              paginator: paginator,
-              multiSelect: multiSelect,
-              onSelectionChange: (s) {
-                printOnFailure("onSelectionChange: $s");
-                selected = Set.from(s);
-              },
+            body: LdListConfigProvider<_SampleStringItem, String>(
+              config: LdListConfig<_SampleStringItem, String>(
+                paginator: paginator,
+                itemBuilder: (context, item, index) {
+                  return LdListItem(
+                    title: Text(item.value.value),
+                  );
+                },
+              ),
+              child: LdSelectableList<_SampleStringItem, String>(
+                paginator: paginator,
+                multiSelect: multiSelect,
+                disableDragGestures: disableDragGestures,
+                onSelectionChange: (s) {
+                  printOnFailure("onSelectionChange: $s");
+                  selected = Set.from(s);
+                },
+                child: LdList<_SampleStringItem, String>(),
+              ),
             ),
           ),
         ),
@@ -97,6 +95,22 @@ void main() {
 
       // Should select A, B, C
       expect(selected.containsAll(['A', 'B', 'C']), isTrue);
+    });
+
+    testWidgets('does not marquee-select when disableDragGestures is true', (WidgetTester tester) async {
+      await tester.pumpWidget(buildTestWidget(multiSelect: true, disableDragGestures: true));
+      await tester.pumpAndSettle();
+
+      final firstCenter = tester.getCenter(find.text('A'));
+      final lastCenter = tester.getCenter(find.text('C'));
+
+      await performPanGesture(
+        tester,
+        startPosition: firstCenter,
+        endPosition: lastCenter + const Offset(10, 0),
+      );
+
+      expect(selected, isEmpty);
     });
 
     testWidgets('selects range with shift+click', (WidgetTester tester) async {
@@ -211,18 +225,24 @@ void main() {
             home: Scaffold(
               body: SizedBox(
                 height: 400,
-                child: LdSelectableList<_SampleStringItem, String>(
-                  paginator: paginator,
-                  multiSelect: true,
-                  onSelectionChange: (selection) {
-                    selected = Set.from(selection);
-                  },
-                  itemBuilder: (context, item, index) {
-                    return SizedBox(
-                      height: itemHeight,
-                      child: LdListItem(title: Text(item.value?.value ?? '')),
-                    );
-                  },
+                child: LdListConfigProvider<_SampleStringItem, String>(
+                  config: LdListConfig<_SampleStringItem, String>(
+                    paginator: paginator,
+                    itemBuilder: (context, item, index) {
+                      return SizedBox(
+                        height: itemHeight,
+                        child: LdListItem(title: Text(item.value.value)),
+                      );
+                    },
+                  ),
+                  child: LdSelectableList<_SampleStringItem, String>(
+                    paginator: paginator,
+                    multiSelect: true,
+                    onSelectionChange: (selection) {
+                      selected = Set.from(selection);
+                    },
+                    child: LdList<_SampleStringItem, String>(),
+                  ),
                 ),
               ),
             ),
@@ -282,19 +302,25 @@ class _ScrollParentSyncedSelectableListState extends State<_ScrollParentSyncedSe
 
   @override
   Widget build(BuildContext context) {
-    return LdSelectableList<_SampleStringItem, String>(
-      paginator: widget.paginator,
-      initialSelectedItems: _initialSelection,
-      showSelectionControls: true,
-      onSelectionChange: (selection) {
-        _ScrollParentSyncedSelectableList.lastReportedSelection = Set.from(selection);
-      },
-      itemBuilder: (context, item, index) {
-        return SizedBox(
-          height: 56,
-          child: LdListItem(title: Text(item.value?.value ?? '')),
-        );
-      },
+    return LdListConfigProvider<_SampleStringItem, String>(
+      config: LdListConfig<_SampleStringItem, String>(
+        paginator: widget.paginator,
+        itemBuilder: (context, item, index) {
+          return SizedBox(
+            height: 56,
+            child: LdListItem(title: Text(item.value.value)),
+          );
+        },
+      ),
+      child: LdSelectableList<_SampleStringItem, String>(
+        paginator: widget.paginator,
+        initialSelectedItems: _initialSelection,
+        showSelectionControls: true,
+        onSelectionChange: (selection) {
+          _ScrollParentSyncedSelectableList.lastReportedSelection = Set.from(selection);
+        },
+        child: LdList<_SampleStringItem, String>(),
+      ),
     );
   }
 }
@@ -330,16 +356,22 @@ class _ParentSyncedSelectableListState extends State<_ParentSyncedSelectableList
           child: const Text('Clear parent'),
         ),
         Expanded(
-          child: LdSelectableList<_SampleStringItem, String>(
-            paginator: _paginator,
-            initialSelectedItems: _externalSelection,
-            multiSelect: true,
-            onSelectionChange: (selection) {
-              _ParentSyncedSelectableList.lastReportedSelection = Set.from(selection);
-            },
-            itemBuilder: (context, item, index) {
-              return LdListItem(title: Text(item.value?.value ?? ''));
-            },
+          child: LdListConfigProvider<_SampleStringItem, String>(
+            config: LdListConfig<_SampleStringItem, String>(
+              paginator: _paginator,
+              itemBuilder: (context, item, index) {
+                return LdListItem(title: Text(item.value.value));
+              },
+            ),
+            child: LdSelectableList<_SampleStringItem, String>(
+              paginator: _paginator,
+              initialSelectedItems: _externalSelection,
+              multiSelect: true,
+              onSelectionChange: (selection) {
+                _ParentSyncedSelectableList.lastReportedSelection = Set.from(selection);
+              },
+              child: LdList<_SampleStringItem, String>(),
+            ),
           ),
         ),
       ],

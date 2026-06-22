@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/intersperse.dart';
+import 'package:liquid_flutter/src/list/shuttle_safe_key.dart';
 import 'package:provider/provider.dart';
 
 part 'list.variants.g.dart';
@@ -63,6 +64,42 @@ typedef LdListItemBuilder<T extends Identifiable> = Widget Function(
   LdPaginatorLoadedItem<T> item,
   int index,
 );
+
+typedef LdListLoadingBuilder = Widget Function(
+  BuildContext context,
+  int position,
+  int totalItems,
+);
+
+/// Reads the merged [LdListConfig.itemBuilder] from [context] and returns a
+/// builder that wraps the parent result.
+LdListItemBuilder<T> ldChainListItemBuilder<T extends Identifiable<IdType>, IdType>(
+  BuildContext context,
+  Widget Function(
+    BuildContext context,
+    LdPaginatorLoadedItem<T> item,
+    int index,
+    LdListItemBuilder<T> parent,
+  ) wrap,
+) {
+  final parent = Provider.of<LdListConfig<T, IdType>>(context, listen: true).itemBuilder!;
+  return (ctx, item, index) => wrap(ctx, item, index, parent);
+}
+
+/// Chains [LdListConfig.loadingBuilder] the same way as [ldChainListItemBuilder].
+LdListLoadingBuilder ldChainLoadingBuilder<T extends Identifiable<IdType>, IdType>(
+  BuildContext context,
+  Widget Function(
+    BuildContext context,
+    int position,
+    int totalItems,
+    LdListLoadingBuilder parent,
+  ) wrap,
+) {
+  final parent = Provider.of<LdListConfig<T, IdType>>(context, listen: true).loadingBuilder ??
+      (context, position, totalItems) => const LdListItemLoading();
+  return (ctx, position, totalItems) => wrap(ctx, position, totalItems, parent);
+}
 
 /// A sophisticated list widget that supports:
 /// - Pagination with loading indicators
@@ -496,12 +533,12 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
 
     _itemKeys[item.value.id] ??= GlobalKey(debugLabel: "list${item.value.id}");
 
-    if (listEntry.item!.state == LdPaginatorItemState.pendingRefresh) {
+    if (listEntry.item!.state == LdPaginatorItemState.pendingRefresh && !widget.paginator.isControlledRefresh) {
       widget.paginator.fetchPageAtOffset(context, listEntry.position!);
     }
 
-    return KeyedSubtree(
-      key: _itemKeys[item.value.id],
+    return LdShuttleSafeKey(
+      childKey: _itemKeys[item.value.id]!,
       child: switch (listEntry.item!.state) {
         LdPaginatorItemState.fetching => _buildLoader(context, listEntry.position!),
         _ => widget.itemBuilder(context, item, listEntry.position!),

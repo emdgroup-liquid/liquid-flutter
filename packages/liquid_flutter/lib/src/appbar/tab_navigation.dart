@@ -15,7 +15,11 @@ class LdNavigationTab {
   final String route;
   final bool Function(BuildContext context)? isActive;
 
-  const LdNavigationTab({required this.label, required this.icon, required this.route, this.isActive});
+  const LdNavigationTab(
+      {required this.label,
+      required this.icon,
+      required this.route,
+      this.isActive});
 }
 
 class LdTabNavigation extends StatefulWidget {
@@ -75,8 +79,9 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
 
   LdAppBarPosition get _effectivePosition {
     return switch (widget.position) {
-      LdAppBarPositionMode.adaptive =>
-        LdTheme.of(context).platform.isDesktop ? LdAppBarPosition.top : LdAppBarPosition.bottom,
+      LdAppBarPositionMode.adaptive => LdTheme.of(context).platform.isDesktop
+          ? LdAppBarPosition.top
+          : LdAppBarPosition.bottom,
       LdAppBarPositionMode.top => LdAppBarPosition.top,
       LdAppBarPositionMode.bottom => LdAppBarPosition.bottom,
     };
@@ -101,7 +106,10 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
         return tab.isActive!(context);
       }
       if (tab.route.endsWith("*")) {
-        return widget.activeRoute.startsWith(tab.route.substring(0, tab.route.length - 1));
+        final withoutWildcard = tab.route.substring(0, tab.route.length - 1);
+
+        return widget.activeRoute
+            .startsWith(tab.route.substring(0, tab.route.length - 1));
       }
       return widget.activeRoute == (tab.route);
     });
@@ -122,6 +130,7 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
 
   void _updateIndicatorPosition() {
     final activeIndex = _activeIndex().clamp(0, _tabCount - 1);
+    print("activeIndex: $activeIndex");
     setState(() {
       _indicatorPosition = activeIndex * _tabStride;
     });
@@ -136,9 +145,11 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
 
   double get _contentWidth => _totalSpacing + _tabCount * _tabWidth;
 
-  double get _tabWidth => max(widget.minTabWidth, (_availableWidth - _totalSpacing) / _tabCount);
+  double get _tabWidth =>
+      max(widget.minTabWidth, (_availableWidth - _totalSpacing) / _tabCount);
 
-  double get _availableWidth => _navWidth - LdTheme.of(context).paddingSize(size: LdSize.xs) * 2;
+  double get _availableWidth =>
+      _navWidth - LdTheme.of(context).paddingSize(size: LdSize.xs) * 2;
 
   double get _totalSpacing => _tabSpacing * (_tabCount - 1);
 
@@ -150,7 +161,8 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
 
   int _getClosestTab(BuildContext context) {
     // Calculate which tab the indicator is closest to based on its left position
-    final closestTabIndex = (_indicatorPosition / _tabStride).round().clamp(0, _tabCount - 1);
+    final closestTabIndex =
+        (_indicatorPosition / _tabStride).round().clamp(0, _tabCount - 1);
     return closestTabIndex;
   }
 
@@ -168,7 +180,8 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
       _lastDraggedTabIndex = currentTabIndex;
     }
     setState(() {
-      _indicatorPosition = (_dragStartIndicatorPosition + (details.localPosition.dx - _dragStartPosition))
+      _indicatorPosition = (_dragStartIndicatorPosition +
+              (details.localPosition.dx - _dragStartPosition))
           .clamp(0, max(0, _contentWidth - _tabWidth));
     });
   }
@@ -258,14 +271,17 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                             active: widget.activeRoute == tab.route,
                             onPressed: () => _onTabTap(tab.route),
                             builder: (context, status, _) {
-                              final colors = switch (widget.activeRoute == tab.route) {
-                                true => ghostColor(theme.primary, theme, status),
+                              final colors =
+                                  switch (widget.activeRoute == tab.route) {
+                                true =>
+                                  ghostColor(theme.primary, theme, status),
                                 false => neutralGhostColor(theme, status),
                               };
                               return Container(
                                 decoration: BoxDecoration(
                                   color: colors.surface,
-                                  borderRadius: LdTheme.of(context).radius(LdSize.s),
+                                  borderRadius:
+                                      LdTheme.of(context).radius(LdSize.s),
                                 ),
                                 child: Builder(
                                   builder: (context) {
@@ -281,7 +297,8 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
 
                                     if (_compactMode) {
                                       return Column(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
                                         children: [
                                           icon,
                                           ldSpacerXS,
@@ -295,7 +312,8 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                                       ).padXS();
                                     }
                                     return Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         icon,
                                         ldSpacerS,
@@ -336,16 +354,18 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                       onHorizontalDragEnd: _onIndicatorDragEnd,
                       child: LdTouchableSurface(
                         onPressed: () {},
-                        builder: (context, status, _) => LdTouchableTouchFeedback(
-                            scaleFactor: 100,
-                            status: status,
-                            child: Container(
-                              width: _tabWidth,
-                              decoration: BoxDecoration(
-                                color: theme.primaryColor.withAlpha(26),
-                                borderRadius: LdTheme.of(context).radius(LdSize.s),
-                              ),
-                            )),
+                        builder: (context, status, _) =>
+                            LdTouchableTouchFeedback(
+                                scaleFactor: 100,
+                                status: status,
+                                child: Container(
+                                  width: _tabWidth,
+                                  decoration: BoxDecoration(
+                                    color: theme.primaryColor.withAlpha(26),
+                                    borderRadius:
+                                        LdTheme.of(context).radius(LdSize.s),
+                                  ),
+                                )),
                       ),
                     ),
                     builder: (context, state, child) {
@@ -375,15 +395,19 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
         addContainer: widget.addContainer,
         scrollBehavior: widget.scrollBehavior,
         wrappedChild: widget.child,
-        outsideAdditionalPadding:
-            !isAttached ? EdgeInsets.symmetric(vertical: LdTheme.of(context).paddingSize(size: LdSize.xs)) : null,
-        insideDecorationBuilder: (isScrolledUnder) => decorationBuilder.buildInsideDecoration(
+        outsideAdditionalPadding: !isAttached
+            ? EdgeInsets.symmetric(
+                vertical: LdTheme.of(context).paddingSize(size: LdSize.xs))
+            : null,
+        insideDecorationBuilder: (isScrolledUnder) =>
+            decorationBuilder.buildInsideDecoration(
           context: context,
           isScrolledUnder: isScrolledUnder,
           isAttached: isAttached,
           position: position,
         ),
-        outsideDecorationBuilder: (isScrolledUnder) => decorationBuilder.buildOutsideDecoration(
+        outsideDecorationBuilder: (isScrolledUnder) =>
+            decorationBuilder.buildOutsideDecoration(
           context: context,
           isScrolledUnder: isScrolledUnder,
           isAttached: isAttached,

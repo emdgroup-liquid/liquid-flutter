@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
@@ -352,6 +354,177 @@ void main() {
       for (int i = 0; i < 5; i++) {
         expect(find.text('Item ${i + 1}'), findsOneWidget);
       }
+    });
+
+    testWidgets('refreshList keeps items visible while fetching', (WidgetTester tester) async {
+      final refreshGate = Completer<void>();
+      final items = sampleItems.sublist(0, 5);
+      final paginator = LdPaginator<_SampleItem, int>(
+        pageSize: 5,
+        initialItems: items,
+        fetchListFunction: (parameters) async {
+          if (parameters.reason == LdFetchReason.refresh) {
+            await refreshGate.future;
+          }
+          return LdListPage<_SampleItem>(
+            newItems: items,
+            hasMore: false,
+            total: items.length,
+          );
+        },
+      );
+
+      late BuildContext capturedContext;
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          Builder(
+            builder: (context) {
+              capturedContext = context;
+              return buildBasicListWidget(data: paginator);
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final refreshFuture = paginator.refreshList(
+        context: capturedContext,
+        reason: LdFetchReason.refresh,
+      );
+      await tester.pump();
+
+      expect(find.text('Item 1'), findsOneWidget);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(paginator.isControlledRefresh, isTrue);
+      expect(paginator.totalItems, equals(5));
+
+      refreshGate.complete();
+      await refreshFuture;
+      await tester.pumpAndSettle();
+
+      expect(paginator.isControlledRefresh, isFalse);
+      for (int i = 0; i < 5; i++) {
+        expect(find.text('Item ${i + 1}'), findsOneWidget);
+      }
+    });
+
+    testWidgets('refreshList applies reordered items atomically', (WidgetTester tester) async {
+      var serverItems = sampleItems.sublist(0, 5);
+      final paginator = LdPaginator<_SampleItem, int>(
+        pageSize: 5,
+        initialItems: serverItems,
+        fetchListFunction: (parameters) async {
+          final end = (parameters.offset + parameters.pageSize).clamp(0, serverItems.length);
+          return LdListPage<_SampleItem>(
+            newItems: parameters.offset < serverItems.length ? serverItems.sublist(parameters.offset, end) : [],
+            hasMore: end < serverItems.length,
+            total: serverItems.length,
+          );
+        },
+      );
+
+      late BuildContext capturedContext;
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          Builder(
+            builder: (context) {
+              capturedContext = context;
+              return buildBasicListWidget(data: paginator);
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Item 1'), findsOneWidget);
+      expect(find.text('Item 5'), findsOneWidget);
+
+      serverItems = [
+        _SampleItem(5),
+        _SampleItem(4),
+        _SampleItem(3),
+        _SampleItem(2),
+        _SampleItem(1),
+      ];
+
+      await paginator.refreshList(
+        context: capturedContext,
+        reason: LdFetchReason.refresh,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(paginator.getItemAt(0)?.value?.id, equals(5));
+      expect(paginator.getItemAt(4)?.value?.id, equals(1));
+    });
+  });
+
+  group('LdPaginator reorderIndices', () {
+    test('no-op when from equals to', () {
+      final paginator = LdPaginator<_SampleItem, int>.fromList([
+        _SampleItem(1),
+        _SampleItem(2),
+        _SampleItem(3),
+      ]);
+
+      paginator.reorderIndices(1, 1);
+
+      expect(paginator.getItemAt(0)?.value?.id, equals(1));
+      expect(paginator.getItemAt(1)?.value?.id, equals(2));
+      expect(paginator.getItemAt(2)?.value?.id, equals(3));
+    });
+
+    test('moves item down and shifts loaded siblings', () {
+      final paginator = LdPaginator<_SampleItem, int>.fromList([
+        _SampleItem(1),
+        _SampleItem(2),
+        _SampleItem(3),
+        _SampleItem(4),
+      ]);
+
+      paginator.reorderIndices(1, 3);
+
+      expect(paginator.getItemAt(0)?.value?.id, equals(1));
+      expect(paginator.getItemAt(1)?.value?.id, equals(3));
+      expect(paginator.getItemAt(2)?.value?.id, equals(4));
+      expect(paginator.getItemAt(3)?.value?.id, equals(2));
+    });
+
+    test('moves item up and shifts loaded siblings', () {
+      final paginator = LdPaginator<_SampleItem, int>.fromList([
+        _SampleItem(1),
+        _SampleItem(2),
+        _SampleItem(3),
+        _SampleItem(4),
+      ]);
+
+      paginator.reorderIndices(3, 1);
+
+      expect(paginator.getItemAt(0)?.value?.id, equals(1));
+      expect(paginator.getItemAt(1)?.value?.id, equals(4));
+      expect(paginator.getItemAt(2)?.value?.id, equals(2));
+      expect(paginator.getItemAt(3)?.value?.id, equals(3));
+    });
+
+    test('shifts sparse indices across a gap', () {
+      final paginator = LdPaginator<_SampleItem, int>(
+        pageSize: 2,
+        initialItems: [_SampleItem(1), _SampleItem(2)],
+        fetchListFunction: (_) async => LdListPage<_SampleItem>(newItems: [], hasMore: false, total: 4),
+      );
+      paginator.totalItems = 4;
+      paginator.replaceItems({
+        0: LdPaginatorItem(value: _SampleItem(1), state: LdPaginatorItemState.loaded),
+        1: LdPaginatorItem(value: _SampleItem(2), state: LdPaginatorItemState.loaded),
+        3: LdPaginatorItem(value: _SampleItem(4), state: LdPaginatorItemState.loaded),
+      });
+
+      paginator.reorderIndices(0, 3);
+
+      expect(paginator.getItemAt(0)?.value?.id, equals(2));
+      expect(paginator.getItemAt(1), isNull);
+      expect(paginator.getItemAt(2)?.value?.id, equals(4));
+      expect(paginator.getItemAt(3)?.value?.id, equals(1));
     });
   });
 }

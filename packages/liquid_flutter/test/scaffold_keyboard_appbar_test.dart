@@ -240,6 +240,138 @@ void main() {
       );
     },
   );
+
+  testWidgets(
+    'LdScaffoldBody shrinks scroll viewport when keyboard is open',
+    (tester) async {
+      const keyboardInset = 300.0;
+      const screenHeight = 800.0;
+
+      const baseData = MediaQueryData(
+        size: Size(400, screenHeight),
+        padding: EdgeInsets.only(top: 44, bottom: 34),
+        viewPadding: EdgeInsets.only(top: 44, bottom: 34),
+      );
+
+      ldDisableAnimations = true;
+      await tester.pumpWidget(
+        LdThemeProvider(
+          theme: LdTheme()..platform = LdPlatform.ios,
+          child: MaterialApp(
+            localizationsDelegates: const [
+              DefaultMaterialLocalizations.delegate,
+              DefaultWidgetsLocalizations.delegate,
+              LiquidLocalizations.delegate,
+            ],
+            home: _KeyboardSimulator(
+              baseData: baseData,
+              keyboardInset: keyboardInset,
+              child: LdScaffold(
+                body: LdAppBar.top(
+                  title: const Text('Title'),
+                  child: LdScaffoldBody(
+                    children: [
+                      const SizedBox(height: 1200),
+                      const TextField(
+                        key: Key('body_field'),
+                        decoration: InputDecoration(hintText: 'Body input'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(_KeyboardSimulator.openKey));
+      await tester.pumpAndSettle();
+
+      final scrollable = tester.renderObject<RenderBox>(
+        find.descendant(
+          of: find.byType(CustomScrollView),
+          matching: find.byType(Scrollable),
+        ).first,
+      );
+
+      expect(
+        scrollable.size.height,
+        lessThan(screenHeight - keyboardInset + 1),
+        reason: 'Scroll viewport should shrink above the keyboard',
+      );
+    },
+  );
+
+  testWidgets(
+    'LdScaffoldBody scrolls focused field above keyboard',
+    (tester) async {
+      const keyboardInset = 300.0;
+      const screenHeight = 800.0;
+      const safeTop = 44.0;
+
+      const baseData = MediaQueryData(
+        size: Size(400, screenHeight),
+        padding: EdgeInsets.only(top: safeTop, bottom: 34),
+        viewPadding: EdgeInsets.only(top: safeTop, bottom: 34),
+      );
+
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      ldDisableAnimations = true;
+      await tester.pumpWidget(
+        LdThemeProvider(
+          theme: LdTheme()..platform = LdPlatform.ios,
+          child: MaterialApp(
+            localizationsDelegates: const [
+              DefaultMaterialLocalizations.delegate,
+              DefaultWidgetsLocalizations.delegate,
+              LiquidLocalizations.delegate,
+            ],
+            home: _KeyboardSimulator(
+              baseData: baseData,
+              keyboardInset: keyboardInset,
+              child: LdScaffold(
+                body: LdAppBar.top(
+                  title: const Text('Title'),
+                  child: LdScaffoldBody(
+                    children: [
+                      const SizedBox(height: 1200),
+                      TextField(
+                        key: const Key('body_field'),
+                        focusNode: focusNode,
+                        decoration: const InputDecoration(hintText: 'Body input'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(_KeyboardSimulator.openKey));
+      await tester.pumpAndSettle();
+
+      focusNode.requestFocus();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pumpAndSettle();
+
+      final fieldBottom = tester.getBottomLeft(find.byKey(const Key('body_field'))).dy;
+      final visibleBottom = screenHeight - keyboardInset;
+
+      expect(
+        fieldBottom,
+        lessThanOrEqualTo(visibleBottom + 1),
+        reason: 'Field bottom ($fieldBottom) should be above keyboard ($visibleBottom)',
+      );
+    },
+  );
 }
 
 class _KeyboardSimulator extends StatefulWidget {
