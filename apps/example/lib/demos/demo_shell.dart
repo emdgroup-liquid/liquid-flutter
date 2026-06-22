@@ -21,7 +21,9 @@ class DemoShell extends StatelessWidget {
       debugName: "Demo Shell Scaffold",
       body: LdTabNavigation(
         position: LdAppBarPositionMode.adaptive,
-        attachedMode: LdAppBarAttachedMode.attached,
+        attachedMode: LdAppBarAttachedMode.floating,
+
+        backgroundColor: theme.surface,
         activeRoute: GoRouterState.of(context).uri.path,
         scrollBehavior: isRoot || theme.platform.isDesktop
             ? LdAppBarScrollBehavior.static
@@ -46,17 +48,7 @@ class DemoShell extends StatelessWidget {
           }
         },
 
-        child: LdWrapConditional(
-          condition: theme.platform.isDesktop,
-          child: child,
-          builder: (context, child) => LdAppBar(
-            shadowMode: LdAppBarShadowMode.hidden,
-            borderMode: LdAppBarBorderMode.visible,
-            backgroundMode: LdAppBarBackgroundMode.visible,
-            title: const Text("LdMonkey Demos"),
-            child: child,
-          ),
-        ),
+        child: child,
       ),
     );
   }

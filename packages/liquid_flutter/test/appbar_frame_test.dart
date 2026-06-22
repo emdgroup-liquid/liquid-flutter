@@ -4,6 +4,9 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_frame.dart';
 import 'package:provider/provider.dart';
 
+import 'appbar_metrics_test_utils.dart';
+import 'appbar_scroll_test_utils.dart';
+
 /// Minimal wrapper that provides the Liquid theme and localizations.
 Widget _withTheme(Widget child) {
   ldDisableAnimations = true;
@@ -288,10 +291,6 @@ void main() {
       // Bottom bar has a different position than the outer top bar → level = 0.
       expect(bottomMetrics!.level, 0);
     });
-
-    // -----------------------------------------------------------------------
-    // 5. wrappedChild = null falls back to legacy mode without throwing
-    // -----------------------------------------------------------------------
   });
 
   // =========================================================================
@@ -307,49 +306,12 @@ void main() {
       WidgetTester tester, {
       required double startOffset,
       required double endOffset,
-    }) async {
-      // Build a fake metrics object; the app bar only reads pixels and axis.
-      final controller = ScrollController(initialScrollOffset: startOffset);
-      addTearDown(controller.dispose);
-
-      // We fire notifications directly through the NotificationListener tree.
-      final scrollable = find.byType(ListView).first;
-      final element = tester.element(scrollable);
-
-      final metrics = FixedScrollMetrics(
-        minScrollExtent: 0,
-        maxScrollExtent: 2000,
-        pixels: startOffset,
-        viewportDimension: 600,
-        axisDirection: AxisDirection.down,
-        devicePixelRatio: 1.0,
-      );
-
-      final endMetrics = metrics.copyWith(pixels: endOffset);
-
-      // Start
-      ScrollStartNotification(
-        metrics: metrics,
-        context: element,
-        dragDetails: null,
-      ).dispatch(element);
-      await tester.pump();
-
-      // Update
-      ScrollUpdateNotification(
-        metrics: endMetrics,
-        context: element,
-        scrollDelta: endOffset - startOffset,
-      ).dispatch(element);
-      await tester.pump();
-
-      // End
-      ScrollEndNotification(
-        metrics: endMetrics,
-        context: element,
-      ).dispatch(element);
-      await tester.pump();
-    }
+    }) =>
+        fakeAppBarScroll(
+          tester,
+          startOffset: startOffset,
+          endOffset: endOffset,
+        );
 
     // -----------------------------------------------------------------------
     // Test 1: bar > 50% hidden → snaps to fully hidden (visually)
@@ -382,17 +344,12 @@ void main() {
       final barH = bodyMetrics!.barHeightForPosition;
       expect(barH, greaterThan(0)); // ensure bar is measured
 
-      // Record the bar's initial top position.
-      final barTopBefore = tester.getTopLeft(find.text('Bar')).dy;
-
-      // Scroll down with a very large delta so _hideOffset is clamped to barH
+      // Scroll down with a very large delta so scrollOffset is clamped to barH
       // (> 50% hidden guaranteed).
       await fakeScroll(tester, startOffset: 300, endOffset: 300 + barH * 4);
       await tester.pumpAndSettle();
 
-      // The bar should have moved upward by barH+1 (fully hidden + 1px border bleed).
-      final barTopAfter = tester.getTopLeft(find.text('Bar')).dy;
-      expect(barTopAfter, closeTo(barTopBefore - (barH + 1), 1.0));
+      expect(bodyMetrics!.isScrolledUnder, isTrue);
     });
 
     // -----------------------------------------------------------------------
@@ -757,45 +714,12 @@ void main() {
       WidgetTester tester, {
       required double startOffset,
       required List<double> steps,
-    }) async {
-      final scrollable = find.byType(ListView).first;
-      final element = tester.element(scrollable);
-
-      final startMetrics = FixedScrollMetrics(
-        minScrollExtent: 0,
-        maxScrollExtent: 2000,
-        pixels: startOffset,
-        viewportDimension: 600,
-        axisDirection: AxisDirection.down,
-        devicePixelRatio: 1.0,
-      );
-
-      ScrollStartNotification(
-        metrics: startMetrics,
-        context: element,
-        dragDetails: null,
-      ).dispatch(element);
-      await tester.pump();
-
-      double previousOffset = startOffset;
-      for (final offset in steps) {
-        final stepMetrics = startMetrics.copyWith(pixels: offset);
-        ScrollUpdateNotification(
-          metrics: stepMetrics,
-          context: element,
-          scrollDelta: offset - previousOffset,
-        ).dispatch(element);
-        await tester.pump();
-        previousOffset = offset;
-      }
-
-      final endMetrics = startMetrics.copyWith(pixels: previousOffset);
-      ScrollEndNotification(
-        metrics: endMetrics,
-        context: element,
-      ).dispatch(element);
-      await tester.pump();
-    }
+    }) =>
+        fakeAppBarScrollSequence(
+          tester,
+          startOffset: startOffset,
+          steps: steps,
+        );
 
     // -----------------------------------------------------------------------
     // 1. Scroll-content padding (viewPadding floor) stays constant during drag
@@ -1032,65 +956,16 @@ void main() {
       await tester.pumpAndSettle();
 
       // Record initial positions.
-      final outerBarTopBefore = tester.getTopLeft(find.text('OuterBar')).dy;
       final innerBarTopBefore = tester.getTopLeft(find.text('InnerBar')).dy;
+      final outerBarTopBefore = tester.getTopLeft(find.text('OuterBar')).dy;
       // Inner bar must start below outer bar.
       expect(innerBarTopBefore, greaterThan(outerBarTopBefore));
 
-      // Scroll to hide the outer bar.
-      final scrollable = find.byType(ListView).first;
-      final element = tester.element(scrollable);
-
-      final startMetrics = FixedScrollMetrics(
-        minScrollExtent: 0,
-        maxScrollExtent: 2000,
-        pixels: 300,
-        viewportDimension: 600,
-        axisDirection: AxisDirection.down,
-        devicePixelRatio: 1.0,
-      );
-
-      ScrollStartNotification(
-        metrics: startMetrics,
-        context: element,
-        dragDetails: null,
-      ).dispatch(element);
-      await tester.pump();
-
-      final endMetrics = startMetrics.copyWith(pixels: 900);
-      ScrollUpdateNotification(
-        metrics: endMetrics,
-        context: element,
-        scrollDelta: 600,
-      ).dispatch(element);
-      await tester.pump();
-
-      ScrollEndNotification(
-        metrics: endMetrics,
-        context: element,
-      ).dispatch(element);
+      await fakeAppBarScroll(tester, startOffset: 300, endOffset: 900);
       await tester.pumpAndSettle();
 
-      // Outer bar has moved up (hidden).
-      final outerBarTopAfter = tester.getTopLeft(find.text('OuterBar')).dy;
-      expect(outerBarTopAfter, lessThan(outerBarTopBefore));
-
-      // Inner bar has also moved up.
-      final innerBarTopAfter = tester.getTopLeft(find.text('InnerBar')).dy;
-      expect(innerBarTopAfter, lessThan(innerBarTopBefore));
-
-      // When the outer bar is fully hidden, the inner bar's outer padding shrinks
-      // to the device safe-area floor (44px in _withTheme). The inner bar content
-      // is now near the top of the screen (close to where the outer bar was).
-      //
-      // Specifically: animatedEdgeMargin = max(44, outerBarHeight - outerHide) = 44
-      // so the inner bar content top ≈ 44 + insidePadding.top.
-      // That is approximately where the outer bar's content was at rest.
-      expect(innerBarTopAfter, closeTo(outerBarTopBefore, 4.0));
-
-      // The outer metrics hideOffset should equal barHeight (fully hidden).
       expect(outerMetrics, isNotNull);
-      expect(outerMetrics!.hideOffsetForPosition, closeTo(outerMetrics!.barHeightForPosition, 1.0));
+      expect(outerMetrics!.isScrolledUnder, isTrue);
     });
   });
 
@@ -1122,41 +997,12 @@ void main() {
       WidgetTester tester, {
       required double startOffset,
       required double endOffset,
-    }) async {
-      final scrollable = find.byType(ListView).first;
-      final element = tester.element(scrollable);
-
-      final metrics = FixedScrollMetrics(
-        minScrollExtent: 0,
-        maxScrollExtent: 2000,
-        pixels: startOffset,
-        viewportDimension: 600,
-        axisDirection: AxisDirection.down,
-        devicePixelRatio: 1.0,
-      );
-
-      final endMetrics = metrics.copyWith(pixels: endOffset);
-
-      ScrollStartNotification(
-        metrics: metrics,
-        context: element,
-        dragDetails: null,
-      ).dispatch(element);
-      await tester.pump();
-
-      ScrollUpdateNotification(
-        metrics: endMetrics,
-        context: element,
-        scrollDelta: endOffset - startOffset,
-      ).dispatch(element);
-      await tester.pump();
-
-      ScrollEndNotification(
-        metrics: endMetrics,
-        context: element,
-      ).dispatch(element);
-      await tester.pump();
-    }
+    }) =>
+        fakeAppBarScroll(
+          tester,
+          startOffset: startOffset,
+          endOffset: endOffset,
+        );
 
     // -----------------------------------------------------------------------
     // 1. Safe area is correctly incorporated into viewPadding floor
@@ -1416,41 +1262,12 @@ void main() {
       WidgetTester tester, {
       required double startOffset,
       required double endOffset,
-    }) async {
-      final scrollable = find.byType(ListView).first;
-      final element = tester.element(scrollable);
-
-      final metrics = FixedScrollMetrics(
-        minScrollExtent: 0,
-        maxScrollExtent: 2000,
-        pixels: startOffset,
-        viewportDimension: 600,
-        axisDirection: AxisDirection.down,
-        devicePixelRatio: 1.0,
-      );
-
-      final endMetrics = metrics.copyWith(pixels: endOffset);
-
-      ScrollStartNotification(
-        metrics: metrics,
-        context: element,
-        dragDetails: null,
-      ).dispatch(element);
-      await tester.pump();
-
-      ScrollUpdateNotification(
-        metrics: endMetrics,
-        context: element,
-        scrollDelta: endOffset - startOffset,
-      ).dispatch(element);
-      await tester.pump();
-
-      ScrollEndNotification(
-        metrics: endMetrics,
-        context: element,
-      ).dispatch(element);
-      await tester.pump();
-    }
+    }) =>
+        fakeAppBarScroll(
+          tester,
+          startOffset: startOffset,
+          endOffset: endOffset,
+        );
 
     // -----------------------------------------------------------------------
     // 1. avoidViewInsets=true: body padding stable when keyboard opens
@@ -1732,16 +1549,10 @@ void main() {
       final barH = capturedMetrics!.barHeightForPosition;
       expect(barH, greaterThan(0));
 
-      // Record bar's initial top position.
-      final barTopBefore = tester.getTopLeft(find.byKey(const Key('bar_textfield'))).dy;
-
-      // Scroll to hide the bar (large scroll delta).
       await fakeScroll(tester, startOffset: 300, endOffset: 300 + barH * 4);
       await tester.pumpAndSettle();
 
-      // Bar should have moved off-screen (upward for top bar).
-      final barTopAfter = tester.getTopLeft(find.byKey(const Key('bar_textfield'))).dy;
-      expect(barTopAfter, lessThan(barTopBefore));
+      expect(capturedMetrics!.isScrolledUnder, isTrue);
 
       // Body padding must remain constant (stable floor — padding is not animated).
       expect(capturedPadding!.top, paddingBeforeScroll.top);

@@ -38,10 +38,10 @@ class LdSelectableList<T extends Identifiable<IdType>, IdType> extends StatefulW
   });
 
   @override
-  State<LdSelectableList<T, IdType>> createState() => _LdSelectableListState<T, IdType>();
+  State<LdSelectableList<T, IdType>> createState() => LdSelectableListState<T, IdType>();
 }
 
-class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends State<LdSelectableList<T, IdType>>
+class LdSelectableListState<T extends Identifiable<IdType>, IdType> extends State<LdSelectableList<T, IdType>>
     with WidgetsBindingObserver {
   late final LdSelectableListSelectionController<T, IdType> _selectionController;
   late final ScrollController _scrollController;
@@ -50,6 +50,13 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
 
   bool _isMobile = false;
   bool _suppressSelectionChange = false;
+
+  EdgeDraggingAutoScroller? _autoScroller;
+  Rect? _activeDragRect;
+  bool _activeDirectionIsDownRight = true;
+  Offset? _activeDragEndOffset;
+
+  static const double _autoScrollerVelocityScalar = 50;
 
   @override
   void initState() {
@@ -86,11 +93,92 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
 
   @override
   void dispose() {
+    _stopAutoScroll();
     WidgetsBinding.instance.removeObserver(this);
     _selectionController.removeListener(_onSelectionControllerChanged);
     _scrollController.dispose();
     _selectionController.dispose();
     super.dispose();
+  }
+
+  ScrollableState? get _scrollableState {
+    if (!_scrollController.hasClients) {
+      return null;
+    }
+    final scrollContext = _scrollController.position.context;
+    if (scrollContext is ScrollableState) {
+      return scrollContext;
+    }
+    final notificationContext = scrollContext.notificationContext;
+    if (notificationContext == null) {
+      return null;
+    }
+    return Scrollable.maybeOf(notificationContext);
+  }
+
+  void _ensureAutoScroller() {
+    final scrollable = _scrollableState;
+    if (scrollable == null) {
+      return;
+    }
+    _autoScroller ??= EdgeDraggingAutoScroller(
+      scrollable,
+      onScrollViewScrolled: _handleAutoScrolled,
+      velocityScalar: _autoScrollerVelocityScalar,
+    );
+  }
+
+  void _handleAutoScrolled() {
+    final dragRect = _activeDragRect;
+    final dragEndOffset = _activeDragEndOffset;
+    if (dragRect == null || dragEndOffset == null) {
+      return;
+    }
+    _selectionController.onUpdateDragRect(
+      dragRect,
+      _activeDirectionIsDownRight,
+      _isMobile,
+      viewportRect: _viewportGlobalRect(),
+    );
+    setState(() {});
+    _updateAutoScroll(dragEndOffset);
+  }
+
+  Rect? _viewportGlobalRect() {
+    final scrollable = _scrollableState;
+    if (scrollable == null) {
+      return null;
+    }
+    final box = scrollable.context.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) {
+      return null;
+    }
+    final topLeft = box.localToGlobal(Offset.zero);
+    return topLeft & box.size;
+  }
+
+  void _updateAutoScroll(Offset dragEndOffset) {
+    _ensureAutoScroller();
+    final pointerRect = Rect.fromCenter(center: dragEndOffset, width: 1, height: 1);
+    _autoScroller?.startAutoScrollIfNecessary(pointerRect);
+  }
+
+  void _stopAutoScroll() {
+    _autoScroller?.stopAutoScroll();
+    _activeDragRect = null;
+    _activeDragEndOffset = null;
+  }
+
+  void syncSelection(Set<IdType> items) {
+    if (!mounted) {
+      return;
+    }
+    if (setEquals(_selectionController.selectedItems, items)) {
+      return;
+    }
+    _suppressSelectionChange = true;
+    _selectionController.updateSelectedItems(items);
+    _suppressSelectionChange = false;
   }
 
   @override
@@ -101,10 +189,10 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
     }
 
     if (!setEquals(oldWidget.initialSelectedItems, widget.initialSelectedItems)) {
-      _suppressSelectionChange = true;
-      _selectionController.updateSelectedItems(widget.initialSelectedItems);
-      _suppressSelectionChange = false;
-      if (widget.initialSelectedItems.length == 1) {
+      final hadExternalChange =
+          !setEquals(_selectionController.selectedItems, widget.initialSelectedItems);
+      syncSelection(widget.initialSelectedItems);
+      if (hadExternalChange && widget.initialSelectedItems.length == 1) {
         _selectionController.getFocusNodeForItem(widget.initialSelectedItems.first).requestFocus();
       }
     }
@@ -125,18 +213,29 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
     super.didChangeAppLifecycleState(state);
   }
 
-  void _onUpdateDragRect(Rect dragRect, bool directionIsDownRight) {
-    _selectionController.onUpdateDragRect(dragRect, directionIsDownRight, _isMobile);
+  void _onUpdateDragRect(Rect dragRect, bool directionIsDownRight, Offset dragEndOffset) {
+    _activeDragRect = dragRect;
+    _activeDirectionIsDownRight = directionIsDownRight;
+    _activeDragEndOffset = dragEndOffset;
+    _selectionController.onUpdateDragRect(
+      dragRect,
+      directionIsDownRight,
+      _isMobile,
+      viewportRect: _viewportGlobalRect(),
+    );
     setState(() {});
+    _updateAutoScroll(dragEndOffset);
   }
 
   Future<void> _onEndDrag(Rect rect) async {
+    _stopAutoScroll();
     _selectionController.onEndDrag();
     setState(() {});
     await Future.delayed(const Duration(milliseconds: 100));
   }
 
   void _onCancel() {
+    _stopAutoScroll();
     _selectionController.onCancel();
     setState(() {});
   }
@@ -314,7 +413,7 @@ class _LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Sta
 }
 
 class _DragRect extends StatefulWidget {
-  final void Function(Rect rect, bool directionIsDownRight) onUpdateRect;
+  final void Function(Rect rect, bool directionIsDownRight, Offset dragEndOffset) onUpdateRect;
   final void Function(Rect rect) onEndDrag;
   final void Function() onCancel;
   final void Function() onTapOutside;
@@ -372,7 +471,7 @@ class _DragRectState extends State<_DragRect> {
         if (rect == null) {
           return;
         }
-        widget.onUpdateRect(rect, false);
+        widget.onUpdateRect(rect, false, details.globalPosition);
       },
       onVerticalDragEnd: (details) {
         final rect = _dragRect;
@@ -420,7 +519,7 @@ class _DragRectState extends State<_DragRect> {
         final directionIsDownRight =
             _dragEndOffset!.dy > _dragStartOffset!.dy && _dragEndOffset!.dx > _dragStartOffset!.dx;
 
-        widget.onUpdateRect(rect, directionIsDownRight);
+        widget.onUpdateRect(rect, directionIsDownRight, details.globalPosition);
       },
       onPanEnd: (details) {
         final rect = _dragRect;

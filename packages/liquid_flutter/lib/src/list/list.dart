@@ -344,14 +344,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
     _pendingGapOffsets.clear();
     _updateRetryControllerState();
     _updateGroupedItems();
-    // #region agent log
-    final scrollOffset = _scrollController.hasClients ? _scrollController.offset : null;
-    debugPrint(
-      '[DEBUG-c191e8] H1,H4,H5 list:_onDataChange '
-      'initialOffset=${widget.paginator.initialOffset} performedInitialScroll=$_performedInitialScroll '
-      'scrollOffset=$scrollOffset itemKeyCount=${_itemKeys.length} totalItems=${widget.paginator.totalItems}',
-    );
-    // #endregion
+
     _maybePerformInitialScroll();
     _maybeScrollToPendingItem();
   }
@@ -446,7 +439,12 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
   Widget _buildListItems() {
     return SliverList.builder(
       itemCount: _groupedItems.length,
-      itemBuilder: (context, index) => _buildListItem(context, index),
+      itemBuilder: (context, index) => LdListItemConfigProvider(
+        config: LdListItemConfig(
+          padding: MediaQuery.of(context).padding + LdTheme.of(context).pad(),
+        ),
+        child: _buildListItem(context, index),
+      ),
     );
   }
 
@@ -570,24 +568,35 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
   }
 
   bool _performedInitialScroll = false;
+  int _pendingScrollAttempts = 0;
+  static const _maxPendingScrollAttempts = 120;
 
   void _maybeScrollToPendingItem() {
     final scrollToId = widget.paginator.pendingScrollToItemId;
     if (scrollToId == null) {
+      _pendingScrollAttempts = 0;
       return;
     }
 
     final index = widget.paginator.getItemIndexById(scrollToId);
-    // #region agent log
-    debugPrint(
-      '[DEBUG-c191e8] FIX list:_maybeScrollToPendingItem scheduled '
-      'id=$scrollToId index=$index hasClients=${_scrollController.hasClients} '
-      'scrollOffset=${_scrollController.hasClients ? _scrollController.offset : null}',
-    );
-    // #endregion
-    if (index == null || !_scrollController.hasClients) {
+    if (index == null) {
+      _pendingScrollAttempts = 0;
       return;
     }
+
+    if (!_scrollController.hasClients) {
+      if (_pendingScrollAttempts++ >= _maxPendingScrollAttempts) {
+        return;
+      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && widget.paginator.pendingScrollToItemId == scrollToId) {
+          _maybeScrollToPendingItem();
+        }
+      });
+      return;
+    }
+
+    _pendingScrollAttempts = 0;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_scrollPendingItemIntoView(scrollToId, index));
@@ -612,9 +621,11 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
 
     final averageHeight = _getAverageItemHeight();
     if (averageHeight <= 0) {
-      // #region agent log
-      debugPrint('[DEBUG-c191e8] FIX list:_scrollPendingItemIntoView abort no averageHeight id=$id');
-      // #endregion
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && widget.paginator.pendingScrollToItemId == id) {
+          _maybeScrollToPendingItem();
+        }
+      });
       return;
     }
 
@@ -629,21 +640,12 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
     final isVisible = index >= firstVisibleIndex && index <= lastVisibleIndex;
 
     if (isVisible) {
-      // #region agent log
-      debugPrint(
-        '[DEBUG-c191e8] FIX list:_scrollPendingItemIntoView skip visible '
-        'id=$id index=$index visibleRange=$firstVisibleIndex-$lastVisibleIndex scrollOffset=$scrollBefore',
-      );
-      // #endregion
+      if (widget.paginator.pendingScrollToItemId == id) {
+        widget.paginator.clearPendingScrollToItem();
+      }
       return;
     }
 
-    // #region agent log
-    debugPrint(
-      '[DEBUG-c191e8] FIX list:_scrollPendingItemIntoView animateTo '
-      'id=$id index=$index target=$target scrollBefore=$scrollBefore',
-    );
-    // #endregion
     await _scrollController.animateTo(
       target,
       duration: const Duration(milliseconds: 300),
@@ -668,12 +670,6 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
     if (widget.paginator.pendingScrollToItemId == id) {
       widget.paginator.clearPendingScrollToItem();
     }
-    // #region agent log
-    debugPrint(
-      '[DEBUG-c191e8] FIX list:_scrollPendingItemIntoView done '
-      'id=$id scrollAfter=${_scrollController.hasClients ? _scrollController.offset : null}',
-    );
-    // #endregion
   }
 
   /// Helper method to perform the initial scroll to the correct position
@@ -692,14 +688,6 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
     final averageHeight = _getAverageItemHeight();
 
     final offset = averageHeight * widget.paginator.initialOffset;
-
-    // #region agent log
-    debugPrint(
-      '[DEBUG-c191e8] H1,H4 list:_maybePerformInitialScroll '
-      'initialOffset=${widget.paginator.initialOffset} averageHeight=$averageHeight '
-      'targetScrollOffset=$offset currentScrollOffset=${_scrollController.offset}',
-    );
-    // #endregion
 
     _scrollController.animateTo(offset, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
   }

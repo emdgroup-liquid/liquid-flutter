@@ -94,12 +94,12 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
       child: LdMonkeyAppBar<T, IdType>(
         location: LdMonkeyActionLocation.masterAppBar,
         additionalActions: widget.primaryAppBarAdditionalActions,
-        child: LdAppBarConfigProvider(
-          config: widget.secondaryAppBarConfig ?? const LdAppBarConfig(),
-          ignoreParent: true,
-          child: LdWrapConditional(
-            condition: widget.filterBarConfig != null,
-            builder: (context, child) => LdAppBar(
+        child: LdWrapConditional(
+          condition: widget.filterBarConfig != null,
+          builder: (context, child) => LdAppBarConfigProvider(
+            config: LdAppBarConfig(),
+            ignoreParent: true,
+            child: LdAppBar(
               leading: Expanded(
                 child: LdFilterChipsBar<T, IdType>(
                   configs: widget.filterBarConfig!,
@@ -107,6 +107,10 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
               ),
               child: child,
             ),
+          ),
+          child: LdAppBarConfigProvider(
+            config: widget.secondaryAppBarConfig ?? const LdAppBarConfig(),
+            ignoreParent: true,
             child: LdMonkeyAppBar<T, IdType>(
               location: LdMonkeyActionLocation.masterSecondary,
               child: body,
@@ -128,8 +132,13 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
         child: LdMonkeyMultiShortcuts(
           actions: actions,
           child: LdScaffold(
-            body: _buildAppBarWrappedBody(
-              _buildList(context, repository, actions),
+            body: LdListItemConfigProvider(
+              config: LdListItemConfig(
+                padding: MediaQuery.of(context).padding,
+              ),
+              child: _buildAppBarWrappedBody(
+                LdAutoBackground(invert: true, child: _buildList(context, repository, actions)),
+              ),
             ),
           ),
         ),

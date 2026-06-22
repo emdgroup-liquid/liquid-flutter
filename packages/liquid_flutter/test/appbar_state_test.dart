@@ -1,110 +1,83 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_state.dart';
+
+import 'appbar_metrics_test_utils.dart';
 
 void main() {
   group('LdAppBarMetrics', () {
     // Level-0 top bar: edgeMargin.top=44 (device safe-area), inner content=48.
     // barHeight.top = edgeMargin.top + inner = 92.
-    const base = LdAppBarMetrics(
+    final base = testAppBarMetrics(
       position: LdAppBarPosition.top,
-      barHeight: EdgeInsets.only(top: 92.0),
-      edgeMargin: EdgeInsets.only(top: 44.0),
-      hideOffset: EdgeInsets.only(top: 0.0),
-      isScrolledUnder: false,
-      level: 0,
+      barHeight: const EdgeInsets.only(top: 92.0),
+      edgeMargin: const EdgeInsets.only(top: 44.0),
     );
 
-    // -------------------------------------------------------------------------
-    // Value equality
-    // -------------------------------------------------------------------------
-
     test('equal when all fields match', () {
-      const other = LdAppBarMetrics(
+      final other = testAppBarMetrics(
         position: LdAppBarPosition.top,
-        barHeight: EdgeInsets.only(top: 92.0),
-        edgeMargin: EdgeInsets.only(top: 44.0),
-        hideOffset: EdgeInsets.only(top: 0.0),
-        isScrolledUnder: false,
-        level: 0,
+        barHeight: const EdgeInsets.only(top: 92.0),
+        edgeMargin: const EdgeInsets.only(top: 44.0),
       );
       expect(base, equals(other));
       expect(base.hashCode, equals(other.hashCode));
     });
 
     test('not equal when any field differs', () {
-      expect(base == base.copyWith(barHeight: const EdgeInsets.only(top: 80.0)), isFalse);
-      expect(base == base.copyWith(edgeMargin: EdgeInsets.zero), isFalse);
+      expect(
+        base == base.copyWith(innerHeight: const EdgeInsets.only(top: 80.0)),
+        isFalse,
+      );
+      expect(base == base.copyWith(ownMargin: EdgeInsets.zero), isFalse);
       expect(base == base.copyWith(position: LdAppBarPosition.bottom), isFalse);
       expect(base == base.copyWith(isScrolledUnder: true), isFalse);
       expect(base == base.copyWith(level: 1), isFalse);
     });
 
-    // -------------------------------------------------------------------------
-    // stableConsumedInsets
-    // -------------------------------------------------------------------------
-
-    test('stableConsumedInsets for top bar = barHeight.top - edgeMargin.top', () {
-      expect(base.stableConsumedInsets, equals(const EdgeInsets.only(top: 48.0)));
+    test('maximumSize for top bar = innerHeight + configuredInsets', () {
+      expect(base.maximumSize, equals(const EdgeInsets.only(top: 92.0)));
     });
 
-    test('stableConsumedInsets ignores hideOffset', () {
-      final hiding = base.copyWith(hideOffset: const EdgeInsets.only(top: 46.0));
-      // Still barHeight.top - edgeMargin.top = 48, regardless of hideOffset.
-      expect(hiding.stableConsumedInsets, equals(const EdgeInsets.only(top: 48.0)));
+    test('maximumSize ignores scrollOffset', () {
+      final hiding = base.copyWith(scrollOffset: const EdgeInsets.only(top: 46.0));
+      expect(hiding.maximumSize, equals(base.maximumSize));
     });
 
-    test('stableConsumedInsets clamped to 0 when barHeight <= edgeMargin', () {
-      final flat = base.copyWith(barHeight: const EdgeInsets.only(top: 44.0)); // inner content = 0
-      expect(flat.stableConsumedInsets, equals(EdgeInsets.zero));
+    test('effectiveSize shrinks as scrollOffset grows', () {
+      final hiding = base.copyWith(scrollOffset: const EdgeInsets.only(top: 46.0));
+      expect(hiding.effectiveSize, equals(const EdgeInsets.only(top: 46.0)));
     });
 
-    test('stableConsumedInsets for bottom bar', () {
-      const bottom = LdAppBarMetrics(
-        position: LdAppBarPosition.bottom,
-        barHeight: EdgeInsets.only(bottom: 82.0),
-        edgeMargin: EdgeInsets.only(bottom: 34.0),
-        hideOffset: EdgeInsets.only(bottom: 0.0),
-        isScrolledUnder: false,
-        level: 0,
+    test('effectiveSize is zero when fully hidden', () {
+      final hidden = base.copyWith(scrollOffset: const EdgeInsets.only(top: 92.0));
+      expect(hidden.effectiveSize, equals(EdgeInsets.zero));
+    });
+
+    test('effectiveSize clamped to 0 when scrollOffset exceeds maximumSize components', () {
+      final overHidden = base.copyWith(scrollOffset: const EdgeInsets.only(top: 120.0));
+      expect(
+        overHidden.accumulatedEffectiveSizes,
+        equals(EdgeInsets.zero),
       );
-      expect(bottom.stableConsumedInsets, equals(const EdgeInsets.only(bottom: 48.0)));
     });
 
-    // -------------------------------------------------------------------------
-    // consumedInsets (animated)
-    // -------------------------------------------------------------------------
-
-    test('consumedInsets with no hideOffset equals stableConsumedInsets', () {
-      expect(base.consumedInsets, equals(base.stableConsumedInsets));
+    test('accumulatedEffectiveSizes for bottom bar', () {
+      final bottom = testAppBarMetrics(
+        position: LdAppBarPosition.bottom,
+        barHeight: const EdgeInsets.only(bottom: 82.0),
+        edgeMargin: const EdgeInsets.only(bottom: 34.0),
+      );
+      expect(bottom.accumulatedEffectiveSizes, equals(const EdgeInsets.only(bottom: 82.0)));
     });
-
-    test('consumedInsets shrinks as hideOffset grows', () {
-      // visible = 92 - 46 = 46; incremental = 46 - 44 = 2
-      final hiding = base.copyWith(hideOffset: const EdgeInsets.only(top: 46.0));
-      expect(hiding.consumedInsets, equals(const EdgeInsets.only(top: 2.0)));
-    });
-
-    test('consumedInsets is zero when fully hidden', () {
-      final hidden = base.copyWith(hideOffset: const EdgeInsets.only(top: 92.0));
-      expect(hidden.consumedInsets, equals(EdgeInsets.zero));
-    });
-
-    test('consumedInsets clamped to 0 when hideOffset > barHeight', () {
-      final overHidden = base.copyWith(hideOffset: const EdgeInsets.only(top: 120.0));
-      expect(overHidden.consumedInsets, equals(EdgeInsets.zero));
-    });
-
-    // -------------------------------------------------------------------------
-    // copyWith
-    // -------------------------------------------------------------------------
 
     test('copyWith preserves unchanged fields', () {
       final modified = base.copyWith(level: 2, isScrolledUnder: true);
       expect(modified.position, base.position);
-      expect(modified.barHeight, base.barHeight);
-      expect(modified.edgeMargin, base.edgeMargin);
-      expect(modified.hideOffset, base.hideOffset);
+      expect(modified.innerHeight, base.innerHeight);
+      expect(modified.configuredInsets, base.configuredInsets);
+      expect(modified.scrollOffset, base.scrollOffset);
       expect(modified.isScrolledUnder, isTrue);
       expect(modified.level, 2);
     });
@@ -113,46 +86,72 @@ void main() {
       expect(base.copyWith(), equals(base));
     });
 
-    // -------------------------------------------------------------------------
-    // EdgeInsets merging across positions (the fix)
-    // -------------------------------------------------------------------------
-
     test('metrics carry both-edge data when a top and bottom bar are nested', () {
-      // Simulate what AppBarFrame._buildMetrics produces for a bottom bar that
-      // wraps inside a top bar whose metrics are already in the tree.
-      const topMetrics = LdAppBarMetrics(
+      final topMetrics = testAppBarMetrics(
         position: LdAppBarPosition.top,
-        barHeight: EdgeInsets.only(top: 92.0),
-        edgeMargin: EdgeInsets.only(top: 44.0),
-        hideOffset: EdgeInsets.only(top: 30.0),
+        barHeight: const EdgeInsets.only(top: 92.0),
+        edgeMargin: const EdgeInsets.only(top: 44.0),
+        hideOffset: const EdgeInsets.only(top: 30.0),
         isScrolledUnder: true,
-        level: 0,
       );
 
-      // Bottom bar writes its edge into a copy of the parent's insets.
       final combined = topMetrics.copyWith(
         position: LdAppBarPosition.bottom,
-        barHeight: topMetrics.barHeight.copyWith(bottom: 80.0),
-        edgeMargin: topMetrics.edgeMargin.copyWith(bottom: 34.0),
-        hideOffset: topMetrics.hideOffset.copyWith(bottom: 0.0),
+        innerHeight: topMetrics.innerHeight.copyWith(bottom: 46.0),
+        ownMargin: topMetrics.configuredInsets.copyWith(bottom: 34.0),
+        scrollOffset: topMetrics.scrollOffset.copyWith(bottom: 0.0),
         level: 0,
       );
 
-      // Top-edge data is preserved.
-      expect(combined.barHeight.top, 92.0);
-      expect(combined.edgeMargin.top, 44.0);
-      expect(combined.hideOffset.top, 30.0);
+      expect(combined.maximumSize.top, 92.0);
+      expect(combined.configuredInsets.top, 44.0);
+      expect(combined.scrollOffset.top, 30.0);
 
-      // Bottom-edge data is written.
-      expect(combined.barHeight.bottom, 80.0);
-      expect(combined.edgeMargin.bottom, 34.0);
-      expect(combined.hideOffset.bottom, 0.0);
+      expect(combined.maximumSize.bottom, 80.0);
+      expect(combined.configuredInsets.bottom, 34.0);
+      expect(combined.scrollOffset.bottom, 0.0);
+    });
+  });
 
-      // stableConsumedInsets covers both edges.
-      expect(
-        combined.stableConsumedInsets,
-        equals(const EdgeInsets.only(top: 48.0, bottom: 46.0)),
+  group('ldHasParentTopAppBar', () {
+    test('returns false for outermost app bar', () {
+      final metrics = testAppBarMetrics(
+        position: LdAppBarPosition.top,
+        barHeight: const EdgeInsets.only(top: 48.0),
       );
+
+      expect(ldHasParentTopAppBar(metrics), isFalse);
+    });
+
+    test('returns true when parent is a top app bar', () {
+      final parent = testAppBarMetrics(
+        position: LdAppBarPosition.top,
+        barHeight: const EdgeInsets.only(top: 48.0),
+      );
+      final child = testAppBarMetrics(
+        position: LdAppBarPosition.top,
+        barHeight: const EdgeInsets.only(top: 40.0),
+        level: 1,
+        parentMetrics: parent,
+      );
+
+      expect(ldHasParentTopAppBar(child), isTrue);
+    });
+
+    test('ignores tab navigation ancestors', () {
+      final parent = testAppBarMetrics(
+        position: LdAppBarPosition.top,
+        barHeight: const EdgeInsets.only(top: 48.0),
+        isTabNavigation: true,
+      );
+      final child = testAppBarMetrics(
+        position: LdAppBarPosition.top,
+        barHeight: const EdgeInsets.only(top: 40.0),
+        level: 1,
+        parentMetrics: parent,
+      );
+
+      expect(ldHasParentTopAppBar(child), isFalse);
     });
   });
 }

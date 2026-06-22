@@ -37,6 +37,8 @@ class LdTabNavigation extends StatefulWidget {
   /// The subtree that this tab bar wraps.
   final Widget child;
 
+  final String? debugName;
+
   const LdTabNavigation({
     super.key,
     required this.activeRoute,
@@ -45,6 +47,7 @@ class LdTabNavigation extends StatefulWidget {
     this.shadowMode = LdAppBarShadowMode.adaptive,
     this.borderMode = LdAppBarBorderMode.adaptive,
     required this.onTabPressed,
+    this.debugName,
     required this.child,
     this.addContainer = false,
     this.enableGradient = true,
@@ -202,85 +205,6 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
         curve: Curves.easeOut,
       );
     }
-  }
-
-  int _fillOpacity(bool isScrolledUnder) {
-    int opacity = 0;
-
-    if (isScrolledUnder) {
-      opacity = 255;
-    }
-
-    return opacity;
-  }
-
-  Color _fillColor(bool isScrolledUnder) {
-    final theme = LdTheme.of(context);
-    final color = LdTheme.of(context).surface;
-
-    return switch (widget.backgroundMode) {
-      LdAppBarBackgroundMode.hidden => Colors.transparent,
-      LdAppBarBackgroundMode.visible => color,
-      LdAppBarBackgroundMode.whenScrolled => color.withAlpha(_fillOpacity(isScrolledUnder)),
-      LdAppBarBackgroundMode.adaptive => switch (theme.platform.isDesktop) {
-          false => color.withAlpha(_fillOpacity(isScrolledUnder)),
-          true => color,
-        },
-    };
-  }
-
-  BoxDecoration _buildOutsideDecoration({
-    required BuildContext context,
-    required bool isScrolledUnder,
-    required bool isAttached,
-    required LdAppBarPosition position,
-  }) {
-    return BoxDecoration(
-      // We fill the outside container when attached.
-      color: isAttached ? _fillColor(isScrolledUnder) : null,
-
-      // Add a border to the app bar when attached. either top or bottom.
-      border: isAttached
-          ? Border(
-              bottom: switch (position) {
-                LdAppBarPosition.top => BorderSide(
-                    color: LdTheme.of(context).border,
-                    width: LdTheme.of(context).borderWidth,
-                  ),
-                LdAppBarPosition.bottom => BorderSide.none,
-              },
-              top: switch (position) {
-                LdAppBarPosition.bottom => BorderSide(
-                    color: LdTheme.of(context).border,
-                    width: LdTheme.of(context).borderWidth,
-                  ),
-                LdAppBarPosition.top => BorderSide.none,
-              },
-            )
-          : null,
-    );
-  }
-
-  BoxDecoration _buildInsideDecoration({
-    required BuildContext context,
-    required bool isScrolledUnder,
-    required bool isAttached,
-    required LdAppBarPosition position,
-  }) {
-    if (isAttached) {
-      return const BoxDecoration();
-    }
-
-    final theme = LdTheme.of(context);
-    return BoxDecoration(
-      borderRadius: BorderRadius.circular(theme.radiusSize(LdSize.m)),
-      color: _fillColor(isScrolledUnder),
-      border: Border.all(
-        color: theme.floatingBorder,
-        width: theme.borderWidth,
-        strokeAlign: BorderSide.strokeAlignOutside,
-      ),
-    );
   }
 
   @override
@@ -444,8 +368,10 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
     final frame = AnnotatedRegion<SystemUiOverlayStyle>(
       value: appBarSystemUiOverlayStyle(theme),
       child: AppBarFrame(
+        debugName: widget.debugName,
         position: position,
         attached: isAttached,
+        isTabNavigation: true,
         addContainer: widget.addContainer,
         scrollBehavior: widget.scrollBehavior,
         wrappedChild: widget.child,
@@ -462,6 +388,15 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
           isScrolledUnder: isScrolledUnder,
           isAttached: isAttached,
           position: position,
+        ),
+        surfaceInfoBuilder: (isScrolledUnder) => LdSurfaceInfo(
+          isSurface: decorationBuilder
+              .resolveAppearance(
+                context,
+                isScrolledUnder: isScrolledUnder,
+                position: position,
+              )
+              .childIsSurface,
         ),
         child: tabBarSurface,
       ),

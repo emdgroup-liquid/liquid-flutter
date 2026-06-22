@@ -46,11 +46,6 @@ class _LdChooseLightweightScopeState<T extends Identifiable<IdType>, IdType>
       showSelectionControls: true,
       filters: _buildInitialFilters(),
     );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        widget.repository.ensureGreedyLoaded(context);
-      }
-    });
   }
 
   Set<LdFilterOption<T, IdType>> _buildInitialFilters() {

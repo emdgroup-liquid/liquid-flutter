@@ -24,6 +24,7 @@ class LdAppBarConfig {
     this.showWindowControls,
     this.title,
     this.trailing,
+    this.padding,
   });
 
   final Widget? child;
@@ -69,6 +70,8 @@ class LdAppBarConfig {
   final Widget? title;
 
   final Widget? trailing;
+
+  final EdgeInsets? padding;
 }
 
 class LdAppBarConfigProvider extends StatelessWidget {
@@ -125,7 +128,8 @@ class LdAppBarConfigProvider extends StatelessWidget {
             showWindowControls:
                 config.showWindowControls ?? parentConfig.showWindowControls,
             title: config.title ?? parentConfig.title,
-            trailing: config.trailing ?? parentConfig.trailing)
+            trailing: config.trailing ?? parentConfig.trailing,
+            padding: config.padding ?? parentConfig.padding)
         : config;
     return Provider<LdAppBarConfig>.value(
       value: mergedConfig,
@@ -158,6 +162,7 @@ class LdAppBar extends StatelessWidget {
     this.showWindowControls,
     this.title,
     this.trailing,
+    this.padding,
     super.key,
   });
 
@@ -184,6 +189,7 @@ class LdAppBar extends StatelessWidget {
     bool? showWindowControls,
     Widget? title,
     Widget? trailing,
+    EdgeInsets? padding,
     Key? key,
   }) {
     return LdAppBar(
@@ -209,6 +215,7 @@ class LdAppBar extends StatelessWidget {
       showWindowControls: showWindowControls,
       title: title,
       trailing: trailing,
+      padding: padding,
       key: key,
     );
   }
@@ -236,6 +243,7 @@ class LdAppBar extends StatelessWidget {
     bool? showWindowControls,
     Widget? title,
     Widget? trailing,
+    EdgeInsets? padding,
     Key? key,
   }) {
     return LdAppBar(
@@ -261,6 +269,7 @@ class LdAppBar extends StatelessWidget {
       showWindowControls: showWindowControls,
       title: title,
       trailing: trailing,
+      padding: padding,
       key: key,
     );
   }
@@ -309,6 +318,8 @@ class LdAppBar extends StatelessWidget {
 
   final Widget? child;
 
+  final EdgeInsets? padding;
+
   @override
   Widget build(BuildContext context) {
     final config = Provider.of<LdAppBarConfig?>(context, listen: true);
@@ -348,6 +359,7 @@ class LdAppBar extends StatelessWidget {
           showWindowControls ?? config?.showWindowControls ?? true,
       title: title ?? config?.title,
       trailing: trailing ?? config?.trailing,
+      padding: padding ?? config?.padding,
     );
   }
 }

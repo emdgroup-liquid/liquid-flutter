@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/drawer_layout.dart';
 import 'package:liquid_flutter_test_utils/ld_frame.dart';
 import 'package:liquid_flutter_test_utils/ld_frame_options.dart';
 import 'package:liquid_flutter_test_utils/system_ui/iphone_16_pro.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
+
+import 'appbar_metrics_test_utils.dart';
 
 /// Helper: wraps [bar] (which has [child]) in a minimal scaffold-like tree.
 /// The bar's wrappedChild provides MediaQuery insets to its subtree.
@@ -312,7 +315,7 @@ void main() {
                 width: 130,
                 child: LdOverflowView(
                   spacing: 8,
-                  builder: (context, remainingItemCount) => const SizedBox(
+                  builder: (context, overflowedChildIndices) => const SizedBox(
                     width: 32,
                     height: 32,
                   ),
@@ -353,7 +356,7 @@ void main() {
                 width: 120,
                 child: LdOverflowView(
                   spacing: 8,
-                  builder: (context, remainingItemCount) => const SizedBox(
+                  builder: (context, overflowedChildIndices) => const SizedBox(
                     width: 32,
                     height: 32,
                   ),
@@ -729,6 +732,211 @@ void main() {
       expect(find.byIcon(LucideIcons.chevronLeft), findsNothing);
     });
 
+    testWidgets('App bar implyLeading when navigator can pop', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            brightnessMode: LdThemeBrightnessMode.light,
+            child: Navigator(
+              onPopPage: (route, result) {
+                if (!route.didPop(result)) {
+                  return false;
+                }
+                return true;
+              },
+              pages: [
+                const MaterialPage<void>(child: SizedBox.shrink()),
+                MaterialPage<void>(
+                  child: LdScaffold(
+                    body: LdAppBar.top(
+                      title: const Text('Detail'),
+                      child: const Center(child: Text('Body')),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(LucideIcons.chevronLeft), findsOneWidget);
+    });
+
+    testWidgets('App bar implyLeading hidden under modal route', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            brightnessMode: LdThemeBrightnessMode.light,
+            child: Builder(
+              builder: (context) {
+                return LdScaffold(
+                  body: LdAppBar.top(
+                    title: const Text('Page'),
+                    child: Center(
+                      child: LdButton(
+                        onPressed: () {
+                          LdModalRoute<void>(
+                            context: context,
+                            pageBuilder: (context) => LdScaffold(
+                              body: LdAppBar.top(
+                                title: const Text('Modal'),
+                                child: const Center(child: Text('Modal body')),
+                              ),
+                            ),
+                          ).show(context);
+                        },
+                        child: const Text('Open modal'),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      expect(find.byIcon(LucideIcons.chevronLeft), findsNothing);
+
+      await tester.tap(find.text('Open modal'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page'), findsOneWidget);
+      expect(find.text('Modal'), findsOneWidget);
+      expect(find.byIcon(LucideIcons.chevronLeft), findsNothing);
+    });
+
+    testWidgets('App bar implyLeading hidden when stacked drawer is open', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            brightnessMode: LdThemeBrightnessMode.light,
+            child: MediaQuery(
+              data: const MediaQueryData(size: Size(400, 800)),
+              child: LdScaffold(
+                drawer: const Center(child: Text('Drawer')),
+                body: LdAppBar.top(
+                  title: const Text('Page'),
+                  child: const Center(child: Text('Body')),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      expect(find.byIcon(LucideIcons.chevronLeft), findsNothing);
+
+      await tester.tap(find.byIcon(LucideIcons.menu));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Drawer'), findsOneWidget);
+      expect(find.byIcon(LucideIcons.chevronLeft), findsNothing);
+
+      LdDrawerLayout.closeDrawer(tester.element(find.text('Body')));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('App bar implyLeading only on innermost top bar when stacked', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            brightnessMode: LdThemeBrightnessMode.light,
+            child: Navigator(
+              onPopPage: (route, result) {
+                if (!route.didPop(result)) {
+                  return false;
+                }
+                return true;
+              },
+              pages: [
+                const MaterialPage<void>(child: SizedBox.shrink()),
+                MaterialPage<void>(
+                  child: LdScaffold(
+                    body: LdAppBar.top(
+                      title: const Text('Outer'),
+                      child: LdAppBar.top(
+                        title: const Text('Inner'),
+                        child: const Center(child: Text('Body')),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(LucideIcons.chevronLeft), findsOneWidget);
+    });
+
+    testWidgets('App bar implyLeading ignores tab navigation when detecting parent', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            brightnessMode: LdThemeBrightnessMode.light,
+            child: Navigator(
+              onPopPage: (route, result) {
+                if (!route.didPop(result)) {
+                  return false;
+                }
+                return true;
+              },
+              pages: [
+                const MaterialPage<void>(child: SizedBox.shrink()),
+                MaterialPage<void>(
+                  child: LdScaffold(
+                    body: LdAppBar.top(
+                      title: const Text('Outer'),
+                      child: LdTabNavigation(
+                        activeRoute: '/home',
+                        onTabPressed: (_) {},
+                        tabs: const [
+                          LdNavigationTab(
+                            label: 'Home',
+                            icon: Icon(LucideIcons.house),
+                            route: '/home',
+                          ),
+                        ],
+                        child: const Center(child: Text('Body')),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(LucideIcons.chevronLeft), findsOneWidget);
+    });
+
     testWidgets('App bar with custom backgroundColor', (WidgetTester tester) async {
       ldDisableAnimations = true;
       await tester.pumpWidget(
@@ -986,13 +1194,9 @@ void main() {
 
       // We'll use a ValueNotifier to drive isScrolledUnder externally.
       final metricsNotifier = ValueNotifier<LdAppBarMetrics>(
-        const LdAppBarMetrics(
+        testAppBarMetrics(
           position: LdAppBarPosition.top,
-          barHeight: EdgeInsets.only(top: 56),
-          edgeMargin: EdgeInsets.zero,
-          hideOffset: EdgeInsets.zero,
-          isScrolledUnder: false,
-          level: 0,
+          barHeight: const EdgeInsets.only(top: 56),
         ),
       );
 
@@ -1022,13 +1226,10 @@ void main() {
       expect(find.text('scrolled'), findsNothing);
 
       // Update metrics so isScrolledUnder becomes true.
-      metricsNotifier.value = const LdAppBarMetrics(
+      metricsNotifier.value = testAppBarMetrics(
         position: LdAppBarPosition.top,
-        barHeight: EdgeInsets.only(top: 56),
-        edgeMargin: EdgeInsets.zero,
-        hideOffset: EdgeInsets.zero,
+        barHeight: const EdgeInsets.only(top: 56),
         isScrolledUnder: true,
-        level: 0,
       );
       await tester.pump();
 
@@ -1090,13 +1291,9 @@ void main() {
       ldDisableAnimations = true;
       await tester.pumpWidget(
         buildWithMetrics(
-          metrics: const LdAppBarMetrics(
+          metrics: testAppBarMetrics(
             position: LdAppBarPosition.top,
-            barHeight: EdgeInsets.only(top: 56),
-            edgeMargin: EdgeInsets.zero,
-            hideOffset: EdgeInsets.zero,
-            isScrolledUnder: false,
-            level: 0,
+            barHeight: const EdgeInsets.only(top: 56),
           ),
           drawerOpen: false,
           isSideBySide: false,
@@ -1114,13 +1311,10 @@ void main() {
       ldDisableAnimations = true;
       await tester.pumpWidget(
         buildWithMetrics(
-          metrics: const LdAppBarMetrics(
+          metrics: testAppBarMetrics(
             position: LdAppBarPosition.top,
-            barHeight: EdgeInsets.only(top: 56),
-            edgeMargin: EdgeInsets.zero,
-            hideOffset: EdgeInsets.zero,
-            isScrolledUnder: false,
-            level: 1, // nested bar
+            barHeight: const EdgeInsets.only(top: 56),
+            level: 1,
           ),
           drawerOpen: false,
           isSideBySide: false,
@@ -1136,13 +1330,9 @@ void main() {
       ldDisableAnimations = true;
       await tester.pumpWidget(
         buildWithMetrics(
-          metrics: const LdAppBarMetrics(
+          metrics: testAppBarMetrics(
             position: LdAppBarPosition.bottom,
-            barHeight: EdgeInsets.only(bottom: 56),
-            edgeMargin: EdgeInsets.zero,
-            hideOffset: EdgeInsets.zero,
-            isScrolledUnder: false,
-            level: 0,
+            barHeight: const EdgeInsets.only(bottom: 56),
           ),
           drawerOpen: false,
           isSideBySide: false,

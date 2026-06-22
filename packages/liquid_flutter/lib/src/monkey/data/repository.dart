@@ -9,7 +9,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
   final Future<int?> Function(FetchOffsetParameters<T, IdType> parameters)? _getOffsetById;
 
   final Future<T?> Function(BuildContext context, IdType id, T newItem)? _updateItem;
-  final Future<T?> Function(BuildContext context, T? newItem)? _createItem;
+  final Future<T> Function(BuildContext context, T? newItem)? _createItem;
   final Future<T> Function(IdType id) _getById;
   final Future<void> Function(BuildContext context, IdType id)? _deleteItem;
   final Future<void> Function(BuildContext context, Set<IdType> ids)? _deleteBatch;
@@ -39,7 +39,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     Future<int?> Function(FetchOffsetParameters<T, IdType> parameters)? getOffsetById,
     Future<void> Function(BuildContext context, IdType id)? deleteItem,
     Future<T?> Function(BuildContext context, IdType id, T newItem)? updateItem,
-    Future<T?> Function(BuildContext context, T? newItem)? createItem,
+    Future<T> Function(BuildContext context, T? newItem)? createItem,
     Future<void> Function(BuildContext context, Set<IdType> ids)? deleteBatch,
     Future<void> Function(BuildContext context, Set<T> items)? updateBatch,
     bool isGreedy = false,
@@ -76,7 +76,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     Future<int?> Function(FetchOffsetParameters<T, IdType> parameters)? getOffsetById,
     Future<void> Function(BuildContext context, IdType id)? deleteItem,
     Future<T?> Function(BuildContext context, IdType id, T newItem)? updateItem,
-    Future<T?> Function(BuildContext context, T? newItem)? createItem,
+    Future<T> Function(BuildContext context, T? newItem)? createItem,
     Future<void> Function(BuildContext context, Set<IdType> ids)? deleteBatch,
     Future<void> Function(BuildContext context, Set<T> items)? updateBatch,
     required bool isGreedy,
@@ -178,7 +178,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     );
   }
 
-  Future<T?> create(BuildContext context, T? newValue, {int? index}) async {
+  Future<T> create(BuildContext context, T? newValue, {int? index}) async {
     assert(
       _createItem != null,
       'Cannot create item. createItem was not configured for this repository',
@@ -194,10 +194,6 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
       final newItem = await _createItem!(context, newValue);
       if (!context.mounted) {
         return newItem;
-      }
-      if (newItem == null) {
-        rollbackItemCreation(tempIndex);
-        return null;
       }
 
       if (_getOffsetById != null) {
@@ -219,7 +215,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
       }
 
       rollbackItemCreation(tempIndex);
-      return null;
+      rethrow;
     }
   }
 
@@ -545,8 +541,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
       _detachedItemsById.clear();
     }
 
-    if (effectiveReason == LdFetchReason.filter ||
-        effectiveReason == LdFetchReason.sort) {
+    if (effectiveReason == LdFetchReason.filter || effectiveReason == LdFetchReason.sort) {
       initialOffset = 0;
     } else if (effectiveReason == LdFetchReason.invalidate) {
       final effectiveAnchorId = anchorId ?? _resolveDefaultRefreshAnchorId();
@@ -739,13 +734,6 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
       before: before,
       after: after,
     );
-    // #region agent log
-    debugPrint(
-      '[DEBUG-c191e8] H2,H4 repository:_applyPostUpdateLayout:entry '
-      'id=$id layoutAffected=$layoutAffected indexBefore=${getItemIndexById(id)} '
-      'initialOffset=$initialOffset hasGetOffsetById=${_getOffsetById != null}',
-    );
-    // #endregion
     if (!layoutAffected) {
       return;
     }
@@ -765,26 +753,12 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
         return;
       }
 
-      // #region agent log
-      debugPrint(
-        '[DEBUG-c191e8] H2,H3 repository:_applyPostUpdateLayout:offset '
-        'id=$id offset=$offset indexBeforeReposition=${getItemIndexById(id)}',
-      );
-      // #endregion
-
       if (offset != null && offset >= 0) {
         repositionItemById(
           id,
           newIndex: offset,
           value: after,
         );
-        // #region agent log
-        debugPrint(
-          '[DEBUG-c191e8] H1,H3 repository:_applyPostUpdateLayout:repositioned '
-          'id=$id newIndex=$offset indexAfter=${getItemIndexById(id)} '
-          'loadedKeys=${itemsMap.keys.toList()} totalItems=$totalItems',
-        );
-        // #endregion
         requestScrollToItem(id);
       } else {
         final index = getItemIndexById(id);
@@ -845,7 +819,7 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     Future<int?> Function(FetchOffsetParameters<L, IdType> parameters)? getOffsetById,
     Future<void> Function(BuildContext context, IdType id)? deleteItem,
     Future<L?> Function(BuildContext context, IdType id, L newItem)? updateItem,
-    Future<L?> Function(BuildContext context, L? newItem)? createItem,
+    Future<L> Function(BuildContext context, L? newItem)? createItem,
     Future<void> Function(BuildContext context, Set<IdType> ids)? deleteBatch,
     Future<void> Function(BuildContext context, Set<L> items)? updateBatch,
   }) {

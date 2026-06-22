@@ -48,10 +48,16 @@ Future<void> performPanGesture(
 
   final targetOffset = endPosition != null ? endPosition - startPosition : offset!;
 
+  // Upward mouse drags do not reliably trigger vertical drag recognizers in
+  // widget tests; touch pointers behave correctly for both directions.
+  final effectiveKind = kind == PointerDeviceKind.mouse && targetOffset.dy < 0
+      ? PointerDeviceKind.touch
+      : kind;
+
   // Start pan gesture
   final gesture = await tester.startGesture(
     startPosition,
-    kind: kind,
+    kind: effectiveKind,
   );
 
   await tester.pump();

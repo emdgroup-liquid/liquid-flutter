@@ -3,9 +3,10 @@ import 'package:liquid_flutter/src/appbar/appbar_state.dart';
 import 'package:provider/provider.dart';
 
 /// Builds its subtree with the current `isScrolledUnder` value sourced from
-/// the nearest [LdAppBarMetrics] provided by [AppBarFrame].
+/// the nearest [LdAppBarMetrics] (populated by [LdAppBarScrolledUnderDetector]
+/// inside [AppBarFrame]).
 ///
-/// Returns `false` when no metrics are available (e.g. legacy scaffold mode).
+/// Defaults to `false` when no [LdAppBarMetrics] ancestor is present.
 class ScrolledUnderBuilder extends StatelessWidget {
   final Widget Function(BuildContext context, bool isScrolledUnder) builder;
 

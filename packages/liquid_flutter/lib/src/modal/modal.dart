@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/modal/sheet_dismiss.dart';
 import 'package:liquid_flutter/src/modal/sheet_transition.dart';
 import 'package:provider/provider.dart';
 
@@ -161,6 +162,7 @@ class LdModalRoute<T> extends PageRoute<T> {
               bottomLeft: Radius.zero,
               bottomRight: Radius.zero,
             );
+    final AnimationController? sheetController = controller;
 
     Widget sheet = Container(
       clipBehavior: Clip.hardEdge,
@@ -188,15 +190,15 @@ class LdModalRoute<T> extends PageRoute<T> {
             parentMetrics: null,
             level: -1,
           ),
-          child: Builder(builder: pageBuilder),
+          child: LdSheetScrollDismissListener(
+            enabled: barrierDismissible,
+            routeAnimation: sheetController ?? const AlwaysStoppedAnimation<double>(1.0),
+            child: Builder(builder: pageBuilder),
+          ),
         ),
       ),
     );
 
-    // Drag-to-dismiss is wrapped around the actual visible sheet so that
-    // hit-testing and the drag math use the sheet's real rendered height
-    // (instead of the full route area above it).
-    final AnimationController? sheetController = controller;
     if (barrierDismissible && sheetController != null) {
       sheet = _LdSheetDragGestureDetector<T>(
         route: this,
@@ -511,7 +513,7 @@ class _LdSheetDragGestureDetector<T> extends StatefulWidget {
 }
 
 class _LdSheetDragGestureDetectorState<T> extends State<_LdSheetDragGestureDetector<T>> {
-  _LdSheetDragController<T>? _dragController;
+  LdSheetDragController? _dragController;
   late VerticalDragGestureRecognizer _recognizer;
 
   @override
@@ -541,7 +543,7 @@ class _LdSheetDragGestureDetectorState<T> extends State<_LdSheetDragGestureDetec
   void _handleDragStart(DragStartDetails details) {
     assert(mounted);
     assert(_dragController == null);
-    _dragController = _LdSheetDragController<T>(
+    _dragController = LdSheetDragController(
       navigator: widget.route.navigator!,
       controller: widget.controller,
       getIsCurrent: () => widget.route.isCurrent,
@@ -552,7 +554,7 @@ class _LdSheetDragGestureDetectorState<T> extends State<_LdSheetDragGestureDetec
   void _handleDragUpdate(DragUpdateDetails details) {
     assert(mounted);
     assert(_dragController != null);
-    final double sheetHeight = context.size?.height ?? 0;
+    final double sheetHeight = LdSheetDismissHeight.maybeOf(context) ?? context.size?.height ?? 0;
     if (sheetHeight <= 0) return;
 
     _dragController!.dragUpdate(details.primaryDelta! / sheetHeight);
@@ -561,7 +563,7 @@ class _LdSheetDragGestureDetectorState<T> extends State<_LdSheetDragGestureDetec
   void _handleDragEnd(DragEndDetails details) {
     assert(mounted);
     assert(_dragController != null);
-    final double sheetHeight = context.size?.height ?? 0;
+    final double sheetHeight = LdSheetDismissHeight.maybeOf(context) ?? context.size?.height ?? 0;
     if (sheetHeight <= 0) {
       _dragController = null;
       return;
@@ -574,99 +576,45 @@ class _LdSheetDragGestureDetectorState<T> extends State<_LdSheetDragGestureDetec
 
   void _handleDragCancel() {
     assert(mounted);
-    _dragController?.dragEnd(0.0);
-    _dragController = null;
+    // The scroll-dismiss listener owns downward pulls at scroll top. Do not
+    // snap the route animation back when this recognizer loses the arena.
+    if (_dragController != null) {
+      _dragController!.navigator.didStopUserGesture();
+      _dragController = null;
+    }
   }
 
   void _handlePointerDown(PointerDownEvent event) {
-    // Only enable drag if barrierDismissible is true (defaults to true)
     final bool canDismiss = widget.route.barrierDismissible;
-    if (canDismiss) {
-      _recognizer.addPointer(event);
+    if (!canDismiss) {
+      return;
     }
+
+    if (ldSheetPrimaryScrollIsAtTop(context)) {
+      return;
+    }
+
+    _recognizer.addPointer(event);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Listener(
-      onPointerDown: _handlePointerDown,
-      behavior: HitTestBehavior.translucent,
-      child: widget.child,
-    );
-  }
-}
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double? sheetHeight =
+            constraints.hasBoundedHeight && constraints.maxHeight.isFinite
+                ? constraints.maxHeight
+                : null;
 
-/// Controller for managing drag gestures on sheet routes.
-class _LdSheetDragController<T> {
-  _LdSheetDragController({
-    required this.navigator,
-    required this.controller,
-    required this.getIsActive,
-    required this.getIsCurrent,
-  }) {
-    navigator.didStartUserGesture();
-  }
-
-  final AnimationController controller;
-  final NavigatorState navigator;
-  final ValueGetter<bool> getIsActive;
-  final ValueGetter<bool> getIsCurrent;
-
-  // Constants from CupertinoSheetRoute
-  static const double _kMinFlingVelocity = 2.0;
-  static const Duration _kDroppedSheetDragAnimationDuration = Duration(milliseconds: 300);
-
-  void dragUpdate(double delta) {
-    controller.value -= delta;
-  }
-
-  void dragEnd(double velocity) {
-    const Curve animationCurve = Curves.easeOut;
-    final bool isCurrent = getIsCurrent();
-    final bool animateForward;
-
-    if (!isCurrent) {
-      // If the route has been navigated away from, animate direction depends on
-      // whether it's still active in the navigation stack.
-      animateForward = getIsActive();
-    } else if (velocity.abs() >= _kMinFlingVelocity) {
-      // If sufficient velocity, animate based on velocity direction.
-      animateForward = velocity <= 0;
-    } else {
-      // If low velocity, pop if dragged past halfway point.
-      animateForward = controller.value > 0.52;
-    }
-
-    if (animateForward) {
-      controller.animateTo(
-        1.0,
-        duration: _kDroppedSheetDragAnimationDuration,
-        curve: animationCurve,
-      );
-    } else {
-      if (isCurrent) {
-        final NavigatorState rootNavigator = Navigator.of(navigator.context, rootNavigator: true);
-        rootNavigator.maybePop();
-      }
-
-      if (controller.isAnimating) {
-        controller.animateBack(
-          0.0,
-          duration: _kDroppedSheetDragAnimationDuration,
-          curve: animationCurve,
+        return LdSheetDismissHeight(
+          sheetHeight: sheetHeight,
+          child: Listener(
+            onPointerDown: _handlePointerDown,
+            behavior: HitTestBehavior.translucent,
+            child: widget.child,
+          ),
         );
-      }
-    }
-
-    if (controller.isAnimating) {
-      void animationStatusCallback(AnimationStatus status) {
-        navigator.didStopUserGesture();
-        controller.removeStatusListener(animationStatusCallback);
-      }
-
-      controller.addStatusListener(animationStatusCallback);
-    } else {
-      navigator.didStopUserGesture();
-    }
+      },
+    );
   }
 }

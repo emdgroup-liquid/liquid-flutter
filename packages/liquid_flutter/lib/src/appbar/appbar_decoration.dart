@@ -4,6 +4,25 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
+/// Resolved fill and surface state for one app bar frame.
+///
+/// [baseColor] is the configured or auto-alternating theme color.
+/// [showsFill] is whether that color is painted (vs transparent at scroll top).
+/// [childIsSurface] is the [LdSurfaceInfo] descendants of the bar content should see.
+class LdAppBarAppearance {
+  const LdAppBarAppearance({
+    required this.baseColor,
+    required this.showsFill,
+    required this.childIsSurface,
+  });
+
+  final Color baseColor;
+  final bool showsFill;
+  final bool childIsSurface;
+
+  Color get paintedColor => showsFill ? baseColor : baseColor.withAlpha(0);
+}
+
 class LdAppBarDecorationBuilder {
   final Color? backgroundColor;
   final LdAppBarShadowMode shadowMode;
@@ -43,19 +62,45 @@ class LdAppBarDecorationBuilder {
     };
   }
 
-  Color fillColor(BuildContext context, bool isScrolledUnder, {bool isInBottomSlot = false}) {
+  /// Resolves fill color, opacity, and child [LdSurfaceInfo] in one place.
+  LdAppBarAppearance resolveAppearance(
+    BuildContext context, {
+    required bool isScrolledUnder,
+    required LdAppBarPosition position,
+  }) {
     final theme = LdTheme.of(context);
-    final surfaceInfo = context.read<LdSurfaceInfo>();
-    final autoSurfaceColor = surfaceInfo.isSurface ? theme.background : theme.surface;
-    final color = backgroundColor ?? autoSurfaceColor;
+    final parentIsSurface = context.read<LdSurfaceInfo>().isSurface;
+    final baseColor = backgroundColor ?? (parentIsSurface ? theme.surface : theme.background);
+    final showsFill = showsBackground(
+      context,
+      isScrolledUnder,
+      isInBottomSlot: position == LdAppBarPosition.bottom,
+    );
+    final childIsSurface = switch (backgroundColor) {
+      null => showsFill ? !parentIsSurface : parentIsSurface,
+      _ => false,
+    };
 
+    return LdAppBarAppearance(
+      baseColor: baseColor,
+      showsFill: showsFill,
+      childIsSurface: childIsSurface,
+    );
+  }
+
+  bool showsBackground(
+    BuildContext context,
+    bool isScrolledUnder, {
+    bool isInBottomSlot = false,
+  }) {
+    final theme = LdTheme.of(context);
     return switch (backgroundMode) {
-      LdAppBarBackgroundMode.hidden => Colors.transparent,
-      LdAppBarBackgroundMode.visible => color,
-      LdAppBarBackgroundMode.whenScrolled => isScrolledUnder ? color : Colors.transparent,
+      LdAppBarBackgroundMode.hidden => false,
+      LdAppBarBackgroundMode.visible => true,
+      LdAppBarBackgroundMode.whenScrolled => isScrolledUnder,
       LdAppBarBackgroundMode.adaptive => switch (theme.platform.isDesktop) {
-          false => isScrolledUnder ? color : Colors.transparent,
-          true => color,
+          false => isScrolledUnder || isInBottomSlot,
+          true => true,
         },
     };
   }
@@ -72,9 +117,14 @@ class LdAppBarDecorationBuilder {
     required bool isAttached,
     required LdAppBarPosition position,
   }) {
+    final appearance = resolveAppearance(
+      context,
+      isScrolledUnder: isScrolledUnder,
+      position: position,
+    );
+
     return BoxDecoration(
-      color:
-          !isAttached ? null : fillColor(context, isScrolledUnder, isInBottomSlot: position == LdAppBarPosition.bottom),
+      color: !isAttached ? null : appearance.paintedColor,
       boxShadow: [
         if (isAttached)
           ldShadowSticky.copyWith(
@@ -114,9 +164,15 @@ class LdAppBarDecorationBuilder {
       return const BoxDecoration();
     }
 
+    final appearance = resolveAppearance(
+      context,
+      isScrolledUnder: isScrolledUnder,
+      position: position,
+    );
+
     return BoxDecoration(
       borderRadius: BorderRadius.circular(borderRadius(context)),
-      color: fillColor(context, isScrolledUnder, isInBottomSlot: position == LdAppBarPosition.bottom),
+      color: appearance.paintedColor,
       boxShadow: [
         ldShadowSticky.copyWith(
           color: shouldShowShadow(context, isScrolledUnder) ? ldShadowSticky.color : Colors.transparent,

@@ -162,7 +162,18 @@ class _LdInputState extends State<LdInput> {
     if (!_focusScopeNode.hasFocus) {
       widget.onBlurred?.call(widget.controller?.text ?? '');
     }
+
     setState(() {});
+  }
+
+  Widget _defaultContextMenuBuilder(
+    BuildContext context,
+    EditableTextState editableTextState,
+  ) {
+    if (SystemContextMenu.isSupportedByField(editableTextState)) {
+      return SystemContextMenu.editableText(editableTextState: editableTextState);
+    }
+    return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
   }
 
   Widget _buildContextMenu(
@@ -280,7 +291,8 @@ class _LdInputState extends State<LdInput> {
                               Flexible(
                                 child: TextField(
                                   focusNode: _focusNode,
-                                  contextMenuBuilder: widget.onCustomPaste == null ? null : _buildContextMenu,
+                                  contextMenuBuilder:
+                                      widget.onCustomPaste == null ? _defaultContextMenuBuilder : _buildContextMenu,
                                   enabled: !widget.disabled,
                                   controller: _controller,
                                   cursorColor: theme.palette.primary.idle(
@@ -304,7 +316,7 @@ class _LdInputState extends State<LdInput> {
                                   obscureText: widget.obscureText,
                                   autofocus: widget.autofocus,
                                   textInputAction: widget.textInputAction,
-                                  scrollPadding: theme.pad(),
+                                  scrollPadding: theme.pad() * 5,
                                   onSubmitted: widget.onSubmitted,
                                   cursorWidth: 1,
                                   style: TextStyle(

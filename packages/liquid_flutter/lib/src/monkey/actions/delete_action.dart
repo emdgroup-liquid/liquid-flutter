@@ -24,7 +24,6 @@ LdMonkeyAction<T, IdType> deleteAction<T extends Identifiable<IdType>, IdType>({
           location: LdMonkeyActionLocation.masterSecondary,
           minSelectionCount: 1,
           maxSelectionCount: null,
-          layoutModes: {LdMonkeyEffectiveLayoutMode.sideBySide},
         ),
       },
       shortcutActivators: {

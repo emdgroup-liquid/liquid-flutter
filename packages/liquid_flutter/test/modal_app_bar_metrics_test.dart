@@ -14,11 +14,15 @@ const _shellPatchedMediaQuery = MediaQueryData(
 /// Simulates [LdAppBarMetrics] left by a parent master-page app bar.
 const _shellAppBarMetrics = LdAppBarMetrics(
   position: LdAppBarPosition.top,
-  barHeight: EdgeInsets.only(top: 118),
-  edgeMargin: EdgeInsets.only(top: 118),
-  hideOffset: EdgeInsets.zero,
+  innerHeight: EdgeInsets.zero,
+  configuredInsets: EdgeInsets.only(top: 118),
+  scrollOffset: EdgeInsets.zero,
+  systemInsets: EdgeInsets.zero,
   isScrolledUnder: false,
   level: 0,
+  willHide: false,
+  scrollBehavior: LdAppBarScrollBehavior.static,
+  appbarLayerMediaQuery: MediaQueryData(),
 );
 
 class _ModalOpener extends StatelessWidget {

@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/drawer_layout.dart';
 import 'package:liquid_flutter/src/monkey/intents.dart';
+import 'package:provider/provider.dart';
 
 enum LdAppBarScrollBehavior {
   static,
@@ -107,9 +108,15 @@ class LdScaffoldState extends State<LdScaffold> {
         meta: true,
       );
 
+  bool get _isSurface {
+    final isDrawer = context.watch<LdDrawerSlot?>() == LdDrawerSlot.drawer;
+    return isDrawer;
+  }
+
   BoxDecoration? get _scaffoldDecoration {
     final theme = LdTheme.of(context, listen: true);
-    Color backgroundColor = widget.backgroundColor ?? theme.background;
+
+    Color backgroundColor = widget.backgroundColor ?? (_isSurface ? theme.background : theme.surface);
 
     return BoxDecoration(
       color: backgroundColor,
@@ -152,49 +159,52 @@ class LdScaffoldState extends State<LdScaffold> {
       child: Container(
         clipBehavior: Clip.hardEdge,
         decoration: _scaffoldDecoration ?? const BoxDecoration(),
-        child: Shortcuts(
-          shortcuts: {
-            toggleDrawerShortcut: const ToggleDrawerIntent(),
-            const SingleActivator(LogicalKeyboardKey.keyF, meta: true): const SearchIntent(),
-          },
-          child: Builder(builder: (context) {
-            return Material(
-              type: MaterialType.transparency,
-              child: Container(
-                clipBehavior: Clip.hardEdge,
-                decoration: _scaffoldDecoration,
-                // Apply the drawer layout if there is a drawer
-                child: LdWrapConditional(
-                  condition: widget.drawer != null,
-                  builder: (context, child) => LdDrawerLayout(
-                    drawerWidth: widget.drawerWidth,
-                    onStateChange: _onDrawerStateChange,
-                    drawer: RepaintBoundary(
-                      child: FocusScope(
-                        node: _focusScopeNode,
-                        child: ScrollObserver(
-                          position: _drawerScrollOffset,
-                          child: widget.drawer!,
+        child: Provider.value(
+          value: LdSurfaceInfo(isSurface: _isSurface),
+          child: Shortcuts(
+            shortcuts: {
+              toggleDrawerShortcut: const ToggleDrawerIntent(),
+              const SingleActivator(LogicalKeyboardKey.keyF, meta: true): const SearchIntent(),
+            },
+            child: Builder(builder: (context) {
+              return Material(
+                type: MaterialType.transparency,
+                child: Container(
+                  clipBehavior: Clip.hardEdge,
+                  decoration: _scaffoldDecoration,
+                  // Apply the drawer layout if there is a drawer
+                  child: LdWrapConditional(
+                    condition: widget.drawer != null,
+                    builder: (context, child) => LdDrawerLayout(
+                      drawerWidth: widget.drawerWidth,
+                      onStateChange: _onDrawerStateChange,
+                      drawer: RepaintBoundary(
+                        child: FocusScope(
+                          node: _focusScopeNode,
+                          child: ScrollObserver(
+                            position: _drawerScrollOffset,
+                            child: widget.drawer!,
+                          ),
                         ),
                       ),
+                      body: child,
+                      reflowBreakpoint: widget.reflowBreakpoint ?? 900,
                     ),
-                    body: child,
-                    reflowBreakpoint: widget.reflowBreakpoint ?? 900,
-                  ),
-                  child: ScrollObserver(
-                    position: _bodyScrollOffset,
-                    child: PrimaryScrollController(
-                      controller: effectiveScrollController,
-                      child: LdNotificationPortal(
-                        debugLabel: "Scaffold Body ${widget.debugName}",
-                        child: FocusTraversalGroup(child: widget.body),
+                    child: ScrollObserver(
+                      position: _bodyScrollOffset,
+                      child: PrimaryScrollController(
+                        controller: effectiveScrollController,
+                        child: LdNotificationPortal(
+                          debugLabel: "Scaffold Body ${widget.debugName}",
+                          child: FocusTraversalGroup(child: widget.body),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            );
-          }),
+              );
+            }),
+          ),
         ),
       ),
     );

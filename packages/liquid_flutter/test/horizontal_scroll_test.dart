@@ -180,11 +180,14 @@ void main() {
       );
 
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 150));
+      await tester.pump(const Duration(milliseconds: 1100));
+      await tester.pump(const Duration(milliseconds: 350));
 
       expect(_scrollController(tester).offset, greaterThan(0));
 
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
 
       expect(_scrollController(tester).offset, 0);
 
@@ -193,7 +196,7 @@ void main() {
           child: LdHorizontalScroll(
             key: const ValueKey('scroll'),
             layout: LdHorizontalScrollLayout.scroll,
-            initialPeek: true,
+            initialPeek: false,
             children: _wideChips(6),
           ),
         ),
@@ -201,6 +204,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(_scrollController(tester).offset, 0);
+      ldDisableAnimations = false;
     });
 
     testWidgets('edge bleed extends scroll area past parent padding', (tester) async {

@@ -81,7 +81,7 @@ void main() {
       Future<int?> Function(FetchOffsetParameters<_TestItem, int> parameters)? getOffsetById,
       Future<void> Function(BuildContext context, int id)? deleteItem,
       Future<_TestItem?> Function(BuildContext context, int id, _TestItem newItem)? updateItem,
-      Future<_TestItem?> Function(BuildContext context, _TestItem? newItem)? createItem,
+      Future<_TestItem> Function(BuildContext context, _TestItem? newItem)? createItem,
       Future<void> Function(BuildContext context, Set<int> ids)? deleteBatch,
       Future<void> Function(BuildContext context, Set<_TestItem> items)? updateBatch,
       int pageSize = 10,
@@ -151,7 +151,7 @@ void main() {
         final repository = createRepository(
           createItem: (context, item) async {
             createCallCount++;
-            return item?.copyWith(id: 100);
+            return item!.copyWith(id: 100);
           },
         );
 
@@ -168,7 +168,7 @@ void main() {
 
       testWidgets('creates item with index parameter', (tester) async {
         final repository = createRepository(
-          createItem: (context, item) async => item?.copyWith(id: 200),
+          createItem: (context, item) async => item!.copyWith(id: 200),
         );
 
         final ctx = await _pumpAndGetContext(tester);
@@ -191,9 +191,10 @@ void main() {
         await _loadRepository(tester, repository, ctx);
 
         final newItem = _TestItem(0, 'New Item', 50);
-        final result = await repository.create(ctx, newItem);
-
-        expect(result, isNull);
+        await expectLater(
+          repository.create(ctx, newItem),
+          throwsA(isA<Exception>()),
+        );
 
         await tester.pump();
         final item = repository.getItemById(newItem.id);
@@ -1004,7 +1005,7 @@ void main() {
 
       testWidgets('create clears cached pages', (tester) async {
         final repository = createRepository(
-          createItem: (context, item) async => item?.copyWith(id: 100),
+          createItem: (context, item) async => item!.copyWith(id: 100),
         );
 
         final ctx = await _pumpAndGetContext(tester);

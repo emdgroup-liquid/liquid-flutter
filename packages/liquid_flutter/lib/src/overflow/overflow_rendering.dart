@@ -26,7 +26,7 @@ class LdRenderOverflowView extends RenderBox
 
   // Cache for overflow indicator size calculations
   Map<int, double>? _cachedIndicatorSizes;
-  int? _lastIndicatorOverflowCount;
+  List<int>? _lastIndicatorOverflowedIndices;
   BoxConstraints? _lastIndicatorConstraints;
   LdRenderOverflowView({
     List<RenderBox>? children,
@@ -188,7 +188,7 @@ class LdRenderOverflowView extends RenderBox
     // (intrinsic sizes cache is handled in _getChildrenIntrinsicSizes)
     if (_constraintsChangedSignificantly(constraints)) {
       _cachedIndicatorSizes = null;
-      _lastIndicatorOverflowCount = null;
+      _lastIndicatorOverflowedIndices = null;
       _lastIndicatorConstraints = null;
     }
 
@@ -416,21 +416,21 @@ class LdRenderOverflowView extends RenderBox
     return _isFlexChild(parentData) || _isPinnedChild(parentData);
   }
 
-  int _offStageOverflowableCount(
+  List<int> _overflowedChildIndices(
     List<RenderBox> children,
     List<bool> onStage,
   ) {
-    var count = 0;
+    final indices = <int>[];
     for (var i = 0; i < children.length; i++) {
       if (onStage[i]) {
         continue;
       }
       final parentData = children[i].parentData as LdOverflowViewParentData;
       if (!_mustShowChild(parentData)) {
-        count++;
+        indices.add(i);
       }
     }
-    return count;
+    return indices;
   }
 
   double _projectedOnStageExtentForMask(
@@ -458,6 +458,10 @@ class LdRenderOverflowView extends RenderBox
     return total;
   }
 
+  List<int> _placeholderOverflowedIndices(int overflowCount) {
+    return List<int>.generate(overflowCount, (index) => index);
+  }
+
   double _projectedOnStageExtentForMaskWithIndicator(
     List<RenderBox> children,
     List<double> childrenSizes,
@@ -467,7 +471,7 @@ class LdRenderOverflowView extends RenderBox
   ) {
     var projected = _projectedOnStageExtentForMask(children, childrenSizes, onStage);
     if (overflowCount > 0) {
-      _layoutOverflowIndicator(overflowCount);
+      _layoutOverflowIndicator(_placeholderOverflowedIndices(overflowCount));
       projected += _getIndicatorSize(overflowIndicator) + spacing;
     }
     return projected;
@@ -492,7 +496,7 @@ class LdRenderOverflowView extends RenderBox
         continue;
       }
       onStage[i] = true;
-      final overflowCount = _offStageOverflowableCount(children, onStage);
+      final overflowCount = _overflowedChildIndices(children, onStage).length;
       final projected = _projectedOnStageExtentForMaskWithIndicator(
         children,
         childrenSizes,
@@ -506,7 +510,7 @@ class LdRenderOverflowView extends RenderBox
     }
 
     while (true) {
-      final overflowCount = _offStageOverflowableCount(children, onStage);
+      final overflowCount = _overflowedChildIndices(children, onStage).length;
       final projected = _projectedOnStageExtentForMaskWithIndicator(
         children,
         childrenSizes,
@@ -654,7 +658,9 @@ class LdRenderOverflowView extends RenderBox
       var indicatorSize = 0.0;
       if (overflowCount > 0) {
         showOverflow = true;
-        final overflowIndicator = _layoutOverflowIndicator(overflowCount);
+        final overflowIndicator = _layoutOverflowIndicator(
+          _placeholderOverflowedIndices(overflowCount),
+        );
         indicatorSize = _getIndicatorSize(overflowIndicator);
         projected += indicatorSize + spacing;
       }
@@ -729,28 +735,40 @@ class LdRenderOverflowView extends RenderBox
     return getMainSize(child.size);
   }
 
+  bool _sameOverflowedChildIndices(List<int> a, List<int> b) {
+    if (a.length != b.length) {
+      return false;
+    }
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   /// Since the overflow indicator might change size depending on
-  /// [overflowCount], we need to layout to determine its size.
-  RenderBox _layoutOverflowIndicator(int overflowCount) {
+  /// [overflowedChildIndices], we need to layout to determine its size.
+  RenderBox _layoutOverflowIndicator(List<int> overflowedChildIndices) {
+    final overflowCount = overflowedChildIndices.length;
     final overflowIndicator = lastChild!;
 
     // Initialize indicator cache if needed
     _cachedIndicatorSizes ??= <int, double>{};
 
     final indicatorConstraints = _childConstraints(0);
-    final overflowIndicatorConstraints = BoxValueConstraints<int>(
-      value: overflowCount,
+    final overflowIndicatorConstraints = BoxValueConstraints<List<int>>(
+      value: overflowedChildIndices,
       constraints: indicatorConstraints,
     );
 
-    // Check if we can skip layout: same overflow count and constraints haven't changed
-    final canSkipLayout = _lastIndicatorOverflowCount == overflowCount &&
-        _lastIndicatorConstraints != null &&
+    final indicesUnchanged = _lastIndicatorOverflowedIndices != null &&
+        _sameOverflowedChildIndices(_lastIndicatorOverflowedIndices!, overflowedChildIndices);
+    final constraintsUnchanged = _lastIndicatorConstraints != null &&
         !_constraintsChangedSignificantly(_lastIndicatorConstraints!);
 
-    if (canSkipLayout && _cachedIndicatorSizes!.containsKey(overflowCount)) {
-      // We've already laid out with this overflow count and constraints,
-      // and we have a cached size, so we can skip the layout
+    // Only skip layout when both the overflowed indices and constraints are unchanged.
+    if (indicesUnchanged && constraintsUnchanged && _cachedIndicatorSizes!.containsKey(overflowCount)) {
       return overflowIndicator;
     }
 
@@ -763,7 +781,7 @@ class LdRenderOverflowView extends RenderBox
     // Cache the main size for this overflow count
     final indicatorSize = _getMainSizeOfRenderBox(overflowIndicator);
     _cachedIndicatorSizes![overflowCount] = indicatorSize;
-    _lastIndicatorOverflowCount = overflowCount;
+    _lastIndicatorOverflowedIndices = List<int>.from(overflowedChildIndices);
     _lastIndicatorConstraints = indicatorConstraints;
 
     return overflowIndicator;
@@ -784,7 +802,7 @@ class LdRenderOverflowView extends RenderBox
     // <-------> fitting children (count)
 
     // Calculate overflow indicator size once for flexible layout
-    final overflowIndicator = _layoutOverflowIndicator(0);
+    final overflowIndicator = _layoutOverflowIndicator(const []);
 
     final children = _children;
     final hasAdaptiveChildren = _hasAdaptiveChildren(children);
@@ -799,7 +817,7 @@ class LdRenderOverflowView extends RenderBox
     late final List<bool> onStageMask;
     late final List<int> onStageIndices;
     late final List<RenderBox> renderedChildren;
-    late final int overflowCount;
+    late final List<int> overflowedChildIndices;
 
     if (hasPinnedChildren) {
       onStageMask = _resolveOnStageMask(
@@ -812,8 +830,8 @@ class LdRenderOverflowView extends RenderBox
         for (var i = 0; i < children.length; i++)
           if (onStageMask[i]) i,
       ];
-      overflowCount = _offStageOverflowableCount(children, onStageMask);
-      showOverflowIndicator = overflowCount > 0;
+      overflowedChildIndices = _overflowedChildIndices(children, onStageMask);
+      showOverflowIndicator = overflowedChildIndices.isNotEmpty;
       renderedChildren = onStageIndices.map((i) => children[i]).toList();
     } else {
       onStageMask = List<bool>.filled(children.length, false);
@@ -837,15 +855,18 @@ class LdRenderOverflowView extends RenderBox
         onStageMask[i] = true;
       }
       onStageIndices = List<int>.generate(fittingChildren, (i) => i);
-      overflowCount = childCount - fittingChildren - 1;
-      showOverflowIndicator = showOverflowIndicator && overflowCount > 0;
+      overflowedChildIndices = List<int>.generate(
+        children.length - fittingChildren,
+        (i) => fittingChildren + i,
+      );
+      showOverflowIndicator = showOverflowIndicator && overflowedChildIndices.isNotEmpty;
       renderedChildren = children.sublist(0, fittingChildren);
     }
 
     if (showOverflowIndicator) {
-      _layoutOverflowIndicator(overflowCount);
+      _layoutOverflowIndicator(overflowedChildIndices);
       _getIndicatorSize(overflowIndicator);
-      _layoutOverflowIndicator(overflowCount);
+      _layoutOverflowIndicator(overflowedChildIndices);
       renderedChildren.add(overflowIndicator);
     } else {
       final overflowIndicatorParentData = overflowIndicator.parentData as LdOverflowViewParentData;
@@ -859,7 +880,7 @@ class LdRenderOverflowView extends RenderBox
     }
 
     var totalUsedSpace = _projectedOnStageExtentForMask(children, childrenSizes, onStageMask);
-    if (showOverflowIndicator && overflowCount > 0) {
+    if (showOverflowIndicator && overflowedChildIndices.isNotEmpty) {
       totalUsedSpace += _getMainSizeOfRenderBox(overflowIndicator) + spacing;
     }
     var remainder = availableExtent - totalUsedSpace;
@@ -906,7 +927,7 @@ class LdRenderOverflowView extends RenderBox
           nonFlexOnStage += childrenSizes[i];
         }
       }
-      if (showOverflowIndicator && overflowCount > 0) {
+      if (showOverflowIndicator && overflowedChildIndices.isNotEmpty) {
         nonFlexOnStage += _getMainSizeOfRenderBox(overflowIndicator);
       }
       final flexSpacing = _spacingExtent(renderedChildren.length);
@@ -937,8 +958,8 @@ class LdRenderOverflowView extends RenderBox
         // Flexible child: lay out once with its final dimensions.
         if (_isHorizontal) {
           child.layout(
-            BoxValueConstraints<int>(
-              value: overflowCount,
+            BoxValueConstraints<List<int>>(
+              value: overflowedChildIndices,
               constraints: BoxConstraints(
                 maxWidth: finalFlexWidth,
                 minWidth: finalFlexWidth,
@@ -949,8 +970,8 @@ class LdRenderOverflowView extends RenderBox
           );
         } else {
           child.layout(
-            BoxValueConstraints<int>(
-              value: overflowCount,
+            BoxValueConstraints<List<int>>(
+              value: overflowedChildIndices,
               constraints: BoxConstraints(
                 maxWidth: constraints.maxWidth,
                 minHeight: finalFlexWidth,
@@ -963,8 +984,8 @@ class LdRenderOverflowView extends RenderBox
       } else {
         // Non-flexible child: lay out with its intrinsic (minimum) size.
         child.layout(
-          BoxValueConstraints<int>(
-            value: overflowCount,
+          BoxValueConstraints<List<int>>(
+            value: overflowedChildIndices,
             constraints: BoxConstraints.loose(Size(
               _isHorizontal ? childrenSizes[childIndex] : constraints.maxWidth,
               _isHorizontal ? constraints.maxHeight : childrenSizes[childIndex],

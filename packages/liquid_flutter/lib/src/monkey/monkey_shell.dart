@@ -168,7 +168,12 @@ class _MonkeyShellLayoutBuilder<T extends Identifiable<IdType>, IdType> extends 
                           ),
                         ),
                       ),
-                      child: wrappedChild,
+                      child: showingDetail
+                          ? wrappedChild
+                          : LdAutoBackground(
+                              invert: true,
+                              child: SizedBox.shrink(),
+                            ),
                     ),
                   ),
                 ),

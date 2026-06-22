@@ -323,7 +323,7 @@ class _LdModalSheetTransitionState extends State<LdModalSheetTransition> with Si
               ),
               child: _coverSheetSecondaryTransition(
                 widget.secondaryRouteAnimation,
-                _coverSheetPrimaryTransition(
+                  _coverSheetPrimaryTransition(
                   context,
                   widget.primaryRouteAnimation,
                   widget.linearTransition,

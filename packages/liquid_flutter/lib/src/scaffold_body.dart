@@ -97,7 +97,7 @@ class LdScaffoldBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    final padding = mediaQuery.padding.atLeast(mediaQuery.viewPadding);
+    final padding = mediaQuery.padding.atLeast(mediaQuery.viewPadding).atLeast(mediaQuery.viewInsets);
 
     final theme = LdTheme.of(context, listen: true);
 
@@ -135,9 +135,11 @@ class LdScaffoldBody extends StatelessWidget {
                 top: verticalSliverPadding.top,
                 bottom: verticalSliverPadding.bottom,
               ),
-              sliver: SliverList.builder(
-                itemCount: effectiveChildren.length,
-                itemBuilder: (context, index) => effectiveChildren[index],
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: effectiveChildren,
+                ),
               ),
             ),
           if (slivers.isNotEmpty)
@@ -158,20 +160,17 @@ class LdScaffoldBody extends StatelessWidget {
         ],
       );
 
-      final fadeColor = backgroundColor ?? theme.background;
+      final effectiveColor = backgroundColor ?? (context.isSurface ? theme.surface : theme.background);
 
       return ColoredBox(
-        color: backgroundColor ?? theme.background,
-        child: _mediaQueryForScrollChild(
-          context,
-          scrollEdgeFade
-              ? LdScrollEdgeFade(
-                  fadeColor: fadeColor,
-                  fadeExtent: scrollEdgeFadeExtent,
-                  child: scrollView,
-                )
-              : scrollView,
-        ),
+        color: effectiveColor,
+        child: scrollEdgeFade
+            ? LdScrollEdgeFade(
+                fadeColor: effectiveColor,
+                fadeExtent: scrollEdgeFadeExtent,
+                child: scrollView,
+              )
+            : scrollView,
       );
     });
   }

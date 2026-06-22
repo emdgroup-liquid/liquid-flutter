@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/monkey/monkey_repository_filter_adapter.dart';
@@ -23,10 +24,38 @@ class _LdEphemeralMonkeyAdapterState<T extends Identifiable<IdType>, IdType>
     extends State<LdEphemeralMonkeyAdapter<T, IdType>> {
   String? _lastFilterSignature;
   String? _lastSortSignature;
+  LdMonkeySortAndFilterState<T, IdType>? _cachedSortAndFilterState;
+  LdMonkeySelection<T, IdType>? _cachedMonkeySelection;
+
+  LdMonkeySortAndFilterState<T, IdType> _sortAndFilterState() {
+    final next = widget.controller.sortAndFilterState;
+    final cached = _cachedSortAndFilterState;
+    if (cached != null &&
+        cached.filters.equals(next.filters) &&
+        cached.sortOptions.equals(next.sortOptions)) {
+      return cached;
+    }
+    return _cachedSortAndFilterState = next;
+  }
+
+  LdMonkeySelection<T, IdType> _monkeySelection() {
+    final next = widget.controller.monkeySelection;
+    final cached = _cachedMonkeySelection;
+    if (cached != null &&
+        setEquals(cached.selection, next.selection) &&
+        setEquals(cached.viewing, next.viewing) &&
+        cached.showSelectionControls == next.showSelectionControls) {
+      return cached;
+    }
+    return _cachedMonkeySelection = next;
+  }
 
   @override
   void initState() {
     super.initState();
+    final state = widget.controller.sortAndFilterState;
+    _lastFilterSignature = _filterSignature(state);
+    _lastSortSignature = _sortSignature(state);
     widget.controller.addListener(_onControllerChanged);
   }
 
@@ -100,10 +129,10 @@ class _LdEphemeralMonkeyAdapterState<T extends Identifiable<IdType>, IdType>
                 value: widget.controller.controllerDelegate,
               ),
               Provider<LdMonkeySortAndFilterState<T, IdType>>.value(
-                value: widget.controller.sortAndFilterState,
+                value: _sortAndFilterState(),
               ),
               Provider<LdMonkeySelection<T, IdType>>.value(
-                value: widget.controller.monkeySelection,
+                value: _monkeySelection(),
               ),
               Provider<LdMonkeyShowingDetail<T, IdType>>.value(value: false),
             ],

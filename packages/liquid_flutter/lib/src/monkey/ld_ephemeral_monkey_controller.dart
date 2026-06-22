@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
@@ -66,6 +67,9 @@ class LdEphemeralMonkeyController<T extends Identifiable<IdType>, IdType> extend
   }
 
   void updateSelection(Set<IdType> selection) {
+    if (setEquals(_selection, selection)) {
+      return;
+    }
     _selection = selection;
     notifyListeners();
   }
@@ -75,6 +79,9 @@ class LdEphemeralMonkeyController<T extends Identifiable<IdType>, IdType> extend
   }
 
   void updateShowSelectionControls(bool showSelectionControls) {
+    if (_showSelectionControls == showSelectionControls) {
+      return;
+    }
     _showSelectionControls = showSelectionControls;
     notifyListeners();
   }

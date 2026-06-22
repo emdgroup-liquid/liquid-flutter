@@ -269,13 +269,6 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
       value: resolvedValue,
       state: state,
     );
-    // #region agent log
-    debugPrint(
-      '[DEBUG-c191e8] H3,H5 list_paginator:repositionItemById '
-      'id=$id currentIndex=$currentIndex newIndex=$newIndex totalItems=$totalItems '
-      'loadedKeys=${_items.keys.toList()}',
-    );
-    // #endregion
     _updated(_items[newIndex]);
   }
 

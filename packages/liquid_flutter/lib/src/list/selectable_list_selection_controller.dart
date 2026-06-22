@@ -153,13 +153,24 @@ class LdSelectableListSelectionController<T extends Identifiable<IdType>, IdType
   bool _dragIsAdditive = true;
   bool _isDragging = false;
 
-  void onUpdateDragRect(Rect dragRect, bool directionIsDownRight, bool isMobile) {
+  void onUpdateDragRect(
+    Rect dragRect,
+    bool directionIsDownRight,
+    bool isMobile, {
+    Rect? viewportRect,
+  }) {
     if (!_isDragging && !isMobile) {
       if (!_ctrlPressed && !_shiftPressed) {
         _selectedItems.clear();
       }
     }
     _isDragging = true;
+
+    final dragIsAdditive = switch (isMobile) {
+      true => _dragIsAdditive,
+      false => directionIsDownRight || _selectedItems.value.isEmpty,
+    };
+
     for (final item in _itemKeys.entries) {
       final box = item.value.currentContext?.findRenderObject() as RenderBox?;
 
@@ -176,8 +187,11 @@ class LdSelectableListSelectionController<T extends Identifiable<IdType>, IdType
 
       if (dragRect.overlaps(rect)) {
         _dragRectItems.add(item.key);
-      } else if (!_showSelectionControls) {
-        _dragRectItems.remove(item.key);
+      } else if (!_showSelectionControls && !dragIsAdditive) {
+        final isInViewport = viewportRect == null || viewportRect.overlaps(rect);
+        if (isInViewport) {
+          _dragRectItems.remove(item.key);
+        }
       }
     }
 
@@ -186,7 +200,7 @@ class LdSelectableListSelectionController<T extends Identifiable<IdType>, IdType
         _dragIsAdditive = !_selectedItems.contains(_dragRectItems.value.first);
       }
     } else {
-      _dragIsAdditive = directionIsDownRight || _selectedItems.value.isEmpty;
+      _dragIsAdditive = dragIsAdditive;
     }
   }
 

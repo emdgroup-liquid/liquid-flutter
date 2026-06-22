@@ -49,14 +49,17 @@ Future<bool> ldConfirmModal(
                 ),
               ],
               child: LdScaffoldBody(
+                minimumPadding: LdTheme.of(context).pad(size: LdSize.l),
                 shrinkWrap: true,
                 children: [
                   if (indicatorType != null)
-                    LdIndicator(
-                      type: indicatorType,
-                      customSize: 24,
-                    ).padVertical(size: LdSize.l),
-                  if (description != null) LdText.p(description, textAlign: TextAlign.center),
+                    Center(
+                      child: LdIndicator(
+                        type: indicatorType,
+                        customSize: 24,
+                      ).padVertical(size: LdSize.l),
+                    ),
+                  if (description != null) Center(child: LdText.p(description, textAlign: TextAlign.center)),
                   if (additionalContent != null) additionalContent,
                 ],
               ),

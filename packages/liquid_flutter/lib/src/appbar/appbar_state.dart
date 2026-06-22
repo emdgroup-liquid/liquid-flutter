@@ -55,6 +55,7 @@ class LdAppBarMetrics {
     required this.systemInsets,
     required this.scrollBehavior,
     this.parentMetrics,
+    this.isTabNavigation = false,
   });
 
   /// True for [modalReset] and other modal-scope baseline values.
@@ -65,6 +66,9 @@ class LdAppBarMetrics {
 
   /// The parent metrics. If this is the outermost app bar, this will be null.
   final LdAppBarMetrics? parentMetrics;
+
+  /// True when these metrics were produced by [LdTabNavigation] rather than [LdAppBar].
+  final bool isTabNavigation;
 
   final LdAppBarScrollBehavior scrollBehavior;
 
@@ -149,6 +153,22 @@ class LdAppBarMetrics {
     return systemInsets.inDirection(position) + cumulatedPositionedSizes(position);
   }
 
+  EdgeInsets get cumulatedMinSize {
+    if (isModalReset) {
+      return EdgeInsets.zero;
+    }
+    final ownMinSize = willHide ? EdgeInsets.zero : (innerHeight + configuredInsets);
+    return ownMinSize + (parentMetrics?.cumulatedMinSize ?? EdgeInsets.zero);
+  }
+
+  EdgeInsets get minSize {
+    // This is the min size of the app bar.
+    final ownSize = (innerHeight + configuredInsets + systemInsets);
+    final minAncestorSize = parentMetrics?.cumulatedMinSize ?? EdgeInsets.zero;
+
+    return ownSize + (minAncestorSize);
+  }
+
   /// The maximum size this appbar takes up.
   EdgeInsets get maximumSize => cumulatedPlainSizes + systemInsets;
 
@@ -171,9 +191,10 @@ class LdAppBarMetrics {
     EdgeInsets? systemInsets,
     LdAppBarMetrics? parentMetrics,
     MediaQueryData? appbarLayerMediaQuery,
+    bool? isTabNavigation,
   }) {
     return LdAppBarMetrics(
-      scrollBehavior: scrollBehavior ?? this.scrollBehavior,
+      scrollBehavior: this.scrollBehavior,
       position: position ?? this.position,
       willHide: willHide ?? this.willHide,
       innerHeight: innerHeight ?? this.innerHeight,
@@ -184,6 +205,7 @@ class LdAppBarMetrics {
       level: level ?? this.level,
       parentMetrics: parentMetrics ?? this.parentMetrics,
       appbarLayerMediaQuery: appbarLayerMediaQuery ?? this.appbarLayerMediaQuery,
+      isTabNavigation: isTabNavigation ?? this.isTabNavigation,
     );
   }
 
@@ -201,7 +223,8 @@ class LdAppBarMetrics {
         other.level == level &&
         other.parentMetrics == parentMetrics &&
         other.systemInsets == systemInsets &&
-        other.appbarLayerMediaQuery == appbarLayerMediaQuery;
+        other.appbarLayerMediaQuery == appbarLayerMediaQuery &&
+        other.isTabNavigation == isTabNavigation;
   }
 
   @override
@@ -217,6 +240,7 @@ class LdAppBarMetrics {
         willHide,
         parentMetrics,
         appbarLayerMediaQuery,
+        isTabNavigation,
       );
 
   @override
@@ -243,6 +267,24 @@ LdAppBarMetrics? ldAppBarParentMetrics(BuildContext context) {
     return null;
   }
   return metrics;
+}
+
+/// Whether [metrics] has an ancestor [LdAppBar] on the top edge.
+///
+/// [LdTabNavigation] metrics are skipped so tab bars do not suppress implied
+/// leading on nested app bars.
+bool ldHasParentTopAppBar(LdAppBarMetrics metrics) {
+  var walker = metrics.parentMetrics;
+  while (walker != null) {
+    if (walker.isModalReset) {
+      break;
+    }
+    if (!walker.isTabNavigation && walker.position == LdAppBarPosition.top) {
+      return true;
+    }
+    walker = walker.parentMetrics;
+  }
+  return false;
 }
 
 extension ScalarAtPosition on EdgeInsets {

@@ -231,7 +231,7 @@ LdRepository<TestItem, int> createTestRepository({
       getOffsetById,
   Future<void> Function(BuildContext context, int id)? deleteItem,
   Future<TestItem?> Function(BuildContext context, int id, TestItem newItem)? updateItem,
-  Future<TestItem?> Function(BuildContext context, TestItem? newItem)? createItem,
+  Future<TestItem> Function(BuildContext context, TestItem? newItem)? createItem,
   Future<void> Function(BuildContext context, Set<int> ids)? deleteBatch,
   Future<void> Function(BuildContext context, Set<TestItem> items)? updateBatch,
 }) {

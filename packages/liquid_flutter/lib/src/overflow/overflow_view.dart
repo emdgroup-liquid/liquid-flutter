@@ -20,7 +20,10 @@ class LdOverflowView extends MultiChildRenderObjectWidget {
   final CrossAxisAlignment crossAxisAlignment;
 
   /// The builder for the overflow indicator.
-  final Widget Function(BuildContext context, int remainingItemCount) builder;
+  ///
+  /// [overflowedChildIndices] lists content-child indices (excluding the overflow
+  /// indicator) that were moved off stage into the menu.
+  final Widget Function(BuildContext context, List<int> overflowedChildIndices) builder;
 
   /// Creates an [LdOverflowView].
 
@@ -35,7 +38,7 @@ class LdOverflowView extends MultiChildRenderObjectWidget {
   }) : super(
           children: [
             ...children,
-            ValueLayoutBuilder<int>(
+            ValueLayoutBuilder<List<int>>(
               builder: (context, constraints) {
                 return builder(context, constraints.value);
               },

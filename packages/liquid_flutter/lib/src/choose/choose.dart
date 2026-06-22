@@ -33,6 +33,54 @@ bool ldChooseCanDismissPicker<IdType>({
   );
 }
 
+Future<void> ldChoosePrefetchPickerData<T extends Identifiable<IdType>, IdType>({
+  required BuildContext context,
+  required LdRepository<T, IdType> repository,
+  required Set<IdType> initialSelection,
+}) async {
+  if (!context.mounted) {
+    return;
+  }
+  if (repository.isGreedy) {
+    await repository.ensureGreedyLoaded(context);
+    return;
+  }
+  if (initialSelection.isNotEmpty) {
+    await repository.initWithSelection(context, initialSelection);
+  }
+}
+
+Future<void> ldChooseScrollToInitialSelection<T extends Identifiable<IdType>, IdType>({
+  required BuildContext context,
+  required LdRepository<T, IdType> repository,
+  required Set<IdType> initialSelection,
+}) async {
+  if (initialSelection.isEmpty || !context.mounted) {
+    return;
+  }
+  await ldChoosePrefetchPickerData<T, IdType>(
+    context: context,
+    repository: repository,
+    initialSelection: initialSelection,
+  );
+  if (!context.mounted) {
+    return;
+  }
+
+  final id = initialSelection.first;
+  for (var attempt = 0; attempt < 60 && context.mounted; attempt++) {
+    if (repository.getItemIndexById(id) != null) {
+      break;
+    }
+    await Future<void>.delayed(Duration.zero);
+  }
+  if (!context.mounted || repository.getItemIndexById(id) == null) {
+    return;
+  }
+
+  repository.requestScrollToItem(id);
+}
+
 enum LdChooseMode {
   page,
   modal,
@@ -323,12 +371,11 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
                 return LdSelectableList<T, IdType>(
                   paginator: repository,
                   itemBuilder: widget.itemBuilder,
-                  initialSelectedItems: context.read<LdMonkeySelection<T, IdType>>().selection,
+                  initialSelectedItems: widget.value ?? <IdType>{},
                   multiSelect: widget.multiple,
                   showSelectionControls: true,
                   onSelectionChange: (selected) {
                     LdMonkeySelection.updateSelection<T, IdType>(context, selected);
-                    LdMonkeySelection.updateShowSelectionControls<T, IdType>(context, true);
                   },
                   listBuilder: (context, itemBuilder) {
                     return LdList(
@@ -359,6 +406,19 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
   }
 
   Future<void> _onTap(BuildContext context) async {
+    final initialSelection = widget.value ?? <IdType>{};
+    await ldChoosePrefetchPickerData<T, IdType>(
+      context: context,
+      repository: _repository,
+      initialSelection: initialSelection,
+    );
+    if (!context.mounted) {
+      return;
+    }
+    if (initialSelection.isNotEmpty) {
+      _repository.requestScrollToItem(initialSelection.first);
+    }
+
     final nav = widget.useRootNavigator ? Navigator.of(context, rootNavigator: true) : Navigator.of(context);
 
     final shouldUsePage = switch (widget.mode) {
@@ -509,12 +569,26 @@ class LdChoosePage<T extends Identifiable<IdType>, IdType> extends StatefulWidge
 }
 
 class LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<LdChoosePage<T, IdType>> {
+  final GlobalKey<LdSelectableListState<T, IdType>> _listKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ldChooseScrollToInitialSelection<T, IdType>(
+        context: context,
+        repository: widget.repository,
+        initialSelection: widget.initialSelectedItems,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final searchFilter = widget.useMonkeySearch ? ldChooseSearchFilter<T, IdType>(context) : null;
-    final selection = context.watch<LdMonkeySelection<T, IdType>?>();
-
-    final selectedItems = selection?.selection ?? widget.initialSelectedItems;
+    final selectedItems = context.select<LdMonkeySelection<T, IdType>?, Set<IdType>>(
+      (selection) => selection?.selection ?? widget.initialSelectedItems,
+    );
     final canDismiss = ldChooseCanDismissPicker<IdType>(
       current: selectedItems,
       initial: widget.initialSelectedItems,
@@ -522,14 +596,14 @@ class LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<Ld
     );
 
     final body = LdSelectableList<T, IdType>(
+      key: _listKey,
       paginator: widget.repository,
       itemBuilder: widget.itemBuilder,
-      initialSelectedItems: selectedItems,
+      initialSelectedItems: widget.initialSelectedItems,
       multiSelect: widget.multiple,
       showSelectionControls: true,
       onSelectionChange: (items) {
         LdMonkeySelection.updateSelection<T, IdType>(context, items);
-        LdMonkeySelection.updateShowSelectionControls<T, IdType>(context, true);
       },
       listBuilder: widget.groupingCriterion == null
           ? null
@@ -551,6 +625,11 @@ class LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<Ld
         body: LdAppBar(
           debugName: 'LdChoosePageAppBar',
           title: Text(widget.label),
+          scrollBehavior: LdAppBarScrollBehavior.static,
+          attachedMode: LdAppBarAttachedMode.attached,
+          backgroundMode: LdAppBarBackgroundMode.visible,
+          borderMode: LdAppBarBorderMode.visible,
+          shadowMode: LdAppBarShadowMode.visible,
           implyCloseModalButton: false,
           searchConfig: searchFilter?.searchConfig((query) {
             searchFilter.update(
@@ -569,6 +648,7 @@ class LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<Ld
                 disabled: selectedItems.isEmpty,
                 onPressed: () {
                   LdMonkeySelection.updateSelection<T, IdType>(context, {});
+                  _listKey.currentState?.syncSelection({});
                 },
                 child: const Text('Clear'),
               ),

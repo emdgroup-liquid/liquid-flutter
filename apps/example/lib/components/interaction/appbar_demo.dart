@@ -3,6 +3,12 @@ import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+/// iPhone-style safe area used when mock system UI is enabled.
+const _kMockViewPadding = EdgeInsets.only(top: 44, bottom: 34);
+
+/// Typical on-screen keyboard height used when mock keyboard is enabled.
+const _kMockKeyboardInset = 300.0;
+
 /// Interactive demo for [LdAppBarWidget]: add, remove, and configure app bars.
 class AppBarDemo extends StatefulWidget {
   const AppBarDemo({super.key});
@@ -460,6 +466,8 @@ class _AppBarDemoState extends State<AppBarDemo> {
 
   String _activeTabRoute = '/home';
   bool _showTabNavigation = false;
+  bool _mockSafeArea = false;
+  bool _mockKeyboard = false;
   LdAppBarAttachedMode _tabAttachedMode = LdAppBarAttachedMode.adaptive;
   LdAppBarBackgroundMode _tabBackgroundMode = LdAppBarBackgroundMode.adaptive;
   LdAppBarPositionMode _tabPosition = LdAppBarPositionMode.adaptive;
@@ -634,6 +642,28 @@ class _AppBarDemoState extends State<AppBarDemo> {
             onPressed: _openTabNavConfig,
           ),
         ),
+        LdText.caption('System simulation'),
+        LdCard(
+          child: LdAutoSpace(
+            children: [
+              LdText.p(
+                'Override [MediaQuery] to simulate device safe areas and an on-screen keyboard. '
+                'Colored overlays mark the mocked regions.',
+              ),
+              LdToggle(
+                label: 'Mock safe area (viewPadding top 44, bottom 34)',
+                checked: _mockSafeArea,
+                onChanged: (value) => setState(() => _mockSafeArea = value),
+              ),
+              LdToggle(
+                label: 'Mock keyboard (viewInsets bottom 300)',
+                checked: _mockKeyboard,
+                onChanged: (value) => setState(() => _mockKeyboard = value),
+              ),
+              LdInput(label: 'Focus to test keyboard attachment', hint: 'Tap to focus'),
+            ],
+          ),
+        ),
         SizedBox(height: 1000, child: LdText.p('Scrollable content')),
       ],
     );
@@ -660,12 +690,102 @@ class _AppBarDemoState extends State<AppBarDemo> {
 
     body = _wrapWithAppBars(body);
 
-    return LdScaffold(
-      drawer: LdScaffold(
-        body: LdAppBarWidget(title: const Text('Drawer'), child: const Text('Drawer')),
+    return _MockSystemUiScope(
+      mockSafeArea: _mockSafeArea,
+      mockKeyboard: _mockKeyboard,
+      child: LdScaffold(
+        drawer: LdScaffold(
+          body: LdAppBar(
+            title: const Text('Drawer'),
+            child: const LdScaffoldBodyCentered(child: Text('Drawer')),
+          ),
+        ),
+        primaryScrollController: _scrollController,
+        body: body,
       ),
-      primaryScrollController: _scrollController,
-      body: body,
+    );
+  }
+}
+
+class _MockSystemUiScope extends StatelessWidget {
+  const _MockSystemUiScope({required this.mockSafeArea, required this.mockKeyboard, required this.child});
+
+  final bool mockSafeArea;
+  final bool mockKeyboard;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!mockSafeArea && !mockKeyboard) {
+      return child;
+    }
+
+    final theme = LdTheme.of(context);
+    final base = MediaQuery.of(context);
+    final viewPadding = mockSafeArea ? _kMockViewPadding : base.viewPadding;
+    final viewInsets = mockKeyboard ? const EdgeInsets.only(bottom: _kMockKeyboardInset) : base.viewInsets;
+    final padding = viewPadding.subtract(viewInsets).resolve(Directionality.of(context));
+
+    return MediaQuery(
+      data: base.copyWith(viewPadding: viewPadding, viewInsets: viewInsets, padding: padding),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          child,
+          if (mockSafeArea && viewPadding.top > 0)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: viewPadding.top,
+              child: _MockSystemUiOverlay(
+                label: 'viewPadding.top ${viewPadding.top.toStringAsFixed(0)}',
+                color: theme.primaryColor.withValues(alpha: 0.18),
+              ),
+            ),
+          if (mockSafeArea && viewPadding.bottom > 0)
+            Positioned(
+              bottom: viewInsets.bottom,
+              left: 0,
+              right: 0,
+              height: viewPadding.bottom,
+              child: _MockSystemUiOverlay(
+                label: 'viewPadding.bottom ${viewPadding.bottom.toStringAsFixed(0)}',
+                color: theme.primaryColor.withValues(alpha: 0.18),
+              ),
+            ),
+          if (mockKeyboard && viewInsets.bottom > 0)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: viewInsets.bottom,
+              child: _MockSystemUiOverlay(
+                label: 'viewInsets.bottom ${viewInsets.bottom.toStringAsFixed(0)}',
+                color: theme.warningColor.withValues(alpha: 0.22),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MockSystemUiOverlay extends StatelessWidget {
+  const _MockSystemUiOverlay({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = LdTheme.of(context);
+
+    return IgnorePointer(
+      child: ColoredBox(
+        color: color,
+        child: Center(child: LdText.caption(label, color: theme.textMuted)),
+      ),
     );
   }
 }

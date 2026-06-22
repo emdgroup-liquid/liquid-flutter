@@ -194,7 +194,6 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
   @override
   Widget build(BuildContext context) {
     return LdScaffold(
-      backgroundColor: LdTheme.of(context, listen: true).surface,
       body: LdAppBar(
         title: Text("Navigation"),
         debugName: "Drawer AppBar",

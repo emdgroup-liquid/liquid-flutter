@@ -15,10 +15,10 @@ Widget _overflowHarness({
         child: SizedBox(
           width: width,
           child: LdOverflowView(
-            builder: (context, remainingItemCount) => SizedBox(
+            builder: (context, overflowedChildIndices) => SizedBox(
               width: 32,
               height: 32,
-              child: Center(child: Text('+$remainingItemCount')),
+              child: Center(child: Text('+${overflowedChildIndices.length}')),
             ),
             spacing: 8,
             children: children,

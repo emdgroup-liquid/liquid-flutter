@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:markdown/markdown.dart' as md;
-import 'package:syntax_highlight/syntax_highlight.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Decodes HTML entities produced by the `markdown` package (e.g. `&quot;`).
@@ -488,53 +487,17 @@ List<InlineSpan> _inlineNodesToSpans(
   return nodes.map((node) => buildTextSpan(context, node)).toList();
 }
 
-class _MarkdownCode extends StatefulWidget {
+class _MarkdownCode extends StatelessWidget {
   final String code;
   final String language;
   const _MarkdownCode({required this.code, required this.language});
 
   @override
-  State<_MarkdownCode> createState() => _MarkdownCodeState();
-}
-
-class _MarkdownCodeState extends State<_MarkdownCode> {
-  TextSpan highlightedCode = TextSpan();
-  Highlighter? highlighter;
-  @override
-  void initState() {
-    super.initState();
-    _loadHighlighter();
-  }
-
-  void _loadHighlighter() async {
-    final theme = await (LdTheme.of(context).isDark
-        ? HighlighterTheme.loadDarkTheme()
-        : HighlighterTheme.loadLightTheme());
-    await Highlighter.initialize([widget.language]);
-
-    highlighter = Highlighter(language: widget.language, theme: theme);
-    highlightedCode =
-        highlighter?.highlight(_mdHtmlUnescape.convert(widget.code)) ??
-        TextSpan();
-    setState(() {});
-  }
-
-  @override
-  void didUpdateWidget(covariant _MarkdownCode oldWidget) {
-    if (oldWidget.code != widget.code) {
-      highlightedCode =
-          highlighter?.highlight(_mdHtmlUnescape.convert(widget.code)) ??
-          TextSpan();
-    }
-    super.didUpdateWidget(oldWidget);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (widget.language.isEmpty || widget.language == 'text') {
-      return Text(widget.code);
-    }
-    return Text.rich(highlightedCode);
+    return Text(
+      _mdHtmlUnescape.convert(code),
+      style: const TextStyle(fontFamily: 'monospace'),
+    );
   }
 }
 

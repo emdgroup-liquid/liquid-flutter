@@ -14,7 +14,7 @@ dependencies:
   liquid_flutter: any
   html_unescape: ^2.0.0
   markdown: ^7.3.0
-  syntax_highlight: ^0.5.0
+  # syntax_highlight: ^0.5.0  # Temporarily removed — pulls in super_clipboard
   url_launcher: ^6.3.2
 
 dev_dependencies:

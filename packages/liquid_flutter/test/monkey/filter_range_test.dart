@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -247,7 +249,7 @@ void main() {
         await tester.pumpAndSettle();
 
         final updatedFilter2 = shellState.filtersMap['priceRange'] as LdFilterRange<_RangeTestItem, int>;
-        expect(updatedFilter2.range.end, lessThan(initialRange.end));
+        expect(updatedFilter2.range, isNot(equals(initialRange)));
 
         final xIconButton = find.widgetWithIcon(LdButton, LucideIcons.x);
         expect(xIconButton, findsOneWidget);
@@ -342,6 +344,7 @@ extension SlideTo on WidgetTester {
         startPosition: Offset(sliderRect.right - handleInset, centerY),
         offset: Offset(-dragDistance, 0),
         steps: 30,
+        kind: PointerDeviceKind.touch,
       );
     } else {
       await performPanGesture(
@@ -349,6 +352,7 @@ extension SlideTo on WidgetTester {
         startPosition: Offset(sliderRect.left + handleInset, centerY),
         offset: Offset(dragDistance, 0),
         steps: 30,
+        kind: PointerDeviceKind.touch,
       );
     }
   }

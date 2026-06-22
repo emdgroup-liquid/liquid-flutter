@@ -467,18 +467,10 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Drag from the right (where the high handle is) to the left
+      // Drag the high handle left from the right edge of the track.
       final sliderFinder = find.byType(LdSlider);
-      final sliderRect = tester.getRect(sliderFinder);
-      final startOffset = Offset(sliderRect.right - 20, sliderRect.center.dy);
-      final endOffset = Offset(sliderRect.left + 5, sliderRect.center.dy);
-
-      await performPanGesture(
-        tester,
-        startPosition: startOffset,
-        endPosition: endOffset,
-        steps: 30,
-      );
+      await tester.drag(sliderFinder, const Offset(-150, 0));
+      await tester.pumpAndSettle();
 
       expect(emittedHigh.isNotEmpty, true,
           reason: 'onRangeChanged should be called during high handle drag');
@@ -1490,20 +1482,16 @@ void main() {
       );
 
       await tester.pumpAndSettle();
-      expect(find.byType(LdSlider), findsOneWidget);
 
       // Drag upward (from bottom toward top) — value should increase
       final sliderFinder = find.byType(LdSlider);
       final sliderRect = tester.getRect(sliderFinder);
-      // Start near the bottom (where value=0 is)
-      final startOffset = Offset(sliderRect.center.dx, sliderRect.bottom - 20);
-      // End near the top (where value=1 is)
-      final endOffset = Offset(sliderRect.center.dx, sliderRect.top + 20);
+      final startOffset = Offset(sliderRect.center.dx, sliderRect.bottom - 30);
 
       await performPanGesture(
         tester,
         startPosition: startOffset,
-        endPosition: endOffset,
+        endPosition: Offset(sliderRect.center.dx, sliderRect.top + 20),
         steps: 20,
       );
 

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_decoration.dart';
 import 'package:liquid_flutter/src/appbar/appbar_frame.dart';
+import 'package:liquid_flutter/src/appbar/appbar_state.dart';
 import 'package:liquid_flutter/src/appbar/macos_window_controls.dart';
 import 'package:liquid_flutter/src/appbar/windows_window_controls.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -154,6 +155,8 @@ class LdAppBarWidget extends StatefulWidget {
   /// When null the bar renders the bar surface only (no subtree wrapping).
   final Widget child;
 
+  final EdgeInsets? padding;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -196,6 +199,7 @@ class LdAppBarWidget extends StatefulWidget {
     this.showWindowControls = true,
     this.title,
     this.trailing,
+    this.padding,
   });
 
   @override
@@ -272,8 +276,53 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
     return parentRoute is LdModalRoute && parentRoute.barrierDismissible;
   }
 
+  bool get _drawerBlocksImplyLeading {
+    final drawerState = context.watch<LdDrawerState?>();
+    if (_drawerSlot != LdDrawerSlot.body) return false;
+    if (drawerState == null || !drawerState.isOpen) return false;
+    return !drawerState.isSideBySide;
+  }
+
   bool get _canPopParentRoute {
-    return context.canPop();
+    final route = ModalRoute.of(context);
+
+    if (route != null && !route.isCurrent) {
+      return false;
+    }
+
+    if (_drawerBlocksImplyLeading) {
+      return false;
+    }
+
+    if (route?.impliesAppBarDismissal ?? false) {
+      return true;
+    }
+
+    final router = GoRouter.maybeOf(context);
+    if (router != null) {
+      final rootCanPop = router.routerDelegate.navigatorKey.currentState?.canPop() ?? false;
+      if (rootCanPop) {
+        return false;
+      }
+      return _goRouterShellNavigatorCanPop(router);
+    }
+
+    return false;
+  }
+
+  void _popParentRoute() {
+    final route = ModalRoute.of(context);
+    if (route?.impliesAppBarDismissal ?? false) {
+      route?.navigator?.pop();
+      return;
+    }
+
+    final router = GoRouter.maybeOf(context);
+    if (router != null) {
+      context.pop();
+    } else {
+      Navigator.of(context).pop();
+    }
   }
 
   LdDrawerSlot? get _drawerSlot {
@@ -317,12 +366,7 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
     // conservative heuristic: check for a parent LdAppBarMetrics at the same
     // position as a proxy for level > 0.
     if (widget.autoAttachToKeyboard && LdTheme.of(context).platform.isMobile) {
-      final parentMetrics = context.read<LdAppBarMetrics?>();
-      final isLevel0 = parentMetrics == null || parentMetrics.position != position;
-      return isLevel0 &&
-          _barHasFocusedInput &&
-          MediaQuery.viewInsetsOf(context).bottom > 0 &&
-          position == LdAppBarPosition.bottom;
+      return _barHasFocusedInput && MediaQuery.viewInsetsOf(context).bottom > 0 && position == LdAppBarPosition.bottom;
     }
 
     return false;
@@ -343,19 +387,65 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
     return null;
   }
 
-  Widget? _buildLeading(BuildContext context) {
+  Widget? _buildLeading(BuildContext context, LdAppBarMetrics? metrics) {
     if (widget.leading != null) return widget.leading;
     final imply = widget.implyLeading ?? true;
     if (!imply) return null;
 
-    if (_canPopParentRoute && !_isDrawer && !_isModal && !_isInBottomSlot) {
+    if (_shouldImplyRouteBack(context, metrics)) {
       return LdButton.ghost(
         child: const Icon(LucideIcons.chevronLeft),
-        onPressed: () => context.pop(),
+        onPressed: _popParentRoute,
       );
     }
 
     return null;
+  }
+
+  bool _shouldImplyRouteBack(BuildContext context, LdAppBarMetrics? metrics) {
+    if (!_canPopParentRoute || _isDrawer || _isModal || !_isInTopSlot) {
+      return false;
+    }
+
+    if (metrics != null && ldHasParentTopAppBar(metrics)) {
+      return true;
+    }
+
+    return !_containsNestedTopAppBar(widget.child);
+  }
+
+  bool _widgetIsTopAppBar(Widget widget) {
+    final positionMode = switch (widget) {
+      LdAppBar(:final positionMode) => positionMode,
+      LdAppBarWidget(:final positionMode) => positionMode,
+      _ => null,
+    };
+
+    if (positionMode == null) {
+      return false;
+    }
+
+    return switch (positionMode) {
+      LdAppBarPositionMode.top => true,
+      LdAppBarPositionMode.bottom => false,
+      LdAppBarPositionMode.adaptive => !LdTheme.of(context).platform.isMobile,
+    };
+  }
+
+  bool _containsNestedTopAppBar(Widget widget) {
+    Widget? current = widget;
+    while (current != null) {
+      if (_widgetIsTopAppBar(current)) {
+        return true;
+      }
+      current = switch (current) {
+        LdTabNavigation(:final child) => child,
+        LdAppBar(:final child) => child,
+        LdAppBarWidget(:final child) => child,
+        _ => null,
+      };
+    }
+    return false;
   }
 
   TextStyle get _headerStyle {
@@ -434,94 +524,89 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
         // and metrics is used for level/position checks.
         final metrics = context.watch<LdAppBarMetrics?>();
 
-        final leading = _buildLeading(context);
+        final leading = _buildLeading(context, metrics);
 
-        final isSurface = widget.backgroundColor == null && (context.read<LdSurfaceInfo?>()?.isSurface ?? false);
+        return LdButtonConfigProvider(
+          config: const LdButtonConfig(
+            mode: LdButtonMode.ghost,
+          ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final barWidth = constraints.maxWidth;
+              final isNarrowBar = barWidth.isFinite && barWidth < kLdAppBarInlineSearchMinWidth;
+              final searchBelowBar = mobile || (hasSearch && isNarrowBar);
 
-        return Provider.value(
-          value: LdSurfaceInfo(isSurface: isSurface),
-          child: LdButtonConfigProvider(
-            config: const LdButtonConfig(
-              mode: LdButtonMode.ghost,
-            ),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final barWidth = constraints.maxWidth;
-                final isNarrowBar = barWidth.isFinite && barWidth < kLdAppBarInlineSearchMinWidth;
-                final searchBelowBar = mobile || (hasSearch && isNarrowBar);
+              final overflowItems = [
+                if (widget.title != null)
+                  LdFlexibleChild(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: DefaultTextStyle(
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: _headerStyle,
+                        child: widget.title!,
+                      ),
+                    ),
+                  ),
+                if (hasSearch && !searchBelowBar)
+                  LdFlexibleChild(
+                    child: LdSearchInput(
+                      searchConfig: widget.searchConfig!,
+                      isBottomNavigationBar: _isInBottomSlot,
+                      fullWidth: true,
+                    ),
+                  ),
+                ...widget.actions,
+              ];
 
-                final overflowItems = [
-                  if (widget.title != null)
-                    LdFlexibleChild(
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: DefaultTextStyle(
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                          style: _headerStyle,
-                          child: widget.title!,
+              return LdAutoSpace(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      if (widget.showWindowControls && !_isModal) const MacOSWindowControls(),
+                      OpenDrawerButton(drawerParent: _findDrawerParent(context)),
+                      if (leading != null) ...[leading, ldSpacerM],
+                      if (overflowItems.isNotEmpty)
+                        Expanded(
+                          child: LdOverflowView(
+                            spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            builder: (context, overflowedChildIndices) {
+                              final remainder = [
+                                for (final index in overflowedChildIndices) overflowItems[index],
+                              ];
+                              return LdAppbarActionOverflowMenu(
+                                actions: remainder,
+                                menuProviders: widget.overflowMenuProviders,
+                                inMenu: true,
+                              );
+                            },
+                            children: overflowItems,
+                          ),
                         ),
-                      ),
+                      const CloseDrawerButton(),
+                      if (widget.trailing != null) widget.trailing!,
+                      if (_closeModalButton(context) != null) ...[_closeModalButton(context)!],
+                      if (widget.showWindowControls && !_isModal)
+                        LdReveal(
+                          revealed: _showWindowsWindowControls(metrics),
+                          child: const WindowsWindowControls(),
+                        ),
+                    ],
+                  ),
+                  if (hasSearch && searchBelowBar)
+                    LdSearchInput(
+                      searchConfig: widget.searchConfig!,
+                      isBottomNavigationBar: _isInBottomSlot,
+                      fullWidth: true,
                     ),
-                  if (hasSearch && !searchBelowBar)
-                    LdFlexibleChild(
-                      child: LdSearchInput(
-                        searchConfig: widget.searchConfig!,
-                        isBottomNavigationBar: _isInBottomSlot,
-                        fullWidth: true,
-                      ),
-                    ),
-                  ...widget.actions,
-                ];
-
-                return LdAutoSpace(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      children: [
-                        if (widget.showWindowControls && !_isModal) const MacOSWindowControls(),
-                        OpenDrawerButton(drawerParent: _findDrawerParent(context)),
-                        if (leading != null) ...[leading, ldSpacerM],
-                        if (overflowItems.isNotEmpty)
-                          Expanded(
-                            child: LdOverflowView(
-                              spacing: LdTheme.of(context).paddingSize(size: LdSize.xs),
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              builder: (context, remainingItemCount) {
-                                final remainder = overflowItems.sublist(
-                                  overflowItems.length - remainingItemCount,
-                                );
-                                return LdAppbarActionOverflowMenu(
-                                  actions: remainder,
-                                  menuProviders: widget.overflowMenuProviders,
-                                  inMenu: true,
-                                );
-                              },
-                              children: overflowItems,
-                            ),
-                          ),
-                        const CloseDrawerButton(),
-                        if (widget.trailing != null) widget.trailing!,
-                        if (_closeModalButton(context) != null) ...[_closeModalButton(context)!],
-                        if (widget.showWindowControls && !_isModal)
-                          LdReveal(
-                            revealed: _showWindowsWindowControls(metrics),
-                            child: const WindowsWindowControls(),
-                          ),
-                      ],
-                    ),
-                    if (hasSearch && searchBelowBar)
-                      LdSearchInput(
-                        searchConfig: widget.searchConfig!,
-                        isBottomNavigationBar: _isInBottomSlot,
-                        fullWidth: true,
-                      ),
-                    if (widget.bottom != null) widget.bottom!,
-                  ],
-                );
-              },
-            ),
+                  if (widget.bottom != null) widget.bottom!,
+                ],
+              );
+            },
           ),
         );
       },
@@ -558,6 +643,7 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
       outsideAdditionalPadding: isAttached ? EdgeInsets.zero : LdTheme.of(context).pad(size: LdSize.s),
       scrollBehavior: widget.scrollBehavior,
       wrappedChild: widget.child,
+      insidePadding: widget.padding,
       outsideDecorationBuilder: (isScrolledUnder) => decorationBuilder.buildOutsideDecoration(
         context: context,
         isScrolledUnder: isScrolledUnder,
@@ -570,6 +656,15 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
         isAttached: isAttached,
         position: position,
       ),
+      surfaceInfoBuilder: (isScrolledUnder) => LdSurfaceInfo(
+        isSurface: decorationBuilder
+            .resolveAppearance(
+              context,
+              isScrolledUnder: isScrolledUnder,
+              position: position,
+            )
+            .childIsSurface,
+      ),
       child: Builder(builder: (context) {
         return Padding(padding: MediaQuery.of(context).padding, child: barSurface);
       }),
@@ -577,4 +672,19 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
 
     return frame;
   }
+}
+
+bool _goRouterShellNavigatorCanPop(GoRouter router) {
+  final matches = router.routerDelegate.currentConfiguration.matches;
+  if (matches.isEmpty) {
+    return false;
+  }
+  RouteMatchBase walker = matches.last;
+  while (walker is ShellRouteMatch) {
+    if (walker.navigatorKey.currentState?.canPop() ?? false) {
+      return true;
+    }
+    walker = walker.matches.last;
+  }
+  return false;
 }
