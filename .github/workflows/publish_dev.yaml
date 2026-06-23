@@ -7,6 +7,7 @@ on:
 
 jobs:
   release_packages:
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -199,6 +200,10 @@ jobs:
               body: info.changelog || 'No changelog available',
               prerelease: true,
             });
+
+      - name: Publish liquid_flutter to pub.dev
+        working-directory: packages/liquid_flutter
+        run: flutter pub publish --force
 
       - name: Build example
         run: |
