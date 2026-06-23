@@ -5,14 +5,10 @@ on:
     tags:
       - "*/v*"
   workflow_dispatch:
-    inputs:
-      tag:
-        description: "Package tag to publish (e.g. liquid_flutter/v23.0.0-3)"
-        required: true
-        type: string
 
 jobs:
   publish_to_pubdev:
+    if: startsWith(github.ref, 'refs/tags/')
     permissions:
       id-token: write
       contents: read
@@ -23,7 +19,9 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+
+      # Provisions the OIDC token pub.dev expects. Flutter includes a Dart SDK but does not set up pub OIDC.
+      - uses: dart-lang/setup-dart@v1
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
@@ -31,47 +29,116 @@ jobs:
       - name: Install Melos
         run: dart pub global activate melos
 
-      - name: Extract package name and version from tag
+      - name: Resolve package from tag
         id: tag_info
-        run: |
-          TAG_NAME="${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}"
-          PACKAGE_NAME="${TAG_NAME%%/v*}"
-          VERSION="${TAG_NAME#*/v}"
-          PACKAGE_DIR="packages/$PACKAGE_NAME"
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const tagName = context.ref.replace(/^refs\/tags\//, '');
+            const match = tagName.match(/^(.+)\/v(.+)$/);
+            if (!match) {
+              core.setFailed(`Invalid tag format: ${tagName}`);
+              return;
+            }
 
-          if [ ! -d "$PACKAGE_DIR" ]; then
-            echo "Unknown package directory: $PACKAGE_DIR"
-            exit 1
-          fi
+            const packageName = match[1];
+            const version = match[2];
+            const packageDir = `packages/${packageName}`;
 
-          echo "package_name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "package_dir=$PACKAGE_DIR" >> $GITHUB_OUTPUT
-          echo "Package: $PACKAGE_NAME"
-          echo "Version: $VERSION"
-          echo "Directory: $PACKAGE_DIR"
+            if (!fs.existsSync(packageDir)) {
+              core.setFailed(`Unknown package directory: ${packageDir}`);
+              return;
+            }
+
+            const pubspec = fs.readFileSync(`${packageDir}/pubspec.yaml`, 'utf8');
+            const isPrivate = /^publish_to:\s*none/m.test(pubspec);
+
+            core.setOutput('package_name', packageName);
+            core.setOutput('version', version);
+            core.setOutput('package_dir', packageDir);
+            core.setOutput('skip', isPrivate ? 'true' : 'false');
+
+            core.info(`Package: ${packageName}`);
+            core.info(`Version: ${version}`);
+            core.info(`Directory: ${packageDir}`);
+            if (isPrivate) {
+              core.info('Package is private (publish_to: none), skipping pub.dev publish');
+            }
 
       - name: Bootstrap Melos
+        if: steps.tag_info.outputs.skip == 'false'
         run: melos bootstrap
 
-      - name: Skip private packages
-        id: publication_gate
-        run: |
-          if rg -n "^publish_to:\s*none" "${{ steps.tag_info.outputs.package_dir }}/pubspec.yaml" > /dev/null; then
-            echo "skip=true" >> $GITHUB_OUTPUT
-            echo "Package is private (publish_to: none), skipping pub.dev publish"
-          else
-            echo "skip=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Build devtools extension
-        if: steps.publication_gate.outputs.skip == 'false' && steps.tag_info.outputs.package_name == 'liquid_flutter'
+        if: steps.tag_info.outputs.skip == 'false' && steps.tag_info.outputs.package_name == 'liquid_flutter'
         run: |
           cd packages/liquid_flutter/extension/devtools/liquid_flutter_extension
           flutter pub get
           flutter build web --output=../build
 
-      - name: Publish to pub.dev
-        if: steps.publication_gate.outputs.skip == 'false'
+      - name: Install dependencies
+        if: steps.tag_info.outputs.skip == 'false'
         working-directory: ${{ steps.tag_info.outputs.package_dir }}
-        run: flutter pub publish --force
+        run: dart pub get
+
+      - name: Publish to pub.dev
+        if: steps.tag_info.outputs.skip == 'false'
+        uses: actions/github-script@v7
+        env:
+          PACKAGE_DIR: ${{ steps.tag_info.outputs.package_dir }}
+          PACKAGE_NAME: ${{ steps.tag_info.outputs.package_name }}
+        with:
+          script: |
+            const { execSync } = require('child_process');
+            const packageDir = process.env.PACKAGE_DIR;
+            const packageName = process.env.PACKAGE_NAME;
+            const retryablePattern = /version solving failed|could not find package|because .+ depends on|does not match any versions|unable to satisfy|no matching version/i;
+
+            const publish = () => {
+              try {
+                const output = execSync('dart pub publish -f', {
+                  cwd: packageDir,
+                  encoding: 'utf8',
+                  stdio: ['pipe', 'pipe', 'pipe'],
+                });
+                console.log(output);
+                return { exitCode: 0, output: output || '' };
+              } catch (error) {
+                const output = `${error.stdout || ''}${error.stderr || ''}`;
+                console.log(output);
+                return { exitCode: error.status ?? 1, output };
+              }
+            };
+
+            const first = publish();
+            if (first.exitCode === 0) {
+              core.info(`Published ${packageName} on first attempt`);
+              return;
+            }
+
+            if (!retryablePattern.test(first.output)) {
+              core.setFailed(`Publish failed with a non-retryable error for ${packageName}`);
+              return;
+            }
+
+            core.warning(`Dependency resolution failed for ${packageName}, retrying while workspace packages publish`);
+
+            for (let attempt = 2; attempt <= 12; attempt += 1) {
+              core.info(`Waiting 90s before publish attempt ${attempt}/12 for ${packageName}`);
+              execSync('sleep 90');
+              execSync('dart pub get', { cwd: packageDir, stdio: 'inherit' });
+
+              const result = publish();
+              if (result.exitCode === 0) {
+                core.info(`Published ${packageName} on attempt ${attempt}`);
+                return;
+              }
+
+              if (!retryablePattern.test(result.output)) {
+                core.setFailed(`Publish failed with a non-retryable error on attempt ${attempt} for ${packageName}`);
+                return;
+              }
+            }
+
+            core.setFailed(`All publish attempts failed for ${packageName}`);

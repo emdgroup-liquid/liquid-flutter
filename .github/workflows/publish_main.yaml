@@ -9,7 +9,6 @@ jobs:
   release_packages:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
       contents: write
     steps:
       - name: Get token for bumper app
@@ -44,56 +43,17 @@ jobs:
       - name: Run tests
         run: melos run test
 
-      - name: Version workspace packages
+      - name: Version, commit, and tag workspace packages
         run: |
+          git config user.name "GitHub Actions"
+          git config user.email "gh-actions@emdgroup.com"
           mtrust_api_guard version-workspace \
-            --no-commit \
-            --no-tag \
             --badge \
             --generate-changelog \
             --json=version_output.json
 
-      - name: Dry-run publish changed packages
+      - name: Push branch and tags
         run: |
-          node -e "
-            const fs = require('fs');
-            const { execSync } = require('child_process');
-            const data = JSON.parse(fs.readFileSync('version_output.json', 'utf8'));
-            const packages = Object.keys(data.packages || {});
-            for (const pkg of packages) {
-              const pubspec = 'packages/' + pkg + '/pubspec.yaml';
-              if (!fs.existsSync(pubspec)) continue;
-              const content = fs.readFileSync(pubspec, 'utf8');
-              if (/^publish_to:\s*none/m.test(content)) {
-                console.log('Skipping dry-run for private package', pkg);
-                continue;
-              }
-              console.log('Running dry-run publish for', pkg);
-              execSync('cd packages/' + pkg + ' && flutter pub publish --dry-run', { stdio: 'inherit' });
-            }
-          "
-
-      - name: Commit version updates
-        run: |
-          /usr/bin/git add packages version_output.json
-          if /usr/bin/git diff --cached --quiet; then
-            echo "No version changes to commit"
-          else
-            /usr/bin/git -c user.name="GitHub Actions" -c user.email="gh-actions@emdgroup.com" commit -m "chore(release): version workspace packages [skip ci]"
-          fi
-
-      - name: Create and push tags
-        run: |
-          node -e "
-            const fs = require('fs');
-            const { execSync } = require('child_process');
-            const data = JSON.parse(fs.readFileSync('version_output.json', 'utf8'));
-            for (const [pkg, info] of Object.entries(data.packages || {})) {
-              const tag = pkg + '/v' + info.version;
-              console.log('Creating tag', tag);
-              execSync('git tag ' + tag, { stdio: 'inherit' });
-            }
-          "
           /usr/bin/git push origin main
           /usr/bin/git push origin --tags
 
@@ -102,8 +62,17 @@ jobs:
         with:
           script: |
             const fs = require('fs');
+            if (!fs.existsSync('version_output.json')) {
+              core.info('No version_output.json, skipping releases');
+              return;
+            }
             const data = JSON.parse(fs.readFileSync('version_output.json', 'utf8'));
             for (const [pkg, info] of Object.entries(data.packages || {})) {
+              const pubspecPath = `packages/${pkg}/pubspec.yaml`;
+              if (!fs.existsSync(pubspecPath)) continue;
+              const pubspec = fs.readFileSync(pubspecPath, 'utf8');
+              if (/^publish_to:\s*none/m.test(pubspec)) continue;
+
               const tag = `${pkg}/v${info.version}`;
               await github.rest.repos.createRelease({
                 owner: context.repo.owner,

@@ -48,5 +48,5 @@ packages/liquid_flutter_test_utils/test/failures/
 
 **/test-results.json
 
-
-opencode.json
+version_output.json
+**/version_output.json
