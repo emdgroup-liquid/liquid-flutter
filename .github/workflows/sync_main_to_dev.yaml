@@ -43,43 +43,23 @@ jobs:
             echo "Merge successful without conflicts"
           else
             echo "Conflicts found — resolving..."
-            
-            # Resolve conflicts by taking main's version for package.json and CHANGELOG.md
-            git checkout --theirs package.json || true
+
+            # Keep main's package versions/changelogs to preserve release consistency.
+            git checkout --theirs packages/*/pubspec.yaml || true
+            git checkout --theirs packages/*/CHANGELOG.md || true
             git checkout --theirs CHANGELOG.md || true
-            
-            # For pubspec.yaml, keep dev version but update version number from package.json
-            git checkout --ours pubspec.yaml || true
-            
-            # Add resolved files
-            git add package.json CHANGELOG.md pubspec.yaml
-            
-            # Check if there are still unresolved conflicts
-            if git ls-files -u | grep -v -E "(package\.json|pubspec\.yaml|CHANGELOG\.md)" | grep -q .; then
+            git add packages/*/pubspec.yaml packages/*/CHANGELOG.md CHANGELOG.md || true
+
+            # Check if there are still unresolved conflicts in files not auto-resolved.
+            if git ls-files -u | grep -q .; then
               echo "Still have unresolved conflicts in other files:"
               git ls-files -u
               exit 1
             fi
-            
+
             # Complete the merge
             git commit -m "chore: sync changes from main with auto-resolved conflicts [skip ci]"
           fi
-          
-          # Extract version from package.json and update pubspec.yaml
-          echo "Updating pubspec.yaml version from package.json..."
-          
-          # Get version from package.json
-          VERSION=$(node -p "require('./package.json').version")
-          echo "Found version: $VERSION"
-          
-          # Update pubspec.yaml version using sed
-          sed -i "s/^version: .*/version: $VERSION/" pubspec.yaml
-          
-          # Commit the version update if there are changes
-          if ! git diff --quiet pubspec.yaml; then
-            git add pubspec.yaml
-            git commit -m "chore: update pubspec.yaml version to $VERSION [skip ci]"
-          fi
-          
+
           # Push changes to dev
           git push origin dev

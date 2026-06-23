@@ -1,9 +1,9 @@
-name: "Release Main"
+name: "Release Dev"
 
 on:
   push:
     branches:
-      - main
+      - dev
 
 jobs:
   release_packages:
@@ -47,11 +47,40 @@ jobs:
       - name: Version workspace packages
         run: |
           mtrust_api_guard version-workspace \
+            --pre-release \
             --no-commit \
             --no-tag \
             --badge \
             --generate-changelog \
             --json=version_output.json
+
+      - name: Validate liquid_flutter next release
+        run: |
+          node -e "
+            const fs = require('fs');
+            const data = JSON.parse(fs.readFileSync('version_output.json', 'utf8'));
+            const value = data?.packages?.liquid_flutter?.version;
+            if (!value) {
+              console.error('liquid_flutter was not versioned. Expected 23.0.0-3 or higher.');
+              process.exit(1);
+            }
+            const parse = (v) => {
+              const [core] = v.split('-');
+              return core.split('.').map((n) => Number(n));
+            };
+            const [ma, mi, pa] = parse(value);
+            const [tma, tmi, tpa] = [23, 0, 0];
+            const belowTarget = ma < tma || (ma === tma && mi < tmi) || (ma === tma && mi === tmi && pa < tpa);
+            if (belowTarget) {
+              console.error('liquid_flutter version is below 23.0.0-3 baseline target:', value);
+              process.exit(1);
+            }
+            if (value.startsWith('23.0.0-1') || value.startsWith('23.0.0-2')) {
+              console.error('Refusing duplicate/old liquid_flutter prerelease:', value);
+              process.exit(1);
+            }
+            console.log('liquid_flutter next version:', value);
+          "
 
       - name: Dry-run publish changed packages
         run: |
@@ -94,10 +123,10 @@ jobs:
               execSync('git tag ' + tag, { stdio: 'inherit' });
             }
           "
-          /usr/bin/git push origin main
+          /usr/bin/git push origin dev
           /usr/bin/git push origin --tags
 
-      - name: Create releases
+      - name: Create prereleases
         uses: actions/github-script@v7
         with:
           script: |
@@ -111,17 +140,18 @@ jobs:
                 tag_name: tag,
                 name: `${pkg} ${info.version}`,
                 body: info.changelog || 'No changelog available',
-                prerelease: false,
+                prerelease: true,
               });
             }
 
       - name: Build example
         run: |
           cd apps/example
-          flutter build web --release --base-href /liquid-flutter/
+          flutter build web --release --base-href /liquid-flutter/dev/
 
       - name: Deploy example
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./apps/example/build/web
+          destination_dir: dev

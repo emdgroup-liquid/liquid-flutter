@@ -27,9 +27,4 @@ melos:
       packageFilters:
         category: testable
     api_guard:
-      packageFilters:
-        diff: "origin/main...HEAD"
-        noPrivate: true
-      orderDependents: true
-      concurrency: 1
-      exec: mtrust_api_guard version --root=\$PWD --no-commit --no-tag --badge --generate-changelog --json=./version_output.json --tag-prefix=\$(basename \$PWD)/v --pre-release
+      run: mtrust_api_guard version-workspace --no-commit --no-tag --badge --generate-changelog --json=./version_output.json --pre-release

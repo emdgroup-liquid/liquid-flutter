@@ -1,0 +1,63 @@
+name: Publish to pub.dev
+
+on:
+  push:
+    tags:
+      - "*/v*"
+
+jobs:
+  publish_to_pubdev:
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+
+      - name: Install Melos
+        run: dart pub global activate melos
+
+      - name: Extract package name and version from tag
+        id: tag_info
+        run: |
+          TAG_NAME="${{ github.ref_name }}"
+          PACKAGE_NAME="${TAG_NAME%%/v*}"
+          VERSION="${TAG_NAME#*/v}"
+          PACKAGE_DIR="packages/$PACKAGE_NAME"
+
+          if [ ! -d "$PACKAGE_DIR" ]; then
+            echo "Unknown package directory: $PACKAGE_DIR"
+            exit 1
+          fi
+
+          echo "package_name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "package_dir=$PACKAGE_DIR" >> $GITHUB_OUTPUT
+          echo "Package: $PACKAGE_NAME"
+          echo "Version: $VERSION"
+          echo "Directory: $PACKAGE_DIR"
+
+      - name: Bootstrap Melos
+        run: melos bootstrap
+
+      - name: Skip private packages
+        id: publication_gate
+        run: |
+          if rg -n "^publish_to:\s*none" "${{ steps.tag_info.outputs.package_dir }}/pubspec.yaml" > /dev/null; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "Package is private (publish_to: none), skipping pub.dev publish"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Publish to pub.dev
+        if: steps.publication_gate.outputs.skip == 'false'
+        working-directory: ${{ steps.tag_info.outputs.package_dir }}
+        run: flutter pub publish --force

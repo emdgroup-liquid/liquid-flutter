@@ -22,6 +22,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Fetch all history for all branches and tags
+          fetch-tags: true
 
       - name: Install Git LFS
         run: sudo apt-get install -y git-lfs && git lfs install
@@ -84,41 +85,17 @@ jobs:
           fail-on-error: false
 
       - name: Install mtrust_api_guard
-        run: dart pub global activate mtrust_api_guard
+        run: dart pub global activate mtrust_api_guard 6.0.6
 
-      - name: Run mtrust_api_guard on changed packages
+      - name: Run mtrust_api_guard workspace check
         id: version_check
-        continue-on-error: true
         run: |
-          # Create directory to collect version outputs
-          mkdir -p version_outputs
-
-          # Track if any packages were processed
-          PACKAGES_PROCESSED=0
-
-          # Run mtrust_api_guard on changed packages and collect outputs
-          melos exec --diff=origin/${{ github.base_ref }} -- bash -c '
-            mtrust_api_guard version --no-commit --no-tag --badge --generate-changelog --json=$OUTPUT_FILE; then
-                  if [ -f "$OUTPUT_FILE" ]; then
-                    cp "$OUTPUT_FILE" "../../version_outputs/"
-                    echo "1" >> "../../version_outputs/.count"
-                  fi
-                fi
-              else
-                echo "Skipping $PACKAGE_NAME (no api_guard directory)"
-              fi
-            fi
-          '
-
-          # Check if any packages were processed
-          if [ -f "version_outputs/.count" ]; then
-            PACKAGES_PROCESSED=$(cat version_outputs/.count | wc -l)
-          fi
-
-          if [ "$PACKAGES_PROCESSED" -eq 0 ]; then
-            echo "No packages with version changes detected"
-            exit 0
-          fi
+          mtrust_api_guard version-workspace \
+            --no-commit \
+            --no-tag \
+            --badge \
+            --generate-changelog \
+            --json=version_output.json
 
       - name: Generate version summary and comment on PR
         if: github.event_name == 'pull_request' && steps.version_check.outcome == 'success'
@@ -126,28 +103,16 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const path = require('path');
-
-            const versionOutputsDir = 'version_outputs';
-            let allVersions = [];
-
-            // Collect all version outputs
-            if (fs.existsSync(versionOutputsDir)) {
-              const files = fs.readdirSync(versionOutputsDir);
-              for (const file of files) {
-                if (file.startsWith('version_output_') && file.endsWith('.json')) {
-                  try {
-                    const filePath = path.join(versionOutputsDir, file);
-                    const content = fs.readFileSync(filePath, 'utf8');
-                    const versionData = JSON.parse(content);
-                    const packageName = file.replace('version_output_', '').replace('.json', '');
-                    allVersions.push({ package: packageName, ...versionData });
-                  } catch (error) {
-                    console.error(`Error parsing ${file}:`, error);
-                  }
-                }
-              }
+            if (!fs.existsSync('version_output.json')) {
+              console.log('No version changes detected');
+              return;
             }
+
+            const versionOutput = JSON.parse(fs.readFileSync('version_output.json', 'utf8'));
+            const allVersions = Object.entries(versionOutput.packages || {}).map(([packageName, info]) => ({
+              package: packageName,
+              ...info,
+            }));
 
             if (allVersions.length === 0) {
               console.log('No version changes detected');
