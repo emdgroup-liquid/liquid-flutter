@@ -24,6 +24,7 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           fetch-depth: 0
           fetch-tags: true
+          lfs: true
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
