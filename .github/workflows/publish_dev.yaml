@@ -131,25 +131,10 @@ jobs:
             console.log('liquid_flutter next version:', value);
           "
 
-      - name: Dry-run publish changed packages
+      - name: Dry-run publish liquid_flutter
         run: |
-          node -e "
-            const fs = require('fs');
-            const { execSync } = require('child_process');
-            const data = JSON.parse(fs.readFileSync('version_output.json', 'utf8'));
-            const packages = Object.keys(data.packages || {});
-            for (const pkg of packages) {
-              const pubspec = 'packages/' + pkg + '/pubspec.yaml';
-              if (!fs.existsSync(pubspec)) continue;
-              const content = fs.readFileSync(pubspec, 'utf8');
-              if (/^publish_to:\s*none/m.test(content)) {
-                console.log('Skipping dry-run for private package', pkg);
-                continue;
-              }
-              console.log('Running dry-run publish for', pkg);
-              execSync('cd packages/' + pkg + ' && flutter pub publish --dry-run', { stdio: 'inherit' });
-            }
-          "
+          cd packages/liquid_flutter
+          flutter pub publish --dry-run
 
       - name: Commit version updates
         run: |
@@ -166,11 +151,14 @@ jobs:
             const fs = require('fs');
             const { execSync } = require('child_process');
             const data = JSON.parse(fs.readFileSync('version_output.json', 'utf8'));
-            for (const [pkg, info] of Object.entries(data.packages || {})) {
-              const tag = pkg + '/v' + info.version;
-              console.log('Creating tag', tag);
-              execSync('git tag ' + tag, { stdio: 'inherit' });
+            const info = data.packages?.liquid_flutter;
+            if (!info) {
+              console.error('liquid_flutter missing from version output');
+              process.exit(1);
             }
+            const tag = 'liquid_flutter/v' + info.version;
+            console.log('Creating tag', tag);
+            execSync('git tag ' + tag, { stdio: 'inherit' });
           "
           /usr/bin/git push origin dev
           /usr/bin/git push origin --tags
@@ -181,17 +169,20 @@ jobs:
           script: |
             const fs = require('fs');
             const data = JSON.parse(fs.readFileSync('version_output.json', 'utf8'));
-            for (const [pkg, info] of Object.entries(data.packages || {})) {
-              const tag = `${pkg}/v${info.version}`;
-              await github.rest.repos.createRelease({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                tag_name: tag,
-                name: `${pkg} ${info.version}`,
-                body: info.changelog || 'No changelog available',
-                prerelease: true,
-              });
+            const info = data.packages?.liquid_flutter;
+            if (!info) {
+              core.setFailed('liquid_flutter missing from version output');
+              return;
             }
+            const tag = `liquid_flutter/v${info.version}`;
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: tag,
+              name: `liquid_flutter ${info.version}`,
+              body: info.changelog || 'No changelog available',
+              prerelease: true,
+            });
 
       - name: Build example
         run: |
