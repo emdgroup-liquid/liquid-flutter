@@ -1,3 +1,64 @@
+## 1.7.0-1
+Released on: 6/23/2026, changelog automatically generated.
+
+### API Changes
+
+#### ✨ Minor changes
+
+**`class` WidgetTreeNode** ([lib/widget_tree_test.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.6.3-1..6f2cb500414387bca362687520bb6fa71425a1f6#diff-77b28609619dfae489094fba8fbddd46a48f5313fb6d155bb662ffb03626aa6a))
+- ❇️ Params added in method `toXmlString`: `parentBounds` (named, optional), `parentConstraints` (named, optional)
+
+**`function` loadAppFonts** ([lib/golden_utils.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.6.3-1..6f2cb500414387bca362687520bb6fa71425a1f6#diff-8c3a1ff205506441531a88e3d816d6e74e548fbadfa9c1d2c50c556ff7f90093))
+- ❇️ Function added: `loadAppFonts`
+
+**`function` multiGolden** ([lib/multi_golden_test.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.6.3-1..6f2cb500414387bca362687520bb6fa71425a1f6#diff-896c93e95156fde96bcb36f862d111612f7b76f8281665a5c8732fe176917496))
+- ❇️ Param added in function `multiGolden`: `widgetTreeOptionsOverrides` (named, optional, default: const {})
+
+**`function` resetTester** ([lib/multi_golden_test.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.6.3-1..6f2cb500414387bca362687520bb6fa71425a1f6#diff-896c93e95156fde96bcb36f862d111612f7b76f8281665a5c8732fe176917496))
+- ❇️ Function added: `resetTester`
+
+**`function` setupGoldenTest** ([lib/golden_utils.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.6.3-1..6f2cb500414387bca362687520bb6fa71425a1f6#diff-8c3a1ff205506441531a88e3d816d6e74e548fbadfa9c1d2c50c556ff7f90093))
+- ❌ Param removed in function `setupGoldenTest`: `fileComparatorThreshold` (named, optional, default: 0.05)
+
+**`function` writeFailureScreenshot** ([lib/multi_golden_test.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.6.3-1..6f2cb500414387bca362687520bb6fa71425a1f6#diff-896c93e95156fde96bcb36f862d111612f7b76f8281665a5c8732fe176917496))
+- ❇️ Function added: `writeFailureScreenshot`
+
+#### 👀 Patch changes
+
+**`function` _allowedPropertyNames** ([lib/widget_tree_test.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.6.3-1..6f2cb500414387bca362687520bb6fa71425a1f6#diff-77b28609619dfae489094fba8fbddd46a48f5313fb6d155bb662ffb03626aa6a))
+- ❇️ Function added: `_allowedPropertyNames`
+
+**`function` _boundsMatchParent** ([lib/widget_tree_test.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.6.3-1..6f2cb500414387bca362687520bb6fa71425a1f6#diff-77b28609619dfae489094fba8fbddd46a48f5313fb6d155bb662ffb03626aa6a))
+- ❇️ Function added: `_boundsMatchParent`
+
+**`function` _captureElementImage** ([lib/multi_golden_test.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.6.3-1..6f2cb500414387bca362687520bb6fa71425a1f6#diff-896c93e95156fde96bcb36f862d111612f7b76f8281665a5c8732fe176917496))
+- ❇️ Function added: `_captureElementImage`
+
+**`function` _colorToHex** ([lib/widget_tree_test.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.6.3-1..6f2cb500414387bca362687520bb6fa71425a1f6#diff-77b28609619dfae489094fba8fbddd46a48f5313fb6d155bb662ffb03626aa6a))
+- ❇️ Function added: `_colorToHex`
+
+**`function` _constraintsMatchParent** ([lib/widget_tree_test.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.6.3-1..6f2cb500414387bca362687520bb6fa71425a1f6#diff-77b28609619dfae489094fba8fbddd46a48f5313fb6d155bb662ffb03626aa6a))
+- ❇️ Function added: `_constraintsMatchParent`
+
+**`function` _getPropertyValueString** ([lib/widget_tree_test.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.6.3-1..6f2cb500414387bca362687520bb6fa71425a1f6#diff-77b28609619dfae489094fba8fbddd46a48f5313fb6d155bb662ffb03626aa6a))
+- ❇️ Function added: `_getPropertyValueString`
+
+**`function` _sanitizeAttributeValue** ([lib/widget_tree_test.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.6.3-1..6f2cb500414387bca362687520bb6fa71425a1f6#diff-77b28609619dfae489094fba8fbddd46a48f5313fb6d155bb662ffb03626aa6a))
+- ❇️ Function added: `_sanitizeAttributeValue`
+
+**`function` _serializeBorder** ([lib/widget_tree_test.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.6.3-1..6f2cb500414387bca362687520bb6fa71425a1f6#diff-77b28609619dfae489094fba8fbddd46a48f5313fb6d155bb662ffb03626aa6a))
+- ❇️ Function added: `_serializeBorder`
+
+**`function` _serializeBorderRadius** ([lib/widget_tree_test.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.6.3-1..6f2cb500414387bca362687520bb6fa71425a1f6#diff-77b28609619dfae489094fba8fbddd46a48f5313fb6d155bb662ffb03626aa6a))
+- ❇️ Function added: `_serializeBorderRadius`
+
+**`function` _serializeBoxDecoration** ([lib/widget_tree_test.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.6.3-1..6f2cb500414387bca362687520bb6fa71425a1f6#diff-77b28609619dfae489094fba8fbddd46a48f5313fb6d155bb662ffb03626aa6a))
+- ❇️ Function added: `_serializeBoxDecoration`
+
+**`meta` dependency `liquid_flutter`** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.6.3-1..6f2cb500414387bca362687520bb6fa71425a1f6#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
+- 📦 Dependency version changed: from `^23.0.0-1` to `^23.0.0-2`
+
+
 # Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.

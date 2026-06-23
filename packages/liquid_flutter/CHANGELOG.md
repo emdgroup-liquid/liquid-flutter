@@ -1,5 +1,8 @@
 ## Unreleased
 
+## 23.0.0-3
+Released on: automatic fallback dev bump to avoid duplicate 23.0.0-2 publish.
+
 ### Features
 
 - **LdRepository:** add `affectedByUpdate` on filter/sort options (replaces deprecated `mutationAffectsCache`) for shared cache invalidation and paginator layout decisions

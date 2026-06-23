@@ -1,3 +1,14 @@
+## 0.0.5-1
+Released on: 6/23/2026, changelog automatically generated.
+
+### API Changes
+
+#### 👀 Patch changes
+
+**`meta` dependency `liquid_flutter`** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_emd_theme/v0.0.5-1..6f2cb500414387bca362687520bb6fa71425a1f6#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
+- 📦 Dependency version changed: from `^23.0.0-1` to `^23.0.0-2`
+
+
 # Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
