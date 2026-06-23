@@ -57,6 +57,13 @@ jobs:
             echo "skip=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Build devtools extension
+        if: steps.publication_gate.outputs.skip == 'false' && steps.tag_info.outputs.package_name == 'liquid_flutter'
+        run: |
+          cd packages/liquid_flutter/extension/devtools/liquid_flutter_extension
+          flutter pub get
+          flutter build web --output=../build
+
       - name: Publish to pub.dev
         if: steps.publication_gate.outputs.skip == 'false'
         working-directory: ${{ steps.tag_info.outputs.package_dir }}

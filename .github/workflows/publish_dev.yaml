@@ -97,6 +97,16 @@ jobs:
                 badge: output.packages.liquid_flutter?.badge || '',
               };
 
+              const changelogPath = 'packages/liquid_flutter/CHANGELOG.md';
+              const changelogEntry = '## ' + targetVersion + '\\nReleased on: automatic fallback dev bump to avoid duplicate 23.0.0-2 publish.\\n\\n';
+              const changelogContent = fs.readFileSync(changelogPath, 'utf8');
+              if (!changelogContent.includes('## ' + targetVersion)) {
+                fs.writeFileSync(
+                  changelogPath,
+                  changelogContent.replace(/^## Unreleased\\n\\n/, '## Unreleased\\n\\n' + changelogEntry),
+                );
+              }
+
               fs.writeFileSync(outputPath, JSON.stringify(output));
             } else {
               console.log('Using computed liquid_flutter version', existing);
@@ -131,11 +141,6 @@ jobs:
             console.log('liquid_flutter next version:', value);
           "
 
-      - name: Dry-run publish liquid_flutter
-        run: |
-          cd packages/liquid_flutter
-          flutter pub publish --dry-run
-
       - name: Commit version updates
         run: |
           /usr/bin/git add packages version_output.json
@@ -144,6 +149,17 @@ jobs:
           else
             /usr/bin/git -c user.name="GitHub Actions" -c user.email="gh-actions@emdgroup.com" commit -m "chore(release): version workspace packages [skip ci]"
           fi
+
+      - name: Build devtools extension for publish validation
+        run: |
+          cd packages/liquid_flutter/extension/devtools/liquid_flutter_extension
+          flutter pub get
+          flutter build web --output=../build
+
+      - name: Dry-run publish liquid_flutter
+        run: |
+          cd packages/liquid_flutter
+          flutter pub publish --dry-run
 
       - name: Create and push tags
         run: |
