@@ -86,6 +86,9 @@ class LdMonkeyBareChildAction<T extends Identifiable<IdType>, IdType> extends Ld
       return;
     }
     await maybePopContextMenu(triggerContext);
+    if (!triggerContext.mounted) {
+      return;
+    }
     final ctx = LdMonkeyActionContext.of<T, IdType>(triggerContext, appContext: appContext);
     await onTrigger(ctx);
   }
@@ -145,6 +148,9 @@ class LdMonkeySubmitAction<T extends Identifiable<IdType>, IdType, Result> exten
       return;
     }
     await maybePopContextMenu(triggerContext);
+    if (!triggerContext.mounted) {
+      return;
+    }
     final ctx = LdMonkeyActionContext.of<T, IdType>(triggerContext, appContext: appContext);
     controller.arg!.value = ctx;
     await controller.trigger();

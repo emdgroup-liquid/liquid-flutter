@@ -45,7 +45,6 @@ class LdText extends StatelessWidget {
       size: size,
       textAlign: textAlign,
       type: LdTextType.caption,
-      key: key,
     );
   }
 
@@ -77,7 +76,6 @@ class LdText extends StatelessWidget {
       size: LdSize.m,
       textAlign: textAlign,
       type: LdTextType.headline,
-      key: key,
     );
   }
 
@@ -109,7 +107,6 @@ class LdText extends StatelessWidget {
       size: LdSize.l,
       textAlign: textAlign,
       type: LdTextType.headline,
-      key: key,
     );
   }
 
@@ -141,7 +138,6 @@ class LdText extends StatelessWidget {
       size: LdSize.s,
       textAlign: textAlign,
       type: LdTextType.headline,
-      key: key,
     );
   }
 
@@ -173,7 +169,6 @@ class LdText extends StatelessWidget {
       size: LdSize.xs,
       textAlign: textAlign,
       type: LdTextType.headline,
-      key: key,
     );
   }
 
@@ -205,7 +200,6 @@ class LdText extends StatelessWidget {
       size: size,
       textAlign: textAlign,
       type: LdTextType.label,
-      key: key,
     );
   }
 
@@ -237,7 +231,6 @@ class LdText extends StatelessWidget {
       size: LdSize.l,
       textAlign: textAlign,
       type: LdTextType.label,
-      key: key,
     );
   }
 
@@ -269,7 +262,6 @@ class LdText extends StatelessWidget {
       size: LdSize.s,
       textAlign: textAlign,
       type: LdTextType.label,
-      key: key,
     );
   }
 
@@ -301,7 +293,6 @@ class LdText extends StatelessWidget {
       size: LdSize.xs,
       textAlign: textAlign,
       type: LdTextType.label,
-      key: key,
     );
   }
 
@@ -333,7 +324,6 @@ class LdText extends StatelessWidget {
       size: size,
       textAlign: textAlign,
       type: LdTextType.paragraph,
-      key: key,
     );
   }
 
@@ -365,7 +355,6 @@ class LdText extends StatelessWidget {
       size: LdSize.l,
       textAlign: textAlign,
       type: LdTextType.paragraph,
-      key: key,
     );
   }
 
@@ -397,7 +386,6 @@ class LdText extends StatelessWidget {
       size: LdSize.s,
       textAlign: textAlign,
       type: LdTextType.paragraph,
-      key: key,
     );
   }
 
@@ -429,7 +417,6 @@ class LdText extends StatelessWidget {
       size: LdSize.xs,
       textAlign: textAlign,
       type: LdTextType.paragraph,
-      key: key,
     );
   }
 

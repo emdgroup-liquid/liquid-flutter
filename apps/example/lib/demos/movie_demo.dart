@@ -239,6 +239,9 @@ List<LdMonkeyAction<MovieDemo, int>> movieActions = [
 
       final newItem = item.copyWith(id: movieData.length + 1, title: "${item.title} (copy)");
 
+      if (!ctx.appContext.mounted) {
+        return;
+      }
       await ctx.repository.create(ctx.appContext, newItem);
 
       await Future.delayed(const Duration(milliseconds: 1500));

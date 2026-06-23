@@ -45,7 +45,6 @@ class LdRadio extends StatelessWidget {
         color: LdTheme.of(context).success,
         focusNode: focusNode,
         disabled: disabled,
-        key: key,
       ),
     );
   }
@@ -69,7 +68,6 @@ class LdRadio extends StatelessWidget {
         color: LdTheme.of(context).warning,
         focusNode: focusNode,
         disabled: disabled,
-        key: key,
       ),
     );
   }
@@ -93,7 +91,6 @@ class LdRadio extends StatelessWidget {
         color: LdTheme.of(context).error,
         focusNode: focusNode,
         disabled: disabled,
-        key: key,
       ),
     );
   }

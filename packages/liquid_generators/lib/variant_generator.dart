@@ -441,20 +441,10 @@ class VariantBuilder implements Builder {
             );
 
             // Build argument strings for code generation
-            final namedArgsList = <String>[];
-
-            // Build named arguments, applying variant defaults
-            for (final param in optionalParams) {
-              final defaultValue = variant.defaults[param.name];
-              if (defaultValue != null) {
-                // Default contains context - will be evaluated in Builder scope
-                namedArgsList.add('${param.name}: $defaultValue');
-              } else {
-                namedArgsList.add('${param.name}: ${param.name}');
-              }
-            }
-
-            namedArgsList.add('key: key');
+            final namedArgsList = _buildOrderedWidgetNamedArgLines(
+              optionalParams: optionalParams,
+              variant: variant,
+            );
 
             // Create the Builder that wraps the public class instantiation
             // Build type arguments string if needed
@@ -542,18 +532,10 @@ class VariantBuilder implements Builder {
             // Direct instantiation with literal defaults
             final positionalArgs =
                 positionalParams.map((p) => refer(p.name)).toList();
-            final namedArgs = <String, Expression>{};
-
-            for (final param in optionalParams) {
-              final defaultValue = variant.defaults[param.name];
-              if (defaultValue != null) {
-                namedArgs[param.name] = CodeExpression(Code(defaultValue));
-              } else {
-                namedArgs[param.name] = refer(param.name);
-              }
-            }
-
-            namedArgs['key'] = refer('key');
+            final namedArgs = _buildOrderedWidgetNamedArgs(
+              optionalParams: optionalParams,
+              variant: variant,
+            );
 
             // Create reference with type parameters if needed
             // When using type parameters as type arguments, we only use the names, not the bounds
@@ -619,6 +601,9 @@ class VariantBuilder implements Builder {
         }
 
         for (final param in optionalParams) {
+          if (param.name == 'child') {
+            continue;
+          }
           final isContextConfigurable =
               contextConfigurableParams.contains(param);
           if (isContextConfigurable && configClassName != null) {
@@ -629,6 +614,45 @@ class VariantBuilder implements Builder {
                 bodyStatements.add(Code(
                     'assert(config?.${param.name} != null || ${param.name} != null, "Parameter ${param.name} is required and it was neither provided nor directly passed");'));
               }
+            }
+
+            if (param.defaultValueCode != null) {
+              final providerAccessSafe =
+                  refer('config').nullSafeProperty(param.name);
+
+              namedArgs[param.name] = refer(param.name)
+                  .ifNullThen(providerAccessSafe)
+                  .ifNullThen(CodeExpression(Code(param.defaultValueCode!)));
+            } else {
+              late Expression providerAccess;
+              if (param.isRequired) {
+                providerAccess = refer('config')
+                    .nullChecked
+                    .property(param.name)
+                    .nullChecked;
+              } else {
+                providerAccess = refer('config').nullSafeProperty(param.name);
+              }
+              namedArgs[param.name] =
+                  refer(param.name).ifNullThen(providerAccess);
+            }
+          } else {
+            namedArgs[param.name] = refer(param.name);
+          }
+        }
+
+        final childParam = optionalParams
+            .where((param) => param.name == 'child')
+            .cast<ParameterElement?>()
+            .firstOrNull;
+        if (childParam != null) {
+          final param = childParam;
+          final isContextConfigurable =
+              contextConfigurableParams.contains(param);
+          if (isContextConfigurable && configClassName != null) {
+            if (param.defaultValueCode == null && param.isRequired) {
+              bodyStatements.add(Code(
+                  'assert(config?.${param.name} != null || ${param.name} != null, "Parameter ${param.name} is required and it was neither provided nor directly passed");'));
             }
 
             if (param.defaultValueCode != null) {
@@ -858,6 +882,74 @@ class _VariantData {
     required this.requiresContext,
     required this.defaults,
   });
+}
+
+bool _isDeferredWidgetNamedArg(String name) => name == 'child' || name == 'key';
+
+String _namedArgExpression(ParameterElement param, _VariantData? variant) {
+  final defaultValue = variant?.defaults[param.name];
+  if (defaultValue != null) {
+    return '${param.name}: $defaultValue';
+  }
+  return '${param.name}: ${param.name}';
+}
+
+Map<String, Expression> _buildOrderedWidgetNamedArgs({
+  required List<ParameterElement> optionalParams,
+  required _VariantData? variant,
+}) {
+  final namedArgs = <String, Expression>{};
+
+  for (final param in optionalParams) {
+    if (_isDeferredWidgetNamedArg(param.name)) {
+      continue;
+    }
+    final defaultValue = variant?.defaults[param.name];
+    if (defaultValue != null) {
+      namedArgs[param.name] = CodeExpression(Code(defaultValue));
+    } else {
+      namedArgs[param.name] = refer(param.name);
+    }
+  }
+
+  if (optionalParams.any((param) => param.name == 'key')) {
+    namedArgs['key'] = refer('key');
+  }
+
+  for (final param in optionalParams.where((param) => param.name == 'child')) {
+    final defaultValue = variant?.defaults[param.name];
+    if (defaultValue != null) {
+      namedArgs[param.name] = CodeExpression(Code(defaultValue));
+    } else {
+      namedArgs[param.name] = refer(param.name);
+    }
+  }
+
+  return namedArgs;
+}
+
+List<String> _buildOrderedWidgetNamedArgLines({
+  required List<ParameterElement> optionalParams,
+  required _VariantData variant,
+}) {
+  final namedArgsList = <String>[];
+
+  for (final param in optionalParams) {
+    if (_isDeferredWidgetNamedArg(param.name)) {
+      continue;
+    }
+    namedArgsList.add(_namedArgExpression(param, variant));
+  }
+
+  if (optionalParams.any((param) => param.name == 'key')) {
+    namedArgsList.add('key: key');
+  }
+
+  for (final param in optionalParams.where((param) => param.name == 'child')) {
+    namedArgsList.add(_namedArgExpression(param, variant));
+  }
+
+  return namedArgsList;
 }
 
 Builder variantGenerator(BuilderOptions _) => VariantBuilder();

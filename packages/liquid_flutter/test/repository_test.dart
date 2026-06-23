@@ -163,7 +163,7 @@ void main() {
 
         expect(createCallCount, equals(1));
         expect(createdItem, isNotNull);
-        expect(createdItem!.id, equals(100));
+        expect(createdItem.id, equals(100));
       });
 
       testWidgets('creates item with index parameter', (tester) async {

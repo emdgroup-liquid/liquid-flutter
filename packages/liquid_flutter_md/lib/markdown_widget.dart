@@ -45,7 +45,7 @@ extension MarkdownNodeDebug on md.Node {
       final unparsedContent = this as md.UnparsedContent;
       return '$indentString UnparsedContent(textContent: ${unparsedContent.textContent})';
     }
-    return '$indentString ${runtimeType}(textContent: $textContent)';
+    return '$indentString $runtimeType(textContent: $textContent)';
   }
 }
 

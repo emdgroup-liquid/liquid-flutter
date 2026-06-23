@@ -8,7 +8,7 @@ analyzer:
     - example/lib/**/*.demo.dart
     - lib/oss_licenses.dart
     - example/build/**
-    - lib/src/*.variants.g.dart
+    - lib/src/**/*.variants.g.dart
 
 formatter:
   page_width: 120

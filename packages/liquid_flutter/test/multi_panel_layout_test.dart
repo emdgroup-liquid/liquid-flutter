@@ -290,7 +290,6 @@ void main() {
     // 8. minPanelWidth clamp: drag to 0 → width == minPanelWidth
     // -------------------------------------------------------------------------
     testWidgets('resize handle drag clamps to minPanelWidth', (WidgetTester tester) async {
-      const initialWidth = 300.0;
       const minWidth = 80.0;
       final reportedWidths = <double>[];
 

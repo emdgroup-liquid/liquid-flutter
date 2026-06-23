@@ -15,7 +15,6 @@ class DemoShell extends StatelessWidget {
     final isProjectsDemoRoot = activeRoute == ("/projects");
     final isRoot = isTaskDemoRoot || isMovieDemoRoot || isProjectsDemoRoot;
     final theme = LdTheme.of(context);
-    // Build the tab navigation (shown conditionally based on platform/route)
 
     return LdScaffold(
       debugName: "Demo Shell Scaffold",

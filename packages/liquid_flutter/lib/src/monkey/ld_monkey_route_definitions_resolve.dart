@@ -21,6 +21,13 @@ Future<LdMonkeyResolvedRouteDefinitions<T, IdType>> resolveMonkeyRouteDefinition
     sortOptionsBuilder(context),
   ]);
 
+  if (!context.mounted) {
+    return LdMonkeyResolvedRouteDefinitions<T, IdType>(
+      filters: (results[0] as List<LdFilterOption<T, IdType>>).toSet(),
+      sortOptions: results[1] as List<LdSortOption<T, IdType>>,
+    );
+  }
+
   final filtersList = results[0] as List<LdFilterOption<T, IdType>>;
   final sortOptions = results[1] as List<LdSortOption<T, IdType>>;
 

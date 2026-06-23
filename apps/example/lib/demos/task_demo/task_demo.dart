@@ -109,6 +109,9 @@ List<LdMonkeyAction<Task, int>> taskActions = [
         final item = await ctx.repository.getById(id);
         updatedItems.add(item.copyWith(done: true));
       }
+      if (!ctx.appContext.mounted) {
+        return;
+      }
       await ctx.repository.updateBatch(ctx.appContext, updatedItems);
     },
     child: Text("Done"),
@@ -133,6 +136,9 @@ List<LdMonkeyAction<Task, int>> taskActions = [
         final item = await ctx.repository.getById(id);
         updatedItems.add(item.copyWith(done: false));
       }
+      if (!ctx.appContext.mounted) {
+        return;
+      }
       await ctx.repository.updateBatch(ctx.appContext, updatedItems);
     },
     child: Text("To do"),
@@ -156,6 +162,9 @@ List<LdMonkeyAction<Task, int>> taskActions = [
 
       final newItem = item.copyWith(id: _nextTaskId(), task: "${item.task} (copy)");
 
+      if (!ctx.appContext.mounted) {
+        return;
+      }
       await ctx.repository.create(ctx.appContext, newItem);
 
       await Future.delayed(const Duration(milliseconds: 1500));

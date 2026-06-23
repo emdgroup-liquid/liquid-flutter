@@ -193,7 +193,6 @@ class LdAppBar extends StatelessWidget {
     Key? key,
   }) {
     return LdAppBar(
-      child: child,
       actions: actions,
       addContainer: addContainer,
       attachedMode: attachedMode,
@@ -216,7 +215,7 @@ class LdAppBar extends StatelessWidget {
       title: title,
       trailing: trailing,
       padding: padding,
-      key: key,
+      child: child,
     );
   }
 
@@ -247,7 +246,6 @@ class LdAppBar extends StatelessWidget {
     Key? key,
   }) {
     return LdAppBar(
-      child: child,
       actions: actions,
       addContainer: addContainer,
       attachedMode: attachedMode,
@@ -270,7 +268,7 @@ class LdAppBar extends StatelessWidget {
       title: title,
       trailing: trailing,
       padding: padding,
-      key: key,
+      child: child,
     );
   }
 
@@ -326,7 +324,6 @@ class LdAppBar extends StatelessWidget {
     assert(config?.child != null || child != null,
         "Parameter child is required and it was neither provided nor directly passed");
     return LdAppBarWidget(
-      child: child ?? config!.child!,
       actions: actions ?? config?.actions ?? const [],
       addContainer: addContainer ?? config?.addContainer ?? false,
       attachedMode:
@@ -360,6 +357,7 @@ class LdAppBar extends StatelessWidget {
       title: title ?? config?.title,
       trailing: trailing ?? config?.trailing,
       padding: padding ?? config?.padding,
+      child: child ?? config!.child!,
     );
   }
 }

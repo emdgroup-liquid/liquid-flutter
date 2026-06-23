@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 /// Callbacks wired from [LdSheetScrollDismissListener] into sheet scroll physics.
-class _LdSheetDismissClient {
+class LdSheetDismissClient {
   bool Function()? canAbsorbOverscroll;
   void Function(double scrollDelta)? onDismissDragUpdate;
 }
@@ -17,7 +16,7 @@ class LdSheetDismissScrollPhysics extends ScrollPhysics {
     this.client,
   });
 
-  final _LdSheetDismissClient? client;
+  final LdSheetDismissClient? client;
 
   @override
   LdSheetDismissScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -29,7 +28,7 @@ class LdSheetDismissScrollPhysics extends ScrollPhysics {
 
   @override
   double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
-    final _LdSheetDismissClient? client = this.client;
+    final LdSheetDismissClient? client = this.client;
     if (client != null &&
         client.canAbsorbOverscroll?.call() == true &&
         position.pixels <= position.minScrollExtent + toleranceFor(position).distance &&
@@ -68,7 +67,7 @@ class _LdSheetScrollBehavior extends ScrollBehavior {
     required this.parent,
   });
 
-  final _LdSheetDismissClient client;
+  final LdSheetDismissClient client;
   final ScrollBehavior parent;
 
   @override
@@ -234,7 +233,7 @@ class _LdSheetScrollDismissListenerState extends State<LdSheetScrollDismissListe
   bool _pointerDownAtScrollTop = false;
   bool _scrollGestureStartedAtTop = false;
   bool _scrolledAwayFromTopDuringGesture = false;
-  final _LdSheetDismissClient _dismissClient = _LdSheetDismissClient();
+  final LdSheetDismissClient _dismissClient = LdSheetDismissClient();
 
   AnimationController? get _routeController {
     final Animation<double> animation = widget.routeAnimation;

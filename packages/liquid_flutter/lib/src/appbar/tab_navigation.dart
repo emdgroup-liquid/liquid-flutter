@@ -100,19 +100,19 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
     return attached;
   }
 
-  int _activeIndex() {
-    return widget.tabs.indexWhere((tab) {
-      if (tab.isActive != null) {
-        return tab.isActive!(context);
-      }
-      if (tab.route.endsWith("*")) {
-        final withoutWildcard = tab.route.substring(0, tab.route.length - 1);
+  bool _isTabActive(LdNavigationTab tab) {
+    if (tab.isActive != null) {
+      return tab.isActive!(context);
+    }
+    if (tab.route.endsWith("*")) {
+      final withoutWildcard = tab.route.substring(0, tab.route.length - 1);
+      return widget.activeRoute.startsWith(withoutWildcard);
+    }
+    return widget.activeRoute == tab.route;
+  }
 
-        return widget.activeRoute
-            .startsWith(tab.route.substring(0, tab.route.length - 1));
-      }
-      return widget.activeRoute == (tab.route);
-    });
+  int _activeIndex() {
+    return widget.tabs.indexWhere(_isTabActive);
   }
 
   double _indicatorPosition = 0;
@@ -130,7 +130,6 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
 
   void _updateIndicatorPosition() {
     final activeIndex = _activeIndex().clamp(0, _tabCount - 1);
-    print("activeIndex: $activeIndex");
     setState(() {
       _indicatorPosition = activeIndex * _tabStride;
     });
@@ -268,11 +267,10 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                         (tab) => SizedBox(
                           width: _tabWidth,
                           child: LdTouchableSurface(
-                            active: widget.activeRoute == tab.route,
+                            active: _isTabActive(tab),
                             onPressed: () => _onTabTap(tab.route),
                             builder: (context, status, _) {
-                              final colors =
-                                  switch (widget.activeRoute == tab.route) {
+                              final colors = switch (_isTabActive(tab)) {
                                 true =>
                                   ghostColor(theme.primary, theme, status),
                                 false => neutralGhostColor(theme, status),

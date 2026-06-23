@@ -53,6 +53,9 @@ LdMonkeyAction<T, IdType> deleteAction<T extends Identifiable<IdType>, IdType>({
         if (confirmed != true) {
           return;
         }
+        if (!ctx.appContext.mounted) {
+          return;
+        }
 
         // Update route state first so hydration and detail routing do not
         // target items that are about to be removed.

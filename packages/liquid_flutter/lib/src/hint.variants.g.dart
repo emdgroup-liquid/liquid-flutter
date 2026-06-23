@@ -17,11 +17,10 @@ class LdHint extends StatelessWidget {
     Key? key,
   }) {
     return LdHint(
-      child: child,
       type: LdHintType.info,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
-      key: key,
+      child: child,
     );
   }
 
@@ -33,11 +32,10 @@ class LdHint extends StatelessWidget {
     Key? key,
   }) {
     return LdHint(
-      child: child,
       type: LdHintType.warning,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
-      key: key,
+      child: child,
     );
   }
 
@@ -49,11 +47,10 @@ class LdHint extends StatelessWidget {
     Key? key,
   }) {
     return LdHint(
-      child: child,
       type: LdHintType.success,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
-      key: key,
+      child: child,
     );
   }
 
@@ -65,11 +62,10 @@ class LdHint extends StatelessWidget {
     Key? key,
   }) {
     return LdHint(
-      child: child,
       type: LdHintType.error,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
-      key: key,
+      child: child,
     );
   }
 
@@ -81,11 +77,10 @@ class LdHint extends StatelessWidget {
     Key? key,
   }) {
     return LdHint(
-      child: child,
       type: LdHintType.canceled,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
-      key: key,
+      child: child,
     );
   }
 
@@ -97,11 +92,10 @@ class LdHint extends StatelessWidget {
     Key? key,
   }) {
     return LdHint(
-      child: child,
       type: LdHintType.loading,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
-      key: key,
+      child: child,
     );
   }
 
@@ -113,11 +107,10 @@ class LdHint extends StatelessWidget {
     Key? key,
   }) {
     return LdHint(
-      child: child,
       type: LdHintType.pending,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
-      key: key,
+      child: child,
     );
   }
 
@@ -129,11 +122,10 @@ class LdHint extends StatelessWidget {
     Key? key,
   }) {
     return LdHint(
-      child: child,
       type: LdHintType.ongoing,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
-      key: key,
+      child: child,
     );
   }
 
@@ -148,10 +140,10 @@ class LdHint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _LdHintWidget(
-      child: child,
       type: type,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
+      child: child,
     );
   }
 }

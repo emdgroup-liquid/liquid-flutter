@@ -116,13 +116,6 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
     _quantityController.animateTo(0.5, curve: Curves.easeInOut);
   }
 
-  void _deduct(double amount) {
-    _quantityController.animateTo(
-      (_quantityController.value - amount).clamp(0, 1),
-      duration: const Duration(milliseconds: 500),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final header = LdAutoSpace(

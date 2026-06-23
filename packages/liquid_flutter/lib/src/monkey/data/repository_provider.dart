@@ -46,7 +46,7 @@ class _LdRepositoryProviderState<T extends Identifiable<IdType>, IdType>
   Future<void> _initRepository(Duration _) async {
     if (_repository.isGreedy) {
       await _repository.ensureGreedyLoaded(context);
-      if (!context.mounted) {
+      if (!mounted) {
         return;
       }
     }
@@ -55,6 +55,9 @@ class _LdRepositoryProviderState<T extends Identifiable<IdType>, IdType>
     if (selection != null && selection.viewing.isNotEmpty) {
       if (!_repository.isGreedy) {
         await _repository.initWithSelection(context, selection.viewing);
+        if (!mounted) {
+          return;
+        }
       }
     } else if (!_repository.isGreedy) {
       await _repository.fetchPageAtOffset(

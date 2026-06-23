@@ -741,12 +741,7 @@ void main() {
             size: LdThemeSize.m,
             brightnessMode: LdThemeBrightnessMode.light,
             child: Navigator(
-              onPopPage: (route, result) {
-                if (!route.didPop(result)) {
-                  return false;
-                }
-                return true;
-              },
+              onDidRemovePage: (_) {},
               pages: [
                 const MaterialPage<void>(child: SizedBox.shrink()),
                 MaterialPage<void>(
@@ -860,12 +855,7 @@ void main() {
             size: LdThemeSize.m,
             brightnessMode: LdThemeBrightnessMode.light,
             child: Navigator(
-              onPopPage: (route, result) {
-                if (!route.didPop(result)) {
-                  return false;
-                }
-                return true;
-              },
+              onDidRemovePage: (_) {},
               pages: [
                 const MaterialPage<void>(child: SizedBox.shrink()),
                 MaterialPage<void>(
@@ -899,12 +889,7 @@ void main() {
             size: LdThemeSize.m,
             brightnessMode: LdThemeBrightnessMode.light,
             child: Navigator(
-              onPopPage: (route, result) {
-                if (!route.didPop(result)) {
-                  return false;
-                }
-                return true;
-              },
+              onDidRemovePage: (_) {},
               pages: [
                 const MaterialPage<void>(child: SizedBox.shrink()),
                 MaterialPage<void>(

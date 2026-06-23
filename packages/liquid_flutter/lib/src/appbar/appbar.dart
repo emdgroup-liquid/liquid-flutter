@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_decoration.dart';
 import 'package:liquid_flutter/src/appbar/appbar_frame.dart';
-import 'package:liquid_flutter/src/appbar/appbar_state.dart';
 import 'package:liquid_flutter/src/appbar/macos_window_controls.dart';
 import 'package:liquid_flutter/src/appbar/windows_window_controls.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -394,8 +393,8 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
 
     if (_shouldImplyRouteBack(context, metrics)) {
       return LdButton.ghost(
-        child: const Icon(LucideIcons.chevronLeft),
         onPressed: _popParentRoute,
+        child: const Icon(LucideIcons.chevronLeft),
       );
     }
 

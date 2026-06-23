@@ -80,12 +80,11 @@ class LdAvatar extends StatelessWidget {
   }) {
     return Builder(
       builder: (BuildContext context) => LdAvatar(
-        child: child,
         emoji: emoji,
         color: LdTheme.of(context).success,
         circular: circular,
         size: size,
-        key: key,
+        child: child,
       ),
     );
   }
@@ -100,12 +99,11 @@ class LdAvatar extends StatelessWidget {
   }) {
     return Builder(
       builder: (BuildContext context) => LdAvatar(
-        child: child,
         emoji: emoji,
         color: LdTheme.of(context).warning,
         circular: circular,
         size: size,
-        key: key,
+        child: child,
       ),
     );
   }
@@ -120,12 +118,11 @@ class LdAvatar extends StatelessWidget {
   }) {
     return Builder(
       builder: (BuildContext context) => LdAvatar(
-        child: child,
         emoji: emoji,
         color: LdTheme.of(context).error,
         circular: circular,
         size: size,
-        key: key,
+        child: child,
       ),
     );
   }
@@ -134,11 +131,11 @@ class LdAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final config = Provider.of<LdAvatarConfig?>(context, listen: true);
     return _LdAvatarWidget(
-      child: child,
       emoji: emoji,
       color: color ?? config?.color,
       circular: circular ?? config?.circular ?? false,
       size: size ?? config?.size ?? LdSize.m,
+      child: child,
     );
   }
 }

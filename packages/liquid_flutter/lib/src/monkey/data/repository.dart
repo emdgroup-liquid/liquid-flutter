@@ -70,8 +70,8 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
 
   LdRepository._({
     required Future<LdListPage<T>> Function(FetchPageParameters<T, IdType> parameters) fetchListWithParameters,
-    required int pageSize,
-    List<T>? initialItems,
+    required super.pageSize,
+    super.initialItems,
     required Future<T> Function(IdType id) getById,
     Future<int?> Function(FetchOffsetParameters<T, IdType> parameters)? getOffsetById,
     Future<void> Function(BuildContext context, IdType id)? deleteItem,
@@ -96,8 +96,6 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
         _autoInvalidateCache = autoInvalidateCache,
         _autoInvalidateCacheOnMutation = autoInvalidateCacheOnMutation,
         super(
-          pageSize: pageSize,
-          initialItems: initialItems,
           repositoryCache: cache,
         ) {
     fetchListFunction = (parameters) => _fetchWithAutoCache(
@@ -649,6 +647,9 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     reorderIndices(fromIndex, toIndex);
 
     final item = getItemById(id)?.value ?? await getById(id);
+    if (!context.mounted) {
+      return;
+    }
     final updated = await reorderHandler(context, item, fromIndex, toIndex);
     if (!context.mounted) {
       return;
@@ -719,6 +720,9 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
     IdType? refreshAnchorId;
 
     for (final entry in layoutChecks.entries) {
+      if (!context.mounted) {
+        return;
+      }
       if (!isLayoutAffectedByUpdate<T, IdType>(
         context: context,
         before: entry.value.before,
@@ -734,6 +738,9 @@ class LdRepository<T extends Identifiable<IdType>, IdType> extends LdPaginator<T
           before: entry.value.before,
           after: entry.value.after,
         );
+        if (!context.mounted) {
+          return;
+        }
       } else {
         needsRefresh = true;
         refreshAnchorId ??= entry.key;

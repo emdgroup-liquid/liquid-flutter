@@ -194,7 +194,7 @@ class LdAppBarMetrics {
     bool? isTabNavigation,
   }) {
     return LdAppBarMetrics(
-      scrollBehavior: this.scrollBehavior,
+      scrollBehavior: scrollBehavior,
       position: position ?? this.position,
       willHide: willHide ?? this.willHide,
       innerHeight: innerHeight ?? this.innerHeight,

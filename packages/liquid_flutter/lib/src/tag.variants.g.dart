@@ -26,11 +26,10 @@ class LdTag extends StatelessWidget {
   }) {
     return Builder(
       builder: (BuildContext context) => LdTag(
-        child: child,
         color: LdTheme.of(context).success,
         onDismiss: onDismiss,
         size: size,
-        key: key,
+        child: child,
       ),
     );
   }
@@ -44,11 +43,10 @@ class LdTag extends StatelessWidget {
   }) {
     return Builder(
       builder: (BuildContext context) => LdTag(
-        child: child,
         color: LdTheme.of(context).warning,
         onDismiss: onDismiss,
         size: size,
-        key: key,
+        child: child,
       ),
     );
   }
@@ -62,11 +60,10 @@ class LdTag extends StatelessWidget {
   }) {
     return Builder(
       builder: (BuildContext context) => LdTag(
-        child: child,
         color: LdTheme.of(context).error,
         onDismiss: onDismiss,
         size: size,
-        key: key,
+        child: child,
       ),
     );
   }
@@ -74,10 +71,10 @@ class LdTag extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _LdTagWidget(
-      child: child,
       color: color,
       onDismiss: onDismiss,
       size: size,
+      child: child,
     );
   }
 }
