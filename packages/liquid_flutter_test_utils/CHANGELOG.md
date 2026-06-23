@@ -1,3 +1,8 @@
+## 1.7.0-3
+Released on: 6/23/2026.
+
+Republish after pub.dev baseline alignment.
+
 ## 1.7.0-1
 Released on: 6/23/2026, changelog automatically generated.
 

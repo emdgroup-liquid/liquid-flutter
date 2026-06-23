@@ -1,6 +1,6 @@
 name: liquid_flutter_window_utils
 description: "Utility platform interface for interacting with the window"
-version: 1.0.0-1
+version: 1.0.0-2
 repository: https://github.com/emdgroup-liquid/liquid-flutter
 environment:
   sdk: ">=3.5.0 <4.0.0"

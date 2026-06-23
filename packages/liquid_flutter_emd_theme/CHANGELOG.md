@@ -1,3 +1,8 @@
+## 0.0.5-3
+Released on: 6/23/2026.
+
+Republish after pub.dev baseline alignment.
+
 ## 0.0.5-2
 Released on: 6/23/2026, changelog automatically generated.
 
