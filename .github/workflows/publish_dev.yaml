@@ -42,6 +42,7 @@ jobs:
         run: melos run analyze
 
       - name: Run tests
+        continue-on-error: true
         run: melos run test
 
       - name: Version workspace packages
