@@ -1,0 +1,224 @@
+import 'package:flutter/material.dart';
+import 'package:liquid/components/component_page.dart';
+import 'package:liquid/components/component_well/component_well.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
+
+class ChooseDemo extends StatefulWidget {
+  const ChooseDemo({super.key});
+
+  @override
+  State<ChooseDemo> createState() => _ChooseDemoState();
+}
+
+class _ChooseDemoState extends State<ChooseDemo> {
+  Set<String> _value = {"strawberry"};
+
+  bool _onSurface = false;
+  bool _allowEmpty = false;
+  bool _disabled = false;
+  bool _multiple = false;
+  bool _enableSearch = false;
+  LdChooseMode _mode = LdChooseMode.auto;
+
+  void _onChange(Set<String> value) {
+    setState(() {
+      _value = value;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ComponentPage(
+      path: "lib/components/form_elements/choose.dart",
+      title: "LdChoose",
+      apiComponents: [
+        "LdChoose",
+        "LdSelectItem",
+      ],
+      demo: LdAutoSpace(
+        children: [
+          LdText.p(
+            "LdChoose is a selection component that allows users to select one or multiple items from a list of options. It supports both single and multiple selection modes, can be configured to require a selection or allow empty values, and adapts its appearance based on the platform and context.",
+          ),
+          ComponentWell(
+            padding: EdgeInsets.all(32),
+            onSurface: _onSurface,
+            minHeight: 300,
+            child: Center(
+              child: LdAutoSpace(children: [
+                LdChoose.fromSelectItems(
+                  label: "Your pie choice",
+                  allowEmpty: _allowEmpty,
+                  disabled: _disabled,
+                  multiple: _multiple,
+                  placeholder: const Text("Choose a pie"),
+                  value: _value,
+                  truncateDisplay: 3,
+                  mode: _mode,
+                  onChanged: _onChange,
+                  searchText: _enableSearch ? (item) => item.searchString ?? '' : null,
+                  items: pies,
+                ),
+                LdText.p("List item trigger"),
+                LdCard(
+                  padding: EdgeInsets.zero,
+                  child: LdChoose.fromSelectItems<String>(
+                    items: pies,
+                    onChanged: _onChange,
+                    label: "Your pie choice",
+                    allowEmpty: _allowEmpty,
+                    disabled: _disabled,
+                    multiple: _multiple,
+                    placeholder: const Text("Choose a pie"),
+                    value: _value,
+                    truncateDisplay: 3,
+                    mode: _mode,
+                    triggerBuilder: (context, config) {
+                      return LdChooseListItemTrigger<LdSelectItem<String>, String>(config: config);
+                    },
+                  ),
+                )
+              ]),
+            ),
+          ),
+          ldSpacerM,
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              LdSelect<LdChooseMode>(
+                  value: _mode,
+                  onChanged: (p0) {
+                    setState(() {
+                      _mode = p0;
+                    });
+                  },
+                  items: const [
+                    LdSelectItem(
+                      child: Text("Auto (uses page for 10+ items)"),
+                      value: LdChooseMode.auto,
+                    ),
+                    LdSelectItem(
+                      child: Text("Page"),
+                      value: LdChooseMode.page,
+                    ),
+                    LdSelectItem(
+                      child: Text("Sheet"),
+                      value: LdChooseMode.modal,
+                    ),
+                  ]),
+              LdButton(
+                  child: const Text("Add Strawberry pie"),
+                  onPressed: () {
+                    setState(() {
+                      _value.add("strawberry");
+                    });
+                  }),
+              LdToggle(
+                checked: _multiple,
+                onChanged: (p0) {
+                  setState(() {
+                    _multiple = p0;
+                  });
+                },
+                label: "Allow multiple",
+              ),
+              LdToggle(
+                checked: _onSurface,
+                onChanged: (p0) {
+                  setState(() {
+                    _onSurface = p0;
+                  });
+                },
+                label: "On surface",
+              ),
+              LdToggle(
+                checked: _allowEmpty,
+                onChanged: (p0) {
+                  setState(() {
+                    _allowEmpty = p0;
+                  });
+                },
+                label: "Allow empty",
+              ),
+              LdToggle(
+                checked: _disabled,
+                onChanged: (p0) {
+                  setState(() {
+                    _disabled = !_disabled;
+                  });
+                },
+                label: "Disabled",
+              ),
+              LdToggle(
+                checked: _enableSearch,
+                onChanged: (p0) {
+                  setState(() {
+                    _enableSearch = p0;
+                  });
+                },
+                label: "Enable search",
+              ),
+            ],
+          ),
+          ldSpacerM,
+        ],
+      ),
+    );
+  }
+}
+
+var pies = [
+  LdSelectItem(
+    child: Text("Raspberry pie"),
+    value: "raspberry",
+    searchString: "Raspberry pie",
+  ),
+  LdSelectItem(
+    child: Text("Strawberry pie"),
+    value: "strawberry",
+    searchString: "Strawberry pie",
+  ),
+  LdSelectItem(
+    child: Text("Apple pie"),
+    enabled: false,
+    value: "apple",
+    searchString: "Apple pie",
+  ),
+  LdSelectItem(
+    child: Text("Blueberry pie"),
+    value: "blueberry",
+    searchString: "Blueberry pie",
+  ),
+  LdSelectItem(
+    child: Text("Cherry pie"),
+    value: "cherry",
+    searchString: "Cherry pie",
+  ),
+  LdSelectItem(
+    child: Text("Peach pie"),
+    value: "peach",
+    searchString: "Peach pie",
+  ),
+  LdSelectItem(
+    child: Text("Chocolate pie"),
+    value: "chocolate",
+    searchString: "Chocolate pie",
+  ),
+  LdSelectItem(
+    child: Text("Banana bread"),
+    value: "banana",
+    searchString: "Banana bread",
+  ),
+  LdSelectItem(
+    child: Text("Pumpkin pie"),
+    value: "pumpkin",
+    searchString: "Pumpkin pie",
+  ),
+  LdSelectItem(
+    child: Text("Lemon pie"),
+    value: "lemon",
+    searchString: "Lemon pie",
+  ),
+];

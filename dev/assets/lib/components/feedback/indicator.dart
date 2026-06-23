@@ -1,0 +1,34 @@
+import 'package:flutter/material.dart';
+import 'package:liquid/components/component_page.dart';
+import 'package:liquid/components/component_well/component_well.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
+
+class IndicatorDemo extends StatelessWidget {
+  const IndicatorDemo({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ComponentPage(
+      path: "lib/components/feedback/indicator.dart",
+      title: "LdIndicator",
+      text: "An indicator is a visual representation of a status or state.",
+      demo: ComponentWell(
+        child: LdAutoSpace(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            ...LdIndicatorType.values.map(
+              (e) => Row(
+                children: [
+                  LdIndicator(type: e),
+                  ldSpacerM,
+                  LdText.ps(e.toString()),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      apiComponents: const ["LdIndicator"],
+    );
+  }
+}
