@@ -55,6 +55,54 @@ jobs:
             --generate-changelog \
             --json=version_output.json
 
+      - name: Ensure liquid_flutter next dev version
+        run: |
+          node -e "
+            const fs = require('fs');
+            const targetVersion = '23.0.0-3';
+            const outputPath = 'version_output.json';
+            const pubspecPath = 'packages/liquid_flutter/pubspec.yaml';
+            const dependentPubspecs = [
+              'packages/liquid_flutter_emd_theme/pubspec.yaml',
+              'packages/liquid_flutter_test_utils/pubspec.yaml',
+              'packages/liquid_flutter_md/pubspec.yaml',
+              'packages/liquid_generators/pubspec.yaml',
+            ];
+            const output = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
+            const existing = output?.packages?.liquid_flutter?.version;
+
+            if (!output.packages) output.packages = {};
+
+            if (!existing || existing.startsWith('23.0.0-1') || existing.startsWith('23.0.0-2')) {
+              console.log('Applying fallback liquid_flutter dev version', targetVersion, 'existing=', existing || 'none');
+
+              const pubspecContent = fs.readFileSync(pubspecPath, 'utf8');
+              fs.writeFileSync(
+                pubspecPath,
+                pubspecContent.replace(/^version:\\s*.*/m, 'version: ' + targetVersion),
+              );
+
+              for (const depPath of dependentPubspecs) {
+                if (!fs.existsSync(depPath)) continue;
+                const content = fs.readFileSync(depPath, 'utf8');
+                fs.writeFileSync(
+                  depPath,
+                  content.replace(/liquid_flutter:\\s*\\^[^\\n]+/g, 'liquid_flutter: ^' + targetVersion),
+                );
+              }
+
+              output.packages.liquid_flutter = {
+                version: targetVersion,
+                changelog: '## ' + targetVersion + '\\nReleased on: automatic fallback dev bump to avoid duplicate 23.0.0-2 publish.\\n',
+                badge: output.packages.liquid_flutter?.badge || '',
+              };
+
+              fs.writeFileSync(outputPath, JSON.stringify(output));
+            } else {
+              console.log('Using computed liquid_flutter version', existing);
+            }
+          "
+
       - name: Validate liquid_flutter next release
         run: |
           node -e "
