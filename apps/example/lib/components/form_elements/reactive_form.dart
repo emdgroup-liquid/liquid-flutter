@@ -99,9 +99,11 @@ class ReactiveFormDemo extends StatelessWidget {
                     child: Text('There is only one correct answer...'),
                   ),
                   validators: [
-                    LdFormValidators.equals({Pet.cats}),
+                    LdFormSetValidators.equals({Pet.dogs}),
                   ],
-                  validationMessages: {'equals': (field) => 'Cats are the only correct answer'},
+                  validationMessages: {
+                    'requiredEquals': (field) => 'Dogs are the only correct answer',
+                  },
                 ),
                 LdReactiveFormItem.multiSelect<FriesTopping>(
                   key: 'friesTopping',

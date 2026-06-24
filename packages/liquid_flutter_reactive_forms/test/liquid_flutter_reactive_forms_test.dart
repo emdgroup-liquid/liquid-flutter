@@ -81,6 +81,36 @@ void main() {
       expect(find.byType(LdSubmit<void, void>), findsOneWidget);
     });
 
+    testWidgets('does not show errors on focus without edits', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          Column(
+            children: [
+              LdReactiveForm(
+                items: [
+                  LdReactiveFormItem.input<String>(
+                    key: 'email',
+                    inputFieldHint: 'Enter your email',
+                    label: 'Email',
+                    validators: [LdFormValidators.required],
+                  ),
+                ],
+                onSubmit: (form) async {},
+              ),
+              const Text('outside'),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(LdInput));
+      await tester.pump();
+      await tester.tap(find.text('outside'));
+      await tester.pump();
+
+      expect(find.text('This field is required'), findsNothing);
+    });
+
     testWidgets('form validation works', (WidgetTester tester) async {
       final formItems = [
         LdReactiveFormItem.input<String>(
@@ -346,6 +376,36 @@ void main() {
       await tester.pump();
 
       expect(blurredValue, 'Jane');
+    });
+
+    testWidgets('shows requiredEquals message for equals validator', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          LdReactiveForm(
+            items: [
+              LdReactiveFormItem.chooseFromItems<String>(
+                key: 'choice',
+                label: 'Pick one',
+                items: const [
+                  LdSelectItem(value: 'a', child: Text('A')),
+                  LdSelectItem(value: 'b', child: Text('B')),
+                ],
+                validators: [LdFormSetValidators.equals({'a'})],
+                validationMessages: {
+                  'requiredEquals': (error) => 'Pick A',
+                },
+              ),
+            ],
+            onSubmit: (form) async {},
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(LdButton));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pick A'), findsOneWidget);
+      expect(find.text('requiredEquals'), findsNothing);
     });
 
     testWidgets('chooseFromItems renders LdChoose trigger', (WidgetTester tester) async {

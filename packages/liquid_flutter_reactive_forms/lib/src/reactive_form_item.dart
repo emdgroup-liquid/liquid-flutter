@@ -66,7 +66,12 @@ class LdReactiveFormItem<TModel, TView> {
       disabled: disabled,
       validators: validators,
       validationMessages: validationMessages,
-      initialValue: valueAccessor.viewToModelValue(initialValue),
+      initialValue: valueAccessor.viewToModelValue(
+        initialValue ?? switch (T) {
+          const (String) => '',
+          _ => null,
+        },
+      ),
       valueAccessor: valueAccessor,
       formFieldBuilder: (state) {
         return _ReactiveLdInput<T>(
@@ -383,7 +388,7 @@ class LdReactiveFormItem<TModel, TView> {
       formControlName: key,
       valueAccessor: valueAccessor,
       validationMessages: validationMessages,
-      showErrors: (control) => control.invalid && control.dirty,
+      showErrors: ldReactiveFormShowErrors,
       builder: (state) {
         return LdAutoSpace(
           children: [
@@ -453,7 +458,9 @@ class _ReactiveLdInputState<T> extends State<_ReactiveLdInput<T>> {
       controller: _controller,
       onChanged: widget.state.didChange,
       onBlurred: (value) {
-        widget.state.control.markAsTouched();
+        if (widget.state.control.dirty) {
+          widget.state.control.markAsTouched();
+        }
         widget.onBlurred?.call(value);
       },
       disabled: widget.state.control.disabled,
