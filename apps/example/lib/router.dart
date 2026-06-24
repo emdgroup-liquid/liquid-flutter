@@ -63,6 +63,7 @@ import 'components/feedback/notification.dart';
 import 'components/form_elements/checkbox.dart';
 import 'components/form_elements/form.dart';
 import 'components/form_elements/input.dart';
+import 'components/form_elements/reactive_form.dart';
 import 'components/interaction/breadcrumb.dart';
 import 'components/layout/accordion.dart';
 import 'components/layout/divider.dart';
@@ -302,6 +303,11 @@ class AppRouter {
           GoRoute(
             path: "/components/form",
             pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const FormDemo()),
+          ),
+          GoRoute(
+            path: "/components/reactive_form",
+            pageBuilder: (context, state) =>
+                NoTransitionPage<void>(key: state.pageKey, child: const ReactiveFormDemo()),
           ),
           GoRoute(
             path: "/components/orb",

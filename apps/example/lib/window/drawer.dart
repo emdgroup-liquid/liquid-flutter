@@ -50,8 +50,7 @@ const components = [
   _Component("Form", "/components/form", LucideIcons.penTool, ComponentCategory.formElements),
   _Component("Input", "/components/input", LucideIcons.textCursorInput, ComponentCategory.formElements),
   _Component("Radio", "/components/radio", LucideIcons.circle, ComponentCategory.formElements),
-  //_Component("Reactive Form", "/components/reactive_form",
-  //    LucideIcons.signature, ComponentCategory.formElements),
+  _Component("Reactive Form", "/components/reactive_form", LucideIcons.signature, ComponentCategory.formElements),
   _Component("Select", "/components/select", LucideIcons.arrowDown, ComponentCategory.formElements),
   _Component(
     "Slider (Confirmation)",
