@@ -723,7 +723,44 @@ LdMonkeyViewingGuard<Task, int>(
 | `isDirty && !isSaving` | Shows discard confirmation; cancel restores the previous viewing via `LdMonkeySelection.updateViewing` |
 | pristine and idle | Allows navigation |
 
-Use both guards together around detail editors. `LdMonkeyReactiveDetailForm` (reactive_forms package) wires these automatically in a later release.
+Use both guards together around detail editors. [LdMonkeyReactiveDetailForm] wires these automatically.
+
+### `LdMonkeyReactiveDetailForm`
+
+Reactive detail editor (`liquid_flutter_reactive_forms`) that connects a `FormGroup` to `LdRepository.update`:
+
+```dart
+LdMonkeyReactiveDetailForm<Task, int, Task>(
+  item: paginatorItem,
+  saveMode: LdMonkeyDetailSaveMode.adaptive,
+  detailToFormValues: (task) => {
+    'title': task.task,
+    'due': task.due,
+  },
+  mapToEntity: (form, task) => task.copyWith(
+    task: form.control('title').value as String,
+    due: form.control('due').value as DateTime,
+  ),
+  itemsBuilder: (context, hooks) => [
+    LdReactiveFormItem.input<String>(
+      key: 'title',
+      inputFieldHint: 'Task',
+      onBlurred: hooks.onBlurred('title'),
+    ),
+    LdReactiveFormItem.datePicker(
+      key: 'due',
+      label: 'Due',
+      // wire onChanged in datePicker via hooks.onCommitted when using blur save
+    ),
+  ],
+)
+```
+
+- **`TDetail`**: optional third type param when the list entity differs from the full record (`loadDetail` + `detailFromEntity`).
+- **`mapToEntity`**: projects form values onto the persistence model at save time.
+- **`LdMonkeyDetailSaveMode.adaptive`**: blur save on mobile, manual Save on desktop.
+- **Merge**: pristine fields patch from the repository stream; dirty fields use `LdMonkeyFieldConflictPolicy` (default `keepLocal`).
+- **`LdMonkeyDetailFormScope`**: exposes `isDirty`, `isSaving`, `save`, `reset`, and `detail` for custom layouts.
 
 ## Deleted Items Guard
 
