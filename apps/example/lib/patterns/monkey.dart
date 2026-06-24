@@ -197,6 +197,20 @@ class MonkeyDemo extends StatelessWidget {
                   },
                 ),
               ),
+              LdSpacer(size: LdSize.m),
+              LdText.hs("Detail editing"),
+              LdText.p(
+                "Learn how to build editable detail views with LdMonkeyReactiveDetailForm, adaptive save, and navigation guards.",
+              ),
+              LdCard(
+                padding: EdgeInsets.zero,
+                child: LdListItem.trailingForward(
+                  title: Text("View Detail Editing Documentation"),
+                  onPressed: () {
+                    context.push("/patterns/monkey/detail-edit");
+                  },
+                ),
+              ),
             ],
           ),
         ],

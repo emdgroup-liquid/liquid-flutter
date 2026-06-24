@@ -52,8 +52,9 @@ class LdMonkeySelection<T extends Identifiable<IdType>, IdType> {
   static void updateViewing<T extends Identifiable<IdType>, IdType>(
     BuildContext context,
     Set<IdType> viewing,
-  ) =>
-      LdMonkeyRouterController.of<T, IdType>(context).updateViewing(context, viewing);
+  ) {
+    LdMonkeyRouterController.of<T, IdType>(context).updateViewing(context, viewing);
+  }
 
   /// Toggles the selection controls visibility in the URL via the central
   /// router controller.

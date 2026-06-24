@@ -89,7 +89,7 @@ class LdMonkeyRouteScope<T extends Identifiable<IdType>, IdType> extends Statele
             create: (_) => LdMonkeyActionScope<T, IdType>(),
             child: LdRepositoryProvider<T, IdType>(
               repositoryBuilder: (context) => repositoryBuilder(context, routeState),
-              child: LdMonkeyRouteDefinitionsResolver<T, IdType>(
+                child: LdMonkeyRouteDefinitionsResolver<T, IdType>(
                 filtersBuilder: filtersBuilder,
                 sortOptionsBuilder: sortOptionsBuilder,
                 routeDefinitionsLoadingText: routeDefinitionsLoadingText,

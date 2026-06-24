@@ -686,44 +686,46 @@ buildMonkeyRoutes<Task, int>(
 
 ## Detail editing guards
 
-Wrap editable detail content with navigation guards while the user has unsaved edits or a save is in flight.
+Editable monkey detail pages use [LdLocationLockRegistry] with [GoRouter.redirect] to intercept all navigation away from a dirty detail path. Each editor registers and removes its own lock; there is no monkey-specific aggregation layer.
 
-### `LdMonkeyUnsavedGuard`
+### Setup
 
-Blocks route pop / modal dismiss (via `PopScope`) while `isDirty` or `isSaving`:
+Mount [LdThemeProvider] (includes [LdLocationLockRegistry]) and wire the router:
 
 ```dart
-LdMonkeyUnsavedGuard(
-  isDirty: form.dirty,
-  isSaving: scope.isSaving,
-  onConfirmDiscard: () => ldMonkeyConfirmDiscardEdits(context),
-  child: detailBody,
+GoRouter(
+  redirect: ldLocationLockRedirect,
+  routes: [...],
 )
 ```
 
-- **Dirty + idle:** back gesture / pop shows discard confirmation; navigation proceeds only when the user confirms.
-- **Saving:** navigation is blocked without a discard prompt.
+Combine with app-specific redirects using [ldComposeGoRouterRedirects].
 
-### `LdMonkeyViewingGuard`
+### Self-managed locks
 
-Intercepts master-list / URL viewing changes while edits are at risk:
+Each editor owns its lock. While edits are dirty or saving it:
+
+- Registers a path-prefix lock for the current URI (sub-path navigation stays allowed)
+- Renders `PopScope(canPop: false)` to block predictive back
+
+Multiple editors may lock the same path (e.g. a multi-view `/task-demo/12,13`); only disjoint, non-nested prefixes conflict. Saving is the editor's own concern — handle it inside `onLeave` (block silently while saving), not on the lock.
 
 ```dart
-LdMonkeyViewingGuard<Task, int>(
-  isDirty: form.dirty,
-  isSaving: scope.isSaving,
-  onConfirmDiscard: () => ldMonkeyConfirmDiscardEdits(context),
-  child: detailBody,
-)
+LdLocationLockRegistry.of(context).register(
+  LdLocationLock(
+    id: 'my-form-${item.id}',
+    pathPrefix: GoRouter.of(context).state.uri.path,
+    onLeave: (context) async {
+      if (isSaving()) return false; // block silently mid-save
+      return ldMonkeyConfirmDiscardEdits(context);
+    },
+  ),
+);
 ```
 
-| Condition | Behaviour |
-| --------- | --------- |
-| `isSaving` | Reverts the viewing change until the save completes |
-| `isDirty && !isSaving` | Shows discard confirmation; cancel restores the previous viewing via `LdMonkeySelection.updateViewing` |
-| pristine and idle | Allows navigation |
+Return `true` from `onLeave` to allow leaving (the lock is removed); `false` to stay. Unregister the lock when the editor becomes pristine and in `dispose`.
 
-Use both guards together around detail editors. [LdMonkeyReactiveDetailForm] wires these automatically.
+[LdMonkeyReactiveDetailForm] does all of this automatically — non-reactive editors use this generic API directly.
 
 ### `LdMonkeyReactiveDetailForm`
 

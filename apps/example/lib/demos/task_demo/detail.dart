@@ -2,99 +2,64 @@ import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:liquid/demos/task_demo/task.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart';
 
-class TaskDetail extends StatefulWidget {
+class TaskDetail extends StatelessWidget {
   final LdPaginatorItem<Task> task;
 
   const TaskDetail({super.key, required this.task});
 
   @override
-  State<TaskDetail> createState() => _TaskDetailState();
-}
-
-class _TaskDetailState extends State<TaskDetail> {
-  final TextEditingController _taskController = TextEditingController();
-  DateTime? _dueDate;
-
-  bool get _isDirty => _taskController.text != widget.task.value?.task || _dueDate != widget.task.value?.due;
-
-  @override
-  void initState() {
-    super.initState();
-    _taskController.text = widget.task.value?.task ?? "";
-    _dueDate = widget.task.value?.due;
-  }
-
-  @override
-  void dispose() {
-    _taskController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (widget.task.value == null) {
+    if (task.value == null) {
       return LdCard(child: Center(child: LdLoader()));
     }
+
     final selection = LdMonkeySelection.of<Task, int>(context, listen: true);
+    final taskValue = task.value!;
+
     return LdWrapConditional(
       condition: selection.viewing.length > 1,
-      builder: (context, child) {
-        return LdCard(child: child);
-      },
+      builder: (context, child) => LdCard(child: child),
       child: LdAutoSpace(
         children: [
           LdReveal(
-            revealed: widget.task.value?.done == true,
-            initialRevealed: widget.task.value?.done == true,
-            child: LdBadge.success(child: Text("Done")),
+            revealed: taskValue.done,
+            initialRevealed: taskValue.done,
+            child: LdBadge.success(child: Text('Done')),
           ),
-          LdInput(
-            hint: "What do you want to do?",
-            maxLines: null,
-            controller: _taskController,
-            size: LdSize.l,
-            onChanged: (p0) {
-              setState(() {});
+          LdMonkeyReactiveDetailForm<Task, int, Task>(
+            item: task,
+            saveMode: LdMonkeyDetailSaveMode.adaptive,
+            detailToFormValues: (detail) => {
+              'task': detail.task,
+              'due': detail.due,
             },
-          ),
-          LdDatePicker(
-            useRootNavigator: true,
-            label: "Due date",
-            value: _dueDate,
-            onChanged: (date) {
-              setState(() {
-                _dueDate = date;
-              });
-            },
-          ),
-          LdText("Last updated: ${Jiffy.parseFromDateTime(widget.task.value!.lastUpdate).fromNow()}"),
-          Row(
-            children: [
-              LdReveal.quick(
-                revealed: _taskController.text.isNotEmpty && _dueDate != null && _isDirty,
-
-                child: LdSubmit<void, void>(
-                  config: LdSubmitConfig<void, void>(
-                    submitText: "Save",
-                    debugLabel: "Save Task",
-                    action: (_) async {
-                      final newTask = Task(
-                        widget.task.value!.id,
-                        _taskController.text,
-                        _dueDate ?? DateTime.now(),
-                        widget.task.value!.done,
-                        widget.task.value!.lastUpdate,
-                        emoji: widget.task.value!.emoji,
-                      );
-                      final repo = LdRepository.of<Task, int>(context);
-                      await repo.update(context, widget.task.value!.id, newTask);
-                    },
-                  ),
-                ),
+            mapToEntity: (form, detail) => detail.copyWith(
+              task: form.control('task').value as String,
+              due: form.control('due').value as DateTime,
+            ),
+            submitConfig: LdFormSubmitConfig(submitText: 'Save'),
+            itemsBuilder: (context, hooks) => [
+              LdReactiveFormItem.input(
+                key: 'task',
+                label: 'Task',
+                inputFieldHint: 'What do you want to do?',
+                maxLines: null,
+                size: LdSize.l,
+                validators: [LdFormValidators.required],
+                onBlurred: hooks.onBlurred('task'),
+              ),
+              LdReactiveFormItem.datePicker(
+                key: 'due',
+                label: 'Due date',
+                useRootNavigator: true,
+                validators: [LdFormValidators.required],
+                onCommitted: hooks.onCommitted('due'),
               ),
             ],
-          ).spaceM(),
+          ),
+          LdText('Last updated: ${Jiffy.parseFromDateTime(taskValue.lastUpdate).fromNow()}'),
         ],
       ),
     );

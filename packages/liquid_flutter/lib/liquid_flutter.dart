@@ -69,6 +69,7 @@ export 'src/modal/modal_builder.dart';
 export 'src/modal/modal_type_mode.dart';
 export 'src/modal/sheet.dart';
 export 'src/modal/utils.dart';
+export 'src/navigation/index.dart';
 export 'src/notifications/notification.dart';
 export 'src/notifications/notification_portal.dart';
 export 'src/notifications/notification_type.dart';

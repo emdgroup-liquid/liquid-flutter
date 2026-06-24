@@ -49,6 +49,7 @@ import 'package:liquid/home.dart';
 import 'package:liquid/patterns/monkey.dart';
 import 'package:liquid/patterns/monkey_actions.dart';
 import 'package:liquid/patterns/monkey_pattern.dart';
+import 'package:liquid/patterns/monkey_detail_edit.dart';
 import 'package:liquid/patterns/monkey_repository.dart';
 import 'package:liquid/patterns/monkey_sorting_filtering.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -81,6 +82,7 @@ class AppRouter {
   late final router = GoRouter(
     debugLogDiagnostics: true,
     initialLocation: "/components/modal",
+    redirect: ldLocationLockRedirect,
     routes: [
       GoRoute(
         path: "/nav-test",
@@ -221,6 +223,11 @@ class AppRouter {
             path: "/patterns/monkey/sorting-filtering",
             pageBuilder: (context, state) =>
                 NoTransitionPage<void>(key: state.pageKey, child: const MonkeySortingFilteringDemo()),
+          ),
+          GoRoute(
+            path: "/patterns/monkey/detail-edit",
+            pageBuilder: (context, state) =>
+                NoTransitionPage<void>(key: state.pageKey, child: const MonkeyDetailEditDemo()),
           ),
           GoRoute(
             path: "/components/button",

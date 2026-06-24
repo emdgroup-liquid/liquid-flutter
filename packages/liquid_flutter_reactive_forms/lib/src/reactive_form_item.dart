@@ -52,6 +52,8 @@ class LdReactiveFormItem<TModel, TView> {
     String? initialValue,
     Map<String, ValidationMessageFunction>? validationMessages,
     void Function(String value)? onBlurred,
+    int? maxLines = 1,
+    LdSize size = LdSize.m,
   }) {
     final valueAccessor = switch (T) {
       const (int) => IntValueAccessor() as ControlValueAccessor<T, String>,
@@ -79,6 +81,8 @@ class LdReactiveFormItem<TModel, TView> {
           inputFieldHint: inputFieldHint,
           label: label,
           onBlurred: onBlurred,
+          maxLines: maxLines,
+          size: size,
         );
       },
     );
@@ -128,6 +132,7 @@ class LdReactiveFormItem<TModel, TView> {
     Map<String, ValidationMessageFunction>? validationMessages,
     LdChooseMode mode = LdChooseMode.auto,
     Text? placeholder,
+    void Function(Set<T> value)? onCommitted,
   }) {
     return LdReactiveFormItem<Set<T>, Set<T>>(
       key: key,
@@ -146,7 +151,10 @@ class LdReactiveFormItem<TModel, TView> {
           placeholder: placeholder ?? const Text('Select...'),
           value: state.control.value,
           disabled: state.control.disabled,
-          onChanged: state.didChange,
+          onChanged: (value) {
+            state.didChange(value);
+            onCommitted?.call(value);
+          },
         );
       },
     );
@@ -310,6 +318,8 @@ class LdReactiveFormItem<TModel, TView> {
     List<LdFormValidator<dynamic>> validators = const [],
     DateTime? initialValue,
     Map<String, ValidationMessageFunction>? validationMessages,
+    bool useRootNavigator = false,
+    void Function(DateTime value)? onCommitted,
   }) {
     return LdReactiveFormItem<DateTime, DateTime>(
       key: key,
@@ -322,7 +332,11 @@ class LdReactiveFormItem<TModel, TView> {
         return LdDatePicker(
           label: label,
           value: state.control.value,
-          onChanged: (value) => state.didChange(value),
+          useRootNavigator: useRootNavigator,
+          onChanged: (value) {
+            state.didChange(value);
+            onCommitted?.call(value);
+          },
         );
       },
     );
@@ -340,6 +354,7 @@ class LdReactiveFormItem<TModel, TView> {
     double max = 100,
     Map<String, ValidationMessageFunction>? validationMessages,
     String Function(double? value)? valueFormatter,
+    void Function(double value)? onCommitted,
   }) {
     final defaultPrecision = max - min < 1 ? 2 : 0;
     valueFormatter ??= (value) => value?.toStringAsFixed(defaultPrecision) ?? '';
@@ -362,8 +377,9 @@ class LdReactiveFormItem<TModel, TView> {
               ],
             ),
             Slider(
-              value: state.control.value ?? 0,
+              value: (state.control.value ?? min).clamp(min, max),
               onChanged: (value) => state.didChange(value),
+              onChangeEnd: onCommitted,
               min: min,
               max: max,
             ),
@@ -410,12 +426,16 @@ class _ReactiveLdInput<T> extends StatefulWidget {
   final String inputFieldHint;
   final String? label;
   final void Function(String value)? onBlurred;
+  final int? maxLines;
+  final LdSize size;
 
   const _ReactiveLdInput({
     required this.state,
     required this.inputFieldHint,
     required this.label,
     this.onBlurred,
+    this.maxLines = 1,
+    this.size = LdSize.m,
   });
 
   @override
@@ -454,6 +474,8 @@ class _ReactiveLdInputState<T> extends State<_ReactiveLdInput<T>> {
       hint: widget.inputFieldHint,
       label: widget.label,
       keyboardType: TextInputType.text,
+      maxLines: widget.maxLines,
+      size: widget.size,
       valid: widget.state.control.valid || widget.state.errorText == null,
       controller: _controller,
       onChanged: widget.state.didChange,

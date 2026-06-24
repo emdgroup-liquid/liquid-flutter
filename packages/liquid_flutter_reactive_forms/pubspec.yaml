@@ -9,6 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  go_router: ^17.0.1
   liquid_flutter:
     path: ../liquid_flutter
   reactive_forms: 18.2.2

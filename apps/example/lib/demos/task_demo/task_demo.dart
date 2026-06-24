@@ -176,7 +176,7 @@ List<LdMonkeyAction<Task, int>> taskActions = [
     child: Text("Duplicate"),
     icon: Icon(LucideIcons.copy),
   ),
-  deleteAction<Task, int>(),
+  deleteAction<Task, int>(detailLocation: LdMonkeyActionLocation.detailSecondary),
   showSelectionControlsAction<Task, int>(),
   showFilterModal<Task, int>(),
   showSelection<Task, int>(),
@@ -188,7 +188,11 @@ class TaskDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LdMonkeyDetailPage<Task, int>.scrollable(
-      primaryAppBarConfig: LdAppBarConfig(debugName: "Detail App Bar Task", title: Text("Task")),
+      primaryAppBarConfig: LdAppBarConfig(debugName: 'Detail App Bar Task', title: Text('Task')),
+      secondaryAppBarConfig: LdAppBarConfig(
+        positionMode: LdAppBarPositionMode.top,
+        borderMode: LdAppBarBorderMode.visible,
+      ),
       buildDetail: (context, item) => TaskDetail(task: item),
     );
   }

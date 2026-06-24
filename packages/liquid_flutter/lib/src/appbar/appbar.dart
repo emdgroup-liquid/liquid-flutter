@@ -312,15 +312,15 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
   void _popParentRoute() {
     final route = ModalRoute.of(context);
     if (route?.impliesAppBarDismissal ?? false) {
-      route?.navigator?.pop();
+      route?.navigator?.maybePop();
       return;
     }
 
     final router = GoRouter.maybeOf(context);
     if (router != null) {
-      context.pop();
+      Navigator.of(context).maybePop();
     } else {
-      Navigator.of(context).pop();
+      Navigator.of(context).maybePop();
     }
   }
 

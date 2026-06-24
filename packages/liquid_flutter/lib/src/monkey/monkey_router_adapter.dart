@@ -61,6 +61,16 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
   Set<IdType> _lastHydratedViewing = {};
   int _selectionHydrationRequest = 0;
 
+  /// URI written by the most recent [router.replace] within the current frame.
+  ///
+  /// `GoRouter.replace` does not update `router.state.uri` synchronously, so
+  /// sequential mutations in the same callback (e.g. updating the selection and
+  /// then toggling the selection controls) would otherwise each read the stale
+  /// pre-replace URI and clobber one another. Chaining mutations through this
+  /// pending URI lets the second mutation build on the first. It is cleared on
+  /// the next frame once the router has caught up.
+  Uri? _baseUri;
+
   void _scheduleSelectionHydration(
     BuildContext context,
     Set<IdType> viewing,
@@ -197,13 +207,19 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
     return context.read<LdMonkeySortAndFilterState<T, IdType>>();
   }
 
+  void _replaceUri(GoRouter router, Uri uri) {
+    _baseUri = uri;
+    router.replace(uri.toString());
+  }
+
   @override
   void updateSelection(BuildContext context, Set<IdType> selection) {
     final router = GoRouter.of(context);
     final routeConfig = context.read<LdMonkeyRouteConfig<T, IdType>>();
 
+    final baseUri = _baseUri ?? router.state.uri;
     final queryParameters = {
-      ...router.state.uri.queryParameters,
+      ...baseUri.queryParameters,
     };
 
     if (routeConfig.serialiseIdType(selection).isNotEmpty) {
@@ -212,8 +228,9 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
       queryParameters.remove(routeConfig.selectionQueryKey);
     }
 
-    router.replace(
-      router.state.uri.replace(queryParameters: queryParameters).toString(),
+    _replaceUri(
+      router,
+      baseUri.replace(queryParameters: queryParameters),
     );
   }
 
@@ -267,16 +284,23 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
   void updateShowSelectionControls(BuildContext context, bool showSelectionControls) {
     final router = GoRouter.of(context);
     final routeConfig = context.read<LdMonkeyRouteConfig<T, IdType>>();
+    final baseUri = _baseUri ?? router.state.uri;
     final queryParameters = <String, dynamic>{
-      ...router.state.uri.queryParameters,
+      ...baseUri.queryParameters,
     };
+
+    if (showSelectionControls == (queryParameters[routeConfig.showSelectionControlsQueryKey] == 'true')) {
+      return;
+    }
+
     if (showSelectionControls) {
       queryParameters[routeConfig.showSelectionControlsQueryKey] = 'true';
     } else {
       queryParameters.remove(routeConfig.showSelectionControlsQueryKey);
     }
-    router.replace(
-      router.state.uri.replace(queryParameters: queryParameters).toString(),
+    _replaceUri(
+      router,
+      baseUri.replace(queryParameters: queryParameters),
     );
   }
 
@@ -300,8 +324,9 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
     } else {
       queryParameters.remove(queryKey);
     }
-    router.replace(
-      router.state.uri.replace(queryParameters: queryParameters).toString(),
+    _replaceUri(
+      router,
+      _baseUri ?? router.state.uri.replace(queryParameters: queryParameters),
     );
   }
 
@@ -331,8 +356,9 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
       queryParameters.remove(queryKey);
     }
 
-    router.replace(
-      router.state.uri.replace(queryParameters: queryParameters).toString(),
+    _replaceUri(
+      router,
+      (_baseUri ?? router.state.uri).replace(queryParameters: queryParameters),
     );
   }
 
@@ -343,7 +369,7 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
     final router = GoRouter.of(context);
     final sortAndFilterState = _resolveSortAndFilterState(context);
     final queryParameters = <String, dynamic>{
-      ...router.state.uri.queryParameters,
+      ...(_baseUri ?? router.state.uri).queryParameters,
     };
 
     for (final filter in sortAndFilterState.filters) {
@@ -402,6 +428,7 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
             query: query,
           );
           _latestSortAndFilterState = sortAndFilterState;
+          _baseUri = state.uri;
 
           return MultiProvider(
             providers: [

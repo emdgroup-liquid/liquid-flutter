@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 
@@ -29,7 +30,8 @@ typedef LdMonkeyDetailFromEntity<T, TDetail> = TDetail Function(T entity);
 /// Reactive detail editor for monkey master-detail pages.
 ///
 /// Wires [LdRepository.update], adaptive blur/manual save, repository stream
-/// merge, and [LdMonkeyUnsavedGuard] / [LdMonkeyViewingGuard].
+/// merge, and self-managed [LdLocationLock] navigation guards (plus a
+/// [PopScope] for predictive back) while edits are dirty or saving.
 class LdMonkeyReactiveDetailForm<T extends Identifiable<IdType>, IdType, TDetail extends Object>
     extends StatefulWidget {
   final LdPaginatorItem<T> item;
@@ -76,7 +78,11 @@ class _LdMonkeyReactiveDetailFormState<T extends Identifiable<IdType>, IdType, T
   IdType? _currentId;
   final Map<String, Object?> _lastServerFormValues = {};
   StreamSubscription<LdPaginatorItem<T>>? _itemSubscription;
+  StreamSubscription<dynamic>? _formSubscription;
   bool _loadingDetail = false;
+  LdLocationLockRegistry? _lockRegistry;
+  late final String _lockId = 'ldMonkeyDetailEdit-${identityHashCode(this)}';
+  bool _lockRegistered = false;
 
   @override
   void initState() {
@@ -92,7 +98,77 @@ class _LdMonkeyReactiveDetailFormState<T extends Identifiable<IdType>, IdType, T
     _saveController = LdSubmitController<void, void>(
       config: (widget.submitConfig ?? LdFormSubmitConfig()).copyWithAction((_) => _performSave()),
     );
+    _saveController.addListener(_onEditStateChanged);
+    _formSubscription = _form.valueChanges.listen((_) => _onEditStateChanged());
     _bootstrapDetail();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _lockRegistry = LdLocationLockRegistry.maybeOf(context);
+    _syncLocationLock();
+  }
+
+  bool get _editsAtRisk => _form.dirty || _isSaving;
+
+  void _onEditStateChanged() {
+    if (!mounted) {
+      return;
+    }
+    _syncLocationLock();
+    setState(() {});
+  }
+
+  void _syncLocationLock() {
+    final registry = _lockRegistry;
+    if (registry == null) {
+      return;
+    }
+
+    if (!_editsAtRisk) {
+      if (_lockRegistered) {
+        registry.unregister(_lockId);
+        _lockRegistered = false;
+      }
+      return;
+    }
+
+    registry.register(
+      LdLocationLock(
+        id: _lockId,
+        pathPrefix: GoRouter.of(context).state.uri.path,
+        onLeave: _onLeaveLockedLocation,
+      ),
+    );
+    _lockRegistered = true;
+  }
+
+  Future<bool> _onLeaveLockedLocation(BuildContext _) async {
+    // While saving, block navigation silently; discarding mid-save is wrong UX.
+    if (_isSaving) {
+      return false;
+    }
+    return ldMonkeyConfirmDiscardEdits(context);
+  }
+
+  /// Handles a pop that [PopScope] blocked (predictive/system back).
+  ///
+  /// The [GoRouter] redirect never runs for a [PopScope]-intercepted pop, so the
+  /// discard prompt is shown here. On confirm the lock is dropped before popping
+  /// so the redirect does not prompt a second time.
+  Future<void> _confirmDiscardAndPop(Object? result) async {
+    if (_isSaving) {
+      return;
+    }
+    final navigator = Navigator.of(context);
+    final shouldDiscard = await ldMonkeyConfirmDiscardEdits(context);
+    if (!shouldDiscard || !mounted) {
+      return;
+    }
+    _form.markAsPristine();
+    _syncLocationLock();
+    navigator.pop(result);
   }
 
   @override
@@ -107,6 +183,10 @@ class _LdMonkeyReactiveDetailFormState<T extends Identifiable<IdType>, IdType, T
   @override
   void dispose() {
     _itemSubscription?.cancel();
+    _formSubscription?.cancel();
+    if (_lockRegistered) {
+      _lockRegistry?.unregister(_lockId);
+    }
     _form.dispose();
     _saveController.dispose();
     super.dispose();
@@ -131,14 +211,12 @@ class _LdMonkeyReactiveDetailFormState<T extends Identifiable<IdType>, IdType, T
     }
 
     _currentId = id;
+    _loadingDetail = true;
     await _itemSubscription?.cancel();
     _itemSubscription = LdRepository.of<T, IdType>(context).watchItem(id).listen(_onItemUpdated);
 
-    setState(() => _loadingDetail = true);
     try {
-      final detail = widget.loadDetail != null
-          ? await widget.loadDetail!(context, id)
-          : widget.item.value! as TDetail;
+      final detail = widget.loadDetail != null ? await widget.loadDetail!(context, id) : widget.item.value! as TDetail;
       if (!mounted || id != _currentId) {
         return;
       }
@@ -147,6 +225,7 @@ class _LdMonkeyReactiveDetailFormState<T extends Identifiable<IdType>, IdType, T
     } finally {
       if (mounted) {
         setState(() => _loadingDetail = false);
+        _syncLocationLock();
       }
     }
   }
@@ -164,7 +243,7 @@ class _LdMonkeyReactiveDetailFormState<T extends Identifiable<IdType>, IdType, T
 
   void _patchFormFromDetail({required bool markPristine}) {
     final detail = _detail;
-    if (detail == null) {
+    if (detail == null || !mounted) {
       return;
     }
 
@@ -212,9 +291,7 @@ class _LdMonkeyReactiveDetailFormState<T extends Identifiable<IdType>, IdType, T
       discardLabel: const Text('Use server'),
       keepEditingLabel: const Text('Keep mine'),
     );
-    return useServer
-        ? LdMonkeyFieldConflictResolution.preferServer
-        : LdMonkeyFieldConflictResolution.keepLocal;
+    return useServer ? LdMonkeyFieldConflictResolution.preferServer : LdMonkeyFieldConflictResolution.keepLocal;
   }
 
   Future<void> _triggerSave() async {
@@ -236,14 +313,7 @@ class _LdMonkeyReactiveDetailFormState<T extends Identifiable<IdType>, IdType, T
     final entity = widget.mapToEntity(_form, _detail!);
     await LdRepository.of<T, IdType>(context).update(context, entity.id, entity);
     _form.markAsPristine();
-  }
-
-  Future<bool> _confirmDiscard() async {
-    final discard = await ldMonkeyConfirmDiscardEdits(context);
-    if (discard) {
-      reset();
-    }
-    return discard;
+    _syncLocationLock();
   }
 
   void reset() {
@@ -252,47 +322,48 @@ class _LdMonkeyReactiveDetailFormState<T extends Identifiable<IdType>, IdType, T
 
   @override
   Widget build(BuildContext context) {
-    if (widget.item.value == null || _loadingDetail) {
+    if (widget.item.value == null || _loadingDetail || _detail == null) {
       return const Center(child: LdLoader());
     }
 
-    return LdMonkeyUnsavedGuard(
-      isDirty: _form.dirty,
-      isSaving: _isSaving,
-      onConfirmDiscard: _confirmDiscard,
-      child: LdMonkeyViewingGuard<T, IdType>(
+    return PopScope(
+      canPop: !_editsAtRisk,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          return;
+        }
+        if (_editsAtRisk) {
+          _confirmDiscardAndPop(result);
+        }
+      },
+      child: LdMonkeyDetailFormScope<TDetail>(
         isDirty: _form.dirty,
         isSaving: _isSaving,
-        onConfirmDiscard: _confirmDiscard,
-        child: LdMonkeyDetailFormScope<TDetail>(
-          isDirty: _form.dirty,
-          isSaving: _isSaving,
-          detail: _detail,
-          save: _saveController.trigger,
-          reset: reset,
-          child: ReactiveFormConfig(
-            validationMessages: ldMergeReactiveFormValidationMessages(widget.validationMessages),
-            child: LdReactiveFormScope(
+        detail: _detail,
+        save: _saveController.trigger,
+        reset: reset,
+        child: ReactiveFormConfig(
+          validationMessages: ldMergeReactiveFormValidationMessages(widget.validationMessages),
+          child: LdReactiveFormScope(
+            formGroup: _form,
+            child: ReactiveForm(
               formGroup: _form,
-              child: ReactiveForm(
-                formGroup: _form,
-                child: LdAutoSpace(
-                  children: [
-                    ..._formItems.map((item) => item.createFormField()),
-                    if (_showSubmitButton) _buildSubmitButton(),
-                    ListenableBuilder(
-                      listenable: _saveController,
-                      builder: (context, _) {
-                        if (_saveController.state.type != LdSubmitStateType.error) {
-                          return const SizedBox.shrink();
-                        }
-                        return LdExceptionView(
-                          exception: _saveController.state.error!.localize(context),
-                        );
-                      },
-                    ),
-                  ],
-                ),
+              child: LdAutoSpace(
+                children: [
+                  ..._formItems.map((item) => item.createFormField()),
+                  if (_showSubmitButton) _buildSubmitButton(),
+                  ListenableBuilder(
+                    listenable: _saveController,
+                    builder: (context, _) {
+                      if (_saveController.state.type != LdSubmitStateType.error) {
+                        return const SizedBox.shrink();
+                      }
+                      return LdExceptionView(
+                        exception: _saveController.state.error!.localize(context),
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
           ),
