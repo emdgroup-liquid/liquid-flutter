@@ -13,6 +13,7 @@ export 'monkey_detail_state.dart';
 export 'monkey_shell.dart';
 export 'monkey_selection.dart';
 export 'detail_page.dart';
+export 'detail_editor/index.dart';
 
 export 'monkey_stack_detail_view.dart';
 export 'monkey_scrollable_detail_view.dart';

@@ -684,6 +684,47 @@ buildMonkeyRoutes<Task, int>(
 )
 ```
 
+## Detail editing guards
+
+Wrap editable detail content with navigation guards while the user has unsaved edits or a save is in flight.
+
+### `LdMonkeyUnsavedGuard`
+
+Blocks route pop / modal dismiss (via `PopScope`) while `isDirty` or `isSaving`:
+
+```dart
+LdMonkeyUnsavedGuard(
+  isDirty: form.dirty,
+  isSaving: scope.isSaving,
+  onConfirmDiscard: () => ldMonkeyConfirmDiscardEdits(context),
+  child: detailBody,
+)
+```
+
+- **Dirty + idle:** back gesture / pop shows discard confirmation; navigation proceeds only when the user confirms.
+- **Saving:** navigation is blocked without a discard prompt.
+
+### `LdMonkeyViewingGuard`
+
+Intercepts master-list / URL viewing changes while edits are at risk:
+
+```dart
+LdMonkeyViewingGuard<Task, int>(
+  isDirty: form.dirty,
+  isSaving: scope.isSaving,
+  onConfirmDiscard: () => ldMonkeyConfirmDiscardEdits(context),
+  child: detailBody,
+)
+```
+
+| Condition | Behaviour |
+| --------- | --------- |
+| `isSaving` | Reverts the viewing change until the save completes |
+| `isDirty && !isSaving` | Shows discard confirmation; cancel restores the previous viewing via `LdMonkeySelection.updateViewing` |
+| pristine and idle | Allows navigation |
+
+Use both guards together around detail editors. `LdMonkeyReactiveDetailForm` (reactive_forms package) wires these automatically in a later release.
+
 ## Deleted Items Guard
 
 `LdMonkeyDeletedItemsGuard` automatically removes deleted items from selection and viewing state. It is included automatically — it is nested inside `LdMonkeyRouterAdapter`, which is part of every monkey scope.
