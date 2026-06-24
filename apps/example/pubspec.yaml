@@ -40,7 +40,7 @@ dependencies:
   shared_preferences: ^2.5.3
   jiffy: ^6.4.3
 
-  mtrust_api_guard: ^5.1.0
+  mtrust_api_guard: ^6.0.7
 
   liquid_flutter_window_utils:
     path: ../../packages/liquid_flutter_window_utils

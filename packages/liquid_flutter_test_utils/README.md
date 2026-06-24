@@ -229,6 +229,8 @@ class WidgetTreeOptions {
     this.strippedWidgets = defaultIgnoredWidgets,
     this.stripPrivateWidgets = true,
     this.includeWidgetBounds = IncludeWidgetBounds.relative,
+    this.focusPackage,
+    this.filterByCreationLocation = true,
   });
 
   final Finder Function(WidgetTester, Widget)? findWidget;
@@ -237,6 +239,14 @@ class WidgetTreeOptions {
   final Set<dynamic> strippedWidgets;
   final bool stripPrivateWidgets;
   final IncludeWidgetBounds includeWidgetBounds;
+
+  /// Package whose widget instantiations are shown in the tree.
+  /// When omitted, auto-detected from the running test file path.
+  final String? focusPackage;
+
+  /// When true (default), only widgets instantiated in the focus package are
+  /// shown; foreign implementation scaffolding is passed through.
+  final bool filterByCreationLocation;
 }
 ```
 
@@ -250,6 +260,33 @@ class WidgetTreeOptions {
   - `IncludeWidgetBounds.none`: Bounds are not included.
   - `IncludeWidgetBounds.relative`: Bounds are relative to the parent widget.
   - `IncludeWidgetBounds.absolute`: Bounds are absolute on the screen.
+- **Focus Package (`focusPackage`)**: Package whose widget instantiations appear in the tree. Defaults to the package running the test (inferred from `packages/<name>/test/` or `apps/<name>/test/`).
+- **Filter by Creation Location (`filterByCreationLocation`)**: When `true` (default), widgets created outside the focus package are omitted and their focus-created descendants are hoisted. Foreign implementation scaffolding (e.g. `DecoratedBox`, `ClipPath`) is passed through. Requires widget creation tracking (`flutter test` enables this by default).
+
+### Focus Package Filtering
+
+By default, widget tree goldens show widgets **instantiated in the package that runs the test** (`lib/` and `test/` sources). This keeps goldens readable by hiding foreign implementation details while still showing first-level widgets your package creates (e.g. a `Container` in `card.dart`).
+
+```dart
+await multiGolden(
+  tester,
+  'LdCard',
+  {
+    'Default': (tester, placeWidget) async {
+      await placeWidget(LdCard(child: LdText.p('Hello')));
+    },
+  },
+  // focusPackage is auto-detected; override only when needed:
+  widgetTreeOptions: const WidgetTreeOptions(
+    focusPackage: 'liquid_flutter',
+    filterByCreationLocation: true,
+  ),
+);
+```
+
+Set `filterByCreationLocation: false` to capture the full widget tree including all foreign subtrees.
+
+**Requirements:** Widget creation tracking must be enabled (default for `flutter test`). If disabled, filtering is skipped and a debug message is printed.
 
 ## Customizing Ignored Widgets
 

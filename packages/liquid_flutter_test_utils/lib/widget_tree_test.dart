@@ -1,9 +1,12 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter_test_utils/diff_util.dart';
+import 'package:liquid_flutter_test_utils/widget_creation_location.dart';
+import 'package:liquid_flutter_test_utils/widget_tree_package_index.dart';
 import 'package:path/path.dart' as path;
 
 const Set<dynamic> defaultIgnoredWidgets = {
@@ -67,6 +70,14 @@ class WidgetTreeOptions {
     /// The precision of the bounds to include in the tree, e.g. 2 for
     /// 2 decimal places. Defaults to 0.
     this.boundsPrecision = 0,
+
+    /// Package name whose widget instantiations are shown in the tree.
+    /// When null, auto-detected from the running test file path.
+    this.focusPackage,
+
+    /// When true, only widgets instantiated in the focus package are shown;
+    /// foreign implementation scaffolding is passed through.
+    this.filterByCreationLocation = true,
   });
 
   final Finder Function(WidgetTester, Widget)? findWidget;
@@ -77,6 +88,34 @@ class WidgetTreeOptions {
   final bool stripPrivateWidgets;
   final IncludeWidgetBounds includeWidgetBounds;
   final int boundsPrecision;
+  final String? focusPackage;
+  final bool filterByCreationLocation;
+}
+
+/// Context for building a filtered widget tree.
+class WidgetTreeContext {
+  WidgetTreeContext({
+    required this.options,
+    required this.tester,
+    required this.focusScope,
+  });
+
+  final WidgetTreeOptions options;
+  final WidgetTester tester;
+  final FocusPackageScope? focusScope;
+
+  bool get useProvenanceFilter =>
+      options.filterByCreationLocation &&
+      focusScope != null &&
+      isWidgetCreationTracked();
+
+  bool isFocusCreated(Element element) {
+    final scope = focusScope;
+    if (scope == null) {
+      return true;
+    }
+    return scope.isFocusCreated(element);
+  }
 }
 
 /// A node in the widget tree.
@@ -509,12 +548,30 @@ Future<void> widgetTreeMatchesGolden(
 }) async {
   update ??= autoUpdateGoldenFiles;
   final goldenName = options.goldenName ?? widget.runtimeType.toString();
+  final testFilePath = currentTestFilePath();
+
+  if (options.filterByCreationLocation && !isWidgetCreationTracked()) {
+    debugPrint(
+      'widgetTreeMatchesGolden: widget creation tracking is disabled; '
+      'falling back to full widget tree capture.',
+    );
+  }
+
+  final focusScope = WidgetTreePackageIndex.resolveForTest(
+    testFilePath: testFilePath,
+    focusPackageOverride: options.focusPackage,
+  );
+
+  final context = WidgetTreeContext(
+    options: options,
+    tester: tester,
+    focusScope: focusScope,
+  );
 
   final testTree = createWidgetTree(
     tester.element(
         options.findWidget?.call(tester, widget) ?? find.byWidget(widget)),
-    tester: tester,
-    options: options,
+    context: context,
   );
 
   // strip all information from the tree that is not relevant for the comparison
@@ -575,32 +632,109 @@ Future<void> widgetTreeMatchesGolden(
 /// Recursively creates a widget tree from the given element.
 WidgetTreeNode? createWidgetTree(
   Element e, {
-  required WidgetTester tester,
-  required WidgetTreeOptions options,
+  required WidgetTreeContext context,
 }) {
+  final nodes = _visitElement(e, context);
+  if (nodes.isEmpty) {
+    return null;
+  }
+  if (nodes.length == 1) {
+    return nodes.first;
+  }
+  return WidgetTreeNode(
+    e.widget,
+    nodes,
+    find.byElementPredicate((el) => el == e),
+    bounds: _elementBounds(e, context),
+    constraints: e.renderObject?.constraints,
+  );
+}
+
+List<WidgetTreeNode> _visitElement(Element e, WidgetTreeContext context) {
   final widget = e.widget;
-  final children = <WidgetTreeNode>[];
+  final childNodes = <WidgetTreeNode>[];
 
   e.visitChildren((element) {
-    final child = createWidgetTree(
-      element,
-      tester: tester,
-      options: options,
-    );
-    if (child != null) children.add(child);
+    childNodes.addAll(_visitElement(element, context));
   });
 
   final finder = find.byElementPredicate((el) => el == e);
-
   final type = widget.runtimeType.toString();
   final typeWithoutGeneric = type.split('<').first;
-  final bounds = switch (options.includeWidgetBounds) {
+  final bounds = _elementBounds(e, context);
+  // ignore: invalid_use_of_protected_member
+  final constraints = e.renderObject?.constraints;
+
+  final shouldStripIgnored = context.options.strippedWidgets.any((stripped) {
+    if (stripped is Type) {
+      return widget.runtimeType == stripped;
+    }
+    if (stripped is String) {
+      return type == stripped || typeWithoutGeneric == stripped;
+    }
+    return false;
+  });
+
+  final shouldStripPrivate = context.options.stripPrivateWidgets &&
+      type.startsWith('_') &&
+      !context.isFocusCreated(e);
+
+  if (shouldStripIgnored || shouldStripPrivate) {
+    if (childNodes.isEmpty) {
+      return [];
+    }
+    if (childNodes.length == 1) {
+      return childNodes;
+    }
+    return [
+      WidgetTreeNode(
+        widget,
+        childNodes,
+        finder,
+        bounds: bounds,
+        constraints: constraints,
+      ),
+    ];
+  }
+
+  if (!context.useProvenanceFilter) {
+    return [
+      WidgetTreeNode(
+        widget,
+        childNodes,
+        finder,
+        bounds: bounds,
+        constraints: constraints,
+      ),
+    ];
+  }
+
+  if (context.isFocusCreated(e)) {
+    return [
+      WidgetTreeNode(
+        widget,
+        childNodes,
+        finder,
+        bounds: bounds,
+        constraints: constraints,
+      ),
+    ];
+  }
+
+  return childNodes;
+}
+
+Rect? _elementBounds(Element e, WidgetTreeContext context) {
+  final finder = find.byElementPredicate((el) => el == e);
+  return switch (context.options.includeWidgetBounds) {
     IncludeWidgetBounds.none => null,
     IncludeWidgetBounds.relative => () {
         final renderObject = e.renderObject;
         if (renderObject is RenderBox) {
-          final pos = renderObject.localToGlobal(Offset.zero,
-              ancestor: e.renderObject?.parent);
+          final pos = renderObject.localToGlobal(
+            Offset.zero,
+            ancestor: e.renderObject?.parent,
+          );
           return Rect.fromLTWH(
             pos.dx,
             pos.dy,
@@ -610,18 +744,13 @@ WidgetTreeNode? createWidgetTree(
         }
 
         if (renderObject is RenderSliverList) {
-          // We cannot just get the bounds of the RenderSliverList
           final constraints = renderObject.constraints;
-
-          // Get the SliverGeometry which contains positioning info
           final geometry = renderObject.geometry;
 
           if (geometry != null && !geometry.visible) {
-            // If the sliver is not visible, return null or an empty rect
             return null;
           }
 
-          // Calculate the bounds based on paintOrigin and paintExtent
           return Rect.fromLTWH(
             constraints.axis == Axis.vertical ? 0 : geometry!.paintOrigin,
             constraints.axis == Axis.vertical ? geometry!.paintOrigin : 0,
@@ -636,34 +765,6 @@ WidgetTreeNode? createWidgetTree(
 
         return null;
       }(),
-    IncludeWidgetBounds.absolute => tester.getRect(finder),
+    IncludeWidgetBounds.absolute => context.tester.getRect(finder),
   };
-
-  // ignore: invalid_use_of_protected_member
-  final constraints = e.renderObject?.constraints;
-
-  final shouldStrip = options.strippedWidgets.any((stripped) {
-    if (stripped is Type) {
-      return widget.runtimeType == stripped;
-    }
-    if (stripped is String) {
-      return type == stripped || typeWithoutGeneric == stripped;
-    }
-    return false;
-  }) ||
-      (options.stripPrivateWidgets && type.startsWith('_'));
-
-  if (shouldStrip) {
-    if (children.isNotEmpty) {
-      return children.length == 1
-          ? children.first
-          : WidgetTreeNode(widget, children, finder,
-              bounds: bounds, constraints: constraints);
-    } else {
-      return null;
-    }
-  }
-
-  return WidgetTreeNode(widget, children, finder,
-      bounds: bounds, constraints: constraints);
 }

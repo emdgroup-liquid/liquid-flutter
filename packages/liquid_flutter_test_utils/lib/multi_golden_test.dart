@@ -243,6 +243,8 @@ Future<void> multiGolden(
                       stripPrivateWidgets: scenarioOverride?.stripPrivateWidgets ?? true,
                       includeWidgetBounds: scenarioOverride?.includeWidgetBounds ?? IncludeWidgetBounds.relative,
                       boundsPrecision: scenarioOverride?.boundsPrecision ?? 0,
+                      focusPackage: scenarioOverride?.focusPackage,
+                      filterByCreationLocation: scenarioOverride?.filterByCreationLocation ?? true,
                     ),
                   );
                 } catch (e) {
