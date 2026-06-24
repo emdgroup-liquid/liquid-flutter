@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 
-import '../liquid_flutter_reactive_forms.dart';
+import 'reactive_form_item.dart';
+import 'reactive_form_scope.dart';
+import 'typedefs.dart';
+import 'validation_messages.dart';
 
 /// A wrapper around [LdSubmitConfig] that strips away the [action] property,
 /// as this will have a pre-defined behavior (form validation, calling
@@ -46,6 +49,7 @@ class LdReactiveForm extends StatefulWidget {
   final LdFormSubmitConfig? submitConfig;
   final LdFormSubmitBuilder? submitBuilder;
   final Future<void> Function(LdFormGroup form) onSubmit;
+  final bool showSubmitButton;
 
   const LdReactiveForm({
     super.key,
@@ -55,6 +59,7 @@ class LdReactiveForm extends StatefulWidget {
     this.validationMessages,
     this.submitBuilder,
     this.submitConfig,
+    this.showSubmitButton = true,
   });
 
   @override
@@ -82,16 +87,19 @@ class _LdReactiveFormState extends State<LdReactiveForm> {
   @override
   Widget build(BuildContext context) {
     return ReactiveFormConfig(
-      validationMessages: widget.validationMessages ?? {},
-      child: ReactiveForm(
+      validationMessages: ldMergeReactiveFormValidationMessages(widget.validationMessages),
+      child: LdReactiveFormScope(
         formGroup: _form,
-        child: LdAutoSpace(
-          children: [
-            ...widget.items.map(
-              (item) => item.createFormField(),
-            ),
-            _buildFormSubmitButton(),
-          ],
+        child: ReactiveForm(
+          formGroup: _form,
+          child: LdAutoSpace(
+            children: [
+              ...widget.items.map(
+                (item) => item.createFormField(),
+              ),
+              if (widget.showSubmitButton) _buildFormSubmitButton(),
+            ],
+          ),
         ),
       ),
     );

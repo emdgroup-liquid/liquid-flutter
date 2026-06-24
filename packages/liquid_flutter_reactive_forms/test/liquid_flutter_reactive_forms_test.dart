@@ -263,5 +263,112 @@ void main() {
 
       expect(onSubmitCalled, isTrue);
     });
+
+    testWidgets('hides submit button when showSubmitButton is false', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          LdReactiveForm(
+            showSubmitButton: false,
+            items: [
+              LdReactiveFormItem.input<String>(
+                key: 'name',
+                inputFieldHint: 'Name',
+              ),
+            ],
+            onSubmit: (form) async {},
+          ),
+        ),
+      );
+
+      expect(find.byType(LdSubmit<void, void>), findsNothing);
+    });
+
+    testWidgets('exposes form group via LdReactiveFormScope', (WidgetTester tester) async {
+      LdFormGroup? scopedForm;
+
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          Builder(
+            builder: (context) {
+              return LdReactiveForm(
+                items: [
+                  LdReactiveFormItem.input<String>(
+                    key: 'name',
+                    inputFieldHint: 'Name',
+                  ),
+                ],
+                onSubmit: (form) async {},
+                submitBuilder: (context, form, child) {
+                  scopedForm = LdReactiveFormScope.of(context);
+                  return LdButton(
+                    onPressed: () async {},
+                    child: const Text('Submit'),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      );
+
+      expect(scopedForm, isNotNull);
+      expect(scopedForm!.contains('name'), isTrue);
+    });
+
+    testWidgets('input onBlurred is called and marks control touched', (WidgetTester tester) async {
+      var blurredValue = '';
+      final formItems = [
+        LdReactiveFormItem.input<String>(
+          key: 'name',
+          inputFieldHint: 'Name',
+          onBlurred: (value) => blurredValue = value,
+        ),
+      ];
+
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          Column(
+            children: [
+              LdReactiveForm(
+                items: formItems,
+                onSubmit: (form) async {},
+              ),
+              const Text('outside'),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(LdInput));
+      await tester.pump();
+      await tester.enterText(find.byType(LdInput), 'Jane');
+      await tester.tap(find.text('outside'));
+      await tester.pump();
+
+      expect(blurredValue, 'Jane');
+    });
+
+    testWidgets('chooseFromItems renders LdChoose trigger', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          LdReactiveForm(
+            items: [
+              LdReactiveFormItem.chooseFromItems<String>(
+                key: 'choice',
+                label: 'Pick one',
+                items: const [
+                  LdSelectItem(value: 'a', child: Text('A')),
+                  LdSelectItem(value: 'b', child: Text('B')),
+                ],
+              ),
+            ],
+            onSubmit: (form) async {},
+          ),
+        ),
+      );
+
+      expect(find.text('Pick one'), findsOneWidget);
+      expect(find.text('Select...'), findsOneWidget);
+    });
   });
 }

@@ -83,8 +83,9 @@ class ReactiveFormDemo extends StatelessWidget {
                   inputFieldHint: 'Age',
                   validators: [LdFormValidators.required],
                 ),
-                LdReactiveFormItem.select<Pet>(
+                LdReactiveFormItem.chooseFromItems<Pet>(
                   key: 'catsOrDogs',
+                  label: 'Cats or Dogs?',
                   items: Pet.values
                       .map(
                         (e) => LdSelectItem(
@@ -93,15 +94,14 @@ class ReactiveFormDemo extends StatelessWidget {
                         ),
                       )
                       .toList(),
-                  label: 'Cats or Dogs?',
                   hintBuilder: (_) => const LdHint(
                     type: LdHintType.info,
                     child: Text('There is only one correct answer...'),
                   ),
                   validators: [
-                    LdFormValidators.equals(Pet.cats),
+                    LdFormValidators.equals({Pet.cats}),
                   ],
-                  validationMessages: {'requiredEquals': (field) => 'Cats are the only correct answer'},
+                  validationMessages: {'equals': (field) => 'Cats are the only correct answer'},
                 ),
                 LdReactiveFormItem.multiSelect<FriesTopping>(
                   key: 'friesTopping',

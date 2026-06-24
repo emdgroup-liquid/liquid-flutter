@@ -51,6 +51,7 @@ class LdReactiveFormItem<TModel, TView> {
     List<LdFormValidator<dynamic>> validators = const [],
     String? initialValue,
     Map<String, ValidationMessageFunction>? validationMessages,
+    void Function(String value)? onBlurred,
   }) {
     final valueAccessor = switch (T) {
       const (int) => IntValueAccessor() as ControlValueAccessor<T, String>,
@@ -72,6 +73,7 @@ class LdReactiveFormItem<TModel, TView> {
           state: state,
           inputFieldHint: inputFieldHint,
           label: label,
+          onBlurred: onBlurred,
         );
       },
     );
@@ -107,16 +109,20 @@ class LdReactiveFormItem<TModel, TView> {
     );
   }
 
-  /// Multi Select Field Constructor
-  static LdReactiveFormItem<Set<T>, Set<T>> multiSelect<T>({
+  /// Choose field backed by [LdChoose.fromSelectItems].
+  static LdReactiveFormItem<Set<T>, Set<T>> chooseFromItems<T>({
     required String key,
     required List<LdSelectItem<T>> items,
     LdHint? Function(LdReactiveFormFieldState<Set<T>, Set<T>>)? hintBuilder,
     String? label,
     bool disabled = false,
+    bool multiple = false,
+    bool allowEmpty = false,
     List<LdFormValidator<dynamic>> validators = const [],
     Set<T>? initialValue,
     Map<String, ValidationMessageFunction>? validationMessages,
+    LdChooseMode mode = LdChooseMode.auto,
+    Text? placeholder,
   }) {
     return LdReactiveFormItem<Set<T>, Set<T>>(
       key: key,
@@ -129,11 +135,133 @@ class LdReactiveFormItem<TModel, TView> {
         return LdChoose.fromSelectItems<T>(
           label: label,
           items: items,
-          multiple: true,
-          allowEmpty: true,
+          multiple: multiple,
+          allowEmpty: allowEmpty,
+          mode: mode,
+          placeholder: placeholder ?? const Text('Select...'),
           value: state.control.value,
           disabled: state.control.disabled,
-          onChanged: (value) => state.didChange(value),
+          onChanged: state.didChange,
+        );
+      },
+    );
+  }
+
+  /// Multi Select Field Constructor
+  ///
+  /// Prefer [chooseFromItems] with `multiple: true`.
+  static LdReactiveFormItem<Set<T>, Set<T>> multiSelect<T>({
+    required String key,
+    required List<LdSelectItem<T>> items,
+    LdHint? Function(LdReactiveFormFieldState<Set<T>, Set<T>>)? hintBuilder,
+    String? label,
+    bool disabled = false,
+    List<LdFormValidator<dynamic>> validators = const [],
+    Set<T>? initialValue,
+    Map<String, ValidationMessageFunction>? validationMessages,
+  }) {
+    return chooseFromItems<T>(
+      key: key,
+      items: items,
+      hintBuilder: hintBuilder,
+      label: label,
+      disabled: disabled,
+      multiple: true,
+      allowEmpty: true,
+      validators: validators,
+      initialValue: initialValue,
+      validationMessages: validationMessages,
+    );
+  }
+
+  /// Choose field backed by [LdChoose.fromList] for identifiable entities.
+  static LdReactiveFormItem<Set<IdType>, Set<IdType>> chooseFromList<T extends Identifiable<IdType>, IdType>({
+    required String key,
+    required List<T> items,
+    required Widget Function(BuildContext context, T item) selectedItemBuilder,
+    Widget Function(BuildContext context, LdPaginatorItem<T> item, int index)? itemBuilder,
+    LdHint? Function(LdReactiveFormFieldState<Set<IdType>, Set<IdType>>)? hintBuilder,
+    String? label,
+    bool disabled = false,
+    bool multiple = false,
+    bool allowEmpty = false,
+    List<LdFormValidator<dynamic>> validators = const [],
+    Set<IdType>? initialValue,
+    Map<String, ValidationMessageFunction>? validationMessages,
+    LdChooseMode mode = LdChooseMode.auto,
+    LdSearchTextExtractor<T>? searchText,
+  }) {
+    return LdReactiveFormItem<Set<IdType>, Set<IdType>>(
+      key: key,
+      hintBuilder: hintBuilder,
+      disabled: disabled,
+      validators: validators,
+      initialValue: initialValue,
+      validationMessages: validationMessages,
+      formFieldBuilder: (state) {
+        return LdChoose.fromList<T, IdType>(
+          label: label,
+          items: items,
+          multiple: multiple,
+          allowEmpty: allowEmpty,
+          mode: mode,
+          searchText: searchText,
+          value: state.control.value,
+          disabled: state.control.disabled,
+          onChanged: state.didChange,
+          itemBuilder: itemBuilder ??
+              (context, item, index) {
+                return LdListItem(
+                  title: Text(item.value?.toString() ?? ''),
+                );
+              },
+          selectedItemBuilder: selectedItemBuilder,
+        );
+      },
+    );
+  }
+
+  /// Choose field backed by a monkey [LdRepository].
+  static LdReactiveFormItem<Set<IdType>, Set<IdType>> chooseRepository<T extends Identifiable<IdType>, IdType>({
+    required String key,
+    required LdRepository<T, IdType> repository,
+    required Widget Function(BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder,
+    required Widget Function(BuildContext context, T item) selectedItemBuilder,
+    LdHint? Function(LdReactiveFormFieldState<Set<IdType>, Set<IdType>>)? hintBuilder,
+    String? label,
+    bool disabled = false,
+    bool multiple = false,
+    bool allowEmpty = false,
+    List<LdFormValidator<dynamic>> validators = const [],
+    Set<IdType>? initialValue,
+    Map<String, ValidationMessageFunction>? validationMessages,
+    LdChooseMode mode = LdChooseMode.auto,
+    LdMonkeyFiltersBuilder<T, IdType>? filtersBuilder,
+    LdMonkeySortOptionsBuilder<T, IdType>? sortOptionsBuilder,
+    List<LdFilterChipConfig<T, IdType>>? filterChipConfigs,
+  }) {
+    return LdReactiveFormItem<Set<IdType>, Set<IdType>>(
+      key: key,
+      hintBuilder: hintBuilder,
+      disabled: disabled,
+      validators: validators,
+      initialValue: initialValue,
+      validationMessages: validationMessages,
+      formFieldBuilder: (state) {
+        return LdChoose<T, IdType>(
+          repository: repository,
+          label: label,
+          multiple: multiple,
+          allowEmpty: allowEmpty,
+          mode: mode,
+          filtersBuilder: filtersBuilder,
+          sortOptionsBuilder: sortOptionsBuilder,
+          filterChipConfigs: filterChipConfigs,
+          value: state.control.value,
+          disabled: state.control.disabled,
+          onChanged: state.didChange,
+          itemBuilder: itemBuilder,
+          selectedItemBuilder: selectedItemBuilder,
         );
       },
     );
@@ -276,11 +404,13 @@ class _ReactiveLdInput<T> extends StatefulWidget {
   final LdReactiveFormFieldState<T, String> state;
   final String inputFieldHint;
   final String? label;
+  final void Function(String value)? onBlurred;
 
   const _ReactiveLdInput({
     required this.state,
     required this.inputFieldHint,
     required this.label,
+    this.onBlurred,
   });
 
   @override
@@ -322,6 +452,10 @@ class _ReactiveLdInputState<T> extends State<_ReactiveLdInput<T>> {
       valid: widget.state.control.valid || widget.state.errorText == null,
       controller: _controller,
       onChanged: widget.state.didChange,
+      onBlurred: (value) {
+        widget.state.control.markAsTouched();
+        widget.onBlurred?.call(value);
+      },
       disabled: widget.state.control.disabled,
     );
   }
