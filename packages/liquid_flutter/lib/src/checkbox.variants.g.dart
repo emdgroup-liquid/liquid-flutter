@@ -107,6 +107,7 @@ class LdCheckbox extends StatelessWidget {
         focusNode: focusNode,
         size: size,
         disabled: disabled,
+        key: key,
       ),
     );
   }
@@ -130,6 +131,7 @@ class LdCheckbox extends StatelessWidget {
         focusNode: focusNode,
         size: size,
         disabled: disabled,
+        key: key,
       ),
     );
   }
@@ -153,6 +155,7 @@ class LdCheckbox extends StatelessWidget {
         focusNode: focusNode,
         size: size,
         disabled: disabled,
+        key: key,
       ),
     );
   }

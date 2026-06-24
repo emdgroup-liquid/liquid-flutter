@@ -20,6 +20,7 @@ class LdHint extends StatelessWidget {
       type: LdHintType.info,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
+      key: key,
       child: child,
     );
   }
@@ -35,6 +36,7 @@ class LdHint extends StatelessWidget {
       type: LdHintType.warning,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
+      key: key,
       child: child,
     );
   }
@@ -50,6 +52,7 @@ class LdHint extends StatelessWidget {
       type: LdHintType.success,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
+      key: key,
       child: child,
     );
   }
@@ -65,6 +68,7 @@ class LdHint extends StatelessWidget {
       type: LdHintType.error,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
+      key: key,
       child: child,
     );
   }
@@ -80,6 +84,7 @@ class LdHint extends StatelessWidget {
       type: LdHintType.canceled,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
+      key: key,
       child: child,
     );
   }
@@ -95,6 +100,7 @@ class LdHint extends StatelessWidget {
       type: LdHintType.loading,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
+      key: key,
       child: child,
     );
   }
@@ -110,6 +116,7 @@ class LdHint extends StatelessWidget {
       type: LdHintType.pending,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
+      key: key,
       child: child,
     );
   }
@@ -125,6 +132,7 @@ class LdHint extends StatelessWidget {
       type: LdHintType.ongoing,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
+      key: key,
       child: child,
     );
   }

@@ -215,6 +215,7 @@ class LdAppBar extends StatelessWidget {
       title: title,
       trailing: trailing,
       padding: padding,
+      key: key,
       child: child,
     );
   }
@@ -268,6 +269,7 @@ class LdAppBar extends StatelessWidget {
       title: title,
       trailing: trailing,
       padding: padding,
+      key: key,
       child: child,
     );
   }

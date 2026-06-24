@@ -84,6 +84,7 @@ class LdAvatar extends StatelessWidget {
         color: LdTheme.of(context).success,
         circular: circular,
         size: size,
+        key: key,
         child: child,
       ),
     );
@@ -103,6 +104,7 @@ class LdAvatar extends StatelessWidget {
         color: LdTheme.of(context).warning,
         circular: circular,
         size: size,
+        key: key,
         child: child,
       ),
     );
@@ -122,6 +124,7 @@ class LdAvatar extends StatelessWidget {
         color: LdTheme.of(context).error,
         circular: circular,
         size: size,
+        key: key,
         child: child,
       ),
     );

@@ -27,6 +27,7 @@ class LdCounter extends StatelessWidget {
       type: type,
       minDigits: minDigits,
       inline: inline,
+      key: key,
     );
   }
 
@@ -46,6 +47,7 @@ class LdCounter extends StatelessWidget {
       type: type,
       minDigits: minDigits,
       inline: inline,
+      key: key,
     );
   }
 
@@ -65,6 +67,7 @@ class LdCounter extends StatelessWidget {
       type: type,
       minDigits: minDigits,
       inline: inline,
+      key: key,
     );
   }
 

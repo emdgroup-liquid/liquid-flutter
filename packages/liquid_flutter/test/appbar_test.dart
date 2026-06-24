@@ -813,6 +813,10 @@ void main() {
 
     testWidgets('App bar implyLeading hidden when stacked drawer is open', (WidgetTester tester) async {
       ldDisableAnimations = true;
+      addTearDown(tester.view.resetPhysicalSize);
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
+
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: const [LiquidLocalizations.delegate],

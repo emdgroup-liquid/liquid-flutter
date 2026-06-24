@@ -18,6 +18,7 @@ class LdIndicator extends StatelessWidget {
       type: LdIndicatorType.info,
       size: size,
       customSize: customSize,
+      key: key,
     );
   }
 
@@ -31,6 +32,7 @@ class LdIndicator extends StatelessWidget {
       type: LdIndicatorType.warning,
       size: size,
       customSize: customSize,
+      key: key,
     );
   }
 
@@ -44,6 +46,7 @@ class LdIndicator extends StatelessWidget {
       type: LdIndicatorType.canceled,
       size: size,
       customSize: customSize,
+      key: key,
     );
   }
 
@@ -57,6 +60,7 @@ class LdIndicator extends StatelessWidget {
       type: LdIndicatorType.error,
       size: size,
       customSize: customSize,
+      key: key,
     );
   }
 
@@ -70,6 +74,7 @@ class LdIndicator extends StatelessWidget {
       type: LdIndicatorType.success,
       size: size,
       customSize: customSize,
+      key: key,
     );
   }
 
@@ -83,6 +88,7 @@ class LdIndicator extends StatelessWidget {
       type: LdIndicatorType.loading,
       size: size,
       customSize: customSize,
+      key: key,
     );
   }
 
@@ -96,6 +102,7 @@ class LdIndicator extends StatelessWidget {
       type: LdIndicatorType.pending,
       size: size,
       customSize: customSize,
+      key: key,
     );
   }
 
@@ -109,6 +116,7 @@ class LdIndicator extends StatelessWidget {
       type: LdIndicatorType.ongoing,
       size: size,
       customSize: customSize,
+      key: key,
     );
   }
 

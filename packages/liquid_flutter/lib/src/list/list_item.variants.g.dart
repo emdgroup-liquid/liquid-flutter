@@ -147,6 +147,7 @@ class LdListItem extends StatelessWidget {
       color: color,
       width: width,
       selectionControl: selectionControl,
+      key: key,
     );
   }
 

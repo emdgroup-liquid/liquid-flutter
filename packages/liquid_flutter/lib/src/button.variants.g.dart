@@ -158,6 +158,7 @@ class LdButton extends StatelessWidget {
       size: size,
       trailing: trailing,
       disableSqueeze: disableSqueeze,
+      key: key,
       child: child,
     );
   }
@@ -207,6 +208,7 @@ class LdButton extends StatelessWidget {
       size: size,
       trailing: trailing,
       disableSqueeze: disableSqueeze,
+      key: key,
       child: child,
     );
   }
@@ -256,6 +258,7 @@ class LdButton extends StatelessWidget {
       size: size,
       trailing: trailing,
       disableSqueeze: disableSqueeze,
+      key: key,
       child: child,
     );
   }
@@ -305,6 +308,7 @@ class LdButton extends StatelessWidget {
       size: size,
       trailing: trailing,
       disableSqueeze: disableSqueeze,
+      key: key,
       child: child,
     );
   }
@@ -397,6 +401,7 @@ class LdButton extends StatelessWidget {
         size: size,
         trailing: trailing,
         disableSqueeze: disableSqueeze,
+        key: key,
         child: child,
       ),
     );
@@ -448,6 +453,7 @@ class LdButton extends StatelessWidget {
         size: size,
         trailing: trailing,
         disableSqueeze: disableSqueeze,
+        key: key,
         child: child,
       ),
     );
@@ -499,6 +505,7 @@ class LdButton extends StatelessWidget {
         size: size,
         trailing: trailing,
         disableSqueeze: disableSqueeze,
+        key: key,
         child: child,
       ),
     );

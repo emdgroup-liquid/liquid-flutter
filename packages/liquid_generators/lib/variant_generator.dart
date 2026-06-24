@@ -912,9 +912,7 @@ Map<String, Expression> _buildOrderedWidgetNamedArgs({
     }
   }
 
-  if (optionalParams.any((param) => param.name == 'key')) {
-    namedArgs['key'] = refer('key');
-  }
+  namedArgs['key'] = refer('key');
 
   for (final param in optionalParams.where((param) => param.name == 'child')) {
     final defaultValue = variant?.defaults[param.name];
@@ -941,9 +939,7 @@ List<String> _buildOrderedWidgetNamedArgLines({
     namedArgsList.add(_namedArgExpression(param, variant));
   }
 
-  if (optionalParams.any((param) => param.name == 'key')) {
-    namedArgsList.add('key: key');
-  }
+  namedArgsList.add('key: key');
 
   for (final param in optionalParams.where((param) => param.name == 'child')) {
     namedArgsList.add(_namedArgExpression(param, variant));

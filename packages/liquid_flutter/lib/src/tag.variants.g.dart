@@ -29,6 +29,7 @@ class LdTag extends StatelessWidget {
         color: LdTheme.of(context).success,
         onDismiss: onDismiss,
         size: size,
+        key: key,
         child: child,
       ),
     );
@@ -46,6 +47,7 @@ class LdTag extends StatelessWidget {
         color: LdTheme.of(context).warning,
         onDismiss: onDismiss,
         size: size,
+        key: key,
         child: child,
       ),
     );
@@ -63,6 +65,7 @@ class LdTag extends StatelessWidget {
         color: LdTheme.of(context).error,
         onDismiss: onDismiss,
         size: size,
+        key: key,
         child: child,
       ),
     );
