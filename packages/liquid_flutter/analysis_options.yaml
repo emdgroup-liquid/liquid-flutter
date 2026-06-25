@@ -9,6 +9,7 @@ analyzer:
     - lib/oss_licenses.dart
     - example/build/**
     - lib/src/**/*.variants.g.dart
+    - generators/**
 
 formatter:
   page_width: 120
