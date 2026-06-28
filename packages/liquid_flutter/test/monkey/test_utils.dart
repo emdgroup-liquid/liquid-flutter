@@ -500,7 +500,7 @@ Widget wrapMonkeyMasterPage<T extends Identifiable<IdType>, IdType>({
         child: ListenableProvider<LdListController<T, IdType>>.value(
           value: repository,
           child: Provider<LdMonkeyRouterController<T, IdType>>.value(
-            value: shellState!.controllerDelegate,
+            value: shellState.controllerDelegate,
             child: ListenableBuilder(
               listenable: shellState,
               builder: (context, _) {

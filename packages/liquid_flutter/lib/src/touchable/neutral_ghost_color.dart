@@ -6,7 +6,6 @@ import 'package:liquid_flutter/src/touchable/touchable_status.dart';
 LdColorBundle neutralGhostColor(LdTheme theme, LdTouchableStatus status) {
   final isOdd = status.isOdd;
   final palette = theme.palette;
-  final neutral = theme.palette.neutral;
   Color border = Colors.transparent;
 
   if (status.disabled) {

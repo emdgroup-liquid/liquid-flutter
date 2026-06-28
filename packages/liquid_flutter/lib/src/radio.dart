@@ -3,7 +3,6 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/haptics.dart';
-import 'package:liquid_flutter/src/touchable/solid_color.dart';
 
 part 'radio.variants.g.dart';
 
@@ -64,7 +63,6 @@ class _LdRadioWidget extends StatelessWidget {
       disabled: disabled,
       builder: (contxt, status, _) => Builder(
         builder: (context) {
-          final colorBundle = solidColor(color ?? theme.palette.primary, theme, status);
           return Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [

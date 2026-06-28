@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/haptics.dart';
 import 'package:liquid_flutter/src/monkey/intents.dart';
-import 'package:liquid_flutter/src/monkey/actions/drawer_actions.dart';
 import 'package:provider/provider.dart';
 
 class LdDrawerLayout extends StatefulWidget {

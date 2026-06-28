@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:provider/provider.dart';
-
 import 'test_utils.dart';
 
 bool _isListItemActive(WidgetTester tester, String itemLabel) {

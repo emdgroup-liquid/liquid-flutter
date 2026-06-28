@@ -17,9 +17,6 @@ Future<String?> ldLocationLockRedirect(
     return null;
   }
 
-  print("registry: $registry");
-  print("state: $state");
-
   final router = GoRouter.of(context);
   final fromUri = router.state.uri;
   final toPath = normalizeLocationPath(state.uri.path);
