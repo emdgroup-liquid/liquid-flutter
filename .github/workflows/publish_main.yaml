@@ -58,33 +58,6 @@ jobs:
           /usr/bin/git push origin main
           /usr/bin/git push origin --tags
 
-      - name: Trigger pub.dev publish workflows
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ steps.app-token.outputs.token }}
-          script: |
-            const fs = require('fs');
-            if (!fs.existsSync('version_output.json')) {
-              core.info('No version_output.json, skipping pub.dev dispatch');
-              return;
-            }
-            const data = JSON.parse(fs.readFileSync('version_output.json', 'utf8'));
-            for (const [pkg, info] of Object.entries(data.packages || {})) {
-              const pubspecPath = `packages/${pkg}/pubspec.yaml`;
-              if (!fs.existsSync(pubspecPath)) continue;
-              const pubspec = fs.readFileSync(pubspecPath, 'utf8');
-              if (/^publish_to:\s*none/m.test(pubspec)) continue;
-
-              const tag = `${pkg}/v${info.version}`;
-              core.info(`Dispatching pub.dev publish for ${tag}`);
-              await github.rest.actions.createWorkflowDispatch({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                workflow_id: 'pub_dev_publish.yaml',
-                ref: tag,
-              });
-            }
-
       - name: Create releases
         uses: actions/github-script@v7
         with:
