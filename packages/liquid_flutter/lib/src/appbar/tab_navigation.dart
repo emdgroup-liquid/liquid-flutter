@@ -15,11 +15,7 @@ class LdNavigationTab {
   final String route;
   final bool Function(BuildContext context)? isActive;
 
-  const LdNavigationTab(
-      {required this.label,
-      required this.icon,
-      required this.route,
-      this.isActive});
+  const LdNavigationTab({required this.label, required this.icon, required this.route, this.isActive});
 }
 
 class LdTabNavigation extends StatefulWidget {
@@ -79,9 +75,8 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
 
   LdAppBarPosition get _effectivePosition {
     return switch (widget.position) {
-      LdAppBarPositionMode.adaptive => LdTheme.of(context).platform.isDesktop
-          ? LdAppBarPosition.top
-          : LdAppBarPosition.bottom,
+      LdAppBarPositionMode.adaptive =>
+        LdTheme.of(context).platform.isDesktop ? LdAppBarPosition.top : LdAppBarPosition.bottom,
       LdAppBarPositionMode.top => LdAppBarPosition.top,
       LdAppBarPositionMode.bottom => LdAppBarPosition.bottom,
     };
@@ -144,11 +139,9 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
 
   double get _contentWidth => _totalSpacing + _tabCount * _tabWidth;
 
-  double get _tabWidth =>
-      max(widget.minTabWidth, (_availableWidth - _totalSpacing) / _tabCount);
+  double get _tabWidth => max(widget.minTabWidth, (_availableWidth - _totalSpacing) / _tabCount);
 
-  double get _availableWidth =>
-      _navWidth - LdTheme.of(context).paddingSize(size: LdSize.xs) * 2;
+  double get _availableWidth => _navWidth - LdTheme.of(context).paddingSize(size: LdSize.xs) * 2;
 
   double get _totalSpacing => _tabSpacing * (_tabCount - 1);
 
@@ -160,8 +153,7 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
 
   int _getClosestTab(BuildContext context) {
     // Calculate which tab the indicator is closest to based on its left position
-    final closestTabIndex =
-        (_indicatorPosition / _tabStride).round().clamp(0, _tabCount - 1);
+    final closestTabIndex = (_indicatorPosition / _tabStride).round().clamp(0, _tabCount - 1);
     return closestTabIndex;
   }
 
@@ -179,8 +171,7 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
       _lastDraggedTabIndex = currentTabIndex;
     }
     setState(() {
-      _indicatorPosition = (_dragStartIndicatorPosition +
-              (details.localPosition.dx - _dragStartPosition))
+      _indicatorPosition = (_dragStartIndicatorPosition + (details.localPosition.dx - _dragStartPosition))
           .clamp(0, max(0, _contentWidth - _tabWidth));
     });
   }
@@ -271,15 +262,13 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                             onPressed: () => _onTabTap(tab.route),
                             builder: (context, status, _) {
                               final colors = switch (_isTabActive(tab)) {
-                                true =>
-                                  ghostColor(theme.primary, theme, status),
+                                true => ghostColor(theme.primary, theme, status),
                                 false => neutralGhostColor(theme, status),
                               };
                               return Container(
                                 decoration: BoxDecoration(
                                   color: colors.surface,
-                                  borderRadius:
-                                      LdTheme.of(context).radius(LdSize.s),
+                                  borderRadius: LdTheme.of(context).radius(LdSize.m),
                                 ),
                                 child: Builder(
                                   builder: (context) {
@@ -295,8 +284,7 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
 
                                     if (_compactMode) {
                                       return Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
                                           icon,
                                           ldSpacerXS,
@@ -310,8 +298,7 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                                       ).padXS();
                                     }
                                     return Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         icon,
                                         ldSpacerS,
@@ -352,18 +339,16 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                       onHorizontalDragEnd: _onIndicatorDragEnd,
                       child: LdTouchableSurface(
                         onPressed: () {},
-                        builder: (context, status, _) =>
-                            LdTouchableTouchFeedback(
-                                scaleFactor: 100,
-                                status: status,
-                                child: Container(
-                                  width: _tabWidth,
-                                  decoration: BoxDecoration(
-                                    color: theme.primaryColor.withAlpha(26),
-                                    borderRadius:
-                                        LdTheme.of(context).radius(LdSize.s),
-                                  ),
-                                )),
+                        builder: (context, status, _) => LdTouchableTouchFeedback(
+                            scaleFactor: 100,
+                            status: status,
+                            child: Container(
+                              width: _tabWidth,
+                              decoration: BoxDecoration(
+                                color: theme.primaryColor.withAlpha(26),
+                                borderRadius: LdTheme.of(context).radius(LdSize.m),
+                              ),
+                            )),
                       ),
                     ),
                     builder: (context, state, child) {
@@ -393,19 +378,14 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
         addContainer: widget.addContainer,
         scrollBehavior: widget.scrollBehavior,
         wrappedChild: widget.child,
-        outsideAdditionalPadding: !isAttached
-            ? EdgeInsets.symmetric(
-                vertical: LdTheme.of(context).paddingSize(size: LdSize.xs))
-            : null,
-        insideDecorationBuilder: (isScrolledUnder) =>
-            decorationBuilder.buildInsideDecoration(
+        outsideAdditionalPadding: !isAttached ? LdTheme.of(context).pad(size: LdSize.s) : null,
+        insideDecorationBuilder: (isScrolledUnder) => decorationBuilder.buildInsideDecoration(
           context: context,
           isScrolledUnder: isScrolledUnder,
           isAttached: isAttached,
           position: position,
         ),
-        outsideDecorationBuilder: (isScrolledUnder) =>
-            decorationBuilder.buildOutsideDecoration(
+        outsideDecorationBuilder: (isScrolledUnder) => decorationBuilder.buildOutsideDecoration(
           context: context,
           isScrolledUnder: isScrolledUnder,
           isAttached: isAttached,

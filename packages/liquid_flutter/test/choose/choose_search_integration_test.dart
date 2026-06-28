@@ -17,9 +17,10 @@ void main() {
       _SearchItem(1, 'Apple pie'),
       _SearchItem(2, 'Banana bread'),
     ];
-    final repository = LdRepository.greedy<_SearchItem, int>(
+    final repository = LdListController.fromModel(
+      LdCallbackModel.greedy<_SearchItem, int>(
       pageSize: 10,
-      getById: (id) async => items.firstWhere((item) => item.id == id),
+      getById: (context, id) async => items.firstWhere((item) => item.id == id),
       fetchListWithParameters: (parameters) async {
         var filtered = items.toList();
         if (parameters.filters.isNotEmpty) {
@@ -35,6 +36,7 @@ void main() {
           total: filtered.length,
         );
       },
+      ),
     );
 
     final controller = LdEphemeralMonkeyController<_SearchItem, int>(
@@ -51,7 +53,7 @@ void main() {
       LdThemeProvider(
         child: MaterialApp(
           localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-          home: ListenableProvider<LdRepository<_SearchItem, int>>.value(
+          home: ListenableProvider<LdListController<_SearchItem, int>>.value(
             value: repository,
             child: LdEphemeralMonkeyAdapter<_SearchItem, int>(
               controller: controller,

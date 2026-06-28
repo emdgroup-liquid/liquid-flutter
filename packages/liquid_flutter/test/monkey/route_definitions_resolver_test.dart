@@ -35,7 +35,7 @@ void main() {
   group('LdMonkeyRouteDefinitionsResolver', () {
     testWidgets('shows localized loading then mounts adapter', (WidgetTester tester) async {
       final routeConfig = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'item');
-      final repository = createTestRepository();
+      final repository = createTestListController();
       final filterCompleter = Completer<List<LdFilterOption<TestItem, int>>>();
 
       final router = GoRouter(
@@ -45,7 +45,7 @@ void main() {
             path: '/',
             builder: (context, state) => Provider<LdMonkeyRouteConfig<TestItem, int>>.value(
               value: routeConfig,
-              child: ListenableProvider<LdRepository<TestItem, int>>.value(
+              child: ListenableProvider<LdListController<TestItem, int>>.value(
                 value: repository,
                 child: LdMonkeyRouteDefinitionsResolver<TestItem, int>(
                   filtersBuilder: (_) => filterCompleter.future,
@@ -82,7 +82,7 @@ void main() {
 
     testWidgets('routeDefinitionsLoadingText overrides default loading copy', (WidgetTester tester) async {
       final routeConfig = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'item');
-      final repository = createTestRepository();
+      final repository = createTestListController();
       final filterCompleter = Completer<List<LdFilterOption<TestItem, int>>>();
 
       final router = GoRouter(
@@ -92,7 +92,7 @@ void main() {
             path: '/',
             builder: (context, state) => Provider<LdMonkeyRouteConfig<TestItem, int>>.value(
               value: routeConfig,
-              child: ListenableProvider<LdRepository<TestItem, int>>.value(
+              child: ListenableProvider<LdListController<TestItem, int>>.value(
                 value: repository,
                 child: LdMonkeyRouteDefinitionsResolver<TestItem, int>(
                   routeDefinitionsLoadingText: (_) => 'Custom catalog loading',
@@ -124,7 +124,7 @@ void main() {
     testWidgets('hydrates oneOf from URL after async filtersBuilder', (WidgetTester tester) async {
       final routeConfig = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'item');
       final categoryQueryKey = routeConfig.filterQueryKey('category');
-      final repository = createTestRepository();
+      final repository = createTestListController();
 
       final router = GoRouter(
         initialLocation: '/?$categoryQueryKey=Gold',
@@ -133,7 +133,7 @@ void main() {
             path: '/',
             builder: (context, state) => Provider<LdMonkeyRouteConfig<TestItem, int>>.value(
               value: routeConfig,
-              child: ListenableProvider<LdRepository<TestItem, int>>.value(
+              child: ListenableProvider<LdListController<TestItem, int>>.value(
                 value: repository,
                 child: LdMonkeyRouteDefinitionsResolver<TestItem, int>(
                   filtersBuilder: (_) async => [
@@ -173,7 +173,7 @@ void main() {
 
     testWidgets('refreshFilterDefinitions re-fetches while keeping shell', (WidgetTester tester) async {
       final routeConfig = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'item');
-      final repository = createTestRepository();
+      final repository = createTestListController();
       var loadCount = 0;
 
       final router = GoRouter(
@@ -183,7 +183,7 @@ void main() {
             path: '/',
             builder: (context, state) => Provider<LdMonkeyRouteConfig<TestItem, int>>.value(
               value: routeConfig,
-              child: ListenableProvider<LdRepository<TestItem, int>>.value(
+              child: ListenableProvider<LdListController<TestItem, int>>.value(
                 value: repository,
                 child: LdMonkeyRouteDefinitionsResolver<TestItem, int>(
                   filtersBuilder: (_) async {

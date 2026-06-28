@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/list/loading_animation.dart';
+import 'package:provider/provider.dart';
 
 class LdListItemLoading extends StatelessWidget {
   final bool hasLeading;
@@ -16,42 +17,63 @@ class LdListItemLoading extends StatelessWidget {
     this.hasSubtitle = true,
   });
 
+  /// A fractional-width loading bar with a [height]-bounded box.
+  ///
+  /// The explicit [SizedBox] height is important: a bare [FractionallySizedBox]
+  /// in an unbounded column grows ~1px taller than its child, which would make
+  /// the loader taller than the real item it stands in for.
+  Widget _bar({required double height, required double widthFactor}) {
+    return SizedBox(
+      height: height,
+      child: FractionallySizedBox(
+        widthFactor: widthFactor,
+        child: LdAnimatedLoadingGradient(height: height),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
+    // Mirror [LdListItemWidget]'s geometry so a loader occupies the exact same
+    // vertical space as the real item it replaces (prevents scroll jumps).
+    final config = Provider.of<LdListItemConfig?>(context, listen: true);
+    final padding = config?.padding ?? theme.balPad(LdSize.s);
+    // The real item reserves space for its border on every edge.
+    final borderWidth = theme.borderWidth;
+    // [LdAvatar] is the canonical leading; it is sized to paddingSize(m) * 3.
+    final leadingSize = theme.paddingSize(size: LdSize.m) * 3;
+    final labelSize = theme.labelSize(LdSize.m);
+    final paragraphSize = theme.paragraphSize(LdSize.s);
     return Container(
-      padding: theme.balPad(LdSize.m),
-      decoration: const BoxDecoration(),
+      padding: padding,
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Colors.transparent,
+          width: borderWidth,
+        ),
+      ),
       child: Row(children: [
-        if (hasLeading) const LdLoader(neutral: true),
+        if (hasLeading) LdLoader(neutral: true, size: leadingSize),
         if (hasLeading) ldSpacerM,
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              FractionallySizedBox(
-                widthFactor: 0.3,
-                child: LdAnimatedLoadingGradient(
-                  height: theme.labelSize(LdSize.m),
-                ),
-              ),
-              if (hasSubtitle) SizedBox(height: theme.paragraphSize(LdSize.s) * 1.5 - theme.paragraphSize(LdSize.s)),
-              if (hasSubtitle)
-                FractionallySizedBox(
-                  widthFactor: 0.4,
-                  child: LdAnimatedLoadingGradient(height: theme.paragraphSize(LdSize.s)),
-                ),
+              _bar(height: labelSize, widthFactor: 0.3),
+              // Reserve the remaining subtitle line height (1.5x) above its bar.
+              if (hasSubtitle) SizedBox(height: paragraphSize * 1.5 - paragraphSize),
+              if (hasSubtitle) _bar(height: paragraphSize, widthFactor: 0.4),
               if (hasSubContent) ldSpacerS,
-              if (hasSubContent)
-                const FractionallySizedBox(widthFactor: 0.3, child: LdAnimatedLoadingGradient(height: 8)),
+              if (hasSubContent) _bar(height: 8, widthFactor: 0.3),
             ],
           ),
         ),
         if (hasTrailing) ldSpacerM,
         if (hasTrailing)
           LdAnimatedLoadingGradient(
-            height: theme.labelSize(LdSize.m) * 2,
-            width: theme.labelSize(LdSize.m) * 4,
+            height: labelSize * 2,
+            width: labelSize * 4,
           ),
       ]),
     );

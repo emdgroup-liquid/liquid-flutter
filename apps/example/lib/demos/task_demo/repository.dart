@@ -29,8 +29,9 @@ List<Task> applyFiltersAndSorting(
     switch (sortOption.name) {
       case "order":
         filtered.sort(
-          (a, b) =>
-              sortOption.direction == LdSortOptionDirection.asc ? a.order.compareTo(b.order) : b.order.compareTo(a.order),
+          (a, b) => sortOption.direction == LdSortOptionDirection.asc
+              ? a.order.compareTo(b.order)
+              : b.order.compareTo(a.order),
         );
       case "due":
         filtered.sort(
@@ -46,21 +47,18 @@ List<Task> applyFiltersAndSorting(
   return filtered;
 }
 
-LdRepository<Task, int> taskRepository(BuildContext context) => LdRepository<Task, int>(
+LdCallbackModel<Task, int> taskModel(BuildContext context) => LdCallbackModel<Task, int>(
   pageSize: 5,
-  getOffsetById: (params) async {
-    // Apply the same filtering and sorting logic as fetchListWithParameters
-
+  getOffsetByIdFn: (params) async {
     return applyFiltersAndSorting(
       testData,
       params.filters,
       params.sortOptions,
     ).indexWhere((element) => element.id == params.id);
   },
-  getById: (id) async {
+  getById: (context, id) async {
     return testData.firstWhere((element) => element.id == id);
   },
-
   fetchListWithParameters: (parameters) async {
     await Future.delayed(const Duration(milliseconds: 200));
 
@@ -84,15 +82,13 @@ LdRepository<Task, int> taskRepository(BuildContext context) => LdRepository<Tas
       if (newItem.order < previous.order) {
         for (final task in testData) {
           if (task.id != id && task.order >= newItem.order && task.order < previous.order) {
-            testData[testData.indexWhere((element) => element.id == task.id)] =
-                task.copyWith(order: task.order + 1);
+            testData[testData.indexWhere((element) => element.id == task.id)] = task.copyWith(order: task.order + 1);
           }
         }
       } else {
         for (final task in testData) {
           if (task.id != id && task.order > previous.order && task.order <= newItem.order) {
-            testData[testData.indexWhere((element) => element.id == task.id)] =
-                task.copyWith(order: task.order - 1);
+            testData[testData.indexWhere((element) => element.id == task.id)] = task.copyWith(order: task.order - 1);
           }
         }
       }
@@ -108,3 +104,4 @@ LdRepository<Task, int> taskRepository(BuildContext context) => LdRepository<Tas
     return item;
   },
 );
+

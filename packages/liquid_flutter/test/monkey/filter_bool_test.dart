@@ -151,13 +151,13 @@ void main() {
         );
 
         final shellState = TestSortAndFilterState<TestItem, int>(filters: {filter});
-        final repository = createTestRepository();
+        final repository = createTestListController();
 
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
               home: Scaffold(
-                body: ListenableProvider<LdRepository<TestItem, int>>.value(
+                body: ListenableProvider<LdListController<TestItem, int>>.value(
                   value: repository,
                   child: Provider<LdMonkeyRouterController<TestItem, int>>.value(
                     value: shellState.controllerDelegate,
@@ -189,13 +189,13 @@ void main() {
         );
 
         final shellState = TestSortAndFilterState<TestItem, int>(filters: {filter});
-        final repository = createTestRepository();
+        final repository = createTestListController();
 
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
               home: Scaffold(
-                body: ListenableProvider<LdRepository<TestItem, int>>.value(
+                body: ListenableProvider<LdListController<TestItem, int>>.value(
                   value: repository,
                   child: Provider<LdMonkeyRouterController<TestItem, int>>.value(
                     value: shellState.controllerDelegate,
@@ -227,13 +227,13 @@ void main() {
         );
 
         final shellState = TestSortAndFilterState<TestItem, int>(filters: {filter});
-        final repository = createTestRepository();
+        final repository = createTestListController();
 
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
               home: Scaffold(
-                body: ListenableProvider<LdRepository<TestItem, int>>.value(
+                body: ListenableProvider<LdListController<TestItem, int>>.value(
                   value: repository,
                   child: Provider<LdMonkeyRouterController<TestItem, int>>.value(
                     value: shellState.controllerDelegate,
@@ -264,13 +264,13 @@ void main() {
         );
 
         final shellState = TestSortAndFilterState<TestItem, int>(filters: {filter});
-        final repository = createTestRepository();
+        final repository = createTestListController();
 
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
               home: Scaffold(
-                body: ListenableProvider<LdRepository<TestItem, int>>.value(
+                body: ListenableProvider<LdListController<TestItem, int>>.value(
                   value: repository,
                   child: ListenableProvider<TestSortAndFilterState<TestItem, int>>.value(
                     value: shellState,
@@ -317,14 +317,14 @@ void main() {
         );
 
         final shellState = TestSortAndFilterState<TestItem, int>(filters: {filter});
-        final repository = createTestRepository();
+        final repository = createTestListController();
 
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
               localizationsDelegates: LiquidLocalizations.localizationsDelegates,
               home: Scaffold(
-                body: ListenableProvider<LdRepository<TestItem, int>>.value(
+                body: ListenableProvider<LdListController<TestItem, int>>.value(
                   value: repository,
                   child: ListenableProvider<TestSortAndFilterState<TestItem, int>>.value(
                     value: shellState,

@@ -72,7 +72,7 @@ class LdAppBarAction extends StatelessWidget {
     this.trailing,
     this.tooltip,
     this.active = false,
-    this.compactMode = LdAppBarActionCompactMode.auto,
+    this.compactMode = LdAppBarActionCompactMode.always,
     this.overflowMode = LdAppBarActionOverflowMode.overflowable,
     this.disabled = false,
     this.color,

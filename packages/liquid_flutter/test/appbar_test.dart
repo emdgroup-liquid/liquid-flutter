@@ -147,6 +147,7 @@ void main() {
                 title: const Text('Items'),
                 actions: [
                   LdAppBarAction(
+                    compactMode: LdAppBarActionCompactMode.auto,
                     leading: const Icon(LucideIcons.listFilter),
                     onPressed: () {},
                     child: const Text('Filter'),
@@ -321,11 +322,13 @@ void main() {
                   ),
                   children: [
                     LdAppBarAction(
+                      compactMode: LdAppBarActionCompactMode.auto,
                       leading: const Icon(LucideIcons.listFilter),
                       onPressed: () {},
                       child: const Text('Filter items'),
                     ),
                     LdAppBarAction(
+                      compactMode: LdAppBarActionCompactMode.auto,
                       leading: const Icon(LucideIcons.save),
                       onPressed: () {},
                       child: const Text('Save all changes'),
@@ -362,12 +365,14 @@ void main() {
                   ),
                   children: [
                     LdAppBarAction(
+                      compactMode: LdAppBarActionCompactMode.auto,
                       leading: const Icon(LucideIcons.gitFork),
                       onPressed: () {},
                       child: const Text('GitHub'),
                     ),
                     LdContextMenu(
                       builder: (context, isShuttle, open, isOpen, child) => LdAppBarAction(
+                        compactMode: LdAppBarActionCompactMode.auto,
                         tooltip: 'Theme',
                         leading: const Icon(LucideIcons.paintBucket),
                         onPressed: open,
@@ -406,6 +411,7 @@ void main() {
                   searchConfig: LdSearchConfig(onSearch: (_) {}, hint: 'Search items'),
                   actions: [
                     LdAppBarAction(
+                      compactMode: LdAppBarActionCompactMode.auto,
                       leading: const Icon(LucideIcons.listFilter),
                       onPressed: () {},
                       child: const Text('Filter'),

@@ -84,17 +84,21 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
                     value: selection.selection.length.toDouble(),
                   )
                 : null,
-            debugName: debugName ?? appBarConfig?.debugName,
+            debugName: debugName ?? appBarConfig?.debugName ?? location.name,
             showWindowControls: appBarConfig?.showWindowControls ?? true,
             positionMode: effectivePositionMode,
             scrollBehavior: barEmpty ? LdAppBarScrollBehavior.hidden : null,
             autoAttachToKeyboard: true,
-            implyLeading: implyLeading ??
-                appBarConfig?.implyLeading ??
-                switch (location) {
-                  LdMonkeyActionLocation.detailAppBar => effectiveLayout == LdMonkeyEffectiveLayoutMode.detail,
-                  _ => true,
+            backgroundColor: switch (effectiveLayout) {
+              LdMonkeyEffectiveLayoutMode.sideBySide => switch (location) {
+                  LdMonkeyActionLocation.detailAppBar ||
+                  LdMonkeyActionLocation.detailSecondary =>
+                    LdTheme.of(context).background,
+                  _ => null,
                 },
+              _ => null,
+            },
+            implyLeading: implyLeading ?? appBarConfig?.implyLeading ?? true,
             searchConfig: switch (location) {
               LdMonkeyActionLocation.masterAppBar => searchFilter?.searchConfig((query) {
                   searchFilter.update(
@@ -108,7 +112,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
               _ => null,
             },
             overflowMenuProviders: (context) => [
-                  ListenableProvider.value(value: LdRepository.of<T, IdType>(context)),
+                  ListenableProvider.value(value: LdListController.of<T, IdType>(context)),
                   Provider.value(value: location),
                   Provider.value(value: effectiveLayout),
                   Provider.value(value: selection)

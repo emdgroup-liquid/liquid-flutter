@@ -58,7 +58,7 @@ Future<BuildContext> _pumpAndGetContext(WidgetTester tester) async {
 // Load the repository with items by calling refreshList and settling.
 Future<void> _loadRepository(
   WidgetTester tester,
-  LdRepository<dynamic, dynamic> repository,
+  LdListController<dynamic, dynamic> repository,
   BuildContext context,
 ) async {
   await repository.refreshList(context: context);
@@ -66,7 +66,7 @@ Future<void> _loadRepository(
 }
 
 void main() {
-  group('LdRepository Tests', () {
+  group('LdListController Tests', () {
     // Default test items
     final defaultItems = <_TestItem>[
       _TestItem(1, 'Item 1', 10),
@@ -75,9 +75,9 @@ void main() {
     ];
 
     // Helper function to create a repository with mock functions
-    LdRepository<_TestItem, int> createRepository({
+    LdListController<_TestItem, int> createRepository({
       Future<LdListPage<_TestItem>> Function(FetchPageParameters<_TestItem, int> parameters)? fetchListWithParameters,
-      Future<_TestItem> Function(int id)? getById,
+      Future<_TestItem> Function(BuildContext context, int id)? getById,
       Future<int?> Function(FetchOffsetParameters<_TestItem, int> parameters)? getOffsetById,
       Future<void> Function(BuildContext context, int id)? deleteItem,
       Future<_TestItem?> Function(BuildContext context, int id, _TestItem newItem)? updateItem,
@@ -90,56 +90,60 @@ void main() {
     }) {
       final items = defaultItems.toList();
 
-      return LdRepository<_TestItem, int>(
-        fetchListWithParameters: fetchListWithParameters ??
-            (parameters) async {
-              final start = parameters.offset;
-              final end = (start + parameters.pageSize < items.length) ? start + parameters.pageSize : items.length;
-              return LdListPage<_TestItem>(
-                newItems: start < items.length ? items.sublist(start, end) : [],
-                hasMore: end < items.length,
-                total: items.length,
-              );
-            },
-        getById: getById ?? (id) async => items.firstWhere((item) => item.id == id),
-        getOffsetById: getOffsetById,
-        deleteItem: deleteItem,
-        updateItem: updateItem,
-        createItem: createItem,
-        deleteBatch: deleteBatch,
-        updateBatch: updateBatch,
-        pageSize: pageSize,
-        autoCache: autoCache,
-        autoInvalidateCache: autoInvalidateCache,
+      return LdListController.fromModel(
+        LdCallbackModel<_TestItem, int>(
+          fetchListWithParameters: fetchListWithParameters ??
+              (parameters) async {
+                final start = parameters.offset;
+                final end = (start + parameters.pageSize < items.length) ? start + parameters.pageSize : items.length;
+                return LdListPage<_TestItem>(
+                  newItems: start < items.length ? items.sublist(start, end) : [],
+                  hasMore: end < items.length,
+                  total: items.length,
+                );
+              },
+          getById: getById ?? (context, id) async => items.firstWhere((item) => item.id == id),
+          getOffsetByIdFn: getOffsetById,
+          deleteItem: deleteItem,
+          updateItem: updateItem,
+          createItem: createItem,
+          deleteBatchFn: deleteBatch,
+          updateBatchFn: updateBatch,
+          pageSize: pageSize,
+          autoCache: autoCache,
+          autoInvalidateCache: autoInvalidateCache,
+        ),
       );
     }
 
     group('getById Method', () {
-      test('retrieves item from server when not in cache', () async {
+      testWidgets('retrieves item from server when not in cache', (tester) async {
         var callCount = 0;
         final repository = createRepository(
-          getById: (id) async {
+          getById: (context, id) async {
             callCount++;
             return _TestItem(id, 'Server Item', 200);
           },
         );
 
-        final item = await repository.getById(99);
+        final ctx = await _pumpAndGetContext(tester);
+        final item = await repository.getById(ctx, 99);
         expect(callCount, equals(1));
         expect(item.id, equals(99));
         expect(item.name, equals('Server Item'));
       });
 
-      test('retrieves item bypassing cache when skipCache is true', () async {
+      testWidgets('retrieves item bypassing cache when skipCache is true', (tester) async {
         var callCount = 0;
         final repository = createRepository(
-          getById: (id) async {
+          getById: (context, id) async {
             callCount++;
             return _TestItem(id, 'Fetched Item', 100);
           },
         );
 
-        final item = await repository.getById(1, skipCache: true);
+        final ctx = await _pumpAndGetContext(tester);
+        final item = await repository.getById(ctx, 1, skipCache: true);
         expect(callCount, equals(1));
         expect(item.name, equals('Fetched Item'));
       });
@@ -159,7 +163,7 @@ void main() {
         await _loadRepository(tester, repository, ctx);
 
         final newItem = _TestItem(0, 'New Item', 50);
-        final createdItem = await repository.create(ctx, newItem);
+        final createdItem = await repository.model!.create(ctx, newItem);
 
         expect(createCallCount, equals(1));
         expect(createdItem, isNotNull);
@@ -175,7 +179,7 @@ void main() {
         await _loadRepository(tester, repository, ctx);
 
         final newItem = _TestItem(0, 'New Item', 50);
-        final createdItem = await repository.create(ctx, newItem, index: 0);
+        final createdItem = await repository.model!.create(ctx, newItem, index: 0);
 
         expect(createdItem, isNotNull);
       });
@@ -192,7 +196,7 @@ void main() {
 
         final newItem = _TestItem(0, 'New Item', 50);
         await expectLater(
-          repository.create(ctx, newItem),
+          repository.model!.create(ctx, newItem),
           throwsA(isA<Exception>()),
         );
 
@@ -208,7 +212,7 @@ void main() {
         await _loadRepository(tester, repository, ctx);
 
         final newItem = _TestItem(0, 'New Item', 50);
-        expect(() => repository.create(ctx, newItem), throwsAssertionError);
+        expect(() => repository.model!.create(ctx, newItem), throwsAssertionError);
       });
     });
 
@@ -226,7 +230,7 @@ void main() {
         await _loadRepository(tester, repository, ctx);
 
         final updatedItem = _TestItem(1, 'Updated Item 1', 15);
-        await repository.update(ctx, 1, updatedItem);
+        await repository.model!.update(ctx, 1, updatedItem);
 
         expect(updateCallCount, equals(1));
         final item = repository.getItemById(1);
@@ -242,7 +246,7 @@ void main() {
         await _loadRepository(tester, repository, ctx);
 
         final updatedItem = _TestItem(1, 'Updated Item 1', 15);
-        await repository.update(ctx, 1, updatedItem);
+        await repository.model!.update(ctx, 1, updatedItem);
 
         final item = repository.getItemById(1);
         expect(item?.value?.name, equals('Updated Item 1'));
@@ -259,7 +263,7 @@ void main() {
         await _loadRepository(tester, repository, ctx);
 
         final updatedItem = _TestItem(1, 'Updated Item 1', 15);
-        await expectLater(() => repository.update(ctx, 1, updatedItem), throwsException);
+        await expectLater(() => repository.model!.update(ctx, 1, updatedItem), throwsException);
 
         await tester.pump();
 
@@ -282,7 +286,7 @@ void main() {
           _TestItem(1, 'Updated 1', 15),
           _TestItem(2, 'Updated 2', 25),
         };
-        await repository.updateBatch(ctx, itemsToUpdate);
+        await repository.model!.updateBatch(ctx, itemsToUpdate);
 
         expect(updateBatchCallCount, equals(1));
       });
@@ -304,7 +308,7 @@ void main() {
           _TestItem(1, 'Updated 1', 15),
           _TestItem(2, 'Updated 2', 25),
         };
-        await repository.updateBatch(ctx, itemsToUpdate);
+        await repository.model!.updateBatch(ctx, itemsToUpdate);
 
         expect(updateItemCallCount, equals(2));
       });
@@ -326,7 +330,7 @@ void main() {
           _TestItem(2, 'Updated 2', 25),
         };
 
-        expect(() => repository.updateBatch(ctx, itemsToUpdate), throwsException);
+        expect(() => repository.model!.updateBatch(ctx, itemsToUpdate), throwsException);
 
         await tester.pump();
         final item1 = repository.getItemById(1);
@@ -349,7 +353,7 @@ void main() {
         final ctx = await _pumpAndGetContext(tester);
         await _loadRepository(tester, repository, ctx);
 
-        await repository.delete(context: ctx, id: 1);
+        await repository.model!.delete(context: ctx, id: 1);
 
         expect(deleteCallCount, equals(1));
         final item = repository.getItemById(1);
@@ -367,7 +371,7 @@ void main() {
         await _loadRepository(tester, repository, ctx);
 
         await expectLater(
-          () => repository.delete(context: ctx, id: 1),
+          () => repository.model!.delete(context: ctx, id: 1),
           throwsException,
         );
 
@@ -382,7 +386,7 @@ void main() {
         final ctx = await _pumpAndGetContext(tester);
         await _loadRepository(tester, repository, ctx);
 
-        await repository.delete(context: ctx, id: 1);
+        await repository.model!.delete(context: ctx, id: 1);
 
         final item = repository.getItemById(1);
         expect(item, isNotNull);
@@ -399,7 +403,7 @@ void main() {
         final ctx = await _pumpAndGetContext(tester);
         await _loadRepository(tester, repository, ctx);
 
-        await repository.deleteBatch(context: ctx, ids: {1, 2});
+        await repository.model!.deleteBatch(context: ctx, ids: {1, 2});
 
         expect(deleteBatchCallCount, equals(1));
         expect(repository.getItemById(1), isNull);
@@ -418,14 +422,14 @@ void main() {
         final ctx = await _pumpAndGetContext(tester);
         await _loadRepository(tester, repository, ctx);
 
-        await repository.deleteBatch(context: ctx, ids: {1, 2});
+        await repository.model!.deleteBatch(context: ctx, ids: {1, 2});
 
         expect(deleteCallCount, equals(2));
       });
 
       testWidgets('deletes batch including detached selection items', (tester) async {
         var currentItems = defaultItems.toList();
-        final repository = LdRepository<_TestItem, int>(
+        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
           pageSize: 1,
           fetchListWithParameters: (parameters) async {
             final start = parameters.offset;
@@ -436,20 +440,23 @@ void main() {
               total: currentItems.length,
             );
           },
-          getById: (id) async => currentItems.firstWhere((item) => item.id == id),
-          getOffsetById: (parameters) async {
+          getById: (context, id) async => currentItems.firstWhere((item) => item.id == id),
+          getOffsetByIdFn: (parameters) async {
             return currentItems.indexWhere((item) => item.id == parameters.id);
           },
           deleteItem: (context, id) async {
             currentItems.removeWhere((item) => item.id == id);
           },
-        );
+        ));
 
         final ctx = await _pumpAndGetContext(tester);
         await repository.initWithSelection(ctx, {1, 2, 3});
         await tester.pumpAndSettle(const Duration(seconds: 1));
+        await repository.loadViewingItem(ctx, 2);
+        await repository.loadViewingItem(ctx, 3);
+        await tester.pumpAndSettle(const Duration(seconds: 1));
 
-        await repository.deleteBatch(context: ctx, ids: {1, 2, 3});
+        await repository.model!.deleteBatch(context: ctx, ids: {1, 2, 3});
         await tester.pump();
 
         expect(repository.getItemById(1), isNull);
@@ -460,7 +467,7 @@ void main() {
 
       testWidgets('does not overwrite deleting items during page fetch', (tester) async {
         var currentItems = defaultItems.toList();
-        final repository = LdRepository<_TestItem, int>(
+        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
           pageSize: 3,
           fetchListWithParameters: (parameters) async {
             final start = parameters.offset;
@@ -471,17 +478,17 @@ void main() {
               total: currentItems.length,
             );
           },
-          getById: (id) async => currentItems.firstWhere((item) => item.id == id),
+          getById: (context, id) async => currentItems.firstWhere((item) => item.id == id),
           deleteItem: (context, id) async {
             await Future<void>.delayed(const Duration(milliseconds: 100));
             currentItems.removeWhere((item) => item.id == id);
           },
-        );
+        ));
 
         final ctx = await _pumpAndGetContext(tester);
         await _loadRepository(tester, repository, ctx);
 
-        final deleteFuture = repository.delete(context: ctx, id: 2);
+        final deleteFuture = repository.model!.delete(context: ctx, id: 2);
         await tester.pump();
 
         expect(repository.getItemById(2)?.state, equals(LdPaginatorItemState.deleting));
@@ -510,7 +517,7 @@ void main() {
 
         // batch delete throws, but shouldn't crash entirely
         try {
-          await repository.deleteBatch(context: ctx, ids: {1, 2});
+          await repository.model!.deleteBatch(context: ctx, ids: {1, 2});
         } catch (_) {}
 
         await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -520,10 +527,10 @@ void main() {
     });
 
     group('initWithSelection', () {
-      testWidgets('initializes with selection when getOffsetById is provided', (tester) async {
+      testWidgets('anchors list when getOffsetById is provided', (tester) async {
         var getOffsetCallCount = 0;
         var fetchCallCount = 0;
-        final repository = LdRepository<_TestItem, int>(
+        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
           fetchListWithParameters: (parameters) async {
             fetchCallCount++;
             return LdListPage<_TestItem>(
@@ -532,12 +539,12 @@ void main() {
               total: 1,
             );
           },
-          getById: (id) async => _TestItem(id, 'Test', 0),
-          getOffsetById: (parameters) async {
+          getById: (context, id) async => _TestItem(id, 'Test', 0),
+          getOffsetByIdFn: (parameters) async {
             getOffsetCallCount++;
             return 1; // Item at offset 1
           },
-        );
+        ));
 
         final ctx = await _pumpAndGetContext(tester);
         await repository.initWithSelection(ctx, {2});
@@ -549,13 +556,13 @@ void main() {
       });
 
       testWidgets('handles null return from getOffsetById', (tester) async {
-        final repository = LdRepository<_TestItem, int>(
+        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
           fetchListWithParameters: (parameters) async {
             return LdListPage<_TestItem>(newItems: [], hasMore: false, total: 0);
           },
-          getById: (id) async => _TestItem(id, 'Test', 0),
-          getOffsetById: (parameters) async => null,
-        );
+          getById: (context, id) async => _TestItem(id, 'Test', 0),
+          getOffsetByIdFn: (parameters) async => null,
+        ));
 
         final ctx = await _pumpAndGetContext(tester);
         await repository.initWithSelection(ctx, {99});
@@ -571,6 +578,68 @@ void main() {
 
         // Should complete without error
         expect(repository.initialOffset, equals(0));
+      });
+    });
+
+    group('loadViewingItem', () {
+      testWidgets('loads detached item and notifies stream listeners', (tester) async {
+        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
+          pageSize: 1,
+          fetchListWithParameters: (parameters) async {
+            return LdListPage<_TestItem>(
+              newItems: [_TestItem(1, 'Item 1', 10)],
+              hasMore: false,
+              total: 1,
+            );
+          },
+          getById: (context, id) async => _TestItem(id, 'Detached $id', id * 10),
+        ));
+
+        final ctx = await _pumpAndGetContext(tester);
+        final loaded = await repository.loadViewingItem(ctx, 99);
+
+        expect(loaded.id, equals(99));
+        expect(repository.getItemById(99)?.value?.name, equals('Detached 99'));
+      });
+
+      testWidgets('rethrows when getById fails', (tester) async {
+        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
+          fetchListWithParameters: (parameters) async {
+            return LdListPage<_TestItem>(newItems: [], hasMore: false, total: 0);
+          },
+          getById: (context, id) async => throw StateError('No element'),
+        ));
+
+        final ctx = await _pumpAndGetContext(tester);
+
+        await expectLater(
+          repository.loadViewingItem(ctx, 99),
+          throwsA(isA<StateError>()),
+        );
+        expect(repository.getItemById(99), isNull);
+      });
+
+      testWidgets('returns cached item without calling getById again', (tester) async {
+        var getByIdCallCount = 0;
+        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
+          fetchListWithParameters: (parameters) async {
+            return LdListPage<_TestItem>(
+              newItems: [_TestItem(1, 'Item 1', 10)],
+              hasMore: false,
+              total: 1,
+            );
+          },
+          getById: (context, id) async {
+            getByIdCallCount++;
+            return _TestItem(id, 'Item $id', id * 10);
+          },
+        ));
+
+        final ctx = await _pumpAndGetContext(tester);
+        await repository.loadViewingItem(ctx, 1);
+        await repository.loadViewingItem(ctx, 1);
+
+        expect(getByIdCallCount, equals(1));
       });
     });
 
@@ -724,26 +793,6 @@ void main() {
         expect(refreshedSecondPage, equals([6, 5, 4]));
       });
 
-      testWidgets('hard:true maps to refresh reason for backward compatibility', (tester) async {
-        final requestedReasons = <LdFetchReason>[];
-        final repository = createRepository(
-          fetchListWithParameters: (parameters) async {
-            requestedReasons.add(parameters.reason);
-            return LdListPage<_TestItem>(
-              newItems: defaultItems,
-              hasMore: false,
-              total: defaultItems.length,
-            );
-          },
-        );
-
-        final ctx = await _pumpAndGetContext(tester);
-
-        await repository.refreshList(context: ctx, hard: true);
-        await tester.pumpAndSettle(const Duration(seconds: 1));
-
-        expect(requestedReasons, contains(LdFetchReason.refresh));
-      });
     });
 
     group('fetch reason and cache', () {
@@ -998,7 +1047,7 @@ void main() {
           total: 3,
         );
 
-        await repository.update(ctx, 1, _TestItem(1, 'Renamed Item 1', 10));
+        await repository.model!.update(ctx, 1, _TestItem(1, 'Renamed Item 1', 10));
 
         expect(repository.cache.readPage(titleKey, 0), isNull);
         expect(repository.cache.readPage(valueKey, 0), isNotNull);
@@ -1018,7 +1067,7 @@ void main() {
           total: defaultItems.length,
         );
 
-        await repository.create(ctx, _TestItem(0, 'New Item', 50));
+        await repository.model!.create(ctx, _TestItem(0, 'New Item', 50));
         await tester.pumpAndSettle(const Duration(seconds: 1));
 
         expect(repository.cache.readPage('stale', 0), isNull);
@@ -1028,9 +1077,9 @@ void main() {
     group('greedy repository', () {
       testWidgets('ensureGreedyLoaded fetches all pages once', (tester) async {
         var fetchCount = 0;
-        final repository = LdRepository.greedy<_TestItem, int>(
+        final repository = LdListController.fromModel(LdCallbackModel.greedy<_TestItem, int>(
           pageSize: 2,
-          getById: (id) async => _TestItem(id, 'Item $id', id),
+          getById: (context, id) async => _TestItem(id, 'Item $id', id),
           fetchListWithParameters: (parameters) async {
             fetchCount++;
             final all = List.generate(5, (index) => _TestItem(index + 1, 'Item ${index + 1}', index + 1));
@@ -1041,7 +1090,7 @@ void main() {
               total: all.length,
             );
           },
-        );
+        ));
 
         final ctx = await _pumpAndGetContext(tester);
 
@@ -1058,9 +1107,9 @@ void main() {
       });
 
       testWidgets('fromList uses greedy loading', (tester) async {
-        final repository = LdRepository.fromList<_TestItem, int>(
+        final repository = LdListController.fromModel(LdCallbackModel.fromList<_TestItem, int>(
           list: defaultItems,
-        );
+        ));
 
         final ctx = await _pumpAndGetContext(tester);
         await repository.ensureGreedyLoaded(ctx);
@@ -1075,9 +1124,9 @@ void main() {
     group('mutation layout', () {
       testWidgets('create repositions item when getOffsetById is configured', (tester) async {
         final items = List.generate(10, (i) => _TestItem(i + 1, 'Item ${i + 1}', i + 1));
-        final repository = LdRepository<_TestItem, int>(
+        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
           pageSize: 5,
-          getOffsetById: (params) async => items.indexWhere((item) => item.id == params.id),
+          getOffsetByIdFn: (params) async => items.indexWhere((item) => item.id == params.id),
           createItem: (context, item) async {
             final created = _TestItem(11, 'New Item', 11);
             items.add(created);
@@ -1093,13 +1142,13 @@ void main() {
               total: items.length,
             );
           },
-          getById: (id) async => items.firstWhere((item) => item.id == id),
-        );
+          getById: (context, id) async => items.firstWhere((item) => item.id == id),
+        ));
 
         final ctx = await _pumpAndGetContext(tester);
         await _loadRepository(tester, repository, ctx);
 
-        await repository.create(ctx, _TestItem(0, 'New Item', 11));
+        await repository.model!.create(ctx, _TestItem(0, 'New Item', 11));
         await tester.pumpAndSettle(const Duration(seconds: 1));
 
         final expectedIndex = items.indexWhere((item) => item.id == 11);
@@ -1107,14 +1156,14 @@ void main() {
       });
 
       test('canCompactIndicesAfterDeletion requires contiguous loaded indices', () {
-        final repository = LdRepository<_TestItem, int>(
+        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
           fetchListWithParameters: (_) async => LdListPage<_TestItem>(
             newItems: const [],
             hasMore: false,
             total: 0,
           ),
-          getById: (id) async => _TestItem(id, 'Item $id', id),
-        );
+          getById: (context, id) async => _TestItem(id, 'Item $id', id),
+        ));
 
         repository.replaceItems({
           0: LdPaginatorItem(value: _TestItem(1, 'Item 1', 1), state: LdPaginatorItemState.loaded),
@@ -1170,7 +1219,7 @@ void main() {
         const indexBefore = 0;
         expect(repository.getItemIndexById(1), equals(indexBefore));
 
-        await repository.update(
+        await repository.model!.update(
           ctx,
           1,
           _TestItem(1, 'Renamed Item 1', 10),
@@ -1215,9 +1264,9 @@ void main() {
         );
         await tester.pump();
 
-        final repository = LdRepository<_TestItem, int>(
+        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
           pageSize: 5,
-          getOffsetById: (params) async => items.indexWhere((item) => item.id == params.id),
+          getOffsetByIdFn: (params) async => items.indexWhere((item) => item.id == params.id),
           updateItem: (context, id, newItem) async {
             final index = items.indexWhere((item) => item.id == id);
             items[index] = newItem;
@@ -1233,15 +1282,174 @@ void main() {
               total: items.length,
             );
           },
-          getById: (id) async => items.firstWhere((item) => item.id == id),
-        );
+          getById: (context, id) async => items.firstWhere((item) => item.id == id),
+        ));
 
         await _loadRepository(tester, repository, ctx);
 
-        await repository.update(ctx, 1, _TestItem(1, 'Item 1', 99));
+        await repository.model!.update(ctx, 1, _TestItem(1, 'Item 1', 99));
         await tester.pumpAndSettle();
 
         expect(repository.getItemIndexById(1), equals(items.length - 1));
+      });
+
+      testWidgets('update closes the source gap without dropping other items', (tester) async {
+        final items = List.generate(5, (i) => _TestItem(i + 1, 'Item ${i + 1}', i + 1));
+        final sortAndFilterState = LdMonkeySortAndFilterState<_TestItem, int>(
+          filters: {},
+          sortOptions: [
+            LdSortOption<_TestItem, int>(
+              name: 'value',
+              label: (_) => 'Value',
+              icon: (_) => const SizedBox.shrink(),
+              isOn: true,
+              affectedByUpdate: (before, after) => before?.value != after?.value,
+            ),
+          ],
+        );
+
+        late BuildContext ctx;
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: const [LiquidLocalizations.delegate],
+            home: LdThemeProvider(
+              child: Provider<LdMonkeySortAndFilterState<_TestItem, int>>.value(
+                value: sortAndFilterState,
+                child: Builder(
+                  builder: (context) {
+                    ctx = context;
+                    return const SizedBox();
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
+          pageSize: 10,
+          getOffsetByIdFn: (params) async => items.indexWhere((item) => item.id == params.id),
+          updateItem: (context, id, newItem) async {
+            final index = items.indexWhere((item) => item.id == id);
+            items[index] = newItem;
+            items.sort((a, b) => a.value.compareTo(b.value));
+            return newItem;
+          },
+          fetchListWithParameters: (parameters) async {
+            final start = parameters.offset;
+            final end = (start + parameters.pageSize).clamp(0, items.length);
+            return LdListPage<_TestItem>(
+              newItems: start < items.length ? items.sublist(start, end) : <_TestItem>[],
+              hasMore: end < items.length,
+              total: items.length,
+            );
+          },
+          getById: (context, id) async => items.firstWhere((item) => item.id == id),
+        ));
+
+        await _loadRepository(tester, repository, ctx);
+
+        // Move item 1 (index 0) to the end. All five items are loaded, so the
+        // shift must stay local and keep every item present in order.
+        await repository.model!.update(ctx, 1, _TestItem(1, 'Item 1', 99));
+        await tester.pumpAndSettle();
+
+        expect(repository.totalItems, equals(5));
+        expect(
+          List.generate(5, (i) => repository.getItemAt(i)?.value?.id),
+          equals([2, 3, 4, 5, 1]),
+        );
+      });
+
+      testWidgets('update closes gaps when item moves beyond the loaded range', (tester) async {
+        final items = List.generate(30, (i) => _TestItem(i + 1, 'Item ${i + 1}', i + 1));
+        final fetchedOffsets = <int>[];
+        final sortAndFilterState = LdMonkeySortAndFilterState<_TestItem, int>(
+          filters: {},
+          sortOptions: [
+            LdSortOption<_TestItem, int>(
+              name: 'value',
+              label: (_) => 'Value',
+              icon: (_) => const SizedBox.shrink(),
+              isOn: true,
+              affectedByUpdate: (before, after) => before?.value != after?.value,
+            ),
+          ],
+        );
+
+        late BuildContext ctx;
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: const [LiquidLocalizations.delegate],
+            home: LdThemeProvider(
+              child: Provider<LdMonkeySortAndFilterState<_TestItem, int>>.value(
+                value: sortAndFilterState,
+                child: Builder(
+                  builder: (context) {
+                    ctx = context;
+                    return const SizedBox();
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
+          pageSize: 10,
+          getOffsetByIdFn: (params) async => items.indexWhere((item) => item.id == params.id),
+          updateItem: (context, id, newItem) async {
+            final index = items.indexWhere((item) => item.id == id);
+            items[index] = newItem;
+            items.sort((a, b) => a.value.compareTo(b.value));
+            return newItem;
+          },
+          fetchListWithParameters: (parameters) async {
+            fetchedOffsets.add(parameters.offset);
+            final start = parameters.offset;
+            final end = (start + parameters.pageSize).clamp(0, items.length);
+            return LdListPage<_TestItem>(
+              newItems: start < items.length ? items.sublist(start, end) : <_TestItem>[],
+              hasMore: end < items.length,
+              total: items.length,
+            );
+          },
+          getById: (context, id) async => items.firstWhere((item) => item.id == id),
+        ));
+
+        await _loadRepository(tester, repository, ctx);
+
+        // Only the first page (indices 0-9) is loaded.
+        expect(repository.getItemIndexById(3), equals(2));
+        expect(repository.getItemAt(9)?.value?.id, equals(10));
+        expect(repository.getItemAt(20), isNull);
+
+        // Move item 3 to the very end. The destination (index 29) lives outside
+        // the loaded range; the shift must keep the loaded items consistent with
+        // the new server order and leave no orphaned gap at the source.
+        await repository.model!.update(ctx, 3, _TestItem(3, 'Item 3', 100));
+        await tester.pumpAndSettle(const Duration(seconds: 1));
+
+        expect(repository.totalItems, equals(30));
+        expect(repository.getItemById(3)?.value?.value, equals(100));
+        expect(repository.getItemIndexById(3), equals(29));
+
+        // The source gap is closed by shifting the trailing loaded items up, so
+        // the item that followed the moved one (id 4) now sits at index 2.
+        expect(repository.getItemAt(2)?.value?.id, equals(4));
+
+        // Index 9 now refers to a genuinely unloaded item (id 11). It is a gap
+        // rather than a stale duplicate, and it must be refetchable.
+        expect(repository.getItemAt(9), isNull);
+
+        fetchedOffsets.clear();
+        await repository.fetchPageAtOffset(ctx, 9);
+        await tester.pumpAndSettle(const Duration(seconds: 1));
+
+        expect(fetchedOffsets, contains(0));
+        expect(repository.getItemAt(9)?.value?.id, equals(11));
       });
 
       testWidgets('create refreshes list when getOffsetById is not configured', (tester) async {
@@ -1272,7 +1480,7 @@ void main() {
         await _loadRepository(tester, repository, ctx);
         fetchReasons.clear();
 
-        await repository.create(ctx, _TestItem(0, 'New Item', 40));
+        await repository.model!.create(ctx, _TestItem(0, 'New Item', 40));
         await tester.pumpAndSettle(const Duration(seconds: 1));
 
         expect(fetchReasons, contains(LdFetchReason.invalidate));
@@ -1310,7 +1518,7 @@ void main() {
         repository.totalItems = 12;
         fetchReasons.clear();
 
-        await repository.delete(context: ctx, id: 2);
+        await repository.model!.delete(context: ctx, id: 2);
         await tester.pumpAndSettle(const Duration(seconds: 1));
 
         expect(fetchReasons, contains(LdFetchReason.invalidate));
@@ -1324,10 +1532,10 @@ void main() {
         var updateCalls = 0;
         var getOffsetCalls = 0;
 
-        final repository = LdRepository<_TestItem, int>(
+        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
           pageSize: 10,
           initialItems: items,
-          getOffsetById: (params) async {
+          getOffsetByIdFn: (params) async {
             getOffsetCalls++;
             return items.indexWhere((item) => item.id == params.id);
           },
@@ -1346,8 +1554,8 @@ void main() {
               total: items.length,
             );
           },
-          getById: (id) async => items.firstWhere((item) => item.id == id),
-        );
+          getById: (context, id) async => items.firstWhere((item) => item.id == id),
+        ));
 
         final ctx = await _pumpAndGetContext(tester);
 

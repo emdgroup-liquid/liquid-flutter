@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 Future<bool> ldConfirmModal(
@@ -34,15 +35,22 @@ Future<bool> ldConfirmModal(
                     size: LdSize.l,
                     width: double.infinity,
                     color: cancelColor ?? LdTheme.of(context).error,
-                    child: negative ?? Text(locale.cancel),
+                    trailing: LdTheme.of(context).platform.isDesktop
+                        ? LdShortcutIndicator(shortcut: SingleActivator(LogicalKeyboardKey.escape))
+                        : null,
                     onPressed: () => Navigator.of(context).pop(false),
+                    child: negative ?? Text(locale.cancel),
                   ),
                 ),
                 LdFlexibleChild(
                   child: LdButton.vague(
                     size: LdSize.l,
                     width: double.infinity,
+                    autoFocus: true,
                     color: confirmColor ?? LdTheme.of(context).primary,
+                    trailing: LdTheme.of(context).platform.isDesktop
+                        ? LdShortcutIndicator(shortcut: SingleActivator(LogicalKeyboardKey.enter))
+                        : null,
                     child: positive ?? Text(locale.confirm),
                     onPressed: () => Navigator.of(context).pop(true),
                   ),

@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/monkey/intents.dart';
 
@@ -15,7 +16,7 @@ const monkeyShortcuts = {
 typedef LdMonkeyActions<T extends Identifiable<IdType>, IdType> = List<LdMonkeyAction<T, IdType>>;
 
 /// The shell route that is wrapped around the master and detail pages.
-/// This widget expects to find an [LdRepository<T, IdType>] in the context.
+/// This widget expects to find an [LdListController<T, IdType>] in the context.
 class LdMonkeyShell<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   const LdMonkeyShell({
     super.key,
@@ -103,7 +104,7 @@ class _MonkeyShellLayoutBuilder<T extends Identifiable<IdType>, IdType> extends 
     required this.child,
   });
 
-  LdMonkeyEffectiveLayoutMode _geteEffectiveLayoutMode(bool showingDetail, BoxConstraints constraints) {
+  LdMonkeyEffectiveLayoutMode _getEffectiveLayoutMode(bool showingDetail, BoxConstraints constraints) {
     final wouldBeSideBySide = constraints.maxWidth > reflowBreakpoint;
 
     return switch (layoutMode) {
@@ -126,7 +127,13 @@ class _MonkeyShellLayoutBuilder<T extends Identifiable<IdType>, IdType> extends 
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       final showingDetail = context.watch<LdMonkeySelection<T, IdType>>().viewing.isNotEmpty;
-      final effectiveLayout = _geteEffectiveLayoutMode(showingDetail, constraints);
+      final effectiveLayout = _getEffectiveLayoutMode(showingDetail, constraints);
+
+      final routeConfig = context.watch<LdMonkeyRouteConfig<T, IdType>>();
+
+      final location = GoRouter.of(context).routerDelegate.state.name;
+
+      final showingNew = routeConfig.createRouteName == location;
 
       final wrappedChild = Provider.value(
         value: LdListItemConfig(
@@ -143,12 +150,13 @@ class _MonkeyShellLayoutBuilder<T extends Identifiable<IdType>, IdType> extends 
             value: LdMonkeyEffectiveLayoutMode.sideBySide,
             child: Provider.value(
               value: LdDrawerState(
-                isOpen: showingDetail,
+                isOpen: showingDetail || showingNew,
                 isSideBySide: true,
               ),
               child: LdMultiPanelLayout(
                 mode: LdMultiPanelLayoutMode.sideBySide,
-                panelVisible: showingDetail,
+                panelVisible: showingDetail || showingNew,
+                minPanelWidth: 350,
                 allowResize: true,
                 panelPosition: LdPanelPosition.right,
                 initialPanelFraction: detailPanelFlex / (1 + detailPanelFlex),
@@ -160,21 +168,24 @@ class _MonkeyShellLayoutBuilder<T extends Identifiable<IdType>, IdType> extends 
                   value: LdDrawerSlot.body,
                   child: PreventAutoFocus(
                     child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        border: Border(
-                          left: BorderSide(
-                            color: LdTheme.of(context).border,
-                            width: LdTheme.of(context).borderWidth,
+                        decoration: BoxDecoration(
+                          border: Border(
+                            left: BorderSide(
+                              color: LdTheme.of(context).border,
+                              width: LdTheme.of(context).borderWidth,
+                            ),
                           ),
                         ),
-                      ),
-                      child: showingDetail
-                          ? wrappedChild
-                          : LdAutoBackground(
-                              invert: true,
-                              child: SizedBox.shrink(),
-                            ),
-                    ),
+                        child: switch (showingDetail) {
+                          true => wrappedChild,
+                          false => switch (showingNew) {
+                              true => wrappedChild,
+                              false => LdAutoBackground(
+                                  invert: true,
+                                  child: SizedBox.shrink(),
+                                ),
+                            }
+                        }),
                   ),
                 ),
               ),

@@ -10,9 +10,9 @@ class _CacheItem with Identifiable<int> {
 }
 
 void main() {
-  group('LdRepositoryCache', () {
+  group('LdListCache', () {
     test('writePage stores defensive copy', () {
-      final cache = LdRepositoryCache<_CacheItem, int>();
+      final cache = LdListCache<_CacheItem, int>();
       final source = [_CacheItem(1, 'a')];
 
       cache.writePage('items', offset: 0, items: source, total: 1);
@@ -23,7 +23,7 @@ void main() {
     });
 
     test('readPage returns unmodifiable list', () {
-      final cache = LdRepositoryCache<_CacheItem, int>();
+      final cache = LdListCache<_CacheItem, int>();
       cache.writePage('items', offset: 0, items: [_CacheItem(1, 'a')], total: 1);
 
       final read = cache.readPage('items', 0);
@@ -35,7 +35,7 @@ void main() {
     });
 
     test('remove deletes entry', () {
-      final cache = LdRepositoryCache<_CacheItem, int>();
+      final cache = LdListCache<_CacheItem, int>();
       cache.writePage('items', offset: 0, items: [_CacheItem(1, 'a')], total: 1);
 
       cache.remove('items');
@@ -45,7 +45,7 @@ void main() {
     });
 
     test('readPage returns null when ttl expired', () async {
-      final cache = LdRepositoryCache<_CacheItem, int>();
+      final cache = LdListCache<_CacheItem, int>();
       cache.writePage(
         'items',
         offset: 0,
@@ -61,7 +61,7 @@ void main() {
     });
 
     test('all merges contiguous pages when complete', () {
-      final cache = LdRepositoryCache<_CacheItem, int>();
+      final cache = LdListCache<_CacheItem, int>();
       cache.writePage(
         'items',
         offset: 0,
@@ -81,7 +81,7 @@ void main() {
     });
 
     test('all returns null when pages are partial', () {
-      final cache = LdRepositoryCache<_CacheItem, int>();
+      final cache = LdListCache<_CacheItem, int>();
       cache.writePage(
         'items',
         offset: 0,
@@ -94,7 +94,7 @@ void main() {
     });
 
     test('all returns null when offsets are not contiguous from 0', () {
-      final cache = LdRepositoryCache<_CacheItem, int>();
+      final cache = LdListCache<_CacheItem, int>();
       cache.writePage(
         'items',
         offset: 2,

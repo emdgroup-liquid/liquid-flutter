@@ -13,6 +13,12 @@ import 'package:provider/single_child_widget.dart';
 
 part 'appbar.variants.g.dart';
 
+class LdAppBarParentShowsImpliedLeading {
+  const LdAppBarParentShowsImpliedLeading(this.value);
+
+  final bool value;
+}
+
 enum LdAppBarShadowMode {
   visible,
   whenScrolled,
@@ -156,6 +162,8 @@ class LdAppBarWidget extends StatefulWidget {
 
   final EdgeInsets? padding;
 
+  final bool? insetScreenRadius;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -186,6 +194,7 @@ class LdAppBarWidget extends StatefulWidget {
     this.borderMode = LdAppBarBorderMode.adaptive,
     this.bottom,
     this.debugName,
+    this.insetScreenRadius = true,
     this.implyCloseModalButton = true,
     this.implyLeading,
     this.avoidViewInsets = false,
@@ -312,15 +321,15 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
   void _popParentRoute() {
     final route = ModalRoute.of(context);
     if (route?.impliesAppBarDismissal ?? false) {
-      route?.navigator?.pop();
+      route?.navigator?.maybePop();
       return;
     }
 
     final router = GoRouter.maybeOf(context);
     if (router != null) {
-      context.pop();
+      Navigator.of(context).maybePop();
     } else {
-      Navigator.of(context).pop();
+      Navigator.of(context).maybePop();
     }
   }
 
@@ -391,7 +400,7 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
     final imply = widget.implyLeading ?? true;
     if (!imply) return null;
 
-    if (_shouldImplyRouteBack(context, metrics)) {
+    if (_shouldImplyRouteBack(metrics)) {
       return LdButton.ghost(
         onPressed: _popParentRoute,
         child: const Icon(LucideIcons.chevronLeft),
@@ -401,50 +410,23 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
     return null;
   }
 
-  bool _shouldImplyRouteBack(BuildContext context, LdAppBarMetrics? metrics) {
-    if (!_canPopParentRoute || _isDrawer || _isModal || !_isInTopSlot) {
+  bool _shouldImplyRouteBack(LdAppBarMetrics? metrics) {
+    if (!_canPopParentRoute ||
+        _isDrawer ||
+        _isModal ||
+        !_isInTopSlot ||
+        widget.implyLeading == false ||
+        widget.leading != null) {
       return false;
     }
 
-    if (metrics != null && ldHasParentTopAppBar(metrics)) {
-      return true;
-    }
+    final parentShowsImpliedLeading = context.read<LdAppBarParentShowsImpliedLeading?>()?.value;
 
-    return !_containsNestedTopAppBar(widget.child);
-  }
-
-  bool _widgetIsTopAppBar(Widget widget) {
-    final positionMode = switch (widget) {
-      LdAppBar(:final positionMode) => positionMode,
-      LdAppBarWidget(:final positionMode) => positionMode,
-      _ => null,
-    };
-
-    if (positionMode == null) {
+    if (parentShowsImpliedLeading ?? false) {
       return false;
     }
 
-    return switch (positionMode) {
-      LdAppBarPositionMode.top => true,
-      LdAppBarPositionMode.bottom => false,
-      LdAppBarPositionMode.adaptive => !LdTheme.of(context).platform.isMobile,
-    };
-  }
-
-  bool _containsNestedTopAppBar(Widget widget) {
-    Widget? current = widget;
-    while (current != null) {
-      if (_widgetIsTopAppBar(current)) {
-        return true;
-      }
-      current = switch (current) {
-        LdTabNavigation(:final child) => child,
-        LdAppBar(:final child) => child,
-        LdAppBarWidget(:final child) => child,
-        _ => null,
-      };
-    }
-    return false;
+    return true;
   }
 
   TextStyle get _headerStyle {
@@ -631,17 +613,24 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
       child: barSurface,
     );
 
+    final parentMetrics = context.watch<LdAppBarMetrics?>();
+
+    bool showingImpliedLeading = _shouldImplyRouteBack(parentMetrics);
+
     final frame = AppBarFrame(
       focusScopeNode: _focusScopeNode,
       avoidViewInsets: widget.avoidViewInsets,
       addContainer: widget.addContainer,
       debugName: widget.debugName,
       position: position,
-      insetBorderRadius: !_isModal,
+      insetBorderRadius: widget.insetScreenRadius ?? !_isModal,
       attached: isAttached,
       outsideAdditionalPadding: isAttached ? EdgeInsets.zero : LdTheme.of(context).pad(size: LdSize.s),
       scrollBehavior: widget.scrollBehavior,
-      wrappedChild: widget.child,
+      wrappedChild: Provider<LdAppBarParentShowsImpliedLeading>.value(
+        value: LdAppBarParentShowsImpliedLeading(showingImpliedLeading),
+        child: widget.child,
+      ),
       insidePadding: widget.padding,
       outsideDecorationBuilder: (isScrolledUnder) => decorationBuilder.buildOutsideDecoration(
         context: context,

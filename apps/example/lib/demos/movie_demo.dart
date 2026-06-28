@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:provider/provider.dart';
 
 class MovieDemo with Identifiable<int> {
   @override
@@ -63,16 +65,16 @@ List<MovieDemo> applyMovieFilters(List<MovieDemo> data, Set<LdFilterOption<Movie
   return ldFuzzySearchFromFilters<MovieDemo, int>(items: filtered, filters: filters, searchText: movieSearchText);
 }
 
-LdRepository<MovieDemo, int> movieRepository(BuildContext context) => LdRepository<MovieDemo, int>(
+LdCallbackModel<MovieDemo, int> movieModel(BuildContext context) => LdCallbackModel<MovieDemo, int>(
   pageSize: 5,
-  getOffsetById: (parameters) async {
+  getOffsetByIdFn: (parameters) async {
     await Future.delayed(const Duration(seconds: 1));
 
     final filtered = applyMovieFilters(movieData, parameters.filters);
 
     return filtered.indexWhere((element) => element.id == parameters.id);
   },
-  getById: (id) async {
+  getById: (context, id) async {
     return movieData.firstWhere((element) => element.id == id);
   },
 
@@ -89,7 +91,7 @@ LdRepository<MovieDemo, int> movieRepository(BuildContext context) => LdReposito
     movieData.removeWhere((element) => element.id == id);
     await Future.delayed(const Duration(milliseconds: 500));
   },
-  deleteBatch: (context, ids) async {
+  deleteBatchFn: (context, ids) async {
     for (final id in ids) {
       movieData.removeWhere((element) => element.id == id);
     }
@@ -107,6 +109,7 @@ LdRepository<MovieDemo, int> movieRepository(BuildContext context) => LdReposito
     return item;
   },
 );
+
 
 Future<List<LdFilterOption<MovieDemo, int>>> buildMovieFilters(BuildContext context) async {
   final genres = await loadMovieGenres(context);
@@ -154,66 +157,73 @@ Future<List<String>> loadMovieGenres(BuildContext context) async {
   return movieData.map((movie) => movie.genre).toSet().toList()..sort();
 }
 
-class _MovieDetail extends StatefulWidget {
+class MovieDetail extends StatelessWidget {
   final LdPaginatorItem<MovieDemo> movie;
-  const _MovieDetail({required this.movie});
-  @override
-  State<_MovieDetail> createState() => _MovieDetailState();
-}
 
-class _MovieDetailState extends State<_MovieDetail> {
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _genreController = TextEditingController();
-  final TextEditingController _ratingController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _titleController.text = widget.movie.value?.title ?? "";
-    _genreController.text = widget.movie.value?.genre ?? "";
-    _ratingController.text = widget.movie.value?.rating.toString() ?? "";
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _genreController.dispose();
-    _ratingController.dispose();
-    super.dispose();
-  }
+  const MovieDetail({super.key, required this.movie});
 
   @override
   Widget build(BuildContext context) {
-    if (widget.movie.value == null) {
+    if (movie.value == null) {
       return LdCard(child: Center(child: LdLoader()));
     }
+
+    final movieValue = movie.value!;
+
     return LdAutoSpace(
       children: [
-        LdInput(label: "Title", hint: "Movie title", controller: _titleController),
-        LdInput(label: "Genre", hint: "Movie genre", controller: _genreController),
-        LdInput(label: "Rating", hint: "1-5", controller: _ratingController, keyboardType: TextInputType.number),
-        LdText("Last updated: ${Jiffy.parseFromDateTime(widget.movie.value!.lastUpdate).fromNow()}"),
-        Row(
-          children: [
-            LdSubmit<void, void>(
-              config: LdSubmitConfig<void, void>(
-                submitText: "Save",
-                debugLabel: "Save Movie",
-                action: (_) async {
-                  final newMovie = MovieDemo(
-                    widget.movie.value!.id,
-                    _titleController.text,
-                    _genreController.text,
-                    int.tryParse(_ratingController.text) ?? 1,
-                    widget.movie.value!.lastUpdate,
-                  );
-                  final repo = LdRepository.of<MovieDemo, int>(context);
-                  await repo.update(context, widget.movie.value!.id, newMovie);
-                },
+        LdMonkeyReactiveDetailForm<MovieDemo, int, MovieDemo, MovieDemo, MovieDemo>.edit(
+          item: movie,
+          saveMode: LdMonkeyDetailSaveMode.adaptive,
+          detailToFormValues: (detail) => {
+            'title': detail.title,
+            'genre': {detail.genre},
+            'rating': detail.rating.toDouble(),
+          },
+          formToUpdatePayload: (form, detail) {
+            final genres = form.control('genre').value as Set<String>;
+            return detail.copyWith(
+              title: form.control('title').value as String,
+              genre: genres.isEmpty ? detail.genre : genres.first,
+              rating: (form.control('rating').value as double).round(),
+            );
+          },
+          submitConfig: LdFormSubmitConfig(submitText: 'Save'),
+          itemsBuilder: (context, hooks) {
+            final genreItems = movieData
+                .map((movie) => movie.genre)
+                .toSet()
+                .map((genre) => LdSelectItem(value: genre, child: Text(genre)))
+                .toList();
+
+            return [
+              LdReactiveFormItem.input(
+                key: 'title',
+                label: 'Title',
+                inputFieldHint: 'Movie title',
+                validators: [LdFormValidators.required],
+                onBlurred: hooks.onBlurred('title'),
               ),
-            ),
-          ],
-        ).spaceM(),
+              LdReactiveFormItem.chooseFromItems<String>(
+                key: 'genre',
+                label: 'Genre',
+                items: genreItems,
+                validators: [LdFormValidators.required],
+                onCommitted: hooks.onCommitted('genre'),
+              ),
+              LdReactiveFormItem.slider(
+                key: 'rating',
+                label: 'Rating',
+                min: 1,
+                max: 5,
+                validators: [LdFormValidators.required],
+
+                onCommitted: hooks.onCommitted('rating'),
+              ),
+            ];
+          },
+        ),
+        LdText('Last updated: ${Jiffy.parseFromDateTime(movieValue.lastUpdate).fromNow()}'),
       ],
     );
   }
@@ -235,14 +245,14 @@ List<LdMonkeyAction<MovieDemo, int>> movieActions = [
     shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyD, meta: true)},
     submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Duplicating"),
     onSubmit: (ctx) async {
-      final item = await ctx.repository.getById(ctx.selectedIds.first);
+      final item = await ctx.listController.getById(ctx.appContext, ctx.selectedIds.first);
 
       final newItem = item.copyWith(id: movieData.length + 1, title: "${item.title} (copy)");
 
       if (!ctx.appContext.mounted) {
         return;
       }
-      await ctx.repository.create(ctx.appContext, newItem);
+      await ctx.appContext.read<LdModel<MovieDemo, int, Object?, Object?>>().create(ctx.appContext, newItem);
 
       await Future.delayed(const Duration(milliseconds: 1500));
 
@@ -268,7 +278,7 @@ class MovieDetailPage extends StatelessWidget {
         positionMode: LdAppBarPositionMode.top,
         borderMode: LdAppBarBorderMode.visible,
       ),
-      buildDetail: (context, item) => _MovieDetail(movie: item),
+      buildDetail: (context, item) => MovieDetail(movie: item),
     );
   }
 }

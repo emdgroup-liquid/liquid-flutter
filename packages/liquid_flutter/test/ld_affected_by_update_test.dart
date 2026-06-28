@@ -176,14 +176,5 @@ void main() {
         isFalse,
       );
     });
-
-    test('mutationAffectsCache typedef alias remains available', () {
-      bool predicate(_LayoutItem? before, _LayoutItem? after) {
-        return before?.title != after?.title;
-      }
-      // ignore: deprecated_member_use_from_same_package
-      final LdMutationAffectsCache<_LayoutItem> alias = predicate;
-      expect(alias(_LayoutItem(1, 'a', 1), _LayoutItem(1, 'b', 1)), isTrue);
-    });
   });
 }

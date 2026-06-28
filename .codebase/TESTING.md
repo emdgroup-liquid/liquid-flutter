@@ -216,7 +216,7 @@ The `multiGolden` function from `liquid_flutter_test_utils` handles:
 ### Test Repository
 
 ```dart
-LdRepository<TestItem, int> createTestRepository({
+LdListController<TestItem, int> createTestListController({
   List<TestItem>? initialItems,
   Set<LdFilterOption<TestItem, int>>? filters,
 }) {
@@ -225,7 +225,7 @@ LdRepository<TestItem, int> createTestRepository({
     TestItem(2, 'Item 2', 20),
   ];
 
-  return LdRepository<TestItem, int>(
+  return LdListController<TestItem, int>(
     fetchListWithParameters: ({required offset, required pageSize, ...}) async {
       return LdListPage(
         newItems: items.skip(offset).take(pageSize).toList(),
@@ -437,7 +437,7 @@ Test multiple components working together (e.g., monkey tests):
 
 ```dart
 testWidgets('renders master and detail side-by-side', (WidgetTester tester) async {
-  final repository = createTestRepository(initialItems: [...]);
+  final repository = createTestListController(initialItems: [...]);
   final routes = buildMonkeyRoutes<TestItem, int>(...);
 
   final router = GoRouter(routes: routes);

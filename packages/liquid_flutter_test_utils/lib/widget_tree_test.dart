@@ -13,6 +13,7 @@ const Set<dynamic> defaultIgnoredWidgets = {
   DefaultTextStyle,
   PhysicalModel,
   AnimatedPhysicalModel,
+  AnimatedBuilder,
   Semantics,
   Actions,
   'NotificationListener',
@@ -641,9 +642,18 @@ WidgetTreeNode? createWidgetTree(
   // ignore: invalid_use_of_protected_member
   final constraints = e.renderObject?.constraints;
 
-  if (options.strippedWidgets.contains(type) ||
-      options.strippedWidgets.contains(typeWithoutGeneric) ||
-      (options.stripPrivateWidgets && type.startsWith('_'))) {
+  final shouldStrip = options.strippedWidgets.any((stripped) {
+    if (stripped is Type) {
+      return widget.runtimeType == stripped;
+    }
+    if (stripped is String) {
+      return type == stripped || typeWithoutGeneric == stripped;
+    }
+    return false;
+  }) ||
+      (options.stripPrivateWidgets && type.startsWith('_'));
+
+  if (shouldStrip) {
     if (children.isNotEmpty) {
       return children.length == 1
           ? children.first

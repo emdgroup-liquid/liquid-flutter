@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/src/monkey/data/identifiable.dart';
-import 'package:liquid_flutter/src/monkey/data/repository.dart';
+import 'package:liquid_flutter/src/monkey/data/list_controller.dart';
 import 'package:liquid_flutter/src/monkey/filter/ld_filter_option.dart';
 import 'package:liquid_flutter/src/monkey/monkey_route_config.dart';
 import 'package:liquid_flutter/src/monkey/monkey_route_state_parser.dart';
@@ -17,7 +17,7 @@ Widget ldFilterStateScope<T extends Identifiable<IdType>, IdType>({
   required GoRouterDelegate routerDelegate,
   required LdMonkeyRouteConfig<T, IdType> routeConfig,
   required LdMonkeyRouterController<T, IdType> routerController,
-  required LdRepository<T, IdType> repository,
+  required LdListController<T, IdType> repository,
   required Iterable<LdFilterOption<T, IdType>> baseFilters,
   required Iterable<LdSortOption<T, IdType>> baseSortOptions,
   required Widget child,
@@ -47,7 +47,7 @@ Widget ldFilterStateScope<T extends Identifiable<IdType>, IdType>({
           Provider<LdMonkeyRouterController<T, IdType>>.value(value: routerController),
           Provider<LdMonkeySortAndFilterState<T, IdType>>.value(value: sortAndFilterState),
           Provider<LdMonkeySelection<T, IdType>>.value(value: selection),
-          ListenableProvider<LdRepository<T, IdType>>.value(value: repository),
+          ListenableProvider<LdListController<T, IdType>>.value(value: repository),
         ],
         child: child,
       );

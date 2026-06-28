@@ -16,9 +16,9 @@ void main() {
 
   group('LdMonkeyShell Tests', () {
     group('Repository Initialization', () {
-      testWidgets('initializes repository via repositoryBuilder', (WidgetTester tester) async {
-        var repositoryCreated = false;
-        final repository = createTestRepository();
+      testWidgets('initializes repository via modelBuilder', (WidgetTester tester) async {
+        var modelCreated = false;
+        final model = createTestModel();
         final routeConfig = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'item');
 
         final router = GoRouter(
@@ -26,9 +26,9 @@ void main() {
           routes: buildMonkeyRoutes<TestItem, int>(
             masterPath: '/test',
             routeConfig: routeConfig,
-            repositoryBuilder: (context, state) {
-              repositoryCreated = true;
-              return repository;
+            modelBuilder: (context, state) {
+              modelCreated = true;
+              return model;
             },
             filtersBuilder: (_) async => [],
             sortOptionsBuilder: (_) async => [],
@@ -56,7 +56,7 @@ await tester.pumpWidget(
 
         // Use bounded pumps to avoid timeout from continuous list-refresh scheduling.
         for (var i = 0; i < 10; i++) { await tester.pump(const Duration(milliseconds: 100)); }
-        expect(repositoryCreated, isTrue);
+        expect(modelCreated, isTrue);
       });
 
       testWidgets('applies query parameters to repository filters', (WidgetTester tester) async {
@@ -66,7 +66,6 @@ await tester.pumpWidget(
           icon: (context) => const Icon(Icons.check),
         );
 
-        final repository = createTestRepository();
         final routeConfig = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'item');
 
         final router = GoRouter(
@@ -74,7 +73,7 @@ await tester.pumpWidget(
           routes: buildMonkeyRoutes<TestItem, int>(
             masterPath: '/test',
             routeConfig: routeConfig,
-            repositoryBuilder: (context, state) => repository,
+            modelBuilder: (context, state) => createTestModel(),
             filtersBuilder: (_) async => [filter],
             sortOptionsBuilder: (_) async => [],
             actions: const [],
@@ -118,7 +117,6 @@ await tester.pumpWidget(
           isOn: true,
         );
 
-        final repository = createTestRepository();
         final routeConfig = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'item');
 
         final router = GoRouter(
@@ -126,7 +124,7 @@ await tester.pumpWidget(
           routes: buildMonkeyRoutes<TestItem, int>(
             masterPath: '/test',
             routeConfig: routeConfig,
-            repositoryBuilder: (context, state) => repository,
+            modelBuilder: (context, state) => createTestModel(),
             filtersBuilder: (_) async => [filter],
             sortOptionsBuilder: (_) async => [],
             actions: const [],
@@ -161,12 +159,6 @@ await tester.pumpWidget(
 
       testWidgets('calls initWithSelection when selected items exist', (WidgetTester tester) async {
         var initWithSelectionCalled = false;
-        final repository = createTestRepository(
-          getOffsetById: (id, {filters, sortOptions}) async {
-            initWithSelectionCalled = true;
-            return 0;
-          },
-        );
 
         final itemRouteConfig = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'item');
         final router = GoRouter(
@@ -175,7 +167,12 @@ await tester.pumpWidget(
             ...buildMonkeyRoutes<TestItem, int>(
               masterPath: '/test',
               routeConfig: itemRouteConfig,
-              repositoryBuilder: (context, state) => repository,
+              modelBuilder: (context, state) => createTestModel(
+                getOffsetById: (id, {filters, sortOptions}) async {
+                  initWithSelectionCalled = true;
+                  return 0;
+                },
+              ),
               filtersBuilder: (_) async => [],
               sortOptionsBuilder: (_) async => [],
               actions: const [],
@@ -208,10 +205,8 @@ await tester.pumpWidget(
         expect(initWithSelectionCalled, isTrue);
       });
 
-      testWidgets('calls fetchItemsAtOffset when no selected items', (WidgetTester tester) async {
-        final repository = createTestRepository(
-          initialItems: [],
-        );
+      testWidgets('fetches list page when no selected items', (WidgetTester tester) async {
+        var fetchListCalled = 0;
 
         final routeConfig = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'item');
         final router = GoRouter(
@@ -219,7 +214,24 @@ await tester.pumpWidget(
           routes: buildMonkeyRoutes<TestItem, int>(
             masterPath: '/test',
             routeConfig: routeConfig,
-            repositoryBuilder: (context, state) => repository,
+            modelBuilder: (context, state) {
+              final items = [
+                TestItem(1, 'Item 1', 10),
+                TestItem(2, 'Item 2', 20),
+              ];
+              return LdCallbackModel<TestItem, int>(
+                fetchListWithParameters: (parameters) async {
+                  fetchListCalled++;
+                  final paginated = items.skip(parameters.offset).take(parameters.pageSize).toList();
+                  return LdListPage<TestItem>(
+                    newItems: paginated,
+                    hasMore: parameters.offset + parameters.pageSize < items.length,
+                    total: items.length,
+                  );
+                },
+                getById: (context, id) async => items.firstWhere((item) => item.id == id),
+              );
+            },
             filtersBuilder: (_) async => [],
             sortOptionsBuilder: (_) async => [],
             actions: const [],
@@ -248,8 +260,12 @@ await tester.pumpWidget(
         for (var i = 0; i < 10; i++) {
           await tester.pump(const Duration(milliseconds: 100));
         }
-        // Repository should have been initialized (empty list is fine)
-        expect(repository.itemsMap.isNotEmpty || repository.itemsMap.isEmpty, isTrue);
+
+        // The list controller should have fetched a page and exposed its items.
+        final ctx = tester.element(find.byType(LdMonkeyShell<TestItem, int>).last);
+        final controller = LdListController.of<TestItem, int>(ctx);
+        expect(fetchListCalled, greaterThan(0));
+        expect(controller.itemsMap, isNotEmpty);
       });
     });
   });

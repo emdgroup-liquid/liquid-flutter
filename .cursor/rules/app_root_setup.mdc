@@ -119,12 +119,17 @@ class AppRouter {
   late final router = GoRouter(
     debugLogDiagnostics: true, // Set to false in production
     initialLocation: "/",
+    redirect: ldLocationLockRedirect, // blocks navigation when detail forms are dirty
     routes: [
       // Your routes here
     ],
   );
 }
 ```
+
+For apps with custom redirects, compose with `ldComposeGoRouterRedirects([ldLocationLockRedirect, myRedirect])`.
+
+`LdThemeProvider` mounts [LdLocationLockRegistry] automatically.
 
 ## Key Points
 

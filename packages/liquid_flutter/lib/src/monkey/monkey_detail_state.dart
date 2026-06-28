@@ -1,21 +1,21 @@
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 class LdMonkeyDetailState<T extends Identifiable<IdType>, IdType> {
-  final LdRepository<T, IdType>? repository;
+  final LdListController<T, IdType>? listController;
 
   final Set<IdType> deletedItems;
 
   const LdMonkeyDetailState({
     this.deletedItems = const {},
-    this.repository,
+    this.listController,
   });
 
   LdMonkeyDetailState<T, IdType> copyWith({
-    LdRepository<T, IdType>? repository,
+    LdListController<T, IdType>? listController,
     Set<IdType>? deletedItems,
   }) {
     return LdMonkeyDetailState<T, IdType>(
-      repository: repository ?? this.repository,
+      listController: listController ?? this.listController,
       deletedItems: deletedItems ?? this.deletedItems,
     );
   }

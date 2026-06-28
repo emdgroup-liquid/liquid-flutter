@@ -12,9 +12,9 @@ class LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType> extends Statefu
     this.secondaryAppBarConfig,
     this.filterBarConfig,
     this.buildList,
-  }) : assert(buildList != null || buildItem != null, "Either buildList or buildItem must be provided");
+  });
 
-  final Widget Function(BuildContext context, LdRepository<T, IdType> repository)? buildList;
+  final Widget Function(BuildContext context, LdListController<T, IdType> repository)? buildList;
   final Widget Function(BuildContext context, LdPaginatorItem<T> item)? buildItem;
   final List<LdFilterChipConfig<T, IdType>>? filterBarConfig;
 
@@ -66,7 +66,7 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
 
   Widget _buildList(
     BuildContext context,
-    LdRepository<T, IdType> repository,
+    LdListController<T, IdType> repository,
     LdMonkeyActions<T, IdType> actions,
   ) {
     if (widget.buildList != null) {
@@ -172,7 +172,7 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
   @override
   Widget build(BuildContext context) {
     LdMonkeySelection.of<T, IdType>(context, listen: true);
-    final repository = LdRepository.of<T, IdType>(context);
+    final repository = LdListController.of<T, IdType>(context);
     final actions = context.watch<LdMonkeyActions<T, IdType>>();
 
     return LdNotificationProvider(

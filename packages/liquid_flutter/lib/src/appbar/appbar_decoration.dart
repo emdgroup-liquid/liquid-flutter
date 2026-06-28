@@ -107,7 +107,7 @@ class LdAppBarDecorationBuilder {
 
   double borderRadius(BuildContext context) {
     final theme = LdTheme.of(context);
-    final radius = theme.radiusSize(LdSize.m);
+    final radius = theme.radiusSize(LdSize.l);
     return radius;
   }
 
@@ -184,7 +184,9 @@ class LdAppBarDecorationBuilder {
         ),
       ],
       border: Border.all(
-        color: LdTheme.of(context).floatingBorder,
+        color: LdTheme.of(context)
+            .floatingBorder
+            .withAlpha(shouldShowBorder(context, isScrolledUnder, isInBottomSlot) ? 255 : 0),
         width: LdTheme.of(context).borderWidth,
       ),
     );
@@ -215,6 +217,15 @@ extension TrimToAppBarPosition on EdgeInsets {
     return copyWith(
       top: position == LdAppBarPosition.top ? top : 0,
       bottom: position == LdAppBarPosition.bottom ? bottom : 0,
+    );
+  }
+
+  EdgeInsets positionOnly(LdAppBarPosition position) {
+    return copyWith(
+      top: position == LdAppBarPosition.top ? top : 0,
+      bottom: position == LdAppBarPosition.bottom ? bottom : 0,
+      left: 0,
+      right: 0,
     );
   }
 }

@@ -10,6 +10,7 @@ workspace:
   - packages/liquid_flutter_test_utils
   - packages/liquid_flutter/extension/devtools/liquid_flutter_extension
   - packages/liquid_flutter_md
+  - packages/liquid_flutter_reactive_forms
   - apps/example
 dev_dependencies:
   melos: ^7.1.0
@@ -19,6 +20,7 @@ melos:
     testable:
       - packages/liquid_flutter
       - packages/liquid_flutter_test_utils
+      - packages/liquid_flutter_reactive_forms
   scripts:
     analyze: 
       exec: dart analyze

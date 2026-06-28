@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/src/modal/modal.dart';
 import 'package:liquid_flutter/src/monkey/actions/actions.dart';
 import 'package:liquid_flutter/src/monkey/data/identifiable.dart';
-import 'package:liquid_flutter/src/monkey/data/repository.dart';
+import 'package:liquid_flutter/src/monkey/data/ld_model.dart';
 import 'package:liquid_flutter/src/monkey/ld_monkey_route_definitions.dart';
 import 'package:liquid_flutter/src/monkey/monkey_effective_layout_mode.dart';
 import 'package:liquid_flutter/src/monkey/monkey_layout_mode.dart';
@@ -22,7 +22,8 @@ class MonkeyRouteNode<T extends Identifiable<IdType>, IdType> {
     required this.routeConfig,
     required this.masterPage,
     required this.detailPage,
-    required this.repositoryBuilder,
+    required this.modelBuilder,
+    this.createPage,
     required this.filtersBuilder,
     required this.sortOptionsBuilder,
     required this.actions,
@@ -46,6 +47,8 @@ class MonkeyRouteNode<T extends Identifiable<IdType>, IdType> {
 
   final Widget detailPage;
 
+  final Widget? createPage;
+
   final LdMonkeyFiltersBuilder<T, IdType> filtersBuilder;
 
   final LdMonkeySortOptionsBuilder<T, IdType> sortOptionsBuilder;
@@ -54,10 +57,10 @@ class MonkeyRouteNode<T extends Identifiable<IdType>, IdType> {
 
   final List<LdMonkeyAction<T, IdType>> actions;
 
-  final LdRepository<T, IdType> Function(
+  final LdModel<T, IdType, Object?, Object?> Function(
     BuildContext context,
     GoRouterState routeState,
-  ) repositoryBuilder;
+  ) modelBuilder;
 
   final bool detailInDialog;
 
@@ -106,7 +109,7 @@ class MonkeyRouteNode<T extends Identifiable<IdType>, IdType> {
         filtersBuilder: filtersBuilder,
         sortOptionsBuilder: sortOptionsBuilder,
         routeDefinitionsLoadingText: routeDefinitionsLoadingText,
-        repositoryBuilder: repositoryBuilder,
+        modelBuilder: modelBuilder,
         masterPage: masterPage,
         shellBuilder: shellBuilder,
         layoutMode: layoutMode,
@@ -165,7 +168,7 @@ List<RouteBase> buildMonkeyRouteTree<T extends Identifiable<IdType>, IdType>({
           filtersBuilder: root.filtersBuilder,
           sortOptionsBuilder: root.sortOptionsBuilder,
           routeDefinitionsLoadingText: root.routeDefinitionsLoadingText,
-          repositoryBuilder: root.repositoryBuilder,
+          modelBuilder: root.modelBuilder,
           masterPage: root.masterPage,
           shellBuilder: root.shellBuilder,
           layoutMode: root.layoutMode,
@@ -220,6 +223,19 @@ List<RouteBase> _buildDetailRoutes({
   required String detailPath,
   List<RouteBase>? additionalDetailRoutes,
 }) {
+  final createPage = node.createPage;
+  final createRoute = createPage != null
+      ? GoRoute(
+          name: node.routeConfig.createRouteName,
+          path: node.routeConfig.createPathSegment,
+          pageBuilder: (context, goState) => _detailPageBuilder(
+            context,
+            createPage,
+            node.detailInDialog,
+          ),
+        )
+      : null;
+
   final detailRoute = GoRoute(
     name: node.routeConfig.detailRouteName,
     path: detailPath,
@@ -239,8 +255,13 @@ List<RouteBase> _buildDetailRoutes({
     ],
   );
 
+  final routes = <RouteBase>[
+    if (createRoute != null) createRoute,
+    detailRoute,
+  ];
+
   if (node.child == null) {
-    return [detailRoute];
+    return routes;
   }
 
   return [
@@ -252,7 +273,7 @@ List<RouteBase> _buildDetailRoutes({
           child: child,
         );
       },
-      routes: [detailRoute],
+      routes: routes,
     ),
   ];
 }

@@ -57,7 +57,7 @@ LdRepository.fromList<Task, int>(
 
 This creates a **greedy** repository that eagerly loads the full in-memory list via `ensureGreedyLoaded`.
 
-### `LdFetchReason`, `cacheKey`, and `LdRepositoryCache`
+### `LdFetchReason`, `cacheKey`, and `LdListCache`
 
 `fetchListWithParameters` receives a `reason`, per-repo `cache`, and a deterministic `cacheKey` (active filters + sorts, excluding offset/pageSize/reason).
 
@@ -585,7 +585,7 @@ final sortAndFilter = LdMonkeySortAndFilterState.of<Task, int>(context);
 final activeSorts = sortAndFilter.activeSortOptions;
 ```
 
-**Note:** Filters and sort options are not stored in the repository — they live in `LdMonkeySortAndFilterState` in the widget tree. Use `LdMonkeyRepositoryFilterAdapter` (automatically included in the monkey scope) to react to filter/sort changes and refresh the repository.
+**Note:** Filters and sort options are not stored in the list controller — they live in `LdMonkeySortAndFilterState` in the widget tree. Use `LdMonkeyListFilterAdapter` (automatically included in the monkey scope) to react to filter/sort changes and refresh the list.
 
 ## Selection State
 
@@ -684,6 +684,86 @@ buildMonkeyRoutes<Task, int>(
 )
 ```
 
+## Detail editing guards
+
+Editable monkey detail pages use [LdLocationLockRegistry] with [GoRouter.redirect] to intercept all navigation away from a dirty detail path. Each editor registers and removes its own lock; there is no monkey-specific aggregation layer.
+
+### Setup
+
+Mount [LdThemeProvider] (includes [LdLocationLockRegistry]) and wire the router:
+
+```dart
+GoRouter(
+  redirect: ldLocationLockRedirect,
+  routes: [...],
+)
+```
+
+Combine with app-specific redirects using [ldComposeGoRouterRedirects].
+
+### Self-managed locks
+
+Each editor owns its lock. While edits are dirty or saving it:
+
+- Registers a path-prefix lock for the current URI (sub-path navigation stays allowed)
+- Renders `PopScope(canPop: false)` to block predictive back
+
+Multiple editors may lock the same path (e.g. a multi-view `/task-demo/12,13`); only disjoint, non-nested prefixes conflict. Saving is the editor's own concern — handle it inside `onLeave` (block silently while saving), not on the lock.
+
+```dart
+LdLocationLockRegistry.of(context).register(
+  LdLocationLock(
+    id: 'my-form-${item.id}',
+    pathPrefix: GoRouter.of(context).state.uri.path,
+    onLeave: (context) async {
+      if (isSaving()) return false; // block silently mid-save
+      return ldMonkeyConfirmDiscardEdits(context);
+    },
+  ),
+);
+```
+
+Return `true` from `onLeave` to allow leaving (the lock is removed); `false` to stay. Unregister the lock when the editor becomes pristine and in `dispose`.
+
+[LdMonkeyReactiveDetailForm] does all of this automatically — non-reactive editors use this generic API directly.
+
+### `LdMonkeyReactiveDetailForm`
+
+Reactive detail editor (`liquid_flutter_reactive_forms`) that connects a `FormGroup` to `LdRepository.update`:
+
+```dart
+LdMonkeyReactiveDetailForm<Task, int, Task>(
+  item: paginatorItem,
+  saveMode: LdMonkeyDetailSaveMode.adaptive,
+  detailToFormValues: (task) => {
+    'title': task.task,
+    'due': task.due,
+  },
+  mapToEntity: (form, task) => task.copyWith(
+    task: form.control('title').value as String,
+    due: form.control('due').value as DateTime,
+  ),
+  itemsBuilder: (context, hooks) => [
+    LdReactiveFormItem.input<String>(
+      key: 'title',
+      inputFieldHint: 'Task',
+      onBlurred: hooks.onBlurred('title'),
+    ),
+    LdReactiveFormItem.datePicker(
+      key: 'due',
+      label: 'Due',
+      // wire onChanged in datePicker via hooks.onCommitted when using blur save
+    ),
+  ],
+)
+```
+
+- **`TDetail`**: optional third type param when the list entity differs from the full record (`loadDetail` + `detailFromEntity`).
+- **`mapToEntity`**: projects form values onto the persistence model at save time.
+- **`LdMonkeyDetailSaveMode.adaptive`**: blur save on mobile, manual Save on desktop.
+- **Merge**: pristine fields patch from the repository stream; dirty fields use `LdMonkeyFieldConflictPolicy` (default `keepLocal`).
+- **`LdMonkeyDetailFormScope`**: exposes `isDirty`, `isSaving`, `save`, `reset`, and `detail` for custom layouts.
+
 ## Deleted Items Guard
 
 `LdMonkeyDeletedItemsGuard` automatically removes deleted items from selection and viewing state. It is included automatically — it is nested inside `LdMonkeyRouterAdapter`, which is part of every monkey scope.
@@ -706,7 +786,7 @@ LdMonkeyRouteScope<Task, int>(
 ```
 
 The provider stack is:
-`LdMonkeyRouteConfig` → `LdMonkeyActions` → `LdRepositoryProvider` → `LdMonkeyRouteDefinitionsResolver` → `LdMonkeyRouterAdapter` (provides `LdMonkeySelection`, `LdMonkeySortAndFilterState`, `LdMonkeyRouterController`, `LdMonkeyRepositoryFilterAdapter`, `LdMonkeyDeletedItemsGuard`) → `LdMonkeyShell`.
+`LdMonkeyRouteConfig` → `LdMonkeyActions` → `LdRepositoryProvider` → `LdMonkeyRouteDefinitionsResolver` → `LdMonkeyRouterAdapter` (provides `LdMonkeySelection`, `LdMonkeySortAndFilterState`, `LdMonkeyRouterController`, `LdMonkeyListFilterAdapter`, `LdMonkeyDeletedItemsGuard`) → `LdMonkeyShell`.
 
 ## Best Practices
 

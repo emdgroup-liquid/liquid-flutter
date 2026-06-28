@@ -3,18 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'test_utils.dart';
 
-Widget _wrapFilterModal<T extends Identifiable<IdType>, IdType>({
-  required Widget child,
-  required LdRepository<T, IdType> repository,
-  required TestSortAndFilterState<T, IdType> shellState,
-}) {
-  return wrapMonkeyFilterTestContext<T, IdType>(
-    repository: repository,
-    shellState: shellState,
-    child: Scaffold(body: child),
-  );
-}
-
 void main() {
   group('Filter Modal Tests', () {
     group('LdFilterModal Widget', () {
@@ -26,10 +14,10 @@ void main() {
         );
 
         final shellState = TestSortAndFilterState<TestItem, int>(filters: {filter});
-        final repository = createTestRepository();
+        final repository = createTestListController();
 
         await tester.pumpWidget(
-          _wrapFilterModal(
+          wrapMonkeyFilterModal(
             repository: repository,
             shellState: shellState,
             child: const LdFilterModal<TestItem, int>(),
@@ -59,10 +47,10 @@ void main() {
         final shellState = TestSortAndFilterState<TestItem, int>(
           filters: {activeFilter, inactiveFilter},
         );
-        final repository = createTestRepository();
+        final repository = createTestListController();
 
         await tester.pumpWidget(
-          _wrapFilterModal(
+          wrapMonkeyFilterModal(
             repository: repository,
             shellState: shellState,
             child: const LdFilterModal<TestItem, int>(),
@@ -84,10 +72,10 @@ void main() {
         );
 
         final shellState = TestSortAndFilterState<TestItem, int>(filters: {filter});
-        final repository = createTestRepository();
+        final repository = createTestListController();
 
         await tester.pumpWidget(
-          _wrapFilterModal(
+          wrapMonkeyFilterModal(
             repository: repository,
             shellState: shellState,
             child: const LdFilterModal<TestItem, int>(),
@@ -113,10 +101,10 @@ void main() {
         final shellState = TestSortAndFilterState<TestItem, int>(
           sortOptions: [sortOption],
         );
-        final repository = createTestRepository();
+        final repository = createTestListController();
 
         await tester.pumpWidget(
-          _wrapFilterModal(
+          wrapMonkeyFilterModal(
             repository: repository,
             shellState: shellState,
             child: const LdFilterModal<TestItem, int>(),
@@ -132,10 +120,10 @@ void main() {
     group('LdFilterContextMenu Widget', () {
       testWidgets('renders filter button', (WidgetTester tester) async {
         final shellState = TestSortAndFilterState<TestItem, int>();
-        final repository = createTestRepository();
+        final repository = createTestListController();
 
         await tester.pumpWidget(
-          _wrapFilterModal(
+          wrapMonkeyFilterModal(
             repository: repository,
             shellState: shellState,
             child: const LdFilterContextMenu<TestItem, int>(),

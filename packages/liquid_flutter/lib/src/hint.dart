@@ -32,13 +32,23 @@ class _LdHintWidget extends StatelessWidget {
   final LdHintType type;
   final LdSize size;
   final CrossAxisAlignment crossAxisAlignment;
+  final bool withBackground;
 
   const _LdHintWidget({
     this.child,
     required this.type,
+    this.withBackground = false,
     this.size = LdSize.m,
     this.crossAxisAlignment = CrossAxisAlignment.center,
   });
+
+  Color _getColor(LdTheme theme) => switch (type) {
+        LdHintType.error => theme.errorColor,
+        LdHintType.info || LdHintType.loading || LdHintType.pending || LdHintType.ongoing => theme.primaryColor,
+        LdHintType.success => theme.successColor,
+        LdHintType.warning => theme.warningColor,
+        LdHintType.canceled => theme.surface,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -46,36 +56,41 @@ class _LdHintWidget extends StatelessWidget {
 
     return Container(
       constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
-      child: IntrinsicWidth(
-        child: Row(crossAxisAlignment: crossAxisAlignment, children: [
-          LdIndicator(
-            type: switch (type) {
-              LdHintType.error => LdIndicatorType.error,
-              LdHintType.info => LdIndicatorType.info,
-              LdHintType.success => LdIndicatorType.success,
-              LdHintType.warning => LdIndicatorType.warning,
-              LdHintType.canceled => LdIndicatorType.canceled,
-              LdHintType.loading => LdIndicatorType.loading,
-              LdHintType.pending => LdIndicatorType.pending,
-              LdHintType.ongoing => LdIndicatorType.ongoing,
-            },
-          ),
-          if (child != null) ...[
-            ldSpacerS,
-            Expanded(
-              child: DefaultTextStyle(
-                style: ldBuildTextStyle(
-                  theme,
-                  LdTextType.paragraph,
-                  LdSize.m,
-                  lineHeight: 1.2,
-                ),
-                child: child!,
+      padding: withBackground ? theme.pad() : null,
+      decoration: withBackground
+          ? BoxDecoration(
+              borderRadius: theme.radius(LdSize.s),
+              color: _getColor(theme).withAlpha(20),
+              border: Border.all(color: _getColor(theme).withAlpha(100)),
+            )
+          : null,
+      child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: crossAxisAlignment, children: [
+        LdIndicator(
+          type: switch (type) {
+            LdHintType.error => LdIndicatorType.error,
+            LdHintType.info => LdIndicatorType.info,
+            LdHintType.success => LdIndicatorType.success,
+            LdHintType.warning => LdIndicatorType.warning,
+            LdHintType.canceled => LdIndicatorType.canceled,
+            LdHintType.loading => LdIndicatorType.loading,
+            LdHintType.pending => LdIndicatorType.pending,
+            LdHintType.ongoing => LdIndicatorType.ongoing,
+          },
+        ),
+        if (child != null) ...[
+          Flexible(
+            child: DefaultTextStyle(
+              style: ldBuildTextStyle(
+                theme,
+                LdTextType.paragraph,
+                LdSize.m,
+                lineHeight: 1.2,
               ),
+              child: child!,
             ),
-          ]
-        ]),
-      ),
+          ),
+        ]
+      ]).spaceS(),
     );
   }
 }

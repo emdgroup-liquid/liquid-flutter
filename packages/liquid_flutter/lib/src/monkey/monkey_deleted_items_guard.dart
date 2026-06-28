@@ -35,7 +35,7 @@ class _LdMonkeyDeletedItemsGuardState<T extends Identifiable<IdType>, IdType>
   @override
   void initState() {
     super.initState();
-    final repository = context.read<LdRepository<T, IdType>>();
+    final repository = context.read<LdListController<T, IdType>>();
     _itemsSubscription = repository.updatedItems.listen(_onItemsChanged);
   }
 
@@ -43,7 +43,7 @@ class _LdMonkeyDeletedItemsGuardState<T extends Identifiable<IdType>, IdType>
   void didChangeDependencies() {
     super.didChangeDependencies();
     _itemsSubscription?.cancel();
-    final repository = context.read<LdRepository<T, IdType>>();
+    final repository = context.read<LdListController<T, IdType>>();
     _itemsSubscription = repository.updatedItems.listen(_onItemsChanged);
   }
 
@@ -103,7 +103,7 @@ class _LdMonkeyDeletedItemsGuardState<T extends Identifiable<IdType>, IdType>
 
   @override
   Widget build(BuildContext context) {
-    context.watch<LdRepository<T, IdType>>();
+    context.watch<LdListController<T, IdType>>();
     final selection = context.watch<LdMonkeySelection<T, IdType>?>();
     if (selection != null) {
       if (_pendingSelection != null && setEquals(selection.selection, _pendingSelection!)) {

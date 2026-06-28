@@ -1,46 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
 import 'test_utils.dart';
-
-/// Wraps a widget with all providers required by [LdMonkeyDetailPage] and
-/// [LdMonkeyAppBar]: repository, selection, layout mode, sort/filter state,
-/// and actions list.
-Widget _wrapDetail<T extends Identifiable<IdType>, IdType>({
-  required Widget child,
-  required LdRepository<T, IdType> repository,
-  required LdMonkeySelection<T, IdType> selection,
-  LdMonkeyEffectiveLayoutMode layoutMode = LdMonkeyEffectiveLayoutMode.detail,
-  List<LdMonkeyAction<T, IdType>> actions = const [],
-  Set<LdFilterOption<T, IdType>> filters = const {},
-}) {
-  return LdThemeProvider(
-    child: MaterialApp(
-      localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-      home: ListenableProvider<LdRepository<T, IdType>>.value(
-        value: repository,
-        child: Provider<LdMonkeySelection<T, IdType>>.value(
-          value: selection,
-          child: Provider<LdMonkeyEffectiveLayoutMode>.value(
-            value: layoutMode,
-            child: Provider<LdMonkeySortAndFilterState<T, IdType>>.value(
-              value: LdMonkeySortAndFilterState<T, IdType>(
-                filters: filters,
-                sortOptions: [],
-              ),
-              child: Provider<LdMonkeyActions<T, IdType>>.value(
-                value: actions,
-                child: child,
-              ),
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
-}
 
 /// Pump enough frames to flush async* stream delivery and setState rebuilds.
 Future<void> _pumpStream(WidgetTester tester) async {
@@ -58,38 +23,8 @@ void main() {
 
   group('LdMonkeyDetailPage Tests', () {
     group('Scrollable View', () {
-      testWidgets('scrollable() factory creates scrollable detail view', (WidgetTester tester) async {
-        final repository = createTestRepository(
-          initialItems: [
-            createTestItem(1),
-            createTestItem(2),
-          ],
-        );
-        final selection = LdMonkeySelection<TestItem, int>(
-          selection: {},
-          viewing: {1, 2},
-          showSelectionControls: false,
-        );
-
-        final detailPage = LdMonkeyDetailPage<TestItem, int>.scrollable(
-          buildDetail: (context, item) => Text('Detail: ${item.value?.name ?? ''}'),
-        );
-
-        await tester.pumpWidget(
-          _wrapDetail(
-            repository: repository,
-            selection: selection,
-            child: detailPage,
-          ),
-        );
-
-        await _pumpStream(tester);
-        expect(find.text('Detail: Item 1'), findsOneWidget);
-        expect(find.text('Detail: Item 2'), findsOneWidget);
-      });
-
-      testWidgets('scrollable view renders multiple items', (WidgetTester tester) async {
-        final repository = createTestRepository(
+      testWidgets('scrollable() factory renders all viewing items', (WidgetTester tester) async {
+        final repository = createTestListController(
           initialItems: [
             createTestItem(1, name: 'Item 1'),
             createTestItem(2, name: 'Item 2'),
@@ -106,7 +41,7 @@ void main() {
         );
 
         await tester.pumpWidget(
-          _wrapDetail(
+          wrapMonkeyDetailPage(
             repository: repository,
             selection: selection,
             child: detailPage,
@@ -121,7 +56,7 @@ void main() {
 
     group('Stacked View', () {
       testWidgets('stacked() factory creates stacked detail view', (WidgetTester tester) async {
-        final repository = createTestRepository(
+        final repository = createTestListController(
           initialItems: [
             createTestItem(1),
             createTestItem(2),
@@ -138,7 +73,7 @@ void main() {
         );
 
         await tester.pumpWidget(
-          _wrapDetail(
+          wrapMonkeyDetailPage(
             repository: repository,
             selection: selection,
             child: detailPage,
@@ -153,7 +88,7 @@ void main() {
 
     group('Stream Selection', () {
       testWidgets('LdMonkeyStreamSelection updates when viewing items change', (WidgetTester tester) async {
-        final repository = createTestRepository(
+        final repository = createTestListController(
           initialItems: [
             createTestItem(1, name: 'Item 1'),
             createTestItem(2, name: 'Item 2'),
@@ -169,13 +104,14 @@ void main() {
         Widget buildTree() => LdThemeProvider(
               child: MaterialApp(
                 localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-                home: ListenableProvider<LdRepository<TestItem, int>>.value(
+                home: ListenableProvider<LdListController<TestItem, int>>.value(
                   value: repository,
                   child: Provider<LdMonkeySelection<TestItem, int>>.value(
                     value: currentSelection,
                     child: LdMonkeyStreamSelection<TestItem, int>(
-                      builder: (context, items) => Column(
-                        children: items.map((item) => Text(item.value?.name ?? '')).toList(),
+                      buildItem: (context, item) => Text(item.value?.name ?? ''),
+                      builder: (context, itemWidgets) => Column(
+                        children: itemWidgets,
                       ),
                     ),
                   ),
@@ -201,7 +137,7 @@ void main() {
       });
 
       testWidgets('LdMonkeyStreamSelection handles empty viewing items', (WidgetTester tester) async {
-        final repository = createTestRepository();
+        final repository = createTestListController();
         final selection = LdMonkeySelection<TestItem, int>(
           selection: {},
           viewing: {},
@@ -212,13 +148,14 @@ void main() {
           LdThemeProvider(
             child: MaterialApp(
               localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-              home: ListenableProvider<LdRepository<TestItem, int>>.value(
+              home: ListenableProvider<LdListController<TestItem, int>>.value(
                 value: repository,
                 child: Provider<LdMonkeySelection<TestItem, int>>.value(
                   value: selection,
                   child: LdMonkeyStreamSelection<TestItem, int>(
-                    builder: (context, items) => Column(
-                      children: items.map((item) => Text(item.value?.name ?? '')).toList(),
+                    buildItem: (context, item) => Text(item.value?.name ?? ''),
+                    builder: (context, itemWidgets) => Column(
+                      children: itemWidgets,
                     ),
                   ),
                 ),
@@ -234,7 +171,7 @@ void main() {
 
     group('App Bars', () {
       testWidgets('uses custom primaryAppBar when provided', (WidgetTester tester) async {
-        final repository = createTestRepository();
+        final repository = createTestListController();
         final selection = LdMonkeySelection<TestItem, int>(
           selection: {},
           viewing: {},
@@ -247,7 +184,7 @@ void main() {
         );
 
         await tester.pumpWidget(
-          _wrapDetail(
+          wrapMonkeyDetailPage(
             repository: repository,
             selection: selection,
             child: detailPage,
@@ -265,7 +202,7 @@ void main() {
       });
 
       testWidgets('uses default LdMonkeyAppBar when primaryAppBar not provided', (WidgetTester tester) async {
-        final repository = createTestRepository();
+        final repository = createTestListController();
         final selection = LdMonkeySelection<TestItem, int>(
           selection: {},
           viewing: {},
@@ -277,7 +214,7 @@ void main() {
         );
 
         await tester.pumpWidget(
-          _wrapDetail(
+          wrapMonkeyDetailPage(
             repository: repository,
             selection: selection,
             child: detailPage,
@@ -289,7 +226,7 @@ void main() {
       });
 
       testWidgets('secondary app bar does not inherit primary app bar title', (WidgetTester tester) async {
-        final repository = createTestRepository();
+        final repository = createTestListController();
         final selection = LdMonkeySelection<TestItem, int>(
           selection: {},
           viewing: {},
@@ -302,7 +239,7 @@ void main() {
         );
 
         await tester.pumpWidget(
-          _wrapDetail(
+          wrapMonkeyDetailPage(
             repository: repository,
             selection: selection,
             child: detailPage,
@@ -314,7 +251,7 @@ void main() {
       });
 
       testWidgets('uses custom secondaryAppBar when provided', (WidgetTester tester) async {
-        final repository = createTestRepository();
+        final repository = createTestListController();
         final selection = LdMonkeySelection<TestItem, int>(
           selection: {},
           viewing: {},
@@ -327,7 +264,7 @@ void main() {
         );
 
         await tester.pumpWidget(
-          _wrapDetail(
+          wrapMonkeyDetailPage(
             repository: repository,
             selection: selection,
             child: detailPage,
@@ -341,7 +278,7 @@ void main() {
 
     group('Viewing Items Updates', () {
       testWidgets('detail view updates when viewing items change', (WidgetTester tester) async {
-        final repository = createTestRepository(
+        final repository = createTestListController(
           initialItems: [
             createTestItem(1, name: 'Item 1'),
             createTestItem(2, name: 'Item 2'),
@@ -358,7 +295,7 @@ void main() {
           buildDetail: (context, item) => Text('Detail: ${item.value?.name ?? ''}'),
         );
 
-        Widget buildTree() => _wrapDetail(
+        Widget buildTree() => wrapMonkeyDetailPage(
               repository: repository,
               selection: currentSelection,
               child: detailPage,
@@ -379,6 +316,74 @@ void main() {
 
         expect(find.text('Detail: Item 2'), findsOneWidget);
         expect(find.text('Detail: Item 1'), findsNothing);
+      });
+    });
+
+    group('Missing item deep link', () {
+      testWidgets('shows error view when viewing item cannot be loaded', (WidgetTester tester) async {
+        final repository = createTestListController(
+          getById: (context, id) async => throw StateError('No element'),
+        );
+        final selection = LdMonkeySelection<TestItem, int>(
+          selection: {},
+          viewing: {99},
+          showSelectionControls: false,
+        );
+
+        final detailPage = LdMonkeyDetailPage<TestItem, int>.scrollable(
+          buildDetail: (context, item) => Text('Detail: ${item.value?.name ?? ''}'),
+        );
+
+        await tester.pumpWidget(
+          wrapMonkeyDetailPage(
+            repository: repository,
+            selection: selection,
+            child: detailPage,
+          ),
+        );
+
+        await tester.pump();
+        await tester.pump();
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('retry-button')), findsOneWidget);
+        expect(find.textContaining('could not be loaded'), findsOneWidget);
+        expect(find.text('Detail:'), findsNothing);
+      });
+
+      testWidgets('shows loader while missing item is loading', (WidgetTester tester) async {
+        final completer = Completer<TestItem>();
+        final repository = createTestListController(
+          getById: (context, id) => completer.future,
+        );
+        final selection = LdMonkeySelection<TestItem, int>(
+          selection: {},
+          viewing: {99},
+          showSelectionControls: false,
+        );
+
+        final detailPage = LdMonkeyDetailPage<TestItem, int>.scrollable(
+          buildDetail: (context, item) => Text('Detail: ${item.value?.name ?? ''}'),
+        );
+
+        await tester.pumpWidget(
+          wrapMonkeyDetailPage(
+            repository: repository,
+            selection: selection,
+            child: detailPage,
+          ),
+        );
+
+        await tester.pump();
+        await tester.pump();
+
+        expect(find.byType(LdLoader), findsWidgets);
+        expect(find.textContaining('Loading item'), findsOneWidget);
+
+        completer.complete(createTestItem(99, name: 'Loaded Item'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Detail: Loaded Item'), findsOneWidget);
       });
     });
   });

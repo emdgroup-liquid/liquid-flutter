@@ -381,7 +381,20 @@ class LdShortcutIndicator extends StatelessWidget {
             const Icon(
               LucideIcons.chevronUp,
             ),
-          Flexible(child: Text(key)),
+          if (shortcut.shift)
+            const Icon(
+              LucideIcons.arrowBigUp,
+            ),
+          if (key == "Enter")
+            const Icon(
+              LucideIcons.cornerDownLeft,
+            )
+          else if (key == "Escape")
+            const Icon(
+              LucideIcons.circleArrowOutUpLeft,
+            )
+          else
+            Flexible(child: Text(key)),
         ],
       ),
     );

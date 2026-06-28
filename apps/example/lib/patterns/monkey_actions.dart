@@ -20,7 +20,7 @@ class MonkeyActionsDemo extends StatelessWidget {
         ComponentsAccordion(components: {"LdMonkeyAction", "LdMonkeyActionVisibility"}),
         LdText.hs("1. Basic Action Structure"),
         LdText.p(
-            "Actions use [LdMonkeyActionContext] for selection, repository, and app-level providers. Use `ctx.appContext` for modals and feature providers; use `ctx.selectedIds` and `ctx.repository` for monkey data."),
+            "Actions use [LdMonkeyActionContext] for selection, list controller, and app-level providers. Use `ctx.appContext` for modals and feature providers; use `ctx.selectedIds` and `ctx.listController` for monkey data."),
         CodeBlock(
           language: "dart",
           code: '''LdMonkeySubmitAction(
@@ -40,7 +40,7 @@ class MonkeyActionsDemo extends StatelessWidget {
     loadingText: "Creating new task",
   ),
   onSubmit: (ctx) async {
-    // ctx.selectedIds, ctx.repository, app providers via ctx.appContext
+    // ctx.selectedIds, ctx.listController, app providers via ctx.appContext
   },
 )''',
         ),
@@ -122,7 +122,7 @@ class MonkeyActionsDemo extends StatelessWidget {
     );
     if (newTaskText == null) return;
     final newTask = Task(/* ... */);
-    await ctx.repository.create(ctx.appContext, newTask);
+    await ctx.model<LdCallbackModel<Task, int>>().create(ctx.appContext, newTask);
     if (ctx.appContext.mounted) {
       ctx.updateViewing({newTask.id});
     }
@@ -157,7 +157,7 @@ class MonkeyActionsDemo extends StatelessWidget {
   ),
   onSubmit: (ctx) async {
     final items = await ctx.getSelectedItems();
-    await ctx.repository.updateBatch(
+    await ctx.model<LdCallbackModel<Task, int>>().updateBatch(
       ctx.appContext,
       items.map((item) => item.copyWith(done: true)).toSet(),
     );
@@ -185,7 +185,7 @@ class MonkeyActionsDemo extends StatelessWidget {
   onSubmit: (ctx) async {
     final item = (await ctx.getSelectedItems()).first;
     final newItem = item.copyWith(id: testData.length + 1);
-    await ctx.repository.create(ctx.appContext, newItem);
+    await ctx.model<LdCallbackModel<Task, int>>().create(ctx.appContext, newItem);
     if (ctx.appContext.mounted) {
       ctx.updateViewing({newItem.id});
     }

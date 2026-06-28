@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/monkey/data/ld_list_cache_key.dart';
 import 'package:provider/provider.dart';
 
 class _MutationItem with Identifiable<int> {
@@ -86,9 +87,9 @@ LdMonkeySortAndFilterState<_MutationItem, int> _sortFilterState({
 }
 
 void main() {
-  group('LdRepositoryCache.invalidateOnMutation', () {
+  group('LdListCache.invalidateOnMutation', () {
     testWidgets('create clears cache', (tester) async {
-      final cache = LdRepositoryCache<_MutationItem, int>();
+      final cache = LdListCache<_MutationItem, int>();
       final context = await _pumpContext(tester);
       cache.writePage(
         'sort:title=title-asc',
@@ -99,7 +100,7 @@ void main() {
 
       cache.invalidateOnMutation(
         context: context,
-        kind: LdRepositoryMutationKind.create,
+        kind: LdListMutationKind.create,
         after: _MutationItem(2, 'B', DateTime(2024)),
       );
 
@@ -107,7 +108,7 @@ void main() {
     });
 
     testWidgets('delete clears cache', (tester) async {
-      final cache = LdRepositoryCache<_MutationItem, int>();
+      final cache = LdListCache<_MutationItem, int>();
       final context = await _pumpContext(tester);
       cache.writePage(
         'sort:title=title-asc',
@@ -118,7 +119,7 @@ void main() {
 
       cache.invalidateOnMutation(
         context: context,
-        kind: LdRepositoryMutationKind.delete,
+        kind: LdListMutationKind.delete,
         before: _MutationItem(1, 'A', DateTime(2024)),
       );
 
@@ -126,7 +127,7 @@ void main() {
     });
 
     testWidgets('update without predicates clears cache', (tester) async {
-      final cache = LdRepositoryCache<_MutationItem, int>();
+      final cache = LdListCache<_MutationItem, int>();
       final context = await _pumpContext(
         tester,
         sortAndFilterState: _sortFilterState(),
@@ -140,7 +141,7 @@ void main() {
 
       cache.invalidateOnMutation(
         context: context,
-        kind: LdRepositoryMutationKind.update,
+        kind: LdListMutationKind.update,
         before: _MutationItem(1, 'A', DateTime(2024)),
         after: _MutationItem(1, 'B', DateTime(2024)),
       );
@@ -149,7 +150,7 @@ void main() {
     });
 
     testWidgets('update removes only keys affected by title sort predicate', (tester) async {
-      final cache = LdRepositoryCache<_MutationItem, int>();
+      final cache = LdListCache<_MutationItem, int>();
       final sortOptions = [
         LdSortOption<_MutationItem, int>(
           name: 'title',
@@ -188,7 +189,7 @@ void main() {
 
       cache.invalidateOnMutation(
         context: context,
-        kind: LdRepositoryMutationKind.update,
+        kind: LdListMutationKind.update,
         before: _MutationItem(1, 'A', DateTime(2024)),
         after: _MutationItem(1, 'B', DateTime(2024)),
       );
@@ -198,7 +199,7 @@ void main() {
     });
 
     testWidgets('update retains key when predicate returns false', (tester) async {
-      final cache = LdRepositoryCache<_MutationItem, int>();
+      final cache = LdListCache<_MutationItem, int>();
       final sortOptions = [
         LdSortOption<_MutationItem, int>(
           name: 'title',
@@ -223,7 +224,7 @@ void main() {
 
       cache.invalidateOnMutation(
         context: context,
-        kind: LdRepositoryMutationKind.update,
+        kind: LdListMutationKind.update,
         before: _MutationItem(1, 'A', DateTime(2024)),
         after: _MutationItem(1, 'A', DateTime(2025)),
       );
@@ -232,7 +233,7 @@ void main() {
     });
 
     testWidgets('null predicate on key part removes key conservatively', (tester) async {
-      final cache = LdRepositoryCache<_MutationItem, int>();
+      final cache = LdListCache<_MutationItem, int>();
       final sortOptions = [
         LdSortOption<_MutationItem, int>(
           name: 'title',
@@ -262,7 +263,7 @@ void main() {
 
       cache.invalidateOnMutation(
         context: context,
-        kind: LdRepositoryMutationKind.update,
+        kind: LdListMutationKind.update,
         before: _MutationItem(1, 'A', DateTime(2024)),
         after: _MutationItem(1, 'A', DateTime(2025)),
       );
@@ -271,7 +272,7 @@ void main() {
     });
 
     testWidgets('update without sort filter state clears cache', (tester) async {
-      final cache = LdRepositoryCache<_MutationItem, int>();
+      final cache = LdListCache<_MutationItem, int>();
       final context = await _pumpContext(tester);
       cache.writePage(
         'sort:title=title-asc',
@@ -282,7 +283,7 @@ void main() {
 
       cache.invalidateOnMutation(
         context: context,
-        kind: LdRepositoryMutationKind.update,
+        kind: LdListMutationKind.update,
         before: _MutationItem(1, 'A', DateTime(2024)),
         after: _MutationItem(1, 'B', DateTime(2024)),
       );

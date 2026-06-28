@@ -55,6 +55,8 @@ class LdThemeProvider extends StatefulWidget {
 }
 
 class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingObserver {
+  final LdLocationLockRegistry _locationLockRegistry = LdLocationLockRegistry();
+
   LdPalette? _palette;
 
   LdThemeSize? _themeSize;
@@ -239,6 +241,7 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
     _theme.removeListener(themeChanged);
     WidgetsBinding.instance.removeObserver(this);
     _windowMaximizedSubscription?.cancel();
+    _locationLockRegistry.dispose();
     _createdTheme?.dispose();
     super.dispose();
   }
@@ -266,27 +269,30 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
   @override
   Widget build(BuildContext context) {
     final windowDecoration = _windowDecoration;
-    return Container(
-      decoration: windowDecoration,
-      clipBehavior: windowDecoration != null ? Clip.hardEdge : Clip.none,
-      child: Provider.value(
-        value: LdSurfaceInfo(isSurface: false),
-        child: ChangeNotifierProvider.value(
-          value: _theme,
-          builder: (context, child) {
-            return Directionality(
-              textDirection: TextDirection.ltr,
-              child: DefaultTextStyle.merge(
-                style: ldBuildTextStyle(
-                  _theme,
-                  LdTextType.paragraph,
-                  LdSize.m,
+    return ChangeNotifierProvider<LdLocationLockRegistry>.value(
+      value: _locationLockRegistry,
+      child: Container(
+        decoration: windowDecoration,
+        clipBehavior: windowDecoration != null ? Clip.hardEdge : Clip.none,
+        child: Provider.value(
+          value: LdSurfaceInfo(isSurface: false),
+          child: ChangeNotifierProvider.value(
+            value: _theme,
+            builder: (context, child) {
+              return Directionality(
+                textDirection: TextDirection.ltr,
+                child: DefaultTextStyle.merge(
+                  style: ldBuildTextStyle(
+                    _theme,
+                    LdTextType.paragraph,
+                    LdSize.m,
+                  ),
+                  child: child!,
                 ),
-                child: child!,
-              ),
-            );
-          },
-          child: widget.child,
+              );
+            },
+            child: widget.child,
+          ),
         ),
       ),
     );

@@ -13,6 +13,7 @@ export 'monkey_detail_state.dart';
 export 'monkey_shell.dart';
 export 'monkey_selection.dart';
 export 'detail_page.dart';
+export 'detail_editor/index.dart';
 
 export 'monkey_stack_detail_view.dart';
 export 'monkey_scrollable_detail_view.dart';
@@ -28,4 +29,3 @@ export 'monkey_picker_scope.dart';
 export 'monkey_sort_and_filter_state.dart';
 export 'ld_monkey_route_definitions.dart';
 export 'ld_monkey_route_definitions_resolver.dart';
-export 'ld_monkey_route_definitions_resolve.dart';

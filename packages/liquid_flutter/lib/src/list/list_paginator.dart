@@ -63,7 +63,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   bool _isControlledRefresh = false;
 
   /// Cache exposed to [FetchPageParameters] during fetches.
-  final LdRepositoryCache<T, IdType> repositoryCache;
+  final LdListCache<T, IdType> listCache;
 
   LdFetchReason _pendingFetchReason = LdFetchReason.pagination;
 
@@ -108,8 +108,8 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     /// order bottom to top, if the number is too large the app might
     /// load more pages than needed.
     this.fetchQueueSize = 3,
-    LdRepositoryCache<T, IdType>? repositoryCache,
-  }) : repositoryCache = repositoryCache ?? LdRepositoryCache<T, IdType>() {
+    LdListCache<T, IdType>? listCache,
+  }) : listCache = listCache ?? LdListCache<T, IdType>() {
     if (initialItems != null) {
       for (var i = 0; i < initialItems.length; i++) {
         _items[i] = LdPaginatorItem<T>(value: initialItems[i], state: LdPaginatorItemState.loaded);
@@ -123,7 +123,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
       pageSize: max(list.length, 1),
       debounceTime: const Duration(milliseconds: 0),
       initialItems: list,
-      repositoryCache: LdRepositoryCache<T, IdType>(),
+      listCache: LdListCache<T, IdType>(),
       fetchListFunction: (parameters) async {
         if (parameters.offset == 0) {
           return LdListPage<T>(
@@ -166,7 +166,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   Stream<LdPaginatorItem<T>> get updatedItems => _itemStreamController.stream;
 
   /// Emits a single-item update for items tracked outside [_items]
-  /// (for example detached selection entries in [LdRepository]).
+  /// (for example detached selection entries in [LdListController]).
   void notifyItemUpdated(LdPaginatorItem<T> item) {
     _updated(item);
   }
@@ -248,6 +248,23 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     _updated(null);
   }
 
+  /// Whether every index between [a] and [b] (inclusive) is currently loaded,
+  /// i.e. they belong to the same uninterrupted run of loaded items.
+  ///
+  /// Used to decide whether a sparse index can be shifted locally (e.g. when
+  /// repositioning an updated item) without exposing a boundary gap that can
+  /// not be refetched because the surrounding page is already marked loaded.
+  bool areIndicesInSameLoadedRun(int a, int b) {
+    final lo = min(a, b);
+    final hi = max(a, b);
+    for (var i = lo; i <= hi; i++) {
+      if (!_items.containsKey(i)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   /// Shifts sparse indices after moving the item at [fromIndex] to [toIndex].
   void reorderIndices(int fromIndex, int toIndex) {
     if (fromIndex == toIndex) {
@@ -311,6 +328,18 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   void removeItemAtIndex(int index) {
     _items.remove(index);
     _updated(null);
+  }
+
+  /// Clears the record of which page offsets have already been requested.
+  ///
+  /// Call this after a local index mutation (e.g. shifting items to reposition
+  /// an updated entry) that can expose a gap at the edge of an already-loaded
+  /// page. Without it the gap would never refill, because its page offset is
+  /// still marked as requested. Gap-free pages keep being skipped by
+  /// [_fetchItems] (it verifies every slot in the range is loaded), so this
+  /// only triggers refetches where data is actually missing.
+  void invalidateRequestedOffsets() {
+    _requestedOffsets.clear();
   }
 
   /// Confirms the update of an item.
@@ -431,26 +460,23 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   Future<void> refreshList({
     required BuildContext context,
     LdFetchReason reason = LdFetchReason.refresh,
-    @Deprecated('Use reason: LdFetchReason.refresh') bool hard = false,
   }) async {
-    final effectiveReason = hard ? LdFetchReason.refresh : reason;
-
-    if (effectiveReason == LdFetchReason.pagination) {
+    if (reason == LdFetchReason.pagination) {
       return;
     }
 
     _offsetQueue.clear();
-    _pendingFetchReason = effectiveReason;
+    _pendingFetchReason = reason;
 
     final hasVisibleItems = _items.values.any(
       (item) => item.value != null && item.state != LdPaginatorItemState.fetching,
     );
     if (!hasVisibleItems) {
-      await _refreshFromEmpty(context, effectiveReason);
+      await _refreshFromEmpty(context, reason);
       return;
     }
 
-    await _refreshWithPendingState(context, effectiveReason);
+    await _refreshWithPendingState(context, reason);
   }
 
   Future<void> _refreshFromEmpty(
@@ -587,7 +613,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
           pageSize: pageSize,
           pageToken: null,
           reason: reason,
-          cache: repositoryCache,
+          cache: listCache,
         ),
       );
       results.add((offset: offset, page: page));
@@ -654,7 +680,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
             pageSize: pageSize,
             pageToken: null,
             reason: _pendingFetchReason,
-            cache: repositoryCache,
+            cache: listCache,
           ),
         );
 
@@ -736,7 +762,12 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     })?.key;
 
     if (index == null) {
-      throw Exception('Unable to roll back. Item with id $id not found');
+      // Nothing to roll back: a concurrent confirm, rollback, or refresh
+      // already resolved or removed this item (e.g. it left a filtered view,
+      // or a sibling update for the same id finished first). Treat as a no-op
+      // so we never undo a confirmed value and never mask the original error
+      // that triggered this rollback.
+      return;
     }
     final item = _items[index]!;
 
@@ -897,7 +928,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
           pageSize: pageSize,
           pageToken: null,
           reason: fetchReason,
-          cache: repositoryCache,
+          cache: listCache,
         ),
       );
 

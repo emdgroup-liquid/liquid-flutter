@@ -6,9 +6,12 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/monkey/intents.dart';
 import 'package:provider/provider.dart';
 
+// ══════════════════════════════════════════════════════════════════════════════
+// LdSearchInput
+// ══════════════════════════════════════════════════════════════════════════════
+
 class LdSearchInput extends StatefulWidget {
   final LdSearchConfig searchConfig;
-
   final bool fullWidth;
   final bool isBottomNavigationBar;
 
@@ -24,29 +27,66 @@ class LdSearchInput extends StatefulWidget {
 }
 
 class _LdSearchInputState extends State<LdSearchInput> {
+  // ── Input ──────────────────────────────────────────────────────────────────
   final GlobalKey _inputKey = GlobalKey();
-
-  final _inputWrapperFocusNode = FocusScopeNode();
-  final _suggestionsFocusNode = FocusScopeNode();
+  final FocusNode _inputFocusNode = FocusNode();
   late final TextEditingController _inputController = TextEditingController(
     text: widget.searchConfig.initialQuery,
   );
 
+  // ── Suggestions fetch ──────────────────────────────────────────────────────
+  // The controller lives for the full lifetime of this widget so that cached
+  // results survive overlay open/close cycles.
+  late final LdSubmitController<List<dynamic>, String>? _suggestionsController;
+  // ValueNotifier used as the `arg` for LdSubmit so changes auto-trigger.
+  late final ValueNotifier<String>? _queryNotifier;
+  Timer? _debounceTimer;
+
+  // ── Overlay ────────────────────────────────────────────────────────────────
   OverlayEntry? _overlayEntry;
-  late final ValueNotifier<Rect?> _inputRectNotifier;
+  late final ValueNotifier<Rect?> _inputRectNotifier = ValueNotifier(null);
+
+
+  // ── Focus suggestions scope (keyboard navigation) ─────────────────────────
+  final FocusScopeNode _suggestionsFocusNode = FocusScopeNode();
 
   StreamSubscription<Intent>? _intentSubscription;
 
   @override
   void initState() {
     super.initState();
-    _inputRectNotifier = ValueNotifier<Rect?>(null);
 
-    _inputWrapperFocusNode.addListener(_onFocusChanged);
+    final hasSuggestions = widget.searchConfig.getSuggestions != null;
+
+    if (hasSuggestions) {
+      _queryNotifier = ValueNotifier(widget.searchConfig.initialQuery ?? '');
+      _suggestionsController = LdSubmitController<List<dynamic>, String>(
+        arg: _queryNotifier,
+        config: LdSubmitConfig(
+          autoTrigger: true,
+          action: (query) async {
+            if (query == null || query.isEmpty) return <dynamic>[];
+            return await widget.searchConfig.getSuggestions!(query);
+          },
+        ),
+      );
+    } else {
+      _queryNotifier = null;
+      _suggestionsController = null;
+    }
+
+    _inputFocusNode.addListener(_onFocusChanged);
+    _inputController.addListener(_onTextChanged);
+
+    // init() registers devtools and fires the initial auto-trigger.
+    // We schedule it post-frame like LdSubmit does.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _suggestionsController?.init();
+    });
   }
 
   @override
-  didUpdateWidget(LdSearchInput oldWidget) {
+  void didUpdateWidget(LdSearchInput oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.searchConfig.initialQuery != widget.searchConfig.initialQuery) {
       _inputController.text = widget.searchConfig.initialQuery ?? '';
@@ -55,80 +95,72 @@ class _LdSearchInputState extends State<LdSearchInput> {
 
   @override
   void dispose() {
-    _inputWrapperFocusNode.removeListener(_onFocusChanged);
+    _inputFocusNode.removeListener(_onFocusChanged);
+    _inputController.removeListener(_onTextChanged);
     _intentSubscription?.cancel();
-    _inputWrapperFocusNode.dispose();
+    _debounceTimer?.cancel();
+
+    _inputFocusNode.dispose();
     _suggestionsFocusNode.dispose();
     _inputController.dispose();
-
     _inputRectNotifier.dispose();
+
+    _suggestionsController?.dispose();
+    _queryNotifier?.dispose();
+
     _overlayEntry?.remove();
     super.dispose();
   }
 
-  void _onFocusChanged() async {
-    final hasFocus = _inputWrapperFocusNode.hasFocus;
-    final suggestionsHasFocus = _suggestionsFocusNode.hasFocus;
+  // ── Text / query ───────────────────────────────────────────────────────────
 
-    await Future.delayed(const Duration(milliseconds: 50));
-
-    if (hasFocus && widget.searchConfig.getSuggestions != null && !suggestionsHasFocus) {
-      _showSuggestionsOverlay();
-    } else if (!hasFocus && !suggestionsHasFocus) {
-      _closeOverlay();
-    }
-
-    setState(() {});
+  void _onTextChanged() {
+    final notifier = _queryNotifier;
+    if (notifier == null) return;
+    final newText = _inputController.text;
+    if (newText == notifier.value) return;
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      if (mounted) notifier.value = newText;
+    });
   }
+
+  // ── Focus ──────────────────────────────────────────────────────────────────
+
+  void _onFocusChanged() {
+    if (_inputFocusNode.hasFocus) {
+      _openOverlay();
+    }
+    // Closing on blur is handled explicitly by each action (submit / accept /
+    // clear / barrier tap).  We do NOT close here to avoid races between the
+    // focus change and the action that caused it.
+  }
+
+  // ── Overlay lifecycle ──────────────────────────────────────────────────────
 
   void _updateInputRect() {
-    if (!mounted) {
-      return;
-    }
+    if (!mounted) return;
+    final box = _inputKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return;
 
-    // Get the input field position
-    final RenderBox? renderBox = _inputKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox == null) {
-      return;
-    }
+    // Express the input's position in the overlay's own coordinate space so
+    // that Positioned inside the OverlayEntry Stack uses the right origin.
+    // Using localToGlobal without an ancestor would give screen-root coords,
+    // which diverge from overlay-local coords whenever the Overlay is itself
+    // offset (nested Navigator, embedded view, transformed ancestor, etc.).
+    final overlayBox = Overlay.of(context).context.findRenderObject() as RenderBox?;
+    if (overlayBox == null) return;
 
-    final position = renderBox.localToGlobal(Offset.zero);
-    final size = renderBox.size;
-    final inputRect = Rect.fromLTWH(position.dx, position.dy, size.width, size.height);
-
-    _inputRectNotifier.value = inputRect;
+    final pos = box.localToGlobal(Offset.zero, ancestor: overlayBox);
+    _inputRectNotifier.value = Rect.fromLTWH(pos.dx, pos.dy, box.size.width, box.size.height);
   }
 
-  void _showSuggestionsOverlay() {
-    if (!mounted) {
-      return;
-    }
-
+  void _openOverlay() {
+    if (_overlayEntry != null || !mounted) return;
+    if (widget.searchConfig.getSuggestions == null) return;
     _updateInputRect();
-    // Show the suggestions overlay using Overlay instead of ModalRoute
-    _showOverlay();
-  }
-
-  void _showOverlay() {
-    final overlay = Overlay.of(context);
-
-    _overlayEntry?.remove();
-    _overlayEntry = OverlayEntry(
-      builder: (context) {
-        return LdSearchSuggestionsOverlay(
-          inputController: _inputController,
-          searchConfig: widget.searchConfig,
-          onSuggestionAccepted: _onSuggestionAccepted,
-          inputRectNotifier: _inputRectNotifier,
-          suggestionsFocusNode: _suggestionsFocusNode,
-          inputFocusNode: _inputWrapperFocusNode,
-          isBottomNavigationBar: widget.isBottomNavigationBar,
-          onDismiss: _closeOverlay,
-        );
-      },
-    );
-
-    overlay.insert(_overlayEntry!);
+    _overlayEntry = OverlayEntry(builder: (_) => _buildOverlay());
+    Overlay.of(context).insert(_overlayEntry!);
   }
 
   void _closeOverlay() {
@@ -136,16 +168,40 @@ class _LdSearchInputState extends State<LdSearchInput> {
     _overlayEntry = null;
   }
 
+  // ── Actions ────────────────────────────────────────────────────────────────
+
   void _onSuggestionAccepted(String suggestion) {
     _inputController.text = suggestion;
+    _queryNotifier?.value = suggestion;
     widget.searchConfig.onSearch(suggestion);
     _closeOverlay();
-    _inputWrapperFocusNode.unfocus();
+    _inputFocusNode.unfocus();
   }
+
+  void _onSubmitted(String text) {
+    widget.searchConfig.onSearch(text);
+    _closeOverlay();
+    _inputFocusNode.unfocus();
+  }
+
+  void _onCleared() {
+    _queryNotifier?.value = '';
+    widget.searchConfig.onSearch('');
+    _closeOverlay();
+    _inputFocusNode.unfocus();
+  }
+
+  void _onBarrierDismiss() {
+    _closeOverlay();
+    _inputFocusNode.unfocus();
+  }
+
+  // ── Key handling ───────────────────────────────────────────────────────────
 
   KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
     if (event is KeyDownEvent) {
-      if (event.logicalKey == LogicalKeyboardKey.arrowDown || event.logicalKey == LogicalKeyboardKey.tab) {
+      if (event.logicalKey == LogicalKeyboardKey.arrowDown ||
+          event.logicalKey == LogicalKeyboardKey.tab) {
         _suggestionsFocusNode.nextFocus();
         return KeyEventResult.handled;
       }
@@ -153,16 +209,37 @@ class _LdSearchInputState extends State<LdSearchInput> {
     return KeyEventResult.ignored;
   }
 
+  // ── Overlay builder ────────────────────────────────────────────────────────
+
+  Widget _buildOverlay() {
+    // The overlay reads from _suggestionsController via ChangeNotifierProvider
+    // so it rebuilds whenever new suggestions arrive — without recreating any
+    // state.
+    return ChangeNotifierProvider<LdSubmitController<List<dynamic>, String>>.value(
+      value: _suggestionsController!,
+      child: LdSearchSuggestionsOverlay(
+        inputRectNotifier: _inputRectNotifier,
+        isBottomNavigationBar: widget.isBottomNavigationBar,
+        onBarrierDismiss: _onBarrierDismiss,
+        suggestionsFocusNode: _suggestionsFocusNode,
+        onSuggestionAccepted: _onSuggestionAccepted,
+        buildSuggestion: widget.searchConfig.buildSuggestion!,
+      ),
+    );
+  }
+
+  // ── Build ──────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
-    // Update input rect when the widget rebuilds (e.g., when layout changes)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_overlayEntry != null) {
-        _updateInputRect();
-      }
+      if (_overlayEntry != null) _updateInputRect();
     });
+
     return Actions(
-      actions: <Type, Action<Intent>>{SearchIntent: SearchAction(searchFocusNode: _inputWrapperFocusNode)},
+      actions: <Type, Action<Intent>>{
+        SearchIntent: SearchAction(searchFocusNode: _inputFocusNode),
+      },
       child: LdWrapConditional(
         condition: !widget.fullWidth,
         builder: (context, child) => ConstrainedBox(
@@ -170,23 +247,24 @@ class _LdSearchInputState extends State<LdSearchInput> {
           child: child,
         ),
         child: Focus(
-          focusNode: _inputWrapperFocusNode,
           onKeyEvent: _onKeyEvent,
-          child: LdInput(
-            key: _inputKey,
-            textInputAction: TextInputAction.search,
-            size: LdSize.s,
-            hint: widget.searchConfig.hint ?? LiquidLocalizations.of(context).search,
-            controller: _inputController,
-            showClear: true,
-            onSubmitted: (text) {
-              widget.searchConfig.onSearch(text);
-              _inputWrapperFocusNode.unfocus();
-            },
-            onCleared: () {
-              widget.searchConfig.onSearch('');
-              _inputWrapperFocusNode.unfocus();
-              _closeOverlay();
+          child: ListenableBuilder(
+            listenable: _suggestionsController ?? ValueNotifier(null),
+            builder: (context, _) {
+              final isLoading =
+                  _suggestionsController?.state.type == LdSubmitStateType.loading;
+              return LdInput(
+                key: _inputKey,
+                focusNode: _inputFocusNode,
+                textInputAction: TextInputAction.search,
+                size: LdSize.s,
+                hint: widget.searchConfig.hint ?? LiquidLocalizations.of(context).search,
+                controller: _inputController,
+                showClear: true,
+                loading: isLoading,
+                onSubmitted: _onSubmitted,
+                onCleared: _onCleared,
+              );
             },
           ),
         ),
@@ -195,112 +273,79 @@ class _LdSearchInputState extends State<LdSearchInput> {
   }
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+// LdSearchSuggestionsOverlay
+//
+// Purely presentational.  All data comes from a
+// LdSubmitController<List<dynamic>, String> provided above via
+// ChangeNotifierProvider — no fetch logic lives here.
+// ══════════════════════════════════════════════════════════════════════════════
+
 class LdSearchSuggestionsOverlay extends StatefulWidget {
-  final LdSearchConfig searchConfig;
   final ValueNotifier<Rect?> inputRectNotifier;
   final bool isBottomNavigationBar;
-  final VoidCallback onDismiss;
+  final VoidCallback onBarrierDismiss;
   final FocusScopeNode suggestionsFocusNode;
-  final FocusNode inputFocusNode;
   final void Function(String suggestion) onSuggestionAccepted;
-  final TextEditingController inputController;
+  final Widget Function(BuildContext, dynamic) buildSuggestion;
 
   const LdSearchSuggestionsOverlay({
     super.key,
-    required this.searchConfig,
     required this.inputRectNotifier,
     required this.isBottomNavigationBar,
-    required this.onDismiss,
+    required this.onBarrierDismiss,
     required this.suggestionsFocusNode,
-    required this.inputFocusNode,
     required this.onSuggestionAccepted,
-    required this.inputController,
+    required this.buildSuggestion,
   });
 
   @override
   State<LdSearchSuggestionsOverlay> createState() => _LdSearchSuggestionsOverlayState();
 }
 
-class _LdSearchSuggestionsOverlayState extends State<LdSearchSuggestionsOverlay> with TickerProviderStateMixin {
+class _LdSearchSuggestionsOverlayState extends State<LdSearchSuggestionsOverlay>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _fadeController;
   late final Animation<double> _fadeAnimation;
 
-  Timer? _debounceTimer;
-  String _currentQuery = '';
+  // Stale-while-revalidate: the last successful list stays visible while a
+  // re-fetch is in flight so the overlay never flashes empty.
+  List<dynamic>? _lastSuggestions;
 
   @override
   void initState() {
     super.initState();
-
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-
-    _fadeAnimation = CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeOut,
-    );
-
+    _fadeAnimation = CurvedAnimation(parent: _fadeController, curve: Curves.easeOut);
     _fadeController.forward();
-
-    // Listen to text changes
-    widget.inputController.addListener(_onTextChanged);
-
-    // Listen to input rect changes
     widget.inputRectNotifier.addListener(_onInputRectChanged);
-
-    // Initial query
-    _currentQuery = widget.inputController.text;
   }
 
   @override
   void dispose() {
-    _debounceTimer?.cancel();
     _fadeController.dispose();
-
-    widget.inputController.removeListener(_onTextChanged);
     widget.inputRectNotifier.removeListener(_onInputRectChanged);
     super.dispose();
   }
 
-  void _onTextChanged() {
-    final newQuery = widget.inputController.text;
-    if (newQuery != _currentQuery) {
-      _debounceTimer?.cancel();
-      _debounceTimer = Timer(const Duration(milliseconds: 300), () {
-        if (mounted) {
-          setState(() {
-            _currentQuery = newQuery;
-          });
-        }
-      });
-    }
-  }
-
   void _onInputRectChanged() {
-    if (mounted) {
-      setState(() {});
-    }
+    if (mounted) setState(() {});
   }
 
-  void _close() {
-    widget.inputFocusNode.unfocus();
+  void _onBarrierTapped() {
+    // Fade out first so the animation is visible, then notify the parent.
     _fadeController.reverse().then((_) {
-      if (mounted) {
-        widget.onDismiss();
-      }
+      if (mounted) widget.onBarrierDismiss();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
     final inputRect = widget.inputRectNotifier.value;
-
-    if (inputRect == null) {
-      return const SizedBox.shrink();
-    }
+    if (inputRect == null) return const SizedBox.shrink();
 
     return Stack(
       fit: StackFit.expand,
@@ -313,16 +358,15 @@ class _LdSearchSuggestionsOverlayState extends State<LdSearchSuggestionsOverlay>
               Positioned.fill(
                 child: ModalBarrier(
                   dismissible: true,
-                  onDismiss: _close,
+                  onDismiss: _onBarrierTapped,
                   color: Colors.transparent,
                 ),
               ),
               _placeOverlay(
-                screenSize,
                 inputRect,
                 FocusScope(
                   node: widget.suggestionsFocusNode,
-                  child: _buildSuggestionsContent(),
+                  child: _buildContent(context),
                 ),
               ),
             ],
@@ -332,101 +376,92 @@ class _LdSearchSuggestionsOverlayState extends State<LdSearchSuggestionsOverlay>
     );
   }
 
-  Widget _placeOverlay(Size screenSize, Rect inputRect, Widget child) {
-    const maxHeight = 300.0;
-    const padding = 16.0;
+  Widget _placeOverlay(Rect inputRect, Widget child) {
+    const double maxHeight = 300;
+    const double padding = 16;
 
     if (!widget.isBottomNavigationBar) {
-      // Desktop: position below the input field
-      final width = inputRect.width;
-      final left = inputRect.left;
-      final top = inputRect.bottom + 4;
-
+      // height is set explicitly so the Positioned has a non-zero layout box
+      // for hit-testing — without it taps fall through to the ModalBarrier.
       return Positioned(
-        left: left,
-        top: top,
-        child: ConstrainedBox(constraints: BoxConstraints(maxWidth: width, maxHeight: maxHeight), child: child),
+        left: inputRect.left,
+        top: inputRect.bottom + 4,
+        width: inputRect.width,
+        height: maxHeight,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: maxHeight),
+            child: child,
+          ),
+        ),
       );
     } else {
+      final screenHeight = MediaQuery.of(context).size.height;
       return Positioned(
         left: padding,
         right: padding,
-        bottom: screenSize.height - inputRect.top + 2 * padding,
+        bottom: screenHeight - inputRect.top + 2 * padding,
         top: MediaQuery.of(context).viewPadding.top,
         child: child,
       );
     }
   }
 
-  Widget _buildSuggestionsContent() {
-    return LdSubmit<List<dynamic>, String>(
-      arg: _currentQuery,
-      config: LdSubmitConfig(
-          autoTrigger: true,
-          action: (query) async {
-            if (query == null || query.isEmpty || widget.searchConfig.getSuggestions == null) {
-              return <dynamic>[];
-            }
-            final result = await widget.searchConfig.getSuggestions!(query);
-            return result;
-          }),
-      child: Builder(
-        builder: (context) {
-          final controller = context.watch<LdSubmitController<List<dynamic>, String>>();
-          final state = controller.state;
+  Widget _buildContent(BuildContext context) {
+    final controller = context.watch<LdSubmitController<List<dynamic>, String>>();
+    final state = controller.state;
+    final theme = LdTheme.of(context);
 
-          final result = state.result;
-          final suggestions = result;
-          final theme = LdTheme.of(context);
+    // Stale-while-revalidate: only advance the visible list on a fresh result.
+    if (state.type == LdSubmitStateType.result) {
+      _lastSuggestions = state.result;
+    }
 
-          return Container(
-            clipBehavior: Clip.hardEdge,
-            decoration: BoxDecoration(
-              color: theme.surface.withAlpha(255),
-              borderRadius: theme.radius(LdSize.m),
-              border: Border.all(
-                color: theme.border,
-                width: theme.borderWidth,
-              ),
-              boxShadow: [
-                ldShadowSticky,
-              ],
-            ),
-            child: NotificationListener<LdSearchAcceptSuggestion>(
-              onNotification: (notification) {
-                widget.onSuggestionAccepted(notification.suggestion.toString());
-                return true;
-              },
-              child: FocusTraversalGroup(
-                policy: OrderedTraversalPolicy(), // This ensures proper order
-                child: switch (state.type) {
-                  LdSubmitStateType.result => ListView.builder(
-                      shrinkWrap: true,
-                      padding: EdgeInsets.zero,
-                      itemCount: suggestions?.length ?? 0,
-                      itemBuilder: (context, index) {
-                        final suggestion = suggestions?[index];
-                        return widget.searchConfig.buildSuggestion!.call(context, suggestion);
-                      },
-                    ),
-                  LdSubmitStateType.loading => Center(
-                      child: LdLoader().padL(),
-                    ),
-                  LdSubmitStateType.error => LdExceptionView(
-                      exception: state.error!,
-                      direction: Axis.vertical,
-                      retryController: controller.retryController,
-                    ),
-                  LdSubmitStateType.idle => const SizedBox.shrink(),
-                },
-              ),
-            ),
-          );
+    // Don't render the card shell at all until there is something to show.
+    final bool hasItems = _lastSuggestions != null && _lastSuggestions!.isNotEmpty;
+    final bool hasContent = hasItems || state.type == LdSubmitStateType.error;
+    if (!hasContent) return const SizedBox.shrink();
+
+    return Container(
+      clipBehavior: Clip.hardEdge,
+      decoration: BoxDecoration(
+        color: theme.surface.withAlpha(255),
+        borderRadius: theme.radius(LdSize.m),
+        border: Border.all(color: theme.border, width: theme.borderWidth),
+        boxShadow: [ldShadowSticky],
+      ),
+      child: NotificationListener<LdSearchAcceptSuggestion>(
+        onNotification: (notification) {
+          widget.onSuggestionAccepted(notification.suggestion.toString());
+          return true;
         },
+        child: FocusTraversalGroup(
+          policy: OrderedTraversalPolicy(),
+          child: switch (state.type) {
+            LdSubmitStateType.result || LdSubmitStateType.loading => ListView.builder(
+                shrinkWrap: true,
+                padding: EdgeInsets.zero,
+                itemCount: _lastSuggestions?.length ?? 0,
+                itemBuilder: (context, index) =>
+                    widget.buildSuggestion(context, _lastSuggestions![index]),
+              ),
+            LdSubmitStateType.error => LdExceptionView(
+                exception: state.error!,
+                direction: Axis.vertical,
+                retryController: controller.retryController,
+              ),
+            LdSubmitStateType.idle => const SizedBox.shrink(),
+          },
+        ),
       ),
     );
   }
 }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// LdSearchAcceptSuggestion notification
+// ══════════════════════════════════════════════════════════════════════════════
 
 class LdSearchAcceptSuggestion extends Notification {
   const LdSearchAcceptSuggestion({required this.suggestion});

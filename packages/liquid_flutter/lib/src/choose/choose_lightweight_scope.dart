@@ -19,7 +19,7 @@ class LdChooseLightweightScope<T extends Identifiable<IdType>, IdType> extends S
     this.groupHeaderBuilder,
   });
 
-  final LdRepository<T, IdType> repository;
+  final LdListController<T, IdType> repository;
   final Widget Function(BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder;
   final Set<IdType> initialSelection;
   final String label;
@@ -96,7 +96,7 @@ class _LdChooseLightweightScopeState<T extends Identifiable<IdType>, IdType>
 
   @override
   Widget build(BuildContext context) {
-    return ListenableProvider<LdRepository<T, IdType>>.value(
+    return ListenableProvider<LdListController<T, IdType>>.value(
       value: widget.repository,
       child: LdEphemeralMonkeyAdapter<T, IdType>(
         controller: _controller,

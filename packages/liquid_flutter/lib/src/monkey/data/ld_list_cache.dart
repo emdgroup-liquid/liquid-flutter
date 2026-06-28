@@ -1,13 +1,14 @@
 import 'package:flutter/widgets.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/monkey/data/ld_list_cache_key.dart';
 import 'package:provider/provider.dart';
 
-class LdRepositoryCacheEntry<T> {
+class LdListCacheEntry<T> {
   int total;
   final Map<int, List<T>> _pagesByOffset;
   final DateTime? expiresAt;
 
-  LdRepositoryCacheEntry({
+  LdListCacheEntry({
     required this.total,
     Map<int, List<T>>? pagesByOffset,
     this.expiresAt,
@@ -69,13 +70,13 @@ class LdRepositoryCacheEntry<T> {
   }
 }
 
-/// Per-repository page-aware cache for use inside [fetchListWithParameters].
-class LdRepositoryCache<T extends Identifiable<IdType>, IdType> {
-  final Map<String, LdRepositoryCacheEntry<T>> _entries = {};
+/// Per-list-controller page-aware cache for use inside [fetchListWithParameters].
+class LdListCache<T extends Identifiable<IdType>, IdType> {
+  final Map<String, LdListCacheEntry<T>> _entries = {};
 
   Iterable<String> get keys => _entries.keys;
 
-  LdRepositoryCacheEntry<T>? readEntry(String key) {
+  LdListCacheEntry<T>? readEntry(String key) {
     final entry = _entries[key];
     if (entry == null) {
       return null;
@@ -100,7 +101,7 @@ class LdRepositoryCache<T extends Identifiable<IdType>, IdType> {
   }) {
     final existing = _entries[key];
     final entry = existing ??
-        LdRepositoryCacheEntry<T>(
+        LdListCacheEntry<T>(
           total: total,
           expiresAt: ttl == null ? null : DateTime.now().add(ttl),
         );
@@ -133,11 +134,11 @@ class LdRepositoryCache<T extends Identifiable<IdType>, IdType> {
   /// or [LdSortOption.affectedByUpdate], read from [LdMonkeySortAndFilterState].
   void invalidateOnMutation({
     required BuildContext context,
-    required LdRepositoryMutationKind kind,
+    required LdListMutationKind kind,
     T? before,
     T? after,
   }) {
-    if (kind == LdRepositoryMutationKind.create || kind == LdRepositoryMutationKind.delete) {
+    if (kind == LdListMutationKind.create || kind == LdListMutationKind.delete) {
       clear();
       return;
     }

@@ -239,6 +239,18 @@ abstract class LiquidLocalizations {
   /// **'Loading filters and sort options...'**
   String get loadingRouteDefinitions;
 
+  /// No description provided for @detailItemLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading item...'**
+  String get detailItemLoading;
+
+  /// No description provided for @detailItemLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'This item could not be loaded. It may have been deleted or you may not have access.'**
+  String get detailItemLoadError;
+
   /// No description provided for @networkError.
   ///
   /// In en, this message translates to:
@@ -418,6 +430,60 @@ abstract class LiquidLocalizations {
   /// In en, this message translates to:
   /// **'Copied to clipboard'**
   String get copiedToClipboard;
+
+  /// No description provided for @discardUnsavedChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard unsaved changes?'**
+  String get discardUnsavedChanges;
+
+  /// No description provided for @discard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discard;
+
+  /// No description provided for @keepEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get keepEditing;
+
+  /// No description provided for @fieldConflictTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Conflicting changes'**
+  String get fieldConflictTitle;
+
+  /// No description provided for @fieldConflictDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'These fields changed elsewhere while you were editing. Choose which value to keep.'**
+  String get fieldConflictDescription;
+
+  /// No description provided for @fieldConflictKeepAllMine.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep all mine'**
+  String get fieldConflictKeepAllMine;
+
+  /// No description provided for @fieldConflictUseAllServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Use all from server'**
+  String get fieldConflictUseAllServer;
+
+  /// No description provided for @fieldConflictYours.
+  ///
+  /// In en, this message translates to:
+  /// **'Your value'**
+  String get fieldConflictYours;
+
+  /// No description provided for @fieldConflictServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Server value'**
+  String get fieldConflictServer;
 }
 
 class _LiquidLocalizationsDelegate extends LocalizationsDelegate<LiquidLocalizations> {

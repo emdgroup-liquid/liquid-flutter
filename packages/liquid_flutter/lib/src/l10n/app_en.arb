@@ -23,6 +23,8 @@
   "clearError": "Clear error",
   "loading": "Loading...",
   "loadingRouteDefinitions": "Loading filters and sort options...",
+  "detailItemLoading": "Loading item...",
+  "detailItemLoadError": "This item could not be loaded. It may have been deleted or you may not have access.",
   "networkError": "A network error occurred. Please make sure you are connected to the internet and try again.",
   "timeoutError": "The request timed out. Please try again.",
   "formatError": "An error occurred while processing the request. Please try again.",
@@ -58,5 +60,14 @@
   "shiftListExplanation": "Select a range of items while holding shift",
   "copy": "Copy",
   "showSelection": "Show",
-  "copiedToClipboard": "Copied to clipboard"
+  "copiedToClipboard": "Copied to clipboard",
+  "discardUnsavedChanges": "Discard unsaved changes?",
+  "discard": "Discard",
+  "keepEditing": "Keep editing",
+  "fieldConflictTitle": "Conflicting changes",
+  "fieldConflictDescription": "These fields changed elsewhere while you were editing. Choose which value to keep.",
+  "fieldConflictKeepAllMine": "Keep all mine",
+  "fieldConflictUseAllServer": "Use all from server",
+  "fieldConflictYours": "Your value",
+  "fieldConflictServer": "Server value"
 }

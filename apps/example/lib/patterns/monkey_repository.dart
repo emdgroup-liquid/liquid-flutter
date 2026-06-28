@@ -13,11 +13,11 @@ class MonkeyRepositoryDemo extends StatelessWidget {
       path: "lib/patterns/monkey_repository.dart",
       category: "Patterns",
       title: "LdMonkey - Repository",
-      apiComponents: ["LdRepository"],
+      apiComponents: ["LdListController"],
       demo: LdAutoSpace(
         children: [
           LdText.p(
-            "The LdRepository is a class that is responsible for fetching and caching data using the provided data source. It supports pagination, filtering, sorting, and CRUD operations.",
+            "The LdListController is a class that is responsible for fetching and caching data using the provided data source. It supports pagination, filtering, sorting, and CRUD operations.",
           ),
 
           LdText.hs("1. Define your data model"),
@@ -32,19 +32,19 @@ class MonkeyRepositoryDemo extends StatelessWidget {
   ...
 }''',
           ),
-          LdText.hs("2. Create the repository"),
+          LdText.hs("2. Create the model"),
           LdText.p(
-            "Create an LdRepository instance that handles all data operations. The repository manages pagination, filtering, sorting, and CRUD operations.",
+            "Create an [LdCallbackModel] (or subclass [LdModel]) that handles data operations. Mount it with [LdMonkeyDataProvider], which wires the paired [LdListController].",
           ),
           CodeBlock(
             language: "dart",
-            code: '''final taskRepository = LdRepository<Task, int>(
+            code: '''final taskModel = LdCallbackModel<Task, int>(
   singularItemTitle: "Task",
   pluralItemTitle: "Tasks",
   pageSize: 10,
   
   // Required: Fetch a single item by ID
-  getById: (id) async {
+  getById: (context, id) async {
     return testData.firstWhere((element) => element.id == id);
   },
   

@@ -28,7 +28,6 @@ class LdFilterSearch<T extends Identifiable<IdType>, IdType, Suggestion> extends
     this.debounceDelay = const Duration(milliseconds: 300),
     super.isEnabled,
     super.affectedByUpdate,
-    @Deprecated('Use affectedByUpdate') super.mutationAffectsCache,
   });
 
   @override
@@ -58,7 +57,6 @@ class LdFilterSearch<T extends Identifiable<IdType>, IdType, Suggestion> extends
     Duration? debounceDelay,
     bool Function(BuildContext context)? isEnabled,
     LdAffectedByUpdate<T>? affectedByUpdate,
-    @Deprecated('Use affectedByUpdate') LdAffectedByUpdate<T>? mutationAffectsCache,
   }) {
     return LdFilterSearch<T, IdType, Suggestion>(
       name: name ?? this.name,
@@ -71,7 +69,7 @@ class LdFilterSearch<T extends Identifiable<IdType>, IdType, Suggestion> extends
       buildSuggestion: buildSuggestion ?? this.buildSuggestion,
       debounceDelay: debounceDelay ?? this.debounceDelay,
       isEnabled: isEnabled ?? this.isEnabled,
-      affectedByUpdate: affectedByUpdate ?? mutationAffectsCache ?? this.affectedByUpdate,
+      affectedByUpdate: affectedByUpdate ?? this.affectedByUpdate,
     );
   }
 

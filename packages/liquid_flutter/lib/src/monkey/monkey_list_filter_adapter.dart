@@ -6,20 +6,20 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
-class LdMonkeyRepositoryFilterAdapter<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
+class LdMonkeyListFilterAdapter<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   final Widget child;
 
-  const LdMonkeyRepositoryFilterAdapter({
+  const LdMonkeyListFilterAdapter({
     super.key,
     required this.child,
   });
 
   @override
-  State<LdMonkeyRepositoryFilterAdapter<T, IdType>> createState() => _LdMonkeyRepositoryFilterAdapterState<T, IdType>();
+  State<LdMonkeyListFilterAdapter<T, IdType>> createState() => _LdMonkeyListFilterAdapterState<T, IdType>();
 }
 
-class _LdMonkeyRepositoryFilterAdapterState<T extends Identifiable<IdType>, IdType>
-    extends State<LdMonkeyRepositoryFilterAdapter<T, IdType>> {
+class _LdMonkeyListFilterAdapterState<T extends Identifiable<IdType>, IdType>
+    extends State<LdMonkeyListFilterAdapter<T, IdType>> {
   LdMonkeySortAndFilterState<T, IdType>? _lastSortAndFilterState;
   @override
   void didChangeDependencies() {
@@ -42,12 +42,12 @@ class _LdMonkeyRepositoryFilterAdapterState<T extends Identifiable<IdType>, IdTy
       _lastSortAndFilterState = sortAndFilterState;
 
       if (context.mounted && !filtersEqual) {
-        final repository = context.read<LdRepository<T, IdType>>();
+        final repository = context.read<LdListController<T, IdType>>();
         await repository.refreshList(context: context, reason: LdFetchReason.filter);
       }
 
       if (context.mounted && !sortOptionsEqual) {
-        final repository = context.read<LdRepository<T, IdType>>();
+        final repository = context.read<LdListController<T, IdType>>();
         await repository.refreshList(context: context, reason: LdFetchReason.sort);
       }
     }

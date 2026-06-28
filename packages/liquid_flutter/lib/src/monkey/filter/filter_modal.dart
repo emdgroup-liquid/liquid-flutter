@@ -8,7 +8,7 @@ LdModalRoute ldFilterModal<T extends Identifiable<IdType>, IdType>(BuildContext 
   final routerDelegate = GoRouter.of(sourceContext).routerDelegate;
   final routeConfig = sourceContext.read<LdMonkeyRouteConfig<T, IdType>>();
   final routerController = sourceContext.read<LdMonkeyRouterController<T, IdType>>();
-  final repository = sourceContext.read<LdRepository<T, IdType>>();
+  final repository = sourceContext.read<LdListController<T, IdType>>();
   final baseSortAndFilterState = sourceContext.read<LdMonkeySortAndFilterState<T, IdType>>();
   // Freeze current filter/sort definitions so URL updates can re-parse state
   // without dropping runtime-only metadata while this modal is open.
@@ -46,7 +46,7 @@ class LdFilterContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
   @override
   Widget build(BuildContext context) {
     final routerDelegate = GoRouter.of(context).routerDelegate;
-    final repository = LdRepository.of<T, IdType>(context);
+    final repository = LdListController.of<T, IdType>(context);
     final routeConfig = context.read<LdMonkeyRouteConfig<T, IdType>>();
     final routerController = context.read<LdMonkeyRouterController<T, IdType>>();
     final baseSortAndFilterState = context.read<LdMonkeySortAndFilterState<T, IdType>>();

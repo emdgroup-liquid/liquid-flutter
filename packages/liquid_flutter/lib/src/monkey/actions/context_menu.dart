@@ -62,7 +62,7 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
                   ),
                 ),
                 ListenableProvider.value(
-                  value: LdRepository.of<T, IdType>(context),
+                  value: LdListController.of<T, IdType>(context),
                 ),
                 Provider<List<LdMonkeyAction<T, IdType>>>.value(
                   value: visibleActions,

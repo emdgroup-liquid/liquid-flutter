@@ -8,10 +8,9 @@ class LdMonkeyScrollableDetailView<T extends Identifiable<IdType>, IdType> exten
   @override
   Widget build(BuildContext context) {
     return LdMonkeyStreamSelection<T, IdType>(
-      builder: (context, items) => LdScaffoldBody(
-        children: [
-          ...items.map((e) => KeyedSubtree(key: ValueKey(e.value?.id), child: buildDetail(context, e))),
-        ],
+      buildItem: buildDetail,
+      builder: (context, itemWidgets) => LdScaffoldBody(
+        children: itemWidgets,
       ),
     );
   }

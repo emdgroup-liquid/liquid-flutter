@@ -138,6 +138,8 @@ Future<void> multiGolden(
         for (final themeSize in themeSizeScenarios) {
           for (final brightness in brightnessScenarios) {
             for (final orientation in orientationScenarios) {
+              await resetTester(tester);
+
               final slug = "${entry.key}/${[
                 if (themeSizeScenarios.length > 1) themeSize.label,
                 if (brightnessScenarios.length > 1) brightness.label,

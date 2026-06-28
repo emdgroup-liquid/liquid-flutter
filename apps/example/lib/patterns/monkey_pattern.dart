@@ -54,22 +54,21 @@ class TaskDetailPage extends StatelessWidget {
         ),
         LdText.hs("2. Selection Configuration"),
         LdText.p(
-            "Selection is handled automatically by LdMonkeyShell. You can access and modify selection state using LdMonkeyShellState."),
+            "Selection state lives in the URL and is exposed through LdMonkeySelection. Read it to inspect the current selection/viewing sets, and mutate it through the static helpers, which write back to the URL via the router controller."),
         CodeBlock(
           language: "dart",
-          code: '''// In your shell widget or actions
-final shellState = LdMonkeyShellState.of<Task, int>(context);
+          code: '''// In your actions or widgets
+final selection = LdMonkeySelection.of<Task, int>(context, listen: true);
 
-// Get current selection
-final selectedItems = shellState.selectedItems;
+// Get current selection / viewing sets
+final selectedIds = selection.selection;
+final viewingIds = selection.viewing;
 
-// Set selection
-shellState.setSelectedItems({taskId});
+// Update selection (writes to the URL via the router controller)
+LdMonkeySelection.updateSelection<Task, int>(context, {taskId});
 
-// Parse selected items from URL (used in buildMonkeyRoutes)
-parseSelected: (selected) {
-  return selected.split(',').map(int.parse).toSet();
-},''',
+// Update which items are shown in the detail panel
+LdMonkeySelection.updateViewing<Task, int>(context, {taskId});''',
         ),
         LdText.hs("3. Layout Configuration"),
         LdText.p("Control how your monkey pattern responds to different screen sizes and layouts."),
@@ -82,7 +81,7 @@ parseSelected: (selected) {
   routeConfig: taskRouteConfig,
   masterPage: TaskMasterPage(),
   detailPage: TaskDetailPage(),
-  repositoryBuilder: (context, state) => taskRepository(context),
+  modelBuilder: (context, state) => taskModel(context),
   filtersBuilder: (_) async => taskFilters,
   sortOptionsBuilder: (_) async => taskSortOptions,
   actions: taskActions,
@@ -182,7 +181,7 @@ parseSelected: (selected) {
       routeConfig: LdMonkeyRouteConfig.identifiableInt<Task>(itemName: "task"),
       masterPage: TaskMasterPage(),
       detailPage: TaskDetailPage(),
-      repositoryBuilder: (context, state) => taskRepository(context),
+      modelBuilder: (context, state) => taskModel(context),
       filtersBuilder: (_) async => taskFilters,
       sortOptionsBuilder: (_) async => taskSortOptions,
       actions: taskActions,
@@ -255,7 +254,7 @@ final router = GoRouter(
       routeConfig: LdMonkeyRouteConfig.identifiableInt<Task>(itemName: "task"),
       masterPage: TaskMasterPage(),
       detailPage: TaskDetailPage(),
-      repositoryBuilder: (context, state) => taskRepository(context),
+      modelBuilder: (context, state) => taskModel(context),
       filtersBuilder: (_) async => taskFilters,
       sortOptionsBuilder: (_) async => taskSortOptions,
       actions: taskActions,

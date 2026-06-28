@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 LdMonkeyAction<T, IdType> deleteAction<T extends Identifiable<IdType>, IdType>({
@@ -65,7 +66,7 @@ LdMonkeyAction<T, IdType> deleteAction<T extends Identifiable<IdType>, IdType>({
           ctx.updateShowSelectionControls(false);
         }
 
-        await ctx.repository.deleteBatch(
+        await ctx.appContext.read<LdModel<T, IdType, Object?, Object?>>().deleteBatch(
           context: ctx.appContext,
           ids: deletedIds,
         );

@@ -40,7 +40,7 @@ List<Widget> _buildRangeChips<T extends Identifiable<IdType>, IdType>(
   final routerDelegate = router?.routerDelegate;
   final routeConfig = router != null ? context.read<LdMonkeyRouteConfig<T, IdType>>() : null;
   final routerController = context.read<LdMonkeyRouterController<T, IdType>>();
-  final repository = LdRepository.of<T, IdType>(context);
+  final repository = LdListController.of<T, IdType>(context);
   final baseSortAndFilterState = LdMonkeySortAndFilterState.of<T, IdType>(context);
   final baseFilters = baseSortAndFilterState.filters.toList(growable: false);
   final baseSortOptions = baseSortAndFilterState.sortOptions.toList(growable: false);
@@ -51,7 +51,7 @@ List<Widget> _buildRangeChips<T extends Identifiable<IdType>, IdType>(
           ? (_) => [
                 Provider<LdMonkeyRouterController<T, IdType>>.value(value: routerController),
                 Provider<LdMonkeySortAndFilterState<T, IdType>>.value(value: baseSortAndFilterState),
-                ListenableProvider<LdRepository<T, IdType>>.value(value: repository),
+                ListenableProvider<LdListController<T, IdType>>.value(value: repository),
               ]
           : null,
       builder: (context, isShuttle, open, isOpen, child) {

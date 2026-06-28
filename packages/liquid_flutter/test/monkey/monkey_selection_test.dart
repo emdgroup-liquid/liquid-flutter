@@ -7,6 +7,20 @@ import 'test_utils.dart';
 
 void main() {
   group('LdMonkeySelection Tests', () {
+    group('Initial State', () {
+      test('initializes with empty selection and viewing', () {
+        final selection = LdMonkeySelection<TestItem, int>(
+          selection: {},
+          viewing: {},
+          showSelectionControls: false,
+        );
+
+        expect(selection.selection, isEmpty);
+        expect(selection.viewing, isEmpty);
+        expect(selection.showSelectionControls, isFalse);
+      });
+    });
+
     group('Adaptive Selection', () {
       testWidgets('adaptive() returns selection for masterAppBar location', (WidgetTester tester) async {
         await tester.pumpWidget(
@@ -121,24 +135,26 @@ void main() {
 
     group('getSelectedItems', () {
       test('getSelectedItems retrieves items from repository', () async {
-        final repository = createTestRepository(
+        final repository = createTestListController(
           initialItems: [
             createTestItem(1),
             createTestItem(2),
           ],
         );
 
+        final ctx = MockBuildContext();
         final selection = {1, 2};
-        final items = await Future.wait(selection.map((id) => repository.getById(id)));
+        final items = await Future.wait(selection.map((id) => repository.getById(ctx, id)));
 
         expect(items.length, equals(2));
         expect(items.map((e) => e.id).toSet(), equals({1, 2}));
       });
 
       test('getSelectedItems returns empty list for empty selection', () async {
-        final repository = createTestRepository();
+        final repository = createTestListController();
+        final ctx = MockBuildContext();
         final selection = <int>{};
-        final items = await Future.wait(selection.map((id) => repository.getById(id)));
+        final items = await Future.wait(selection.map((id) => repository.getById(ctx, id)));
 
         expect(items, isEmpty);
       });
@@ -146,24 +162,26 @@ void main() {
 
     group('getViewingItems', () {
       test('getViewingItems retrieves items from repository', () async {
-        final repository = createTestRepository(
+        final repository = createTestListController(
           initialItems: [
             createTestItem(1),
             createTestItem(2),
           ],
         );
 
+        final ctx = MockBuildContext();
         final viewing = {1, 2};
-        final items = await Future.wait(viewing.map((id) => repository.getById(id)));
+        final items = await Future.wait(viewing.map((id) => repository.getById(ctx, id)));
 
         expect(items.length, equals(2));
         expect(items.map((e) => e.id).toSet(), equals({1, 2}));
       });
 
       test('getViewingItems returns empty list for empty viewing', () async {
-        final repository = createTestRepository();
+        final repository = createTestListController();
+        final ctx = MockBuildContext();
         final viewing = <int>{};
-        final items = await Future.wait(viewing.map((id) => repository.getById(id)));
+        final items = await Future.wait(viewing.map((id) => repository.getById(ctx, id)));
 
         expect(items, isEmpty);
       });
@@ -254,6 +272,21 @@ void main() {
         final selection2 = LdMonkeySelection<TestItem, int>(
           selection: {1, 2},
           viewing: {3},
+          showSelectionControls: false,
+        );
+
+        expect(selection1, isNot(equals(selection2)));
+      });
+
+      test('selections with different showSelectionControls are not equal', () {
+        final selection1 = LdMonkeySelection<TestItem, int>(
+          selection: {},
+          viewing: {},
+          showSelectionControls: true,
+        );
+        final selection2 = LdMonkeySelection<TestItem, int>(
+          selection: {},
+          viewing: {},
           showSelectionControls: false,
         );
 

@@ -1,4 +1,4 @@
-/// Describes why [LdRepository.fetchListWithParameters] is being invoked.
+/// Describes why [LdListController.fetchListWithParameters] is being invoked.
 enum LdFetchReason {
   /// First load when the paginator has no data yet.
   initial,
