@@ -33,7 +33,7 @@ jobs:
         run: dart pub global activate melos
 
       - name: Install mtrust_api_guard
-        run: dart pub global activate mtrust_api_guard 8.1.0
+        run: dart pub global activate mtrust_api_guard 8.1.1
 
       - name: Bootstrap Melos
         run: melos bootstrap
