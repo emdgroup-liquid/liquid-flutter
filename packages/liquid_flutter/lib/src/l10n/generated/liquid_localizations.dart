@@ -484,6 +484,18 @@ abstract class LiquidLocalizations {
   /// In en, this message translates to:
   /// **'Server value'**
   String get fieldConflictServer;
+
+  /// No description provided for @noItemsMatchFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'No items match your filters'**
+  String get noItemsMatchFilter;
+
+  /// No description provided for @clearFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get clearFilters;
 }
 
 class _LiquidLocalizationsDelegate extends LocalizationsDelegate<LiquidLocalizations> {

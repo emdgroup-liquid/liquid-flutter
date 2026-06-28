@@ -740,7 +740,9 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
       );
     }
 
-    if (widget.paginator.currentItemCount == 0 && !widget.paginator.busy) {
+    if (widget.paginator.currentItemCount == 0 &&
+        !widget.paginator.busy &&
+        widget.paginator.totalItems == 0) {
       return _buildEmpty(context);
     }
 

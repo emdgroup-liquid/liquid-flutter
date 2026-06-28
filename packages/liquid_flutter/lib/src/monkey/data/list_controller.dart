@@ -32,6 +32,12 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
   /// Per-list-controller cache available in [FetchPageParameters.cache].
   final LdListCache<T, IdType> cache;
 
+  /// Synchronous guard for the [refreshList] override: set to `true`
+  /// immediately (before any `await`) so that a second concurrent call that
+  /// enters during the async anchor-offset resolution is dropped instead of
+  /// racing to commit its own refresh results on top of the first.
+  bool _refreshInProgress = false;
+
   factory LdListController.fromModel(
     LdModel<T, IdType, Object?, Object?> model, {
     List<T>? initialItems,
@@ -89,6 +95,12 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
   ) async {
     if (_autoInvalidateCache &&
         (parameters.reason == LdFetchReason.refresh || parameters.reason == LdFetchReason.invalidate)) {
+      if (ldPrintDebugMessages) {
+        debugPrint(
+          '[LdCache] clear (reason=${parameters.reason} offset=${parameters.offset}) '
+          'keys=[${cache.keys.join(", ")}]',
+        );
+      }
       cache.clear();
     }
 
@@ -96,17 +108,50 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
       final cachedPage = cache.readPage(parameters.cacheKey, parameters.offset);
       if (cachedPage != null) {
         final entry = cache.readEntry(parameters.cacheKey)!;
+        if (ldPrintDebugMessages) {
+          final ids = cachedPage.map((e) => (e as dynamic).id).toList();
+          debugPrint(
+            '[LdCache] HIT offset=${parameters.offset} key="${parameters.cacheKey}" '
+            'total=${entry.total} ids=$ids',
+          );
+        }
         return LdListPage<T>(
           newItems: cachedPage,
           hasMore: parameters.offset + cachedPage.length < entry.total,
           total: entry.total,
         );
+      } else {
+        if (ldPrintDebugMessages) {
+          final cachedOffsets = cache.readEntry(parameters.cacheKey)?.pagesByOffset.keys.toList() ?? [];
+          debugPrint(
+            '[LdCache] MISS offset=${parameters.offset} key="${parameters.cacheKey}" '
+            'cachedOffsets=$cachedOffsets → going to API',
+          );
+        }
       }
     }
 
+    if (ldPrintDebugMessages) {
+      debugPrint(
+        '[LdCache] API request offset=${parameters.offset} pageSize=${parameters.pageSize} '
+        'reason=${parameters.reason} key="${parameters.cacheKey}"',
+      );
+    }
     final page = await fetchListWithParameters(parameters);
+    if (ldPrintDebugMessages) {
+      final ids = page.newItems.map((e) => (e as dynamic).id).toList();
+      debugPrint(
+        '[LdCache] API response offset=${parameters.offset} total=${page.total} ids=$ids',
+      );
+    }
 
     if (_autoCache) {
+      if (ldPrintDebugMessages) {
+        debugPrint(
+          '[LdCache] write offset=${parameters.offset} key="${parameters.cacheKey}" '
+          'total=${page.total} count=${page.newItems.length}',
+        );
+      }
       cache.writePage(
         parameters.cacheKey,
         offset: parameters.offset,
@@ -286,6 +331,9 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
   }) {
     final detachedItem = _detachedItemsById.remove(id);
     if (detachedItem != null) {
+      if (ldPrintDebugMessages) {
+        debugPrint('[LdListController] id=$id: confirmed deletion via detached path');
+      }
       notifyItemUpdated(
         detachedItem.copyWith(state: LdPaginatorItemState.deleted),
       );
@@ -293,7 +341,14 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
     }
 
     if (getItemIndexById(id) != null) {
+      if (ldPrintDebugMessages) {
+        debugPrint('[LdListController] id=$id: confirmed deletion via paged path');
+      }
       unawaited(_confirmPagedDeletion(context, id: id, refresh: refresh));
+    } else {
+      if (ldPrintDebugMessages) {
+        debugPrint('[LdListController] id=$id: confirm deletion called but item not found (already removed?)');
+      }
     }
   }
 
@@ -317,6 +372,16 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
       return;
     }
 
+    // Skip if a controlled refresh is already in flight (e.g. from a
+    // concurrent deletion confirmation) — the in-flight refresh will settle
+    // the list to a consistent state already.
+    if (isControlledRefresh || busy) {
+      if (ldPrintDebugMessages) {
+        debugPrint('[LdListController] id=$id: skipping redundant refreshList (refresh already in progress)');
+      }
+      return;
+    }
+
     await refreshList(
       context: context,
       reason: LdFetchReason.invalidate,
@@ -330,18 +395,45 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
       if (detachedItem.state == LdPaginatorItemState.deleting) {
         _detachedItemsById[id] = detachedItem.copyWith(state: LdPaginatorItemState.loaded);
         notifyItemUpdated(_detachedItemsById[id]!);
+        if (ldPrintDebugMessages) {
+          debugPrint('[LdListController] id=$id: rollback deletion via detached path → loaded');
+        }
       }
       return;
     }
 
     if (getItemIndexById(id) == null) {
+      if (ldPrintDebugMessages) {
+        debugPrint('[LdListController] id=$id: rollback deletion called but item not found (no-op)');
+      }
       return;
     }
 
     try {
       rollbackItemDeletion(id);
+      if (ldPrintDebugMessages) {
+        debugPrint('[LdListController] id=$id: rollback deletion via paged path → rolledBackDeletion');
+      }
     } catch (_) {
       // Item may have been removed while the delete request was in flight.
+    }
+  }
+
+  /// When a controlled refresh commits its new items, any in-flight transient
+  /// entries (deleting / updating / creating) are evicted from [_items] before
+  /// the map is replaced. We move them into [_detachedItemsById] so that the
+  /// pending confirm / rollback callbacks can still resolve via the detached
+  /// path in [_confirmDeletionForId] / [_rollbackDeletionForId].
+  @override
+  void onTransientItemsEvictedByRefresh(Map<int, LdPaginatorItem<T>> transientItems) {
+    for (final item in transientItems.values) {
+      if (item.value != null) {
+        // Only register in the detached map if not already tracked there.
+        _detachedItemsById.putIfAbsent(item.value!.id, () => item);
+        if (ldPrintDebugMessages) {
+          debugPrint('[LdListController] evicted id=${item.value!.id} state=${item.state} → detached');
+        }
+      }
     }
   }
 
@@ -505,6 +597,16 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
     LdFetchReason reason = LdFetchReason.refresh,
     IdType? anchorId,
   }) async {
+    // Prevent a second concurrent refresh from racing through the async anchor
+    // resolution below while a first refresh has already started (or is about
+    // to call super.refreshList which sets _isControlledRefresh).
+    // _refreshInProgress is set synchronously (before any await) so it is
+    // visible to any second call that enters on the same microtask turn.
+    if (_refreshInProgress || isControlledRefresh || busy) {
+      return;
+    }
+    _refreshInProgress = true;
+
     if (reason == LdFetchReason.refresh) {
       _detachedItemsById.clear();
     }
@@ -546,23 +648,50 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
     }
 
     if (!context.mounted) {
+      _refreshInProgress = false;
       return;
     }
 
-    await super.refreshList(
-      context: context,
-      reason: reason,
-    );
+    try {
+      await super.refreshList(
+        context: context,
+        reason: reason,
+      );
+    } finally {
+      _refreshInProgress = false;
+    }
   }
 
   @override
   void confirmItemUpdate(IdType id, T? newValue) {
     final detachedItem = _detachedItemsById[id];
     if (detachedItem != null) {
-      _detachedItemsById[id] = LdPaginatorItem<T>(
-        value: newValue ?? detachedItem.value,
-        state: LdPaginatorItemState.loaded,
-      );
+      // The item was evicted to the detached map during a concurrent refresh.
+      // The base-class _items no longer has an `updating` entry for it so
+      // calling super would throw.
+      //
+      // Two sub-cases:
+      // A) The item is *still* only in the detached map — store the confirmed
+      //    value there so a subsequent getItemById call sees it.
+      // B) The item has *re-appeared* in _items (because the concurrent refresh
+      //    fetched a fresh copy from the server) — apply the confirmed value
+      //    directly to the paged entry via super so the UI stays up-to-date.
+      final pagedItem = super.getItemById(id);
+      if (pagedItem != null) {
+        // Sub-case B: item is back in the paged list (a concurrent refresh
+        // fetched a fresh copy).  Transition it through updating → loaded so
+        // that the confirmed value reaches the UI.
+        _detachedItemsById.remove(id);
+        scheduleItemUpdate(id, newValue);
+        super.confirmItemUpdate(id, newValue);
+      } else {
+        // Sub-case A: item is only in the detached map.
+        _detachedItemsById[id] = LdPaginatorItem<T>(
+          value: newValue ?? detachedItem.value,
+          state: LdPaginatorItemState.loaded,
+        );
+      }
+      return;
     }
     super.confirmItemUpdate(id, newValue);
   }

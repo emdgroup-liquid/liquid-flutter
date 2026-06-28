@@ -94,6 +94,24 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
           actions,
           canReorder: canReorder,
         ),
+        emptyBuilder: (context, onRefresh) {
+          final filterState = LdMonkeySortAndFilterState.of<T, IdType>(context);
+          final hasActiveFilters = filterState.activeFilters.isNotEmpty;
+          return LdListEmpty(
+            hasActiveFilters: hasActiveFilters,
+            onClearFilters: hasActiveFilters
+                ? () async {
+                    for (final filter in filterState.activeFilters) {
+                      LdMonkeySortAndFilterState.updateFilter<T, IdType>(
+                        context,
+                        filter.copyWith(isOn: false),
+                      );
+                    }
+                  }
+                : null,
+            onRefresh: hasActiveFilters ? null : () => onRefresh(context),
+          );
+        },
       ),
       child: LdSelectableList<T, IdType>(
         key: _listKey,

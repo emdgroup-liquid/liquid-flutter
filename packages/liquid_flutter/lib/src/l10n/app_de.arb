@@ -32,5 +32,7 @@
   "fieldConflictKeepAllMine": "Alle meine behalten",
   "fieldConflictUseAllServer": "Alle vom Server übernehmen",
   "fieldConflictYours": "Ihr Wert",
-  "fieldConflictServer": "Serverwert"
+  "fieldConflictServer": "Serverwert",
+  "noItemsMatchFilter": "Keine Elemente entsprechen Ihren Filtern",
+  "clearFilters": "Filter zurücksetzen"
 }
