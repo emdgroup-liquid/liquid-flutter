@@ -70,7 +70,7 @@ class LdMonkeyReactiveDetailForm<T extends Identifiable<IdType>, IdType, TDetail
     required this.item,
     required this.itemsBuilder,
     required this.detailToFormValues,
-    required LdMonkeyDetailFormToUpdatePayload<TUpdate, TDetail> formToUpdatePayload,
+    required this.formToUpdatePayload,
     this.loadDetail,
     this.detailFromEntity,
     this.saveMode = LdMonkeyDetailSaveMode.adaptive,
@@ -82,7 +82,6 @@ class LdMonkeyReactiveDetailForm<T extends Identifiable<IdType>, IdType, TDetail
     this.submitConfig,
   })  : mode = LdMonkeyReactiveDetailFormMode.edit,
         initialDetail = null,
-        formToUpdatePayload = formToUpdatePayload,
         formToCreatePayload = null,
         onCreated = null;
 
@@ -91,7 +90,7 @@ class LdMonkeyReactiveDetailForm<T extends Identifiable<IdType>, IdType, TDetail
     required this.initialDetail,
     required this.itemsBuilder,
     required this.detailToFormValues,
-    required LdMonkeyDetailFormToCreatePayload<TCreate, TDetail> formToCreatePayload,
+    required this.formToCreatePayload,
     this.onCreated,
     this.conflictPolicy = LdMonkeyFieldConflictPolicy.keepLocal,
     this.onFieldConflict,
@@ -101,7 +100,6 @@ class LdMonkeyReactiveDetailForm<T extends Identifiable<IdType>, IdType, TDetail
   })  : mode = LdMonkeyReactiveDetailFormMode.create,
         item = null,
         formToUpdatePayload = null,
-        formToCreatePayload = formToCreatePayload,
         loadDetail = null,
         detailFromEntity = null,
         saveMode = LdMonkeyDetailSaveMode.manualSubmit,
@@ -228,8 +226,10 @@ class _LdMonkeyReactiveDetailFormState<T extends Identifiable<IdType>, IdType, T
 
     _currentId = id;
     _loadingDetail = true;
+    final listController = LdListController.of<T, IdType>(context);
     await _itemSubscription?.cancel();
-    _itemSubscription = LdListController.of<T, IdType>(context).watchItem(id).listen(_onItemUpdated);
+    if (!mounted) return;
+    _itemSubscription = listController.watchItem(id).listen(_onItemUpdated);
 
     try {
       final detail = widget.loadDetail != null ? await widget.loadDetail!(context, id) : widget.item!.value! as TDetail;
@@ -379,20 +379,23 @@ class _LdMonkeyReactiveDetailFormState<T extends Identifiable<IdType>, IdType, T
     try {
       final model = context.read<LdModel<T, IdType, Object?, Object?>>();
       await _runPreSaveCheck();
+      if (!mounted) return;
 
       if (widget.mode == LdMonkeyReactiveDetailFormMode.create) {
         final payload = widget.formToCreatePayload!(_form, _detail!);
+        // ignore: use_build_context_synchronously
         final created = await model.create(context, payload);
         _form.markAsPristine();
 
-        Future.delayed(Duration(milliseconds: 500), () {
-          widget.onCreated?.call(context, created);
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) widget.onCreated?.call(context, created);
         });
         return;
       }
 
       final payload = widget.formToUpdatePayload!(_form, _detail!);
       final entityId = widget.item!.value!.id;
+      // ignore: use_build_context_synchronously
       await model.update(context, entityId, payload);
       _form.markAsPristine();
     } on LdMonkeyVersionConflictException<TDetail> catch (exception) {

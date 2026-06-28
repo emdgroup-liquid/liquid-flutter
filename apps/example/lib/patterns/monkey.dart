@@ -8,8 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 class _ArchLayer extends StatelessWidget {
   final String label;
   final List<String> items;
-  final Color? color;
-  const _ArchLayer({required this.label, required this.items, this.color});
+  const _ArchLayer({required this.label, required this.items});
 
   @override
   Widget build(BuildContext context) {

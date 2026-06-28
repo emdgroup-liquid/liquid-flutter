@@ -131,7 +131,7 @@ void main() {
         updateCount++;
         tasks[0] = item;
         return item;
-      });
+      },);
     final listController = _buildListController(model);
 
     await tester.pumpWidget(

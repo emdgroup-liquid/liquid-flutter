@@ -46,7 +46,7 @@ jobs:
       #   run: very_good packages check licenses --allowed=MIT,Apache-2.0,BSD-3-Clause,BSD-2-Clause
 
       - name: Run analyzer
-        run: melos exec -- dart analyze
+        run: melos run analyze
 
       - name: Run tests
         run: |

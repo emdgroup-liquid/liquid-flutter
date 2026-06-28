@@ -163,9 +163,7 @@ void main() {
       //   fetch.  We simulate this by returning item id=5 in BOTH page 0 and
       //   page 1 responses.
 
-      var fetchCount = 0;
       final controller = _makeController((params) async {
-        fetchCount++;
         if (params.offset == 0) {
           // Initial page: items 1-5
           return LdListPage<_Item>(
@@ -363,11 +361,9 @@ void main() {
       final deleteGate = Completer<void>();
 
       final items = List.generate(5, (i) => _Item(i + 1));
-      var fetchCount = 0;
 
       final controller = _makeController(
         (params) async {
-          fetchCount++;
           final slice =
               items.skip(params.offset).take(params.pageSize).toList();
           return LdListPage<_Item>(
@@ -685,11 +681,9 @@ void main() {
       // _buildEmpty / _buildListView branch is chosen correctly.
 
       final serverItems = List.generate(10, (i) => _Item(i + 1));
-      var fetchCount = 0;
 
       final controller = _makeController(
         (params) async {
-          fetchCount++;
           final slice =
               serverItems.skip(params.offset).take(params.pageSize).toList();
           return LdListPage<_Item>(
