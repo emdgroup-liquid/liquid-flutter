@@ -52,6 +52,7 @@ import 'package:liquid/patterns/monkey_actions.dart';
 import 'package:liquid/patterns/monkey_pattern.dart';
 import 'package:liquid/patterns/monkey_detail_edit.dart';
 import 'package:liquid/patterns/monkey_repository.dart';
+import 'package:liquid/patterns/monkey_backend.dart';
 import 'package:liquid/patterns/monkey_sorting_filtering.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
@@ -206,6 +207,11 @@ class AppRouter {
             path: "/patterns/monkey/sorting-filtering",
             pageBuilder: (context, state) =>
                 NoTransitionPage<void>(key: state.pageKey, child: const MonkeySortingFilteringDemo()),
+          ),
+          GoRoute(
+            path: "/patterns/monkey/backend",
+            pageBuilder: (context, state) =>
+                NoTransitionPage<void>(key: state.pageKey, child: const MonkeyBackendDemo()),
           ),
           GoRoute(
             path: "/patterns/monkey/detail-edit",

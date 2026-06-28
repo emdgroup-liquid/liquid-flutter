@@ -274,6 +274,21 @@ class MonkeyDemo extends StatelessWidget {
                 ),
               ),
               LdSpacer(size: LdSize.m),
+              LdSpacer(size: LdSize.m),
+              LdText.hs("Backend API"),
+              LdText.p(
+                "Learn what your server-side API must look like to be fully compatible with LdMonkey — pagination contract, filter/sort wire format, and the offset-by-id endpoint.",
+              ),
+              LdCard(
+                padding: EdgeInsets.zero,
+                child: LdListItem.trailingForward(
+                  title: Text("View Backend API Documentation"),
+                  onPressed: () {
+                    context.push("/patterns/monkey/backend");
+                  },
+                ),
+              ),
+              LdSpacer(size: LdSize.m),
               LdText.hs("Detail editing"),
               LdText.p(
                 "Learn how to build editable detail views with LdMonkeyReactiveDetailForm, adaptive save, and navigation guards.",

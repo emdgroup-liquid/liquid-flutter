@@ -303,6 +303,11 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                       onPressed: () => _showPage(context, "/patterns/monkey/sorting-filtering"),
                       child: const Text("Sorting & Filtering"),
                     ),
+                    LdDrawerItemSection(
+                      active: GoRouterState.of(context).uri.path == ("/patterns/monkey/backend"),
+                      onPressed: () => _showPage(context, "/patterns/monkey/backend"),
+                      child: const Text("Backend API"),
+                    ),
                   ],
                 ),
 
