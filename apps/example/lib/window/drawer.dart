@@ -220,22 +220,22 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                   initiallyExpanded: true,
                   children: [
                     LdDrawerItemSection(
-                      active: GoRouterState.of(context).uri.path == "/task-demo",
+                      active: GoRouterState.of(context).uri.path.startsWith("/task-demo"),
                       leading: const Icon(LucideIcons.check),
                       onPressed: () => _showPage(context, "/task-demo/38"),
                       child: const Text("Task"),
                     ),
                     LdDrawerItemSection(
-                      active: GoRouterState.of(context).uri.path == "/movie-demo",
+                      active: GoRouterState.of(context).uri.path.startsWith("/movie-demo"),
                       leading: const Icon(LucideIcons.film),
                       onPressed: () => _showPage(context, "/movie-demo"),
                       child: const Text("Movie"),
                     ),
                     LdDrawerItemSection(
-                      active: GoRouterState.of(context).uri.path == "/projects",
+                      active: GoRouterState.of(context).uri.path.startsWith("/projects"),
                       leading: const Icon(LucideIcons.folder),
                       onPressed: () => _showPage(context, "/projects"),
-                      child: const Text("Movie"),
+                      child: const Text("Projects"),
                     ),
                   ],
                 ),

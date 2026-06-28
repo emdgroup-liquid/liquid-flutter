@@ -12,6 +12,7 @@ class LdAppBarConfig {
     this.borderMode,
     this.bottom,
     this.debugName,
+    this.insetScreenRadius,
     this.implyCloseModalButton,
     this.implyLeading,
     this.avoidViewInsets,
@@ -46,6 +47,8 @@ class LdAppBarConfig {
   final Widget? bottom;
 
   final String? debugName;
+
+  final bool? insetScreenRadius;
 
   final bool? implyCloseModalButton;
 
@@ -112,6 +115,8 @@ class LdAppBarConfigProvider extends StatelessWidget {
             borderMode: config.borderMode ?? parentConfig.borderMode,
             bottom: config.bottom ?? parentConfig.bottom,
             debugName: config.debugName ?? parentConfig.debugName,
+            insetScreenRadius:
+                config.insetScreenRadius ?? parentConfig.insetScreenRadius,
             implyCloseModalButton: config.implyCloseModalButton ??
                 parentConfig.implyCloseModalButton,
             implyLeading: config.implyLeading ?? parentConfig.implyLeading,
@@ -150,6 +155,7 @@ class LdAppBar extends StatelessWidget {
     this.borderMode,
     this.bottom,
     this.debugName,
+    this.insetScreenRadius,
     this.implyCloseModalButton,
     this.implyLeading,
     this.avoidViewInsets,
@@ -177,6 +183,7 @@ class LdAppBar extends StatelessWidget {
     LdAppBarBorderMode? borderMode,
     Widget? bottom,
     String? debugName,
+    bool? insetScreenRadius,
     bool? implyCloseModalButton,
     bool? implyLeading,
     bool? avoidViewInsets,
@@ -202,6 +209,7 @@ class LdAppBar extends StatelessWidget {
       borderMode: borderMode,
       bottom: bottom,
       debugName: debugName,
+      insetScreenRadius: insetScreenRadius,
       implyCloseModalButton: implyCloseModalButton,
       implyLeading: implyLeading,
       avoidViewInsets: avoidViewInsets,
@@ -231,6 +239,7 @@ class LdAppBar extends StatelessWidget {
     LdAppBarBorderMode? borderMode,
     Widget? bottom,
     String? debugName,
+    bool? insetScreenRadius,
     bool? implyCloseModalButton,
     bool? implyLeading,
     bool? avoidViewInsets,
@@ -256,6 +265,7 @@ class LdAppBar extends StatelessWidget {
       borderMode: borderMode,
       bottom: bottom,
       debugName: debugName,
+      insetScreenRadius: insetScreenRadius,
       implyCloseModalButton: implyCloseModalButton,
       implyLeading: implyLeading,
       avoidViewInsets: avoidViewInsets,
@@ -320,6 +330,8 @@ class LdAppBar extends StatelessWidget {
 
   final EdgeInsets? padding;
 
+  final bool? insetScreenRadius;
+
   @override
   Widget build(BuildContext context) {
     final config = Provider.of<LdAppBarConfig?>(context, listen: true);
@@ -340,6 +352,7 @@ class LdAppBar extends StatelessWidget {
           borderMode ?? config?.borderMode ?? LdAppBarBorderMode.adaptive,
       bottom: bottom ?? config?.bottom,
       debugName: debugName ?? config?.debugName,
+      insetScreenRadius: insetScreenRadius ?? config?.insetScreenRadius ?? true,
       implyCloseModalButton:
           implyCloseModalButton ?? config?.implyCloseModalButton ?? true,
       implyLeading: implyLeading ?? config?.implyLeading,

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter_reactive_forms/src/monkey_detail/ld_monkey_field_conflict.dart';
+import 'package:liquid_flutter_reactive_forms/src/monkey_detail/ld_monkey_field_conflict_error.dart';
+import 'package:liquid_flutter_reactive_forms/src/monkey_detail/ld_monkey_field_conflict_hint.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 
 import '../liquid_flutter_reactive_forms.dart';
@@ -15,6 +18,10 @@ import '../liquid_flutter_reactive_forms.dart';
 class LdReactiveFormItem<TModel, TView> {
   /// The key of the form field.
   final String key;
+
+  /// Human-readable label of the form field. Used for display purposes such as
+  /// the field-conflict resolution prompt.
+  final String? label;
 
   /// The builder function that creates the form field widget.
   final LdFormFieldBuilder<TModel, TView> formFieldBuilder;
@@ -33,6 +40,7 @@ class LdReactiveFormItem<TModel, TView> {
   const LdReactiveFormItem({
     required this.key,
     required this.formFieldBuilder,
+    this.label,
     this.hintBuilder,
     this.disabled = false,
     this.validators = const [],
@@ -64,15 +72,17 @@ class LdReactiveFormItem<TModel, TView> {
     };
     return LdReactiveFormItem<T, String>(
       key: key,
+      label: label,
       hintBuilder: hintBuilder,
       disabled: disabled,
       validators: validators,
       validationMessages: validationMessages,
       initialValue: valueAccessor.viewToModelValue(
-        initialValue ?? switch (T) {
-          const (String) => '',
-          _ => null,
-        },
+        initialValue ??
+            switch (T) {
+              const (String) => '',
+              _ => null,
+            },
       ),
       valueAccessor: valueAccessor,
       formFieldBuilder: (state) {
@@ -101,6 +111,7 @@ class LdReactiveFormItem<TModel, TView> {
   }) {
     return LdReactiveFormItem<T, T>(
       key: key,
+      label: label,
       hintBuilder: hintBuilder,
       disabled: disabled,
       validators: validators,
@@ -136,6 +147,7 @@ class LdReactiveFormItem<TModel, TView> {
   }) {
     return LdReactiveFormItem<Set<T>, Set<T>>(
       key: key,
+      label: label,
       hintBuilder: hintBuilder,
       disabled: disabled,
       validators: validators,
@@ -206,6 +218,7 @@ class LdReactiveFormItem<TModel, TView> {
   }) {
     return LdReactiveFormItem<Set<IdType>, Set<IdType>>(
       key: key,
+      label: label,
       hintBuilder: hintBuilder,
       disabled: disabled,
       validators: validators,
@@ -234,10 +247,10 @@ class LdReactiveFormItem<TModel, TView> {
     );
   }
 
-  /// Choose field backed by a monkey [LdRepository].
+  /// Choose field backed by a monkey [LdListController].
   static LdReactiveFormItem<Set<IdType>, Set<IdType>> chooseRepository<T extends Identifiable<IdType>, IdType>({
     required String key,
-    required LdRepository<T, IdType> repository,
+    required LdListController<T, IdType> repository,
     required Widget Function(BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder,
     required Widget Function(BuildContext context, T item) selectedItemBuilder,
     LdHint? Function(LdReactiveFormFieldState<Set<IdType>, Set<IdType>>)? hintBuilder,
@@ -255,6 +268,7 @@ class LdReactiveFormItem<TModel, TView> {
   }) {
     return LdReactiveFormItem<Set<IdType>, Set<IdType>>(
       key: key,
+      label: label,
       hintBuilder: hintBuilder,
       disabled: disabled,
       validators: validators,
@@ -292,6 +306,7 @@ class LdReactiveFormItem<TModel, TView> {
   }) {
     return LdReactiveFormItem<bool, bool>(
       key: key,
+      label: label,
       hintBuilder: hintBuilder,
       disabled: disabled,
       validators: validators,
@@ -323,6 +338,7 @@ class LdReactiveFormItem<TModel, TView> {
   }) {
     return LdReactiveFormItem<DateTime, DateTime>(
       key: key,
+      label: label,
       hintBuilder: hintBuilder,
       disabled: disabled,
       validators: validators,
@@ -352,38 +368,26 @@ class LdReactiveFormItem<TModel, TView> {
     double? initialValue,
     double min = 0,
     double max = 100,
+    double step = 1,
     Map<String, ValidationMessageFunction>? validationMessages,
-    String Function(double? value)? valueFormatter,
     void Function(double value)? onCommitted,
   }) {
-    final defaultPrecision = max - min < 1 ? 2 : 0;
-    valueFormatter ??= (value) => value?.toStringAsFixed(defaultPrecision) ?? '';
     return LdReactiveFormItem<double, double>(
       key: key,
+      label: label,
       hintBuilder: hintBuilder,
       disabled: disabled,
       validators: validators,
       initialValue: initialValue,
       validationMessages: validationMessages,
       formFieldBuilder: (state) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                if (label != null) LdText.l(label, textAlign: TextAlign.start),
-                const Spacer(),
-                LdText.ls(valueFormatter!(state.control.value)),
-              ],
-            ),
-            Slider(
-              value: (state.control.value ?? min).clamp(min, max),
-              onChanged: (value) => state.didChange(value),
-              onChangeEnd: onCommitted,
-              min: min,
-              max: max,
-            ),
-          ],
+        return LdSlider(
+          label: label,
+          value: (state.control.value ?? min).clamp(min, max),
+          onChanged: (value) => state.didChange(value),
+          step: step,
+          min: min,
+          max: max,
         );
       },
     );
@@ -413,7 +417,49 @@ class LdReactiveFormItem<TModel, TView> {
               LdHint(type: LdHintType.error, child: Text(state.errorText!))
             else if (hintBuilder != null)
               hintBuilder!.call(state) ?? const SizedBox.shrink(),
-            const LdSpacer(size: LdSize.l),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Detail-form field with server-conflict hints below the control.
+  Widget buildMonkeyDetailField({
+    required void Function(
+      LdMonkeyFieldConflict conflict,
+      LdMonkeyFieldConflictResolution resolution,
+    ) onResolveConflict,
+  }) {
+    return ReactiveFormField<TModel, TView>(
+      formControlName: key,
+      valueAccessor: valueAccessor,
+      validationMessages: validationMessages,
+      showErrors: ldReactiveFormShowErrors,
+      builder: (state) {
+        final control = state.control;
+        final conflictError = control.getError(kLdMonkeyServerConflictKey);
+        final conflict = conflictError is LdMonkeyFieldConflictError
+            ? LdMonkeyFieldConflict(
+                fieldKey: key,
+                label: label,
+                localValue: conflictError.localValue,
+                serverValue: conflictError.serverValue,
+              )
+            : null;
+
+        return LdAutoSpace(
+          children: [
+            formFieldBuilder(state),
+            if (conflict != null)
+              LdMonkeyFieldConflictHint(
+                control: control,
+                label: label,
+                onResolve: (resolution) => onResolveConflict(conflict, resolution),
+              )
+            else if (state.errorText != null)
+              LdHint(type: LdHintType.error, child: Text(state.errorText!))
+            else if (hintBuilder != null)
+              hintBuilder!.call(state) ?? const SizedBox.shrink(),
           ],
         );
       },

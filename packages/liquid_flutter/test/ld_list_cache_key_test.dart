@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/monkey/data/ld_list_cache_key.dart';
 
 class _KeyItem with Identifiable<int> {
   @override
@@ -14,10 +15,10 @@ Widget _icon(BuildContext context) => const SizedBox.shrink();
 String _label(BuildContext context) => 'label';
 
 void main() {
-  group('ldRepositoryCacheKey', () {
+  group('ldListCacheKey', () {
     test('empty filters and sorts produce empty key', () {
       expect(
-        ldRepositoryCacheKey<_KeyItem, int>(filters: {}, sortOptions: []),
+        ldListCacheKey<_KeyItem, int>(filters: {}, sortOptions: []),
         isEmpty,
       );
     });
@@ -50,11 +51,11 @@ void main() {
         direction: LdSortOptionDirection.asc,
       );
 
-      final keyOne = ldRepositoryCacheKey<_KeyItem, int>(
+      final keyOne = ldListCacheKey<_KeyItem, int>(
         filters: {filterB, filterA},
         sortOptions: [sortB, sortA],
       );
-      final keyTwo = ldRepositoryCacheKey<_KeyItem, int>(
+      final keyTwo = ldListCacheKey<_KeyItem, int>(
         filters: {filterA, filterB},
         sortOptions: [sortA, sortB],
       );
@@ -67,7 +68,7 @@ void main() {
     });
 
     test('appends pageToken when provided', () {
-      final key = ldRepositoryCacheKey<_KeyItem, int>(
+      final key = ldListCacheKey<_KeyItem, int>(
         filters: {},
         sortOptions: [],
         pageToken: 'next-page',
@@ -77,13 +78,13 @@ void main() {
     });
   });
 
-  group('parseLdRepositoryCacheKey', () {
+  group('parseLdListCacheKey', () {
     test('parses empty key', () {
-      expect(parseLdRepositoryCacheKey(''), isEmpty);
+      expect(parseLdListCacheKey(''), isEmpty);
     });
 
     test('parses filters sorts and token', () {
-      final key = ldRepositoryCacheKey<_KeyItem, int>(
+      final key = ldListCacheKey<_KeyItem, int>(
         filters: {
           LdFilterBool<_KeyItem, int>(
             name: 'active',
@@ -103,7 +104,7 @@ void main() {
         pageToken: 'next',
       );
 
-      final parts = parseLdRepositoryCacheKey(key);
+      final parts = parseLdListCacheKey(key);
       expect(parts.length, equals(3));
       expect(parts[0].kind, equals('filter'));
       expect(parts[0].name, equals('active'));
@@ -117,7 +118,7 @@ void main() {
 
     test('parses serialized values containing equals characters', () {
       final key = 'filter:search=foo=bar|sort:name=name-asc';
-      final parts = parseLdRepositoryCacheKey(key);
+      final parts = parseLdListCacheKey(key);
 
       expect(parts.length, equals(2));
       expect(parts[0].name, equals('search'));

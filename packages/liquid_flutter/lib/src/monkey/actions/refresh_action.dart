@@ -12,8 +12,8 @@ LdMonkeyAction<T, IdType> refreshAction<T extends Identifiable<IdType>, IdType>(
           minSelectionCount: 0,
           visibleWhenShowingSelectionControls: false,
           maxSelectionCount: null,
-          isVisible: (context) {
-            return LdTheme.of(context).platform.isDesktop;
+          isVisible: (ctx) {
+            return LdTheme.of(ctx.appContext).platform.isDesktop;
           },
         ),
       },
@@ -21,7 +21,7 @@ LdMonkeyAction<T, IdType> refreshAction<T extends Identifiable<IdType>, IdType>(
         loadingText: LiquidLocalizations.of(appContext).loading,
       ),
       onSubmit: (ctx) async {
-        ctx.repository.refreshList(context: ctx.appContext, reason: LdFetchReason.refresh);
+        ctx.listController.refreshList(context: ctx.appContext, reason: LdFetchReason.refresh);
       },
       childBuilder: (context) => Text(LiquidLocalizations.of(context).refresh),
       icon: Icon(LucideIcons.refreshCcw),

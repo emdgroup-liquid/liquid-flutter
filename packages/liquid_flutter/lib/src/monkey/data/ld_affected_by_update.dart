@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/monkey/data/ld_list_cache_key.dart';
 import 'package:provider/provider.dart';
 
 /// Returns whether changing [before] to [after] might change list membership or
@@ -8,10 +9,6 @@ import 'package:provider/provider.dart';
 /// Used for cache invalidation and paginator layout decisions. Bias toward `true`
 /// — false negatives cause visible glitches.
 typedef LdAffectedByUpdate<T> = bool Function(T? before, T? after);
-
-/// @nodoc
-@Deprecated('Use LdAffectedByUpdate')
-typedef LdMutationAffectsCache<T> = LdAffectedByUpdate<T>;
 
 /// Evaluates [predicate], defaulting to `true` when unset (conservative).
 bool evaluateAffectedByUpdate<T>(
@@ -66,7 +63,7 @@ bool isCacheKeyAffectedByUpdate<T extends Identifiable<IdType>, IdType>({
   required Map<String, LdFilterOption<T, IdType>> filtersByName,
   required Map<String, LdSortOption<T, IdType>> sortsByName,
 }) {
-  for (final part in parseLdRepositoryCacheKey(cacheKey)) {
+  for (final part in parseLdListCacheKey(cacheKey)) {
     switch (part.kind) {
       case 'filter':
         final filter = filtersByName[part.name];

@@ -83,6 +83,12 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
   String get loadingRouteDefinitions => 'Filter und Sortierung werden geladen...';
 
   @override
+  String get detailItemLoading => 'Element wird geladen...';
+
+  @override
+  String get detailItemLoadError => 'Dieses Element konnte nicht geladen werden. Es wurde möglicherweise gelöscht oder Sie haben keinen Zugriff.';
+
+  @override
   String get networkError => 'Netzwerkfehler. Bitte stellen Sie sicher, dass Sie mit dem Internet verbunden sind und versuchen Sie es erneut.';
 
   @override
@@ -197,4 +203,31 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
 
   @override
   String get copiedToClipboard => 'Copied to clipboard';
+
+  @override
+  String get discardUnsavedChanges => 'Ungespeicherte Änderungen verwerfen?';
+
+  @override
+  String get discard => 'Verwerfen';
+
+  @override
+  String get keepEditing => 'Weiter bearbeiten';
+
+  @override
+  String get fieldConflictTitle => 'Widersprüchliche Änderungen';
+
+  @override
+  String get fieldConflictDescription => 'Diese Felder wurden anderswo geändert, während Sie sie bearbeitet haben. Wählen Sie, welcher Wert übernommen werden soll.';
+
+  @override
+  String get fieldConflictKeepAllMine => 'Alle meine behalten';
+
+  @override
+  String get fieldConflictUseAllServer => 'Alle vom Server übernehmen';
+
+  @override
+  String get fieldConflictYours => 'Ihr Wert';
+
+  @override
+  String get fieldConflictServer => 'Serverwert';
 }

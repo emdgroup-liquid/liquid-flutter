@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/src/monkey/actions/actions.dart';
 import 'package:liquid_flutter/src/monkey/data/identifiable.dart';
-import 'package:liquid_flutter/src/monkey/data/repository.dart';
-import 'package:liquid_flutter/src/monkey/data/repository_provider.dart';
+import 'package:liquid_flutter/src/monkey/data/ld_model.dart';
+import 'package:liquid_flutter/src/monkey/data/monkey_data_provider.dart';
 import 'package:liquid_flutter/src/monkey/ld_monkey_route_definitions.dart';
 import 'package:liquid_flutter/src/monkey/ld_monkey_route_definitions_resolver.dart';
 import 'package:liquid_flutter/src/monkey/monkey_layout_mode.dart';
@@ -15,10 +15,7 @@ import 'package:liquid_flutter/src/monkey/monkey_shell.dart';
 import 'package:provider/provider.dart';
 
 /// Provider stack for one monkey level: [LdMonkeyRouteConfig], actions,
-/// repository, [LdMonkeyRouterAdapter], and shell.
-///
-/// Used by [buildMonkeyRouteTree] and may be used manually for custom
-/// [GoRouter] shapes.
+/// model, list controller, [LdMonkeyRouterAdapter], and shell.
 class LdMonkeyRouteScope<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
   const LdMonkeyRouteScope({
     super.key,
@@ -27,7 +24,7 @@ class LdMonkeyRouteScope<T extends Identifiable<IdType>, IdType> extends Statele
     required this.actions,
     required this.filtersBuilder,
     required this.sortOptionsBuilder,
-    required this.repositoryBuilder,
+    required this.modelBuilder,
     required this.masterPage,
     required this.child,
     this.routeDefinitionsLoadingText,
@@ -54,12 +51,10 @@ class LdMonkeyRouteScope<T extends Identifiable<IdType>, IdType> extends Statele
 
   final LdMonkeyReorderHandler<T, IdType>? reorderHandler;
 
-  /// Called when the repository is created; [routeState] is the shell state
-  /// at build time (updates when navigation changes).
-  final LdRepository<T, IdType> Function(
+  final LdModel<T, IdType, Object?, Object?> Function(
     BuildContext context,
     GoRouterState routeState,
-  ) repositoryBuilder;
+  ) modelBuilder;
 
   final Widget masterPage;
 
@@ -87,9 +82,9 @@ class LdMonkeyRouteScope<T extends Identifiable<IdType>, IdType> extends Statele
           value: actions,
           child: Provider<LdMonkeyActionScope<T, IdType>>(
             create: (_) => LdMonkeyActionScope<T, IdType>(),
-            child: LdRepositoryProvider<T, IdType>(
-              repositoryBuilder: (context) => repositoryBuilder(context, routeState),
-                child: LdMonkeyRouteDefinitionsResolver<T, IdType>(
+            child: LdMonkeyDataProvider<T, IdType, LdModel<T, IdType, Object?, Object?>>(
+              modelBuilder: (context) => modelBuilder(context, routeState),
+              child: LdMonkeyRouteDefinitionsResolver<T, IdType>(
                 filtersBuilder: filtersBuilder,
                 sortOptionsBuilder: sortOptionsBuilder,
                 routeDefinitionsLoadingText: routeDefinitionsLoadingText,

@@ -20,7 +20,7 @@ class LdMonkeyPickerScope<T extends Identifiable<IdType>, IdType> extends Statef
     this.actions = const [],
   });
 
-  final LdRepository<T, IdType> repository;
+  final LdListController<T, IdType> repository;
   final Widget Function(BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder;
   final Set<IdType> initialSelection;
   final String label;
@@ -29,7 +29,7 @@ class LdMonkeyPickerScope<T extends Identifiable<IdType>, IdType> extends Statef
   final LdMonkeyFiltersBuilder<T, IdType>? filtersBuilder;
   final LdMonkeySortOptionsBuilder<T, IdType>? sortOptionsBuilder;
   final List<LdFilterChipConfig<T, IdType>>? filterChipConfigs;
-  final Widget Function(BuildContext context, LdRepository<T, IdType> repository)? buildList;
+  final Widget Function(BuildContext context, LdListController<T, IdType> repository)? buildList;
   final List<LdMonkeyAction<T, IdType>> actions;
 
   @override
@@ -67,7 +67,7 @@ class _LdMonkeyPickerScopeState<T extends Identifiable<IdType>, IdType>
 
   @override
   Widget build(BuildContext context) {
-    return ListenableProvider<LdRepository<T, IdType>>.value(
+    return ListenableProvider<LdListController<T, IdType>>.value(
       value: widget.repository,
       child: Provider<LdMonkeyInteractionMode>.value(
         value: LdMonkeyInteractionMode.pick,
@@ -118,7 +118,7 @@ class _LdMonkeyPickerPage<T extends Identifiable<IdType>, IdType> extends Statel
   final Set<IdType> initialSelection;
   final Widget Function(BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder;
   final List<LdFilterChipConfig<T, IdType>>? filterChipConfigs;
-  final Widget Function(BuildContext context, LdRepository<T, IdType> repository)? buildList;
+  final Widget Function(BuildContext context, LdListController<T, IdType> repository)? buildList;
 
   @override
   Widget build(BuildContext context) {

@@ -85,16 +85,16 @@ class LdMonkeySelection<T extends Identifiable<IdType>, IdType> {
 
   static Future<List<T>> getSelectedItems<T extends Identifiable<IdType>, IdType>(BuildContext context) async {
     final selection = adaptive<T, IdType>(context);
-    final repository = LdRepository.of<T, IdType>(context);
+    final repository = LdListController.of<T, IdType>(context);
 
-    return Future.wait(selection.map((id) => (repository.getById(id))));
+    return Future.wait(selection.map((id) => (repository.getById(context, id))));
   }
 
   static Future<List<T>> getViewingItems<T extends Identifiable<IdType>, IdType>(BuildContext context) async {
     final selection = of<T, IdType>(context).viewing;
-    final repository = LdRepository.of<T, IdType>(context);
+    final repository = LdListController.of<T, IdType>(context);
 
-    return Future.wait(selection.map((id) => (repository.getById(id))));
+    return Future.wait(selection.map((id) => (repository.getById(context, id))));
   }
 
   @override

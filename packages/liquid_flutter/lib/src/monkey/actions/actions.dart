@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/monkey/intents.dart';
-
 import 'package:provider/provider.dart';
+
+import 'package:liquid_flutter/src/monkey/intents.dart';
 
 enum LdMonkeyActionLocation {
   masterAppBar,
@@ -15,7 +15,7 @@ enum LdMonkeyActionLocation {
 }
 
 abstract class LdMonkeyAction<T extends Identifiable<IdType>, IdType> {
-  final Set<LdMonkeyActionVisibility> visibility;
+  final Set<LdMonkeyActionVisibility<T, IdType>> visibility;
 
   final bool multiSelect;
 
@@ -27,11 +27,11 @@ abstract class LdMonkeyAction<T extends Identifiable<IdType>, IdType> {
   final LdAppBarActionOverflowMode appBarOverflowMode;
 
   LdMonkeyAction({
-    required this.visibility,
+    Set<LdMonkeyActionVisibility<T, IdType>>? visibility,
     this.multiSelect = true,
     this.shortcutActivators = const {},
     this.appBarOverflowMode = LdAppBarActionOverflowMode.overflowable,
-  });
+  }) : visibility = visibility ?? <LdMonkeyActionVisibility<T, IdType>>{};
 
   bool isVisible(BuildContext context, {LdMonkeyActionLocation? location}) {
     location ??= context.read<LdMonkeyActionLocation>();
@@ -40,17 +40,12 @@ abstract class LdMonkeyAction<T extends Identifiable<IdType>, IdType> {
       return false;
     }
 
-    return visibility.any((e) => e.isVisibleInContext<T, IdType>(context, location: location));
+    return visibility.any((e) => e.isVisibleInContext(context, location: location));
   }
 
   Future<void> onShortcutPressed(BuildContext triggerContext, LdMonkeyActionScope<T, IdType> scope);
 
   Widget buildTrigger(BuildContext triggerContext, LdMonkeyActionScope<T, IdType> scope);
-
-  @Deprecated('Use buildTrigger with LdMonkeyActionScope from context')
-  Widget build(BuildContext context) {
-    return buildTrigger(context, LdMonkeyActionScope.of<T, IdType>(context));
-  }
 }
 
 class LdMonkeyBareChildAction<T extends Identifiable<IdType>, IdType> extends LdMonkeyAction<T, IdType> {
@@ -59,7 +54,7 @@ class LdMonkeyBareChildAction<T extends Identifiable<IdType>, IdType> extends Ld
 
   LdMonkeyBareChildAction({
     required this.builder,
-    super.visibility = const {},
+    super.visibility,
     super.multiSelect = true,
     super.shortcutActivators = const {},
     super.appBarOverflowMode = LdAppBarActionOverflowMode.overflowable,
@@ -129,7 +124,7 @@ class LdMonkeySubmitAction<T extends Identifiable<IdType>, IdType, Result> exten
     this.child,
     this.childBuilder,
     this.icon,
-    super.visibility = const {},
+    super.visibility,
     super.multiSelect = true,
     super.shortcutActivators = const {},
     super.appBarOverflowMode = LdAppBarActionOverflowMode.overflowable,
@@ -253,45 +248,5 @@ class _LdMonkeySubmitActionHostState<T extends Identifiable<IdType>, IdType, Res
       _controller = controller;
       widget.scope.registerSubmit(widget.action.id, controller);
     }
-  }
-}
-
-class OpenDrawerAction extends Action<OpenDrawerIntent> {
-  final VoidCallback onOpenDrawer;
-
-  OpenDrawerAction({required this.onOpenDrawer});
-
-  @override
-  void invoke(OpenDrawerIntent intent) {
-    onOpenDrawer();
-  }
-}
-
-class CloseDrawerAction extends Action<CloseDrawerIntent> {
-  final VoidCallback onCloseDrawer;
-
-  CloseDrawerAction({required this.onCloseDrawer});
-
-  @override
-  void invoke(CloseDrawerIntent intent) {
-    onCloseDrawer();
-  }
-}
-
-class ToggleDrawerAction extends Action<ToggleDrawerIntent> {
-  final VoidCallback onToggleDrawer;
-
-  final bool _isActionEnabled;
-
-  ToggleDrawerAction({required this.onToggleDrawer, bool isActionEnabled = true}) : _isActionEnabled = isActionEnabled;
-
-  @override
-  bool get isActionEnabled {
-    return _isActionEnabled;
-  }
-
-  @override
-  void invoke(ToggleDrawerIntent intent) {
-    onToggleDrawer();
   }
 }

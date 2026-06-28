@@ -24,8 +24,8 @@ class MonkeyDetailEditDemo extends StatelessWidget {
         children: [
           LdText.p(
             'Editable monkey detail pages should use LdMonkeyReactiveDetailForm from liquid_flutter_reactive_forms. '
-            'It wires reactive form fields to LdRepository.update, adaptive blur/manual save, server merge, '
-            'and navigation guards for unsaved edits.',
+            'It wires reactive form fields to LdModel.update, adaptive blur/manual save, server merge, '
+            'and LdLocationLockGuard for unsaved edits.',
           ),
           ComponentsAccordion(
             components: const {
@@ -40,14 +40,14 @@ class MonkeyDetailEditDemo extends StatelessWidget {
           ),
           CodeBlock(
             language: 'dart',
-            code: '''LdMonkeyReactiveDetailForm<Task, int, Task>(
+            code: '''LdMonkeyReactiveDetailForm<Task, int, Task, Task, Task>.edit(
   item: task,
   saveMode: LdMonkeyDetailSaveMode.adaptive,
   detailToFormValues: (detail) => {
     'task': detail.task,
     'due': detail.due,
   },
-  mapToEntity: (form, detail) => detail.copyWith(
+  formToUpdatePayload: (form, detail) => detail.copyWith(
     task: form.control('task').value as String,
     due: form.control('due').value as DateTime,
   ),

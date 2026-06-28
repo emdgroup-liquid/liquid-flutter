@@ -2,7 +2,6 @@ name: liquid_flutter_reactive_forms
 description: A companion package to liquid_flutter that provides extensions for reactive_forms
 version: 0.1.0
 repository: https://github.com/emdgroup-liquid/liquid-flutter
-publish_to: none
 resolution: workspace
 environment:
   sdk: ">=3.5.0 <4.0.0"
@@ -10,8 +9,8 @@ dependencies:
   flutter:
     sdk: flutter
   go_router: ^17.0.1
-  liquid_flutter:
-    path: ../liquid_flutter
+  liquid_flutter: ^23.0.0-4
+  lucide_icons_flutter: ^3.1.14+2
   reactive_forms: 18.2.2
 dev_dependencies:
   flutter_test:

@@ -57,7 +57,7 @@ LdRepository.fromList<Task, int>(
 
 This creates a **greedy** repository that eagerly loads the full in-memory list via `ensureGreedyLoaded`.
 
-### `LdFetchReason`, `cacheKey`, and `LdRepositoryCache`
+### `LdFetchReason`, `cacheKey`, and `LdListCache`
 
 `fetchListWithParameters` receives a `reason`, per-repo `cache`, and a deterministic `cacheKey` (active filters + sorts, excluding offset/pageSize/reason).
 
@@ -585,7 +585,7 @@ final sortAndFilter = LdMonkeySortAndFilterState.of<Task, int>(context);
 final activeSorts = sortAndFilter.activeSortOptions;
 ```
 
-**Note:** Filters and sort options are not stored in the repository — they live in `LdMonkeySortAndFilterState` in the widget tree. Use `LdMonkeyRepositoryFilterAdapter` (automatically included in the monkey scope) to react to filter/sort changes and refresh the repository.
+**Note:** Filters and sort options are not stored in the list controller — they live in `LdMonkeySortAndFilterState` in the widget tree. Use `LdMonkeyListFilterAdapter` (automatically included in the monkey scope) to react to filter/sort changes and refresh the list.
 
 ## Selection State
 
@@ -786,7 +786,7 @@ LdMonkeyRouteScope<Task, int>(
 ```
 
 The provider stack is:
-`LdMonkeyRouteConfig` → `LdMonkeyActions` → `LdRepositoryProvider` → `LdMonkeyRouteDefinitionsResolver` → `LdMonkeyRouterAdapter` (provides `LdMonkeySelection`, `LdMonkeySortAndFilterState`, `LdMonkeyRouterController`, `LdMonkeyRepositoryFilterAdapter`, `LdMonkeyDeletedItemsGuard`) → `LdMonkeyShell`.
+`LdMonkeyRouteConfig` → `LdMonkeyActions` → `LdRepositoryProvider` → `LdMonkeyRouteDefinitionsResolver` → `LdMonkeyRouterAdapter` (provides `LdMonkeySelection`, `LdMonkeySortAndFilterState`, `LdMonkeyRouterController`, `LdMonkeyListFilterAdapter`, `LdMonkeyDeletedItemsGuard`) → `LdMonkeyShell`.
 
 ## Best Practices
 

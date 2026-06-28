@@ -1,17 +1,17 @@
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-enum LdRepositoryMutationKind {
+enum LdListMutationKind {
   create,
   update,
   delete,
 }
 
-class LdRepositoryCacheKeyPart {
+class LdListCacheKeyPart {
   final String kind;
   final String name;
   final String value;
 
-  const LdRepositoryCacheKeyPart({
+  const LdListCacheKeyPart({
     required this.kind,
     required this.name,
     required this.value,
@@ -22,7 +22,7 @@ class LdRepositoryCacheKeyPart {
 ///
 /// Excludes pagination fields ([offset], [pageSize], [reason]). Optionally
 /// includes [pageToken] for token-based APIs.
-String ldRepositoryCacheKey<T extends Identifiable<IdType>, IdType>({
+String ldListCacheKey<T extends Identifiable<IdType>, IdType>({
   required Iterable<LdFilterOption<T, IdType>> filters,
   required Iterable<LdSortOption<T, IdType>> sortOptions,
   String? pageToken,
@@ -46,13 +46,13 @@ String ldRepositoryCacheKey<T extends Identifiable<IdType>, IdType>({
   return parts.join('|');
 }
 
-/// Parses a cache key produced by [ldRepositoryCacheKey].
-List<LdRepositoryCacheKeyPart> parseLdRepositoryCacheKey(String key) {
+/// Parses a cache key produced by [ldListCacheKey].
+List<LdListCacheKeyPart> parseLdListCacheKey(String key) {
   if (key.isEmpty) {
     return const [];
   }
 
-  final parsed = <LdRepositoryCacheKeyPart>[];
+  final parsed = <LdListCacheKeyPart>[];
   for (final segment in key.split('|')) {
     if (segment.startsWith('filter:')) {
       final rest = segment.substring('filter:'.length);
@@ -61,7 +61,7 @@ List<LdRepositoryCacheKeyPart> parseLdRepositoryCacheKey(String key) {
         continue;
       }
       parsed.add(
-        LdRepositoryCacheKeyPart(
+        LdListCacheKeyPart(
           kind: 'filter',
           name: rest.substring(0, separatorIndex),
           value: rest.substring(separatorIndex + 1),
@@ -77,7 +77,7 @@ List<LdRepositoryCacheKeyPart> parseLdRepositoryCacheKey(String key) {
         continue;
       }
       parsed.add(
-        LdRepositoryCacheKeyPart(
+        LdListCacheKeyPart(
           kind: 'sort',
           name: rest.substring(0, separatorIndex),
           value: rest.substring(separatorIndex + 1),
@@ -88,7 +88,7 @@ List<LdRepositoryCacheKeyPart> parseLdRepositoryCacheKey(String key) {
 
     if (segment.startsWith('token:')) {
       parsed.add(
-        LdRepositoryCacheKeyPart(
+        LdListCacheKeyPart(
           kind: 'token',
           name: '',
           value: segment.substring('token:'.length),

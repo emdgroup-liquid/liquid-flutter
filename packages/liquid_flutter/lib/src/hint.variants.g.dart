@@ -4,6 +4,7 @@ class LdHint extends StatelessWidget {
   const LdHint({
     this.child,
     required this.type,
+    this.withBackground = false,
     this.size = LdSize.m,
     this.crossAxisAlignment = CrossAxisAlignment.center,
     super.key,
@@ -12,12 +13,14 @@ class LdHint extends StatelessWidget {
   factory LdHint.info({
     Widget? child,
     required LdHintType type,
+    bool withBackground = false,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
     Key? key,
   }) {
     return LdHint(
       type: LdHintType.info,
+      withBackground: withBackground,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
       key: key,
@@ -28,12 +31,14 @@ class LdHint extends StatelessWidget {
   factory LdHint.warning({
     Widget? child,
     required LdHintType type,
+    bool withBackground = false,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
     Key? key,
   }) {
     return LdHint(
       type: LdHintType.warning,
+      withBackground: withBackground,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
       key: key,
@@ -44,12 +49,14 @@ class LdHint extends StatelessWidget {
   factory LdHint.success({
     Widget? child,
     required LdHintType type,
+    bool withBackground = false,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
     Key? key,
   }) {
     return LdHint(
       type: LdHintType.success,
+      withBackground: withBackground,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
       key: key,
@@ -60,12 +67,14 @@ class LdHint extends StatelessWidget {
   factory LdHint.error({
     Widget? child,
     required LdHintType type,
+    bool withBackground = false,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
     Key? key,
   }) {
     return LdHint(
       type: LdHintType.error,
+      withBackground: withBackground,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
       key: key,
@@ -76,12 +85,14 @@ class LdHint extends StatelessWidget {
   factory LdHint.canceled({
     Widget? child,
     required LdHintType type,
+    bool withBackground = false,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
     Key? key,
   }) {
     return LdHint(
       type: LdHintType.canceled,
+      withBackground: withBackground,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
       key: key,
@@ -92,12 +103,14 @@ class LdHint extends StatelessWidget {
   factory LdHint.loading({
     Widget? child,
     required LdHintType type,
+    bool withBackground = false,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
     Key? key,
   }) {
     return LdHint(
       type: LdHintType.loading,
+      withBackground: withBackground,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
       key: key,
@@ -108,12 +121,14 @@ class LdHint extends StatelessWidget {
   factory LdHint.pending({
     Widget? child,
     required LdHintType type,
+    bool withBackground = false,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
     Key? key,
   }) {
     return LdHint(
       type: LdHintType.pending,
+      withBackground: withBackground,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
       key: key,
@@ -124,12 +139,14 @@ class LdHint extends StatelessWidget {
   factory LdHint.ongoing({
     Widget? child,
     required LdHintType type,
+    bool withBackground = false,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
     Key? key,
   }) {
     return LdHint(
       type: LdHintType.ongoing,
+      withBackground: withBackground,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
       key: key,
@@ -145,10 +162,13 @@ class LdHint extends StatelessWidget {
 
   final CrossAxisAlignment crossAxisAlignment;
 
+  final bool withBackground;
+
   @override
   Widget build(BuildContext context) {
     return _LdHintWidget(
       type: type,
+      withBackground: withBackground,
       size: size,
       crossAxisAlignment: crossAxisAlignment,
       child: child,

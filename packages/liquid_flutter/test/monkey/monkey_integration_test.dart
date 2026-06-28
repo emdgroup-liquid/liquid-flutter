@@ -17,12 +17,6 @@ void main() {
     final routeConfig = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'item');
 
     testWidgets('buildMonkeyRoutes navigates to detail', (WidgetTester tester) async {
-      final repository = createTestRepository(
-        initialItems: [
-          createTestItem(1, name: 'One'),
-        ],
-      );
-
       final routes = buildMonkeyRoutes<TestItem, int>(
         masterPath: '/t',
         routeConfig: routeConfig,
@@ -32,7 +26,7 @@ void main() {
           ),
         ),
         detailPage: const Text('Detail'),
-        repositoryBuilder: (context, state) => repository,
+        modelBuilder: (context, state) => createTestModel(),
         filtersBuilder: (_) async => [],
         sortOptionsBuilder: (_) async => [],
         actions: const [],
@@ -68,11 +62,6 @@ void main() {
         final parentRouteConfig = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'parent');
         final childRouteConfig = LdMonkeyRouteConfig.identifiableString<_ChildItem>(itemName: 'child');
 
-        final parentRepo = createTestRepository(initialItems: [createTestItem(1)]);
-        final childRepo = LdRepository.fromList<_ChildItem, String>(
-          list: [_ChildItem('a', 'A'), _ChildItem('b', 'B')],
-        );
-
         final routes = buildMonkeyRouteTree<TestItem, int>(
           masterPath: '/p',
           root: MonkeyRouteNode<TestItem, int>(
@@ -84,7 +73,7 @@ void main() {
             detailPage: LdMonkeyMasterPage<_ChildItem, String>(
               buildItem: (context, item) => LdListItem(title: Text(item.value?.name ?? '')),
             ),
-            repositoryBuilder: (context, state) => parentRepo,
+            modelBuilder: (context, state) => createTestModel(),
             filtersBuilder: (_) async => [],
             sortOptionsBuilder: (_) async => [],
             actions: const [],
@@ -94,7 +83,18 @@ void main() {
               routeConfig: childRouteConfig,
               masterPage: const SizedBox(),
               detailPage: const Text('ChildDetail'),
-              repositoryBuilder: (context, state) => childRepo,
+              modelBuilder: (context, state) => LdCallbackModel<_ChildItem, String>(
+                isGreedy: true,
+                getById: (context, id) async => _ChildItem(id, id.toUpperCase()),
+                fetchListWithParameters: (parameters) async {
+                  final items = [_ChildItem('a', 'A'), _ChildItem('b', 'B')];
+                  return LdListPage<_ChildItem>(
+                    newItems: items.skip(parameters.offset).take(parameters.pageSize).toList(),
+                    hasMore: parameters.offset + parameters.pageSize < items.length,
+                    total: items.length,
+                  );
+                },
+              ),
               filtersBuilder: (_) async => [],
               sortOptionsBuilder: (_) async => [],
               actions: const [],

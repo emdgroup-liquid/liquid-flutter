@@ -52,6 +52,12 @@ class LdMonkeyRouteConfig<T extends Identifiable<IdType>, IdType> {
   /// The GoRoute.name for the detail route
   String get detailRouteName => "$itemName-detail";
 
+  /// The GoRoute.name for the create route
+  String get createRouteName => '$itemName-create';
+
+  /// Static path segment for the create route (literal, not a path param)
+  String get createPathSegment => 'new';
+
   /// The key of the query parameter to store the show selection controls
   String get showSelectionControlsQueryKey => "select_$itemName";
 

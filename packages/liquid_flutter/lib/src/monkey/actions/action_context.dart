@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 
 /// Snapshot of monkey action state at build or trigger time.
 ///
-/// Use [selectedIds], [selection], and [repository] for monkey data.
+/// Use [selectedIds], [selection], and [listController] for monkey data.
+/// Use [model] for typed mutations.
 /// Use [appContext] for app-level [Provider] lookups, modals, and navigation.
 class LdMonkeyActionContext<T extends Identifiable<IdType>, IdType> {
   /// Full route/app tree — app [Provider] lookups, modals, navigation side-effects.
@@ -24,8 +25,8 @@ class LdMonkeyActionContext<T extends Identifiable<IdType>, IdType> {
   /// Set when [location] is [LdMonkeyActionLocation.context].
   final LdPaginatorItem<T>? contextItem;
 
-  /// Repository for this monkey route.
-  final LdRepository<T, IdType> repository;
+  /// List controller for this monkey route.
+  final LdListController<T, IdType> listController;
 
   const LdMonkeyActionContext({
     required this.appContext,
@@ -33,19 +34,27 @@ class LdMonkeyActionContext<T extends Identifiable<IdType>, IdType> {
     required this.selection,
     required this.location,
     required this.layoutMode,
-    required this.repository,
+    required this.listController,
     this.contextItem,
   });
 
   /// Reads monkey state from [triggerContext] and pairs it with [appContext].
+  ///
+  /// When [listen] is true the [triggerContext] subscribes to the selection and
+  /// the [LdListController], so the surrounding widget rebuilds (and the context
+  /// is re-evaluated) whenever the selection or the underlying items change. Use
+  /// this when building a context for reactive evaluation such as visibility.
   static LdMonkeyActionContext<T, IdType> of<T extends Identifiable<IdType>, IdType>(
     BuildContext triggerContext, {
     required BuildContext appContext,
+    bool listen = false,
   }) {
     final location = triggerContext.read<LdMonkeyActionLocation>();
-    final selection = LdMonkeySelection.of<T, IdType>(triggerContext);
+    final selection = LdMonkeySelection.of<T, IdType>(triggerContext, listen: listen);
     final layoutMode = triggerContext.read<LdMonkeyEffectiveLayoutMode>();
-    final repository = LdRepository.of<T, IdType>(triggerContext);
+    final listController = listen
+        ? triggerContext.watch<LdListController<T, IdType>>()
+        : LdListController.of<T, IdType>(triggerContext);
     LdPaginatorItem<T>? contextItem;
     try {
       contextItem = triggerContext.read<LdPaginatorItem<T>>();
@@ -55,17 +64,19 @@ class LdMonkeyActionContext<T extends Identifiable<IdType>, IdType> {
 
     return LdMonkeyActionContext<T, IdType>(
       appContext: appContext,
-      selectedIds: LdMonkeySelection.adaptive<T, IdType>(triggerContext, location: location),
+      selectedIds: LdMonkeySelection.adaptive<T, IdType>(triggerContext, location: location, listen: listen),
       selection: selection,
       location: location,
       layoutMode: layoutMode,
-      repository: repository,
+      listController: listController,
       contextItem: contextItem,
     );
   }
 
+  TModel model<TModel extends LdModel<T, IdType, Object?, Object?>>() => appContext.read<TModel>();
+
   Future<List<T>> getSelectedItems() {
-    return Future.wait(selectedIds.map(repository.getById));
+    return Future.wait(selectedIds.map((id) => listController.getById(appContext, id)));
   }
 
   void updateViewing(Set<IdType> viewing) {

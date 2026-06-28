@@ -34,12 +34,13 @@ import 'package:liquid/components/layout/multi_panel_layout.dart';
 import 'package:liquid/components/layout/selectable_list.dart';
 import 'package:liquid/components/layout/spring.dart';
 import 'package:liquid/components/material.dart';
-import 'package:liquid/demos/demo_shell.dart';
+
 import 'package:liquid/demos/layout_documentation.dart';
 import 'package:liquid/demos/movie_demo.dart';
 import 'package:liquid/demos/projects/pages.dart';
 import 'package:liquid/demos/projects/repo.dart';
 import 'package:liquid/demos/radius_documentation.dart';
+import 'package:liquid/demos/task_demo/create.dart';
 import 'package:liquid/demos/task_demo/repository.dart';
 import 'package:liquid/demos/task_demo/task.dart';
 import 'package:liquid/demos/task_demo/task_demo.dart';
@@ -81,81 +82,14 @@ class AppRouter {
 
   late final router = GoRouter(
     debugLogDiagnostics: true,
-    initialLocation: "/components/modal",
+    initialLocation: "/",
     redirect: ldLocationLockRedirect,
     routes: [
       GoRoute(
         path: "/nav-test",
         pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const NavTest()),
       ),
-      StatefulShellRoute.indexedStack(
-        branches: [
-          StatefulShellBranch(
-            initialLocation: "/movie-demo",
-            routes: [
-              ...buildMonkeyRoutes<MovieDemo, int>(
-                masterPath: "/movie-demo",
-                routeConfig: LdMonkeyRouteConfig.identifiableInt<MovieDemo>(itemName: "movie"),
-                sortOptionsBuilder: (_) async => [],
-                actions: movieActions,
-                filtersBuilder: buildMovieFilters,
-                detailPage: MovieDetailPage(),
-                detailInDialog: true,
-                masterPage: MovieMasterPage(),
-                repositoryBuilder: (context, state) => movieRepository(context),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            initialLocation: "/task-demo?sort-task=due-asc",
-            routes: [
-              ...buildMonkeyRoutes<Task, int>(
-                masterPath: "/task-demo",
-                routeConfig: LdMonkeyRouteConfig.identifiableInt<Task>(itemName: "task"),
-                sortOptionsBuilder: (_) async => taskSortOptions,
-                actions: taskActions,
-                filtersBuilder: (_) async => taskFilters,
-                detailPage: TaskDetailPage(),
-                masterPage: TaskMasterPage(),
-                repositoryBuilder: (context, state) => taskRepository(context),
-                reorderHandler: taskReorderHandler,
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            initialLocation: '/projects',
-            routes: [
-              ...buildMonkeyRouteTree<Project, int>(
-                masterPath: projectMasterPath,
-                root: MonkeyRouteNode<Project, int>(
-                  routeConfig: projectRouteConfig,
-                  masterPage: ProjectMasterPage(),
-                  detailPage: FileMasterPage(),
-                  repositoryBuilder: (context, state) => projectRepository(),
-                  filtersBuilder: (_) async => [],
-                  sortOptionsBuilder: (_) async => [],
-                  actions: const [],
-                  child: MonkeyRouteNode<File, String>(
-                    detailPathPrefix: 'files',
-                    routeConfig: fileRouteConfig,
-                    masterPage: FileMasterPage(),
-                    detailPage: FileDetailPage(),
-                    repositoryBuilder: (context, state) =>
-                        fileRepository(state.pathParameters[projectRouteConfig.viewingParamName]!),
-                    filtersBuilder: (_) async => [],
-                    sortOptionsBuilder: (_) async => [],
-                    actions: const [],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-        pageBuilder: (context, state, child) => NoTransitionPage<void>(
-          key: state.pageKey,
-          child: DemoShell(child: child),
-        ),
-      ),
+
       GoRoute(
         path: "/components/appbar",
         pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const AppBarDemo()),
@@ -170,6 +104,55 @@ class AppRouter {
           GoRoute(
             path: "/chemical",
             pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const ChemicalScreen()),
+          ),
+
+          ...buildMonkeyRoutes<Task, int>(
+            masterPath: "/task-demo",
+            routeConfig: taskRouteConfig,
+            sortOptionsBuilder: (_) async => taskSortOptions,
+            actions: taskActions,
+            filtersBuilder: (_) async => taskFilters,
+            detailPage: TaskDetailPage(),
+            createPage: const TaskCreatePage(),
+            masterPage: TaskMasterPage(),
+            modelBuilder: (context, state) => taskModel(context),
+            reorderHandler: taskReorderHandler,
+          ),
+
+          ...buildMonkeyRoutes<MovieDemo, int>(
+            masterPath: "/movie-demo",
+            routeConfig: LdMonkeyRouteConfig.identifiableInt<MovieDemo>(itemName: "movie"),
+            sortOptionsBuilder: (_) async => [],
+            actions: movieActions,
+            filtersBuilder: buildMovieFilters,
+            detailPage: MovieDetailPage(),
+            detailInDialog: true,
+            masterPage: MovieMasterPage(),
+            modelBuilder: (context, state) => movieModel(context),
+          ),
+
+          ...buildMonkeyRouteTree<Project, int>(
+            masterPath: projectMasterPath,
+            root: MonkeyRouteNode<Project, int>(
+              routeConfig: projectRouteConfig,
+              masterPage: ProjectMasterPage(),
+              detailPage: FileMasterPage(),
+              modelBuilder: (context, state) => projectModel(),
+              filtersBuilder: (_) async => [],
+              sortOptionsBuilder: (_) async => [],
+              actions: const [],
+              child: MonkeyRouteNode<File, String>(
+                detailPathPrefix: 'files',
+                routeConfig: fileRouteConfig,
+                masterPage: FileMasterPage(),
+                detailPage: FileDetailPage(),
+                modelBuilder: (context, state) =>
+                    fileModel(state.pathParameters[projectRouteConfig.viewingParamName]!),
+                filtersBuilder: (_) async => [],
+                sortOptionsBuilder: (_) async => [],
+                actions: const [],
+              ),
+            ),
           ),
 
           GoRoute(

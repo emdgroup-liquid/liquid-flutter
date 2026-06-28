@@ -10,6 +10,8 @@
   "formatError": "Ein Fehler beim Verarbeiten der Anfrage ist aufgetreten. Bitte versuchen Sie es erneut.",
   "loading": "Laden...",
   "loadingRouteDefinitions": "Filter und Sortierung werden geladen...",
+  "detailItemLoading": "Element wird geladen...",
+  "detailItemLoadError": "Dieses Element konnte nicht geladen werden. Es wurde möglicherweise gelöscht oder Sie haben keinen Zugriff.",
   "moreInfo": "Weitere Informationen",
   "networkError": "Netzwerkfehler. Bitte stellen Sie sicher, dass Sie mit dem Internet verbunden sind und versuchen Sie es erneut.",
   "noItemsFound": "Keine Elemente gefunden",
@@ -21,5 +23,14 @@
   "selectDate": "Datum auswählen",
   "submit": "Absenden",
   "timeoutError": "Zeitüberschreitung der Anfrage. Bitte versuchen Sie es erneut.",
-  "unknownError": "Unbekannter Fehler"
+  "unknownError": "Unbekannter Fehler",
+  "discardUnsavedChanges": "Ungespeicherte Änderungen verwerfen?",
+  "discard": "Verwerfen",
+  "keepEditing": "Weiter bearbeiten",
+  "fieldConflictTitle": "Widersprüchliche Änderungen",
+  "fieldConflictDescription": "Diese Felder wurden anderswo geändert, während Sie sie bearbeitet haben. Wählen Sie, welcher Wert übernommen werden soll.",
+  "fieldConflictKeepAllMine": "Alle meine behalten",
+  "fieldConflictUseAllServer": "Alle vom Server übernehmen",
+  "fieldConflictYours": "Ihr Wert",
+  "fieldConflictServer": "Serverwert"
 }

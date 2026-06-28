@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:liquid/demos/task_demo/task.dart';
+import 'package:liquid/demos/task_demo/task_form.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart';
 
@@ -28,38 +29,16 @@ class TaskDetail extends StatelessWidget {
             initialRevealed: taskValue.done,
             child: LdBadge.success(child: Text('Done')),
           ),
-          LdMonkeyReactiveDetailForm<Task, int, Task>(
+          LdMonkeyReactiveDetailForm<Task, int, Task, Task, Task>.edit(
             item: task,
             saveMode: LdMonkeyDetailSaveMode.adaptive,
-            detailToFormValues: (detail) => {
-              'task': detail.task,
-              'due': detail.due,
-            },
-            mapToEntity: (form, detail) => detail.copyWith(
-              task: form.control('task').value as String,
-              due: form.control('due').value as DateTime,
-            ),
+            conflictPolicy: LdMonkeyFieldConflictPolicy.prompt,
+            detailToFormValues: taskDetailToFormValues,
+            formToUpdatePayload: taskFormToUpdatePayload,
             submitConfig: LdFormSubmitConfig(submitText: 'Save'),
-            itemsBuilder: (context, hooks) => [
-              LdReactiveFormItem.input(
-                key: 'task',
-                label: 'Task',
-                inputFieldHint: 'What do you want to do?',
-                maxLines: null,
-                size: LdSize.l,
-                validators: [LdFormValidators.required],
-                onBlurred: hooks.onBlurred('task'),
-              ),
-              LdReactiveFormItem.datePicker(
-                key: 'due',
-                label: 'Due date',
-                useRootNavigator: true,
-                validators: [LdFormValidators.required],
-                onCommitted: hooks.onCommitted('due'),
-              ),
-            ],
+            itemsBuilder: (context, hooks) => buildTaskFormItems(hooks),
           ),
-          LdText('Last updated: ${Jiffy.parseFromDateTime(taskValue.lastUpdate).fromNow()}'),
+          LdMute(child: LdText.ls('Last updated: ${Jiffy.parseFromDateTime(taskValue.lastUpdate).fromNow()}')),
         ],
       ),
     );

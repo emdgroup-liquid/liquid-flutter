@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/monkey/data/ld_list_cache_key.dart';
 import 'package:provider/provider.dart';
 
 class FetchPageParameters<T extends Identifiable<IdType>, IdType> {
@@ -8,7 +9,7 @@ class FetchPageParameters<T extends Identifiable<IdType>, IdType> {
   final int pageSize;
   final String? pageToken;
   final LdFetchReason reason;
-  final LdRepositoryCache<T, IdType> cache;
+  final LdListCache<T, IdType> cache;
 
   FetchPageParameters({
     required this.context,
@@ -38,7 +39,7 @@ class FetchPageParameters<T extends Identifiable<IdType>, IdType> {
       [];
 
   /// Deterministic cache key for the active filter and sort query.
-  String get cacheKey => ldRepositoryCacheKey<T, IdType>(
+  String get cacheKey => ldListCacheKey<T, IdType>(
         filters: filters,
         sortOptions: sortOptions,
         pageToken: pageToken,
@@ -49,7 +50,7 @@ class FetchOffsetParameters<T extends Identifiable<IdType>, IdType> {
   BuildContext context;
   final IdType id;
   final LdFetchReason reason;
-  final LdRepositoryCache<T, IdType> cache;
+  final LdListCache<T, IdType> cache;
 
   FetchOffsetParameters({
     required this.context,
@@ -75,7 +76,7 @@ class FetchOffsetParameters<T extends Identifiable<IdType>, IdType> {
       [];
 
   /// Deterministic cache key for the active filter and sort query.
-  String get cacheKey => ldRepositoryCacheKey<T, IdType>(
+  String get cacheKey => ldListCacheKey<T, IdType>(
         filters: filters,
         sortOptions: sortOptions,
       );

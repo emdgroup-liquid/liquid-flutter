@@ -104,7 +104,7 @@ class _LdListReorderScopeState<T extends Identifiable<IdType>, IdType> extends S
   void _insertOverlay() {
     _overlayEntry?.remove();
     _overlayEntry = OverlayEntry(builder: _buildDropIndicatorOverlay);
-    Overlay.of(context).insert(_overlayEntry!);
+    Overlay.of(context, rootOverlay: true).insert(_overlayEntry!);
   }
 
   void _markOverlayNeedsBuild() {
@@ -232,7 +232,7 @@ class _LdListReorderScopeState<T extends Identifiable<IdType>, IdType> extends S
       child: Material(
         color: Colors.transparent,
         child: Provider<LdIsShuttle>.value(
-          value: true,
+          value: const LdIsShuttle(true),
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: _dragFeedbackWidth ?? MediaQuery.sizeOf(context).width),
             child: Builder(
@@ -260,7 +260,7 @@ class _LdListReorderScopeState<T extends Identifiable<IdType>, IdType> extends S
     final childWhenDragging = Opacity(
       opacity: 0.4,
       child: Provider<LdIsShuttle>.value(
-        value: true,
+        value: const LdIsShuttle(true),
         child: child,
       ),
     );

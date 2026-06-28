@@ -687,10 +687,6 @@ class LdContextMenuRoute extends ModalRoute<void> {
   bool get opaque => false;
 }
 
-Future<bool> maybePopContextMenu(BuildContext context) async {
-  final navigator = Navigator.maybeOf(context, rootNavigator: true);
-  if (navigator == null) {
-    return false;
-  }
-  return navigator.maybePop();
+Future<void> maybePopContextMenu(BuildContext context) async {
+  LdContextMenuDissmissNotification().dispatch(context);
 }

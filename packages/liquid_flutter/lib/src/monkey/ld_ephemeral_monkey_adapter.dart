@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/monkey/monkey_repository_filter_adapter.dart';
+import 'package:liquid_flutter/src/monkey/monkey_list_filter_adapter.dart';
 import 'package:provider/provider.dart';
 
 /// Provides monkey filter/selection state from [LdEphemeralMonkeyController]
@@ -103,7 +103,7 @@ class _LdEphemeralMonkeyAdapterState<T extends Identifiable<IdType>, IdType>
       if (!mounted) {
         return;
       }
-      final repository = LdRepository.maybeOf<T, IdType>(context);
+      final repository = LdListController.maybeOf<T, IdType>(context);
       if (repository == null) {
         return;
       }
@@ -136,7 +136,7 @@ class _LdEphemeralMonkeyAdapterState<T extends Identifiable<IdType>, IdType>
               ),
               Provider<LdMonkeyShowingDetail<T, IdType>>.value(value: false),
             ],
-            child: LdMonkeyRepositoryFilterAdapter<T, IdType>(
+            child: LdMonkeyListFilterAdapter<T, IdType>(
               child: widget.child,
             ),
           );

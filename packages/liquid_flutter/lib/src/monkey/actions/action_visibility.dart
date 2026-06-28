@@ -2,14 +2,19 @@ import 'package:flutter/widgets.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
-class LdMonkeyActionVisibility {
+class LdMonkeyActionVisibility<T extends Identifiable<IdType>, IdType> {
   final LdMonkeyActionLocation location;
   final int minSelectionCount;
   final int? maxSelectionCount;
   final bool? visibleWhenShowingSelectionControls;
   final Set<LdMonkeyEffectiveLayoutMode> layoutModes;
 
-  final bool Function(BuildContext context)? isVisible;
+  /// Custom visibility predicate.
+  ///
+  /// Receives an up-to-date [LdMonkeyActionContext] that is bound to the
+  /// selection and the [LdListController], so the predicate is re-evaluated
+  /// whenever the selection or the underlying items change.
+  final bool Function(LdMonkeyActionContext<T, IdType> context)? isVisible;
 
   LdMonkeyActionVisibility({
     required this.location,
@@ -24,11 +29,16 @@ class LdMonkeyActionVisibility {
     this.isVisible,
   });
 
-  bool isVisibleInContext<T extends Identifiable<IdType>, IdType>(BuildContext context,
-      {LdMonkeyActionLocation? location}) {
+  bool isVisibleInContext(BuildContext context, {LdMonkeyActionLocation? location}) {
     location ??= context.read<LdMonkeyActionLocation>();
-    if (isVisible != null) {
-      if (!isVisible!(context)) {
+    final predicate = isVisible;
+    if (predicate != null) {
+      final actionContext = LdMonkeyActionContext.of<T, IdType>(
+        context,
+        appContext: context,
+        listen: true,
+      );
+      if (!predicate(actionContext)) {
         return false;
       }
     }

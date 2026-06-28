@@ -1,12 +1,8 @@
-// ignore_for_file: lines_longer_than_80_chars
+// Tests for the [TestSortAndFilterState] helper in [test_utils.dart].
 //
-// The old `LdMonkeyShellState` public class was replaced by the private
-// `_LdMonkeyShellState` and the router-driven `LdMonkeySelection` /
-// `LdMonkeySortAndFilterState` value types.
-//
-// These tests exercise `LdMonkeySelection` (the public value-type equivalent)
-// and the `TestSortAndFilterState` helper (which mimics the mutation API for
-// unit tests without a real GoRouter).
+// This helper mimics the router-driven mutation API (filters, sort, selection,
+// viewing) without a real GoRouter so other monkey tests can simulate state
+// changes. These tests verify the harness itself behaves correctly.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,80 +11,6 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'test_utils.dart';
 
 void main() {
-  group('LdMonkeySelection Tests', () {
-    group('Initial State', () {
-      test('initializes with empty selection and viewing', () {
-        final selection = LdMonkeySelection<TestItem, int>(
-          selection: {},
-          viewing: {},
-          showSelectionControls: false,
-        );
-
-        expect(selection.selection, isEmpty);
-        expect(selection.viewing, isEmpty);
-        expect(selection.showSelectionControls, isFalse);
-      });
-    });
-
-    group('Equality and Hashing', () {
-      test('two selections with same values are equal', () {
-        final s1 = LdMonkeySelection<TestItem, int>(
-          selection: {1, 2},
-          viewing: {3},
-          showSelectionControls: false,
-        );
-        final s2 = LdMonkeySelection<TestItem, int>(
-          selection: {1, 2},
-          viewing: {3},
-          showSelectionControls: false,
-        );
-        expect(s1, equals(s2));
-      });
-
-      test('selections with different selection sets are not equal', () {
-        final s1 = LdMonkeySelection<TestItem, int>(
-          selection: {1},
-          viewing: {},
-          showSelectionControls: false,
-        );
-        final s2 = LdMonkeySelection<TestItem, int>(
-          selection: {2},
-          viewing: {},
-          showSelectionControls: false,
-        );
-        expect(s1, isNot(equals(s2)));
-      });
-
-      test('selections with different viewing sets are not equal', () {
-        final s1 = LdMonkeySelection<TestItem, int>(
-          selection: {},
-          viewing: {1},
-          showSelectionControls: false,
-        );
-        final s2 = LdMonkeySelection<TestItem, int>(
-          selection: {},
-          viewing: {2},
-          showSelectionControls: false,
-        );
-        expect(s1, isNot(equals(s2)));
-      });
-
-      test('selections with different showSelectionControls are not equal', () {
-        final s1 = LdMonkeySelection<TestItem, int>(
-          selection: {},
-          viewing: {},
-          showSelectionControls: true,
-        );
-        final s2 = LdMonkeySelection<TestItem, int>(
-          selection: {},
-          viewing: {},
-          showSelectionControls: false,
-        );
-        expect(s1, isNot(equals(s2)));
-      });
-    });
-  });
-
   group('TestSortAndFilterState Tests', () {
     group('Filter Mutations', () {
       test('updateFilter replaces a filter by name', () {

@@ -10,7 +10,7 @@ class Project with Identifiable<int> {
   Project(this.id, this.name, this.description, this.createdAt, this.updatedAt);
 }
 
-LdRepository<Project, int> projectRepository() => LdRepository.fromList<Project, int>(
+LdCallbackModel<Project, int> projectModel() => LdCallbackModel.fromList<Project, int>(
   list: [
     Project(1, "Project 1", "Description 1", DateTime.now(), DateTime.now()),
     Project(2, "Project 2", "Description 2", DateTime.now(), DateTime.now()),
@@ -28,7 +28,7 @@ class File with Identifiable<String> {
   File(this.id, this.name, this.description, this.createdAt, this.updatedAt);
 }
 
-LdRepository<File, String> fileRepository(String projectId) => LdRepository.fromList<File, String>(
+LdCallbackModel<File, String> fileModel(String projectId) => LdCallbackModel.fromList<File, String>(
   list: [
     File("${projectId}1", "$projectId-File 1", "Description 1", DateTime.now(), DateTime.now()),
     File("${projectId}2", "$projectId-File 2", "Description 2", DateTime.now(), DateTime.now()),

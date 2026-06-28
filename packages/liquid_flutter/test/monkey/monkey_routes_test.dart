@@ -9,17 +9,24 @@ class _RouteTestItem with Identifiable<int> {
   _RouteTestItem(this.id);
 }
 
+LdCallbackModel<_RouteTestItem, int> _routeTestModel() => LdCallbackModel<_RouteTestItem, int>(
+      isGreedy: true,
+      getById: (context, id) async => _RouteTestItem(id),
+      fetchListWithParameters: (parameters) async {
+        final items = [_RouteTestItem(1), _RouteTestItem(2), _RouteTestItem(3)];
+        return LdListPage<_RouteTestItem>(
+          newItems: items.skip(parameters.offset).take(parameters.pageSize).toList(),
+          hasMore: parameters.offset + parameters.pageSize < items.length,
+          total: items.length,
+        );
+      },
+    );
+
 void main() {
   group('buildMonkeyRoutes', () {
     final routeConfig = LdMonkeyRouteConfig.identifiableInt<_RouteTestItem>(itemName: 'item');
 
-    LdRepository<_RouteTestItem, int> testRepository() => LdRepository.fromList<_RouteTestItem, int>(
-          list: [
-            _RouteTestItem(1),
-            _RouteTestItem(2),
-            _RouteTestItem(3),
-          ],
-        );
+    LdCallbackModel<_RouteTestItem, int> testModel() => _routeTestModel();
 
     test('master route path and name', () {
       final routes = buildMonkeyRoutes<_RouteTestItem, int>(
@@ -27,7 +34,7 @@ void main() {
         routeConfig: routeConfig,
         detailPage: const SizedBox(),
         masterPage: const SizedBox(),
-        repositoryBuilder: (context, state) => testRepository(),
+        modelBuilder: (context, state) => testModel(),
         filtersBuilder: (_) async => [],
         sortOptionsBuilder: (_) async => [],
         actions: const [],
@@ -46,7 +53,7 @@ void main() {
         routeConfig: routeConfig,
         detailPage: const SizedBox(),
         masterPage: const SizedBox(),
-        repositoryBuilder: (context, state) => testRepository(),
+        modelBuilder: (context, state) => testModel(),
         filtersBuilder: (_) async => [],
         sortOptionsBuilder: (_) async => [],
         actions: const [],
@@ -66,13 +73,7 @@ void main() {
     final cfgB = LdMonkeyRouteConfig.identifiableInt<_RouteTestItem>(itemName: 'b');
     final cfgC = LdMonkeyRouteConfig.identifiableInt<_RouteTestItem>(itemName: 'c');
 
-    LdRepository<_RouteTestItem, int> testRepository() => LdRepository.fromList<_RouteTestItem, int>(
-          list: [
-            _RouteTestItem(1),
-            _RouteTestItem(2),
-            _RouteTestItem(3),
-          ],
-        );
+    LdCallbackModel<_RouteTestItem, int> testModel() => _routeTestModel();
 
     test('two levels: nested detail path uses prefix', () {
       final routes = buildMonkeyRouteTree<_RouteTestItem, int>(
@@ -81,7 +82,7 @@ void main() {
           routeConfig: cfgA,
           masterPage: const SizedBox(),
           detailPage: const SizedBox(),
-          repositoryBuilder: (context, state) => testRepository(),
+          modelBuilder: (context, state) => testModel(),
           filtersBuilder: (_) async => [],
           sortOptionsBuilder: (_) async => [],
           actions: const [],
@@ -90,7 +91,7 @@ void main() {
             routeConfig: cfgB,
             masterPage: const SizedBox(),
             detailPage: const SizedBox(),
-            repositoryBuilder: (context, state) => testRepository(),
+            modelBuilder: (context, state) => testModel(),
             filtersBuilder: (_) async => [],
             sortOptionsBuilder: (_) async => [],
             actions: const [],
@@ -110,7 +111,7 @@ void main() {
           routeConfig: cfgA,
           masterPage: const SizedBox(),
           detailPage: const SizedBox(),
-          repositoryBuilder: (context, state) => testRepository(),
+          modelBuilder: (context, state) => testModel(),
           filtersBuilder: (_) async => [],
           sortOptionsBuilder: (_) async => [],
           actions: const [],
@@ -119,7 +120,7 @@ void main() {
             routeConfig: cfgB,
             masterPage: const SizedBox(),
             detailPage: const SizedBox(),
-            repositoryBuilder: (context, state) => testRepository(),
+            modelBuilder: (context, state) => testModel(),
             filtersBuilder: (_) async => [],
             sortOptionsBuilder: (_) async => [],
             actions: const [],
@@ -128,7 +129,7 @@ void main() {
               routeConfig: cfgC,
               masterPage: const SizedBox(),
               detailPage: const SizedBox(),
-              repositoryBuilder: (context, state) => testRepository(),
+              modelBuilder: (context, state) => testModel(),
               filtersBuilder: (_) async => [],
               sortOptionsBuilder: (_) async => [],
               actions: const [],

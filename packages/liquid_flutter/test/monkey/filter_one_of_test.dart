@@ -151,13 +151,13 @@ void main() {
         );
 
         final shellState = TestSortAndFilterState<TestItem, int>(filters: {filter});
-        final repository = createTestRepository();
+        final repository = createTestListController();
 
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
               home: Scaffold(
-                body: ListenableProvider<LdRepository<TestItem, int>>.value(
+                body: ListenableProvider<LdListController<TestItem, int>>.value(
                   value: repository,
                   child: ChangeNotifierProvider<TestSortAndFilterState<TestItem, int>>.value(
                     value: shellState,

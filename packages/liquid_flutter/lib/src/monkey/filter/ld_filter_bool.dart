@@ -10,7 +10,6 @@ class LdFilterBool<T extends Identifiable<IdType>, IdType> extends LdFilterOptio
     super.isOn = false,
     super.isEnabled,
     super.affectedByUpdate,
-    @Deprecated('Use affectedByUpdate') super.mutationAffectsCache,
   });
 
   @override
@@ -31,7 +30,6 @@ class LdFilterBool<T extends Identifiable<IdType>, IdType> extends LdFilterOptio
     String? name,
     bool? isOn,
     LdAffectedByUpdate<T>? affectedByUpdate,
-    @Deprecated('Use affectedByUpdate') LdAffectedByUpdate<T>? mutationAffectsCache,
   }) {
     return LdFilterBool<T, IdType>(
       name: name ?? this.name,
@@ -39,7 +37,7 @@ class LdFilterBool<T extends Identifiable<IdType>, IdType> extends LdFilterOptio
       icon: icon ?? this.icon,
       isOn: isOn ?? this.isOn,
       isEnabled: isEnabled ?? this.isEnabled,
-      affectedByUpdate: affectedByUpdate ?? mutationAffectsCache ?? this.affectedByUpdate,
+      affectedByUpdate: affectedByUpdate ?? this.affectedByUpdate,
     );
   }
 

@@ -9,59 +9,42 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
-enum TaskActionId { create, markDone, markUndone, duplicate }
+enum TaskActionId { markDone, markUndone, duplicate, setDueToday, externalEdit }
+
+final taskRouteConfig = LdMonkeyRouteConfig.identifiableInt<Task>(itemName: 'task');
+
+DateTime _dueDateToday() {
+  final now = DateTime.now();
+  return DateTime(now.year, now.month, now.day);
+}
 
 int _nextTaskId() {
   return testData.fold<int>(0, (max, task) => task.id > max ? task.id : max) + 1;
 }
 
+bool _hasTodoInSelection(LdMonkeyActionContext<Task, int> ctx) {
+  for (final id in ctx.selectedIds) {
+    final item = ctx.listController.getItemById(id);
+    if (item?.value?.done == false) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool _hasDoneInSelection(LdMonkeyActionContext<Task, int> ctx) {
+  for (final id in ctx.selectedIds) {
+    final item = ctx.listController.getItemById(id);
+    if (item?.value?.done == true) {
+      return true;
+    }
+  }
+  return false;
+}
+
 List<LdMonkeyAction<Task, int>> taskActions = [
   refreshAction<Task, int>(),
-  LdMonkeySubmitAction(
-    id: TaskActionId.create,
-    visibility: {
-      LdMonkeyActionVisibility(
-        location: LdMonkeyActionLocation.masterAppBar,
-        visibleWhenShowingSelectionControls: false,
-      ),
-    },
-    tooltip: (context) => "Create new task",
-    shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyN, meta: true)},
-    submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Creating new task"),
-    onSubmit: (ctx) async {
-      final newTaskText = await ldEnterTextModal(
-        context: ctx.appContext,
-        initialValue: "New tasks",
-        inputHint: "New Task",
-        inputLabel: "Task",
-        useRootNavigator: true,
-      );
-
-      if (newTaskText == null) {
-        return;
-      }
-
-      final newTask = Task(
-        _nextTaskId(),
-        newTaskText,
-        DateTime.now().add(const Duration(days: 1)),
-        false,
-        DateTime.now(),
-      );
-      if (!ctx.appContext.mounted) {
-        return;
-      }
-      await ctx.repository.create(ctx.appContext, newTask);
-
-      await Future.delayed(const Duration(milliseconds: 1500));
-
-      if (ctx.appContext.mounted) {
-        ctx.updateViewing({newTask.id});
-      }
-    },
-    child: Text("New Task"),
-    icon: Icon(LucideIcons.plus),
-  ),
+  reactiveCreateAction<Task, int>(routeConfig: taskRouteConfig),
   LdMonkeySubmitAction(
     id: TaskActionId.markDone,
     tooltip: (context) => "Mark as done",
@@ -70,35 +53,13 @@ List<LdMonkeyAction<Task, int>> taskActions = [
         location: LdMonkeyActionLocation.detailAppBar,
         minSelectionCount: 1,
         maxSelectionCount: null,
-        isVisible: (context) {
-          final selection = LdMonkeySelection.adaptive<Task, int>(context, listen: true);
-          bool hasTodo = false;
-          for (final id in selection) {
-            final item = LdRepository.of<Task, int>(context).getItemById(id);
-            if (item?.value?.done == false) {
-              hasTodo = true;
-              break;
-            }
-          }
-          return hasTodo;
-        },
+        isVisible: _hasTodoInSelection,
       ),
       LdMonkeyActionVisibility(
         location: LdMonkeyActionLocation.context,
         minSelectionCount: 1,
         maxSelectionCount: null,
-        isVisible: (context) {
-          final selection = LdMonkeySelection.adaptive<Task, int>(context, listen: true);
-          bool hasTodo = false;
-          for (final id in selection) {
-            final item = LdRepository.of<Task, int>(context).getItemById(id);
-            if (item?.value?.done == false) {
-              hasTodo = true;
-              break;
-            }
-          }
-          return hasTodo;
-        },
+        isVisible: _hasTodoInSelection,
       ),
     },
     shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyD)},
@@ -106,13 +67,13 @@ List<LdMonkeyAction<Task, int>> taskActions = [
     onSubmit: (ctx) async {
       final updatedItems = <Task>{};
       for (final id in ctx.selectedIds) {
-        final item = await ctx.repository.getById(id);
+        final item = await ctx.listController.getById(ctx.appContext, id);
         updatedItems.add(item.copyWith(done: true));
       }
       if (!ctx.appContext.mounted) {
         return;
       }
-      await ctx.repository.updateBatch(ctx.appContext, updatedItems);
+      await ctx.appContext.read<LdModel<Task, int, Object?, Object?>>().updateBatch(ctx.appContext, updatedItems);
     },
     child: Text("Done"),
     icon: Icon(LucideIcons.check),
@@ -125,24 +86,80 @@ List<LdMonkeyAction<Task, int>> taskActions = [
         location: LdMonkeyActionLocation.detailAppBar,
         minSelectionCount: 1,
         maxSelectionCount: null,
+        isVisible: (ctx) => _hasDoneInSelection(ctx),
       ),
-      LdMonkeyActionVisibility(location: LdMonkeyActionLocation.context, minSelectionCount: 1, maxSelectionCount: null),
+      LdMonkeyActionVisibility(
+        location: LdMonkeyActionLocation.context,
+        minSelectionCount: 1,
+        maxSelectionCount: null,
+        isVisible: (ctx) => _hasDoneInSelection(ctx),
+      ),
     },
     shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyU)},
     submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Marking as undone", allowResubmit: true),
     onSubmit: (ctx) async {
       final updatedItems = <Task>{};
       for (final id in ctx.selectedIds) {
-        final item = await ctx.repository.getById(id);
+        final item = await ctx.listController.getById(ctx.appContext, id);
         updatedItems.add(item.copyWith(done: false));
       }
       if (!ctx.appContext.mounted) {
         return;
       }
-      await ctx.repository.updateBatch(ctx.appContext, updatedItems);
+      await ctx.appContext.read<LdModel<Task, int, Object?, Object?>>().updateBatch(ctx.appContext, updatedItems);
     },
     child: Text("To do"),
     icon: Icon(LucideIcons.hourglass),
+  ),
+  LdMonkeySubmitAction(
+    id: TaskActionId.setDueToday,
+    tooltip: (context) => 'Set due date to today (simulates external change)',
+    visibility: {
+      LdMonkeyActionVisibility(
+        location: LdMonkeyActionLocation.detailAppBar,
+        minSelectionCount: 1,
+        maxSelectionCount: 1,
+      ),
+    },
+    submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: 'Setting due date to today', allowResubmit: true),
+    onSubmit: (ctx) async {
+      final updatedItems = <Task>{};
+      for (final id in ctx.selectedIds) {
+        final item = await ctx.listController.getById(ctx.appContext, id);
+        updatedItems.add(item.copyWith(due: _dueDateToday()));
+      }
+      if (!ctx.appContext.mounted) {
+        return;
+      }
+      await ctx.appContext.read<LdModel<Task, int, Object?, Object?>>().updateBatch(ctx.appContext, updatedItems);
+    },
+    child: Text('Due today'),
+    icon: Icon(LucideIcons.calendarCheck),
+  ),
+  LdMonkeySubmitAction(
+    id: TaskActionId.externalEdit,
+    tooltip: (context) => 'Externally edit name + due date (simulates a multi-field conflict)',
+    visibility: {
+      LdMonkeyActionVisibility(
+        location: LdMonkeyActionLocation.detailAppBar,
+        minSelectionCount: 1,
+        maxSelectionCount: 1,
+      ),
+    },
+    submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: 'Applying external edit', allowResubmit: true),
+    onSubmit: (ctx) async {
+      final updatedItems = <Task>{};
+      for (final id in ctx.selectedIds) {
+        final item = await ctx.listController.getById(ctx.appContext, id);
+        updatedItems.add(item.copyWith(task: '${item.task} [edited elsewhere]', due: _dueDateToday()));
+      }
+      if (!ctx.appContext.mounted) {
+        return;
+      }
+      await ctx.appContext.read<LdModel<Task, int, Object?, Object?>>().updateBatch(ctx.appContext, updatedItems);
+    },
+    child: Text('Edit elsewhere'),
+    icon: Icon(LucideIcons.userPen),
   ),
   LdMonkeySubmitAction(
     id: TaskActionId.duplicate,
@@ -158,14 +175,14 @@ List<LdMonkeyAction<Task, int>> taskActions = [
     shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyD, meta: true)},
     submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Duplicating"),
     onSubmit: (ctx) async {
-      final item = await ctx.repository.getById(ctx.selectedIds.first);
+      final item = await ctx.listController.getById(ctx.appContext, ctx.selectedIds.first);
 
       final newItem = item.copyWith(id: _nextTaskId(), task: "${item.task} (copy)");
 
       if (!ctx.appContext.mounted) {
         return;
       }
-      await ctx.repository.create(ctx.appContext, newItem);
+      await ctx.appContext.read<LdModel<Task, int, Object?, Object?>>().create(ctx.appContext, newItem);
 
       await Future.delayed(const Duration(milliseconds: 1500));
 
@@ -176,7 +193,7 @@ List<LdMonkeyAction<Task, int>> taskActions = [
     child: Text("Duplicate"),
     icon: Icon(LucideIcons.copy),
   ),
-  deleteAction<Task, int>(detailLocation: LdMonkeyActionLocation.detailSecondary),
+  deleteAction<Task, int>(detailLocation: LdMonkeyActionLocation.detailAppBar),
   showSelectionControlsAction<Task, int>(),
   showFilterModal<Task, int>(),
   showSelection<Task, int>(),
@@ -190,6 +207,7 @@ class TaskDetailPage extends StatelessWidget {
     return LdMonkeyDetailPage<Task, int>.scrollable(
       primaryAppBarConfig: LdAppBarConfig(debugName: 'Detail App Bar Task', title: Text('Task')),
       secondaryAppBarConfig: LdAppBarConfig(
+        debugName: 'Detail Secondary App Bar Task',
         positionMode: LdAppBarPositionMode.top,
         borderMode: LdAppBarBorderMode.visible,
       ),
@@ -203,23 +221,33 @@ class TaskMasterPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LdMonkeyMasterPage<Task, int>(
-      primaryAppBarConfig: LdAppBarConfig(debugName: "Master App Bar Tasks", title: Text("Tasks")),
-      buildItem: (context, item) => LdListItem(
-        title: Text(
-          item.value!.task,
-          style: TextStyle(decoration: item.value!.done ? TextDecoration.lineThrough : TextDecoration.none),
+    return LdListConfigProvider<Task, int>(
+      // Match the loader to the item shape (leading avatar + subtitle) so the
+      // placeholder occupies the same height and the list doesn't jump.
+      config: LdListConfig<Task, int>(
+        loadingBuilder: (context, position, totalItems) => const LdListItemLoading(
+          hasLeading: true,
+          hasSubtitle: true,
         ),
-        subtitle: Text(
-          "Due ${Jiffy.parseFromDateTime(item.value!.due).fromNow()}",
-          style: TextStyle(
-            color: switch (item.value!.due.isBefore(DateTime.now())) {
-              true => LdTheme.of(context).errorColor,
-              _ => null,
-            },
+      ),
+      child: LdMonkeyMasterPage<Task, int>(
+        primaryAppBarConfig: LdAppBarConfig(debugName: "Master App Bar Tasks", title: Text("Tasks")),
+        buildItem: (context, item) => LdListItem(
+          title: Text(
+            item.value!.task,
+            style: TextStyle(decoration: item.value!.done ? TextDecoration.lineThrough : TextDecoration.none),
           ),
+          subtitle: Text(
+            "Due ${Jiffy.parseFromDateTime(item.value!.due).fromNow()}",
+            style: TextStyle(
+              color: switch (item.value!.due.isBefore(DateTime.now())) {
+                true => LdTheme.of(context).errorColor,
+                _ => null,
+              },
+            ),
+          ),
+          leading: LdAvatar(emoji: true, child: LdText(item.value!.emoji)),
         ),
-        leading: LdAvatar(emoji: true, child: LdText(item.value!.emoji)),
       ),
     );
   }
@@ -248,16 +276,8 @@ List<LdSortOption<Task, int>> taskSortOptions = [
   ),
 ];
 
-Future<Task> taskReorderHandler(
-  BuildContext context,
-  Task item,
-  int fromIndex,
-  int toIndex,
-) async {
-  return item.copyWith(
-    order: toIndex,
-    lastUpdate: DateTime.now(),
-  );
+Future<Task> taskReorderHandler(BuildContext context, Task item, int fromIndex, int toIndex) async {
+  return item.copyWith(order: toIndex, lastUpdate: DateTime.now());
 }
 
 List<LdFilterOption<Task, int>> taskFilters = [

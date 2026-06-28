@@ -4,6 +4,7 @@ import 'package:jiffy/jiffy.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:provider/provider.dart';
 
 class MovieDemo with Identifiable<int> {
   @override
@@ -64,16 +65,16 @@ List<MovieDemo> applyMovieFilters(List<MovieDemo> data, Set<LdFilterOption<Movie
   return ldFuzzySearchFromFilters<MovieDemo, int>(items: filtered, filters: filters, searchText: movieSearchText);
 }
 
-LdRepository<MovieDemo, int> movieRepository(BuildContext context) => LdRepository<MovieDemo, int>(
+LdCallbackModel<MovieDemo, int> movieModel(BuildContext context) => LdCallbackModel<MovieDemo, int>(
   pageSize: 5,
-  getOffsetById: (parameters) async {
+  getOffsetByIdFn: (parameters) async {
     await Future.delayed(const Duration(seconds: 1));
 
     final filtered = applyMovieFilters(movieData, parameters.filters);
 
     return filtered.indexWhere((element) => element.id == parameters.id);
   },
-  getById: (id) async {
+  getById: (context, id) async {
     return movieData.firstWhere((element) => element.id == id);
   },
 
@@ -90,7 +91,7 @@ LdRepository<MovieDemo, int> movieRepository(BuildContext context) => LdReposito
     movieData.removeWhere((element) => element.id == id);
     await Future.delayed(const Duration(milliseconds: 500));
   },
-  deleteBatch: (context, ids) async {
+  deleteBatchFn: (context, ids) async {
     for (final id in ids) {
       movieData.removeWhere((element) => element.id == id);
     }
@@ -108,6 +109,7 @@ LdRepository<MovieDemo, int> movieRepository(BuildContext context) => LdReposito
     return item;
   },
 );
+
 
 Future<List<LdFilterOption<MovieDemo, int>>> buildMovieFilters(BuildContext context) async {
   final genres = await loadMovieGenres(context);
@@ -170,7 +172,7 @@ class MovieDetail extends StatelessWidget {
 
     return LdAutoSpace(
       children: [
-        LdMonkeyReactiveDetailForm<MovieDemo, int, MovieDemo>(
+        LdMonkeyReactiveDetailForm<MovieDemo, int, MovieDemo, MovieDemo, MovieDemo>.edit(
           item: movie,
           saveMode: LdMonkeyDetailSaveMode.adaptive,
           detailToFormValues: (detail) => {
@@ -178,7 +180,7 @@ class MovieDetail extends StatelessWidget {
             'genre': {detail.genre},
             'rating': detail.rating.toDouble(),
           },
-          mapToEntity: (form, detail) {
+          formToUpdatePayload: (form, detail) {
             final genres = form.control('genre').value as Set<String>;
             return detail.copyWith(
               title: form.control('title').value as String,
@@ -191,12 +193,7 @@ class MovieDetail extends StatelessWidget {
             final genreItems = movieData
                 .map((movie) => movie.genre)
                 .toSet()
-                .map(
-                  (genre) => LdSelectItem(
-                    value: genre,
-                    child: Text(genre),
-                  ),
-                )
+                .map((genre) => LdSelectItem(value: genre, child: Text(genre)))
                 .toList();
 
             return [
@@ -220,7 +217,7 @@ class MovieDetail extends StatelessWidget {
                 min: 1,
                 max: 5,
                 validators: [LdFormValidators.required],
-                valueFormatter: (value) => value?.round().toString() ?? '',
+
                 onCommitted: hooks.onCommitted('rating'),
               ),
             ];
@@ -248,14 +245,14 @@ List<LdMonkeyAction<MovieDemo, int>> movieActions = [
     shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyD, meta: true)},
     submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Duplicating"),
     onSubmit: (ctx) async {
-      final item = await ctx.repository.getById(ctx.selectedIds.first);
+      final item = await ctx.listController.getById(ctx.appContext, ctx.selectedIds.first);
 
       final newItem = item.copyWith(id: movieData.length + 1, title: "${item.title} (copy)");
 
       if (!ctx.appContext.mounted) {
         return;
       }
-      await ctx.repository.create(ctx.appContext, newItem);
+      await ctx.appContext.read<LdModel<MovieDemo, int, Object?, Object?>>().create(ctx.appContext, newItem);
 
       await Future.delayed(const Duration(milliseconds: 1500));
 

@@ -36,6 +36,8 @@ Future<double> getScreenRadius() async {
     if (iosRadiusMap.containsKey(deviceType)) {
       return iosRadiusMap[deviceType]!;
     }
+
+    print("deviceType: $deviceType");
   }
 
   return 0.0;
@@ -94,4 +96,5 @@ final iosRadiusMap = {
   "iPad16,2": 21.5,
   "iPad16,4": 30.0,
   "iPad16,6": 30.0,
+  "iPhone18,3": 30.0,
 };

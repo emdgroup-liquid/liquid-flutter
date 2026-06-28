@@ -8,7 +8,7 @@ import 'test_utils.dart';
 
 class _RouterAdapterHarness extends StatefulWidget {
   final LdMonkeyRouteConfig<TestItem, int> routeConfig;
-  final LdRepository<TestItem, int> repository;
+  final LdListController<TestItem, int> repository;
   final List<String> initialOptions;
 
   const _RouterAdapterHarness({
@@ -60,7 +60,7 @@ class _RouterAdapterHarnessState extends State<_RouterAdapterHarness> {
 
   @override
   Widget build(BuildContext context) {
-    return ListenableProvider<LdRepository<TestItem, int>>.value(
+    return ListenableProvider<LdListController<TestItem, int>>.value(
       value: widget.repository,
       child: LdMonkeyRouterAdapter<TestItem, int>(
         routeConfig: widget.routeConfig,
@@ -85,7 +85,7 @@ void main() {
     testWidgets('keeps valid one-of values and clears removed values after definition updates',
         (WidgetTester tester) async {
       final routeConfig = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'item');
-      final repository = createTestRepository();
+      final repository = createTestListController();
       final harnessKey = GlobalKey<_RouterAdapterHarnessState>();
       final categoryQueryKey = routeConfig.filterQueryKey('category');
 

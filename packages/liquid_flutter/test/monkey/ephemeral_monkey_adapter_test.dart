@@ -13,16 +13,18 @@ class _EphemeralItem with Identifiable<int> {
 void main() {
   testWidgets('first selection update does not refresh repository filters', (tester) async {
     var fetchCount = 0;
-    final repository = LdRepository<_EphemeralItem, int>(
-      getById: (id) async => _EphemeralItem(id),
-      fetchListWithParameters: (parameters) async {
-        fetchCount++;
-        return LdListPage(
-          newItems: List.generate(5, (index) => _EphemeralItem(index)),
-          hasMore: false,
-          total: 5,
-        );
-      },
+    final repository = LdListController.fromModel(
+      LdCallbackModel<_EphemeralItem, int>(
+        getById: (context, id) async => _EphemeralItem(id),
+        fetchListWithParameters: (parameters) async {
+          fetchCount++;
+          return LdListPage(
+            newItems: List.generate(5, (index) => _EphemeralItem(index)),
+            hasMore: false,
+            total: 5,
+          );
+        },
+      ),
     );
 
     final controller = LdEphemeralMonkeyController<_EphemeralItem, int>(
@@ -32,7 +34,7 @@ void main() {
     await tester.pumpWidget(
       LdThemeProvider(
         child: MaterialApp(
-          home: ListenableProvider<LdRepository<_EphemeralItem, int>>.value(
+          home: ListenableProvider<LdListController<_EphemeralItem, int>>.value(
             value: repository,
             child: LdEphemeralMonkeyAdapter<_EphemeralItem, int>(
               controller: controller,

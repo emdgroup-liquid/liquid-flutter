@@ -9,7 +9,9 @@ void main() {
       _PickerItem(1, 'Alpha'),
       _PickerItem(2, 'Beta'),
     ];
-    final repository = LdRepository.fromList<_PickerItem, int>(list: items);
+    final repository = LdListController.fromModel(
+      LdCallbackModel.fromList<_PickerItem, int>(list: items),
+    );
 
     Set<int>? result;
     await tester.pumpWidget(

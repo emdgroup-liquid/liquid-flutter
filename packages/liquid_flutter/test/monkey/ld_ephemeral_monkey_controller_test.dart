@@ -29,16 +29,18 @@ void main() {
     testWidgets('repository refreshes on filter update', (tester) async {
       final items = [createTestItem(1, name: 'Alpha'), createTestItem(2, name: 'Beta')];
       var fetchCount = 0;
-      final repository = LdRepository<TestItem, int>(
-        fetchListWithParameters: (parameters) async {
-          fetchCount++;
-          return LdListPage<TestItem>(
-            newItems: items,
-            hasMore: false,
-            total: items.length,
-          );
-        },
-        getById: (id) async => items.firstWhere((item) => item.id == id),
+      final repository = LdListController.fromModel(
+        LdCallbackModel<TestItem, int>(
+          fetchListWithParameters: (parameters) async {
+            fetchCount++;
+            return LdListPage<TestItem>(
+              newItems: items,
+              hasMore: false,
+              total: items.length,
+            );
+          },
+          getById: (context, id) async => items.firstWhere((item) => item.id == id),
+        ),
       );
 
       final controller = LdEphemeralMonkeyController<TestItem, int>(
@@ -55,7 +57,7 @@ void main() {
         LdThemeProvider(
           child: MaterialApp(
             localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-            home: ListenableProvider<LdRepository<TestItem, int>>.value(
+            home: ListenableProvider<LdListController<TestItem, int>>.value(
               value: repository,
               child: LdEphemeralMonkeyAdapter<TestItem, int>(
                 controller: controller,

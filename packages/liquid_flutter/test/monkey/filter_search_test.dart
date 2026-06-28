@@ -99,7 +99,7 @@ void main() {
     });
 
     group('UI Rendering', () {
-      testWidgets('renders search input widget', (WidgetTester tester) async {
+      testWidgets('renders the real search input with initial query', (WidgetTester tester) async {
         final filter = LdFilterSearch<TestItem, int, String>(
           name: 'search',
           label: (context) => 'Search',
@@ -109,32 +109,18 @@ void main() {
         );
 
         final shellState = TestSortAndFilterState<TestItem, int>(filters: {filter});
-        final repository = createTestRepository();
+        final repository = createTestListController();
 
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
+              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
               home: Scaffold(
-                body: ListenableProvider<LdRepository<TestItem, int>>.value(
+                body: ListenableProvider<LdListController<TestItem, int>>.value(
                   value: repository,
                   child: Provider<LdMonkeyRouterController<TestItem, int>>.value(
                     value: shellState.controllerDelegate,
-                    child: Row(
-                      children: [
-                        Expanded(child: Text(filter.searchText)),
-                        LdButton.vague(
-                          size: LdSize.s,
-                          onPressed: () {
-                            // Deactivate search filter via shellState
-                            shellState.updateFilter(
-                              MockBuildContext(),
-                              filter.copyWith(isOn: false),
-                            );
-                          },
-                          child: const Icon(Icons.close),
-                        ),
-                      ],
-                    ),
+                    child: Builder(builder: filter.build),
                   ),
                 ),
               ),
@@ -144,7 +130,50 @@ void main() {
 
         await tester.pumpAndSettle();
 
+        // The real filter widget renders an LdInput seeded with the search text.
+        expect(find.byType(LdSearchInput), findsOneWidget);
+        expect(find.byType(LdInput), findsOneWidget);
         expect(find.text('test'), findsOneWidget);
+      });
+
+      testWidgets('typing in the search input updates the filter state', (WidgetTester tester) async {
+        final filter = LdFilterSearch<TestItem, int, String>(
+          name: 'search',
+          label: (context) => 'Search',
+          icon: (context) => const Icon(Icons.search),
+          isOn: false,
+        );
+
+        final shellState = TestSortAndFilterState<TestItem, int>(filters: {filter});
+        final repository = createTestListController();
+
+        await tester.pumpWidget(
+          LdThemeProvider(
+            child: MaterialApp(
+              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+              home: Scaffold(
+                body: ListenableProvider<LdListController<TestItem, int>>.value(
+                  value: repository,
+                  child: Provider<LdMonkeyRouterController<TestItem, int>>.value(
+                    value: shellState.controllerDelegate,
+                    child: Builder(builder: filter.build),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byType(LdInput), 'hello');
+        // The search filter commits on submit (TextInputAction.search).
+        await tester.testTextInput.receiveAction(TextInputAction.search);
+        await tester.pumpAndSettle();
+
+        final updated = shellState.filtersMap['search'] as LdFilterSearch<TestItem, int, String>;
+        expect(updated.searchText, equals('hello'));
+        expect(updated.isOn, isTrue);
       });
     });
   });

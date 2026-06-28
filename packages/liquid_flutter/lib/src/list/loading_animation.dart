@@ -10,14 +10,20 @@ class LdAnimatedLoadingGradient extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final box = Container(
       height: height,
       width: width,
       decoration: BoxDecoration(
         color: LdTheme.of(context).neutralShade(3),
         borderRadius: LdTheme.of(context).radius(LdSize.m),
       ),
-    )
+    );
+
+    if (ldDisableAnimations) {
+      return box;
+    }
+
+    return box
         .animate(
           onPlay: (controller) => controller.repeat(),
         )

@@ -79,7 +79,7 @@ class _LdRadioWidget extends StatelessWidget {
                     key: const ValueKey("frame"),
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: colorBundle.surface,
+                        color: theme.primaryColor,
                         width: borderWidth,
                       ),
                       shape: BoxShape.circle,

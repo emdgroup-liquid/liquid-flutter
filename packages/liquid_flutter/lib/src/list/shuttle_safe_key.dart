@@ -1,7 +1,11 @@
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
-typedef LdIsShuttle = bool;
+class LdIsShuttle {
+  const LdIsShuttle(this.value);
+
+  final bool value;
+}
 
 class LdShuttleSafeKey extends StatelessWidget {
   const LdShuttleSafeKey({
@@ -16,7 +20,7 @@ class LdShuttleSafeKey extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isShuttle = Provider.of<LdIsShuttle?>(context, listen: true) ?? false;
+    final isShuttle = Provider.of<LdIsShuttle?>(context, listen: true)?.value ?? false;
     if (isShuttle) {
       return child;
     }

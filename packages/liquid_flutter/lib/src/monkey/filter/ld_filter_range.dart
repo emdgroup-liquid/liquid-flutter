@@ -19,7 +19,6 @@ class LdFilterRange<T extends Identifiable<IdType>, IdType> extends LdFilterOpti
     RangeValues? range,
     super.isEnabled,
     super.affectedByUpdate,
-    @Deprecated('Use affectedByUpdate') super.mutationAffectsCache,
   }) : range = range ?? RangeValues(min, max);
 
   @override
@@ -67,7 +66,6 @@ class LdFilterRange<T extends Identifiable<IdType>, IdType> extends LdFilterOpti
     double? step,
     bool Function(BuildContext context)? isEnabled,
     LdAffectedByUpdate<T>? affectedByUpdate,
-    @Deprecated('Use affectedByUpdate') LdAffectedByUpdate<T>? mutationAffectsCache,
   }) {
     return LdFilterRange<T, IdType>(
       name: name ?? this.name,
@@ -79,7 +77,7 @@ class LdFilterRange<T extends Identifiable<IdType>, IdType> extends LdFilterOpti
       step: step ?? this.step,
       range: range ?? this.range,
       isEnabled: isEnabled ?? this.isEnabled,
-      affectedByUpdate: affectedByUpdate ?? mutationAffectsCache ?? this.affectedByUpdate,
+      affectedByUpdate: affectedByUpdate ?? this.affectedByUpdate,
     );
   }
 

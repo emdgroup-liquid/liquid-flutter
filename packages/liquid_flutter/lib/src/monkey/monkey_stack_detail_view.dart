@@ -10,32 +10,37 @@ class LdMonkeyStackDetailView<T extends Identifiable<IdType>, IdType> extends St
   @override
   Widget build(BuildContext context) {
     return LdMonkeyStreamSelection<T, IdType>(
-      builder: (context, items) => Stack(children: [
-        ...items.mapIndexed(
-          (index, e) => LdSpring(
+      buildItem: (context, item) => switch (item.state) {
+        LdPaginatorItemState.deleting || LdPaginatorItemState.deleted => LdReveal.quick(
+            revealed: false,
+            initialRevealed: true,
+            child: buildDetail(context, item),
+          ),
+        _ => buildDetail(context, item),
+      },
+      builder: (context, itemWidgets) => Stack(
+        children: [
+          ...itemWidgets.mapIndexed(
+            (index, child) => LdSpring(
               initialPosition: 0,
-              builder: (context, state, child) {
+              builder: (context, state, springChild) {
                 final position = max(0, state.position);
                 return Transform.scale(
-                    scale: 1 - (position * 0.02),
-                    child: Transform.rotate(
-                      angle: index % 3 * 0.02,
-                      child: Transform.translate(
-                        offset: Offset(0, position * 5),
-                        child: child,
-                      ),
-                    ));
-              },
-              child: switch (e.state) {
-                LdPaginatorItemState.deleting || LdPaginatorItemState.deleted => LdReveal.quick(
-                    revealed: false,
-                    initialRevealed: true,
-                    child: buildDetail(context, e),
+                  scale: 1 - (position * 0.02),
+                  child: Transform.rotate(
+                    angle: index % 3 * 0.02,
+                    child: Transform.translate(
+                      offset: Offset(0, position * 5),
+                      child: springChild,
+                    ),
                   ),
-                _ => buildDetail(context, e),
-              }),
-        ),
-      ]),
+                );
+              },
+              child: child,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

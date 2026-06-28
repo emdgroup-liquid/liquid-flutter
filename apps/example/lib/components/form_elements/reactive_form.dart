@@ -16,20 +16,14 @@ class ReactiveFormDemo extends StatelessWidget {
     return ComponentPage(
       path: "lib/components/form_elements/reactive_form.dart",
       title: "LdReactiveForm",
-      apiComponents: const [
-        "LdReactiveForm",
-        "LdReactiveFormItem",
-        "LdFormSubmitConfig",
-      ],
+      apiComponents: const ["LdReactiveForm", "LdReactiveFormItem", "LdFormSubmitConfig"],
       demo: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ComponentWell(
             onSurface: true,
             child: LdReactiveForm(
-              validators: [
-                LdFormValidators.mustMatch('email', 'email2'),
-              ],
+              validators: [LdFormValidators.mustMatch('email', 'email2')],
               validationMessages: {
                 'required': (field) => 'This field is required',
                 'mustMatch': (field) => 'The emails must match',
@@ -46,17 +40,13 @@ class ReactiveFormDemo extends StatelessWidget {
                       title: const Text('LdReactiveForm Demo'),
                       child: LdScaffoldBody(
                         addContainer: true,
-                        children: [
-                          LdText.p('Form submitted with values: ${form.value}'),
-                        ],
+                        children: [LdText.p('Form submitted with values: ${form.value}')],
                       ),
                     ),
                   ),
                 ).show(context);
               },
-              submitConfig: LdFormSubmitConfig(
-                submitText: 'Submit Form',
-              ),
+              submitConfig: LdFormSubmitConfig(submitText: 'Submit Form'),
               items: [
                 LdReactiveFormItem.input<String>(
                   key: 'name',
@@ -86,36 +76,19 @@ class ReactiveFormDemo extends StatelessWidget {
                 LdReactiveFormItem.chooseFromItems<Pet>(
                   key: 'catsOrDogs',
                   label: 'Cats or Dogs?',
-                  items: Pet.values
-                      .map(
-                        (e) => LdSelectItem(
-                          value: e,
-                          child: Text(e.name.capitalize()),
-                        ),
-                      )
-                      .toList(),
-                  hintBuilder: (_) => const LdHint(
-                    type: LdHintType.info,
-                    child: Text('There is only one correct answer...'),
-                  ),
+                  items: Pet.values.map((e) => LdSelectItem(value: e, child: Text(e.name.capitalize()))).toList(),
+                  hintBuilder: (_) =>
+                      const LdHint(type: LdHintType.info, child: Text('There is only one correct answer...')),
                   validators: [
                     LdFormSetValidators.equals({Pet.dogs}),
                   ],
-                  validationMessages: {
-                    'requiredEquals': (field) => 'Dogs are the only correct answer',
-                  },
+                  validationMessages: {'requiredEquals': (field) => 'Dogs are the only correct answer'},
                 ),
                 LdReactiveFormItem.multiSelect<FriesTopping>(
                   key: 'friesTopping',
                   items: const [
-                    LdSelectItem(
-                      value: FriesTopping.ketchup,
-                      child: Text('Ketchup'),
-                    ),
-                    LdSelectItem(
-                      value: FriesTopping.mayo,
-                      child: Text('Mayo'),
-                    ),
+                    LdSelectItem(value: FriesTopping.ketchup, child: Text('Ketchup')),
+                    LdSelectItem(value: FriesTopping.mayo, child: Text('Mayo')),
                   ],
                   label: 'Ketchup, Mayo? (Both?)',
                 ),
@@ -124,26 +97,17 @@ class ReactiveFormDemo extends StatelessWidget {
                   label: 'How awesome is Liquid Flutter?',
                   min: 0,
                   max: 10,
-                  valueFormatter: (value) => value == null ? '' : '${value.toStringAsFixed(0)} out of 10',
+                  step: 1,
                   hintBuilder: (state) {
                     final value = state.control.value;
                     if (value == null) {
                       return null;
                     } else if (value < 3) {
-                      return const LdHint(
-                        type: LdHintType.warning,
-                        child: Text('That is not enough!'),
-                      );
+                      return const LdHint(type: LdHintType.warning, child: Text('That is not enough!'));
                     } else if (value < 7) {
-                      return const LdHint(
-                        type: LdHintType.info,
-                        child: Text('You can do better!'),
-                      );
+                      return const LdHint(type: LdHintType.info, child: Text('You can do better!'));
                     } else {
-                      return const LdHint(
-                        type: LdHintType.success,
-                        child: Text('Now we are talking!'),
-                      );
+                      return const LdHint(type: LdHintType.success, child: Text('Now we are talking!'));
                     }
                   },
                 ),

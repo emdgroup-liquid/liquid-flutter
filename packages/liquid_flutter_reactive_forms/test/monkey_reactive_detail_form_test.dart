@@ -38,7 +38,8 @@ class _StubRouter implements LdMonkeyRouterController<_TestTask, int> {
 }
 
 Widget _wrapDetailForm({
-  required LdRepository<_TestTask, int> repository,
+  required LdCallbackModel<_TestTask, int> model,
+  required LdListController<_TestTask, int> listController,
   required Widget child,
 }) {
   return LdThemeProvider(
@@ -51,18 +52,21 @@ Widget _wrapDetailForm({
         routes: [
           GoRoute(
             path: '/task-demo/1',
-            builder: (context, state) => ListenableProvider<LdRepository<_TestTask, int>>.value(
-              value: repository,
+            builder: (context, state) => MultiProvider(
+              providers: [
+                Provider<LdModel<_TestTask, int, Object?, Object?>>.value(value: model),
+                ListenableProvider<LdListController<_TestTask, int>>.value(value: listController),
+              ],
               child: Provider<LdMonkeySelection<_TestTask, int>>.value(
                 value: LdMonkeySelection<_TestTask, int>(
                   selection: {},
                   viewing: {1},
                   showSelectionControls: false,
                 ),
-                child: Provider<LdMonkeyRouterController<_TestTask, int>>.value(
-                  value: _StubRouter(),
-                  child: child,
-                ),
+              child: Provider<LdMonkeyRouterController<_TestTask, int>>.value(
+                value: _StubRouter(),
+                child: SingleChildScrollView(child: child),
+              ),
               ),
             ),
           ),
@@ -72,22 +76,29 @@ Widget _wrapDetailForm({
   );
 }
 
-LdRepository<_TestTask, int> _buildRepository(List<_TestTask> tasks) {
-  return LdRepository<_TestTask, int>(
+LdCallbackModel<_TestTask, int> _buildModel(
+  List<_TestTask> tasks, {
+  Future<_TestTask?> Function(BuildContext context, int id, _TestTask item)? updateItem,
+}) {
+  return LdCallbackModel<_TestTask, int>(
     pageSize: 10,
     initialItems: tasks,
-    getById: (id) async => tasks.firstWhere((t) => t.id == id),
+    getById: (context, id) async => tasks.firstWhere((t) => t.id == id),
     fetchListWithParameters: (_) async => LdListPage(
       newItems: tasks,
       hasMore: false,
       total: tasks.length,
     ),
-    updateItem: (context, id, item) async => item,
+    updateItem: updateItem ?? (context, id, item) async => item,
   );
 }
 
+LdListController<_TestTask, int> _buildListController(LdCallbackModel<_TestTask, int> model) {
+  return LdListController<_TestTask, int>.fromModel(model, initialItems: model.initialItems);
+}
+
 Widget _detailFormFor(List<_TestTask> tasks) {
-  return LdMonkeyReactiveDetailForm<_TestTask, int, _TestTask>(
+  return LdMonkeyReactiveDetailForm<_TestTask, int, _TestTask, _TestTask, _TestTask>.edit(
     item: LdPaginatorItem(
       value: tasks.first,
       state: LdPaginatorItemState.loaded,
@@ -96,7 +107,7 @@ Widget _detailFormFor(List<_TestTask> tasks) {
     detailToFormValues: (task) => {
       'title': task.title,
     },
-    mapToEntity: (form, task) => task.copyWith(
+    formToUpdatePayload: (form, task) => task.copyWith(
       title: form.control('title').value as String,
     ),
     itemsBuilder: (context, hooks) => [
@@ -116,26 +127,18 @@ void main() {
   testWidgets('save marks form pristine', (tester) async {
     final tasks = [_TestTask(1, 'Original', false)];
     var updateCount = 0;
-    final repository = LdRepository<_TestTask, int>(
-      pageSize: 10,
-      initialItems: tasks,
-      getById: (id) async => tasks.firstWhere((t) => t.id == id),
-      fetchListWithParameters: (_) async => LdListPage(
-        newItems: tasks,
-        hasMore: false,
-        total: tasks.length,
-      ),
-      updateItem: (context, id, item) async {
+    final model = _buildModel(tasks, updateItem: (context, id, item) async {
         updateCount++;
         tasks[0] = item;
         return item;
-      },
-    );
+      });
+    final listController = _buildListController(model);
 
     await tester.pumpWidget(
       _wrapDetailForm(
-        repository: repository,
-        child: LdMonkeyReactiveDetailForm<_TestTask, int, _TestTask>(
+        model: model,
+        listController: listController,
+        child: LdMonkeyReactiveDetailForm<_TestTask, int, _TestTask, _TestTask, _TestTask>.edit(
           item: LdPaginatorItem(
             value: tasks.first,
             state: LdPaginatorItemState.loaded,
@@ -144,7 +147,7 @@ void main() {
           detailToFormValues: (task) => {
             'title': task.title,
           },
-          mapToEntity: (form, task) => task.copyWith(
+          formToUpdatePayload: (form, task) => task.copyWith(
             title: form.control('title').value as String,
           ),
           itemsBuilder: (context, hooks) => [
@@ -160,9 +163,15 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byType(LdInput), 'Updated title');
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Save'));
+    final saveButton = find.byWidgetPredicate(
+      (widget) => widget is LdButton && widget.child is Text && (widget.child as Text).data == 'Save',
+    );
+    expect(saveButton, findsOneWidget);
+    expect(tester.widget<LdButton>(saveButton).disabled, isFalse);
+
+    await tester.tap(saveButton);
     await tester.pumpAndSettle();
 
     expect(updateCount, 1);
@@ -171,27 +180,19 @@ void main() {
 
   testWidgets('registers a location lock while dirty', (tester) async {
     final tasks = [_TestTask(1, 'Original', false)];
-    final repository = LdRepository<_TestTask, int>(
-      pageSize: 10,
-      initialItems: tasks,
-      getById: (id) async => tasks.firstWhere((t) => t.id == id),
-      fetchListWithParameters: (_) async => LdListPage(
-        newItems: tasks,
-        hasMore: false,
-        total: tasks.length,
-      ),
-      updateItem: (context, id, item) async => item,
-    );
+    final model = _buildModel(tasks);
+    final listController = _buildListController(model);
 
     LdLocationLockRegistry? lockRegistry;
 
     await tester.pumpWidget(
       _wrapDetailForm(
-        repository: repository,
+        model: model,
+        listController: listController,
         child: Builder(
           builder: (context) {
             lockRegistry = LdLocationLockRegistry.of(context);
-            return LdMonkeyReactiveDetailForm<_TestTask, int, _TestTask>(
+            return LdMonkeyReactiveDetailForm<_TestTask, int, _TestTask, _TestTask, _TestTask>.edit(
               item: LdPaginatorItem(
                 value: tasks.first,
                 state: LdPaginatorItemState.loaded,
@@ -200,7 +201,7 @@ void main() {
               detailToFormValues: (task) => {
                 'title': task.title,
               },
-              mapToEntity: (form, task) => task.copyWith(
+              formToUpdatePayload: (form, task) => task.copyWith(
                 title: form.control('title').value as String,
               ),
               itemsBuilder: (context, hooks) => [
@@ -228,11 +229,15 @@ void main() {
 
   testWidgets('blocked back shows discard dialog and pops on confirm', (tester) async {
     final tasks = [_TestTask(1, 'Original', false)];
-    final repository = _buildRepository(tasks);
+    final model = _buildModel(tasks);
+    final listController = _buildListController(model);
 
     Widget detailRoute(BuildContext context) {
-      return ListenableProvider<LdRepository<_TestTask, int>>.value(
-        value: repository,
+      return MultiProvider(
+        providers: [
+          Provider<LdModel<_TestTask, int, Object?, Object?>>.value(value: model),
+          ListenableProvider<LdListController<_TestTask, int>>.value(value: listController),
+        ],
         child: Provider<LdMonkeySelection<_TestTask, int>>.value(
           value: LdMonkeySelection<_TestTask, int>(
             selection: {},
@@ -307,11 +312,15 @@ void main() {
 
   testWidgets('blocked back keeps the form when discard is cancelled', (tester) async {
     final tasks = [_TestTask(1, 'Original', false)];
-    final repository = _buildRepository(tasks);
+    final model = _buildModel(tasks);
+    final listController = _buildListController(model);
 
     Widget detailRoute(BuildContext context) {
-      return ListenableProvider<LdRepository<_TestTask, int>>.value(
-        value: repository,
+      return MultiProvider(
+        providers: [
+          Provider<LdModel<_TestTask, int, Object?, Object?>>.value(value: model),
+          ListenableProvider<LdListController<_TestTask, int>>.value(value: listController),
+        ],
         child: Provider<LdMonkeySelection<_TestTask, int>>.value(
           value: LdMonkeySelection<_TestTask, int>(
             selection: {},

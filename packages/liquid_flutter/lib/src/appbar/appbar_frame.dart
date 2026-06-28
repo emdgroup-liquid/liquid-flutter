@@ -176,22 +176,34 @@ class _AppBarFrameState extends State<AppBarFrame> {
     super.dispose();
   }
 
-  EdgeInsets _effectiveSystemInsets(BuildContext context, LdAppBarMetrics? parentMetrics) {
+  EdgeInsets _effectiveSystemInsets(BuildContext context, LdAppBarMetrics? parentMetrics, BoxConstraints constraints) {
     EdgeInsets systemInsets = EdgeInsets.zero;
     MediaQueryData effectiveMediaQuery = parentMetrics?.appbarLayerMediaQuery ?? MediaQuery.of(context);
-    systemInsets = effectiveMediaQuery.viewPadding;
+    systemInsets = effectiveMediaQuery.viewPadding.trimToAppBarPosition(widget.position);
+
     if (_shouldApplyViewInsets()) {
       systemInsets = systemInsets.atLeast(effectiveMediaQuery.viewInsets);
     }
 
+    final outsidePadding =
+        (widget.outsideMinPadding ?? EdgeInsets.zero).atLeast(widget.outsideAdditionalPadding ?? EdgeInsets.zero);
+
+    systemInsets = systemInsets - outsidePadding.positionOnly(widget.position);
+
+    systemInsets = systemInsets - _insidePadding(constraints).positionOnly(widget.position);
+
+    if (!widget.attached) {
+      systemInsets = systemInsets + LdTheme.of(context).pad(size: LdSize.xs).positionOnly(widget.position);
+    }
+
     if (widget.insetBorderRadius) {
-      final theme = LdTheme.of(context);
-
-      // We inset by the screen radius.
-
-      systemInsets = systemInsets.atLeast(
-        EdgeInsets.symmetric(horizontal: (theme.screenRadius) / 2 - systemInsets.bottom),
-      );
+      if (widget.attached) {
+        final radiusPadding = LdTheme.of(context).screenRadius / 2;
+        systemInsets = systemInsets.atLeast(EdgeInsets.symmetric(horizontal: radiusPadding));
+      } else {
+        final radiusPadding = LdTheme.of(context).screenRadius - LdTheme.of(context).radiusSize(LdSize.l);
+        systemInsets = systemInsets.atLeast(EdgeInsets.all(radiusPadding));
+      }
     }
 
     return systemInsets;
@@ -199,7 +211,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
 
   /// Build the EdgeInsets we need to apply to place the app bar such that it is not overlapping
   /// system UI or other app bars.
-  EdgeInsets _ownMargin(BoxConstraints constraints) {
+  EdgeInsets _ownMargin(BoxConstraints constraints, LdAppBarMetrics? parentMetrics) {
     EdgeInsets configuredInsets = EdgeInsets.zero;
 
     if (widget.addContainer) {
@@ -214,7 +226,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
     var result = configuredInsets;
 
     if (widget.outsideAdditionalPadding != null) {
-      result += widget.outsideAdditionalPadding!;
+      result += widget.outsideAdditionalPadding!.trimToAppBarPosition(widget.position);
     }
 
     return result;
@@ -260,7 +272,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
       if (widget.attached) {
         result = theme.pad(size: LdSize.s).atLeast(_containerPadding(constraints));
       } else {
-        result = theme.pad(size: LdSize.s);
+        result = theme.balPad(LdSize.s);
       }
     }
     return result;
@@ -516,6 +528,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
     required EdgeInsets ownMargin,
     required EdgeInsets scrollOffset,
     required EdgeInsets systemInsets,
+    required Color color,
   }) {
     return LdAppBarMetrics(
       appbarLayerMediaQuery: _buildAppBarMediaQuery(),
@@ -549,28 +562,39 @@ class _AppBarFrameState extends State<AppBarFrame> {
     final data = MediaQuery.of(context);
 
     EdgeInsets viewInsets = data.viewInsets;
+    EdgeInsets padding = metrics.bodyPadding.atLeast(data.padding);
 
     if (_shouldApplyViewInsets()) {
       viewInsets = viewInsets.atLeast(_barHeight.toEdgeInsetsUsingPosition(widget.position));
     }
 
+    if (widget.insetBorderRadius) {
+      final radiusPadding = LdTheme.of(context).screenRadius - LdTheme.of(context).radiusSize(LdSize.l);
+      if (widget.attached) {
+        padding = padding.atLeast(EdgeInsets.symmetric(horizontal: radiusPadding));
+      } else {
+        padding = padding.atLeast(EdgeInsets.all(radiusPadding));
+      }
+    }
+
     return data.copyWith(
-      padding: data.padding.atLeast(metrics.bodyPadding),
+      padding: padding,
       viewInsets: data.viewInsets.atLeast(viewInsets),
     );
   }
 
-  Widget _buildScrim(LdAppBarMetrics metrics) {
-    final appearance = LdAppBarDecorationBuilder()
-        .resolveAppearance(context, isScrolledUnder: metrics.isScrolledUnder, position: widget.position);
+  Widget _buildScrim(LdAppBarMetrics metrics, LdAppBarAppearance appearance) {
+    Color baseColor = appearance.paintedColor;
 
-    final baseColor = appearance.baseColor;
+    if (!widget.attached) {
+      baseColor = LdTheme.of(context).absolute;
+    }
 
     var height = (metrics.systemInsets + metrics.configuredInsets).atPosition(widget.position);
 
     final visiblePortion = (metrics.maximumSize - metrics.scrollOffset).atPosition(widget.position);
 
-    height = visiblePortion.clamp(0, height);
+    height = visiblePortion.clamp(0.0, max(1, height.toDouble()));
 
     if (!metrics.willHide) {
       height = 0;
@@ -612,12 +636,12 @@ class _AppBarFrameState extends State<AppBarFrame> {
     final parentMetrics = ldAppBarParentMetrics(context);
 
     return LayoutBuilder(builder: (context, constraints) {
-      final ownMargin = _ownMargin(constraints);
+      final ownMargin = _ownMargin(constraints, parentMetrics);
 
       final inheritedMargin =
           (parentMetrics?.accumulatedEffectiveSizes ?? EdgeInsets.zero).inDirection(widget.position);
 
-      final systemInsets = _effectiveSystemInsets(context, parentMetrics);
+      final systemInsets = _effectiveSystemInsets(context, parentMetrics, constraints);
 
       final honoringViewInsets = _isHonoringViewInsets(parentMetrics);
       if (honoringViewInsets) {
@@ -626,8 +650,9 @@ class _AppBarFrameState extends State<AppBarFrame> {
         _snapOverriding = false;
       }
 
-      var outerMargin =
-          ownMargin + (inheritedMargin + (parentMetrics?.systemInsets ?? EdgeInsets.zero)).atLeast(systemInsets);
+      var outerMargin = ownMargin + (inheritedMargin + systemInsets);
+
+      outerMargin = outerMargin.atLeast(EdgeInsets.zero);
 
       _barHeight = switch (widget.position) {
             LdAppBarPosition.top => outerMargin.top,
@@ -659,6 +684,11 @@ class _AppBarFrameState extends State<AppBarFrame> {
             builder: (springContext, springState, child) {
               _springLivePosition = springState.position;
 
+              final isScrolledUnder = LdAppBarScrolledUnderScope.of(springContext);
+
+              final appearance = LdAppBarDecorationBuilder()
+                  .resolveAppearance(context, isScrolledUnder: isScrolledUnder, position: widget.position);
+
               final animatedHideOffset = honoringViewInsets ? 0.0 : _springLivePosition;
 
               final translateY = widget.position == LdAppBarPosition.top ? -animatedHideOffset : animatedHideOffset;
@@ -673,6 +703,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
                 ownMargin: ownMargin,
                 systemInsets: systemInsets,
                 scrollOffset: scrollOffset,
+                color: appearance.paintedColor,
               );
 
               return LdAppBarScrollNotifier(
@@ -701,7 +732,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
                           ),
                         ),
                       ),
-                      _buildScrim(metrics),
+                      _buildScrim(metrics, appearance),
                     ],
                   ),
                 ),

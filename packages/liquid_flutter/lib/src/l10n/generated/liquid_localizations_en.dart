@@ -83,6 +83,12 @@ class LiquidLocalizationsEn extends LiquidLocalizations {
   String get loadingRouteDefinitions => 'Loading filters and sort options...';
 
   @override
+  String get detailItemLoading => 'Loading item...';
+
+  @override
+  String get detailItemLoadError => 'This item could not be loaded. It may have been deleted or you may not have access.';
+
+  @override
   String get networkError => 'A network error occurred. Please make sure you are connected to the internet and try again.';
 
   @override
@@ -197,4 +203,31 @@ class LiquidLocalizationsEn extends LiquidLocalizations {
 
   @override
   String get copiedToClipboard => 'Copied to clipboard';
+
+  @override
+  String get discardUnsavedChanges => 'Discard unsaved changes?';
+
+  @override
+  String get discard => 'Discard';
+
+  @override
+  String get keepEditing => 'Keep editing';
+
+  @override
+  String get fieldConflictTitle => 'Conflicting changes';
+
+  @override
+  String get fieldConflictDescription => 'These fields changed elsewhere while you were editing. Choose which value to keep.';
+
+  @override
+  String get fieldConflictKeepAllMine => 'Keep all mine';
+
+  @override
+  String get fieldConflictUseAllServer => 'Use all from server';
+
+  @override
+  String get fieldConflictYours => 'Your value';
+
+  @override
+  String get fieldConflictServer => 'Server value';
 }

@@ -55,8 +55,8 @@ Widget _wrapChipsHarness({
     child: MaterialApp(
       localizationsDelegates: LiquidLocalizations.localizationsDelegates,
       home: Scaffold(
-        body: ListenableProvider<LdRepository<TestItem, int>>.value(
-          value: createTestRepository(),
+        body: ListenableProvider<LdListController<TestItem, int>>.value(
+          value: createTestListController(),
           child: ListenableProvider<TestSortAndFilterState<TestItem, int>>.value(
             value: shellState,
             child: Provider<LdMonkeyRouterController<TestItem, int>>.value(

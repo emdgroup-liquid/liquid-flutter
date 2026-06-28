@@ -166,7 +166,7 @@ class _LdScrollEdgeFadeState extends State<LdScrollEdgeFade> {
   }
 
   double _fadeBandExtent(LdTheme theme, double safeInset) {
-    final themeBand = theme.paddingSize(size: LdSize.m) * 2;
+    final themeBand = theme.paddingSize(size: LdSize.m);
     return widget.fadeExtent ?? max(themeBand, safeInset);
   }
 

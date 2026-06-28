@@ -187,11 +187,13 @@ void main() {
 
         final shellState = _RangeShellState(filter);
 
-        final repository = LdRepository<_RangeTestItem, int>(
-          fetchListWithParameters: (parameters) async {
-            return LdListPage<_RangeTestItem>(newItems: [], hasMore: false, total: 0);
-          },
-          getById: (id) async => _RangeTestItem(id, 'Test', 10.0),
+        final repository = LdListController.fromModel(
+          LdCallbackModel<_RangeTestItem, int>(
+            fetchListWithParameters: (parameters) async {
+              return LdListPage<_RangeTestItem>(newItems: [], hasMore: false, total: 0);
+            },
+            getById: (context, id) async => _RangeTestItem(id, 'Test', 10.0),
+          ),
         );
 
         await tester.pumpWidget(
@@ -199,7 +201,7 @@ void main() {
             child: MaterialApp(
               localizationsDelegates: LiquidLocalizations.localizationsDelegates,
               home: Scaffold(
-                body: ListenableProvider<LdRepository<_RangeTestItem, int>>.value(
+                body: ListenableProvider<LdListController<_RangeTestItem, int>>.value(
                   value: repository,
                   child: ListenableProvider<_RangeShellState>.value(
                     value: shellState,

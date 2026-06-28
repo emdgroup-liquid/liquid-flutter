@@ -3,6 +3,16 @@ Released on: 6/23/2026, changelog automatically generated.
 
 ## Unreleased
 
+### Breaking changes
+
+- **LdListCache:** rename `LdRepositoryCache` / `LdRepositoryCacheEntry` / `LdRepositoryCacheKeyPart` / `LdRepositoryMutationKind` to `LdListCache*` / `LdListMutationKind`; rename `ldRepositoryCacheKey` / `parseLdRepositoryCacheKey` to `ldListCacheKey` / `parseLdListCacheKey`
+- **LdPaginator:** rename `repositoryCache` parameter and field to `listCache`
+- **LdMonkeyDetailState:** rename `repository` field to `listController`
+- **LdMonkeyListFilterAdapter:** rename from `LdMonkeyRepositoryFilterAdapter` (`monkey_list_filter_adapter.dart`)
+- **Tests:** rename `createTestRepository` to `createTestListController`; rename `repository_test.dart` to `list_controller_test.dart`
+- Remove deprecated `mutationAffectsCache` on filter/sort options, `LdMutationAffectsCache` typedef, and `LdMonkeyAction.build()` — use `affectedByUpdate` and `buildTrigger` instead
+- Stop exporting internal monkey helpers: `resolveMonkeyRouteDefinitions`, `ldListCacheKey`, `parseLdListCacheKey`, `LdListCacheKeyPart`, and `LdListMutationKind`
+
 ## 23.0.0-3
 Released on: automatic fallback dev bump to avoid duplicate 23.0.0-2 publish.
 

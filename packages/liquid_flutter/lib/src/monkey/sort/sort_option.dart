@@ -63,9 +63,6 @@ class LdSortOption<T extends Identifiable<IdType>, IdType> {
   /// Used for cache invalidation and paginator layout decisions.
   final LdAffectedByUpdate<T>? affectedByUpdate;
 
-  @Deprecated('Use affectedByUpdate')
-  LdAffectedByUpdate<T>? get mutationAffectsCache => affectedByUpdate;
-
   LdSortOption({
     required this.label,
     required this.icon,
@@ -73,16 +70,14 @@ class LdSortOption<T extends Identifiable<IdType>, IdType> {
     this.isOn = false,
     this.direction = LdSortOptionDirection.asc,
     this.supportsReorder = false,
-    LdAffectedByUpdate<T>? affectedByUpdate,
-    @Deprecated('Use affectedByUpdate') LdAffectedByUpdate<T>? mutationAffectsCache,
-  }) : affectedByUpdate = affectedByUpdate ?? mutationAffectsCache;
+    this.affectedByUpdate,
+  });
 
   LdSortOption<T, IdType> copyWith({
     bool? isOn,
     LdSortOptionDirection? direction,
     bool? supportsReorder,
     LdAffectedByUpdate<T>? affectedByUpdate,
-    @Deprecated('Use affectedByUpdate') LdAffectedByUpdate<T>? mutationAffectsCache,
   }) {
     return LdSortOption<T, IdType>(
       name: name,
@@ -91,7 +86,7 @@ class LdSortOption<T extends Identifiable<IdType>, IdType> {
       isOn: isOn ?? this.isOn,
       direction: direction ?? this.direction,
       supportsReorder: supportsReorder ?? this.supportsReorder,
-      affectedByUpdate: affectedByUpdate ?? mutationAffectsCache ?? this.affectedByUpdate,
+      affectedByUpdate: affectedByUpdate ?? this.affectedByUpdate,
     );
   }
 }

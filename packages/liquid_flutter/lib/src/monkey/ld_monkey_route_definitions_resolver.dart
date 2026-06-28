@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/monkey/resolve_monkey_route_definitions.dart';
 import 'package:provider/provider.dart';
 
 typedef LdMonkeyRouteDefinitionsChildBuilder<T extends Identifiable<IdType>, IdType> = Widget

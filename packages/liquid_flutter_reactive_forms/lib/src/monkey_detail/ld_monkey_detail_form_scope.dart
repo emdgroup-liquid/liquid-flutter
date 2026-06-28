@@ -1,7 +1,9 @@
 import 'package:flutter/widgets.dart';
+import 'package:liquid_flutter_reactive_forms/src/monkey_detail/ld_monkey_reactive_detail_form_mode.dart';
 
 /// Exposes detail-form state to custom layouts (e.g. save in an app bar).
 class LdMonkeyDetailFormScope<TDetail> extends InheritedWidget {
+  final LdMonkeyReactiveDetailFormMode mode;
   final bool isDirty;
   final bool isSaving;
   final TDetail? detail;
@@ -9,6 +11,7 @@ class LdMonkeyDetailFormScope<TDetail> extends InheritedWidget {
   final void Function() reset;
 
   const LdMonkeyDetailFormScope({
+    required this.mode,
     required this.isDirty,
     required this.isSaving,
     required this.detail,
@@ -30,7 +33,8 @@ class LdMonkeyDetailFormScope<TDetail> extends InheritedWidget {
 
   @override
   bool updateShouldNotify(LdMonkeyDetailFormScope<TDetail> oldWidget) {
-    return isDirty != oldWidget.isDirty ||
+    return mode != oldWidget.mode ||
+        isDirty != oldWidget.isDirty ||
         isSaving != oldWidget.isSaving ||
         detail != oldWidget.detail;
   }

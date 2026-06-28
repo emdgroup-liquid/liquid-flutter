@@ -702,6 +702,9 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
         alignment: 0.5,
         duration: const Duration(milliseconds: 150),
       );
+      if (itemContext.mounted) {
+        FocusScope.of(itemContext).requestFocus();
+      }
     }
 
     if (widget.paginator.pendingScrollToItemId == id) {

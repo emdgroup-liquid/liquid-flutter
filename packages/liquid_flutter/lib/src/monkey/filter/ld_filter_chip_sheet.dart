@@ -30,7 +30,7 @@ Future<void> ldFilterChipModal<T extends Identifiable<IdType>, IdType>(
   final routerDelegate = router.routerDelegate;
   final routeConfig = sourceContext.read<LdMonkeyRouteConfig<T, IdType>>();
   final routerController = sourceContext.read<LdMonkeyRouterController<T, IdType>>();
-  final repository = sourceContext.read<LdRepository<T, IdType>>();
+  final repository = sourceContext.read<LdListController<T, IdType>>();
   final baseSortAndFilterState = sourceContext.read<LdMonkeySortAndFilterState<T, IdType>>();
   final baseFilters = baseSortAndFilterState.filters.toList(growable: false);
   final baseSortOptions = baseSortAndFilterState.sortOptions.toList(growable: false);

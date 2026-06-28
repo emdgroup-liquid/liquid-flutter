@@ -21,7 +21,10 @@ LdColorBundle neutralGhostColor(LdTheme theme, LdTouchableStatus status) {
   if (status.focus || status.pressed) {
     return LdColorBundle.autoText(
       theme: theme,
-      surface: isOdd ? theme.neutralShade(4) : theme.neutralShade(4),
+      surface: switch (status.onSurface) {
+        true => theme.neutralShade(3),
+        false => theme.neutralShade(3),
+      },
       textColor: palette.primary,
       iconColor: palette.primary,
       border: border,
@@ -31,17 +34,10 @@ LdColorBundle neutralGhostColor(LdTheme theme, LdTouchableStatus status) {
   if (status.active) {
     return LdColorBundle.autoText(
       theme: theme,
-      surface: Color.alphaBlend(theme.primaryColor.withAlpha(20),
-          neutral.relative(theme.isDark, (isOdd ? 3 : 2) + (status.onSurface ? 0 : 1))),
-      border: border,
-      iconColor: palette.primary,
-    );
-  }
-
-  if (status.pressed) {
-    return LdColorBundle.autoText(
-      theme: theme,
-      surface: neutral.relative(theme.isDark, (isOdd ? 3 : 2) + (status.onSurface ? 0 : 1)),
+      surface: switch (status.onSurface) {
+        true => theme.neutralShade(theme.isDark ? -1 : 3),
+        false => theme.neutralShade(2),
+      },
       border: border,
       iconColor: palette.primary,
     );
@@ -50,7 +46,10 @@ LdColorBundle neutralGhostColor(LdTheme theme, LdTouchableStatus status) {
   if (status.hovering) {
     return LdColorBundle.autoText(
       theme: theme,
-      surface: neutral.relative(theme.isDark, (isOdd ? 3 : 2) + (status.onSurface ? 0 : 1)),
+      surface: switch (status.onSurface) {
+        true => theme.neutralShade(2),
+        false => theme.neutralShade(2),
+      },
       border: border,
       iconColor: palette.primary,
     );

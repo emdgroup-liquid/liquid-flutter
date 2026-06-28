@@ -35,7 +35,7 @@ bool ldChooseCanDismissPicker<IdType>({
 
 Future<void> ldChoosePrefetchPickerData<T extends Identifiable<IdType>, IdType>({
   required BuildContext context,
-  required LdRepository<T, IdType> repository,
+  required LdListController<T, IdType> repository,
   required Set<IdType> initialSelection,
 }) async {
   if (!context.mounted) {
@@ -52,7 +52,7 @@ Future<void> ldChoosePrefetchPickerData<T extends Identifiable<IdType>, IdType>(
 
 Future<void> ldChooseScrollToInitialSelection<T extends Identifiable<IdType>, IdType>({
   required BuildContext context,
-  required LdRepository<T, IdType> repository,
+  required LdListController<T, IdType> repository,
   required Set<IdType> initialSelection,
 }) async {
   if (initialSelection.isEmpty || !context.mounted) {
@@ -120,7 +120,7 @@ typedef LdChooseTriggerBuilder<T extends Identifiable<IdType>, IdType> = Widget 
 
 /// A widget that presents a dropdown in a seperate page.
 class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
-  final LdRepository<T, IdType>? repository;
+  final LdListController<T, IdType>? repository;
   final List<T>? items;
   final Widget Function(BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder;
   final Widget Function(BuildContext context, T item) selectedItemBuilder;
@@ -277,7 +277,7 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
 }
 
 class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdChoose<T, IdType>> {
-  late LdRepository<T, IdType> _repository;
+  late LdListController<T, IdType> _repository;
   bool _ownsRepository = false;
   LdSearchTextExtractor<T>? _effectiveSearchText;
 
@@ -288,24 +288,26 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
     if (widget.items != null && widget.repository == null) {
       final items = widget.items!;
       final searchText = _effectiveSearchText;
-      _repository = LdRepository.greedy<T, IdType>(
-        getById: (id) async => items.firstWhere((item) => item.id == id),
-        fetchListWithParameters: (parameters) async {
-          var filtered = items.toList();
-          final filters = parameters.filters;
-          if (searchText != null && filters.isNotEmpty) {
-            filtered = ldFuzzySearchFromFilters<T, IdType>(
-              items: filtered,
-              filters: filters,
-              searchText: searchText,
+      _repository = LdListController.fromModel(
+        LdCallbackModel.greedy<T, IdType>(
+          getById: (context, id) async => items.firstWhere((item) => item.id == id),
+          fetchListWithParameters: (parameters) async {
+            var filtered = items.toList();
+            final filters = parameters.filters;
+            if (searchText != null && filters.isNotEmpty) {
+              filtered = ldFuzzySearchFromFilters<T, IdType>(
+                items: filtered,
+                filters: filters,
+                searchText: searchText,
+              );
+            }
+            return LdListPage<T>(
+              newItems: filtered.skip(parameters.offset).take(parameters.pageSize).toList(),
+              hasMore: parameters.offset + parameters.pageSize < filtered.length,
+              total: filtered.length,
             );
-          }
-          return LdListPage<T>(
-            newItems: filtered.skip(parameters.offset).take(parameters.pageSize).toList(),
-            hasMore: parameters.offset + parameters.pageSize < filtered.length,
-            total: filtered.length,
-          );
-        },
+          },
+        ),
       );
       _repository.initialOffset = 0;
       _ownsRepository = true;
@@ -340,7 +342,7 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
   }
 
   Future<List<T>> _fetchSelectedItems(List<IdType> ids) async {
-    return Future.wait(ids.map((id) => _repository.getById(id)));
+    return Future.wait(ids.map((id) => _repository.getById(context, id)));
   }
 
   @override
@@ -545,7 +547,7 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
 }
 
 class LdChoosePage<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
-  final LdRepository<T, IdType> repository;
+  final LdListController<T, IdType> repository;
   final Widget Function(BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder;
   final Set<IdType> initialSelectedItems;
   final bool multiple;

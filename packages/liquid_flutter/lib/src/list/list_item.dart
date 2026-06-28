@@ -140,6 +140,7 @@ class LdListItemWidget extends StatelessWidget {
         LdSize.m,
         color: theme.text,
       ),
+      maxLines: 1,
       child: title!,
     );
   }
@@ -154,6 +155,7 @@ class LdListItemWidget extends StatelessWidget {
         LdSize.s,
         color: theme.textMuted,
       ),
+      maxLines: 1,
       child: subtitle!,
     );
   }
@@ -179,7 +181,7 @@ class LdListItemWidget extends StatelessWidget {
 
     final theme = LdTheme.of(context, listen: true);
     final effectiveWidth = width ?? double.infinity;
-    final isShuttle = Provider.of<LdIsShuttle?>(context, listen: true) ?? false;
+    final isShuttle = Provider.of<LdIsShuttle?>(context, listen: true)?.value ?? false;
     final effectiveFocusNode = isShuttle ? null : focusNode;
 
     return LdTouchableSurface(

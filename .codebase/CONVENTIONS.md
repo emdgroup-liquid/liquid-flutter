@@ -22,7 +22,7 @@ lib/
 
 ### Functions & Methods
 
-- **Public functions**: `PascalCase` (e.g., `buildSubmit`, `createTestRepository`)
+- **Public functions**: `PascalCase` (e.g., `buildSubmit`, `createTestListController`)
 - **Private functions**: `_camelCase` with leading underscore (e.g., `_buildHint`, `_onTap`)
 - **Callbacks**: Suffix with `Callback` when type name (e.g., `VoidCallback? retry`)
 - **Handlers**: Suffix with `Handler` for event handlers (e.g., `onPressed`)
@@ -274,7 +274,7 @@ const _LdButtonWidget({
 | Pattern | Example | Use Case |
 |---------|---------|----------|
 | `build*` | `buildSubmit()` | Construct UI elements |
-| `create*` | `createTestRepository()` | Factory methods |
+| `create*` | `createTestListController()` | Factory methods |
 | `_on*` | `_onTap()`, `_onFocusChange()` | Event handlers |
 | `get*` | `get _theme` | Getters |
 | `_build*` | `_buildHint()` | Private builders |

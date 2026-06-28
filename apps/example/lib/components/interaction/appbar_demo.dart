@@ -124,7 +124,7 @@ class _AppBarDemoConfig {
   }
 
   Widget wrap(Widget child, List<Widget> demoActions) {
-    return LdAppBarWidget(
+    return LdAppBar(
       positionMode: positionMode,
       scrollBehavior: scrollBehavior,
       title: Text(title),

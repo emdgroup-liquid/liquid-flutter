@@ -5,52 +5,6 @@ import 'package:provider/provider.dart';
 
 import 'test_utils.dart';
 
-/// Minimal provider wrapper for [LdMonkeyMasterPage] tests.
-Widget _wrapMasterPage<T extends Identifiable<IdType>, IdType>({
-  required Widget child,
-  required LdRepository<T, IdType> repository,
-  TestSortAndFilterState<T, IdType>? shellState,
-  LdMonkeyEffectiveLayoutMode layoutMode = LdMonkeyEffectiveLayoutMode.master,
-  List<LdMonkeyAction<T, IdType>> actions = const [],
-}) {
-  shellState ??= TestSortAndFilterState<T, IdType>();
-  return LdThemeProvider(
-    child: MaterialApp(
-      localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-      home: Provider<LdMonkeyActionScope<T, IdType>>(
-        create: (_) => LdMonkeyActionScope<T, IdType>(),
-        child: ListenableProvider<LdRepository<T, IdType>>.value(
-          value: repository,
-          child: Provider<LdMonkeyRouterController<T, IdType>>.value(
-            value: shellState.controllerDelegate,
-            child: ListenableBuilder(
-              listenable: shellState,
-              builder: (context, _) {
-                return Provider<LdMonkeySortAndFilterState<T, IdType>>.value(
-                  value: shellState!.state,
-                  child: Provider<LdMonkeySelection<T, IdType>>.value(
-                    value: shellState.selection,
-                    child: Provider<LdMonkeyActions<T, IdType>>.value(
-                      value: actions,
-                      child: Provider<LdMonkeyEffectiveLayoutMode>.value(
-                        value: layoutMode,
-                        child: LdMonkeyActionHost<T, IdType>(
-                          actions: actions,
-                          child: child,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
 bool _isListItemActive(WidgetTester tester, String itemLabel) {
   final touchable = tester.widget<LdTouchableSurface>(
     find.descendant(
@@ -71,11 +25,11 @@ void main() {
           icon: (context) => const Icon(Icons.search),
         );
 
-        final repository = createTestRepository();
+        final repository = createTestListController();
         final shellState = TestSortAndFilterState<TestItem, int>(filters: {searchFilter});
 
         await tester.pumpWidget(
-          _wrapMasterPage(
+          wrapMonkeyMasterPage(
             repository: repository,
             shellState: shellState,
             child: LdMonkeyMasterPage<TestItem, int>(
@@ -92,10 +46,10 @@ void main() {
       });
 
       testWidgets('does not initialize search config when no search filter', (WidgetTester tester) async {
-        final repository = createTestRepository();
+        final repository = createTestListController();
 
         await tester.pumpWidget(
-          _wrapMasterPage(
+          wrapMonkeyMasterPage(
             repository: repository,
             child: LdMonkeyMasterPage<TestItem, int>(
               buildItem: (context, item) => LdListItem(
@@ -113,14 +67,14 @@ void main() {
 
     group('List Building', () {
       testWidgets('uses buildItem when provided', (WidgetTester tester) async {
-        final repository = createTestRepository(
+        final repository = createTestListController(
           initialItems: [
             createTestItem(1, name: 'Custom Item'),
           ],
         );
 
         await tester.pumpWidget(
-          _wrapMasterPage(
+          wrapMonkeyMasterPage(
             repository: repository,
             child: LdMonkeyMasterPage<TestItem, int>(
               buildItem: (context, item) => LdListItem(
@@ -135,10 +89,10 @@ void main() {
       });
 
       testWidgets('uses buildList when provided', (WidgetTester tester) async {
-        final repository = createTestRepository();
+        final repository = createTestListController();
 
         await tester.pumpWidget(
-          _wrapMasterPage(
+          wrapMonkeyMasterPage(
             repository: repository,
             child: LdMonkeyMasterPage<TestItem, int>(
               buildList: (context, repository) => const Text('Custom List'),
@@ -150,36 +104,33 @@ void main() {
         expect(find.text('Custom List'), findsOneWidget);
       });
 
-      testWidgets('uses default item builder when neither buildItem nor buildList provided',
-          (WidgetTester tester) async {
-        final repository = createTestRepository(
+      testWidgets('uses default item builder when only buildItem is omitted', (WidgetTester tester) async {
+        final repository = createTestListController(
           initialItems: [
             createTestItem(1),
           ],
         );
 
         await tester.pumpWidget(
-          _wrapMasterPage(
+          wrapMonkeyMasterPage(
             repository: repository,
-            child: LdMonkeyMasterPage<TestItem, int>(
-              buildItem: (context, item) => LdListItem(
-                title: Text(item.value?.toString() ?? ''),
-              ),
-            ),
+            // No buildItem / buildList: exercise the default item builder,
+            // which renders LdListItem(title: Text(item.value!.toString())).
+            child: LdMonkeyMasterPage<TestItem, int>(),
           ),
         );
 
         await tester.pumpAndSettle();
-        expect(find.textContaining('TestItem'), findsWidgets);
+        expect(find.textContaining('TestItem(id: 1'), findsWidgets);
       });
     });
 
     group('App Bars', () {
       testWidgets('uses custom primaryAppBarConfig when provided', (WidgetTester tester) async {
-        final repository = createTestRepository();
+        final repository = createTestListController();
 
         await tester.pumpWidget(
-          _wrapMasterPage(
+          wrapMonkeyMasterPage(
             repository: repository,
             child: LdMonkeyMasterPage<TestItem, int>(
               buildItem: (context, item) => LdListItem(
@@ -201,10 +152,10 @@ void main() {
       });
 
       testWidgets('uses default LdMonkeyAppBar when primaryAppBarConfig not provided', (WidgetTester tester) async {
-        final repository = createTestRepository();
+        final repository = createTestListController();
 
         await tester.pumpWidget(
-          _wrapMasterPage(
+          wrapMonkeyMasterPage(
             repository: repository,
             child: LdMonkeyMasterPage<TestItem, int>(
               buildItem: (context, item) => LdListItem(
@@ -219,10 +170,10 @@ void main() {
       });
 
       testWidgets('uses custom secondaryAppBarConfig when provided', (WidgetTester tester) async {
-        final repository = createTestRepository();
+        final repository = createTestListController();
 
         await tester.pumpWidget(
-          _wrapMasterPage(
+          wrapMonkeyMasterPage(
             repository: repository,
             child: LdMonkeyMasterPage<TestItem, int>(
               secondaryAppBarConfig: LdAppBarConfig(title: const Text('Custom Secondary App Bar')),
@@ -240,7 +191,7 @@ void main() {
 
     group('Selection Handling', () {
       testWidgets('viewing item is indicated as active in the master list', (WidgetTester tester) async {
-        final repository = createTestRepository(
+        final repository = createTestListController(
           initialItems: [
             createTestItem(1, name: 'Item 1'),
             createTestItem(2, name: 'Item 2'),
@@ -250,7 +201,7 @@ void main() {
         shellState.updateViewing(MockBuildContext(), {1});
 
         await tester.pumpWidget(
-          _wrapMasterPage(
+          wrapMonkeyMasterPage(
             repository: repository,
             shellState: shellState,
             layoutMode: LdMonkeyEffectiveLayoutMode.sideBySide,
@@ -269,7 +220,7 @@ void main() {
       });
 
       testWidgets('onSelectionChange updates shell state', (WidgetTester tester) async {
-        final repository = createTestRepository(
+        final repository = createTestListController(
           initialItems: [
             createTestItem(1),
             createTestItem(2),
@@ -278,7 +229,7 @@ void main() {
         final shellState = TestSortAndFilterState<TestItem, int>();
 
         await tester.pumpWidget(
-          _wrapMasterPage(
+          wrapMonkeyMasterPage(
             repository: repository,
             shellState: shellState,
             child: LdMonkeyMasterPage<TestItem, int>(
@@ -304,14 +255,14 @@ void main() {
 
     group('Item Animations', () {
       testWidgets('wraps items in LdListItemAnimation', (WidgetTester tester) async {
-        final repository = createTestRepository(
+        final repository = createTestListController(
           initialItems: [
             createTestItem(1),
           ],
         );
 
         await tester.pumpWidget(
-          _wrapMasterPage(
+          wrapMonkeyMasterPage(
             repository: repository,
             child: LdMonkeyMasterPage<TestItem, int>(
               buildItem: (context, item) => LdListItem(

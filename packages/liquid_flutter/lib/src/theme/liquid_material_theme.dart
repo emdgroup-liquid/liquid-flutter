@@ -48,6 +48,22 @@ ThemeData getMaterialTheme(LdTheme theme) {
     ),
   );
 
+  final tooltipTheme = TooltipThemeData(
+    decoration: BoxDecoration(
+      color: theme.surface,
+      border: Border.all(
+        color: theme.floatingBorder,
+        width: theme.borderWidth,
+      ),
+      borderRadius: theme.radius(LdSize.s),
+    ),
+    textStyle: baseStyle.copyWith(
+      fontSize: theme.paragraphSize(LdSize.s),
+      color: theme.text,
+    ),
+    padding: theme.balPad(LdSize.s),
+  );
+
   if (palette.isDark) {
     return ThemeData(
       // Define the default brightness and colors.
@@ -58,6 +74,8 @@ ThemeData getMaterialTheme(LdTheme theme) {
         foregroundColor: theme.text,
         shadowColor: theme.neutralShade(2),
       ),
+
+      tooltipTheme: tooltipTheme,
 
       colorScheme: ColorScheme.dark(
         primary: theme.primaryColor,
@@ -91,6 +109,7 @@ ThemeData getMaterialTheme(LdTheme theme) {
       centerTitle: false,
       foregroundColor: theme.text,
     ),
+    tooltipTheme: tooltipTheme,
     colorScheme: ColorScheme.light(
       primary: theme.primaryColor,
       onPrimary: theme.primaryColorText,

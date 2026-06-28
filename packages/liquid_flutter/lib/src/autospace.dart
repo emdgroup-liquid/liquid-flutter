@@ -25,9 +25,7 @@ List<Widget> generateAutoSpacings({
   for (var child in children) {
     var next = index == children.length - 1 ? null : children[index + 1];
     index++;
-    if (child is LdSpacer) {
-      continue;
-    }
+
     finalChildren.add(child);
 
     if (next == null) {
@@ -72,6 +70,7 @@ List<Widget> generateAutoSpacings({
       (LdCard _, LdCard _) => _LdSizeItem(LdSize.l, 2),
       (LdDrawerItemSection _, LdDrawerItemSection _) => _LdSizeItem(LdSize.xs, 1),
       (LdSectionHeader _, LdSectionHeader _) => _LdSizeItem(LdSize.l, 1),
+      (LdSpacer _, _) => _LdSizeItem(LdSize.m, 0),
       (_, LdText nextText) => switch (nextText.type) {
           (LdTextType.headline) => _LdSizeItem(LdSize.l, 2),
           (_) => _LdSizeItem(defaultSpacing, 1)

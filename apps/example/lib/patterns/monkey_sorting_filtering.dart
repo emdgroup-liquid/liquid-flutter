@@ -17,7 +17,7 @@ class MonkeySortingFilteringDemo extends StatelessWidget {
         children: [
           LdText.h("Sorting & Filtering"),
           LdText.p(
-            "The monkey pattern provides powerful sorting and filtering capabilities through the LdRepository. These features work together to help users find and organize their data efficiently.",
+            "The monkey pattern provides powerful sorting and filtering capabilities through the LdListController. These features work together to help users find and organize their data efficiently.",
           ),
           ComponentsAccordion(
             components: {"LdSortOption", "LdFilterOption", "LdFilterBoolOption", "LdFilterSearchOption"},
@@ -155,7 +155,7 @@ class MonkeySortingFilteringDemo extends StatelessWidget {
           LdText.p("Filters and sorting are integrated into the repository's fetchListWithParameters method:"),
           CodeBlock(
             language: "dart",
-            code: '''final taskRepository = LdRepository<Task, int>(
+            code: '''final taskModel = LdCallbackModel<Task, int>(
   // ... other configuration
   
   fetchListWithParameters: ({

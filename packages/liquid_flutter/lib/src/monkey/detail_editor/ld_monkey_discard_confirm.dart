@@ -3,8 +3,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 /// Shows a discard-confirmation modal for unsaved detail edits.
 ///
-/// Returns `true` when the user chooses to discard; `false` when they keep
-/// editing.
+/// Returns `true` when the user chooses to keep editing.
 Future<bool> ldMonkeyConfirmDiscardEdits(
   BuildContext context, {
   String? description,
@@ -12,12 +11,13 @@ Future<bool> ldMonkeyConfirmDiscardEdits(
   Widget? discardLabel,
   Widget? keepEditingLabel,
 }) {
+  final l10n = LiquidLocalizations.of(context);
   return ldConfirmModal(
     context: context,
     title: title,
-    description: description ?? 'Discard unsaved changes?',
-    positive: discardLabel ?? const Text('Discard'),
-    negative: keepEditingLabel ?? const Text('Keep editing'),
+    description: description ?? l10n.discardUnsavedChanges,
+    positive: keepEditingLabel ?? Text(l10n.keepEditing),
+    negative: discardLabel ?? Text(l10n.discard),
     useRootNavigator: true,
   );
 }
