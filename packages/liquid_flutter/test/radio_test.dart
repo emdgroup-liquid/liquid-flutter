@@ -72,7 +72,7 @@ void main() {
 
     expect(
       radio.border?.top.color,
-      shadAmber.active(false),
+      shadAmber.center(false),
     );
     // check if color is correct by finding the box decoration
   });
