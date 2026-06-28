@@ -9,7 +9,7 @@ dependencies:
   flutter:
     sdk: flutter
   go_router: ^17.0.1
-  liquid_flutter: ^23.0.0-4
+  liquid_flutter: ^23.0.0-5
   lucide_icons_flutter: ^3.1.14+2
   reactive_forms: 18.2.2
 dev_dependencies:
