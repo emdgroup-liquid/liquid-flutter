@@ -197,10 +197,6 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   }) {
     final index = getItemIndexById(id);
     if (index == null) throw Exception('Item with id $id not found');
-    if (ldPrintDebugMessages) {
-      debugPrint(
-          '[LdPaginator] #$index id=$id: deleting → deleted (compactable=${canCompactIndicesAfterDeletion(index)}, totalItems=${totalItems - 1})');
-    }
     _updated(_items[index]!.copyWith(state: LdPaginatorItemState.deleted));
 
     _items.remove(index);
@@ -410,9 +406,6 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     final pageOffset = (normalizedOffset ~/ pageSize) * pageSize;
 
     if (_requestedOffsets.contains(pageOffset)) {
-      if (ldPrintDebugMessages) {
-        debugPrint('[LdPaginator] fetchPageAtOffset=$pageOffset skipped (already requested/in-flight)');
-      }
       return;
     }
 
@@ -425,10 +418,6 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
       }
     }
 
-    if (ldPrintDebugMessages) {
-      debugPrint(
-          '[LdPaginator] fetchPageAtOffset=$pageOffset ${immediate ? "immediate" : "debounced"} (queue=${_offsetQueue.length})');
-    }
 
     if (!immediate && debounceTime > Duration.zero) {
       // Debounced path: reset the timer. The fetch fires once the user stops
@@ -526,12 +515,6 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     final hasVisibleItems = _items.values.any(
       (item) => item.value != null && item.state != LdPaginatorItemState.fetching,
     );
-    if (ldPrintDebugMessages) {
-      debugPrint(
-        '[LdPaginator] refreshList reason=$reason hasVisibleItems=$hasVisibleItems '
-        'totalItems=$totalItems currentItemCount=$currentItemCount',
-      );
-    }
     if (!hasVisibleItems) {
       await _refreshFromEmpty(context, reason);
       return;
@@ -632,7 +615,6 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   }
 
   void _markItemsPendingRefresh() {
-    var count = 0;
     for (final entry in _items.entries.toList()) {
       final item = entry.value;
       if (item.value == null) {
@@ -640,26 +622,16 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
       }
       if (item.state == LdPaginatorItemState.loaded) {
         _items[entry.key] = item.copyWith(state: LdPaginatorItemState.pendingRefresh);
-        count++;
       }
-    }
-    if (ldPrintDebugMessages) {
-      final skipped = _items.values.where((i) => i.value != null && _isTransientItemState(i.state)).length;
-      debugPrint('[LdPaginator] _markItemsPendingRefresh: $count → pendingRefresh, $skipped transient preserved');
     }
     _updated(null);
   }
 
   void _revertControlledRefresh() {
-    var reverted = 0;
     for (final entry in _items.entries.toList()) {
       if (entry.value.state == LdPaginatorItemState.pendingRefresh) {
         _items[entry.key] = entry.value.copyWith(state: LdPaginatorItemState.loaded);
-        reverted++;
       }
-    }
-    if (ldPrintDebugMessages) {
-      debugPrint('[LdPaginator] _revertControlledRefresh: $reverted items pendingRefresh → loaded');
     }
     _isControlledRefresh = false;
     _setBusy(false);
@@ -718,15 +690,6 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     for (final entry in _items.entries) {
       if (entry.value.value != null && _isTransientItemState(entry.value.state)) {
         transientItems[entry.key] = entry.value;
-      }
-    }
-    if (ldPrintDebugMessages) {
-      debugPrint(
-        '[LdPaginator] _commitRefreshState: ${newItems.length} items from server, '
-        '${transientItems.length} transient evicted, totalItems: $totalItems → $newTotal',
-      );
-      for (final e in transientItems.entries) {
-        debugPrint('  evicted #${e.key} id=${e.value.value!.id} state=${e.value.state}');
       }
     }
     onTransientItemsEvictedByRefresh(transientItems);
@@ -840,9 +803,6 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
       value: item.value,
       state: LdPaginatorItemState.rolledBackDeletion,
     );
-    if (ldPrintDebugMessages) {
-      debugPrint('[LdPaginator] #$index id=$id: deleting → rolledBackDeletion');
-    }
     _updated(_items[index]);
   }
 
@@ -919,9 +879,6 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
       value: item.value,
       state: LdPaginatorItemState.deleting,
     );
-    if (ldPrintDebugMessages) {
-      debugPrint('[LdPaginator] #$index id=$id: ${item.state} → deleting');
-    }
     _updated(_items[index]);
   }
 
@@ -1017,9 +974,6 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
     bool changed = false;
     final fetchReason = _pendingFetchReason;
-    if (ldPrintDebugMessages) {
-      debugPrint('[LdPaginator] _fetchItems offset=$offset reason=$fetchReason started');
-    }
 
     try {
       final page = await fetchListFunction!(
@@ -1033,10 +987,6 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
         ),
       );
 
-      if (ldPrintDebugMessages) {
-        debugPrint(
-            '[LdPaginator] _fetchItems offset=$offset done: ${page.newItems.length} items, total=${page.total} (${page.newItems.map((e) => e.id).toList().join(', ')})');
-      }
 
       if (refresh) {
         _reset();
@@ -1054,14 +1004,8 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
         // cache so the next gap-fill re-fetches from the server rather than
         // replaying the stale position data and creating an infinite ping-pong.
         listCache.clear();
-        if (ldPrintDebugMessages) {
-          debugPrint('[LdPaginator] _fetchItems offset=$offset: cross-page eviction — cache cleared');
-        }
       }
     } catch (e, s) {
-      if (ldPrintDebugMessages) {
-        debugPrint('[LdPaginator] _fetchItems offset=$offset error: $e');
-      }
       _setError(LdException(
         exception: e,
         stackTrace: s,
@@ -1113,31 +1057,18 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
           // the caller to schedule a debounced full refreshList so everything
           // settles to a coherent state.
           hadCrossPageEviction = true;
-          if (ldPrintDebugMessages) {
-            debugPrint(
-                '[LdPaginator] _insertPageItems: cross-page eviction — #$index id=${item.id} moved from page offset=$evictedPageOffset → will trigger refresh');
-          }
         }
       }
 
-      final idx = offset + i;
       final hasTransientItem = _items.values.any(
         (existingItem) => existingItem.value?.id == item.id && _isTransientItemState(existingItem.state),
       );
       if (hasTransientItem) {
-        if (ldPrintDebugMessages) {
-          debugPrint('[LdPaginator] #$idx id=${item.id}: skipped page insert (transient in-flight)');
-        }
         continue;
       }
 
-      if (ldPrintDebugMessages) {
-        final prev = _items[idx];
-        final prevState = prev != null ? '${prev.state}' : 'absent';
-        debugPrint('[LdPaginator] #$idx id=${item.id}: $prevState → loaded (via _insertPageItems)');
-      }
-      _items[idx] = LdPaginatorItem<T>(value: item, state: LdPaginatorItemState.loaded);
-      _updated(_items[idx]);
+      _items[offset + i] = LdPaginatorItem<T>(value: item, state: LdPaginatorItemState.loaded);
+      _updated(_items[offset + i]);
     }
 
     return hadCrossPageEviction;

@@ -60,22 +60,10 @@ LdCallbackModel<Task, int> taskModel(BuildContext context) => LdCallbackModel<Ta
     return testData.firstWhere((element) => element.id == id);
   },
   fetchListWithParameters: (parameters) async {
-    final snapshotAtCall = testData.map((t) => t.id).toList();
-    debugPrint(
-      '[MockAPI] fetch START offset=${parameters.offset} pageSize=${parameters.pageSize} '
-      'reason=${parameters.reason} testData.length=${snapshotAtCall.length}',
-    );
     await Future.delayed(const Duration(milliseconds: 200));
 
     final filtered = applyFiltersAndSorting(testData, parameters.filters, parameters.sortOptions);
     final result = filtered.skip(parameters.offset).take(parameters.pageSize).toList();
-    final snapshotAtReturn = testData.map((t) => t.id).toList();
-    debugPrint(
-      '[MockAPI] fetch DONE offset=${parameters.offset} total=${filtered.length} '
-      'ids=${result.map((t) => t.id).toList()} '
-      'testData.length=${snapshotAtReturn.length}'
-      '${snapshotAtCall.length != snapshotAtReturn.length ? " *** testData CHANGED during delay (${snapshotAtCall.length}→${snapshotAtReturn.length}) ***" : ""}',
-    );
     return LdListPage<Task>(
       newItems: result,
       hasMore: parameters.offset + parameters.pageSize < filtered.length,
@@ -83,11 +71,8 @@ LdCallbackModel<Task, int> taskModel(BuildContext context) => LdCallbackModel<Ta
     );
   },
   deleteItem: (context, id) async {
-    debugPrint('[MockAPI] delete id=$id START — removing from testData (length=${testData.length})');
     testData.removeWhere((element) => element.id == id);
-    debugPrint('[MockAPI] delete id=$id removed — testData.length=${testData.length}, waiting 500ms');
     await Future.delayed(const Duration(milliseconds: 500));
-    debugPrint('[MockAPI] delete id=$id DONE');
   },
   updateItem: (context, id, newItem) async {
     final index = testData.indexWhere((element) => element.id == id);

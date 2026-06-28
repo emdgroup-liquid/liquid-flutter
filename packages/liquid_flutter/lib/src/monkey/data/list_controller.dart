@@ -95,12 +95,6 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
   ) async {
     if (_autoInvalidateCache &&
         (parameters.reason == LdFetchReason.refresh || parameters.reason == LdFetchReason.invalidate)) {
-      if (ldPrintDebugMessages) {
-        debugPrint(
-          '[LdCache] clear (reason=${parameters.reason} offset=${parameters.offset}) '
-          'keys=[${cache.keys.join(", ")}]',
-        );
-      }
       cache.clear();
     }
 
@@ -108,50 +102,17 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
       final cachedPage = cache.readPage(parameters.cacheKey, parameters.offset);
       if (cachedPage != null) {
         final entry = cache.readEntry(parameters.cacheKey)!;
-        if (ldPrintDebugMessages) {
-          final ids = cachedPage.map((e) => (e as dynamic).id).toList();
-          debugPrint(
-            '[LdCache] HIT offset=${parameters.offset} key="${parameters.cacheKey}" '
-            'total=${entry.total} ids=$ids',
-          );
-        }
         return LdListPage<T>(
           newItems: cachedPage,
           hasMore: parameters.offset + cachedPage.length < entry.total,
           total: entry.total,
         );
-      } else {
-        if (ldPrintDebugMessages) {
-          final cachedOffsets = cache.readEntry(parameters.cacheKey)?.pagesByOffset.keys.toList() ?? [];
-          debugPrint(
-            '[LdCache] MISS offset=${parameters.offset} key="${parameters.cacheKey}" '
-            'cachedOffsets=$cachedOffsets → going to API',
-          );
-        }
       }
     }
 
-    if (ldPrintDebugMessages) {
-      debugPrint(
-        '[LdCache] API request offset=${parameters.offset} pageSize=${parameters.pageSize} '
-        'reason=${parameters.reason} key="${parameters.cacheKey}"',
-      );
-    }
     final page = await fetchListWithParameters(parameters);
-    if (ldPrintDebugMessages) {
-      final ids = page.newItems.map((e) => (e as dynamic).id).toList();
-      debugPrint(
-        '[LdCache] API response offset=${parameters.offset} total=${page.total} ids=$ids',
-      );
-    }
 
     if (_autoCache) {
-      if (ldPrintDebugMessages) {
-        debugPrint(
-          '[LdCache] write offset=${parameters.offset} key="${parameters.cacheKey}" '
-          'total=${page.total} count=${page.newItems.length}',
-        );
-      }
       cache.writePage(
         parameters.cacheKey,
         offset: parameters.offset,
@@ -232,12 +193,7 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
         );
       }
       return newItem;
-    } catch (e, stackTrace) {
-      if (ldPrintDebugMessages) {
-        debugPrint("Error creating item: $e");
-        debugPrint(stackTrace.toString());
-      }
-
+    } catch (e, _) {
       rollbackItemCreation(tempIndex);
       rethrow;
     }
@@ -331,9 +287,6 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
   }) {
     final detachedItem = _detachedItemsById.remove(id);
     if (detachedItem != null) {
-      if (ldPrintDebugMessages) {
-        debugPrint('[LdListController] id=$id: confirmed deletion via detached path');
-      }
       notifyItemUpdated(
         detachedItem.copyWith(state: LdPaginatorItemState.deleted),
       );
@@ -341,14 +294,7 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
     }
 
     if (getItemIndexById(id) != null) {
-      if (ldPrintDebugMessages) {
-        debugPrint('[LdListController] id=$id: confirmed deletion via paged path');
-      }
       unawaited(_confirmPagedDeletion(context, id: id, refresh: refresh));
-    } else {
-      if (ldPrintDebugMessages) {
-        debugPrint('[LdListController] id=$id: confirm deletion called but item not found (already removed?)');
-      }
     }
   }
 
@@ -376,9 +322,6 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
     // concurrent deletion confirmation) — the in-flight refresh will settle
     // the list to a consistent state already.
     if (isControlledRefresh || busy) {
-      if (ldPrintDebugMessages) {
-        debugPrint('[LdListController] id=$id: skipping redundant refreshList (refresh already in progress)');
-      }
       return;
     }
 
@@ -395,25 +338,16 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
       if (detachedItem.state == LdPaginatorItemState.deleting) {
         _detachedItemsById[id] = detachedItem.copyWith(state: LdPaginatorItemState.loaded);
         notifyItemUpdated(_detachedItemsById[id]!);
-        if (ldPrintDebugMessages) {
-          debugPrint('[LdListController] id=$id: rollback deletion via detached path → loaded');
-        }
       }
       return;
     }
 
     if (getItemIndexById(id) == null) {
-      if (ldPrintDebugMessages) {
-        debugPrint('[LdListController] id=$id: rollback deletion called but item not found (no-op)');
-      }
       return;
     }
 
     try {
       rollbackItemDeletion(id);
-      if (ldPrintDebugMessages) {
-        debugPrint('[LdListController] id=$id: rollback deletion via paged path → rolledBackDeletion');
-      }
     } catch (_) {
       // Item may have been removed while the delete request was in flight.
     }
@@ -430,9 +364,6 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
       if (item.value != null) {
         // Only register in the detached map if not already tracked there.
         _detachedItemsById.putIfAbsent(item.value!.id, () => item);
-        if (ldPrintDebugMessages) {
-          debugPrint('[LdListController] evicted id=${item.value!.id} state=${item.state} → detached');
-        }
       }
     }
   }
