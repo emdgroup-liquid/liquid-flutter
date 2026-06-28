@@ -1,3 +1,6 @@
+## 23.0.0-5
+Released on: 6/28/2026, changelog automatically generated.
+
 ## 23.0.0-4
 Released on: 6/23/2026, changelog automatically generated.
 
