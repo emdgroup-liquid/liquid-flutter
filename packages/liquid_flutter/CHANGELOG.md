@@ -1,4 +1,408 @@
 ## 23.0.0-4
+Released on: 6/28/2026, changelog automatically generated.
+
+
+### Features
+
+- **monkey:** detail reactive forms ([#146](issues/146)) ([22d88a8](commit/22d88a8))
+
+### API Changes
+
+#### 💣 Breaking changes
+
+**`class` FetchOffsetParameters<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/data/fetch_page_parameters.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-d021e526a9882fd604228a370eefaceebc0fc93ea40bf51001d6632c0dda06be))
+- 🔄 Param type changed in default constructor: `cache` (`LdRepositoryCache<T, IdType>` → `LdListCache<T, IdType>`)
+- 🔄 Property type changed: `cache`
+
+**`class` FetchPageParameters<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/data/fetch_page_parameters.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-d021e526a9882fd604228a370eefaceebc0fc93ea40bf51001d6632c0dda06be))
+- 🔄 Param type changed in default constructor: `cache` (`LdRepositoryCache<T, IdType>` → `LdListCache<T, IdType>`)
+- 🔄 Property type changed: `cache`
+
+**`class` LdChoose<T extends Identifiable<IdType>, IdType>** ([lib/src/choose/choose.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-6ce965d70e5a38c7bb7d300718c981f5dd5c18807dcaf9b633cdc74c1d5c5c74))
+- 🔄 Param type changed in default constructor: `repository` (`LdRepository<T, IdType>?` → `LdListController<T, IdType>?`)
+- 🔄 Property type changed: `repository`
+
+**`class` LdChoosePage<T extends Identifiable<IdType>, IdType>** ([lib/src/choose/choose.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-6ce965d70e5a38c7bb7d300718c981f5dd5c18807dcaf9b633cdc74c1d5c5c74))
+- 🔄 Param type changed in default constructor: `repository` (`LdRepository<T, IdType>` → `LdListController<T, IdType>`)
+- 🔄 Property type changed: `repository`
+
+**`class` LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E>** ([lib/src/monkey/filter/ld_filter_any_of.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-06379cf11167b7e50d8fea6084957a34ae2ce3bf735cfe2edaff5b8f5f6a3a37))
+- ❌ Property removed: `mutationAffectsCache`
+
+**`class` LdFilterBool<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/filter/ld_filter_bool.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-b7e2eb346e2d45ea0555ea553cfbf179ee5c8371be7d02d82cb669dacc2825c5))
+- ❌ Property removed: `mutationAffectsCache`
+
+**`class` LdFilterOneOf<T extends Identifiable<IdType>, IdType, E>** ([lib/src/monkey/filter/ld_filter_one_of.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-8b4a7370965f8b84a2f66898dc4740594b5f188545f63c3b9a6b8fcdafdd876e))
+- ❌ Property removed: `mutationAffectsCache`
+
+**`class` LdFilterOption<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/filter/ld_filter_option.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-03168a2273b93173ad00eaf26bfb2a8d185f19617a0c46505dd419b9f6072a5a))
+- ❌ Property removed: `mutationAffectsCache`
+
+**`class` LdFilterRange<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/filter/ld_filter_range.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-bf38054883adc797e5840cf283d60d46e21ba512471c51e299aaada452eec6b9))
+- ❌ Property removed: `mutationAffectsCache`
+
+**`class` LdFilterSearch<T extends Identifiable<IdType>, IdType, Suggestion>** ([lib/src/monkey/filter/ld_filter_search.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-4d71fc5bfdc4b0254470d2133519e55d28aa4013ef9ab8eeb02f139201fe0f73))
+- ❌ Property removed: `mutationAffectsCache`
+
+**`class` LdMonkeyAction<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/actions/actions.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-250ba08dbbe05925449c761878d3265c71d99d63e119d34feda97f183532dd30))
+- 🔄 Param type changed in default constructor: `visibility` (`Set<LdMonkeyActionVisibility>` → `Set<LdMonkeyActionVisibility<T, IdType>>?`)
+- 🔄 Property type changed: `visibility`
+- ❌ Method removed: `build`
+
+**`class` LdMonkeyActionContext<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/actions/action_context.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-490b9c51c0fd0b353a8b4454e047f2383e43f00189e06727a0ba137be0762606))
+- ❌ Param removed in default constructor: `repository` (named, required)
+- ❇️ Param added in default constructor: `listController` (named, required)
+- ❌ Property removed: `repository`
+
+**`class` LdMonkeyActionVisibility** ([lib/src/monkey/actions/action_visibility.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-838fefbc7b1b558a58ba0ae3fd5f830ebc9c1949e2e7747d95f60d6d558ba047))
+- 🔄 Type parameters changed: `` → `T extends Identifiable<IdType>, IdType`
+- 🔄 Param type changed in default constructor: `isVisible` (`bool Function(BuildContext)?` → `bool Function(LdMonkeyActionContext<T, IdType>)?`)
+- 🔄 Property type changed: `isVisible`
+- 🔄 Type parameters changed: `T extends Identifiable<IdType>, IdType` → ``
+
+**`class` LdMonkeyBareChildAction<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/actions/actions.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-250ba08dbbe05925449c761878d3265c71d99d63e119d34feda97f183532dd30))
+- 🔄 Param type changed in default constructor: `visibility` (`Set<LdMonkeyActionVisibility>` → `Set<LdMonkeyActionVisibility<T, IdType>>?`)
+- 🔄 Property type changed: `visibility`
+- ❌ Method removed: `build`
+
+**`class` LdMonkeyDetailState<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_detail_state.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-7a06a00001ff731934e0ba2c50ce88f2a6af34845580cf96625322a48d9531d3))
+- ❌ Property removed: `repository`
+
+**`class` LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_master_page.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-f027b9824ac3c8ae9ddbe6ac353d6cb02c90fe60d3a5d83846b29dbd7ec3c437))
+- 🔄 Param type changed in default constructor: `buildList` (`Widget Function(BuildContext, LdRepository<T, IdType>)?` → `Widget Function(BuildContext, LdListController<T, IdType>)?`)
+- 🔄 Property type changed: `buildList`
+
+**`class` LdMonkeyPickerScope<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_picker_scope.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-d1599e4a12ee6169e95864395fcf14659a019ba7fdaddf746f622a39c34a244a))
+- 🔄 Param type changed in default constructor: `repository` (`LdRepository<T, IdType>` → `LdListController<T, IdType>`), `buildList` (`Widget Function(BuildContext, LdRepository<T, IdType>)?` → `Widget Function(BuildContext, LdListController<T, IdType>)?`)
+- 🔄 Properties type changed: `repository`, `buildList`
+
+**`class` LdMonkeyRouteScope<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_route_scope.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-00b40f9e0517eb15a03249100eaf69b7c20db14e2b2ec72a032292e923048ac2))
+- ❌ Param removed in default constructor: `repositoryBuilder` (named, required)
+- ❇️ Param added in default constructor: `modelBuilder` (named, required)
+- ❌ Property removed: `repositoryBuilder`
+
+**`class` LdMonkeyStreamSelection<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/detail_page.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-43d347b03da89e053d770a97150585d0955be32f82540fad5d2ceabd18d33035))
+- 🔄 Param type changed in default constructor: `builder` (`Widget Function(BuildContext, List<LdPaginatorItem<T>>)` → `Widget Function(BuildContext, List<Widget>)`)
+- ❇️ Param added in default constructor: `buildItem` (named, required)
+- 🔄 Property type changed: `builder`
+
+**`class` LdMonkeySubmitAction<T extends Identifiable<IdType>, IdType, Result>** ([lib/src/monkey/actions/actions.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-250ba08dbbe05925449c761878d3265c71d99d63e119d34feda97f183532dd30))
+- 🔄 Param type changed in default constructor: `visibility` (`Set<LdMonkeyActionVisibility>` → `Set<LdMonkeyActionVisibility<T, IdType>>?`)
+- 🔄 Property type changed: `visibility`
+- ❌ Method removed: `build`
+
+**`typedef` LdMutationAffectsCache<T>** ([lib/src/monkey/data/ld_affected_by_update.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-74fb5918f10666fdf9a5fb209a6f4e8ea291803510547de27e62092cc81f56fd))
+- ❌ Typedef removed: `LdMutationAffectsCache`
+
+**`class` LdPaginator<T extends Identifiable<IdType>, IdType>** ([lib/src/list/list_paginator.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-c279977c526f2e1ad42c33e9e9f5451f323d228e7974b6ae305a16daa9ff8dc8))
+- ❌ Property removed: `repositoryCache`
+
+**`class` LdRepository<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/data/repository.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-0106e16f709edb1982d818cd2ca7b45a46cce2d5530db851270c61b4e1c950c3))
+- ❌ Class removed: `LdRepository`
+
+**`class` LdRepositoryCache<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/data/ld_repository_cache.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-170a12b231174ccfdff0bfe7771685b4bf22bf9ab31b8afce256040de514c2fd))
+- ❌ Class removed: `LdRepositoryCache`
+
+**`class` LdRepositoryCacheEntry<T>** ([lib/src/monkey/data/ld_repository_cache.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-170a12b231174ccfdff0bfe7771685b4bf22bf9ab31b8afce256040de514c2fd))
+- ❌ Class removed: `LdRepositoryCacheEntry`
+
+**`class` LdRepositoryCacheKeyPart** ([lib/src/monkey/data/ld_repository_cache_key.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-6e8c9c3e7558a30779b8b1c0ac395a40ef934acc956f6b2866b40d07fee70900))
+- ❌ Class removed: `LdRepositoryCacheKeyPart`
+
+**`enum` LdRepositoryMutationKind** ([lib/src/monkey/data/ld_repository_cache_key.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-6e8c9c3e7558a30779b8b1c0ac395a40ef934acc956f6b2866b40d07fee70900))
+- ❌ Enum removed: `LdRepositoryMutationKind`
+
+**`class` LdRepositoryProvider<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/data/repository_provider.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-d53f8e2e8c07954a7305ae5112dd68d3dd433f1bc35fd6369e32edfe3324dd8c))
+- ❌ Class removed: `LdRepositoryProvider`
+
+**`class` LdSearchSuggestionsOverlay** ([lib/src/appbar/search_components.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-c7750a1ad0e6a79e8cd9a447bd3f31dd1c31866d30873339df5d2bea4b410ecd))
+- ❌ Params removed in default constructor: `searchConfig` (named, required), `onDismiss` (named, required), `inputFocusNode` (named, required), `inputController` (named, required)
+- ❇️ Params added in default constructor: `onBarrierDismiss` (named, required), `buildSuggestion` (named, required)
+- ❌ Properties removed: `searchConfig`, `onDismiss`, `inputFocusNode`, `inputController`
+
+**`class` LdSortOption<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/sort/sort_option.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-c6eadbc49568be771b736102517c1d37486b870934e27b2c3ebc0ea60a09db00))
+- ❌ Property removed: `mutationAffectsCache`
+
+**`class` MonkeyRouteNode<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_route_tree.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-5ee5971433b226f5666f1c6e2da4cdd4b73a3416065519e97a778a01e3fae04d))
+- ❌ Param removed in default constructor: `repositoryBuilder` (named, required)
+- ❇️ Param added in default constructor: `modelBuilder` (named, required)
+- ❌ Property removed: `repositoryBuilder`
+
+**`class` _LdMonkeyPickerPage<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_picker_scope.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-d1599e4a12ee6169e95864395fcf14659a019ba7fdaddf746f622a39c34a244a))
+- 🔄 Param type changed in default constructor: `buildList` (`Widget Function(BuildContext, LdRepository<T, IdType>)?` → `Widget Function(BuildContext, LdListController<T, IdType>)?`)
+
+**`function` buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_routes.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-5dd41942d7588e4b4e14333a7153952c923f9bc1226bae8302adcf3f9c97ce29))
+- ❌ Param removed in function `buildMonkeyRoutes`: `repositoryBuilder` (named, required)
+- ❇️ Param added in function `buildMonkeyRoutes`: `modelBuilder` (named, required)
+
+**`function` ldChoosePrefetchPickerData<T extends Identifiable<IdType>, IdType>** ([lib/src/choose/choose.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-6ce965d70e5a38c7bb7d300718c981f5dd5c18807dcaf9b633cdc74c1d5c5c74))
+- 🔄 Param type changed in function `ldChoosePrefetchPickerData`: `repository` (`LdRepository<T, IdType>` → `LdListController<T, IdType>`)
+
+**`function` ldChooseScrollToInitialSelection<T extends Identifiable<IdType>, IdType>** ([lib/src/choose/choose.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-6ce965d70e5a38c7bb7d300718c981f5dd5c18807dcaf9b633cdc74c1d5c5c74))
+- 🔄 Param type changed in function `ldChooseScrollToInitialSelection`: `repository` (`LdRepository<T, IdType>` → `LdListController<T, IdType>`)
+
+**`function` ldFilterStateScope<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/filter/filter_state_scope.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-3b25b129d1452a8f16b915cff559c0939528bf00ca22b7594fd9a28be4d42fda))
+- 🔄 Param type changed in function `ldFilterStateScope`: `repository` (`LdRepository<T, IdType>` → `LdListController<T, IdType>`)
+
+**`function` ldRepositoryCacheKey<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/data/ld_repository_cache_key.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-6e8c9c3e7558a30779b8b1c0ac395a40ef934acc956f6b2866b40d07fee70900))
+- ❌ Function removed: `ldRepositoryCacheKey`
+
+**`function` maybePopContextMenu** ([lib/src/context_menu.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-bd031ede2f184bbdb13c86e7300dc3ab6f62af650bf3cc1bd5c74ad2fe3e824e))
+- 🔄 Function type changed: `maybePopContextMenu` (`Future<bool>` → `Future<void>`)
+
+**`function` parseLdRepositoryCacheKey** ([lib/src/monkey/data/ld_repository_cache_key.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-6e8c9c3e7558a30779b8b1c0ac395a40ef934acc956f6b2866b40d07fee70900))
+- ❌ Function removed: `parseLdRepositoryCacheKey`
+
+**`function` parseSortAndFilterFromContext<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/ld_monkey_route_definitions_resolve.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-483f852cf6425834bbc66ad35ed31269fc7d1cc7b5f21c1aafff66d91e41bf71))
+- ❌ Function removed: `parseSortAndFilterFromContext`
+
+**`function` resolveMonkeyRouteDefinitions<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/ld_monkey_route_definitions_resolve.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-483f852cf6425834bbc66ad35ed31269fc7d1cc7b5f21c1aafff66d91e41bf71))
+- ❌ Function removed: `resolveMonkeyRouteDefinitions`
+
+#### ✨ Minor changes
+
+**`class` LdAppBar** ([lib/src/appbar/appbar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-3fa4ae735c9f6ca4c26ac958e08eaa30e2da735b6e0f0ed00665eb6c2b2bb49f))
+- ❇️ Param added in default constructor: `insetScreenRadius` (named, optional)
+- ❇️ Param added in constructor `top`: `insetScreenRadius` (named, optional)
+- ❇️ Param added in constructor `bottom`: `insetScreenRadius` (named, optional)
+- ❇️ Property added: `insetScreenRadius`
+
+**`class` LdAppBarConfig** ([lib/src/appbar/appbar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-3fa4ae735c9f6ca4c26ac958e08eaa30e2da735b6e0f0ed00665eb6c2b2bb49f))
+- ❇️ Param added in default constructor: `insetScreenRadius` (named, optional)
+- ❇️ Property added: `insetScreenRadius`
+
+**`class` LdAppBarParentShowsImpliedLeading** ([lib/src/appbar/appbar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-3fa4ae735c9f6ca4c26ac958e08eaa30e2da735b6e0f0ed00665eb6c2b2bb49f))
+- ❇️ Class added: `LdAppBarParentShowsImpliedLeading`
+
+**`class` LdAppBarWidget** ([lib/src/appbar/appbar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-3fa4ae735c9f6ca4c26ac958e08eaa30e2da735b6e0f0ed00665eb6c2b2bb49f))
+- ❇️ Param added in default constructor: `insetScreenRadius` (named, optional, default: true)
+- ❇️ Property added: `insetScreenRadius`
+
+**`class` LdCallbackModel<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/data/ld_callback_model.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-bbe6dccbaff1f85db929a2244aa1272b485ea8ef19047f4e87871d9a0c49ee84))
+- ❇️ Class added: `LdCallbackModel`
+
+**`class` LdFilterAnyOf<T extends Identifiable<IdType>, IdType, E>** ([lib/src/monkey/filter/ld_filter_any_of.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-06379cf11167b7e50d8fea6084957a34ae2ce3bf735cfe2edaff5b8f5f6a3a37))
+- ❌ Param removed in default constructor: `mutationAffectsCache` (named, optional)
+- ❌ Param removed in method `copyWith`: `mutationAffectsCache` (named, optional)
+
+**`class` LdFilterBool<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/filter/ld_filter_bool.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-b7e2eb346e2d45ea0555ea553cfbf179ee5c8371be7d02d82cb669dacc2825c5))
+- ❌ Param removed in default constructor: `mutationAffectsCache` (named, optional)
+- ❌ Param removed in method `copyWith`: `mutationAffectsCache` (named, optional)
+
+**`class` LdFilterOneOf<T extends Identifiable<IdType>, IdType, E>** ([lib/src/monkey/filter/ld_filter_one_of.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-8b4a7370965f8b84a2f66898dc4740594b5f188545f63c3b9a6b8fcdafdd876e))
+- ❌ Param removed in default constructor: `mutationAffectsCache` (named, optional)
+- ❌ Param removed in method `copyWith`: `mutationAffectsCache` (named, optional)
+
+**`class` LdFilterOption<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/filter/ld_filter_option.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-03168a2273b93173ad00eaf26bfb2a8d185f19617a0c46505dd419b9f6072a5a))
+- ❌ Param removed in default constructor: `mutationAffectsCache` (named, optional)
+- ❌ Param removed in method `copyWith`: `mutationAffectsCache` (named, optional)
+
+**`class` LdFilterRange<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/filter/ld_filter_range.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-bf38054883adc797e5840cf283d60d46e21ba512471c51e299aaada452eec6b9))
+- ❌ Param removed in default constructor: `mutationAffectsCache` (named, optional)
+- ❌ Param removed in method `copyWith`: `mutationAffectsCache` (named, optional)
+
+**`class` LdFilterSearch<T extends Identifiable<IdType>, IdType, Suggestion>** ([lib/src/monkey/filter/ld_filter_search.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-4d71fc5bfdc4b0254470d2133519e55d28aa4013ef9ab8eeb02f139201fe0f73))
+- ❌ Param removed in default constructor: `mutationAffectsCache` (named, optional)
+- ❌ Param removed in method `copyWith`: `mutationAffectsCache` (named, optional)
+
+**`class` LdHint** ([lib/src/hint.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-dfc92525de9815f786b74d0fb4e4a920602109f9db1ffe185778ade2d4295570))
+- ❇️ Param added in default constructor: `withBackground` (named, optional, default: false)
+- ❇️ Param added in constructor `info`: `withBackground` (named, optional, default: false)
+- ❇️ Param added in constructor `warning`: `withBackground` (named, optional, default: false)
+- ❇️ Param added in constructor `success`: `withBackground` (named, optional, default: false)
+- ❇️ Param added in constructor `error`: `withBackground` (named, optional, default: false)
+- ❇️ Param added in constructor `canceled`: `withBackground` (named, optional, default: false)
+- ❇️ Param added in constructor `loading`: `withBackground` (named, optional, default: false)
+- ❇️ Param added in constructor `pending`: `withBackground` (named, optional, default: false)
+- ❇️ Param added in constructor `ongoing`: `withBackground` (named, optional, default: false)
+- ❇️ Property added: `withBackground`
+
+**`class` LdListCache<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/data/ld_list_cache.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-66ab121367b2360137ee9a1e4723c7883f9e0f2dea09e27ab228be7f5d7d08f9))
+- ❇️ Class added: `LdListCache`
+
+**`class` LdListCacheEntry<T>** ([lib/src/monkey/data/ld_list_cache.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-66ab121367b2360137ee9a1e4723c7883f9e0f2dea09e27ab228be7f5d7d08f9))
+- ❇️ Class added: `LdListCacheEntry`
+
+**`class` LdListController<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/data/list_controller.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-2bd19515e63ce2d64323e30fa8b37fd3ca7fac879e8a0089508961972dcadd7c))
+- ❇️ Class added: `LdListController`
+
+**`class` LdLocationLock** ([lib/src/navigation/ld_location_lock_registry.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-4950b178a62cd55cc0420625280ee0c1a7f026dc09b4f58794ea9c4cb4ed355c))
+- ❇️ Class added: `LdLocationLock`
+
+**`class` LdLocationLockGuard** ([lib/src/navigation/ld_location_lock_guard.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-e3ebea6c4b880ee0288c011f275ac09a3d6b23095d0a415ed1c63cfe5b4b7b35))
+- ❇️ Class added: `LdLocationLockGuard`
+
+**`typedef` LdLocationLockOnLeave** ([lib/src/navigation/ld_location_lock_registry.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-4950b178a62cd55cc0420625280ee0c1a7f026dc09b4f58794ea9c4cb4ed355c))
+- ❇️ Typedef added: `LdLocationLockOnLeave`
+
+**`class` LdLocationLockRegistry** ([lib/src/navigation/ld_location_lock_registry.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-4950b178a62cd55cc0420625280ee0c1a7f026dc09b4f58794ea9c4cb4ed355c))
+- ❇️ Class added: `LdLocationLockRegistry`
+
+**`class` LdModel<T extends Identifiable<IdType>, IdType, TCreate, TUpdate>** ([lib/src/monkey/data/ld_model.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-44449e404af55a988303764c787a8c8f8f96d93a74e10ed133ffd7252d0b2f68))
+- ❇️ Class added: `LdModel`
+
+**`class` LdMonkeyAction<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/actions/actions.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-250ba08dbbe05925449c761878d3265c71d99d63e119d34feda97f183532dd30))
+- ✅ Param became optional in default constructor: `visibility` (named, required)
+
+**`class` LdMonkeyActionContext<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/actions/action_context.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-490b9c51c0fd0b353a8b4454e047f2383e43f00189e06727a0ba137be0762606))
+- ❇️ Property added: `listController`
+- ❇️ Param added in method `of`: `listen` (named, optional, default: false)
+- ❇️ Method added: `model`
+
+**`class` LdMonkeyDataProvider<T extends Identifiable<IdType>, IdType, TModel extends LdModel<T, IdType, Object?, Object?>>** ([lib/src/monkey/data/monkey_data_provider.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-2499202652f18c58a59faf8a1d1e15426fc12660189e337f2edfb644bfac6792))
+- ❇️ Class added: `LdMonkeyDataProvider`
+
+**`class` LdMonkeyDetailState<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_detail_state.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-7a06a00001ff731934e0ba2c50ce88f2a6af34845580cf96625322a48d9531d3))
+- ❌ Param removed in default constructor: `repository` (named, optional)
+- ❇️ Param added in default constructor: `listController` (named, optional)
+- ❇️ Property added: `listController`
+- ❌ Param removed in method `copyWith`: `repository` (named, optional)
+- ❇️ Param added in method `copyWith`: `listController` (named, optional)
+
+**`class` LdMonkeyRouteConfig<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_route_config.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-e1d4248f5b3581ffaf1a1d2cb4d4b3d63b7e479e22aacc0bb35c483da737b1f2))
+- ❇️ Properties added: `createRouteName`, `createPathSegment`
+
+**`class` LdMonkeyRouteScope<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_route_scope.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-00b40f9e0517eb15a03249100eaf69b7c20db14e2b2ec72a032292e923048ac2))
+- ❇️ Property added: `modelBuilder`
+
+**`class` LdMonkeyStreamSelection<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/detail_page.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-43d347b03da89e053d770a97150585d0955be32f82540fad5d2ceabd18d33035))
+- ❇️ Property added: `buildItem`
+
+**`class` LdPaginator<T extends Identifiable<IdType>, IdType>** ([lib/src/list/list_paginator.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-c279977c526f2e1ad42c33e9e9f5451f323d228e7974b6ae305a16daa9ff8dc8))
+- ❌ Param removed in default constructor: `repositoryCache` (named, optional)
+- ❇️ Param added in default constructor: `listCache` (named, optional)
+- ❇️ Property added: `listCache`
+- ❌ Param removed in method `refreshList`: `hard` (named, optional, default: false)
+- ❇️ Methods added: `areIndicesInSameLoadedRun`, `invalidateRequestedOffsets`
+
+**`class` LdSearchSuggestionsOverlay** ([lib/src/appbar/search_components.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-c7750a1ad0e6a79e8cd9a447bd3f31dd1c31866d30873339df5d2bea4b410ecd))
+- ❇️ Properties added: `onBarrierDismiss`, `buildSuggestion`
+
+**`class` LdSortOption<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/sort/sort_option.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-c6eadbc49568be771b736102517c1d37486b870934e27b2c3ebc0ea60a09db00))
+- ❌ Param removed in default constructor: `mutationAffectsCache` (named, optional)
+- ❌ Param removed in method `copyWith`: `mutationAffectsCache` (named, optional)
+
+**`class` LiquidLocalizations** ([lib/src/l10n/generated/liquid_localizations.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-355d12226806e42fbe28958594669ec350c927c0fc7c9226bf2b78c89f288995))
+- ❇️ Properties added: `detailItemLoading`, `detailItemLoadError`, `discardUnsavedChanges`, `discard`, `keepEditing`, `fieldConflictTitle`, `fieldConflictDescription`, `fieldConflictKeepAllMine`, `fieldConflictUseAllServer`, `fieldConflictYours`, `fieldConflictServer`
+
+**`class` MonkeyRouteNode<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_route_tree.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-5ee5971433b226f5666f1c6e2da4cdd4b73a3416065519e97a778a01e3fae04d))
+- ❇️ Param added in default constructor: `createPage` (named, optional)
+- ❇️ Properties added: `createPage`, `modelBuilder`
+
+**`class` _LdHintWidget** ([lib/src/hint.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-dfc92525de9815f786b74d0fb4e4a920602109f9db1ffe185778ade2d4295570))
+- ❇️ Param added in default constructor: `withBackground` (named, optional, default: false)
+
+**`function` buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_routes.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-5dd41942d7588e4b4e14333a7153952c923f9bc1226bae8302adcf3f9c97ce29))
+- ❇️ Param added in function `buildMonkeyRoutes`: `createPage` (named, optional)
+
+**`function` isWithinLocationPathPrefix** ([lib/src/navigation/ld_location_lock_registry.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-4950b178a62cd55cc0420625280ee0c1a7f026dc09b4f58794ea9c4cb4ed355c))
+- ❇️ Function added: `isWithinLocationPathPrefix`
+
+**`function` ldComposeGoRouterRedirects** ([lib/src/navigation/ld_location_lock_redirect.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-853c055fdcd99592a6195086dc75bd39bc82cabae19533aba82a3418c0786aaf))
+- ❇️ Function added: `ldComposeGoRouterRedirects`
+
+**`function` ldLocationLockRedirect** ([lib/src/navigation/ld_location_lock_redirect.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-853c055fdcd99592a6195086dc75bd39bc82cabae19533aba82a3418c0786aaf))
+- ❇️ Function added: `ldLocationLockRedirect`
+
+**`function` ldMonkeyConfirmDiscardEdits** ([lib/src/monkey/detail_editor/ld_monkey_discard_confirm.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-15feafebb4126ecc6852f9b263ff15be62e2881e931ac652a9d56061674155d9))
+- ❇️ Function added: `ldMonkeyConfirmDiscardEdits`
+
+**`function` locationPathsConflict** ([lib/src/navigation/ld_location_lock_registry.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-4950b178a62cd55cc0420625280ee0c1a7f026dc09b4f58794ea9c4cb4ed355c))
+- ❇️ Function added: `locationPathsConflict`
+
+**`function` normalizeLocationPath** ([lib/src/navigation/ld_location_lock_registry.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-4950b178a62cd55cc0420625280ee0c1a7f026dc09b4f58794ea9c4cb4ed355c))
+- ❇️ Function added: `normalizeLocationPath`
+
+**`function` reactiveCreateAction<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/actions/reactive_create_action.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-852f8403829c840ccc60deb94222f0f1d23388aa9e1f4c015542280486ac5a72))
+- ❇️ Function added: `reactiveCreateAction`
+
+#### 👀 Patch changes
+
+**`class` LdListItemLoading** ([lib/src/list/list_loading.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-478f5ed43cb6c85df98ea6d437fe5a451b72e72d0e52d6975063f91db573dd65))
+- ❇️ Method added: `_bar`
+
+**`class` LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_router_adapter.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-38733ea6a1cce5fbf22de0240816bf176f58d0e504bf36a2b06519fe5f9a108d))
+- ❌ Properties removed: `_lastHydratedViewing`, `_selectionHydrationRequest`
+- ❇️ Property added: `_baseUri`
+- ❌ Methods removed: `_scheduleSelectionHydration`, `_hasSameFilterStructure`, `_filterStructureSignature`, `_stableKeySignature`, `_hasSameSortStructure`, `_replaceFilterByName`, `_pathParametersForDetail`, `_currentQueryParameters`
+- ❇️ Method added: `_replaceUri`
+
+**`class` _LdAppBarWidgetState** ([lib/src/appbar/appbar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-3fa4ae735c9f6ca4c26ac958e08eaa30e2da735b6e0f0ed00665eb6c2b2bb49f))
+- 🔢 Param reordered in method `_shouldImplyRouteBack`: `metrics` (positional, required)
+- ❌ Param removed in method `_shouldImplyRouteBack`: `context` (positional, required)
+- ❌ Methods removed: `_widgetIsTopAppBar`, `_containsNestedTopAppBar`
+
+**`class` _LdChooseState<T extends Identifiable<IdType>, IdType>** ([lib/src/choose/choose.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-6ce965d70e5a38c7bb7d300718c981f5dd5c18807dcaf9b633cdc74c1d5c5c74))
+- 🔄 Property type changed: `_repository`
+
+**`class` _LdHintWidget** ([lib/src/hint.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-dfc92525de9815f786b74d0fb4e4a920602109f9db1ffe185778ade2d4295570))
+- ❇️ Property added: `withBackground`
+- ❇️ Method added: `_getColor`
+
+**`class` _LdLocationLockGuardState** ([lib/src/navigation/ld_location_lock_guard.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-e3ebea6c4b880ee0288c011f275ac09a3d6b23095d0a415ed1c63cfe5b4b7b35))
+- ❇️ Class added: `_LdLocationLockGuardState`
+
+**`class` _LdMonkeyDataProviderState<T extends Identifiable<IdType>, IdType, TModel extends LdModel<T, IdType, Object?, Object?>>** ([lib/src/monkey/data/monkey_data_provider.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-2499202652f18c58a59faf8a1d1e15426fc12660189e337f2edfb644bfac6792))
+- ❇️ Class added: `_LdMonkeyDataProviderState`
+
+**`class` _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_master_page.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-f027b9824ac3c8ae9ddbe6ac353d6cb02c90fe60d3a5d83846b29dbd7ec3c437))
+- 🔄 Param type changed in method `_buildList`: `repository` (`LdRepository<T, IdType>` → `LdListController<T, IdType>`)
+
+**`class` _LdMonkeyPickerPage<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_picker_scope.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-d1599e4a12ee6169e95864395fcf14659a019ba7fdaddf746f622a39c34a244a))
+- 🔄 Property type changed: `buildList`
+
+**`class` _LdMonkeySelectionHydrator<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_router_adapter.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-38733ea6a1cce5fbf22de0240816bf176f58d0e504bf36a2b06519fe5f9a108d))
+- ❇️ Class added: `_LdMonkeySelectionHydrator`
+
+**`class` _LdMonkeySelectionHydratorState<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_router_adapter.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-38733ea6a1cce5fbf22de0240816bf176f58d0e504bf36a2b06519fe5f9a108d))
+- ❇️ Class added: `_LdMonkeySelectionHydratorState`
+
+**`class` _LdMonkeyViewingItemLoader<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/detail_page.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-43d347b03da89e053d770a97150585d0955be32f82540fad5d2ceabd18d33035))
+- ❇️ Class added: `_LdMonkeyViewingItemLoader`
+
+**`class` _LdMonkeyViewingItemSubmitBuilder<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/detail_page.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-43d347b03da89e053d770a97150585d0955be32f82540fad5d2ceabd18d33035))
+- ❇️ Class added: `_LdMonkeyViewingItemSubmitBuilder`
+
+**`class` _LdRepositoryProviderState<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/data/repository_provider.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-d53f8e2e8c07954a7305ae5112dd68d3dd433f1bc35fd6369e32edfe3324dd8c))
+- ❌ Class removed: `_LdRepositoryProviderState`
+
+**`class` _LdSearchInputState** ([lib/src/appbar/search_components.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-c7750a1ad0e6a79e8cd9a447bd3f31dd1c31866d30873339df5d2bea4b410ecd))
+- ❌ Property removed: `_inputWrapperFocusNode`
+- ❇️ Properties added: `_inputFocusNode`, `_suggestionsController`, `_queryNotifier`, `_debounceTimer`
+- ❌ Methods removed: `_showSuggestionsOverlay`, `_showOverlay`
+- ❇️ Methods added: `_onTextChanged`, `_openOverlay`, `_onSubmitted`, `_onCleared`, `_onBarrierDismiss`, `_buildOverlay`
+
+**`class` _LdSearchSuggestionsOverlayState** ([lib/src/appbar/search_components.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-c7750a1ad0e6a79e8cd9a447bd3f31dd1c31866d30873339df5d2bea4b410ecd))
+- ➖ Mixin removed: TickerProviderStateMixin
+- ➕ Mixin added: SingleTickerProviderStateMixin
+- ❌ Properties removed: `_tickers`, `_debounceTimer`, `_currentQuery`
+- ❇️ Properties added: `_ticker`, `_lastSuggestions`
+- ❌ Methods removed: `_removeTicker`, `_updateTickers`, `_onTextChanged`, `_close`, `_buildSuggestionsContent`
+- 🔢 Params reordered in method `_placeOverlay`: `inputRect` (positional, required), `child` (positional, required)
+- ❌ Param removed in method `_placeOverlay`: `screenSize` (positional, required)
+- ❇️ Methods added: `_updateTicker`, `_onBarrierTapped`, `_buildContent`
+
+**`class` _LdThemeProviderState** ([lib/src/theme/theme_provider.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-bb56e3df14103825a8edc59aa7689986b2bface5596870727b1ab28297f86e57))
+- ❇️ Property added: `_locationLockRegistry`
+
+**`class` _MonkeyShellLayoutBuilder<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_shell.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-f58e8426a3074373d1a4d8d50d0d7467233933c3ceffe3098ffc530558a3aa9b))
+- ❌ Method removed: `_geteEffectiveLayoutMode`
+- ❇️ Method added: `_getEffectiveLayoutMode`
+
+**`class` _RepositoryWatchItems<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/detail_page.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-43d347b03da89e053d770a97150585d0955be32f82540fad5d2ceabd18d33035))
+- ❇️ Class added: `_RepositoryWatchItems`
+
+**`class` _RepositoryWatchItemsState<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/detail_page.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-43d347b03da89e053d770a97150585d0955be32f82540fad5d2ceabd18d33035))
+- ❇️ Class added: `_RepositoryWatchItemsState`
+
+**`class` _RepostoryWatchItems<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/detail_page.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-43d347b03da89e053d770a97150585d0955be32f82540fad5d2ceabd18d33035))
+- ❌ Class removed: `_RepostoryWatchItems`
+
+**`class` _RepostoryWatchItemsState<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/detail_page.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-3..liquid_flutter/v23.0.0-4#diff-43d347b03da89e053d770a97150585d0955be32f82540fad5d2ceabd18d33035))
+- ❌ Class removed: `_RepostoryWatchItemsState`
+
+
+## 23.0.0-4
 Released on: 6/23/2026, changelog automatically generated.
 
 ## Unreleased
