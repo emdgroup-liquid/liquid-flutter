@@ -80,7 +80,7 @@ jobs:
           fail-on-error: false
 
       - name: Install mtrust_api_guard
-        run: dart pub global activate mtrust_api_guard 6.0.7
+        run: dart pub global activate mtrust_api_guard 8.1.0
 
       - name: Run mtrust_api_guard workspace check
         id: version_check
