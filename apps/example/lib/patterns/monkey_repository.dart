@@ -39,8 +39,6 @@ class MonkeyRepositoryDemo extends StatelessWidget {
           CodeBlock(
             language: "dart",
             code: '''final taskModel = LdCallbackModel<Task, int>(
-  singularItemTitle: "Task",
-  pluralItemTitle: "Tasks",
   pageSize: 10,
   
   // Required: Fetch a single item by ID
@@ -48,29 +46,23 @@ class MonkeyRepositoryDemo extends StatelessWidget {
     return testData.firstWhere((element) => element.id == id);
   },
   
-  
-  // Required: Fetch paginated list with filters and sorting
-  fetchListWithParameters: ({
-    required int offset,
-    required int pageSize,
-    String? pageToken,
-    Set<LdFilterOption<Task, int>>? filters,
-    List<LdSortOption<Task, int>>? sortOptions,
-  }) async {
+  // Required: Fetch paginated list with filters and sorting.
+  // params is a FetchPageParameters<Task, int> with offset, pageSize,
+  // filters, sortOptions, cacheKey, reason, and cache.
+  fetchListWithParameters: (params) async {
     // Apply filters
     var filtered = testData.where((item) {
-      return filters?.every((filter) => filter.optimisticFilter(item)) ?? true;
+      return params.filters?.every((filter) => filter.optimisticFilter(item)) ?? true;
     }).toList();
     
     // Apply sorting
-    for (final sortOption in sortOptions ?? []) {
+    for (final sortOption in params.sortOptions ?? []) {
       filtered.sort((a, b) => sortOption.optimisticSort(a, b));
     }
     
     // Apply pagination
-    final startIndex = offset;
-    final endIndex = (offset + pageSize).clamp(0, filtered.length);
-    final pageItems = filtered.sublist(startIndex, endIndex);
+    final endIndex = (params.offset + params.pageSize).clamp(0, filtered.length);
+    final pageItems = filtered.sublist(params.offset, endIndex);
     
     return LdListPage<Task>(
       newItems: pageItems,
@@ -79,25 +71,21 @@ class MonkeyRepositoryDemo extends StatelessWidget {
     );
   },
 
-
-  // Optional: Get the offset of an item for deep linking this 
-  // is used to move the list to the selected item when restoring a deep link.
-  // This is basicually the position of the item when fetched from the backend.
-  getOffsetById: (id, {filters, sortOptions}) async {
-    await Future.delayed(const Duration(seconds: 1));
-    
+  // Optional: Get the offset of an item for deep-link restoration.
+  // Used to scroll the list to the selected item when restoring a URL.
+  getOffsetByIdFn: (params) async {
     // Apply the same filtering and sorting logic as fetchListWithParameters
     final filtered = testData
         .where((element) =>
-            filters?.every((filter) => filter.optimisticFilter(element)) ??
+            params.filters?.every((filter) => filter.optimisticFilter(element)) ??
             true)
         .toList();
 
-    for (final sortOption in sortOptions ?? []) {
+    for (final sortOption in params.sortOptions ?? []) {
       filtered.sort((a, b) => sortOption.optimisticSort(a, b));
     }
 
-    return filtered.indexWhere((element) => element.id == id);
+    return filtered.indexWhere((element) => element.id == params.id);
   },
   
 );''',
@@ -113,7 +101,7 @@ class MonkeyRepositoryDemo extends StatelessWidget {
   },
   
   // Optional: Delete multiple items
-  deleteBatch: (context, ids) async {
+  deleteBatchFn: (context, ids) async {
     testData.removeWhere((element) => ids.contains(element.id));
     await Future.delayed(const Duration(milliseconds: 500));
   },
@@ -127,7 +115,7 @@ class MonkeyRepositoryDemo extends StatelessWidget {
     return updatedItem;
   },
   
-  // Optional: Create a new item (no id parameter - id is part of the item)
+  // Optional: Create a new item
   createItem: (context, Task? item) async {
     testData.add(item!);
     await Future.delayed(const Duration(milliseconds: 500));
