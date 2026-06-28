@@ -244,8 +244,8 @@ final router = GoRouter(
         LdText.p("For more detailed information on specific aspects of the monkey pattern:"),
         LdAutoSpace(children: [
           LdCard(
-            header: Text("Repository"),
-            child: LdText.p("Learn how to set up the data repository with sorting and filtering"),
+            header: Text("Data Model"),
+            child: LdText.p("Learn how to set up the data model with sorting and filtering"),
           ),
           LdCard(
             header: Text("Actions"),

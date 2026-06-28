@@ -12,7 +12,7 @@ class MonkeyRepositoryDemo extends StatelessWidget {
     return ComponentPage(
       path: "lib/patterns/monkey_repository.dart",
       category: "Patterns",
-      title: "LdMonkey - Repository",
+      title: "LdMonkey - Data Model",
       apiComponents: ["LdListController"],
       demo: LdAutoSpace(
         children: [

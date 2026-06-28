@@ -286,7 +286,7 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                     LdDrawerItemSection(
                       active: GoRouterState.of(context).uri.path == ("/patterns/monkey/repository"),
                       onPressed: () => _showPage(context, "/patterns/monkey/repository"),
-                      child: const Text("Repository"),
+                      child: const Text("Data Model"),
                     ),
                     LdDrawerItemSection(
                       active: GoRouterState.of(context).uri.path == ("/patterns/monkey/pattern"),

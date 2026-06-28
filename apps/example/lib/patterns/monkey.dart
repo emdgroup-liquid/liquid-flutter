@@ -5,6 +5,77 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+class _ArchLayer extends StatelessWidget {
+  final String label;
+  final List<String> items;
+  final Color? color;
+  const _ArchLayer({required this.label, required this.items, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = LdTheme.of(context);
+    return LdCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          LdText.ps(label),
+          SizedBox(height: theme.pad(size: LdSize.s).top),
+          Wrap(
+            spacing: theme.pad(size: LdSize.s).left,
+            runSpacing: theme.pad(size: LdSize.s).top,
+            children: items.map((e) => LdTag(child: Text(e))).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MonkeyArchDiagram extends StatelessWidget {
+  const _MonkeyArchDiagram();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = LdTheme.of(context);
+    final arrowColor = theme.textMuted;
+    return Column(
+      children: [
+        const _ArchLayer(
+          label: "Router / URL layer",
+          items: ["GoRouter", "URL state", "location lock", "deep links"],
+        ),
+        Center(
+          child: Icon(LucideIcons.arrowDown, color: arrowColor, size: 20),
+        ),
+        const _ArchLayer(
+          label: "Widget layer",
+          items: [
+            "LdMonkeyShell",
+            "LdMonkeyMasterPage",
+            "LdMonkeyDetailPage",
+            "LdMonkeyAppBar",
+            "LdMonkeyBareChildAction",
+          ],
+        ),
+        Center(
+          child: Icon(LucideIcons.arrowDown, color: arrowColor, size: 20),
+        ),
+        const _ArchLayer(
+          label: "Data layer",
+          items: [
+            "LdCallbackModel",
+            "LdModel",
+            "filtersBuilder",
+            "sortOptionsBuilder",
+            "deleteBatchFn",
+            "getOffsetByIdFn",
+          ],
+        ),
+      ],
+    );
+  }
+}
+
 class MonkeyDemo extends StatelessWidget {
   const MonkeyDemo({super.key});
 
@@ -58,6 +129,11 @@ class MonkeyDemo extends StatelessWidget {
               ),
             ),
           ),
+          LdText.hs("Architecture"),
+          LdText.p(
+            "LdMonkey is composed of three layers. The router owns URL state and drives the shell. The widget layer renders master list, detail panel, and toolbar. The data layer (LdCallbackModel / LdModel) holds items and exposes reactive streams that the widgets observe.",
+          ),
+          const _MonkeyArchDiagram(),
           LdText.caption("Demos"),
           LdCard(
             padding: EdgeInsets.zero,
@@ -141,14 +217,14 @@ class MonkeyDemo extends StatelessWidget {
           ),
           LdAutoSpace(
             children: [
-              LdText.hs("Repository"),
+              LdText.hs("Data Model"),
               LdText.p(
-                "Learn how to set up the data repository that handles all CRUD operations, pagination, filtering, and sorting.",
+                "Learn how to set up the data model that handles all CRUD operations, pagination, filtering, and sorting.",
               ),
               LdCard(
                 padding: EdgeInsets.zero,
                 child: LdListItem.trailingForward(
-                  title: Text("View Repository Documentation"),
+                  title: Text("View Data Model Documentation"),
                   onPressed: () {
                     context.push("/patterns/monkey/repository");
                   },

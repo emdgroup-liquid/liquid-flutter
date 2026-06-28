@@ -157,7 +157,7 @@ class MonkeySortingFilteringDemo extends StatelessWidget {
 )''',
           ),
 
-          LdText.hs("4. Repository Integration"),
+          LdText.hs("4. Data Model Integration"),
           LdText.p(
             "Active filters and sort options are passed to fetchListWithParameters "
             "as a FetchPageParameters object. Apply them to your data fetching logic:",
