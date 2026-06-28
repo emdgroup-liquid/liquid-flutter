@@ -24,70 +24,98 @@ class Task with Identifiable<int> {
 }
 ```
 
-### Repository: `LdRepository`
+### Data Layer: `LdModel` and `LdCallbackModel`
 
-The repository extends `LdPaginator` and manages fetching, creating, updating, and deleting items. It's provided to the widget tree via `LdRepositoryProvider`.
+The monkey data layer is built around `LdModel<T, IdType, TCreate, TUpdate>` (abstract base) and `LdCallbackModel<T, IdType>` (the callback-based implementation). These replace the old `LdRepository`. The in-tree controller is `LdListController<T, IdType>`.
 
-**Required parameters:** `fetchListWithParameters` and `getById`. Everything else (`createItem`, `updateItem`, `deleteItem`, `deleteBatch`, `updateBatch`) is optional.
+Pass an `LdModel` via the `modelBuilder` parameter on `buildMonkeyRoutes` / `MonkeyRouteNode`. The monkey framework creates and attaches `LdListController` automatically.
+
+#### `LdCallbackModel` (standard usage)
 
 ```dart
-LdRepository<Task, int>(
+LdCallbackModel<Task, int>(
   // Required:
   fetchListWithParameters: (params) async {
     final page = await api.getTasks(offset: params.offset, limit: params.pageSize);
     return LdListPage(newItems: page.items, hasMore: page.hasMore, total: page.total);
   },
-  getById: (id) async => await api.getTask(id),
-  // Optional:
-  createItem: (item) async => await api.createTask(item!),
-  updateItem: (id, item) async => await api.updateTask(id, item),
-  deleteItem: (id) async => await api.deleteTask(id),
+  getById: (context, id) async => await api.getTask(id),
+  // Optional CRUD:
+  createItem: (context, item) async => await api.createTask(item!),
+  updateItem: (context, id, item) async => await api.updateTask(id, item),
+  deleteItem: (context, id) async => await api.deleteTask(id),
+  deleteBatchFn: (context, ids) async => await api.deleteTasks(ids),
+  updateBatchFn: (context, items) async => await api.updateTasks(items),
 )
 ```
 
-### `LdRepository.fromList` (in-memory / local data)
-
-For demos, tests, or simple use cases where all data is available locally:
+#### `LdCallbackModel.fromList` (in-memory / local data)
 
 ```dart
-LdRepository.fromList<Task, int>(
+LdCallbackModel.fromList<Task, int>(
   list: [Task(1, 'Write tests', false), Task(2, 'Ship it', true)],
 )
 ```
 
-This creates a **greedy** repository that eagerly loads the full in-memory list via `ensureGreedyLoaded`.
+Creates a greedy in-memory model. Optionally pass `filterFunction` and `sortFunction` for client-side filter/sort.
 
-### `LdFetchReason`, `cacheKey`, and `LdListCache`
+#### `LdCallbackModel.greedy`
 
-`fetchListWithParameters` receives a `reason`, per-repo `cache`, and a deterministic `cacheKey` (active filters + sorts, excluding offset/pageSize/reason).
-
-By default, `LdRepository` **auto-caches pages** under `params.cacheKey` (cache reads apply on `pagination` only), and **auto-invalidates** the cache on `refresh` / `invalidate`. Opt out with `autoCache: false` or `autoInvalidateCache: false`.
+For small or complete datasets that should fully load regardless of scroll:
 
 ```dart
-LdRepository<Task, int>(
+LdCallbackModel.greedy<Task, int>(
+  pageSize: 50,
+  getById: (context, id) async => await api.getTask(id),
   fetchListWithParameters: (params) async {
-    final page = await api.getTasks(
-      offset: params.offset,
-      limit: params.pageSize,
-      filters: params.filters,
-      sorts: params.sortOptions,
-    );
-    return LdListPage(
-      newItems: page.items,
-      hasMore: page.hasMore,
-      total: page.total,
-    );
+    // Return pages; called repeatedly until hasMore == false on init.
+    ...
   },
-  getById: (id) async => api.getTask(id),
 )
 ```
 
-For client-side filtering over a full dataset, read the merged cache after greedy load:
+#### Subclassing `LdModel` (advanced)
+
+Override `LdModel` when you need custom caching strategy, batching, or lifecycle hooks:
 
 ```dart
-final entry = params.cache.readEntry(params.cacheKey);
-final all = entry?.all; // null until all pages are cached contiguously from 0
+class TaskModel extends LdModel<Task, int, TaskCreate, TaskUpdate> {
+  @override
+  Future<LdListPage<Task>> fetchListWithParameters(FetchPageParameters<Task, int> params) async { ... }
+
+  @override
+  Future<Task> getById(BuildContext context, int id) async { ... }
+
+  @override
+  Future<Task> persistCreate(BuildContext context, TaskCreate payload) async { ... }
+
+  @override
+  Future<Task?> persistUpdate(BuildContext context, int id, TaskUpdate payload) async { ... }
+
+  @override
+  Future<void> persistDelete(BuildContext context, int id) async { ... }
+
+  @override
+  Future<void> persistDeleteBatch(BuildContext context, Set<int> ids) async { ... }
+
+  @override
+  Future<void> persistUpdateBatch(BuildContext context, Set<TaskUpdate> items) async { ... }
+}
 ```
+
+Call mutations via the model's public methods (which delegate to the mounted `LdListController`):
+
+```dart
+await model.create(context, payload);
+await model.update(context, id, payload);
+await model.delete(context: context, id: id);
+```
+
+#### `LdFetchReason`, `cacheKey`, and `LdListCache`
+
+`fetchListWithParameters` receives a `reason`, per-model `cache`, and a deterministic `cacheKey` (active filters + sorts, excluding offset/pageSize/reason).
+
+By default, `LdCallbackModel` auto-caches pages under `params.cacheKey` and auto-invalidates on `refresh` / `invalidate`. Opt out with `autoCache: false` or `autoInvalidateCache: false`.
 
 | `LdFetchReason` | Typical use |
 |-----------------|-------------|
@@ -95,27 +123,7 @@ final all = entry?.all; // null until all pages are cached contiguously from 0
 | `pagination` | Scroll / load more |
 | `filter` / `sort` | Filter or sort changed (paginator resets view) |
 | `refresh` | User pull-to-refresh (clears cache when auto-invalidate is on) |
-| `invalidate` | CRUD / external cache bust (clears cache when auto-invalidate is on) |
-
-Filter/sort changes trigger a **hard paginator reset** (offset 0). A new `cacheKey` isolates cached pages per query.
-
-### `LdRepository.greedy`
-
-For small or complete datasets where the full list should load regardless of scroll:
-
-```dart
-LdRepository.greedy<Task, int>(
-  pageSize: 50,
-  getById: (id) async => await api.getTask(id),
-  fetchListWithParameters: (params) async {
-    // Return one large page (hasMore: false) or paginated pages.
-    // Called repeatedly until hasMore is false on init.
-    ...
-  },
-)
-```
-
-`LdRepositoryProvider` calls `ensureGreedyLoaded` automatically for greedy repos. Pages are cached automatically unless `autoCache: false`.
+| `invalidate` | CRUD / external cache bust |
 
 ### Route Config: `LdMonkeyRouteConfig`
 
@@ -129,7 +137,10 @@ LdMonkeyRouteConfig.identifiableString<Task>(itemName: 'task')
 LdMonkeyRouteConfig.identifiableInt<Task>(itemName: 'task')
 ```
 
-The `itemName` must be unique across a monkey tree and is used for path params (`viewing_<itemName>`), query keys (`selection_<itemName>`, `select_<itemName>`), and `GoRoute.name`s (`<itemName>-master`, `<itemName>-detail`).
+The `itemName` must be unique across a monkey tree. It is used for:
+- Path params: `viewing_<itemName>`
+- Query keys: `selection_<itemName>`, `select_<itemName>`
+- Route names: `<itemName>-master`, `<itemName>-detail`, `<itemName>-create`
 
 ## Getting Started: A Basic Monkey Route
 
@@ -149,7 +160,7 @@ final routes = buildMonkeyRoutes<Task, int>(
   detailPage: LdMonkeyDetailPage(
     body: TaskDetail(),
   ),
-  repositoryBuilder: (context, state) => LdRepository<Task, int>(...),
+  modelBuilder: (context, state) => LdCallbackModel<Task, int>(...),
   filtersBuilder: (_) async => [],
   sortOptionsBuilder: (_) async => [],
   actions: const [],
@@ -170,16 +181,9 @@ final router = GoRouter(
 );
 ```
 
-Or assign to a variable first and pass it directly when it is the only routes list:
-
-```dart
-final routes = buildMonkeyRoutes<Task, int>(...);
-final router = GoRouter(routes: routes, initialLocation: '/tasks');
-```
-
 ### 3. The route tree is created by the framework
 
-Navigating to `/tasks` shows the master list. Navigating to `/tasks/1` opens the detail for item with id 1. On wide screens (`>600px`) the layout becomes side-by-side automatically.
+Navigating to `/tasks` shows the master list. Navigating to `/tasks/:viewing_task` opens the detail. On wide screens (`>600px`) the layout becomes side-by-side automatically.
 
 ## Route Building API
 
@@ -193,21 +197,30 @@ buildMonkeyRoutes<T, IdType>({
   required String masterPath,
   required Widget detailPage,            // LdMonkeyDetailPage or custom
   required Widget masterPage,            // LdMonkeyMasterPage or custom
-  required LdRepository<T, IdType> Function(BuildContext, GoRouterState) repositoryBuilder,
-  required LdMonkeyFiltersBuilder<T, IdType> filtersBuilder,
-  required LdMonkeySortOptionsBuilder<T, IdType> sortOptionsBuilder,
+  required LdModel<T, IdType, Object?, Object?> Function(BuildContext, GoRouterState) modelBuilder,
+  required LdMonkeyFiltersBuilder<T, IdType> filtersBuilder,    // async filter builder
+  required LdMonkeySortOptionsBuilder<T, IdType> sortOptionsBuilder,  // async sort builder
   LdMonkeyRouteDefinitionsLoadingTextBuilder? routeDefinitionsLoadingText,
   required List<LdMonkeyAction<T, IdType>> actions,
   Widget Function(BuildContext, GoRouterState, Widget)? shellBuilder,
   List<RouteBase>? additionalDetailRoutes,
   List<RouteBase>? additionalMasterRoutes,
   bool detailInDialog = false,
+  Widget? createPage,                    // optional create route (served at masterPath/new)
   LdMonkeyLayoutMode layoutMode = LdMonkeyLayoutMode.auto,
   double? reflowBreakpoint,
   double? detailPanelFlex,
   bool? allowMultipleSelection,
   bool? immediateViewSelection,
+  LdMonkeyReorderHandler<T, IdType>? reorderHandler,  // drag-to-reorder handler
 })
+```
+
+`filtersBuilder` and `sortOptionsBuilder` are async because filter/sort definitions may be fetched from the server. For static options, return a completed future:
+
+```dart
+filtersBuilder: (_) async => [LdFilterSearch(...)],
+sortOptionsBuilder: (_) async => [LdSortOption(...)],
 ```
 
 ### `buildMonkeyRouteTree` and `MonkeyRouteNode`
@@ -217,21 +230,23 @@ For nested/stacked master-detail trees (where the parent's detail page contains 
 ```dart
 final routes = buildMonkeyRouteTree<Task, int>(
   masterPath: '/projects',
-  root: MonkeyRouteNode<Task, int>(
+  root: MonkeyRouteNode<Project, int>(
     routeConfig: parentRouteConfig,
-    masterPage: LdMonkeyMasterPage<Task, int>(...),
-    detailPage: LdMonkeyMasterPage<File, String>(...),  // child master
-    repositoryBuilder: (context, state) => parentRepo,
+    masterPage: LdMonkeyMasterPage<Project, int>(...),
+    detailPage: LdMonkeyMasterPage<Task, int>(...),  // child master
+    modelBuilder: (context, state) => parentModel,
     filtersBuilder: (_) async => [],
     sortOptionsBuilder: (_) async => [],
     actions: const [],
-    child: MonkeyRouteNode<File, String>(
-      detailPathPrefix: 'files',
+    child: MonkeyRouteNode<Task, int>(
+      detailPathPrefix: 'tasks',
       routeConfig: childRouteConfig,
       masterPage: const SizedBox(),
-      detailPage: const Text('FileDetail'),
-      repositoryBuilder: (context, state) => childRepo,
-      ...
+      detailPage: const Text('TaskDetail'),
+      modelBuilder: (context, state) => childModel,
+      filtersBuilder: (_) async => [],
+      sortOptionsBuilder: (_) async => [],
+      actions: const [],
     ),
   ),
 );
@@ -241,7 +256,19 @@ See the **Nested Master-Detail** section below for more detail.
 
 ## LdMonkeyMasterPage
 
-Renders the master (list) side of the monkey. It expects an `LdRepository<T, IdType>` and `LdMonkeyActions<T, IdType>` in the context (provided by the `ShellRoute` scope). `LdMonkeyActions` is a typedef alias for `List<LdMonkeyAction<T, IdType>>`.
+Renders the master (list) side of the monkey. Expects an `LdListController<T, IdType>` and `LdMonkeyActions<T, IdType>` in the context (provided by the `ShellRoute` scope).
+
+```dart
+LdMonkeyMasterPage<T, IdType>({
+  Widget Function(BuildContext, LdListController<T, IdType>)? buildList,
+  Widget Function(BuildContext, LdPaginatorItem<T>)? buildItem,
+  List<LdFilterChipConfig<T, IdType>>? filterBarConfig,   // renders LdFilterChipsBar
+  LdAppBarConfig? primaryAppBarConfig,
+  LdAppBarConfig? secondaryAppBarConfig,
+  List<Widget> primaryAppBarAdditionalActions = const [],
+  bool allowMultipleSelection = true,
+})
+```
 
 ### With `buildItem` (default list)
 
@@ -257,55 +284,52 @@ LdMonkeyMasterPage<Task, int>(
 
 ### With `buildList` (custom list widget)
 
+`buildList` receives a `LdListController<T, IdType>` (not `LdRepository`). Bypasses default selection, reorder, and context-menu wiring.
+
 ```dart
 LdMonkeyMasterPage<Task, int>(
-  buildList: (context, repository) => LdSelectableList<Task, int>(
-    paginator: repository,
+  buildList: (context, controller) => LdSelectableList<Task, int>(
+    paginator: controller,
     multiSelect: true,
     itemBuilder: (context, item, index) => MyCustomListItem(item: item),
   ),
 )
 ```
 
-### With custom app bars
+### With app bar config
+
+Title, leading, and bar customization go through `LdAppBarConfig`:
 
 ```dart
 LdMonkeyMasterPage<Task, int>(
-  primaryAppBarConfig: LdAppBarConfig(
-    title: Text('Tasks'),
-  ),
-  primaryAppBarAdditionalActions: [MyCustomAction()],
-  secondaryAppBarConfig: LdAppBarConfig(
-    bottom: LdFilterChipsBar<Task, int>(configs: [...]),
-  ),
-)
-```
-
-### `allowMultipleSelection`
-
-`LdMonkeyMasterPage` has its own `allowMultipleSelection` parameter (default `true`) that controls whether the default list allows multi-select. **Known bug (#112):** setting `allowMultipleSelection: false` at the route level (`buildMonkeyRoutes` / `MonkeyRouteNode`) currently has no effect on `LdMonkeyMasterPage` — the two parameters are independent. Until the bug is fixed, set it on `LdMonkeyMasterPage` directly:
-
-```dart
-LdMonkeyMasterPage<Task, int>(
-  allowMultipleSelection: false,  // set here, not only on buildMonkeyRoutes
+  primaryAppBarConfig: LdAppBarConfig(title: Text('Tasks')),
+  primaryAppBarAdditionalActions: [MyCustomButton()],
+  filterBarConfig: [LdFilterChipConfig(...)],  // renders chip bar below primary bar
   buildItem: (context, item) => LdListItem(title: Text(item.value?.title ?? '')),
 )
 ```
 
+### `filterBarConfig`
+
+Pass a list of `LdFilterChipConfig<T, IdType>` to render an `LdFilterChipsBar` automatically between the primary and secondary app bars. This is the preferred way to show active filter chips.
+
+### `allowMultipleSelection`
+
+Controls whether the default list allows multi-select (default `true`). Set it here — the route-level `allowMultipleSelection` on `buildMonkeyRoutes` / `MonkeyRouteNode` controls URL-sync, not the list widget.
+
 ### Key behavior
 
-- `LdMonkeyAppBar` with `location: LdMonkeyActionLocation.masterAppBar` is the primary app bar (top).
-- `LdMonkeyAppBar` with `location: LdMonkeyActionLocation.masterSecondary` is the secondary bar (bottom).
-- Shortcut bindings (`LdMonkeyMultiShortcuts` / `LdMonkeySingleShortcuts`) and context menus (`LdMonkeyContextMenu`) are automatically wired when using the default `buildItem` path.
+- Shortcut bindings and context menus are automatically wired when using the default `buildItem` path.
+- When `canReorder` is true (exactly one active sort option with `supportsReorder: true`), the list renders inside `LdListReorderScope` with `LdListReorderHandler`.
 
 ## LdMonkeyDetailPage
 
-### Default
-
 ```dart
-LdMonkeyDetailPage(
-  body: MyDetailWidget(),
-)
+LdMonkeyDetailPage<T, IdType>({
+  required Widget body,
+  LdAppBarConfig? primaryAppBarConfig,
+  LdAppBarConfig? secondaryAppBarConfig,
+})
 ```
 
 ### Scrollable (renders all viewing items as a scrollable list)
@@ -325,18 +349,33 @@ LdMonkeyDetailPage.stacked(
 )
 ```
 
-## LdMonkeyAppBar
+### `LdMonkeyStreamSelection`
 
-The LdMonkeyAppBar automatically injects actions based on the `LdMonkeyActionLocation`. Customize title, bottom, and other bar properties via `LdAppBarConfig` on `LdMonkeyMasterPage` or `LdMonkeyDetailPage`.
+Streams live updates for all currently-viewed items and rebuilds when they change:
 
 ```dart
-LdMonkeyMasterPage<Task, int>(
-  primaryAppBarConfig: LdAppBarConfig(title: Text('Tasks')),
-  buildItem: (context, item) => LdListItem(title: Text(item.value?.title ?? '')),
+LdMonkeyStreamSelection<Task, int>(
+  showLoaderWhileEmpty: false,
+  buildItem: (context, item) => TaskCard(item: item),
+  builder: (context, itemWidgets) => Column(children: itemWidgets),
 )
 ```
 
-**Note:** When an `LdMonkeyAppBar` has no title, no actions, and no `additionalActions`, it renders as `child ?? SizedBox.shrink()` — the bar surface is invisible. This is by design (avoids an empty bar), but can be surprising if you expect an app bar to always be visible.
+## LdMonkeyAppBar
+
+`LdMonkeyAppBar` automatically injects monkey actions at the given location. Set title and bar properties via `LdAppBarConfig` on `LdMonkeyMasterPage` or `LdMonkeyDetailPage` — `LdMonkeyAppBar` itself has no `title` parameter.
+
+```dart
+const LdMonkeyAppBar({
+  required LdMonkeyActionLocation location,
+  List<Widget> additionalActions = const [],
+  String? debugName,
+  bool? implyLeading,   // overrides LdAppBarConfig.implyLeading
+  Widget? child,        // subtree the bar wraps; null renders the bar surface only
+})
+```
+
+**Note:** When an `LdMonkeyAppBar` has no actions and no `additionalActions`, it renders as `child ?? SizedBox.shrink()` — the bar surface is invisible. This is by design (avoids an empty bar), but can be surprising if you expect an app bar to always be visible.
 
 ### Action locations
 
@@ -365,7 +404,7 @@ LdMonkeyActionVisibility(
     LdMonkeyEffectiveLayoutMode.sideBySide,
   },
   visibleWhenShowingSelectionControls: true,  // null = always, true/false = specific
-  isVisible: (context) => true,  // Custom predicate
+  isVisible: (ctx) => true,  // Custom predicate (receives LdMonkeyActionContext)
 )
 ```
 
@@ -380,7 +419,7 @@ Shared snapshot for action logic in both bare-child and submit actions. Built by
 | `updateViewing`, `updateSelection`, … | helpers on `ctx` |
 | After any `await` | `ctx.appContext.mounted` |
 
-Context menu actions receive item-scoped `selectedIds` because [LdMonkeyContextMenu](packages/liquid_flutter/lib/src/monkey/actions/context_menu.dart) overrides the selection provider for the overlay.
+Context menu actions receive item-scoped `selectedIds` because `LdMonkeyContextMenu` overrides the selection provider for the overlay.
 
 ### `LdMonkeyBareChildAction`
 
@@ -401,7 +440,7 @@ LdMonkeyBareChildAction<Task, int>(
     child: const Text('New'),
   ),
   onTrigger: (ctx) async {
-    // Use ctx.selectedIds, ctx.repository; app providers via ctx.appContext
+    // Use ctx.selectedIds, ctx.appContext for providers, navigation, etc.
   },
 )
 ```
@@ -410,7 +449,7 @@ Wire `onPressed: trigger` so press-time snapshots stay fresh. `onTrigger` is als
 
 ### `LdMonkeySubmitAction`
 
-For async operations with loading state, error handling, and notifications. Requires a unique `id` (String or enum). One offstage `LdSubmit` host is mounted per route; app bar and context menu share loading state.
+For async operations with loading state, error handling, and notifications. Requires a unique `id`. One offstage `LdSubmit` host is mounted per route; app bar and context menu share loading state.
 
 For standard delete, use `deleteAction<Task, int>()` instead (see Built-in Action Factories below).
 
@@ -428,18 +467,18 @@ LdMonkeySubmitAction<Task, int, void>(
     loadingText: 'Archiving...',
   ),
   onSubmit: (ctx) async {
-    await archiveSelected(ctx);
+    await archiveSelected(ctx.selectedIds);
   },
   child: const Text('Archive'),
   icon: const Icon(LucideIcons.archive),
+  // Optional:
+  childBuilder: (triggerContext) => Text('Archive (${count})'),  // reactive child
+  appBarOverflowMode: LdAppBarActionOverflowMode.overflowable,
+  multiSelect: true,
 )
 ```
 
-Use `submitConfig(appContext)` for static options and `onSubmit(ctx)` for action logic. Do not read monkey state from raw `BuildContext` in action callbacks.
-
 ### Built-in Action Factories
-
-The monkey system provides several pre-built actions:
 
 | Factory Function | Location | Behavior |
 |---|---|---|
@@ -448,9 +487,8 @@ The monkey system provides several pre-built actions:
 | `showFilterContextMenu<T, IdType>()` | `masterAppBar` | Dropdown filter menu |
 | `showFilterModal<T, IdType>()` | `masterAppBar` | Modal filter dialog |
 | `refreshAction<T, IdType>()` | `masterAppBar` | Desktop-only refresh button |
-| `deleteAction<T, IdType>()` | `detailAppBar`, `context`, `masterSecondary` | Deletes selected items via repository |
-
-Include them in the `actions` list:
+| `deleteAction<T, IdType>()` | `detailAppBar`, `context`, `masterSecondary` | Deletes selected items via the model |
+| `reactiveCreateAction<T, IdType>(routeConfig:)` | `masterAppBar` | Pushes the named create route (`<itemName>-create`) |
 
 ```dart
 actions: [
@@ -459,6 +497,7 @@ actions: [
   showFilterContextMenu<Task, int>(),
   refreshAction<Task, int>(),
   deleteAction<Task, int>(),
+  reactiveCreateAction<Task, int>(routeConfig: routeConfig),
   // Custom actions...
 ]
 ```
@@ -469,7 +508,7 @@ Actions with `LdMonkeyActionVisibility(location: LdMonkeyActionLocation.context,
 
 ### Keyboard Shortcuts
 
-Set `shortcutActivators` on any action and the monkey system will automatically wire `CallbackShortcuts` (via `LdMonkeyMultiShortcuts`/`LdMonkeySingleShortcuts`):
+Set `shortcutActivators` on any action and the monkey system will automatically wire `CallbackShortcuts`:
 
 ```dart
 LdMonkeyBareChildAction<Task, int>(
@@ -478,10 +517,19 @@ LdMonkeyBareChildAction<Task, int>(
 )
 ```
 
-The `monkeyShortcuts` constant provides built-in keyboard shortcuts:
+Built-in shortcuts:
 - `Cmd+F` — Search intent (when `LdFilterSearch` is configured)
 - `Cmd+R` — Refresh intent
 - `Cmd+A` — Select all intent
+
+### `appBarOverflowMode` and `multiSelect`
+
+All action types expose two additional base parameters:
+
+```dart
+LdAppBarActionOverflowMode appBarOverflowMode = LdAppBarActionOverflowMode.overflowable,
+bool multiSelect = true,
+```
 
 ## Filtering
 
@@ -489,51 +537,35 @@ The `monkeyShortcuts` constant provides built-in keyboard shortcuts:
 
 - **`LdFilterSearch<T, IdType, Suggestion>`** — Search/text filter, automatically adds a search bar to the master app bar
 - **`LdFilterBool<T, IdType>`** — Boolean toggle filter
-- **`LdFilterOneOf<T, IdType>`** — Select one from a set of options
-- **`LdFilterAnyOf<T, IdType>`** — Select any number from a set of options (checkboxes)
+- **`LdFilterOneOf<T, IdType, V>`** — Select one from a set of options
+- **`LdFilterAnyOf<T, IdType, V>`** — Select any number from a set of options (checkboxes)
 - **`LdFilterRange<T, IdType>`** — Range filter (min/max)
 
 ### Adding Filters
 
-```dart
-final filters = <LdFilterOption<Task, int>>[
-  LdFilterSearch<Task, int, String>(
-    name: 'search',
-    label: (context) => 'Search tasks',
-    icon: (context) => const Icon(LucideIcons.search),
-  ),
-  LdFilterBool<Task, int>(
-    name: 'completed',
-    label: (context) => 'Completed only',
-    icon: (context) => const Icon(LucideIcons.checkCircle),
-  ),
-  LdFilterOneOf<Task, int, String>(
-    name: 'priority',
-    label: (context) => 'Priority',
-    icon: (context) => const Icon(LucideIcons.flag),
-    allValues: {
-      for (final option in ['Low', 'Medium', 'High'])
-        option: (context) => Text(option),
-    },
-  ),
-];
-```
-
-Pass async builders to `buildMonkeyRoutes` or `MonkeyRouteNode`. Load dynamic oneOf/anyOf option catalogs inside `filtersBuilder`:
+Filters are provided via the async `filtersBuilder` on `buildMonkeyRoutes` / `MonkeyRouteNode`. Dynamic option catalogs can be loaded inside the builder:
 
 ```dart
 buildMonkeyRoutes<Task, int>(
   filtersBuilder: (context) async {
-    final categories = await api.fetchCategories(context);
+    final categories = await api.fetchCategories();
     return [
-      ...taskFilters,
+      LdFilterSearch<Task, int, String>(
+        name: 'search',
+        label: (context) => 'Search tasks',
+        icon: (context) => const Icon(LucideIcons.search),
+      ),
+      LdFilterBool<Task, int>(
+        name: 'completed',
+        label: (context) => 'Completed only',
+        icon: (context) => const Icon(LucideIcons.checkCircle),
+      ),
       LdFilterOneOf<Task, int, String>(
         name: 'category',
         label: (context) => 'Category',
         icon: (context) => const Icon(LucideIcons.tag),
         allValues: {
-          for (final category in categories)
-            category: (context) => Text(category),
+          for (final cat in categories) cat: (context) => Text(cat),
         },
       ),
     ];
@@ -544,19 +576,19 @@ buildMonkeyRoutes<Task, int>(
 ```
 
 The monkey will automatically:
-- Resolve definitions via **`LdMonkeyRouteDefinitionsResolver`** (`LdSubmit`, localized `loadingRouteDefinitions`)
+- Resolve definitions via `LdMonkeyRouteDefinitionsResolver` (with loading state)
 - Sync filter state with URL query parameters
 - Show a search bar in the master app bar when an `LdFilterSearch` is configured
 - Show filter indicator badges on filter buttons
 
-Re-fetch definitions from the server: **`LdMonkeySortAndFilterState.refreshFilterDefinitions(context)`** (uses the resolver's `LdSubmitController`).
+Re-fetch definitions from the server: `LdMonkeySortAndFilterState.refreshFilterDefinitions(context)`.
 
-For filter chips on the master bar, use **`LdFilterChipsBar`** on **`LdMonkeyAppBar.bottom`** (bool toggle, range/oneOf/anyOf inline or sheet). Optional **`groupLabel`** on each config shows a muted label before that filter's chips (e.g. inline any-of genres). The bar flattens each filter into individual chip widgets so **`LdHorizontalScroll`** can scroll them on mobile/tablet or **`Wrap`** them on desktop without clipping wide inline groups. Edge fades, one-time peek, and **`edgeBleed`** (matching app bar inside padding) apply in scroll layout.
+For filter chips on the master bar, pass `filterBarConfig` to `LdMonkeyMasterPage`. Chips are rendered in `LdFilterChipsBar` which handles horizontal scrolling on mobile and wrapping on desktop.
 
 ### Accessing Active Filters
 
 ```dart
-final filterState = LdMonkeySortAndFilterState.of<Task, int>(context);
+final filterState = LdMonkeySortAndFilterState.of<Task, int>(context);  // listen: true by default
 final activeFilters = filterState.activeFilters;
 final searchFilter = filterState.filters.whereType<LdFilterSearch>().firstOrNull;
 ```
@@ -571,21 +603,44 @@ final sortOptions = <LdSortOption<Task, int>>[
     icon: (context) => const Icon(LucideIcons.arrowUpAZ),
   ),
   LdSortOption<Task, int>(
-    name: 'priority',
-    label: (context) => 'Priority',
-    icon: (context) => const Icon(LucideIcons.arrowUpAZ),
+    name: 'order',
+    label: (context) => 'Custom order',
+    icon: (context) => const Icon(LucideIcons.gripVertical),
+    supportsReorder: true,  // enables drag-to-reorder when this sort is active
   ),
 ];
 ```
 
-Sort options are synced with URL query parameters. Access active sort options via:
+Sort options are synced with URL query parameters. Access active sort options:
 
 ```dart
 final sortAndFilter = LdMonkeySortAndFilterState.of<Task, int>(context);
 final activeSorts = sortAndFilter.activeSortOptions;
+final canReorder = sortAndFilter.canReorder; // true when exactly one active sort has supportsReorder: true
 ```
 
-**Note:** Filters and sort options are not stored in the list controller — they live in `LdMonkeySortAndFilterState` in the widget tree. Use `LdMonkeyListFilterAdapter` (automatically included in the monkey scope) to react to filter/sort changes and refresh the list.
+**Note:** Filters and sort options are not stored in the list controller — they live in `LdMonkeySortAndFilterState` in the widget tree. `LdMonkeyListFilterAdapter` (included automatically in the monkey scope) reacts to filter/sort changes and refreshes the list controller.
+
+## Drag-to-Reorder
+
+Provide a `reorderHandler` on `buildMonkeyRoutes` / `MonkeyRouteNode` and set `supportsReorder: true` on the relevant sort option. The list automatically renders with drag handles when `canReorder` is true:
+
+```dart
+buildMonkeyRoutes<Task, int>(
+  reorderHandler: (context, item, fromIndex, toIndex) async {
+    return await api.reorderTask(item.id, toIndex);
+  },
+  sortOptionsBuilder: (_) async => [
+    LdSortOption<Task, int>(
+      name: 'order',
+      label: (context) => 'Custom order',
+      icon: (context) => const Icon(LucideIcons.gripVertical),
+      supportsReorder: true,
+    ),
+  ],
+  ...
+)
+```
 
 ## Selection State
 
@@ -597,6 +652,7 @@ The `LdMonkeySelection<T, IdType>` class tracks three things:
 ### Reading Selection
 
 ```dart
+// listen: false by default — pass true to rebuild when selection changes
 final selection = LdMonkeySelection.of<Task, int>(context, listen: true);
 final selectedIds = selection.selection;
 final viewingIds = selection.viewing;
@@ -608,11 +664,19 @@ final viewingIds = selection.viewing;
 LdMonkeySelection.updateSelection<Task, int>(context, {1, 2, 3});
 LdMonkeySelection.updateViewing<Task, int>(context, {1});
 LdMonkeySelection.updateShowSelectionControls<Task, int>(context, true);
+LdMonkeySelection.maybeClearSelection<Task, int>(context);  // shows confirmation modal
+```
+
+### Getting Item Objects
+
+```dart
+final selectedItems = await LdMonkeySelection.getSelectedItems<Task, int>(context);
+final viewingItems = await LdMonkeySelection.getViewingItems<Task, int>(context);
 ```
 
 ### Adaptive Selection
 
-The `adaptive` method returns the relevant set based on action location:
+`LdMonkeySelection.adaptive` returns the relevant set based on action location:
 - `masterAppBar` / `masterSecondary` / `context` → `selection`
 - `detailAppBar` / `detailSecondary` → `viewing`
 
@@ -653,7 +717,7 @@ final routes = buildMonkeyRouteTree<Project, int>(
     masterPage: LdMonkeyMasterPage<Project, int>(...),
     // Parent detail IS the child's master page:
     detailPage: LdMonkeyMasterPage<Task, int>(...),
-    repositoryBuilder: (context, state) => projectRepo,
+    modelBuilder: (context, state) => projectModel,
     filtersBuilder: (_) async => [...],
     sortOptionsBuilder: (_) async => [...],
     actions: [...],
@@ -662,7 +726,7 @@ final routes = buildMonkeyRouteTree<Project, int>(
       routeConfig: LdMonkeyRouteConfig.identifiableInt<Task>(itemName: 'task'),
       masterPage: const SizedBox(),
       detailPage: const Text('Task Detail'),
-      repositoryBuilder: (context, state) => taskRepo,
+      modelBuilder: (context, state) => taskModel,
       filtersBuilder: (_) async => [...],
       sortOptionsBuilder: (_) async => [...],
       actions: [...],
@@ -673,9 +737,36 @@ final routes = buildMonkeyRouteTree<Project, int>(
 
 **Important:** Each `routeConfig.itemName` must be unique across the entire tree to avoid path param and query key collisions.
 
+### `scopeStorageKey`
+
+Override the default scope key generation (which uses ancestor `viewing_*` path params) via the `scopeStorageKey` parameter on `MonkeyRouteNode`:
+
+```dart
+MonkeyRouteNode<Task, int>(
+  scopeStorageKey: (root, state) => 'my-custom-scope-key',
+  ...
+)
+```
+
+## Create Route
+
+A separate create route (`masterPath/new`) can be provided via `createPage` on `buildMonkeyRoutes` / `MonkeyRouteNode`. Use `reactiveCreateAction` to push to it:
+
+```dart
+buildMonkeyRoutes<Task, int>(
+  createPage: LdMonkeyDetailPage(body: TaskCreateForm()),
+  actions: [
+    reactiveCreateAction<Task, int>(routeConfig: routeConfig),
+  ],
+  ...
+)
+```
+
+The named route is `<itemName>-create`; use `GoRouter.of(context).pushNamed('task-create')` to navigate programmatically.
+
 ## Detail Modal
 
-Show detail in a modal/dialog when not in side-by-side mode. Pass `detailInDialog: true` to `buildMonkeyRoutes` — the router will automatically open the detail page as an `LdModalRoute` when a narrow-screen user navigates to the detail route:
+Show detail in a modal/dialog when not in side-by-side mode:
 
 ```dart
 buildMonkeyRoutes<Task, int>(
@@ -684,13 +775,15 @@ buildMonkeyRoutes<Task, int>(
 )
 ```
 
-## Detail editing guards
+The router automatically opens the detail page as an `LdModalRoute` when a narrow-screen user navigates to the detail route.
 
-Editable monkey detail pages use [LdLocationLockRegistry] with [GoRouter.redirect] to intercept all navigation away from a dirty detail path. Each editor registers and removes its own lock; there is no monkey-specific aggregation layer.
+## Detail Editing Guards
+
+Editable monkey detail pages use `LdLocationLockRegistry` with `GoRouter.redirect` to intercept all navigation away from a dirty detail path.
 
 ### Setup
 
-Mount [LdThemeProvider] (includes [LdLocationLockRegistry]) and wire the router:
+Mount `LdThemeProvider` (includes `LdLocationLockRegistry`) and wire the router:
 
 ```dart
 GoRouter(
@@ -699,16 +792,11 @@ GoRouter(
 )
 ```
 
-Combine with app-specific redirects using [ldComposeGoRouterRedirects].
+Combine with app-specific redirects using `ldComposeGoRouterRedirects`.
 
 ### Self-managed locks
 
-Each editor owns its lock. While edits are dirty or saving it:
-
-- Registers a path-prefix lock for the current URI (sub-path navigation stays allowed)
-- Renders `PopScope(canPop: false)` to block predictive back
-
-Multiple editors may lock the same path (e.g. a multi-view `/task-demo/12,13`); only disjoint, non-nested prefixes conflict. Saving is the editor's own concern — handle it inside `onLeave` (block silently while saving), not on the lock.
+Each editor owns its lock:
 
 ```dart
 LdLocationLockRegistry.of(context).register(
@@ -723,50 +811,151 @@ LdLocationLockRegistry.of(context).register(
 );
 ```
 
-Return `true` from `onLeave` to allow leaving (the lock is removed); `false` to stay. Unregister the lock when the editor becomes pristine and in `dispose`.
+Return `true` from `onLeave` to allow leaving; `false` to stay. Unregister the lock when the editor becomes pristine and in `dispose`.
 
-[LdMonkeyReactiveDetailForm] does all of this automatically — non-reactive editors use this generic API directly.
+`LdMonkeyReactiveDetailForm` does all of this automatically — non-reactive editors use this generic API directly.
 
-### `LdMonkeyReactiveDetailForm`
+## Reactive Detail Forms (`liquid_flutter_reactive_forms` package)
 
-Reactive detail editor (`liquid_flutter_reactive_forms`) that connects a `FormGroup` to `LdRepository.update`:
+`LdMonkeyReactiveDetailForm` connects a `reactive_forms` `FormGroup` to `LdModel.update` / `LdModel.create`. It manages save mode, field conflict resolution, navigation guards, and streams live updates.
 
 ```dart
-LdMonkeyReactiveDetailForm<Task, int, Task>(
-  item: paginatorItem,
+// Edit mode — 5 type params: T, IdType, TDetail, TCreate, TUpdate
+LdMonkeyReactiveDetailForm<Task, int, Task, Task, Task>.edit(
+  item: paginatorItem,                     // LdPaginatorItem<T>? from the list
   saveMode: LdMonkeyDetailSaveMode.adaptive,
   detailToFormValues: (task) => {
-    'title': task.task,
-    'due': task.due,
+    'title': task.title,
+    'completed': task.completed,
   },
-  mapToEntity: (form, task) => task.copyWith(
-    task: form.control('title').value as String,
-    due: form.control('due').value as DateTime,
+  formToUpdatePayload: (form, task) => task.copyWith(
+    title: form.control('title').value as String,
+    completed: form.control('completed').value as bool,
   ),
   itemsBuilder: (context, hooks) => [
     LdReactiveFormItem.input<String>(
       key: 'title',
-      inputFieldHint: 'Task',
+      inputFieldHint: 'Task title',
       onBlurred: hooks.onBlurred('title'),
     ),
-    LdReactiveFormItem.datePicker(
-      key: 'due',
-      label: 'Due',
-      // wire onChanged in datePicker via hooks.onCommitted when using blur save
+    LdReactiveFormItem.checkbox(
+      key: 'completed',
+      label: 'Completed',
     ),
   ],
 )
 ```
 
-- **`TDetail`**: optional third type param when the list entity differs from the full record (`loadDetail` + `detailFromEntity`).
-- **`mapToEntity`**: projects form values onto the persistence model at save time.
-- **`LdMonkeyDetailSaveMode.adaptive`**: blur save on mobile, manual Save on desktop.
-- **Merge**: pristine fields patch from the repository stream; dirty fields use `LdMonkeyFieldConflictPolicy` (default `keepLocal`).
-- **`LdMonkeyDetailFormScope`**: exposes `isDirty`, `isSaving`, `save`, `reset`, and `detail` for custom layouts.
+When `TDetail` differs from `T` (e.g. a richer detail DTO loaded separately):
+
+```dart
+LdMonkeyReactiveDetailForm<Task, int, TaskDetail, TaskCreate, TaskUpdate>.edit(
+  item: paginatorItem,
+  loadDetail: (context, id) async => await api.getTaskDetail(id),  // async detail loader
+  detailFromEntity: (task) => TaskDetail.fromTask(task),           // extract from stream updates
+  detailToFormValues: (detail) => {'title': detail.title},
+  formToUpdatePayload: (form, detail) => TaskUpdate(title: form.control('title').value as String),
+  ...
+)
+```
+
+```dart
+// Create mode
+LdMonkeyReactiveDetailForm<Task, int, Task, TaskCreate, TaskUpdate>.create(
+  initialDetail: null,
+  detailToFormValues: (_) => {'title': ''},
+  formToCreatePayload: (form, _) => TaskCreate(title: form.control('title').value as String),
+  onCreated: (context, task) => GoRouter.of(context).go('/tasks/${task.id}'),
+  itemsBuilder: (context, hooks) => [
+    LdReactiveFormItem.input<String>(key: 'title', inputFieldHint: 'Task title'),
+  ],
+)
+```
+
+### Save modes
+
+```dart
+enum LdMonkeyDetailSaveMode {
+  onBlur,        // save on blur/field commit; no submit button
+  manualSubmit,  // explicit save button when form is dirty and valid
+  adaptive,      // onBlur on mobile, manualSubmit on desktop
+}
+```
+
+### Conflict resolution
+
+When the server returns an updated item while the user is editing:
+
+```dart
+enum LdMonkeyFieldConflictPolicy {
+  keepLocal,    // always keep user's local value (default)
+  preferServer, // always overwrite with server value
+  prompt,       // show per-field UI prompt (use LdMonkeyFieldConflictHint)
+}
+```
+
+With `LdMonkeyDetailPreSaveCheck.repositoryGetById`, a fresh entity is fetched before saving and any conflicts are merged. Throws `LdMonkeyVersionConflictException` if unresolvable.
+
+### Accessing form state from child widgets
+
+`LdMonkeyDetailFormScope` is an `InheritedWidget` that exposes form state for use in custom layouts (e.g., a Save button in an app bar):
+
+```dart
+final formScope = LdMonkeyDetailFormScope.of<TaskDetail>(context);
+// formScope.isDirty, formScope.isSaving, formScope.detail, formScope.save(), formScope.reset()
+```
+
+### `LdReactiveFormItem` factory constructors
+
+```dart
+LdReactiveFormItem.input<String>(key: 'title', inputFieldHint: 'Title', onBlurred: hooks.onBlurred('title'))
+LdReactiveFormItem.input<int>(key: 'count', inputFieldHint: 'Count')       // uses IntValueAccessor
+LdReactiveFormItem.input<double>(key: 'price', inputFieldHint: 'Price')    // uses DoubleValueAccessor
+LdReactiveFormItem.input<DateTime>(key: 'due', inputFieldHint: 'Due date') // uses DateTimeValueAccessor
+LdReactiveFormItem.select<Priority>(key: 'priority', items: [...])
+LdReactiveFormItem.chooseFromItems<String>(key: 'tags', items: [...], multiple: true)
+LdReactiveFormItem.chooseFromList<Tag, int>(key: 'tags', items: allTags, selectedItemBuilder: ..., multiple: true)
+LdReactiveFormItem.chooseRepository<Tag, int>(key: 'tags', repository: tagController, itemBuilder: ..., selectedItemBuilder: ...)
+LdReactiveFormItem.checkbox(key: 'done', label: 'Done')
+LdReactiveFormItem.datePicker(key: 'due', label: 'Due date', onCommitted: hooks.onCommitted('due'))
+LdReactiveFormItem.slider(key: 'progress', label: 'Progress', min: 0, max: 100)
+```
+
+## Picker Scope
+
+`LdMonkeyPickerScope` renders the monkey master list as an entity picker, without a router. The Navigator pops with the confirmed `Set<IdType>`:
+
+```dart
+LdMonkeyPickerScope<Tag, int>(
+  repository: tagController,           // pre-constructed LdListController
+  initialSelection: {1, 3},
+  label: 'Select tags',
+  multiple: true,
+  allowEmpty: false,
+  itemBuilder: (context, item, index) => LdListItem(title: Text(item.value?.name ?? '')),
+  filtersBuilder: (_) async => [],
+  sortOptionsBuilder: (_) async => [],
+)
+```
+
+## Ephemeral Monkey Controller
+
+`LdEphemeralMonkeyController` provides in-memory monkey navigation state for picker / test scopes (no GoRouter):
+
+```dart
+LdEphemeralMonkeyController<Task, int>(
+  filters: filterSet,
+  sortOptions: sortList,
+  initialSelection: {1},
+  showSelectionControls: true,
+)
+```
+
+The `controllerDelegate` getter returns an `LdMonkeyRouterController` interface for use with `Provider`.
 
 ## Deleted Items Guard
 
-`LdMonkeyDeletedItemsGuard` automatically removes deleted items from selection and viewing state. It is included automatically — it is nested inside `LdMonkeyRouterAdapter`, which is part of every monkey scope.
+`LdMonkeyDeletedItemsGuard` automatically removes deleted items from selection and viewing state. It is included automatically inside `LdMonkeyRouterAdapter`, which is part of every monkey scope.
 
 ## LdMonkeyRouteScope
 
@@ -779,14 +968,14 @@ LdMonkeyRouteScope<Task, int>(
   actions: actions,
   filtersBuilder: (_) async => filters,
   sortOptionsBuilder: (_) async => sortOptions,
-  repositoryBuilder: (context, state) => repository,
+  modelBuilder: (context, state) => model,
   masterPage: masterPage,
   child: child,
 )
 ```
 
 The provider stack is:
-`LdMonkeyRouteConfig` → `LdMonkeyActions` → `LdRepositoryProvider` → `LdMonkeyRouteDefinitionsResolver` → `LdMonkeyRouterAdapter` (provides `LdMonkeySelection`, `LdMonkeySortAndFilterState`, `LdMonkeyRouterController`, `LdMonkeyListFilterAdapter`, `LdMonkeyDeletedItemsGuard`) → `LdMonkeyShell`.
+`LdMonkeyRouteConfig` → `LdMonkeyActions` → `LdMonkeyDataProvider` → `LdMonkeyRouteDefinitionsResolver` → `LdMonkeyRouterAdapter` (provides `LdMonkeySelection`, `LdMonkeySortAndFilterState`, `LdMonkeyRouterController`, `LdMonkeyListFilterAdapter`, `LdMonkeyDeletedItemsGuard`) → `LdMonkeyShell`.
 
 ## Best Practices
 
@@ -794,9 +983,12 @@ The provider stack is:
 2. **Use `buildMonkeyRouteTree` and `MonkeyRouteNode` for nested master-detail** — the child's scope is automatically available at the parent's detail position.
 3. **Always use `LdMonkeyRouteConfig.identifiableString` or `.identifiableInt`** — custom serialization only when IDs contain underscores or special characters.
 4. **Keep `itemName` unique across the entire monkey tree** to avoid URL parameter collisions.
-5. **Use the built-in action factories** (`toggleSelectionControls`, `showSelection`, `showFilterContextMenu`, `refreshAction`, `deleteAction`) before writing custom ones.
+5. **Use the built-in action factories** (`toggleSelectionControls`, `showSelection`, `showFilterContextMenu`, `refreshAction`, `deleteAction`, `reactiveCreateAction`) before writing custom ones.
 6. **Prefer `LdMonkeyBareChildAction` for simple buttons** and `LdMonkeySubmitAction` for async operations.
 7. **Use `LdMonkeyActionVisibility` to control action placement** — set the `location`, `minSelectionCount`, and `layoutModes` to match your UX requirements.
 8. **Add `LdFilterSearch` to enable search** — it automatically adds a search bar to the master app bar and syncs with URL query params.
 9. **Use `LdMonkeyDetailPage.scrollable` for multiple viewing items** and `.stacked` for animated transitions.
 10. **Set `detailPanelFlex` to control side-by-side proportions** — higher values give more space to the detail panel.
+11. **Use `LdCallbackModel.fromList` for demos/tests** — it handles in-memory pagination, filtering, and sorting automatically.
+12. **Use `LdMonkeyReactiveDetailForm` from `liquid_flutter_reactive_forms`** for editing detail pages — it handles save mode, conflict resolution, navigation guards, and live updates automatically.
+13. **Set `supportsReorder: true` on a sort option and pass `reorderHandler`** to enable drag-to-reorder when that sort is active.
