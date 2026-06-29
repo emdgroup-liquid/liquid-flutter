@@ -493,7 +493,7 @@ void main() {
 
         expect(repository.getItemById(2)?.state, equals(LdPaginatorItemState.deleting));
 
-        await repository.fetchPageAtOffset(ctx, 0);
+        await repository.fetchPageAtOffset(ctx, 0, reason: LdFetchReason.refresh);
         await tester.pump();
 
         expect(repository.getItemById(2)?.state, equals(LdPaginatorItemState.deleting));
