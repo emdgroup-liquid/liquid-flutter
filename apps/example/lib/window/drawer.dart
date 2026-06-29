@@ -78,6 +78,12 @@ const components = [
   _Component("Reveal", "/components/reveal", LucideIcons.eye, ComponentCategory.feedback),
 
   // Navigation & Interaction
+  _Component(
+    "Metaball (Experiment)",
+    "/experiments/metaball",
+    LucideIcons.sparkles,
+    ComponentCategory.interaction,
+  ),
   _Component("Action Runner", "/components/action-runner", LucideIcons.tableOfContents, ComponentCategory.interaction),
   _Component("Breadcrumb", "/components/breadcrumb", LucideIcons.arrowRight, ComponentCategory.interaction),
   _Component("Button", "/components/button", LucideIcons.pointer, ComponentCategory.interaction),
@@ -213,6 +219,12 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                   leading: const Icon(LdIcons.beaker),
                   onPressed: () => _showPage(context, "/chemical"),
                   child: const Text("Magic"),
+                ),
+                LdDrawerItemSection(
+                  active: GoRouterState.of(context).uri.path.startsWith("/experiments/metaball"),
+                  leading: const Icon(LucideIcons.sparkles),
+                  onPressed: () => _showPage(context, "/experiments/metaball"),
+                  child: const Text("Metaball"),
                 ),
                 LdDrawerItemSection(
                   leading: const Text("🐵"),
