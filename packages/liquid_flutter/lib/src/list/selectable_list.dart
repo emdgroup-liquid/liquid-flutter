@@ -217,7 +217,6 @@ class LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Stat
 
   void _tryScrollToInitialSelection(Set<IdType> initialSelectedItems) async {
     if (initialSelectedItems.isEmpty) {
-      print("No initial selected items");
       return;
     }
     final listController = widget.listController is LdListController<T, IdType>
@@ -225,7 +224,6 @@ class LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Stat
         : null;
     final index = listController?.getItemIndexById(initialSelectedItems.first);
     if (index == null) {
-      print("Item is not loaded yet");
       // Item is not loaded yet, if there is getOffsetById, we can use that to scroll to the correct position
       if (listController?.model.getOffsetById != null) {
         final offset = await listController!.model.getOffsetById!(

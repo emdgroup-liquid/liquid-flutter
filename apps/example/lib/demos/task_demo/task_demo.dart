@@ -65,10 +65,10 @@ List<LdMonkeyAction<Task, int>> taskActions = [
     shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyD)},
     submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Marking as done", allowResubmit: true),
     onSubmit: (ctx) async {
-      final updatedItems = <Task>{};
+      final updatedItems = <int, Task>{};
       for (final id in ctx.selectedIds) {
         final item = await ctx.listController.getById(ctx.appContext, id);
-        updatedItems.add(item.copyWith(done: true));
+        updatedItems[id] = item.copyWith(done: true);
       }
       if (!ctx.appContext.mounted) {
         return;
@@ -98,10 +98,10 @@ List<LdMonkeyAction<Task, int>> taskActions = [
     shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyU)},
     submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Marking as undone", allowResubmit: true),
     onSubmit: (ctx) async {
-      final updatedItems = <Task>{};
+      final updatedItems = <int, Task>{};
       for (final id in ctx.selectedIds) {
         final item = await ctx.listController.getById(ctx.appContext, id);
-        updatedItems.add(item.copyWith(done: false));
+        updatedItems[id] = item.copyWith(done: false);
       }
       if (!ctx.appContext.mounted) {
         return;
@@ -123,10 +123,10 @@ List<LdMonkeyAction<Task, int>> taskActions = [
     },
     submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: 'Setting due date to today', allowResubmit: true),
     onSubmit: (ctx) async {
-      final updatedItems = <Task>{};
+      final updatedItems = <int, Task>{};
       for (final id in ctx.selectedIds) {
         final item = await ctx.listController.getById(ctx.appContext, id);
-        updatedItems.add(item.copyWith(due: _dueDateToday()));
+        updatedItems[id] = item.copyWith(due: _dueDateToday());
       }
       if (!ctx.appContext.mounted) {
         return;
@@ -148,10 +148,10 @@ List<LdMonkeyAction<Task, int>> taskActions = [
     },
     submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: 'Applying external edit', allowResubmit: true),
     onSubmit: (ctx) async {
-      final updatedItems = <Task>{};
+      final updatedItems = <int, Task>{};
       for (final id in ctx.selectedIds) {
         final item = await ctx.listController.getById(ctx.appContext, id);
-        updatedItems.add(item.copyWith(task: '${item.task} [edited elsewhere]', due: _dueDateToday()));
+        updatedItems[id] = item.copyWith(task: '${item.task} [edited elsewhere]', due: _dueDateToday());
       }
       if (!ctx.appContext.mounted) {
         return;
