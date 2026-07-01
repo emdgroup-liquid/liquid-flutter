@@ -255,7 +255,7 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
     }
 
     final anchorId = selectedIds.first;
-    final offset = await _getOffsetById!(
+    final offset = await _getOffsetById(
       FetchOffsetParameters(
         context: context,
         id: anchorId,

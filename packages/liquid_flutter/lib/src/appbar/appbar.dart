@@ -331,10 +331,9 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
     // Provider<LdAppBarMetrics>.value so the bar surface can react to scroll).
     Widget barSurface = Builder(
       builder: (context) {
-        // Read metrics injected by AppBarFrame for the bar surface context.
-        // isScrolledUnder is used via the decoration builders in AppBarFrame,
-        // and metrics is used for level/position checks.
-        final metrics = context.watch<LdAppBarMetrics?>();
+        // Watch metrics injected by AppBarFrame so this builder rebuilds
+        // whenever metrics change (e.g. isScrolledUnder, level, position).
+        context.watch<LdAppBarMetrics?>();
 
         final showWindowControls = MacOSWindowControls.canShow(context) &&
             widget.implyFeatures.contains(LdAppBarImpliedFeature.windowControls);

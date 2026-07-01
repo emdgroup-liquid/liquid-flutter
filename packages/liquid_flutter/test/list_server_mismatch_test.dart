@@ -323,9 +323,9 @@ void main() {
       refreshCallCount = 0; // only count refreshes from now on
 
       // Fire 3 concurrent deletes without awaiting — all block on deleteCompleter
-      final f1 = controller.model!.delete(context: ctx, id: 1);
-      final f2 = controller.model!.delete(context: ctx, id: 2);
-      final f3 = controller.model!.delete(context: ctx, id: 3);
+      final f1 = controller.model.delete(context: ctx, id: 1);
+      final f2 = controller.model.delete(context: ctx, id: 2);
+      final f3 = controller.model.delete(context: ctx, id: 3);
 
       // Give the scheduleItemDeletion calls a moment to run
       await tester.pump(const Duration(milliseconds: 10));
@@ -384,7 +384,7 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
       // Start delete for id=3 (does not await — will block on deleteGate)
-      final deleteFuture = controller.model!.delete(context: ctx, id: 3);
+      final deleteFuture = controller.model.delete(context: ctx, id: 3);
 
       // Wait until the delete has started (item is now in `deleting` state)
       await deleteStarted.future;
@@ -444,7 +444,7 @@ void main() {
 
       // Start failing delete
       final deleteFuture =
-          controller.model!.delete(context: ctx, id: 2).catchError((_) {});
+          controller.model.delete(context: ctx, id: 2).catchError((_) {});
 
       await tester.pump(const Duration(milliseconds: 10));
 
@@ -544,7 +544,7 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
       // Start delete for id=1 — will block
-      final deleteFuture = controller.model!.delete(context: ctx, id: 1);
+      final deleteFuture = controller.model.delete(context: ctx, id: 1);
       await tester.pump(const Duration(milliseconds: 10));
 
       // Trigger refresh (server no longer returns id=1)
@@ -657,7 +657,7 @@ void main() {
 
       // Delete all 5 loaded items
       for (final id in [1, 2, 3, 4, 5]) {
-        await controller.model!.delete(context: ctx, id: id);
+        await controller.model.delete(context: ctx, id: id);
       }
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
@@ -722,7 +722,7 @@ void main() {
 
       // Delete all loaded items — await each so the confirms run synchronously
       for (final id in [1, 2, 3, 4, 5]) {
-        await controller.model!.delete(context: listCtx, id: id);
+        await controller.model.delete(context: listCtx, id: id);
         // Flush the micro-task-deferred _onDataChange timer after each delete
         await tester.pump(Duration.zero);
       }
@@ -785,7 +785,7 @@ void main() {
 
       // Start an update for id=2 — will block on updateGate
       final updateFuture =
-          controller.model!.update(ctx, 2, _Item(2, 'updated'));
+          controller.model.update(ctx, 2, _Item(2, 'updated'));
 
       // Give scheduleItemUpdate a moment to run (item is now in `updating` state)
       await tester.pump(const Duration(milliseconds: 10));
@@ -838,7 +838,7 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
       final updateFuture =
-          controller.model!.update(ctx, 3, _Item(3, 'optimistic'));
+          controller.model.update(ctx, 3, _Item(3, 'optimistic'));
       await tester.pump(const Duration(milliseconds: 10));
 
       // Refresh while update in-flight

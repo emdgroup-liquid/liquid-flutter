@@ -163,7 +163,7 @@ void main() {
         await _loadRepository(tester, repository, ctx);
 
         final newItem = _TestItem(0, 'New Item', 50);
-        final createdItem = await repository.model!.create(ctx, newItem);
+        final createdItem = await repository.model.create(ctx, newItem);
 
         expect(createCallCount, equals(1));
         expect(createdItem, isNotNull);
@@ -179,7 +179,7 @@ void main() {
         await _loadRepository(tester, repository, ctx);
 
         final newItem = _TestItem(0, 'New Item', 50);
-        final createdItem = await repository.model!.create(ctx, newItem, index: 0);
+        final createdItem = await repository.model.create(ctx, newItem, index: 0);
 
         expect(createdItem, isNotNull);
       });
@@ -196,7 +196,7 @@ void main() {
 
         final newItem = _TestItem(0, 'New Item', 50);
         await expectLater(
-          repository.model!.create(ctx, newItem),
+          repository.model.create(ctx, newItem),
           throwsA(isA<Exception>()),
         );
 
@@ -212,7 +212,7 @@ void main() {
         await _loadRepository(tester, repository, ctx);
 
         final newItem = _TestItem(0, 'New Item', 50);
-        expect(() => repository.model!.create(ctx, newItem), throwsAssertionError);
+        expect(() => repository.model.create(ctx, newItem), throwsAssertionError);
       });
     });
 
@@ -230,7 +230,7 @@ void main() {
         await _loadRepository(tester, repository, ctx);
 
         final updatedItem = _TestItem(1, 'Updated Item 1', 15);
-        await repository.model!.update(ctx, 1, updatedItem);
+        await repository.model.update(ctx, 1, updatedItem);
 
         expect(updateCallCount, equals(1));
         final item = repository.getItemById(1);
@@ -246,7 +246,7 @@ void main() {
         await _loadRepository(tester, repository, ctx);
 
         final updatedItem = _TestItem(1, 'Updated Item 1', 15);
-        await repository.model!.update(ctx, 1, updatedItem);
+        await repository.model.update(ctx, 1, updatedItem);
 
         final item = repository.getItemById(1);
         expect(item?.value?.name, equals('Updated Item 1'));
@@ -263,7 +263,7 @@ void main() {
         await _loadRepository(tester, repository, ctx);
 
         final updatedItem = _TestItem(1, 'Updated Item 1', 15);
-        await expectLater(() => repository.model!.update(ctx, 1, updatedItem), throwsException);
+        await expectLater(() => repository.model.update(ctx, 1, updatedItem), throwsException);
 
         await tester.pump();
 
@@ -286,7 +286,7 @@ void main() {
           1: _TestItem(1, 'Updated 1', 15),
           2: _TestItem(2, 'Updated 2', 25),
         };
-        await repository.model!.updateBatch(ctx, itemsToUpdate);
+        await repository.model.updateBatch(ctx, itemsToUpdate);
 
         expect(updateBatchCallCount, equals(1));
       });
@@ -308,7 +308,7 @@ void main() {
           1: _TestItem(1, 'Updated 1', 15),
           2: _TestItem(2, 'Updated 2', 25),
         };
-        await repository.model!.updateBatch(ctx, itemsToUpdate);
+        await repository.model.updateBatch(ctx, itemsToUpdate);
 
         expect(updateItemCallCount, equals(2));
       });
@@ -330,7 +330,7 @@ void main() {
           2: _TestItem(2, 'Updated 2', 25),
         };
 
-        expect(() => repository.model!.updateBatch(ctx, itemsToUpdate), throwsException);
+        expect(() => repository.model.updateBatch(ctx, itemsToUpdate), throwsException);
 
         await tester.pump();
         final item1 = repository.getItemById(1);
@@ -353,7 +353,7 @@ void main() {
         final ctx = await _pumpAndGetContext(tester);
         await _loadRepository(tester, repository, ctx);
 
-        await repository.model!.delete(context: ctx, id: 1);
+        await repository.model.delete(context: ctx, id: 1);
 
         expect(deleteCallCount, equals(1));
         final item = repository.getItemById(1);
@@ -371,7 +371,7 @@ void main() {
         await _loadRepository(tester, repository, ctx);
 
         await expectLater(
-          () => repository.model!.delete(context: ctx, id: 1),
+          () => repository.model.delete(context: ctx, id: 1),
           throwsException,
         );
 
@@ -386,7 +386,7 @@ void main() {
         final ctx = await _pumpAndGetContext(tester);
         await _loadRepository(tester, repository, ctx);
 
-        await repository.model!.delete(context: ctx, id: 1);
+        await repository.model.delete(context: ctx, id: 1);
 
         final item = repository.getItemById(1);
         expect(item, isNotNull);
@@ -403,7 +403,7 @@ void main() {
         final ctx = await _pumpAndGetContext(tester);
         await _loadRepository(tester, repository, ctx);
 
-        await repository.model!.deleteBatch(context: ctx, ids: {1, 2});
+        await repository.model.deleteBatch(context: ctx, ids: {1, 2});
 
         expect(deleteBatchCallCount, equals(1));
         expect(repository.getItemById(1), isNull);
@@ -422,7 +422,7 @@ void main() {
         final ctx = await _pumpAndGetContext(tester);
         await _loadRepository(tester, repository, ctx);
 
-        await repository.model!.deleteBatch(context: ctx, ids: {1, 2});
+        await repository.model.deleteBatch(context: ctx, ids: {1, 2});
 
         expect(deleteCallCount, equals(2));
       });
@@ -456,7 +456,7 @@ void main() {
         await repository.loadViewingItem(ctx, 3);
         await tester.pumpAndSettle(const Duration(seconds: 1));
 
-        await repository.model!.deleteBatch(context: ctx, ids: {1, 2, 3});
+        await repository.model.deleteBatch(context: ctx, ids: {1, 2, 3});
         await tester.pump();
 
         expect(repository.getItemById(1), isNull);
@@ -488,7 +488,7 @@ void main() {
         final ctx = await _pumpAndGetContext(tester);
         await _loadRepository(tester, repository, ctx);
 
-        final deleteFuture = repository.model!.delete(context: ctx, id: 2);
+        final deleteFuture = repository.model.delete(context: ctx, id: 2);
         await tester.pump();
 
         expect(repository.getItemById(2)?.state, equals(LdPaginatorItemState.deleting));
@@ -517,7 +517,7 @@ void main() {
 
         // batch delete throws, but shouldn't crash entirely
         try {
-          await repository.model!.deleteBatch(context: ctx, ids: {1, 2});
+          await repository.model.deleteBatch(context: ctx, ids: {1, 2});
         } catch (_) {}
 
         await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -558,7 +558,7 @@ void main() {
         // deleteBatch with no deleteBatchFn falls back to per-item deletes.
         // The controller re-throws the cause of any partial failure.
         try {
-          await repository.model!.deleteBatch(context: ctx, ids: {1, 2});
+          await repository.model.deleteBatch(context: ctx, ids: {1, 2});
         } catch (_) {
           // expected: partial failure throws for the failed item
         }
@@ -1093,7 +1093,7 @@ void main() {
           total: 3,
         );
 
-        await repository.model!.update(ctx, 1, _TestItem(1, 'Renamed Item 1', 10));
+        await repository.model.update(ctx, 1, _TestItem(1, 'Renamed Item 1', 10));
 
         expect(repository.cache.readPage(titleKey, 0), isNull);
         expect(repository.cache.readPage(valueKey, 0), isNotNull);
@@ -1113,7 +1113,7 @@ void main() {
           total: defaultItems.length,
         );
 
-        await repository.model!.create(ctx, _TestItem(0, 'New Item', 50));
+        await repository.model.create(ctx, _TestItem(0, 'New Item', 50));
         await tester.pumpAndSettle(const Duration(seconds: 1));
 
         expect(repository.cache.readPage('stale', 0), isNull);
@@ -1139,7 +1139,7 @@ void main() {
         );
 
         await expectLater(
-          () => repository.model!.update(ctx, 1, _TestItem(1, 'Updated', 99)),
+          () => repository.model.update(ctx, 1, _TestItem(1, 'Updated', 99)),
           throwsException,
         );
 
@@ -1222,7 +1222,7 @@ void main() {
         final ctx = await _pumpAndGetContext(tester);
         await _loadRepository(tester, repository, ctx);
 
-        await repository.model!.create(ctx, _TestItem(0, 'New Item', 11));
+        await repository.model.create(ctx, _TestItem(0, 'New Item', 11));
         await tester.pumpAndSettle(const Duration(seconds: 1));
 
         final expectedIndex = items.indexWhere((item) => item.id == 11);
@@ -1293,7 +1293,7 @@ void main() {
         const indexBefore = 0;
         expect(repository.getItemIndexById(1), equals(indexBefore));
 
-        await repository.model!.update(
+        await repository.model.update(
           ctx,
           1,
           _TestItem(1, 'Renamed Item 1', 10),
@@ -1361,7 +1361,7 @@ void main() {
 
         await _loadRepository(tester, repository, ctx);
 
-        await repository.model!.update(ctx, 1, _TestItem(1, 'Item 1', 99));
+        await repository.model.update(ctx, 1, _TestItem(1, 'Item 1', 99));
         await tester.pumpAndSettle();
 
         expect(repository.getItemIndexById(1), equals(items.length - 1));
@@ -1426,7 +1426,7 @@ void main() {
 
         // Move item 1 (index 0) to the end. All five items are loaded, so the
         // shift must stay local and keep every item present in order.
-        await repository.model!.update(ctx, 1, _TestItem(1, 'Item 1', 99));
+        await repository.model.update(ctx, 1, _TestItem(1, 'Item 1', 99));
         await tester.pumpAndSettle();
 
         expect(repository.totalItems, equals(5));
@@ -1503,7 +1503,7 @@ void main() {
         // Move item 3 to the very end. The destination (index 29) lives outside
         // the loaded range; the shift must keep the loaded items consistent with
         // the new server order and leave no orphaned gap at the source.
-        await repository.model!.update(ctx, 3, _TestItem(3, 'Item 3', 100));
+        await repository.model.update(ctx, 3, _TestItem(3, 'Item 3', 100));
         await tester.pumpAndSettle(const Duration(seconds: 1));
 
         expect(repository.totalItems, equals(30));
@@ -1552,7 +1552,7 @@ void main() {
         await _loadRepository(tester, repository, ctx);
         fetchReasons.clear();
 
-        await repository.model!.create(ctx, _TestItem(0, 'New Item', 40));
+        await repository.model.create(ctx, _TestItem(0, 'New Item', 40));
         await tester.pumpAndSettle(const Duration(seconds: 1));
 
         expect(fetchReasons, contains(LdFetchReason.invalidate));
@@ -1588,7 +1588,7 @@ void main() {
         repository.totalItems = 12;
         fetchReasons.clear();
 
-        await repository.model!.delete(context: ctx, id: 2);
+        await repository.model.delete(context: ctx, id: 2);
         await tester.pumpAndSettle(const Duration(seconds: 1));
 
         expect(fetchReasons, contains(LdFetchReason.invalidate));

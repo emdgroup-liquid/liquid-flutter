@@ -37,8 +37,6 @@ class _LdListReorderScopeState<T extends Identifiable<IdType>, IdType> extends S
 
   LdListItemBuilder<T>? _innerItemBuilder;
 
-  bool get _isMobile => LdTheme.of(context).platform.isMobile;
-
   LdPaginator<T, IdType> get _paginator => Provider.of<LdListConfig<T, IdType>>(context, listen: false).paginator!;
 
   GlobalKey _slotKey(int position) =>

@@ -541,7 +541,6 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     BuildContext context,
     LdFetchReason effectiveReason,
   ) async {
-    assert(fetchListFunction != null, 'fetchListFunction is not set. Can not refresh items');
 
     _isControlledRefresh = true;
     _setBusy(true);
@@ -649,7 +648,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
         break;
       }
 
-      final page = await fetchListFunction!(
+      final page = await fetchListFunction(
         FetchPageParameters(
           context: context,
           offset: offset,
@@ -713,7 +712,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   /// is false. Used by greedy repositories to capture the full dataset up front.
   @protected
   Future<void> eagerFetchAllPages(BuildContext context) async {
-    if (!context.mounted || fetchListFunction == null) {
+    if (!context.mounted) {
       return;
     }
 
@@ -728,7 +727,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
       _pendingFetchReason = offset == 0 ? LdFetchReason.initial : LdFetchReason.pagination;
 
       try {
-        final page = await fetchListFunction!(
+        final page = await fetchListFunction(
           FetchPageParameters(
             context: context,
             offset: offset,
@@ -963,7 +962,6 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     _requestedOffsets.add(offset);
     _setBusy(true);
 
-    assert(fetchListFunction != null, 'fetchListFunction is not set. Can not fetch items');
 
     if (!context.mounted) {
       _mutex.release();
@@ -975,7 +973,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     final fetchReason = _pendingFetchReason;
 
     try {
-      final page = await fetchListFunction!(
+      final page = await fetchListFunction(
         FetchPageParameters(
           context: context,
           offset: offset,
