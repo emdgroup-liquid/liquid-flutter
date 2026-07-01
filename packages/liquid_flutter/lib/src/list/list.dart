@@ -116,7 +116,6 @@ class LdListWidget<T extends Identifiable<IdType>, IdType> extends StatefulWidge
     @ContextConfigurable() required this.itemBuilder,
     @ContextConfigurable() required this.paginator,
     @ContextConfigurable() this.areEqual,
-    @ContextConfigurable() this.assumedItemHeight,
     @ContextConfigurable() this.emptyBuilder,
     @ContextConfigurable() this.errorBuilder,
     @ContextConfigurable() this.footer,
@@ -169,10 +168,6 @@ class LdListWidget<T extends Identifiable<IdType>, IdType> extends StatefulWidge
   /// Otherwise, it will create a new scroll controller.
   final ScrollController? scrollController;
 
-  /// The assumed height of an item. Is used to calculate the scroll space
-  /// to virtually allocate for items that are not yet loaded.
-  final double? assumedItemHeight;
-
   /// Function that checks if two items are equal.
   final bool Function(T a, T b)? areEqual;
 
@@ -202,7 +197,7 @@ class LdListWidget<T extends Identifiable<IdType>, IdType> extends StatefulWidge
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('primary', primary));
     properties.add(DiagnosticsProperty<bool>('shrinkWrap', shrinkWrap));
-    properties.add(DoubleProperty('assumedItemHeight', assumedItemHeight));
+
     properties.add(DiagnosticsProperty<ScrollPhysics?>('physics', physics));
     properties.add(DiagnosticsProperty<Widget?>('header', header));
     properties.add(DiagnosticsProperty<Widget?>('footer', footer));
@@ -295,11 +290,6 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
       setState(() {});
     }
 
-    if (widget.paginator.initialOffset != oldWidget.paginator.initialOffset) {
-      _performedInitialScroll = false;
-      _maybePerformInitialScroll();
-    }
-
     if (widget.footer != oldWidget.footer) {
       setState(() {});
     }
@@ -381,9 +371,6 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
     _pendingGapOffsets.clear();
     _updateRetryControllerState();
     _updateGroupedItems();
-
-    _maybePerformInitialScroll();
-    _maybeScrollToPendingItem();
   }
 
   void _updateRetryControllerState() {
@@ -584,154 +571,6 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
     ).padL();
   }
 
-  double _getAverageItemHeight() {
-    double totalHeight = 0;
-    double count = 0;
-
-    for (final item in _itemKeys.values) {
-      final height = item.currentContext?.findRenderObject()?.paintBounds.height;
-
-      if (height != null) {
-        totalHeight += height;
-        count++;
-      }
-    }
-
-    if (count == 0) {
-      return widget.assumedItemHeight ?? 0;
-    }
-
-    return totalHeight / count;
-  }
-
-  bool _performedInitialScroll = false;
-  int _pendingScrollAttempts = 0;
-  static const _maxPendingScrollAttempts = 120;
-
-  void _maybeScrollToPendingItem() {
-    final scrollToId = widget.paginator.pendingScrollToItemId;
-    if (scrollToId == null) {
-      _pendingScrollAttempts = 0;
-      return;
-    }
-
-    final index = widget.paginator.getItemIndexById(scrollToId);
-    if (index == null) {
-      _pendingScrollAttempts = 0;
-      return;
-    }
-
-    if (!_scrollController.hasClients) {
-      if (_pendingScrollAttempts++ >= _maxPendingScrollAttempts) {
-        return;
-      }
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && widget.paginator.pendingScrollToItemId == scrollToId) {
-          _maybeScrollToPendingItem();
-        }
-      });
-      return;
-    }
-
-    _pendingScrollAttempts = 0;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(_scrollPendingItemIntoView(scrollToId, index));
-    });
-  }
-
-  Future<void> _scrollPendingItemIntoView(IdType id, int index) async {
-    if (!mounted || !_scrollController.hasClients) {
-      return;
-    }
-    if (widget.paginator.pendingScrollToItemId != id) {
-      return;
-    }
-
-    await widget.paginator.fetchPageAtOffset(context, index);
-    if (!mounted || !_scrollController.hasClients) {
-      return;
-    }
-    if (widget.paginator.pendingScrollToItemId != id) {
-      return;
-    }
-
-    final averageHeight = _getAverageItemHeight();
-    if (averageHeight <= 0) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && widget.paginator.pendingScrollToItemId == id) {
-          _maybeScrollToPendingItem();
-        }
-      });
-      return;
-    }
-
-    final target = (averageHeight * index).clamp(
-      0.0,
-      _scrollController.position.maxScrollExtent,
-    );
-    final scrollBefore = _scrollController.offset;
-    final viewportHeight = _scrollController.position.viewportDimension;
-    final firstVisibleIndex = (scrollBefore / averageHeight).floor();
-    final lastVisibleIndex = ((scrollBefore + viewportHeight) / averageHeight).ceil();
-    final isVisible = index >= firstVisibleIndex && index <= lastVisibleIndex;
-
-    if (isVisible) {
-      if (widget.paginator.pendingScrollToItemId == id) {
-        widget.paginator.clearPendingScrollToItem();
-      }
-      return;
-    }
-
-    await _scrollController.animateTo(
-      target,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-
-    if (!mounted) {
-      return;
-    }
-
-    await WidgetsBinding.instance.endOfFrame;
-
-    final itemContext = _itemKeys[id]?.currentContext;
-    if (itemContext != null && itemContext.mounted) {
-      await Scrollable.ensureVisible(
-        itemContext,
-        alignment: 0.5,
-        duration: const Duration(milliseconds: 150),
-      );
-      if (itemContext.mounted) {
-        FocusScope.of(itemContext).requestFocus();
-      }
-    }
-
-    if (widget.paginator.pendingScrollToItemId == id) {
-      widget.paginator.clearPendingScrollToItem();
-    }
-  }
-
-  /// Helper method to perform the initial scroll to the correct position
-  /// based on the initial offset.
-  Future<void> _maybePerformInitialScroll() async {
-    if (!_scrollController.hasClients) return;
-    // We need to wait for at least the top items to load to calculate
-    // the average height correctly
-    if (_itemKeys.isEmpty) return;
-    if (widget.paginator.initialOffset == 0) return;
-
-    if (_performedInitialScroll) return;
-
-    _performedInitialScroll = true;
-
-    final averageHeight = _getAverageItemHeight();
-
-    final offset = averageHeight * widget.paginator.initialOffset;
-
-    _scrollController.animateTo(offset, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
-  }
-
   @override
   Widget build(BuildContext context) {
     if (widget.paginator.hasError) {
@@ -740,9 +579,7 @@ class _LdListState<T extends Identifiable<IdType>, IdType> extends State<LdListW
       );
     }
 
-    if (widget.paginator.currentItemCount == 0 &&
-        !widget.paginator.busy &&
-        widget.paginator.totalItems == 0) {
+    if (widget.paginator.currentItemCount == 0 && !widget.paginator.busy && widget.paginator.totalItems == 0) {
       return _buildEmpty(context);
     }
 

@@ -8,7 +8,6 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
   final LdMonkeyActionLocation location;
   final String? debugName;
   final List<Widget> additionalActions;
-  final bool? implyLeading;
 
   /// The subtree that this app bar wraps.
   ///
@@ -23,7 +22,6 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
     this.additionalActions = const [],
     required this.location,
     this.debugName,
-    this.implyLeading,
     this.child,
   });
 
@@ -53,12 +51,31 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
           location,
         );
 
-        final barEmpty = (searchFilter == null || location != LdMonkeyActionLocation.masterAppBar) &&
-            actions.isEmpty &&
+        final searchConfig = switch (location) {
+          LdMonkeyActionLocation.masterAppBar => searchFilter?.searchConfig((query) {
+              searchFilter.update(
+                context,
+                searchFilter.copyWith(
+                  isOn: query.isNotEmpty,
+                  searchText: query,
+                ),
+              );
+            }),
+          _ => null,
+        };
+
+        final barEmpty = actions.isEmpty &&
+            searchConfig == null &&
             additionalActions.isEmpty &&
             appBarConfig?.title == null &&
             appBarConfig?.bottom == null &&
             !showClearSelectionButton;
+
+        final showBar = switch (location) {
+          LdMonkeyActionLocation.masterAppBar => true,
+          LdMonkeyActionLocation.detailAppBar => true,
+          _ => !barEmpty,
+        };
 
         final effectivePositionMode = appBarConfig?.positionMode ??
             switch (location) {
@@ -70,14 +87,15 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
             };
 
         return LdAppBar(
-            leading: showClearSelectionButton
-                ? LdButton.vague(
-                    child: const Icon(LucideIcons.x),
-                    onPressed: () {
-                      LdMonkeySelection.maybeClearSelection<T, IdType>(context);
-                    },
-                  ).animate().scaleXY()
-                : null,
+            leading: switch (showClearSelectionButton) {
+              true => LdButton.vague(
+                  child: const Icon(LucideIcons.x),
+                  onPressed: () {
+                    LdMonkeySelection.maybeClearSelection<T, IdType>(context);
+                  },
+                ).animate().scaleXY(),
+              false => null,
+            },
             title: showClearSelectionButton
                 ? LdCounterText.template(
                     LiquidLocalizations.of(context).nItemsSelected(selection.selection.length),
@@ -85,20 +103,9 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
                   )
                 : null,
             debugName: debugName ?? appBarConfig?.debugName ?? location.name,
-            showWindowControls: appBarConfig?.showWindowControls ?? true,
             positionMode: effectivePositionMode,
-            scrollBehavior: barEmpty ? LdAppBarScrollBehavior.hidden : null,
+            scrollBehavior: showBar ? null : LdAppBarScrollBehavior.hidden,
             autoAttachToKeyboard: true,
-            backgroundColor: switch (effectiveLayout) {
-              LdMonkeyEffectiveLayoutMode.sideBySide => switch (location) {
-                  LdMonkeyActionLocation.detailAppBar ||
-                  LdMonkeyActionLocation.detailSecondary =>
-                    LdTheme.of(context).background,
-                  _ => null,
-                },
-              _ => null,
-            },
-            implyLeading: implyLeading ?? appBarConfig?.implyLeading ?? true,
             searchConfig: switch (location) {
               LdMonkeyActionLocation.masterAppBar => searchFilter?.searchConfig((query) {
                   searchFilter.update(

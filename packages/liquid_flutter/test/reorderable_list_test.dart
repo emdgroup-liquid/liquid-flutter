@@ -77,7 +77,7 @@ void main() {
                     ),
                   ),
                   child: LdSelectableList<_ReorderItem, int>(
-                    paginator: paginator,
+                    listController: paginator,
                     disableDragGestures: true,
                     child: LdListReorderScope<_ReorderItem, int>(
                       onReorder: (id, from, to) async {

@@ -148,8 +148,7 @@ class AppRouter {
                 routeConfig: fileRouteConfig,
                 masterPage: FileMasterPage(),
                 detailPage: FileDetailPage(),
-                modelBuilder: (context, state) =>
-                    fileModel(state.pathParameters[projectRouteConfig.viewingParamName]!),
+                modelBuilder: (context, state) => fileModel(state.pathParameters[projectRouteConfig.viewingParamName]!),
                 filtersBuilder: (_) async => [],
                 sortOptionsBuilder: (_) async => [],
                 actions: const [],

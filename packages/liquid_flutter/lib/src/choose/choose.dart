@@ -41,12 +41,9 @@ Future<void> ldChoosePrefetchPickerData<T extends Identifiable<IdType>, IdType>(
   if (!context.mounted) {
     return;
   }
-  if (repository.isGreedy) {
+  if (repository.model.isGreedy) {
     await repository.ensureGreedyLoaded(context);
     return;
-  }
-  if (initialSelection.isNotEmpty) {
-    await repository.initWithSelection(context, initialSelection);
   }
 }
 
@@ -94,7 +91,7 @@ class LdChooseTriggerConfig<T extends Identifiable<IdType>, IdType> {
   final VoidCallback onTap;
   final int truncateDisplay;
   final String label;
-  final Widget? hint;
+  final Widget hint;
   final LdSize size;
   final bool disabled;
   final Widget Function(BuildContext context, T item) selectedItemBuilder;
@@ -288,7 +285,7 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
     if (widget.items != null && widget.repository == null) {
       final items = widget.items!;
       final searchText = _effectiveSearchText;
-      _repository = LdListController.fromModel(
+      _repository = LdListController(
         LdCallbackModel.greedy<T, IdType>(
           getById: (context, id) async => items.firstWhere((item) => item.id == id),
           fetchListWithParameters: (parameters) async {
@@ -383,7 +380,7 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
                     padding: MediaQuery.paddingOf(context),
                   ),
                   child: LdSelectableList<T, IdType>(
-                    paginator: repository,
+                    listController: repository,
                     initialSelectedItems: widget.value ?? <IdType>{},
                     multiSelect: widget.multiple,
                     showSelectionControls: true,
@@ -475,7 +472,7 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
   }) {
     final triggerConfig = LdChooseTriggerConfig<T, IdType>(
       selectedItems: selectedItems,
-      hint: widget.hint,
+      hint: widget.hint ?? Text(LiquidLocalizations.of(context).choose),
       selectedIds: selectedIds,
       state: state,
       onTap: () => _onTap(context),
@@ -615,7 +612,7 @@ class LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<Ld
       ),
       child: LdSelectableList<T, IdType>(
         key: _listKey,
-        paginator: widget.repository,
+        listController: widget.repository,
         initialSelectedItems: widget.initialSelectedItems,
         multiSelect: widget.multiple,
         showSelectionControls: true,
@@ -638,7 +635,7 @@ class LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<Ld
           backgroundMode: LdAppBarBackgroundMode.visible,
           borderMode: LdAppBarBorderMode.visible,
           shadowMode: LdAppBarShadowMode.visible,
-          implyCloseModalButton: false,
+          implyFeatures: const {},
           searchConfig: searchFilter?.searchConfig((query) {
             searchFilter.update(
               context,

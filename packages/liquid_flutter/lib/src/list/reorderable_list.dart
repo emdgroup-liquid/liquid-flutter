@@ -265,33 +265,19 @@ class _LdListReorderScopeState<T extends Identifiable<IdType>, IdType> extends S
       ),
     );
 
-    final draggable = _isMobile
-        ? LongPressDraggable<Object>(
-            key: ValueKey('reorder_lp_$id'),
-            data: id,
-            axis: Axis.vertical,
-            maxSimultaneousDrags: 1,
-            feedback: feedback,
-            childWhenDragging: childWhenDragging,
-            onDragStarted: () => _onDragStarted(id, index),
-            onDragUpdate: _onDragUpdate,
-            onDragEnd: _onDragEnd,
-            onDraggableCanceled: (_, __) => _onDragCanceled(),
-            child: child,
-          )
-        : Draggable<Object>(
-            key: ValueKey('reorder_d_$id'),
-            data: id,
-            axis: Axis.vertical,
-            maxSimultaneousDrags: 1,
-            feedback: feedback,
-            childWhenDragging: childWhenDragging,
-            onDragStarted: () => _onDragStarted(id, index),
-            onDragUpdate: _onDragUpdate,
-            onDragEnd: _onDragEnd,
-            onDraggableCanceled: (_, __) => _onDragCanceled(),
-            child: child,
-          );
+    final draggable = LongPressDraggable<Object>(
+      key: ValueKey('reorder_lp_$id'),
+      data: id,
+      axis: Axis.vertical,
+      maxSimultaneousDrags: 1,
+      feedback: feedback,
+      childWhenDragging: childWhenDragging,
+      onDragStarted: () => _onDragStarted(id, index),
+      onDragUpdate: _onDragUpdate,
+      onDragEnd: _onDragEnd,
+      onDraggableCanceled: (_, __) => _onDragCanceled(),
+      child: child,
+    );
 
     return draggable;
   }

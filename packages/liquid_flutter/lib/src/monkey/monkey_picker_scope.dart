@@ -36,8 +36,7 @@ class LdMonkeyPickerScope<T extends Identifiable<IdType>, IdType> extends Statef
   State<LdMonkeyPickerScope<T, IdType>> createState() => _LdMonkeyPickerScopeState<T, IdType>();
 }
 
-class _LdMonkeyPickerScopeState<T extends Identifiable<IdType>, IdType>
-    extends State<LdMonkeyPickerScope<T, IdType>> {
+class _LdMonkeyPickerScopeState<T extends Identifiable<IdType>, IdType> extends State<LdMonkeyPickerScope<T, IdType>> {
   late final LdEphemeralMonkeyController<T, IdType> _controller;
   LdMonkeyResolvedRouteDefinitions<T, IdType>? _lastResolved;
 
@@ -76,23 +75,23 @@ class _LdMonkeyPickerScopeState<T extends Identifiable<IdType>, IdType>
           child: Provider<LdMonkeyActionScope<T, IdType>>(
             create: (_) => LdMonkeyActionScope<T, IdType>(),
             child: LdMonkeyRouteDefinitionsResolver<T, IdType>(
-            filtersBuilder: widget.filtersBuilder ?? _defaultFiltersBuilder,
-            sortOptionsBuilder: widget.sortOptionsBuilder ?? _defaultSortOptionsBuilder,
-            child: (context, resolved) {
-              _applyResolved(resolved);
-              return LdEphemeralMonkeyAdapter<T, IdType>(
-                controller: _controller,
-                child: _LdMonkeyPickerPage<T, IdType>(
-                  label: widget.label,
-                  multiple: widget.multiple,
-                  allowEmpty: widget.allowEmpty,
-                  initialSelection: widget.initialSelection,
-                  itemBuilder: widget.itemBuilder,
-                  filterChipConfigs: widget.filterChipConfigs,
-                  buildList: widget.buildList,
-                ),
-              );
-            },
+              filtersBuilder: widget.filtersBuilder ?? _defaultFiltersBuilder,
+              sortOptionsBuilder: widget.sortOptionsBuilder ?? _defaultSortOptionsBuilder,
+              child: (context, resolved) {
+                _applyResolved(resolved);
+                return LdEphemeralMonkeyAdapter<T, IdType>(
+                  controller: _controller,
+                  child: _LdMonkeyPickerPage<T, IdType>(
+                    label: widget.label,
+                    multiple: widget.multiple,
+                    allowEmpty: widget.allowEmpty,
+                    initialSelection: widget.initialSelection,
+                    itemBuilder: widget.itemBuilder,
+                    filterChipConfigs: widget.filterChipConfigs,
+                    buildList: widget.buildList,
+                  ),
+                );
+              },
             ),
           ),
         ),
@@ -129,9 +128,7 @@ class _LdMonkeyPickerPage<T extends Identifiable<IdType>, IdType> extends Statel
       allowEmpty: allowEmpty,
     );
 
-    final bottom = filterChipConfigs == null
-        ? null
-        : LdFilterChipsBar<T, IdType>(configs: filterChipConfigs!);
+    final bottom = filterChipConfigs == null ? null : LdFilterChipsBar<T, IdType>(configs: filterChipConfigs!);
 
     return PopScope(
       canPop: canDismiss,
@@ -140,38 +137,38 @@ class _LdMonkeyPickerPage<T extends Identifiable<IdType>, IdType> extends Statel
         child: LdScaffold(
           debugName: 'LdMonkeyPickerPage',
           body: LdMonkeyMasterPage<T, IdType>(
-        allowMultipleSelection: multiple,
-        primaryAppBarConfig: LdAppBarConfig(
-          debugName: 'LdMonkeyPickerAppBar',
-          title: Text(label),
-          implyLeading: false,
-          bottom: bottom,
-        ),
-        primaryAppBarAdditionalActions: [
-          if (allowEmpty)
-            LdButton.ghost(
-              disabled: selection.selection.isEmpty,
-              onPressed: () {
-                LdMonkeySelection.updateSelection<T, IdType>(context, {});
-              },
-              child: const Text('Clear'),
+            allowMultipleSelection: multiple,
+            primaryAppBarConfig: LdAppBarConfig(
+              debugName: 'LdMonkeyPickerAppBar',
+              title: Text(label),
+              implyFeatures: const {},
+              bottom: bottom,
             ),
-          LdButton(
-            key: const Key('ldChoose_done'),
-            disabled: !ldChooseCanConfirmSelection<IdType>(
-              current: selection.selection,
-              initial: initialSelection,
-            ),
-            onPressed: () {
-              maybePopContextMenu(context);
-              Navigator.of(context).pop(selection.selection);
-            },
-            child: const Text('Done'),
+            primaryAppBarAdditionalActions: [
+              if (allowEmpty)
+                LdButton.ghost(
+                  disabled: selection.selection.isEmpty,
+                  onPressed: () {
+                    LdMonkeySelection.updateSelection<T, IdType>(context, {});
+                  },
+                  child: const Text('Clear'),
+                ),
+              LdButton(
+                key: const Key('ldChoose_done'),
+                disabled: !ldChooseCanConfirmSelection<IdType>(
+                  current: selection.selection,
+                  initial: initialSelection,
+                ),
+                onPressed: () {
+                  maybePopContextMenu(context);
+                  Navigator.of(context).pop(selection.selection);
+                },
+                child: const Text('Done'),
+              ),
+            ],
+            buildList: buildList,
+            buildItem: (context, item) => itemBuilder(context, item, 0),
           ),
-        ],
-        buildList: buildList,
-        buildItem: (context, item) => itemBuilder(context, item, 0),
-        ),
         ),
       ),
     );

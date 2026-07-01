@@ -70,7 +70,6 @@ List<Widget> generateAutoSpacings({
       (LdCard _, LdCard _) => _LdSizeItem(LdSize.l, 2),
       (LdDrawerItemSection _, LdDrawerItemSection _) => _LdSizeItem(LdSize.xs, 1),
       (LdSectionHeader _, LdSectionHeader _) => _LdSizeItem(LdSize.l, 1),
-      (LdSpacer _, _) => _LdSizeItem(LdSize.m, 0),
       (_, LdText nextText) => switch (nextText.type) {
           (LdTextType.headline) => _LdSizeItem(LdSize.l, 2),
           (_) => _LdSizeItem(defaultSpacing, 1)
@@ -78,12 +77,18 @@ List<Widget> generateAutoSpacings({
       (_, _) => _LdSizeItem(defaultSpacing, 1),
     };
 
-    for (int i = 0; i < spacer.multiplier; i++) {
-      finalChildren.add(
-        LdSpacer(
-          size: spacer.size,
-        ),
-      );
+    if (next is LdSpacer || child is LdSpacer) {
+      spacer = _LdSizeItem(defaultSpacing, 0);
+    }
+
+    if (spacer.multiplier != 0) {
+      for (int i = 0; i < spacer.multiplier; i++) {
+        finalChildren.add(
+          LdSpacer(
+            size: spacer.size,
+          ),
+        );
+      }
     }
   }
 

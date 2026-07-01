@@ -14,7 +14,7 @@ typedef FetchListFunction<T extends Identifiable<IdType>, IdType> = Future<LdLis
     FetchPageParameters<T, IdType> parameters);
 
 class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier {
-  FetchListFunction<T, IdType>? fetchListFunction;
+  FetchListFunction<T, IdType> fetchListFunction;
   final int pageSize;
   int initialOffset;
   final Duration debounceTime;
@@ -81,7 +81,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   }
 
   LdPaginator({
-    this.fetchListFunction,
+    required this.fetchListFunction,
 
     /// The number of items that are fetched at once.
     /// The [pageSize] will be passed to the [FetchListFunction] and used to
@@ -417,7 +417,6 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
         _offsetQueue.add(normalizedOffset);
       }
     }
-
 
     if (!immediate && debounceTime > Duration.zero) {
       // Debounced path: reset the timer. The fetch fires once the user stops
@@ -986,7 +985,6 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
           cache: listCache,
         ),
       );
-
 
       if (refresh) {
         _reset();

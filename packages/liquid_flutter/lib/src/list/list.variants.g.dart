@@ -5,7 +5,6 @@ class LdListConfig<T extends Identifiable<IdType>, IdType> {
     this.itemBuilder,
     this.paginator,
     this.areEqual,
-    this.assumedItemHeight,
     this.emptyBuilder,
     this.errorBuilder,
     this.footer,
@@ -22,24 +21,19 @@ class LdListConfig<T extends Identifiable<IdType>, IdType> {
     this.shrinkWrap,
   });
 
-  final Widget Function(BuildContext, LdPaginatorLoadedItem<T>, int)?
-      itemBuilder;
+  final Widget Function(BuildContext, LdPaginatorLoadedItem<T>, int)? itemBuilder;
 
   final LdPaginator<T, IdType>? paginator;
 
   final bool Function(T, T)? areEqual;
 
-  final double? assumedItemHeight;
-
-  final Widget Function(BuildContext, Future<void> Function(BuildContext))?
-      emptyBuilder;
+  final Widget Function(BuildContext, Future<void> Function(BuildContext))? emptyBuilder;
 
   final Widget Function(BuildContext, Object?, void Function())? errorBuilder;
 
   final Widget? footer;
 
-  final Widget Function(BuildContext, dynamic, List<LdPaginatorItem<T>>)?
-      groupHeaderBuilder;
+  final Widget Function(BuildContext, dynamic, List<LdPaginatorItem<T>>)? groupHeaderBuilder;
 
   final dynamic Function(T)? groupingCriterion;
 
@@ -62,8 +56,7 @@ class LdListConfig<T extends Identifiable<IdType>, IdType> {
   final bool? shrinkWrap;
 }
 
-class LdListConfigProvider<T extends Identifiable<IdType>, IdType>
-    extends StatelessWidget {
+class LdListConfigProvider<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
   const LdListConfigProvider({
     required this.config,
     required this.child,
@@ -85,33 +78,25 @@ class LdListConfigProvider<T extends Identifiable<IdType>, IdType>
         child: child,
       );
     }
-    final parentConfig =
-        Provider.of<LdListConfig<T, IdType>?>(context, listen: true);
+    final parentConfig = Provider.of<LdListConfig<T, IdType>?>(context, listen: true);
     final mergedConfig = parentConfig != null
         ? LdListConfig<T, IdType>(
             itemBuilder: config.itemBuilder ?? parentConfig.itemBuilder,
             paginator: config.paginator ?? parentConfig.paginator,
             areEqual: config.areEqual ?? parentConfig.areEqual,
-            assumedItemHeight:
-                config.assumedItemHeight ?? parentConfig.assumedItemHeight,
             emptyBuilder: config.emptyBuilder ?? parentConfig.emptyBuilder,
             errorBuilder: config.errorBuilder ?? parentConfig.errorBuilder,
             footer: config.footer ?? parentConfig.footer,
-            groupHeaderBuilder:
-                config.groupHeaderBuilder ?? parentConfig.groupHeaderBuilder,
-            groupingCriterion:
-                config.groupingCriterion ?? parentConfig.groupingCriterion,
+            groupHeaderBuilder: config.groupHeaderBuilder ?? parentConfig.groupHeaderBuilder,
+            groupingCriterion: config.groupingCriterion ?? parentConfig.groupingCriterion,
             header: config.header ?? parentConfig.header,
-            loadingBuilder:
-                config.loadingBuilder ?? parentConfig.loadingBuilder,
+            loadingBuilder: config.loadingBuilder ?? parentConfig.loadingBuilder,
             padding: config.padding ?? parentConfig.padding,
             physics: config.physics ?? parentConfig.physics,
             primary: config.primary ?? parentConfig.primary,
             retryConfig: config.retryConfig ?? parentConfig.retryConfig,
-            scrollController:
-                config.scrollController ?? parentConfig.scrollController,
-            separatorBuilder:
-                config.separatorBuilder ?? parentConfig.separatorBuilder,
+            scrollController: config.scrollController ?? parentConfig.scrollController,
+            separatorBuilder: config.separatorBuilder ?? parentConfig.separatorBuilder,
             shrinkWrap: config.shrinkWrap ?? parentConfig.shrinkWrap)
         : config;
     return Provider<LdListConfig<T, IdType>>.value(
@@ -126,7 +111,6 @@ class LdList<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
     this.itemBuilder,
     this.paginator,
     this.areEqual,
-    this.assumedItemHeight,
     this.emptyBuilder,
     this.errorBuilder,
     this.footer,
@@ -144,11 +128,9 @@ class LdList<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
     super.key,
   });
 
-  final Widget Function(BuildContext, LdPaginatorLoadedItem<T>, int)?
-      itemBuilder;
+  final Widget Function(BuildContext, LdPaginatorLoadedItem<T>, int)? itemBuilder;
 
-  final Widget Function(BuildContext, Future<void> Function(BuildContext))?
-      emptyBuilder;
+  final Widget Function(BuildContext, Future<void> Function(BuildContext))? emptyBuilder;
 
   final Widget Function(BuildContext, Object?, void Function())? errorBuilder;
 
@@ -156,16 +138,13 @@ class LdList<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
 
   final dynamic Function(T)? groupingCriterion;
 
-  final Widget Function(BuildContext, dynamic, List<LdPaginatorItem<T>>)?
-      groupHeaderBuilder;
+  final Widget Function(BuildContext, dynamic, List<LdPaginatorItem<T>>)? groupHeaderBuilder;
 
   final Widget Function(BuildContext)? separatorBuilder;
 
   final LdPaginator<T, IdType>? paginator;
 
   final ScrollController? scrollController;
-
-  final double? assumedItemHeight;
 
   final bool Function(T, T)? areEqual;
 
@@ -194,7 +173,6 @@ class LdList<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
       itemBuilder: itemBuilder ?? config!.itemBuilder!,
       paginator: paginator ?? config!.paginator!,
       areEqual: areEqual ?? config?.areEqual,
-      assumedItemHeight: assumedItemHeight ?? config?.assumedItemHeight,
       emptyBuilder: emptyBuilder ?? config?.emptyBuilder,
       errorBuilder: errorBuilder ?? config?.errorBuilder,
       footer: footer ?? config?.footer,

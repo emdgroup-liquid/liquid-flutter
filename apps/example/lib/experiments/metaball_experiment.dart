@@ -11,6 +11,10 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 enum MetaballShape { roundedRect, ellipse }
 
+/// Maximum number of metaball shapes the shader supports.
+/// Capped at 12 to stay within Metal's 30 fragment-buffer-slot limit on iOS.
+const int _kMetaballMaxShapes = 12;
+
 /// A draggable blob. [color] is used for the widget content painted inside it.
 class MetaballBlob {
   Offset position;
@@ -319,6 +323,7 @@ class _MetaballExperimentState extends State<MetaballExperiment> with SingleTick
   }
 
   void _addBlob(Offset center) {
+    if (_blobs.length >= _kMetaballMaxShapes) return;
     setState(() {
       _blobs.add(
         MetaballBlob(
@@ -602,38 +607,56 @@ class _MetaballMasked extends StatelessWidget {
 
   /// Write uniforms into [s]. When [expand] > 0 each blob's width/height is
   /// inflated by that many logical pixels, producing the border mask.
+  ///
+  /// Uniform layout (packed into vec4 slots to stay within Metal's 30-buffer
+  /// limit on iOS):
+  ///   flat 0–3  : u0 (sizeW, sizeH, blend, numShapes)
+  ///   flat 4–7  : u1 (pointerActive, pointerCx, pointerCy, pointerR)
+  ///   per shape i, 8 floats at 8 + i*8:
+  ///     +0 type, +1 cx, +2 cy, +3 w  → vec4 uSia
+  ///     +4 h,    +5 r,  +6 pad, +7 pad → vec4 uSib
+  /// Max shapes: 12
   void _setUniforms(ui.FragmentShader s, Size size, {double expand = 0}) {
-    final int n = blobs.length.clamp(0, 15);
+    final int n = blobs.length.clamp(0, _kMetaballMaxShapes);
 
+    // u0: (sizeW, sizeH, blend, numShapes)
     s.setFloat(0, size.width);
     s.setFloat(1, size.height);
     s.setFloat(2, blend);
     s.setFloat(3, n.toDouble());
 
+    // u1: (pointerActive, pointerCx, pointerCy, pointerR)
     final active = pointerPos != null;
     s.setFloat(4, active ? 1.0 : 0.0);
     s.setFloat(5, active ? pointerPos!.dx : 0.0);
     s.setFloat(6, active ? pointerPos!.dy : 0.0);
     s.setFloat(7, active ? pointerRadius : 0.0);
 
-    for (int i = 0; i < 15; i++) {
-      final base = 8 + i * 6;
+    for (int i = 0; i < _kMetaballMaxShapes; i++) {
+      final base = 8 + i * 8;
       if (i < n) {
         final blob = blobs[i];
         final type = blob.shape == MetaballShape.ellipse ? 2.0 : 1.0;
+        // uSia: (type, cx, cy, w)
         s.setFloat(base + 0, type);
         s.setFloat(base + 1, blob.position.dx);
         s.setFloat(base + 2, blob.position.dy);
         s.setFloat(base + 3, blob.width + expand * 2);
+        // uSib: (h, r, pad, pad)
         s.setFloat(base + 4, blob.height + expand * 2);
         s.setFloat(base + 5, blob.cornerRadius);
+        s.setFloat(base + 6, 0.0);
+        s.setFloat(base + 7, 0.0);
       } else {
+        // Off-screen placeholder shape
         s.setFloat(base + 0, 1.0);
         s.setFloat(base + 1, -99999.0);
         s.setFloat(base + 2, -99999.0);
         s.setFloat(base + 3, 0.0);
         s.setFloat(base + 4, 0.0);
         s.setFloat(base + 5, 0.0);
+        s.setFloat(base + 6, 0.0);
+        s.setFloat(base + 7, 0.0);
       }
     }
   }

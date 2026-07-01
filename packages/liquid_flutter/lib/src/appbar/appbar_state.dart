@@ -16,6 +16,11 @@ enum LdAppBarPosition {
   bottom,
 }
 
+extension LdAppBarPositionExtension on BuildContext {
+  bool get isInTopAppBar => watch<LdAppBarMetrics?>()?.position == LdAppBarPosition.top;
+  bool get isInBottomAppBar => watch<LdAppBarMetrics?>()?.position == LdAppBarPosition.bottom;
+}
+
 /// Immutable snapshot of the combined app-bar state at a point in time.
 ///
 /// All per-edge values are stored as [EdgeInsets] so the same object covers
@@ -100,11 +105,28 @@ class LdAppBarMetrics {
     return ownSize.atLeast(EdgeInsets.zero) + (parentMetrics?.accumulatedEffectiveSizes ?? EdgeInsets.zero);
   }
 
+  bool get isModal => isModalReset || (parentMetrics?.isModal ?? false);
+
   EdgeInsets get accumulatedScrollOffset {
     if (isModalReset) {
       return EdgeInsets.zero;
     }
     return scrollOffset + (parentMetrics?.accumulatedScrollOffset ?? EdgeInsets.zero);
+  }
+
+  static LdAppBarMetrics reset(BuildContext context) {
+    return LdAppBarMetrics(
+      position: LdAppBarPosition.top,
+      level: -1,
+      willHide: false,
+      innerHeight: EdgeInsets.zero,
+      systemInsets: EdgeInsets.zero,
+      configuredInsets: EdgeInsets.zero,
+      isScrolledUnder: false,
+      appbarLayerMediaQuery: MediaQuery.of(context),
+      scrollOffset: EdgeInsets.zero,
+      scrollBehavior: LdAppBarScrollBehavior.static,
+    );
   }
 
   /// The scroll offset of the app bar. This is the offset that the appbar is currently scrolled. This includes
@@ -263,9 +285,7 @@ class LdAppBarMetrics {
 /// Resolves ancestor [LdAppBarMetrics], treating [LdAppBarMetrics.modalReset] as absent.
 LdAppBarMetrics? ldAppBarParentMetrics(BuildContext context) {
   final metrics = Provider.of<LdAppBarMetrics?>(context, listen: true);
-  if (metrics != null && metrics.isModalReset) {
-    return null;
-  }
+
   return metrics;
 }
 

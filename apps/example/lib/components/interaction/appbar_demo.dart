@@ -29,9 +29,12 @@ class _AppBarDemoConfig {
     this.backgroundMode = LdAppBarBackgroundMode.adaptive,
     this.attachedMode = LdAppBarAttachedMode.adaptive,
     this.addContainer = false,
-    this.showWindowControls = true,
-    this.implyLeading = true,
-    this.implyCloseModalButton = true,
+    this.implyFeatures = const {
+      LdAppBarImpliedFeature.back,
+      LdAppBarImpliedFeature.close,
+      LdAppBarImpliedFeature.windowControls,
+      LdAppBarImpliedFeature.drawerToggle,
+    },
     this.autoAttachToKeyboard = true,
     this.avoidViewInsets = false,
     this.enableSearch = false,
@@ -48,9 +51,8 @@ class _AppBarDemoConfig {
   final LdAppBarBackgroundMode backgroundMode;
   final LdAppBarAttachedMode attachedMode;
   final bool addContainer;
-  final bool showWindowControls;
-  final bool implyLeading;
-  final bool implyCloseModalButton;
+  final Set<LdAppBarImpliedFeature> implyFeatures;
+
   final bool autoAttachToKeyboard;
   final bool avoidViewInsets;
   final bool enableSearch;
@@ -77,9 +79,8 @@ class _AppBarDemoConfig {
     LdAppBarBackgroundMode? backgroundMode,
     LdAppBarAttachedMode? attachedMode,
     bool? addContainer,
-    bool? showWindowControls,
-    bool? implyLeading,
-    bool? implyCloseModalButton,
+    Set<LdAppBarImpliedFeature>? implyFeatures,
+
     bool? autoAttachToKeyboard,
     bool? avoidViewInsets,
     bool? enableSearch,
@@ -96,9 +97,8 @@ class _AppBarDemoConfig {
       backgroundMode: backgroundMode ?? this.backgroundMode,
       attachedMode: attachedMode ?? this.attachedMode,
       addContainer: addContainer ?? this.addContainer,
-      showWindowControls: showWindowControls ?? this.showWindowControls,
-      implyLeading: implyLeading ?? this.implyLeading,
-      implyCloseModalButton: implyCloseModalButton ?? this.implyCloseModalButton,
+      implyFeatures: implyFeatures ?? this.implyFeatures,
+
       autoAttachToKeyboard: autoAttachToKeyboard ?? this.autoAttachToKeyboard,
       avoidViewInsets: avoidViewInsets ?? this.avoidViewInsets,
       enableSearch: enableSearch ?? this.enableSearch,
@@ -136,9 +136,7 @@ class _AppBarDemoConfig {
       backgroundMode: backgroundMode,
       attachedMode: attachedMode,
       addContainer: addContainer,
-      showWindowControls: showWindowControls,
-      implyLeading: implyLeading,
-      implyCloseModalButton: implyCloseModalButton,
+      implyFeatures: implyFeatures,
       autoAttachToKeyboard: autoAttachToKeyboard,
       avoidViewInsets: avoidViewInsets,
       child: child,
@@ -286,20 +284,12 @@ class _AppBarConfigModalState extends State<_AppBarConfigModal> {
                   checked: _config.addContainer,
                   onChanged: (value) => _update((c) => c.copyWith(addContainer: value)),
                 ),
-                LdToggle(
-                  label: 'Show window controls',
-                  checked: _config.showWindowControls,
-                  onChanged: (value) => _update((c) => c.copyWith(showWindowControls: value)),
-                ),
-                LdToggle(
-                  label: 'Imply leading',
-                  checked: _config.implyLeading,
-                  onChanged: (value) => _update((c) => c.copyWith(implyLeading: value)),
-                ),
-                LdToggle(
-                  label: 'Imply close modal button',
-                  checked: _config.implyCloseModalButton,
-                  onChanged: (value) => _update((c) => c.copyWith(implyCloseModalButton: value)),
+                LdChoose.fromSelectItems(
+                  multiple: true,
+                  label: 'Implied features',
+                  items: LdAppBarImpliedFeature.values.map((e) => LdSelectItem(value: e, child: Text(e.name))).toList(),
+                  onChanged: (value) => _update((c) => c.copyWith(implyFeatures: value)),
+                  value: _config.implyFeatures,
                 ),
                 LdToggle(
                   label: 'Auto attach to keyboard',

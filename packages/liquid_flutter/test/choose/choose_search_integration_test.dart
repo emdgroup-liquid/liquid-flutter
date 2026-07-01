@@ -17,25 +17,25 @@ void main() {
       _SearchItem(1, 'Apple pie'),
       _SearchItem(2, 'Banana bread'),
     ];
-    final repository = LdListController.fromModel(
+    final repository = LdListController(
       LdCallbackModel.greedy<_SearchItem, int>(
-      pageSize: 10,
-      getById: (context, id) async => items.firstWhere((item) => item.id == id),
-      fetchListWithParameters: (parameters) async {
-        var filtered = items.toList();
-        if (parameters.filters.isNotEmpty) {
-          filtered = ldFuzzySearchFromFilters<_SearchItem, int>(
-            items: filtered,
-            filters: parameters.filters,
-            searchText: (item) => item.label,
+        pageSize: 10,
+        getById: (context, id) async => items.firstWhere((item) => item.id == id),
+        fetchListWithParameters: (parameters) async {
+          var filtered = items.toList();
+          if (parameters.filters.isNotEmpty) {
+            filtered = ldFuzzySearchFromFilters<_SearchItem, int>(
+              items: filtered,
+              filters: parameters.filters,
+              searchText: (item) => item.label,
+            );
+          }
+          return LdListPage<_SearchItem>(
+            newItems: filtered,
+            hasMore: false,
+            total: filtered.length,
           );
-        }
-        return LdListPage<_SearchItem>(
-          newItems: filtered,
-          hasMore: false,
-          total: filtered.length,
-        );
-      },
+        },
       ),
     );
 
@@ -67,7 +67,7 @@ void main() {
                       },
                     ),
                     child: LdSelectableList<_SearchItem, int>(
-                      paginator: repository,
+                      listController: repository,
                       showSelectionControls: true,
                       child: LdList<_SearchItem, int>(),
                     ),

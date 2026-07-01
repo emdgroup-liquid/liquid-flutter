@@ -116,7 +116,7 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
       child: LdSelectableList<T, IdType>(
         key: _listKey,
         showSelectionControls: selection.showSelectionControls,
-        paginator: repository,
+        listController: repository,
         initialSelectedItems: selection.showSelectionControls ? selection.selection : selection.viewing,
         multiSelect: widget.allowMultipleSelection,
         disableDragGestures: canReorder,
@@ -179,7 +179,7 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
             ignoreParent: true,
             child: LdMonkeyAppBar<T, IdType>(
               location: LdMonkeyActionLocation.masterSecondary,
-              child: body,
+              child: LdScrollEdgeFade(child: body),
             ),
           ),
         ),
@@ -203,7 +203,7 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
                 padding: MediaQuery.of(context).padding,
               ),
               child: _buildAppBarWrappedBody(
-                LdAutoBackground(invert: true, child: _buildList(context, repository, actions)),
+                _buildList(context, repository, actions),
               ),
             ),
           ),

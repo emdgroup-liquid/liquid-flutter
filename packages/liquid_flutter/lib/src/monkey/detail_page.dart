@@ -212,7 +212,8 @@ class _RepositoryWatchItems<T extends Identifiable<IdType>, IdType> extends Stat
   State<_RepositoryWatchItems<T, IdType>> createState() => _RepositoryWatchItemsState<T, IdType>();
 }
 
-class _RepositoryWatchItemsState<T extends Identifiable<IdType>, IdType> extends State<_RepositoryWatchItems<T, IdType>> {
+class _RepositoryWatchItemsState<T extends Identifiable<IdType>, IdType>
+    extends State<_RepositoryWatchItems<T, IdType>> {
   StreamSubscription<List<LdPaginatorItem<T>>>? _itemsSubscription;
 
   void _onItemsChanged(List<LdPaginatorItem<T>> items) {
@@ -228,7 +229,8 @@ class _RepositoryWatchItemsState<T extends Identifiable<IdType>, IdType> extends
   @override
   void initState() {
     super.initState();
-    _itemsSubscription = LdListController.of<T, IdType>(context).watchListOfItems(widget.viewing).listen(_onItemsChanged);
+    _itemsSubscription =
+        LdListController.of<T, IdType>(context).watchListOfItems(widget.viewing).listen(_onItemsChanged);
   }
 
   @override
@@ -236,7 +238,8 @@ class _RepositoryWatchItemsState<T extends Identifiable<IdType>, IdType> extends
     super.didUpdateWidget(oldWidget);
     if (!setEquals(widget.viewing, oldWidget.viewing)) {
       _itemsSubscription?.cancel();
-      _itemsSubscription = LdListController.of<T, IdType>(context).watchListOfItems(widget.viewing).listen(_onItemsChanged);
+      _itemsSubscription =
+          LdListController.of<T, IdType>(context).watchListOfItems(widget.viewing).listen(_onItemsChanged);
     }
   }
 

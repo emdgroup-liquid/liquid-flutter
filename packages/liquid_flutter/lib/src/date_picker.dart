@@ -74,7 +74,7 @@ class _LdDatePickerState extends State<LdDatePicker> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = LdTheme.of(context);
+    final theme = LdTheme.of(context, listen: true);
     return LdModalBuilder(
       useRootNavigator: widget.useRootNavigator,
       builder: (context, open) => LdBundle(

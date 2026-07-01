@@ -24,7 +24,7 @@ class LdMonkeyShell<T extends Identifiable<IdType>, IdType> extends StatefulWidg
     required this.masterPage,
     this.actions = const [],
     this.allowMultipleSelection = true,
-    this.detailPanelFlex = 2,
+    this.detailPanelFraction = 0.3,
     this.immediateViewSelection,
     this.layoutMode = LdMonkeyLayoutMode.auto,
     this.reflowBreakpoint = 600,
@@ -49,10 +49,8 @@ class LdMonkeyShell<T extends Identifiable<IdType>, IdType> extends StatefulWidg
   /// the component will display in side-by-side mode. Defaults to 600 pixels.
   final double reflowBreakpoint;
 
-  /// Flex ratio for the detail panel in side-by-side layout.
-  ///
-  /// Higher values give more space to the detail view. Defaults to 2.
-  final double detailPanelFlex;
+  /// How much of the screen width the detail panel should occupy in side-by-side layout.
+  final double detailPanelFraction;
 
   /// The master page to display in the master panel. This parameter is not used
   /// if the the effective layout is not side by side.
@@ -82,7 +80,7 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
     return _MonkeyShellLayoutBuilder<T, IdType>(
       layoutMode: widget.layoutMode,
       reflowBreakpoint: widget.reflowBreakpoint,
-      detailPanelFlex: widget.detailPanelFlex,
+      detailPanelFraction: widget.detailPanelFraction,
       masterPage: widget.masterPage,
       child: widget.child,
     );
@@ -92,14 +90,14 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
 class _MonkeyShellLayoutBuilder<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
   final LdMonkeyLayoutMode layoutMode;
   final double reflowBreakpoint;
-  final double detailPanelFlex;
+  final double detailPanelFraction;
   final Widget masterPage;
   final Widget child;
 
   const _MonkeyShellLayoutBuilder({
     required this.layoutMode,
     required this.reflowBreakpoint,
-    required this.detailPanelFlex,
+    required this.detailPanelFraction,
     required this.masterPage,
     required this.child,
   });
@@ -147,27 +145,30 @@ class _MonkeyShellLayoutBuilder<T extends Identifiable<IdType>, IdType> extends 
 
       return switch (effectiveLayout) {
         LdMonkeyEffectiveLayoutMode.sideBySide => Provider.value(
-            value: LdMonkeyEffectiveLayoutMode.sideBySide,
+            value: effectiveLayout,
             child: Provider.value(
-              value: LdDrawerState(
-                isOpen: showingDetail || showingNew,
-                isSideBySide: true,
-              ),
-              child: LdMultiPanelLayout(
-                mode: LdMultiPanelLayoutMode.sideBySide,
-                panelVisible: showingDetail || showingNew,
-                minPanelWidth: 350,
-                allowResize: true,
-                panelPosition: LdPanelPosition.right,
-                initialPanelFraction: detailPanelFlex / (1 + detailPanelFlex),
-                body: Provider.value(
-                  value: LdDrawerSlot.drawer,
-                  child: masterPage,
+              value: LdMonkeyEffectiveLayoutMode.sideBySide,
+              child: Provider.value(
+                value: LdDrawerState(
+                  isOpen: showingDetail || showingNew,
+                  isSideBySide: true,
                 ),
-                panel: Provider.value(
-                  value: LdDrawerSlot.body,
-                  child: PreventAutoFocus(
-                    child: DecoratedBox(
+                child: LdMultiPanelLayout(
+                  mode: LdMultiPanelLayoutMode.sideBySide,
+                  panelVisible: showingDetail || showingNew,
+                  minPanelWidth: 350,
+                  minBodyWidth: reflowBreakpoint - 351,
+                  allowResize: true,
+                  panelPosition: LdPanelPosition.right,
+                  initialPanelFraction: detailPanelFraction,
+                  body: Provider.value(
+                    value: LdDrawerSlot.drawer,
+                    child: masterPage,
+                  ),
+                  panel: Provider.value(
+                    value: LdDrawerSlot.body,
+                    child: PreventAutoFocus(
+                      child: DecoratedBox(
                         decoration: BoxDecoration(
                           border: Border(
                             left: BorderSide(
@@ -176,16 +177,12 @@ class _MonkeyShellLayoutBuilder<T extends Identifiable<IdType>, IdType> extends 
                             ),
                           ),
                         ),
-                        child: switch (showingDetail) {
+                        child: switch (showingDetail || showingNew) {
                           true => wrappedChild,
-                          false => switch (showingNew) {
-                              true => wrappedChild,
-                              false => LdAutoBackground(
-                                  invert: true,
-                                  child: SizedBox.shrink(),
-                                ),
-                            }
-                        }),
+                          false => SizedBox.shrink(),
+                        },
+                      ),
+                    ),
                   ),
                 ),
               ),

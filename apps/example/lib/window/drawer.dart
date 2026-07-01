@@ -78,12 +78,7 @@ const components = [
   _Component("Reveal", "/components/reveal", LucideIcons.eye, ComponentCategory.feedback),
 
   // Navigation & Interaction
-  _Component(
-    "Metaball (Experiment)",
-    "/experiments/metaball",
-    LucideIcons.sparkles,
-    ComponentCategory.interaction,
-  ),
+  _Component("Metaball (Experiment)", "/experiments/metaball", LucideIcons.sparkles, ComponentCategory.interaction),
   _Component("Action Runner", "/components/action-runner", LucideIcons.tableOfContents, ComponentCategory.interaction),
   _Component("Breadcrumb", "/components/breadcrumb", LucideIcons.arrowRight, ComponentCategory.interaction),
   _Component("Button", "/components/button", LucideIcons.pointer, ComponentCategory.interaction),
@@ -200,9 +195,8 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
   Widget build(BuildContext context) {
     return LdScaffold(
       body: LdAppBar(
-        title: Text("Navigation"),
         debugName: "Drawer AppBar",
-        //backgroundMode: LdAppBarBackgroundMode.visible,
+        title: SizedBox.shrink(),
         child: Builder(
           builder: (context) {
             return LdScaffoldBody(

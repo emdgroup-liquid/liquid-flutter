@@ -99,7 +99,7 @@ Future<String?> ldEnterTextModal({
   final res = await LdModalRoute<String?>(
       context: context,
       barrierDismissible: allowDismiss,
-      dialogSize: LdSize.s,
+      dialogSize: LdSize.m,
       pageBuilder: (context) {
         return _LdEnterTextModal(
           description: description,

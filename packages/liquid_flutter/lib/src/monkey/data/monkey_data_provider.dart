@@ -3,8 +3,8 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
 /// Mounts [model] and its [LdListController] in the widget tree.
-class LdMonkeyDataProvider<T extends Identifiable<IdType>, IdType,
-    TModel extends LdModel<T, IdType, Object?, Object?>> extends StatefulWidget {
+class LdMonkeyDataProvider<T extends Identifiable<IdType>, IdType, TModel extends LdModel<T, IdType, Object?, Object?>>
+    extends StatefulWidget {
   final TModel Function(BuildContext context) modelBuilder;
   final Widget child;
 
@@ -15,8 +15,7 @@ class LdMonkeyDataProvider<T extends Identifiable<IdType>, IdType,
   });
 
   @override
-  State<LdMonkeyDataProvider<T, IdType, TModel>> createState() =>
-      _LdMonkeyDataProviderState<T, IdType, TModel>();
+  State<LdMonkeyDataProvider<T, IdType, TModel>> createState() => _LdMonkeyDataProviderState<T, IdType, TModel>();
 }
 
 class _LdMonkeyDataProviderState<T extends Identifiable<IdType>, IdType,
@@ -28,7 +27,7 @@ class _LdMonkeyDataProviderState<T extends Identifiable<IdType>, IdType,
   void initState() {
     super.initState();
     _model = widget.modelBuilder(context);
-    _listController = LdListController.fromModel(_model);
+    _listController = LdListController(_model);
     WidgetsBinding.instance.addPostFrameCallback(_initListController);
   }
 

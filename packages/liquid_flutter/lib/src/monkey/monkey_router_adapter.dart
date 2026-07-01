@@ -333,22 +333,17 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
   }
 }
 
-/// Positions the list around [viewing] that may live outside the currently
-/// loaded pages (e.g. a deep-linked detail selection).
+/// Anchors the list view around [viewing] items that may live outside the
+/// currently loaded pages (e.g. a deep-linked detail selection).
 ///
-/// It is mounted *below* the [LdMonkeySortAndFilterState] provider on purpose:
-/// resolving a selection offset goes through [FetchOffsetParameters], which
-/// reads the active filter and sort state from its [BuildContext]. Hydrating
-/// from a context above that provider would resolve offsets against the
-/// unfiltered/unsorted dataset and place items at the wrong index, corrupting
-/// the list.
-///
-/// Per-item loading for the detail view is handled on [LdMonkeyDetailPage].
+/// Mounted *below* [LdMonkeySortAndFilterState] so that offset resolution in
+/// [FetchOffsetParameters] reads the correct active filter/sort state.
 class _LdMonkeySelectionHydrator<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   final Set<IdType> viewing;
   final Widget child;
 
   const _LdMonkeySelectionHydrator({
+    super.key,
     required this.viewing,
     required this.child,
   });
@@ -377,10 +372,7 @@ class _LdMonkeySelectionHydratorState<T extends Identifiable<IdType>, IdType>
       if (repository == null) {
         return;
       }
-      await repository.ensureSelectionAnchored(
-        context,
-        viewing,
-      );
+      await repository.initWithSelection(context, viewing);
     });
   }
 

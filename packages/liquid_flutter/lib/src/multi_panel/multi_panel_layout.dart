@@ -44,6 +44,8 @@ class LdMultiPanelLayout extends StatefulWidget {
   /// reactively when changed (e.g. parent layout constraints).
   final double? panelWidth;
 
+  final double? minBodyWidth;
+
   /// Called when the panel width changes during a resize drag.
   final void Function(double width)? onPanelWidthChanged;
 
@@ -60,6 +62,9 @@ class LdMultiPanelLayout extends StatefulWidget {
   // TODO(enableScaling): implement body-scale effect
   final bool enableScaling;
 
+  /// Whether to inset the body when the panel is visible.
+  final bool insetBody;
+
   const LdMultiPanelLayout({
     super.key,
     this.mode = LdMultiPanelLayoutMode.sideBySide,
@@ -69,6 +74,7 @@ class LdMultiPanelLayout extends StatefulWidget {
     this.allowResize = false,
     this.initialPanelFraction,
     this.minPanelWidth = 80,
+    this.minBodyWidth,
     this.initialPanelVisible,
     this.panelVisible,
     this.onPanelVisibilityChanged,
@@ -76,8 +82,9 @@ class LdMultiPanelLayout extends StatefulWidget {
     this.onPanelWidthChanged,
     this.mass = 5,
     this.springConstant = 3,
-    this.dampingCoefficient = 9,
+    this.dampingCoefficient = 5,
     this.enableScaling = true,
+    this.insetBody = false,
   });
 
   @override
@@ -90,6 +97,8 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
 
   /// Current visibility state (internal).
   late bool _panelVisible;
+
+  double _internalPanelFraction = 0;
 
   /// Whether a resize gesture is active (kept for cursor / UX feedback only;
   /// does NOT gate spring tree construction in [_buildSideBySide]).
@@ -108,6 +117,8 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
 
   /// Guard to defer fraction-based width calculation to first layout frame.
   bool _fractionApplied = false;
+
+  bool _appliedPanelWidth = false;
 
   @override
   void initState() {
@@ -132,10 +143,9 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
       });
     }
 
-    // Sync width from controlled prop.
     if (widget.panelWidth != null && widget.panelWidth != oldWidget.panelWidth) {
       setState(() {
-        _internalPanelWidth = widget.panelWidth!;
+        _appliedPanelWidth = false;
       });
     }
   }
@@ -207,189 +217,269 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
     );
   }
 
-  // ---------------------------------------------------------------------------
+  // ---------------  ------------------------------------------------------------
   // Side-by-side layout
   // ---------------------------------------------------------------------------
 
-  Widget _buildSideBySide(BoxConstraints constraints) {
-    _totalWidth = constraints.maxWidth;
-    final panelW = _clampPanelWidth(
-      _effectivePanelWidth(_totalWidth),
-      _totalWidth,
-      stacked: false,
-    );
-    final isLeft = widget.panelPosition == LdPanelPosition.left;
-
-    // Panel slides off the left/right edge when hidden.
-    // Translation target: 0 when visible, ±panelW when hidden.
-    final panelTranslation = _panelVisible ? 0.0 : (isLeft ? -panelW : panelW);
-
-    // Body left/right offset when panel is visible.
-    final bodyLeftWhenVisible = isLeft ? panelW + 1 : 0.0;
-    final bodyRightWhenVisible = isLeft ? 0.0 : panelW - 1;
-    final bodyLeft = _panelVisible ? bodyLeftWhenVisible : 0.0;
-    final bodyRight = _panelVisible ? bodyRightWhenVisible : 0.0;
-
-    // Compute the effective panel width that accounts for any in-progress resize
-    // delta. Springs use [panelW] (stable) as their target; the delta is applied
-    // additively inside each builder so the rendered positions track the pointer
-    // 1:1 without spring physics lag.
-    final double effectivePanelW = (panelW + _resizeDelta).clamp(
-      widget.minPanelWidth,
-      _totalWidth - widget.minPanelWidth,
-    );
-
-    Widget buildBody({required double left, required double right}) {
-      return Positioned(
-        left: left,
-        right: right,
-        top: 0,
-        bottom: 0,
-        child: Provider.value(
-          value: LdMultiPanelChildState(
-            left: left,
-            width: _totalWidth - left - right,
-            onScreen: true,
-            isDragging: _isResizing,
-            dragOffset: 0,
-            role: LdPanelRole.body,
-          ),
-          child: widget.body,
-        ),
+  BorderSide get _bodyBorderSide => BorderSide(
+        color: LdTheme.of(context).border,
+        width: LdTheme.of(context).borderWidth,
       );
+
+  bool get _panelIsLeft => widget.panelPosition == LdPanelPosition.left;
+  bool get _insetBody => widget.insetBody;
+
+  Decoration get _bodyDecoration => switch (_insetBody) {
+        true => BoxDecoration(
+            boxShadow: [ldShadowSticky],
+            color: LdTheme.of(context).background,
+            borderRadius: LdTheme.of(context).radius(LdSize.m),
+            border: Border.all(
+              color: LdTheme.of(context).border,
+              width: LdTheme.of(context).borderWidth,
+              strokeAlign: BorderSide.strokeAlignOutside,
+            ),
+          ),
+        false => BoxDecoration(
+              border: Border(
+            right: _panelIsLeft ? BorderSide.none : _bodyBorderSide,
+            left: _panelIsLeft ? _bodyBorderSide : BorderSide.none,
+          )),
+      };
+
+  EdgeInsets get _insetPadding => LdTheme.of(context).pad(size: LdSize.m);
+
+  EdgeInsets get _bodyMargin => switch (_insetBody) {
+        true => switch (_panelVisible) {
+            true => _insetPadding,
+            false => EdgeInsets.zero,
+          },
+        false => EdgeInsets.zero,
+      };
+  EdgeInsets get _additionalDrawerPadding => switch (_insetBody) {
+        true => _insetPadding.copyWith(
+            left: _panelIsLeft ? null : 0,
+            right: _panelIsLeft ? 0 : null,
+          ),
+        false => EdgeInsets.zero,
+      };
+
+  Widget _buildSideBySide(BoxConstraints constraints) {
+    _totalWidth = max(1, constraints.maxWidth);
+
+    final minPanelFraction = widget.minPanelWidth / _totalWidth;
+    final maxPanelFraction = 1 - ((widget.minBodyWidth ?? 1) / _totalWidth);
+
+    if (_internalPanelFraction == 0 && widget.initialPanelFraction != null) {
+      _internalPanelFraction = widget.initialPanelFraction!;
+    } else if (_internalPanelFraction == 0 && _totalWidth > 1) {
+      _internalPanelFraction = (widget.panelWidth ?? widget.minPanelWidth) / _totalWidth;
     }
 
-    // Resize handle position (boundary between panel and body).
-    // Uses effectivePanelW so the handle tracks the pointer during a resize drag.
-    final double resizeHandleLeft = isLeft
-        ? (_panelVisible ? effectivePanelW - 4 : -4)
-        : (_panelVisible ? _totalWidth - effectivePanelW - 4 : _totalWidth - 4);
+    double effectivePanelFraction = _internalPanelFraction;
 
-    final border = BorderSide(
-      color: LdTheme.of(context).border,
-      width: LdTheme.of(context).borderWidth,
-    );
+    if (widget.panelWidth != null && !_appliedPanelWidth && !_isResizing) {
+      effectivePanelFraction = widget.panelWidth! / _totalWidth;
+      _appliedPanelWidth = true;
+    }
 
-    Widget buildPanel({required double panelLeft}) {
+    if (_isResizing) {
+      effectivePanelFraction = effectivePanelFraction + (_resizeDelta / _totalWidth);
+    }
+
+    // Not using clamp to avoid crashes when totalWidth is not settled yet
+    effectivePanelFraction = min(maxPanelFraction, effectivePanelFraction);
+    effectivePanelFraction = max(minPanelFraction, effectivePanelFraction);
+
+    // Instead of storing the panel width / visible translation as pixels, we use fractions. This
+    // enables the widget to scale properly when the parent constraints change without requiring the springs to
+    // re-evaluate their targets.
+
+    final isLeft = _panelIsLeft;
+
+    Widget buildPanel({
+      required double panelLeft,
+      required double panelWidth,
+      required double panelVisibility,
+    }) {
+      final mediaQuery = MediaQuery.of(context);
+      final bodyWidth = _totalWidth - panelWidth;
+      final padding = EdgeInsets.only(
+        right: isLeft ? _totalWidth - (_totalWidth - bodyWidth) : 0,
+        left: isLeft ? 0 : _totalWidth - panelWidth,
+      );
+
+      final metrics = context.watch<LdAppBarMetrics?>();
+
       return Positioned(
-        left: panelLeft,
+        left: 0,
         top: 0,
         bottom: 0,
-        width: effectivePanelW,
+        right: 0,
         child: Provider.value(
           value: LdMultiPanelChildState(
             left: panelLeft,
-            width: effectivePanelW,
+            width: panelWidth,
             onScreen: _panelVisible,
             isDragging: _isResizing,
             dragOffset: 0,
             role: LdPanelRole.panel,
           ),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border(
-                right: isLeft ? border : BorderSide.none,
-                left: isLeft ? BorderSide.none : border,
+          child: MediaQuery(
+            data: mediaQuery.copyWith(
+              padding: padding.atLeast(mediaQuery.padding),
+            ),
+            child: Provider.value(
+              value: metrics?.copyWith(
+                appbarLayerMediaQuery: metrics.appbarLayerMediaQuery.copyWith(
+                  padding: padding.atLeast(metrics.appbarLayerMediaQuery.padding),
+                ),
+              ),
+              child: Builder(
+                builder: (context) {
+                  final data = MediaQuery.of(context);
+                  return LdWrapConditional(
+                    condition: _insetBody,
+                    builder: (context, child) => MediaQuery(
+                      data: data.copyWith(
+                        padding: (data.padding + (_additionalDrawerPadding * panelVisibility)).atLeast(EdgeInsets.zero),
+                      ),
+                      child: child,
+                    ),
+                    child: widget.panel,
+                  );
+                },
               ),
             ),
-            child: widget.panel,
           ),
         ),
       );
     }
 
-    // Actual body left/right positions accounting for any in-progress resize.
-    // During resize, overriden=true forces springs to track pointer 1:1.
-    // After resize ends, overriden=false and springs animate to the new target.
-    final double actualBodyLeft = bodyLeft + (isLeft ? _resizeDelta : 0.0);
-    final double actualBodyRight = bodyRight + (isLeft ? 0.0 : _resizeDelta);
-
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        // Body — LdSpring nodes stay in the tree at all times so widget.body
-        // is never remounted. overriden=true during resize so springs track
-        // the pointer 1:1; on drag end the spring animates to the new stable size.
-        LdSpring(
-          key: const Key('body_left'),
-          mass: widget.mass,
-          springConstant: widget.springConstant,
-          dampingCoefficient: widget.dampingCoefficient,
-          initialPosition: actualBodyLeft,
-          position: actualBodyLeft,
-          overriden: _isResizing,
-          builder: (context, leftState, child) {
-            return LdSpring(
-              key: const Key('body_right'),
-              mass: widget.mass,
-              springConstant: widget.springConstant,
-              dampingCoefficient: widget.dampingCoefficient,
-              initialPosition: actualBodyRight,
-              position: actualBodyRight,
-              overriden: _isResizing,
-              builder: (context, rightState, child) {
-                return buildBody(
-                  left: leftState.position,
-                  right: rightState.position,
+    Widget buildBody({required double left, required double right}) {
+      final mediaQuery = MediaQuery.of(context);
+      return Positioned.fill(
+        child: MediaQuery(
+          data: mediaQuery.copyWith(
+            padding: mediaQuery.padding.copyWith(
+              left: max(0, mediaQuery.padding.left - left),
+              right: max(0, mediaQuery.padding.right - right),
+            ),
+          ),
+          child: Provider.value(
+            value: LdMultiPanelChildState(
+              left: left,
+              width: _totalWidth - left - right,
+              onScreen: true,
+              isDragging: _isResizing,
+              dragOffset: 0,
+              role: LdPanelRole.body,
+            ),
+            child: Builder(
+              builder: (context) {
+                return Padding(
+                  padding: EdgeInsets.only(
+                    left: left.clamp(0, _totalWidth),
+                    right: right.clamp(0, _totalWidth),
+                  ),
+                  child: AnimatedContainer(
+                    duration: Duration(milliseconds: 300),
+                    margin: _bodyMargin,
+                    clipBehavior: Clip.hardEdge,
+                    decoration: _bodyDecoration,
+                    child: widget.body,
+                  ),
                 );
-              },
-              child: widget.body,
-            );
-          },
-          child: widget.body,
-        ),
-        // Panel — same overriden pattern during resize.
-        _buildPanelSpring(
-          initialPosition: panelTranslation,
-          position: panelTranslation,
-          overriden: _isResizing,
-          builder: (context, transState) {
-            // transState.position slides from 0 (visible) to ±panelW (hidden).
-            final double panelActualLeft =
-                isLeft ? transState.position : (_totalWidth - effectivePanelW + transState.position);
-            return buildPanel(panelLeft: panelActualLeft);
-          },
-        ),
-        // Resize handle overlay
-        if (widget.allowResize && _panelVisible)
-          Positioned(
-            left: resizeHandleLeft,
-            top: 0,
-            bottom: 0,
-            width: 8,
-            child: _LdPanelResizeHandle(
-              isLeft: isLeft,
-              onDragUpdate: (delta) {
-                if (widget.panelWidth != null) {
-                  // Controlled mode: only fire callback
-                  final newWidth = (widget.panelWidth! + (isLeft ? delta : -delta)).clamp(
-                    widget.minPanelWidth,
-                    _totalWidth - widget.minPanelWidth,
-                  );
-                  widget.onPanelWidthChanged?.call(newWidth);
-                } else {
-                  setState(() {
-                    _isResizing = true;
-                    // Accumulate the resize delta; do NOT update _internalPanelWidth
-                    // here so that the spring targets remain stable during the drag.
-                    // Clamping is enforced in [effectivePanelW] above.
-                    _resizeDelta += (isLeft ? delta : -delta);
-                  });
-                  // Notify with the clamped effective width.
-                  widget.onPanelWidthChanged?.call(effectivePanelW);
-                }
-              },
-              onDragEnd: () {
-                setState(() {
-                  // Commit the accumulated delta into the stable width and reset.
-                  _internalPanelWidth = effectivePanelW;
-                  _resizeDelta = 0;
-                  _isResizing = false;
-                });
               },
             ),
           ),
-      ],
+        ),
+      );
+    }
+
+    return LdSpring(
+      key: const Key('offset_spring'),
+      mass: widget.mass,
+      springConstant: widget.springConstant,
+      dampingCoefficient: widget.dampingCoefficient,
+      initialPosition: _panelVisible ? 1 : 0,
+      position: _panelVisible ? 1 : 0,
+      overriden: _isResizing,
+      builder: (context, state, child) {
+        final panelVisibility = state.position.clamp(0.0, 1.0);
+        return LdSpring(
+          key: const Key('ratio_spring'),
+          mass: widget.mass,
+          springConstant: widget.springConstant,
+          dampingCoefficient: widget.dampingCoefficient,
+          initialPosition: effectivePanelFraction,
+          position: effectivePanelFraction,
+          overriden: _isResizing,
+          builder: (context, state, child) {
+            final panelFraction = state.position.clamp(0.0, 1.0);
+            final effectiveBodyWidth = (1 - (panelFraction * panelVisibility)) * _totalWidth;
+            // Panel remains the same width but gets translated
+            final effectivePanelWidth = panelFraction * _totalWidth;
+
+            final panelLeft = isLeft
+                ? -effectivePanelWidth * (1 - panelVisibility)
+                : _totalWidth - (effectivePanelWidth * (panelVisibility));
+
+            final bodyLeft = isLeft ? effectivePanelWidth * panelVisibility : 0.0;
+            final bodyRight =
+                isLeft ? _totalWidth - bodyLeft - effectiveBodyWidth : effectivePanelWidth * panelVisibility;
+
+            final resizeHandleLeft = isLeft ? bodyLeft : bodyLeft + effectiveBodyWidth;
+
+            final parentMetrics = ldAppBarParentMetrics(context);
+
+            return Provider.value(
+              value:
+                  parentMetrics != null ? LdAppBarMetrics.reset(context).copyWith(parentMetrics: parentMetrics) : null,
+              child: Stack(
+                children: [
+                  buildPanel(panelLeft: panelLeft, panelWidth: effectivePanelWidth, panelVisibility: panelVisibility),
+                  buildBody(left: bodyLeft, right: bodyRight),
+
+                  // Resize handle overlay
+                  if (widget.allowResize && _panelVisible)
+                    Positioned(
+                      left: resizeHandleLeft,
+                      top: 0,
+                      bottom: 0,
+                      width: 8,
+                      child: _LdPanelResizeHandle(
+                        isLeft: isLeft,
+                        onDragUpdate: (delta) {
+                          setState(() {
+                            _isResizing = true;
+                            // Accumulate the resize delta; do NOT update _internalPanelWidth
+                            // here so that the spring targets remain stable during the drag.
+                            // Clamping is enforced in [effectivePanelW] above.
+                            _resizeDelta += (isLeft ? delta : -delta);
+                          });
+                          // Notify with the clamped effective width.
+                          widget.onPanelWidthChanged?.call(effectivePanelWidth);
+                        },
+                        onDragEnd: () {
+                          setState(() {
+                            // Commit the accumulated delta into the stable width and reset.
+                            _internalPanelWidth = effectivePanelWidth;
+
+                            _internalPanelFraction = effectivePanelWidth / _totalWidth;
+
+                            _resizeDelta = 0;
+                            _isResizing = false;
+                          });
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -560,6 +650,7 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        LdTheme.of(context, listen: true);
         if (widget.mode == LdMultiPanelLayoutMode.sideBySide) {
           return _buildSideBySide(constraints);
         } else {

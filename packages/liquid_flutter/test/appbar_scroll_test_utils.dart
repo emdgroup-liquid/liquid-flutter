@@ -74,10 +74,12 @@ void dispatchAppBarScrollNotification(
   WidgetTester tester, {
   required ScrollNotification notification,
   required double scrollDelta,
+  double momentumVelocity = 0.0,
 }) {
   final element = tester.element(find.byType(Scrollable).first);
   LdAppBarScrollNotification(
     source: notification,
     scrollDelta: scrollDelta,
+    momentumVelocity: momentumVelocity,
   ).dispatch(element);
 }
