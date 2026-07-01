@@ -44,7 +44,7 @@ void main() {
                 },
               ),
               child: LdSelectableList<_SampleStringItem, String>(
-                paginator: paginator,
+                listController: paginator,
                 multiSelect: multiSelect,
                 disableDragGestures: disableDragGestures,
                 onSelectionChange: (s) {
@@ -236,7 +236,7 @@ void main() {
                     },
                   ),
                   child: LdSelectableList<_SampleStringItem, String>(
-                    paginator: paginator,
+                    listController: paginator,
                     multiSelect: true,
                     onSelectionChange: (selection) {
                       selected = Set.from(selection);
@@ -313,7 +313,7 @@ class _ScrollParentSyncedSelectableListState extends State<_ScrollParentSyncedSe
         },
       ),
       child: LdSelectableList<_SampleStringItem, String>(
-        paginator: widget.paginator,
+        listController: widget.paginator,
         initialSelectedItems: _initialSelection,
         showSelectionControls: true,
         onSelectionChange: (selection) {
@@ -364,7 +364,7 @@ class _ParentSyncedSelectableListState extends State<_ParentSyncedSelectableList
               },
             ),
             child: LdSelectableList<_SampleStringItem, String>(
-              paginator: _paginator,
+              listController: _paginator,
               initialSelectedItems: _externalSelection,
               multiSelect: true,
               onSelectionChange: (selection) {

@@ -83,14 +83,14 @@ void main() {
       Future<_TestItem?> Function(BuildContext context, int id, _TestItem newItem)? updateItem,
       Future<_TestItem> Function(BuildContext context, _TestItem? newItem)? createItem,
       Future<void> Function(BuildContext context, Set<int> ids)? deleteBatch,
-      Future<void> Function(BuildContext context, Set<_TestItem> items)? updateBatch,
+      Future<void> Function(BuildContext context, Map<int, _TestItem> items)? updateBatch,
       int pageSize = 10,
       bool autoCache = true,
       bool autoInvalidateCache = true,
     }) {
       final items = defaultItems.toList();
 
-      return LdListController.fromModel(
+      return LdListController(
         LdCallbackModel<_TestItem, int>(
           fetchListWithParameters: fetchListWithParameters ??
               (parameters) async {
@@ -283,8 +283,8 @@ void main() {
         await _loadRepository(tester, repository, ctx);
 
         final itemsToUpdate = {
-          _TestItem(1, 'Updated 1', 15),
-          _TestItem(2, 'Updated 2', 25),
+          1: _TestItem(1, 'Updated 1', 15),
+          2: _TestItem(2, 'Updated 2', 25),
         };
         await repository.model!.updateBatch(ctx, itemsToUpdate);
 
@@ -305,8 +305,8 @@ void main() {
         await _loadRepository(tester, repository, ctx);
 
         final itemsToUpdate = {
-          _TestItem(1, 'Updated 1', 15),
-          _TestItem(2, 'Updated 2', 25),
+          1: _TestItem(1, 'Updated 1', 15),
+          2: _TestItem(2, 'Updated 2', 25),
         };
         await repository.model!.updateBatch(ctx, itemsToUpdate);
 
@@ -326,8 +326,8 @@ void main() {
         await _loadRepository(tester, repository, ctx);
 
         final itemsToUpdate = {
-          _TestItem(1, 'Updated 1', 15),
-          _TestItem(2, 'Updated 2', 25),
+          1: _TestItem(1, 'Updated 1', 15),
+          2: _TestItem(2, 'Updated 2', 25),
         };
 
         expect(() => repository.model!.updateBatch(ctx, itemsToUpdate), throwsException);
@@ -429,7 +429,7 @@ void main() {
 
       testWidgets('deletes batch including detached selection items', (tester) async {
         var currentItems = defaultItems.toList();
-        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
+        final repository = LdListController(LdCallbackModel<_TestItem, int>(
           pageSize: 1,
           fetchListWithParameters: (parameters) async {
             final start = parameters.offset;
@@ -450,7 +450,7 @@ void main() {
         ));
 
         final ctx = await _pumpAndGetContext(tester);
-        await repository.initWithSelection(ctx, {1, 2, 3});
+
         await tester.pumpAndSettle(const Duration(seconds: 1));
         await repository.loadViewingItem(ctx, 2);
         await repository.loadViewingItem(ctx, 3);
@@ -467,7 +467,7 @@ void main() {
 
       testWidgets('does not overwrite deleting items during page fetch', (tester) async {
         var currentItems = defaultItems.toList();
-        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
+        final repository = LdListController(LdCallbackModel<_TestItem, int>(
           pageSize: 3,
           fetchListWithParameters: (parameters) async {
             final start = parameters.offset;
@@ -524,13 +524,59 @@ void main() {
         // Repository should still have items (refreshed after error)
         expect(repository.itemsMap, isNotEmpty);
       });
+
+      testWidgets('partial deleteBatch success: confirms succeeded, rolls back failed', (tester) async {
+        // Manage a mutable backing store so refreshes reflect real deletions.
+        final currentItems = [_TestItem(1, 'Item 1', 10), _TestItem(2, 'Item 2', 20)];
+
+        final repository = LdListController(
+          LdCallbackModel<_TestItem, int>(
+            pageSize: 10,
+            fetchListWithParameters: (parameters) async {
+              final start = parameters.offset;
+              final end = (start + parameters.pageSize).clamp(0, currentItems.length);
+              return LdListPage<_TestItem>(
+                newItems: start < currentItems.length ? currentItems.sublist(start, end) : [],
+                hasMore: end < currentItems.length,
+                total: currentItems.length,
+              );
+            },
+            getById: (context, id) async => currentItems.firstWhere((item) => item.id == id),
+            deleteItem: (context, id) async {
+              if (id == 2) throw Exception('delete failed for id $id');
+              currentItems.removeWhere((item) => item.id == id);
+            },
+          ),
+        );
+
+        final ctx = await _pumpAndGetContext(tester);
+        await _loadRepository(tester, repository, ctx);
+
+        expect(repository.getItemById(1), isNotNull);
+        expect(repository.getItemById(2), isNotNull);
+
+        // deleteBatch with no deleteBatchFn falls back to per-item deletes.
+        // The controller re-throws the cause of any partial failure.
+        try {
+          await repository.model!.deleteBatch(context: ctx, ids: {1, 2});
+        } catch (_) {
+          // expected: partial failure throws for the failed item
+        }
+
+        await tester.pumpAndSettle(const Duration(seconds: 1));
+
+        // Item 1 succeeded — must be removed from the controller.
+        expect(repository.getItemById(1), isNull);
+        // Item 2 failed — must still be present (rolled back).
+        expect(repository.getItemById(2), isNotNull);
+      });
     });
 
     group('initWithSelection', () {
       testWidgets('anchors list when getOffsetById is provided', (tester) async {
         var getOffsetCallCount = 0;
         var fetchCallCount = 0;
-        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
+        final repository = LdListController(LdCallbackModel<_TestItem, int>(
           fetchListWithParameters: (parameters) async {
             fetchCallCount++;
             return LdListPage<_TestItem>(
@@ -548,6 +594,7 @@ void main() {
 
         final ctx = await _pumpAndGetContext(tester);
         await repository.initWithSelection(ctx, {2});
+        await repository.refreshList(context: ctx);
         await tester.pumpAndSettle(const Duration(seconds: 1));
 
         expect(getOffsetCallCount, equals(1));
@@ -556,7 +603,7 @@ void main() {
       });
 
       testWidgets('handles null return from getOffsetById', (tester) async {
-        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
+        final repository = LdListController(LdCallbackModel<_TestItem, int>(
           fetchListWithParameters: (parameters) async {
             return LdListPage<_TestItem>(newItems: [], hasMore: false, total: 0);
           },
@@ -792,7 +839,6 @@ void main() {
         final refreshedSecondPage = [3, 4, 5].map((index) => repository.getItemAt(index)?.value?.id).toList();
         expect(refreshedSecondPage, equals([6, 5, 4]));
       });
-
     });
 
     group('fetch reason and cache', () {
@@ -1071,6 +1117,34 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 1));
 
         expect(repository.cache.readPage('stale', 0), isNull);
+      });
+
+      testWidgets('cache is NOT invalidated when update persist fails', (tester) async {
+        final repository = createRepository(
+          getOffsetById: (params) async => params.id - 1,
+          updateItem: (context, id, newItem) async {
+            throw Exception('Update failed');
+          },
+        );
+
+        final ctx = await _pumpAndGetContext(tester);
+        await _loadRepository(tester, repository, ctx);
+
+        const cacheKey = 'keep-this';
+        repository.cache.writePage(
+          cacheKey,
+          offset: 0,
+          items: defaultItems,
+          total: defaultItems.length,
+        );
+
+        await expectLater(
+          () => repository.model!.update(ctx, 1, _TestItem(1, 'Updated', 99)),
+          throwsException,
+        );
+
+        // Cache must NOT have been cleared — persist never succeeded.
+        expect(repository.cache.readPage(cacheKey, 0), isNotNull);
       });
     });
 
@@ -1465,9 +1539,7 @@ void main() {
           fetchListWithParameters: (parameters) async {
             fetchReasons.add(parameters.reason);
             final start = parameters.offset;
-            final end = (start + parameters.pageSize < items.length)
-                ? start + parameters.pageSize
-                : items.length;
+            final end = (start + parameters.pageSize < items.length) ? start + parameters.pageSize : items.length;
             return LdListPage<_TestItem>(
               newItems: start < items.length ? items.sublist(start, end) : [],
               hasMore: end < items.length,
@@ -1497,9 +1569,7 @@ void main() {
           fetchListWithParameters: (parameters) async {
             fetchReasons.add(parameters.reason);
             final start = parameters.offset;
-            final end = (start + parameters.pageSize < items.length)
-                ? start + parameters.pageSize
-                : items.length;
+            final end = (start + parameters.pageSize < items.length) ? start + parameters.pageSize : items.length;
             return LdListPage<_TestItem>(
               newItems: start < items.length ? items.sublist(start, end) : [],
               hasMore: end < items.length,

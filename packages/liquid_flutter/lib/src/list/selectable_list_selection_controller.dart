@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -224,6 +225,21 @@ class LdSelectableListSelectionController<T extends Identifiable<IdType>, IdType
 
   GlobalKey getKeyForItem(IdType id) {
     return _itemKeys[id] ??= GlobalKey(debugLabel: "Selection$id");
+  }
+
+  double getAverageItemHeight() {
+    if (_itemKeys.isEmpty) {
+      return 0;
+    }
+    final heights = _itemKeys.entries
+        .map((e) => e.value.currentContext?.findRenderObject() as RenderBox?)
+        .whereType<RenderBox>()
+        .map((e) => e.size.height)
+        .toList();
+    if (heights.isEmpty) {
+      return 0;
+    }
+    return heights.average.toDouble();
   }
 
   FocusNode getFocusNodeForItem(IdType id) {
