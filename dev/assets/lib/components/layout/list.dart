@@ -70,7 +70,7 @@ class _ListDemoState extends State<ListDemo> {
                   subtitle: Text("This is a Footer"),
                 ),
                 paginator: _paginator,
-                assumedItemHeight: _assumeItemHeight ? 50 : null,
+
                 groupingCriterion: _enableGrouping ? (item) => item.category : null,
                 groupHeaderBuilder: _enableGrouping
                     ? (context, remainder, items) =>
@@ -102,10 +102,7 @@ class _ListDemoState extends State<ListDemo> {
                 Wrap(
                   children: [
                     LdButton(
-                      onPressed: () => _paginator.refreshList(
-                            context: context,
-                            reason: LdFetchReason.refresh,
-                          ),
+                      onPressed: () => _paginator.refreshList(context: context, reason: LdFetchReason.refresh),
                       child: const Text("Refresh list"),
                     ),
                     LdButton(
