@@ -1,6 +1,6 @@
 name: liquid_flutter_test_utils
 description: Test utilities for Liquid Flutter and more
-version: 1.7.0-5
+version: 1.7.0-6
 homepage: https://github.com/emdgroup-liquid/liquid-flutter-test-utils
 environment:
   sdk: ">=3.5.0 <4.0.0"
