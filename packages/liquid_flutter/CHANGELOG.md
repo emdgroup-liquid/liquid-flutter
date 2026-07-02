@@ -1,3 +1,330 @@
+## 23.0.0-6
+Released on: 7/2/2026, changelog automatically generated.
+
+
+### Bug Fixes
+
+- edge cases for monkey pattern ([#149](issues/149)) ([8ab8efe](commit/8ab8efe))
+
+### API Changes
+
+#### 💣 Breaking changes
+
+**`class` CloseDrawerButton** ([lib/src/appbar/drawer_buttons.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-998051ffbe5c2156247ec3ddd0dae8857b52454fad9991da3821f6ba5e3cdc1b))
+- ❌ Class removed: `CloseDrawerButton`
+
+**`class` LdAppBar** ([lib/src/appbar/appbar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-3fa4ae735c9f6ca4c26ac958e08eaa30e2da735b6e0f0ed00665eb6c2b2bb49f))
+- ❌ Properties removed: `implyLeading`, `showWindowControls`, `implyCloseModalButton`
+
+**`class` LdAppBarConfig** ([lib/src/appbar/appbar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-3fa4ae735c9f6ca4c26ac958e08eaa30e2da735b6e0f0ed00665eb6c2b2bb49f))
+- ❌ Properties removed: `implyCloseModalButton`, `implyLeading`, `showWindowControls`
+
+**`class` LdAppBarParentShowsImpliedLeading** ([lib/src/appbar/appbar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-3fa4ae735c9f6ca4c26ac958e08eaa30e2da735b6e0f0ed00665eb6c2b2bb49f))
+- ❌ Class removed: `LdAppBarParentShowsImpliedLeading`
+
+**`class` LdAppBarScrollNotification** ([lib/src/appbar/appbar_scroll_notifier.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-63a4629b74bb8cfffe808706c50a1945d309e7b59bacc2ef3325cf1fe5534f79))
+- ❇️ Param added in default constructor: `momentumVelocity` (named, required)
+
+**`class` LdAppBarWidget** ([lib/src/appbar/appbar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-3fa4ae735c9f6ca4c26ac958e08eaa30e2da735b6e0f0ed00665eb6c2b2bb49f))
+- ❌ Properties removed: `implyLeading`, `showWindowControls`, `implyCloseModalButton`
+
+**`class` LdBottomBar** ([lib/src/appbar/bottom_bar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-178e06f6e9bcb5b603d39a4524326f7e1f8ea90bd5bd2d3256b53845237111b2))
+- ❌ Class removed: `LdBottomBar`
+
+**`class` LdCallbackModel<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/data/ld_callback_model.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-bbe6dccbaff1f85db929a2244aa1272b485ea8ef19047f4e87871d9a0c49ee84))
+- 🔄 Param type changed in default constructor: `updateBatchFn` (`Future<void> Function(BuildContext, Set<T>)?` → `Future<void> Function(BuildContext, Map<IdType, T>)?`)
+- 🔄 Properties type changed: `cache`, `updateBatchFn`
+- 🔄 Param type changed in method `persistUpdateBatch`: `items` (`Set<T>` → `Map<IdType, T>`)
+- 🔄 Param type changed in method `updateBatch`: `items` (`Set<T>` → `Map<IdType, T>`)
+- 🔄 Param type changed in method `greedy`: `updateBatch` (`Future<void> Function(BuildContext, Set<L>)?` → `Future<void> Function(BuildContext, Map<IdType, L>)?`)
+
+**`class` LdChooseTriggerConfig<T extends Identifiable<IdType>, IdType>** ([lib/src/choose/choose.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-6ce965d70e5a38c7bb7d300718c981f5dd5c18807dcaf9b633cdc74c1d5c5c74))
+- 🔄 Param type changed in default constructor: `hint` (`Widget?` → `Widget`)
+- 🔄 Property type changed: `hint`
+
+**`class` LdList<T extends Identifiable<IdType>, IdType>** ([lib/src/list/list.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-888f80c71ddeacb424418138bd38d5900a4ffe694069cba2af68eb89e66a4a41))
+- ❌ Property removed: `assumedItemHeight`
+
+**`class` LdListConfig<T extends Identifiable<IdType>, IdType>** ([lib/src/list/list.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-888f80c71ddeacb424418138bd38d5900a4ffe694069cba2af68eb89e66a4a41))
+- ❌ Property removed: `assumedItemHeight`
+
+**`class` LdListController<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/data/list_controller.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-2bd19515e63ce2d64323e30fa8b37fd3ca7fac879e8a0089508961972dcadd7c))
+- 🔄 Properties type changed: `fetchListFunction`, `model`
+- ❌ Methods removed: `ensureSelectionAnchored`, `ensureSelectionLoaded`
+- 🔄 Param type changed in method `updateBatchFromModel`: `items` (`Set<TUpdate>` → `Map<IdType, TUpdate>`)
+
+**`class` LdListItem** ([lib/src/list/list_item.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-78298edd98f67013b7aac32bb2d42bcfc7aac8ca48eadd30199b423dbceca120))
+- 🔄 Param type changed in default constructor: `selectDisabled` (`bool` → `bool?`), `tradeLeadingForSelectionControl` (`bool` → `bool?`)
+- 🔄 Param type changed in constructor `trailingForward`: `selectDisabled` (`bool` → `bool?`), `tradeLeadingForSelectionControl` (`bool` → `bool?`)
+- 🔄 Properties type changed: `selectDisabled`, `tradeLeadingForSelectionControl`
+
+**`class` LdListWidget<T extends Identifiable<IdType>, IdType>** ([lib/src/list/list.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-888f80c71ddeacb424418138bd38d5900a4ffe694069cba2af68eb89e66a4a41))
+- ❌ Property removed: `assumedItemHeight`
+
+**`class` LdModel<T extends Identifiable<IdType>, IdType, TCreate, TUpdate>** ([lib/src/monkey/data/ld_model.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-44449e404af55a988303764c787a8c8f8f96d93a74e10ed133ffd7252d0b2f68))
+- 🔄 Property type changed: `cache`
+- 🔄 Param type changed in method `persistUpdateBatch`: `items` (`Set<TUpdate>` → `Map<IdType, TUpdate>`)
+- 🔄 Param type changed in method `updateBatch`: `items` (`Set<TUpdate>` → `Map<IdType, TUpdate>`)
+
+**`class` LdMonkeyAppBar<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_app_bar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-1ed77dea165bf61117ba5c39537c923f703bf59c28964a4507ccb301fab79a69))
+- ❌ Property removed: `implyLeading`
+
+**`class` LdMonkeyRouteScope<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_route_scope.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-00b40f9e0517eb15a03249100eaf69b7c20db14e2b2ec72a032292e923048ac2))
+- ❌ Property removed: `detailPanelFlex`
+
+**`class` LdMonkeyShell<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_shell.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-f58e8426a3074373d1a4d8d50d0d7467233933c3ceffe3098ffc530558a3aa9b))
+- ❌ Property removed: `detailPanelFlex`
+
+**`class` LdPaginator<T extends Identifiable<IdType>, IdType>** ([lib/src/list/list_paginator.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-c279977c526f2e1ad42c33e9e9f5451f323d228e7974b6ae305a16daa9ff8dc8))
+- 🔄 Param type changed in default constructor: `fetchListFunction` (`Future<LdListPage<T>> Function(FetchPageParameters<T, IdType>)?` → `Future<LdListPage<T>> Function(FetchPageParameters<T, IdType>)`)
+- ⚠️ Param became required in default constructor: `fetchListFunction` (named, optional)
+- 🔄 Property type changed: `fetchListFunction`
+
+**`class` LdSelectableList<T extends Identifiable<IdType>, IdType>** ([lib/src/list/selectable_list.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-f78a865a5b517b6892730363bb581f1e53588fb39b9bc88417dea463806327c7))
+- ❌ Param removed in default constructor: `paginator` (named, required)
+- ❇️ Param added in default constructor: `listController` (named, required)
+- ❌ Property removed: `paginator`
+
+**`class` MonkeyRouteNode<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_route_tree.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-5ee5971433b226f5666f1c6e2da4cdd4b73a3416065519e97a778a01e3fae04d))
+- ❌ Property removed: `detailPanelFlex`
+
+**`class` OpenDrawerButton** ([lib/src/appbar/drawer_buttons.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-998051ffbe5c2156247ec3ddd0dae8857b52454fad9991da3821f6ba5e3cdc1b))
+- ❌ Class removed: `OpenDrawerButton`
+
+**`class` _MonkeyShellLayoutBuilder<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_shell.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-f58e8426a3074373d1a4d8d50d0d7467233933c3ceffe3098ffc530558a3aa9b))
+- ❌ Param removed in default constructor: `detailPanelFlex` (named, required)
+- ❇️ Param added in default constructor: `detailPanelFraction` (named, required)
+
+#### ✨ Minor changes
+
+**`class` LdAppBar** ([lib/src/appbar/appbar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-3fa4ae735c9f6ca4c26ac958e08eaa30e2da735b6e0f0ed00665eb6c2b2bb49f))
+- ❌ Params removed in default constructor: `implyCloseModalButton` (named, optional), `implyLeading` (named, optional), `showWindowControls` (named, optional)
+- ❇️ Param added in default constructor: `implyFeatures` (named, optional)
+- ❌ Params removed in constructor `top`: `implyCloseModalButton` (named, optional), `implyLeading` (named, optional), `showWindowControls` (named, optional)
+- ❇️ Param added in constructor `top`: `implyFeatures` (named, optional)
+- ❌ Params removed in constructor `bottom`: `implyCloseModalButton` (named, optional), `implyLeading` (named, optional), `showWindowControls` (named, optional)
+- ❇️ Param added in constructor `bottom`: `implyFeatures` (named, optional)
+- ❇️ Property added: `implyFeatures`
+
+**`class` LdAppBarBackButton** ([lib/src/appbar/implied/back_button.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-7e1d936bdce32148d727491647951c9dc105fdf48f2514a06d608a2d213355b0))
+- ❇️ Class added: `LdAppBarBackButton`
+
+**`class` LdAppBarCloseModalButton** ([lib/src/appbar/implied/close_modal_button.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-69f412aac8d31ba909107a2403043591e80a50825ac7249c2309c3f2470c24f7))
+- ❇️ Class added: `LdAppBarCloseModalButton`
+
+**`class` LdAppBarConfig** ([lib/src/appbar/appbar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-3fa4ae735c9f6ca4c26ac958e08eaa30e2da735b6e0f0ed00665eb6c2b2bb49f))
+- ❌ Params removed in default constructor: `implyCloseModalButton` (named, optional), `implyLeading` (named, optional), `showWindowControls` (named, optional)
+- ❇️ Param added in default constructor: `implyFeatures` (named, optional)
+- ❇️ Property added: `implyFeatures`
+
+**`enum` LdAppBarImpliedFeature** ([lib/src/appbar/implied/implied_features.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-b3c404c6a9fe207062878cbde59f322e4ec3a9091ae09d1de578d72672b83eac))
+- ❇️ Enum added: `LdAppBarImpliedFeature`
+
+**`class` LdAppBarImpliedFeatures** ([lib/src/appbar/implied/implied_features.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-b3c404c6a9fe207062878cbde59f322e4ec3a9091ae09d1de578d72672b83eac))
+- ❇️ Class added: `LdAppBarImpliedFeatures`
+
+**`extension` LdAppBarImpliedFeaturesExtension** ([lib/src/appbar/implied/implied_features.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-b3c404c6a9fe207062878cbde59f322e4ec3a9091ae09d1de578d72672b83eac))
+- ❇️ Extension added: `LdAppBarImpliedFeaturesExtension`
+
+**`class` LdAppBarMetrics** ([lib/src/appbar/appbar_state.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-3e75260b022f83d5ee36c231362f6603999ada7073b656454d1545bcd74b197d))
+- ❇️ Property added: `isModal`
+- ❇️ Method added: `reset`
+
+**`extension` LdAppBarPositionExtension** ([lib/src/appbar/appbar_state.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-3e75260b022f83d5ee36c231362f6603999ada7073b656454d1545bcd74b197d))
+- ❇️ Extension added: `LdAppBarPositionExtension`
+
+**`class` LdAppBarScrollNotification** ([lib/src/appbar/appbar_scroll_notifier.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-63a4629b74bb8cfffe808706c50a1945d309e7b59bacc2ef3325cf1fe5534f79))
+- ❇️ Property added: `momentumVelocity`
+
+**`class` LdAppBarWidget** ([lib/src/appbar/appbar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-3fa4ae735c9f6ca4c26ac958e08eaa30e2da735b6e0f0ed00665eb6c2b2bb49f))
+- ❌ Params removed in default constructor: `implyCloseModalButton` (named, optional, default: true), `implyLeading` (named, optional), `showWindowControls` (named, optional, default: true)
+- ❇️ Param added in default constructor: `implyFeatures` (named, optional, default: const {LdAppBarImpliedFeature.back, LdAppBarImpliedFeature.close, LdAppBarImpliedFeature.windowControls, LdAppBarImpliedFeature.drawerToggle})
+- ❇️ Property added: `implyFeatures`
+
+**`class` LdCallbackModel<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/data/ld_callback_model.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-bbe6dccbaff1f85db929a2244aa1272b485ea8ef19047f4e87871d9a0c49ee84))
+- ❌ Modifier `final` removed from property: `cache`
+- ❇️ Methods added: `fetchListWithParametersCached`, `invalidateCacheOnMutation`
+
+**`class` LdDrawerButton** ([lib/src/appbar/implied/drawer_buttons.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-f7a28a7ef5a5f8cbe3161476e8e6b235bfc48881932e597e19aaa98f2279514f))
+- ❇️ Class added: `LdDrawerButton`
+
+**`enum` LdDrawerButtonType** ([lib/src/appbar/implied/drawer_buttons.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-f7a28a7ef5a5f8cbe3161476e8e6b235bfc48881932e597e19aaa98f2279514f))
+- ❇️ Enum added: `LdDrawerButtonType`
+
+**`extension` LdDrawerSlotExtension** ([lib/src/scaffold.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-35c580af7b94cd13fc78765d9afc1f836ec439643e1a61922b4b6c7a0614553d))
+- ❇️ Extension added: `LdDrawerSlotExtension`
+
+**`class` LdList<T extends Identifiable<IdType>, IdType>** ([lib/src/list/list.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-888f80c71ddeacb424418138bd38d5900a4ffe694069cba2af68eb89e66a4a41))
+- ❌ Param removed in default constructor: `assumedItemHeight` (named, optional)
+
+**`class` LdListCacheKeyPart** ([lib/src/monkey/data/ld_list_cache_key.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-c2dd9b794bf55e14f63062a0c1baeb9f502d36d666a1f9ecda1d0dc871c374f4))
+- ❇️ Class added: `LdListCacheKeyPart`
+
+**`class` LdListConfig<T extends Identifiable<IdType>, IdType>** ([lib/src/list/list.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-888f80c71ddeacb424418138bd38d5900a4ffe694069cba2af68eb89e66a4a41))
+- ❌ Param removed in default constructor: `assumedItemHeight` (named, optional)
+
+**`class` LdListController<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/data/list_controller.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-2bd19515e63ce2d64323e30fa8b37fd3ca7fac879e8a0089508961972dcadd7c))
+- ❌ Modifier `factory` removed from constructor: `fromModel`
+- ❇️ Constructor added: `new`
+- ❇️ Method added: `onTransientItemsEvictedByRefresh`
+
+**`class` LdListEmpty** ([lib/src/list/list_empty.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-3acf2a0268f75f5c094dbd095f10e4b2ffd09cdfc410f0d25829c3e84e8954e6))
+- ❇️ Params added in default constructor: `hasActiveFilters` (named, optional, default: false), `onClearFilters` (named, optional)
+- ❇️ Properties added: `hasActiveFilters`, `onClearFilters`
+
+**`class` LdListItem** ([lib/src/list/list_item.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-78298edd98f67013b7aac32bb2d42bcfc7aac8ca48eadd30199b423dbceca120))
+- ❇️ Param added in default constructor: `isOdd` (named, optional)
+- ❇️ Param added in constructor `trailingForward`: `isOdd` (named, optional)
+- ❇️ Property added: `isOdd`
+
+**`class` LdListItemConfig** ([lib/src/list/list_item.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-78298edd98f67013b7aac32bb2d42bcfc7aac8ca48eadd30199b423dbceca120))
+- ❇️ Params added in default constructor: `leading` (named, optional), `selectDisabled` (named, optional), `subContent` (named, optional), `subtitle` (named, optional), `title` (named, optional), `tradeLeadingForSelectionControl` (named, optional), `width` (named, optional), `isOdd` (named, optional)
+- ❇️ Properties added: `leading`, `selectDisabled`, `subContent`, `subtitle`, `title`, `tradeLeadingForSelectionControl`, `width`, `isOdd`
+
+**`class` LdListItemWidget** ([lib/src/list/list_item.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-78298edd98f67013b7aac32bb2d42bcfc7aac8ca48eadd30199b423dbceca120))
+- ❇️ Param added in default constructor: `isOdd` (named, optional, default: false)
+- ❇️ Property added: `isOdd`
+
+**`enum` LdListMutationKind** ([lib/src/monkey/data/ld_list_cache_key.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-c2dd9b794bf55e14f63062a0c1baeb9f502d36d666a1f9ecda1d0dc871c374f4))
+- ❇️ Enum added: `LdListMutationKind`
+
+**`class` LdListWidget<T extends Identifiable<IdType>, IdType>** ([lib/src/list/list.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-888f80c71ddeacb424418138bd38d5900a4ffe694069cba2af68eb89e66a4a41))
+- ❌ Param removed in default constructor: `assumedItemHeight` (named, optional)
+
+**`extension` LdModalRouteExtension** ([lib/src/modal/modal.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-2d55c400b021d628a7e92bc6d07673f3775bac69b40c544c8332ae622d0f715d))
+- ❇️ Extension added: `LdModalRouteExtension`
+
+**`class` LdModel<T extends Identifiable<IdType>, IdType, TCreate, TUpdate>** ([lib/src/monkey/data/ld_model.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-44449e404af55a988303764c787a8c8f8f96d93a74e10ed133ffd7252d0b2f68))
+- ❇️ Methods added: `fetchListWithParametersCached`, `invalidateCacheOnMutation`
+
+**`class` LdMonkeyAppBar<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_app_bar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-1ed77dea165bf61117ba5c39537c923f703bf59c28964a4507ccb301fab79a69))
+- ❌ Param removed in default constructor: `implyLeading` (named, optional)
+
+**`class` LdMonkeyRouteScope<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_route_scope.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-00b40f9e0517eb15a03249100eaf69b7c20db14e2b2ec72a032292e923048ac2))
+- ❌ Param removed in default constructor: `detailPanelFlex` (named, optional)
+- ❇️ Param added in default constructor: `detailPanelFraction` (named, optional)
+- ❇️ Property added: `detailPanelFraction`
+
+**`class` LdMonkeyShell<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_shell.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-f58e8426a3074373d1a4d8d50d0d7467233933c3ceffe3098ffc530558a3aa9b))
+- ❌ Param removed in default constructor: `detailPanelFlex` (named, optional, default: 2)
+- ❇️ Param added in default constructor: `detailPanelFraction` (named, optional, default: 0.3)
+- ❇️ Property added: `detailPanelFraction`
+
+**`class` LdMultiPanelLayout** ([lib/src/multi_panel/multi_panel_layout.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-dcf83dd1348efc710dbc6957e505c08eb421234a466c65f2b9630f2f41b83750))
+- ❇️ Params added in default constructor: `minBodyWidth` (named, optional), `insetBody` (named, optional, default: false)
+- ❇️ Properties added: `minBodyWidth`, `insetBody`
+
+**`class` LdPaginator<T extends Identifiable<IdType>, IdType>** ([lib/src/list/list_paginator.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-c279977c526f2e1ad42c33e9e9f5451f323d228e7974b6ae305a16daa9ff8dc8))
+- ❇️ Method added: `onTransientItemsEvictedByRefresh`
+
+**`class` LdPartialBatchDeleteException<IdType>** ([lib/src/monkey/data/ld_list_cache_key.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-c2dd9b794bf55e14f63062a0c1baeb9f502d36d666a1f9ecda1d0dc871c374f4))
+- ❇️ Class added: `LdPartialBatchDeleteException`
+
+**`class` LdSelectableList<T extends Identifiable<IdType>, IdType>** ([lib/src/list/selectable_list.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-f78a865a5b517b6892730363bb581f1e53588fb39b9bc88417dea463806327c7))
+- ❇️ Property added: `listController`
+
+**`class` LiquidLocalizations** ([lib/src/l10n/generated/liquid_localizations.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-355d12226806e42fbe28958594669ec350c927c0fc7c9226bf2b78c89f288995))
+- ❇️ Properties added: `noItemsMatchFilter`, `clearFilters`
+
+**`class` MacOSWindowControls** ([lib/src/appbar/implied/macos_window_controls.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-5618493c48c92a6f1beaf7b88e3b34f6b67d749e9a04545fd6ead0ac8acae1ce))
+- ❇️ Class added: `MacOSWindowControls`
+
+**`class` MonkeyRouteNode<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_route_tree.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-5ee5971433b226f5666f1c6e2da4cdd4b73a3416065519e97a778a01e3fae04d))
+- ❌ Param removed in default constructor: `detailPanelFlex` (named, optional)
+- ❇️ Param added in default constructor: `detailPanelFraction` (named, optional)
+- ❇️ Property added: `detailPanelFraction`
+
+**`class` WindowsWindowControls** ([lib/src/appbar/implied/windows_window_controls.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-fc922da4536be59880c71e67a04ca821005f466d692ccfbb779887db3d11f2fb))
+- ❇️ Class added: `WindowsWindowControls`
+
+**`class` _LdMonkeySelectionHydrator<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_router_adapter.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-38733ea6a1cce5fbf22de0240816bf176f58d0e504bf36a2b06519fe5f9a108d))
+- ❇️ Param added in default constructor: `key` (named, optional)
+
+**`function` buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_routes.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-5dd41942d7588e4b4e14333a7153952c923f9bc1226bae8302adcf3f9c97ce29))
+- ❌ Param removed in function `buildMonkeyRoutes`: `detailPanelFlex` (named, optional)
+- ❇️ Param added in function `buildMonkeyRoutes`: `detailPanelFraction` (named, optional)
+
+**`function` ldListCacheKey<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/data/ld_list_cache_key.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-c2dd9b794bf55e14f63062a0c1baeb9f502d36d666a1f9ecda1d0dc871c374f4))
+- ❇️ Function added: `ldListCacheKey`
+
+**`function` parseLdListCacheKey** ([lib/src/monkey/data/ld_list_cache_key.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-c2dd9b794bf55e14f63062a0c1baeb9f502d36d666a1f9ecda1d0dc871c374f4))
+- ❇️ Function added: `parseLdListCacheKey`
+
+#### 👀 Patch changes
+
+**`class` LdCallbackModel<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/data/ld_callback_model.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-bbe6dccbaff1f85db929a2244aa1272b485ea8ef19047f4e87871d9a0c49ee84))
+- ➖ Property annotation removed: `cache` (@override)
+- ❇️ Properties added: `_ownedCache`, `_providedCache`
+
+**`class` LdListController<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/data/list_controller.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-2bd19515e63ce2d64323e30fa8b37fd3ca7fac879e8a0089508961972dcadd7c))
+- ❌ Constructor removed: `_`
+- ❌ Properties removed: `_isGreedy`, `_autoCache`, `_autoInvalidateCache`, `_autoInvalidateCacheOnMutation`
+- 🔄 Property type changed: `_attachedModel`
+- ❇️ Property added: `_refreshInProgress`
+- ❇️ Param added in method `_addToOffsetQueue`: `immediate` (named, optional, default: false)
+- 🔄 Method type changed: `_fetchItems` (`Future<List<T>>` → `Future<bool>`), `_insertPageItems` (`List<T>` → `bool`)
+- ❌ Methods removed: `_fetchWithAutoCache`, `_maybeInvalidateOnMutation`, `_idFromUpdatePayload`
+- ✏️ Param renamed in method `initWithSelection`: `selection` → `selectedIds`
+
+**`class` LdListItemWidget** ([lib/src/list/list_item.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-78298edd98f67013b7aac32bb2d42bcfc7aac8ca48eadd30199b423dbceca120))
+- ➕ Constructor annotation added: `new` (@ContextConfigurable())
+- ➖ Params annotation removed: `` (@ContextConfigurable()), `` (@ContextConfigurable()), `` (@ContextConfigurable()), `` (@ContextConfigurable()), `` (@ContextConfigurable()), `` (@ContextConfigurable()), `` (@ContextConfigurable()), `` (@ContextConfigurable()), `` (@ContextConfigurable()), `` (@ContextConfigurable()), `` (@ContextConfigurable())
+
+**`class` LdModel<T extends Identifiable<IdType>, IdType, TCreate, TUpdate>** ([lib/src/monkey/data/ld_model.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-44449e404af55a988303764c787a8c8f8f96d93a74e10ed133ffd7252d0b2f68))
+- ❇️ Property added: `_ownedCache`
+
+**`class` LdPaginator<T extends Identifiable<IdType>, IdType>** ([lib/src/list/list_paginator.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-c279977c526f2e1ad42c33e9e9f5451f323d228e7974b6ae305a16daa9ff8dc8))
+- ❇️ Param added in method `_addToOffsetQueue`: `immediate` (named, optional, default: false)
+- 🔄 Method type changed: `_fetchItems` (`Future<List<T>>` → `Future<bool>`), `_insertPageItems` (`List<T>` → `bool`)
+
+**`class` LdScaffoldState** ([lib/src/scaffold.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-35c580af7b94cd13fc78765d9afc1f836ec439643e1a61922b4b6c7a0614553d))
+- ❌ Property removed: `_isSurface`
+- 🔄 Property type changed: `_scaffoldDecoration`
+
+**`class` LdSelectableListState<T extends Identifiable<IdType>, IdType>** ([lib/src/list/selectable_list.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-f78a865a5b517b6892730363bb581f1e53588fb39b9bc88417dea463806327c7))
+- ❇️ Method added: `_tryScrollToInitialSelection`
+
+**`class` _LdAppBarScrollNotifierState** ([lib/src/appbar/appbar_scroll_notifier.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-63a4629b74bb8cfffe808706c50a1945d309e7b59bacc2ef3325cf1fe5534f79))
+- ❇️ Property added: `_lastMomentumFrameTime`
+- ❇️ Method added: `_momentumVelocity`
+
+**`class` _LdAppBarWidgetState** ([lib/src/appbar/appbar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-3fa4ae735c9f6ca4c26ac958e08eaa30e2da735b6e0f0ed00665eb6c2b2bb49f))
+- ❌ Properties removed: `_isModal`, `_canDismissModal`, `_drawerBlocksImplyLeading`, `_canPopParentRoute`, `_drawerSlot`, `_isDrawer`
+- ❌ Methods removed: `_closeModalButton`, `_popParentRoute`, `_findDrawerParent`, `_buildLeading`, `_shouldImplyRouteBack`, `_showWindowsWindowControls`
+
+**`class` _LdListReorderScopeState<T extends Identifiable<IdType>, IdType>** ([lib/src/list/reorderable_list.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-7fba1dfd3dfe7dce17c728b3b6196db4d04769e588d7de2b34901f5b0567fa1f))
+- ❌ Property removed: `_isMobile`
+
+**`class` _LdListState<T extends Identifiable<IdType>, IdType>** ([lib/src/list/list.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-888f80c71ddeacb424418138bd38d5900a4ffe694069cba2af68eb89e66a4a41))
+- ❌ Properties removed: `_performedInitialScroll`, `_pendingScrollAttempts`, `_maxPendingScrollAttempts`
+- ❌ Methods removed: `_getAverageItemHeight`, `_maybeScrollToPendingItem`, `_scrollPendingItemIntoView`, `_maybePerformInitialScroll`
+
+**`class` _LdMultiPanelLayoutState** ([lib/src/multi_panel/multi_panel_layout.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-dcf83dd1348efc710dbc6957e505c08eb421234a466c65f2b9630f2f41b83750))
+- ❇️ Properties added: `_internalPanelFraction`, `_appliedPanelWidth`, `_bodyBorderSide`, `_panelIsLeft`, `_insetBody`, `_bodyDecoration`, `_insetPadding`, `_bodyMargin`, `_additionalDrawerPadding`
+
+**`class` _LdToggleState** ([lib/src/toggle.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-3be9fabf9ea8105794cfaa3898af4f8abed89551a1e963a7ee9183a05649ce25))
+- ❌ Property removed: `_controller`
+- ➖ Method annotation removed: `didUpdateWidget` (@override)
+- ➕ Methods annotation added: `didUpdateWidget` (@mustCallSuper), `didUpdateWidget` (@protected)
+- ❌ Method removed: `_updateStatus`
+
+**`class` _MonkeyShellLayoutBuilder<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_shell.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-f58e8426a3074373d1a4d8d50d0d7467233933c3ceffe3098ffc530558a3aa9b))
+- ❌ Property removed: `detailPanelFlex`
+- ❇️ Property added: `detailPanelFraction`
+
+**`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
+- 📦 Added `meta`: with version `^1.9.0`
+
+**`function` _goRouterCanPop** ([lib/src/appbar/implied/back_button.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-7e1d936bdce32148d727491647951c9dc105fdf48f2514a06d608a2d213355b0))
+- ❇️ Function added: `_goRouterCanPop`
+
+**`function` _goRouterShellNavigatorCanPop** ([lib/src/appbar/appbar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-3fa4ae735c9f6ca4c26ac958e08eaa30e2da735b6e0f0ed00665eb6c2b2bb49f))
+- ❌ Function removed: `_goRouterShellNavigatorCanPop`
+
+**`function` _isDescendant** ([lib/src/appbar/implied/back_button.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-5..liquid_flutter/v23.0.0-6#diff-7e1d936bdce32148d727491647951c9dc105fdf48f2514a06d608a2d213355b0))
+- ❇️ Function added: `_isDescendant`
+
+
 ## 23.0.0-5
 Released on: 6/28/2026, changelog automatically generated.
 
