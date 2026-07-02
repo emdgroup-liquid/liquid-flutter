@@ -14,7 +14,7 @@ typedef FetchListFunction<T extends Identifiable<IdType>, IdType> = Future<LdLis
     FetchPageParameters<T, IdType> parameters);
 
 class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier {
-  FetchListFunction<T, IdType>? fetchListFunction;
+  FetchListFunction<T, IdType> fetchListFunction;
   final int pageSize;
   int initialOffset;
   final Duration debounceTime;
@@ -81,7 +81,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   }
 
   LdPaginator({
-    this.fetchListFunction,
+    required this.fetchListFunction,
 
     /// The number of items that are fetched at once.
     /// The [pageSize] will be passed to the [FetchListFunction] and used to
@@ -149,7 +149,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   /// The number of items that are loaded
   int get currentItemCount => _items.values
       .where(
-        (item) => item.state != LdPaginatorItemState.fetching,
+        (item) => item.state != LdPaginatorItemState.fetching && item.state != LdPaginatorItemState.deleting,
       )
       .length;
 
@@ -368,15 +368,15 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   }
 
   Future<void> _triggerFetch(BuildContext context) async {
-    if (_fetchInProgress) {
+    if (_fetchInProgress || _isControlledRefresh) {
       return;
     }
 
     _fetchInProgress = true;
     try {
-      while (_offsetQueue.isNotEmpty && context.mounted) {
-        final newItems = await _fetchItems(context: context);
-        if (newItems.isNotEmpty) {
+      while (_offsetQueue.isNotEmpty && context.mounted && !_isControlledRefresh) {
+        final changed = await _fetchItems(context: context);
+        if (changed) {
           notifyListeners();
         }
       }
@@ -385,37 +385,63 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     }
   }
 
-  // Fetch items starting at a specific offset
-  Future<void> _addToOffsetQueue(BuildContext context, int offset) async {
+  // Fetch items starting at a specific offset.
+  //
+  // When [immediate] is false (the default for scroll-driven pagination calls)
+  // and [debounceTime] is non-zero, the actual fetch is deferred until the
+  // debounce timer fires. Rapid calls during a fast scroll therefore collapse
+  // into a single fetch of the offsets that are still queued when the timer
+  // fires. This is the intended use of the [debounceTime] parameter.
+  //
+  // Pass [immediate] = true for non-pagination triggers (refresh, initial
+  // load, scroll-to-item) so they are never delayed.
+  Future<void> _addToOffsetQueue(
+    BuildContext context,
+    int offset, {
+    bool immediate = false,
+  }) async {
     if (offset < 0) offset = 0;
 
     final normalizedOffset = offset;
     final pageOffset = (normalizedOffset ~/ pageSize) * pageSize;
 
-    if (_offsetQueue.contains(normalizedOffset)) {
-      if (!_fetchInProgress) {
-        await _triggerFetch(context);
-      }
-      return;
-    }
-
     if (_requestedOffsets.contains(pageOffset)) {
       return;
     }
 
-    if (_offsetQueue.length < fetchQueueSize) {
-      _offsetQueue.add(normalizedOffset);
-    } else {
-      _offsetQueue.removeAt(0);
-      _offsetQueue.add(normalizedOffset);
+    if (!_offsetQueue.contains(normalizedOffset)) {
+      if (_offsetQueue.length < fetchQueueSize) {
+        _offsetQueue.add(normalizedOffset);
+      } else {
+        _offsetQueue.removeAt(0);
+        _offsetQueue.add(normalizedOffset);
+      }
     }
 
-    await _triggerFetch(context);
+    if (!immediate && debounceTime > Duration.zero) {
+      // Debounced path: reset the timer. The fetch fires once the user stops
+      // scrolling (or once the current burst of gap-fill requests settles).
+      _debounceTimer?.cancel();
+      _debounceTimer = Timer(debounceTime, () {
+        if (context.mounted) {
+          _triggerFetch(context);
+        }
+      });
+    } else {
+      // Immediate path: cancel any pending debounce so a subsequent debounced
+      // scroll burst cannot interfere with this fetch, then fire right away.
+      _debounceTimer?.cancel();
+      _debounceTimer = null;
+      await _triggerFetch(context);
+    }
   }
 
-  /// Fetch items at a specific offset, normalized to the nearest page size
-  /// It makes sense to use this strategy in order to avoid fetching items
-  /// that are already loaded.
+  /// Fetch items at a specific offset, normalized to the nearest page size.
+  ///
+  /// Scroll-driven pagination calls are debounced by [debounceTime] so that a
+  /// fast fling does not trigger a network request for every intermediate page.
+  /// Non-pagination reasons (initial, refresh, invalidate, filter, sort) bypass
+  /// the debounce and fire immediately.
   Future<void> fetchPageAtOffset(
     BuildContext context,
     int offset, {
@@ -427,7 +453,11 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     _pendingFetchReason = reason;
     // normalize position to the nearest page size
     final pagedOffset = (offset ~/ pageSize) * pageSize;
-    return _addToOffsetQueue(context, pagedOffset);
+    // Only pagination calls from the list widget (gap-fills during scroll) are
+    // debounced. Every other reason represents an explicit action that should
+    // start immediately.
+    final immediate = reason != LdFetchReason.pagination || debounceTime == Duration.zero;
+    return _addToOffsetQueue(context, pagedOffset, immediate: immediate);
   }
 
   // Get all non-null items in order
@@ -455,6 +485,19 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   bool isItemLoaded(int position) {
     return _items[position]?.state != LdPaginatorItemState.fetching;
   }
+
+  /// Called by [_commitRefreshState] just before [_items] is replaced with the
+  /// fresh server data. [transientItems] contains every entry that was in
+  /// [_items] with a transient state (deleting / updating / creating) and their
+  /// current index keys.
+  ///
+  /// Subclasses that track in-flight operations outside [_items] (e.g. via a
+  /// side-channel map) should override this to take ownership of those items so
+  /// that pending confirms / rollbacks can still resolve after the refresh.
+  ///
+  /// The default implementation is a no-op.
+  @protected
+  void onTransientItemsEvictedByRefresh(Map<int, LdPaginatorItem<T>> transientItems) {}
 
   // Refresh List - mark items pending, fetch in the background, then commit.
   Future<void> refreshList({
@@ -489,7 +532,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     final fetchOffset = _refreshBaseOffset(effectiveReason);
 
     if (context.mounted) {
-      await _addToOffsetQueue(context, fetchOffset);
+      await _addToOffsetQueue(context, fetchOffset, immediate: true);
     }
     _setBusy(false);
   }
@@ -498,7 +541,6 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     BuildContext context,
     LdFetchReason effectiveReason,
   ) async {
-    assert(fetchListFunction != null, 'fetchListFunction is not set. Can not refresh items');
 
     _isControlledRefresh = true;
     _setBusy(true);
@@ -606,7 +648,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
         break;
       }
 
-      final page = await fetchListFunction!(
+      final page = await fetchListFunction(
         FetchPageParameters(
           context: context,
           offset: offset,
@@ -638,6 +680,18 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
       }
     }
 
+    // Give subclasses a chance to evacuate in-flight (transient) items before
+    // _items is replaced. Items returned here will no longer be tracked inside
+    // _items, so subclasses must take ownership of them (e.g. move them to a
+    // side-channel map) so that in-flight confirms/rollbacks can still resolve.
+    final transientItems = <int, LdPaginatorItem<T>>{};
+    for (final entry in _items.entries) {
+      if (entry.value.value != null && _isTransientItemState(entry.value.state)) {
+        transientItems[entry.key] = entry.value;
+      }
+    }
+    onTransientItemsEvictedByRefresh(transientItems);
+
     _items
       ..clear()
       ..addAll(newItems);
@@ -658,7 +712,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   /// is false. Used by greedy repositories to capture the full dataset up front.
   @protected
   Future<void> eagerFetchAllPages(BuildContext context) async {
-    if (!context.mounted || fetchListFunction == null) {
+    if (!context.mounted) {
       return;
     }
 
@@ -673,7 +727,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
       _pendingFetchReason = offset == 0 ? LdFetchReason.initial : LdFetchReason.pagination;
 
       try {
-        final page = await fetchListFunction!(
+        final page = await fetchListFunction(
           FetchPageParameters(
             context: context,
             offset: offset,
@@ -878,7 +932,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     }
   }
 
-  Future<List<T>> _fetchItems({
+  Future<bool> _fetchItems({
     bool refresh = false,
     required BuildContext context,
   }) async {
@@ -886,7 +940,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
     if (_offsetQueue.isEmpty) {
       _mutex.release();
-      return [];
+      return false;
     }
 
     final offset = _offsetQueue.removeAt(0);
@@ -902,26 +956,24 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     }
     if (allLoaded && !refresh) {
       _mutex.release();
-      return [];
+      return false;
     }
 
     _requestedOffsets.add(offset);
     _setBusy(true);
 
-    final List<T> loadedItems = [];
-
-    assert(fetchListFunction != null, 'fetchListFunction is not set. Can not fetch items');
 
     if (!context.mounted) {
       _mutex.release();
       _setBusy(false);
-      return [];
+      return false;
     }
 
+    bool changed = false;
     final fetchReason = _pendingFetchReason;
 
     try {
-      final page = await fetchListFunction!(
+      final page = await fetchListFunction(
         FetchPageParameters(
           context: context,
           offset: offset,
@@ -937,9 +989,18 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
       }
 
       totalItems = page.total;
-      loadedItems.addAll(_insertPageItems(page, offset));
+      final hadCrossPageEviction = _insertPageItems(page, offset);
       _requestedOffsets.remove(offset);
       _setError(null);
+      changed = page.newItems.isNotEmpty;
+      if (hadCrossPageEviction) {
+        // The same item appeared at two different indices across two fetches
+        // that hit different server snapshots. Any cached pages are now stale
+        // (they record item positions from the older snapshot). Clear the whole
+        // cache so the next gap-fill re-fetches from the server rather than
+        // replaying the stale position data and creating an infinite ping-pong.
+        listCache.clear();
+      }
     } catch (e, s) {
       _setError(LdException(
         exception: e,
@@ -951,7 +1012,7 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     _pendingFetchReason = LdFetchReason.pagination;
     _setBusy(false);
     _mutex.release();
-    return loadedItems;
+    return changed;
   }
 
   bool _isTransientItemState(LdPaginatorItemState state) {
@@ -961,8 +1022,15 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     };
   }
 
-  List<T> _insertPageItems(LdListPage<T> page, int offset) {
-    final loadedItems = <T>[];
+  /// Insert items from [page] at [offset] into [_items].
+  ///
+  /// Returns `true` if any item from [page] displaced an item that was stored
+  /// under a slot belonging to a *different* page (i.e. a cross-page eviction).
+  /// This is a signal that two concurrent fetches hit different server snapshots
+  /// and the list index is momentarily inconsistent; the caller may want to
+  /// schedule a refresh once the current batch of mutations has settled.
+  bool _insertPageItems(LdListPage<T> page, int offset) {
+    bool hadCrossPageEviction = false;
 
     for (int i = 0; i < page.newItems.length; i++) {
       final item = page.newItems[i];
@@ -977,9 +1045,17 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
       for (final index in toRemove) {
         _items.remove(index);
+        final evictedPageOffset = (index ~/ pageSize) * pageSize;
+        if (evictedPageOffset != (offset ~/ pageSize) * pageSize) {
+          // Item moved from a different page's slot — two concurrent fetches
+          // hit different server snapshots. Do NOT re-open the stale page for
+          // a gap-fill (that would create a ping-pong loop). Instead, signal
+          // the caller to schedule a debounced full refreshList so everything
+          // settles to a coherent state.
+          hadCrossPageEviction = true;
+        }
       }
 
-      final idx = offset + i;
       final hasTransientItem = _items.values.any(
         (existingItem) => existingItem.value?.id == item.id && _isTransientItemState(existingItem.state),
       );
@@ -987,12 +1063,11 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
         continue;
       }
 
-      _items[idx] = LdPaginatorItem<T>(value: item, state: LdPaginatorItemState.loaded);
-      _updated(_items[idx]);
-      loadedItems.add(item);
+      _items[offset + i] = LdPaginatorItem<T>(value: item, state: LdPaginatorItemState.loaded);
+      _updated(_items[offset + i]);
     }
 
-    return loadedItems;
+    return hadCrossPageEviction;
   }
 
   void _reset() {

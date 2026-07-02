@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -126,13 +128,16 @@ class LdModalRoute<T> extends PageRoute<T> {
   double _topPadding(BuildContext context) {
     final maxWidth = MediaQuery.widthOf(context);
     final maxHeight = MediaQuery.heightOf(context);
-    final topPadding = maxHeight * topGapRatio;
+    var topPadding = maxHeight * topGapRatio;
     if (sheetAspectRatio != null) {
       final desiredHeight = maxWidth / sheetAspectRatio!;
       final finalHeight = desiredHeight.clamp(0, maxHeight);
 
       return maxHeight - finalHeight;
     }
+
+    // Adjust for view padding
+    topPadding = max(topPadding, MediaQuery.of(context).padding.top);
     return topPadding;
   }
 
@@ -176,25 +181,10 @@ class LdModalRoute<T> extends PageRoute<T> {
       ),
       child: CupertinoUserInterfaceLevel(
         data: CupertinoUserInterfaceLevelData.elevated,
-        child: Provider.value(
-          value: LdAppBarMetrics(
-            position: LdAppBarPosition.bottom,
-            scrollBehavior: LdAppBarScrollBehavior.static,
-            willHide: false,
-            innerHeight: EdgeInsets.zero,
-            systemInsets: EdgeInsets.zero,
-            configuredInsets: EdgeInsets.zero,
-            scrollOffset: EdgeInsets.zero,
-            appbarLayerMediaQuery: mediaQuery,
-            isScrolledUnder: false,
-            parentMetrics: null,
-            level: -1,
-          ),
-          child: LdSheetScrollDismissListener(
-            enabled: barrierDismissible,
-            routeAnimation: sheetController ?? const AlwaysStoppedAnimation<double>(1.0),
-            child: Builder(builder: pageBuilder),
-          ),
+        child: LdSheetScrollDismissListener(
+          enabled: barrierDismissible,
+          routeAnimation: sheetController ?? const AlwaysStoppedAnimation<double>(1.0),
+          child: Builder(builder: pageBuilder),
         ),
       ),
     );
@@ -213,16 +203,21 @@ class LdModalRoute<T> extends PageRoute<T> {
         viewPadding: mediaQuery.viewPadding.copyWith(top: 0),
         viewInsets: mediaQuery.viewInsets.copyWith(top: 0),
       ),
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: maxSheetHeight),
-          child: Container(
-            margin: sheetInsets,
-            child: sheet,
+      child: Builder(builder: (context) {
+        return Align(
+          alignment: Alignment.bottomCenter,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: maxSheetHeight),
+            child: Container(
+              margin: sheetInsets,
+              child: Provider.value(
+                value: LdAppBarMetrics.reset(context),
+                child: sheet,
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 
@@ -242,10 +237,10 @@ class LdModalRoute<T> extends PageRoute<T> {
         configuredSize = const Size(400, 300);
         break;
       case LdSize.s:
-        configuredSize = const Size(500, 400);
+        configuredSize = const Size(300, 400);
         break;
       case LdSize.m:
-        configuredSize = const Size(600, 500);
+        configuredSize = const Size(500, 500);
         break;
       case LdSize.l:
         configuredSize = const Size(900, 700);
@@ -272,43 +267,33 @@ class LdModalRoute<T> extends PageRoute<T> {
       context: context,
       removeTop: true,
       removeBottom: true,
-      child: Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minWidth: 0,
-            maxWidth: maxWidth,
-            minHeight: 0,
-            maxHeight: maxHeight,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: dialogBorderRadius ?? theme.radius(LdSize.m),
-              border: Border.all(
-                color: theme.stroke,
-                width: LdTheme.of(context).borderWidth,
-                strokeAlign: BorderSide.strokeAlignOutside,
+      child: Builder(builder: (context) {
+        return Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minWidth: 0,
+              maxWidth: maxWidth,
+              minHeight: 0,
+              maxHeight: maxHeight,
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: dialogBorderRadius ?? theme.radius(LdSize.m),
+                border: Border.all(
+                  color: theme.stroke,
+                  width: LdTheme.of(context).borderWidth,
+                  strokeAlign: BorderSide.strokeAlignOutside,
+                ),
+              ),
+              clipBehavior: Clip.hardEdge,
+              child: Provider.value(
+                value: LdAppBarMetrics.reset(context),
+                child: Builder(builder: pageBuilder),
               ),
             ),
-            clipBehavior: Clip.hardEdge,
-            child: Provider.value(
-              value: LdAppBarMetrics(
-                appbarLayerMediaQuery: MediaQuery.of(context),
-                configuredInsets: EdgeInsets.zero,
-                innerHeight: EdgeInsets.zero,
-                isScrolledUnder: false,
-                level: -1,
-                parentMetrics: null,
-                position: LdAppBarPosition.bottom,
-                scrollBehavior: LdAppBarScrollBehavior.static,
-                scrollOffset: EdgeInsets.zero,
-                systemInsets: EdgeInsets.zero,
-                willHide: false,
-              ),
-              child: Builder(builder: pageBuilder),
-            ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 
@@ -602,9 +587,7 @@ class _LdSheetDragGestureDetectorState<T> extends State<_LdSheetDragGestureDetec
     return LayoutBuilder(
       builder: (context, constraints) {
         final double? sheetHeight =
-            constraints.hasBoundedHeight && constraints.maxHeight.isFinite
-                ? constraints.maxHeight
-                : null;
+            constraints.hasBoundedHeight && constraints.maxHeight.isFinite ? constraints.maxHeight : null;
 
         return LdSheetDismissHeight(
           sheetHeight: sheetHeight,
@@ -616,5 +599,13 @@ class _LdSheetDragGestureDetectorState<T> extends State<_LdSheetDragGestureDetec
         );
       },
     );
+  }
+}
+
+extension LdModalRouteExtension on BuildContext {
+  /// Whether this context is inside an [LdModalRoute].
+  bool get isInLdModal {
+    final modalRoute = ModalRoute.of(this);
+    return modalRoute is LdModalRoute;
   }
 }

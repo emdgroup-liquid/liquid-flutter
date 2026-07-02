@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/src/list/list_page.dart';
 import 'package:liquid_flutter/src/monkey/data/fetch_page_parameters.dart';
 import 'package:liquid_flutter/src/monkey/data/identifiable.dart';
-import 'package:liquid_flutter/src/monkey/data/list_controller.dart';
+import 'package:liquid_flutter/src/monkey/data/ld_fetch_reason.dart';
 import 'package:liquid_flutter/src/monkey/data/ld_list_cache.dart';
+import 'package:liquid_flutter/src/monkey/data/ld_list_cache_key.dart';
+import 'package:liquid_flutter/src/monkey/data/list_controller.dart';
+import 'package:meta/meta.dart';
 
 /// App-level data model for a monkey route.
 ///
@@ -24,13 +27,77 @@ abstract class LdModel<T extends Identifiable<IdType>, IdType, TCreate, TUpdate>
 
   bool get autoInvalidateCacheOnMutation => true;
 
-  LdListCache<T, IdType>? get cache => null;
+  /// Owned cache instance. Subclasses that wish to supply their own
+  /// [LdListCache] should override [cache] and return it there; the default
+  /// implementation returns a lazily-created private instance.
+  late final LdListCache<T, IdType> _ownedCache = LdListCache<T, IdType>();
+
+  LdListCache<T, IdType> get cache => _ownedCache;
 
   Future<int?> Function(FetchOffsetParameters<T, IdType> parameters)? get getOffsetById => null;
 
   Future<LdListPage<T>> fetchListWithParameters(
     FetchPageParameters<T, IdType> parameters,
   );
+
+  /// Fetches a page from [fetchListWithParameters], applying the model's
+  /// [autoCache] and [autoInvalidateCache] policies.
+  ///
+  /// This is a non-overridable wrapper used by [LdListController] so that
+  /// cache read/write logic lives in the model rather than the controller.
+  @nonVirtual
+  Future<LdListPage<T>> fetchListWithParametersCached(
+    FetchPageParameters<T, IdType> parameters,
+  ) async {
+    if (autoInvalidateCache &&
+        (parameters.reason == LdFetchReason.refresh ||
+            parameters.reason == LdFetchReason.invalidate ||
+            parameters.reason == LdFetchReason.filter ||
+            parameters.reason == LdFetchReason.sort)) {
+      cache.clear();
+    }
+    if (autoCache && parameters.reason == LdFetchReason.pagination) {
+      final cachedPage = cache.readPage(parameters.cacheKey, parameters.offset);
+      if (cachedPage != null) {
+        final entry = cache.readEntry(parameters.cacheKey)!;
+        return LdListPage<T>(
+          newItems: cachedPage,
+          hasMore: parameters.offset + cachedPage.length < entry.total,
+          total: entry.total,
+        );
+      }
+    }
+    final page = await fetchListWithParameters(parameters);
+    if (autoCache) {
+      cache.writePage(
+        parameters.cacheKey,
+        offset: parameters.offset,
+        items: page.newItems,
+        total: page.total,
+      );
+    }
+    return page;
+  }
+
+  /// Invalidates the cache after a mutation, if [autoInvalidateCacheOnMutation]
+  /// is enabled.
+  ///
+  /// Should be called after a successful persist operation so that only
+  /// confirmed server values drive cache invalidation.
+  void invalidateCacheOnMutation(
+    BuildContext context, {
+    required LdListMutationKind kind,
+    T? before,
+    T? after,
+  }) {
+    if (!autoInvalidateCacheOnMutation) return;
+    cache.invalidateOnMutation(
+      context: context,
+      kind: kind,
+      before: before,
+      after: after,
+    );
+  }
 
   Future<T> getById(BuildContext context, IdType id);
 
@@ -42,7 +109,8 @@ abstract class LdModel<T extends Identifiable<IdType>, IdType, TCreate, TUpdate>
 
   Future<void> persistDeleteBatch(BuildContext context, Set<IdType> ids);
 
-  Future<void> persistUpdateBatch(BuildContext context, Set<TUpdate> items);
+  /// Persists a batch update. [items] is a map from item id to update payload.
+  Future<void> persistUpdateBatch(BuildContext context, Map<IdType, TUpdate> items);
 
   /// Maps a create payload to an optimistic list-row preview when [TCreate] != [T].
   T? createPreview(TCreate payload) => null;
@@ -101,9 +169,10 @@ abstract class LdModel<T extends Identifiable<IdType>, IdType, TCreate, TUpdate>
         ids,
       );
 
+  /// Updates a batch of items. [items] is a map from item id to update payload.
   Future<void> updateBatch(
     BuildContext context,
-    Set<TUpdate> items,
+    Map<IdType, TUpdate> items,
   ) =>
       _listController!.updateBatchFromModel(
         context,

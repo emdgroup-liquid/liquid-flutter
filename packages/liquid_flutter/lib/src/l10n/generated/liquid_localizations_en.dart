@@ -230,4 +230,10 @@ class LiquidLocalizationsEn extends LiquidLocalizations {
 
   @override
   String get fieldConflictServer => 'Server value';
+
+  @override
+  String get noItemsMatchFilter => 'No items match your filters';
+
+  @override
+  String get clearFilters => 'Clear filters';
 }

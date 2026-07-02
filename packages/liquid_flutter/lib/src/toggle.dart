@@ -27,42 +27,12 @@ class LdToggle extends StatefulWidget {
 }
 
 class _LdToggleState extends State<LdToggle> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
   @override
   void initState() {
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
-
-    _updateStatus();
     super.initState();
   }
 
   LdTheme get _theme => Provider.of<LdTheme>(context, listen: false);
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(oldWidget) {
-    if (mounted) {
-      _updateStatus();
-    }
-
-    super.didUpdateWidget(oldWidget);
-  }
-
-  void _updateStatus() {
-    {
-      if (widget.checked) {
-        _controller.forward();
-      } else {
-        _controller.reverse();
-      }
-    }
-  }
 
   void _onTap() {
     if (widget.onChanged != null) {

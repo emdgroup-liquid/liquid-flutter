@@ -18,19 +18,22 @@ class HomeHero extends StatelessWidget {
             clipBehavior: Clip.hardEdge,
             child: Image.asset('liquid_flutter_icon.jpg', width: 64, height: 64),
           ),
-          ldSpacerM,
+
           Flexible(
             child: LdAutoSpace(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                LdText.hl('Build for every platform \n with Liquid Flutter', textAlign: TextAlign.center),
+                LdText.hl('Build for every platform with Liquid Flutter', textAlign: TextAlign.center),
                 LdMute(
                   child: LdText.ll(
                     'Cross platform design system for Flutter. With first class support for desktop and mobile.',
+                    textAlign: TextAlign.center,
                   ),
                 ),
                 Wrap(
                   spacing: 8,
+                  alignment: WrapAlignment.center,
+                  runAlignment: WrapAlignment.center,
                   runSpacing: 8,
                   children: [
                     LdTag(child: Text('Web')),

@@ -78,6 +78,7 @@ const components = [
   _Component("Reveal", "/components/reveal", LucideIcons.eye, ComponentCategory.feedback),
 
   // Navigation & Interaction
+  _Component("Metaball (Experiment)", "/experiments/metaball", LucideIcons.sparkles, ComponentCategory.interaction),
   _Component("Action Runner", "/components/action-runner", LucideIcons.tableOfContents, ComponentCategory.interaction),
   _Component("Breadcrumb", "/components/breadcrumb", LucideIcons.arrowRight, ComponentCategory.interaction),
   _Component("Button", "/components/button", LucideIcons.pointer, ComponentCategory.interaction),
@@ -194,9 +195,8 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
   Widget build(BuildContext context) {
     return LdScaffold(
       body: LdAppBar(
-        title: Text("Navigation"),
         debugName: "Drawer AppBar",
-        //backgroundMode: LdAppBarBackgroundMode.visible,
+        title: SizedBox.shrink(),
         child: Builder(
           builder: (context) {
             return LdScaffoldBody(
@@ -213,6 +213,12 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                   leading: const Icon(LdIcons.beaker),
                   onPressed: () => _showPage(context, "/chemical"),
                   child: const Text("Magic"),
+                ),
+                LdDrawerItemSection(
+                  active: GoRouterState.of(context).uri.path.startsWith("/experiments/metaball"),
+                  leading: const Icon(LucideIcons.sparkles),
+                  onPressed: () => _showPage(context, "/experiments/metaball"),
+                  child: const Text("Metaball"),
                 ),
                 LdDrawerItemSection(
                   leading: const Text("🐵"),
@@ -286,7 +292,7 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                     LdDrawerItemSection(
                       active: GoRouterState.of(context).uri.path == ("/patterns/monkey/repository"),
                       onPressed: () => _showPage(context, "/patterns/monkey/repository"),
-                      child: const Text("Repository"),
+                      child: const Text("Data Model"),
                     ),
                     LdDrawerItemSection(
                       active: GoRouterState.of(context).uri.path == ("/patterns/monkey/pattern"),
@@ -302,6 +308,11 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                       active: GoRouterState.of(context).uri.path == ("/patterns/monkey/sorting-filtering"),
                       onPressed: () => _showPage(context, "/patterns/monkey/sorting-filtering"),
                       child: const Text("Sorting & Filtering"),
+                    ),
+                    LdDrawerItemSection(
+                      active: GoRouterState.of(context).uri.path == ("/patterns/monkey/backend"),
+                      onPressed: () => _showPage(context, "/patterns/monkey/backend"),
+                      child: const Text("Backend API"),
                     ),
                   ],
                 ),

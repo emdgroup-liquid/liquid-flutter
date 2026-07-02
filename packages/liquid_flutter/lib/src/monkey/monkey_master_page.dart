@@ -94,11 +94,29 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
           actions,
           canReorder: canReorder,
         ),
+        emptyBuilder: (context, onRefresh) {
+          final filterState = LdMonkeySortAndFilterState.of<T, IdType>(context);
+          final hasActiveFilters = filterState.activeFilters.isNotEmpty;
+          return LdListEmpty(
+            hasActiveFilters: hasActiveFilters,
+            onClearFilters: hasActiveFilters
+                ? () async {
+                    for (final filter in filterState.activeFilters) {
+                      LdMonkeySortAndFilterState.updateFilter<T, IdType>(
+                        context,
+                        filter.copyWith(isOn: false),
+                      );
+                    }
+                  }
+                : null,
+            onRefresh: hasActiveFilters ? null : () => onRefresh(context),
+          );
+        },
       ),
       child: LdSelectableList<T, IdType>(
         key: _listKey,
         showSelectionControls: selection.showSelectionControls,
-        paginator: repository,
+        listController: repository,
         initialSelectedItems: selection.showSelectionControls ? selection.selection : selection.viewing,
         multiSelect: widget.allowMultipleSelection,
         disableDragGestures: canReorder,
@@ -161,7 +179,7 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
             ignoreParent: true,
             child: LdMonkeyAppBar<T, IdType>(
               location: LdMonkeyActionLocation.masterSecondary,
-              child: body,
+              child: LdScrollEdgeFade(child: body),
             ),
           ),
         ),
@@ -185,7 +203,7 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
                 padding: MediaQuery.of(context).padding,
               ),
               child: _buildAppBarWrappedBody(
-                LdAutoBackground(invert: true, child: _buildList(context, repository, actions)),
+                _buildList(context, repository, actions),
               ),
             ),
           ),

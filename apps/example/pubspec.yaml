@@ -62,6 +62,9 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+  shaders:
+    - shaders/metaball.frag
+
   assets:
     - liquid_flutter_icon.jpg
     - assets/
@@ -72,6 +75,7 @@ flutter:
     - lib/components/interaction/
     - lib/components/feedback/
     - lib/components/form_elements/
+    - lib/experiments/
 
   fonts:
     - family: Lato

@@ -34,7 +34,7 @@ class LdChooseListItemTrigger<T extends Identifiable<IdType>, IdType> extends St
         crossAxisAlignment: WrapCrossAlignment.center,
         runSpacing: 8,
         children: [
-          if (selectedItemsCount == 0 && config.hint != null) config.hint!,
+          if (selectedItemsCount == 0) config.hint,
           ...config.selectedItems
               .sublist(0, displayItems)
               .map((item) => config.selectedItemBuilder(context, item))

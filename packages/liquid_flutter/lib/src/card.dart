@@ -25,57 +25,60 @@ class LdCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
 
-    return Container(
-      clipBehavior: Clip.hardEdge,
-      decoration: BoxDecoration(
-          borderRadius: theme.radius(LdSize.m),
-          border: flat
-              ? Border.all(
-                  strokeAlign: BorderSide.strokeAlignOutside,
-                  color: theme.border,
-                  width: theme.borderWidth,
-                )
-              : null,
-          boxShadow: flat ? null : [ldShadowDefault]),
-      child: LdAutoBackground(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (header != null) ...[
-              LdAutoBackground(
-                child: Container(
-                  padding: padding ?? theme.pad(size: LdSize.m),
-                  child: header,
+    return Padding(
+      padding: flat ? EdgeInsets.all(theme.borderWidth) : EdgeInsets.zero,
+      child: Container(
+        clipBehavior: Clip.hardEdge,
+        decoration: BoxDecoration(
+            borderRadius: theme.radius(LdSize.m),
+            border: flat
+                ? Border.all(
+                    strokeAlign: BorderSide.strokeAlignOutside,
+                    color: theme.border,
+                    width: theme.borderWidth,
+                  )
+                : null,
+            boxShadow: flat ? null : [ldShadowDefault]),
+        child: LdAutoBackground(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (header != null) ...[
+                LdAutoBackground(
+                  child: Container(
+                    padding: padding ?? theme.pad(size: LdSize.m),
+                    child: header,
+                  ),
                 ),
-              ),
-              const LdDivider(
-                height: 1,
-              )
-            ],
-            expandChild
-                ? Expanded(
-                    child: Padding(
+                const LdDivider(
+                  height: 1,
+                )
+              ],
+              expandChild
+                  ? Expanded(
+                      child: Padding(
+                        padding: padding ?? theme.pad(size: LdSize.m),
+                        child: child,
+                      ),
+                    )
+                  : Padding(
                       padding: padding ?? theme.pad(size: LdSize.m),
                       child: child,
                     ),
-                  )
-                : Padding(
-                    padding: padding ?? theme.pad(size: LdSize.m),
-                    child: child,
-                  ),
-            if (footer != null) ...[
-              const LdDivider(
-                height: 1,
-              ),
-              LdAutoBackground(
-                child: Container(
-                  padding: padding ?? theme.pad(size: LdSize.m),
-                  child: footer,
+              if (footer != null) ...[
+                const LdDivider(
+                  height: 1,
                 ),
-              ),
-            ]
-          ],
+                LdAutoBackground(
+                  child: Container(
+                    padding: padding ?? theme.pad(size: LdSize.m),
+                    child: footer,
+                  ),
+                ),
+              ]
+            ],
+          ),
         ),
       ),
     );

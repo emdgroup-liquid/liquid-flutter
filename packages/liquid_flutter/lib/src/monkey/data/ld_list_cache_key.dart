@@ -6,6 +6,29 @@ enum LdListMutationKind {
   delete,
 }
 
+/// Thrown by [LdCallbackModel.persistDeleteBatch] when the per-item fallback
+/// succeeds for some IDs but fails for others.
+///
+/// [succeededIds] contains every ID whose individual delete call completed
+/// without error. The controller uses this to confirm those deletions and only
+/// roll back the IDs that actually failed.
+class LdPartialBatchDeleteException<IdType> implements Exception {
+  /// The IDs whose delete calls completed successfully before the first error.
+  final Set<IdType> succeededIds;
+
+  /// The error thrown by the first failing delete call.
+  final Object cause;
+
+  const LdPartialBatchDeleteException({
+    required this.succeededIds,
+    required this.cause,
+  });
+
+  @override
+  String toString() =>
+      'LdPartialBatchDeleteException(succeeded: $succeededIds, cause: $cause)';
+}
+
 class LdListCacheKeyPart {
   final String kind;
   final String name;

@@ -3,6 +3,7 @@ import 'package:liquid_flutter/src/list/list_page.dart';
 import 'package:liquid_flutter/src/monkey/data/fetch_page_parameters.dart';
 import 'package:liquid_flutter/src/monkey/data/identifiable.dart';
 import 'package:liquid_flutter/src/monkey/data/ld_list_cache.dart';
+import 'package:liquid_flutter/src/monkey/data/ld_list_cache_key.dart';
 import 'package:liquid_flutter/src/monkey/data/ld_model.dart';
 import 'package:liquid_flutter/src/monkey/filter/ld_filter_option.dart';
 import 'package:liquid_flutter/src/monkey/sort/sort_option.dart';
@@ -23,11 +24,12 @@ class LdCallbackModel<T extends Identifiable<IdType>, IdType> extends LdModel<T,
     this.autoCache = true,
     this.autoInvalidateCache = true,
     this.autoInvalidateCacheOnMutation = true,
-    this.cache,
+    LdListCache<T, IdType>? cache,
     List<T>? initialItems,
-  }) : fetchListFn = fetchListWithParameters,
-       _getById = getById,
-       _initialItems = initialItems;
+  })  : fetchListFn = fetchListWithParameters,
+        _getById = getById,
+        _initialItems = initialItems,
+        _providedCache = cache;
 
   @override
   final int pageSize;
@@ -44,8 +46,12 @@ class LdCallbackModel<T extends Identifiable<IdType>, IdType> extends LdModel<T,
   @override
   final bool autoInvalidateCacheOnMutation;
 
+  /// An optional caller-supplied cache. When non-null, overrides the
+  /// lazily-created [LdModel._ownedCache].
+  final LdListCache<T, IdType>? _providedCache;
+
   @override
-  final LdListCache<T, IdType>? cache;
+  LdListCache<T, IdType> get cache => _providedCache ?? super.cache;
 
   final Future<LdListPage<T>> Function(FetchPageParameters<T, IdType> parameters)
   fetchListFn;
@@ -65,7 +71,8 @@ class LdCallbackModel<T extends Identifiable<IdType>, IdType> extends LdModel<T,
 
   final Future<void> Function(BuildContext context, Set<IdType> ids)? deleteBatchFn;
 
-  final Future<void> Function(BuildContext context, Set<T> items)? updateBatchFn;
+  /// Batch-update callback. Receives a map from item id to updated item.
+  final Future<void> Function(BuildContext context, Map<IdType, T> items)? updateBatchFn;
 
   final List<T>? _initialItems;
 
@@ -122,13 +129,35 @@ class LdCallbackModel<T extends Identifiable<IdType>, IdType> extends LdModel<T,
       deleteItem != null,
       'Cannot delete items. deleteItem was not configured for this model',
     );
+
+    // Per-item fallback: track partial success so the controller can confirm
+    // the succeeded deletions and only roll back the ones that actually failed.
+    final succeeded = <IdType>{};
+    Object? firstError;
     for (final id in ids) {
-      await deleteItem!(context, id);
+      try {
+        await deleteItem!(context, id);
+        succeeded.add(id);
+      } catch (e) {
+        firstError = e;
+        // Continue attempting remaining items so we maximise partial success.
+      }
+    }
+
+    if (firstError != null) {
+      throw LdPartialBatchDeleteException<IdType>(
+        succeededIds: succeeded,
+        cause: firstError,
+      );
     }
   }
 
+  /// Persists a batch update. [items] is a map from item id to updated item.
+  ///
+  /// Delegates to [updateBatchFn] when provided; otherwise falls back to
+  /// calling [updateItem] once per entry.
   @override
-  Future<void> persistUpdateBatch(BuildContext context, Set<T> items) async {
+  Future<void> persistUpdateBatch(BuildContext context, Map<IdType, T> items) async {
     if (updateBatchFn != null) {
       await updateBatchFn!(context, items);
       return;
@@ -138,8 +167,8 @@ class LdCallbackModel<T extends Identifiable<IdType>, IdType> extends LdModel<T,
       updateItem != null,
       'Cannot update items. updateItem was not configured for this model',
     );
-    for (final item in items) {
-      await updateItem!(context, item.id, item);
+    for (final entry in items.entries) {
+      await updateItem!(context, entry.key, entry.value);
     }
   }
 
@@ -158,7 +187,7 @@ class LdCallbackModel<T extends Identifiable<IdType>, IdType> extends LdModel<T,
     Future<L?> Function(BuildContext context, IdType id, L newItem)? updateItem,
     Future<L> Function(BuildContext context, L? newItem)? createItem,
     Future<void> Function(BuildContext context, Set<IdType> ids)? deleteBatch,
-    Future<void> Function(BuildContext context, Set<L> items)? updateBatch,
+    Future<void> Function(BuildContext context, Map<IdType, L> items)? updateBatch,
     LdListCache<L, IdType>? cache,
     List<L>? initialItems,
   }) {

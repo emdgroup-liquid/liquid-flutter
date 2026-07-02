@@ -32,6 +32,7 @@ Widget _scrollViewportForKeyboard(
     ),
   );
 }
+
 /// Strips vertical [MediaQueryData.padding] for scroll content without touching
 /// [MediaQueryData.viewPadding] (unlike [MediaQuery.removePadding]).
 ///

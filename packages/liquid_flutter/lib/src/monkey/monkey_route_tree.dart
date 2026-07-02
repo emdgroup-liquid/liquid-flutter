@@ -34,7 +34,7 @@ class MonkeyRouteNode<T extends Identifiable<IdType>, IdType> {
     this.detailPathPrefix,
     this.layoutMode = LdMonkeyLayoutMode.auto,
     this.reflowBreakpoint,
-    this.detailPanelFlex,
+    this.detailPanelFraction,
     this.allowMultipleSelection,
     this.immediateViewSelection,
     this.reorderHandler,
@@ -81,7 +81,7 @@ class MonkeyRouteNode<T extends Identifiable<IdType>, IdType> {
 
   final double? reflowBreakpoint;
 
-  final double? detailPanelFlex;
+  final double? detailPanelFraction;
 
   final bool? allowMultipleSelection;
 
@@ -114,7 +114,7 @@ class MonkeyRouteNode<T extends Identifiable<IdType>, IdType> {
         shellBuilder: shellBuilder,
         layoutMode: layoutMode,
         reflowBreakpoint: reflowBreakpoint,
-        detailPanelFlex: detailPanelFlex,
+        detailPanelFraction: detailPanelFraction,
         allowMultipleSelection: allowMultipleSelection,
         immediateViewSelection: immediateViewSelection,
         reorderHandler: reorderHandler,
@@ -173,7 +173,7 @@ List<RouteBase> buildMonkeyRouteTree<T extends Identifiable<IdType>, IdType>({
           shellBuilder: root.shellBuilder,
           layoutMode: root.layoutMode,
           reflowBreakpoint: root.reflowBreakpoint,
-          detailPanelFlex: root.detailPanelFlex,
+          detailPanelFraction: root.detailPanelFraction,
           allowMultipleSelection: root.allowMultipleSelection,
           immediateViewSelection: root.immediateViewSelection,
           reorderHandler: root.reorderHandler,

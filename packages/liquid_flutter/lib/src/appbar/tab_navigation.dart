@@ -391,15 +391,6 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
           isAttached: isAttached,
           position: position,
         ),
-        surfaceInfoBuilder: (isScrolledUnder) => LdSurfaceInfo(
-          isSurface: decorationBuilder
-              .resolveAppearance(
-                context,
-                isScrolledUnder: isScrolledUnder,
-                position: position,
-              )
-              .childIsSurface,
-        ),
         child: tabBarSurface,
       ),
     );

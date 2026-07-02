@@ -86,14 +86,12 @@ LdMonkeySelection.updateViewing<Task, int>(context, {taskId});''',
   sortOptionsBuilder: (_) async => taskSortOptions,
   actions: taskActions,
   detailInDialog: false,
-  shellBuilder: (context, state, child) => LdMonkeyShell<Task, int>(
-    layoutMode: LdMonkeyLayoutMode.auto,
-    masterPage: TaskMasterPage(),
-    reflowBreakpoint: 600,
-    detailPanelFlex: 2,
-    actions: [],
-    child: child,
-  ),
+  // Layout options are passed directly — no need for a custom shellBuilder
+  layoutMode: LdMonkeyLayoutMode.auto,
+  reflowBreakpoint: 600,
+  detailPanelFlex: 2,
+  // Use shellBuilder only to inject extra providers above the shell:
+  // shellBuilder: (context, state, child) => Provider.value(value: myService, child: child),
 ),''',
         ),
         LdText.hs("4. Actions Configuration"),
@@ -222,32 +220,9 @@ class TaskDetailPage extends StatelessWidget {
   }
 }
 
-// Shell wrapper (optional, for custom actions)
-class TaskShell extends StatelessWidget {
-  final Widget child;
-  final GoRouterState state;
-  
-  const TaskShell({
-    super.key,
-    required this.child,
-    required this.state,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return LdMonkeyShell<Task, int>(
-      layoutMode: LdMonkeyLayoutMode.auto,
-      masterPage: TaskMasterPage(),
-      actions: [
-        // Your actions here - see Actions documentation for examples
-      ],
-      child: child,
-    );
-  }
-}
-
-// Router configuration
+// Router configuration — all layout and action config goes on buildMonkeyRoutes
 final router = GoRouter(
+  redirect: ldLocationLockRedirect, // required for edit navigation guards
   routes: [
     ...buildMonkeyRoutes<Task, int>(
       masterPath: "/task-demo",
@@ -258,10 +233,9 @@ final router = GoRouter(
       filtersBuilder: (_) async => taskFilters,
       sortOptionsBuilder: (_) async => taskSortOptions,
       actions: taskActions,
-      shellBuilder: (context, state, child) => TaskShell(
-        state: state,
-        child: child,
-      ),
+      layoutMode: LdMonkeyLayoutMode.auto,
+      reflowBreakpoint: 600,
+      detailPanelFlex: 2,
     ),
   ],
 );''',
@@ -270,8 +244,8 @@ final router = GoRouter(
         LdText.p("For more detailed information on specific aspects of the monkey pattern:"),
         LdAutoSpace(children: [
           LdCard(
-            header: Text("Repository"),
-            child: LdText.p("Learn how to set up the data repository with sorting and filtering"),
+            header: Text("Data Model"),
+            child: LdText.p("Learn how to set up the data model with sorting and filtering"),
           ),
           LdCard(
             header: Text("Actions"),

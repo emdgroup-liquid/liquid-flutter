@@ -63,8 +63,9 @@ LdCallbackModel<Task, int> taskModel(BuildContext context) => LdCallbackModel<Ta
     await Future.delayed(const Duration(milliseconds: 200));
 
     final filtered = applyFiltersAndSorting(testData, parameters.filters, parameters.sortOptions);
+    final result = filtered.skip(parameters.offset).take(parameters.pageSize).toList();
     return LdListPage<Task>(
-      newItems: filtered.skip(parameters.offset).take(parameters.pageSize).toList(),
+      newItems: result,
       hasMore: parameters.offset + parameters.pageSize < filtered.length,
       total: filtered.length,
     );

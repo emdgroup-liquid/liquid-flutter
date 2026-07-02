@@ -6,12 +6,20 @@ class LdListItemConfig {
     this.borderRadius,
     this.disabled,
     this.isSelected,
+    this.leading,
     this.onSelectionChanged,
     this.onPressed,
     this.padding,
+    this.selectDisabled,
+    this.subContent,
+    this.subtitle,
+    this.title,
+    this.tradeLeadingForSelectionControl,
     this.focusNode,
     this.trailing,
     this.color,
+    this.width,
+    this.isOdd,
     this.selectionControl,
   });
 
@@ -23,17 +31,33 @@ class LdListItemConfig {
 
   final bool? isSelected;
 
+  final Widget? leading;
+
   final void Function(bool)? onSelectionChanged;
 
   final void Function()? onPressed;
 
   final EdgeInsets? padding;
 
+  final bool? selectDisabled;
+
+  final Widget? subContent;
+
+  final Widget? subtitle;
+
+  final Widget? title;
+
+  final bool? tradeLeadingForSelectionControl;
+
   final FocusNode? focusNode;
 
   final Widget? trailing;
 
   final LdColor? color;
+
+  final double? width;
+
+  final bool? isOdd;
 
   final LdSelectionControl? selectionControl;
 }
@@ -67,13 +91,24 @@ class LdListItemConfigProvider extends StatelessWidget {
             borderRadius: config.borderRadius ?? parentConfig.borderRadius,
             disabled: config.disabled ?? parentConfig.disabled,
             isSelected: config.isSelected ?? parentConfig.isSelected,
+            leading: config.leading ?? parentConfig.leading,
             onSelectionChanged:
                 config.onSelectionChanged ?? parentConfig.onSelectionChanged,
             onPressed: config.onPressed ?? parentConfig.onPressed,
             padding: config.padding ?? parentConfig.padding,
+            selectDisabled:
+                config.selectDisabled ?? parentConfig.selectDisabled,
+            subContent: config.subContent ?? parentConfig.subContent,
+            subtitle: config.subtitle ?? parentConfig.subtitle,
+            title: config.title ?? parentConfig.title,
+            tradeLeadingForSelectionControl:
+                config.tradeLeadingForSelectionControl ??
+                    parentConfig.tradeLeadingForSelectionControl,
             focusNode: config.focusNode ?? parentConfig.focusNode,
             trailing: config.trailing ?? parentConfig.trailing,
             color: config.color ?? parentConfig.color,
+            width: config.width ?? parentConfig.width,
+            isOdd: config.isOdd ?? parentConfig.isOdd,
             selectionControl:
                 config.selectionControl ?? parentConfig.selectionControl)
         : config;
@@ -94,15 +129,16 @@ class LdListItem extends StatelessWidget {
     this.onSelectionChanged,
     this.onPressed,
     this.padding,
-    this.selectDisabled = false,
+    this.selectDisabled,
     this.subContent,
     this.subtitle,
     this.title,
-    this.tradeLeadingForSelectionControl = true,
+    this.tradeLeadingForSelectionControl,
     this.focusNode,
     this.trailing,
     this.color,
     this.width,
+    this.isOdd,
     this.selectionControl,
     super.key,
   });
@@ -116,15 +152,16 @@ class LdListItem extends StatelessWidget {
     void Function(bool)? onSelectionChanged,
     void Function()? onPressed,
     EdgeInsets? padding,
-    bool selectDisabled = false,
+    bool? selectDisabled,
     Widget? subContent,
     Widget? subtitle,
     Widget? title,
-    bool tradeLeadingForSelectionControl = true,
+    bool? tradeLeadingForSelectionControl,
     FocusNode? focusNode,
     Widget? trailing,
     LdColor? color,
     double? width,
+    bool? isOdd,
     LdSelectionControl? selectionControl,
     Key? key,
   }) {
@@ -146,6 +183,7 @@ class LdListItem extends StatelessWidget {
       trailing: const LdListDefaultTrailingForward(),
       color: color,
       width: width,
+      isOdd: isOdd,
       selectionControl: selectionControl,
       key: key,
     );
@@ -165,7 +203,7 @@ class LdListItem extends StatelessWidget {
 
   final double? width;
 
-  final bool selectDisabled;
+  final bool? selectDisabled;
 
   final void Function(bool)? onSelectionChanged;
 
@@ -179,13 +217,15 @@ class LdListItem extends StatelessWidget {
 
   final bool? disabled;
 
-  final bool tradeLeadingForSelectionControl;
+  final bool? tradeLeadingForSelectionControl;
 
   final LdColor? color;
 
   final EdgeInsets? padding;
 
   final BorderRadius? borderRadius;
+
+  final bool? isOdd;
 
   @override
   Widget build(BuildContext context) {
@@ -195,19 +235,22 @@ class LdListItem extends StatelessWidget {
       borderRadius: borderRadius ?? config?.borderRadius,
       disabled: disabled ?? config?.disabled ?? false,
       isSelected: isSelected ?? config?.isSelected ?? false,
-      leading: leading,
+      leading: leading ?? config?.leading,
       onSelectionChanged: onSelectionChanged ?? config?.onSelectionChanged,
       onPressed: onPressed ?? config?.onPressed,
       padding: padding ?? config?.padding,
-      selectDisabled: selectDisabled,
-      subContent: subContent,
-      subtitle: subtitle,
-      title: title,
-      tradeLeadingForSelectionControl: tradeLeadingForSelectionControl,
+      selectDisabled: selectDisabled ?? config?.selectDisabled ?? false,
+      subContent: subContent ?? config?.subContent,
+      subtitle: subtitle ?? config?.subtitle,
+      title: title ?? config?.title,
+      tradeLeadingForSelectionControl: tradeLeadingForSelectionControl ??
+          config?.tradeLeadingForSelectionControl ??
+          true,
       focusNode: focusNode ?? config?.focusNode,
       trailing: trailing ?? config?.trailing,
       color: color ?? config?.color,
-      width: width,
+      width: width ?? config?.width,
+      isOdd: isOdd ?? config?.isOdd ?? false,
       selectionControl: selectionControl ??
           config?.selectionControl ??
           LdSelectionControl.none,

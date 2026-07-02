@@ -125,7 +125,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
       disabled: widget.disabled,
       pressed: _pressed,
       isOdd: widget.isOdd,
-      onSurface: LdSurfaceInfo.of(context).isSurface,
+      onSurface: LdSurfaceInfo.of(context, listen: true).isSurface,
       panOffset: _panOffset,
     );
 

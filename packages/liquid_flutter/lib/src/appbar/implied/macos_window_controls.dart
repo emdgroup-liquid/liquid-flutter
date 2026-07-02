@@ -7,31 +7,42 @@ class MacOSWindowControls extends StatelessWidget {
     super.key,
   });
 
+  static bool canShow(BuildContext context) {
+    if (!context.mounted) return false;
+
+    if (LdTheme.of(context).platform != LdPlatform.macos) return false;
+
+    final parentShows = LdAppBarImpliedFeature.windowControls.shownByParent(context);
+    if (parentShows) return false;
+
+    if (context.isInLdModal) return false;
+
+    if (!context.isInTopAppBar) return false;
+
+    return true;
+  }
+
+  static bool isShowing(BuildContext context) {
+    if (!canShow(context)) return false;
+
+    final slot = context.watch<LdDrawerSlot?>();
+    final drawerState = context.watch<LdDrawerState?>();
+
+    if (drawerState == null) return true;
+
+    if (slot == LdDrawerSlot.drawer && drawerState.isOpen) return true;
+    if (slot == LdDrawerSlot.body && !drawerState.isOpen) return true;
+
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (LdTheme.of(context).platform != LdPlatform.macos) {
+    if (!canShow(context)) {
       return const SizedBox.shrink();
     }
 
-    bool show = false;
-
-    final metrics = context.watch<LdAppBarMetrics?>();
-    final level = (metrics?.position == LdAppBarPosition.top) ? metrics!.level : 1;
-
-    final drawerSlot = context.watch<LdDrawerSlot?>();
-    final drawerState = context.watch<LdDrawerState?>();
-
-    if (level == 0) {
-      if (drawerSlot == LdDrawerSlot.body) {
-        if (!(drawerState?.isOpen ?? false)) {
-          show = true;
-        }
-      } else if (drawerSlot == LdDrawerSlot.drawer) {
-        if (drawerState?.isOpen ?? false) {
-          show = true;
-        }
-      }
-    }
+    final show = isShowing(context);
 
     return LdReveal.quick(
       revealed: show,

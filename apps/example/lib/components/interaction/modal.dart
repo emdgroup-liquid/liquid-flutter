@@ -23,6 +23,7 @@ class _DemoSheet extends StatelessWidget {
   final bool userDismissable;
   final double insetValue;
   final bool enableFooter;
+  final bool useRootNavigator;
 
   const _DemoSheet({
     required this.mode,
@@ -32,13 +33,14 @@ class _DemoSheet extends StatelessWidget {
     required this.enableHeader,
     required this.userDismissable,
     required this.insetValue,
+    required this.useRootNavigator,
     required this.enableFooter,
   });
 
   @override
   Widget build(BuildContext context) {
     return LdModalBuilder(
-      useRootNavigator: true,
+      useRootNavigator: useRootNavigator,
       builder: (context, openSheet) {
         return LdButton(
           onPressed: () async {
@@ -76,6 +78,7 @@ class _DemoSheet extends StatelessWidget {
               Row(
                 children: [
                   _DemoSheet(
+                    useRootNavigator: useRootNavigator,
                     enableHeader: enableHeader,
                     insetValue: insetValue,
                     enableScaling: enableScaling,
@@ -137,7 +140,7 @@ class _DemoSheet extends StatelessWidget {
 
           // Build the header bar conditionally
           final Widget scaffoldBody = enableHeader
-              ? LdAppBar(title: const Text("Modal"), child: bodyWithFooter)
+              ? LdAppBar(title: const Text("Modal"), debugName: "Modal Demo", child: bodyWithFooter)
               : bodyWithFooter;
 
           return LdScaffold(body: scaffoldBody);
@@ -467,6 +470,8 @@ class _ModalDemoState extends State<ModalDemo> {
 
   bool _userDismissable = true;
 
+  bool _useRootNavigator = true;
+
   bool _fixedDialogSize = false;
 
   bool _enableHeader = true;
@@ -494,6 +499,7 @@ class _ModalDemoState extends State<ModalDemo> {
           ComponentWell(
             child: Center(
               child: _DemoSheet(
+                useRootNavigator: _useRootNavigator,
                 insetValue: _insetValue,
                 fixedDialogSize: _fixedDialogSize,
                 enableHeader: _enableHeader,
@@ -569,6 +575,15 @@ class _ModalDemoState extends State<ModalDemo> {
             onChanged: (value) {
               setState(() {
                 _enableFooter = value;
+              });
+            },
+          ),
+          LdToggle(
+            label: "Use root navigator",
+            checked: _useRootNavigator,
+            onChanged: (value) {
+              setState(() {
+                _useRootNavigator = value;
               });
             },
           ),

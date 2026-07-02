@@ -69,5 +69,7 @@
   "fieldConflictKeepAllMine": "Keep all mine",
   "fieldConflictUseAllServer": "Use all from server",
   "fieldConflictYours": "Your value",
-  "fieldConflictServer": "Server value"
+  "fieldConflictServer": "Server value",
+  "noItemsMatchFilter": "No items match your filters",
+  "clearFilters": "Clear filters"
 }

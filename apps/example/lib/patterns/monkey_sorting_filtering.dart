@@ -17,243 +17,260 @@ class MonkeySortingFilteringDemo extends StatelessWidget {
         children: [
           LdText.h("Sorting & Filtering"),
           LdText.p(
-            "The monkey pattern provides powerful sorting and filtering capabilities through the LdListController. These features work together to help users find and organize their data efficiently.",
+            "The monkey pattern provides powerful sorting and filtering capabilities. "
+            "Filters and sort options are provided as async builders to buildMonkeyRoutes "
+            "and live in LdMonkeySortAndFilterState in the widget tree. The LdMonkeyListFilterAdapter "
+            "automatically refreshes the list controller whenever they change.",
           ),
           ComponentsAccordion(
-            components: {"LdSortOption", "LdFilterOption", "LdFilterBoolOption", "LdFilterSearchOption"},
+            components: {"LdSortOption", "LdFilterOption", "LdFilterBool", "LdFilterSearch", "LdFilterOneOf", "LdFilterAnyOf"},
           ),
           LdText.hs("1. Sort Options"),
           LdText.p(
-            "Sort options allow users to order items by different criteria. Each sort option includes a name, label, icon, and sorting function.",
+            "Sort options allow users to order items by different criteria. Pass them via the async "
+            "sortOptionsBuilder. Set supportsReorder: true on a sort option to enable drag-to-reorder "
+            "when that sort is active (requires reorderHandler on buildMonkeyRoutes).",
           ),
           CodeBlock(
             language: "dart",
-            code: '''
-            sortOptions: [
-              LdSortOption<Task, int>(
-                name: "due",
-                label: (context) => "Due Date",
-                isOn: true, // Default active sort
-                icon: (context) => const Icon(LucideIcons.calendar),
-                optimisticSort: (a, b) {
-                  return a.due.compareTo(b.due);
-                },
-              ),
-            ],''',
+            code: '''sortOptionsBuilder: (_) async => [
+  LdSortOption<Task, int>(
+    name: "due",
+    label: (context) => "Due Date",
+    isOn: true, // active by default
+    icon: (context) => const Icon(LucideIcons.calendar),
+    optimisticSort: (a, b) => a.due.compareTo(b.due),
+  ),
+  LdSortOption<Task, int>(
+    name: "order",
+    label: (context) => "Custom order",
+    icon: (context) => const Icon(LucideIcons.gripVertical),
+    supportsReorder: true, // enables drag handles when active
+    optimisticSort: (a, b) => a.order.compareTo(b.order),
+  ),
+],''',
           ),
 
           LdText.hs("2. Filter Options"),
           LdText.p(
-            "Allow users to filter items based on different criteria. The monkey pattern supports several types of filters:",
+            "Filters are provided via the async filtersBuilder. The monkey pattern includes "
+            "several filter types for common use cases:",
           ),
+
           LdText.hs("Boolean Filters"),
-          LdText.p("Simple on/off filters for boolean properties:"),
+          LdText.p("Simple on/off filters for boolean properties (e.g. done/to-do):"),
           CodeBlock(
             language: "dart",
-            code: '''
-            filters: {
-              LdFilterBoolOption<Task, int>(
-                name: "done",
-                label: (context) => "Completed",
-                icon: (context) => const Icon(LucideIcons.check),
-                optimisticFilter: (item) {
-                  return item.done;
-                },
-              ),
-            },''',
+            code: '''LdFilterBool<Task, int>(
+  name: "done",
+  label: (context) => "Completed",
+  icon: (context) => const Icon(LucideIcons.check),
+),''',
           ),
+
           LdText.hs("Search Filters"),
-          LdText.p("Text-based search filters with suggestions:"),
+          LdText.p(
+            "Text-based search with optional autocomplete suggestions. "
+            "Automatically adds a search bar to the master app bar.",
+          ),
           CodeBlock(
             language: "dart",
-            code: '''LdFilterSearchOption<Task, int, String>(
+            code: '''LdFilterSearch<Task, int, String>(
   name: "search",
   label: (context) => "Search",
   icon: (context) => const Icon(LucideIcons.search),
-  optimisticFilter: (item, searchText) {
-    return item.task.toLowerCase().contains(searchText.toLowerCase());
-  },
   getSuggestions: (searchText) async {
     return testData
-        .where((element) =>
-            element.task.toLowerCase().startsWith(searchText.toLowerCase()))
+        .where((e) => e.task.toLowerCase().startsWith(searchText.toLowerCase()))
         .map((e) => e.task)
         .toList();
   },
 ),''',
           ),
-          LdText.hs("Custom Filters"),
-          LdText.p("Advanced filters with custom logic and UI:"),
+
+          LdText.hs("One-of Filters"),
+          LdText.p("Let the user pick exactly one value from a fixed set:"),
           CodeBlock(
             language: "dart",
-            code: '''LdFilterOption<Task, int>(
+            code: '''LdFilterOneOf<Task, int, String>(
   name: "priority",
   label: (context) => "Priority",
   icon: (context) => const Icon(LucideIcons.flag),
-  optimisticFilter: (item) {
-    // This will be called with the current filter state
-    // You can access the filter's current value through the repository
-    return true; // Implement your filtering logic
-  },
-  buildFilterWidget: (context, currentValue, onChanged) {
-    return LdSelect<String>(
-      value: currentValue,
-      onChanged: onChanged,
-      options: [
-        LdSelectOption(value: "high", label: "High"),
-        LdSelectOption(value: "medium", label: "Medium"),
-        LdSelectOption(value: "low", label: "Low"),
-      ],
-    );
+  allValues: {
+    "high": (context) => Text("High"),
+    "medium": (context) => Text("Medium"),
+    "low": (context) => Text("Low"),
   },
 ),''',
           ),
-          LdText.hs("4. Filter Combinations"),
-          LdText.p(
-            "Multiple filters can be combined using AND logic. Users can activate multiple filters simultaneously:",
-          ),
-          CodeBlock(
-            language: "dart",
-            code: '''filters: {
-  // Status filters
-  LdFilterBoolOption<Task, int>(
-    name: "done",
-    label: (context) => "Done",
-    icon: (context) => const Icon(LucideIcons.check),
-    optimisticFilter: (item) => item.done,
-  ),
-  LdFilterBoolOption<Task, int>(
-    name: "todo",
-    label: (context) => "To Do",
-    icon: (context) => const Icon(LucideIcons.hourglass),
-    optimisticFilter: (item) => !item.done,
-  ),
-  
-  // Search filter
-  LdFilterSearchOption<Task, int, String>(
-    name: "search",
-    label: (context) => "Search",
-    icon: (context) => const Icon(LucideIcons.search),
-    optimisticFilter: (item, searchText) {
-      return item.task.toLowerCase().contains(searchText.toLowerCase());
-    },
-  ),
-  
-  // Priority filter
-  LdFilterOption<Task, int>(
-    name: "priority",
-    label: (context) => "Priority",
-    icon: (context) => const Icon(LucideIcons.flag),
-    optimisticFilter: (item) {
-      // Custom logic based on current filter state
-      return true;
-    },
-  ),
-},''',
-          ),
-          LdText.hs("5. Repository Integration"),
-          LdText.p("Filters and sorting are integrated into the repository's fetchListWithParameters method:"),
-          CodeBlock(
-            language: "dart",
-            code: '''final taskModel = LdCallbackModel<Task, int>(
-  // ... other configuration
-  
-  fetchListWithParameters: ({
-    required int offset,
-    required int pageSize,
-    String? pageToken,
-    Set<LdFilterOption<Task, int>>? filters,
-    List<LdSortOption<Task, int>>? sortOptions,
-  }) async {
-    // Apply filters
-    var filteredData = testData.where((item) {
-      return filters?.every((filter) => filter.optimisticFilter(item)) ?? true;
-    }).toList();
-    
-    // Apply sorting
-    for (final sortOption in sortOptions ?? []) {
-      filteredData.sort((a, b) => sortOption.optimisticSort(a, b));
-    }
-    
-    // Apply pagination
-    final startIndex = offset;
-    final endIndex = (offset + pageSize).clamp(0, filteredData.length);
-    final pageItems = filteredData.sublist(startIndex, endIndex);
-    
-    return LdListPage<Task>(
-      newItems: pageItems,
-      hasMore: endIndex < filteredData.length,
-      total: filteredData.length,
-    );
-  },
-  
-  // ... other configuration
-);''',
-          ),
-          LdText.hs("6. URL State Management"),
-          LdText.p(
-            "Filter and sort states are automatically managed in the URL, allowing users to bookmark and share filtered views:",
-          ),
-          CodeBlock(
-            language: "dart",
-            code: '''// URL will look like: /task-demo?filters=done,todo&sort=due&search=important
 
-// The repository automatically:
-// 1. Parses filter and sort parameters from URL
-// 2. Applies them to the data fetching
-// 3. Updates URL when filters/sorts change
-// 4. Restores state when navigating back''',
-          ),
-          LdText.hs("7. Filter UI Components"),
-          LdText.p("The monkey pattern provides built-in UI components for managing filters:"),
-
-          ComponentsAccordion(components: {"LdFilterModal", "showFilterContextMenu", "showFilterModal"}),
-          LdText.hs("8. Advanced Filter Examples"),
-          LdText.p("More complex filter scenarios:"),
-          LdText.hs("Date Range Filter"),
+          LdText.hs("Any-of Filters"),
+          LdText.p("Let the user pick one or more values (checkboxes):"),
           CodeBlock(
             language: "dart",
-            code: '''LdFilterOption<Task, int>(
-  name: "due_date",
-  label: (context) => "Due Date",
-  icon: (context) => const Icon(LucideIcons.calendar),
-  optimisticFilter: (item) {
-    // Custom date range filtering logic
-    final now = DateTime.now();
-    final dueDate = item.due;
-    return dueDate.isAfter(now) && dueDate.isBefore(now.add(Duration(days: 7)));
-  },
-  buildFilterWidget: (context, currentValue, onChanged) {
-    return LdDatePicker(
-      value: currentValue,
-      onChanged: onChanged,
-    );
-  },
-),''',
-          ),
-          LdText.hs("Multi-Select Filter"),
-          CodeBlock(
-            language: "dart",
-            code: '''LdFilterOption<Task, int>(
+            code: '''LdFilterAnyOf<Task, int, String>(
   name: "categories",
   label: (context) => "Categories",
   icon: (context) => const Icon(LucideIcons.tag),
-  optimisticFilter: (item) {
-    // Check if item matches any selected categories
-    return true; // Implement multi-select logic
-  },
-  buildFilterWidget: (context, currentValue, onChanged) {
-    return LdMultiSelect<String>(
-      value: currentValue ?? [],
-      onChanged: onChanged,
-      options: [
-        LdSelectOption(value: "work", label: "Work"),
-        LdSelectOption(value: "personal", label: "Personal"),
-        LdSelectOption(value: "shopping", label: "Shopping"),
-      ],
-    );
+  allValues: {
+    "work": (context) => Text("Work"),
+    "personal": (context) => Text("Personal"),
+    "shopping": (context) => Text("Shopping"),
   },
 ),''',
+          ),
+
+          LdText.hs("3. Passing Filters and Sort Options"),
+          LdText.p(
+            "Pass async builders to buildMonkeyRoutes. Dynamic option catalogs (e.g. from an API) "
+            "are loaded inside the builder. Call LdMonkeySortAndFilterState.refreshFilterDefinitions(context) "
+            "to re-fetch definitions at runtime.",
+          ),
+          CodeBlock(
+            language: "dart",
+            code: '''buildMonkeyRoutes<Task, int>(
+  filtersBuilder: (context) async {
+    final categories = await api.fetchCategories();
+    return [
+      LdFilterSearch<Task, int, String>(
+        name: "search",
+        label: (context) => "Search",
+        icon: (context) => const Icon(LucideIcons.search),
+      ),
+      LdFilterBool<Task, int>(
+        name: "done",
+        label: (context) => "Completed",
+        icon: (context) => const Icon(LucideIcons.check),
+      ),
+      LdFilterOneOf<Task, int, String>(
+        name: "category",
+        label: (context) => "Category",
+        icon: (context) => const Icon(LucideIcons.tag),
+        allValues: {
+          for (final cat in categories) cat: (context) => Text(cat),
+        },
+      ),
+    ];
+  },
+  sortOptionsBuilder: (_) async => taskSortOptions,
+  ...
+)''',
+          ),
+
+          LdText.hs("4. Data Model Integration"),
+          LdText.p(
+            "Active filters and sort options are passed to fetchListWithParameters "
+            "as a FetchPageParameters object. Apply them to your data fetching logic:",
+          ),
+          CodeBlock(
+            language: "dart",
+            code: '''final taskModel = LdCallbackModel<Task, int>(
+  fetchListWithParameters: (params) async {
+    // Apply filters
+    var filtered = testData.where((item) {
+      return params.filters?.every((f) => f.optimisticFilter(item)) ?? true;
+    }).toList();
+    
+    // Apply sorting
+    for (final sort in params.sortOptions ?? []) {
+      filtered.sort((a, b) => sort.optimisticSort(a, b));
+    }
+    
+    // Apply pagination
+    final end = (params.offset + params.pageSize).clamp(0, filtered.length);
+    return LdListPage<Task>(
+      newItems: filtered.sublist(params.offset, end),
+      hasMore: end < filtered.length,
+      total: filtered.length,
+    );
+  },
+  getById: (context, id) async => testData.firstWhere((e) => e.id == id),
+);''',
+          ),
+
+          LdText.hs("5. URL State Management"),
+          LdText.p(
+            "Filter and sort states are automatically serialized into the URL, allowing users to bookmark "
+            "and share filtered views. The monkey restores state on navigation.",
+          ),
+          CodeBlock(
+            language: "dart",
+            code: '''// URL will look like:
+// /task-demo?filters=done&sort=due&search=important
+
+// The monkey automatically:
+// 1. Parses filter and sort parameters from the URL on load
+// 2. Updates the URL when filters/sorts change
+// 3. Restores state when navigating back''',
+          ),
+
+          LdText.hs("6. Accessing Active Filters"),
+          LdText.p("Read the current filter and sort state from anywhere in the tree:"),
+          CodeBlock(
+            language: "dart",
+            code: '''final state = LdMonkeySortAndFilterState.of<Task, int>(context); // listen: true by default
+final activeFilters = state.activeFilters;
+final activeSorts = state.activeSortOptions;
+final canReorder = state.canReorder; // true when one active sort has supportsReorder: true
+
+// Search filter value:
+final search = state.filters.whereType<LdFilterSearch>().firstOrNull;
+final searchText = search?.searchText ?? "";''',
+          ),
+
+          LdText.hs("7. Filter UI Components"),
+          LdText.p(
+            "The monkey provides built-in action factories for showing filter UI. "
+            "Add them to the actions list:",
+          ),
+          ComponentsAccordion(components: {"LdFilterModal", "showFilterContextMenu", "showFilterModal"}),
+          CodeBlock(
+            language: "dart",
+            code: '''actions: [
+  showFilterContextMenu<Task, int>(), // dropdown popover in the master app bar
+  showFilterModal<Task, int>(),       // full modal filter sheet
+]''',
+          ),
+
+          LdText.hs("8. Filter Chips Bar"),
+          LdText.p(
+            "Pass filterBarConfig to LdMonkeyMasterPage to render active filter chips "
+            "below the primary app bar. Chips allow users to deactivate individual filters inline.",
+          ),
+          CodeBlock(
+            language: "dart",
+            code: '''LdMonkeyMasterPage<Task, int>(
+  filterBarConfig: [
+    LdFilterChipConfig<Task, int>(filterName: "done"),
+    LdFilterChipConfig<Task, int>(filterName: "priority"),
+  ],
+  buildItem: (context, item) => LdListItem(title: Text(item.value!.task)),
+)''',
+          ),
+
+          LdText.hs("9. Drag-to-Reorder"),
+          LdText.p(
+            "Enable drag-to-reorder by setting supportsReorder: true on a sort option and "
+            "providing a reorderHandler on buildMonkeyRoutes. Reorder mode activates automatically "
+            "when that sort option is the sole active sort.",
+          ),
+          CodeBlock(
+            language: "dart",
+            code: '''buildMonkeyRoutes<Task, int>(
+  reorderHandler: (context, item, fromIndex, toIndex) async {
+    return await api.reorderTask(item.id, toIndex);
+  },
+  sortOptionsBuilder: (_) async => [
+    LdSortOption<Task, int>(
+      name: "order",
+      label: (context) => "Custom order",
+      icon: (context) => const Icon(LucideIcons.gripVertical),
+      supportsReorder: true,
+      optimisticSort: (a, b) => a.order.compareTo(b.order),
+    ),
+  ],
+  ...
+)''',
           ),
         ],
       ),

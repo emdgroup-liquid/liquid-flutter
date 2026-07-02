@@ -61,7 +61,6 @@ void main() {
         height: 500,
         child: LdList<_SampleItem, int?>(
           paginator: data,
-          assumedItemHeight: 60,
           groupingCriterion: grouping,
           separatorBuilder: seperatorBuilder ?? (context) => const LdDivider(),
           groupHeaderBuilder: groupingBuilder ??

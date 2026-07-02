@@ -230,4 +230,10 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
 
   @override
   String get fieldConflictServer => 'Serverwert';
+
+  @override
+  String get noItemsMatchFilter => 'Keine Elemente entsprechen Ihren Filtern';
+
+  @override
+  String get clearFilters => 'Filter zurücksetzen';
 }

@@ -232,7 +232,7 @@ LdCallbackModel<TestItem, int> createTestModel({
   Future<TestItem?> Function(BuildContext context, int id, TestItem newItem)? updateItem,
   Future<TestItem> Function(BuildContext context, TestItem? newItem)? createItem,
   Future<void> Function(BuildContext context, Set<int> ids)? deleteBatch,
-  Future<void> Function(BuildContext context, Set<TestItem> items)? updateBatch,
+  Future<void> Function(BuildContext context, Map<int, TestItem> items)? updateBatch,
 }) {
   final items = initialItems ??
       [
@@ -278,7 +278,7 @@ LdListController<TestItem, int> createTestListController({
   Future<TestItem?> Function(BuildContext context, int id, TestItem newItem)? updateItem,
   Future<TestItem> Function(BuildContext context, TestItem? newItem)? createItem,
   Future<void> Function(BuildContext context, Set<int> ids)? deleteBatch,
-  Future<void> Function(BuildContext context, Set<TestItem> items)? updateBatch,
+  Future<void> Function(BuildContext context, Map<int, TestItem> items)? updateBatch,
 }) {
   return LdListController<TestItem, int>.fromModel(
     createTestModel(

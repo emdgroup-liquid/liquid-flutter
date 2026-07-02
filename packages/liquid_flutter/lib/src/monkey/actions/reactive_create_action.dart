@@ -15,11 +15,6 @@ LdMonkeyAction<T, IdType> reactiveCreateAction<T extends Identifiable<IdType>, I
           minSelectionCount: 0,
           maxSelectionCount: 0,
         ),
-        LdMonkeyActionVisibility(
-          location: LdMonkeyActionLocation.masterSecondary,
-          minSelectionCount: 0,
-          maxSelectionCount: 0,
-        ),
       },
       onTrigger: (ctx) async {
         GoRouter.of(ctx.appContext).pushNamed(routeConfig.createRouteName);

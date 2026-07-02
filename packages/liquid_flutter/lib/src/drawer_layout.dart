@@ -10,6 +10,8 @@ class LdDrawerLayout extends StatefulWidget {
   final Widget body;
   final double reflowBreakpoint;
   final bool enableScaling;
+  final bool drawerRight;
+  final bool insetBody;
 
   final void Function(LdDrawerState) onStateChange;
 
@@ -20,6 +22,8 @@ class LdDrawerLayout extends StatefulWidget {
     required this.body,
     required this.reflowBreakpoint,
     required this.drawerWidth,
+    this.drawerRight = false,
+    this.insetBody = false,
     this.enableScaling = false,
     required this.onStateChange,
   });
@@ -145,6 +149,9 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
 
   bool get _isDrawerOpen => _panelVisible;
 
+  bool get _insetBody =>
+      widget.insetBody || (context.findAncestorStateOfType<LdDrawerLayoutState>()?._insetBody != true && _isSideBySide);
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -183,13 +190,14 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
             return Stack(
               children: [
                 LdMultiPanelLayout(
+                  insetBody: _insetBody,
                   enableScaling: widget.enableScaling,
                   mode: mode,
                   panelVisible: _panelVisible,
                   onPanelVisibilityChanged: _onPanelVisibilityChanged,
                   panelWidth: _effectiveDrawerWidth,
-                  panelPosition: LdPanelPosition.left,
-                  allowResize: false,
+                  panelPosition: widget.drawerRight ? LdPanelPosition.right : LdPanelPosition.left,
+                  allowResize: true,
                   mass: 1,
                   springConstant: 12,
                   dampingCoefficient: 9,
@@ -210,13 +218,7 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
                         isOpen: _isDrawerOpen,
                         isSideBySide: _isSideBySide,
                       ),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          boxShadow: [ldShadowSticky],
-                          color: LdTheme.of(context).background,
-                        ),
-                        child: widget.body,
-                      ),
+                      child: widget.body,
                     ),
                   ),
                 ),

@@ -14,7 +14,7 @@ class LdSelectableList<T extends Identifiable<IdType>, IdType> extends StatefulW
   final Set<IdType> initialSelectedItems;
   final bool multiSelect;
 
-  final LdPaginator<T, IdType> paginator;
+  final LdPaginator<T, IdType> listController;
 
   final void Function(Set<IdType> selectedItems)? onSelectionChange;
 
@@ -31,7 +31,7 @@ class LdSelectableList<T extends Identifiable<IdType>, IdType> extends StatefulW
     this.child,
     this.onSelectionChange,
     this.multiSelect = false,
-    required this.paginator,
+    required this.listController,
     this.showSelectionControls = false,
     this.initialSelectedItems = const {},
     this.disableDragGestures = false,
@@ -67,9 +67,15 @@ class LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Stat
 
     _selectionController = LdSelectableListSelectionController<T, IdType>(
       multiSelect: widget.multiSelect,
-      paginator: widget.paginator,
+      paginator: widget.listController,
       initialSelectedItems: widget.initialSelectedItems,
     );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _tryScrollToInitialSelection(widget.initialSelectedItems);
+      }
+    });
 
     _selectionController.setShowSelectionControls(widget.showSelectionControls);
 
@@ -191,13 +197,84 @@ class LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Stat
     if (!setEquals(oldWidget.initialSelectedItems, widget.initialSelectedItems)) {
       final hadExternalChange = !setEquals(_selectionController.selectedItems, widget.initialSelectedItems);
       syncSelection(widget.initialSelectedItems);
-      if (hadExternalChange && widget.initialSelectedItems.length == 1) {
-        _selectionController.getFocusNodeForItem(widget.initialSelectedItems.first).requestFocus();
+
+      final previousSelectedItems = oldWidget.initialSelectedItems;
+      final newSelectedItems = widget.initialSelectedItems;
+
+      if (hadExternalChange) {
+        if (newSelectedItems.isEmpty && previousSelectedItems.isNotEmpty) {
+          _tryScrollToInitialSelection(previousSelectedItems);
+        } else {
+          _tryScrollToInitialSelection(newSelectedItems);
+        }
       }
     }
 
     if (oldWidget.showSelectionControls != widget.showSelectionControls) {
       _selectionController.setShowSelectionControls(widget.showSelectionControls);
+    }
+  }
+
+  void _tryScrollToInitialSelection(Set<IdType> initialSelectedItems) async {
+    if (initialSelectedItems.isEmpty) {
+      return;
+    }
+    final listController = widget.listController is LdListController<T, IdType>
+        ? widget.listController as LdListController<T, IdType>
+        : null;
+    final index = listController?.getItemIndexById(initialSelectedItems.first);
+    if (index == null) {
+      // Item is not loaded yet, if there is getOffsetById, we can use that to scroll to the correct position
+      if (listController?.model.getOffsetById != null) {
+        final offset = await listController!.model.getOffsetById!(
+          FetchOffsetParameters<T, IdType>(
+            context: context,
+            id: initialSelectedItems.first,
+            reason: LdFetchReason.initial,
+            cache: listController.cache,
+          ),
+        );
+
+        if (offset != null) {
+          double averageHeight = 0;
+          int attempts = 0;
+          do {
+            averageHeight = _selectionController.getAverageItemHeight();
+            if (averageHeight == 0) {
+              await Future.delayed(const Duration(milliseconds: 100));
+            }
+            attempts++;
+          } while (averageHeight == 0 && attempts < 10);
+
+          if (averageHeight > 0) {
+            _scrollController.animateTo(offset.toDouble() * averageHeight,
+                duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+          }
+        }
+      }
+    } else {
+      // Item is already loaded and might be in the list,
+
+      final itemContext = _selectionController.getKeyForItem(initialSelectedItems.first).currentContext;
+
+      if (itemContext != null && itemContext.mounted) {
+        await Scrollable.ensureVisible(
+          itemContext,
+          alignment: 0.5,
+          alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+        );
+        _selectionController.getFocusNodeForItem(initialSelectedItems.first).requestFocus();
+      } else {
+        // Item is not rendered but loaded, we try to scroll to the item based on the index
+        final index = listController?.getItemIndexById(initialSelectedItems.first);
+        final averageHeight = _selectionController.getAverageItemHeight();
+        if (index != null) {
+          _scrollController.animateTo(index.toDouble() * averageHeight,
+              duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+        }
+        await Future.delayed(const Duration(milliseconds: 500));
+        _selectionController.getFocusNodeForItem(initialSelectedItems.first).requestFocus();
+      }
     }
   }
 
@@ -283,7 +360,7 @@ class LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Stat
 
         return LdListConfigProvider<T, IdType>(
           config: LdListConfig<T, IdType>(
-            paginator: widget.paginator,
+            paginator: widget.listController,
             scrollController: _scrollController,
             itemBuilder: chainedItemBuilder,
           ),

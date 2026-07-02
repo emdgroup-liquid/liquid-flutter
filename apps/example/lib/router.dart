@@ -52,10 +52,12 @@ import 'package:liquid/patterns/monkey_actions.dart';
 import 'package:liquid/patterns/monkey_pattern.dart';
 import 'package:liquid/patterns/monkey_detail_edit.dart';
 import 'package:liquid/patterns/monkey_repository.dart';
+import 'package:liquid/patterns/monkey_backend.dart';
 import 'package:liquid/patterns/monkey_sorting_filtering.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 import 'components/bento_gallery.dart';
+import 'experiments/metaball_experiment.dart';
 import 'components/data_display/markdown.dart';
 import 'components/data_display/table.dart';
 import 'components/data_display/tag.dart';
@@ -146,8 +148,7 @@ class AppRouter {
                 routeConfig: fileRouteConfig,
                 masterPage: FileMasterPage(),
                 detailPage: FileDetailPage(),
-                modelBuilder: (context, state) =>
-                    fileModel(state.pathParameters[projectRouteConfig.viewingParamName]!),
+                modelBuilder: (context, state) => fileModel(state.pathParameters[projectRouteConfig.viewingParamName]!),
                 filtersBuilder: (_) async => [],
                 sortOptionsBuilder: (_) async => [],
                 actions: const [],
@@ -206,6 +207,11 @@ class AppRouter {
             path: "/patterns/monkey/sorting-filtering",
             pageBuilder: (context, state) =>
                 NoTransitionPage<void>(key: state.pageKey, child: const MonkeySortingFilteringDemo()),
+          ),
+          GoRoute(
+            path: "/patterns/monkey/backend",
+            pageBuilder: (context, state) =>
+                NoTransitionPage<void>(key: state.pageKey, child: const MonkeyBackendDemo()),
           ),
           GoRoute(
             path: "/patterns/monkey/detail-edit",
@@ -412,6 +418,11 @@ class AppRouter {
           GoRoute(
             path: "/components/bento-gallery",
             pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const BentoGallery()),
+          ),
+          GoRoute(
+            path: "/experiments/metaball",
+            pageBuilder: (context, state) =>
+                NoTransitionPage<void>(key: state.pageKey, child: const MetaballExperiment()),
           ),
           GoRoute(
             path: "/components/markdown",

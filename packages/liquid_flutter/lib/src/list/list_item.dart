@@ -33,27 +33,30 @@ class LdListItemWidget extends StatelessWidget {
   final LdColor? color;
   final EdgeInsets? padding;
   final BorderRadius? borderRadius;
+  final bool isOdd;
 
+  @ContextConfigurable()
   const LdListItemWidget({
     super.key,
-    @ContextConfigurable() this.active = false,
-    @ContextConfigurable() this.borderRadius,
-    @ContextConfigurable() this.disabled = false,
-    @ContextConfigurable() this.isSelected = false,
+    this.active = false,
+    this.borderRadius,
+    this.disabled = false,
+    this.isSelected = false,
     this.leading,
-    @ContextConfigurable() this.onSelectionChanged,
-    @ContextConfigurable() this.onPressed,
-    @ContextConfigurable() this.padding,
+    this.onSelectionChanged,
+    this.onPressed,
+    this.padding,
     this.selectDisabled = false,
     this.subContent,
     this.subtitle,
     this.title,
     this.tradeLeadingForSelectionControl = true,
-    @ContextConfigurable() this.focusNode,
-    @ContextConfigurable() this.trailing,
-    @ContextConfigurable() this.color,
+    this.focusNode,
+    this.trailing,
+    this.color,
     this.width,
-    @ContextConfigurable() this.selectionControl = LdSelectionControl.none,
+    this.isOdd = false,
+    this.selectionControl = LdSelectionControl.none,
   });
 
   Widget _buildSelectionControls(BuildContext context, bool disabledState) {
@@ -186,6 +189,7 @@ class LdListItemWidget extends StatelessWidget {
 
     return LdTouchableSurface(
       focusNode: effectiveFocusNode,
+      isOdd: isOdd,
       onPressed: () {
         if (selectionControl != LdSelectionControl.none) {
           onSelectionChanged?.call(!isSelected);

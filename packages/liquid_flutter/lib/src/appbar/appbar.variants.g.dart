@@ -13,8 +13,7 @@ class LdAppBarConfig {
     this.bottom,
     this.debugName,
     this.insetScreenRadius,
-    this.implyCloseModalButton,
-    this.implyLeading,
+    this.implyFeatures,
     this.avoidViewInsets,
     this.leading,
     this.overflowMenuProviders,
@@ -22,7 +21,6 @@ class LdAppBarConfig {
     this.scrollBehavior,
     this.searchConfig,
     this.shadowMode,
-    this.showWindowControls,
     this.title,
     this.trailing,
     this.padding,
@@ -50,9 +48,7 @@ class LdAppBarConfig {
 
   final bool? insetScreenRadius;
 
-  final bool? implyCloseModalButton;
-
-  final bool? implyLeading;
+  final Set<LdAppBarImpliedFeature>? implyFeatures;
 
   final bool? avoidViewInsets;
 
@@ -67,8 +63,6 @@ class LdAppBarConfig {
   final LdSearchConfig? searchConfig;
 
   final LdAppBarShadowMode? shadowMode;
-
-  final bool? showWindowControls;
 
   final Widget? title;
 
@@ -117,9 +111,7 @@ class LdAppBarConfigProvider extends StatelessWidget {
             debugName: config.debugName ?? parentConfig.debugName,
             insetScreenRadius:
                 config.insetScreenRadius ?? parentConfig.insetScreenRadius,
-            implyCloseModalButton: config.implyCloseModalButton ??
-                parentConfig.implyCloseModalButton,
-            implyLeading: config.implyLeading ?? parentConfig.implyLeading,
+            implyFeatures: config.implyFeatures ?? parentConfig.implyFeatures,
             avoidViewInsets:
                 config.avoidViewInsets ?? parentConfig.avoidViewInsets,
             leading: config.leading ?? parentConfig.leading,
@@ -130,8 +122,6 @@ class LdAppBarConfigProvider extends StatelessWidget {
                 config.scrollBehavior ?? parentConfig.scrollBehavior,
             searchConfig: config.searchConfig ?? parentConfig.searchConfig,
             shadowMode: config.shadowMode ?? parentConfig.shadowMode,
-            showWindowControls:
-                config.showWindowControls ?? parentConfig.showWindowControls,
             title: config.title ?? parentConfig.title,
             trailing: config.trailing ?? parentConfig.trailing,
             padding: config.padding ?? parentConfig.padding)
@@ -156,8 +146,7 @@ class LdAppBar extends StatelessWidget {
     this.bottom,
     this.debugName,
     this.insetScreenRadius,
-    this.implyCloseModalButton,
-    this.implyLeading,
+    this.implyFeatures,
     this.avoidViewInsets,
     this.leading,
     this.overflowMenuProviders,
@@ -165,7 +154,6 @@ class LdAppBar extends StatelessWidget {
     this.scrollBehavior,
     this.searchConfig,
     this.shadowMode,
-    this.showWindowControls,
     this.title,
     this.trailing,
     this.padding,
@@ -184,8 +172,7 @@ class LdAppBar extends StatelessWidget {
     Widget? bottom,
     String? debugName,
     bool? insetScreenRadius,
-    bool? implyCloseModalButton,
-    bool? implyLeading,
+    Set<LdAppBarImpliedFeature>? implyFeatures,
     bool? avoidViewInsets,
     Widget? leading,
     List<SingleChildWidget> Function(BuildContext)? overflowMenuProviders,
@@ -193,7 +180,6 @@ class LdAppBar extends StatelessWidget {
     LdAppBarScrollBehavior? scrollBehavior,
     LdSearchConfig? searchConfig,
     LdAppBarShadowMode? shadowMode,
-    bool? showWindowControls,
     Widget? title,
     Widget? trailing,
     EdgeInsets? padding,
@@ -210,8 +196,7 @@ class LdAppBar extends StatelessWidget {
       bottom: bottom,
       debugName: debugName,
       insetScreenRadius: insetScreenRadius,
-      implyCloseModalButton: implyCloseModalButton,
-      implyLeading: implyLeading,
+      implyFeatures: implyFeatures,
       avoidViewInsets: avoidViewInsets,
       leading: leading,
       overflowMenuProviders: overflowMenuProviders,
@@ -219,7 +204,6 @@ class LdAppBar extends StatelessWidget {
       scrollBehavior: scrollBehavior,
       searchConfig: searchConfig,
       shadowMode: shadowMode,
-      showWindowControls: showWindowControls,
       title: title,
       trailing: trailing,
       padding: padding,
@@ -240,8 +224,7 @@ class LdAppBar extends StatelessWidget {
     Widget? bottom,
     String? debugName,
     bool? insetScreenRadius,
-    bool? implyCloseModalButton,
-    bool? implyLeading,
+    Set<LdAppBarImpliedFeature>? implyFeatures,
     bool? avoidViewInsets,
     Widget? leading,
     List<SingleChildWidget> Function(BuildContext)? overflowMenuProviders,
@@ -249,7 +232,6 @@ class LdAppBar extends StatelessWidget {
     LdAppBarScrollBehavior? scrollBehavior,
     LdSearchConfig? searchConfig,
     LdAppBarShadowMode? shadowMode,
-    bool? showWindowControls,
     Widget? title,
     Widget? trailing,
     EdgeInsets? padding,
@@ -266,8 +248,7 @@ class LdAppBar extends StatelessWidget {
       bottom: bottom,
       debugName: debugName,
       insetScreenRadius: insetScreenRadius,
-      implyCloseModalButton: implyCloseModalButton,
-      implyLeading: implyLeading,
+      implyFeatures: implyFeatures,
       avoidViewInsets: avoidViewInsets,
       leading: leading,
       overflowMenuProviders: overflowMenuProviders,
@@ -275,7 +256,6 @@ class LdAppBar extends StatelessWidget {
       scrollBehavior: scrollBehavior,
       searchConfig: searchConfig,
       shadowMode: shadowMode,
-      showWindowControls: showWindowControls,
       title: title,
       trailing: trailing,
       padding: padding,
@@ -292,7 +272,7 @@ class LdAppBar extends StatelessWidget {
 
   final Color? backgroundColor;
 
-  final bool? implyLeading;
+  final Set<LdAppBarImpliedFeature>? implyFeatures;
 
   final bool? addContainer;
 
@@ -305,10 +285,6 @@ class LdAppBar extends StatelessWidget {
   final LdAppBarBackgroundMode? backgroundMode;
 
   final LdAppBarAttachedMode? attachedMode;
-
-  final bool? showWindowControls;
-
-  final bool? implyCloseModalButton;
 
   final bool? avoidViewInsets;
 
@@ -353,9 +329,14 @@ class LdAppBar extends StatelessWidget {
       bottom: bottom ?? config?.bottom,
       debugName: debugName ?? config?.debugName,
       insetScreenRadius: insetScreenRadius ?? config?.insetScreenRadius ?? true,
-      implyCloseModalButton:
-          implyCloseModalButton ?? config?.implyCloseModalButton ?? true,
-      implyLeading: implyLeading ?? config?.implyLeading,
+      implyFeatures: implyFeatures ??
+          config?.implyFeatures ??
+          const {
+            LdAppBarImpliedFeature.back,
+            LdAppBarImpliedFeature.close,
+            LdAppBarImpliedFeature.windowControls,
+            LdAppBarImpliedFeature.drawerToggle
+          },
       avoidViewInsets: avoidViewInsets ?? config?.avoidViewInsets ?? false,
       leading: leading ?? config?.leading,
       overflowMenuProviders:
@@ -367,8 +348,6 @@ class LdAppBar extends StatelessWidget {
           LdAppBarScrollBehavior.mobileOnly,
       searchConfig: searchConfig ?? config?.searchConfig,
       shadowMode: shadowMode ?? config?.shadowMode ?? LdAppBarShadowMode.hidden,
-      showWindowControls:
-          showWindowControls ?? config?.showWindowControls ?? true,
       title: title ?? config?.title,
       trailing: trailing ?? config?.trailing,
       padding: padding ?? config?.padding,

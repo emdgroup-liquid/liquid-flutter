@@ -16,6 +16,8 @@ class _MultiPanelLayoutDemoState extends State<MultiPanelLayoutDemo> {
   bool _allowResize = false;
   bool _panelVisible = true;
 
+  double _panelWidth = 200;
+
   Widget _buildChildInfo(BuildContext context, LdMultiPanelChildState state) {
     final theme = LdTheme.of(context);
     return Container(
@@ -32,26 +34,12 @@ class _MultiPanelLayoutDemoState extends State<MultiPanelLayoutDemo> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              LdText.hs(
-                state.role == LdPanelRole.panel ? "Panel" : "Body",
-              ),
+              LdText.hs(state.role == LdPanelRole.panel ? "Panel" : "Body"),
               ldSpacerS,
-              LdText.p(
-                "Role: ${state.role.name}",
-                textAlign: TextAlign.center,
-              ),
-              LdText.p(
-                "Left: ${state.left.toStringAsFixed(0)} px",
-                textAlign: TextAlign.center,
-              ),
-              LdText.p(
-                "Width: ${state.width.toStringAsFixed(0)} px",
-                textAlign: TextAlign.center,
-              ),
-              LdText.p(
-                "Dragging: ${state.isDragging}",
-                textAlign: TextAlign.center,
-              ),
+              LdText.p("Role: ${state.role.name}", textAlign: TextAlign.center),
+              LdText.p("Left: ${state.left.toStringAsFixed(0)} px", textAlign: TextAlign.center),
+              LdText.p("Width: ${state.width.toStringAsFixed(0)} px", textAlign: TextAlign.center),
+              LdText.p("Dragging: ${state.isDragging}", textAlign: TextAlign.center),
             ],
           ),
         ),
@@ -63,7 +51,7 @@ class _MultiPanelLayoutDemoState extends State<MultiPanelLayoutDemo> {
     return Builder(
       builder: (context) {
         final state = LdMultiPanelChildState.watch(context);
-        return _buildChildInfo(context, state);
+        return Padding(padding: MediaQuery.paddingOf(context), child: _buildChildInfo(context, state));
       },
     );
   }
@@ -72,7 +60,7 @@ class _MultiPanelLayoutDemoState extends State<MultiPanelLayoutDemo> {
     return Builder(
       builder: (context) {
         final state = LdMultiPanelChildState.watch(context);
-        return _buildChildInfo(context, state);
+        return Padding(padding: MediaQuery.paddingOf(context), child: _buildChildInfo(context, state));
       },
     );
   }
@@ -102,10 +90,15 @@ class _MultiPanelLayoutDemoState extends State<MultiPanelLayoutDemo> {
                 panelPosition: _panelPosition,
                 allowResize: _allowResize,
                 panelVisible: _panelVisible,
-                panelWidth: 200,
+                panelWidth: _panelWidth,
                 onPanelVisibilityChanged: (visible) {
                   setState(() {
                     _panelVisible = visible;
+                  });
+                },
+                onPanelWidthChanged: (width) {
+                  setState(() {
+                    _panelWidth = width;
                   });
                 },
                 panel: _buildPanel(),
@@ -123,14 +116,8 @@ class _MultiPanelLayoutDemoState extends State<MultiPanelLayoutDemo> {
                   value: _mode,
                   label: "Mode",
                   items: const [
-                    LdSelectItem(
-                      value: LdMultiPanelLayoutMode.sideBySide,
-                      child: Text("Side by Side"),
-                    ),
-                    LdSelectItem(
-                      value: LdMultiPanelLayoutMode.stacked,
-                      child: Text("Stacked"),
-                    ),
+                    LdSelectItem(value: LdMultiPanelLayoutMode.sideBySide, child: Text("Side by Side")),
+                    LdSelectItem(value: LdMultiPanelLayoutMode.stacked, child: Text("Stacked")),
                   ],
                   onChanged: (mode) => setState(() => _mode = mode),
                 ),
@@ -138,14 +125,8 @@ class _MultiPanelLayoutDemoState extends State<MultiPanelLayoutDemo> {
                   value: _panelPosition,
                   label: "Panel Position",
                   items: const [
-                    LdSelectItem(
-                      value: LdPanelPosition.left,
-                      child: Text("Left"),
-                    ),
-                    LdSelectItem(
-                      value: LdPanelPosition.right,
-                      child: Text("Right"),
-                    ),
+                    LdSelectItem(value: LdPanelPosition.left, child: Text("Left")),
+                    LdSelectItem(value: LdPanelPosition.right, child: Text("Right")),
                   ],
                   onChanged: (pos) => setState(() => _panelPosition = pos),
                 ),
@@ -159,23 +140,25 @@ class _MultiPanelLayoutDemoState extends State<MultiPanelLayoutDemo> {
                   checked: _panelVisible,
                   onChanged: (v) => setState(() => _panelVisible = v),
                 ),
+                LayoutBuilder(
+                  builder: (context, constraints) => LdSlider(
+                    min: 10,
+                    max: constraints.maxWidth,
+                    label: "Panel Width",
+                    value: _panelWidth,
+                    onChanged: (v) => setState(() => _panelWidth = v.clamp(0, constraints.maxWidth)),
+                  ),
+                ),
                 Row(
                   children: [
                     LdButton(
-                      onPressed: () =>
-                          setState(() => _panelVisible = !_panelVisible),
+                      onPressed: () => setState(() => _panelVisible = !_panelVisible),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            _panelVisible
-                                ? LucideIcons.panelLeftClose
-                                : LucideIcons.panelLeftOpen,
-                          ),
+                          Icon(_panelVisible ? LucideIcons.panelLeftClose : LucideIcons.panelLeftOpen),
                           const SizedBox(width: 8),
-                          Text(
-                            _panelVisible ? "Hide Panel" : "Show Panel",
-                          ),
+                          Text(_panelVisible ? "Hide Panel" : "Show Panel"),
                         ],
                       ),
                     ),

@@ -1,6 +1,7 @@
 export 'identifiable.dart';
 export 'ld_affected_by_update.dart';
 export 'ld_fetch_reason.dart';
+export 'ld_list_cache_key.dart';
 export 'ld_model.dart';
 export 'ld_callback_model.dart';
 export 'ld_list_cache.dart';

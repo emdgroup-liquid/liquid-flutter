@@ -1,23 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_decoration.dart';
 import 'package:liquid_flutter/src/appbar/appbar_frame.dart';
-import 'package:liquid_flutter/src/appbar/macos_window_controls.dart';
-import 'package:liquid_flutter/src/appbar/windows_window_controls.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
 part 'appbar.variants.g.dart';
-
-class LdAppBarParentShowsImpliedLeading {
-  const LdAppBarParentShowsImpliedLeading(this.value);
-
-  final bool value;
-}
 
 enum LdAppBarShadowMode {
   visible,
@@ -114,7 +104,7 @@ class LdAppBarWidget extends StatefulWidget {
 
   final Color? backgroundColor;
 
-  final bool? implyLeading;
+  final Set<LdAppBarImpliedFeature> implyFeatures;
 
   final bool addContainer;
 
@@ -127,10 +117,6 @@ class LdAppBarWidget extends StatefulWidget {
   final LdAppBarBackgroundMode backgroundMode;
 
   final LdAppBarAttachedMode attachedMode;
-
-  final bool showWindowControls;
-
-  final bool implyCloseModalButton;
 
   final bool avoidViewInsets;
 
@@ -173,7 +159,7 @@ class LdAppBarWidget extends StatefulWidget {
     properties.add(FlagProperty('addContainer', value: addContainer, ifTrue: 'enabled'));
     properties.add(ColorProperty('backgroundColor', backgroundColor));
     properties.add(IntProperty('actionsCount', actions.length));
-    properties.add(DiagnosticsProperty<bool?>('implyLeading', implyLeading));
+    properties.add(DiagnosticsProperty<Set<LdAppBarImpliedFeature>>('implyFeatures', implyFeatures));
     properties.add(DiagnosticsProperty<Widget?>('title', title));
     properties.add(DiagnosticsProperty<Widget?>('leading', leading));
     properties.add(DiagnosticsProperty<Widget?>('trailing', trailing));
@@ -195,8 +181,12 @@ class LdAppBarWidget extends StatefulWidget {
     this.bottom,
     this.debugName,
     this.insetScreenRadius = true,
-    this.implyCloseModalButton = true,
-    this.implyLeading,
+    this.implyFeatures = const {
+      LdAppBarImpliedFeature.back,
+      LdAppBarImpliedFeature.close,
+      LdAppBarImpliedFeature.windowControls,
+      LdAppBarImpliedFeature.drawerToggle
+    },
     this.avoidViewInsets = false,
     this.leading,
     this.overflowMenuProviders,
@@ -204,7 +194,6 @@ class LdAppBarWidget extends StatefulWidget {
     this.scrollBehavior = LdAppBarScrollBehavior.mobileOnly,
     this.searchConfig,
     this.shadowMode = LdAppBarShadowMode.hidden,
-    this.showWindowControls = true,
     this.title,
     this.trailing,
     this.padding,
@@ -249,98 +238,6 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
 
   bool get _barHasFocusedInput => ldAppBarFocusScopeHasInputFocus(_focusScopeNode);
 
-  bool get _isModal {
-    final ModalRoute<Object?>? parentRoute = ModalRoute.of(context);
-    return parentRoute is LdModalRoute;
-  }
-
-  Widget? _closeModalButton(BuildContext context) {
-    if (!widget.implyCloseModalButton) return null;
-    if (!_isModal) return null;
-    if (!_canDismissModal) return null;
-
-    // Only show on a top-position bar at level 0.
-    // In stack-mode, LdAppBarMetrics is injected by AppBarFrame into the bar
-    // surface context. In legacy mode (no metrics available) we treat this bar
-    // as level 0 and rely on position to decide.
-    final metrics = context.read<LdAppBarMetrics?>();
-    if (metrics != null) {
-      // Stack-mode: check position and level from metrics.
-      if (metrics.position != LdAppBarPosition.top) return null;
-      if (metrics.level > 0) return null;
-    } else {
-      // Legacy mode: show only if this bar is at the top position.
-      if (_effectivePosition != LdAppBarPosition.top) return null;
-    }
-
-    return LdButton.ghost(
-      child: const Icon(LucideIcons.x),
-      onPressed: () => Navigator.of(context).maybePop(),
-    );
-  }
-
-  bool get _canDismissModal {
-    final ModalRoute<Object?>? parentRoute = ModalRoute.of(context);
-    return parentRoute is LdModalRoute && parentRoute.barrierDismissible;
-  }
-
-  bool get _drawerBlocksImplyLeading {
-    final drawerState = context.watch<LdDrawerState?>();
-    if (_drawerSlot != LdDrawerSlot.body) return false;
-    if (drawerState == null || !drawerState.isOpen) return false;
-    return !drawerState.isSideBySide;
-  }
-
-  bool get _canPopParentRoute {
-    final route = ModalRoute.of(context);
-
-    if (route != null && !route.isCurrent) {
-      return false;
-    }
-
-    if (_drawerBlocksImplyLeading) {
-      return false;
-    }
-
-    if (route?.impliesAppBarDismissal ?? false) {
-      return true;
-    }
-
-    final router = GoRouter.maybeOf(context);
-    if (router != null) {
-      final rootCanPop = router.routerDelegate.navigatorKey.currentState?.canPop() ?? false;
-      if (rootCanPop) {
-        return false;
-      }
-      return _goRouterShellNavigatorCanPop(router);
-    }
-
-    return false;
-  }
-
-  void _popParentRoute() {
-    final route = ModalRoute.of(context);
-    if (route?.impliesAppBarDismissal ?? false) {
-      route?.navigator?.maybePop();
-      return;
-    }
-
-    final router = GoRouter.maybeOf(context);
-    if (router != null) {
-      Navigator.of(context).maybePop();
-    } else {
-      Navigator.of(context).maybePop();
-    }
-  }
-
-  LdDrawerSlot? get _drawerSlot {
-    return context.watch<LdDrawerSlot?>();
-  }
-
-  bool get _isDrawer {
-    return _drawerSlot == LdDrawerSlot.drawer;
-  }
-
   LdAppBarPosition get _effectivePosition {
     return switch (widget.positionMode) {
       LdAppBarPositionMode.top => LdAppBarPosition.top,
@@ -380,55 +277,6 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
     return false;
   }
 
-  LdScaffoldState? _findDrawerParent(BuildContext context) {
-    BuildContext? currentContext = context;
-    while (currentContext != null) {
-      final scaffoldState = currentContext.findAncestorStateOfType<LdScaffoldState>();
-      if (scaffoldState == null) {
-        return null;
-      }
-      if (scaffoldState.hasDrawer && !scaffoldState.isDrawerOpen) {
-        return scaffoldState;
-      }
-      currentContext = scaffoldState.context;
-    }
-    return null;
-  }
-
-  Widget? _buildLeading(BuildContext context, LdAppBarMetrics? metrics) {
-    if (widget.leading != null) return widget.leading;
-    final imply = widget.implyLeading ?? true;
-    if (!imply) return null;
-
-    if (_shouldImplyRouteBack(metrics)) {
-      return LdButton.ghost(
-        onPressed: _popParentRoute,
-        child: const Icon(LucideIcons.chevronLeft),
-      );
-    }
-
-    return null;
-  }
-
-  bool _shouldImplyRouteBack(LdAppBarMetrics? metrics) {
-    if (!_canPopParentRoute ||
-        _isDrawer ||
-        _isModal ||
-        !_isInTopSlot ||
-        widget.implyLeading == false ||
-        widget.leading != null) {
-      return false;
-    }
-
-    final parentShowsImpliedLeading = context.read<LdAppBarParentShowsImpliedLeading?>()?.value;
-
-    if (parentShowsImpliedLeading ?? false) {
-      return false;
-    }
-
-    return true;
-  }
-
   TextStyle get _headerStyle {
     final theme = LdTheme.of(context, listen: true);
     return switch (theme.themeSize) {
@@ -457,23 +305,6 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
 
   SystemUiOverlayStyle get _systemUiOverlayStyle => appBarSystemUiOverlayStyle(LdTheme.of(context, listen: true));
 
-  // Whether to show Windows window controls.
-  // In stack-mode: level 0 = the bar's own metrics have level 0.
-  // In legacy mode: the parent LdAppBarMetrics is the metrics from an
-  // ancestor bar (if any).
-  bool _showWindowsWindowControls(LdAppBarMetrics? metricsFromBarSurface) {
-    if (!_isInTopSlot || _isModal || _isDrawer) return false;
-    if (LdTheme.of(context).platform != LdPlatform.windows) return false;
-    // In stack-mode the bar surface receives its own metrics (level >= 0).
-    // Show window controls only when level == 0.
-    if (metricsFromBarSurface != null) {
-      return metricsFromBarSurface.level == 0;
-    }
-    // Legacy mode: check parent metrics (metrics from bars above this one).
-    final parentMetrics = context.read<LdAppBarMetrics?>();
-    return parentMetrics == null || parentMetrics.position != LdAppBarPosition.top;
-  }
-
   @override
   Widget build(BuildContext context) {
     // Rebuild when the keyboard opens/closes (autoAttachToKeyboard).
@@ -483,7 +314,7 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
     final isAttached = _effectivelyAttached();
     // Keep drag tied to the visible top bar surface, not parent metrics,
     // because wrapper/stack composition can make parent-level checks stale.
-    final enableWindowDrag = _isInTopSlot && !_isModal && !_isDrawer && widget.showWindowControls;
+    final enableWindowDrag = _isInTopSlot && widget.implyFeatures.contains(LdAppBarImpliedFeature.windowControls);
 
     final hasSearch = widget.searchConfig != null;
     final mobile = LdTheme.of(context).platform.isMobile;
@@ -500,12 +331,22 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
     // Provider<LdAppBarMetrics>.value so the bar surface can react to scroll).
     Widget barSurface = Builder(
       builder: (context) {
-        // Read metrics injected by AppBarFrame for the bar surface context.
-        // isScrolledUnder is used via the decoration builders in AppBarFrame,
-        // and metrics is used for level/position checks.
-        final metrics = context.watch<LdAppBarMetrics?>();
+        // Watch metrics injected by AppBarFrame so this builder rebuilds
+        // whenever metrics change (e.g. isScrolledUnder, level, position).
+        context.watch<LdAppBarMetrics?>();
 
-        final leading = _buildLeading(context, metrics);
+        final showWindowControls = MacOSWindowControls.canShow(context) &&
+            widget.implyFeatures.contains(LdAppBarImpliedFeature.windowControls);
+        final showDrawerOpenButton = LdDrawerButton.canShow(context, LdDrawerButtonType.open) &&
+            widget.implyFeatures.contains(LdAppBarImpliedFeature.drawerToggle);
+        final showDrawerCloseButton = LdDrawerButton.canShow(context, LdDrawerButtonType.close) &&
+            widget.implyFeatures.contains(LdAppBarImpliedFeature.drawerToggle);
+        final showCloseModalButton =
+            LdAppBarCloseModalButton.canShow(context) && widget.implyFeatures.contains(LdAppBarImpliedFeature.close);
+        final showBackButton =
+            LdAppBarBackButton.canShow(context) && widget.implyFeatures.contains(LdAppBarImpliedFeature.back);
+        final showWindowsWindowControls = WindowsWindowControls.canShow(context) &&
+            widget.implyFeatures.contains(LdAppBarImpliedFeature.windowControls);
 
         return LdButtonConfigProvider(
           config: const LdButtonConfig(
@@ -546,9 +387,10 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
                 children: [
                   Row(
                     children: [
-                      if (widget.showWindowControls && !_isModal) const MacOSWindowControls(),
-                      OpenDrawerButton(drawerParent: _findDrawerParent(context)),
-                      if (leading != null) ...[leading, ldSpacerM],
+                      if (showWindowControls) MacOSWindowControls(),
+                      if (showDrawerOpenButton) LdDrawerButton(type: LdDrawerButtonType.open),
+                      if (showBackButton) LdAppBarBackButton(),
+                      if (widget.leading != null) widget.leading!,
                       if (overflowItems.isNotEmpty)
                         Expanded(
                           child: LdOverflowView(
@@ -568,16 +410,12 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
                             children: overflowItems,
                           ),
                         ),
-                      const CloseDrawerButton(),
+                      if (showDrawerCloseButton) LdDrawerButton(type: LdDrawerButtonType.close),
                       if (widget.trailing != null) widget.trailing!,
-                      if (_closeModalButton(context) != null) ...[_closeModalButton(context)!],
-                      if (widget.showWindowControls && !_isModal)
-                        LdReveal(
-                          revealed: _showWindowsWindowControls(metrics),
-                          child: const WindowsWindowControls(),
-                        ),
+                      if (showCloseModalButton) LdAppBarCloseModalButton(),
+                      if (showWindowsWindowControls) WindowsWindowControls(),
                     ],
-                  ),
+                  ).spaceS(),
                   if (hasSearch && searchBelowBar)
                     LdSearchInput(
                       searchConfig: widget.searchConfig!,
@@ -613,23 +451,32 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
       child: barSurface,
     );
 
-    final parentMetrics = context.watch<LdAppBarMetrics?>();
-
-    bool showingImpliedLeading = _shouldImplyRouteBack(parentMetrics);
-
     final frame = AppBarFrame(
       focusScopeNode: _focusScopeNode,
       avoidViewInsets: widget.avoidViewInsets,
       addContainer: widget.addContainer,
       debugName: widget.debugName,
       position: position,
-      insetBorderRadius: widget.insetScreenRadius ?? !_isModal,
+      insetBorderRadius: widget.insetScreenRadius ?? false,
       attached: isAttached,
       outsideAdditionalPadding: isAttached ? EdgeInsets.zero : LdTheme.of(context).pad(size: LdSize.s),
       scrollBehavior: widget.scrollBehavior,
-      wrappedChild: Provider<LdAppBarParentShowsImpliedLeading>.value(
-        value: LdAppBarParentShowsImpliedLeading(showingImpliedLeading),
-        child: widget.child,
+      wrappedChild: Builder(
+        builder: (context) {
+          return Provider<LdAppBarImpliedFeatures>.value(
+            value: LdAppBarImpliedFeatures(features: {
+              ...context.read<LdAppBarImpliedFeatures?>()?.features ?? {},
+              if (LdAppBarBackButton.canShow(context)) LdAppBarImpliedFeature.back,
+              if (MacOSWindowControls.canShow(context) || WindowsWindowControls.canShow(context))
+                LdAppBarImpliedFeature.windowControls,
+              if (LdDrawerButton.canShow(context, LdDrawerButtonType.open) ||
+                  LdDrawerButton.canShow(context, LdDrawerButtonType.close))
+                LdAppBarImpliedFeature.drawerToggle,
+              if (LdAppBarCloseModalButton.canShow(context)) LdAppBarImpliedFeature.close,
+            }),
+            child: widget.child,
+          );
+        },
       ),
       insidePadding: widget.padding,
       outsideDecorationBuilder: (isScrolledUnder) => decorationBuilder.buildOutsideDecoration(
@@ -644,35 +491,13 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
         isAttached: isAttached,
         position: position,
       ),
-      surfaceInfoBuilder: (isScrolledUnder) => LdSurfaceInfo(
-        isSurface: decorationBuilder
-            .resolveAppearance(
-              context,
-              isScrolledUnder: isScrolledUnder,
-              position: position,
-            )
-            .childIsSurface,
+      child: Builder(
+        builder: (context) {
+          return Padding(padding: MediaQuery.of(context).padding, child: barSurface);
+        },
       ),
-      child: Builder(builder: (context) {
-        return Padding(padding: MediaQuery.of(context).padding, child: barSurface);
-      }),
     );
 
     return frame;
   }
-}
-
-bool _goRouterShellNavigatorCanPop(GoRouter router) {
-  final matches = router.routerDelegate.currentConfiguration.matches;
-  if (matches.isEmpty) {
-    return false;
-  }
-  RouteMatchBase walker = matches.last;
-  while (walker is ShellRouteMatch) {
-    if (walker.navigatorKey.currentState?.canPop() ?? false) {
-      return true;
-    }
-    walker = walker.matches.last;
-  }
-  return false;
 }

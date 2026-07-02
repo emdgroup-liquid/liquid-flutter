@@ -83,10 +83,6 @@ class LdSubmitController<T, Arg> with ChangeNotifier {
       config.onCanceled!();
     }
 
-    if (ldPrintDebugMessages) {
-      debugPrint("Cancelling submit controller");
-    }
-
     _retryController.reset();
     _setState(LdSubmitState<T>(type: LdSubmitStateType.idle));
   }
@@ -131,16 +127,6 @@ class LdSubmitController<T, Arg> with ChangeNotifier {
 
       late LdException exception;
 
-      if (e is LdLocalizedException) {
-        if (ldPrintDebugMessages) {
-          debugPrint(
-            "Throwing a localized exception is a bad practive. "
-            "Use an LdExceptionLocalizer to handle translations. "
-            "Otherwise exceptions will not respect the current locale.",
-          );
-        }
-      }
-
       // Convert the exception using the exceptionMapper
       if (e is LdException) {
         exception = e;
@@ -149,12 +135,6 @@ class LdSubmitController<T, Arg> with ChangeNotifier {
           exception: e,
           stackTrace: s,
           attempt: _retryController.state.attempt,
-        );
-      }
-
-      if (ldPrintDebugMessages) {
-        debugPrint(
-          "An error occurred in LdSubmitController<${T.toString()}>: $e \n $s",
         );
       }
 
@@ -199,9 +179,6 @@ class LdSubmitController<T, Arg> with ChangeNotifier {
 
   Future<void> trigger() async {
     if (!canTrigger) {
-      if (ldPrintDebugMessages) {
-        debugPrint("Cannot trigger, state is ${state.type}");
-      }
       return;
     }
     await _trigger();
@@ -214,9 +191,6 @@ class LdSubmitController<T, Arg> with ChangeNotifier {
   }
 
   void reset() {
-    if (ldPrintDebugMessages) {
-      debugPrint("Resetting submit controller");
-    }
     _retryController.reset();
     _setState(LdSubmitState<T>(type: LdSubmitStateType.idle));
   }

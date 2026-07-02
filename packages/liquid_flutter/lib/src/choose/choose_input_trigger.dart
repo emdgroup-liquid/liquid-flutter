@@ -86,7 +86,7 @@ class LdChooseInputTrigger<T extends Identifiable<IdType>, IdType> extends State
                                 LdSize.m,
                                 color: theme.textMuted,
                               ),
-                              child: config.hint!),
+                              child: config.hint),
                         ...selectedItems
                             .sublist(0, displayItems)
                             .map((item) => selectedItemBuilder(context, item))

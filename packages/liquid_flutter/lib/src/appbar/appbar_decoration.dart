@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:provider/provider.dart';
 
 /// Resolved fill and surface state for one app bar frame.
 ///
@@ -86,7 +85,6 @@ class LdAppBarDecorationBuilder {
     required LdAppBarPosition position,
   }) {
     final theme = LdTheme.of(context);
-    final parentIsSurface = context.read<LdSurfaceInfo>().isSurface;
     final baseColor = backgroundColor ?? theme.surface;
     final showsFill = shouldShowBackground(
       context,
@@ -94,7 +92,7 @@ class LdAppBarDecorationBuilder {
       isInBottomSlot: position == LdAppBarPosition.bottom,
     );
     final childIsSurface = switch (backgroundColor) {
-      null => showsFill ? !parentIsSurface : parentIsSurface,
+      null => showsFill ? true : false,
       _ => false,
     };
 

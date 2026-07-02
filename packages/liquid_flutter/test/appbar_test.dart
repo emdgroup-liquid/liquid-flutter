@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/drawer_layout.dart';
 import 'package:liquid_flutter_test_utils/ld_frame.dart';
@@ -718,14 +719,14 @@ void main() {
       expect(find.text('Bottom Content'), findsOneWidget);
     });
 
-    testWidgets('App bar implyLeading - false', (WidgetTester tester) async {
+    testWidgets('App bar back feature disabled when implyFeatures is empty', (WidgetTester tester) async {
       ldDisableAnimations = true;
       await tester.pumpWidget(
         _wrapInScaffold(
           LdScaffold(
             body: LdAppBar.top(
               title: const Text('App Bar'),
-              implyLeading: false,
+              implyFeatures: const {},
               child: const Center(child: Text('Body')),
             ),
           ),
@@ -738,38 +739,76 @@ void main() {
       expect(find.byIcon(LucideIcons.chevronLeft), findsNothing);
     });
 
-    testWidgets('App bar implyLeading when navigator can pop', (WidgetTester tester) async {
+    testWidgets('App bar back feature shown when navigator can pop', (WidgetTester tester) async {
       ldDisableAnimations = true;
-      await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldFrame(
-            size: LdThemeSize.m,
-            brightnessMode: LdThemeBrightnessMode.light,
-            child: Navigator(
-              onDidRemovePage: (_) {},
-              pages: [
-                const MaterialPage<void>(child: SizedBox.shrink()),
-                MaterialPage<void>(
-                  child: LdScaffold(
-                    body: LdAppBar.top(
-                      title: const Text('Detail'),
-                      child: const Center(child: Text('Body')),
+
+      // The back button requires GoRouter with a populated navigation stack.
+      // Start at /list, then navigate to /list/detail so the shell navigator
+      // has a route to pop.
+      final router = GoRouter(
+        initialLocation: '/list',
+        routes: [
+          ShellRoute(
+            // Use LdThemeProvider directly — ldFrame creates its own GoRouter
+            // which would shadow the test router and break canPop detection.
+            builder: (context, state, child) => LdThemeProvider(
+              size: LdThemeSize.m,
+              brightnessMode: LdThemeBrightnessMode.light,
+              child: child,
+            ),
+            routes: [
+              GoRoute(
+                path: '/list',
+                builder: (context, state) => LdScaffold(
+                  body: LdAppBar.top(
+                    title: const Text('List'),
+                    child: Center(
+                      child: Builder(
+                        builder: (context) => LdButton(
+                          onPressed: () => context.push('/list/detail'),
+                          child: const Text('Go to detail'),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ],
-            ),
+                routes: [
+                  GoRoute(
+                    path: 'detail',
+                    builder: (context, state) => LdScaffold(
+                      body: LdAppBar.top(
+                        title: const Text('Detail'),
+                        child: const Center(child: Text('Body')),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          routerConfig: router,
         ),
       );
 
       await tester.pumpAndSettle();
 
+      // No back button on the root /list route.
+      expect(find.byIcon(LucideIcons.chevronLeft), findsNothing);
+
+      // Navigate to /list/detail — now the shell navigator has a route to pop.
+      await tester.tap(find.text('Go to detail'));
+      await tester.pumpAndSettle();
+
       expect(find.byIcon(LucideIcons.chevronLeft), findsOneWidget);
     });
 
-    testWidgets('App bar implyLeading hidden under modal route', (WidgetTester tester) async {
+    testWidgets('App bar back feature hidden under modal route', (WidgetTester tester) async {
       ldDisableAnimations = true;
       await tester.pumpWidget(
         MaterialApp(
@@ -817,7 +856,7 @@ void main() {
       expect(find.byIcon(LucideIcons.chevronLeft), findsNothing);
     });
 
-    testWidgets('App bar implyLeading hidden when stacked drawer is open', (WidgetTester tester) async {
+    testWidgets('App bar back feature hidden when stacked drawer is open', (WidgetTester tester) async {
       ldDisableAnimations = true;
       addTearDown(tester.view.resetPhysicalSize);
       tester.view.physicalSize = const Size(400, 800);
@@ -856,77 +895,140 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('App bar implyLeading only on innermost top bar when stacked', (WidgetTester tester) async {
+    testWidgets('App bar back feature only on innermost top bar when stacked', (WidgetTester tester) async {
       ldDisableAnimations = true;
-      await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldFrame(
-            size: LdThemeSize.m,
-            brightnessMode: LdThemeBrightnessMode.light,
-            child: Navigator(
-              onDidRemovePage: (_) {},
-              pages: [
-                const MaterialPage<void>(child: SizedBox.shrink()),
-                MaterialPage<void>(
-                  child: LdScaffold(
-                    body: LdAppBar.top(
-                      title: const Text('Outer'),
-                      child: LdAppBar.top(
-                        title: const Text('Inner'),
-                        child: const Center(child: Text('Body')),
-                      ),
+
+      // Use GoRouter with a shell so the back button can appear.
+      // With two stacked LdAppBars, the back button should appear exactly once
+      // — in the innermost bar — because the outer bar's implied feature is
+      // propagated to child contexts via LdAppBarImpliedFeatures.
+      // Start at /list, navigate to /list/detail so the shell navigator can pop.
+      final router = GoRouter(
+        initialLocation: '/list',
+        routes: [
+          ShellRoute(
+            // Use LdThemeProvider directly — ldFrame creates its own GoRouter
+            // which would shadow the test router and break canPop detection.
+            builder: (context, state, child) => LdThemeProvider(
+              size: LdThemeSize.m,
+              brightnessMode: LdThemeBrightnessMode.light,
+              child: child,
+            ),
+            routes: [
+              GoRoute(
+                path: '/list',
+                builder: (context, state) => Center(
+                  child: Builder(
+                    builder: (context) => LdButton(
+                      onPressed: () => context.push('/list/detail'),
+                      child: const Text('Go to detail'),
                     ),
                   ),
                 ),
-              ],
-            ),
+                routes: [
+                  GoRoute(
+                    path: 'detail',
+                    builder: (context, state) => LdScaffold(
+                      body: LdAppBar.top(
+                        title: const Text('Outer'),
+                        child: LdAppBar.top(
+                          title: const Text('Inner'),
+                          child: const Center(child: Text('Body')),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          routerConfig: router,
         ),
       );
 
       await tester.pumpAndSettle();
 
+      // Navigate to the detail page so the shell navigator can pop.
+      await tester.tap(find.text('Go to detail'));
+      await tester.pumpAndSettle();
+
+      // Exactly one back button — only in the innermost bar.
       expect(find.byIcon(LucideIcons.chevronLeft), findsOneWidget);
     });
 
-    testWidgets('App bar implyLeading ignores tab navigation when detecting parent', (WidgetTester tester) async {
+    testWidgets('App bar back feature ignores tab navigation when detecting parent', (WidgetTester tester) async {
       ldDisableAnimations = true;
-      await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [LiquidLocalizations.delegate],
-          home: ldFrame(
-            size: LdThemeSize.m,
-            brightnessMode: LdThemeBrightnessMode.light,
-            child: Navigator(
-              onDidRemovePage: (_) {},
-              pages: [
-                const MaterialPage<void>(child: SizedBox.shrink()),
-                MaterialPage<void>(
-                  child: LdScaffold(
-                    body: LdAppBar.top(
-                      title: const Text('Outer'),
-                      child: LdTabNavigation(
-                        activeRoute: '/home',
-                        onTabPressed: (_) {},
-                        tabs: const [
-                          LdNavigationTab(
-                            label: 'Home',
-                            icon: Icon(LucideIcons.house),
-                            route: '/home',
-                          ),
-                        ],
-                        child: const Center(child: Text('Body')),
-                      ),
+
+      // Use GoRouter so the back button can appear. The tab navigation inside
+      // the app bar should not interfere with back-button logic.
+      // Start at /list, navigate to /list/detail so the shell navigator can pop.
+      final router = GoRouter(
+        initialLocation: '/list',
+        routes: [
+          ShellRoute(
+            // Use LdThemeProvider directly — ldFrame creates its own GoRouter
+            // which would shadow the test router and break canPop detection.
+            builder: (context, state, child) => LdThemeProvider(
+              size: LdThemeSize.m,
+              brightnessMode: LdThemeBrightnessMode.light,
+              child: child,
+            ),
+            routes: [
+              GoRoute(
+                path: '/list',
+                builder: (context, state) => Center(
+                  child: Builder(
+                    builder: (context) => LdButton(
+                      onPressed: () => context.push('/list/detail'),
+                      child: const Text('Go to detail'),
                     ),
                   ),
                 ),
-              ],
-            ),
+                routes: [
+                  GoRoute(
+                    path: 'detail',
+                    builder: (context, state) => LdScaffold(
+                      body: LdAppBar.top(
+                        title: const Text('Outer'),
+                        child: LdTabNavigation(
+                          activeRoute: '/home',
+                          onTabPressed: (_) {},
+                          tabs: const [
+                            LdNavigationTab(
+                              label: 'Home',
+                              icon: Icon(LucideIcons.house),
+                              route: '/home',
+                            ),
+                          ],
+                          child: const Center(child: Text('Body')),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          routerConfig: router,
         ),
       );
 
+      await tester.pumpAndSettle();
+
+      // Navigate to the detail page so the shell navigator can pop.
+      await tester.tap(find.text('Go to detail'));
       await tester.pumpAndSettle();
 
       expect(find.byIcon(LucideIcons.chevronLeft), findsOneWidget);
@@ -1252,11 +1354,16 @@ void main() {
     });
   });
 
-  group('OpenDrawerButton visibility', () {
-    Widget buildWithMetrics({
-      required LdAppBarMetrics? metrics,
+  group('LdDrawerButton visibility', () {
+    /// Builds a minimal widget tree that places [LdDrawerButton] inside the
+    /// required providers. The button visibility is now driven by
+    /// [LdAppBarImpliedFeatures] (parent shows it → hide here) and
+    /// [LdDrawerSlot] (slot must match the button type).
+    Widget buildButton({
       required bool drawerOpen,
       required bool isSideBySide,
+      Set<LdAppBarImpliedFeature> parentImpliedFeatures = const {},
+      LdDrawerSlot drawerSlot = LdDrawerSlot.body,
     }) {
       return MaterialApp(
         localizationsDelegates: const [LiquidLocalizations.delegate],
@@ -1265,8 +1372,10 @@ void main() {
           brightnessMode: LdThemeBrightnessMode.light,
           child: MultiProvider(
             providers: [
-              Provider<LdAppBarMetrics?>.value(value: metrics),
-              Provider<LdDrawerSlot?>.value(value: LdDrawerSlot.body),
+              Provider<LdAppBarImpliedFeatures?>.value(
+                value: LdAppBarImpliedFeatures(features: parentImpliedFeatures),
+              ),
+              Provider<LdDrawerSlot?>.value(value: drawerSlot),
               Provider<LdDrawerState?>.value(
                 value: LdDrawerState(
                   isOpen: drawerOpen,
@@ -1274,79 +1383,58 @@ void main() {
                 ),
               ),
             ],
-            child: const _FakeDrawerLayout(
-              child: OpenDrawerButton(),
-            ),
+            child: const LdDrawerButton(type: LdDrawerButtonType.open),
           ),
         ),
       );
     }
 
-    testWidgets('is visible in level-0 top bar with closed drawer', (WidgetTester tester) async {
+    testWidgets('is visible when no parent has already shown it', (WidgetTester tester) async {
       ldDisableAnimations = true;
       await tester.pumpWidget(
-        buildWithMetrics(
-          metrics: testAppBarMetrics(
-            position: LdAppBarPosition.top,
-            barHeight: const EdgeInsets.only(top: 56),
-          ),
+        buildButton(
           drawerOpen: false,
           isSideBySide: false,
+          // parentImpliedFeatures is empty → button is not suppressed.
         ),
       );
       await tester.pump();
 
-      // LdReveal wraps the button; check that the icon is not excluded from focus
-      // (which happens when shouldShow is false).
+      // LdReveal wraps the button; check that focus is not excluded.
       final excludeFocus = tester.widget<ExcludeFocus>(find.byType(ExcludeFocus).first);
       expect(excludeFocus.excluding, isFalse);
     });
 
-    testWidgets('is hidden in nested (level > 0) top bar', (WidgetTester tester) async {
+    testWidgets('is hidden when a parent bar already shows drawerToggle', (WidgetTester tester) async {
       ldDisableAnimations = true;
       await tester.pumpWidget(
-        buildWithMetrics(
-          metrics: testAppBarMetrics(
-            position: LdAppBarPosition.top,
-            barHeight: const EdgeInsets.only(top: 56),
-            level: 1,
-          ),
+        buildButton(
           drawerOpen: false,
           isSideBySide: false,
+          // Parent bar propagates drawerToggle → this button must be suppressed.
+          parentImpliedFeatures: {LdAppBarImpliedFeature.drawerToggle},
         ),
       );
       await tester.pump();
 
-      final excludeFocus = tester.widget<ExcludeFocus>(find.byType(ExcludeFocus).first);
-      expect(excludeFocus.excluding, isTrue);
+      // canShow() returns false, so the button is replaced by SizedBox.shrink().
+      expect(find.byType(LdReveal), findsNothing);
     });
 
-    testWidgets('is hidden in bottom bar', (WidgetTester tester) async {
+    testWidgets('is not visible when drawer slot does not match button type', (WidgetTester tester) async {
       ldDisableAnimations = true;
+      // The open button requires LdDrawerSlot.body. Placing it in the
+      // drawer slot means canShow returns false.
       await tester.pumpWidget(
-        buildWithMetrics(
-          metrics: testAppBarMetrics(
-            position: LdAppBarPosition.bottom,
-            barHeight: const EdgeInsets.only(bottom: 56),
-          ),
-          drawerOpen: false,
+        buildButton(
+          drawerOpen: true,
           isSideBySide: false,
+          drawerSlot: LdDrawerSlot.drawer, // wrong slot for open button
         ),
       );
       await tester.pump();
 
-      final excludeFocus = tester.widget<ExcludeFocus>(find.byType(ExcludeFocus).first);
-      expect(excludeFocus.excluding, isTrue);
+      expect(find.byType(LdReveal), findsNothing);
     });
   });
-}
-
-/// Minimal fake that satisfies LdDrawerLayout ancestor check inside
-/// [OpenDrawerButton._shouldShow].
-class _FakeDrawerLayout extends StatelessWidget {
-  final Widget child;
-  const _FakeDrawerLayout({required this.child});
-
-  @override
-  Widget build(BuildContext context) => child;
 }

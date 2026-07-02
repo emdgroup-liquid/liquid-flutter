@@ -13,9 +13,11 @@ class SelectableListDemo extends StatefulWidget {
 }
 
 class _SelectableListDemoState extends State<SelectableListDemo> {
-  late final LdPaginator<SampleItem, String> _paginator = LdPaginator<SampleItem, String>(
-    initialOffset: 0,
-    fetchListFunction: _fetchItems,
+  late final LdListController<SampleItem, String> _paginator = LdListController<SampleItem, String>(
+    LdCallbackModel<SampleItem, String>(
+      fetchListWithParameters: _fetchItems,
+      getById: (context, id) => Future.value(sampleItems.firstWhere((item) => item.id == id)),
+    ),
   );
 
   bool _multiSelect = true;
@@ -99,7 +101,7 @@ class _SelectableListDemoState extends State<SelectableListDemo> {
                 ),
                 child: LdSelectableList<SampleItem, String>(
                   multiSelect: _multiSelect,
-                  paginator: _paginator,
+                  listController: _paginator,
                   onSelectionChange: _onSelectionChange,
                   child: LdList<SampleItem, String>(),
                 ),

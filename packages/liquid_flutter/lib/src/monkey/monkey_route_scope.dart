@@ -31,7 +31,7 @@ class LdMonkeyRouteScope<T extends Identifiable<IdType>, IdType> extends Statele
     this.shellBuilder,
     this.layoutMode = LdMonkeyLayoutMode.auto,
     this.reflowBreakpoint,
-    this.detailPanelFlex,
+    this.detailPanelFraction,
     this.allowMultipleSelection,
     this.immediateViewSelection,
     this.reorderHandler,
@@ -66,7 +66,7 @@ class LdMonkeyRouteScope<T extends Identifiable<IdType>, IdType> extends Statele
 
   final double? reflowBreakpoint;
 
-  final double? detailPanelFlex;
+  final double? detailPanelFraction;
 
   final bool? allowMultipleSelection;
 
@@ -99,7 +99,7 @@ class LdMonkeyRouteScope<T extends Identifiable<IdType>, IdType> extends Statele
                           masterPage: masterPage,
                           layoutMode: layoutMode,
                           reflowBreakpoint: reflowBreakpoint ?? 600,
-                          detailPanelFlex: detailPanelFlex ?? 2,
+                          detailPanelFraction: detailPanelFraction ?? 0.3,
                           allowMultipleSelection: allowMultipleSelection ?? true,
                           immediateViewSelection: immediateViewSelection,
                           child: child,

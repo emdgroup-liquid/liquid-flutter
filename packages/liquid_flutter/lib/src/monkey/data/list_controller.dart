@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/monkey/data/ld_list_cache_key.dart';
 import 'package:provider/provider.dart';
 
 class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginator<T, IdType> {
@@ -11,16 +10,9 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
 
   final Future<T> Function(BuildContext context, IdType id) _getById;
 
-  final bool _isGreedy;
-  final bool _autoCache;
-  final bool _autoInvalidateCache;
-  final bool _autoInvalidateCacheOnMutation;
   bool _greedyLoadComplete = false;
 
-  LdModel<T, IdType, Object?, Object?>? _attachedModel;
-
-  /// The [LdModel] wired to this list controller via [fromModel].
-  LdModel<T, IdType, Object?, Object?>? get model => _attachedModel;
+  LdModel<T, IdType, Object?, Object?> _attachedModel;
 
   IdType? _lastSelectionAnchorId;
 
@@ -29,320 +21,59 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
   /// We can not simply append them to the list, since that might break the pagination.
   final Map<IdType, LdPaginatorItem<T>> _detachedItemsById = {};
 
-  /// Per-list-controller cache available in [FetchPageParameters.cache].
+  /// Per-list-controller cache — delegates to the model's owned cache.
   final LdListCache<T, IdType> cache;
 
-  factory LdListController.fromModel(
+  /// Synchronous guard for the [refreshList] override: set to `true`
+  /// immediately (before any `await`) so that a second concurrent call that
+  /// enters during the async anchor-offset resolution is dropped instead of
+  /// racing to commit its own refresh results on top of the first.
+  bool _refreshInProgress = false;
+
+  LdListController(
     LdModel<T, IdType, Object?, Object?> model, {
     List<T>? initialItems,
-  }) {
-    final resolvedCache = model.cache ?? LdListCache<T, IdType>();
-    final controller = LdListController._(
-      fetchListWithParameters: model.fetchListWithParameters,
-      pageSize: model.pageSize,
-      initialItems: initialItems ?? (model is LdCallbackModel<T, IdType> ? model.initialItems : null),
-      getById: model.getById,
-      getOffsetById: model.getOffsetById,
-      isGreedy: model.isGreedy,
-      autoCache: model.autoCache,
-      autoInvalidateCache: model.autoInvalidateCache,
-      autoInvalidateCacheOnMutation: model.autoInvalidateCacheOnMutation,
-      cache: resolvedCache,
-    );
-    model.attachListController(controller);
-    return controller;
+  })  : _attachedModel = model,
+        cache = model.cache,
+        _getById = model.getById,
+        _getOffsetById = model.getOffsetById,
+        super(
+          pageSize: model.pageSize,
+          initialItems: initialItems ?? (model is LdCallbackModel<T, IdType> ? model.initialItems : null),
+          listCache: model.cache,
+          fetchListFunction: model.fetchListWithParametersCached,
+        ) {
+    model.attachListController(this);
   }
 
-  LdListController._({
-    required Future<LdListPage<T>> Function(FetchPageParameters<T, IdType> parameters) fetchListWithParameters,
-    required super.pageSize,
-    super.initialItems,
-    required Future<T> Function(BuildContext context, IdType id) getById,
-    Future<int?> Function(FetchOffsetParameters<T, IdType> parameters)? getOffsetById,
-    required bool isGreedy,
-    required bool autoCache,
-    required bool autoInvalidateCache,
-    required bool autoInvalidateCacheOnMutation,
-    required this.cache,
-  })  : _getById = getById,
-        _getOffsetById = getOffsetById,
-        _isGreedy = isGreedy,
-        _autoCache = autoCache,
-        _autoInvalidateCache = autoInvalidateCache,
-        _autoInvalidateCacheOnMutation = autoInvalidateCacheOnMutation,
+  /// Named constructor alias for [LdListController.new].
+  LdListController.fromModel(
+    LdModel<T, IdType, Object?, Object?> model, {
+    List<T>? initialItems,
+  })  : _attachedModel = model,
+        cache = model.cache,
+        _getById = model.getById,
+        _getOffsetById = model.getOffsetById,
         super(
-          listCache: cache,
+          pageSize: model.pageSize,
+          initialItems: initialItems ?? (model is LdCallbackModel<T, IdType> ? model.initialItems : null),
+          listCache: model.cache,
+          fetchListFunction: model.fetchListWithParametersCached,
         ) {
-    fetchListFunction = (parameters) => _fetchWithAutoCache(
-          fetchListWithParameters,
-          parameters,
-        );
+    model.attachListController(this);
   }
+
+  /// Whether this list controller's model is greedy.
+  bool get isGreedy => _attachedModel.isGreedy;
+
+  /// Whether a greedy list controller has finished loading the full dataset.
+  bool get isDataComplete => _attachedModel.isGreedy && _greedyLoadComplete;
+
+  /// The [LdModel] wired to this list controller via [fromModel].
+  LdModel<T, IdType, Object?, Object?> get model => _attachedModel;
 
   void attachModel(LdModel<T, IdType, Object?, Object?> model) {
     _attachedModel = model;
-  }
-
-  Future<LdListPage<T>> _fetchWithAutoCache(
-    Future<LdListPage<T>> Function(FetchPageParameters<T, IdType> parameters) fetchListWithParameters,
-    FetchPageParameters<T, IdType> parameters,
-  ) async {
-    if (_autoInvalidateCache &&
-        (parameters.reason == LdFetchReason.refresh || parameters.reason == LdFetchReason.invalidate)) {
-      cache.clear();
-    }
-
-    if (_autoCache && parameters.reason == LdFetchReason.pagination) {
-      final cachedPage = cache.readPage(parameters.cacheKey, parameters.offset);
-      if (cachedPage != null) {
-        final entry = cache.readEntry(parameters.cacheKey)!;
-        return LdListPage<T>(
-          newItems: cachedPage,
-          hasMore: parameters.offset + cachedPage.length < entry.total,
-          total: entry.total,
-        );
-      }
-    }
-
-    final page = await fetchListWithParameters(parameters);
-
-    if (_autoCache) {
-      cache.writePage(
-        parameters.cacheKey,
-        offset: parameters.offset,
-        items: page.newItems,
-        total: page.total,
-      );
-    }
-
-    return page;
-  }
-
-  bool get isGreedy => _isGreedy;
-
-  /// Whether a greedy list controller has finished loading the full dataset.
-  bool get isDataComplete => _isGreedy && _greedyLoadComplete;
-
-  /// Eagerly loads every page via [fetchListWithParameters] until [LdListPage.hasMore]
-  /// is false. No-op for non-greedy list controllers or when already complete.
-  Future<void> ensureGreedyLoaded(BuildContext context) async {
-    if (!_isGreedy || _greedyLoadComplete) {
-      return;
-    }
-
-    await eagerFetchAllPages(context);
-
-    if (context.mounted) {
-      _greedyLoadComplete = true;
-    }
-  }
-
-  void _maybeInvalidateOnMutation(
-    BuildContext context, {
-    required LdListMutationKind kind,
-    T? before,
-    T? after,
-  }) {
-    if (!_autoInvalidateCacheOnMutation) {
-      return;
-    }
-
-    cache.invalidateOnMutation(
-      context: context,
-      kind: kind,
-      before: before,
-      after: after,
-    );
-  }
-
-  Future<T> createFromModel<TCreate>(
-    BuildContext context,
-    LdModel<T, IdType, TCreate, Object?> model,
-    TCreate payload, {
-    int? index,
-  }) async {
-    final preview = model.createPreview(payload);
-    _maybeInvalidateOnMutation(
-      context,
-      kind: LdListMutationKind.create,
-      before: null,
-      after: preview,
-    );
-    final tempIndex = scheduleItemCreation(preview, index: index);
-    try {
-      final newItem = await model.persistCreate(context, payload);
-      if (!context.mounted) {
-        return newItem;
-      }
-
-      if (_getOffsetById != null) {
-        await _finalizeCreateWithOffset(context, newItem: newItem, tempIndex: tempIndex);
-      } else {
-        rollbackItemCreation(tempIndex);
-        removeItemAtIndex(tempIndex);
-        await refreshList(
-          context: context,
-          reason: LdFetchReason.invalidate,
-          anchorId: newItem.id,
-        );
-      }
-      return newItem;
-    } catch (e, stackTrace) {
-      if (ldPrintDebugMessages) {
-        debugPrint("Error creating item: $e");
-        debugPrint(stackTrace.toString());
-      }
-
-      rollbackItemCreation(tempIndex);
-      rethrow;
-    }
-  }
-
-  Future<void> _finalizeCreateWithOffset(
-    BuildContext context, {
-    required T newItem,
-    required int tempIndex,
-  }) async {
-    final offset = await _getOffsetById!(
-      FetchOffsetParameters(
-        context: context,
-        id: newItem.id,
-        reason: LdFetchReason.invalidate,
-        cache: cache,
-      ),
-    );
-
-    if (!context.mounted) {
-      return;
-    }
-
-    if (offset != null && offset >= 0) {
-      removeItemAtIndex(tempIndex);
-      repositionItemById(
-        newItem.id,
-        newIndex: offset,
-        value: newItem,
-      );
-      requestScrollToItem(newItem.id);
-      return;
-    }
-
-    rollbackItemCreation(tempIndex);
-    removeItemAtIndex(tempIndex);
-    await refreshList(
-      context: context,
-      reason: LdFetchReason.invalidate,
-      anchorId: newItem.id,
-    );
-  }
-
-  Future<void> deleteFromModel(
-    BuildContext context,
-    LdModel<T, IdType, Object?, Object?> model,
-    IdType id,
-  ) async {
-    if (!model.supportsSingleDelete) {
-      return;
-    }
-
-    _maybeInvalidateOnMutation(
-      context,
-      kind: LdListMutationKind.delete,
-    );
-    _scheduleDeletionForId(id);
-    try {
-      await model.persistDelete(context, id);
-      if (!context.mounted) {
-        return;
-      }
-      _confirmDeletionForId(context, id);
-    } catch (e) {
-      _rollbackDeletionForId(id);
-      rethrow;
-    }
-  }
-
-  bool _isDetached(IdType id) {
-    return super.getItemById(id) == null && _detachedItemsById.containsKey(id);
-  }
-
-  void _scheduleDeletionForId(IdType id) {
-    if (_isDetached(id)) {
-      final item = _detachedItemsById[id]!;
-      _detachedItemsById[id] = item.copyWith(state: LdPaginatorItemState.deleting);
-      notifyItemUpdated(_detachedItemsById[id]!);
-      return;
-    }
-
-    if (getItemIndexById(id) != null) {
-      scheduleItemDeletion(id);
-    }
-  }
-
-  void _confirmDeletionForId(
-    BuildContext context,
-    IdType id, {
-    bool refresh = false,
-  }) {
-    final detachedItem = _detachedItemsById.remove(id);
-    if (detachedItem != null) {
-      notifyItemUpdated(
-        detachedItem.copyWith(state: LdPaginatorItemState.deleted),
-      );
-      return;
-    }
-
-    if (getItemIndexById(id) != null) {
-      unawaited(_confirmPagedDeletion(context, id: id, refresh: refresh));
-    }
-  }
-
-  Future<void> _confirmPagedDeletion(
-    BuildContext context, {
-    required IdType id,
-    required bool refresh,
-  }) async {
-    final compacted = confirmItemDeletion(
-      context: context,
-      refresh: refresh,
-      id: id,
-    );
-
-    if (compacted || refresh || !context.mounted) {
-      return;
-    }
-
-    if (_isGreedy && isDataComplete) {
-      await eagerFetchAllPages(context);
-      return;
-    }
-
-    await refreshList(
-      context: context,
-      reason: LdFetchReason.invalidate,
-      anchorId: _resolveDeletionAnchorId(id),
-    );
-  }
-
-  void _rollbackDeletionForId(IdType id) {
-    final detachedItem = _detachedItemsById[id];
-    if (detachedItem != null) {
-      if (detachedItem.state == LdPaginatorItemState.deleting) {
-        _detachedItemsById[id] = detachedItem.copyWith(state: LdPaginatorItemState.loaded);
-        notifyItemUpdated(_detachedItemsById[id]!);
-      }
-      return;
-    }
-
-    if (getItemIndexById(id) == null) {
-      return;
-    }
-
-    try {
-      rollbackItemDeletion(id);
-    } catch (_) {
-      // Item may have been removed while the delete request was in flight.
-    }
   }
 
   @override
@@ -359,6 +90,73 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
     );
   }
 
+  @override
+  void confirmItemUpdate(IdType id, T? newValue) {
+    final detachedItem = _detachedItemsById[id];
+    if (detachedItem != null) {
+      // The item was evicted to the detached map during a concurrent refresh.
+      // The base-class _items no longer has an `updating` entry for it so
+      // calling super would throw.
+      //
+      // Two sub-cases:
+      // A) The item is *still* only in the detached map — store the confirmed
+      //    value there so a subsequent getItemById call sees it.
+      // B) The item has *re-appeared* in _items (because the concurrent refresh
+      //    fetched a fresh copy from the server) — apply the confirmed value
+      //    directly to the paged entry via super so the UI stays up-to-date.
+      final pagedItem = super.getItemById(id);
+      if (pagedItem != null) {
+        // Sub-case B: item is back in the paged list (a concurrent refresh
+        // fetched a fresh copy).  Transition it through updating → loaded so
+        // that the confirmed value reaches the UI.
+        _detachedItemsById.remove(id);
+        scheduleItemUpdate(id, newValue);
+        super.confirmItemUpdate(id, newValue);
+      } else {
+        // Sub-case A: item is only in the detached map.
+        _detachedItemsById[id] = LdPaginatorItem<T>(
+          value: newValue ?? detachedItem.value,
+          state: LdPaginatorItemState.loaded,
+        );
+      }
+      return;
+    }
+    super.confirmItemUpdate(id, newValue);
+  }
+
+  Future<T> createFromModel<TCreate>(
+    BuildContext context,
+    LdModel<T, IdType, TCreate, Object?> model,
+    TCreate payload, {
+    int? index,
+  }) async {
+    final preview = model.createPreview(payload);
+    final tempIndex = scheduleItemCreation(preview, index: index);
+    try {
+      final newItem = await model.persistCreate(context, payload);
+      if (!context.mounted) {
+        return newItem;
+      }
+      _attachedModel.invalidateCacheOnMutation(context, kind: LdListMutationKind.create, before: null, after: newItem);
+
+      if (_getOffsetById != null) {
+        await _finalizeCreateWithOffset(context, newItem: newItem, tempIndex: tempIndex);
+      } else {
+        rollbackItemCreation(tempIndex);
+        removeItemAtIndex(tempIndex);
+        await refreshList(
+          context: context,
+          reason: LdFetchReason.invalidate,
+          anchorId: newItem.id,
+        );
+      }
+      return newItem;
+    } catch (e, _) {
+      rollbackItemCreation(tempIndex);
+      rethrow;
+    }
+  }
+
   Future<void> deleteBatchFromModel(
     BuildContext context,
     LdModel<T, IdType, Object?, Object?> model,
@@ -368,33 +166,106 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
       return;
     }
 
-    final exceptions = <dynamic>[];
-    _maybeInvalidateOnMutation(
-      context,
-      kind: LdListMutationKind.delete,
-    );
     for (final id in ids) {
       _scheduleDeletionForId(id);
     }
     try {
       await model.persistDeleteBatch(context, ids);
-
+      if (context.mounted) {
+        _attachedModel.invalidateCacheOnMutation(context, kind: LdListMutationKind.delete);
+      }
       for (final id in ids) {
         if (!context.mounted) {
           break;
         }
         _confirmDeletionForId(context, id, refresh: false);
       }
+    } on LdPartialBatchDeleteException<IdType> catch (e) {
+      // Some per-item deletes succeeded; confirm those and roll back the rest.
+      final failedIds = ids.difference(e.succeededIds);
+
+      if (e.succeededIds.isNotEmpty && context.mounted) {
+        _attachedModel.invalidateCacheOnMutation(context, kind: LdListMutationKind.delete);
+        for (final id in e.succeededIds) {
+          if (!context.mounted) break;
+          _confirmDeletionForId(context, id, refresh: false);
+        }
+      }
+
+      for (final id in failedIds) {
+        _rollbackDeletionForId(id);
+      }
+
+      if (context.mounted) refreshList(context: context);
+      // Re-throw the underlying cause so the caller sees the original error.
+      throw e.cause;
     } catch (e) {
       for (final id in ids) {
         _rollbackDeletionForId(id);
       }
-      exceptions.add(e);
+      if (context.mounted) refreshList(context: context);
+      rethrow;
+    }
+  }
+
+  Future<void> deleteFromModel(
+    BuildContext context,
+    LdModel<T, IdType, Object?, Object?> model,
+    IdType id,
+  ) async {
+    if (!model.supportsSingleDelete) {
+      return;
     }
 
-    if (exceptions.isNotEmpty && context.mounted) {
-      refreshList(context: context);
-      throw Exception(exceptions);
+    _scheduleDeletionForId(id);
+    try {
+      await model.persistDelete(context, id);
+      if (!context.mounted) {
+        return;
+      }
+      _attachedModel.invalidateCacheOnMutation(context, kind: LdListMutationKind.delete);
+      _confirmDeletionForId(context, id);
+    } catch (e) {
+      _rollbackDeletionForId(id);
+      rethrow;
+    }
+  }
+
+  /// Eagerly loads every page via [fetchListWithParameters] until [LdListPage.hasMore]
+  /// is false. No-op for non-greedy list controllers or when already complete.
+  Future<void> ensureGreedyLoaded(BuildContext context) async {
+    if (!model.isGreedy || _greedyLoadComplete) {
+      return;
+    }
+
+    await eagerFetchAllPages(context);
+
+    if (context.mounted) {
+      _greedyLoadComplete = true;
+    }
+  }
+
+  /// Anchors the list view to the first selected item by resolving its server
+  /// offset via [getOffsetById].
+  ///
+  /// No-op when [selectedIds] is empty or [getOffsetById] is not configured.
+  Future<void> initWithSelection(BuildContext context, Set<IdType> selectedIds) async {
+    if (selectedIds.isEmpty || _getOffsetById == null) {
+      return;
+    }
+
+    final anchorId = selectedIds.first;
+    final offset = await _getOffsetById(
+      FetchOffsetParameters(
+        context: context,
+        id: anchorId,
+        reason: LdFetchReason.invalidate,
+        cache: cache,
+      ),
+    );
+
+    if (offset != null && offset >= 0) {
+      initialOffset = offset;
     }
   }
 
@@ -416,48 +287,6 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
       return pagedItem;
     }
     return _detachedItemsById[id];
-  }
-
-  /// Positions the list around [selection] via [getOffsetById] when configured.
-  ///
-  /// Does not fetch individual items by id; use [loadViewingItem] from the detail
-  /// page (or other UI that needs the row) so load failures can be surfaced.
-  Future<void> ensureSelectionAnchored(
-    BuildContext context,
-    Set<IdType> selection,
-  ) async {
-    if (selection.isEmpty) {
-      return;
-    }
-    _lastSelectionAnchorId = selection.first;
-
-    if (_getOffsetById != null) {
-      final firstOffset = await _getOffsetById(
-        FetchOffsetParameters(
-          context: context,
-          id: selection.first,
-          reason: LdFetchReason.initial,
-          cache: cache,
-        ),
-      );
-      initialOffset = firstOffset ?? initialOffset;
-      if (firstOffset != null && context.mounted) {
-        await fetchPageAtOffset(
-          context,
-          firstOffset,
-        );
-      }
-    }
-
-    if (!context.mounted) {
-      return;
-    }
-
-    for (final id in selection) {
-      if (super.getItemById(id) != null) {
-        _detachedItemsById.remove(id);
-      }
-    }
   }
 
   /// Loads a single viewing item by id and stores it as a detached entry when it
@@ -484,19 +313,19 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
     return item;
   }
 
-  /// Anchors the list for [selection]. Prefer [ensureSelectionAnchored] for new code.
-  Future<void> ensureSelectionLoaded(
-    BuildContext context,
-    Set<IdType> selection,
-  ) async {
-    await ensureSelectionAnchored(context, selection);
-  }
-
-  Future<void> initWithSelection(BuildContext context, Set<IdType> selection) async {
-    await ensureSelectionAnchored(
-      context,
-      selection,
-    );
+  /// When a controlled refresh commits its new items, any in-flight transient
+  /// entries (deleting / updating / creating) are evicted from [_items] before
+  /// the map is replaced. We move them into [_detachedItemsById] so that the
+  /// pending confirm / rollback callbacks can still resolve via the detached
+  /// path in [_confirmDeletionForId] / [_rollbackDeletionForId].
+  @override
+  void onTransientItemsEvictedByRefresh(Map<int, LdPaginatorItem<T>> transientItems) {
+    for (final item in transientItems.values) {
+      if (item.value != null) {
+        // Only register in the detached map if not already tracked there.
+        _detachedItemsById.putIfAbsent(item.value!.id, () => item);
+      }
+    }
   }
 
   @override
@@ -505,6 +334,16 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
     LdFetchReason reason = LdFetchReason.refresh,
     IdType? anchorId,
   }) async {
+    // Prevent a second concurrent refresh from racing through the async anchor
+    // resolution below while a first refresh has already started (or is about
+    // to call super.refreshList which sets _isControlledRefresh).
+    // _refreshInProgress is set synchronously (before any await) so it is
+    // visible to any second call that enters on the same microtask turn.
+    if (_refreshInProgress || isControlledRefresh || busy) {
+      return;
+    }
+    _refreshInProgress = true;
+
     if (reason == LdFetchReason.refresh) {
       _detachedItemsById.clear();
     }
@@ -546,68 +385,17 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
     }
 
     if (!context.mounted) {
+      _refreshInProgress = false;
       return;
     }
 
-    await super.refreshList(
-      context: context,
-      reason: reason,
-    );
-  }
-
-  @override
-  void confirmItemUpdate(IdType id, T? newValue) {
-    final detachedItem = _detachedItemsById[id];
-    if (detachedItem != null) {
-      _detachedItemsById[id] = LdPaginatorItem<T>(
-        value: newValue ?? detachedItem.value,
-        state: LdPaginatorItemState.loaded,
-      );
-    }
-    super.confirmItemUpdate(id, newValue);
-  }
-
-  Future<void> updateFromModel<TUpdate>(
-    BuildContext context,
-    LdModel<T, IdType, Object?, TUpdate> model,
-    IdType id,
-    TUpdate payload, {
-    bool skipLayout = false,
-  }) async {
-    final before = getItemById(id)?.value;
-    final optimistic = payload is T ? payload as T : before;
-    _maybeInvalidateOnMutation(
-      context,
-      kind: LdListMutationKind.update,
-      before: before,
-      after: optimistic,
-    );
-    if (optimistic != null) {
-      scheduleItemUpdate(id, optimistic);
-    }
-    final T? newItem;
     try {
-      final newItemFromServer = await model.persistUpdate(context, id, payload);
-      newItem = newItemFromServer ?? optimistic;
-    } catch (e) {
-      await rollbackItemUpdate(id);
-      rethrow;
-    }
-
-    if (!context.mounted || newItem == null) {
-      return;
-    }
-
-    // Persist succeeded: confirm + layout run outside the rollback try so an
-    // interrupted/failed layout step never rolls back a confirmed item.
-    confirmItemUpdate(id, newItem);
-    if (!skipLayout) {
-      await _applyPostUpdateLayout(
-        context,
-        id: id,
-        before: before,
-        after: newItem,
+      await super.refreshList(
+        context: context,
+        reason: reason,
       );
+    } finally {
+      _refreshInProgress = false;
     }
   }
 
@@ -636,38 +424,36 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
       return;
     }
     final model = _attachedModel;
-    if (model == null) {
-      return;
-    }
     await model.update(context, id, updated, skipLayout: true);
   }
 
+  /// Updates a batch of items. [items] maps each item's id to the update payload.
+  ///
+  /// Optimistically applies each update before persisting. On persist failure,
+  /// all updates are rolled back. Cache invalidation happens after a successful
+  /// persist using confirmed server values.
   Future<void> updateBatchFromModel<TUpdate>(
     BuildContext context,
     LdModel<T, IdType, Object?, TUpdate> model,
-    Set<TUpdate> items,
+    Map<IdType, TUpdate> items,
   ) async {
+    final beforeMap = {for (final id in items.keys) id: getItemById(id)?.value};
     final layoutChecks = <IdType, ({T? before, T after})>{};
-    for (final item in items) {
-      final id = _idFromUpdatePayload(item);
-      final before = getItemById(id)?.value;
-      final optimistic = item is T ? item : before;
+
+    for (final entry in items.entries) {
+      final id = entry.key;
+      final before = beforeMap[id];
+      final optimistic = entry.value is T ? entry.value as T : before;
       if (optimistic != null) {
         layoutChecks[id] = (before: before, after: optimistic);
-        _maybeInvalidateOnMutation(
-          context,
-          kind: LdListMutationKind.update,
-          before: before,
-          after: optimistic,
-        );
         scheduleItemUpdate(id, optimistic);
       }
     }
     try {
       await model.persistUpdateBatch(context, items);
     } catch (e) {
-      for (final item in items) {
-        await rollbackItemUpdate(_idFromUpdatePayload(item));
+      for (final id in items.keys) {
+        await rollbackItemUpdate(id);
       }
       rethrow;
     }
@@ -676,9 +462,9 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
     // rollback-worthy. Keeping them outside the try above prevents a layout
     // step that fails or is interrupted by navigation from rolling back items
     // that were already optimistically confirmed.
-    for (final item in items) {
-      final id = _idFromUpdatePayload(item);
-      final resolved = item is T ? item : getItemById(id)?.value;
+    for (final entry in items.entries) {
+      final id = entry.key;
+      final resolved = entry.value is T ? entry.value as T : getItemById(id)?.value;
       if (resolved != null) {
         confirmItemUpdate(id, resolved);
         final existing = layoutChecks[id];
@@ -687,55 +473,68 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
         }
       }
     }
+
+    // Invalidate cache per item using confirmed server values.
+    if (context.mounted) {
+      for (final entry in items.entries) {
+        final id = entry.key;
+        final confirmed = layoutChecks[id]?.after;
+        if (confirmed != null) {
+          _attachedModel.invalidateCacheOnMutation(
+            context,
+            kind: LdListMutationKind.update,
+            before: beforeMap[id],
+            after: confirmed,
+          );
+        }
+      }
+    }
+
     if (context.mounted) {
       await _applyPostUpdateLayoutBatch(context, layoutChecks);
     }
   }
 
-  IdType _idFromUpdatePayload<TUpdate>(TUpdate item) {
-    return (item as dynamic).id as IdType;
-  }
-
-  Future<void> _applyPostUpdateLayoutBatch(
+  Future<void> updateFromModel<TUpdate>(
     BuildContext context,
-    Map<IdType, ({T? before, T after})> layoutChecks,
-  ) async {
-    var needsRefresh = false;
-    IdType? refreshAnchorId;
-
-    for (final entry in layoutChecks.entries) {
-      if (!context.mounted) {
-        return;
-      }
-      if (!isLayoutAffectedByUpdate<T, IdType>(
-        context: context,
-        before: entry.value.before,
-        after: entry.value.after,
-      )) {
-        continue;
-      }
-
-      if (_getOffsetById != null) {
-        await _applyPostUpdateLayout(
-          context,
-          id: entry.key,
-          before: entry.value.before,
-          after: entry.value.after,
-        );
-        if (!context.mounted) {
-          return;
-        }
-      } else {
-        needsRefresh = true;
-        refreshAnchorId ??= entry.key;
-      }
+    LdModel<T, IdType, Object?, TUpdate> model,
+    IdType id,
+    TUpdate payload, {
+    bool skipLayout = false,
+  }) async {
+    final before = getItemById(id)?.value;
+    final optimistic = payload is T ? payload as T : before;
+    if (optimistic != null) {
+      scheduleItemUpdate(id, optimistic);
+    }
+    final T? newItem;
+    try {
+      final newItemFromServer = await model.persistUpdate(context, id, payload);
+      newItem = newItemFromServer ?? optimistic;
+    } catch (e) {
+      await rollbackItemUpdate(id);
+      rethrow;
     }
 
-    if (needsRefresh && context.mounted) {
-      await refreshList(
-        context: context,
-        reason: LdFetchReason.invalidate,
-        anchorId: refreshAnchorId,
+    if (!context.mounted || newItem == null) {
+      return;
+    }
+
+    // Persist succeeded: confirm + layout run outside the rollback try so an
+    // interrupted/failed layout step never rolls back a confirmed item.
+    confirmItemUpdate(id, newItem);
+    _attachedModel.invalidateCacheOnMutation(
+      context,
+      kind: LdListMutationKind.update,
+      before: before,
+      after: newItem,
+    );
+    if (!skipLayout) {
+      await _applyPostUpdateLayout(
+        context,
+        id: id,
+        before: before,
+        after: newItem,
       );
     }
   }
@@ -789,6 +588,171 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
     );
   }
 
+  Future<void> _applyPostUpdateLayoutBatch(
+    BuildContext context,
+    Map<IdType, ({T? before, T after})> layoutChecks,
+  ) async {
+    var needsRefresh = false;
+    IdType? refreshAnchorId;
+
+    for (final entry in layoutChecks.entries) {
+      if (!context.mounted) {
+        return;
+      }
+      if (!isLayoutAffectedByUpdate<T, IdType>(
+        context: context,
+        before: entry.value.before,
+        after: entry.value.after,
+      )) {
+        continue;
+      }
+
+      if (_getOffsetById != null) {
+        await _applyPostUpdateLayout(
+          context,
+          id: entry.key,
+          before: entry.value.before,
+          after: entry.value.after,
+        );
+        if (!context.mounted) {
+          return;
+        }
+      } else {
+        needsRefresh = true;
+        refreshAnchorId ??= entry.key;
+      }
+    }
+
+    if (needsRefresh && context.mounted) {
+      await refreshList(
+        context: context,
+        reason: LdFetchReason.invalidate,
+        anchorId: refreshAnchorId,
+      );
+    }
+  }
+
+  void _confirmDeletionForId(
+    BuildContext context,
+    IdType id, {
+    bool refresh = false,
+  }) {
+    final detachedItem = _detachedItemsById.remove(id);
+    if (detachedItem != null) {
+      notifyItemUpdated(
+        detachedItem.copyWith(state: LdPaginatorItemState.deleted),
+      );
+      return;
+    }
+
+    if (getItemIndexById(id) != null) {
+      unawaited(_confirmPagedDeletion(context, id: id, refresh: refresh));
+    }
+  }
+
+  Future<void> _confirmPagedDeletion(
+    BuildContext context, {
+    required IdType id,
+    required bool refresh,
+  }) async {
+    final compacted = confirmItemDeletion(
+      context: context,
+      refresh: refresh,
+      id: id,
+    );
+
+    if (compacted || refresh || !context.mounted) {
+      return;
+    }
+
+    if (model.isGreedy && isDataComplete) {
+      await eagerFetchAllPages(context);
+      return;
+    }
+
+    // Skip if a controlled refresh is already in flight (e.g. from a
+    // concurrent deletion confirmation) — the in-flight refresh will settle
+    // the list to a consistent state already.
+    if (isControlledRefresh || busy) {
+      return;
+    }
+
+    await refreshList(
+      context: context,
+      reason: LdFetchReason.invalidate,
+      anchorId: _resolveDeletionAnchorId(id),
+    );
+  }
+
+  Future<void> _finalizeCreateWithOffset(
+    BuildContext context, {
+    required T newItem,
+    required int tempIndex,
+  }) async {
+    final offset = await _getOffsetById!(
+      FetchOffsetParameters(
+        context: context,
+        id: newItem.id,
+        reason: LdFetchReason.invalidate,
+        cache: cache,
+      ),
+    );
+
+    if (!context.mounted) {
+      return;
+    }
+
+    if (offset != null && offset >= 0) {
+      removeItemAtIndex(tempIndex);
+      repositionItemById(
+        newItem.id,
+        newIndex: offset,
+        value: newItem,
+      );
+      requestScrollToItem(newItem.id);
+      return;
+    }
+
+    rollbackItemCreation(tempIndex);
+    removeItemAtIndex(tempIndex);
+    await refreshList(
+      context: context,
+      reason: LdFetchReason.invalidate,
+      anchorId: newItem.id,
+    );
+  }
+
+  bool _isDetached(IdType id) {
+    return super.getItemById(id) == null && _detachedItemsById.containsKey(id);
+  }
+
+  /// Removes an item that no longer belongs in the list after an update (e.g.
+  /// it was filtered out by the new value).
+  ///
+  /// Indices above the removed slot are compacted when it is safe to do so;
+  /// otherwise the list is refreshed so no gap (and therefore no stuck loader)
+  /// is left behind.
+  Future<void> _removeUpdatedItemFromLayout(
+    BuildContext context,
+    IdType id,
+  ) async {
+    if (getItemIndexById(id) == null) {
+      _detachedItemsById.remove(id);
+      return;
+    }
+
+    final compacted = confirmItemDeletion(context: context, id: id);
+    if (compacted || !context.mounted) {
+      return;
+    }
+
+    await refreshList(
+      context: context,
+      reason: LdFetchReason.invalidate,
+      anchorId: _resolveDeletionAnchorId(id),
+    );
+  }
+
   /// Moves an updated item to its resolved [offset] while keeping the sparse
   /// index map gap-free.
   ///
@@ -829,44 +793,6 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
     requestScrollToItem(id);
   }
 
-  /// Removes an item that no longer belongs in the list after an update (e.g.
-  /// it was filtered out by the new value).
-  ///
-  /// Indices above the removed slot are compacted when it is safe to do so;
-  /// otherwise the list is refreshed so no gap (and therefore no stuck loader)
-  /// is left behind.
-  Future<void> _removeUpdatedItemFromLayout(
-    BuildContext context,
-    IdType id,
-  ) async {
-    if (getItemIndexById(id) == null) {
-      _detachedItemsById.remove(id);
-      return;
-    }
-
-    final compacted = confirmItemDeletion(context: context, id: id);
-    if (compacted || !context.mounted) {
-      return;
-    }
-
-    await refreshList(
-      context: context,
-      reason: LdFetchReason.invalidate,
-      anchorId: _resolveDeletionAnchorId(id),
-    );
-  }
-
-  IdType? _resolveDeletionAnchorId(IdType deletedId) {
-    if (_lastSelectionAnchorId != null && _lastSelectionAnchorId != deletedId) {
-      return _lastSelectionAnchorId;
-    }
-
-    return itemsMap.entries
-        .where((entry) => entry.value.value != null && entry.value.value!.id != deletedId)
-        .map((entry) => entry.value.value!.id)
-        .firstOrNull;
-  }
-
   IdType? _resolveDefaultRefreshAnchorId() {
     final currentItem = getItemAt(initialOffset);
     if (currentItem?.value != null) {
@@ -881,6 +807,51 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
         .where((entry) => entry.value.value != null)
         .map((entry) => entry.value.value!.id)
         .firstOrNull;
+  }
+
+  IdType? _resolveDeletionAnchorId(IdType deletedId) {
+    if (_lastSelectionAnchorId != null && _lastSelectionAnchorId != deletedId) {
+      return _lastSelectionAnchorId;
+    }
+
+    return itemsMap.entries
+        .where((entry) => entry.value.value != null && entry.value.value!.id != deletedId)
+        .map((entry) => entry.value.value!.id)
+        .firstOrNull;
+  }
+
+  void _rollbackDeletionForId(IdType id) {
+    final detachedItem = _detachedItemsById[id];
+    if (detachedItem != null) {
+      if (detachedItem.state == LdPaginatorItemState.deleting) {
+        _detachedItemsById[id] = detachedItem.copyWith(state: LdPaginatorItemState.loaded);
+        notifyItemUpdated(_detachedItemsById[id]!);
+      }
+      return;
+    }
+
+    if (getItemIndexById(id) == null) {
+      return;
+    }
+
+    try {
+      rollbackItemDeletion(id);
+    } catch (_) {
+      // Item may have been removed while the delete request was in flight.
+    }
+  }
+
+  void _scheduleDeletionForId(IdType id) {
+    if (_isDetached(id)) {
+      final item = _detachedItemsById[id]!;
+      _detachedItemsById[id] = item.copyWith(state: LdPaginatorItemState.deleting);
+      notifyItemUpdated(_detachedItemsById[id]!);
+      return;
+    }
+
+    if (getItemIndexById(id) != null) {
+      scheduleItemDeletion(id);
+    }
   }
 
   static LdListController<T, IdType>? maybeOf<T extends Identifiable<IdType>, IdType>(BuildContext context) {

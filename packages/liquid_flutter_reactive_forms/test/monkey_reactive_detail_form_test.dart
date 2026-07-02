@@ -63,10 +63,10 @@ Widget _wrapDetailForm({
                   viewing: {1},
                   showSelectionControls: false,
                 ),
-              child: Provider<LdMonkeyRouterController<_TestTask, int>>.value(
-                value: _StubRouter(),
-                child: SingleChildScrollView(child: child),
-              ),
+                child: Provider<LdMonkeyRouterController<_TestTask, int>>.value(
+                  value: _StubRouter(),
+                  child: SingleChildScrollView(child: child),
+                ),
               ),
             ),
           ),
@@ -94,7 +94,7 @@ LdCallbackModel<_TestTask, int> _buildModel(
 }
 
 LdListController<_TestTask, int> _buildListController(LdCallbackModel<_TestTask, int> model) {
-  return LdListController<_TestTask, int>.fromModel(model, initialItems: model.initialItems);
+  return LdListController<_TestTask, int>(model, initialItems: model.initialItems);
 }
 
 Widget _detailFormFor(List<_TestTask> tasks) {
@@ -127,11 +127,14 @@ void main() {
   testWidgets('save marks form pristine', (tester) async {
     final tasks = [_TestTask(1, 'Original', false)];
     var updateCount = 0;
-    final model = _buildModel(tasks, updateItem: (context, id, item) async {
+    final model = _buildModel(
+      tasks,
+      updateItem: (context, id, item) async {
         updateCount++;
         tasks[0] = item;
         return item;
-      });
+      },
+    );
     final listController = _buildListController(model);
 
     await tester.pumpWidget(

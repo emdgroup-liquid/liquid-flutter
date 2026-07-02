@@ -288,53 +288,48 @@ class _ProductKeyInfosState extends State<_ProductKeyInfos> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 70,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.all(1),
+    return LdHorizontalScroll(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 100,
+          child: LdCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                LdText.h("5-4"),
+                LdMute(child: LdText.caption("pH")),
+              ],
+            ),
+          ),
+        ),
 
-        children: [
-          SizedBox(
-            width: 200,
-            child: LdCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  LdText.h("5-4"),
-                  LdMute(child: LdText.caption("pH")),
-                ],
-              ),
+        SizedBox(
+          width: 150,
+          child: LdCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                LdCounter(value: _boilingPoint),
+                LdMute(child: LdText.caption("Boiling point")),
+              ],
             ),
           ),
-          ldSpacerM,
-          SizedBox(
-            width: 200,
-            child: LdCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  LdCounter(value: _boilingPoint),
-                  LdMute(child: LdText.caption("Boiling point")),
-                ],
-              ),
+        ),
+
+        SizedBox(
+          width: 150,
+          child: LdCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                LdCounter(value: _brewingPressure, precision: 2),
+                LdMute(child: LdText.caption("Brewing pressure")),
+              ],
             ),
           ),
-          ldSpacerM,
-          SizedBox(
-            width: 200,
-            child: LdCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  LdCounter(value: _brewingPressure, precision: 2),
-                  LdMute(child: LdText.caption("Brewing pressure")),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

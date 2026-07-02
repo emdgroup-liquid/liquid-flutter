@@ -6,21 +6,40 @@ class LdListEmpty extends StatelessWidget {
   final Future<void> Function()? onRefresh;
   final String? text;
 
+  /// When true, the empty state shows a filter-aware message and an option to
+  /// clear the active filters via [onClearFilters].
+  final bool hasActiveFilters;
+
+  /// Called when the user taps the "Clear filters" button. Only shown when
+  /// [hasActiveFilters] is true.
+  final Future<void> Function()? onClearFilters;
+
   const LdListEmpty({
     super.key,
     this.onRefresh,
     this.text,
+    this.hasActiveFilters = false,
+    this.onClearFilters,
   });
 
   @override
   Widget build(BuildContext context) {
+    final loc = LiquidLocalizations.of(context);
+    final label = text ?? (hasActiveFilters ? loc.noItemsMatchFilter : loc.noItemsFound);
+
     return Center(
       child: Column(mainAxisSize: MainAxisSize.min, children: [
-        const LdAvatar(child: Icon(LucideIcons.searchSlash)),
+        LdAvatar(child: Icon(hasActiveFilters ? LucideIcons.filterX : LucideIcons.searchSlash)),
         ldSpacerM,
-        LdText.p(text ?? LiquidLocalizations.of(context).noItemsFound),
+        LdText.p(label),
         ldSpacerM,
-        if (onRefresh != null)
+        if (hasActiveFilters && onClearFilters != null)
+          LdButton(
+            mode: LdButtonMode.outline,
+            onPressed: () => onClearFilters!(),
+            child: Text(loc.clearFilters),
+          )
+        else if (onRefresh != null)
           LdSubmit<void, void>(
             config: LdSubmitConfig<void, void>(
               action: (_) => onRefresh!(),
@@ -29,7 +48,7 @@ class LdListEmpty extends StatelessWidget {
               submitButtonBuilder: (context, controller) => LdButton(
                 mode: LdButtonMode.outline,
                 onPressed: controller.trigger,
-                child: Text(LiquidLocalizations.of(context).refresh),
+                child: Text(loc.refresh),
               ),
             ),
           ),
