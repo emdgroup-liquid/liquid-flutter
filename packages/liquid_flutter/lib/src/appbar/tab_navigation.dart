@@ -5,8 +5,10 @@ import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_decoration.dart';
 import 'package:liquid_flutter/src/appbar/appbar_frame.dart';
+import 'package:liquid_flutter/src/appbar/appbar_scrolled_under.dart';
 import 'package:liquid_flutter/src/haptics.dart';
 import 'package:liquid_flutter/src/touchable/neutral_ghost_color.dart';
+import 'package:provider/provider.dart';
 
 class LdNavigationTab {
   final String label;
@@ -225,6 +227,10 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
     // The tab bar surface widget — passed as [child] to AppBarFrame.
     final tabBarSurface = LayoutBuilder(
       builder: (context, constraints) {
+        final isScrolledUnder = LdAppBarScrolledUnderScope.of(context);
+        final isSurface = decorationBuilder
+            .resolveAppearance(context, isScrolledUnder: isScrolledUnder, position: position)
+            .childIsSurface;
         if (constraints.maxWidth != _navWidth) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
@@ -239,128 +245,135 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
           });
         }
 
-        return LdScrollEdgeFade(
-          axis: Axis.horizontal,
-          fadeColor: context.surfaceColor,
-          controller: _scrollController,
-          child: Builder(builder: (context) {
-            return SingleChildScrollView(
-              padding: LdTheme.of(context).pad(size: LdSize.xs),
-              controller: _scrollController,
-              scrollDirection: Axis.horizontal,
-              child: Stack(
-                children: [
-                  Row(
-                    spacing: _tabSpacing,
-                    children: [
-                      ...widget.tabs.map(
-                        (tab) => SizedBox(
-                          width: _tabWidth,
-                          child: LdTouchableSurface(
-                            active: _isTabActive(tab),
-                            onPressed: () => _onTabTap(tab.route),
-                            builder: (context, status, _) {
-                              final colors = switch (_isTabActive(tab)) {
-                                true => ghostColor(theme.primary, theme, status),
-                                false => neutralGhostColor(theme, status),
-                              };
-                              return Container(
-                                decoration: BoxDecoration(
-                                  color: colors.surface,
-                                  borderRadius: LdTheme.of(context).radius(LdSize.m),
-                                ),
-                                child: Builder(
-                                  builder: (context) {
-                                    final iconColor = colors.icon;
-                                    final textColor = colors.text;
-                                    final icon = IconTheme(
-                                      data: IconThemeData(
-                                        color: iconColor,
-                                        size: theme.labelSize(LdSize.l),
-                                      ),
-                                      child: tab.icon,
-                                    );
+        print("isSurface: $isSurface");
 
-                                    if (_compactMode) {
-                                      return Column(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          icon,
-                                          ldSpacerXS,
-                                          LdText.ls(
-                                            tab.label,
-                                            color: textColor,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
+        return Provider.value(
+          value: LdSurfaceInfo(isSurface: true),
+          child: Builder(builder: (context) {
+            return LdScrollEdgeFade(
+              axis: Axis.horizontal,
+              fadeColor: context.surfaceColor,
+              controller: _scrollController,
+              child: Builder(builder: (context) {
+                return SingleChildScrollView(
+                  padding: LdTheme.of(context).pad(size: LdSize.xs),
+                  controller: _scrollController,
+                  scrollDirection: Axis.horizontal,
+                  child: Stack(
+                    children: [
+                      Row(
+                        spacing: _tabSpacing,
+                        children: [
+                          ...widget.tabs.map(
+                            (tab) => SizedBox(
+                              width: _tabWidth,
+                              child: LdTouchableSurface(
+                                active: _isTabActive(tab),
+                                onPressed: () => _onTabTap(tab.route),
+                                builder: (context, status, _) {
+                                  final colors = switch (_isTabActive(tab)) {
+                                    true => ghostColor(theme.primary, theme, status),
+                                    false => neutralGhostColor(theme, status),
+                                  };
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                      color: colors.surface,
+                                      borderRadius: LdTheme.of(context).radius(LdSize.m),
+                                    ),
+                                    child: Builder(
+                                      builder: (context) {
+                                        final iconColor = colors.icon;
+                                        final textColor = colors.text;
+                                        final icon = IconTheme(
+                                          data: IconThemeData(
+                                            color: iconColor,
+                                            size: theme.labelSize(LdSize.l),
                                           ),
-                                        ],
-                                      ).padXS();
-                                    }
-                                    return Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        icon,
-                                        ldSpacerS,
-                                        Flexible(
-                                          child: LdText.l(
-                                            tab.label,
-                                            color: textColor,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ],
-                                    ).padS();
-                                  },
-                                ),
-                              );
-                            },
+                                          child: tab.icon,
+                                        );
+
+                                        if (_compactMode) {
+                                          return Column(
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: [
+                                              icon,
+                                              ldSpacerXS,
+                                              LdText.ls(
+                                                tab.label,
+                                                color: textColor,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          ).padXS();
+                                        }
+                                        return Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            icon,
+                                            ldSpacerS,
+                                            Flexible(
+                                              child: LdText.l(
+                                                tab.label,
+                                                color: textColor,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ).padS();
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      LdSpring(
+                        springConstant: 20,
+                        dampingCoefficient: 20,
+                        mass: 5,
+                        position: _indicatorPosition,
+                        child: GestureDetector(
+                          onHorizontalDragStart: (details) {
+                            _dragStartPosition = details.localPosition.dx;
+                            _dragStartIndicatorPosition = _indicatorPosition;
+                            _lastDraggedTabIndex = _getClosestTab(context);
+                          },
+                          onHorizontalDragUpdate: _onIndicatorDragUpdate,
+                          onHorizontalDragCancel: () {
+                            _updateIndicatorPosition();
+                          },
+                          onHorizontalDragEnd: _onIndicatorDragEnd,
+                          child: LdTouchableSurface(
+                            onPressed: () {},
+                            builder: (context, status, _) => LdTouchableTouchFeedback(
+                                scaleFactor: 100,
+                                status: status,
+                                child: Container(
+                                  width: _tabWidth,
+                                  decoration: BoxDecoration(
+                                    color: theme.primaryColor.withAlpha(26),
+                                    borderRadius: LdTheme.of(context).radius(LdSize.m),
+                                  ),
+                                )),
                           ),
                         ),
+                        builder: (context, state, child) {
+                          return Positioned(
+                            bottom: 0,
+                            top: 0,
+                            left: state.position,
+                            child: child!,
+                          );
+                        },
                       ),
                     ],
                   ),
-                  LdSpring(
-                    springConstant: 20,
-                    dampingCoefficient: 20,
-                    mass: 5,
-                    position: _indicatorPosition,
-                    child: GestureDetector(
-                      onHorizontalDragStart: (details) {
-                        _dragStartPosition = details.localPosition.dx;
-                        _dragStartIndicatorPosition = _indicatorPosition;
-                        _lastDraggedTabIndex = _getClosestTab(context);
-                      },
-                      onHorizontalDragUpdate: _onIndicatorDragUpdate,
-                      onHorizontalDragCancel: () {
-                        _updateIndicatorPosition();
-                      },
-                      onHorizontalDragEnd: _onIndicatorDragEnd,
-                      child: LdTouchableSurface(
-                        onPressed: () {},
-                        builder: (context, status, _) => LdTouchableTouchFeedback(
-                            scaleFactor: 100,
-                            status: status,
-                            child: Container(
-                              width: _tabWidth,
-                              decoration: BoxDecoration(
-                                color: theme.primaryColor.withAlpha(26),
-                                borderRadius: LdTheme.of(context).radius(LdSize.m),
-                              ),
-                            )),
-                      ),
-                    ),
-                    builder: (context, state, child) {
-                      return Positioned(
-                        bottom: 0,
-                        top: 0,
-                        left: state.position,
-                        child: child!,
-                      );
-                    },
-                  ),
-                ],
-              ),
+                );
+              }),
             );
           }),
         );

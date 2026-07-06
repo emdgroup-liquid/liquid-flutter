@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_decoration.dart';
 import 'package:liquid_flutter/src/appbar/appbar_frame.dart';
+import 'package:liquid_flutter/src/appbar/appbar_scrolled_under.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
@@ -493,7 +494,16 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
       ),
       child: Builder(
         builder: (context) {
-          return Padding(padding: MediaQuery.of(context).padding, child: barSurface);
+          return Provider.value(
+              value: LdSurfaceInfo(
+                  isSurface: decorationBuilder
+                      .resolveAppearance(
+                        context,
+                        isScrolledUnder: LdAppBarScrolledUnderScope.of(context),
+                        position: position,
+                      )
+                      .showsFill),
+              child: Padding(padding: MediaQuery.of(context).padding, child: barSurface));
         },
       ),
     );

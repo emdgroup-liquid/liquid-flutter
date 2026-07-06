@@ -202,14 +202,6 @@ class _AppBarFrameState extends State<AppBarFrame> {
       systemInsets = systemInsets.atLeast(parentMediaQuery?.viewInsets ?? contextMediaQuery.viewInsets);
     }
 
-    final outsidePadding =
-        (widget.outsideMinPadding ?? EdgeInsets.zero).atLeast(widget.outsideAdditionalPadding ?? EdgeInsets.zero);
-
-    if (systemInsets.atPosition(widget.position) > 0 && LdTheme.of(context).platform == LdPlatform.ios) {
-      systemInsets = systemInsets - outsidePadding.positionOnly(widget.position);
-      systemInsets = systemInsets - _insidePadding(constraints).positionOnly(widget.position);
-    }
-
     if (!widget.attached) {
       systemInsets = systemInsets + LdTheme.of(context).pad(size: LdSize.xs).positionOnly(widget.position);
     }
