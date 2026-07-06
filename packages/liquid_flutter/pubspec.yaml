@@ -47,3 +47,6 @@ flutter:
     - family: Lato
       fonts:
         - asset: lib/fonts/Lato-Regular.ttf
+    - family: NotoColorEmoji
+      fonts:
+        - asset: assets/fonts/NotoColorEmoji-Regular.ttf

@@ -157,7 +157,6 @@ class LdScaffoldState extends State<LdScaffold> {
         child: Shortcuts(
           shortcuts: {
             toggleDrawerShortcut: const ToggleDrawerIntent(),
-            const SingleActivator(LogicalKeyboardKey.keyF, meta: true): const SearchIntent(),
           },
           child: Builder(builder: (context) {
             return Material(

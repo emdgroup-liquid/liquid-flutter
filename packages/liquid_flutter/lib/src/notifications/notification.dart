@@ -26,7 +26,7 @@ class LdNotification {
     return type == LdNotificationType.acknowledge;
   }
 
-  final Key key = UniqueKey();
+  final Key key = GlobalKey();
 
   final bool canDismiss;
 

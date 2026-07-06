@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/touchable/touchable_colors.dart';
-import 'package:liquid_flutter/src/touchable/touchable_status.dart';
 
 /// Outline surface mode - transparent background with colored text and border
 LdColorBundle outlineColor(

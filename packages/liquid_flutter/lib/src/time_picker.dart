@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/touchable/input_color.dart';
 
 class LdTimePicker extends StatelessWidget {
   final bool useRootNavigator;

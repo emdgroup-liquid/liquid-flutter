@@ -357,7 +357,7 @@ void main() {
 
         expect(deleteCallCount, equals(1));
         final item = repository.getItemById(1);
-        expect(item, isNull);
+        expect(item?.state, equals(LdPaginatorItemState.deleted));
       });
 
       testWidgets('handles deletion error and rolls back', (tester) async {
@@ -406,8 +406,8 @@ void main() {
         await repository.model.deleteBatch(context: ctx, ids: {1, 2});
 
         expect(deleteBatchCallCount, equals(1));
-        expect(repository.getItemById(1), isNull);
-        expect(repository.getItemById(2), isNull);
+        expect(repository.getItemById(1)?.state, equals(LdPaginatorItemState.deleted));
+        expect(repository.getItemById(2)?.state, equals(LdPaginatorItemState.deleted));
       });
 
       testWidgets('deletes batch without deleteBatch callback calls delete individually', (tester) async {
@@ -459,9 +459,10 @@ void main() {
         await repository.model.deleteBatch(context: ctx, ids: {1, 2, 3});
         await tester.pump();
 
+        // Item 1 was never loaded into the controller, so it stays unknown (null).
         expect(repository.getItemById(1), isNull);
-        expect(repository.getItemById(2), isNull);
-        expect(repository.getItemById(3), isNull);
+        expect(repository.getItemById(2)?.state, equals(LdPaginatorItemState.deleted));
+        expect(repository.getItemById(3)?.state, equals(LdPaginatorItemState.deleted));
         expect(currentItems, isEmpty);
       });
 
@@ -502,7 +503,7 @@ void main() {
         await deleteFuture;
         await tester.pump();
 
-        expect(repository.getItemById(2), isNull);
+        expect(repository.getItemById(2)?.state, equals(LdPaginatorItemState.deleted));
       });
 
       testWidgets('handles batch deletion errors and refreshes list', (tester) async {
@@ -1592,7 +1593,7 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 1));
 
         expect(fetchReasons, contains(LdFetchReason.invalidate));
-        expect(repository.getItemById(2), isNull);
+        expect(repository.getItemById(2)?.state, equals(LdPaginatorItemState.deleted));
       });
     });
 

@@ -8,12 +8,13 @@ class LdFilterSearch<T extends Identifiable<IdType>, IdType, Suggestion> extends
   final Duration debounceDelay;
   final String? hint;
 
-  LdSearchConfig searchConfig(Function(String query) onSearch) => LdSearchConfig(
+  LdSearchConfig searchConfig(Function(String query) onSearch, {FocusNode? inputFocusNode}) => LdSearchConfig(
         getSuggestions: getSuggestions,
         buildSuggestion: buildSuggestion,
         initialQuery: searchText,
         hint: hint,
         onSearch: onSearch,
+        inputFocusNode: inputFocusNode,
       );
 
   LdFilterSearch({

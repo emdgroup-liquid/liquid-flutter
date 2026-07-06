@@ -6,7 +6,6 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_decoration.dart';
 import 'package:liquid_flutter/src/appbar/appbar_frame.dart';
 import 'package:liquid_flutter/src/haptics.dart';
-import 'package:liquid_flutter/src/touchable/ghost_color.dart';
 import 'package:liquid_flutter/src/touchable/neutral_ghost_color.dart';
 
 class LdNavigationTab {

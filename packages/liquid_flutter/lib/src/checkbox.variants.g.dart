@@ -2,6 +2,7 @@ part of 'checkbox.dart';
 
 class LdCheckboxConfig {
   const LdCheckboxConfig({
+    this.label,
     this.checked,
     this.onChanged,
     this.color,
@@ -9,6 +10,8 @@ class LdCheckboxConfig {
     this.size,
     this.disabled,
   });
+
+  final String? label;
 
   final bool? checked;
 
@@ -48,6 +51,7 @@ class LdCheckboxConfigProvider extends StatelessWidget {
     final parentConfig = Provider.of<LdCheckboxConfig?>(context, listen: true);
     final mergedConfig = parentConfig != null
         ? LdCheckboxConfig(
+            label: config.label ?? parentConfig.label,
             checked: config.checked ?? parentConfig.checked,
             onChanged: config.onChanged ?? parentConfig.onChanged,
             color: config.color ?? parentConfig.color,
@@ -164,12 +168,12 @@ class LdCheckbox extends StatelessWidget {
   Widget build(BuildContext context) {
     final config = Provider.of<LdCheckboxConfig?>(context, listen: true);
     return _LdCheckboxWidget(
-      label: label,
+      label: label ?? config?.label,
       checked: checked ?? config?.checked ?? false,
       onChanged: onChanged ?? config?.onChanged,
       color: color ?? config?.color,
       focusNode: focusNode ?? config?.focusNode,
-      size: size ?? config?.size ?? LdSize.s,
+      size: size ?? config?.size ?? LdSize.m,
       disabled: disabled ?? config?.disabled ?? false,
     );
   }

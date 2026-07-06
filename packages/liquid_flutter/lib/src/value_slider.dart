@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/form_label.dart';
+
 import 'package:liquid_flutter/src/haptics.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -673,13 +673,6 @@ class _LdSliderState extends State<LdSlider> {
 
     final inactiveColor = theme.neutralShade(3);
 
-    // Label always sits above the slider widget
-    final label = LdFormLabel(
-      label: widget.label,
-      size: widget.size,
-      disabled: widget.disabled,
-    );
-
     final track = LayoutBuilder(
       builder: (context, constraints) {
         final trackLength = _isVertical ? constraints.maxHeight : constraints.maxWidth;
@@ -818,10 +811,14 @@ class _LdSliderState extends State<LdSlider> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: _isVertical ? MainAxisSize.max : MainAxisSize.min,
       children: [
-        label,
+        if (widget.label != null)
+          LdText.l(
+            widget.label!,
+            size: widget.size,
+          ),
         if (_isVertical) Expanded(child: track) else track,
       ],
-    );
+    ).spaceS();
   }
 
   Widget _buildRange(BuildContext context) {
@@ -850,13 +847,6 @@ class _LdSliderState extends State<LdSlider> {
 
     final activeColor = widget.disabled ? theme.neutralShade(4) : effectiveColor.idle(theme.isDark);
     final inactiveColor = theme.neutralShade(3);
-
-    // Label always sits above the slider widget
-    final label = LdFormLabel(
-      label: widget.label,
-      size: widget.size,
-      disabled: widget.disabled,
-    );
 
     final track = LayoutBuilder(
       builder: (context, constraints) {
@@ -1148,7 +1138,11 @@ class _LdSliderState extends State<LdSlider> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: _isVertical ? MainAxisSize.max : MainAxisSize.min,
       children: [
-        label,
+        if (widget.label != null)
+          LdText.l(
+            widget.label!,
+            size: widget.size,
+          ),
         if (_isVertical) Expanded(child: track) else track,
       ],
     );

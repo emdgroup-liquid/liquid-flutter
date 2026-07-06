@@ -57,15 +57,18 @@ class LdNotificationPortal extends StatelessWidget {
                   index,
                   notification,
                 ) {
-                  return LdNotificationWidget(
-                    key: notification.key,
-                    index: controller.notifications.length - index - 1,
-                    notification: notification,
-                    removing: notification.removing,
-                    didConfirm: notification.didConfirm,
-                    onDismiss: () {
-                      controller.onDismissNotification(notification);
-                    },
+                  return Align(
+                    alignment: Alignment.bottomCenter,
+                    child: LdNotificationWidget(
+                      key: notification.key,
+                      index: controller.notifications.length - index - 1,
+                      notification: notification,
+                      removing: notification.removing,
+                      didConfirm: notification.didConfirm,
+                      onDismiss: () {
+                        controller.onDismissNotification(notification);
+                      },
+                    ),
                   );
                 }).toList(),
               ),
@@ -148,7 +151,6 @@ class LdNotificationWidget extends StatelessWidget {
       key: notification.dismissKey,
       autoFocus: true,
       onPressed: onDismiss,
-      width: double.infinity,
       child: Text(ackText),
     );
   }
@@ -170,41 +172,40 @@ class LdNotificationWidget extends StatelessWidget {
       child: LdAutoSpace(
         children: [
           Row(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
                 padding: _theme(context).pad(size: LdSize.xs),
                 child: _icon(context),
               ).animate().fade(delay: 200.ms),
-              ldSpacerM,
-              Expanded(
-                  child: Row(
-                children: [
-                  Expanded(
-                      child: LdAutoSpace(
-                    children: [
-                      // Text of the notification
-                      LdText.p(
-                        notification.message,
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Text of the notification
+                    LdText.p(
+                      notification.message,
+                      overflow: TextOverflow.fade,
+                    ),
+                    if (notification.subMessage != null)
+                      LdText.ps(
+                        notification.subMessage!,
                         overflow: TextOverflow.fade,
+                        color: _theme(context).textMuted,
                       ),
-                      if (notification.subMessage != null)
-                        LdText.ps(notification.subMessage!,
-                            overflow: TextOverflow.fade, color: _theme(context).textMuted),
-                    ],
-                  )),
-                  ldSpacerM,
-                  if (notification.canDismiss && notification is! LdAcknowledgeNotification)
-                    // Dismiss button
-                    LdButton.ghost(
-                      color: _colorBundle(context),
-                      onPressed: onDismiss,
-                      child: const Icon(LucideIcons.x),
-                    ).animate().fade(delay: 400.ms)
-                ],
-              )).animate().fade(delay: 300.ms),
+                  ],
+                ),
+              ).animate().fade(delay: 300.ms),
+              if (notification.canDismiss && notification is! LdAcknowledgeNotification)
+                // Dismiss button
+                LdButton.ghost(
+                  color: _colorBundle(context),
+                  onPressed: onDismiss,
+                  child: const Icon(LucideIcons.x),
+                ).animate().fade(delay: 400.ms)
             ],
-          ),
+          ).spaceS(),
           if (notification is LdAcknowledgeNotification) _buildAcknowledgeButton(context),
         ],
       ),

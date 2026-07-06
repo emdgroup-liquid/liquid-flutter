@@ -9,6 +9,7 @@ import 'package:liquid/components/feedback/indicator.dart';
 import 'package:liquid/components/feedback/loader.dart';
 import 'package:liquid/components/feedback/reveal.dart';
 import 'package:liquid/components/form_elements/choose.dart';
+import 'package:liquid/components/form_elements/emoji_picker.dart';
 import 'package:liquid/components/form_elements/date_time_pickers.dart';
 import 'package:liquid/components/form_elements/radio.dart';
 import 'package:liquid/components/form_elements/select.dart';
@@ -59,15 +60,16 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'components/bento_gallery.dart';
 import 'experiments/metaball_experiment.dart';
 import 'components/data_display/markdown.dart';
+import 'components/form_elements/markdown_editor.dart';
 import 'components/data_display/table.dart';
 import 'components/data_display/tag.dart';
 import 'components/feedback/badge.dart';
 import 'components/feedback/hint.dart';
 import 'components/feedback/notification.dart';
 import 'components/form_elements/checkbox.dart';
-import 'components/form_elements/form.dart';
+
 import 'components/form_elements/input.dart';
-import 'components/form_elements/reactive_form.dart';
+
 import 'components/interaction/breadcrumb.dart';
 import 'components/layout/accordion.dart';
 import 'components/layout/divider.dart';
@@ -236,6 +238,11 @@ class AppRouter {
             pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const ChooseDemo()),
           ),
           GoRoute(
+            path: "/components/emoji-picker",
+            pageBuilder: (context, state) =>
+                NoTransitionPage<void>(key: state.pageKey, child: const EmojiPickerDemo()),
+          ),
+          GoRoute(
             path: "/components/drawer",
             pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const DrawerDemo()),
           ),
@@ -296,15 +303,7 @@ class AppRouter {
               return NoTransitionPage<void>(key: state.pageKey, child: const ExceptionDemo());
             },
           ),
-          GoRoute(
-            path: "/components/form",
-            pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const FormDemo()),
-          ),
-          GoRoute(
-            path: "/components/reactive_form",
-            pageBuilder: (context, state) =>
-                NoTransitionPage<void>(key: state.pageKey, child: const ReactiveFormDemo()),
-          ),
+
           GoRoute(
             path: "/components/orb",
             pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const OrbDemo()),
@@ -427,6 +426,11 @@ class AppRouter {
           GoRoute(
             path: "/components/markdown",
             pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const MarkdownDemo()),
+          ),
+          GoRoute(
+            path: "/components/markdown-editor",
+            pageBuilder: (context, state) =>
+                NoTransitionPage<void>(key: state.pageKey, child: const MarkdownEditorDemo()),
           ),
         ],
       ),

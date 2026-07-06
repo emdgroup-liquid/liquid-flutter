@@ -137,7 +137,7 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
       return;
     }
 
-    final showingDetail = context.read<LdMonkeyShowingDetail<T, IdType>>();
+    final showingDetail = router.state.name == routeConfig.detailRouteName;
     final onCreateRoute = router.state.name == routeConfig.createRouteName;
 
     final queryParameters = Map<String, dynamic>.from(router.state.uri.queryParameters);
@@ -153,11 +153,14 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
     // detail route instead of stacking on top of it.
     if (onCreateRoute) {
       if (viewingItems.isNotEmpty) {
-        router.replaceNamed(
+        final uri = router.namedLocation(
           routeConfig.detailRouteName,
           pathParameters: pathParameters,
           queryParameters: queryParameters,
         );
+
+        _baseUri = Uri.parse(uri);
+        router.replace(uri);
       }
       return;
     }
@@ -165,20 +168,27 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
     if (showingDetail) {
       if (viewingItems.isEmpty) {
         router.pop();
+        _baseUri = router.state.uri;
       } else {
-        router.replaceNamed(
+        final uri = router.namedLocation(
           routeConfig.detailRouteName,
           pathParameters: pathParameters,
           queryParameters: queryParameters,
         );
+
+        _baseUri = Uri.parse(uri);
+        router.replace(uri);
       }
     } else {
       if (viewingItems.isNotEmpty) {
-        router.pushNamed(
+        final uri = router.namedLocation(
           routeConfig.detailRouteName,
           pathParameters: pathParameters,
           queryParameters: queryParameters,
         );
+
+        _baseUri = Uri.parse(uri);
+        router.push(uri);
       }
     }
   }
@@ -201,6 +211,7 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
     } else {
       queryParameters.remove(routeConfig.showSelectionControlsQueryKey);
     }
+
     _replaceUri(
       router,
       baseUri.replace(queryParameters: queryParameters),
@@ -292,6 +303,7 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
 
           final state = delegate.state;
           final query = state.uri.queryParameters;
+
           final selection = LdMonkeyRouteStateParser.parseSelection<T, IdType>(
             routeConfig: widget.routeConfig,
             query: query,

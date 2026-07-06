@@ -225,10 +225,7 @@ class TaskMasterPage extends StatelessWidget {
       // Match the loader to the item shape (leading avatar + subtitle) so the
       // placeholder occupies the same height and the list doesn't jump.
       config: LdListConfig<Task, int>(
-        loadingBuilder: (context, position, totalItems) => const LdListItemLoading(
-          hasLeading: true,
-          hasSubtitle: true,
-        ),
+        loadingBuilder: (context, position, totalItems) => const LdListItemLoading(hasLeading: true, hasSubtitle: true),
       ),
       child: LdMonkeyMasterPage<Task, int>(
         primaryAppBarConfig: LdAppBarConfig(debugName: "Master App Bar Tasks", title: Text("Tasks")),
@@ -246,7 +243,7 @@ class TaskMasterPage extends StatelessWidget {
               },
             ),
           ),
-          leading: LdAvatar(emoji: true, child: LdText(item.value!.emoji)),
+          leading: LdAvatar(child: LdEmoji(item.value!.emoji)),
         ),
       ),
     );

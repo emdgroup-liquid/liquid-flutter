@@ -411,9 +411,9 @@ void main() {
       await deleteFuture;
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
-      // id=3 should be gone from the controller after confirm
-      expect(controller.getItemById(3), isNull,
-          reason: 'item must be removed after deletion confirmed');
+      // id=3 should be in deleted state in the detached map after confirm
+      expect(controller.getItemById(3)?.state, equals(LdPaginatorItemState.deleted),
+          reason: 'item must be in deleted state after deletion confirmed');
 
       controller.dispose();
     });

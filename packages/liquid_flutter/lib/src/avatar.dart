@@ -14,14 +14,12 @@ class _LdAvatarWidget extends StatelessWidget {
 
   final LdColor? color;
 
-  final bool emoji;
   final bool circular;
 
   final LdSize size;
 
   const _LdAvatarWidget({
     required this.child,
-    this.emoji = false,
     @ContextConfigurable() this.color,
     @ContextConfigurable() this.circular = false,
     @ContextConfigurable() this.size = LdSize.m,
@@ -33,7 +31,18 @@ class _LdAvatarWidget extends StatelessWidget {
 
     final foreground = color ?? theme.primary;
 
-    final fillColor = foreground.idle(theme.isDark).withAlpha(26);
+    final touchable = context.watch<LdTouchableStatus?>();
+
+    var fillColor = foreground.fromCenter(1, theme.isDark).withAlpha(50);
+
+    if (touchable != null) {
+      if (touchable.active) {
+        fillColor = foreground.fromCenter(3, theme.isDark);
+      }
+      if (touchable.pressed) {
+        fillColor = foreground.fromCenter(2, theme.isDark);
+      }
+    }
 
     final textIconColor = foreground.idle(theme.isDark);
 
@@ -59,16 +68,15 @@ class _LdAvatarWidget extends StatelessWidget {
               LdSize.l,
               color: textIconColor,
               lineHeight: 1,
-            ),
-            child: LdWrapConditional(
-                condition: emoji,
-                builder: (context, child) {
-                  return Padding(
-                    padding: EdgeInsets.only(left: 4),
-                    child: child,
-                  );
-                },
-                child: child),
+            ).copyWith(shadows: [
+              Shadow(
+                color: foreground.fromCenter(-2, theme.isDark),
+                offset: Offset(0, 0),
+                blurRadius: 1,
+              ),
+            ]),
+            textAlign: TextAlign.center,
+            child: child,
           ),
         ),
       ),

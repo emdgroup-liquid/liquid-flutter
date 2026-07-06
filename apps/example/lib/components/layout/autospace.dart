@@ -30,7 +30,7 @@ class _AutoSpaceDemoState extends State<AutoSpaceDemo> {
                 LdText.hl("Autospace Demo Form"),
                 LdMute(child: LdText.l("This is a demo form to show how autospace works")),
                 LdText.p("It will automatically space out elements based on their type"),
-                LdButton(
+                LdButton.outline(
                   trailing: const Icon(LucideIcons.arrowRight),
                   onPressed: () {},
                   child: const Text("Already have filled this form?"),

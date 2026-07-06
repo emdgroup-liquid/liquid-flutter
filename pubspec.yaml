@@ -21,6 +21,7 @@ melos:
       - packages/liquid_flutter
       - packages/liquid_flutter_test_utils
       - packages/liquid_flutter_reactive_forms
+      - packages/liquid_flutter_md
   scripts:
     analyze:
       exec: dart analyze --fatal-infos

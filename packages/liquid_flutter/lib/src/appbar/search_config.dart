@@ -6,12 +6,13 @@ class LdSearchConfig {
   final void Function(String text) onSearch;
   final String? hint;
   final String? initialQuery;
+  final FocusNode? inputFocusNode;
 
   LdSearchConfig({
     this.getSuggestions,
     this.buildSuggestion,
     required this.onSearch,
-    FocusNode? inputFocusNode,
+    this.inputFocusNode,
     this.hint,
     this.initialQuery,
   });

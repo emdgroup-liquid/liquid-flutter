@@ -23,6 +23,15 @@ class LdSubmitController<T, Arg> with ChangeNotifier {
 
   ValueNotifier<Arg?>? arg;
 
+  bool _isDisabled = false;
+
+  bool get isDisabled => _isDisabled;
+
+  set disabled(bool value) {
+    _isDisabled = value;
+    notifyListeners();
+  }
+
   LdSubmitController({required this.config, this.arg}) {
     _retryController = LdRetryController(
       onRetry: _nextAttempt,
@@ -142,6 +151,15 @@ class LdSubmitController<T, Arg> with ChangeNotifier {
         LdHaptics.vibrate(HapticsType.error);
       }
 
+      if (ldPrintDebugMessages) {
+        // ignore: avoid_print
+        print("Exception occurred in $this");
+        // ignore: avoid_print
+        print(exception.toString());
+        // ignore: avoid_print
+        print(exception.stackTrace.toString());
+      }
+
       _setState(
         LdSubmitState(
           type: LdSubmitStateType.error,
@@ -173,9 +191,7 @@ class LdSubmitController<T, Arg> with ChangeNotifier {
 
   bool get canRetry => _retryController.state.canRetry;
 
-  bool get canRetrigger => _isError && state.error?.canRetry == true;
-
-  bool get canTrigger => _isIdle || canRetry || (_isResult && config.allowResubmit == true);
+  bool get canTrigger => !_isDisabled && (_isIdle || canRetry || (_isResult && config.allowResubmit == true));
 
   Future<void> trigger() async {
     if (!canTrigger) {
@@ -218,7 +234,7 @@ class LdSubmitController<T, Arg> with ChangeNotifier {
       "type": state.type.toString(),
       "retryController": _retryController.toMap(),
       "canRetry": canRetry,
-      "canRetrigger": canRetrigger,
+      "isDisabled": isDisabled,
       "canTrigger": canTrigger,
       "isError": _isError,
       "isLoading": _isLoading,

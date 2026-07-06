@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/haptics.dart';
 
 part 'radio.variants.g.dart';
@@ -27,7 +26,7 @@ class _LdRadioWidget extends StatelessWidget {
   const _LdRadioWidget({
     this.label,
     required this.checked,
-    this.size = LdSize.s,
+    this.size = LdSize.m,
     this.onChanged,
     this.color,
     this.focusNode,
@@ -47,12 +46,13 @@ class _LdRadioWidget extends StatelessWidget {
 
     final size = this.size.clamp(LdSize.s, LdSize.l);
 
-    final radioSize = theme.paddingSize(size: size) * 2;
+    final labelSize = theme.labelSize(size);
 
-    final label = LdFormLabel(
-      label: this.label,
-      size: size,
-      direction: Axis.horizontal,
+    final radioSize = labelSize * 1.5;
+
+    final label = LdText.l(
+      this.label ?? '',
+      size: this.size,
     );
 
     return LdTouchableSurface(
@@ -66,28 +66,31 @@ class _LdRadioWidget extends StatelessWidget {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              LdSpring(
-                springConstant: 20,
-                position: (checked ? radioSize / 4 : radioSize / 8),
-                builder: (context, state, child) {
-                  final borderWidth = state.position;
-                  return Container(
-                    height: radioSize,
-                    width: radioSize,
-                    key: const ValueKey("frame"),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: (color ?? theme.palette.primary).center(theme.isDark),
-                        width: borderWidth,
+              Transform.translate(
+                offset: Offset(0, 1),
+                child: LdSpring(
+                  springConstant: 20,
+                  position: (checked ? radioSize * 0.3 : radioSize * 0.15),
+                  builder: (context, state, child) {
+                    final borderWidth = state.position;
+                    return Container(
+                      height: radioSize,
+                      width: radioSize,
+                      key: const ValueKey("frame"),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: (color ?? theme.palette.primary).center(theme.isDark),
+                          width: borderWidth,
+                        ),
+                        shape: BoxShape.circle,
                       ),
-                      shape: BoxShape.circle,
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
               if (this.label != null) Flexible(child: label)
             ],
-          );
+          ).spaceXS();
         },
       ),
     );

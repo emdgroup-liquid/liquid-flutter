@@ -10,6 +10,7 @@ ThemeData getMaterialTheme(LdTheme theme) {
     color: palette.text,
     package: theme.fontFamilyPackage,
     fontFamily: theme.fontFamily,
+    fontFamilyFallback: theme.fontFamilyFallback,
   );
 
   final text = TextTheme(

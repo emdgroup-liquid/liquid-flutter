@@ -24,13 +24,8 @@ class _LdMonkeyDeletedItemsGuardState<T extends Identifiable<IdType>, IdType>
   /// Accumulates deleted ids until the router has caught up. Without this,
   /// rapid deletions each read stale selection from the URL and overwrite
   /// one another with partial updates.
-  final Set<IdType> _deletedIds = {};
-  bool _flushScheduled = false;
 
-  /// Router updates are async; track what we already dispatched so we do not
-  /// call [router.replace] again while the URL still reflects the old state.
-  Set<IdType>? _pendingSelection;
-  Set<IdType>? _pendingViewing;
+  bool _flushScheduled = false;
 
   @override
   void initState() {
@@ -54,10 +49,9 @@ class _LdMonkeyDeletedItemsGuardState<T extends Identifiable<IdType>, IdType>
   }
 
   void _onItemsChanged(LdPaginatorItem<T> item) {
-    if (item.state != LdPaginatorItemState.deleted || item.value?.id == null) {
+    if (item.state != LdPaginatorItemState.deleted || item.state != LdPaginatorItemState.deleted) {
       return;
     }
-    _deletedIds.add(item.value!.id);
     _scheduleFlush();
   }
 
@@ -66,12 +60,12 @@ class _LdMonkeyDeletedItemsGuardState<T extends Identifiable<IdType>, IdType>
       return;
     }
     _flushScheduled = true;
-    scheduleMicrotask(_flushPendingDeletions);
+    Future.delayed(Duration(milliseconds: 500), _flushPendingDeletions);
   }
 
   void _flushPendingDeletions() {
     _flushScheduled = false;
-    if (!mounted || _deletedIds.isEmpty) {
+    if (!mounted) {
       return;
     }
 
@@ -80,44 +74,24 @@ class _LdMonkeyDeletedItemsGuardState<T extends Identifiable<IdType>, IdType>
       return;
     }
 
-    final newViewing = selection.viewing.difference(_deletedIds);
-    final newSelection = selection.selection.difference(_deletedIds);
+    final deletedIds = context.read<LdListController<T, IdType>>().deletedItems.map((item) => item.value!.id).toSet();
+
+    final newViewing = selection.viewing.difference(deletedIds);
+    final newSelection = selection.selection.difference(deletedIds);
 
     // Only drop ids once the route no longer references them; clearing earlier
     // would lose track of removals while the router is still catching up.
-    _deletedIds.removeWhere(
-      (id) => !selection.selection.contains(id) && !selection.viewing.contains(id),
-    );
 
-    if (!setEquals(newViewing, selection.viewing) &&
-        (_pendingViewing == null || !setEquals(newViewing, _pendingViewing!))) {
-      _pendingViewing = newViewing;
+    if (!setEquals(newViewing, selection.viewing)) {
       LdMonkeySelection.updateViewing<T, IdType>(context, newViewing);
     }
-    if (!setEquals(newSelection, selection.selection) &&
-        (_pendingSelection == null || !setEquals(newSelection, _pendingSelection!))) {
-      _pendingSelection = newSelection;
+    if (!setEquals(newSelection, selection.selection)) {
       LdMonkeySelection.updateSelection<T, IdType>(context, newSelection);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    context.watch<LdListController<T, IdType>>();
-    final selection = context.watch<LdMonkeySelection<T, IdType>?>();
-    if (selection != null) {
-      if (_pendingSelection != null && setEquals(selection.selection, _pendingSelection!)) {
-        _pendingSelection = null;
-      }
-      if (_pendingViewing != null && setEquals(selection.viewing, _pendingViewing!)) {
-        _pendingViewing = null;
-      }
-      if (_deletedIds.isNotEmpty) {
-        _deletedIds.removeWhere(
-          (id) => !selection.selection.contains(id) && !selection.viewing.contains(id),
-        );
-      }
-    }
     return widget.child;
   }
 }

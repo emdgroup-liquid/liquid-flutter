@@ -14,6 +14,12 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
 
   LdModel<T, IdType, Object?, Object?> _attachedModel;
 
+  UnmodifiableListView<LdPaginatorItem<T>> get deletedItems => UnmodifiableListView(
+        _detachedItemsById.values.where((item) => item.state == LdPaginatorItemState.deleted).toList(),
+      );
+
+  UnmodifiableMapView<IdType, LdPaginatorItem<T>> get detachedItemsById => UnmodifiableMapView(_detachedItemsById);
+
   IdType? _lastSelectionAnchorId;
 
   /// This map is used to store items that were fetched, but can not be sorted
@@ -82,12 +88,33 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
     bool refresh = false,
     required IdType id,
   }) {
-    _detachedItemsById.remove(id);
-    return super.confirmItemDeletion(
-      context: context,
-      refresh: refresh,
-      id: id,
-    );
+    // Deleted items are kept in the detached items map, so we can safely show removed states in the UI.
+
+    final item = getItemById(id);
+
+    if (item == null) {
+      // Item is not known to this controller (not paged, not detached).
+      // The server-side delete already succeeded, so there is nothing to
+      // clean up locally — just report as compacted and move on.
+      return true;
+    }
+
+    // If the item is detached already we return true anyways, since there was no unsafe list order
+    // created by this deletion
+    bool compacted = true;
+
+    if (!_isDetached(id)) {
+      final compacted = super.confirmItemDeletion(
+        context: context,
+        refresh: false,
+        id: id,
+      );
+
+      _maybeRefreshPostDeletion(context, id: id, refresh: refresh, compacted: compacted);
+    }
+
+    _detachedItemsById[id] = item.copyWith(state: LdPaginatorItemState.deleted);
+    return compacted;
   }
 
   @override
@@ -178,7 +205,7 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
         if (!context.mounted) {
           break;
         }
-        _confirmDeletionForId(context, id, refresh: false);
+        confirmItemDeletion(context: context, id: id, refresh: false);
       }
     } on LdPartialBatchDeleteException<IdType> catch (e) {
       // Some per-item deletes succeeded; confirm those and roll back the rest.
@@ -188,7 +215,7 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
         _attachedModel.invalidateCacheOnMutation(context, kind: LdListMutationKind.delete);
         for (final id in e.succeededIds) {
           if (!context.mounted) break;
-          _confirmDeletionForId(context, id, refresh: false);
+          confirmItemDeletion(context: context, id: id, refresh: false);
         }
       }
 
@@ -224,7 +251,7 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
         return;
       }
       _attachedModel.invalidateCacheOnMutation(context, kind: LdListMutationKind.delete);
-      _confirmDeletionForId(context, id);
+      confirmItemDeletion(context: context, id: id, refresh: false);
     } catch (e) {
       _rollbackDeletionForId(id);
       rethrow;
@@ -495,7 +522,7 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
     }
   }
 
-  Future<void> updateFromModel<TUpdate>(
+  Future<T?> updateFromModel<TUpdate>(
     BuildContext context,
     LdModel<T, IdType, Object?, TUpdate> model,
     IdType id,
@@ -517,7 +544,7 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
     }
 
     if (!context.mounted || newItem == null) {
-      return;
+      return null;
     }
 
     // Persist succeeded: confirm + layout run outside the rollback try so an
@@ -537,6 +564,7 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
         after: newItem,
       );
     }
+    return newItem;
   }
 
   Future<void> _applyPostUpdateLayout(
@@ -632,35 +660,12 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
     }
   }
 
-  void _confirmDeletionForId(
-    BuildContext context,
-    IdType id, {
-    bool refresh = false,
-  }) {
-    final detachedItem = _detachedItemsById.remove(id);
-    if (detachedItem != null) {
-      notifyItemUpdated(
-        detachedItem.copyWith(state: LdPaginatorItemState.deleted),
-      );
-      return;
-    }
-
-    if (getItemIndexById(id) != null) {
-      unawaited(_confirmPagedDeletion(context, id: id, refresh: refresh));
-    }
-  }
-
-  Future<void> _confirmPagedDeletion(
+  Future<void> _maybeRefreshPostDeletion(
     BuildContext context, {
     required IdType id,
     required bool refresh,
+    bool compacted = false,
   }) async {
-    final compacted = confirmItemDeletion(
-      context: context,
-      refresh: refresh,
-      id: id,
-    );
-
     if (compacted || refresh || !context.mounted) {
       return;
     }

@@ -30,6 +30,13 @@
     "shiftListExplanation",
     "copy",
     "showSelection",
-    "copiedToClipboard"
+    "copiedToClipboard",
+    "fieldConflictKeepMine",
+    "fieldConflictUseServer",
+    "save",
+    "saving",
+    "create",
+    "creating",
+    "discardChanges"
   ]
 }

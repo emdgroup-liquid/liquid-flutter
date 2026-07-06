@@ -73,20 +73,20 @@ class LdDrawerButton extends StatelessWidget {
 
     final showing = isShowing(context, type);
 
-    return LdReveal.quick(
-      axes: const {Axis.horizontal},
-      initialRevealed: showing,
-      revealed: showing,
-      child: ExcludeFocus(
-        excluding: !showing,
-        child: Row(
-          children: [
-            Tooltip(
-              message: switch (type) {
-                LdDrawerButtonType.open => LiquidLocalizations.of(context).openDrawer,
-                LdDrawerButtonType.close => LiquidLocalizations.of(context).closeDrawer,
-              },
-              child: LdButton.ghost(
+    return Tooltip(
+      message: switch (type) {
+        LdDrawerButtonType.open => LiquidLocalizations.of(context).openDrawer,
+        LdDrawerButtonType.close => LiquidLocalizations.of(context).closeDrawer,
+      },
+      child: LdReveal.quick(
+        axes: const {Axis.horizontal},
+        initialRevealed: showing,
+        revealed: showing,
+        child: ExcludeFocus(
+          excluding: !showing,
+          child: Row(
+            children: [
+              LdButton.ghost(
                 child: Icon(icon),
                 onPressed: () {
                   if (type == LdDrawerButtonType.open) {
@@ -96,8 +96,8 @@ class LdDrawerButton extends StatelessWidget {
                   }
                 },
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -52,15 +52,18 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
         );
 
         final searchConfig = switch (location) {
-          LdMonkeyActionLocation.masterAppBar => searchFilter?.searchConfig((query) {
-              searchFilter.update(
-                context,
-                searchFilter.copyWith(
-                  isOn: query.isNotEmpty,
-                  searchText: query,
-                ),
-              );
-            }),
+          LdMonkeyActionLocation.masterAppBar => searchFilter?.searchConfig(
+              (query) {
+                searchFilter.update(
+                  context,
+                  searchFilter.copyWith(
+                    isOn: query.isNotEmpty,
+                    searchText: query,
+                  ),
+                );
+              },
+              inputFocusNode: context.watch<LdMonkeySearchFocusNode>().focusNode,
+            ),
           _ => null,
         };
 
@@ -106,18 +109,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
             positionMode: effectivePositionMode,
             scrollBehavior: showBar ? null : LdAppBarScrollBehavior.hidden,
             autoAttachToKeyboard: true,
-            searchConfig: switch (location) {
-              LdMonkeyActionLocation.masterAppBar => searchFilter?.searchConfig((query) {
-                  searchFilter.update(
-                    context,
-                    searchFilter.copyWith(
-                      isOn: query.isNotEmpty,
-                      searchText: query,
-                    ),
-                  );
-                }),
-              _ => null,
-            },
+            searchConfig: searchConfig,
             overflowMenuProviders: (context) => [
                   ListenableProvider.value(value: LdListController.of<T, IdType>(context)),
                   Provider.value(value: location),

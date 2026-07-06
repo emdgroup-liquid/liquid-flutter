@@ -109,4 +109,9 @@ class LdMonkeySelection<T extends Identifiable<IdType>, IdType> {
 
   @override
   int get hashCode => selection.hashCode ^ viewing.hashCode;
+
+  @override
+  String toString() {
+    return 'LdMonkeySelection(selection: $selection, viewing: $viewing, showSelectionControls: $showSelectionControls)';
+  }
 }

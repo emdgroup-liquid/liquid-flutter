@@ -68,8 +68,15 @@
   "fieldConflictDescription": "These fields changed elsewhere while you were editing. Choose which value to keep.",
   "fieldConflictKeepAllMine": "Keep all mine",
   "fieldConflictUseAllServer": "Use all from server",
-  "fieldConflictYours": "Your value",
-  "fieldConflictServer": "Server value",
+  "fieldConflictKeepMine": "Keep mine",
+  "fieldConflictUseServer": "Use server",
   "noItemsMatchFilter": "No items match your filters",
-  "clearFilters": "Clear filters"
+  "clearFilters": "Clear filters",
+  "save": "Save",
+  "saving": "Saving",
+  "create": "Create",
+  "creating": "Creating..",
+  "discardChanges": "Dicard changes"
+  
+
 }

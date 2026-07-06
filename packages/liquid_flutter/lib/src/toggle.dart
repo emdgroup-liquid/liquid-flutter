@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/form_label.dart';
+
 import 'package:liquid_flutter/src/haptics.dart';
 import 'package:provider/provider.dart';
 
@@ -82,12 +82,6 @@ class _LdToggleState extends State<LdToggle> with SingleTickerProviderStateMixin
   Widget build(BuildContext context) {
     final colors = widget.color ?? _theme.palette.primary;
 
-    final label = LdFormLabel(
-      label: widget.label,
-      size: widget.size,
-      direction: Axis.horizontal,
-    );
-
     return LdTouchableSurface(
       onPressed: _onTap,
       disabled: widget.disabled,
@@ -156,9 +150,9 @@ class _LdToggleState extends State<LdToggle> with SingleTickerProviderStateMixin
                       ]),
                     ),
                   ),
-                  Flexible(child: label),
+                  if (widget.label != null) Flexible(child: LdText.l(widget.label!, size: widget.size)),
                 ],
-              );
+              ).spaceS();
             },
           ),
         );

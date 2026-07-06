@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/touchable/touchable_status.dart';
+import 'package:provider/provider.dart';
 
 const disabledAlpha = 200;
 
@@ -29,6 +29,8 @@ class LdTouchableSurface extends StatefulWidget {
   final Widget? child;
   final Set<LogicalKeyboardKey>? onPressedKeys;
 
+  final void Function(bool isHovering)? onHover;
+
   final Widget Function(
     BuildContext contxt,
     LdTouchableStatus status,
@@ -38,6 +40,7 @@ class LdTouchableSurface extends StatefulWidget {
     super.key,
     required this.onPressed,
     this.hitTestBehavior = HitTestBehavior.opaque,
+    this.onHover,
     required this.builder,
     this.allowTapOutside = false,
     this.textFieldTapRegion = false,
@@ -55,9 +58,19 @@ class LdTouchableSurface extends StatefulWidget {
 }
 
 class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
-  bool _hovering = false;
+  bool _isHovering = false;
   bool _pressed = false;
   bool _hasFocus = false;
+
+  set _hovering(bool value) {
+    if (widget.onHover != null) {
+      widget.onHover!(value);
+    }
+
+    _isHovering = value;
+  }
+
+  bool get _hovering => _isHovering;
 
   final _listenerKey = GlobalKey();
   FocusNode? _focusNode;
@@ -229,7 +242,10 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
                   });
                 }
               },
-              child: widget.builder(context, status, widget.child),
+              child: Provider.value(
+                value: status,
+                child: widget.builder(context, status, widget.child),
+              ),
             ),
           );
         }),

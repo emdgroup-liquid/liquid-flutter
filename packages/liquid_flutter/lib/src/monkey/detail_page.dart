@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
-/// The page rendered by [LdMonkey] to show the detail of the selected
-/// items
+/// The page rendered by [LdMonkey] to show the detail of the viewing
+/// items.
 class LdMonkeyDetailPage<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
   final Widget body;
   final LdAppBarConfig? secondaryAppBarConfig;
@@ -87,23 +87,27 @@ class LdMonkeyStreamSelection<T extends Identifiable<IdType>, IdType> extends St
       viewing: viewing,
       builder: (context) {
         final listController = LdListController.of<T, IdType>(context);
-        final itemWidgets = viewing.map((id) {
-          final item = listController.getItemById(id);
-          if (item != null) {
-            return KeyedSubtree(
-              key: ValueKey(id),
-              child: buildItem(context, item),
-            );
-          }
+        final itemWidgets = viewing
+            .map((id) {
+              final item = listController.getItemById(id);
 
-          return KeyedSubtree(
-            key: ValueKey(id),
-            child: _LdMonkeyViewingItemLoader<T, IdType>(
-              id: id,
-              buildItem: buildItem,
-            ),
-          );
-        }).toList();
+              if (item != null) {
+                return KeyedSubtree(
+                  key: ValueKey(id),
+                  child: buildItem(context, item),
+                );
+              }
+
+              return KeyedSubtree(
+                key: ValueKey(id),
+                child: _LdMonkeyViewingItemLoader<T, IdType>(
+                  id: id,
+                  buildItem: buildItem,
+                ),
+              );
+            })
+            .nonNulls
+            .toList();
 
         if (showLoaderWhileEmpty && viewing.isNotEmpty && itemWidgets.isEmpty) {
           return LdScaffold(

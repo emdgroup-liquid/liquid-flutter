@@ -52,40 +52,30 @@ class MacOSWindowControls extends StatelessWidget {
         excluding: !show,
         child: Row(
           children: [
-            Tooltip(
-              message: LiquidLocalizations.of(context).close,
-              child: LdButton.ghost(
-                size: LdSize.xs,
-                color: LdTheme.of(context).error,
-                child: const Icon(Icons.circle, size: 14),
-                onPressed: () {
-                  LdAppBarWidget.callbacks?.onClose?.call();
-                },
-              ),
+            LdButton.ghost(
+              size: LdSize.xs,
+              color: LdTheme.of(context).error,
+              child: const Icon(Icons.circle, size: 14),
+              onPressed: () {
+                LdAppBarWidget.callbacks?.onClose?.call();
+              },
             ),
-            Tooltip(
-              message: LiquidLocalizations.of(context).minimize,
-              child: LdButton.ghost(
-                size: LdSize.xs,
-                color: LdTheme.of(context).warning,
-                child: const Icon(Icons.circle, size: 14),
-                onPressed: () {
-                  LdAppBarWidget.callbacks?.onMinimize?.call();
-                },
-              ),
+            LdButton.ghost(
+              size: LdSize.xs,
+              color: LdTheme.of(context).warning,
+              child: const Icon(Icons.circle, size: 14),
+              onPressed: () {
+                LdAppBarWidget.callbacks?.onMinimize?.call();
+              },
             ),
-            Tooltip(
-              message: LiquidLocalizations.of(context).maximize,
-              child: LdButton.ghost(
-                size: LdSize.xs,
-                color: LdTheme.of(context).success,
-                child: const Icon(Icons.circle, size: 14),
-                onPressed: () {
-                  LdAppBarWidget.callbacks?.onMaximize?.call();
-                },
-              ),
+            LdButton.ghost(
+              size: LdSize.xs,
+              color: LdTheme.of(context).success,
+              child: const Icon(Icons.circle, size: 14),
+              onPressed: () {
+                LdAppBarWidget.callbacks?.onMaximize?.call();
+              },
             ),
-            ldSpacerM,
           ],
         ),
       ),

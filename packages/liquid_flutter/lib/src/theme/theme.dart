@@ -105,6 +105,22 @@ class LdTheme extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Font family fallback list applied to every [TextStyle] built by the
+  /// design system.  Defaults to `null` (system emoji font) on all platforms.
+  ///
+  /// The previous iOS/macOS `NotoColorEmoji` override that worked around the
+  /// emoji advance-width centering bug
+  /// (https://github.com/flutter/flutter/issues/119623) is no longer needed
+  /// because [LdEmoji] corrects both axes optically at render time.
+  List<String>? _fontFamilyFallback;
+
+  List<String>? get fontFamilyFallback => _fontFamilyFallback;
+
+  set fontFamilyFallback(List<String>? fallback) {
+    _fontFamilyFallback = fallback;
+    notifyListeners();
+  }
+
   /// Set the default size for the theme
   void setThemeSize(LdThemeSize size) {
     _defaultSize = size;

@@ -473,17 +473,17 @@ abstract class LiquidLocalizations {
   /// **'Use all from server'**
   String get fieldConflictUseAllServer;
 
-  /// No description provided for @fieldConflictYours.
+  /// No description provided for @fieldConflictKeepMine.
   ///
   /// In en, this message translates to:
-  /// **'Your value'**
-  String get fieldConflictYours;
+  /// **'Keep mine'**
+  String get fieldConflictKeepMine;
 
-  /// No description provided for @fieldConflictServer.
+  /// No description provided for @fieldConflictUseServer.
   ///
   /// In en, this message translates to:
-  /// **'Server value'**
-  String get fieldConflictServer;
+  /// **'Use server'**
+  String get fieldConflictUseServer;
 
   /// No description provided for @noItemsMatchFilter.
   ///
@@ -496,6 +496,36 @@ abstract class LiquidLocalizations {
   /// In en, this message translates to:
   /// **'Clear filters'**
   String get clearFilters;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving'**
+  String get saving;
+
+  /// No description provided for @create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
+
+  /// No description provided for @creating.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating..'**
+  String get creating;
+
+  /// No description provided for @discardChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Dicard changes'**
+  String get discardChanges;
 }
 
 class _LiquidLocalizationsDelegate extends LocalizationsDelegate<LiquidLocalizations> {

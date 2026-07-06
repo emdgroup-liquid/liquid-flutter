@@ -5,6 +5,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:reactive_forms/reactive_forms.dart';
 
 class MovieDemo with Identifiable<int> {
   @override
@@ -110,7 +111,6 @@ LdCallbackModel<MovieDemo, int> movieModel(BuildContext context) => LdCallbackMo
   },
 );
 
-
 Future<List<LdFilterOption<MovieDemo, int>>> buildMovieFilters(BuildContext context) async {
   final genres = await loadMovieGenres(context);
   return [
@@ -172,9 +172,11 @@ class MovieDetail extends StatelessWidget {
 
     return LdAutoSpace(
       children: [
-        LdMonkeyReactiveDetailForm<MovieDemo, int, MovieDemo, MovieDemo, MovieDemo>.edit(
+        LdForm<MovieDemo, int, MovieDemo, MovieDemo, MovieDemo>(
+          mode: LdFormMode.edit,
           item: movie,
-          saveMode: LdMonkeyDetailSaveMode.adaptive,
+          itemToDetail: (context, item) => Future.value(item!),
+          saveMode: LdReactiveFormSaveMode.adaptive,
           detailToFormValues: (detail) => {
             'title': detail.title,
             'genre': {detail.genre},
@@ -188,42 +190,31 @@ class MovieDetail extends StatelessWidget {
               rating: (form.control('rating').value as double).round(),
             );
           },
-          submitConfig: LdFormSubmitConfig(submitText: 'Save'),
-          itemsBuilder: (context, hooks) {
-            final genreItems = movieData
-                .map((movie) => movie.genre)
-                .toSet()
-                .map((genre) => LdSelectItem(value: genre, child: Text(genre)))
-                .toList();
 
-            return [
-              LdReactiveFormItem.input(
-                key: 'title',
-                label: 'Title',
-                inputFieldHint: 'Movie title',
-                validators: [LdFormValidators.required],
-                onBlurred: hooks.onBlurred('title'),
-              ),
-              LdReactiveFormItem.chooseFromItems<String>(
-                key: 'genre',
-                label: 'Genre',
-                items: genreItems,
-                validators: [LdFormValidators.required],
-                onCommitted: hooks.onCommitted('genre'),
-              ),
-              LdReactiveFormItem.slider(
-                key: 'rating',
-                label: 'Rating',
-                min: 1,
-                max: 5,
-                validators: [LdFormValidators.required],
+          formItems: [
+            LdReactiveFormItem<String>(key: 'title', validators: [Validators.required]),
+            LdReactiveFormItem<Set<String>>(key: 'genre', validators: [Validators.required]),
+            LdReactiveFormItem<double>(key: 'rating', validators: [Validators.required]),
+          ],
+          child: Builder(
+            builder: (context) {
+              final genreItems = movieData
+                  .map((movie) => movie.genre)
+                  .toSet()
+                  .map((genre) => LdSelectItem(value: genre, child: Text(genre)))
+                  .toList();
 
-                onCommitted: hooks.onCommitted('rating'),
-              ),
-            ];
-          },
+              return LdAutoSpace(
+                children: [
+                  LdFormInput<String>(formKey: 'title', label: 'Title', hint: 'Movie title'),
+                  LdFormChoose<String>(formKey: 'genre', label: 'Genre', items: genreItems),
+                  LdFormSlider(formKey: 'rating', label: 'Rating', min: 1, max: 5),
+                ],
+              );
+            },
+          ),
         ),
-        LdText('Last updated: ${Jiffy.parseFromDateTime(movieValue.lastUpdate).fromNow()}'),
+        LdText.p('Last updated: ${Jiffy.parseFromDateTime(movieValue.lastUpdate).fromNow()}'),
       ],
     );
   }

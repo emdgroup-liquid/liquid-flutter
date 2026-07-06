@@ -1,9 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/form_label.dart';
 import 'package:liquid_flutter/src/haptics.dart';
-import 'package:liquid_flutter/src/touchable/input_color.dart';
 import 'package:liquid_flutter/src/touchable/neutral_ghost_color.dart';
 
 class LdSelectItem<T> with Identifiable<T> {
@@ -258,7 +256,11 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
       mainAxisSize: MainAxisSize.min,
       children: [
         // Include label if not null
-        LdFormLabel(label: widget.label, size: size),
+        if (widget.label != null)
+          LdText.l(
+            widget.label!,
+            size: size,
+          ),
         LdContextMenu(
           positionMode: LdContextPositionMode.relativeTrigger,
           zoomMode: LdContextZoomMode.never,
@@ -286,7 +288,7 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
           },
         ),
       ],
-    );
+    ).spaceS();
   }
 }
 

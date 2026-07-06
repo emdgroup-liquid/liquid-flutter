@@ -313,11 +313,6 @@ class LdSelectableListSelectionController<T extends Identifiable<IdType>, IdType
       return KeyEventResult.handled;
     }
 
-    if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
-      _selectedItems.clear();
-      return KeyEventResult.handled;
-    }
-
     if (isShift || isCtrl) {
       notifyListeners();
       return KeyEventResult.handled;
@@ -326,12 +321,19 @@ class LdSelectableListSelectionController<T extends Identifiable<IdType>, IdType
     return KeyEventResult.ignored;
   }
 
+  void resetModifierKeys() {
+    if (_shiftPressed || _ctrlPressed) {
+      _shiftPressed = false;
+      _ctrlPressed = false;
+      notifyListeners();
+    }
+  }
+
   void handleAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive ||
         state == AppLifecycleState.detached) {
-      _shiftPressed = false;
-      _ctrlPressed = false;
+      resetModifierKeys();
     }
   }
 

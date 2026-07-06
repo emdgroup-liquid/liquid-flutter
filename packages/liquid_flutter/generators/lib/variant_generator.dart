@@ -466,15 +466,20 @@ class VariantBuilder implements Builder {
             cb.factory = true;
             cb.name = variant.name;
 
-            // Add all parameters (same as regular constructor)
+            // Add all parameters (same as regular constructor), but skip
+            // positional params that are fully covered by variant defaults.
             cb.requiredParameters.addAll(
-              positionalParams.map((p) => Parameter((pb) => pb
-                ..name = p.name
-                ..type = refer(p.type.toString()))),
+              positionalParams
+                  .where((p) => !variant.defaults.containsKey(p.name))
+                  .map((p) => Parameter((pb) => pb
+                    ..name = p.name
+                    ..type = refer(p.type.toString()))),
             );
 
             cb.optionalParameters.addAll(
-              optionalParams.map((p) {
+              optionalParams
+                  .where((p) => !variant.defaults.containsKey(p.name))
+                  .map((p) {
                 final isContextConfigurable =
                     contextConfigurableParams.contains(p);
                 final hasDefaultValue = p.defaultValueCode != null;

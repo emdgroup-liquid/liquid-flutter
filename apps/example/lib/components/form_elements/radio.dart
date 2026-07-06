@@ -13,43 +13,58 @@ class RadioDemo extends StatefulWidget {
 class _RadioDemoState extends State<RadioDemo> {
   String _selection = "cookie";
 
+  final Map<String, String> _choices = {
+    "cookie": "Cookie",
+    "pie": "Pie with a very long label to explain what this choice does",
+    "yes": "Yes",
+  };
+
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
       path: "lib/components/form_elements/radio.dart",
       title: "LdRadio",
       demo: ComponentWell(
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            LdRadio(
-              label: "Cookie",
-              checked: _selection == "cookie",
-              onChanged: (p0) => setState(() {
-                _selection = "cookie";
-              }),
+        child: LdAutoSpace(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            LdText.hs("Large size"),
+
+            ..._choices.entries.map(
+              (entry) => LdRadio(
+                label: entry.value,
+                size: LdSize.l,
+                checked: _selection == entry.key,
+                onChanged: (p0) => setState(() {
+                  _selection = entry.key;
+                }),
+              ),
             ),
-            const SizedBox(
-              height: 8,
+
+            LdText.hs("Default size"),
+            ..._choices.entries.map(
+              (entry) => LdRadio(
+                label: entry.value,
+                checked: _selection == entry.key,
+                onChanged: (p0) => setState(() {
+                  _selection = entry.key;
+                }),
+              ),
             ),
-            LdRadio(
-              label: "Pie with a very long label to explain what this choice does",
-              checked: _selection == "pie",
-              onChanged: (p0) => setState(() {
-                _selection = "pie";
-              }),
+
+            LdDivider(),
+
+            ..._choices.entries.map(
+              (entry) => LdRadio(
+                label: entry.value,
+                size: LdSize.s,
+                checked: _selection == entry.key,
+                onChanged: (p0) => setState(() {
+                  _selection = entry.key;
+                }),
+              ),
             ),
-            const SizedBox(
-              height: 8,
-            ),
-            LdRadio(
-              label: "Yes",
-              checked: _selection == "yes",
-              onChanged: (p0) => setState(() {
-                _selection = "yes";
-              }),
-            ),
-          ]),
+          ],
         ),
       ),
     );

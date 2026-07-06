@@ -7,7 +7,7 @@ class SubmitControllerDto {
 
   final String type;
   final bool canRetry;
-  final bool canRetrigger;
+  final bool isDisabled;
   final bool canTrigger;
   final bool autoTrigger;
   final bool allowCancel;
@@ -20,7 +20,7 @@ class SubmitControllerDto {
     required this.state,
     required this.type,
     required this.canRetry,
-    required this.canRetrigger,
+    required this.isDisabled,
     required this.allowCancel,
     required this.allowResubmit,
     required this.canTrigger,
@@ -34,7 +34,7 @@ class SubmitControllerDto {
       "allowCancel": allowCancel,
       "allowResubmit": allowResubmit,
       "autoTrigger": autoTrigger,
-      "canRetrigger": canRetrigger,
+      "isDisabled": isDisabled,
       "canRetry": canRetry,
       "canTrigger": canTrigger,
       "id": id,
@@ -50,7 +50,7 @@ class SubmitControllerDto {
       allowCancel: map["allowCancel"],
       allowResubmit: map["allowResubmit"],
       autoTrigger: map["autoTrigger"],
-      canRetrigger: map["canRetrigger"],
+      isDisabled: map["isDisabled"],
       canRetry: map["canRetry"],
       canTrigger: map["canTrigger"],
       id: map["id"],
@@ -67,7 +67,7 @@ class SubmitControllerDto {
       state: SubmitControllerStateDto.fromLdSubmitState(controller.state),
       type: controller.runtimeType.toString(),
       canRetry: controller.canRetry,
-      canRetrigger: controller.canRetrigger,
+      isDisabled: controller.isDisabled,
       canTrigger: controller.canTrigger,
       autoTrigger: controller.config.autoTrigger,
       withHaptics: controller.config.hapticsEnabled,

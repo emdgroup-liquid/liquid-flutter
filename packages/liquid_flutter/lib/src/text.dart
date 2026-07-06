@@ -70,6 +70,7 @@ TextStyle ldBuildTextStyle(LdTheme theme, LdTextType type, LdSize size,
   return TextStyle(
     package: theme.fontFamilyPackage,
     fontFamily: fontFamily,
+    fontFamilyFallback: theme.fontFamilyFallback,
     fontWeight: fontWeight,
     color: color,
     height: effectiveLineHeight,
@@ -163,7 +164,7 @@ class _LdTextWidget extends StatelessWidget {
       textAlign: textAlign,
       maxLines: maxLines,
       overflow: overflow,
-      textHeightBehavior: TextHeightBehavior(applyHeightToFirstAscent: false),
+      textHeightBehavior: TextHeightBehavior(applyHeightToFirstAscent: false, applyHeightToLastDescent: false),
       textDirection: TextDirection.ltr,
     );
   }

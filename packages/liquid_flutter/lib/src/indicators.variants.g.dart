@@ -9,7 +9,6 @@ class LdIndicator extends StatelessWidget {
   });
 
   factory LdIndicator.info({
-    required LdIndicatorType type,
     LdSize size = LdSize.m,
     double? customSize,
     Key? key,
@@ -23,7 +22,6 @@ class LdIndicator extends StatelessWidget {
   }
 
   factory LdIndicator.warning({
-    required LdIndicatorType type,
     LdSize size = LdSize.m,
     double? customSize,
     Key? key,
@@ -37,7 +35,6 @@ class LdIndicator extends StatelessWidget {
   }
 
   factory LdIndicator.canceled({
-    required LdIndicatorType type,
     LdSize size = LdSize.m,
     double? customSize,
     Key? key,
@@ -51,7 +48,6 @@ class LdIndicator extends StatelessWidget {
   }
 
   factory LdIndicator.error({
-    required LdIndicatorType type,
     LdSize size = LdSize.m,
     double? customSize,
     Key? key,
@@ -65,7 +61,6 @@ class LdIndicator extends StatelessWidget {
   }
 
   factory LdIndicator.success({
-    required LdIndicatorType type,
     LdSize size = LdSize.m,
     double? customSize,
     Key? key,
@@ -79,7 +74,6 @@ class LdIndicator extends StatelessWidget {
   }
 
   factory LdIndicator.loading({
-    required LdIndicatorType type,
     LdSize size = LdSize.m,
     double? customSize,
     Key? key,
@@ -93,7 +87,6 @@ class LdIndicator extends StatelessWidget {
   }
 
   factory LdIndicator.pending({
-    required LdIndicatorType type,
     LdSize size = LdSize.m,
     double? customSize,
     Key? key,
@@ -107,7 +100,6 @@ class LdIndicator extends StatelessWidget {
   }
 
   factory LdIndicator.ongoing({
-    required LdIndicatorType type,
     LdSize size = LdSize.m,
     double? customSize,
     Key? key,

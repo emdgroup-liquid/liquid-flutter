@@ -52,23 +52,25 @@ void main() {
 
   group('LdReactiveForm', () {
     testWidgets('renders form items correctly', (WidgetTester tester) async {
-      final formItems = [
-        LdReactiveFormItem.input<String>(
-          key: 'name',
-          inputFieldHint: 'Enter your name',
-          label: 'Name',
-        ),
-        LdReactiveFormItem.checkbox(
-          key: 'terms',
-          label: 'Accept Terms',
-        ),
-      ];
-
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          LdReactiveForm(
-            items: formItems,
+          LdForm(
+            items: [
+              LdReactiveFormItem<String>(key: 'name'),
+              LdReactiveFormItem<bool>(key: 'terms'),
+            ],
             onSubmit: (form) async {},
+            children: [
+              LdFormInput<String>(
+                formKey: 'name',
+                label: 'Name',
+                hint: 'Enter your name',
+              ),
+              LdFormCheckbox(
+                formKey: 'terms',
+                label: 'Accept Terms',
+              ),
+            ],
           ),
         ),
       );
@@ -86,16 +88,21 @@ void main() {
         _wrapWithMaterialApp(
           Column(
             children: [
-              LdReactiveForm(
+              LdForm(
                 items: [
-                  LdReactiveFormItem.input<String>(
+                  LdReactiveFormItem<String>(
                     key: 'email',
-                    inputFieldHint: 'Enter your email',
-                    label: 'Email',
                     validators: [LdFormValidators.required],
                   ),
                 ],
                 onSubmit: (form) async {},
+                children: [
+                  LdFormInput<String>(
+                    formKey: 'email',
+                    label: 'Email',
+                    hint: 'Enter your email',
+                  ),
+                ],
               ),
               const Text('outside'),
             ],
@@ -112,24 +119,27 @@ void main() {
     });
 
     testWidgets('form validation works', (WidgetTester tester) async {
-      final formItems = [
-        LdReactiveFormItem.input<String>(
-          key: 'email',
-          inputFieldHint: 'Enter your email',
-          label: 'Email',
-          validators: [LdFormValidators.required, LdFormValidators.email],
-          validationMessages: {
-            'required': (error) => 'Email is required',
-            'email': (error) => 'Invalid email format',
-          },
-        ),
-      ];
-
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          LdReactiveForm(
-            items: formItems,
+          LdForm(
+            items: [
+              LdReactiveFormItem<String>(
+                key: 'email',
+                validators: [LdFormValidators.required, LdFormValidators.email],
+              ),
+            ],
             onSubmit: (form) async {},
+            validationMessages: {
+              'required': (error) => 'Email is required',
+              'email': (error) => 'Invalid email format',
+            },
+            children: [
+              LdFormInput<String>(
+                formKey: 'email',
+                label: 'Email',
+                hint: 'Enter your email',
+              ),
+            ],
           ),
         ),
       );
@@ -157,21 +167,26 @@ void main() {
 
     testWidgets('onSubmit is called with valid form', (WidgetTester tester) async {
       var onSubmitCalled = false;
-      final formItems = [
-        LdReactiveFormItem.input<String>(
-          key: 'name',
-          inputFieldHint: 'Enter your name',
-          initialValue: 'John Doe',
-        ),
-      ];
 
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          LdReactiveForm(
-            items: formItems,
+          LdForm(
+            items: [
+              LdReactiveFormItem<String>(
+                key: 'name',
+                initialValue: 'John Doe',
+              ),
+            ],
             onSubmit: (form) async {
               onSubmitCalled = true;
             },
+            children: [
+              LdFormInput<String>(
+                formKey: 'name',
+                label: 'Name',
+                hint: 'Enter your name',
+              ),
+            ],
           ),
         ),
       );
@@ -184,24 +199,28 @@ void main() {
     });
 
     testWidgets('form is disabled during submission', (WidgetTester tester) async {
-      final formItems = [
-        LdReactiveFormItem.input<String>(
-          key: 'name',
-          inputFieldHint: 'Enter your name',
-          initialValue: 'John Doe',
-        ),
-      ];
-
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          LdReactiveForm(
-            items: formItems,
+          LdForm(
+            items: [
+              LdReactiveFormItem<String>(
+                key: 'name',
+                initialValue: 'John Doe',
+              ),
+            ],
             onSubmit: (form) async {
               await Future<void>.delayed(const Duration(milliseconds: 500));
             },
             submitConfig: LdFormSubmitConfig(
               loadingText: 'Submitting...',
             ),
+            children: [
+              LdFormInput<String>(
+                formKey: 'name',
+                label: 'Name',
+                hint: 'Enter your name',
+              ),
+            ],
           ),
         ),
       );
@@ -216,17 +235,12 @@ void main() {
     });
 
     testWidgets('custom submit button appears correctly', (WidgetTester tester) async {
-      final formItems = [
-        LdReactiveFormItem.input<String>(
-          key: 'name',
-          inputFieldHint: 'Enter your name',
-        ),
-      ];
-
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          LdReactiveForm(
-            items: formItems,
+          LdForm(
+            items: [
+              LdReactiveFormItem<String>(key: 'name'),
+            ],
             onSubmit: (form) async {},
             submitBuilder: (context, form, child) {
               return LdButton(
@@ -235,6 +249,13 @@ void main() {
                 child: const Text('Custom Submit'),
               );
             },
+            children: [
+              LdFormInput<String>(
+                formKey: 'name',
+                label: 'Name',
+                hint: 'Enter your name',
+              ),
+            ],
           ),
         ),
       );
@@ -243,19 +264,6 @@ void main() {
     });
 
     testWidgets('form validators are applied', (WidgetTester tester) async {
-      final formItems = [
-        LdReactiveFormItem.input<String>(
-          key: 'username',
-          inputFieldHint: 'Username',
-          initialValue: 'user1',
-        ),
-        LdReactiveFormItem.input<String>(
-          key: 'password',
-          inputFieldHint: 'Password',
-          initialValue: 'pass',
-        ),
-      ];
-
       final formValidator = LdFormValidators.mustMatch(
         'username',
         'password',
@@ -265,8 +273,17 @@ void main() {
 
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          LdReactiveForm(
-            items: formItems,
+          LdForm(
+            items: [
+              LdReactiveFormItem<String>(
+                key: 'username',
+                initialValue: 'user1',
+              ),
+              LdReactiveFormItem<String>(
+                key: 'password',
+                initialValue: 'pass',
+              ),
+            ],
             validators: [formValidator],
             validationMessages: {
               'mustMatch': (error) => 'Username and password must not match',
@@ -274,6 +291,10 @@ void main() {
             onSubmit: (form) async {
               onSubmitCalled = true;
             },
+            children: [
+              LdFormInput<String>(formKey: 'username', label: 'Username', hint: 'Username'),
+              LdFormInput<String>(formKey: 'password', label: 'Password', hint: 'Password'),
+            ],
           ),
         ),
       );
@@ -297,15 +318,15 @@ void main() {
     testWidgets('hides submit button when showSubmitButton is false', (WidgetTester tester) async {
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          LdReactiveForm(
+          LdForm(
             showSubmitButton: false,
             items: [
-              LdReactiveFormItem.input<String>(
-                key: 'name',
-                inputFieldHint: 'Name',
-              ),
+              LdReactiveFormItem<String>(key: 'name'),
             ],
             onSubmit: (form) async {},
+            children: [
+              LdFormInput<String>(formKey: 'name', label: 'Name', hint: 'Name'),
+            ],
           ),
         ),
       );
@@ -320,12 +341,9 @@ void main() {
         _wrapWithMaterialApp(
           Builder(
             builder: (context) {
-              return LdReactiveForm(
+              return LdForm(
                 items: [
-                  LdReactiveFormItem.input<String>(
-                    key: 'name',
-                    inputFieldHint: 'Name',
-                  ),
+                  LdReactiveFormItem<String>(key: 'name'),
                 ],
                 onSubmit: (form) async {},
                 submitBuilder: (context, form, child) {
@@ -335,6 +353,9 @@ void main() {
                     child: const Text('Submit'),
                   );
                 },
+                children: [
+                  LdFormInput<String>(formKey: 'name', label: 'Name', hint: 'Name'),
+                ],
               );
             },
           ),
@@ -347,21 +368,24 @@ void main() {
 
     testWidgets('input onBlurred is called and marks control touched', (WidgetTester tester) async {
       var blurredValue = '';
-      final formItems = [
-        LdReactiveFormItem.input<String>(
-          key: 'name',
-          inputFieldHint: 'Name',
-          onBlurred: (value) => blurredValue = value,
-        ),
-      ];
 
       await tester.pumpWidget(
         _wrapWithMaterialApp(
           Column(
             children: [
-              LdReactiveForm(
-                items: formItems,
+              LdForm(
+                items: [
+                  LdReactiveFormItem<String>(key: 'name'),
+                ],
                 onSubmit: (form) async {},
+                children: [
+                  LdFormInput<String>(
+                    formKey: 'name',
+                    label: 'Name',
+                    hint: 'Name',
+                    onBlurred: (value) => blurredValue = value,
+                  ),
+                ],
               ),
               const Text('outside'),
             ],
@@ -381,22 +405,29 @@ void main() {
     testWidgets('shows requiredEquals message for equals validator', (WidgetTester tester) async {
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          LdReactiveForm(
+          LdForm(
             items: [
-              LdReactiveFormItem.chooseFromItems<String>(
+              LdReactiveFormItem<Set<String>>(
                 key: 'choice',
+                validators: [
+                  LdFormSetValidators.equals({'a'})
+                ],
+              ),
+            ],
+            validationMessages: {
+              'requiredEquals': (error) => 'Pick A',
+            },
+            onSubmit: (form) async {},
+            children: [
+              LdFormChoose<String>(
+                formKey: 'choice',
                 label: 'Pick one',
                 items: const [
                   LdSelectItem(value: 'a', child: Text('A')),
                   LdSelectItem(value: 'b', child: Text('B')),
                 ],
-                validators: [LdFormSetValidators.equals({'a'})],
-                validationMessages: {
-                  'requiredEquals': (error) => 'Pick A',
-                },
               ),
             ],
-            onSubmit: (form) async {},
           ),
         ),
       );
@@ -411,10 +442,14 @@ void main() {
     testWidgets('chooseFromItems renders LdChoose trigger', (WidgetTester tester) async {
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          LdReactiveForm(
+          LdForm(
             items: [
-              LdReactiveFormItem.chooseFromItems<String>(
-                key: 'choice',
+              LdReactiveFormItem<Set<String>>(key: 'choice'),
+            ],
+            onSubmit: (form) async {},
+            children: [
+              LdFormChoose<String>(
+                formKey: 'choice',
                 label: 'Pick one',
                 items: const [
                   LdSelectItem(value: 'a', child: Text('A')),
@@ -422,7 +457,6 @@ void main() {
                 ],
               ),
             ],
-            onSubmit: (form) async {},
           ),
         ),
       );

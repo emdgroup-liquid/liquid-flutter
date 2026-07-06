@@ -14,7 +14,6 @@ class LdCounter extends StatelessWidget {
   factory LdCounter.s({
     required double value,
     int precision = 0,
-    LdSize size = LdSize.m,
     LdTextType type = LdTextType.headline,
     int? minDigits,
     bool inline = false,
@@ -34,7 +33,6 @@ class LdCounter extends StatelessWidget {
   factory LdCounter.l({
     required double value,
     int precision = 0,
-    LdSize size = LdSize.m,
     LdTextType type = LdTextType.headline,
     int? minDigits,
     bool inline = false,
@@ -54,7 +52,6 @@ class LdCounter extends StatelessWidget {
   factory LdCounter.xs({
     required double value,
     int precision = 0,
-    LdSize size = LdSize.m,
     LdTextType type = LdTextType.headline,
     int? minDigits,
     bool inline = false,

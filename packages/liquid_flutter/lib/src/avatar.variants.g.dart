@@ -53,7 +53,6 @@ class LdAvatarConfigProvider extends StatelessWidget {
 class LdAvatar extends StatelessWidget {
   const LdAvatar({
     required this.child,
-    this.emoji = false,
     this.color,
     this.circular,
     this.size,
@@ -64,15 +63,12 @@ class LdAvatar extends StatelessWidget {
 
   final LdColor? color;
 
-  final bool emoji;
-
   final bool? circular;
 
   final LdSize? size;
 
   static Widget success({
     required Widget child,
-    bool emoji = false,
     LdColor? color,
     bool? circular,
     LdSize? size,
@@ -80,7 +76,6 @@ class LdAvatar extends StatelessWidget {
   }) {
     return Builder(
       builder: (BuildContext context) => LdAvatar(
-        emoji: emoji,
         color: LdTheme.of(context).success,
         circular: circular,
         size: size,
@@ -92,7 +87,6 @@ class LdAvatar extends StatelessWidget {
 
   static Widget warning({
     required Widget child,
-    bool emoji = false,
     LdColor? color,
     bool? circular,
     LdSize? size,
@@ -100,7 +94,6 @@ class LdAvatar extends StatelessWidget {
   }) {
     return Builder(
       builder: (BuildContext context) => LdAvatar(
-        emoji: emoji,
         color: LdTheme.of(context).warning,
         circular: circular,
         size: size,
@@ -112,7 +105,6 @@ class LdAvatar extends StatelessWidget {
 
   static Widget error({
     required Widget child,
-    bool emoji = false,
     LdColor? color,
     bool? circular,
     LdSize? size,
@@ -120,7 +112,6 @@ class LdAvatar extends StatelessWidget {
   }) {
     return Builder(
       builder: (BuildContext context) => LdAvatar(
-        emoji: emoji,
         color: LdTheme.of(context).error,
         circular: circular,
         size: size,
@@ -134,7 +125,6 @@ class LdAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final config = Provider.of<LdAvatarConfig?>(context, listen: true);
     return _LdAvatarWidget(
-      emoji: emoji,
       color: color ?? config?.color,
       circular: circular ?? config?.circular ?? false,
       size: size ?? config?.size ?? LdSize.m,

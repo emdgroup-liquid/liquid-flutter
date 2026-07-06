@@ -65,10 +65,23 @@ class LdMonkeyShell<T extends Identifiable<IdType>, IdType> extends StatefulWidg
   State<LdMonkeyShell<T, IdType>> createState() => _LdMonkeyShellState<T, IdType>();
 }
 
+class LdMonkeySearchFocusNode {
+  final FocusNode focusNode;
+
+  LdMonkeySearchFocusNode({required this.focusNode});
+}
+
 class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<LdMonkeyShell<T, IdType>> {
+  final LdMonkeySearchFocusNode _searchFocusNode = LdMonkeySearchFocusNode(focusNode: FocusNode());
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _searchFocusNode.focusNode.dispose();
   }
 
   @override
@@ -77,12 +90,15 @@ class _LdMonkeyShellState<T extends Identifiable<IdType>, IdType> extends State<
     // need to update the repository with the new filters and sort options
     context.watch<LdMonkeySortAndFilterState<T, IdType>>();
 
-    return _MonkeyShellLayoutBuilder<T, IdType>(
-      layoutMode: widget.layoutMode,
-      reflowBreakpoint: widget.reflowBreakpoint,
-      detailPanelFraction: widget.detailPanelFraction,
-      masterPage: widget.masterPage,
-      child: widget.child,
+    return Provider<LdMonkeySearchFocusNode>.value(
+      value: _searchFocusNode,
+      child: _MonkeyShellLayoutBuilder<T, IdType>(
+        layoutMode: widget.layoutMode,
+        reflowBreakpoint: widget.reflowBreakpoint,
+        detailPanelFraction: widget.detailPanelFraction,
+        masterPage: widget.masterPage,
+        child: widget.child,
+      ),
     );
   }
 }
@@ -123,80 +139,105 @@ class _MonkeyShellLayoutBuilder<T extends Identifiable<IdType>, IdType> extends 
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      final showingDetail = context.watch<LdMonkeySelection<T, IdType>>().viewing.isNotEmpty;
-      final effectiveLayout = _getEffectiveLayoutMode(showingDetail, constraints);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final selection = context.watch<LdMonkeySelection<T, IdType>>();
+        final showingDetail = selection.viewing.isNotEmpty;
 
-      final routeConfig = context.watch<LdMonkeyRouteConfig<T, IdType>>();
+        final effectiveLayout = _getEffectiveLayoutMode(showingDetail, constraints);
 
-      final location = GoRouter.of(context).routerDelegate.state.name;
+        final routeConfig = context.watch<LdMonkeyRouteConfig<T, IdType>>();
 
-      final showingNew = routeConfig.createRouteName == location;
+        final location = GoRouter.of(context).routerDelegate.state.name;
 
-      final wrappedChild = Provider.value(
-        value: LdListItemConfig(
-          trailing: switch (effectiveLayout) {
-            LdMonkeyEffectiveLayoutMode.master || LdMonkeyEffectiveLayoutMode.detail => LdListDefaultTrailingForward(),
-            _ => null,
+        final showingNew = routeConfig.createRouteName == location;
+
+        final wrappedChild = Provider.value(
+          value: LdListItemConfig(
+            trailing: switch (effectiveLayout) {
+              LdMonkeyEffectiveLayoutMode.master ||
+              LdMonkeyEffectiveLayoutMode.detail =>
+                LdListDefaultTrailingForward(),
+              _ => null,
+            },
+          ),
+          child: child,
+        );
+
+        return CallbackShortcuts(
+          bindings: {
+            SingleActivator(LogicalKeyboardKey.keyR, meta: true): () {
+              context.read<LdListController<T, IdType>>().refreshList(context: context, reason: LdFetchReason.initial);
+            },
+            SingleActivator(LogicalKeyboardKey.escape): () {
+              if (selection.showSelectionControls) {
+                LdMonkeySelection.maybeClearSelection<T, IdType>(context);
+                return;
+              }
+              if (showingDetail && effectiveLayout == LdMonkeyEffectiveLayoutMode.sideBySide) {
+                LdMonkeySelection.updateViewing<T, IdType>(context, {});
+              }
+            },
+            SingleActivator(LogicalKeyboardKey.keyF, meta: true): () {
+              context.read<LdMonkeySearchFocusNode?>()?.focusNode.requestFocus();
+            },
           },
-        ),
-        child: child,
-      );
-
-      return switch (effectiveLayout) {
-        LdMonkeyEffectiveLayoutMode.sideBySide => Provider.value(
-            value: effectiveLayout,
-            child: Provider.value(
-              value: LdMonkeyEffectiveLayoutMode.sideBySide,
-              child: Provider.value(
-                value: LdDrawerState(
-                  isOpen: showingDetail || showingNew,
-                  isSideBySide: true,
-                ),
-                child: LdMultiPanelLayout(
-                  mode: LdMultiPanelLayoutMode.sideBySide,
-                  panelVisible: showingDetail || showingNew,
-                  minPanelWidth: 350,
-                  minBodyWidth: reflowBreakpoint - 351,
-                  allowResize: true,
-                  panelPosition: LdPanelPosition.right,
-                  initialPanelFraction: detailPanelFraction,
-                  body: Provider.value(
-                    value: LdDrawerSlot.drawer,
-                    child: masterPage,
-                  ),
-                  panel: Provider.value(
-                    value: LdDrawerSlot.body,
-                    child: PreventAutoFocus(
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            left: BorderSide(
-                              color: LdTheme.of(context).border,
-                              width: LdTheme.of(context).borderWidth,
+          child: switch (effectiveLayout) {
+            LdMonkeyEffectiveLayoutMode.sideBySide => Provider.value(
+                value: effectiveLayout,
+                child: Provider.value(
+                  value: LdMonkeyEffectiveLayoutMode.sideBySide,
+                  child: Provider.value(
+                    value: LdDrawerState(
+                      isOpen: showingDetail || showingNew,
+                      isSideBySide: true,
+                    ),
+                    child: LdMultiPanelLayout(
+                      mode: LdMultiPanelLayoutMode.sideBySide,
+                      panelVisible: showingDetail || showingNew,
+                      minPanelWidth: 350,
+                      minBodyWidth: reflowBreakpoint - 351,
+                      allowResize: true,
+                      panelPosition: LdPanelPosition.right,
+                      initialPanelFraction: detailPanelFraction,
+                      body: Provider.value(
+                        value: LdDrawerSlot.drawer,
+                        child: masterPage,
+                      ),
+                      panel: Provider.value(
+                        value: LdDrawerSlot.body,
+                        child: PreventAutoFocus(
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              border: Border(
+                                left: BorderSide(
+                                  color: LdTheme.of(context).border,
+                                  width: LdTheme.of(context).borderWidth,
+                                ),
+                              ),
                             ),
+                            child: switch (showingDetail || showingNew) {
+                              true => wrappedChild,
+                              false => SizedBox.shrink(),
+                            },
                           ),
                         ),
-                        child: switch (showingDetail || showingNew) {
-                          true => wrappedChild,
-                          false => SizedBox.shrink(),
-                        },
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ),
-        _ => Provider.value(
-            value: switch (showingDetail) {
-              true => LdMonkeyEffectiveLayoutMode.detail,
-              false => LdMonkeyEffectiveLayoutMode.master,
-            },
-            child: wrappedChild,
-          ),
-      };
-    });
+            _ => Provider.value(
+                value: switch (showingDetail) {
+                  true => LdMonkeyEffectiveLayoutMode.detail,
+                  false => LdMonkeyEffectiveLayoutMode.master,
+                },
+                child: wrappedChild,
+              ),
+          },
+        );
+      },
+    );
   }
 }
 

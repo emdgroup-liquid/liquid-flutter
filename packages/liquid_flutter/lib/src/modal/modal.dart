@@ -266,6 +266,8 @@ class LdModalRoute<T> extends PageRoute<T> {
     return MediaQuery.removePadding(
       context: context,
       removeTop: true,
+      removeLeft: true,
+      removeRight: true,
       removeBottom: true,
       child: Builder(builder: (context) {
         return Center(

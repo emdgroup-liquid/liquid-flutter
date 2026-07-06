@@ -36,8 +36,6 @@ LdMonkeyAction<T, IdType> deleteAction<T extends Identifiable<IdType>, IdType>({
       ),
       onSubmit: (ctx) async {
         final deletedIds = {...ctx.selectedIds};
-        final nextViewing = ctx.selection.viewing.difference(deletedIds);
-        final nextSelection = ctx.selection.selection.difference(deletedIds);
 
         final confirmed = await ldConfirmModal(
           context: ctx.appContext,
@@ -58,18 +56,18 @@ LdMonkeyAction<T, IdType> deleteAction<T extends Identifiable<IdType>, IdType>({
           return;
         }
 
-        // Update route state first so hydration and detail routing do not
+        /*  // Update route state first so hydration and detail routing do not
         // target items that are about to be removed.
         ctx.updateViewing(nextViewing);
         ctx.updateSelection(nextSelection);
         if (nextSelection.isEmpty) {
           ctx.updateShowSelectionControls(false);
-        }
+        } */
 
         await ctx.appContext.read<LdModel<T, IdType, Object?, Object?>>().deleteBatch(
-          context: ctx.appContext,
-          ids: deletedIds,
-        );
+              context: ctx.appContext,
+              ids: deletedIds,
+            );
       },
       childBuilder: (context) {
         return Text(

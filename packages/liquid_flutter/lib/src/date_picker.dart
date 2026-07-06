@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/shrinkwrap_pageview.dart';
-import 'package:liquid_flutter/src/touchable/input_color.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
@@ -559,7 +558,7 @@ class _MonthView extends StatelessWidget {
             return Expanded(
               child: AspectRatio(
                 aspectRatio: aspectRatio,
-                child: LdButton.ghost(
+                child: LdButton(
                   mode: _buttonMode(day),
                   key: Key("day_${day.year}_${day.month}_${day.day}"),
                   active: isSelected(day),

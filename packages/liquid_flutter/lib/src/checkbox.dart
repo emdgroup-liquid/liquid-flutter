@@ -1,18 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:liquid_flutter/src/color/color.dart';
-import 'package:liquid_flutter/src/form_label.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
+
 import 'package:liquid_flutter/src/haptics.dart';
 import 'package:liquid_flutter/src/preview_wrapper.dart';
-import 'package:liquid_flutter/src/touchable/outline_color.dart';
-import 'package:liquid_flutter/src/touchable/solid_color.dart';
-import 'package:liquid_flutter/src/touchable/touchable.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
-
-import 'tokens.dart';
-
-import 'theme/theme.dart';
-import 'annotations.dart';
 
 part 'checkbox.variants.g.dart';
 
@@ -51,14 +43,17 @@ class _LdCheckboxWidget extends StatefulWidget {
   final LdSize size;
   final Function(bool)? onChanged;
   final LdColor? color;
-  const _LdCheckboxWidget(
-      {this.label,
-      @ContextConfigurable() this.checked = false,
-      @ContextConfigurable() this.onChanged,
-      @ContextConfigurable() this.color,
-      @ContextConfigurable() this.focusNode,
-      @ContextConfigurable() this.size = LdSize.s,
-      @ContextConfigurable() this.disabled = false});
+
+  @ContextConfigurable()
+  const _LdCheckboxWidget({
+    this.label,
+    this.checked = false,
+    this.onChanged,
+    this.color,
+    this.focusNode,
+    this.size = LdSize.m,
+    this.disabled = false,
+  });
 
   @override
   State<_LdCheckboxWidget> createState() => _LdCheckboxState();
@@ -73,12 +68,11 @@ class _LdCheckboxState extends State<_LdCheckboxWidget> {
 
     final size = widget.size.clamp(LdSize.s, LdSize.l);
 
-    final checkboxSize = theme.paddingSize(size: size) * 2;
+    final checkboxSize = theme.labelSize(size) * 1.5;
 
-    final label = LdFormLabel(
-      label: widget.label,
+    final label = LdText.l(
+      widget.label ?? '',
       size: widget.size,
-      direction: Axis.horizontal,
     );
 
     return LdTouchableSurface(
@@ -103,33 +97,37 @@ class _LdCheckboxState extends State<_LdCheckboxWidget> {
           label: widget.label,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
+            textBaseline: TextBaseline.alphabetic,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                key: const ValueKey("frame"),
-                height: checkboxSize,
-                width: checkboxSize,
-                decoration: BoxDecoration(
-                  color: colors.surface,
-                  border: Border.all(
-                    color: colors.border,
-                    width: 2,
+              Transform.translate(
+                offset: Offset(0, 1),
+                child: Container(
+                  key: const ValueKey("frame"),
+                  height: checkboxSize,
+                  width: checkboxSize,
+                  decoration: BoxDecoration(
+                    color: colors.surface,
+                    border: Border.all(
+                      color: colors.border,
+                      width: 2,
+                    ),
+                    borderRadius: LdTheme.of(context).radius(size.adjust(-2)),
                   ),
-                  borderRadius: LdTheme.of(context).radius(size.adjust(-2)),
-                ),
-                child: Opacity(
-                  opacity: widget.checked ? 1 : 0,
-                  child: Icon(
-                    key: const ValueKey("checkmark"),
-                    LucideIcons.check,
-                    color: colors.text,
-                    size: theme.labelSize(widget.size),
+                  child: Opacity(
+                    opacity: widget.checked ? 1 : 0,
+                    child: Icon(
+                      key: const ValueKey("checkmark"),
+                      LucideIcons.check,
+                      color: colors.text,
+                      size: theme.labelSize(widget.size),
+                    ),
                   ),
                 ),
               ),
               Flexible(child: label),
             ],
-          ),
+          ).spaceXS(),
         );
       }),
     );

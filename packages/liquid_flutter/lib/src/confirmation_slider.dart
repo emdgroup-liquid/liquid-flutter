@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/form_label.dart';
+
 import 'package:liquid_flutter/src/haptics.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -174,11 +174,10 @@ class _LdConfirmationSliderState extends State<LdConfirmationSlider> with Ticker
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        LdFormLabel(
-          label: widget.label,
-          size: LdSize.m,
-          disabled: widget.disabled,
-        ),
+        if (widget.label != null)
+          LdText.l(
+            widget.label!,
+          ),
         LayoutBuilder(
           builder: (context, constraints) => Container(
             height: _thumbSize + _thumbPadding * 2 + theme.borderWidth * 2,
@@ -222,6 +221,6 @@ class _LdConfirmationSliderState extends State<LdConfirmationSlider> with Ticker
           ),
         ),
       ],
-    );
+    ).spaceS();
   }
 }

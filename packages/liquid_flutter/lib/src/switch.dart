@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/form_label.dart';
+
 import 'package:liquid_flutter/src/haptics.dart';
 
 class LdSwitch<T> extends StatelessWidget {
@@ -32,7 +32,11 @@ class LdSwitch<T> extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        LdFormLabel(label: label, size: size),
+        if (label != null)
+          LdText.l(
+            label!,
+            size: size,
+          ),
         Container(
           clipBehavior: Clip.hardEdge,
           decoration: BoxDecoration(
@@ -46,7 +50,7 @@ class LdSwitch<T> extends StatelessWidget {
           ),
         ),
       ],
-    );
+    ).spaceS();
   }
 
   Widget _buildItem(LdTheme theme, T key, Widget child) {

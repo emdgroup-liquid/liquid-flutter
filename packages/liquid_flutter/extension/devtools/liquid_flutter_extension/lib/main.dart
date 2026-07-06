@@ -12,13 +12,9 @@ void main() {
           appBuilder: (context, theme) {
             return MaterialApp(
               theme: theme,
-              localizationsDelegates:
-                  LiquidLocalizations.localizationsDelegates,
+              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
               home: LdScaffold(
-                body: LdAppBar(
-                  title: Text('Liquid Flutter Extension'),
-                  child: const LiquidFlutterExtension(),
-                ),
+                body: LdAppBar(title: Text('Liquid Flutter Extension'), child: const LiquidFlutterExtension()),
               ),
             );
           },
@@ -62,22 +58,14 @@ class _LiquidFlutterExtensionState extends State<LiquidFlutterExtension> {
   }
 
   Future<void> _getControllers() async {
-    final response = await serviceManager.callServiceExtensionOnMainIsolate(
-      'ext.liquid_flutter.submit.getControllers',
-    );
+    final response = await serviceManager.callServiceExtensionOnMainIsolate('ext.liquid_flutter.submit.getControllers');
 
     final controllersList = response.json!["controllers"] as List<dynamic>;
 
-    final controllersParsed = controllersList
-        .map((e) => SubmitControllerDto.fromMap(e))
-        .toList();
+    final controllersParsed = controllersList.map((e) => SubmitControllerDto.fromMap(e)).toList();
 
     setState(() {
-      controllers = Map.fromEntries(
-        controllersParsed.map(
-          (e) => MapEntry<String, SubmitControllerDto>(e.id, e),
-        ),
-      );
+      controllers = Map.fromEntries(controllersParsed.map((e) => MapEntry<String, SubmitControllerDto>(e.id, e)));
     });
   }
 
@@ -100,18 +88,14 @@ class _LiquidFlutterExtensionState extends State<LiquidFlutterExtension> {
 
     vmService.onExtensionEvent.listen((event) {
       if (event.extensionKind == "ext.liquid_flutter.submit.state") {
-        final controller =
-            event.extensionData?.data["controller"] as Map<String, dynamic>;
+        final controller = event.extensionData?.data["controller"] as Map<String, dynamic>;
 
         setState(() {
-          controllers[controller["id"]] = SubmitControllerDto.fromMap(
-            controller,
-          );
+          controllers[controller["id"]] = SubmitControllerDto.fromMap(controller);
         });
       }
 
-      if (event.extensionKind ==
-          "ext.liquid_flutter.submit.removedController") {
+      if (event.extensionKind == "ext.liquid_flutter.submit.removedController") {
         final controller = event.extensionData?.data["controller"];
 
         setState(() {
@@ -128,9 +112,7 @@ class _LiquidFlutterExtensionState extends State<LiquidFlutterExtension> {
       children: [
         ...controllers.values.map(
           (item) => LdCard(
-            header: LdText.l(
-              "${item.id} ${item.debugLabel != null ? " - ${item.debugLabel}" : ""} - ${item.type}",
-            ),
+            header: LdText.l("${item.id} ${item.debugLabel != null ? " - ${item.debugLabel}" : ""} - ${item.type}"),
             child: LdAutoSpace(
               children: [
                 Row(
@@ -141,14 +123,10 @@ class _LiquidFlutterExtensionState extends State<LiquidFlutterExtension> {
                           LdAvatar(
                             child: LdIndicator(
                               type: switch (item.state.type) {
-                                LdSubmitStateType.idle =>
-                                  LdIndicatorType.pending,
-                                LdSubmitStateType.loading =>
-                                  LdIndicatorType.loading,
-                                LdSubmitStateType.error =>
-                                  LdIndicatorType.error,
-                                LdSubmitStateType.result =>
-                                  LdIndicatorType.success,
+                                LdSubmitStateType.idle => LdIndicatorType.pending,
+                                LdSubmitStateType.loading => LdIndicatorType.loading,
+                                LdSubmitStateType.error => LdIndicatorType.error,
+                                LdSubmitStateType.result => LdIndicatorType.success,
                               },
                             ),
                           ),
@@ -166,71 +144,35 @@ class _LiquidFlutterExtensionState extends State<LiquidFlutterExtension> {
                       spacing: 4,
                       runSpacing: 4,
                       children: [
-                        if (item.canRetrigger)
-                          Tooltip(
-                            message: "Can retriggger",
-                            child: Icon(LucideIcons.repeat, size: 14),
-                          ),
-                        if (item.canTrigger)
-                          Tooltip(
-                            message: "Can trigger",
-                            child: Icon(LucideIcons.play, size: 14),
-                          ),
-                        if (item.allowCancel)
-                          Tooltip(
-                            message: "Can cancel",
-                            child: Icon(LucideIcons.x, size: 14),
-                          ),
+                        if (item.isDisabled) Tooltip(message: "Disabled", child: Icon(LucideIcons.pause, size: 14)),
+                        if (item.canTrigger) Tooltip(message: "Can trigger", child: Icon(LucideIcons.play, size: 14)),
+                        if (item.allowCancel) Tooltip(message: "Can cancel", child: Icon(LucideIcons.x, size: 14)),
                         if (item.allowResubmit)
-                          Tooltip(
-                            message: "Can resubmit",
-                            child: Icon(LucideIcons.repeat, size: 14),
-                          ),
+                          Tooltip(message: "Can resubmit", child: Icon(LucideIcons.repeat, size: 14)),
                         if (item.withHaptics)
-                          Tooltip(
-                            message: "With haptics",
-                            child: Icon(LucideIcons.volume, size: 14),
-                          ),
-                        if (item.autoTrigger)
-                          Tooltip(
-                            message: "Auto trigger",
-                            child: Icon(LucideIcons.car, size: 14),
-                          ),
+                          Tooltip(message: "With haptics", child: Icon(LucideIcons.volume, size: 14)),
+                        if (item.autoTrigger) Tooltip(message: "Auto trigger", child: Icon(LucideIcons.car, size: 14)),
                       ],
                     ),
                   ],
                 ),
 
-                if (item.state.error != null) ...[
-                  LdText.l("Error:"),
-                  LdText.ps(item.state.error!),
-                ],
-                if (item.state.result != null) ...[
-                  LdText.l("Result:"),
-                  LdText.ps(item.state.result!),
-                ],
+                if (item.state.error != null) ...[LdText.l("Error:"), LdText.ps(item.state.error!)],
+                if (item.state.result != null) ...[LdText.l("Result:"), LdText.ps(item.state.result!)],
 
                 //Text(item["state"]),
                 Wrap(
                   spacing: 4,
                   runSpacing: 4,
                   children: [
-                    LdButton(
-                      size: LdSize.m,
-                      onPressed: () => _triggerController(item.id),
-                      child: Text("Trigger"),
-                    ),
+                    LdButton(size: LdSize.m, onPressed: () => _triggerController(item.id), child: Text("Trigger")),
                     LdButton.error(
                       mode: LdButtonMode.outline,
                       size: LdSize.m,
                       onPressed: () => _forceErrorController(item.id),
                       child: Text("Force Error"),
                     ),
-                    LdButton.vague(
-                      size: LdSize.m,
-                      onPressed: () => _resetController(item.id),
-                      child: Text("Reset"),
-                    ),
+                    LdButton.vague(size: LdSize.m, onPressed: () => _resetController(item.id), child: Text("Reset")),
                   ],
                 ),
               ],

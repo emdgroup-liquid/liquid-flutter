@@ -11,25 +11,9 @@ class Task with Identifiable<int> {
   final DateTime lastUpdate;
   final int order;
 
-  Task(
-    this.id,
-    this.task,
-    this.due,
-    this.done,
-    this.lastUpdate, {
-    this.emoji = "📋",
-    int? order,
-  }) : order = order ?? id;
+  Task(this.id, this.task, this.due, this.done, this.lastUpdate, {this.emoji = "📋", int? order}) : order = order ?? id;
 
-  Task copyWith({
-    int? id,
-    String? task,
-    String? emoji,
-    DateTime? due,
-    bool? done,
-    DateTime? lastUpdate,
-    int? order,
-  }) =>
+  Task copyWith({int? id, String? task, String? emoji, DateTime? due, bool? done, DateTime? lastUpdate, int? order}) =>
       Task(
         id ?? this.id,
         task ?? this.task,
@@ -39,4 +23,9 @@ class Task with Identifiable<int> {
         emoji: emoji ?? this.emoji,
         order: order ?? this.order,
       );
+
+  @override
+  String toString() {
+    return 'Task(id: $id, task: $task, due: $due, done: $done, lastUpdate: $lastUpdate, emoji: $emoji, order: $order)';
+  }
 }

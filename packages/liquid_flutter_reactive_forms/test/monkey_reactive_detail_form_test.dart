@@ -98,22 +98,26 @@ LdListController<_TestTask, int> _buildListController(LdCallbackModel<_TestTask,
 }
 
 Widget _detailFormFor(List<_TestTask> tasks) {
-  return LdMonkeyReactiveDetailForm<_TestTask, int, _TestTask, _TestTask, _TestTask>.edit(
+  return LdForm<_TestTask, int, _TestTask, _TestTask, _TestTask>.edit(
     item: LdPaginatorItem(
       value: tasks.first,
       state: LdPaginatorItemState.loaded,
     ),
-    saveMode: LdMonkeyDetailSaveMode.manualSubmit,
+    saveMode: LdFormMode.manualSubmit,
     detailToFormValues: (task) => {
       'title': task.title,
     },
     formToUpdatePayload: (form, task) => task.copyWith(
       title: form.control('title').value as String,
     ),
-    itemsBuilder: (context, hooks) => [
-      LdReactiveFormItem.input<String>(
-        key: 'title',
-        inputFieldHint: 'Title',
+    items: [
+      LdReactiveFormItem<String>(key: 'title'),
+    ],
+    childrenBuilder: (context, hooks) => [
+      LdFormInput<String>(
+        formKey: 'title',
+        label: 'Title',
+        hint: 'Title',
         onBlurred: hooks.onBlurred('title'),
       ),
     ],
@@ -141,22 +145,26 @@ void main() {
       _wrapDetailForm(
         model: model,
         listController: listController,
-        child: LdMonkeyReactiveDetailForm<_TestTask, int, _TestTask, _TestTask, _TestTask>.edit(
+        child: LdForm<_TestTask, int, _TestTask, _TestTask, _TestTask>.edit(
           item: LdPaginatorItem(
             value: tasks.first,
             state: LdPaginatorItemState.loaded,
           ),
-          saveMode: LdMonkeyDetailSaveMode.manualSubmit,
+          saveMode: LdFormMode.manualSubmit,
           detailToFormValues: (task) => {
             'title': task.title,
           },
           formToUpdatePayload: (form, task) => task.copyWith(
             title: form.control('title').value as String,
           ),
-          itemsBuilder: (context, hooks) => [
-            LdReactiveFormItem.input<String>(
-              key: 'title',
-              inputFieldHint: 'Title',
+          items: [
+            LdReactiveFormItem<String>(key: 'title'),
+          ],
+          childrenBuilder: (context, hooks) => [
+            LdFormInput<String>(
+              formKey: 'title',
+              label: 'Title',
+              hint: 'Title',
               onBlurred: hooks.onBlurred('title'),
             ),
           ],
@@ -195,22 +203,26 @@ void main() {
         child: Builder(
           builder: (context) {
             lockRegistry = LdLocationLockRegistry.of(context);
-            return LdMonkeyReactiveDetailForm<_TestTask, int, _TestTask, _TestTask, _TestTask>.edit(
+            return LdForm<_TestTask, int, _TestTask, _TestTask, _TestTask>.edit(
               item: LdPaginatorItem(
                 value: tasks.first,
                 state: LdPaginatorItemState.loaded,
               ),
-              saveMode: LdMonkeyDetailSaveMode.manualSubmit,
+              saveMode: LdFormMode.manualSubmit,
               detailToFormValues: (task) => {
                 'title': task.title,
               },
               formToUpdatePayload: (form, task) => task.copyWith(
                 title: form.control('title').value as String,
               ),
-              itemsBuilder: (context, hooks) => [
-                LdReactiveFormItem.input<String>(
-                  key: 'title',
-                  inputFieldHint: 'Title',
+              items: [
+                LdReactiveFormItem<String>(key: 'title'),
+              ],
+              childrenBuilder: (context, hooks) => [
+                LdFormInput<String>(
+                  formKey: 'title',
+                  label: 'Title',
+                  hint: 'Title',
                   onBlurred: hooks.onBlurred('title'),
                 ),
               ],
@@ -390,5 +402,106 @@ void main() {
     // Cancelling keeps the detail route open.
     expect(find.byType(LdInput), findsOneWidget);
     expect(find.text('open'), findsNothing);
+  });
+
+  testWidgets('arbitrary widgets can be mixed in childrenBuilder', (tester) async {
+    final tasks = [_TestTask(1, 'Original', false)];
+    final model = _buildModel(tasks);
+    final listController = _buildListController(model);
+
+    await tester.pumpWidget(
+      _wrapDetailForm(
+        model: model,
+        listController: listController,
+        child: LdForm<_TestTask, int, _TestTask, _TestTask, _TestTask>.edit(
+          item: LdPaginatorItem(
+            value: tasks.first,
+            state: LdPaginatorItemState.loaded,
+          ),
+          saveMode: LdFormMode.manualSubmit,
+          detailToFormValues: (task) => {'title': task.title},
+          formToUpdatePayload: (form, task) => task.copyWith(
+            title: form.control('title').value as String,
+          ),
+          items: [
+            LdReactiveFormItem<String>(key: 'title'),
+            LdReactiveFormItem<String>(key: 'note'),
+          ],
+          childrenBuilder: (context, hooks) => [
+            LdFormInput<String>(
+              formKey: 'title',
+              label: 'Title',
+              hint: 'Title',
+              onBlurred: hooks.onBlurred('title'),
+            ),
+            const Text('extra widget'),
+            LdFormInput<String>(
+              formKey: 'note',
+              label: 'Note',
+              hint: 'Note',
+              onBlurred: hooks.onBlurred('note'),
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Both fields and the injected widget are rendered.
+    expect(find.byType(LdInput), findsNWidgets(2));
+    expect(find.text('extra widget'), findsOneWidget);
+  });
+
+  testWidgets('widget can access LdMonkeyDetailFormScope via context', (tester) async {
+    final tasks = [_TestTask(1, 'Original', false)];
+    final model = _buildModel(tasks);
+    final listController = _buildListController(model);
+
+    await tester.pumpWidget(
+      _wrapDetailForm(
+        model: model,
+        listController: listController,
+        child: LdForm<_TestTask, int, _TestTask, _TestTask, _TestTask>.edit(
+          item: LdPaginatorItem(
+            value: tasks.first,
+            state: LdPaginatorItemState.loaded,
+          ),
+          saveMode: LdFormMode.manualSubmit,
+          detailToFormValues: (task) => {'title': task.title},
+          formToUpdatePayload: (form, task) => task.copyWith(
+            title: form.control('title').value as String,
+          ),
+          items: [
+            LdReactiveFormItem<String>(key: 'title'),
+          ],
+          childrenBuilder: (context, hooks) => [
+            Builder(
+              builder: (context) {
+                final scope = LdMonkeyDetailFormScope.of<_TestTask>(context);
+                return Text(scope.isDirty ? 'dirty' : 'pristine');
+              },
+            ),
+            LdFormInput<String>(
+              formKey: 'title',
+              label: 'Title',
+              hint: 'Title',
+              onBlurred: hooks.onBlurred('title'),
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Initially pristine.
+    expect(find.text('pristine'), findsOneWidget);
+    expect(find.text('dirty'), findsNothing);
+
+    // Edit a field — the widget should now reflect dirty state.
+    await tester.enterText(find.byType(LdInput), 'Changed');
+    await tester.pump();
+
+    expect(find.text('dirty'), findsOneWidget);
+    expect(find.text('pristine'), findsNothing);
   });
 }

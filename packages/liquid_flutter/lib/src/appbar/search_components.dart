@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/monkey/intents.dart';
 import 'package:provider/provider.dart';
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -29,7 +28,7 @@ class LdSearchInput extends StatefulWidget {
 class _LdSearchInputState extends State<LdSearchInput> {
   // ── Input ──────────────────────────────────────────────────────────────────
   final GlobalKey _inputKey = GlobalKey();
-  final FocusNode _inputFocusNode = FocusNode();
+  late FocusNode _inputFocusNode = widget.searchConfig.inputFocusNode ?? FocusNode();
   late final TextEditingController _inputController = TextEditingController(
     text: widget.searchConfig.initialQuery,
   );
@@ -45,7 +44,6 @@ class _LdSearchInputState extends State<LdSearchInput> {
   // ── Overlay ────────────────────────────────────────────────────────────────
   OverlayEntry? _overlayEntry;
   late final ValueNotifier<Rect?> _inputRectNotifier = ValueNotifier(null);
-
 
   // ── Focus suggestions scope (keyboard navigation) ─────────────────────────
   final FocusScopeNode _suggestionsFocusNode = FocusScopeNode();
@@ -91,6 +89,11 @@ class _LdSearchInputState extends State<LdSearchInput> {
     if (oldWidget.searchConfig.initialQuery != widget.searchConfig.initialQuery) {
       _inputController.text = widget.searchConfig.initialQuery ?? '';
     }
+    if (oldWidget.searchConfig.inputFocusNode != widget.searchConfig.inputFocusNode) {
+      _inputFocusNode.removeListener(_onFocusChanged);
+      _inputFocusNode = widget.searchConfig.inputFocusNode ?? FocusNode();
+      _inputFocusNode.addListener(_onFocusChanged);
+    }
   }
 
   @override
@@ -100,7 +103,10 @@ class _LdSearchInputState extends State<LdSearchInput> {
     _intentSubscription?.cancel();
     _debounceTimer?.cancel();
 
-    _inputFocusNode.dispose();
+    // Only dispose the focus node if it was not provided by the parent.
+    if (widget.searchConfig.inputFocusNode == null) {
+      _inputFocusNode.dispose();
+    }
     _suggestionsFocusNode.dispose();
     _inputController.dispose();
     _inputRectNotifier.dispose();
@@ -200,8 +206,7 @@ class _LdSearchInputState extends State<LdSearchInput> {
 
   KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
     if (event is KeyDownEvent) {
-      if (event.logicalKey == LogicalKeyboardKey.arrowDown ||
-          event.logicalKey == LogicalKeyboardKey.tab) {
+      if (event.logicalKey == LogicalKeyboardKey.arrowDown || event.logicalKey == LogicalKeyboardKey.tab) {
         _suggestionsFocusNode.nextFocus();
         return KeyEventResult.handled;
       }
@@ -236,37 +241,31 @@ class _LdSearchInputState extends State<LdSearchInput> {
       if (_overlayEntry != null) _updateInputRect();
     });
 
-    return Actions(
-      actions: <Type, Action<Intent>>{
-        SearchIntent: SearchAction(searchFocusNode: _inputFocusNode),
-      },
-      child: LdWrapConditional(
-        condition: !widget.fullWidth,
-        builder: (context, child) => ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 250, minWidth: 200),
-          child: child,
-        ),
-        child: Focus(
-          onKeyEvent: _onKeyEvent,
-          child: ListenableBuilder(
-            listenable: _suggestionsController ?? ValueNotifier(null),
-            builder: (context, _) {
-              final isLoading =
-                  _suggestionsController?.state.type == LdSubmitStateType.loading;
-              return LdInput(
-                key: _inputKey,
-                focusNode: _inputFocusNode,
-                textInputAction: TextInputAction.search,
-                size: LdSize.s,
-                hint: widget.searchConfig.hint ?? LiquidLocalizations.of(context).search,
-                controller: _inputController,
-                showClear: true,
-                loading: isLoading,
-                onSubmitted: _onSubmitted,
-                onCleared: _onCleared,
-              );
-            },
-          ),
+    return LdWrapConditional(
+      condition: !widget.fullWidth,
+      builder: (context, child) => ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 250, minWidth: 200),
+        child: child,
+      ),
+      child: Focus(
+        onKeyEvent: _onKeyEvent,
+        child: ListenableBuilder(
+          listenable: _suggestionsController ?? ValueNotifier(null),
+          builder: (context, _) {
+            final isLoading = _suggestionsController?.state.type == LdSubmitStateType.loading;
+            return LdInput(
+              key: _inputKey,
+              focusNode: _inputFocusNode,
+              textInputAction: TextInputAction.search,
+              size: LdSize.s,
+              hint: widget.searchConfig.hint ?? LiquidLocalizations.of(context).search,
+              controller: _inputController,
+              showClear: true,
+              loading: isLoading,
+              onSubmitted: _onSubmitted,
+              onCleared: _onCleared,
+            );
+          },
         ),
       ),
     );
@@ -303,8 +302,7 @@ class LdSearchSuggestionsOverlay extends StatefulWidget {
   State<LdSearchSuggestionsOverlay> createState() => _LdSearchSuggestionsOverlayState();
 }
 
-class _LdSearchSuggestionsOverlayState extends State<LdSearchSuggestionsOverlay>
-    with SingleTickerProviderStateMixin {
+class _LdSearchSuggestionsOverlayState extends State<LdSearchSuggestionsOverlay> with SingleTickerProviderStateMixin {
   late final AnimationController _fadeController;
   late final Animation<double> _fadeAnimation;
 
@@ -443,8 +441,7 @@ class _LdSearchSuggestionsOverlayState extends State<LdSearchSuggestionsOverlay>
                 shrinkWrap: true,
                 padding: EdgeInsets.zero,
                 itemCount: _lastSuggestions?.length ?? 0,
-                itemBuilder: (context, index) =>
-                    widget.buildSuggestion(context, _lastSuggestions![index]),
+                itemBuilder: (context, index) => widget.buildSuggestion(context, _lastSuggestions![index]),
               ),
             LdSubmitStateType.error => LdExceptionView(
                 exception: state.error!,

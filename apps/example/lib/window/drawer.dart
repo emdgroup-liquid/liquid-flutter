@@ -46,6 +46,7 @@ const components = [
   // Form Elements
   _Component("Checkbox", "/components/checkbox", LucideIcons.circleCheck, ComponentCategory.formElements),
   _Component("Choose", "/components/choose", LucideIcons.textSelect, ComponentCategory.formElements),
+  _Component("Emoji Picker", "/components/emoji-picker", LucideIcons.smile, ComponentCategory.formElements),
   _Component("Date/Time Picker", "/components/date-time-picker", LucideIcons.calendar, ComponentCategory.formElements),
   _Component("Form", "/components/form", LucideIcons.penTool, ComponentCategory.formElements),
   _Component("Input", "/components/input", LucideIcons.textCursorInput, ComponentCategory.formElements),
@@ -64,6 +65,7 @@ const components = [
     LucideIcons.slidersHorizontal,
     ComponentCategory.formElements,
   ),
+  _Component("Markdown Editor", "/components/markdown-editor", LucideIcons.penLine, ComponentCategory.formElements),
   _Component("Submit", "/components/submit", LucideIcons.send, ComponentCategory.formElements),
   _Component("Switch", "/components/switch", LucideIcons.betweenHorizontalStart, ComponentCategory.formElements),
   _Component("Toggle", "/components/toggle", Icons.toggle_on, ComponentCategory.formElements),

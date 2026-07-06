@@ -12,7 +12,6 @@ class LdHint extends StatelessWidget {
 
   factory LdHint.info({
     Widget? child,
-    required LdHintType type,
     bool withBackground = false,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
@@ -30,7 +29,6 @@ class LdHint extends StatelessWidget {
 
   factory LdHint.warning({
     Widget? child,
-    required LdHintType type,
     bool withBackground = false,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
@@ -48,7 +46,6 @@ class LdHint extends StatelessWidget {
 
   factory LdHint.success({
     Widget? child,
-    required LdHintType type,
     bool withBackground = false,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
@@ -66,7 +63,6 @@ class LdHint extends StatelessWidget {
 
   factory LdHint.error({
     Widget? child,
-    required LdHintType type,
     bool withBackground = false,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
@@ -84,7 +80,6 @@ class LdHint extends StatelessWidget {
 
   factory LdHint.canceled({
     Widget? child,
-    required LdHintType type,
     bool withBackground = false,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
@@ -102,7 +97,6 @@ class LdHint extends StatelessWidget {
 
   factory LdHint.loading({
     Widget? child,
-    required LdHintType type,
     bool withBackground = false,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
@@ -120,7 +114,6 @@ class LdHint extends StatelessWidget {
 
   factory LdHint.pending({
     Widget? child,
-    required LdHintType type,
     bool withBackground = false,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
@@ -138,7 +131,6 @@ class LdHint extends StatelessWidget {
 
   factory LdHint.ongoing({
     Widget? child,
-    required LdHintType type,
     bool withBackground = false,
     LdSize size = LdSize.m,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,

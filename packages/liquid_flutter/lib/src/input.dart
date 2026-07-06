@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/form_label.dart';
-import 'package:liquid_flutter/src/touchable/input_color.dart';
+
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// An input field
@@ -238,11 +237,11 @@ class _LdInputState extends State<LdInput> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          LdFormLabel(
-            label: widget.label,
-            size: widget.size,
-            disabled: widget.disabled,
-          ),
+          if (widget.label != null)
+            LdText.l(
+              widget.label!,
+              size: widget.size,
+            ),
           CallbackShortcuts(
             bindings: _shortcutBindings,
             child: LdTouchableSurface(
@@ -346,7 +345,7 @@ class _LdInputState extends State<LdInput> {
             ),
           )
         ],
-      ),
+      ).spaceS(),
     );
   }
 }

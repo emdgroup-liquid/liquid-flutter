@@ -51,17 +51,27 @@ class MonkeyDetailEditDemo extends StatelessWidget {
     task: form.control('task').value as String,
     due: form.control('due').value as DateTime,
   ),
-  itemsBuilder: (context, hooks) => [
-    LdReactiveFormItem.input(
+  items: [
+    LdReactiveFormItem<String>(
       key: 'task',
-      inputFieldHint: 'What do you want to do?',
       validators: [LdFormValidators.required],
+    ),
+    LdReactiveFormItem<DateTime>(
+      key: 'due',
+      validators: [LdFormValidators.required],
+    ),
+  ],
+  childrenBuilder: (context, hooks) => [
+    LdFormInput<String>(
+      formKey: 'task',
+      hint: 'What do you want to do?',
       onBlurred: hooks.onBlurred('task'),
     ),
-    LdReactiveFormItem.datePicker(
-      key: 'due',
+    // Arbitrary widgets can be placed anywhere alongside form fields.
+    const LdBanner(child: Text('Fill in all fields before saving.')),
+    LdFormDatePicker(
+      formKey: 'due',
       label: 'Due date',
-      validators: [LdFormValidators.required],
       onCommitted: hooks.onCommitted('due'),
     ),
   ],

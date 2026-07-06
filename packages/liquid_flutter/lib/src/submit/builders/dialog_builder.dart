@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/ld_with_implicit_delay.dart';
 import 'package:liquid_flutter/src/submit/builders/submit_button.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
@@ -86,7 +88,11 @@ class _LdSubmitDialogState<T, Arg> extends State<LdSubmitDialog<T, Arg>> {
     if (open) {
       _overlayController.show();
     } else {
-      _overlayController.hide();
+      Future.delayed(const Duration(milliseconds: 1500), () {
+        if (mounted) {
+          _overlayController.hide();
+        }
+      });
     }
   }
 
@@ -101,8 +107,16 @@ class _LdSubmitDialogState<T, Arg> extends State<LdSubmitDialog<T, Arg>> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               ldSpacerL,
-              const LdLoader(
-                size: 48,
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
+                switchInCurve: Curves.easeInOut,
+                switchOutCurve: Curves.easeInOut,
+                child: switch (controller.state.type) {
+                  LdSubmitStateType.loading => LdIndicator.loading(customSize: 24, key: const Key('loading-indicator')),
+                  LdSubmitStateType.result => LdIndicator.success(customSize: 24, key: const Key('success-indicator')),
+                  _ => SizedBox.shrink(),
+                },
               ),
               if (controller.config.loadingText != null)
                 LdText.p(
@@ -153,59 +167,71 @@ class _LdSubmitDialogState<T, Arg> extends State<LdSubmitDialog<T, Arg>> {
 
   Widget _overlayChildBuilder(BuildContext context) {
     final theme = LdTheme.of(context);
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: ColoredBox(
-            color: theme.palette.neutral.shades[8].withAlpha(150),
-          ),
-        ),
-        ModalBarrier(onDismiss: _handleDismiss),
-        Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minWidth: 300,
-              minHeight: 200,
-              maxWidth: 400,
-              maxHeight: 400,
-            ),
-            child: Container(
-              decoration: BoxDecoration(
-                color: LdTheme.of(context).background,
-                border: Border.all(
-                  color: LdTheme.of(context).stroke,
-                  width: theme.borderWidth,
+    return LdWithImplicitDelay(
+        delay: const Duration(milliseconds: 600),
+        initialCondition: false,
+        condition: _submitController.state.type == LdSubmitStateType.result,
+        builder: (context, condition) {
+          return AnimatedOpacity(
+            opacity: condition ? 0 : 1,
+            duration: const Duration(milliseconds: 300),
+            child: Stack(
+              children: [
+                ModalBarrier(
+                  onDismiss: _handleDismiss,
+                  color: theme.palette.neutral.shades[8].withAlpha(150),
                 ),
-                borderRadius: LdTheme.of(context).radius(LdSize.l),
-              ),
-              child: Column(
-                children: [
-                  if (_submitController.canCancel || _submitController.canRetry)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        LdButton.vague(
-                          onPressed: _handleDismiss,
-                          child: Icon(LucideIcons.x),
+                Padding(
+                  padding: MediaQuery.of(context).padding,
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        minWidth: 300,
+                        minHeight: 200,
+                        maxWidth: 400,
+                        maxHeight: 400,
+                      ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: LdTheme.of(context).background,
+                          border: Border.all(
+                            color: LdTheme.of(context).stroke,
+                            width: theme.borderWidth,
+                          ),
+                          borderRadius: LdTheme.of(context).radius(LdSize.l),
                         ),
-                      ],
-                    ),
-                  Expanded(
-                    child: Center(
-                      child: switch (_submitController.state.type) {
-                        (LdSubmitStateType.loading) => buildLoadingDialog(context, _submitController),
-                        (LdSubmitStateType.error) => buildErrorDialog(context, _submitController),
-                        (_) => Container(),
-                      },
+                        child: Column(
+                          children: [
+                            if (_submitController.canCancel || _submitController.canRetry)
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  LdButton.vague(
+                                    onPressed: _handleDismiss,
+                                    child: Icon(LucideIcons.x),
+                                  ),
+                                ],
+                              ),
+                            Expanded(
+                              child: Center(
+                                child: switch (_submitController.state.type) {
+                                  (LdSubmitStateType.loading || LdSubmitStateType.result) =>
+                                    buildLoadingDialog(context, _submitController),
+                                  (LdSubmitStateType.error) => buildErrorDialog(context, _submitController),
+                                  (_) => Container(),
+                                },
+                              ),
+                            ),
+                          ],
+                        ).padS(),
+                      ).padL().animate().scaleXY(),
                     ),
                   ),
-                ],
-              ).padS(),
-            ).padL(),
-          ),
-        ),
-      ],
-    );
+                ),
+              ],
+            ),
+          );
+        });
   }
 
   @override

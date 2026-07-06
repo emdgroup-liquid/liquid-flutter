@@ -48,37 +48,42 @@ List<Widget> generateAutoSpacings({
       next = next.child;
     }
 
-    _LdSizeItem spacer = switch ((child.runtimeType, next.runtimeType)) {
-      (LdText childText, _) => switch (next.runtimeType) {
-          (LdText nextText) => switch ((childText.type, nextText.type)) {
-              (LdTextType.headline, LdTextType.label) => _LdSizeItem(LdSize.s, 1),
-              (LdTextType.headline, _) => _LdSizeItem(LdSize.l, 2),
-              (LdTextType.paragraph, LdTextType.headline) => _LdSizeItem(LdSize.l, 3),
-              (LdTextType.paragraph, LdTextType.paragraph) => _LdSizeItem(LdSize.m, 1),
-              (_, LdTextType.label) => _LdSizeItem(LdSize.s, 1),
-              (LdTextType.label, _) => _LdSizeItem(LdSize.s, 1),
-              (_, _) => _LdSizeItem(defaultSpacing, 1)
-            },
-          (_) => _LdSizeItem(LdSize.m, 1)
+    _LdSizeItem spacer = switch ((child, next)) {
+      (LdListItem _, LdListItem _) => _LdSizeItem(LdSize.s, 0),
+      (LdText childText, LdText nextText) => switch ((childText.type, nextText.type)) {
+          (LdTextType.headline, LdTextType.label) => _LdSizeItem(LdSize.xs, 1),
+          (LdTextType.headline, _) => _LdSizeItem(LdSize.l, 2),
+          (LdTextType.paragraph, LdTextType.headline) => _LdSizeItem(LdSize.l, 3),
+          (LdTextType.paragraph, LdTextType.paragraph) => _LdSizeItem(LdSize.m, 1),
+          (_, LdTextType.label) => _LdSizeItem(LdSize.s, 1),
+          (LdTextType.label, _) => _LdSizeItem(LdSize.s, 1),
+          (_, _) => _LdSizeItem(defaultSpacing, 1)
         },
+      (LdText _, _) => _LdSizeItem(LdSize.m, 1),
       (LdButton _, LdButton _) => _LdSizeItem(LdSize.s, 1),
-      (LdRadio _, LdRadio _) => _LdSizeItem(LdSize.s, 1),
-      (LdCheckbox _, LdCheckbox _) => _LdSizeItem(LdSize.s, 1),
-      (LdToggle _, LdToggle _) => _LdSizeItem(LdSize.s, 1),
-      (LdBundle _, LdBundle _) => _LdSizeItem(LdSize.l, 2),
-      (LdDivider _, _) => _LdSizeItem(LdSize.l, 1),
+      (LdRadio _, LdRadio _) => _LdSizeItem(LdSize.xs, 1),
+      (LdCheckbox _, LdCheckbox _) => _LdSizeItem(LdSize.xs, 1),
+      (LdToggle _, LdToggle _) => _LdSizeItem(LdSize.xs, 1),
+      (LdDivider _, _) => _LdSizeItem(LdSize.l, 2),
       (LdCard _, LdCard _) => _LdSizeItem(LdSize.l, 2),
       (LdDrawerItemSection _, LdDrawerItemSection _) => _LdSizeItem(LdSize.xs, 1),
       (LdSectionHeader _, LdSectionHeader _) => _LdSizeItem(LdSize.l, 1),
+      (LdBundle _, LdBundle _) => _LdSizeItem(LdSize.l, 2),
+      (_, LdBundle _) => _LdSizeItem(LdSize.l, 1),
       (_, LdText nextText) => switch (nextText.type) {
-          (LdTextType.headline) => _LdSizeItem(LdSize.l, 2),
-          (_) => _LdSizeItem(defaultSpacing, 1)
+          LdTextType.headline => _LdSizeItem(LdSize.l, 2),
+          _ => _LdSizeItem(defaultSpacing, 1)
         },
+      (_, LdDivider _) => _LdSizeItem(LdSize.l, 1),
       (_, _) => _LdSizeItem(defaultSpacing, 1),
     };
 
     if (next is LdSpacer || child is LdSpacer) {
       spacer = _LdSizeItem(defaultSpacing, 0);
+    }
+
+    if (_isInputLike(child) && _isInputLike(next)) {
+      spacer = _LdSizeItem(LdSize.l, 1);
     }
 
     if (spacer.multiplier != 0) {
@@ -93,6 +98,15 @@ List<Widget> generateAutoSpacings({
   }
 
   return finalChildren;
+}
+
+bool _isInputLike(Widget child) {
+  return child is LdInput ||
+      child is LdChoose ||
+      child is LdDatePicker ||
+      child is LdTimePicker ||
+      child is LdSelect ||
+      child is LdSwitch;
 }
 
 class _LdSizeItem {

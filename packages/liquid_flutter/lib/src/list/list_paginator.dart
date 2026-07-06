@@ -330,6 +330,13 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     _updated(null);
   }
 
+  void removeItemById(IdType id) {
+    final index = getItemIndexById(id);
+    if (index == null) throw Exception('Item with id $id not found');
+    _items.remove(index);
+    _updated(null);
+  }
+
   /// Clears the record of which page offsets have already been requested.
   ///
   /// Call this after a local index mutation (e.g. shifting items to reposition
@@ -541,7 +548,6 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     BuildContext context,
     LdFetchReason effectiveReason,
   ) async {
-
     _isControlledRefresh = true;
     _setBusy(true);
     _markItemsPendingRefresh();
@@ -961,7 +967,6 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
     _requestedOffsets.add(offset);
     _setBusy(true);
-
 
     if (!context.mounted) {
       _mutex.release();

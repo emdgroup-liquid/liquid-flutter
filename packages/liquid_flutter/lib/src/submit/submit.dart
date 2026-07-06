@@ -57,6 +57,7 @@ class LdSubmit<T, Arg> extends StatefulWidget {
   final LdSubmitConfig<T, Arg>? config;
   final LdSubmitController<T, Arg>? controller;
   final Widget? child;
+  final bool? disabled;
   final Arg? arg;
   final bool Function(Arg? oldArg, Arg? newArg)? argEquals;
 
@@ -65,6 +66,7 @@ class LdSubmit<T, Arg> extends StatefulWidget {
     this.arg,
     this.config,
     this.controller,
+    this.disabled,
 
     /// Will default to [LdSubmitInlineBuilder] if not provided
     this.child,
@@ -91,6 +93,9 @@ class _LdSubmitState<T, Arg> extends State<LdSubmit<T, Arg>> {
     } else {
       _controller = LdSubmitController<T, Arg>(config: widget.config!, arg: _argNotifier);
       _createdController = true;
+    }
+    if (widget.disabled != null) {
+      _controller?.disabled = widget.disabled!;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _controller?.init();
@@ -124,6 +129,10 @@ class _LdSubmitState<T, Arg> extends State<LdSubmit<T, Arg>> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _controller?.init();
       });
+    }
+
+    if (widget.disabled != oldWidget.disabled && widget.disabled != null) {
+      _controller?.disabled = widget.disabled!;
     }
   }
 

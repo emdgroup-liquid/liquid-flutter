@@ -92,13 +92,89 @@ void main() {
         serverValues: {'title': 'server title', 'note': 'server note'},
         lastServerValues: lastServer,
         conflictPolicy: LdMonkeyFieldConflictPolicy.prompt,
-        fieldLabels: {'title': 'Title', 'note': 'Note'},
       );
 
       expect(form.control('title').getError(kLdMonkeyServerConflictKey), isNotNull);
       expect(form.control('note').getError(kLdMonkeyServerConflictKey), isNotNull);
       expect(form.control('title').value, 'my title');
       expect(lastServer['note'], 'server note');
+    });
+
+    test('re-triggers conflict when server resends same value after user resolved keepLocal', () async {
+      final form = FormGroup({
+        'title': FormControl<String>(value: 'my title'),
+      });
+      form.control('title').markAsDirty();
+      final lastServer = {'title': 'original'};
+
+      // First conflict: server sends 'server v1'
+      await ldMonkeyMergeFormFromServer(
+        form: form,
+        serverValues: {'title': 'server v1'},
+        lastServerValues: lastServer,
+        conflictPolicy: LdMonkeyFieldConflictPolicy.prompt,
+      );
+      expect(form.control('title').getError(kLdMonkeyServerConflictKey), isNotNull);
+      expect(lastServer['title'], 'server v1');
+
+      // User resolves by keeping local — removes the error
+      ldMonkeyResolveFieldConflict(
+        form: form,
+        conflict: LdMonkeyFieldConflict(
+          fieldKey: 'title',
+          localValue: 'my title',
+          serverValue: 'server v1',
+        ),
+        resolution: LdMonkeyFieldConflictResolution.keepLocal,
+        lastServerValues: lastServer,
+      );
+      expect(form.control('title').getError(kLdMonkeyServerConflictKey), isNull);
+      expect(form.control('title').dirty, isTrue);
+
+      // Server re-sends the same value 'server v1' — should re-trigger conflict
+      await ldMonkeyMergeFormFromServer(
+        form: form,
+        serverValues: {'title': 'server v1'},
+        lastServerValues: lastServer,
+        conflictPolicy: LdMonkeyFieldConflictPolicy.prompt,
+      );
+
+      expect(
+        form.control('title').getError(kLdMonkeyServerConflictKey),
+        isNotNull,
+        reason: 'Conflict should re-appear when server resends the same value after keepLocal resolution',
+      );
+    });
+
+    test('does not re-trigger conflict when same value is already showing as unresolved', () async {
+      final form = FormGroup({
+        'title': FormControl<String>(value: 'my title'),
+      });
+      form.control('title').markAsDirty();
+      final lastServer = {'title': 'original'};
+
+      // First conflict
+      await ldMonkeyMergeFormFromServer(
+        form: form,
+        serverValues: {'title': 'server v1'},
+        lastServerValues: lastServer,
+        conflictPolicy: LdMonkeyFieldConflictPolicy.prompt,
+      );
+      final errorBefore = form.control('title').getError(kLdMonkeyServerConflictKey);
+      expect(errorBefore, isNotNull);
+
+      // Server re-sends the same value while conflict is still unresolved — should not duplicate/reset
+      await ldMonkeyMergeFormFromServer(
+        form: form,
+        serverValues: {'title': 'server v1'},
+        lastServerValues: lastServer,
+        conflictPolicy: LdMonkeyFieldConflictPolicy.prompt,
+      );
+
+      // Error should still be present and identical (not re-set)
+      final errorAfter = form.control('title').getError(kLdMonkeyServerConflictKey);
+      expect(errorAfter, same(errorBefore),
+          reason: 'Existing unresolved conflict should not be replaced when server resends same value');
     });
 
     test('onFieldConflict resolves per field under prompt policy', () async {

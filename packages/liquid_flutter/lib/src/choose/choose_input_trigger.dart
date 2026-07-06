@@ -1,9 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/form_label.dart';
+
 import 'package:liquid_flutter/src/intersperse.dart';
-import 'package:liquid_flutter/src/touchable/input_color.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class LdChooseInputTrigger<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
@@ -40,8 +39,8 @@ class LdChooseInputTrigger<T extends Identifiable<IdType>, IdType> extends State
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        LdFormLabel(
-          label: label,
+        LdText.l(
+          label,
           size: size,
         ),
         LdTouchableSurface(
@@ -109,6 +108,6 @@ class LdChooseInputTrigger<T extends Identifiable<IdType>, IdType> extends State
           ),
         ),
       ],
-    );
+    ).spaceS();
   }
 }

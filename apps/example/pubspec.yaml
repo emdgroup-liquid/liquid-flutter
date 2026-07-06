@@ -49,6 +49,7 @@ dependencies:
     path: ../../packages/liquid_flutter_md
   hooks: ^1.0.0
   responsive_builder: ^0.7.1
+  reactive_forms: ^18.2.2
 
 dev_dependencies:
   flutter_test:

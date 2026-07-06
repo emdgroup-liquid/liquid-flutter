@@ -7,6 +7,7 @@ class LdButtonConfig {
     this.color,
     this.active,
     this.width,
+    this.onHover,
     this.disabled,
     this.focusNode,
     this.alignment,
@@ -25,6 +26,8 @@ class LdButtonConfig {
   final bool? active;
 
   final double? width;
+
+  final FutureOr<void> Function(bool)? onHover;
 
   final bool? disabled;
 
@@ -71,6 +74,7 @@ class LdButtonConfigProvider extends StatelessWidget {
             color: config.color ?? parentConfig.color,
             active: config.active ?? parentConfig.active,
             width: config.width ?? parentConfig.width,
+            onHover: config.onHover ?? parentConfig.onHover,
             disabled: config.disabled ?? parentConfig.disabled,
             focusNode: config.focusNode ?? parentConfig.focusNode,
             alignment: config.alignment ?? parentConfig.alignment,
@@ -96,6 +100,7 @@ class LdButton extends StatelessWidget {
     this.color,
     this.active,
     this.width,
+    this.onHover,
     this.disabled,
     this.focusNode,
     this.autoFocus = false,
@@ -121,6 +126,7 @@ class LdButton extends StatelessWidget {
     LdColor? color,
     bool? active,
     double? width,
+    FutureOr<void> Function(bool)? onHover,
     bool? disabled,
     FocusNode? focusNode,
     bool autoFocus = false,
@@ -130,7 +136,6 @@ class LdButton extends StatelessWidget {
     bool loading = false,
     String? loadingText,
     String? errorText,
-    LdButtonMode? mode,
     double? progress,
     LdSize? size,
     Widget? trailing,
@@ -144,6 +149,7 @@ class LdButton extends StatelessWidget {
       color: color,
       active: active,
       width: width,
+      onHover: onHover,
       disabled: disabled,
       focusNode: focusNode,
       autoFocus: autoFocus,
@@ -171,6 +177,7 @@ class LdButton extends StatelessWidget {
     LdColor? color,
     bool? active,
     double? width,
+    FutureOr<void> Function(bool)? onHover,
     bool? disabled,
     FocusNode? focusNode,
     bool autoFocus = false,
@@ -180,7 +187,6 @@ class LdButton extends StatelessWidget {
     bool loading = false,
     String? loadingText,
     String? errorText,
-    LdButtonMode? mode,
     double? progress,
     LdSize? size,
     Widget? trailing,
@@ -194,6 +200,7 @@ class LdButton extends StatelessWidget {
       color: color,
       active: active,
       width: width,
+      onHover: onHover,
       disabled: disabled,
       focusNode: focusNode,
       autoFocus: autoFocus,
@@ -221,6 +228,7 @@ class LdButton extends StatelessWidget {
     LdColor? color,
     bool? active,
     double? width,
+    FutureOr<void> Function(bool)? onHover,
     bool? disabled,
     FocusNode? focusNode,
     bool autoFocus = false,
@@ -230,7 +238,6 @@ class LdButton extends StatelessWidget {
     bool loading = false,
     String? loadingText,
     String? errorText,
-    LdButtonMode? mode,
     double? progress,
     LdSize? size,
     Widget? trailing,
@@ -244,6 +251,7 @@ class LdButton extends StatelessWidget {
       color: color,
       active: active,
       width: width,
+      onHover: onHover,
       disabled: disabled,
       focusNode: focusNode,
       autoFocus: autoFocus,
@@ -271,6 +279,7 @@ class LdButton extends StatelessWidget {
     LdColor? color,
     bool? active,
     double? width,
+    FutureOr<void> Function(bool)? onHover,
     bool? disabled,
     FocusNode? focusNode,
     bool autoFocus = false,
@@ -280,7 +289,6 @@ class LdButton extends StatelessWidget {
     bool loading = false,
     String? loadingText,
     String? errorText,
-    LdButtonMode? mode,
     double? progress,
     LdSize? size,
     Widget? trailing,
@@ -294,6 +302,7 @@ class LdButton extends StatelessWidget {
       color: color,
       active: active,
       width: width,
+      onHover: onHover,
       disabled: disabled,
       focusNode: focusNode,
       autoFocus: autoFocus,
@@ -316,6 +325,8 @@ class LdButton extends StatelessWidget {
   final Widget child;
 
   final FutureOr<void> Function() onPressed;
+
+  final FutureOr<void> Function(bool)? onHover;
 
   final bool? disabled;
 
@@ -363,6 +374,7 @@ class LdButton extends StatelessWidget {
     LdColor? color,
     bool? active,
     double? width,
+    FutureOr<void> Function(bool)? onHover,
     bool? disabled,
     FocusNode? focusNode,
     bool autoFocus = false,
@@ -387,6 +399,7 @@ class LdButton extends StatelessWidget {
         color: LdTheme.of(context).warning,
         active: active,
         width: width,
+        onHover: onHover,
         disabled: disabled,
         focusNode: focusNode,
         autoFocus: autoFocus,
@@ -415,6 +428,7 @@ class LdButton extends StatelessWidget {
     LdColor? color,
     bool? active,
     double? width,
+    FutureOr<void> Function(bool)? onHover,
     bool? disabled,
     FocusNode? focusNode,
     bool autoFocus = false,
@@ -439,6 +453,7 @@ class LdButton extends StatelessWidget {
         color: LdTheme.of(context).error,
         active: active,
         width: width,
+        onHover: onHover,
         disabled: disabled,
         focusNode: focusNode,
         autoFocus: autoFocus,
@@ -467,6 +482,7 @@ class LdButton extends StatelessWidget {
     LdColor? color,
     bool? active,
     double? width,
+    FutureOr<void> Function(bool)? onHover,
     bool? disabled,
     FocusNode? focusNode,
     bool autoFocus = false,
@@ -491,6 +507,7 @@ class LdButton extends StatelessWidget {
         color: LdTheme.of(context).success,
         active: active,
         width: width,
+        onHover: onHover,
         disabled: disabled,
         focusNode: focusNode,
         autoFocus: autoFocus,
@@ -521,6 +538,7 @@ class LdButton extends StatelessWidget {
       color: color ?? config?.color,
       active: active ?? config?.active,
       width: width ?? config?.width,
+      onHover: onHover ?? config?.onHover,
       disabled: disabled ?? config?.disabled ?? false,
       focusNode: focusNode ?? config?.focusNode,
       autoFocus: autoFocus,

@@ -158,7 +158,6 @@ class LdListItem extends StatelessWidget {
     Widget? title,
     bool? tradeLeadingForSelectionControl,
     FocusNode? focusNode,
-    Widget? trailing,
     LdColor? color,
     double? width,
     bool? isOdd,

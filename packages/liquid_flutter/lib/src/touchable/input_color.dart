@@ -1,6 +1,4 @@
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/touchable/touchable_colors.dart';
-import 'package:liquid_flutter/src/touchable/touchable_status.dart';
 
 /// Input surface mode - specialized for input fields with validation states
 LdColorBundle inputColor(

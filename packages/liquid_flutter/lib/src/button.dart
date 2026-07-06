@@ -6,14 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/touchable/ghost_color.dart';
-import 'package:liquid_flutter/src/touchable/solid_color.dart';
 import 'package:liquid_flutter/src/touchable/vague_color.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
-
-import 'touchable/touchable_colors.dart';
-import 'touchable/touchable_status.dart';
 
 part 'button.variants.g.dart';
 
@@ -33,6 +28,7 @@ enum LdButtonMode { filled, outline, ghost, vague }
 class _LdButtonWidget extends StatefulWidget {
   final Widget child;
   final FutureOr<void> Function() onPressed;
+  final FutureOr<void> Function(bool isHovering)? onHover;
   final bool disabled;
   final FocusNode? focusNode;
   final Widget? trailing;
@@ -63,6 +59,7 @@ class _LdButtonWidget extends StatefulWidget {
     @ContextConfigurable() this.color,
     @ContextConfigurable() this.active,
     @ContextConfigurable() this.width,
+    @ContextConfigurable() this.onHover,
     @ContextConfigurable() this.disabled = false,
     @ContextConfigurable() this.focusNode,
     this.autoFocus = false,
@@ -266,6 +263,7 @@ class _LdButtonState extends State<_LdButtonWidget> {
       focusNode: widget.focusNode,
       hitTestBehavior: HitTestBehavior.opaque,
       autoFocus: widget.autoFocus,
+      onHover: widget.onHover,
       active: widget.active ?? false,
       disabled: widget.disabled || isLoading,
       onPressed: _onTap,

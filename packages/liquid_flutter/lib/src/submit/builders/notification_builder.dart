@@ -92,7 +92,6 @@ class _LdSubmitNotificationState<T, Arg> extends State<_LdSubmitNotification<T, 
       _notification = _notificationsController?.addNotification(
         LdNotification(
           message: localizedError.message,
-          subMessage: localizedError.moreInfo,
           type: LdNotificationType.error,
         ),
       );

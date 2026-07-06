@@ -226,14 +226,29 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
   String get fieldConflictUseAllServer => 'Alle vom Server übernehmen';
 
   @override
-  String get fieldConflictYours => 'Ihr Wert';
+  String get fieldConflictKeepMine => 'Keep mine';
 
   @override
-  String get fieldConflictServer => 'Serverwert';
+  String get fieldConflictUseServer => 'Use server';
 
   @override
   String get noItemsMatchFilter => 'Keine Elemente entsprechen Ihren Filtern';
 
   @override
   String get clearFilters => 'Filter zurücksetzen';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get saving => 'Saving';
+
+  @override
+  String get create => 'Create';
+
+  @override
+  String get creating => 'Creating..';
+
+  @override
+  String get discardChanges => 'Dicard changes';
 }

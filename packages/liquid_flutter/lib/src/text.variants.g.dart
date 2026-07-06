@@ -29,7 +29,6 @@ class LdText extends StatelessWidget {
     bool processLinks = false,
     LdSize size = LdSize.m,
     TextAlign? textAlign,
-    LdTextType? type = LdTextType.paragraph,
     Key? key,
   }) {
     return LdText(
@@ -59,9 +58,7 @@ class LdText extends StatelessWidget {
     void Function(String)? onLinkTap,
     TextOverflow? overflow,
     bool processLinks = false,
-    LdSize size = LdSize.m,
     TextAlign? textAlign,
-    LdTextType? type = LdTextType.paragraph,
     Key? key,
   }) {
     return LdText(
@@ -91,9 +88,7 @@ class LdText extends StatelessWidget {
     void Function(String)? onLinkTap,
     TextOverflow? overflow,
     bool processLinks = false,
-    LdSize size = LdSize.m,
     TextAlign? textAlign,
-    LdTextType? type = LdTextType.paragraph,
     Key? key,
   }) {
     return LdText(
@@ -123,9 +118,7 @@ class LdText extends StatelessWidget {
     void Function(String)? onLinkTap,
     TextOverflow? overflow,
     bool processLinks = false,
-    LdSize size = LdSize.m,
     TextAlign? textAlign,
-    LdTextType? type = LdTextType.paragraph,
     Key? key,
   }) {
     return LdText(
@@ -155,9 +148,7 @@ class LdText extends StatelessWidget {
     void Function(String)? onLinkTap,
     TextOverflow? overflow,
     bool processLinks = false,
-    LdSize size = LdSize.m,
     TextAlign? textAlign,
-    LdTextType? type = LdTextType.paragraph,
     Key? key,
   }) {
     return LdText(
@@ -189,7 +180,6 @@ class LdText extends StatelessWidget {
     bool processLinks = false,
     LdSize size = LdSize.m,
     TextAlign? textAlign,
-    LdTextType? type = LdTextType.paragraph,
     Key? key,
   }) {
     return LdText(
@@ -219,9 +209,7 @@ class LdText extends StatelessWidget {
     void Function(String)? onLinkTap,
     TextOverflow? overflow,
     bool processLinks = false,
-    LdSize size = LdSize.m,
     TextAlign? textAlign,
-    LdTextType? type = LdTextType.paragraph,
     Key? key,
   }) {
     return LdText(
@@ -251,9 +239,7 @@ class LdText extends StatelessWidget {
     void Function(String)? onLinkTap,
     TextOverflow? overflow,
     bool processLinks = false,
-    LdSize size = LdSize.m,
     TextAlign? textAlign,
-    LdTextType? type = LdTextType.paragraph,
     Key? key,
   }) {
     return LdText(
@@ -283,9 +269,7 @@ class LdText extends StatelessWidget {
     void Function(String)? onLinkTap,
     TextOverflow? overflow,
     bool processLinks = false,
-    LdSize size = LdSize.m,
     TextAlign? textAlign,
-    LdTextType? type = LdTextType.paragraph,
     Key? key,
   }) {
     return LdText(
@@ -317,7 +301,6 @@ class LdText extends StatelessWidget {
     bool processLinks = false,
     LdSize size = LdSize.m,
     TextAlign? textAlign,
-    LdTextType? type = LdTextType.paragraph,
     Key? key,
   }) {
     return LdText(
@@ -347,9 +330,7 @@ class LdText extends StatelessWidget {
     void Function(String)? onLinkTap,
     TextOverflow? overflow,
     bool processLinks = false,
-    LdSize size = LdSize.m,
     TextAlign? textAlign,
-    LdTextType? type = LdTextType.paragraph,
     Key? key,
   }) {
     return LdText(
@@ -379,9 +360,7 @@ class LdText extends StatelessWidget {
     void Function(String)? onLinkTap,
     TextOverflow? overflow,
     bool processLinks = false,
-    LdSize size = LdSize.m,
     TextAlign? textAlign,
-    LdTextType? type = LdTextType.paragraph,
     Key? key,
   }) {
     return LdText(
@@ -411,9 +390,7 @@ class LdText extends StatelessWidget {
     void Function(String)? onLinkTap,
     TextOverflow? overflow,
     bool processLinks = false,
-    LdSize size = LdSize.m,
     TextAlign? textAlign,
-    LdTextType? type = LdTextType.paragraph,
     Key? key,
   }) {
     return LdText(

@@ -223,6 +223,7 @@ class LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Stat
         ? widget.listController as LdListController<T, IdType>
         : null;
     final index = listController?.getItemIndexById(initialSelectedItems.first);
+
     if (index == null) {
       // Item is not loaded yet, if there is getOffsetById, we can use that to scroll to the correct position
       if (listController?.model.getOffsetById != null) {
@@ -234,6 +235,9 @@ class LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Stat
             cache: listController.cache,
           ),
         );
+        if (offset == -1) {
+          return;
+        }
 
         if (offset != null) {
           double averageHeight = 0;
@@ -271,9 +275,9 @@ class LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Stat
         if (index != null) {
           _scrollController.animateTo(index.toDouble() * averageHeight,
               duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+          await Future.delayed(const Duration(milliseconds: 500));
+          _selectionController.getFocusNodeForItem(initialSelectedItems.first).requestFocus();
         }
-        await Future.delayed(const Duration(milliseconds: 500));
-        _selectionController.getFocusNodeForItem(initialSelectedItems.first).requestFocus();
       }
     }
   }
@@ -405,7 +409,11 @@ class LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Stat
                 child: Focus(
                   focusNode: _selectionController.focusNode,
                   autofocus: true,
-                  onFocusChange: (_) {},
+                  onFocusChange: (hasFocus) {
+                    if (!hasFocus) {
+                      _selectionController.resetModifierKeys();
+                    }
+                  },
                   onKeyEvent: _onKeyEvent,
                   child: Container(),
                 ),
@@ -436,7 +444,11 @@ class LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Stat
       child: Focus(
         focusNode: _selectionController.focusNode,
         autofocus: true,
-        onFocusChange: (_) {},
+        onFocusChange: (hasFocus) {
+          if (!hasFocus) {
+            _selectionController.resetModifierKeys();
+          }
+        },
         onKeyEvent: _onKeyEvent,
         child: Stack(
           fit: StackFit.expand,

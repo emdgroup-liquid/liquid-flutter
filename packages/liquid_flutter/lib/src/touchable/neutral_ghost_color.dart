@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/touchable/touchable_colors.dart';
-import 'package:liquid_flutter/src/touchable/touchable_status.dart';
 
 LdColorBundle neutralGhostColor(LdTheme theme, LdTouchableStatus status) {
   final isOdd = status.isOdd;
@@ -35,7 +33,7 @@ LdColorBundle neutralGhostColor(LdTheme theme, LdTouchableStatus status) {
       theme: theme,
       surface: switch (status.onSurface) {
         true => theme.neutralShade(theme.isDark ? -1 : 3),
-        false => theme.neutralShade(2),
+        false => theme.neutralShade(theme.isDark ? 3 : 4),
       },
       border: border,
       iconColor: palette.primary,
@@ -47,7 +45,7 @@ LdColorBundle neutralGhostColor(LdTheme theme, LdTouchableStatus status) {
       theme: theme,
       surface: switch (status.onSurface) {
         true => theme.neutralShade(2),
-        false => theme.neutralShade(2),
+        false => theme.neutralShade(3),
       },
       border: border,
       iconColor: palette.primary,

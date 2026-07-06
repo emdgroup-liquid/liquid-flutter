@@ -135,7 +135,7 @@ abstract class LdModel<T extends Identifiable<IdType>, IdType, TCreate, TUpdate>
         index: index,
       );
 
-  Future<void> update(
+  Future<T?> update(
     BuildContext context,
     IdType id,
     TUpdate payload, {

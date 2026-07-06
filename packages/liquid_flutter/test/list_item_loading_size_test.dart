@@ -64,7 +64,7 @@ void main() {
         tester,
         // [LdList] wraps every item with `MediaQuery.padding + theme.pad()`.
         configPadding: (theme) => theme.pad(),
-        leading: const LdAvatar(emoji: true, child: LdText("🐒")),
+        leading: const LdAvatar(child: LdText("🐒")),
         subtitle: const Text("Due tomorrow"),
         hasLeading: true,
         hasSubtitle: true,
@@ -77,7 +77,7 @@ void main() {
       final sizes = await _measure(
         tester,
         configPadding: (theme) => null,
-        leading: const LdAvatar(emoji: true, child: LdText("🐒")),
+        leading: const LdAvatar(child: LdText("🐒")),
         subtitle: const Text("Due tomorrow"),
         hasLeading: true,
         hasSubtitle: true,

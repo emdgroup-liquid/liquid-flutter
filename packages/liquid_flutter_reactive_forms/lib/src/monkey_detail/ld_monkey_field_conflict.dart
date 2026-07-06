@@ -17,9 +17,6 @@ class LdMonkeyFieldConflict {
   /// The control key of the conflicted field.
   final String fieldKey;
 
-  /// Human-readable label for the field, when available.
-  final String? label;
-
   /// The value the user currently has in the (dirty) control.
   final Object? localValue;
 
@@ -30,7 +27,6 @@ class LdMonkeyFieldConflict {
     required this.fieldKey,
     required this.localValue,
     required this.serverValue,
-    this.label,
   });
 }
 
