@@ -68,7 +68,7 @@ class _MyAppState extends State<MyApp> {
       child: Builder(
         builder: (BuildContext context) {
           return LdNotificationProvider(
-              child: LdNotificationPortal(
+              child: LdNotificationPortal(  // renders notification toasts
                 child: LdThemeProvider(
                 screenRadius: Future.value(widget.screenRadius),
                 windowMaximizedStream:
@@ -103,7 +103,7 @@ class _MyAppState extends State<MyApp> {
 
 3. **CallbackShortcuts**: Optional but recommended for keyboard shortcuts. Can be omitted if not needed.
 
-4. **LdNotificationProvider**: Sets up the `LdNotificationsController` in the widget tree. To actually render notification toasts on screen, also wrap the content with **`LdNotificationPortal`**.
+4. **LdNotificationProvider** + **LdNotificationPortal**: `LdNotificationProvider` sets up the `LdNotificationsController` in the widget tree. `LdNotificationPortal` (a direct child) renders the actual notification toasts on screen — both are required.
 
 5. **LdThemeProvider**: Required for theme management. Pass `screenRadius: getScreenRadius()` (from `liquid_flutter_window_utils`) for device/window corner radius. On macOS, also pass `windowMaximizedStream` so radius becomes `0` when the window is maximized.
 
@@ -122,12 +122,20 @@ class AppRouter {
   late final router = GoRouter(
     debugLogDiagnostics: true, // Set to false in production
     initialLocation: "/",
+    redirect: ldLocationLockRedirect, // blocks navigation when detail forms are dirty
     routes: [
       // Your routes here
     ],
   );
 }
 ```
+
+For apps with custom redirects, compose them:
+```dart
+redirect: ldComposeGoRouterRedirects([ldLocationLockRedirect, myRedirect]),
+```
+
+`LdThemeProvider` mounts `LdLocationLockRegistry` automatically, which `ldLocationLockRedirect` consults.
 
 ## Key Points
 
