@@ -1,3 +1,14 @@
+## 0.0.5-4
+Released on: 7/7/2026, changelog automatically generated.
+
+### API Changes
+
+#### 👀 Patch changes
+
+**`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_emd_theme/v0.0.5-3..liquid_flutter_emd_theme/v0.0.5-4#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
+- 📦 `liquid_flutter` version changed: from `^23.0.0-4` to `^23.0.0-7`
+
+
 ## 0.0.5-3
 Released on: 6/23/2026.
 
