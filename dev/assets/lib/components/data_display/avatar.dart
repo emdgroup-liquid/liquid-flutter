@@ -30,7 +30,28 @@ class _AvatarDemoState extends State<AvatarDemo> {
                 LdAvatar(child: const Icon(LdIcons.user)),
                 LdAvatar(child: const Text("AB")),
                 LdAvatar(child: const Text("JD")),
-                LdAvatar(emoji: true, child: const LdText("😊")),
+                LdAvatar(child: const LdEmoji("😊")),
+              ],
+            ).spaceM(),
+          ),
+          ComponentWell(
+            title: const Text("Emoji Avatars (optically centred)"),
+            description: const Text(
+              "LdEmoji computes the visual centroid of the rendered glyph and "
+              "applies a translation so the perceived centre of the emoji "
+              "aligns with the geometric centre of the avatar. "
+              "Emojis like 🚗 (baseline-anchored) or 👑 (top-anchored) "
+              "benefit most.",
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                LdAvatar(child: LdEmoji("🚗")),
+                LdAvatar(child: LdEmoji("👑")),
+                LdAvatar(child: LdEmoji("🏠")),
+                LdAvatar(child: LdEmoji("🌿")),
+                LdAvatar(child: LdEmoji("⚡")),
+                LdAvatar(child: LdEmoji("🎯")),
               ],
             ).spaceM(),
           ),
