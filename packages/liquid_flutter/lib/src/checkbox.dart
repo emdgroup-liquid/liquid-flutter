@@ -70,11 +70,6 @@ class _LdCheckboxState extends State<_LdCheckboxWidget> {
 
     final checkboxSize = theme.labelSize(size) * 1.5;
 
-    final label = LdText.l(
-      widget.label ?? '',
-      size: widget.size,
-    );
-
     return LdTouchableSurface(
       key: const Key('ldCheckbox_touchable'),
       hitTestBehavior: HitTestBehavior.opaque,
@@ -125,7 +120,11 @@ class _LdCheckboxState extends State<_LdCheckboxWidget> {
                   ),
                 ),
               ),
-              Flexible(child: label),
+              if (widget.label != null)
+                LdText.l(
+                  widget.label ?? '',
+                  size: widget.size,
+                )
             ],
           ).spaceXS(),
         );

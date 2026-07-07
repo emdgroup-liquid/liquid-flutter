@@ -68,32 +68,35 @@ class _LdMonkeyPickerScopeState<T extends Identifiable<IdType>, IdType> extends 
   Widget build(BuildContext context) {
     return ListenableProvider<LdListController<T, IdType>>.value(
       value: widget.repository,
-      child: Provider<LdMonkeyInteractionMode>.value(
-        value: LdMonkeyInteractionMode.pick,
-        child: Provider<LdMonkeyActions<T, IdType>>.value(
-          value: widget.actions,
-          child: Provider<LdMonkeyActionScope<T, IdType>>(
-            create: (_) => LdMonkeyActionScope<T, IdType>(),
-            child: LdMonkeyActionHost<T, IdType>(
-              actions: widget.actions,
-              child: LdMonkeyRouteDefinitionsResolver<T, IdType>(
-                filtersBuilder: widget.filtersBuilder ?? _defaultFiltersBuilder,
-                sortOptionsBuilder: widget.sortOptionsBuilder ?? _defaultSortOptionsBuilder,
-                child: (context, resolved) {
-                  _applyResolved(resolved);
-                  return LdEphemeralMonkeyAdapter<T, IdType>(
-                    controller: _controller,
-                    child: _LdMonkeyPickerPage<T, IdType>(
-                      label: widget.label,
-                      multiple: widget.multiple,
-                      allowEmpty: widget.allowEmpty,
-                      initialSelection: widget.initialSelection,
-                      itemBuilder: widget.itemBuilder,
-                      filterChipConfigs: widget.filterChipConfigs,
-                      buildList: widget.buildList,
-                    ),
-                  );
-                },
+      child: Provider<LdMonkeySearchFocusNode>(
+        create: (_) => LdMonkeySearchFocusNode(focusNode: FocusNode()),
+        child: Provider<LdMonkeyInteractionMode>.value(
+          value: LdMonkeyInteractionMode.pick,
+          child: Provider<LdMonkeyActions<T, IdType>>.value(
+            value: widget.actions,
+            child: Provider<LdMonkeyActionScope<T, IdType>>(
+              create: (_) => LdMonkeyActionScope<T, IdType>(),
+              child: LdMonkeyActionHost<T, IdType>(
+                actions: widget.actions,
+                child: LdMonkeyRouteDefinitionsResolver<T, IdType>(
+                  filtersBuilder: widget.filtersBuilder ?? _defaultFiltersBuilder,
+                  sortOptionsBuilder: widget.sortOptionsBuilder ?? _defaultSortOptionsBuilder,
+                  child: (context, resolved) {
+                    _applyResolved(resolved);
+                    return LdEphemeralMonkeyAdapter<T, IdType>(
+                      controller: _controller,
+                      child: _LdMonkeyPickerPage<T, IdType>(
+                        label: widget.label,
+                        multiple: widget.multiple,
+                        allowEmpty: widget.allowEmpty,
+                        initialSelection: widget.initialSelection,
+                        itemBuilder: widget.itemBuilder,
+                        filterChipConfigs: widget.filterChipConfigs,
+                        buildList: widget.buildList,
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ),

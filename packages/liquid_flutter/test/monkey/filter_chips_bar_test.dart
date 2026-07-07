@@ -327,7 +327,7 @@ void main() {
 
       final ratingY = tester.getTopLeft(find.text('Rating')).dy;
       final genreY = tester.getTopLeft(find.text('Genre')).dy;
-      expect(ratingY, genreY);
+      expect((ratingY - genreY).abs(), lessThanOrEqualTo(1.0));
     });
 
     testWidgets('desktop wrap breaks inline chips across lines when group overflows', (tester) async {

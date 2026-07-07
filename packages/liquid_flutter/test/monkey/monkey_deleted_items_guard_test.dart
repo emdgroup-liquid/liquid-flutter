@@ -31,7 +31,8 @@ void main() {
         ),
       );
 
-      await tester.pump();
+      await tester.pump(); // drain stream delivery microtasks
+      await tester.pump(const Duration(milliseconds: 500)); // fire the debounce timer
 
       expect(shellState.currentSelection, equals({2}));
       expect(shellState.currentViewing, isEmpty);
@@ -64,7 +65,8 @@ void main() {
         );
       }
 
-      await tester.pump();
+      await tester.pump(); // drain stream delivery microtasks
+      await tester.pump(const Duration(milliseconds: 500)); // fire the debounce timer
 
       expect(shellState.currentSelection, isEmpty);
       expect(shellState.currentViewing, isEmpty);

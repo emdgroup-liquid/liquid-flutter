@@ -160,6 +160,7 @@ void main() {
     // Complete the action
     completer.complete(12);
 
+    await tester.pump(const Duration(milliseconds: 1500));
     await tester.pumpAndSettle();
 
     expect(find.byType(LdLoader), findsNothing);

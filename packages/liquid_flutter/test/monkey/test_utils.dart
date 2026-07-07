@@ -497,30 +497,33 @@ Widget wrapMonkeyMasterPage<T extends Identifiable<IdType>, IdType>({
       localizationsDelegates: LiquidLocalizations.localizationsDelegates,
       home: Provider<LdMonkeyActionScope<T, IdType>>(
         create: (_) => LdMonkeyActionScope<T, IdType>(),
-        child: ListenableProvider<LdListController<T, IdType>>.value(
-          value: repository,
-          child: Provider<LdMonkeyRouterController<T, IdType>>.value(
-            value: shellState.controllerDelegate,
-            child: ListenableBuilder(
-              listenable: shellState,
-              builder: (context, _) {
-                return Provider<LdMonkeySortAndFilterState<T, IdType>>.value(
-                  value: shellState!.state,
-                  child: Provider<LdMonkeySelection<T, IdType>>.value(
-                    value: shellState.selection,
-                    child: Provider<LdMonkeyActions<T, IdType>>.value(
-                      value: actions,
-                      child: Provider<LdMonkeyEffectiveLayoutMode>.value(
-                        value: layoutMode,
-                        child: LdMonkeyActionHost<T, IdType>(
-                          actions: actions,
-                          child: child,
+        child: Provider<LdMonkeySearchFocusNode>(
+          create: (_) => LdMonkeySearchFocusNode(focusNode: FocusNode()),
+          child: ListenableProvider<LdListController<T, IdType>>.value(
+            value: repository,
+            child: Provider<LdMonkeyRouterController<T, IdType>>.value(
+              value: shellState.controllerDelegate,
+              child: ListenableBuilder(
+                listenable: shellState,
+                builder: (context, _) {
+                  return Provider<LdMonkeySortAndFilterState<T, IdType>>.value(
+                    value: shellState!.state,
+                    child: Provider<LdMonkeySelection<T, IdType>>.value(
+                      value: shellState.selection,
+                      child: Provider<LdMonkeyActions<T, IdType>>.value(
+                        value: actions,
+                        child: Provider<LdMonkeyEffectiveLayoutMode>.value(
+                          value: layoutMode,
+                          child: LdMonkeyActionHost<T, IdType>(
+                            actions: actions,
+                            child: child,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ),

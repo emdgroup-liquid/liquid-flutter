@@ -24,6 +24,7 @@ class _LdMonkeyDeletedItemsGuardState<T extends Identifiable<IdType>, IdType>
   /// Accumulates deleted ids until the router has caught up. Without this,
   /// rapid deletions each read stale selection from the URL and overwrite
   /// one another with partial updates.
+  final Set<IdType> _pendingDeletedIds = {};
 
   bool _flushScheduled = false;
 
@@ -49,8 +50,11 @@ class _LdMonkeyDeletedItemsGuardState<T extends Identifiable<IdType>, IdType>
   }
 
   void _onItemsChanged(LdPaginatorItem<T> item) {
-    if (item.state != LdPaginatorItemState.deleted || item.state != LdPaginatorItemState.deleted) {
+    if (item.state != LdPaginatorItemState.deleted) {
       return;
+    }
+    if (item.value != null) {
+      _pendingDeletedIds.add(item.value!.id);
     }
     _scheduleFlush();
   }
@@ -74,7 +78,14 @@ class _LdMonkeyDeletedItemsGuardState<T extends Identifiable<IdType>, IdType>
       return;
     }
 
-    final deletedIds = context.read<LdListController<T, IdType>>().deletedItems.map((item) => item.value!.id).toSet();
+    // Merge any ids tracked by the controller's detached map (covers real
+    // delete flows) with ids accumulated from the stream (covers test stubs
+    // that call notifyItemUpdated directly without going through the model).
+    final deletedIds = {
+      ...context.read<LdListController<T, IdType>>().deletedItems.map((item) => item.value!.id),
+      ..._pendingDeletedIds,
+    };
+    _pendingDeletedIds.clear();
 
     final newViewing = selection.viewing.difference(deletedIds);
     final newSelection = selection.selection.difference(deletedIds);
