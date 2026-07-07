@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -20,7 +21,13 @@ class LdNavigationTab {
 }
 
 class LdTabNavigation extends StatefulWidget {
-  final String activeRoute;
+  /// The currently active route. Used to determine which tab is highlighted
+  /// when [pageController] is not provided, or to supplement initial state
+  /// when [pageController] is provided.
+  ///
+  /// Either [activeRoute] or [pageController] must be non-null.
+  final String? activeRoute;
+
   final void Function(String route) onTabPressed;
   final List<LdNavigationTab> tabs;
   final LdAppBarAttachedMode attachedMode;
@@ -35,6 +42,21 @@ class LdTabNavigation extends StatefulWidget {
 
   final double minTabWidth;
 
+  /// Optional [PageController] to keep the tab indicator in continuous sync
+  /// with a [PageView]. When provided:
+  ///
+  /// - The indicator tracks [PageController.page] frame-by-frame during swipes
+  ///   (spring is bypassed while the page is scrolling, then re-enabled on
+  ///   release so the indicator settles with the characteristic bounce).
+  /// - Tapping a tab calls [PageController.animateToPage] in addition to
+  ///   [onTabPressed].
+  /// - Dragging the tab indicator also calls [PageController.animateToPage]
+  ///   on release.
+  ///
+  /// The [PageController.initialPage] is used to seed the initial indicator
+  /// position when [activeRoute] is null.
+  final PageController? pageController;
+
   /// The subtree that this tab bar wraps.
   final Widget child;
 
@@ -42,7 +64,7 @@ class LdTabNavigation extends StatefulWidget {
 
   const LdTabNavigation({
     super.key,
-    required this.activeRoute,
+    this.activeRoute,
     required this.tabs,
     this.backgroundColor,
     this.shadowMode = LdAppBarShadowMode.adaptive,
@@ -57,7 +79,11 @@ class LdTabNavigation extends StatefulWidget {
     this.position = LdAppBarPositionMode.adaptive,
     this.scrollBehavior = LdAppBarScrollBehavior.static,
     this.minTabWidth = 75,
-  });
+    this.pageController,
+  }) : assert(
+         activeRoute != null || pageController != null,
+         'LdTabNavigation: either activeRoute or pageController must be provided.',
+       );
 
   @override
   State<LdTabNavigation> createState() => _LdTabNavigationState();
@@ -67,12 +93,97 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
 
+  /// Integer index of the currently highlighted tab. Used when [activeRoute]
+  /// is null and the position is driven by [pageController].
+  int _currentPageIndex = 0;
+
+  /// When true, the [LdSpring] is bypassed and the indicator follows the
+  /// [pageController] position directly (no lag during swipe).
+  bool _springOverridden = false;
+
+  // ── PageController wiring ──────────────────────────────────────────────────
+
+  void _attachPageController() {
+    final pc = widget.pageController;
+    if (pc == null) return;
+    pc.addListener(_onPageControllerUpdate);
+    // Seed the index from the initial page if activeRoute is absent.
+    if (widget.activeRoute == null) {
+      _currentPageIndex = pc.initialPage.clamp(0, _tabCount - 1);
+    }
+  }
+
+  void _detachPageController(PageController? pc) {
+    pc?.removeListener(_onPageControllerUpdate);
+  }
+
+  void _onPageControllerUpdate() {
+    final pc = widget.pageController;
+    if (pc == null || !pc.hasClients) return;
+    final page = pc.page;
+    if (page == null) return;
+    _updateIndicatorFromPage(page);
+  }
+
+  /// Translates a fractional [page] value (e.g. 1.37 mid-swipe) into a pixel
+  /// indicator position. Overrides the spring while the page is non-integer so
+  /// the indicator follows the finger directly; releases the spring once the
+  /// page settles.
+  ///
+  /// The active tab highlight ([_currentPageIndex]) is only committed once the
+  /// page fully settles — matching the behaviour of dragging the indicator
+  /// directly, where the active tab only updates on drag end.
+  void _updateIndicatorFromPage(double page) {
+    final isScrolling = (page - page.roundToDouble()).abs() > 0.001;
+    final newPosition = page.clamp(0, _tabCount - 1) * _tabStride;
+
+    setState(() {
+      // Only snap the active-tab highlight when the page has settled to an
+      // integer. Mid-swipe the indicator moves but no tab becomes active yet.
+      if (!isScrolling) {
+        _currentPageIndex = page.round().clamp(0, _tabCount - 1);
+      }
+      _indicatorPosition = newPosition;
+      _springOverridden = isScrolling;
+    });
+
+    if (!isScrolling) {
+      _scrollToIndicator();
+    }
+  }
+
+  // ── Lifecycle ──────────────────────────────────────────────────────────────
+
+  @override
+  void initState() {
+    super.initState();
+    _attachPageController();
+  }
+
   @override
   void dispose() {
+    _detachPageController(widget.pageController);
     _focusNode.dispose();
     _scrollController.dispose();
     super.dispose();
   }
+
+  @override
+  void didUpdateWidget(LdTabNavigation oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.pageController != widget.pageController) {
+      _detachPageController(oldWidget.pageController);
+      _attachPageController();
+    }
+
+    // Route-based update only when we are not in PageController mode.
+    if (widget.pageController == null && oldWidget.activeRoute != widget.activeRoute) {
+      _updateIndicatorPosition();
+    }
+  }
+
+  // ── Position & layout ──────────────────────────────────────────────────────
 
   LdAppBarPosition get _effectivePosition {
     return switch (widget.position) {
@@ -97,32 +208,33 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
   }
 
   bool _isTabActive(LdNavigationTab tab) {
+    final route = widget.activeRoute;
+
+    // PageController mode: active tab is determined by the integer page index.
+    if (route == null) {
+      return widget.tabs.indexOf(tab) == _currentPageIndex;
+    }
+
     if (tab.isActive != null) {
       return tab.isActive!(context);
     }
     if (tab.route.endsWith("*")) {
       final withoutWildcard = tab.route.substring(0, tab.route.length - 1);
-      return widget.activeRoute.startsWith(withoutWildcard);
+      return route.startsWith(withoutWildcard);
     }
-    return widget.activeRoute == tab.route;
+    return route == tab.route;
   }
 
   int _activeIndex() {
+    if (widget.activeRoute == null) {
+      return _currentPageIndex.clamp(0, _tabCount - 1);
+    }
     return widget.tabs.indexWhere(_isTabActive);
   }
 
   double _indicatorPosition = 0;
 
   double _navWidth = 0;
-
-  @override
-  void didUpdateWidget(LdTabNavigation oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (oldWidget.activeRoute != widget.activeRoute) {
-      _updateIndicatorPosition();
-    }
-  }
 
   void _updateIndicatorPosition() {
     final activeIndex = _activeIndex().clamp(0, _tabCount - 1);
@@ -148,12 +260,13 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
 
   bool get _compactMode => _navWidth < 500;
 
+  // ── Drag gesture on the indicator ─────────────────────────────────────────
+
   double _dragStartPosition = 0;
   int _lastDraggedTabIndex = 0;
   double _dragStartIndicatorPosition = 0;
 
   int _getClosestTab(BuildContext context) {
-    // Calculate which tab the indicator is closest to based on its left position
     final closestTabIndex = (_indicatorPosition / _tabStride).round().clamp(0, _tabCount - 1);
     return closestTabIndex;
   }
@@ -161,6 +274,11 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
   void _onIndicatorDragEnd(DragEndDetails details) {
     final closestTabIndex = _getClosestTab(context);
     widget.onTabPressed(widget.tabs[closestTabIndex].route);
+    widget.pageController?.animateToPage(
+      closestTabIndex,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
     _updateIndicatorPosition();
   }
 
@@ -177,11 +295,19 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
     });
   }
 
-  void _onTabTap(String route) {
+  void _onTabTap(int tabIndex) {
+    final route = widget.tabs[tabIndex].route;
     widget.onTabPressed(route);
+    widget.pageController?.animateToPage(
+      tabIndex,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
     _updateIndicatorPosition();
     LdHaptics.vibrate(HapticsType.light);
   }
+
+  // ── Scroll to keep active tab visible ─────────────────────────────────────
 
   void _scrollToIndicator() {
     if (!_scrollController.hasClients) {
@@ -211,6 +337,8 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
     }
   }
 
+  // ── Build ──────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
@@ -231,6 +359,7 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
         final isSurface = decorationBuilder
             .resolveAppearance(context, isScrolledUnder: isScrolledUnder, position: position)
             .childIsSurface;
+
         if (constraints.maxWidth != _navWidth) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
@@ -245,10 +374,8 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
           });
         }
 
-        print("isSurface: $isSurface");
-
         return Provider.value(
-          value: LdSurfaceInfo(isSurface: true),
+          value: LdSurfaceInfo(isSurface: isSurface),
           child: Builder(builder: (context) {
             return LdScrollEdgeFade(
               axis: Axis.horizontal,
@@ -264,12 +391,12 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                       Row(
                         spacing: _tabSpacing,
                         children: [
-                          ...widget.tabs.map(
-                            (tab) => SizedBox(
+                          ...widget.tabs.mapIndexed(
+                            (index, tab) => SizedBox(
                               width: _tabWidth,
                               child: LdTouchableSurface(
                                 active: _isTabActive(tab),
-                                onPressed: () => _onTabTap(tab.route),
+                                onPressed: () => _onTabTap(index),
                                 builder: (context, status, _) {
                                   final colors = switch (_isTabActive(tab)) {
                                     true => ghostColor(theme.primary, theme, status),
@@ -335,6 +462,7 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                         springConstant: 20,
                         dampingCoefficient: 20,
                         mass: 5,
+                        overriden: _springOverridden,
                         position: _indicatorPosition,
                         child: GestureDetector(
                           onHorizontalDragStart: (details) {

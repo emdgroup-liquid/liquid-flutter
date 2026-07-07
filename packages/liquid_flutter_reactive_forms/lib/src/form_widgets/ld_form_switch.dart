@@ -1,25 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart';
+import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart' hide LdForm;
 import 'package:liquid_flutter_reactive_forms/src/form_widgets/ld_form_field_base.dart';
 import 'package:provider/provider.dart';
 
-/// A reactive date-picker field that binds to a [FormControl<DateTime>] by [formKey].
-class LdFormDatePicker extends StatelessWidget {
+/// A reactive segmented-control field that binds to a [FormControl<T>] by [formKey].
+///
+/// Wraps [LdSwitch] — a tab-bar-style selector where the user picks one value
+/// from a fixed [Map<T, Widget>] of options.
+///
+/// Place this inside a [ReactiveForm] / [LdForm] widget tree.
+/// The corresponding [LdReactiveFormItem] with the same [formKey] must be
+/// present in the parent form's [items] list.
+class LdFormSwitch<T> extends StatelessWidget {
   final String formKey;
   final String? label;
+  final Map<T, Widget> children;
   final bool? disabled;
-  final bool useRootNavigator;
-
-  final LdHint? Function(ReactiveFormFieldState<DateTime, DateTime>)? hintBuilder;
+  final LdSize size;
+  final LdColor? color;
+  final bool expand;
+  final LdHint? Function(ReactiveFormFieldState<T, T>)? hintBuilder;
   final Map<String, ValidationMessageFunction>? validationMessages;
 
-  const LdFormDatePicker({
+  const LdFormSwitch({
     super.key,
     required this.formKey,
+    required this.children,
     this.label,
     this.disabled,
-    this.useRootNavigator = false,
+    this.size = LdSize.m,
+    this.color,
+    this.expand = false,
     this.hintBuilder,
     this.validationMessages,
   });
@@ -27,7 +39,7 @@ class LdFormDatePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scope = context.watch<LdFormState?>();
-    return ReactiveFormField<DateTime, DateTime>(
+    return ReactiveFormField<T, T>(
       formControlName: formKey,
       validationMessages: validationMessages ?? {},
       showErrors: ldReactiveFormShowErrors,
@@ -36,10 +48,14 @@ class LdFormDatePicker extends StatelessWidget {
         formKey: formKey,
         hintBuilder: hintBuilder,
         context: context,
-        field: LdDatePicker(
+        field: LdSwitch<T>(
           label: label,
-          value: state.control.value,
-          useRootNavigator: useRootNavigator,
+          children: children,
+          value: state.control.value as T,
+          size: size,
+          color: color,
+          expand: expand,
+          disabled: disabled ?? state.control.disabled,
           onChanged: (value) {
             state.didChange(value);
             state.control.markAsTouched();

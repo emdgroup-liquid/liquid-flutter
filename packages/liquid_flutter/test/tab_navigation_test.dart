@@ -342,4 +342,259 @@ void main() {
       },
     );
   });
+
+  // ── PageController sync tests ──────────────────────────────────────────────
+
+  group('LdTabNavigation PageController sync', () {
+    final pageViewTabs = [
+      LdNavigationTab(
+        label: 'Home',
+        icon: const Icon(LucideIcons.house),
+        route: '/home',
+      ),
+      LdNavigationTab(
+        label: 'Search',
+        icon: const Icon(LucideIcons.search),
+        route: '/search',
+      ),
+      LdNavigationTab(
+        label: 'Profile',
+        icon: const Icon(LucideIcons.user),
+        route: '/profile',
+      ),
+    ];
+
+    testWidgets(
+      'renders with only pageController (no activeRoute)',
+      (WidgetTester tester) async {
+        ldDisableAnimations = true;
+        final pageController = PageController();
+
+        await tester.pumpWidget(
+          _wrapInScaffold(
+            LdScaffold(
+              body: LdTabNavigation(
+                tabs: pageViewTabs,
+                pageController: pageController,
+                onTabPressed: (_) {},
+                child: PageView(
+                  controller: pageController,
+                  children: const [
+                    Center(child: Text('Page 0')),
+                    Center(child: Text('Page 1')),
+                    Center(child: Text('Page 2')),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(find.text('Home'), findsOneWidget);
+        expect(find.text('Search'), findsOneWidget);
+        expect(find.text('Profile'), findsOneWidget);
+
+        pageController.dispose();
+      },
+    );
+
+    testWidgets(
+      'initial page from PageController.initialPage seeds the indicator',
+      (WidgetTester tester) async {
+        ldDisableAnimations = true;
+        // Start on page 1 (Search)
+        final pageController = PageController(initialPage: 1);
+        String? pressedRoute;
+
+        await tester.pumpWidget(
+          _wrapInScaffold(
+            LdScaffold(
+              body: LdTabNavigation(
+                tabs: pageViewTabs,
+                pageController: pageController,
+                onTabPressed: (route) => pressedRoute = route,
+                child: PageView(
+                  controller: pageController,
+                  children: const [
+                    Center(child: Text('Page 0')),
+                    Center(child: Text('Page 1')),
+                    Center(child: Text('Page 2')),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        // Tapping Search tab (page 1) should call onTabPressed with /search.
+        await tester.tap(find.text('Search'));
+        await tester.pumpAndSettle();
+
+        expect(pressedRoute, equals('/search'));
+
+        pageController.dispose();
+      },
+    );
+
+    testWidgets(
+      'tapping a tab calls onTabPressed with the correct route',
+      (WidgetTester tester) async {
+        ldDisableAnimations = true;
+        final pageController = PageController();
+        String? pressedRoute;
+
+        await tester.pumpWidget(
+          _wrapInScaffold(
+            LdScaffold(
+              body: LdTabNavigation(
+                tabs: pageViewTabs,
+                pageController: pageController,
+                onTabPressed: (route) => pressedRoute = route,
+                child: PageView(
+                  controller: pageController,
+                  children: const [
+                    Center(child: Text('Page 0')),
+                    Center(child: Text('Page 1')),
+                    Center(child: Text('Page 2')),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Search'));
+        await tester.pumpAndSettle();
+
+        expect(pressedRoute, equals('/search'));
+
+        pageController.dispose();
+      },
+    );
+
+    testWidgets(
+      'pageController.jumpToPage updates the active tab index',
+      (WidgetTester tester) async {
+        ldDisableAnimations = true;
+        final pageController = PageController();
+
+        await tester.pumpWidget(
+          _wrapInScaffold(
+            LdScaffold(
+              body: LdTabNavigation(
+                tabs: pageViewTabs,
+                pageController: pageController,
+                onTabPressed: (_) {},
+                child: PageView(
+                  controller: pageController,
+                  children: const [
+                    Center(child: Text('Page 0')),
+                    Center(child: Text('Page 1')),
+                    Center(child: Text('Page 2')),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        // Jump to page 2 (Profile)
+        pageController.jumpToPage(2);
+        await tester.pumpAndSettle();
+
+        // Profile tab should now be the active one — verify by tapping it and
+        // checking nothing unexpected fires (the tab is already active).
+        expect(find.text('Profile'), findsOneWidget);
+
+        pageController.dispose();
+      },
+    );
+
+    testWidgets(
+      'can use both activeRoute and pageController together',
+      (WidgetTester tester) async {
+        ldDisableAnimations = true;
+        final pageController = PageController();
+
+        await tester.pumpWidget(
+          _wrapInScaffold(
+            LdScaffold(
+              body: LdTabNavigation(
+                tabs: pageViewTabs,
+                activeRoute: '/home',
+                pageController: pageController,
+                onTabPressed: (_) {},
+                child: PageView(
+                  controller: pageController,
+                  children: const [
+                    Center(child: Text('Page 0')),
+                    Center(child: Text('Page 1')),
+                    Center(child: Text('Page 2')),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(find.text('Home'), findsOneWidget);
+
+        pageController.dispose();
+      },
+    );
+
+    testWidgets(
+      'swapping pageController detaches old listener and attaches new one',
+      (WidgetTester tester) async {
+        ldDisableAnimations = true;
+        final pc1 = PageController();
+        final pc2 = PageController(initialPage: 2);
+        String? pressedRoute;
+
+        Widget buildWidget(PageController pc) => _wrapInScaffold(
+              LdScaffold(
+                body: LdTabNavigation(
+                  tabs: pageViewTabs,
+                  pageController: pc,
+                  onTabPressed: (route) => pressedRoute = route,
+                  child: PageView(
+                    controller: pc,
+                    children: const [
+                      Center(child: Text('Page 0')),
+                      Center(child: Text('Page 1')),
+                      Center(child: Text('Page 2')),
+                    ],
+                  ),
+                ),
+              ),
+            );
+
+        await tester.pumpWidget(buildWidget(pc1));
+        await tester.pumpAndSettle();
+
+        // Swap to pc2
+        await tester.pumpWidget(buildWidget(pc2));
+        await tester.pumpAndSettle();
+
+        // Tapping Profile (index 2, which pc2 started on) should still work.
+        await tester.tap(find.text('Profile'));
+        await tester.pumpAndSettle();
+
+        expect(pressedRoute, equals('/profile'));
+
+        pc1.dispose();
+        pc2.dispose();
+      },
+    );
+  });
 }

@@ -149,6 +149,10 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   /// Extracts searchable text for [fromList] / fuzzy local filtering.
   final LdSearchTextExtractor<T>? searchText;
 
+  /// Actions shown in the picker's app bar (repository-backed / monkey picker
+  /// path only — requires [filtersBuilder] to be set alongside [repository]).
+  final List<LdMonkeyAction<T, IdType>> actions;
+
   const LdChoose({
     this.repository,
     this.items,
@@ -172,6 +176,7 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
     this.sortOptionsBuilder,
     this.filterChipConfigs,
     this.searchText,
+    this.actions = const [],
     super.key,
   })  : assert(items != null || repository != null, 'Either items or repository must be provided'),
         assert(items == null || repository == null, 'Cannot provide both items and repository');
@@ -364,6 +369,7 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
         filtersBuilder: widget.filtersBuilder,
         sortOptionsBuilder: widget.sortOptionsBuilder,
         filterChipConfigs: widget.filterChipConfigs,
+        actions: widget.actions,
         buildList: widget.groupingCriterion == null
             ? null
             : (context, repository) {

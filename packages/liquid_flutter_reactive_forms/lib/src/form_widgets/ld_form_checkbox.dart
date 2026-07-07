@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart';
 import 'package:liquid_flutter_reactive_forms/src/form_widgets/ld_form_field_base.dart';
+import 'package:provider/provider.dart';
 
 /// A reactive checkbox field that binds to a [FormControl<bool>] by [formKey].
 class LdFormCheckbox extends StatelessWidget {
@@ -21,6 +23,7 @@ class LdFormCheckbox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scope = context.watch<LdFormState?>();
     return ReactiveFormField<bool, bool>(
       formControlName: formKey,
       validationMessages: validationMessages ?? {},
@@ -34,7 +37,11 @@ class LdFormCheckbox extends StatelessWidget {
           label: label,
           color: state.control.valid || state.control.pristine ? null : shadRed,
           checked: state.control.value ?? false,
-          onChanged: (value) => state.didChange(value),
+          onChanged: (value) {
+            state.didChange(value);
+            state.control.markAsTouched();
+            scope?.onFieldCommitted(formKey);
+          },
           disabled: disabled ?? state.control.disabled,
         ),
       ),

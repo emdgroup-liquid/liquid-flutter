@@ -27,6 +27,11 @@ class LdMarkdownEditor extends StatefulWidget {
   /// Called when the text changes.
   final ValueChanged<String>? onChanged;
 
+  /// Called when the user submits the field (e.g. presses the action key on
+  /// the keyboard). Only fired when [textInputAction] is set to an action
+  /// that triggers submission (e.g. [TextInputAction.done]).
+  final ValueChanged<String>? onSubmitted;
+
   /// Called when the user taps a link.
   final void Function(String url, String title)? onLinkTap;
 
@@ -45,17 +50,64 @@ class LdMarkdownEditor extends StatefulWidget {
   /// Focus node.
   final FocusNode? focusNode;
 
+  /// Whether the field is in read-only mode.
+  ///
+  /// In read-only mode the WYSIWYG rendered view is always shown and tapping
+  /// the field does not bring up the keyboard. Defaults to `false`.
+  final bool readOnly;
+
+  /// Whether the field is enabled.
+  ///
+  /// A disabled field does not respond to user input. Defaults to `true`.
+  final bool enabled;
+
+  /// Whether the field should be focused automatically when the widget is
+  /// inserted into the tree. Defaults to `false`.
+  final bool autofocus;
+
+  /// The type of action button to show on the soft keyboard.
+  ///
+  /// Defaults to [TextInputAction.newline], which inserts a newline on press
+  /// and is appropriate for a multiline markdown editor.
+  final TextInputAction textInputAction;
+
+  /// Optional input formatters applied to every text change.
+  final List<TextInputFormatter>? inputFormatters;
+
+  /// Whether to enable autocorrect. Defaults to `false` to avoid mangling
+  /// markdown syntax such as `**bold**` or backtick code spans.
+  final bool autocorrect;
+
+  /// Whether to show input suggestions (e.g. emoji bar on iOS).
+  /// Defaults to `false` to keep the editing experience predictable for
+  /// structured markdown content.
+  final bool enableSuggestions;
+
+  /// Whether this field should expand to fill its parent.
+  ///
+  /// When `true`, [maxLines] must be `null` (unbounded). Defaults to `false`.
+  final bool expands;
+
   const LdMarkdownEditor({
     super.key,
     this.controller,
     this.initialValue,
     this.onChanged,
+    this.onSubmitted,
     this.onLinkTap,
     this.imageBuilder,
     this.minLines,
     this.maxLines,
     this.hintText,
     this.focusNode,
+    this.readOnly = false,
+    this.enabled = true,
+    this.autofocus = false,
+    this.textInputAction = TextInputAction.newline,
+    this.inputFormatters,
+    this.autocorrect = false,
+    this.enableSuggestions = false,
+    this.expands = false,
   });
 
   @override
@@ -315,16 +367,24 @@ class _LdMarkdownEditorState extends State<LdMarkdownEditor> {
         isCollapsed: true,
         contentPadding: EdgeInsets.zero,
       ),
-      maxLines: widget.maxLines,
+      maxLines: widget.expands ? null : widget.maxLines,
       minLines: widget.minLines,
+      expands: widget.expands,
       keyboardType: TextInputType.multiline,
-      textInputAction: TextInputAction.newline,
+      textInputAction: widget.textInputAction,
+      readOnly: widget.readOnly,
+      enabled: widget.enabled,
+      autofocus: widget.autofocus,
+      inputFormatters: widget.inputFormatters,
+      autocorrect: widget.autocorrect,
+      enableSuggestions: widget.enableSuggestions,
       style: ldBuildTextStyle(theme, LdTextType.paragraph, LdSize.m).copyWith(letterSpacing: 0, wordSpacing: 0),
       strutStyle: StrutStyle.fromTextStyle(
         ldBuildTextStyle(theme, LdTextType.paragraph, LdSize.m).copyWith(letterSpacing: 0, wordSpacing: 0),
         forceStrutHeight: true,
       ),
       onChanged: widget.onChanged,
+      onSubmitted: widget.onSubmitted,
       cursorColor: theme.primaryColor,
     );
   }
@@ -355,7 +415,7 @@ class _LdMarkdownEditorState extends State<LdMarkdownEditor> {
         //    EditableText's internal behaviour and prevent layout shift)
         //  - strutStyle derived from that style (same as TextField does internally)
         //  - textHeightBehavior matching EditableText's default
-        if (!focused && _controller.text.isNotEmpty) ...[
+        if ((!focused || widget.readOnly) && _controller.text.isNotEmpty) ...[
           Text.rich(
             _controller.buildTextSpan(
               context: context,
@@ -374,9 +434,10 @@ class _LdMarkdownEditorState extends State<LdMarkdownEditor> {
               forceStrutHeight: true,
             ),
           ),
-          Positioned.fill(
-            child: GestureDetector(behavior: HitTestBehavior.translucent, onTap: () => _focusNode.requestFocus()),
-          ),
+          if (!widget.readOnly && widget.enabled)
+            Positioned.fill(
+              child: GestureDetector(behavior: HitTestBehavior.translucent, onTap: () => _focusNode.requestFocus()),
+            ),
         ],
       ],
     );

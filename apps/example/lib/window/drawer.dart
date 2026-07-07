@@ -89,6 +89,7 @@ const components = [
   _Component("Orb", "/components/orb", LucideIcons.droplet, ComponentCategory.interaction),
   _Component("Speed Reader", "/components/speed-reader", LucideIcons.bookOpen, ComponentCategory.interaction),
   _Component("Tab Navigation", "/components/tab", LucideIcons.betweenVerticalEnd, ComponentCategory.interaction),
+  _Component("Tab + PageView", "/components/tab-pageview", LucideIcons.panelsTopLeft, ComponentCategory.interaction),
 
   // Data Display
   _Component("Counter", "/components/counter", LucideIcons.hash, ComponentCategory.dataDisplay),

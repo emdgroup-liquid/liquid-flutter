@@ -1,24 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart';
+import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart' hide LdForm;
 import 'package:liquid_flutter_reactive_forms/src/form_widgets/ld_form_field_base.dart';
 import 'package:provider/provider.dart';
 
-/// A reactive date-picker field that binds to a [FormControl<DateTime>] by [formKey].
-class LdFormDatePicker extends StatelessWidget {
+/// A reactive time-picker field that binds to a [FormControl<TimeOfDay>] by [formKey].
+///
+/// Wraps [LdTimePicker] — a button that opens a wheel + text-field modal.
+/// For a date picker see [LdFormDatePicker].
+///
+/// Place this inside a [ReactiveForm] / [LdForm] widget tree.
+/// The corresponding [LdReactiveFormItem] with the same [formKey] must be
+/// present in the parent form's [items] list.
+class LdFormTimePicker extends StatelessWidget {
   final String formKey;
   final String? label;
   final bool? disabled;
+  final int minutePrecision;
   final bool useRootNavigator;
-
-  final LdHint? Function(ReactiveFormFieldState<DateTime, DateTime>)? hintBuilder;
+  final LdHint? Function(ReactiveFormFieldState<TimeOfDay, TimeOfDay>)? hintBuilder;
   final Map<String, ValidationMessageFunction>? validationMessages;
 
-  const LdFormDatePicker({
+  const LdFormTimePicker({
     super.key,
     required this.formKey,
     this.label,
     this.disabled,
+    this.minutePrecision = 15,
     this.useRootNavigator = false,
     this.hintBuilder,
     this.validationMessages,
@@ -27,7 +35,7 @@ class LdFormDatePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scope = context.watch<LdFormState?>();
-    return ReactiveFormField<DateTime, DateTime>(
+    return ReactiveFormField<TimeOfDay, TimeOfDay>(
       formControlName: formKey,
       validationMessages: validationMessages ?? {},
       showErrors: ldReactiveFormShowErrors,
@@ -36,10 +44,12 @@ class LdFormDatePicker extends StatelessWidget {
         formKey: formKey,
         hintBuilder: hintBuilder,
         context: context,
-        field: LdDatePicker(
+        field: LdTimePicker(
           label: label,
           value: state.control.value,
+          minutePrecision: minutePrecision,
           useRootNavigator: useRootNavigator,
+          disabled: disabled ?? state.control.disabled,
           onChanged: (value) {
             state.didChange(value);
             state.control.markAsTouched();

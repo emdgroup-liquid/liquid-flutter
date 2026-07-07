@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart';
 import 'package:liquid_flutter_reactive_forms/src/form_widgets/ld_form_field_base.dart';
+import 'package:provider/provider.dart';
 
 /// A reactive choose field backed by a static list of [LdSelectItem]s.
 ///
@@ -36,6 +38,7 @@ class LdFormChoose<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scope = context.watch<LdFormState?>();
     return ReactiveFormField<Set<T>, Set<T>>(
       formControlName: formKey,
       validationMessages: validationMessages ?? {},
@@ -56,6 +59,8 @@ class LdFormChoose<T> extends StatelessWidget {
           disabled: disabled ?? state.control.disabled,
           onChanged: (value) {
             state.didChange(value);
+            state.control.markAsTouched();
+            scope?.onFieldCommitted(formKey);
             onCommitted?.call(value);
           },
         ),
@@ -99,6 +104,7 @@ class LdFormChooseFromList<T extends Identifiable<IdType>, IdType> extends State
 
   @override
   Widget build(BuildContext context) {
+    final scope = context.watch<LdFormState?>();
     return ReactiveFormField<Set<IdType>, Set<IdType>>(
       formControlName: formKey,
       validationMessages: validationMessages ?? {},
@@ -117,7 +123,11 @@ class LdFormChooseFromList<T extends Identifiable<IdType>, IdType> extends State
           searchText: searchText,
           value: state.control.value,
           disabled: disabled ?? state.control.disabled,
-          onChanged: state.didChange,
+          onChanged: (value) {
+            state.didChange(value);
+            state.control.markAsTouched();
+            scope?.onFieldCommitted(formKey);
+          },
           itemBuilder: itemBuilder ??
               (context, item, index) => LdListItem(
                     title: Text(item.value?.toString() ?? ''),
@@ -168,6 +178,7 @@ class LdFormChooseRepository<T extends Identifiable<IdType>, IdType> extends Sta
 
   @override
   Widget build(BuildContext context) {
+    final scope = context.watch<LdFormState?>();
     return ReactiveFormField<Set<IdType>, Set<IdType>>(
       formControlName: formKey,
       validationMessages: validationMessages ?? {},
@@ -188,7 +199,11 @@ class LdFormChooseRepository<T extends Identifiable<IdType>, IdType> extends Sta
           filterChipConfigs: filterChipConfigs,
           value: state.control.value,
           disabled: disabled ?? state.control.disabled,
-          onChanged: state.didChange,
+          onChanged: (value) {
+            state.didChange(value);
+            state.control.markAsTouched();
+            scope?.onFieldCommitted(formKey);
+          },
           itemBuilder: itemBuilder,
           selectedItemBuilder: selectedItemBuilder,
         ),
