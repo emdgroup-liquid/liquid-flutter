@@ -43,6 +43,9 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
+    - shaders/
+  shaders:
+    - shaders/metaball.frag
   fonts:
     - family: Lato
       fonts:

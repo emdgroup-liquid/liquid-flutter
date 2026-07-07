@@ -47,6 +47,7 @@ export 'src/indicators.dart';
 export 'src/input.dart';
 export 'src/l10n/generated/liquid_localizations.dart';
 export 'src/liquid_orb.dart';
+export 'src/metaball/index.dart';
 export 'src/list/list.dart';
 export 'src/list/list_empty.dart';
 export 'src/list/list_item.dart';

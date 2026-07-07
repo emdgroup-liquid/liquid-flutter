@@ -135,7 +135,8 @@ class NotificationDemo extends StatelessWidget {
                     LdButton(
                       child: const Text("Loading"),
                       onPressed: () async {
-                        final notification = LdNotificationsController.of(context).addNotification(
+                        final controller = LdNotificationsController.of(context);
+                        final notification = controller.addNotification(
                           LdNotification(
                             type: LdNotificationType.loading,
                             canDismiss: false,
@@ -145,12 +146,8 @@ class NotificationDemo extends StatelessWidget {
                           ),
                         );
                         await Future.delayed(const Duration(seconds: 2));
-                        // ignore: use_build_context_synchronously
-                        LdNotificationsController.of(context).onDismissNotification(notification);
-                        // ignore: use_build_context_synchronously
-                        LdNotificationsController.of(
-                          context,
-                        ).addNotification(LdNotification(message: "Done", type: LdNotificationType.success));
+                        controller.onDismissNotification(notification);
+                        controller.addNotification(LdNotification(message: "Done", type: LdNotificationType.success));
                       },
                     ),
                   ],

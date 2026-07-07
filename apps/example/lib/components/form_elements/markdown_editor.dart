@@ -56,8 +56,6 @@ class _MarkdownEditorDemoState extends State<MarkdownEditorDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = LdTheme.of(context);
-
     return ComponentPage(
       path: "lib/components/form_elements/markdown_editor.dart",
       title: "LdMarkdownEditor",

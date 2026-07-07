@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart' hide LdForm;
-import 'package:liquid_flutter_reactive_forms/src/form_widgets/ld_form_field_base.dart';
 import 'package:provider/provider.dart';
 
 /// A reactive radio-button group that binds to a [FormControl<T>] by [formKey].
