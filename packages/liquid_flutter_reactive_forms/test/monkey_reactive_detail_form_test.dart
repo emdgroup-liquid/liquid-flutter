@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart';
 import 'package:provider/provider.dart';
+import 'package:reactive_forms/reactive_forms.dart';
 
 class _TestTask with Identifiable<int> {
   @override
@@ -98,29 +99,33 @@ LdListController<_TestTask, int> _buildListController(LdCallbackModel<_TestTask,
 }
 
 Widget _detailFormFor(List<_TestTask> tasks) {
-  return LdForm<_TestTask, int, _TestTask, _TestTask, _TestTask>.edit(
+  return LdForm<_TestTask, int, _TestTask, _TestTask, _TestTask>(
     item: LdPaginatorItem(
       value: tasks.first,
       state: LdPaginatorItemState.loaded,
     ),
-    saveMode: LdFormMode.manualSubmit,
+    mode: LdFormMode.edit,
+    saveMode: LdReactiveFormSaveMode.manualSubmit,
     detailToFormValues: (task) => {
       'title': task.title,
     },
     formToUpdatePayload: (form, task) => task.copyWith(
       title: form.control('title').value as String,
     ),
-    items: [
+    itemToDetail: (context, entity) async => entity!,
+    formItems: [
       LdReactiveFormItem<String>(key: 'title'),
     ],
-    childrenBuilder: (context, hooks) => [
-      LdFormInput<String>(
-        formKey: 'title',
-        label: 'Title',
-        hint: 'Title',
-        onBlurred: hooks.onBlurred('title'),
-      ),
-    ],
+    child: Column(
+      children: [
+        LdFormInput<String>(
+          formKey: 'title',
+          label: 'Title',
+          hint: 'Title',
+        ),
+        const LdFormSubmitButton(),
+      ],
+    ),
   );
 }
 
@@ -145,29 +150,33 @@ void main() {
       _wrapDetailForm(
         model: model,
         listController: listController,
-        child: LdForm<_TestTask, int, _TestTask, _TestTask, _TestTask>.edit(
+        child: LdForm<_TestTask, int, _TestTask, _TestTask, _TestTask>(
           item: LdPaginatorItem(
             value: tasks.first,
             state: LdPaginatorItemState.loaded,
           ),
-          saveMode: LdFormMode.manualSubmit,
+          mode: LdFormMode.edit,
+          saveMode: LdReactiveFormSaveMode.manualSubmit,
           detailToFormValues: (task) => {
             'title': task.title,
           },
           formToUpdatePayload: (form, task) => task.copyWith(
             title: form.control('title').value as String,
           ),
-          items: [
+          itemToDetail: (context, entity) async => entity!,
+          formItems: [
             LdReactiveFormItem<String>(key: 'title'),
           ],
-          childrenBuilder: (context, hooks) => [
-            LdFormInput<String>(
-              formKey: 'title',
-              label: 'Title',
-              hint: 'Title',
-              onBlurred: hooks.onBlurred('title'),
-            ),
-          ],
+          child: Column(
+            children: [
+              LdFormInput<String>(
+                formKey: 'title',
+                label: 'Title',
+                hint: 'Title',
+              ),
+              const LdFormSubmitButton(),
+            ],
+          ),
         ),
       ),
     );
@@ -203,29 +212,33 @@ void main() {
         child: Builder(
           builder: (context) {
             lockRegistry = LdLocationLockRegistry.of(context);
-            return LdForm<_TestTask, int, _TestTask, _TestTask, _TestTask>.edit(
+            return LdForm<_TestTask, int, _TestTask, _TestTask, _TestTask>(
               item: LdPaginatorItem(
                 value: tasks.first,
                 state: LdPaginatorItemState.loaded,
               ),
-              saveMode: LdFormMode.manualSubmit,
+              mode: LdFormMode.edit,
+              saveMode: LdReactiveFormSaveMode.manualSubmit,
               detailToFormValues: (task) => {
                 'title': task.title,
               },
               formToUpdatePayload: (form, task) => task.copyWith(
                 title: form.control('title').value as String,
               ),
-              items: [
+              itemToDetail: (context, entity) async => entity!,
+              formItems: [
                 LdReactiveFormItem<String>(key: 'title'),
               ],
-              childrenBuilder: (context, hooks) => [
-                LdFormInput<String>(
-                  formKey: 'title',
-                  label: 'Title',
-                  hint: 'Title',
-                  onBlurred: hooks.onBlurred('title'),
-                ),
-              ],
+              child: Column(
+                children: [
+                  LdFormInput<String>(
+                    formKey: 'title',
+                    label: 'Title',
+                    hint: 'Title',
+                  ),
+                  const LdFormSubmitButton(),
+                ],
+              ),
             );
           },
         ),
@@ -404,7 +417,7 @@ void main() {
     expect(find.text('open'), findsNothing);
   });
 
-  testWidgets('arbitrary widgets can be mixed in childrenBuilder', (tester) async {
+  testWidgets('arbitrary widgets can be mixed in child', (tester) async {
     final tasks = [_TestTask(1, 'Original', false)];
     final model = _buildModel(tasks);
     final listController = _buildListController(model);
@@ -413,35 +426,37 @@ void main() {
       _wrapDetailForm(
         model: model,
         listController: listController,
-        child: LdForm<_TestTask, int, _TestTask, _TestTask, _TestTask>.edit(
+        child: LdForm<_TestTask, int, _TestTask, _TestTask, _TestTask>(
           item: LdPaginatorItem(
             value: tasks.first,
             state: LdPaginatorItemState.loaded,
           ),
-          saveMode: LdFormMode.manualSubmit,
+          mode: LdFormMode.edit,
+          saveMode: LdReactiveFormSaveMode.manualSubmit,
           detailToFormValues: (task) => {'title': task.title},
           formToUpdatePayload: (form, task) => task.copyWith(
             title: form.control('title').value as String,
           ),
-          items: [
+          itemToDetail: (context, entity) async => entity!,
+          formItems: [
             LdReactiveFormItem<String>(key: 'title'),
             LdReactiveFormItem<String>(key: 'note'),
           ],
-          childrenBuilder: (context, hooks) => [
-            LdFormInput<String>(
-              formKey: 'title',
-              label: 'Title',
-              hint: 'Title',
-              onBlurred: hooks.onBlurred('title'),
-            ),
-            const Text('extra widget'),
-            LdFormInput<String>(
-              formKey: 'note',
-              label: 'Note',
-              hint: 'Note',
-              onBlurred: hooks.onBlurred('note'),
-            ),
-          ],
+          child: Column(
+            children: [
+              LdFormInput<String>(
+                formKey: 'title',
+                label: 'Title',
+                hint: 'Title',
+              ),
+              const Text('extra widget'),
+              LdFormInput<String>(
+                formKey: 'note',
+                label: 'Note',
+                hint: 'Note',
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -452,7 +467,7 @@ void main() {
     expect(find.text('extra widget'), findsOneWidget);
   });
 
-  testWidgets('widget can access LdMonkeyDetailFormScope via context', (tester) async {
+  testWidgets('widget can access LdFormState via Provider', (tester) async {
     final tasks = [_TestTask(1, 'Original', false)];
     final model = _buildModel(tasks);
     final listController = _buildListController(model);
@@ -461,33 +476,36 @@ void main() {
       _wrapDetailForm(
         model: model,
         listController: listController,
-        child: LdForm<_TestTask, int, _TestTask, _TestTask, _TestTask>.edit(
+        child: LdForm<_TestTask, int, _TestTask, _TestTask, _TestTask>(
           item: LdPaginatorItem(
             value: tasks.first,
             state: LdPaginatorItemState.loaded,
           ),
-          saveMode: LdFormMode.manualSubmit,
+          mode: LdFormMode.edit,
+          saveMode: LdReactiveFormSaveMode.manualSubmit,
           detailToFormValues: (task) => {'title': task.title},
           formToUpdatePayload: (form, task) => task.copyWith(
             title: form.control('title').value as String,
           ),
-          items: [
+          itemToDetail: (context, entity) async => entity!,
+          formItems: [
             LdReactiveFormItem<String>(key: 'title'),
           ],
-          childrenBuilder: (context, hooks) => [
-            Builder(
-              builder: (context) {
-                final scope = LdMonkeyDetailFormScope.of<_TestTask>(context);
-                return Text(scope.isDirty ? 'dirty' : 'pristine');
-              },
-            ),
-            LdFormInput<String>(
-              formKey: 'title',
-              label: 'Title',
-              hint: 'Title',
-              onBlurred: hooks.onBlurred('title'),
-            ),
-          ],
+          child: Column(
+            children: [
+              Builder(
+                builder: (context) {
+                  final form = ReactiveForm.of(context)!;
+                  return Text(form.dirty ? 'dirty' : 'pristine');
+                },
+              ),
+              LdFormInput<String>(
+                formKey: 'title',
+                label: 'Title',
+                hint: 'Title',
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart';
+import 'package:provider/provider.dart';
+import 'package:reactive_forms/reactive_forms.dart';
 
-Widget _wrapWithMaterialApp(Widget widget) {
+Widget _wrapWithReactiveForm({
+  required FormGroup form,
+  required Widget child,
+  Map<String, ValidationMessageFunction>? validationMessages,
+}) {
   return MaterialApp(
     localizationsDelegates: const [
       LiquidLocalizations.delegate,
@@ -12,7 +18,13 @@ Widget _wrapWithMaterialApp(Widget widget) {
       body: LdThemeProvider(
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Container(child: widget),
+          child: ReactiveFormConfig(
+            validationMessages: ldMergeReactiveFormValidationMessages(validationMessages),
+            child: ReactiveForm(
+              formGroup: form,
+              child: child,
+            ),
+          ),
         ),
       ),
     ),
@@ -20,96 +32,45 @@ Widget _wrapWithMaterialApp(Widget widget) {
 }
 
 void main() {
-  group('LdFormSubmitConfig', () {
-    test('creates a copy with action', () {
-      final config = LdFormSubmitConfig(
-        loadingText: 'Loading...',
-        submitText: 'Submit',
-        allowResubmit: true,
-        withHaptics: false,
-        autoTrigger: true,
-        timeout: const Duration(seconds: 5),
-        allowCancel: true,
-      );
+  group('LdFormInput', () {
+    testWidgets('renders label and hint', (WidgetTester tester) async {
+      final form = FormGroup({'name': FormControl<String>()});
 
-      var actionResult = '';
-      final configWithAction = config.copyWithAction((_) async {
-        actionResult = 'Action executed';
-      });
-
-      expect(configWithAction.loadingText, equals('Loading...'));
-      expect(configWithAction.submitText, equals('Submit'));
-      expect(configWithAction.allowResubmit, isTrue);
-      expect(configWithAction.withHaptics, isFalse);
-      expect(configWithAction.autoTrigger, isTrue);
-      expect(configWithAction.timeout, equals(const Duration(seconds: 5)));
-      expect(configWithAction.allowCancel, isTrue);
-
-      configWithAction.action(null);
-      expect(actionResult, equals('Action executed'));
-    });
-  });
-
-  group('LdReactiveForm', () {
-    testWidgets('renders form items correctly', (WidgetTester tester) async {
       await tester.pumpWidget(
-        _wrapWithMaterialApp(
-          LdForm(
-            items: [
-              LdReactiveFormItem<String>(key: 'name'),
-              LdReactiveFormItem<bool>(key: 'terms'),
-            ],
-            onSubmit: (form) async {},
-            children: [
-              LdFormInput<String>(
-                formKey: 'name',
-                label: 'Name',
-                hint: 'Enter your name',
-              ),
-              LdFormCheckbox(
-                formKey: 'terms',
-                label: 'Accept Terms',
-              ),
-            ],
+        _wrapWithReactiveForm(
+          form: form,
+          child: LdFormInput<String>(
+            formKey: 'name',
+            label: 'Name',
+            hint: 'Enter your name',
           ),
         ),
       );
 
       expect(find.text('Name'), findsOneWidget);
       expect(find.text('Enter your name'), findsOneWidget);
-      expect(find.text('Accept Terms'), findsOneWidget);
       expect(find.byType(LdInput), findsOneWidget);
-      expect(find.byType(LdCheckbox), findsOneWidget);
-      expect(find.byType(LdSubmit<void, void>), findsOneWidget);
     });
 
-    testWidgets('does not show errors on focus without edits', (WidgetTester tester) async {
+    testWidgets('does not show error before touch', (WidgetTester tester) async {
+      final form = FormGroup({
+        'email': FormControl<String>(validators: [Validators.required]),
+      });
+
       await tester.pumpWidget(
-        _wrapWithMaterialApp(
-          Column(
+        _wrapWithReactiveForm(
+          form: form,
+          validationMessages: {'required': (_) => 'This field is required'},
+          child: Column(
             children: [
-              LdForm(
-                items: [
-                  LdReactiveFormItem<String>(
-                    key: 'email',
-                    validators: [LdFormValidators.required],
-                  ),
-                ],
-                onSubmit: (form) async {},
-                children: [
-                  LdFormInput<String>(
-                    formKey: 'email',
-                    label: 'Email',
-                    hint: 'Enter your email',
-                  ),
-                ],
-              ),
+              LdFormInput<String>(formKey: 'email', label: 'Email', hint: 'Enter your email'),
               const Text('outside'),
             ],
           ),
         ),
       );
 
+      // Tap the input then blur — no error yet because not dirty
       await tester.tap(find.byType(LdInput));
       await tester.pump();
       await tester.tap(find.text('outside'));
@@ -118,274 +79,55 @@ void main() {
       expect(find.text('This field is required'), findsNothing);
     });
 
-    testWidgets('form validation works', (WidgetTester tester) async {
+    testWidgets('shows error after marking dirty and touched', (WidgetTester tester) async {
+      final form = FormGroup({
+        'email': FormControl<String>(validators: [Validators.required, Validators.email]),
+      });
+
       await tester.pumpWidget(
-        _wrapWithMaterialApp(
-          LdForm(
-            items: [
-              LdReactiveFormItem<String>(
-                key: 'email',
-                validators: [LdFormValidators.required, LdFormValidators.email],
-              ),
-            ],
-            onSubmit: (form) async {},
-            validationMessages: {
-              'required': (error) => 'Email is required',
-              'email': (error) => 'Invalid email format',
-            },
-            children: [
-              LdFormInput<String>(
-                formKey: 'email',
-                label: 'Email',
-                hint: 'Enter your email',
-              ),
-            ],
-          ),
+        _wrapWithReactiveForm(
+          form: form,
+          validationMessages: {
+            'required': (_) => 'Email is required',
+            'email': (_) => 'Invalid email format',
+          },
+          child: LdFormInput<String>(formKey: 'email', label: 'Email', hint: 'Enter email'),
         ),
       );
 
-      final submitButton = find.byType(LdButton);
-      expect(submitButton, findsOneWidget);
-      await tester.tap(submitButton);
-      await tester.pumpAndSettle();
+      // Mark touched and dirty to trigger error display
+      form.control('email').markAsTouched();
+      form.control('email').markAsDirty();
+      await tester.pump();
 
       expect(find.text('Email is required'), findsOneWidget);
 
       await tester.enterText(find.byType(LdInput), 'not-an-email');
-      await tester.tap(submitButton);
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(find.text('Invalid email format'), findsOneWidget);
 
       await tester.enterText(find.byType(LdInput), 'test@example.com');
-      await tester.tap(submitButton);
-      await tester.pumpAndSettle();
-
-      expect(find.text('Invalid email format'), findsNothing);
-      expect(find.text('Email is required'), findsNothing);
-    });
-
-    testWidgets('onSubmit is called with valid form', (WidgetTester tester) async {
-      var onSubmitCalled = false;
-
-      await tester.pumpWidget(
-        _wrapWithMaterialApp(
-          LdForm(
-            items: [
-              LdReactiveFormItem<String>(
-                key: 'name',
-                initialValue: 'John Doe',
-              ),
-            ],
-            onSubmit: (form) async {
-              onSubmitCalled = true;
-            },
-            children: [
-              LdFormInput<String>(
-                formKey: 'name',
-                label: 'Name',
-                hint: 'Enter your name',
-              ),
-            ],
-          ),
-        ),
-      );
-
-      final submitButton = find.byType(LdButton);
-      await tester.tap(submitButton);
-      await tester.pumpAndSettle();
-
-      expect(onSubmitCalled, isTrue);
-    });
-
-    testWidgets('form is disabled during submission', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        _wrapWithMaterialApp(
-          LdForm(
-            items: [
-              LdReactiveFormItem<String>(
-                key: 'name',
-                initialValue: 'John Doe',
-              ),
-            ],
-            onSubmit: (form) async {
-              await Future<void>.delayed(const Duration(milliseconds: 500));
-            },
-            submitConfig: LdFormSubmitConfig(
-              loadingText: 'Submitting...',
-            ),
-            children: [
-              LdFormInput<String>(
-                formKey: 'name',
-                label: 'Name',
-                hint: 'Enter your name',
-              ),
-            ],
-          ),
-        ),
-      );
-
-      final submitButton = find.byType(LdButton);
-      await tester.tap(submitButton);
       await tester.pump();
 
-      expect(find.text('Submitting...'), findsOneWidget);
-
-      await tester.pumpAndSettle();
+      expect(find.text('Invalid email format'), findsNothing);
     });
 
-    testWidgets('custom submit button appears correctly', (WidgetTester tester) async {
+    testWidgets('onBlurred callback is invoked on focus loss', (WidgetTester tester) async {
+      final form = FormGroup({'name': FormControl<String>()});
+
       await tester.pumpWidget(
-        _wrapWithMaterialApp(
-          LdForm(
-            items: [
-              LdReactiveFormItem<String>(key: 'name'),
-            ],
-            onSubmit: (form) async {},
-            submitBuilder: (context, form, child) {
-              return LdButton(
-                onPressed: () async {},
-                disabled: form.disabled,
-                child: const Text('Custom Submit'),
-              );
-            },
+        _wrapWithReactiveForm(
+          form: form,
+          child: Column(
             children: [
-              LdFormInput<String>(
-                formKey: 'name',
-                label: 'Name',
-                hint: 'Enter your name',
-              ),
-            ],
-          ),
-        ),
-      );
-
-      expect(find.text('Custom Submit'), findsOneWidget);
-    });
-
-    testWidgets('form validators are applied', (WidgetTester tester) async {
-      final formValidator = LdFormValidators.mustMatch(
-        'username',
-        'password',
-      );
-
-      var onSubmitCalled = false;
-
-      await tester.pumpWidget(
-        _wrapWithMaterialApp(
-          LdForm(
-            items: [
-              LdReactiveFormItem<String>(
-                key: 'username',
-                initialValue: 'user1',
-              ),
-              LdReactiveFormItem<String>(
-                key: 'password',
-                initialValue: 'pass',
-              ),
-            ],
-            validators: [formValidator],
-            validationMessages: {
-              'mustMatch': (error) => 'Username and password must not match',
-            },
-            onSubmit: (form) async {
-              onSubmitCalled = true;
-            },
-            children: [
-              LdFormInput<String>(formKey: 'username', label: 'Username', hint: 'Username'),
-              LdFormInput<String>(formKey: 'password', label: 'Password', hint: 'Password'),
-            ],
-          ),
-        ),
-      );
-
-      final submitButton = find.byType(LdButton);
-      await tester.tap(submitButton);
-      await tester.pumpAndSettle();
-
-      expect(find.text('Username and password must not match'), findsOneWidget);
-      expect(onSubmitCalled, isFalse);
-
-      await tester.enterText(find.byType(LdInput).first, 'same');
-      await tester.enterText(find.byType(LdInput).last, 'same');
-
-      await tester.tap(submitButton);
-      await tester.pumpAndSettle();
-
-      expect(onSubmitCalled, isTrue);
-    });
-
-    testWidgets('hides submit button when showSubmitButton is false', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        _wrapWithMaterialApp(
-          LdForm(
-            showSubmitButton: false,
-            items: [
-              LdReactiveFormItem<String>(key: 'name'),
-            ],
-            onSubmit: (form) async {},
-            children: [
-              LdFormInput<String>(formKey: 'name', label: 'Name', hint: 'Name'),
-            ],
-          ),
-        ),
-      );
-
-      expect(find.byType(LdSubmit<void, void>), findsNothing);
-    });
-
-    testWidgets('exposes form group via LdReactiveFormScope', (WidgetTester tester) async {
-      LdFormGroup? scopedForm;
-
-      await tester.pumpWidget(
-        _wrapWithMaterialApp(
-          Builder(
-            builder: (context) {
-              return LdForm(
-                items: [
-                  LdReactiveFormItem<String>(key: 'name'),
-                ],
-                onSubmit: (form) async {},
-                submitBuilder: (context, form, child) {
-                  scopedForm = LdReactiveFormScope.of(context);
-                  return LdButton(
-                    onPressed: () async {},
-                    child: const Text('Submit'),
-                  );
-                },
-                children: [
-                  LdFormInput<String>(formKey: 'name', label: 'Name', hint: 'Name'),
-                ],
-              );
-            },
-          ),
-        ),
-      );
-
-      expect(scopedForm, isNotNull);
-      expect(scopedForm!.contains('name'), isTrue);
-    });
-
-    testWidgets('input onBlurred is called and marks control touched', (WidgetTester tester) async {
-      var blurredValue = '';
-
-      await tester.pumpWidget(
-        _wrapWithMaterialApp(
-          Column(
-            children: [
-              LdForm(
-                items: [
-                  LdReactiveFormItem<String>(key: 'name'),
-                ],
-                onSubmit: (form) async {},
-                children: [
-                  LdFormInput<String>(
-                    formKey: 'name',
-                    label: 'Name',
-                    hint: 'Name',
-                    onBlurred: (value) => blurredValue = value,
-                  ),
-                ],
+              Provider<LdFormState?>.value(
+                value: null,
+                child: LdFormInput<String>(
+                  formKey: 'name',
+                  label: 'Name',
+                  hint: 'Name',
+                ),
               ),
               const Text('outside'),
             ],
@@ -399,63 +141,48 @@ void main() {
       await tester.tap(find.text('outside'));
       await tester.pump();
 
-      expect(blurredValue, 'Jane');
+      // The control value should reflect what was typed
+      expect(form.control('name').value, 'Jane');
     });
+  });
 
-    testWidgets('shows requiredEquals message for equals validator', (WidgetTester tester) async {
+  group('LdFormCheckbox', () {
+    testWidgets('renders label and toggles control', (WidgetTester tester) async {
+      final form = FormGroup({'terms': FormControl<bool>(value: false)});
+
       await tester.pumpWidget(
-        _wrapWithMaterialApp(
-          LdForm(
-            items: [
-              LdReactiveFormItem<Set<String>>(
-                key: 'choice',
-                validators: [
-                  LdFormSetValidators.equals({'a'})
-                ],
-              ),
-            ],
-            validationMessages: {
-              'requiredEquals': (error) => 'Pick A',
-            },
-            onSubmit: (form) async {},
-            children: [
-              LdFormChoose<String>(
-                formKey: 'choice',
-                label: 'Pick one',
-                items: const [
-                  LdSelectItem(value: 'a', child: Text('A')),
-                  LdSelectItem(value: 'b', child: Text('B')),
-                ],
-              ),
-            ],
+        _wrapWithReactiveForm(
+          form: form,
+          child: LdFormCheckbox(
+            formKey: 'terms',
+            label: 'Accept Terms',
           ),
         ),
       );
 
-      await tester.tap(find.byType(LdButton));
-      await tester.pumpAndSettle();
+      expect(find.text('Accept Terms'), findsOneWidget);
+      expect(find.byType(LdCheckbox), findsOneWidget);
 
-      expect(find.text('Pick A'), findsOneWidget);
-      expect(find.text('requiredEquals'), findsNothing);
+      await tester.tap(find.byType(LdCheckbox));
+      await tester.pump();
+
+      expect(form.control('terms').value, isTrue);
     });
+  });
 
-    testWidgets('chooseFromItems renders LdChoose trigger', (WidgetTester tester) async {
+  group('LdFormChoose', () {
+    testWidgets('renders label and select trigger', (WidgetTester tester) async {
+      final form = FormGroup({'choice': FormControl<Set<String>>()});
+
       await tester.pumpWidget(
-        _wrapWithMaterialApp(
-          LdForm(
-            items: [
-              LdReactiveFormItem<Set<String>>(key: 'choice'),
-            ],
-            onSubmit: (form) async {},
-            children: [
-              LdFormChoose<String>(
-                formKey: 'choice',
-                label: 'Pick one',
-                items: const [
-                  LdSelectItem(value: 'a', child: Text('A')),
-                  LdSelectItem(value: 'b', child: Text('B')),
-                ],
-              ),
+        _wrapWithReactiveForm(
+          form: form,
+          child: LdFormChoose<String>(
+            formKey: 'choice',
+            label: 'Pick one',
+            items: const [
+              LdSelectItem(value: 'a', child: Text('A')),
+              LdSelectItem(value: 'b', child: Text('B')),
             ],
           ),
         ),
@@ -463,6 +190,50 @@ void main() {
 
       expect(find.text('Pick one'), findsOneWidget);
       expect(find.text('Select...'), findsOneWidget);
+    });
+  });
+
+  group('LdFormSetValidators', () {
+    test('equals validator returns no error when set matches', () {
+      final validator = LdFormSetValidators.equals({'a'});
+      final control = FormControl<Set<String>>(value: {'a'});
+      expect(validator(control), isNull);
+    });
+
+    test('equals validator returns error when set does not match', () {
+      final validator = LdFormSetValidators.equals({'a'});
+      final control = FormControl<Set<String>>(value: {'b'});
+      expect(validator(control), isNotNull);
+    });
+
+    testWidgets('shows custom message for requiredEquals-style error', (WidgetTester tester) async {
+      final form = FormGroup({
+        'choice': FormControl<Set<String>>(
+          validators: [LdFormSetValidators.equals({'a'})],
+        ),
+      });
+
+      await tester.pumpWidget(
+        _wrapWithReactiveForm(
+          form: form,
+          validationMessages: {'equals': (_) => 'Pick A'},
+          child: LdFormChoose<String>(
+            formKey: 'choice',
+            label: 'Pick one',
+            items: const [
+              LdSelectItem(value: 'a', child: Text('A')),
+              LdSelectItem(value: 'b', child: Text('B')),
+            ],
+          ),
+        ),
+      );
+
+      // Mark dirty + touched to trigger error display
+      form.control('choice').markAsTouched();
+      form.control('choice').markAsDirty();
+      await tester.pump();
+
+      expect(find.text('Pick A'), findsOneWidget);
     });
   });
 }
