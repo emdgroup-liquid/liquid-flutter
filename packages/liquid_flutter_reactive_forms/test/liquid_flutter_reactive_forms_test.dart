@@ -216,10 +216,11 @@ void main() {
       await tester.pumpWidget(
         _wrapWithReactiveForm(
           form: form,
-          validationMessages: {'equals': (_) => 'Pick A'},
           child: LdFormChoose<String>(
             formKey: 'choice',
             label: 'Pick one',
+            // In reactive_forms 18.x, ValidationMessage.equals = 'requiredEquals'.
+            validationMessages: {'requiredEquals': (_) => 'Pick A'},
             items: const [
               LdSelectItem(value: 'a', child: Text('A')),
               LdSelectItem(value: 'b', child: Text('B')),
@@ -228,9 +229,14 @@ void main() {
         ),
       );
 
-      // Mark dirty + touched to trigger error display
+      await tester.pump();
+
+      // Interact with the control so the field shows validation errors.
       form.control('choice').markAsTouched();
       form.control('choice').markAsDirty();
+      // Two pumps: first propagates the control change event,
+      // second lets ReactiveFormField rebuild with the updated error state.
+      await tester.pump();
       await tester.pump();
 
       expect(find.text('Pick A'), findsOneWidget);

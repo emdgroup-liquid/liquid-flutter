@@ -180,10 +180,13 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    // Advance past LdSubmitDialogBuilder's 1500ms hide-delay timer.
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
 
     await tester.enterText(find.byType(LdInput), 'Updated title');
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
 
     final saveButton = find.byWidgetPredicate(
       (widget) => widget is LdButton && widget.child is Text && (widget.child as Text).data == 'Save',
@@ -192,10 +195,13 @@ void main() {
     expect(tester.widget<LdButton>(saveButton).disabled, isFalse);
 
     await tester.tap(saveButton);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
 
     expect(updateCount, 1);
     expect(tasks.first.title, 'Updated title');
+    // Drain any remaining hide-delay timers.
+    await tester.pump(const Duration(seconds: 2));
   });
 
   testWidgets('registers a location lock while dirty', (tester) async {
@@ -244,7 +250,9 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    // Advance past LdSubmitDialogBuilder's 1500ms hide-delay timer.
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
 
     expect(lockRegistry!.isEmpty, isTrue);
 
@@ -253,6 +261,8 @@ void main() {
 
     expect(lockRegistry!.isEmpty, isFalse);
     expect(lockRegistry!.locks.single.pathPrefix, '/task-demo/1');
+    // Drain any remaining hide-delay timers.
+    await tester.pump(const Duration(seconds: 2));
   });
 
   testWidgets('blocked back shows discard dialog and pops on confirm', (tester) async {
