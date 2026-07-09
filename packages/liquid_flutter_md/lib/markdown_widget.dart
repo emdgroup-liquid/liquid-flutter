@@ -1,6 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_highlight/flutter_highlight.dart';
+import 'package:flutter_highlight/themes/atom-one-dark.dart';
+import 'package:flutter_highlight/themes/github.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_md/src/markdown/markdown.dart' as md;
 
@@ -17,8 +20,7 @@ md.Document _getDocument() {
 
 /// Parses [data] into markdown AST nodes.
 /// Private – use [LdMarkdown] for rendering.
-List<md.Node> _parseMarkdownNodes(String data) =>
-    _getDocument().parse(data);
+List<md.Node> _parseMarkdownNodes(String data) => _getDocument().parse(data);
 
 // ---------------------------------------------------------------------------
 // Debug helpers (kept public for tooling / tests)
@@ -36,14 +38,8 @@ extension MarkdownNodeDebug on md.Node {
     final indentString = ' ' * indent;
     if (this is md.Element) {
       final element = this as md.Element;
-      final children =
-          element.children
-              ?.map((child) => child.toDebugString(indent: indent + 2))
-              .join('\n') ??
-          '';
-      final attributes = element.attributes.isEmpty
-          ? ''
-          : ', attributes: ${element.attributes}';
+      final children = element.children?.map((child) => child.toDebugString(indent: indent + 2)).join('\n') ?? '';
+      final attributes = element.attributes.isEmpty ? '' : ', attributes: ${element.attributes}';
       return '$indentString Element(tag: ${element.tag}$attributes, children: [\n$children\n$indentString])';
     } else if (this is md.Text) {
       final text = this as md.Text;
@@ -60,24 +56,57 @@ extension MarkdownNodeDebug on md.Node {
 // LdMarkdown — viewer widget
 // ---------------------------------------------------------------------------
 
-/// A widget that renders markdown using Liquid Flutter components.
+/// Renders a markdown string using native Liquid Flutter components.
 ///
-/// [onLinkTap] is called when the user taps a link. The consumer is
-/// responsible for navigation / URL launching.
+/// The parser uses the GitHub Web extension set, supporting tables, fenced
+/// code blocks, strikethrough, task lists, and GitHub-flavored alerts
+/// (`> [!NOTE]`, `> [!WARNING]`, etc.).
 ///
-/// [imageBuilder] is called to build an image widget for a given src / alt
-/// pair.  Return `null` to fall back to a plain [Image.network].
+/// The parsed AST is cached: re-rendering with the same [data] string does
+/// not re-parse.
+///
+/// ## Basic usage
+///
+/// ```dart
+/// LdMarkdown(
+///   data: '# Hello\n\nThis is **bold** and *italic*.',
+/// )
+/// ```
+///
+/// ## Link handling
+///
+/// Supply [onLinkTap] to intercept link taps; the widget does not launch
+/// URLs automatically.
+///
+/// ```dart
+/// LdMarkdown(
+///   data: '[Visit us](https://example.com)',
+///   onLinkTap: (url, title) => launchUrl(Uri.parse(url)),
+/// )
+/// ```
+///
+/// ## Live demo
+///
+/// <!-- demo:LdMarkdownLive -->
 class LdMarkdown extends StatefulWidget {
+  /// The markdown source string to render.
   final String data;
+
+  /// When `true` (default), wraps the output in [LdAutoSpace] which adds
+  /// automatic spacing between block elements. Set to `false` to use a plain
+  /// [Column] instead.
   final bool shrinkWrap;
+
+  /// Padding applied around the rendered content.
   final EdgeInsets padding;
 
-  /// Called when the user taps a link.  `url` is the href; `title` is the
-  /// optional link title attribute (may be empty).
+  /// Called when the user taps a link. `url` is the href; `title` is the
+  /// optional link title attribute (may be empty). The consumer is responsible
+  /// for navigation or URL launching.
   final void Function(String url, String title)? onLinkTap;
 
   /// Called to build an image widget for a given [src] / [alt] pair.
-  /// Return `null` to use the default [Image.network] fallback.
+  /// Return `null` to fall back to a plain [Image.network].
   final Widget? Function(String src, String alt)? imageBuilder;
 
   const LdMarkdown({
@@ -121,14 +150,8 @@ class _LdMarkdownState extends State<LdMarkdown> {
     return Padding(
       padding: widget.padding,
       child: widget.shrinkWrap
-          ? LdAutoSpace(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: widgets,
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: widgets,
-            ),
+          ? LdAutoSpace(crossAxisAlignment: CrossAxisAlignment.start, children: widgets)
+          : Column(crossAxisAlignment: CrossAxisAlignment.start, children: widgets),
     );
   }
 }
@@ -149,14 +172,7 @@ List<Widget> markdownToWidgets(
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
   return nodes
-      .map(
-        (node) => _nodeToBlockWidget(
-          context,
-          node,
-          onLinkTap: onLinkTap,
-          imageBuilder: imageBuilder,
-        ),
-      )
+      .map((node) => _nodeToBlockWidget(context, node, onLinkTap: onLinkTap, imageBuilder: imageBuilder))
       .whereType<Widget>()
       .toList();
 }
@@ -168,28 +184,19 @@ Widget? _nodeToBlockWidget(
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
   if (node is md.Element) {
-    return _elementToBlockWidget(
-      context,
-      node,
-      onLinkTap: onLinkTap,
-      imageBuilder: imageBuilder,
-    );
+    return _elementToBlockWidget(context, node, onLinkTap: onLinkTap, imageBuilder: imageBuilder);
   }
   if (node is md.Text) {
     return _orphanTextWidget(context, node.textContent);
   }
   if (node is md.UnparsedContent) {
-    return Text.rich(
-      TextSpan(text: node.textContent, style: _paragraphStyle(context)),
-    );
+    return Text.rich(TextSpan(text: node.textContent, style: _paragraphStyle(context)));
   }
   return null;
 }
 
 Widget _orphanTextWidget(BuildContext context, String text) {
-  return Text.rich(
-    TextSpan(text: text, style: _paragraphStyle(context)),
-  );
+  return Text.rich(TextSpan(text: text, style: _paragraphStyle(context)));
 }
 
 Widget _elementToBlockWidget(
@@ -198,7 +205,7 @@ Widget _elementToBlockWidget(
   void Function(String url, String title)? onLinkTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
-  final theme = LdTheme.of(context);
+  final theme = LdTheme.of(context, listen: true);
 
   return switch (node.tag) {
     'p' ||
@@ -209,23 +216,10 @@ Widget _elementToBlockWidget(
     'h5' ||
     'h6' ||
     'em' ||
-    'i' =>
-      buildText(context, node, onLinkTap: onLinkTap, imageBuilder: imageBuilder),
+    'i' => buildText(context, node, onLinkTap: onLinkTap, imageBuilder: imageBuilder),
 
-    'ul' => _buildList(
-      context,
-      node,
-      ordered: false,
-      onLinkTap: onLinkTap,
-      imageBuilder: imageBuilder,
-    ),
-    'ol' => _buildList(
-      context,
-      node,
-      ordered: true,
-      onLinkTap: onLinkTap,
-      imageBuilder: imageBuilder,
-    ),
+    'ul' => _buildList(context, node, ordered: false, onLinkTap: onLinkTap, imageBuilder: imageBuilder),
+    'ol' => _buildList(context, node, ordered: true, onLinkTap: onLinkTap, imageBuilder: imageBuilder),
 
     'img' => () {
       final src = node.attributes['src'] ?? '';
@@ -236,53 +230,34 @@ Widget _elementToBlockWidget(
     'br' => ldSpacerL,
     'hr' => LdDivider(),
 
-    'li' => _buildStandaloneListItem(
-      context,
-      node,
-      onLinkTap: onLinkTap,
-      imageBuilder: imageBuilder,
-    ),
+    'li' => _buildStandaloneListItem(context, node, onLinkTap: onLinkTap, imageBuilder: imageBuilder),
 
     'input' => LdCheckbox(checked: node.attributes['checked'] == 'true'),
 
     'strong' => Text.rich(
       TextSpan(
         style: _paragraphStyle(context),
-        children: [
-          buildTextSpan(
-            context,
-            node,
-            onLinkTap: onLinkTap,
-            imageBuilder: imageBuilder,
-          ),
-        ],
+        children: [buildTextSpan(context, node, onLinkTap: onLinkTap, imageBuilder: imageBuilder)],
       ),
     ),
 
     'pre' => LdBundle(
       children: [
         LdCard(
-          child: _combineBlockWidgets(
-            context,
-            node.children ?? [],
-            onLinkTap: onLinkTap,
-            imageBuilder: imageBuilder,
-          ),
+          child: _combineBlockWidgets(context, node.children ?? [], onLinkTap: onLinkTap, imageBuilder: imageBuilder),
         ),
       ],
     ),
 
-    'code' => _MarkdownCode(code: node.textContent, language: node.attributes['class']?.split('-').lastOrNull ?? 'text'),
+    'code' => _MarkdownCode(
+      code: node.textContent,
+      language: node.attributes['class']?.split('-').lastOrNull ?? 'text',
+    ),
 
     'blockquote' => LdCard(
       child: LdAutoSpace(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: markdownToWidgets(
-          context,
-          node.children ?? [],
-          onLinkTap: onLinkTap,
-          imageBuilder: imageBuilder,
-        ),
+        children: markdownToWidgets(context, node.children ?? [], onLinkTap: onLinkTap, imageBuilder: imageBuilder),
       ),
     ),
 
@@ -292,12 +267,8 @@ Widget _elementToBlockWidget(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: (node.children ?? [])
             .map(
-              (child) => _elementToBlockWidget(
-                context,
-                child as md.Element,
-                onLinkTap: onLinkTap,
-                imageBuilder: imageBuilder,
-              ),
+              (child) =>
+                  _elementToBlockWidget(context, child as md.Element, onLinkTap: onLinkTap, imageBuilder: imageBuilder),
             )
             .toList(),
       ),
@@ -306,12 +277,8 @@ Widget _elementToBlockWidget(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: (node.children ?? [])
           .map(
-            (child) => _elementToBlockWidget(
-              context,
-              child as md.Element,
-              onLinkTap: onLinkTap,
-              imageBuilder: imageBuilder,
-            ),
+            (child) =>
+                _elementToBlockWidget(context, child as md.Element, onLinkTap: onLinkTap, imageBuilder: imageBuilder),
           )
           .toList(),
     ),
@@ -320,12 +287,8 @@ Widget _elementToBlockWidget(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: (node.children ?? [])
             .map(
-              (child) => _elementToBlockWidget(
-                context,
-                child as md.Element,
-                onLinkTap: onLinkTap,
-                imageBuilder: imageBuilder,
-              ),
+              (child) =>
+                  _elementToBlockWidget(context, child as md.Element, onLinkTap: onLinkTap, imageBuilder: imageBuilder),
             )
             .toList(),
       ),
@@ -333,24 +296,15 @@ Widget _elementToBlockWidget(
     'th' || 'td' => Expanded(
       child: Padding(
         padding: theme.pad(size: LdSize.s),
-        child: _tableCellContent(
-          context,
-          node,
-          onLinkTap: onLinkTap,
-          imageBuilder: imageBuilder,
-        ),
+        child: _tableCellContent(context, node, onLinkTap: onLinkTap, imageBuilder: imageBuilder),
       ),
     ),
     'tr' => Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: (node.children ?? [])
           .map(
-            (child) => _elementToBlockWidget(
-              context,
-              child as md.Element,
-              onLinkTap: onLinkTap,
-              imageBuilder: imageBuilder,
-            ),
+            (child) =>
+                _elementToBlockWidget(context, child as md.Element, onLinkTap: onLinkTap, imageBuilder: imageBuilder),
           )
           .toList(),
     ),
@@ -363,28 +317,16 @@ Widget _elementToBlockWidget(
           'important' => LdHintType.warning,
           'caution' => LdHintType.warning,
           'warning' => LdHintType.warning,
-          _ => throw Exception(
-            'Invalid hint type: ${node.attributes['class']?.split('-').last}',
-          ),
+          _ => throw Exception('Invalid hint type: ${node.attributes['class']?.split('-').last}'),
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: markdownToWidgets(
-            context,
-            node.children ?? [],
-            onLinkTap: onLinkTap,
-            imageBuilder: imageBuilder,
-          ),
+          children: markdownToWidgets(context, node.children ?? [], onLinkTap: onLinkTap, imageBuilder: imageBuilder),
         ),
       ),
       _ => SizedBox(
         width: double.infinity,
-        child: _combineBlockWidgets(
-          context,
-          node.children ?? [],
-          onLinkTap: onLinkTap,
-          imageBuilder: imageBuilder,
-        ),
+        child: _combineBlockWidgets(context, node.children ?? [], onLinkTap: onLinkTap, imageBuilder: imageBuilder),
       ),
     },
 
@@ -398,12 +340,7 @@ Widget _combineBlockWidgets(
   void Function(String url, String title)? onLinkTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
-  final widgets = markdownToWidgets(
-    context,
-    nodes,
-    onLinkTap: onLinkTap,
-    imageBuilder: imageBuilder,
-  );
+  final widgets = markdownToWidgets(context, nodes, onLinkTap: onLinkTap, imageBuilder: imageBuilder);
   return switch (widgets.length) {
     0 => const SizedBox.shrink(),
     1 => widgets.first,
@@ -423,24 +360,14 @@ Widget _tableCellContent(
   if (children.length == 1 && children.first is md.Element) {
     final child = children.first as md.Element;
     if (child.tag == 'p') {
-      return buildText(
-        context,
-        child,
-        onLinkTap: onLinkTap,
-        imageBuilder: imageBuilder,
-      );
+      return buildText(context, child, onLinkTap: onLinkTap, imageBuilder: imageBuilder);
     }
   }
 
   return Text.rich(
     TextSpan(
       style: _paragraphStyle(context),
-      children: _inlineNodesToSpans(
-        context,
-        children,
-        onLinkTap: onLinkTap,
-        imageBuilder: imageBuilder,
-      ),
+      children: _inlineNodesToSpans(context, children, onLinkTap: onLinkTap, imageBuilder: imageBuilder),
     ),
   );
 }
@@ -458,14 +385,10 @@ bool _listHasNestedLists(md.Element list) {
 }
 
 EdgeInsets _listPadding(BuildContext context, {required int indent}) {
-  final theme = LdTheme.of(context);
+  final theme = LdTheme.of(context, listen: true);
   final step = theme.pad(size: LdSize.s.adjust(-1)).left;
   if (indent == 0) {
-    return theme.pad(size: LdSize.s.adjust(-1)).copyWith(
-      top: 0,
-      bottom: 0,
-      right: 0,
-    );
+    return theme.pad(size: LdSize.s.adjust(-1)).copyWith(top: 0, bottom: 0, right: 0);
   }
   return EdgeInsets.only(left: step);
 }
@@ -505,13 +428,7 @@ Widget _buildList(
     child: Text.rich(
       TextSpan(
         style: _paragraphStyle(context),
-        children: _flatListSpans(
-          context,
-          list,
-          ordered: ordered,
-          onLinkTap: onLinkTap,
-          imageBuilder: imageBuilder,
-        ),
+        children: _flatListSpans(context, list, ordered: ordered, onLinkTap: onLinkTap, imageBuilder: imageBuilder),
       ),
     ),
   );
@@ -531,18 +448,8 @@ List<InlineSpan> _flatListSpans(
   for (final node in list.children ?? []) {
     if (node is! md.Element || node.tag != 'li') continue;
     if (itemIndex > 0) spans.add(TextSpan(text: '\n', style: style));
-    spans.addAll(
-      _listItemPrefixSpans(context, node, ordered: ordered, index: itemIndex),
-    );
-    spans.addAll(
-      _listItemInlineSpans(
-        context,
-        node,
-        style: style,
-        onLinkTap: onLinkTap,
-        imageBuilder: imageBuilder,
-      ),
-    );
+    spans.addAll(_listItemPrefixSpans(context, node, ordered: ordered, index: itemIndex));
+    spans.addAll(_listItemInlineSpans(context, node, style: style, onLinkTap: onLinkTap, imageBuilder: imageBuilder));
     itemIndex++;
   }
 
@@ -578,13 +485,7 @@ Widget _buildNestedListItem(
   final style = _paragraphStyle(context);
   final inlineSpans = <InlineSpan>[
     ..._listItemPrefixSpans(context, li, ordered: ordered, index: index),
-    ..._listItemInlineSpans(
-      context,
-      li,
-      style: style,
-      onLinkTap: onLinkTap,
-      imageBuilder: imageBuilder,
-    ),
+    ..._listItemInlineSpans(context, li, style: style, onLinkTap: onLinkTap, imageBuilder: imageBuilder),
   ];
 
   final nestedLists = <Widget>[];
@@ -618,11 +519,9 @@ List<InlineSpan> _listItemPrefixSpans(
   required bool ordered,
   required int index,
 }) {
-  final theme = LdTheme.of(context);
+  final theme = LdTheme.of(context, listen: true);
   final style = _paragraphStyle(context);
-  final input = li.children
-      ?.whereType<md.Element>()
-      .firstWhereOrNull((e) => e.tag == 'input');
+  final input = li.children?.whereType<md.Element>().firstWhereOrNull((e) => e.tag == 'input');
 
   if (input != null) {
     return [
@@ -637,10 +536,7 @@ List<InlineSpan> _listItemPrefixSpans(
   }
 
   final prefix = ordered ? '${index + 1}.' : '•';
-  return [
-    TextSpan(text: prefix, style: style),
-    TextSpan(text: ' ', style: style),
-  ];
+  return [TextSpan(text: prefix, style: style), TextSpan(text: ' ', style: style)];
 }
 
 List<InlineSpan> _listItemInlineSpans(
@@ -663,33 +559,14 @@ List<InlineSpan> _listItemInlineSpans(
         case 'p':
           if (paragraphIndex > 0) spans.add(TextSpan(text: '\n', style: style));
           spans.addAll(
-            _inlineNodesToSpans(
-              context,
-              child.children ?? [],
-              onLinkTap: onLinkTap,
-              imageBuilder: imageBuilder,
-            ),
+            _inlineNodesToSpans(context, child.children ?? [], onLinkTap: onLinkTap, imageBuilder: imageBuilder),
           );
           paragraphIndex++;
         default:
-          spans.add(
-            buildTextSpan(
-              context,
-              child,
-              onLinkTap: onLinkTap,
-              imageBuilder: imageBuilder,
-            ),
-          );
+          spans.add(buildTextSpan(context, child, onLinkTap: onLinkTap, imageBuilder: imageBuilder));
       }
     } else {
-      spans.add(
-        buildTextSpan(
-          context,
-          child,
-          onLinkTap: onLinkTap,
-          imageBuilder: imageBuilder,
-        ),
-      );
+      spans.add(buildTextSpan(context, child, onLinkTap: onLinkTap, imageBuilder: imageBuilder));
     }
   }
 
@@ -702,17 +579,26 @@ List<InlineSpan> _inlineNodesToSpans(
   void Function(String url, String title)? onLinkTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
-  return nodes
-      .map(
-        (node) => buildTextSpan(
-          context,
-          node,
-          onLinkTap: onLinkTap,
-          imageBuilder: imageBuilder,
-        ),
-      )
-      .toList();
+  return nodes.map((node) => buildTextSpan(context, node, onLinkTap: onLinkTap, imageBuilder: imageBuilder)).toList();
 }
+
+/// Maps a highlight.js theme to use dynamic LdTheme surface/text colors for
+/// the 'root' entry while keeping all token colors from the chosen theme.
+Map<String, TextStyle> _themedHighlightMap(
+  Map<String, TextStyle> base,
+  Color background,
+  Color foreground,
+) {
+  return {
+    ...base,
+    'root': (base['root'] ?? const TextStyle()).copyWith(
+      backgroundColor: background,
+      color: foreground,
+    ),
+  };
+}
+
+const _kCodeFontSize = 13.0;
 
 class _MarkdownCode extends StatelessWidget {
   final String code;
@@ -721,7 +607,40 @@ class _MarkdownCode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(code, style: const TextStyle(fontFamily: 'monospace'));
+    final theme = LdTheme.of(context, listen: true);
+    final isDark = theme.isDark;
+
+    // Pick a base highlight.js theme that matches the current brightness,
+    // then override 'root' background/foreground with LdTheme surface colors
+    // so the code block fits naturally into the design system.
+    final baseTheme = isDark ? atomOneDarkTheme : githubTheme;
+    final highlightTheme = _themedHighlightMap(
+      baseTheme,
+      theme.surface,
+      theme.text,
+    );
+
+    // Normalize language: strip any residual "language-" prefix that may
+    // survive from older parsers, and fall back to plain text.
+    final lang = language.replaceFirst('language-', '');
+
+    return ClipRect(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: HighlightView(
+          code,
+          language: lang.isEmpty || lang == 'text' ? null : lang,
+          theme: highlightTheme,
+          padding: theme.pad(size: LdSize.s),
+          textStyle: TextStyle(
+            fontFamily: theme.monoFontFamily,
+            package: theme.monoFontFamilyPackage,
+            fontSize: _kCodeFontSize,
+            height: 1.5,
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -731,7 +650,7 @@ Widget buildText(
   void Function(String url, String title)? onLinkTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
-  final theme = LdTheme.of(context);
+  final theme = LdTheme.of(context, listen: true);
   final (paddingTop, paddingBottom) = switch (text.tag) {
     'h1' => (LdSize.l, LdSize.s),
     'h2' => (LdSize.l, LdSize.s),
@@ -749,12 +668,7 @@ Widget buildText(
     padding: padding,
     child: Text.rich(
       TextSpan(
-        children: _inlineNodesToSpans(
-          context,
-          text.children ?? [],
-          onLinkTap: onLinkTap,
-          imageBuilder: imageBuilder,
-        ),
+        children: _inlineNodesToSpans(context, text.children ?? [], onLinkTap: onLinkTap, imageBuilder: imageBuilder),
         style: switch (text.tag) {
           'p' => ldBuildTextStyle(theme, LdTextType.paragraph, LdSize.m),
           'h1' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.l),
@@ -785,15 +699,9 @@ InlineSpan buildTextSpan(
   }
   if (node is md.Element) {
     final theme = LdTheme.of(context);
-    final children = node.children
-            ?.map(
-              (e) => buildTextSpan(
-                context,
-                e,
-                onLinkTap: onLinkTap,
-                imageBuilder: imageBuilder,
-              ),
-            )
+    final children =
+        node.children
+            ?.map((e) => buildTextSpan(context, e, onLinkTap: onLinkTap, imageBuilder: imageBuilder))
             .toList() ??
         [];
     return switch (node.tag) {
@@ -820,8 +728,10 @@ InlineSpan buildTextSpan(
         children: children,
         text: children.isEmpty ? node.textContent : null,
         style: TextStyle(
-          fontFamily: 'monospace',
-          background: Paint()..color = theme.surface,
+          fontFamily: theme.monoFontFamily,
+          package: theme.monoFontFamilyPackage,
+          fontSize: _kCodeFontSize,
+          background: Paint()..color = theme.neutralShade(3),
         ),
       ),
       'br' => const TextSpan(text: '\n'),

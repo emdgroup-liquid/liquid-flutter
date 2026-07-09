@@ -20,7 +20,6 @@ import 'package:liquid/components/form_elements/switch.dart';
 import 'package:liquid/components/form_elements/toggle.dart';
 import 'package:liquid/components/interaction/action_runner.dart';
 import 'package:liquid/components/interaction/appbar_demo.dart';
-import 'package:liquid/components/interaction/button.dart';
 import 'package:liquid/components/interaction/context_menu.dart';
 import 'package:liquid/components/interaction/modal.dart';
 import 'package:liquid/components/interaction/orb.dart';
@@ -60,12 +59,10 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 
 import 'components/bento_gallery.dart';
 import 'experiments/metaball_experiment.dart';
-import 'components/data_display/markdown.dart';
 import 'components/form_elements/markdown_editor.dart';
 import 'components/data_display/table.dart';
 import 'components/data_display/tag.dart';
 import 'components/feedback/badge.dart';
-import 'components/feedback/hint.dart';
 import 'components/feedback/notification.dart';
 import 'components/form_elements/checkbox.dart';
 
@@ -74,6 +71,9 @@ import 'components/form_elements/input.dart';
 import 'components/interaction/breadcrumb.dart';
 import 'components/layout/accordion.dart';
 import 'components/layout/divider.dart';
+import 'components/generated/hint_doc_page.doc.g.dart';
+import 'components/generated/button_doc_page.doc.g.dart';
+import 'components/generated/markdown_doc_page.doc.g.dart';
 import 'window/app_scaffold.dart';
 
 final projectRouteConfig = LdMonkeyRouteConfig.identifiableInt<Project>(itemName: "project");
@@ -223,7 +223,7 @@ class AppRouter {
           ),
           GoRoute(
             path: "/components/button",
-            pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const ButtonDemo()),
+            pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const LdButtonDocPage()),
           ),
           GoRoute(
             path: "/components/card",
@@ -327,7 +327,7 @@ class AppRouter {
           ),
           GoRoute(
             path: "/components/hint",
-            pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const HintDemo()),
+            pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const LdHintDocPage()),
           ),
           GoRoute(
             path: "/components/avatar",
@@ -431,7 +431,7 @@ class AppRouter {
           ),
           GoRoute(
             path: "/components/markdown",
-            pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const MarkdownDemo()),
+            pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const LdMarkdownDocPage()),
           ),
           GoRoute(
             path: "/components/markdown-editor",

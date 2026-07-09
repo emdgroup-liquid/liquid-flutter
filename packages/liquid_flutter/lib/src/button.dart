@@ -6,16 +6,128 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/preview_wrapper.dart';
 import 'package:liquid_flutter/src/touchable/vague_color.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 part 'button.variants.g.dart';
 
-/// Determines the mode of the button
-enum LdButtonMode { filled, outline, ghost, vague }
+/// The visual style of an [LdButton].
+enum LdButtonMode {
+  /// Solid filled background. The default and highest-emphasis style.
+  filled,
 
-/// A pressable button
+  /// Transparent with a visible border.
+  outline,
+
+  /// Fully transparent — no background or border at rest.
+  ghost,
+
+  /// Subtle tinted background, lower emphasis than [filled].
+  vague,
+}
+
+@LiquidMultiPreview(name: 'LdButton – filled')
+Widget ldButtonFilledPreview() => LdButton(
+      onPressed: () async {},
+      child: const Text('Button'),
+    );
+
+@LiquidMultiPreview(name: 'LdButton – outline')
+Widget ldButtonOutlinePreview() => LdButton.outline(
+      onPressed: () async {},
+      child: const Text('Button'),
+    );
+
+@LiquidMultiPreview(name: 'LdButton – ghost')
+Widget ldButtonGhostPreview() => LdButton.ghost(
+      onPressed: () async {},
+      child: const Text('Button'),
+    );
+
+@LiquidMultiPreview(name: 'LdButton – disabled')
+Widget ldButtonDisabledPreview() => LdButton(
+      onPressed: () async {},
+      disabled: true,
+      child: const Text('Disabled'),
+    );
+
+@LiquidMultiPreview(name: 'LdButton – with leading icon')
+Widget ldButtonLeadingPreview() => LdButton(
+      onPressed: () async {},
+      leading: const Icon(LucideIcons.save),
+      child: const Text('Save'),
+    );
+
+@LiquidMultiPreview(name: 'LdButton – circular')
+Widget ldButtonCircularPreview() => LdButton(
+      onPressed: () async {},
+      child: const Icon(LucideIcons.x),
+    );
+
+/// A pressable button with automatic loading state and error handling.
+///
+/// [LdButton] manages its own loading and error states when [autoLoading] is
+/// `true` (the default). If [onPressed] throws, the button briefly shows an
+/// error indication before resetting.
+///
+/// ## Basic usage
+///
+/// ```dart
+/// LdButton(
+///   onPressed: () async {
+///     await saveData();
+///   },
+///   child: const Text('Save'),
+/// )
+/// ```
+///
+/// ## Modes
+///
+/// Control the visual style with [mode] ([LdButtonMode]). Convenience
+/// constructors `LdButton.ghost`, `LdButton.outline`, and `LdButton.vague`
+/// are available as shorthand.
+///
+/// ## Interactive playground
+///
+/// <!-- demo:LdButtonPlayground -->
+///
+/// ## Leading and trailing icons
+///
+/// Pass an icon to [leading] or [trailing]. Do not set an explicit `size` on
+/// the icon — the button derives the correct size from its own [size] param.
+///
+/// <!-- demo:LdButtonLeadingTrailing -->
+///
+/// ## Disabled
+///
+/// <!-- demo:LdButtonDisabled -->
+///
+/// ## Circular / icon-only
+///
+/// Passing an [Icon] as [child] automatically renders a circular button.
+/// Set [circular] explicitly to override this behaviour.
+///
+/// <!-- demo:LdButtonCircular -->
+///
+/// ## Full width
+///
+/// <!-- demo:LdButtonFullWidth -->
+///
+/// ## Error state
+///
+/// When [onPressed] throws, the button automatically shows an error state.
+/// Throw an [LdLocalizedException] to surface a human-readable message.
+///
+/// <!-- demo:LdButtonError -->
+///
+/// ## Context configuration
+///
+/// Use [LdButtonConfigProvider] to apply default [LdButtonConfig] values to
+/// all buttons within a subtree — useful for toolbars and button groups.
+///
+/// <!-- demo:LdButtonConfig -->
 @Variants([
   Variant('ghost', defaults: {'mode': 'LdButtonMode.ghost'}),
   Variant('vague', defaults: {'mode': 'LdButtonMode.vague'}),
@@ -26,29 +138,73 @@ enum LdButtonMode { filled, outline, ghost, vague }
   Variant('success', defaults: {'color': 'LdTheme.of(context).success'}),
 ])
 class _LdButtonWidget extends StatefulWidget {
+  /// The primary label or content of the button.
   final Widget child;
+
+  /// Called when the button is tapped. May be async; errors are caught
+  /// automatically when [autoLoading] is `true`.
   final FutureOr<void> Function() onPressed;
+
+  /// Called whenever the hover state changes.
   final FutureOr<void> Function(bool isHovering)? onHover;
+
+  /// Prevents interaction when `true`.
   final bool disabled;
+
+  /// An optional focus node to control focus programmatically.
   final FocusNode? focusNode;
+
+  /// Widget placed after [child] inside the button.
   final Widget? trailing;
+
+  /// Widget placed before [child] inside the button.
   final Widget? leading;
+
+  /// Drives the loading state externally. Prefer [autoLoading] for most cases.
   final bool loading;
+
+  /// The color scheme for the button. Defaults to the theme's primary color.
   final LdColor? color;
+
+  /// Fixed width of the button. Use `double.infinity` for full-width.
   final double? width;
+
+  /// When `true` (default), the button manages its own loading and error
+  /// states by wrapping [onPressed] automatically.
   final bool autoLoading;
+
+  /// Circular progress value (0–1). `null` shows an indeterminate spinner.
   final double? progress;
+
+  /// Whether to request focus automatically when the widget is first built.
   final bool autoFocus;
+
+  /// Disables the press-squeeze scale animation.
   final bool disableSqueeze;
 
+  /// The visual style of the button. Defaults to [LdButtonMode.filled].
   final LdButtonMode mode;
+
+  /// Overrides the default center alignment of button content.
   final MainAxisAlignment? alignment;
+
+  /// Size of the button. Defaults to [LdSize.m].
   final LdSize size;
+
+  /// When `true`, renders the button in an active/pressed appearance.
   final bool? active;
+
+  /// Forces circular shape. Inferred automatically when [child] is an [Icon].
   final bool? circular;
+
+  /// Overrides the default corner radius derived from the theme.
   final BorderRadius? borderRadius;
 
+  /// Custom text shown while loading. Defaults to the localized "Loading" string.
   final String? loadingText;
+
+  /// Custom text shown on error. Defaults to the exception message or
+  /// the localized "Failed" string.
   final String? errorText;
 
   const _LdButtonWidget({

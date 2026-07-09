@@ -49,6 +49,12 @@ flutter:
     - family: Lato
       fonts:
         - asset: lib/fonts/Lato-Regular.ttf
+    - family: NotoSansMono
+      fonts:
+        - asset: lib/fonts/NotoSansMono-Regular.ttf
+          weight: 400
+        - asset: lib/fonts/NotoSansMono-Bold.ttf
+          weight: 700
     - family: NotoColorEmoji
       fonts:
         - asset: assets/fonts/NotoColorEmoji-Regular.ttf

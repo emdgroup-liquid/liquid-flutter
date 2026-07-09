@@ -2,17 +2,28 @@
 #include <flutter/runtime_effect.glsl>
 
 // ---------------------------------------------------------------------------
-// Pure alpha-mask metaball shader.
-// Outputs vec4(a,a,a,a) — used with BlendMode.dstIn to mask a widget layer.
+// Metaball shader — two modes from one program.
+//
+// mode 0 (fill): outputs vec4(a,a,a,a) — alpha mask for ShaderMask+dstIn.
+// mode 1 (border): outputs borderColor * ringAlpha — painted above fill layer
+//   via CustomPaint.
+//
+//   Border strategy: a pixel is in the border ring when it is outside the
+//   smooth-union fill (dFinal > 0) but within borderWidth of the nearest
+//   *individual* shape boundary (minShapeSDF < borderWidth). Individual shape
+//   SDFs have gradient ≈ 1 everywhere, so borderWidth in SDF units equals
+//   borderWidth in pixels — no stretching in the blend neck.
 //
 // Uniforms are packed into vec4 slots to stay within Metal's 30-buffer limit
 // on iOS (Impeller maps every scalar uniform to a separate buffer slot).
 //
 // Float index map (Flutter FragmentShader.setFloat):
-//   0-3  : u0  (sizeW, sizeH, uBlend, uNumShapes)
-//   4-7  : u1  (uPointerActive, uPointerCx, uPointerCy, uPointerR)
+//   0-3   : u0  (sizeW, sizeH, blend, numShapes)
+//   4-7   : u1  (pointerActive, pointerCx, pointerCy, pointerR)
+//   8-11  : u2  (mode [0=fill, 1=border], borderWidth, pad, pad)
+//   12-15 : u3  (borderColor RGBA — ignored in fill mode)
 //
-//   Per shape i (i=0..11), 8 floats at index 8 + i*8:
+//   Per shape i (i=0..11), 8 floats at index 16 + i*8:
 //     +0 type   (1=rrect, 2=ellipse)
 //     +1 centerX
 //     +2 centerY
@@ -22,11 +33,13 @@
 //     +6 (padding)
 //     +7 (padding)
 //
-// Max shapes: 12  (uses 2 + 12*2 = 26 vec4 buffer slots, within Metal's 30)
+// Max shapes: 12  (uses 4 + 12*2 = 28 vec4 buffer slots, within Metal's 30)
 // ---------------------------------------------------------------------------
 
 uniform vec4 u0; // (sizeW, sizeH, blend, numShapes)
 uniform vec4 u1; // (pointerActive, pointerCx, pointerCy, pointerR)
+uniform vec4 u2; // (mode, borderWidth, pad, pad)
+uniform vec4 u3; // borderColor RGBA
 
 // Each shape packed as two vec4:
 //   sa = (type, cx, cy, w)
@@ -95,6 +108,7 @@ float sizedBlend(vec4 sa, vec4 sb, vec4 sa2, vec4 sb2) {
     return u0.z * t; // u0.z = uBlend
 }
 
+// Blended scene SDF — used for fill boundary and pointer influence.
 float sceneSDF(vec2 p, float n) {
     float d = shapeSDF(p, uS0a, uS0b);
     if (n > 1.0)  d = smoothUnion(d, shapeSDF(p, uS1a,  uS1b),  sizedBlend(uS0a,  uS0b,  uS1a,  uS1b));
@@ -111,6 +125,29 @@ float sceneSDF(vec2 p, float n) {
     return d;
 }
 
+// Full scene SDF with pointer influence applied at position p.
+// Extracted so the same deformation can be evaluated at neighbour positions.
+float sceneSdfWithPointer(vec2 p, float n, float insideSign) {
+    float d = sceneSDF(p, n);
+    if (u1.x > 0.5 && u1.w != 0.0) {
+        float dist = length(p - vec2(u1.y, u1.z));
+        float bell = 1.0 - smoothstep(0.0, 120.0, dist);
+        d = d + u1.w * insideSign * bell;
+    }
+    return d;
+}
+
+// Returns the minimum pointer-deformed SDF among p and its 4 axis-aligned
+// neighbours at distance 'r', using a shared insideSign computed at p.
+float minNeighbourSDF(vec2 p, float n, float r, float insideSign) {
+    float d = sceneSdfWithPointer(p, n, insideSign);
+    d = min(d, sceneSdfWithPointer(p + vec2( r,  0.0), n, insideSign));
+    d = min(d, sceneSdfWithPointer(p + vec2(-r,  0.0), n, insideSign));
+    d = min(d, sceneSdfWithPointer(p + vec2( 0.0,  r), n, insideSign));
+    d = min(d, sceneSdfWithPointer(p + vec2( 0.0, -r), n, insideSign));
+    return d;
+}
+
 out vec4 fragColor;
 
 void main() {
@@ -119,27 +156,42 @@ void main() {
 
     float dReal = sceneSDF(p, n);
 
-    // Pointer influence — radial bell bump scaled by R and the inside/outside
-    // sign of the pointer position, so that:
-    //   inside  + R>0 → expand (inflate)      outside + R>0 → repel boundary
-    //   inside  + R<0 → contract (deflate)    outside + R<0 → attract (overshoot)
-    //
-    // Formula: dFinal = dReal + R * sign(dAtPointer) * bell
+    // Pointer influence — radial bell bump.
+    // insideSign is computed once at p and reused for neighbour samples.
+    float insideSign = 0.0;
     float dFinal = dReal;
     if (u1.x > 0.5 && u1.w != 0.0) { // u1.x=pointerActive, u1.w=pointerR
-        float dAtPointer = sceneSDF(vec2(u1.y, u1.z), n); // u1.y=cx, u1.z=cy
-        // Smooth transition from -1 (inside) to +1 (outside) over a 40px band
-        // centred on the shape boundary, avoiding the hard snap of sign().
-        float insideSign = mix(-1.0, 1.0, smoothstep(-20.0, 20.0, dAtPointer));
-
+        float dAtPointer = sceneSDF(vec2(u1.y, u1.z), n);
+        insideSign = mix(-1.0, 1.0, smoothstep(-20.0, 20.0, dAtPointer));
         float dist = length(p - vec2(u1.y, u1.z));
         float bell = 1.0 - smoothstep(0.0, 120.0, dist);
-
         dFinal = dReal + u1.w * insideSign * bell;
     }
 
-    // 1px anti-alias band — crisp edge with minimal fringing.
-    float a = 1.0 - smoothstep(-0.5, 0.5, dFinal);
-    // Output as premultiplied alpha mask — RGB=alpha so dstIn works correctly.
-    fragColor = vec4(a, a, a, a);
+    if (u2.x < 0.5) {
+        // ---- mode 0: fill alpha mask ----
+        // Used with ShaderMask + BlendMode.dstIn to clip the fill layer.
+        float a = 1.0 - smoothstep(-0.5, 0.5, dFinal);
+        fragColor = vec4(a, a, a, a);
+    } else {
+        // ---- mode 1: border ring ----
+        // A pixel is a border pixel when it is outside the fill but has at
+        // least one neighbour that is inside. We sample sceneSDF at the current
+        // pixel and its 4 axis-aligned neighbours at distance borderWidth.
+        // If the current pixel is outside (dFinal > 0) but the minimum over
+        // all neighbours is inside (< 0), this pixel is on the border.
+        //
+        // This is pixel-accurate regardless of SDF gradient: borderWidth here
+        // is a literal screen-space sample distance, not an SDF threshold.
+        float bw = u2.y;
+        float dNeighbourMin = minNeighbourSDF(p, n, bw, insideSign);
+
+        // Smoothstep transitions for AA:
+        //   inner edge — where the fill starts (dFinal crosses 0)
+        //   outer edge — where the furthest neighbour crosses 0
+        float innerAlpha = 1.0 - smoothstep(-0.5, 0.5, dFinal);
+        float outerAlpha = 1.0 - smoothstep(-0.5, 0.5, dNeighbourMin);
+        float ringAlpha  = clamp(outerAlpha - innerAlpha, 0.0, 1.0);
+        fragColor = u3 * ringAlpha;
+    }
 }

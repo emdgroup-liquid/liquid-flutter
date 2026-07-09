@@ -9,7 +9,6 @@ import 'package:liquid_flutter_window_utils/liquid_flutter_window_utils.dart';
 import 'package:liquid_flutter_window_utils/screen_radius_defaults.dart';
 
 import 'package:provider/provider.dart';
-import 'package:syntax_highlight/syntax_highlight.dart';
 
 GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -18,7 +17,6 @@ final searchFocusNode = FocusNode();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GoRouter.optionURLReflectsImperativeAPIs = true;
-  await Highlighter.initialize(['dart', 'yaml', 'sql']);
 
   // Window callbacks for macOS
   LdAppBarWidget.callbacks = LdWindowCallbacks(

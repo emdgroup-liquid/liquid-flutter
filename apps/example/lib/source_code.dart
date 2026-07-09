@@ -1,101 +1,56 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_highlight/flutter_highlight.dart';
+import 'package:flutter_highlight/themes/atom-one-dark.dart';
+import 'package:flutter_highlight/themes/solarized-light.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:syntax_highlight/syntax_highlight.dart';
 
-class SourceCode extends StatefulWidget {
+class SourceCode extends StatelessWidget {
   final String code;
   final String language;
   final EdgeInsets? padding;
 
   const SourceCode({super.key, required this.code, this.language = "dart", this.padding});
 
-  @override
-  State<SourceCode> createState() => _SourceCodeState();
-}
-
-class _SourceCodeState extends State<SourceCode> {
-  HighlighterTheme? themeDark;
-  HighlighterTheme? themeLight;
-
-  @override
-  void initState() {
-    _loadHighlighter();
-    super.initState();
-  }
-
-  void _loadHighlighter() async {
-    final ldTheme = LdTheme.of(context);
-
-    themeDark = await HighlighterTheme.loadFromAssets(
-      ["packages/syntax_highlight/themes/dark_plus.json", "packages/syntax_highlight/themes/dark_vs.json"],
-      TextStyle(
-        fontFamily: "NotoSansMono",
-        color: ldTheme.palette.neutral.relative(false, 1),
-        background: Paint()..color = Colors.transparent,
-        fontSize: ldTheme.paragraphSize(LdSize.s),
-      ),
-    );
-
-    themeLight = await HighlighterTheme.loadFromAssets(
-      ["packages/syntax_highlight/themes/light_vs.json", "packages/syntax_highlight/themes/light_plus.json"],
-      TextStyle(
-        fontFamily: "NotoSansMono",
-        color: ldTheme.palette.neutral.relative(true, 1),
-        background: Paint()..color = Colors.transparent,
-        fontSize: ldTheme.paragraphSize(LdSize.s),
-      ),
-    );
-
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  String reduceIndent(String code) {
+  static String _reduceIndent(String code) {
     double minIndent = double.infinity;
     for (final line in code.split("\n")) {
-      if (line.trim().isEmpty) {
-        continue;
-      }
+      if (line.trim().isEmpty) continue;
       final indent = line.length - line.trimLeft().length;
-      if (indent < minIndent) {
-        minIndent = indent.toDouble();
-      }
+      if (indent < minIndent) minIndent = indent.toDouble();
     }
 
-    // Remove the minimum indent from all lines
     final lines = code.split("\n");
     for (var i = 0; i < lines.length; i++) {
       lines[i] = lines[i].substring(min(minIndent.toInt(), lines[i].length));
     }
-
     return lines.join("\n");
   }
 
   @override
   Widget build(BuildContext context) {
-    if (themeDark == null) return const SizedBox();
+    final ldTheme = LdTheme.of(context, listen: true);
+    final isDark = ldTheme.isDark;
 
-    final code = reduceIndent(widget.code);
-
-    final highlighter = Highlighter(
-      language: widget.language,
-      theme: LdTheme.of(context, listen: true).isDark ? themeDark! : themeLight!,
-    );
-
-    final highlightedCode = highlighter.highlight(code);
-
-    return Container(
-      width: double.infinity,
-      padding: widget.padding,
-
-      child: SelectableRegion(
-        focusNode: FocusNode(),
-        selectionControls: materialTextSelectionControls,
-        child: Text.rich(highlightedCode),
+    final baseTheme = isDark ? atomOneDarkTheme : solarizedLightTheme;
+    // Override root background so it's transparent — the parent LdCard provides the surface.
+    final highlightTheme = {
+      ...baseTheme,
+      'root': (baseTheme['root'] ?? const TextStyle()).copyWith(
+        backgroundColor: Colors.transparent,
+        color: ldTheme.text,
       ),
+    };
+
+    final fontSize = ldTheme.paragraphSize(LdSize.s);
+
+    return HighlightView(
+      _reduceIndent(code),
+      language: language,
+      theme: highlightTheme,
+      padding: padding,
+      textStyle: TextStyle(fontFamily: ldTheme.monoFontFamily, package: ldTheme.monoFontFamilyPackage, fontSize: fontSize, height: 1.5),
     );
   }
 }

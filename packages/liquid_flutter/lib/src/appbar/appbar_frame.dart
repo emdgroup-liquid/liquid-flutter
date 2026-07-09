@@ -566,7 +566,8 @@ class _AppBarFrameState extends State<AppBarFrame> {
     required Color color,
   }) {
     return LdAppBarMetrics(
-      appbarLayerMediaQuery: _buildAppBarMediaQuery(parentMetrics),
+      appbarLayerMediaQuery:
+          _buildAppBarMediaQuery(_innerHeight.toEdgeInsetsUsingPosition(widget.position), parentMetrics),
       configuredInsets: ownMargin,
       innerHeight: _innerHeight.toEdgeInsetsUsingPosition(widget.position),
       isScrolledUnder: LdAppBarScrolledUnderScope.of(context),
@@ -581,14 +582,8 @@ class _AppBarFrameState extends State<AppBarFrame> {
     );
   }
 
-  MediaQueryData _buildAppBarMediaQuery(LdAppBarMetrics? parentMetrics) {
+  MediaQueryData _buildAppBarMediaQuery(EdgeInsets ownSize, LdAppBarMetrics? parentMetrics) {
     final data = parentMetrics?.appbarLayerMediaQuery ?? MediaQuery.of(context);
-
-    if (_shouldApplyViewInsets()) {
-      return data.copyWith(
-        viewInsets: data.viewInsets + _barHeight.toEdgeInsetsUsingPosition(widget.position),
-      );
-    }
 
     return data;
   }
@@ -664,8 +659,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
     return LayoutBuilder(builder: (context, constraints) {
       final ownMargin = _ownMargin(constraints, parentMetrics);
 
-      final inheritedMargin =
-          (parentMetrics?.accumulatedEffectiveSizes ?? EdgeInsets.zero).inDirection(widget.position);
+      var inheritedMargin = (parentMetrics?.accumulatedEffectiveSizes ?? EdgeInsets.zero).inDirection(widget.position);
 
       final systemInsets = _effectiveSystemInsets(context, parentMetrics, constraints);
 
@@ -674,6 +668,8 @@ class _AppBarFrameState extends State<AppBarFrame> {
         _hideOffset = 0;
         _visualTarget = 0;
         _snapOverriding = false;
+        // Appbars that are honoring view insets add themselves to the view insets, so we dont
+        // need to account for them in the inherited margin.
       }
 
       var outerMargin = ownMargin + (inheritedMargin + systemInsets);

@@ -12,9 +12,11 @@ dependencies:
     sdk: flutter
   collection: ^1.19.1
   liquid_flutter: any
-  # syntax_highlight: ^0.5.0  # Temporarily removed — pulls in super_clipboard
+  flutter_highlight: ^0.7.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+
+

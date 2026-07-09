@@ -50,3 +50,7 @@ packages/liquid_flutter_test_utils/test/failures/
 
 version_output.json
 **/version_output.json
+
+# API snapshot — generated on demand by `melos run generate_api`, not committed
+packages/liquid_flutter/api_guard/api.json
+apps/example/.api_guard/

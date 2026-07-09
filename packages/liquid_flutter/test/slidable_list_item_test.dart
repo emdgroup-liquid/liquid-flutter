@@ -410,7 +410,7 @@ void main() {
 
     // Helper: finds the action tap-target key for a given action label index
     // inside a specific row identified by [rowTitle].
-    Finder _actionTarget(String rowTitle, String actionLabel, int index) {
+    Finder actionTarget(String rowTitle, String actionLabel, int index) {
       return find.descendant(
         of: find.ancestor(
           of: find.text(rowTitle),
@@ -488,15 +488,15 @@ void main() {
       await tester.pump();
 
       // Only 'First' should have an action target visible.
-      expect(_actionTarget('First', 'Archive', 0), findsOneWidget);
-      expect(_actionTarget('Second', 'Archive', 0), findsNothing);
+      expect(actionTarget('First', 'Archive', 0), findsOneWidget);
+      expect(actionTarget('Second', 'Archive', 0), findsNothing);
 
       // Let animation settle.
       await tester.pump(const Duration(milliseconds: 1600));
       await tester.pump();
       await tester.pumpAndSettle(const Duration(seconds: 2));
-      expect(_actionTarget('First', 'Archive', 0), findsNothing);
-      expect(_actionTarget('Second', 'Archive', 0), findsNothing);
+      expect(actionTarget('First', 'Archive', 0), findsNothing);
+      expect(actionTarget('Second', 'Archive', 0), findsNothing);
     });
 
     testWidgets('peek is suppressed when initialPeek is false', (tester) async {

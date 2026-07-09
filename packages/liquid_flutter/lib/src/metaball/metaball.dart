@@ -6,69 +6,31 @@ import 'package:flutter/widgets.dart';
 
 import 'metaball_blob.dart';
 import 'metaball_mask.dart';
-import 'metaball_shader_scope.dart';
 
 // ---------------------------------------------------------------------------
-// _MetaballChild — wraps a single caller-supplied child widget
+// _LdMetaballScopeData — InheritedWidget that exposes the scope to descendants
 // ---------------------------------------------------------------------------
 
-/// Internal data record for a single child of [LdMetaball].
-class _MetaballChild {
-  final Widget child;
-  final GlobalKey key;
-  final LdMetaballShape shape;
-  final double cornerRadius;
+class _LdMetaballScopeData extends InheritedWidget {
+  final _LdMetaballScopeState scope;
 
-  _MetaballChild({
-    required this.child,
-    required this.key,
-    required this.shape,
-    required this.cornerRadius,
-  });
-}
-
-// ---------------------------------------------------------------------------
-// LdMetaballChild — public wrapper to declare a child with blob metadata
-// ---------------------------------------------------------------------------
-
-/// Wraps a [child] widget so that [LdMetaball] can auto-detect its position
-/// and size and render it inside a metaball blob.
-///
-/// Place [LdMetaballChild] widgets directly inside [LdMetaball.children].
-///
-/// ```dart
-/// LdMetaball(
-///   children: [
-///     LdMetaballChild(
-///       shape: LdMetaballShape.roundedRect,
-///       cornerRadius: 24,
-///       child: MyButton(),
-///     ),
-///     LdMetaballChild(
-///       shape: LdMetaballShape.ellipse,
-///       child: MyAvatar(),
-///     ),
-///   ],
-/// )
-/// ```
-class LdMetaballChild extends StatelessWidget {
-  final Widget child;
-  final LdMetaballShape shape;
-  final double cornerRadius;
-
-  const LdMetaballChild({
-    super.key,
-    required this.child,
-    this.shape = LdMetaballShape.roundedRect,
-    this.cornerRadius = 16,
+  const _LdMetaballScopeData({
+    required this.scope,
+    required super.child,
   });
 
   @override
-  Widget build(BuildContext context) => child;
+  bool updateShouldNotify(_LdMetaballScopeData old) => scope != old.scope;
+
+  static _LdMetaballScopeState? of(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<_LdMetaballScopeData>()
+        ?.scope;
+  }
 }
 
 // ---------------------------------------------------------------------------
-// _SpringSim — imperative Euler-integration spring (no widget overhead)
+// _SpringSim — imperative Euler-integration spring
 // ---------------------------------------------------------------------------
 
 class _SpringSim {
@@ -108,75 +70,46 @@ class _SpringSim {
 }
 
 // ---------------------------------------------------------------------------
-// LdMetaball — high-level, self-contained widget
+// LdMetaballScope — the liquid surface container
 // ---------------------------------------------------------------------------
 
-/// A self-contained liquid metaball widget.
+/// A self-contained liquid metaball surface.
 ///
-/// [LdMetaball] automatically measures the position and size of each
-/// [LdMetaballChild] in its [children] list and feeds them to the underlying
-/// [LdMetaballMask] on every frame.  The caller does not need to maintain any
-/// [LdMetaballBlob] state manually — layout is tracked via [GlobalKey]s.
-///
-/// ## Pointer interaction
-///
-/// When [interactive] is `true` (the default), pointer events within the
-/// widget are used to drive a spring-animated deformation of the metaball
-/// surface — the liquid "squishes" toward the touch point and springs back.
-/// Set [interactive] to `false` to disable this behaviour.
-///
-/// ## Blend
-///
-/// [blend] controls the width of the smooth-union neck between blobs.  0
-/// produces a hard union; 40–80 gives a viscous liquid feel.
-///
-/// ## Shader loading
-///
-/// [LdMetaball] looks for a [LdMetaballShaderScope] ancestor first.  If one
-/// is found, it uses the shared shaders from that scope (recommended for pages
-/// that contain multiple [LdMetaball] widgets).  If no scope is found, it
-/// loads its own [ui.FragmentProgram] independently.
-///
-/// ## Example
+/// Place [LdMetaball] widgets anywhere in [children] — each one registers its
+/// own size and position with this scope every frame so the shader always
+/// tracks the actual layout with no lag.
 ///
 /// ```dart
-/// LdMetaball(
-///   blend: 40,
+/// LdMetaballScope(
 ///   surfaceColor: theme.surface,
 ///   borderColor: theme.border,
+///   blend: 40,
 ///   children: [
-///     LdMetaballChild(
+///     LdMetaball(
 ///       shape: LdMetaballShape.roundedRect,
 ///       cornerRadius: 24,
-///       child: SizedBox(
-///         width: 120,
-///         height: 48,
-///         child: Center(child: Text('Hello')),
-///       ),
+///       child: MyButton(),
 ///     ),
-///     LdMetaballChild(
+///     LdMetaball(
 ///       shape: LdMetaballShape.ellipse,
-///       child: SizedBox.square(dimension: 80),
+///       child: MyAvatar(),
 ///     ),
 ///   ],
 /// )
 /// ```
-class LdMetaball extends StatefulWidget {
-  /// The child widgets to wrap with metaball blobs.
-  ///
-  /// Each element should be a [LdMetaballChild] (or any widget whose
-  /// [LdMetaball] can measure the render box of).  The children are laid out
-  /// in a [Stack] so they can be placed freely via [Positioned] or similar.
+class LdMetaballScope extends StatefulWidget {
+  /// The child widgets. Wrap any child that should have a metaball blob
+  /// around it in an [LdMetaball] widget.
   final List<Widget> children;
-
-  /// Blend radius. 0 = hard union; ~40 = liquid feel.
-  final double blend;
 
   /// Fill colour for the interior of all blobs.
   final Color surfaceColor;
 
-  /// Colour of the border ring around all blobs.
-  final Color borderColor;
+  /// Colour of the border ring around all blobs. When null, no border is drawn.
+  final Color? borderColor;
+
+  /// Blend radius. 0 = hard union; ~40 = liquid feel.
+  final double blend;
 
   /// Width of the border ring in logical pixels.
   final double borderWidth;
@@ -184,32 +117,29 @@ class LdMetaball extends StatefulWidget {
   /// Whether pointer/touch events should animate the metaball surface.
   final bool interactive;
 
-  const LdMetaball({
+  const LdMetaballScope({
     super.key,
     required this.children,
     required this.surfaceColor,
-    required this.borderColor,
+    this.borderColor,
     this.blend = 40,
     this.borderWidth = 1,
     this.interactive = true,
   });
 
   @override
-  State<LdMetaball> createState() => _LdMetaballState();
+  State<LdMetaballScope> createState() => _LdMetaballScopeState();
 }
 
-class _LdMetaballState extends State<LdMetaball>
+class _LdMetaballScopeState extends State<LdMetaballScope>
     with SingleTickerProviderStateMixin {
-  // Shader instances — either borrowed from scope or owned locally.
+  // Shader — owned and disposed by this state.
   ui.FragmentShader? _fill;
   ui.FragmentShader? _border;
-  bool _ownedShaders = false; // true when we loaded them ourselves
 
-  // Per-child tracking
-  late List<_MetaballChild> _children;
-
-  // Measured blobs (updated each frame when size changes)
-  List<LdMetaballBlob> _blobs = [];
+  // Registered blobs keyed by the LdMetaball State that owns them.
+  // Using insertion-ordered map so blob order is deterministic.
+  final Map<_LdMetaballState, LdMetaballBlob> _blobs = {};
 
   // Pointer spring
   Offset? _pointerPos;
@@ -232,63 +162,11 @@ class _LdMetaballState extends State<LdMetaball>
   @override
   void initState() {
     super.initState();
-    _rebuildChildren();
+    _loadShaders();
     _ticker = createTicker(_onTick)..start();
   }
 
-  @override
-  void didUpdateWidget(LdMetaball old) {
-    super.didUpdateWidget(old);
-    if (old.children != widget.children) {
-      _rebuildChildren();
-    }
-  }
-
-  void _rebuildChildren() {
-    _children = widget.children.map((child) {
-      LdMetaballShape shape = LdMetaballShape.roundedRect;
-      double cornerRadius = 16;
-      if (child is LdMetaballChild) {
-        shape = child.shape;
-        cornerRadius = child.cornerRadius;
-      }
-      return _MetaballChild(
-        child: child,
-        key: GlobalKey(debugLabel: 'LdMetaballChild'),
-        shape: shape,
-        cornerRadius: cornerRadius,
-      );
-    }).toList();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _tryBorrowShaders();
-  }
-
-  /// Tries to get shaders from an ancestor [LdMetaballShaderScope].
-  /// Falls back to loading its own shader if none is found.
-  void _tryBorrowShaders() {
-    try {
-      final scoped = LdMetaballShaderScope.of(context);
-      if (scoped != null && !_ownedShaders) {
-        // Use scope shaders — don't dispose them.
-        setState(() {
-          _fill = scoped.fill;
-          _border = scoped.border;
-        });
-      }
-    } on FlutterError {
-      // No scope — load our own.
-      if (_fill == null && !_ownedShaders) {
-        _ownedShaders = true;
-        _loadOwnShaders();
-      }
-    }
-  }
-
-  Future<void> _loadOwnShaders() async {
+  Future<void> _loadShaders() async {
     try {
       final program = await ui.FragmentProgram.fromAsset(
         'packages/liquid_flutter/shaders/metaball.frag',
@@ -296,11 +174,47 @@ class _LdMetaballState extends State<LdMetaball>
       if (mounted) {
         setState(() {
           _fill = program.fragmentShader();
-          _border = program.fragmentShader();
+          _border =
+              widget.borderColor != null ? program.fragmentShader() : null;
         });
       }
     } catch (e, st) {
-      debugPrint('LdMetaball: shader load failed\n$e\n$st');
+      debugPrint('LdMetaballScope: shader load failed\n$e\n$st');
+    }
+  }
+
+  @override
+  void didUpdateWidget(LdMetaballScope old) {
+    super.didUpdateWidget(old);
+    // If borderColor toggled between null and non-null, allocate or release
+    // the border shader instance accordingly.
+    final hadBorder = old.borderColor != null;
+    final hasBorder = widget.borderColor != null;
+    if (hadBorder != hasBorder) {
+      if (hasBorder && _fill != null) {
+        // Need a border shader — reuse the already-loaded program via a new
+        // fragmentShader() call. We can't get the program back from _fill, so
+        // reload from asset (cheap: Flutter caches fragment programs).
+        _border?.dispose();
+        _border = null;
+        _loadBorderShader();
+      } else {
+        _border?.dispose();
+        _border = null;
+      }
+    }
+  }
+
+  Future<void> _loadBorderShader() async {
+    try {
+      final program = await ui.FragmentProgram.fromAsset(
+        'packages/liquid_flutter/shaders/metaball.frag',
+      );
+      if (mounted && widget.borderColor != null) {
+        setState(() => _border = program.fragmentShader());
+      }
+    } catch (e, st) {
+      debugPrint('LdMetaballScope: border shader load failed\n$e\n$st');
     }
   }
 
@@ -308,15 +222,42 @@ class _LdMetaballState extends State<LdMetaball>
   void dispose() {
     _ticker.dispose();
     _bounceTimer?.cancel();
-    if (_ownedShaders) {
-      _fill?.dispose();
-      _border?.dispose();
-    }
+    _fill?.dispose();
+    _border?.dispose();
     super.dispose();
   }
 
   // -------------------------------------------------------------------------
-  // Ticker — spring simulation + blob measurement
+  // Registration API — called by LdMetaball children
+  // -------------------------------------------------------------------------
+
+  /// Returns this scope's [RenderBox], used by [LdMetaball] children to
+  /// convert their global position to the scope's local coordinate space.
+  RenderBox? get renderBox {
+    final obj = context.findRenderObject();
+    if (obj is RenderBox && obj.hasSize) return obj;
+    return null;
+  }
+
+  void register(_LdMetaballState child, LdMetaballBlob blob) {
+    final current = _blobs[child];
+    if (current == blob) return; // nothing changed
+    setState(() {
+      _blobs[child] = blob;
+    });
+  }
+
+  void unregister(_LdMetaballState child) {
+    if (!_blobs.containsKey(child)) return;
+    // Defer to post-frame: unregister may be called from dispose() while the
+    // framework tree is locked, in which case setState() would throw.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _blobs.remove(child));
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // Ticker — drives the pointer spring only
   // -------------------------------------------------------------------------
 
   void _onTick(Duration elapsed) {
@@ -324,65 +265,15 @@ class _LdMetaballState extends State<LdMetaball>
     _lastTick = elapsed;
     if (last == null) return;
 
+    if (!_radiusSpring.isActive) return;
+
     final elapsedMs = (elapsed - last).inMilliseconds.clamp(1, 64);
-
-    final springWasActive = _radiusSpring.isActive;
-    if (springWasActive) {
-      _radiusSpring.step(elapsedMs);
-      if (!_radiusSpring.isActive &&
-          _radiusSpring.target == _radiusOff) {
-        _pointerPos = null;
-      }
+    _radiusSpring.step(elapsedMs);
+    if (!_radiusSpring.isActive && _radiusSpring.target == _radiusOff) {
+      setState(() => _pointerPos = null);
+    } else {
+      setState(() {});
     }
-
-    // Measure all child render boxes and rebuild the blob list.
-    final newBlobs = _measureBlobs();
-    final blobsChanged = !_blobListEqual(newBlobs, _blobs);
-
-    if (springWasActive || blobsChanged) {
-      setState(() {
-        _blobs = newBlobs;
-      });
-    }
-  }
-
-  /// Reads the [RenderBox] of each child via its [GlobalKey] and converts to
-  /// [LdMetaballBlob] in the local coordinate space of this widget's own
-  /// [RenderBox].
-  List<LdMetaballBlob> _measureBlobs() {
-    final myBox = context.findRenderObject() as RenderBox?;
-    if (myBox == null || !myBox.hasSize) return _blobs;
-
-    final List<LdMetaballBlob> result = [];
-    for (final child in _children) {
-      final childCtx = child.key.currentContext;
-      if (childCtx == null) continue;
-      final childBox = childCtx.findRenderObject() as RenderBox?;
-      if (childBox == null || !childBox.hasSize) continue;
-
-      // Convert child's top-left to local coordinates of this widget.
-      final localTopLeft =
-          myBox.globalToLocal(childBox.localToGlobal(Offset.zero));
-      final size = childBox.size;
-      final center = localTopLeft + Offset(size.width / 2, size.height / 2);
-
-      result.add(LdMetaballBlob(
-        position: center,
-        width: size.width,
-        height: size.height,
-        cornerRadius: child.cornerRadius,
-        shape: child.shape,
-      ));
-    }
-    return result;
-  }
-
-  bool _blobListEqual(List<LdMetaballBlob> a, List<LdMetaballBlob> b) {
-    if (a.length != b.length) return false;
-    for (int i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
   }
 
   // -------------------------------------------------------------------------
@@ -422,36 +313,164 @@ class _LdMetaballState extends State<LdMetaball>
   Widget build(BuildContext context) {
     final fill = _fill;
     final border = _border;
+    final blobs = _blobs.values.toList();
 
-    return Listener(
-      onPointerDown: (e) => _onPointerDown(e.localPosition),
-      onPointerMove: (e) => _onPointerMove(e.localPosition),
-      onPointerUp: (_) => _onPointerUp(),
-      onPointerCancel: (_) => _onPointerUp(),
-      child: Stack(
-        fit: StackFit.passthrough,
-        children: [
-          // Metaball mask layer (below the children so pointer events pass through)
-          if (fill != null && border != null && _blobs.isNotEmpty)
-            Positioned.fill(
-              child: LdMetaballMask(
-                shader: fill,
-                borderShader: border,
-                blobs: _blobs,
-                blend: widget.blend,
-                surfaceColor: widget.surfaceColor,
-                borderColor: widget.borderColor,
-                borderWidth: widget.borderWidth,
-                pointerPos: _pointerPos,
-                pointerRadius: _radiusSpring.position,
+    return _LdMetaballScopeData(
+      scope: this,
+      child: Listener(
+        onPointerDown: (e) => _onPointerDown(e.localPosition),
+        onPointerMove: (e) => _onPointerMove(e.localPosition),
+        onPointerUp: (_) => _onPointerUp(),
+        onPointerCancel: (_) => _onPointerUp(),
+        child: Stack(
+          fit: StackFit.passthrough,
+          children: [
+            if (fill != null && blobs.isNotEmpty)
+              Positioned.fill(
+                child: LdMetaballMask(
+                  shader: fill,
+                  borderShader: border,
+                  blobs: blobs,
+                  blend: widget.blend,
+                  surfaceColor: widget.surfaceColor,
+                  borderColor: widget.borderColor,
+                  borderWidth: widget.borderWidth,
+                  pointerPos: _pointerPos,
+                  pointerRadius: _radiusSpring.position,
+                ),
               ),
-            ),
-
-          // Children — each wrapped with its GlobalKey for measurement
-          for (final meta in _children)
-            KeyedSubtree(key: meta.key, child: meta.child),
-        ],
+            ...widget.children,
+          ],
+        ),
       ),
     );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// LdMetaball — a single blob child that registers itself with LdMetaballScope
+// ---------------------------------------------------------------------------
+
+/// Wraps a child widget and registers it as a metaball blob with the nearest
+/// [LdMetaballScope] ancestor.
+///
+/// [LdMetaball] measures its own size and position after each frame and
+/// reports them to the scope — no lag, even for animated children.
+///
+/// Must be a descendant of [LdMetaballScope].
+///
+/// ```dart
+/// LdMetaballScope(
+///   surfaceColor: Colors.white,
+///   borderColor: Colors.black12,
+///   children: [
+///     LdMetaball(
+///       shape: LdMetaballShape.roundedRect,
+///       cornerRadius: 24,
+///       child: MyButton(),
+///     ),
+///   ],
+/// )
+/// ```
+class LdMetaball extends StatefulWidget {
+  final Widget child;
+  final LdMetaballShape shape;
+  final double cornerRadius;
+
+  const LdMetaball({
+    super.key,
+    required this.child,
+    this.shape = LdMetaballShape.roundedRect,
+    this.cornerRadius = 16,
+  });
+
+  @override
+  State<LdMetaball> createState() => _LdMetaballState();
+}
+
+class _LdMetaballState extends State<LdMetaball> {
+  // Stable key for measuring this widget's render box. Created once, never
+  // recreated — preserves animation state in child widgets across rebuilds.
+  final GlobalKey _key = GlobalKey();
+
+  // Cached scope reference — updated in didChangeDependencies so it is safe
+  // to read in dispose() where context lookups are forbidden.
+  _LdMetaballScopeState? _scope;
+
+  @override
+  void initState() {
+    super.initState();
+    // Schedule first measurement after the initial layout.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _measure());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final newScope = _LdMetaballScopeData.of(context);
+    if (newScope != _scope) {
+      // Unregister from the old scope (if any) and register with the new one.
+      _scope?.unregister(this);
+      _scope = newScope;
+      // Registration with the new scope happens on the next _measure() call.
+    }
+  }
+
+  @override
+  void didUpdateWidget(LdMetaball old) {
+    super.didUpdateWidget(old);
+    // Shape/cornerRadius may have changed — re-measure immediately.
+    if (old.shape != widget.shape ||
+        old.cornerRadius != widget.cornerRadius) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _measure());
+    }
+  }
+
+  @override
+  void dispose() {
+    _scope?.unregister(this);
+    super.dispose();
+  }
+
+  void _measure() {
+    if (!mounted) return;
+
+    final scope = _scope;
+    if (scope == null) return;
+
+    final scopeBox = scope.renderBox;
+    final myBox = _key.currentContext?.findRenderObject() as RenderBox?;
+
+    if (scopeBox == null || myBox == null || !myBox.hasSize) {
+      // Layout not ready yet — try again next frame.
+      WidgetsBinding.instance.addPostFrameCallback((_) => _measure());
+      return;
+    }
+
+    final localTopLeft =
+        scopeBox.globalToLocal(myBox.localToGlobal(Offset.zero));
+    final size = myBox.size;
+    final center = localTopLeft + Offset(size.width / 2, size.height / 2);
+
+    scope.register(
+      this,
+      LdMetaballBlob(
+        position: center,
+        width: size.width,
+        height: size.height,
+        cornerRadius: widget.cornerRadius,
+        shape: widget.shape,
+      ),
+    );
+
+    // Keep measuring every frame so animated children stay in sync.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _measure());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // KeyedSubtree gives the subtree a stable identity so Flutter never
+    // remounts child widgets (e.g. AnimatedContainer) across rebuilds.
+    return KeyedSubtree(key: _key, child: widget.child);
   }
 }

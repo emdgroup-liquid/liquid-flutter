@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -74,8 +72,6 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
 
   final _listenerKey = GlobalKey();
   FocusNode? _focusNode;
-  Offset? _pointerDownOffset;
-
   bool _createdFocusNode = false;
 
   Set<LogicalKeyboardKey> get _onPressedKeys =>
@@ -198,7 +194,6 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
                   }
                   _safeSetState(() {
                     _pressed = true;
-                    _pointerDownOffset = d.localPosition;
                   });
                 }
               }),

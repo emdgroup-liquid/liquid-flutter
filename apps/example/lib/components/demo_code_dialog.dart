@@ -1,43 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_highlight/flutter_highlight.dart';
+import 'package:flutter_highlight/themes/atom-one-dark.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:syntax_highlight/syntax_highlight.dart';
 
-class DemoCodeDialog extends StatefulWidget {
+class DemoCodeDialog extends StatelessWidget {
   final String demoCode;
 
   const DemoCodeDialog({super.key, required this.demoCode});
 
   @override
-  State<DemoCodeDialog> createState() => _DemoCodeDialogState();
-}
-
-class _DemoCodeDialogState extends State<DemoCodeDialog> {
-  HighlighterTheme? _theme;
-  HighlighterTheme? _themeDark;
-
-  @override
-  void initState() {
-    prepareHighlighter();
-    super.initState();
-  }
-
-  void prepareHighlighter() async {
-    await Highlighter.initialize(['dart']);
-    _themeDark = await HighlighterTheme.loadDarkTheme();
-    setState(() {});
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (_theme == null) {
-      return const Center(child: LdLoader());
-    }
-
-    final highlighter = Highlighter(language: 'dart', theme: _themeDark!);
-
-    var highlightedCode = highlighter.highlight(widget.demoCode);
-
     return LdModalBuilder(
       builder: (context, onPress) => LdButton(
         leading: const Icon(LucideIcons.code),
@@ -48,28 +21,33 @@ class _DemoCodeDialogState extends State<DemoCodeDialog> {
       ),
       modal: LdModalRoute(
         context: context,
-        pageBuilder: (context) => LdScaffold(
-          body: LdAppBar(
-            title: const Text("Code Example"),
-            child: LdScaffoldBody(
-              children: [
-                SelectableRegion(
-                  focusNode: FocusNode(),
-                  selectionControls: MaterialTextSelectionControls(),
-                  child: Container(
-                    color: shadZinc.shades.last,
-                    child: SingleChildScrollView(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text.rich(highlightedCode, style: TextStyle(color: Colors.white)),
+        pageBuilder: (context) {
+          final ldTheme = LdTheme.of(context, listen: false);
+          return LdScaffold(
+            body: LdAppBar(
+              title: const Text("Code Example"),
+              child: LdScaffoldBody(
+                children: [
+                  SingleChildScrollView(
+                    child: HighlightView(
+                      demoCode,
+                      language: 'dart',
+                      theme: atomOneDarkTheme,
+                      padding: const EdgeInsets.all(16),
+                      textStyle: TextStyle(
+                        fontFamily: ldTheme.monoFontFamily,
+                        package: ldTheme.monoFontFamilyPackage,
+                        fontSize: 13,
+                        height: 1.5,
+                        color: Colors.white,
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

@@ -2,21 +2,90 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/preview_wrapper.dart';
 
 part 'hint.variants.g.dart';
 
+/// The semantic type of an [LdHint], which controls its color and icon.
 enum LdHintType {
+  /// Neutral informational message.
   info,
+
+  /// Something requires the user's attention.
   warning,
+
+  /// An operation completed successfully.
   success,
+
+  /// An operation failed or is in an error state.
   error,
+
+  /// An operation was canceled.
   canceled,
+
+  /// An operation is currently in progress.
   loading,
+
+  /// An operation has not started yet.
   pending,
+
+  /// An operation is ongoing (started but not finished).
   ongoing,
 }
 
-/// A colored badge with an icon and a text
+@LiquidMultiPreview(name: 'LdHint – all types')
+Widget ldHintPreview() {
+  return LdAutoSpace(
+    children: [
+      const LdHint(type: LdHintType.info, child: Text('Info')),
+      const LdHint(type: LdHintType.warning, child: Text('Warning')),
+      const LdHint(type: LdHintType.success, child: Text('Success')),
+      const LdHint(type: LdHintType.error, child: Text('Error')),
+      const LdHint(type: LdHintType.canceled, child: Text('Canceled')),
+      const LdHint(type: LdHintType.loading, child: Text('Loading')),
+      const LdHint(type: LdHintType.pending, child: Text('Pending')),
+      const LdHint(type: LdHintType.ongoing, child: Text('Ongoing')),
+    ],
+  );
+}
+
+@LiquidMultiPreview(name: 'LdHint – with background')
+Widget ldHintWithBackgroundPreview() {
+  return LdAutoSpace(
+    children: [
+      const LdHint(type: LdHintType.info, withBackground: true, child: Text('Info')),
+      const LdHint(type: LdHintType.warning, withBackground: true, child: Text('Warning')),
+      const LdHint(type: LdHintType.success, withBackground: true, child: Text('Success')),
+      const LdHint(type: LdHintType.error, withBackground: true, child: Text('Error')),
+    ],
+  );
+}
+
+/// A status indicator paired with an optional text label.
+///
+/// [LdHint] combines an [LdIndicator] icon with a text child to communicate
+/// the state of an operation or piece of content. The color and icon are
+/// driven by the [type] parameter.
+///
+/// ## Basic usage
+///
+/// ```dart
+/// LdHint(
+///   type: LdHintType.success,
+///   child: const Text('Saved successfully'),
+/// )
+/// ```
+///
+/// ## All types
+///
+/// <!-- demo:LdHintVariants -->
+///
+/// ## With background
+///
+/// Set [withBackground] to `true` to add a tinted background and border,
+/// useful for drawing attention to the hint inside a form or card.
+///
+/// <!-- demo:LdHintWithBackground -->
 @Variants([
   Variant('info', defaults: {'type': 'LdHintType.info'}),
   Variant('warning', defaults: {'type': 'LdHintType.warning'}),
@@ -28,10 +97,20 @@ enum LdHintType {
   Variant('ongoing', defaults: {'type': 'LdHintType.ongoing'}),
 ])
 class _LdHintWidget extends StatelessWidget {
+  /// The label or content displayed next to the indicator icon.
   final Widget? child;
+
+  /// Controls the color and icon of the hint.
   final LdHintType type;
+
+  /// Size of the indicator and label text. Defaults to [LdSize.m].
   final LdSize size;
+
+  /// How the icon and text are aligned on the cross axis.
+  /// Defaults to [CrossAxisAlignment.center].
   final CrossAxisAlignment crossAxisAlignment;
+
+  /// When `true`, renders a tinted background and border around the hint.
   final bool withBackground;
 
   const _LdHintWidget({

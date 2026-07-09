@@ -31,3 +31,15 @@ melos:
         category: testable
     api_guard:
       run: mtrust_api_guard version-workspace --no-commit --no-tag --badge --generate-changelog --json=./version_output.json --pre-release
+
+    generate_api:
+      run: >-
+        mkdir -p apps/example/.api_guard &&
+        mtrust_api_guard generate --root packages/liquid_flutter --out apps/example/.api_guard/liquid_flutter.json &&
+        mtrust_api_guard generate --root packages/liquid_flutter_md --out apps/example/.api_guard/liquid_flutter_md.json &&
+        mtrust_api_guard generate --root packages/liquid_flutter_reactive_forms --out apps/example/.api_guard/liquid_flutter_reactive_forms.json
+      description: "Generate per-package api.json snapshots for the example app doc generator. Output is gitignored and built on demand."
+
+    generate_docs:
+      run: melos run generate_api && dart run apps/example/tools/generate_doc_pages.dart
+      description: "Regenerate component doc pages from dartdoc comments. Runs generate_api automatically."

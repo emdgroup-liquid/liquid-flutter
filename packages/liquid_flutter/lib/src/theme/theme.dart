@@ -121,6 +121,28 @@ class LdTheme extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Monospace font family used for code blocks and inline code.
+  /// Defaults to 'NotoSansMono' shipped with the liquid_flutter package.
+  String _monoFontFamily = 'NotoSansMono';
+
+  String get monoFontFamily => _monoFontFamily;
+
+  set monoFontFamily(String newFont) {
+    _monoFontFamily = newFont;
+    notifyListeners();
+  }
+
+  /// Package that owns [monoFontFamily]. Set to `null` if the font is declared
+  /// by the consuming app rather than a package.
+  String? _monoFontFamilyPackage = ldIncludeFontPackage ? 'liquid_flutter' : null;
+
+  String? get monoFontFamilyPackage => _monoFontFamilyPackage;
+
+  set monoFontFamilyPackage(String? newPackage) {
+    _monoFontFamilyPackage = newPackage;
+    notifyListeners();
+  }
+
   /// Set the default size for the theme
   void setThemeSize(LdThemeSize size) {
     _defaultSize = size;
