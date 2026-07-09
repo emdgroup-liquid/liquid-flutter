@@ -14,7 +14,7 @@ enum LdSelectionControl { none, radio, checkbox }
 @Variants([
   Variant('trailingForward', defaults: {'trailing': 'const LdListDefaultTrailingForward()'}),
 ])
-class LdListItemWidget extends StatelessWidget {
+class LdListItemWidget extends StatefulWidget {
   final Widget? leading;
   final Widget? trailing;
   final Widget? title;
@@ -34,6 +34,7 @@ class LdListItemWidget extends StatelessWidget {
   final EdgeInsets? padding;
   final BorderRadius? borderRadius;
   final bool isOdd;
+  final BoxShadow? shadow;
 
   @ContextConfigurable()
   const LdListItemWidget({
@@ -51,6 +52,7 @@ class LdListItemWidget extends StatelessWidget {
     this.subtitle,
     this.title,
     this.tradeLeadingForSelectionControl = true,
+    this.shadow,
     this.focusNode,
     this.trailing,
     this.color,
@@ -59,28 +61,35 @@ class LdListItemWidget extends StatelessWidget {
     this.selectionControl = LdSelectionControl.none,
   });
 
+  @override
+  State<LdListItemWidget> createState() => _LdListItemWidgetState();
+}
+
+class _LdListItemWidgetState extends State<LdListItemWidget> {
+  final _innerContentKey = GlobalKey();
+
   Widget _buildSelectionControls(BuildContext context, bool disabledState) {
-    if (selectionControl == LdSelectionControl.none) return const SizedBox.shrink();
+    if (widget.selectionControl == LdSelectionControl.none) return const SizedBox.shrink();
     return Row(
       children: [
-        switch (selectionControl) {
+        switch (widget.selectionControl) {
           LdSelectionControl.radio => ExcludeFocus(
               child: LdRadio(
-                checked: isSelected,
-                color: color,
+                checked: widget.isSelected,
+                color: widget.color,
                 disabled: disabledState,
                 onChanged: (value) {
-                  onSelectionChanged?.call(value);
+                  widget.onSelectionChanged?.call(value);
                 },
               ),
             ),
           LdSelectionControl.checkbox => ExcludeFocus(
               child: LdCheckbox(
-                checked: isSelected,
-                color: color,
+                checked: widget.isSelected,
+                color: widget.color,
                 disabled: disabledState,
                 onChanged: (value) {
-                  onSelectionChanged?.call(value);
+                  widget.onSelectionChanged?.call(value);
                 },
               ),
             ),
@@ -102,19 +111,20 @@ class LdListItemWidget extends StatelessWidget {
   }
 
   Widget _buildLeading(BuildContext context, LdTheme theme) {
-    if (leading == null) return const SizedBox.shrink();
+    if (widget.leading == null) return const SizedBox.shrink();
     return LdAvatarConfigProvider(
       config: LdAvatarConfig(
-        color: color,
+        color: widget.color,
       ),
       child: _buildIconTheme(
         LdReveal.quick(
           axes: const {Axis.horizontal},
-          revealed: !(selectionControl != LdSelectionControl.none && tradeLeadingForSelectionControl),
-          initialRevealed: !(selectionControl != LdSelectionControl.none && tradeLeadingForSelectionControl),
+          revealed: !(widget.selectionControl != LdSelectionControl.none && widget.tradeLeadingForSelectionControl),
+          initialRevealed:
+              !(widget.selectionControl != LdSelectionControl.none && widget.tradeLeadingForSelectionControl),
           child: Row(
             children: [
-              leading!,
+              widget.leading!,
               ldSpacerM,
             ],
           ),
@@ -125,17 +135,17 @@ class LdListItemWidget extends StatelessWidget {
   }
 
   Widget _buildTrailing(BuildContext context, LdTheme theme) {
-    if (trailing == null) return const SizedBox.shrink();
+    if (widget.trailing == null) return const SizedBox.shrink();
     return _buildIconTheme(
       Row(
-        children: [ldSpacerM, trailing!],
+        children: [ldSpacerM, widget.trailing!],
       ),
       theme,
     );
   }
 
   Widget _buildTitle(BuildContext context, LdTheme theme) {
-    if (title == null) return const SizedBox.shrink();
+    if (widget.title == null) return const SizedBox.shrink();
     return DefaultTextStyle(
       style: ldBuildTextStyle(
         theme,
@@ -144,12 +154,12 @@ class LdListItemWidget extends StatelessWidget {
         color: theme.text,
       ),
       maxLines: 1,
-      child: title!,
+      child: widget.title!,
     );
   }
 
   Widget _buildSubtitle(BuildContext context, LdTheme theme) {
-    if (subtitle == null) return const SizedBox.shrink();
+    if (widget.subtitle == null) return const SizedBox.shrink();
     return DefaultTextStyle(
       style: ldBuildTextStyle(
         theme,
@@ -159,85 +169,104 @@ class LdListItemWidget extends StatelessWidget {
         color: theme.textMuted,
       ),
       maxLines: 1,
-      child: subtitle!,
+      child: widget.subtitle!,
     );
   }
 
+  EdgeInsets _effectivePadding(BuildContext context) {
+    final theme = LdTheme.of(context, listen: true);
+    if (widget.padding != null) return widget.padding!;
+    if (widget.leading != null || widget.subContent != null || widget.subtitle != null) return theme.balPad(LdSize.s);
+    // In title only mode we apply a bit more padding
+    return theme.balPad(LdSize.m);
+  }
+
   Widget _buildSubContent(BuildContext context, LdTheme theme) {
-    if (subContent == null) return const SizedBox.shrink();
-    return subContent!;
+    if (widget.subContent == null) return const SizedBox.shrink();
+    return widget.subContent!;
+  }
+
+  bool get _isDisabled {
+    return switch (widget.selectionControl) {
+      (LdSelectionControl.none) => widget.disabled,
+      (LdSelectionControl.radio) => widget.selectDisabled,
+      (LdSelectionControl.checkbox) => widget.selectDisabled,
+    };
+  }
+
+  Widget _buildInnerContent(BuildContext context, LdColorBundle? bundle) {
+    final theme = LdTheme.of(context, listen: true);
+    return Container(
+      key: _innerContentKey,
+      width: widget.width ?? double.infinity,
+      padding: _effectivePadding(context),
+      decoration: BoxDecoration(
+        boxShadow: widget.shadow != null ? [widget.shadow!] : null,
+        color: bundle?.surface ?? context.surfaceColor,
+        borderRadius: widget.borderRadius,
+        border: bundle != null
+            ? Border.all(
+                color: bundle.border,
+                width: theme.borderWidth,
+              )
+            : null,
+      ),
+      child: Row(
+        mainAxisSize: widget.width != double.infinity ? MainAxisSize.min : MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          LdReveal.quick(
+            axes: const {Axis.horizontal},
+            revealed: widget.selectionControl != LdSelectionControl.none,
+            initialRevealed: widget.selectionControl != LdSelectionControl.none,
+            child: _buildSelectionControls(context, _isDisabled),
+          ),
+          if (widget.leading != null) _buildLeading(context, theme),
+          Flexible(
+            fit: widget.width != double.infinity ? FlexFit.tight : FlexFit.loose,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (widget.title != null) _buildTitle(context, theme),
+                if (widget.subtitle != null) _buildSubtitle(context, theme),
+                if (widget.subContent != null) _buildSubContent(context, theme),
+              ],
+            ),
+          ),
+          if (widget.trailing != null) _buildTrailing(context, theme),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    bool disabledState;
-
-    if (selectionControl != LdSelectionControl.none) {
-      if (selectDisabled) {
-        disabledState = false;
-      } else {
-        disabledState = disabled;
-      }
-    } else {
-      disabledState = disabled;
-    }
-
     final theme = LdTheme.of(context, listen: true);
-    final effectiveWidth = width ?? double.infinity;
+
     final isShuttle = Provider.of<LdIsShuttle?>(context, listen: true)?.value ?? false;
-    final effectiveFocusNode = isShuttle ? null : focusNode;
+    final effectiveFocusNode = isShuttle ? null : widget.focusNode;
+
+    final bool isInteractive = widget.selectionControl != LdSelectionControl.none || widget.onPressed != null;
+
+    if (!isInteractive) {
+      return _buildInnerContent(context, null);
+    }
 
     return LdTouchableSurface(
       focusNode: effectiveFocusNode,
-      isOdd: isOdd,
+      isOdd: widget.isOdd,
       onPressed: () {
-        if (selectionControl != LdSelectionControl.none) {
-          onSelectionChanged?.call(!isSelected);
+        if (widget.selectionControl != LdSelectionControl.none) {
+          widget.onSelectionChanged?.call(!widget.isSelected);
         } else {
-          onPressed?.call();
+          widget.onPressed?.call();
         }
       },
-      active: active || (selectionControl != LdSelectionControl.none && isSelected),
-      disabled: disabledState || (selectionControl == LdSelectionControl.none && onPressed == null),
+      active: widget.active || (widget.selectionControl != LdSelectionControl.none && widget.isSelected),
+      disabled: _isDisabled,
       builder: (contxt, status, _) {
         final colorBundle = neutralGhostColor(theme, status);
-        return Container(
-          width: effectiveWidth,
-          padding: padding ?? theme.balPad(LdSize.s),
-          decoration: BoxDecoration(
-            color: colorBundle.surface,
-            borderRadius: borderRadius,
-            border: Border.all(
-              color: colorBundle.border,
-              width: theme.borderWidth,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: effectiveWidth != double.infinity ? MainAxisSize.min : MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              LdReveal.quick(
-                axes: const {Axis.horizontal},
-                revealed: selectionControl != LdSelectionControl.none,
-                initialRevealed: selectionControl != LdSelectionControl.none,
-                child: _buildSelectionControls(context, disabledState),
-              ),
-              if (leading != null) _buildLeading(context, theme),
-              Flexible(
-                fit: effectiveWidth == double.infinity ? FlexFit.tight : FlexFit.loose,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (title != null) _buildTitle(context, theme),
-                    if (subtitle != null) _buildSubtitle(context, theme),
-                    if (subContent != null) _buildSubContent(context, theme),
-                  ],
-                ),
-              ),
-              if (trailing != null) _buildTrailing(context, theme),
-            ],
-          ),
-        );
+        return _buildInnerContent(context, colorBundle);
       },
     );
   }

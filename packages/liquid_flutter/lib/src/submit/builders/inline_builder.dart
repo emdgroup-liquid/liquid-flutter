@@ -27,6 +27,7 @@ class LdSubmitInlineBuilder<T, Arg> extends LdSubmitBuilder<T, Arg> {
         final state = controller.state;
 
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (resultBuilder != null && state.type == LdSubmitStateType.result)
               resultBuilder!(context, state.result as T, controller),

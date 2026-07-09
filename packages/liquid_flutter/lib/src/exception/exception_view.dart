@@ -17,11 +17,15 @@ class LdExceptionView extends StatelessWidget {
   /// [Axis.horizontal].
   final Axis direction;
 
+  /// Whether to show the indicator
+  final bool showIndicator;
+
   const LdExceptionView({
     super.key,
     required this.exception,
     this.retryController,
     this.retry,
+    this.showIndicator = true,
     this.direction = Axis.vertical,
   }) : assert(
           retryController == null || retry == null,
@@ -95,18 +99,19 @@ class LdExceptionView extends StatelessWidget {
     final localizedException = exception.localize(context);
     return LdAutoSpace(
       children: [
-        LdReveal.quick(
-          revealed: true,
-          initialRevealed: false,
-          child: localizedException.customIconBuilder?.call(context) ??
-              LdHint(
-                type: exception.type,
-                child: Text(
-                  localizedException.message,
-                  key: const Key('exception-message'),
+        if (showIndicator)
+          LdReveal.quick(
+            revealed: true,
+            initialRevealed: false,
+            child: localizedException.customIconBuilder?.call(context) ??
+                LdHint(
+                  type: exception.type,
+                  child: Text(
+                    localizedException.message,
+                    key: const Key('exception-message'),
+                  ),
                 ),
-              ),
-        ),
+          ),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -140,11 +145,12 @@ class LdExceptionView extends StatelessWidget {
     return LdAutoSpace(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        localizedException.customIconBuilder?.call(context) ??
-            LdHint(
-              type: exception.type,
-              size: LdSize.l,
-            ),
+        if (showIndicator)
+          localizedException.customIconBuilder?.call(context) ??
+              LdHint(
+                type: exception.type,
+                size: LdSize.l,
+              ),
         LdText.p(
           localizedException.message,
           textAlign: TextAlign.center,

@@ -156,10 +156,69 @@ class _ChooseDemoState extends State<ChooseDemo> {
             ],
           ),
           ldSpacerM,
+          const _LinkedListTriggerSection(),
+          ldSpacerM,
           const _TagSelectorSection(),
           ldSpacerM,
         ],
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Linked-list trigger demo
+// ---------------------------------------------------------------------------
+
+class _LinkedListTriggerSection extends StatefulWidget {
+  const _LinkedListTriggerSection();
+
+  @override
+  State<_LinkedListTriggerSection> createState() => _LinkedListTriggerSectionState();
+}
+
+class _LinkedListTriggerSectionState extends State<_LinkedListTriggerSection> {
+  Set<String> _selected = {'strawberry', 'blueberry'};
+
+  @override
+  Widget build(BuildContext context) {
+    return LdAutoSpace(
+      children: [
+        LdText.h('Linked-list trigger'),
+        LdText.p(
+          'Renders each selected item as a swipeable list row. '
+          'Swipe a row left to remove it. '
+          'Tap a row to "view" the item (shows a notification). '
+          'The Add row at the bottom opens the picker.',
+        ),
+        ComponentWell(
+          padding: EdgeInsets.zero,
+          child: LdChoose.fromSelectItems<String>(
+            items: pies,
+            multiple: true,
+            allowEmpty: true,
+            label: 'Linked pies',
+            placeholder: const Text('No pies linked yet'),
+            value: _selected,
+            onChanged: (ids) => setState(() => _selected = ids),
+            triggerBuilder: (context, config) {
+              return LdChooseLinkedListTrigger(
+                config: config,
+                addLabel: 'Link a pie',
+                removeLabel: 'Unlink',
+                onItemPressed: (ctx, item) {
+                  LdNotificationsController.of(ctx).addNotification(
+                    LdNotification(
+                      type: LdNotificationType.info,
+                      message: 'Navigating to "${item.child is Text ? (item.child as Text).data : item.id}"',
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

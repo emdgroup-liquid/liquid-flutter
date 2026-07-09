@@ -15,6 +15,7 @@ class LdListItemConfig {
     this.subtitle,
     this.title,
     this.tradeLeadingForSelectionControl,
+    this.shadow,
     this.focusNode,
     this.trailing,
     this.color,
@@ -48,6 +49,8 @@ class LdListItemConfig {
   final Widget? title;
 
   final bool? tradeLeadingForSelectionControl;
+
+  final BoxShadow? shadow;
 
   final FocusNode? focusNode;
 
@@ -104,6 +107,7 @@ class LdListItemConfigProvider extends StatelessWidget {
             tradeLeadingForSelectionControl:
                 config.tradeLeadingForSelectionControl ??
                     parentConfig.tradeLeadingForSelectionControl,
+            shadow: config.shadow ?? parentConfig.shadow,
             focusNode: config.focusNode ?? parentConfig.focusNode,
             trailing: config.trailing ?? parentConfig.trailing,
             color: config.color ?? parentConfig.color,
@@ -134,6 +138,7 @@ class LdListItem extends StatelessWidget {
     this.subtitle,
     this.title,
     this.tradeLeadingForSelectionControl,
+    this.shadow,
     this.focusNode,
     this.trailing,
     this.color,
@@ -157,6 +162,7 @@ class LdListItem extends StatelessWidget {
     Widget? subtitle,
     Widget? title,
     bool? tradeLeadingForSelectionControl,
+    BoxShadow? shadow,
     FocusNode? focusNode,
     LdColor? color,
     double? width,
@@ -178,6 +184,7 @@ class LdListItem extends StatelessWidget {
       subtitle: subtitle,
       title: title,
       tradeLeadingForSelectionControl: tradeLeadingForSelectionControl,
+      shadow: shadow,
       focusNode: focusNode,
       trailing: const LdListDefaultTrailingForward(),
       color: color,
@@ -226,6 +233,8 @@ class LdListItem extends StatelessWidget {
 
   final bool? isOdd;
 
+  final BoxShadow? shadow;
+
   @override
   Widget build(BuildContext context) {
     final config = Provider.of<LdListItemConfig?>(context, listen: true);
@@ -245,6 +254,7 @@ class LdListItem extends StatelessWidget {
       tradeLeadingForSelectionControl: tradeLeadingForSelectionControl ??
           config?.tradeLeadingForSelectionControl ??
           true,
+      shadow: shadow ?? config?.shadow,
       focusNode: focusNode ?? config?.focusNode,
       trailing: trailing ?? config?.trailing,
       color: color ?? config?.color,

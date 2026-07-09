@@ -76,6 +76,14 @@ class _LdSubmitDialogState<T, Arg> extends State<LdSubmitDialog<T, Arg>> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _submitController = context.read<LdSubmitController<T, Arg>>();
+    _subscription?.cancel();
+    _subscription = _submitController.stateStream.listen(_onStateChanged);
+  }
+
+  @override
   void dispose() {
     _subscription?.cancel();
     super.dispose();
@@ -85,6 +93,7 @@ class _LdSubmitDialogState<T, Arg> extends State<LdSubmitDialog<T, Arg>> {
     if (!mounted) return;
 
     final open = state.type == LdSubmitStateType.loading || state.type == LdSubmitStateType.error;
+
     if (open) {
       _overlayController.show();
     } else {
@@ -94,9 +103,14 @@ class _LdSubmitDialogState<T, Arg> extends State<LdSubmitDialog<T, Arg>> {
         }
       });
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
-  Widget buildLoadingDialog(
+  Widget buildDialog(
     BuildContext context,
     LdSubmitController<T, Arg> controller,
   ) {
@@ -106,7 +120,6 @@ class _LdSubmitDialogState<T, Arg> extends State<LdSubmitDialog<T, Arg>> {
             animate: true,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              ldSpacerL,
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
                 transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
@@ -115,41 +128,39 @@ class _LdSubmitDialogState<T, Arg> extends State<LdSubmitDialog<T, Arg>> {
                 child: switch (controller.state.type) {
                   LdSubmitStateType.loading => LdIndicator.loading(customSize: 24, key: const Key('loading-indicator')),
                   LdSubmitStateType.result => LdIndicator.success(customSize: 24, key: const Key('success-indicator')),
+                  LdSubmitStateType.error => LdIndicator.error(customSize: 24, key: const Key('error-indicator')),
                   _ => SizedBox.shrink(),
                 },
               ),
-              if (controller.config.loadingText != null)
-                LdText.p(
-                  controller.config.loadingText!,
-                  textAlign: TextAlign.center,
-                )
-              else
-                LdText.p(
-                  LiquidLocalizations.of(context).loading,
-                  textAlign: TextAlign.center,
-                ),
-              if (controller.canCancel)
-                LdButton.ghost(
-                  onPressed: controller.cancel,
-                  child: Text(LiquidLocalizations.of(context).cancel),
-                ),
+              if (controller.state.type != LdSubmitStateType.error)
+                if (controller.config.loadingText != null)
+                  LdText.p(
+                    controller.config.loadingText!,
+                    textAlign: TextAlign.center,
+                  )
+                else
+                  LdText.p(
+                    LiquidLocalizations.of(context).loading,
+                    textAlign: TextAlign.center,
+                  ),
+              if (controller.state.type == LdSubmitStateType.error)
+                if (widget.errorBuilder != null)
+                  widget.errorBuilder!(context, controller.state.error!, controller)
+                else
+                  LdExceptionView(
+                    exception: controller.state.error!.localize(context),
+                    direction: Axis.vertical,
+                    retryController: controller.retryController,
+                    showIndicator: false,
+                  ).padL().animate().scaleXY(),
+              if (controller.state.type == LdSubmitStateType.result)
+                if (controller.canCancel)
+                  LdButton.ghost(
+                    onPressed: controller.cancel,
+                    child: Text(LiquidLocalizations.of(context).cancel),
+                  ),
             ],
           ).padL();
-  }
-
-  Widget buildErrorDialog(
-    BuildContext context,
-    LdSubmitController<T, Arg> controller,
-  ) {
-    if (widget.errorBuilder != null) {
-      return widget.errorBuilder!(context, controller.state.error!, controller);
-    }
-
-    return LdExceptionView(
-      exception: controller.state.error!.localize(context),
-      direction: Axis.vertical,
-      retryController: controller.retryController,
-    ).padL();
   }
 
   void _handleDismiss() {
@@ -215,9 +226,8 @@ class _LdSubmitDialogState<T, Arg> extends State<LdSubmitDialog<T, Arg>> {
                             Expanded(
                               child: Center(
                                 child: switch (_submitController.state.type) {
-                                  (LdSubmitStateType.loading || LdSubmitStateType.result) =>
-                                    buildLoadingDialog(context, _submitController),
-                                  (LdSubmitStateType.error) => buildErrorDialog(context, _submitController),
+                                  (LdSubmitStateType.loading || LdSubmitStateType.result || LdSubmitStateType.error) =>
+                                    buildDialog(context, _submitController),
                                   (_) => Container(),
                                 },
                               ),

@@ -67,6 +67,10 @@ Future<void> _pumpSpring(WidgetTester tester) async {
 
 void main() {
   group('LdSlidableListItem', () {
+    // Disable animations so the peek timer does not leak into unrelated tests.
+    setUp(() => ldDisableAnimations = true);
+    tearDown(() => ldDisableAnimations = false);
+
     testWidgets('partial drag does not trigger actions', (tester) async {
       var archiveCalled = false;
       var deleteCalled = false;
@@ -194,6 +198,7 @@ void main() {
     });
 
     testWidgets('dismiss delete triggers callback after collapse', (tester) async {
+      ldDisableAnimations = false;
       var deleteCalled = false;
 
       await tester.pumpWidget(
@@ -295,6 +300,58 @@ void main() {
       expect(archiveCalled, isFalse);
     });
 
+    testWidgets('dismissing first item in list does not cascade to next item', (tester) async {
+      // Regression: without keys, Flutter reuses the _LdSlidableListItemState of
+      // the dismissed slot for the item that slides up into its place.  That
+      // recycled state carried _isDismissing = true, which immediately triggered
+      // an LdReveal collapse on the innocent neighbour.
+      ldDisableAnimations = false;
+      final items = ['First', 'Second', 'Third'];
+      var deletedTitle = '';
+
+      await tester.pumpWidget(
+        _wrap(
+          StatefulBuilder(
+            builder: (context, setState) {
+              return LdSlidableGroup(
+                child: Column(
+                  children: [
+                    for (final title in items)
+                      LdSlidableListItem(
+                        endActionPane: LdSlideActionPane(
+                          actions: [
+                            LdSlideAction(
+                              icon: LucideIcons.trash2,
+                              label: 'Delete',
+                              onTriggered: (_) => setState(() {
+                                deletedTitle = title;
+                                items.remove(title);
+                              }),
+                              dismissBehavior: LdSlideActionDismissBehavior.dismiss,
+                            ),
+                          ],
+                        ),
+                        child: LdListItem(title: Text(title)),
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      // Swipe 'First' all the way to trigger dismiss
+      await tester.drag(find.text('First'), const Offset(-145, 0));
+      await tester.pump();
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      expect(deletedTitle, equals('First'));
+      // 'Second' and 'Third' must still be visible
+      expect(find.text('Second'), findsOneWidget);
+      expect(find.text('Third'), findsOneWidget);
+    });
+
     testWidgets('opening second row closes first row', (tester) async {
       var secondArchived = false;
 
@@ -344,6 +401,128 @@ void main() {
       await _tapArchiveInRow(tester, 'Second');
       await _pumpSpring(tester);
       expect(secondArchived, isTrue);
+    });
+  });
+
+  group('LdSlidableListItem – peek hint', () {
+    setUp(() => ldDisableAnimations = false);
+    tearDown(() => ldDisableAnimations = true);
+
+    // Helper: finds the action tap-target key for a given action label index
+    // inside a specific row identified by [rowTitle].
+    Finder _actionTarget(String rowTitle, String actionLabel, int index) {
+      return find.descendant(
+        of: find.ancestor(
+          of: find.text(rowTitle),
+          matching: find.byType(LdSlidableListItem),
+        ).first,
+        matching: find.byKey(ValueKey('ld-slide-target-$actionLabel-$index')),
+      );
+    }
+
+    testWidgets('standalone item briefly peeks then snaps back', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          _buildSlidable(title: 'Item'),
+        ),
+      );
+      // Flush initial frames / addPostFrameCallback.
+      await tester.pump();
+      await tester.pump();
+
+      // Before delay: no action targets visible.
+      expect(find.byKey(const ValueKey('ld-slide-target-Archive-0')), findsNothing);
+
+      // Advance past the 1500 ms peek delay then flush the setState.
+      await tester.pump(const Duration(milliseconds: 1600));
+      await tester.pump();
+
+      // Peek should be active — end-pane action target is visible.
+      expect(find.byKey(const ValueKey('ld-slide-target-Archive-0')), findsOneWidget);
+
+      // Advance through the 1500 ms peek-open window then let the spring settle.
+      await tester.pump(const Duration(milliseconds: 1600));
+      await tester.pump();
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      // Row should have snapped back to rest.
+      expect(find.byKey(const ValueKey('ld-slide-target-Archive-0')), findsNothing);
+    });
+
+    testWidgets('only first item in group peeks', (tester) async {
+      Widget trackedItem(String title) {
+        return LdSlidableListItem(
+          endActionPane: LdSlideActionPane(
+            actions: [
+              LdSlideAction(
+                icon: LucideIcons.archive,
+                label: 'Archive',
+                onTriggered: (_) {},
+              ),
+            ],
+          ),
+          child: LdListItem(title: Text(title)),
+        );
+      }
+
+      await tester.pumpWidget(
+        _wrap(
+          SizedBox(
+            height: 300,
+            child: LdSlidableGroup(
+              child: Column(
+                children: [
+                  trackedItem('First'),
+                  trackedItem('Second'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      // Advance past the 1500 ms peek delay then flush setState.
+      await tester.pump(const Duration(milliseconds: 1600));
+      await tester.pump();
+
+      // Only 'First' should have an action target visible.
+      expect(_actionTarget('First', 'Archive', 0), findsOneWidget);
+      expect(_actionTarget('Second', 'Archive', 0), findsNothing);
+
+      // Let animation settle.
+      await tester.pump(const Duration(milliseconds: 1600));
+      await tester.pump();
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+      expect(_actionTarget('First', 'Archive', 0), findsNothing);
+      expect(_actionTarget('Second', 'Archive', 0), findsNothing);
+    });
+
+    testWidgets('peek is suppressed when initialPeek is false', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          LdSlidableListItem(
+            initialPeek: false,
+            endActionPane: LdSlideActionPane(
+              actions: [
+                LdSlideAction(
+                  icon: LucideIcons.archive,
+                  label: 'Archive',
+                  onTriggered: (_) {},
+                ),
+              ],
+            ),
+            child: LdListItem(title: const Text('Item')),
+          ),
+        ),
+      );
+
+      await tester.pump(const Duration(milliseconds: 700));
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // No action targets should ever appear.
+      expect(find.byKey(const ValueKey('ld-slide-target-Archive-0')), findsNothing);
     });
   });
 }

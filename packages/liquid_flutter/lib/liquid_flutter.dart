@@ -13,6 +13,7 @@ export 'src/card.dart';
 export 'src/checkbox.dart';
 export 'src/choose/choose.dart';
 export 'src/choose/choose_input_trigger.dart';
+export 'src/choose/choose_linked_list_trigger.dart';
 export 'src/choose/choose_list_item_trigger.dart';
 export 'src/collapse.dart';
 export 'src/counter.dart';

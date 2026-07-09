@@ -53,7 +53,7 @@ LdColorBundle neutralGhostColor(LdTheme theme, LdTouchableStatus status) {
   }
 
   return LdColorBundle(
-    surface: isOdd ? theme.surface.withAlpha(100) : theme.background,
+    surface: status.onSurface ? theme.surface : theme.background,
     text: theme.isDark ? theme.text : palette.primary.center(theme.isDark),
     border: border,
     icon: palette.primary.center(theme.isDark),

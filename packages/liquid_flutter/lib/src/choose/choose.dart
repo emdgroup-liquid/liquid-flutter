@@ -96,6 +96,15 @@ class LdChooseTriggerConfig<T extends Identifiable<IdType>, IdType> {
   final bool disabled;
   final Widget Function(BuildContext context, T item) selectedItemBuilder;
 
+  /// Called when a single item should be removed from the selection.
+  /// Triggers `onChanged` on the parent [LdChoose] with the item removed.
+  /// Only non-null when [LdChoose] has a non-null `value`.
+  final void Function(IdType id)? onRemoveItem;
+
+  /// Whether removing all items is permitted.
+  /// Mirrors [LdChoose.allowEmpty].
+  final bool allowEmpty;
+
   const LdChooseTriggerConfig({
     required this.selectedItems,
     required this.selectedIds,
@@ -107,6 +116,8 @@ class LdChooseTriggerConfig<T extends Identifiable<IdType>, IdType> {
     required this.size,
     required this.disabled,
     required this.selectedItemBuilder,
+    this.onRemoveItem,
+    this.allowEmpty = false,
   });
 }
 
@@ -487,6 +498,13 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
       size: widget.size,
       disabled: widget.disabled,
       selectedItemBuilder: widget.selectedItemBuilder,
+      allowEmpty: widget.allowEmpty,
+      onRemoveItem: widget.value == null
+          ? null
+          : (id) {
+              final next = widget.value!.where((v) => v != id).toSet();
+              widget.onChanged(next);
+            },
     );
 
     if (widget.triggerBuilder != null) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/haptics.dart';
 
+
 /// Post-trigger behavior for a slide action.
 enum LdSlideActionDismissBehavior {
   /// Invoke [LdSlideAction.onTriggered], then spring the row closed.
@@ -35,7 +36,7 @@ class LdSlideAction {
 class LdSlideActionPane {
   const LdSlideActionPane({
     required this.actions,
-    this.threshold = 1.0,
+    this.threshold = 1.5,
   }) : assert(actions.length > 0);
 
   final List<LdSlideAction> actions;
@@ -61,6 +62,18 @@ class LdSlidableGroup extends StatefulWidget {
 
 class _LdSlidableGroupState extends State<LdSlidableGroup> {
   _LdSlidableListItemState? _openItem;
+
+  /// Whether the one-shot peek hint has already been claimed by the first item
+  /// to register inside this group.
+  bool _hintClaimed = false;
+
+  /// Returns true the first time it is called; false for every subsequent call.
+  /// Used so that only the first item in a group runs the peek hint.
+  bool claimHint() {
+    if (_hintClaimed) return false;
+    _hintClaimed = true;
+    return true;
+  }
 
   void registerOpen(_LdSlidableListItemState item) {
     if (_openItem != null && _openItem != item) {
@@ -97,6 +110,7 @@ class LdSlidableListItem extends StatefulWidget {
     this.endActionPane,
     this.closeOnScroll = true,
     this.enabled = true,
+    this.initialPeek = true,
     super.key,
   });
 
@@ -105,6 +119,11 @@ class LdSlidableListItem extends StatefulWidget {
   final LdSlideActionPane? endActionPane;
   final bool closeOnScroll;
   final bool enabled;
+
+  /// When true (default), the first item in a [LdSlidableGroup] — or a
+  /// standalone item — briefly slides to reveal the actions on first mount,
+  /// teaching the user that the row is slidable.
+  final bool initialPeek;
 
   @override
   State<LdSlidableListItem> createState() => _LdSlidableListItemState();
@@ -115,25 +134,72 @@ class _LdSlidableListItemState extends State<LdSlidableListItem> {
   static const _openThreshold = 0.4;
   static const _actionBaseWidth = 72.0;
 
+  static const _peekDelay = Duration(milliseconds: 1500);
+  static const _peekDuration = Duration(milliseconds: 1500);
+
   double _offset = 0;
-  double _animationStart = 0;
-  double _animationEnd = 0;
   bool _isDragging = false;
-  bool _isAnimating = false;
   bool _isDismissing = false;
   bool _dragAxisResolved = false;
   bool _triggeredDuringGesture = false;
   bool _openedAtDragStart = false;
-  int _animationKey = 0;
   LdSlideAction? _pendingDismissAction;
+
+  bool _peekCompleted = false;
+  bool _peekRunning = false;
 
   Offset? _dragStartPosition;
   _LdSlidableGroupState? _group;
 
+  final _contextMenuKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    // Schedule peek for standalone items (no group). Items inside a group
+    // schedule from didChangeDependencies once _group is resolved.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // Only run here when there is no group; group items are handled in
+      // didChangeDependencies after _group is set.
+      if (_group == null) _maybeRunPeek();
+    });
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _group = context.findAncestorStateOfType<_LdSlidableGroupState>();
+    final newGroup = context.findAncestorStateOfType<_LdSlidableGroupState>();
+    if (newGroup != _group) {
+      _group = newGroup;
+      if (_group != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _maybeRunPeek();
+        });
+      }
+    }
+  }
+
+  @override
+  void didUpdateWidget(LdSlidableListItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reset all transient state when this slot is reused for a different logical
+    // item (e.g. the list shrank and a sibling slid into this position without a
+    // stable key). Without this, _isDismissing carried over from the previous
+    // item causes the new item to immediately start its own collapse animation.
+    if (oldWidget.child != widget.child) {
+      _offset = 0;
+      _isDragging = false;
+      _isDismissing = false;
+      _dragAxisResolved = false;
+      _triggeredDuringGesture = false;
+      _openedAtDragStart = false;
+      _pendingDismissAction = null;
+      _dragStartPosition = null;
+      _peekCompleted = true; // do not re-peek when a new item slides into this slot
+      _peekRunning = false;
+    }
   }
 
   @override
@@ -160,30 +226,55 @@ class _LdSlidableListItemState extends State<LdSlidableListItem> {
   }
 
   void _animateTo(double target, {required bool animated}) {
-    if (!animated || ldDisableAnimations) {
-      setState(() {
-        _offset = target;
-        _isAnimating = false;
-        _isDragging = false;
-      });
-      if (target == 0) {
-        _group?.unregister(this);
-      }
+    setState(() {
+      _offset = target;
+      _isDragging = false;
+    });
+    if (target == 0) {
+      _group?.unregister(this);
+    }
+  }
+
+  /// Briefly slides the row to reveal the action pane, then snaps back.
+  /// Only runs once per mount, and only for the first item in a group.
+  Future<void> _maybeRunPeek() async {
+    if (!mounted || _peekCompleted || _peekRunning || !widget.enabled || !widget.initialPeek || ldDisableAnimations) {
       return;
     }
 
-    setState(() {
-      _animationStart = _offset;
-      _animationEnd = target;
-      _offset = target;
-      _isAnimating = true;
-      _isDragging = false;
-      _animationKey++;
-    });
+    // Inside a group: only the first item to call claimHint() gets the peek.
+    if (_group != null && !_group!.claimHint()) return;
+
+    // Determine peek direction: prefer end pane (most common), fall back to start.
+    final hasEnd = widget.endActionPane != null;
+    final hasStart = widget.startActionPane != null;
+    if (!hasEnd && !hasStart) return;
+
+    _peekCompleted = true;
+    _peekRunning = true;
+
+    final distance = LdTheme.of(context).pad(size: LdSize.m).left;
+    // Positive offset reveals the start pane, negative reveals the end pane.
+    final peekTarget = hasEnd ? -distance : distance;
+
+    try {
+      await Future.delayed(_peekDelay);
+      if (!mounted || _isDragging || _isOpen) return;
+
+      // Slide out to reveal actions briefly.
+      setState(() => _offset = peekTarget);
+      await Future.delayed(_peekDuration);
+      if (!mounted) return;
+
+      // Spring back.
+      setState(() => _offset = 0);
+    } finally {
+      if (mounted) _peekRunning = false;
+    }
   }
 
   double _clampOffset(double value) {
-    return value.clamp(-_endPaneWidth, _startPaneWidth);
+    return value.clamp(-_endPaneWidth * 1.5, _startPaneWidth * 1.5);
   }
 
   List<double> _actionWidths(LdSlideActionPane pane, double paneWidth) {
@@ -261,9 +352,7 @@ class _LdSlidableListItemState extends State<LdSlidableListItem> {
   }
 
   double _snapThresholdPx(double paneWidth, double extent) {
-    return _openedAtDragStart && extent < paneWidth
-        ? paneWidth / 2
-        : paneWidth * _openThreshold;
+    return _openedAtDragStart && extent < paneWidth ? paneWidth / 2 : paneWidth * _openThreshold;
   }
 
   double _openTargetForPane({
@@ -329,7 +418,6 @@ class _LdSlidableListItemState extends State<LdSlidableListItem> {
     _triggeredDuringGesture = false;
     _openedAtDragStart = _isOpen;
     _isDragging = true;
-    _isAnimating = false;
     _group?.registerOpen(this);
   }
 
@@ -437,6 +525,47 @@ class _LdSlidableListItemState extends State<LdSlidableListItem> {
     action?.onTriggered(context);
   }
 
+  /// Right-click opens the row to whichever side the cursor is on.
+  ///
+  /// When both panes exist the row is split at its midpoint: cursor on the
+  /// left half opens the start pane, cursor on the right half opens the end
+  /// pane (reversed for RTL). When only one pane exists it always opens
+  /// regardless of cursor position. If the row is already open it closes.
+  void _handleSecondaryTapDown(TapDownDetails details) {
+    if (!widget.enabled || _isDismissing) return;
+
+    // Already open on either side — close it.
+    if (_isOpen) {
+      _close(animated: true);
+      return;
+    }
+
+    final hasStart = widget.startActionPane != null;
+    final hasEnd = widget.endActionPane != null;
+    if (!hasStart && !hasEnd) return;
+
+    final bool openStart;
+    if (hasStart && !hasEnd) {
+      openStart = true;
+    } else if (hasEnd && !hasStart) {
+      openStart = false;
+    } else {
+      // Both panes — use cursor x position relative to the widget midpoint.
+      final box = _contextMenuKey.currentContext?.findRenderObject() as RenderBox?;
+      final width = box?.size.width ?? 0;
+      final isRtl = Directionality.of(context) == TextDirection.rtl;
+      final isLeftHalf = details.localPosition.dx < width / 2;
+      // LTR: left → start, right → end. RTL: mirrored.
+      openStart = isLeftHalf != isRtl;
+    }
+
+    _group?.registerOpen(this);
+    _animateTo(
+      openStart ? _startPaneWidth : -_endPaneWidth,
+      animated: true,
+    );
+  }
+
   Widget _buildActionTapTargets({
     required LdSlideActionPane pane,
     required bool isStart,
@@ -536,47 +665,48 @@ class _LdSlidableListItemState extends State<LdSlidableListItem> {
   }
 
   Widget _buildSlidingForeground(Widget child) {
-    final theme = LdTheme.of(context);
-    final opaqueForeground = ColoredBox(
-      color: theme.surface,
-      child: SizedBox(
-        width: double.infinity,
-        child: child,
-      ),
-    );
+    final theme = LdTheme.of(context, listen: true);
 
-    if (_isAnimating && !_isDragging) {
-      return LdSpring(
-        key: ValueKey(_animationKey),
-        initialPosition: _animationStart,
-        position: _animationEnd,
-        mass: 2,
-        springConstant: 20,
-        dampingCoefficient: 15,
-        onAnimationEnd: (_, __) {
-          if (!mounted) {
-            return;
-          }
-          setState(() {
-            _isAnimating = false;
-          });
-          if (_animationEnd == 0) {
-            _group?.unregister(this);
-          }
-        },
-        builder: (context, state, springChild) {
-          return Transform.translate(
-            offset: Offset(state.position, 0),
-            child: springChild,
-          );
-        },
-        child: opaqueForeground,
-      );
-    }
-
-    return Transform.translate(
-      offset: Offset(_offset, 0),
-      child: opaqueForeground,
+    return LdSpring(
+      key: const Key('slidable-foreground'),
+      initialPosition: _offset,
+      position: _offset,
+      mass: 2,
+      overriden: _isDragging,
+      springConstant: 20,
+      dampingCoefficient: 15,
+      builder: (context, state, springChild) {
+        return Transform.translate(
+          offset: Offset(state.position, 0),
+          child: Container(
+            margin: EdgeInsets.symmetric(
+              vertical: state.position.abs().clamp(0, 10),
+              horizontal: state.position.abs().clamp(0, 10),
+            ),
+            child: LdListItemConfigProvider(
+              config: LdListItemConfig(
+                active: state.position.abs() > 5,
+                shadow: ldShadowDefault.copyWith(
+                  blurRadius: state.position.abs().clamp(0, 10),
+                ),
+                borderRadius: BorderRadius.circular(
+                  state.position.abs().clamp(
+                        0,
+                        theme.radiusSize(LdSize.m),
+                      ),
+                ),
+                padding: theme.balPad(LdSize.m).atLeast(
+                      EdgeInsets.symmetric(
+                        vertical: state.position.abs().clamp(0, 10),
+                      ),
+                    ),
+              ),
+              child: springChild!,
+            ),
+          ),
+        );
+      },
+      child: child,
     );
   }
 
@@ -585,10 +715,12 @@ class _LdSlidableListItemState extends State<LdSlidableListItem> {
 
     final foreground = _buildSlidingForeground(
       GestureDetector(
+        key: _contextMenuKey,
         onHorizontalDragStart: _handleDragStart,
         onHorizontalDragUpdate: _handleDragUpdate,
         onHorizontalDragEnd: _handleDragEnd,
         onHorizontalDragCancel: _handleDragCancel,
+        onSecondaryTapDown: _handleSecondaryTapDown,
         behavior: _isOpen ? HitTestBehavior.translucent : HitTestBehavior.deferToChild,
         child: IgnorePointer(
           ignoring: _isDragging || _isOpen,
@@ -597,47 +729,50 @@ class _LdSlidableListItemState extends State<LdSlidableListItem> {
       ),
     );
 
-    return Stack(
-      clipBehavior: Clip.hardEdge,
-      children: [
-        if (widget.startActionPane != null)
-          Positioned(
-            top: 0,
-            bottom: 0,
-            left: isRtl ? null : 0,
-            right: isRtl ? 0 : null,
-            child: _buildActionPane(
+    return ColoredBox(
+      color: context.isSurface ? LdTheme.of(context).background : LdTheme.of(context).surface,
+      child: Stack(
+        clipBehavior: Clip.hardEdge,
+        children: [
+          if (widget.startActionPane != null)
+            Positioned(
+              top: 0,
+              bottom: 0,
+              left: isRtl ? null : 0,
+              right: isRtl ? 0 : null,
+              child: _buildActionPane(
+                pane: widget.startActionPane!,
+                isStart: true,
+                revealedExtent: _offset,
+              ),
+            ),
+          if (widget.endActionPane != null)
+            Positioned(
+              top: 0,
+              bottom: 0,
+              left: isRtl ? 0 : null,
+              right: isRtl ? null : 0,
+              child: _buildActionPane(
+                pane: widget.endActionPane!,
+                isStart: false,
+                revealedExtent: _offset.abs(),
+              ),
+            ),
+          foreground,
+          if (widget.startActionPane != null && _offset > 0)
+            _buildActionTapTargets(
               pane: widget.startActionPane!,
               isStart: true,
               revealedExtent: _offset,
             ),
-          ),
-        if (widget.endActionPane != null)
-          Positioned(
-            top: 0,
-            bottom: 0,
-            left: isRtl ? 0 : null,
-            right: isRtl ? null : 0,
-            child: _buildActionPane(
+          if (widget.endActionPane != null && _offset < 0)
+            _buildActionTapTargets(
               pane: widget.endActionPane!,
               isStart: false,
               revealedExtent: _offset.abs(),
             ),
-          ),
-        foreground,
-        if (widget.startActionPane != null && _offset > 0)
-          _buildActionTapTargets(
-            pane: widget.startActionPane!,
-            isStart: true,
-            revealedExtent: _offset,
-          ),
-        if (widget.endActionPane != null && _offset < 0)
-          _buildActionTapTargets(
-            pane: widget.endActionPane!,
-            isStart: false,
-            revealedExtent: _offset.abs(),
-          ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -692,13 +827,13 @@ class _LdSlideActionCell extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeOut,
-        color: isCommitTarget ? background : theme.background,
+        color: background.withAlpha(isCommitTarget ? 255 : 0),
         child: Center(
           child: FittedBox(
             fit: BoxFit.scaleDown,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-              child: Column(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

@@ -60,11 +60,21 @@ class _ListItemDemoState extends State<ListItemDemo> {
             ),
           ),
           ldSpacerL,
+          LdText.caption("Title only"),
+          ComponentWell(
+            padding: EdgeInsets.zero,
+            child: Column(
+              children: [LdListItem(title: Text("Just a title"), onPressed: () {})],
+            ),
+          ),
+
           ComponentWell(
             onSurface: true,
             padding: EdgeInsets.zero,
             child: Column(
               children: [
+                LdListItem(title: Text("Just a title"), onPressed: () {}),
+                LdDivider(),
                 LdListItem(
                   selectionControl: _showSelectionControls,
                   isSelected: _selectedItems.contains(0),
@@ -73,7 +83,7 @@ class _ListItemDemoState extends State<ListItemDemo> {
                   title: Text("Liquid Flutter List"),
                   subtitle: Text("This is a subtitle"),
                 ),
-                LdDivider(height: 1),
+                LdDivider(),
                 LdListItem(
                   leading: LdAvatar(child: Text("B")),
                   onPressed: () {
@@ -84,7 +94,7 @@ class _ListItemDemoState extends State<ListItemDemo> {
                   title: Text("Press me"),
                   subtitle: Text("I will  trade leading for selection control"),
                 ),
-                LdListSeperator(child: Text("This is a separator")),
+                LdListSeperator(child: LdText.caption("This is a separator")),
                 LdListItem(
                   disabled: true,
                   selectionControl: _showSelectionControls,
