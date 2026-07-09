@@ -188,54 +188,40 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
                 _hovering = false;
               });
             },
-            child: Listener(
+            child: GestureDetector(
               key: _listenerKey,
               behavior: widget.hitTestBehavior,
-              onPointerDown: (d) => _safeSetState(() {
+              onTapDown: (d) => _safeSetState(() {
                 if (!widget.disabled) {
                   if (widget.focusNode != null) {
                     _focusNode?.requestFocus();
                   }
-                  _pressed = true;
-                  _pointerDownOffset = d.localPosition;
+                  _safeSetState(() {
+                    _pressed = true;
+                    _pointerDownOffset = d.localPosition;
+                  });
                 }
               }),
-              onPointerUp: (details) => _safeSetState(() {
+              onTapUp: (details) => _safeSetState(() {
+                _safeSetState(() {
+                  _pressed = false;
+                });
+              }),
+              onTap: () {
                 if (widget.disabled) {
                   return;
                 }
 
-                _pressed = false;
-
-                final listenerBox = _listenerKey.currentContext?.findRenderObject() as RenderBox?;
-                final size = listenerBox?.size ?? Size.zero;
-                // Make sure the pointer has not moved too far
-                final distanceThreshold = 32;
-
-                final distance = sqrt(
-                  pow(details.localPosition.dx - _pointerDownOffset!.dx, 2) +
-                      pow(details.localPosition.dy - _pointerDownOffset!.dy, 2),
-                );
-
-                if (distance > distanceThreshold) {
-                  return;
-                }
-
-                if (details.localPosition.dx > 0 &&
-                    details.localPosition.dx < size.width &&
-                    details.localPosition.dy > 0 &&
-                    details.localPosition.dy < size.height) {
-                  if (!widget.disabled) widget.onPressed();
-                }
-              }),
-              onPointerMove: (event) {
+                widget.onPressed();
+              },
+              onPanUpdate: (event) {
                 if (_pressed) {
                   _safeSetState(() {
                     _panOffset = event.localPosition;
                   });
                 }
               },
-              onPointerCancel: (_) {
+              onPanEnd: (_) {
                 if (_pressed) {
                   _safeSetState(() {
                     _pressed = false;

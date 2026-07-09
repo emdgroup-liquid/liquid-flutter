@@ -440,9 +440,9 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
         onPanStart: (details) {
           LdAppBarWidget.callbacks?.onMove?.call();
         },
-        onDoubleTap: () {
+        /* onDoubleTap: () {
           LdScaffoldState.maybeOf(context)?.scrollToTop();
-        },
+        }, */
         child: barSurface,
       );
     }
