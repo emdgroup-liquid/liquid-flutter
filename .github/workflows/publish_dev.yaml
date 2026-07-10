@@ -37,6 +37,9 @@ jobs:
       - name: Bootstrap Melos
         run: melos bootstrap
 
+      - name: Generate API guard snapshots
+        run: melos run generate_api
+
       - name: Run analyzer
         run: melos run analyze
 
