@@ -1,3 +1,185 @@
+## 23.0.0-8
+Released on: 7/10/2026, changelog automatically generated.
+
+
+### Bug Fixes
+
+- use gesture detector for touchables again, but disable double tap on app bars since it adds touch delays. ([bf9d097](commit/bf9d097))
+- **touchable:** extract trackPan flag; honour hitTestBehavior in non-trackPan path ([bd921b6](commit/bd921b6))
+- **list:** remove spurious border on LdListItemLoading; fix timer leak in LdSlidableListItem; restrict marquee drag to mouse ([a3aadf7](commit/a3aadf7))
+- **selectable_list:** move child argument last in GestureDetector (sort_child_properties_last) ([c8745a5](commit/c8745a5))
+### Features
+
+- linked list choose ([74f8aa3](commit/74f8aa3))
+
+### API Changes
+
+#### 💣 Breaking changes
+
+**`class` LdListItemWidget** ([lib/src/list/list_item.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-78298edd98f67013b7aac32bb2d42bcfc7aac8ca48eadd30199b423dbceca120))
+- 🔄 Superclass changed: `StatelessWidget` → `StatefulWidget`
+- ❌ Method removed: `build`
+
+**`class` LdMetaball** ([lib/src/metaball/metaball.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-3f44f81d32a4f6357495811a0ef11ac4b71c58f40a155f27cc5a848a6665677c))
+- ❌ Params removed in default constructor: `children` (named, required), `surfaceColor` (named, required), `borderColor` (named, required)
+- ❇️ Param added in default constructor: `child` (named, required)
+- ❌ Properties removed: `children`, `blend`, `surfaceColor`, `borderColor`, `borderWidth`, `interactive`
+
+**`class` LdMetaballChild** ([lib/src/metaball/metaball.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-3f44f81d32a4f6357495811a0ef11ac4b71c58f40a155f27cc5a848a6665677c))
+- ❌ Class removed: `LdMetaballChild`
+
+**`class` LdMetaballMask** ([lib/src/metaball/metaball_mask.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-6f3c60daed9da62bd711d1411765f7c1b19493924f4b32ca88db0c1436df7b09))
+- 🔄 Param type changed in default constructor: `borderShader` (`FragmentShader` → `FragmentShader?`), `borderColor` (`Color` → `Color?`)
+- 🔄 Properties type changed: `borderShader`, `borderColor`
+
+**`class` LdMetaballMaskScoped** ([lib/src/metaball/metaball_mask.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-6f3c60daed9da62bd711d1411765f7c1b19493924f4b32ca88db0c1436df7b09))
+- ❌ Class removed: `LdMetaballMaskScoped`
+
+**`class` LdMetaballShaderScope** ([lib/src/metaball/metaball_shader_scope.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-36d3e099d8e35fd786b1d1cfc58ced2cf2ed02ef582778d4961e245a39b3dca4))
+- ❌ Class removed: `LdMetaballShaderScope`
+
+**`class` LdMetaballShaders** ([lib/src/metaball/metaball_shader_scope.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-36d3e099d8e35fd786b1d1cfc58ced2cf2ed02ef582778d4961e245a39b3dca4))
+- ❌ Class removed: `LdMetaballShaders`
+
+#### ✨ Minor changes
+
+**`class` LdChooseLinkedListTrigger<T extends Identifiable<IdType>, IdType>** ([lib/src/choose/choose_linked_list_trigger.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-07d8676c2fbefeb0ecd9af3e80fa5f8c81a03e1c74e8056bd5d121edb90c55ee))
+- ❇️ Class added: `LdChooseLinkedListTrigger`
+
+**`class` LdChooseTriggerConfig<T extends Identifiable<IdType>, IdType>** ([lib/src/choose/choose.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-6ce965d70e5a38c7bb7d300718c981f5dd5c18807dcaf9b633cdc74c1d5c5c74))
+- ❇️ Params added in default constructor: `onRemoveItem` (named, optional), `allowEmpty` (named, optional, default: false)
+- ❇️ Properties added: `onRemoveItem`, `allowEmpty`
+
+**`class` LdExceptionView** ([lib/src/exception/exception_view.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-3b9caa32d813b4accee332539fa3d1e44ecc015a406dd715143f70a5e7c96088))
+- ❇️ Param added in default constructor: `showIndicator` (named, optional, default: true)
+- ❇️ Property added: `showIndicator`
+
+**`class` LdListItem** ([lib/src/list/list_item.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-78298edd98f67013b7aac32bb2d42bcfc7aac8ca48eadd30199b423dbceca120))
+- ❇️ Param added in default constructor: `shadow` (named, optional)
+- ❇️ Param added in constructor `trailingForward`: `shadow` (named, optional)
+- ❇️ Property added: `shadow`
+
+**`class` LdListItemConfig** ([lib/src/list/list_item.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-78298edd98f67013b7aac32bb2d42bcfc7aac8ca48eadd30199b423dbceca120))
+- ❇️ Param added in default constructor: `shadow` (named, optional)
+- ❇️ Property added: `shadow`
+
+**`class` LdListItemWidget** ([lib/src/list/list_item.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-78298edd98f67013b7aac32bb2d42bcfc7aac8ca48eadd30199b423dbceca120))
+- ❇️ Param added in default constructor: `shadow` (named, optional)
+- ❇️ Property added: `shadow`
+- ❇️ Method added: `createState`
+
+**`class` LdMetaball** ([lib/src/metaball/metaball.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-3f44f81d32a4f6357495811a0ef11ac4b71c58f40a155f27cc5a848a6665677c))
+- ❌ Params removed in default constructor: `blend` (named, optional, default: 40), `borderWidth` (named, optional, default: 1), `interactive` (named, optional, default: true)
+- ❇️ Params added in default constructor: `shape` (named, optional, default: LdMetaballShape.roundedRect), `cornerRadius` (named, optional, default: 16)
+- ❇️ Properties added: `child`, `shape`, `cornerRadius`
+
+**`class` LdMetaballMask** ([lib/src/metaball/metaball_mask.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-6f3c60daed9da62bd711d1411765f7c1b19493924f4b32ca88db0c1436df7b09))
+- ✅ Params became optional in default constructor: `borderShader` (named, required), `borderColor` (named, required)
+- ❌ Param removed in method `setUniforms`: `expand` (named, optional, default: 0)
+- ❇️ Methods added: `setFillUniforms`, `setBorderUniforms`
+
+**`class` LdMetaballScope** ([lib/src/metaball/metaball.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-3f44f81d32a4f6357495811a0ef11ac4b71c58f40a155f27cc5a848a6665677c))
+- ❇️ Class added: `LdMetaballScope`
+
+**`class` LdSlidableListItem** ([lib/src/list/slidable_list_item.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-fcb34fc43152cea4985180d7f43b5d8266ca996e5bb0ce02005764e0bfb7ebc9))
+- ❇️ Param added in default constructor: `initialPeek` (named, optional, default: true)
+- ❇️ Property added: `initialPeek`
+
+**`class` LdTheme** ([lib/src/theme/theme.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-e230b3066fca6361167b035927f3d5e83cda9a34212c86e2a307ed82bcf0d99e))
+- ❇️ Properties added: `monoFontFamily`, `monoFontFamilyPackage`
+
+**`class` LdTouchableSurface** ([lib/src/touchable/touchable.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-390c2ec1e7b0ebec409f605c4cdc4ea7ef337cf7876bdca7a87de6f2c647ea96))
+- ❇️ Param added in default constructor: `trackPan` (named, optional, default: false)
+- ❇️ Property added: `trackPan`
+
+**`function` ldButtonCircularPreview** ([lib/src/button.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-ff5af0a48673590388fb412e3ae360f4d302beeea64e1280f57ea1b097e23697))
+- ❇️ Function added: `ldButtonCircularPreview`
+
+**`function` ldButtonDisabledPreview** ([lib/src/button.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-ff5af0a48673590388fb412e3ae360f4d302beeea64e1280f57ea1b097e23697))
+- ❇️ Function added: `ldButtonDisabledPreview`
+
+**`function` ldButtonFilledPreview** ([lib/src/button.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-ff5af0a48673590388fb412e3ae360f4d302beeea64e1280f57ea1b097e23697))
+- ❇️ Function added: `ldButtonFilledPreview`
+
+**`function` ldButtonGhostPreview** ([lib/src/button.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-ff5af0a48673590388fb412e3ae360f4d302beeea64e1280f57ea1b097e23697))
+- ❇️ Function added: `ldButtonGhostPreview`
+
+**`function` ldButtonLeadingPreview** ([lib/src/button.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-ff5af0a48673590388fb412e3ae360f4d302beeea64e1280f57ea1b097e23697))
+- ❇️ Function added: `ldButtonLeadingPreview`
+
+**`function` ldButtonOutlinePreview** ([lib/src/button.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-ff5af0a48673590388fb412e3ae360f4d302beeea64e1280f57ea1b097e23697))
+- ❇️ Function added: `ldButtonOutlinePreview`
+
+**`function` ldHintPreview** ([lib/src/hint.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-dfc92525de9815f786b74d0fb4e4a920602109f9db1ffe185778ade2d4295570))
+- ❇️ Function added: `ldHintPreview`
+
+**`function` ldHintWithBackgroundPreview** ([lib/src/hint.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-dfc92525de9815f786b74d0fb4e4a920602109f9db1ffe185778ade2d4295570))
+- ❇️ Function added: `ldHintWithBackgroundPreview`
+
+#### 👀 Patch changes
+
+**`class` LdListItemWidget** ([lib/src/list/list_item.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-78298edd98f67013b7aac32bb2d42bcfc7aac8ca48eadd30199b423dbceca120))
+- ❌ Methods removed: `_buildSelectionControls`, `_buildIconTheme`, `_buildLeading`, `_buildTrailing`, `_buildTitle`, `_buildSubtitle`, `_buildSubContent`
+
+**`class` LdMetaballMask** ([lib/src/metaball/metaball_mask.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-6f3c60daed9da62bd711d1411765f7c1b19493924f4b32ca88db0c1436df7b09))
+- ❌ Method removed: `_maskedLayer`
+- ❇️ Method added: `_writeCommon`
+
+**`class` LdTheme** ([lib/src/theme/theme.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-e230b3066fca6361167b035927f3d5e83cda9a34212c86e2a307ed82bcf0d99e))
+- ❇️ Properties added: `_monoFontFamily`, `_monoFontFamilyPackage`
+
+**`class` _LdListItemWidgetState** ([lib/src/list/list_item.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-78298edd98f67013b7aac32bb2d42bcfc7aac8ca48eadd30199b423dbceca120))
+- ❇️ Class added: `_LdListItemWidgetState`
+
+**`class` _LdMetaballScopeData** ([lib/src/metaball/metaball.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-3f44f81d32a4f6357495811a0ef11ac4b71c58f40a155f27cc5a848a6665677c))
+- ❇️ Class added: `_LdMetaballScopeData`
+
+**`class` _LdMetaballScopeState** ([lib/src/metaball/metaball.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-3f44f81d32a4f6357495811a0ef11ac4b71c58f40a155f27cc5a848a6665677c))
+- ❇️ Class added: `_LdMetaballScopeState`
+
+**`class` _LdMetaballShaderData** ([lib/src/metaball/metaball_shader_scope.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-36d3e099d8e35fd786b1d1cfc58ced2cf2ed02ef582778d4961e245a39b3dca4))
+- ❌ Class removed: `_LdMetaballShaderData`
+
+**`class` _LdMetaballShaderScopeState** ([lib/src/metaball/metaball_shader_scope.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-36d3e099d8e35fd786b1d1cfc58ced2cf2ed02ef582778d4961e245a39b3dca4))
+- ❌ Class removed: `_LdMetaballShaderScopeState`
+
+**`class` _LdMetaballState** ([lib/src/metaball/metaball.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-3f44f81d32a4f6357495811a0ef11ac4b71c58f40a155f27cc5a848a6665677c))
+- ➖ Mixin removed: SingleTickerProviderStateMixin
+- ❌ Properties removed: `_ticker`, `_tickerModeNotifier`, `_fill`, `_border`, `_ownedShaders`, `_children`, `_blobs`, `_pointerPos`, `_pointerDown`, `_radiusSpring`, `_radiusPeak`, `_radiusRest`, `_radiusOff`, `_bounceTimer`, `_lastTick`
+- ❇️ Properties added: `_key`, `_scope`
+- ➖ Methods annotation removed: `activate` (@override), `debugFillProperties` (@override)
+- ➕ Methods annotation added: `activate` (@protected), `activate` (@mustCallSuper), `debugFillProperties` (@protected), `debugFillProperties` (@mustCallSuper)
+- ❌ Methods removed: `createTicker`, `_updateTicker`, `_updateTickerModeNotifier`, `_rebuildChildren`, `_tryBorrowShaders`, `_loadOwnShaders`, `_onTick`, `_measureBlobs`, `_blobListEqual`, `_onPointerDown`, `_onPointerMove`, `_onPointerUp`
+- ❇️ Method added: `_measure`
+
+**`class` _LdSlidableGroupState** ([lib/src/list/slidable_list_item.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-fcb34fc43152cea4985180d7f43b5d8266ca996e5bb0ce02005764e0bfb7ebc9))
+- ❇️ Property added: `_hintClaimed`
+- ❇️ Method added: `claimHint`
+
+**`class` _LdSlidableListItemState** ([lib/src/list/slidable_list_item.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-fcb34fc43152cea4985180d7f43b5d8266ca996e5bb0ce02005764e0bfb7ebc9))
+- ❌ Properties removed: `_animationStart`, `_animationEnd`, `_isAnimating`, `_animationKey`
+- ❇️ Properties added: `_peekDelay`, `_peekDuration`, `_peekCompleted`, `_peekRunning`, `_peekDelayTimer`, `_peekDurationTimer`, `_contextMenuKey`
+- ➖ Methods annotation removed: `initState` (@protected), `initState` (@mustCallSuper), `didUpdateWidget` (@mustCallSuper), `didUpdateWidget` (@protected)
+- ➕ Methods annotation added: `initState` (@override), `didUpdateWidget` (@override)
+- ❇️ Methods added: `_maybeRunPeek`, `_handleSecondaryTapDown`
+
+**`class` _LdSubmitDialogState<T, Arg>** ([lib/src/submit/builders/dialog_builder.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-667617a61b037cae73c86a02fac20c0c80283ad8dc680535c250ada7f9ae994a))
+- ➖ Methods annotation removed: `didChangeDependencies` (@protected), `didChangeDependencies` (@mustCallSuper)
+- ➕ Method annotation added: `didChangeDependencies` (@override)
+- ❌ Methods removed: `buildLoadingDialog`, `buildErrorDialog`
+- ❇️ Method added: `buildDialog`
+
+**`class` _LdTouchableSurfaceState** ([lib/src/touchable/touchable.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-390c2ec1e7b0ebec409f605c4cdc4ea7ef337cf7876bdca7a87de6f2c647ea96))
+- ❌ Property removed: `_pointerDownOffset`
+- ❇️ Method added: `_buildGestureLayer`
+
+**`class` _MetaballBorderPainter** ([lib/src/metaball/metaball_mask.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-6f3c60daed9da62bd711d1411765f7c1b19493924f4b32ca88db0c1436df7b09))
+- ❇️ Class added: `_MetaballBorderPainter`
+
+**`class` _MetaballChild** ([lib/src/metaball/metaball.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-7..liquid_flutter/v23.0.0-8#diff-3f44f81d32a4f6357495811a0ef11ac4b71c58f40a155f27cc5a848a6665677c))
+- ❌ Class removed: `_MetaballChild`
+
+
 ## 23.0.0-7
 Released on: 7/7/2026, changelog automatically generated.
 
