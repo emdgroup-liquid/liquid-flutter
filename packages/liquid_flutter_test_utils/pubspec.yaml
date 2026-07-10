@@ -1,6 +1,6 @@
 name: liquid_flutter_test_utils
 description: Test utilities for Liquid Flutter and more
-version: 1.7.0-7
+version: 1.7.0-8
 homepage: https://github.com/emdgroup-liquid/liquid-flutter-test-utils
 environment:
   sdk: ">=3.5.0 <4.0.0"
@@ -16,7 +16,7 @@ dependencies:
     sdk: flutter
   golden_toolkit: ^0.15.0
   go_router: ^17.0.0
-  liquid_flutter: ^23.0.0-4
+  liquid_flutter: ^23.0.0-8
   path: ^1.9.0
   flutter_svg: ^2.0.17
   responsive_builder: ^0.7.1
