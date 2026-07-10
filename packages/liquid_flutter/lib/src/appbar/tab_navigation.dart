@@ -475,10 +475,11 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                             _updateIndicatorPosition();
                           },
                            onHorizontalDragEnd: _onIndicatorDragEnd,
-                           child: IgnorePointer(
-                             child: LdTouchableSurface(
-                               onPressed: () {},
-                               builder: (context, status, _) => LdTouchableTouchFeedback(
+                             child: IgnorePointer(
+                              child: LdTouchableSurface(
+                                onPressed: () {},
+                                trackPan: true,
+                                builder: (context, status, _) => LdTouchableTouchFeedback(
                                    scaleFactor: 100,
                                    status: status,
                                    child: Container(

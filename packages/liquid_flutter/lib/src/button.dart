@@ -422,6 +422,7 @@ class _LdButtonState extends State<_LdButtonWidget> {
       onHover: widget.onHover,
       active: widget.active ?? false,
       disabled: widget.disabled || isLoading,
+      trackPan: true,
       onPressed: _onTap,
       builder: (context, status, _) => Builder(builder: (context) {
         final colors = switch (widget.mode) {

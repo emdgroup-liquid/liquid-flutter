@@ -16,6 +16,13 @@ class LdTouchableSurface extends StatefulWidget {
   final bool autoFocus;
   final bool isOdd;
 
+  /// When true, tracks pointer-move events and exposes them as
+  /// [LdTouchableStatus.panOffset]. Only enable this for surfaces that use
+  /// the offset (e.g. buttons with squeeze/ripple animations). Defaults to
+  /// false to avoid registering unnecessary [Listener] overhead on every
+  /// interactive surface.
+  final bool trackPan;
+
   final FocusNode? focusNode;
   final Function() onPressed;
   final bool allowTapOutside;
@@ -48,6 +55,7 @@ class LdTouchableSurface extends StatefulWidget {
     this.autoFocus = false,
     this.onPressedKeys,
     this.isOdd = false,
+    this.trackPan = false,
     this.child,
   });
 
@@ -125,6 +133,62 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
     }
   }
 
+  Widget _buildGestureLayer(LdTouchableStatus status) {
+    // When trackPan is true the outer Listener carries hitTestBehavior and
+    // the inner GestureDetector must be translucent so it doesn't shadow the
+    // Listener. When trackPan is false the GestureDetector is the outermost
+    // layer and should honour hitTestBehavior directly.
+    final innerBehavior = widget.trackPan ? HitTestBehavior.translucent : widget.hitTestBehavior;
+    final gestureDetector = GestureDetector(
+      key: _listenerKey,
+      behavior: innerBehavior,
+      onTapDown: (d) => _safeSetState(() {
+        if (!widget.disabled) {
+          if (widget.focusNode != null) {
+            _focusNode?.requestFocus();
+          }
+          _pressed = true;
+        }
+      }),
+      onTapUp: (_) => _safeSetState(() {
+        _pressed = false;
+      }),
+      onTap: () {
+        if (!widget.disabled) {
+          widget.onPressed();
+        }
+      },
+      child: Provider.value(
+        value: status,
+        child: widget.builder(context, status, widget.child),
+      ),
+    );
+
+    if (!widget.trackPan) {
+      return gestureDetector;
+    }
+
+    // Only add a Listener for pan-offset tracking when the caller needs it
+    // (e.g. buttons with squeeze/ripple animations). The Listener does not
+    // participate in the gesture arena, so it never blocks ancestor drag
+    // recognizers (e.g. LdSelectableList's marquee-select GestureDetector).
+    return Listener(
+      behavior: widget.hitTestBehavior,
+      onPointerMove: (event) {
+        if (_pressed) {
+          _safeSetState(() => _panOffset = event.localPosition);
+        }
+      },
+      onPointerUp: (_) {
+        if (_pressed) _safeSetState(() => _pressed = false);
+      },
+      onPointerCancel: (_) {
+        if (_pressed) _safeSetState(() => _pressed = false);
+      },
+      child: gestureDetector,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final status = LdTouchableStatus(
@@ -184,50 +248,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
                 _hovering = false;
               });
             },
-            child: GestureDetector(
-              key: _listenerKey,
-              behavior: widget.hitTestBehavior,
-              onTapDown: (d) => _safeSetState(() {
-                if (!widget.disabled) {
-                  if (widget.focusNode != null) {
-                    _focusNode?.requestFocus();
-                  }
-                  _safeSetState(() {
-                    _pressed = true;
-                  });
-                }
-              }),
-              onTapUp: (details) => _safeSetState(() {
-                _safeSetState(() {
-                  _pressed = false;
-                });
-              }),
-              onTap: () {
-                if (widget.disabled) {
-                  return;
-                }
-
-                widget.onPressed();
-              },
-              onPanUpdate: (event) {
-                if (_pressed) {
-                  _safeSetState(() {
-                    _panOffset = event.localPosition;
-                  });
-                }
-              },
-              onPanEnd: (_) {
-                if (_pressed) {
-                  _safeSetState(() {
-                    _pressed = false;
-                  });
-                }
-              },
-              child: Provider.value(
-                value: status,
-                child: widget.builder(context, status, widget.child),
-              ),
-            ),
+            child: _buildGestureLayer(status),
           );
         }),
       ),
