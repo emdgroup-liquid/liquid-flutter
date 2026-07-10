@@ -39,20 +39,12 @@ class LdListItemLoading extends StatelessWidget {
     // vertical space as the real item it replaces (prevents scroll jumps).
     final config = Provider.of<LdListItemConfig?>(context, listen: true);
     final padding = config?.padding ?? theme.balPad(LdSize.s);
-    // The real item reserves space for its border on every edge.
-    final borderWidth = theme.borderWidth;
     // [LdAvatar] is the canonical leading; it is sized to paddingSize(m) * 3.
     final leadingSize = theme.paddingSize(size: LdSize.m) * 3;
     final labelSize = theme.labelSize(LdSize.m);
     final paragraphSize = theme.paragraphSize(LdSize.s);
     return Container(
       padding: padding,
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Colors.transparent,
-          width: borderWidth,
-        ),
-      ),
       child: Row(children: [
         if (hasLeading) LdLoader(neutral: true, size: leadingSize),
         if (hasLeading) ldSpacerM,

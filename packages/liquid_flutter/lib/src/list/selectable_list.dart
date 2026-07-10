@@ -1,6 +1,7 @@
 // ignore_for_file: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
 
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -591,6 +592,7 @@ class _DragRectState extends State<_DragRect> {
         widget.onTapOutside();
       },
       child: widget.child,
+      supportedDevices: const {PointerDeviceKind.mouse},
       onPanStart: (details) {
         _dragStartOffset = details.globalPosition;
         _overlayPortalController.show();

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/haptics.dart';
@@ -147,6 +149,8 @@ class _LdSlidableListItemState extends State<LdSlidableListItem> {
 
   bool _peekCompleted = false;
   bool _peekRunning = false;
+  Timer? _peekDelayTimer;
+  Timer? _peekDurationTimer;
 
   Offset? _dragStartPosition;
   _LdSlidableGroupState? _group;
@@ -204,6 +208,8 @@ class _LdSlidableListItemState extends State<LdSlidableListItem> {
 
   @override
   void dispose() {
+    _peekDelayTimer?.cancel();
+    _peekDurationTimer?.cancel();
     _group?.unregister(this);
     super.dispose();
   }
@@ -258,12 +264,19 @@ class _LdSlidableListItemState extends State<LdSlidableListItem> {
     final peekTarget = hasEnd ? -distance : distance;
 
     try {
-      await Future.delayed(_peekDelay);
+      final delayCompleter = Completer<void>();
+      _peekDelayTimer = Timer(_peekDelay, delayCompleter.complete);
+      await delayCompleter.future;
+      _peekDelayTimer = null;
       if (!mounted || _isDragging || _isOpen) return;
 
       // Slide out to reveal actions briefly.
       setState(() => _offset = peekTarget);
-      await Future.delayed(_peekDuration);
+
+      final durationCompleter = Completer<void>();
+      _peekDurationTimer = Timer(_peekDuration, durationCompleter.complete);
+      await durationCompleter.future;
+      _peekDurationTimer = null;
       if (!mounted) return;
 
       // Spring back.
