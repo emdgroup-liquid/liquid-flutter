@@ -591,7 +591,6 @@ class _DragRectState extends State<_DragRect> {
       onTap: () {
         widget.onTapOutside();
       },
-      child: widget.child,
       supportedDevices: const {PointerDeviceKind.mouse},
       onPanStart: (details) {
         _dragStartOffset = details.globalPosition;
@@ -633,6 +632,7 @@ class _DragRectState extends State<_DragRect> {
         }
         setState(() {});
       },
+      child: widget.child,
     );
   }
 
