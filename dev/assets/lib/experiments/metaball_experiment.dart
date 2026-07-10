@@ -1,20 +1,10 @@
 import 'dart:async';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-
-// ---------------------------------------------------------------------------
-// Re-export the old internal shape/blob types under the old names so the
-// lower-level demos below can still reference them.
-// ---------------------------------------------------------------------------
-
-// (MetaballShape / MetaballBlob are now LdMetaballShape / LdMetaballBlob in
-//  the library.  The aliases below keep the experiment readable.)
-typedef MetaballShape = LdMetaballShape;
-typedef MetaballBlob = LdMetaballBlob;
-const MetaballShape roundedRect = LdMetaballShape.roundedRect;
-const MetaballShape ellipse = LdMetaballShape.ellipse;
 
 /// Maximum number of metaball shapes the shader supports.
 const int _kMetaballMaxShapes = kLdMetaballMaxBlobs;
@@ -28,27 +18,23 @@ class MetaballExperiment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Wrap the whole page in a single shader scope so the interactive
-    // playground and the morph demo share one FragmentProgram load.
-    return LdMetaballShaderScope(
-      child: LdScaffold(
-        body: LdAppBar(
-          title: const Text('Metaball Experiment'),
-          child: LdScaffoldBody(
-            addContainer: false,
-            children: [
-              // --- Demo 1: High-level LdMetaball (auto-layout, no blob math) ---
-              const _SimpleMetaballDemo(),
-              const LdDivider(),
+    return LdScaffold(
+      body: LdAppBar(
+        title: const Text('Metaball Experiment'),
+        child: LdScaffoldBody(
+          addContainer: false,
+          children: const [
+            // --- Demo 1: High-level LdMetaballScope + LdMetaball ---
+            _SimpleMetaballDemo(),
+            LdDivider(),
 
-              // --- Demo 2: Interactive playground (low-level LdMetaballMask) ---
-              const _InteractivePlayground(),
-              const LdDivider(),
+            // --- Demo 2: Interactive playground (low-level LdMetaballMask) ---
+            _InteractivePlayground(),
+            LdDivider(),
 
-              // --- Demo 3: Button → menu morph (LdMetaballMask + springs) ---
-              const _MorphDemo(),
-            ],
-          ),
+            // --- Demo 3: Button → menu morph (LdMetaballMask + springs) ---
+            _MorphDemo(),
+          ],
         ),
       ),
     );
@@ -56,10 +42,10 @@ class MetaballExperiment extends StatelessWidget {
 }
 
 // ===========================================================================
-// Demo 1 — Simple high-level LdMetaball
+// Demo 1 — High-level LdMetaballScope + LdMetaball
 //
-// Shows LdMetaball with LdMetaballChild children.  No blob math, no shader
-// management — the widgets discover their own positions.
+// LdMetaball children register themselves each frame — no manual blob math,
+// no coordinate lag, animations work correctly.
 // ===========================================================================
 
 class _SimpleMetaballDemo extends StatefulWidget {
@@ -80,69 +66,60 @@ class _SimpleMetaballDemoState extends State<_SimpleMetaballDemo> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          LdText.hs('High-level LdMetaball'),
+          LdText.hs('High-level LdMetaballScope'),
           ldSpacerS,
           LdText.p(
-            'Children declare their own shape. LdMetaball measures each '
-            'widget and feeds the blobs to the shader automatically.',
+            'LdMetaball children register their own size and position each '
+            'frame — no blob math, no lag on animated children.',
             color: theme.textMuted,
           ),
           ldSpacerM,
-          // The LdMetaball widget — children are normal Flutter widgets.
-          LdMetaball(
-            surfaceColor: theme.surface,
+          LdMetaballScope(
+            surfaceColor: theme.primaryColor.withAlpha(50),
             borderColor: theme.border,
             blend: 30,
             children: [
-              // A pill button blob
-              LdMetaballChild(
-                shape: LdMetaballShape.roundedRect,
-                cornerRadius: 24,
-                child: GestureDetector(
-                  onTap: () => setState(() => _expanded = !_expanded),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 350),
-                    curve: Curves.easeInOutCubic,
-                    width: _expanded ? 200 : 140,
-                    height: 48,
-                    alignment: Alignment.center,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          _expanded ? LucideIcons.x : LucideIcons.layoutGrid,
-                          color: theme.text,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _expanded ? 'Close' : 'Actions',
-                          style: TextStyle(
-                            color: theme.text,
-                            fontWeight: FontWeight.w600,
+              // Pill button — animates width when toggled
+              Padding(
+                padding: const EdgeInsets.only(top: 32.0, left: 16.0, bottom: 32.0),
+                child: Row(
+                  children: [
+                    LdMetaball(
+                      shape: LdMetaballShape.roundedRect,
+                      cornerRadius: 24,
+                      child: GestureDetector(
+                        onTap: () => setState(() => _expanded = !_expanded),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 350),
+                          curve: Curves.easeInOutCubic,
+                          width: _expanded ? 200 : 140,
+                          height: 48,
+                          alignment: Alignment.center,
+                          child: LdButton.ghost(
+                            child: Text("Toggle"),
+                            onPressed: () => setState(() => _expanded = !_expanded),
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 350),
+                      padding: EdgeInsets.symmetric(horizontal: _expanded ? 0 : 16.0),
+                      child: LdMetaball(
+                        shape: LdMetaballShape.ellipse,
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          alignment: Alignment.center,
+                          child: Icon(LucideIcons.star, color: theme.text, size: 18),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
-              // A small circle blob that appears when expanded
-              if (_expanded)
-                LdMetaballChild(
-                  shape: LdMetaballShape.ellipse,
-                  child: Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      alignment: Alignment.center,
-                      child: Icon(LucideIcons.star, color: theme.text, size: 18),
-                    ),
-                  ),
-                ),
+              // Small circle that appears when expanded
             ],
           ),
         ],
@@ -154,13 +131,9 @@ class _SimpleMetaballDemoState extends State<_SimpleMetaballDemo> {
 // ===========================================================================
 // Demo 2 — Interactive playground (low-level LdMetaballMask)
 //
-// Preserves the original draggable-blob playground, now using the public
-// API types (LdMetaballBlob, LdMetaballShape, LdMetaballMask).
+// Manages blobs manually for full geometry control.
+// Loads its own shaders — no shared scope needed.
 // ===========================================================================
-
-// ---------------------------------------------------------------------------
-// Icon + label overlay for a single blob
-// ---------------------------------------------------------------------------
 
 class _BlobLabel extends StatelessWidget {
   final LdMetaballBlob blob;
@@ -177,16 +150,7 @@ class _BlobLabel extends StatelessWidget {
     LucideIcons.diamond,
   ];
 
-  static const _labels = [
-    'Design',
-    'Explore',
-    'Energy',
-    'Rhythm',
-    'Bright',
-    'Cloud',
-    'Spark',
-    'Gem',
-  ];
+  static const _labels = ['Design', 'Explore', 'Energy', 'Rhythm', 'Bright', 'Cloud', 'Spark', 'Gem'];
 
   const _BlobLabel({required this.blob, required this.index});
 
@@ -220,22 +184,13 @@ class _BlobLabel extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Draggable blob handle
-// ---------------------------------------------------------------------------
-
 class _BlobHandle extends StatelessWidget {
   final LdMetaballBlob blob;
   final bool selected;
   final VoidCallback onTap;
   final void Function(DragUpdateDetails) onDrag;
 
-  const _BlobHandle({
-    required this.blob,
-    required this.selected,
-    required this.onTap,
-    required this.onDrag,
-  });
+  const _BlobHandle({required this.blob, required this.selected, required this.onTap, required this.onDrag});
 
   @override
   Widget build(BuildContext context) {
@@ -245,19 +200,11 @@ class _BlobHandle extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         onPanUpdate: onDrag,
-        child: Container(
-          width: blob.width + 8,
-          height: blob.height + 8,
-          decoration: const BoxDecoration(),
-        ),
+        child: Container(width: blob.width + 8, height: blob.height + 8, decoration: const BoxDecoration()),
       ),
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Minimal Euler-integration spring
-// ---------------------------------------------------------------------------
 
 class _SpringSim {
   final double springConstant;
@@ -276,8 +223,7 @@ class _SpringSim {
     required this.target,
   }) : position = initial;
 
-  bool get isActive =>
-      (position - target).abs() > 0.05 || _velocity.abs() > 0.05;
+  bool get isActive => (position - target).abs() > 0.05 || _velocity.abs() > 0.05;
 
   void step(int elapsedMs) {
     const timeStep = 0.01;
@@ -295,10 +241,6 @@ class _SpringSim {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Interactive playground
-// ---------------------------------------------------------------------------
-
 class _InteractivePlayground extends StatefulWidget {
   const _InteractivePlayground();
 
@@ -306,8 +248,7 @@ class _InteractivePlayground extends StatefulWidget {
   State<_InteractivePlayground> createState() => _InteractivePlaygroundState();
 }
 
-class _InteractivePlaygroundState extends State<_InteractivePlayground>
-    with SingleTickerProviderStateMixin {
+class _InteractivePlaygroundState extends State<_InteractivePlayground> with SingleTickerProviderStateMixin {
   static const double _borderWidth = 1.0;
 
   double _blend = 40.0;
@@ -341,26 +282,30 @@ class _InteractivePlaygroundState extends State<_InteractivePlayground>
 
   late List<LdMetaballBlob> _blobs;
 
+  // Own shader pair — loaded independently (no shared scope)
+  ui.FragmentShader? _fill;
+  ui.FragmentShader? _border;
+
   @override
   void initState() {
     super.initState();
     _ticker = createTicker(_onTick)..start();
-    _blobs = [
-      const LdMetaballBlob(
+    _blobs = const [
+      LdMetaballBlob(
         position: Offset(160, 250),
         width: 120,
         height: 120,
         cornerRadius: 32,
         shape: LdMetaballShape.roundedRect,
       ),
-      const LdMetaballBlob(
+      LdMetaballBlob(
         position: Offset(310, 250),
         width: 100,
         height: 100,
         cornerRadius: 50,
         shape: LdMetaballShape.ellipse,
       ),
-      const LdMetaballBlob(
+      LdMetaballBlob(
         position: Offset(230, 380),
         width: 90,
         height: 90,
@@ -368,12 +313,29 @@ class _InteractivePlaygroundState extends State<_InteractivePlayground>
         shape: LdMetaballShape.roundedRect,
       ),
     ];
+    _loadShaders();
+  }
+
+  Future<void> _loadShaders() async {
+    try {
+      final program = await ui.FragmentProgram.fromAsset('packages/liquid_flutter/shaders/metaball.frag');
+      if (mounted) {
+        setState(() {
+          _fill = program.fragmentShader();
+          _border = program.fragmentShader();
+        });
+      }
+    } catch (e, st) {
+      debugPrint('_InteractivePlayground: shader load failed\n$e\n$st');
+    }
   }
 
   @override
   void dispose() {
     _ticker.dispose();
     _bounceTimer?.cancel();
+    _fill?.dispose();
+    _border?.dispose();
     super.dispose();
   }
 
@@ -418,13 +380,10 @@ class _InteractivePlaygroundState extends State<_InteractivePlayground>
   void _addBlob(Offset center) {
     if (_blobs.length >= _kMetaballMaxShapes) return;
     setState(() {
-      _blobs.add(LdMetaballBlob(
-        position: center,
-        width: 90,
-        height: 90,
-        cornerRadius: 28,
-        shape: LdMetaballShape.roundedRect,
-      ));
+      _blobs = [
+        ..._blobs,
+        LdMetaballBlob(position: center, width: 90, height: 90, cornerRadius: 28, shape: LdMetaballShape.roundedRect),
+      ];
       _selectedIndex = _blobs.length - 1;
     });
   }
@@ -432,7 +391,8 @@ class _InteractivePlaygroundState extends State<_InteractivePlayground>
   void _removeSelected() {
     if (_blobs.length <= 1) return;
     setState(() {
-      _blobs.removeAt(_selectedIndex);
+      final list = List<LdMetaballBlob>.from(_blobs)..removeAt(_selectedIndex);
+      _blobs = list;
       _selectedIndex = (_selectedIndex - 1).clamp(0, _blobs.length - 1);
     });
   }
@@ -440,19 +400,20 @@ class _InteractivePlaygroundState extends State<_InteractivePlayground>
   LdMetaballBlob get _selected => _blobs[_selectedIndex];
 
   void _updateSelected(LdMetaballBlob updated) {
-    setState(() => _blobs[_selectedIndex] = updated);
+    setState(() {
+      final list = List<LdMetaballBlob>.from(_blobs);
+      list[_selectedIndex] = updated;
+      _blobs = list;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
-    // Resolve shaders from the nearest scope
-    final shaders = LdMetaballShaderScope.of(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildCanvas(theme, shaders),
+        _buildCanvas(theme),
         Padding(
           padding: theme.pad(size: LdSize.m),
           child: Column(
@@ -474,7 +435,9 @@ class _InteractivePlaygroundState extends State<_InteractivePlayground>
     );
   }
 
-  Widget _buildCanvas(LdTheme theme, LdMetaballShaders? shaders) {
+  Widget _buildCanvas(LdTheme theme) {
+    final fill = _fill;
+    final border = _border;
     return AspectRatio(
       aspectRatio: 2.0,
       child: LayoutBuilder(
@@ -493,13 +456,13 @@ class _InteractivePlaygroundState extends State<_InteractivePlayground>
                 color: theme.background,
                 child: Stack(
                   children: [
-                    if (shaders == null)
+                    if (fill == null || border == null)
                       const Center(child: LdLoader())
                     else
                       Positioned.fill(
                         child: LdMetaballMask(
-                          shader: shaders.fill,
-                          borderShader: shaders.border,
+                          shader: fill,
+                          borderShader: border,
                           blobs: _blobs,
                           blend: _blend,
                           pointerPos: _pointerPos,
@@ -509,10 +472,7 @@ class _InteractivePlaygroundState extends State<_InteractivePlayground>
                           borderWidth: _borderWidth,
                           child: Stack(
                             fit: StackFit.expand,
-                            children: [
-                              for (int i = 0; i < _blobs.length; i++)
-                                _BlobLabel(blob: _blobs[i], index: i),
-                            ],
+                            children: [for (int i = 0; i < _blobs.length; i++) _BlobLabel(blob: _blobs[i], index: i)],
                           ),
                         ),
                       ),
@@ -524,15 +484,15 @@ class _InteractivePlaygroundState extends State<_InteractivePlayground>
                         onTap: () => setState(() => _selectedIndex = i),
                         onDrag: (d) {
                           setState(() {
-                            final b = _blobs[i];
-                            _blobs[i] = b.copyWith(
+                            final list = List<LdMetaballBlob>.from(_blobs);
+                            final b = list[i];
+                            list[i] = b.copyWith(
                               position: Offset(
-                                (b.position.dx + d.delta.dx)
-                                    .clamp(0, size.width),
-                                (b.position.dy + d.delta.dy)
-                                    .clamp(0, size.height),
+                                (b.position.dx + d.delta.dx).clamp(0, size.width),
+                                (b.position.dy + d.delta.dy).clamp(0, size.height),
                               ),
                             );
+                            _blobs = list;
                           });
                         },
                       ),
@@ -543,18 +503,12 @@ class _InteractivePlaygroundState extends State<_InteractivePlayground>
                       right: 0,
                       child: Center(
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
                             color: theme.surface.withValues(alpha: 0.85),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: LdText.pxs(
-                            'Drag blobs  •  double-tap to add',
-                            color: theme.textMuted,
-                          ),
+                          child: LdText.pxs('Drag blobs  •  double-tap to add', color: theme.textMuted),
                         ),
                       ),
                     ),
@@ -573,17 +527,8 @@ class _InteractivePlaygroundState extends State<_InteractivePlayground>
     return LdAutoSpace(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(children: [
-          LdText.l('Blend radius'),
-          const Spacer(),
-          LdText.ls('${_blend.round()} px'),
-        ]),
-        Slider(
-          value: _blend,
-          min: 0,
-          max: 120,
-          onChanged: (v) => setState(() => _blend = v),
-        ),
+        Row(children: [LdText.l('Blend radius'), const Spacer(), LdText.ls('${_blend.round()} px')]),
+        Slider(value: _blend, min: 0, max: 120, onChanged: (v) => setState(() => _blend = v)),
         const LdDivider(),
         Row(
           children: [
@@ -604,14 +549,11 @@ class _InteractivePlaygroundState extends State<_InteractivePlayground>
             LdText.l('Color'),
             const SizedBox(width: 12),
             for (final c in _palette)
-              GestureDetector(
-                onTap: () => setState(() {}), // color not stored in blob anymore
-                child: Container(
-                  width: 28,
-                  height: 28,
-                  margin: const EdgeInsets.only(right: 6),
-                  decoration: BoxDecoration(color: c, shape: BoxShape.circle),
-                ),
+              Container(
+                width: 28,
+                height: 28,
+                margin: const EdgeInsets.only(right: 6),
+                decoration: BoxDecoration(color: c, shape: BoxShape.circle),
               ),
           ],
         ),
@@ -620,32 +562,18 @@ class _InteractivePlaygroundState extends State<_InteractivePlayground>
           value: blob.shape,
           onChanged: (v) => _updateSelected(blob.copyWith(shape: v)),
           items: const [
-            LdSelectItem(
-              value: LdMetaballShape.roundedRect,
-              child: Text('Rounded rect'),
-            ),
-            LdSelectItem(
-              value: LdMetaballShape.ellipse,
-              child: Text('Ellipse'),
-            ),
+            LdSelectItem(value: LdMetaballShape.roundedRect, child: Text('Rounded rect')),
+            LdSelectItem(value: LdMetaballShape.ellipse, child: Text('Ellipse')),
           ],
         ),
-        Row(children: [
-          LdText.l('Width'),
-          const Spacer(),
-          LdText.ls('${blob.width.round()} px'),
-        ]),
+        Row(children: [LdText.l('Width'), const Spacer(), LdText.ls('${blob.width.round()} px')]),
         Slider(
           value: blob.width,
           min: 40,
           max: 220,
           onChanged: (v) => _updateSelected(blob.copyWith(width: v)),
         ),
-        Row(children: [
-          LdText.l('Height'),
-          const Spacer(),
-          LdText.ls('${blob.height.round()} px'),
-        ]),
+        Row(children: [LdText.l('Height'), const Spacer(), LdText.ls('${blob.height.round()} px')]),
         Slider(
           value: blob.height,
           min: 40,
@@ -653,11 +581,7 @@ class _InteractivePlaygroundState extends State<_InteractivePlayground>
           onChanged: (v) => _updateSelected(blob.copyWith(height: v)),
         ),
         if (blob.shape == LdMetaballShape.roundedRect) ...[
-          Row(children: [
-            LdText.l('Corner radius'),
-            const Spacer(),
-            LdText.ls('${blob.cornerRadius.round()} px'),
-          ]),
+          Row(children: [LdText.l('Corner radius'), const Spacer(), LdText.ls('${blob.cornerRadius.round()} px')]),
           Slider(
             value: blob.cornerRadius,
             min: 0,
@@ -674,7 +598,7 @@ class _InteractivePlaygroundState extends State<_InteractivePlayground>
 // Demo 3 — Morph transition (LdMetaballMask + springs)
 //
 // A button blob smooth-unions into a menu blob as it opens.
-// Uses LdMetaballMask directly for full control over blob geometry.
+// Loads its own shaders — no shared scope needed.
 // ===========================================================================
 
 class _MorphDemo extends StatefulWidget {
@@ -684,8 +608,7 @@ class _MorphDemo extends StatefulWidget {
   State<_MorphDemo> createState() => _MorphDemoState();
 }
 
-class _MorphDemoState extends State<_MorphDemo>
-    with SingleTickerProviderStateMixin {
+class _MorphDemoState extends State<_MorphDemo> with SingleTickerProviderStateMixin {
   bool _open = false;
 
   Offset? _pointerPos;
@@ -730,16 +653,37 @@ class _MorphDemoState extends State<_MorphDemo>
   late final Ticker _ticker;
   Duration? _lastTick;
 
+  // Own shader pair
+  ui.FragmentShader? _fill;
+  ui.FragmentShader? _border;
+
   @override
   void initState() {
     super.initState();
     _ticker = createTicker(_onTick)..start();
+    _loadShaders();
+  }
+
+  Future<void> _loadShaders() async {
+    try {
+      final program = await ui.FragmentProgram.fromAsset('packages/liquid_flutter/shaders/metaball.frag');
+      if (mounted) {
+        setState(() {
+          _fill = program.fragmentShader();
+          _border = program.fragmentShader();
+        });
+      }
+    } catch (e, st) {
+      debugPrint('_MorphDemo: shader load failed\n$e\n$st');
+    }
   }
 
   @override
   void dispose() {
     _ticker.dispose();
     _bounceTimer?.cancel();
+    _fill?.dispose();
+    _border?.dispose();
     super.dispose();
   }
 
@@ -748,9 +692,7 @@ class _MorphDemoState extends State<_MorphDemo>
     _lastTick = elapsed;
     if (last == null) return;
     final elapsedMs = (elapsed - last).inMilliseconds.clamp(1, 64);
-    if (_btnSpring.isActive ||
-        _menuSpring.isActive ||
-        _radiusSpring.isActive) {
+    if (_btnSpring.isActive || _menuSpring.isActive || _radiusSpring.isActive) {
       _btnSpring.step(elapsedMs);
       _menuSpring.step(elapsedMs);
       _radiusSpring.step(elapsedMs);
@@ -792,7 +734,8 @@ class _MorphDemoState extends State<_MorphDemo>
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
-    final shaders = LdMetaballShaderScope.of(context);
+    final fill = _fill;
+    final border = _border;
 
     final menuScale = _menuSpring.position;
     const btnW = _btnW;
@@ -845,15 +788,13 @@ class _MorphDemoState extends State<_MorphDemo>
             child: SizedBox(
               width: canvasW,
               height: _canvasH,
-              child: shaders == null
+              child: fill == null || border == null
                   ? const Center(child: LdLoader())
                   : LdMetaballMask(
-                      shader: shaders.fill,
-                      borderShader: shaders.border,
+                      shader: fill,
+                      borderShader: border,
                       blobs: blobs,
-                      blend: _blendClosed +
-                          (_blendOpen - _blendClosed) *
-                              (1 - _menuSpring.position),
+                      blend: _blendClosed + (_blendOpen - _blendClosed) * (1 - _menuSpring.position),
                       surfaceColor: theme.surface,
                       borderColor: theme.border,
                       borderWidth: 1.0,
@@ -878,10 +819,6 @@ class _MorphDemoState extends State<_MorphDemo>
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Content rendered inside the morph blobs
-// ---------------------------------------------------------------------------
 
 class _MorphContent extends StatelessWidget {
   final List<LdMetaballBlob> blobs;
@@ -934,11 +871,7 @@ class _MorphContent extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     for (final (icon, label) in _menuItems)
-                      LdListItem(
-                        leading: Icon(icon, size: 18),
-                        title: Text(label),
-                        onPressed: onToggle,
-                      ),
+                      LdListItem(leading: Icon(icon, size: 18), title: Text(label), onPressed: onToggle),
                   ],
                 ),
               ),

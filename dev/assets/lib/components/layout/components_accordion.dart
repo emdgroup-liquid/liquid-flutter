@@ -27,8 +27,9 @@ class _ComponentsAccordionState extends State<ComponentsAccordion> {
 
   Future<void> _loadApiJson() async {
     try {
-      final String jsonString = await rootBundle.loadString('../api_guard/api.json');
-      final List<dynamic> jsonList = json.decode(jsonString) as List<dynamic>;
+      final String jsonString = await rootBundle.loadString('.api_guard/liquid_flutter.json');
+      final Map<String, dynamic> jsonMap = json.decode(jsonString) as Map<String, dynamic>;
+      final List<dynamic> jsonList = jsonMap['components'] as List<dynamic>;
 
       final List<DocComponent> components = jsonList
           .map((json) => DocComponent.fromJson(json as Map<String, dynamic>))
