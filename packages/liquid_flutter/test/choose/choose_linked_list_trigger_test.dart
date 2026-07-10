@@ -166,7 +166,9 @@ void main() {
       await tester.pumpAndSettle();
 
       // Full swipe left on Apple pie row to trigger the Unlink action (72 px pane).
-      await tester.drag(find.text('Apple pie'), const Offset(-100, 0));
+      // The default LdSlideActionPane threshold is 1.5×, so the drag must
+      // exceed 72 × 1.5 = 108 px for auto-trigger on release.
+      await tester.drag(find.text('Apple pie'), const Offset(-150, 0));
       await _settle(tester);
 
       expect(currentValue.contains('a'), isFalse);
