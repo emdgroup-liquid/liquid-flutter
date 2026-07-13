@@ -1,58 +1,21 @@
 PODS:
-  - device_info_plus (0.0.1):
-    - FlutterMacOS
   - FlutterMacOS (1.0.0)
-  - irondash_engine_context (0.0.1):
-    - FlutterMacOS
   - liquid_flutter_window_utils (0.0.1):
-    - FlutterMacOS
-  - package_info_plus (0.0.1):
-    - FlutterMacOS
-  - shared_preferences_foundation (0.0.1):
-    - Flutter
-    - FlutterMacOS
-  - super_native_extensions (0.0.1):
-    - FlutterMacOS
-  - url_launcher_macos (0.0.1):
     - FlutterMacOS
 
 DEPENDENCIES:
-  - device_info_plus (from `Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
-  - irondash_engine_context (from `Flutter/ephemeral/.symlinks/plugins/irondash_engine_context/macos`)
   - liquid_flutter_window_utils (from `Flutter/ephemeral/.symlinks/plugins/liquid_flutter_window_utils/macos`)
-  - package_info_plus (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos`)
-  - shared_preferences_foundation (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin`)
-  - super_native_extensions (from `Flutter/ephemeral/.symlinks/plugins/super_native_extensions/macos`)
-  - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
 
 EXTERNAL SOURCES:
-  device_info_plus:
-    :path: Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
-  irondash_engine_context:
-    :path: Flutter/ephemeral/.symlinks/plugins/irondash_engine_context/macos
   liquid_flutter_window_utils:
     :path: Flutter/ephemeral/.symlinks/plugins/liquid_flutter_window_utils/macos
-  package_info_plus:
-    :path: Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos
-  shared_preferences_foundation:
-    :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin
-  super_native_extensions:
-    :path: Flutter/ephemeral/.symlinks/plugins/super_native_extensions/macos
-  url_launcher_macos:
-    :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
 
 SPEC CHECKSUMS:
-  device_info_plus: 4fb280989f669696856f8b129e4a5e3cd6c48f76
   FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
-  irondash_engine_context: 893c7d96d20ce361d7e996f39d360c4c2f9869ba
-  liquid_flutter_window_utils: 4f6190831a93935ae3f7c1078a2dcb7f4b384af5
-  package_info_plus: f0052d280d17aa382b932f399edf32507174e870
-  shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
-  super_native_extensions: c2795d6d9aedf4a79fae25cb6160b71b50549189
-  url_launcher_macos: f87a979182d112f911de6820aefddaf56ee9fbfd
+  liquid_flutter_window_utils: 08338c9de990e493e63db32a549aea6762e96c44
 
 PODFILE CHECKSUM: 7ea94091761b499e0c705bed8ccc305efda9867b
 

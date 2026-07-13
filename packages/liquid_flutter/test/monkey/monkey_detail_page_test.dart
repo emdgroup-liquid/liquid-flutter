@@ -36,7 +36,7 @@ void main() {
           showSelectionControls: false,
         );
 
-        final detailPage = LdMonkeyDetailPage<TestItem, int>.scrollable(
+        final detailPage = LdMonkeyDetailAppBars<TestItem, int>.scrollable(
           buildDetail: (context, item) => Text('Detail: ${item.value?.name ?? ''}'),
         );
 
@@ -68,7 +68,7 @@ void main() {
           showSelectionControls: false,
         );
 
-        final detailPage = LdMonkeyDetailPage<TestItem, int>.stacked(
+        final detailPage = LdMonkeyDetailAppBars<TestItem, int>.stacked(
           buildDetail: (context, item) => Text('Detail: ${item.value?.name ?? ''}'),
         );
 
@@ -108,7 +108,7 @@ void main() {
                   value: repository,
                   child: Provider<LdMonkeySelection<TestItem, int>>.value(
                     value: currentSelection,
-                    child: LdMonkeyStreamSelection<TestItem, int>(
+                    child: LdMonkeyViewingBuilder<TestItem, int>(
                       buildItem: (context, item) => Text(item.value?.name ?? ''),
                       builder: (context, itemWidgets) => Column(
                         children: itemWidgets,
@@ -152,7 +152,7 @@ void main() {
                 value: repository,
                 child: Provider<LdMonkeySelection<TestItem, int>>.value(
                   value: selection,
-                  child: LdMonkeyStreamSelection<TestItem, int>(
+                  child: LdMonkeyViewingBuilder<TestItem, int>(
                     buildItem: (context, item) => Text(item.value?.name ?? ''),
                     builder: (context, itemWidgets) => Column(
                       children: itemWidgets,
@@ -178,9 +178,9 @@ void main() {
           showSelectionControls: false,
         );
 
-        final detailPage = LdMonkeyDetailPage<TestItem, int>(
+        final detailPage = LdMonkeyDetailAppBars<TestItem, int>(
           primaryAppBarConfig: LdAppBarConfig(title: const Text('Custom Primary App Bar')),
-          body: Container(),
+          child: Container(),
         );
 
         await tester.pumpWidget(
@@ -209,8 +209,8 @@ void main() {
           showSelectionControls: false,
         );
 
-        final detailPage = LdMonkeyDetailPage<TestItem, int>(
-          body: Container(),
+        final detailPage = LdMonkeyDetailAppBars<TestItem, int>(
+          child: Container(),
         );
 
         await tester.pumpWidget(
@@ -233,9 +233,9 @@ void main() {
           showSelectionControls: false,
         );
 
-        final detailPage = LdMonkeyDetailPage<TestItem, int>(
+        final detailPage = LdMonkeyDetailAppBars<TestItem, int>(
           primaryAppBarConfig: LdAppBarConfig(title: const Text('Primary Only Title')),
-          body: Container(),
+          child: Container(),
         );
 
         await tester.pumpWidget(
@@ -258,9 +258,9 @@ void main() {
           showSelectionControls: false,
         );
 
-        final detailPage = LdMonkeyDetailPage<TestItem, int>(
+        final detailPage = LdMonkeyDetailAppBars<TestItem, int>(
           secondaryAppBarConfig: LdAppBarConfig(title: const Text('Custom Secondary App Bar')),
-          body: Container(),
+          child: Container(),
         );
 
         await tester.pumpWidget(
@@ -291,7 +291,7 @@ void main() {
           showSelectionControls: false,
         );
 
-        final detailPage = LdMonkeyDetailPage<TestItem, int>.scrollable(
+        final detailPage = LdMonkeyDetailAppBars<TestItem, int>.scrollable(
           buildDetail: (context, item) => Text('Detail: ${item.value?.name ?? ''}'),
         );
 
@@ -330,7 +330,7 @@ void main() {
           showSelectionControls: false,
         );
 
-        final detailPage = LdMonkeyDetailPage<TestItem, int>.scrollable(
+        final detailPage = LdMonkeyDetailAppBars<TestItem, int>.scrollable(
           buildDetail: (context, item) => Text('Detail: ${item.value?.name ?? ''}'),
         );
 
@@ -362,7 +362,7 @@ void main() {
           showSelectionControls: false,
         );
 
-        final detailPage = LdMonkeyDetailPage<TestItem, int>.scrollable(
+        final detailPage = LdMonkeyDetailAppBars<TestItem, int>.scrollable(
           buildDetail: (context, item) => Text('Detail: ${item.value?.name ?? ''}'),
         );
 

@@ -44,26 +44,21 @@ class LdMonkeyActionContext<T extends Identifiable<IdType>, IdType> {
   /// the [LdListController], so the surrounding widget rebuilds (and the context
   /// is re-evaluated) whenever the selection or the underlying items change. Use
   /// this when building a context for reactive evaluation such as visibility.
-  static LdMonkeyActionContext<T, IdType>
-      of<T extends Identifiable<IdType>, IdType>(
+  static LdMonkeyActionContext<T, IdType> of<T extends Identifiable<IdType>, IdType>(
     BuildContext triggerContext, {
     required BuildContext appContext,
     bool listen = false,
   }) {
     final location = triggerContext.read<LdMonkeyActionLocation>();
-    final selection =
-        LdMonkeySelection.of<T, IdType>(triggerContext, listen: listen);
+    final selection = LdMonkeySelection.of<T, IdType>(triggerContext, listen: listen);
     final layoutMode = triggerContext.read<LdMonkeyEffectiveLayoutMode>();
-    final listController = listen
-        ? triggerContext.watch<LdListController<T, IdType>>()
-        : LdListController.of<T, IdType>(triggerContext);
-    LdPaginatorItem<T>? contextItem =
-        triggerContext.read<LdPaginatorItem<T>?>();
+    final listController =
+        listen ? triggerContext.watch<LdListController<T, IdType>>() : LdListController.of<T, IdType>(triggerContext);
+    LdPaginatorItem<T>? contextItem = triggerContext.read<LdPaginatorItem<T>?>();
 
     return LdMonkeyActionContext<T, IdType>(
       appContext: appContext,
-      selectedIds: LdMonkeySelection.adaptive<T, IdType>(triggerContext,
-          location: location, listen: listen),
+      selectedIds: LdMonkeySelection.adaptive<T, IdType>(triggerContext, location: location, listen: listen),
       selection: selection,
       location: location,
       layoutMode: layoutMode,
@@ -73,11 +68,10 @@ class LdMonkeyActionContext<T extends Identifiable<IdType>, IdType> {
   }
 
   TModel model<TModel extends LdModel<T, IdType, Object?, Object?>>() =>
-      appContext.read<TModel>();
+      appContext.read<LdListController<T, IdType>>().model as TModel;
 
   Future<List<T>> getSelectedItems() {
-    return Future.wait(
-        selectedIds.map((id) => listController.getById(appContext, id)));
+    return Future.wait(selectedIds.map((id) => listController.getById(appContext, id)));
   }
 
   void updateViewing(Set<IdType> viewing) {
@@ -93,7 +87,6 @@ class LdMonkeyActionContext<T extends Identifiable<IdType>, IdType> {
   }
 
   void updateShowSelectionControls(bool showSelectionControls) {
-    LdMonkeySelection.updateShowSelectionControls<T, IdType>(
-        appContext, showSelectionControls);
+    LdMonkeySelection.updateShowSelectionControls<T, IdType>(appContext, showSelectionControls);
   }
 }

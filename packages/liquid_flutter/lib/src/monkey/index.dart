@@ -15,8 +15,6 @@ export 'monkey_selection.dart';
 export 'detail_page.dart';
 export 'detail_editor/index.dart';
 
-export 'monkey_stack_detail_view.dart';
-export 'monkey_scrollable_detail_view.dart';
 export 'monkey_app_bar.dart';
 export 'monkey_layout_mode.dart';
 export 'monkey_effective_layout_mode.dart';

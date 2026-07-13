@@ -4,7 +4,8 @@ List<Widget> _buildOneOfChips<T extends Identifiable<IdType>, IdType>(
   BuildContext context,
   LdFilterChipOneOfConfig<T, IdType> config,
 ) {
-  final filter = findMonkeyFilterByName<T, IdType, LdFilterOneOf<T, IdType, dynamic>>(
+  final filter =
+      findMonkeyFilterByName<T, IdType, LdFilterOneOf<T, IdType, dynamic>>(
     context,
     filterName: config.filterName,
     listen: true,
@@ -14,8 +15,10 @@ List<Widget> _buildOneOfChips<T extends Identifiable<IdType>, IdType>(
   }
 
   return switch (config.presentation) {
-    LdFilterChipChoicePresentation.choose => _buildOneOfChooseChips(context, filter, config),
-    LdFilterChipChoicePresentation.inline => _buildOneOfInlineChips(context, filter, config),
+    LdFilterChipChoicePresentation.choose =>
+      _buildOneOfChooseChips(context, filter, config),
+    LdFilterChipChoicePresentation.inline =>
+      _buildOneOfInlineChips(context, filter, config),
   };
 }
 
@@ -119,8 +122,9 @@ List<Widget> _buildOneOfInlineChips<T extends Identifiable<IdType>, IdType>(
 
   for (final value in options) {
     final isSelected = filter.isOn && filter.selectedValue == value;
-    final child =
-        config.optionChild?.call(context, value) ?? filter.allValues[value]?.call(context) ?? Text(value.toString());
+    final child = config.optionChild?.call(context, value) ??
+        filter.allValues[value]?.call(context) ??
+        Text(value.toString());
     chips.add(
       ldFilterChipButton(
         selected: isSelected,

@@ -1,0 +1,11 @@
+analyzer:
+  plugins:
+    liquid_flutter_lint:
+
+linter:
+  rules:
+    - avoid_print
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - prefer_final_locals
+    - sort_child_properties_last

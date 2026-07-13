@@ -160,6 +160,120 @@ void main() {
       expect(find.text('initial'), findsOneWidget);
     });
   });
+
+  group('LdMarkdownEditingController — list continuation (value setter intercept)', () {
+    // Simulates engine/IME behavior: inserting a single '\n' at the cursor
+    // position by calling the value setter directly (the actual runtime path
+    // in Flutter 3.44+).
+    void insertNewlineAtCursor(LdMarkdownEditingController ctrl) {
+      final pos = ctrl.selection.baseOffset;
+      final text = ctrl.text;
+      ctrl.value = TextEditingValue(
+        text: '${text.substring(0, pos)}\n${text.substring(pos)}',
+        selection: TextSelection.collapsed(offset: pos + 1),
+      );
+    }
+
+    test('continues unordered list with -', () {
+      final ctrl = LdMarkdownEditingController(text: '- item');
+      addTearDown(ctrl.dispose);
+      ctrl.selection = const TextSelection.collapsed(offset: 6);
+
+      insertNewlineAtCursor(ctrl);
+
+      expect(ctrl.text, '- item\n- ');
+    });
+
+    test('removes empty unordered list item', () {
+      final ctrl = LdMarkdownEditingController(text: '- ');
+      addTearDown(ctrl.dispose);
+      ctrl.selection = const TextSelection.collapsed(offset: 2);
+
+      insertNewlineAtCursor(ctrl);
+
+      expect(ctrl.text, '');
+    });
+
+    test('continues unordered list with *', () {
+      final ctrl = LdMarkdownEditingController(text: '* item');
+      addTearDown(ctrl.dispose);
+      ctrl.selection = const TextSelection.collapsed(offset: 6);
+
+      insertNewlineAtCursor(ctrl);
+
+      expect(ctrl.text, '* item\n* ');
+    });
+
+    test('continues ordered list', () {
+      final ctrl = LdMarkdownEditingController(text: '1. item');
+      addTearDown(ctrl.dispose);
+      ctrl.selection = const TextSelection.collapsed(offset: 7);
+
+      insertNewlineAtCursor(ctrl);
+
+      expect(ctrl.text, '1. item\n2. ');
+    });
+
+    test('removes empty ordered list item', () {
+      final ctrl = LdMarkdownEditingController(text: '1. ');
+      addTearDown(ctrl.dispose);
+      ctrl.selection = const TextSelection.collapsed(offset: 3);
+
+      insertNewlineAtCursor(ctrl);
+
+      expect(ctrl.text, '');
+    });
+
+    test('continues blockquote', () {
+      final ctrl = LdMarkdownEditingController(text: '> quote');
+      addTearDown(ctrl.dispose);
+      ctrl.selection = const TextSelection.collapsed(offset: 7);
+
+      insertNewlineAtCursor(ctrl);
+
+      expect(ctrl.text, '> quote\n> ');
+    });
+
+    test('removes empty blockquote', () {
+      final ctrl = LdMarkdownEditingController(text: '> ');
+      addTearDown(ctrl.dispose);
+      ctrl.selection = const TextSelection.collapsed(offset: 2);
+
+      insertNewlineAtCursor(ctrl);
+
+      expect(ctrl.text, '');
+    });
+
+    test('does not continue horizontal rule', () {
+      final ctrl = LdMarkdownEditingController(text: '---');
+      addTearDown(ctrl.dispose);
+      ctrl.selection = const TextSelection.collapsed(offset: 3);
+
+      insertNewlineAtCursor(ctrl);
+
+      expect(ctrl.text, '---\n');
+    });
+
+    test('continues indented list item', () {
+      final ctrl = LdMarkdownEditingController(text: '  - item');
+      addTearDown(ctrl.dispose);
+      ctrl.selection = const TextSelection.collapsed(offset: 8);
+
+      insertNewlineAtCursor(ctrl);
+
+      expect(ctrl.text, '  - item\n  - ');
+    });
+
+    test('non-list newline is not modified', () {
+      final ctrl = LdMarkdownEditingController(text: 'hello world');
+      addTearDown(ctrl.dispose);
+      ctrl.selection = const TextSelection.collapsed(offset: 11);
+
+      insertNewlineAtCursor(ctrl);
+
+      expect(ctrl.text, 'hello world\n');
+    });
+  });
 }
 
 /// Recursively flattens a [TextSpan] tree into a plain string.

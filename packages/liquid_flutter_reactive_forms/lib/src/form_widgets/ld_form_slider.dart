@@ -47,6 +47,8 @@ class LdFormSlider extends StatelessWidget {
           step: step,
           onChanged: (value) {
             state.didChange(value);
+          },
+          onChangeEnd: () {
             scope?.onFieldCommitted(formKey);
           },
         ),

@@ -31,7 +31,104 @@ class LdMarkdownEditingController extends TextEditingController {
   /// (safe because the result is used in [Text.rich], not [EditableText]).
   bool isEditing = true;
 
+  bool _transforming = false;
+
   final List<GestureRecognizer> _activeRecognizers = [];
+
+  /// Intercepts newline insertions from the engine/IME (Flutter 3.44+)
+  /// to implement smart list/blockquote continuation.
+  ///
+  /// In modern Flutter the engine inserts the newline directly into the
+  /// controller via the TextInputConnection and calls
+  /// `performAction(TextInputAction.newline)` — the key event system
+  /// (`FocusNode.onKeyEvent`) is NOT involved for Enter.  We must intercept
+  /// at the value setter level instead.
+  @override
+  set value(TextEditingValue newValue) {
+    if (_transforming) {
+      super.value = newValue;
+      return;
+    }
+
+    final oldValue = value;
+    super.value = newValue;
+
+    _handleNewlineInserted(oldValue, newValue);
+  }
+
+  void _handleNewlineInserted(TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text.length != oldValue.text.length + 1) return;
+    if (oldValue.selection.baseOffset < 0) return;
+
+    final cursorPos = oldValue.selection.baseOffset;
+    if (cursorPos >= newValue.text.length) return;
+    if (newValue.text[cursorPos] != '\n') return;
+
+    final lineStart = oldValue.text.lastIndexOf('\n', cursorPos - 1) + 1;
+    final line = oldValue.text.substring(lineStart, cursorPos);
+
+    if (RegExp(r'^(\*{3,}|-{3,}|_{3,})\s*$').hasMatch(line)) return;
+
+    _transforming = true;
+
+    final orderedMatch = RegExp(r'^(\s*)(\d+)\.\s').firstMatch(line);
+    if (orderedMatch != null) {
+      final indent = orderedMatch.group(1)!;
+      final num = int.parse(orderedMatch.group(2)!);
+      if (line.trim() == '${orderedMatch.group(2)}.') {
+        value = TextEditingValue(
+          text: oldValue.text.substring(0, lineStart) + oldValue.text.substring(cursorPos),
+          selection: TextSelection.collapsed(offset: lineStart),
+        );
+      } else {
+        final continuation = '$indent${num + 1}. ';
+        value = TextEditingValue(
+          text: newValue.text.substring(0, cursorPos + 1) + continuation + newValue.text.substring(cursorPos + 1),
+          selection: TextSelection.collapsed(offset: cursorPos + 1 + continuation.length),
+        );
+      }
+      _transforming = false;
+      return;
+    }
+
+    final unorderedMatch = RegExp(r'^(\s*)([-*+]) ').firstMatch(line);
+    if (unorderedMatch != null) {
+      final indent = unorderedMatch.group(1)!;
+      final marker = unorderedMatch.group(2)!;
+      if (line.trim() == marker) {
+        value = TextEditingValue(
+          text: oldValue.text.substring(0, lineStart) + oldValue.text.substring(cursorPos),
+          selection: TextSelection.collapsed(offset: lineStart),
+        );
+      } else {
+        final continuation = '$indent$marker ';
+        value = TextEditingValue(
+          text: newValue.text.substring(0, cursorPos + 1) + continuation + newValue.text.substring(cursorPos + 1),
+          selection: TextSelection.collapsed(offset: cursorPos + 1 + continuation.length),
+        );
+      }
+      _transforming = false;
+      return;
+    }
+
+    if (line.startsWith('> ')) {
+      if (line.trim() == '>') {
+        value = TextEditingValue(
+          text: oldValue.text.substring(0, lineStart) + oldValue.text.substring(cursorPos),
+          selection: TextSelection.collapsed(offset: lineStart),
+        );
+      } else {
+        value = TextEditingValue(
+          text: '${newValue.text.substring(0, cursorPos + 1)}> ${newValue.text.substring(cursorPos + 1)}',
+          selection: TextSelection.collapsed(offset: cursorPos + 1 + 2),
+        );
+      }
+      _transforming = false;
+      return;
+    }
+
+    _transforming = false;
+  }
 
   @override
   void dispose() {

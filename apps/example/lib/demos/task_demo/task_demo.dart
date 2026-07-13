@@ -204,14 +204,13 @@ class TaskDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LdMonkeyDetailPage<Task, int>.scrollable(
-      primaryAppBarConfig: LdAppBarConfig(debugName: 'Detail App Bar Task', title: Text('Task')),
-      secondaryAppBarConfig: LdAppBarConfig(
-        debugName: 'Detail Secondary App Bar Task',
-        positionMode: LdAppBarPositionMode.top,
-        borderMode: LdAppBarBorderMode.visible,
+    return Provider.value(
+      value: LdMonkeyDetailAppbarConfig(
+        appbarConfig: LdAppBarConfig(debugName: 'Detail App Bar Task', title: Text('Task')),
       ),
-      buildDetail: (context, item) => TaskDetail(task: item),
+      child: LdMonkeyScrollableDetailPage<Task, int>(
+        builder: (context, items) => items.map((item) => TaskDetail(task: item)).toList(),
+      ),
     );
   }
 }
@@ -227,23 +226,27 @@ class TaskMasterPage extends StatelessWidget {
       config: LdListConfig<Task, int>(
         loadingBuilder: (context, position, totalItems) => const LdListItemLoading(hasLeading: true, hasSubtitle: true),
       ),
-      child: LdMonkeyMasterPage<Task, int>(
-        primaryAppBarConfig: LdAppBarConfig(debugName: "Master App Bar Tasks", title: Text("Tasks")),
-        buildItem: (context, item) => LdListItem(
-          title: Text(
-            item.value!.task,
-            style: TextStyle(decoration: item.value!.done ? TextDecoration.lineThrough : TextDecoration.none),
-          ),
-          subtitle: Text(
-            "Due ${Jiffy.parseFromDateTime(item.value!.due).fromNow()}",
-            style: TextStyle(
-              color: switch (item.value!.due.isBefore(DateTime.now())) {
-                true => LdTheme.of(context).errorColor,
-                _ => null,
-              },
+      child: Provider.value(
+        value: LdMonkeyMasterAppbarConfig(
+          appbarConfig: LdAppBarConfig(debugName: "Master App Bar Tasks", title: Text("Tasks")),
+        ),
+        child: LdMonkeyMasterPage<Task, int>(
+          buildItem: (context, item) => LdListItem(
+            title: Text(
+              item.value!.task,
+              style: TextStyle(decoration: item.value!.done ? TextDecoration.lineThrough : TextDecoration.none),
             ),
+            subtitle: Text(
+              "Due ${Jiffy.parseFromDateTime(item.value!.due).fromNow()}",
+              style: TextStyle(
+                color: switch (item.value!.due.isBefore(DateTime.now())) {
+                  true => LdTheme.of(context).errorColor,
+                  _ => null,
+                },
+              ),
+            ),
+            leading: LdAvatar(child: LdEmoji(item.value!.emoji)),
           ),
-          leading: LdAvatar(child: LdEmoji(item.value!.emoji)),
         ),
       ),
     );

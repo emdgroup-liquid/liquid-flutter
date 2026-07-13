@@ -12,6 +12,27 @@ class LdAvatarConfig {
   final bool? circular;
 
   final LdSize? size;
+
+  LdAvatarConfig copyWith({
+    LdColor? color,
+    bool? circular,
+    LdSize? size,
+  }) {
+    return LdAvatarConfig(
+      color: color ?? this.color,
+      circular: circular ?? this.circular,
+      size: size ?? this.size,
+    );
+  }
+
+  LdAvatarConfig merge(LdAvatarConfig? other) {
+    if (other == null) return this;
+    return LdAvatarConfig(
+      color: other.color ?? this.color,
+      circular: other.circular ?? this.circular,
+      size: other.size ?? this.size,
+    );
+  }
 }
 
 class LdAvatarConfigProvider extends StatelessWidget {

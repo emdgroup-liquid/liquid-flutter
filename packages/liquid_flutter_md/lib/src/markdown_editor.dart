@@ -393,8 +393,9 @@ class _LdMarkdownEditorState extends State<LdMarkdownEditor> {
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context);
 
-    final focused = _focusNode.hasFocus;
+final focused = _focusNode.hasFocus;
     _controller.isEditing = focused;
+    final showRaw = focused || _controller.text.isEmpty;
 
     // The TextField must always stay mounted so the FocusNode remains attached.
     // When blurred we show a Text.rich driven by the same controller (with
@@ -402,20 +403,21 @@ class _LdMarkdownEditorState extends State<LdMarkdownEditor> {
     // tap overlay to re-focus. Text.rich has no strut so WidgetSpan heights
     // work correctly.
     return Stack(
-      children: [
-        // Always mounted — keeps FocusNode attached.
+children: [
+        // Show the raw TextField when focused or when empty (so the hint
+        // placeholder is always visible and the user can tap to focus).
         Offstage(
-          offstage: !focused,
+          offstage: !showRaw,
           child: TapRegion(onTapOutside: (_) => _focusNode.unfocus(), child: _buildTextField(context, theme)),
         ),
 
-        // Shown when blurred: Text.rich from the same controller.
+        // Shown when blurred and non-empty: Text.rich from the same controller.
         // Match TextField's text metrics exactly:
         //  - same style (including letterSpacing:0 / wordSpacing:0 to match
         //    EditableText's internal behaviour and prevent layout shift)
         //  - strutStyle derived from that style (same as TextField does internally)
         //  - textHeightBehavior matching EditableText's default
-        if ((!focused || widget.readOnly) && _controller.text.isNotEmpty) ...[
+        if (!focused && _controller.text.isNotEmpty) ...[
           Text.rich(
             _controller.buildTextSpan(
               context: context,

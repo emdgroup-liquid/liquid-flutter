@@ -79,7 +79,7 @@ Future<Offset> _computeTranslation(ui.Image image, double widgetSize) async {
     for (int x = 0; x < w; x++) {
       final int idx = (y * w + x) * 4;
       final double alpha = pixels[idx + 3] / 255.0;
-      final double weight = sqrt(alpha);
+      final double weight = alpha;
       wx += x * weight;
       wy += y * weight;
       total += weight;
@@ -105,10 +105,13 @@ Future<Offset> _computeTranslation(ui.Image image, double widgetSize) async {
 ///
 /// Priority order:
 ///   1. `style.fontSize` if explicitly set
-///   2. `DefaultTextStyle.of(context).style.fontSize`
-///   3. Fallback: 24.0
+///   2. `IconTheme.of(context).size` — set by [LdAvatar] and similar wrappers
+///   3. `DefaultTextStyle.of(context).style.fontSize`
+///   4. Fallback: 24.0
 double _resolveSize(BuildContext context, TextStyle? style) {
   if (style?.fontSize != null) return style!.fontSize!;
+  final iconSize = IconTheme.of(context).size;
+  if (iconSize != null) return iconSize;
   final inherited = DefaultTextStyle.of(context).style.fontSize;
   return inherited ?? 24.0;
 }
@@ -163,7 +166,8 @@ class _LdEmojiState extends State<LdEmoji> {
   @override
   void didUpdateWidget(LdEmoji old) {
     super.didUpdateWidget(old);
-    if (old.emoji != widget.emoji || old.style?.fontSize != widget.style?.fontSize) {
+    if (old.emoji != widget.emoji ||
+        old.style?.fontSize != widget.style?.fontSize) {
       _scheduleComputation();
     }
   }
@@ -191,22 +195,19 @@ class _LdEmojiState extends State<LdEmoji> {
     final double size = _resolvedSize ?? _resolveSize(context, widget.style);
 
     return SizedBox(
-      width: size,
-      height: size,
-      child: ClipRect(
+      width: size * 1.5,
+      height: size * 1.5,
+      child: Center(
         child: Transform.translate(
-          offset: _offset,
-          child: Center(
-            child: Text(
-              widget.emoji,
-              style: TextStyle(
-                fontSize: size,
-                height: 1,
-                // No fontFamily override — use the platform emoji font.
-              ),
-              maxLines: 1,
-              textAlign: TextAlign.center,
+          offset: Offset.zero,
+          child: Text(
+            widget.emoji,
+            style: TextStyle(
+              fontSize: size,
+              height: 1,
             ),
+            maxLines: 1,
+            textAlign: TextAlign.center,
           ),
         ),
       ),

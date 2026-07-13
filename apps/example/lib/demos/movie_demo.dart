@@ -164,58 +164,56 @@ class MovieDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (movie.value == null) {
-      return LdCard(child: Center(child: LdLoader()));
-    }
+    return LdForm<MovieDemo, int, MovieDemo, MovieDemo, MovieDemo>(
+      mode: LdFormMode.edit,
 
-    final movieValue = movie.value!;
+      item: movie,
+      itemToDetail: (context, item) => Future.value(item!),
+      saveMode: LdReactiveFormSaveMode.adaptive,
+      detailToFormValues: (detail) => {
+        'title': detail.title,
+        'genre': {detail.genre},
+        'rating': detail.rating.toDouble(),
+      },
+      formToUpdatePayload: (form, detail) {
+        final genres = form.control('genre').value as Set<String>;
+        return detail.copyWith(
+          title: form.control('title').value as String,
+          genre: genres.isEmpty ? detail.genre : genres.first,
+          rating: (form.control('rating').value as double).round(),
+        );
+      },
 
-    return LdAutoSpace(
-      children: [
-        LdForm<MovieDemo, int, MovieDemo, MovieDemo, MovieDemo>(
-          mode: LdFormMode.edit,
-          item: movie,
-          itemToDetail: (context, item) => Future.value(item!),
-          saveMode: LdReactiveFormSaveMode.adaptive,
-          detailToFormValues: (detail) => {
-            'title': detail.title,
-            'genre': {detail.genre},
-            'rating': detail.rating.toDouble(),
-          },
-          formToUpdatePayload: (form, detail) {
-            final genres = form.control('genre').value as Set<String>;
-            return detail.copyWith(
-              title: form.control('title').value as String,
-              genre: genres.isEmpty ? detail.genre : genres.first,
-              rating: (form.control('rating').value as double).round(),
-            );
-          },
+      formItems: [
+        LdReactiveFormItem<String>(key: 'title', validators: [Validators.required]),
+        LdReactiveFormItem<Set<String>>(key: 'genre', validators: [Validators.required]),
+        LdReactiveFormItem<double>(key: 'rating', validators: [Validators.required]),
+      ],
+      child: Builder(
+        builder: (context) {
+          final genreItems = movieData
+              .map((movie) => movie.genre)
+              .toSet()
+              .map((genre) => LdSelectItem(value: genre, child: Text(genre)))
+              .toList();
 
-          formItems: [
-            LdReactiveFormItem<String>(key: 'title', validators: [Validators.required]),
-            LdReactiveFormItem<Set<String>>(key: 'genre', validators: [Validators.required]),
-            LdReactiveFormItem<double>(key: 'rating', validators: [Validators.required]),
-          ],
-          child: Builder(
-            builder: (context) {
-              final genreItems = movieData
-                  .map((movie) => movie.genre)
-                  .toSet()
-                  .map((genre) => LdSelectItem(value: genre, child: Text(genre)))
-                  .toList();
-
-              return LdAutoSpace(
+          return Provider.value(
+            value: LdMonkeyDetailAppbarConfig(appbarConfig: LdAppBarConfig(title: Text(movie.value!.title))),
+            child: LdMonkeyDetailAppBars<MovieDemo, int>(
+              child: LdScaffoldBody(
                 children: [
                   LdFormInput<String>(formKey: 'title', label: 'Title', hint: 'Movie title'),
                   LdFormChoose<String>(formKey: 'genre', label: 'Genre', items: genreItems),
                   LdFormSlider(formKey: 'rating', label: 'Rating', min: 1, max: 5),
+                  LdText.p('Last updated: ${Jiffy.parseFromDateTime(movie.value!.lastUpdate).fromNow()}'),
+
+                  Row(children: [LdFormSubmitButton(), LdFormResetButton()]).spaceS(),
                 ],
-              );
-            },
-          ),
-        ),
-        LdText.p('Last updated: ${Jiffy.parseFromDateTime(movieValue.lastUpdate).fromNow()}'),
-      ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -263,13 +261,13 @@ class MovieDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LdMonkeyDetailPage<MovieDemo, int>.scrollable(
-      primaryAppBarConfig: LdAppBarConfig(title: Text("Movie"), debugName: "MovieDetailPage"),
-      secondaryAppBarConfig: LdAppBarConfig(
-        positionMode: LdAppBarPositionMode.top,
-        borderMode: LdAppBarBorderMode.visible,
+    return LdScaffold(
+      body: LdMonkeyViewingBuilder<MovieDemo, int>(
+        builder: (context, items) {
+          final movie = items.first;
+          return MovieDetail(movie: movie);
+        },
       ),
-      buildDetail: (context, item) => MovieDetail(movie: item),
     );
   }
 }
@@ -279,27 +277,30 @@ class MovieMasterPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LdMonkeyMasterPage<MovieDemo, int>(
-      filterBarConfig: [
-        LdFilterChipConfig.range(filterName: 'rating'),
-        LdFilterChipConfig.anyOf(
-          filterName: 'genre',
-          groupLabel: (context) => 'Genre',
-          presentation: LdFilterChipChoicePresentation.inline,
-          optionChild: (context, genre) => Text(genre as String),
-        ),
-      ],
-      primaryAppBarConfig: LdAppBarConfig(title: LdText.h('Movies')),
-      buildItem: (context, item) => LdListItem(
-        title: Text(item.value!.title),
-        subtitle: Text(item.value!.genre),
-        trailing: LdTag(
-          color: switch (item.value!.rating) {
-            1 => LdTheme.of(context).error,
-            2 || 3 => LdTheme.of(context).warning,
-            _ => LdTheme.of(context).success,
-          },
-          child: Row(children: [Text("${item.value!.rating}"), Icon(LucideIcons.star)]).spaceXS(),
+    return Provider.value(
+      value: LdMonkeyMasterAppbarConfig(appbarConfig: LdAppBarConfig(title: LdText.h('Movies'))),
+      child: LdMonkeyMasterPage<MovieDemo, int>(
+        filterBarConfig: [
+          LdFilterChipConfig.range(filterName: 'rating'),
+          LdFilterChipConfig.anyOf(
+            filterName: 'genre',
+            groupLabel: (context) => 'Genre',
+            presentation: LdFilterChipChoicePresentation.inline,
+            optionChild: (context, genre) => Text(genre as String),
+          ),
+        ],
+
+        buildItem: (context, item) => LdListItem(
+          title: Text(item.value!.title),
+          subtitle: Text(item.value!.genre),
+          trailing: LdTag(
+            color: switch (item.value!.rating) {
+              1 => LdTheme.of(context).error,
+              2 || 3 => LdTheme.of(context).warning,
+              _ => LdTheme.of(context).success,
+            },
+            child: Row(children: [Text("${item.value!.rating}"), Icon(LucideIcons.star)]).spaceXS(),
+          ),
         ),
       ),
     );

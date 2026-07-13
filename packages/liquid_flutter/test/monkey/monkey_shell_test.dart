@@ -34,16 +34,15 @@ void main() {
             sortOptionsBuilder: (_) async => [],
             actions: const [],
             masterPage: const SizedBox(),
-            detailPage: LdMonkeyDetailPage<TestItem, int>(
-              body: LdMonkeyStackDetailView<TestItem, int>(
+            detailPage: LdMonkeyDetailAppBars<TestItem, int>(
+              child: LdMonkeyStackDetailView<TestItem, int>(
                 buildDetail: (context, item) => Text(item.value.toString()),
               ),
             ),
           ),
         );
 
-        
-await tester.pumpWidget(
+        await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp.router(
               localizationsDelegates: const [
@@ -55,7 +54,9 @@ await tester.pumpWidget(
         );
 
         // Use bounded pumps to avoid timeout from continuous list-refresh scheduling.
-        for (var i = 0; i < 10; i++) { await tester.pump(const Duration(milliseconds: 100)); }
+        for (var i = 0; i < 10; i++) {
+          await tester.pump(const Duration(milliseconds: 100));
+        }
         expect(modelCreated, isTrue);
       });
 
@@ -78,8 +79,8 @@ await tester.pumpWidget(
             sortOptionsBuilder: (_) async => [],
             actions: const [],
             masterPage: const SizedBox(),
-            detailPage: LdMonkeyDetailPage<TestItem, int>(
-              body: LdMonkeyStackDetailView<TestItem, int>(
+            detailPage: LdMonkeyDetailAppBars<TestItem, int>(
+              child: LdMonkeyStackDetailView<TestItem, int>(
                 buildDetail: (context, item) => Text(item.value.toString()),
               ),
             ),
@@ -129,8 +130,8 @@ await tester.pumpWidget(
             sortOptionsBuilder: (_) async => [],
             actions: const [],
             masterPage: const SizedBox(),
-            detailPage: LdMonkeyDetailPage<TestItem, int>(
-              body: LdMonkeyStackDetailView<TestItem, int>(
+            detailPage: LdMonkeyDetailAppBars<TestItem, int>(
+              child: LdMonkeyStackDetailView<TestItem, int>(
                 buildDetail: (context, item) => Text(item.value.toString()),
               ),
             ),
@@ -176,8 +177,8 @@ await tester.pumpWidget(
               filtersBuilder: (_) async => [],
               sortOptionsBuilder: (_) async => [],
               actions: const [],
-              detailPage: LdMonkeyDetailPage<TestItem, int>(
-                body: LdMonkeyStackDetailView<TestItem, int>(buildDetail: (context, item) {
+              detailPage: LdMonkeyDetailAppBars<TestItem, int>(
+                child: LdMonkeyStackDetailView<TestItem, int>(buildDetail: (context, item) {
                   return Text(item.value.toString());
                 }),
               ),
@@ -236,8 +237,8 @@ await tester.pumpWidget(
             sortOptionsBuilder: (_) async => [],
             actions: const [],
             masterPage: const SizedBox(),
-            detailPage: LdMonkeyDetailPage<TestItem, int>(
-              body: LdMonkeyStackDetailView<TestItem, int>(
+            detailPage: LdMonkeyDetailAppBars<TestItem, int>(
+              child: LdMonkeyStackDetailView<TestItem, int>(
                 buildDetail: (context, item) => Text(item.value.toString()),
               ),
             ),

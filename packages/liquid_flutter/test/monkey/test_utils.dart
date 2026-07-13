@@ -125,20 +125,17 @@ class _TestRouterControllerDelegate<T extends Identifiable<IdType>, IdType>
   _TestRouterControllerDelegate(this._delegate);
 
   @override
-  void updateFilter(BuildContext context, LdFilterOption<T, IdType> filter) =>
-      _delegate.updateFilter(context, filter);
+  void updateFilter(BuildContext context, LdFilterOption<T, IdType> filter) => _delegate.updateFilter(context, filter);
 
   @override
   void updateSortOptions(BuildContext context, List<LdSortOption<T, IdType>> sortOptions) =>
       _delegate.updateSortOptions(context, sortOptions);
 
   @override
-  void updateSelection(BuildContext context, Set<IdType> selection) =>
-      _delegate.updateSelection(context, selection);
+  void updateSelection(BuildContext context, Set<IdType> selection) => _delegate.updateSelection(context, selection);
 
   @override
-  void updateViewing(BuildContext context, Set<IdType> viewingItems) =>
-      _delegate.updateViewing(context, viewingItems);
+  void updateViewing(BuildContext context, Set<IdType> viewingItems) => _delegate.updateViewing(context, viewingItems);
 
   @override
   void updateShowSelectionControls(BuildContext context, bool showSelectionControls) =>
@@ -169,8 +166,7 @@ class TestSortAndFilterState<T extends Identifiable<IdType>, IdType> extends Cha
 
   /// Returns a non-Listenable delegate suitable for
   /// `Provider<LdMonkeyRouterController>.value(value: ...)`.
-  LdMonkeyRouterController<T, IdType> get controllerDelegate =>
-      _TestRouterControllerDelegate<T, IdType>(this);
+  LdMonkeyRouterController<T, IdType> get controllerDelegate => _TestRouterControllerDelegate<T, IdType>(this);
 
   LdMonkeySortAndFilterState<T, IdType> get state => LdMonkeySortAndFilterState<T, IdType>(
         filters: _filters,
@@ -184,8 +180,7 @@ class TestSortAndFilterState<T extends Identifiable<IdType>, IdType> extends Cha
       );
 
   /// Direct access to current filter map by name (for test assertions).
-  Map<String, LdFilterOption<T, IdType>> get filtersMap =>
-      {for (final f in _filters) f.name: f};
+  Map<String, LdFilterOption<T, IdType>> get filtersMap => {for (final f in _filters) f.name: f};
 
   @override
   void updateFilter(BuildContext context, LdFilterOption<T, IdType> filter) {
@@ -317,8 +312,7 @@ Widget wrapMonkeyFilterTestContext<T extends Identifiable<IdType>, IdType>({
   if (routeConfig != null) {
     config = routeConfig;
   } else if (T == TestItem && IdType == int) {
-    config = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'item')
-        as LdMonkeyRouteConfig<T, IdType>;
+    config = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'item') as LdMonkeyRouteConfig<T, IdType>;
   } else {
     throw ArgumentError(
       'wrapMonkeyFilterTestContext requires routeConfig for $T/$IdType',
@@ -532,7 +526,7 @@ Widget wrapMonkeyMasterPage<T extends Identifiable<IdType>, IdType>({
   );
 }
 
-/// Wraps a widget with providers required by [LdMonkeyDetailPage] and [LdMonkeyAppBar].
+/// Wraps a widget with providers required by [LdMonkeyDetailAppBars] and [LdMonkeyAppBar].
 Widget wrapMonkeyDetailPage<T extends Identifiable<IdType>, IdType>({
   required Widget child,
   required LdListController<T, IdType> repository,

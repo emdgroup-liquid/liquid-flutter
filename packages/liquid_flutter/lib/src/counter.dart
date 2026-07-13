@@ -2,9 +2,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-part 'counter.variants.g.dart';
-
-const _counterTextHeightBehavior = TextHeightBehavior(applyHeightToFirstAscent: false);
+const _counterTextHeightBehavior =
+    TextHeightBehavior(applyHeightToFirstAscent: false);
 
 ({double baseline, double lineHeight}) _counterTextMetrics(TextStyle style) {
   final painter = TextPainter(
@@ -19,38 +18,33 @@ const _counterTextHeightBehavior = TextHeightBehavior(applyHeightToFirstAscent: 
   );
 }
 
-@Variants([
-  Variant('s', defaults: {'size': 'LdSize.s'}),
-  Variant('l', defaults: {'size': 'LdSize.l'}),
-  Variant('xs', defaults: {'size': 'LdSize.xs'}),
-])
-class _LdCounterWidget extends StatefulWidget {
+class LdCounter extends StatefulWidget {
   final double value;
 
-  final LdSize size;
-  final LdTextType type;
   final int precision;
+  final TextStyle? style;
   final int? minDigits;
   final bool inline;
 
-  const _LdCounterWidget({
+  const LdCounter({
+    super.key,
     required this.value,
     this.precision = 0,
-    this.size = LdSize.m,
-    this.type = LdTextType.headline,
+    this.style,
     this.minDigits,
     this.inline = false,
   });
 
   @override
-  State<_LdCounterWidget> createState() => _LdCounterState();
+  State<LdCounter> createState() => _LdCounterState();
 }
 
-class _LdCounterState extends State<_LdCounterWidget> {
+class _LdCounterState extends State<LdCounter> {
   final List<(bool, String)> _digits = [];
   @override
   void initState() {
     super.initState();
+
     _generateDigits();
   }
 
@@ -63,6 +57,13 @@ class _LdCounterState extends State<_LdCounterWidget> {
       _generateDigits();
       setState(() {});
     }
+  }
+
+  TextStyle _getStyle() {
+    if (widget.style != null) {
+      return widget.style!;
+    }
+    return DefaultTextStyle.of(context).style;
   }
 
   String _formatValue() {
@@ -112,15 +113,16 @@ class _LdCounterState extends State<_LdCounterWidget> {
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: widget.inline ? CrossAxisAlignment.baseline : CrossAxisAlignment.center,
+      crossAxisAlignment: widget.inline
+          ? CrossAxisAlignment.baseline
+          : CrossAxisAlignment.center,
       textBaseline: TextBaseline.alphabetic,
       children: [
         ..._digits.mapIndexed((index, e) {
           final digit = _LdCounterDigit(
             digit: e.$2,
-            size: widget.size,
-            type: widget.type,
             inline: widget.inline,
+            style: _getStyle(),
           );
 
           if (widget.inline) {
@@ -149,15 +151,13 @@ class _LdCounterState extends State<_LdCounterWidget> {
 
 class _LdCounterDigit extends StatefulWidget {
   final String digit;
-  final LdSize size;
-  final LdTextType type;
+  final TextStyle style;
   final bool inline;
 
   const _LdCounterDigit({
     required this.digit,
-    required this.size,
-    required this.type,
     this.inline = false,
+    required this.style,
   });
 
   @override
@@ -167,7 +167,20 @@ class _LdCounterDigit extends StatefulWidget {
 class _LdCounterDigitState extends State<_LdCounterDigit> {
   List<double> _textWidths = [];
 
-  static const chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '-'];
+  static const chars = [
+    '0',
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    '.',
+    '-'
+  ];
 
   double calculateTextWidth(String text, TextStyle style) {
     final TextPainter textPainter = TextPainter(
@@ -181,7 +194,7 @@ class _LdCounterDigitState extends State<_LdCounterDigit> {
   }
 
   double _digitHeight(LdTheme theme) {
-    final style = ldBuildTextStyle(theme, widget.type, widget.size);
+    final style = DefaultTextStyle.of(context).style;
     return _counterTextMetrics(style).lineHeight;
   }
 
@@ -193,36 +206,32 @@ class _LdCounterDigitState extends State<_LdCounterDigit> {
   }
 
   void _generateTextWidths() {
-    final theme = LdTheme.of(context);
-    final style = ldBuildTextStyle(theme, widget.type, widget.size);
-    _textWidths = chars.map((e) => calculateTextWidth(e, style)).toList();
+    _textWidths =
+        chars.map((e) => calculateTextWidth(e, widget.style)).toList();
+    setState(() {});
   }
 
   @override
   void didUpdateWidget(oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.size != widget.size || oldWidget.type != widget.type) {
+    if (oldWidget.style != widget.style) {
       _generateTextWidths();
     }
   }
 
   Widget _buildDigitText(String text) {
-    return LdText(
+    return Text(
       text,
-      type: widget.type,
-      size: widget.size,
+      style: widget.style,
     );
   }
 
   Widget _buildDigitCell(String text, {required double height}) {
     return SizedBox(
-      height: height,
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: _buildDigitText(text),
-      ),
-    );
+        height: height,
+        child: Align(
+            alignment: Alignment.topCenter, child: _buildDigitText(text)));
   }
 
   List<Widget> _buildDigitColumn(double height) {
@@ -315,8 +324,10 @@ class _LdCounterDigitState extends State<_LdCounterDigit> {
     final offset = chars.indexOf(widget.digit);
     final theme = LdTheme.of(context);
     final height = _digitHeight(theme);
-    final style = ldBuildTextStyle(theme, widget.type, widget.size);
-    final metrics = _counterTextMetrics(style);
+    final metrics = _counterTextMetrics(widget.style);
+    if (_textWidths.length <= offset) {
+      return const SizedBox.shrink();
+    }
     final width = _textWidths[offset];
 
     if (widget.inline) {
@@ -419,44 +430,23 @@ class LdCounterText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final LdMute? ldMute = context.findAncestorWidgetOfExactType<LdMute>();
-    final theme = LdTheme.of(context, listen: true);
+    final style = DefaultTextStyle.of(context).style;
 
-    final style = ldBuildTextStyle(
-      theme,
-      type,
-      size,
-      color: color ?? (ldMute != null ? theme.textMuted : null),
-      lineHeight: lineHeight,
-      fontWeight: fontWeight,
-    );
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.baseline,
-      textBaseline: TextBaseline.alphabetic,
-      children: [
-        if (before.isNotEmpty)
-          Text(
-            before,
-            style: style,
-            textHeightBehavior: _counterTextHeightBehavior,
+    return RichText(
+      text: TextSpan(
+        children: [
+          if (before.isNotEmpty) TextSpan(text: before, style: style),
+          WidgetSpan(
+            child: LdCounter(
+              value: value,
+              precision: precision,
+              minDigits: minDigits,
+              inline: true,
+            ),
           ),
-        LdCounter(
-          value: value,
-          type: type,
-          size: size,
-          precision: precision,
-          minDigits: minDigits,
-          inline: true,
-        ),
-        if (after.isNotEmpty)
-          Text(
-            after,
-            style: style,
-            textHeightBehavior: _counterTextHeightBehavior,
-          ),
-      ],
+          if (after.isNotEmpty) TextSpan(text: after, style: style),
+        ],
+      ),
     );
   }
 }

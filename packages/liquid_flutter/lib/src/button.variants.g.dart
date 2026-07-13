@@ -42,6 +42,57 @@ class LdButtonConfig {
   final LdSize? size;
 
   final bool? disableSqueeze;
+
+  LdButtonConfig copyWith({
+    bool? autoLoading,
+    BorderRadius? borderRadius,
+    LdColor? color,
+    bool? active,
+    double? width,
+    FutureOr<void> Function(bool)? onHover,
+    bool? disabled,
+    FocusNode? focusNode,
+    MainAxisAlignment? alignment,
+    bool? circular,
+    LdButtonMode? mode,
+    LdSize? size,
+    bool? disableSqueeze,
+  }) {
+    return LdButtonConfig(
+      autoLoading: autoLoading ?? this.autoLoading,
+      borderRadius: borderRadius ?? this.borderRadius,
+      color: color ?? this.color,
+      active: active ?? this.active,
+      width: width ?? this.width,
+      onHover: onHover ?? this.onHover,
+      disabled: disabled ?? this.disabled,
+      focusNode: focusNode ?? this.focusNode,
+      alignment: alignment ?? this.alignment,
+      circular: circular ?? this.circular,
+      mode: mode ?? this.mode,
+      size: size ?? this.size,
+      disableSqueeze: disableSqueeze ?? this.disableSqueeze,
+    );
+  }
+
+  LdButtonConfig merge(LdButtonConfig? other) {
+    if (other == null) return this;
+    return LdButtonConfig(
+      autoLoading: other.autoLoading ?? this.autoLoading,
+      borderRadius: other.borderRadius ?? this.borderRadius,
+      color: other.color ?? this.color,
+      active: other.active ?? this.active,
+      width: other.width ?? this.width,
+      onHover: other.onHover ?? this.onHover,
+      disabled: other.disabled ?? this.disabled,
+      focusNode: other.focusNode ?? this.focusNode,
+      alignment: other.alignment ?? this.alignment,
+      circular: other.circular ?? this.circular,
+      mode: other.mode ?? this.mode,
+      size: other.size ?? this.size,
+      disableSqueeze: other.disableSqueeze ?? this.disableSqueeze,
+    );
+  }
 }
 
 class LdButtonConfigProvider extends StatelessWidget {

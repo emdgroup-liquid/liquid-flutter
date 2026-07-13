@@ -57,6 +57,71 @@ class LdListConfig<T extends Identifiable<IdType>, IdType> {
   final Widget Function(BuildContext)? separatorBuilder;
 
   final bool? shrinkWrap;
+
+  LdListConfig<T, IdType> copyWith({
+    Widget Function(BuildContext, LdPaginatorLoadedItem<T>, int)? itemBuilder,
+    LdPaginator<T, IdType>? paginator,
+    bool Function(T, T)? areEqual,
+    Widget Function(BuildContext, Future<void> Function(BuildContext))?
+        emptyBuilder,
+    Widget Function(BuildContext, Object?, void Function())? errorBuilder,
+    Widget? footer,
+    Widget Function(BuildContext, dynamic, List<LdPaginatorItem<T>>)?
+        groupHeaderBuilder,
+    dynamic Function(T)? groupingCriterion,
+    Widget? header,
+    Widget Function(BuildContext, int, int)? loadingBuilder,
+    EdgeInsets? padding,
+    ScrollPhysics? physics,
+    bool? primary,
+    LdRetryConfig? retryConfig,
+    ScrollController? scrollController,
+    Widget Function(BuildContext)? separatorBuilder,
+    bool? shrinkWrap,
+  }) {
+    return LdListConfig<T, IdType>(
+      itemBuilder: itemBuilder ?? this.itemBuilder,
+      paginator: paginator ?? this.paginator,
+      areEqual: areEqual ?? this.areEqual,
+      emptyBuilder: emptyBuilder ?? this.emptyBuilder,
+      errorBuilder: errorBuilder ?? this.errorBuilder,
+      footer: footer ?? this.footer,
+      groupHeaderBuilder: groupHeaderBuilder ?? this.groupHeaderBuilder,
+      groupingCriterion: groupingCriterion ?? this.groupingCriterion,
+      header: header ?? this.header,
+      loadingBuilder: loadingBuilder ?? this.loadingBuilder,
+      padding: padding ?? this.padding,
+      physics: physics ?? this.physics,
+      primary: primary ?? this.primary,
+      retryConfig: retryConfig ?? this.retryConfig,
+      scrollController: scrollController ?? this.scrollController,
+      separatorBuilder: separatorBuilder ?? this.separatorBuilder,
+      shrinkWrap: shrinkWrap ?? this.shrinkWrap,
+    );
+  }
+
+  LdListConfig<T, IdType> merge(LdListConfig<T, IdType>? other) {
+    if (other == null) return this;
+    return LdListConfig<T, IdType>(
+      itemBuilder: other.itemBuilder ?? this.itemBuilder,
+      paginator: other.paginator ?? this.paginator,
+      areEqual: other.areEqual ?? this.areEqual,
+      emptyBuilder: other.emptyBuilder ?? this.emptyBuilder,
+      errorBuilder: other.errorBuilder ?? this.errorBuilder,
+      footer: other.footer ?? this.footer,
+      groupHeaderBuilder: other.groupHeaderBuilder ?? this.groupHeaderBuilder,
+      groupingCriterion: other.groupingCriterion ?? this.groupingCriterion,
+      header: other.header ?? this.header,
+      loadingBuilder: other.loadingBuilder ?? this.loadingBuilder,
+      padding: other.padding ?? this.padding,
+      physics: other.physics ?? this.physics,
+      primary: other.primary ?? this.primary,
+      retryConfig: other.retryConfig ?? this.retryConfig,
+      scrollController: other.scrollController ?? this.scrollController,
+      separatorBuilder: other.separatorBuilder ?? this.separatorBuilder,
+      shrinkWrap: other.shrinkWrap ?? this.shrinkWrap,
+    );
+  }
 }
 
 class LdListConfigProvider<T extends Identifiable<IdType>, IdType>

@@ -737,6 +737,60 @@ class VariantBuilder implements Builder {
             ..defaultTo = null));
         }
       }));
+
+      // Generate copyWith method
+      builder.methods.add(Method((mb) {
+        mb.name = 'copyWith';
+        mb.returns = _configTypeReference(configClassName, typeParameters);
+
+        for (final param in contextConfigurableParams) {
+          mb.optionalParameters.add(Parameter((pb) => pb
+            ..name = param.name
+            ..named = true
+            ..required = false
+            ..type = refer(_makeNullableType(param.type.toString()))));
+        }
+
+        final namedArgs = <String, Expression>{};
+        for (final param in contextConfigurableParams) {
+          namedArgs[param.name] = refer(param.name)
+              .ifNullThen(refer('this').property(param.name));
+        }
+
+        mb.body = _configTypeReference(configClassName, typeParameters)
+            .newInstance(const [], namedArgs)
+            .returned
+            .statement;
+      }));
+
+      // Generate merge method
+      builder.methods.add(Method((mb) {
+        mb.name = 'merge';
+        mb.returns = _configTypeReference(configClassName, typeParameters);
+
+        mb.requiredParameters.add(Parameter((pb) => pb
+          ..name = 'other'
+          ..type = _configNullableTypeReference(configClassName, typeParameters)));
+
+        final bodyStatements = <Code>[];
+        bodyStatements.add(const Code('if (other == null) return this;'));
+
+        final namedArgs = <String, Expression>{};
+        for (final param in contextConfigurableParams) {
+          namedArgs[param.name] = refer('other')
+              .property(param.name)
+              .ifNullThen(refer('this').property(param.name));
+        }
+
+        bodyStatements.add(
+          _configTypeReference(configClassName, typeParameters)
+              .newInstance(const [], namedArgs)
+              .returned
+              .statement,
+        );
+
+        mb.body = Block.of(bodyStatements);
+      }));
     });
   }
 
@@ -874,6 +928,34 @@ class VariantBuilder implements Builder {
         mb.body = Block.of(bodyStatements);
       }));
     });
+  }
+
+  /// Builds a TypeReference for the config class, with type arguments if it has
+  /// type parameters (e.g. `LdListConfig<T, IdType>`).
+  TypeReference _configTypeReference(
+    String configClassName,
+    List<TypeReference> typeParameters,
+  ) {
+    if (typeParameters.isEmpty) {
+      return TypeReference((tr) => tr.symbol = configClassName);
+    }
+    return TypeReference((tr) {
+      tr.symbol = configClassName;
+      tr.types.addAll(typeParameters.map((tp) => refer(tp.symbol)));
+    });
+  }
+
+  /// Builds a nullable TypeReference for the config class, using a string-based
+  /// approach to ensure the `?` suffix is emitted correctly even with generic
+  /// type arguments.
+  Reference _configNullableTypeReference(
+    String configClassName,
+    List<TypeReference> typeParameters,
+  ) {
+    final typeArgs = typeParameters.isNotEmpty
+        ? '<${typeParameters.map((tp) => tp.symbol).join(', ')}>'
+        : '';
+    return refer('$configClassName$typeArgs?');
   }
 }
 

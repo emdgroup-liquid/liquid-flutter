@@ -203,6 +203,9 @@ class LdSlider extends StatefulWidget {
   /// Called when the value changes via user interaction (single mode only).
   final ValueChanged<double>? onChanged;
 
+  /// Called when a drag gesture ends (single mode only).
+  final VoidCallback? onChangeEnd;
+
   // ---- Range-mode fields -------------------------------------------------
 
   /// The current low value of the range (range mode only).
@@ -213,6 +216,9 @@ class LdSlider extends StatefulWidget {
 
   /// Called when the range changes via user interaction (range mode only).
   final void Function(double low, double high)? onRangeChanged;
+
+  /// Called when a drag gesture ends (range mode only).
+  final VoidCallback? onRangeChangeEnd;
 
   /// Whether the entire filled region between the two handles can be dragged
   /// as a unit, translating both values by the same delta while preserving
@@ -252,6 +258,7 @@ class LdSlider extends StatefulWidget {
     super.key,
     required double value,
     required ValueChanged<double> onChanged,
+    this.onChangeEnd,
     this.min = 0.0,
     this.max = 1.0,
     this.step = 0.0,
@@ -268,17 +275,19 @@ class LdSlider extends StatefulWidget {
         lowValue = null,
         highValue = null,
         onRangeChanged = null,
+        onRangeChangeEnd = null,
         allowRangeDrag = false;
 
   /// Creates a range slider with two independent handles.
   ///
   /// [lowValue] must be <= [highValue] in debug mode; in release mode the
   /// values are clamped gracefully.
-  const LdSlider.range({
+const LdSlider.range({
     super.key,
     required double lowValue,
     required double highValue,
     required void Function(double low, double high) onRangeChanged,
+    this.onRangeChangeEnd,
     bool allowRangeDrag = false,
     this.min = 0.0,
     this.max = 1.0,
@@ -291,6 +300,7 @@ class LdSlider extends StatefulWidget {
   })  : _isRange = true,
         value = null,
         onChanged = null,
+        onChangeEnd = null,
         // ignore: prefer_initializing_formals
         lowValue = lowValue,
         // ignore: prefer_initializing_formals
@@ -456,6 +466,7 @@ class _LdSliderState extends State<LdSlider> {
       _isDragging = false;
       _prevStepIndex = null;
     });
+    widget.onChangeEnd?.call();
   }
 
   // ---- Range-mode drag helpers -------------------------------------------
@@ -517,6 +528,7 @@ class _LdSliderState extends State<LdSlider> {
       _lowDragAnchorValue = null;
       _lowDragAccumPx = 0.0;
     });
+    widget.onRangeChangeEnd?.call();
   }
 
   void _onHighDragStart(DragStartDetails details) {
@@ -575,6 +587,7 @@ class _LdSliderState extends State<LdSlider> {
       _highDragAnchorValue = null;
       _highDragAccumPx = 0.0;
     });
+    widget.onRangeChangeEnd?.call();
   }
 
   // ---- Range fill drag helpers -------------------------------------------
@@ -647,6 +660,7 @@ class _LdSliderState extends State<LdSlider> {
       _rangeDragAnchorHigh = null;
       _rangeDragStartGlobal = null;
     });
+    widget.onRangeChangeEnd?.call();
   }
 
   // ---- Build ------------------------------------------------------------

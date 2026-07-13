@@ -13,7 +13,7 @@ class HomeSalesCard extends StatelessWidget {
         children: [
           Row(children: [LdText.l('Sales'), Spacer(), Icon(LucideIcons.arrowRight, size: 16)]),
           ldSpacerL,
-          LdCounter.l(value: 9452002),
+          LdCounter(value: 9452002),
           LdText.ls('+13% from last month'),
         ],
       ),

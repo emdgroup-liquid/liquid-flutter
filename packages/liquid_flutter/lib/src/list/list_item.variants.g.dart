@@ -63,6 +63,80 @@ class LdListItemConfig {
   final bool? isOdd;
 
   final LdSelectionControl? selectionControl;
+
+  LdListItemConfig copyWith({
+    bool? active,
+    BorderRadius? borderRadius,
+    bool? disabled,
+    bool? isSelected,
+    Widget? leading,
+    void Function(bool)? onSelectionChanged,
+    void Function()? onPressed,
+    EdgeInsets? padding,
+    bool? selectDisabled,
+    Widget? subContent,
+    Widget? subtitle,
+    Widget? title,
+    bool? tradeLeadingForSelectionControl,
+    BoxShadow? shadow,
+    FocusNode? focusNode,
+    Widget? trailing,
+    LdColor? color,
+    double? width,
+    bool? isOdd,
+    LdSelectionControl? selectionControl,
+  }) {
+    return LdListItemConfig(
+      active: active ?? this.active,
+      borderRadius: borderRadius ?? this.borderRadius,
+      disabled: disabled ?? this.disabled,
+      isSelected: isSelected ?? this.isSelected,
+      leading: leading ?? this.leading,
+      onSelectionChanged: onSelectionChanged ?? this.onSelectionChanged,
+      onPressed: onPressed ?? this.onPressed,
+      padding: padding ?? this.padding,
+      selectDisabled: selectDisabled ?? this.selectDisabled,
+      subContent: subContent ?? this.subContent,
+      subtitle: subtitle ?? this.subtitle,
+      title: title ?? this.title,
+      tradeLeadingForSelectionControl: tradeLeadingForSelectionControl ??
+          this.tradeLeadingForSelectionControl,
+      shadow: shadow ?? this.shadow,
+      focusNode: focusNode ?? this.focusNode,
+      trailing: trailing ?? this.trailing,
+      color: color ?? this.color,
+      width: width ?? this.width,
+      isOdd: isOdd ?? this.isOdd,
+      selectionControl: selectionControl ?? this.selectionControl,
+    );
+  }
+
+  LdListItemConfig merge(LdListItemConfig? other) {
+    if (other == null) return this;
+    return LdListItemConfig(
+      active: other.active ?? this.active,
+      borderRadius: other.borderRadius ?? this.borderRadius,
+      disabled: other.disabled ?? this.disabled,
+      isSelected: other.isSelected ?? this.isSelected,
+      leading: other.leading ?? this.leading,
+      onSelectionChanged: other.onSelectionChanged ?? this.onSelectionChanged,
+      onPressed: other.onPressed ?? this.onPressed,
+      padding: other.padding ?? this.padding,
+      selectDisabled: other.selectDisabled ?? this.selectDisabled,
+      subContent: other.subContent ?? this.subContent,
+      subtitle: other.subtitle ?? this.subtitle,
+      title: other.title ?? this.title,
+      tradeLeadingForSelectionControl: other.tradeLeadingForSelectionControl ??
+          this.tradeLeadingForSelectionControl,
+      shadow: other.shadow ?? this.shadow,
+      focusNode: other.focusNode ?? this.focusNode,
+      trailing: other.trailing ?? this.trailing,
+      color: other.color ?? this.color,
+      width: other.width ?? this.width,
+      isOdd: other.isOdd ?? this.isOdd,
+      selectionControl: other.selectionControl ?? this.selectionControl,
+    );
+  }
 }
 
 class LdListItemConfigProvider extends StatelessWidget {

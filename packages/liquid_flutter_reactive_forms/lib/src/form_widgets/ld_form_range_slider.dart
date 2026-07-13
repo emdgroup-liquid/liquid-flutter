@@ -72,6 +72,8 @@ class LdFormRangeSlider extends StatelessWidget {
             onRangeChanged: (low, high) {
               state.didChange((low, high));
               state.control.markAsTouched();
+            },
+            onRangeChangeEnd: () {
               scope?.onFieldCommitted(formKey);
             },
           ),

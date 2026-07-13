@@ -88,6 +88,18 @@ The generator additionally produces:
 class BadgeConfig {
   const BadgeConfig({this.size});
   final LdSize? size;
+
+  /// Returns a copy with the given fields replaced.
+  BadgeConfig copyWith({LdSize? size}) {
+    return BadgeConfig(size: size ?? this.size);
+  }
+
+  /// Merges [other] into this config. The other config's non-null values
+  /// take precedence. Returns `this` if [other] is null.
+  BadgeConfig merge(BadgeConfig? other) {
+    if (other == null) return this;
+    return BadgeConfig(size: other.size ?? this.size);
+  }
 }
 
 // Config provider widget — merges with parent provider

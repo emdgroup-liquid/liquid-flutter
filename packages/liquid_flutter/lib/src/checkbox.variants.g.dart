@@ -24,6 +24,39 @@ class LdCheckboxConfig {
   final LdSize? size;
 
   final bool? disabled;
+
+  LdCheckboxConfig copyWith({
+    String? label,
+    bool? checked,
+    dynamic Function(bool)? onChanged,
+    LdColor? color,
+    FocusNode? focusNode,
+    LdSize? size,
+    bool? disabled,
+  }) {
+    return LdCheckboxConfig(
+      label: label ?? this.label,
+      checked: checked ?? this.checked,
+      onChanged: onChanged ?? this.onChanged,
+      color: color ?? this.color,
+      focusNode: focusNode ?? this.focusNode,
+      size: size ?? this.size,
+      disabled: disabled ?? this.disabled,
+    );
+  }
+
+  LdCheckboxConfig merge(LdCheckboxConfig? other) {
+    if (other == null) return this;
+    return LdCheckboxConfig(
+      label: other.label ?? this.label,
+      checked: other.checked ?? this.checked,
+      onChanged: other.onChanged ?? this.onChanged,
+      color: other.color ?? this.color,
+      focusNode: other.focusNode ?? this.focusNode,
+      size: other.size ?? this.size,
+      disabled: other.disabled ?? this.disabled,
+    );
+  }
 }
 
 class LdCheckboxConfigProvider extends StatelessWidget {

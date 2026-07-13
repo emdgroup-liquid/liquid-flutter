@@ -17,24 +17,29 @@ import 'package:provider/provider.dart';
 /// call methods on this directly; instead they use the static facades on
 /// [LdMonkeySelection] and [LdMonkeySortAndFilterState] which look this up
 /// via [BuildContext].
-abstract class LdMonkeyRouterController<T extends Identifiable<IdType>, IdType> {
+abstract class LdMonkeyRouterController<T extends Identifiable<IdType>,
+    IdType> {
   void updateSelection(BuildContext context, Set<IdType> selection);
 
   void updateViewing(BuildContext context, Set<IdType> viewingItems);
 
-  void updateShowSelectionControls(BuildContext context, bool showSelectionControls);
+  void updateShowSelectionControls(
+      BuildContext context, bool showSelectionControls);
 
   void updateFilter(BuildContext context, LdFilterOption<T, IdType> filter);
 
-  void updateSortOptions(BuildContext context, List<LdSortOption<T, IdType>> sortOptions);
+  void updateSortOptions(
+      BuildContext context, List<LdSortOption<T, IdType>> sortOptions);
 
-  static LdMonkeyRouterController<T, IdType> of<T extends Identifiable<IdType>, IdType>(BuildContext context) {
+  static LdMonkeyRouterController<T, IdType>
+      of<T extends Identifiable<IdType>, IdType>(BuildContext context) {
     return context.read<LdMonkeyRouterController<T, IdType>>();
   }
 }
 
 /// Sync the state of the router with the state of the shell.
-class LdMonkeyRouterAdapter<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
+class LdMonkeyRouterAdapter<T extends Identifiable<IdType>, IdType>
+    extends StatefulWidget {
   final Widget child;
   final LdMonkeyRouteConfig<T, IdType> routeConfig;
 
@@ -50,12 +55,14 @@ class LdMonkeyRouterAdapter<T extends Identifiable<IdType>, IdType> extends Stat
   });
 
   @override
-  State<LdMonkeyRouterAdapter<T, IdType>> createState() => LdMonkeyRouterAdapterState<T, IdType>();
+  State<LdMonkeyRouterAdapter<T, IdType>> createState() =>
+      LdMonkeyRouterAdapterState<T, IdType>();
 }
 
 typedef LdMonkeyShowingDetail<T extends Identifiable<IdType>, IdType> = bool;
 
-class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends State<LdMonkeyRouterAdapter<T, IdType>>
+class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType>
+    extends State<LdMonkeyRouterAdapter<T, IdType>>
     implements LdMonkeyRouterController<T, IdType> {
   // This keeps UI updates responsive while the router delegate catches up.
   LdMonkeySortAndFilterState<T, IdType>? _latestSortAndFilterState;
@@ -79,8 +86,10 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
       return;
     }
 
-    final filterDefinitionsChanged = !ldMonkeyHasSameFilterStructure(oldWidget.filters, widget.filters);
-    final sortDefinitionsChanged = !ldMonkeyHasSameSortStructure(oldWidget.sortOptions, widget.sortOptions);
+    final filterDefinitionsChanged =
+        !ldMonkeyHasSameFilterStructure(oldWidget.filters, widget.filters);
+    final sortDefinitionsChanged = !ldMonkeyHasSameSortStructure(
+        oldWidget.sortOptions, widget.sortOptions);
 
     if (!filterDefinitionsChanged && !sortDefinitionsChanged) {
       return;
@@ -91,7 +100,8 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
     _latestSortAndFilterState = null;
   }
 
-  LdMonkeySortAndFilterState<T, IdType> _resolveSortAndFilterState(BuildContext context) {
+  LdMonkeySortAndFilterState<T, IdType> _resolveSortAndFilterState(
+      BuildContext context) {
     final current = _latestSortAndFilterState;
     if (current != null) {
       return current;
@@ -115,7 +125,8 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
     };
 
     if (routeConfig.serialiseIdType(selection).isNotEmpty) {
-      queryParameters[routeConfig.selectionQueryKey] = routeConfig.serialiseIdType(selection);
+      queryParameters[routeConfig.selectionQueryKey] =
+          routeConfig.serialiseIdType(selection);
     } else {
       queryParameters.remove(routeConfig.selectionQueryKey);
     }
@@ -133,14 +144,16 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
 
     final viewingParam = routeConfig.serialiseIdType(viewingItems);
 
-    if (viewingParam == router.state.pathParameters[routeConfig.viewingParamName]) {
+    if (viewingParam ==
+        router.state.pathParameters[routeConfig.viewingParamName]) {
       return;
     }
 
     final showingDetail = router.state.name == routeConfig.detailRouteName;
     final onCreateRoute = router.state.name == routeConfig.createRouteName;
 
-    final queryParameters = Map<String, dynamic>.from(router.state.uri.queryParameters);
+    final queryParameters =
+        Map<String, dynamic>.from(router.state.uri.queryParameters);
     final pathParameters = ldMonkeyPathParametersForDetail(
       context,
       routeConfig: routeConfig,
@@ -194,7 +207,8 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
   }
 
   @override
-  void updateShowSelectionControls(BuildContext context, bool showSelectionControls) {
+  void updateShowSelectionControls(
+      BuildContext context, bool showSelectionControls) {
     final router = GoRouter.of(context);
     final routeConfig = context.read<LdMonkeyRouteConfig<T, IdType>>();
     final baseUri = _baseUri ?? router.state.uri;
@@ -202,7 +216,9 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
       ...baseUri.queryParameters,
     };
 
-    if (showSelectionControls == (queryParameters[routeConfig.showSelectionControlsQueryKey] == 'true')) {
+    if (showSelectionControls ==
+        (queryParameters[routeConfig.showSelectionControlsQueryKey] ==
+            'true')) {
       return;
     }
 
@@ -244,6 +260,7 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
     } else {
       queryParameters.remove(queryKey);
     }
+
     _replaceUri(
       router,
       (_baseUri ?? router.state.uri).replace(queryParameters: queryParameters),
@@ -251,7 +268,8 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
   }
 
   @override
-  void updateSortOptions(BuildContext context, List<LdSortOption<T, IdType>> sortOptions) {
+  void updateSortOptions(
+      BuildContext context, List<LdSortOption<T, IdType>> sortOptions) {
     final currentState = _resolveSortAndFilterState(context);
     _latestSortAndFilterState = LdMonkeySortAndFilterState<T, IdType>(
       filters: currentState.filters,
@@ -273,8 +291,10 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
 
     final queryKey = routeConfig.sortQueryKey;
 
-    final sortOptionString =
-        sortOptions.where((sortOption) => sortOption.isOn).map((sortOption) => sortOption.serialize()).join("_");
+    final sortOptionString = sortOptions
+        .where((sortOption) => sortOption.isOn)
+        .map((sortOption) => sortOption.serialize())
+        .join("_");
 
     if (sortOptionString.isNotEmpty) {
       queryParameters[queryKey] = sortOptionString;
@@ -298,7 +318,9 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
           final matches = delegate.currentConfiguration.routes;
 
           final detailMatch = matches.firstWhereOrNull(
-            (match) => match is GoRoute && match.name == widget.routeConfig.detailRouteName,
+            (match) =>
+                match is GoRoute &&
+                match.name == widget.routeConfig.detailRouteName,
           ) as GoRoute?;
 
           final state = delegate.state;
@@ -310,10 +332,12 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
             pathParameters: state.pathParameters,
           );
           final baseSortAndFilterState = _latestSortAndFilterState;
-          final sortAndFilterState = LdMonkeyRouteStateParser.parseSortAndFilter<T, IdType>(
+          final sortAndFilterState =
+              LdMonkeyRouteStateParser.parseSortAndFilter<T, IdType>(
             routeConfig: widget.routeConfig,
             baseFilters: baseSortAndFilterState?.filters ?? widget.filters,
-            baseSortOptions: baseSortAndFilterState?.sortOptions ?? widget.sortOptions,
+            baseSortOptions:
+                baseSortAndFilterState?.sortOptions ?? widget.sortOptions,
             query: query,
           );
           _latestSortAndFilterState = sortAndFilterState;
@@ -335,7 +359,8 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
             child: _LdMonkeySelectionHydrator<T, IdType>(
               viewing: selection.viewing,
               child: LdMonkeyListFilterAdapter<T, IdType>(
-                child: LdMonkeyDeletedItemsGuard<T, IdType>(child: widget.child),
+                child:
+                    LdMonkeyDeletedItemsGuard<T, IdType>(child: widget.child),
               ),
             ),
           );
@@ -350,7 +375,8 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType> extends
 ///
 /// Mounted *below* [LdMonkeySortAndFilterState] so that offset resolution in
 /// [FetchOffsetParameters] reads the correct active filter/sort state.
-class _LdMonkeySelectionHydrator<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
+class _LdMonkeySelectionHydrator<T extends Identifiable<IdType>, IdType>
+    extends StatefulWidget {
   final Set<IdType> viewing;
   final Widget child;
 
@@ -361,7 +387,8 @@ class _LdMonkeySelectionHydrator<T extends Identifiable<IdType>, IdType> extends
   });
 
   @override
-  State<_LdMonkeySelectionHydrator<T, IdType>> createState() => _LdMonkeySelectionHydratorState<T, IdType>();
+  State<_LdMonkeySelectionHydrator<T, IdType>> createState() =>
+      _LdMonkeySelectionHydratorState<T, IdType>();
 }
 
 class _LdMonkeySelectionHydratorState<T extends Identifiable<IdType>, IdType>
@@ -377,7 +404,9 @@ class _LdMonkeySelectionHydratorState<T extends Identifiable<IdType>, IdType>
     final request = ++_selectionHydrationRequest;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted || request != _selectionHydrationRequest || viewing.isEmpty) {
+      if (!mounted ||
+          request != _selectionHydrationRequest ||
+          viewing.isEmpty) {
         return;
       }
       final repository = LdListController.maybeOf<T, IdType>(context);

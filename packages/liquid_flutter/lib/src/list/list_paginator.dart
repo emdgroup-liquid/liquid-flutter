@@ -73,7 +73,9 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
   /// Requests that mounted [LdList] widgets scroll [id] into view.
   void requestScrollToItem(IdType id) {
     pendingScrollToItemId = id;
-    notifyListeners();
+    if (hasListeners) {
+      notifyListeners();
+    }
   }
 
   void clearPendingScrollToItem() {

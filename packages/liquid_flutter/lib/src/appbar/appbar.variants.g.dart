@@ -69,6 +69,87 @@ class LdAppBarConfig {
   final Widget? trailing;
 
   final EdgeInsets? padding;
+
+  LdAppBarConfig copyWith({
+    Widget? child,
+    List<Widget>? actions,
+    bool? addContainer,
+    LdAppBarAttachedMode? attachedMode,
+    bool? autoAttachToKeyboard,
+    Color? backgroundColor,
+    LdAppBarBackgroundMode? backgroundMode,
+    LdAppBarBorderMode? borderMode,
+    Widget? bottom,
+    String? debugName,
+    bool? insetScreenRadius,
+    Set<LdAppBarImpliedFeature>? implyFeatures,
+    bool? avoidViewInsets,
+    Widget? leading,
+    List<SingleChildWidget> Function(BuildContext)? overflowMenuProviders,
+    LdAppBarPositionMode? positionMode,
+    LdAppBarScrollBehavior? scrollBehavior,
+    LdSearchConfig? searchConfig,
+    LdAppBarShadowMode? shadowMode,
+    Widget? title,
+    Widget? trailing,
+    EdgeInsets? padding,
+  }) {
+    return LdAppBarConfig(
+      child: child ?? this.child,
+      actions: actions ?? this.actions,
+      addContainer: addContainer ?? this.addContainer,
+      attachedMode: attachedMode ?? this.attachedMode,
+      autoAttachToKeyboard: autoAttachToKeyboard ?? this.autoAttachToKeyboard,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      backgroundMode: backgroundMode ?? this.backgroundMode,
+      borderMode: borderMode ?? this.borderMode,
+      bottom: bottom ?? this.bottom,
+      debugName: debugName ?? this.debugName,
+      insetScreenRadius: insetScreenRadius ?? this.insetScreenRadius,
+      implyFeatures: implyFeatures ?? this.implyFeatures,
+      avoidViewInsets: avoidViewInsets ?? this.avoidViewInsets,
+      leading: leading ?? this.leading,
+      overflowMenuProviders:
+          overflowMenuProviders ?? this.overflowMenuProviders,
+      positionMode: positionMode ?? this.positionMode,
+      scrollBehavior: scrollBehavior ?? this.scrollBehavior,
+      searchConfig: searchConfig ?? this.searchConfig,
+      shadowMode: shadowMode ?? this.shadowMode,
+      title: title ?? this.title,
+      trailing: trailing ?? this.trailing,
+      padding: padding ?? this.padding,
+    );
+  }
+
+  LdAppBarConfig merge(LdAppBarConfig? other) {
+    if (other == null) return this;
+    return LdAppBarConfig(
+      child: other.child ?? this.child,
+      actions: other.actions ?? this.actions,
+      addContainer: other.addContainer ?? this.addContainer,
+      attachedMode: other.attachedMode ?? this.attachedMode,
+      autoAttachToKeyboard:
+          other.autoAttachToKeyboard ?? this.autoAttachToKeyboard,
+      backgroundColor: other.backgroundColor ?? this.backgroundColor,
+      backgroundMode: other.backgroundMode ?? this.backgroundMode,
+      borderMode: other.borderMode ?? this.borderMode,
+      bottom: other.bottom ?? this.bottom,
+      debugName: other.debugName ?? this.debugName,
+      insetScreenRadius: other.insetScreenRadius ?? this.insetScreenRadius,
+      implyFeatures: other.implyFeatures ?? this.implyFeatures,
+      avoidViewInsets: other.avoidViewInsets ?? this.avoidViewInsets,
+      leading: other.leading ?? this.leading,
+      overflowMenuProviders:
+          other.overflowMenuProviders ?? this.overflowMenuProviders,
+      positionMode: other.positionMode ?? this.positionMode,
+      scrollBehavior: other.scrollBehavior ?? this.scrollBehavior,
+      searchConfig: other.searchConfig ?? this.searchConfig,
+      shadowMode: other.shadowMode ?? this.shadowMode,
+      title: other.title ?? this.title,
+      trailing: other.trailing ?? this.trailing,
+      padding: other.padding ?? this.padding,
+    );
+  }
 }
 
 class LdAppBarConfigProvider extends StatelessWidget {

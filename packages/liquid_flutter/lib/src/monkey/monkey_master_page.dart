@@ -6,10 +6,7 @@ class LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType> extends Statefu
   const LdMonkeyMasterPage({
     super.key,
     this.buildItem,
-    this.primaryAppBarConfig,
-    this.primaryAppBarAdditionalActions = const [],
     this.allowMultipleSelection = true,
-    this.secondaryAppBarConfig,
     this.filterBarConfig,
     this.buildList,
   });
@@ -17,10 +14,6 @@ class LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType> extends Statefu
   final Widget Function(BuildContext context, LdListController<T, IdType> repository)? buildList;
   final Widget Function(BuildContext context, LdPaginatorItem<T> item)? buildItem;
   final List<LdFilterChipConfig<T, IdType>>? filterBarConfig;
-
-  final LdAppBarConfig? primaryAppBarConfig;
-  final LdAppBarConfig? secondaryAppBarConfig;
-  final List<Widget> primaryAppBarAdditionalActions;
 
   final bool allowMultipleSelection;
 
@@ -151,37 +144,25 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
   }
 
   Widget _buildAppBarWrappedBody(Widget body) {
-    return LdWrapConditional(
-      condition: widget.primaryAppBarConfig != null,
-      builder: (context, child) => LdAppBarConfigProvider(
-        config: widget.primaryAppBarConfig!,
-        child: child,
-      ),
-      child: LdMonkeyAppBar<T, IdType>(
-        location: LdMonkeyActionLocation.masterAppBar,
-        additionalActions: widget.primaryAppBarAdditionalActions,
-        child: LdWrapConditional(
-          condition: widget.filterBarConfig != null,
-          builder: (context, child) => LdAppBarConfigProvider(
-            config: LdAppBarConfig(),
-            ignoreParent: true,
-            child: LdAppBar(
-              leading: Expanded(
-                child: LdFilterChipsBar<T, IdType>(
-                  configs: widget.filterBarConfig!,
-                ),
+    return LdMonkeyAppBar<T, IdType>(
+      location: LdMonkeyActionLocation.masterAppBar,
+      child: LdWrapConditional(
+        condition: widget.filterBarConfig != null,
+        builder: (context, child) => LdAppBarConfigProvider(
+          config: LdAppBarConfig(),
+          ignoreParent: true,
+          child: LdAppBar(
+            leading: Expanded(
+              child: LdFilterChipsBar<T, IdType>(
+                configs: widget.filterBarConfig!,
               ),
-              child: child,
             ),
+            child: child,
           ),
-          child: LdAppBarConfigProvider(
-            config: widget.secondaryAppBarConfig ?? const LdAppBarConfig(),
-            ignoreParent: true,
-            child: LdMonkeyAppBar<T, IdType>(
-              location: LdMonkeyActionLocation.masterSecondary,
-              child: LdScrollEdgeFade(child: body),
-            ),
-          ),
+        ),
+        child: LdMonkeyAppBar<T, IdType>(
+          location: LdMonkeyActionLocation.masterSecondary,
+          child: LdScrollEdgeFade(child: body),
         ),
       ),
     );

@@ -142,38 +142,37 @@ class _LdMonkeyPickerPage<T extends Identifiable<IdType>, IdType> extends Statel
         value: LdMonkeyEffectiveLayoutMode.master,
         child: LdScaffold(
           debugName: 'LdMonkeyPickerPage',
-          body: LdMonkeyMasterPage<T, IdType>(
-            allowMultipleSelection: multiple,
-            primaryAppBarConfig: LdAppBarConfig(
-              debugName: 'LdMonkeyPickerAppBar',
-              title: Text(label),
-              implyFeatures: const {},
-              bottom: bottom,
+          body: Provider.value(
+            value: LdMonkeyMasterAppbarConfig(
+                appbarConfig: LdAppBarConfig(
+                    debugName: 'LdMonkeyPickerAppBar', title: Text(label), implyFeatures: const {}, bottom: bottom),
+                additionalActions: [
+                  if (allowEmpty)
+                    LdButton.ghost(
+                      disabled: selection.selection.isEmpty,
+                      onPressed: () {
+                        LdMonkeySelection.updateSelection<T, IdType>(context, {});
+                      },
+                      child: const Text('Clear'),
+                    ),
+                  LdButton(
+                    key: const Key('ldChoose_done'),
+                    disabled: !ldChooseCanConfirmSelection<IdType>(
+                      current: selection.selection,
+                      initial: initialSelection,
+                    ),
+                    onPressed: () {
+                      maybePopContextMenu(context);
+                      Navigator.of(context).pop(selection.selection);
+                    },
+                    child: const Text('Done'),
+                  ),
+                ]),
+            child: LdMonkeyMasterPage<T, IdType>(
+              allowMultipleSelection: multiple,
+              buildList: buildList,
+              buildItem: (context, item) => itemBuilder(context, item, 0),
             ),
-            primaryAppBarAdditionalActions: [
-              if (allowEmpty)
-                LdButton.ghost(
-                  disabled: selection.selection.isEmpty,
-                  onPressed: () {
-                    LdMonkeySelection.updateSelection<T, IdType>(context, {});
-                  },
-                  child: const Text('Clear'),
-                ),
-              LdButton(
-                key: const Key('ldChoose_done'),
-                disabled: !ldChooseCanConfirmSelection<IdType>(
-                  current: selection.selection,
-                  initial: initialSelection,
-                ),
-                onPressed: () {
-                  maybePopContextMenu(context);
-                  Navigator.of(context).pop(selection.selection);
-                },
-                child: const Text('Done'),
-              ),
-            ],
-            buildList: buildList,
-            buildItem: (context, item) => itemBuilder(context, item, 0),
           ),
         ),
       ),

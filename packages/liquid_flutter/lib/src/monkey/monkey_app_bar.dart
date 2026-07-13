@@ -4,10 +4,54 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+sealed class LdMonkeyAppbarConfig {
+  final LdAppBarConfig? appbarConfig;
+  final List<Widget> additionalActions;
+  final String? debugName;
+
+  const LdMonkeyAppbarConfig({
+    this.appbarConfig,
+    this.additionalActions = const [],
+    this.debugName,
+  });
+}
+
+class LdMonkeyMasterAppbarConfig extends LdMonkeyAppbarConfig {
+  LdMonkeyMasterAppbarConfig({
+    super.appbarConfig,
+    super.additionalActions,
+    super.debugName,
+  });
+}
+
+class LdMonkeyMasterSecondaryAppbarConfig extends LdMonkeyAppbarConfig {
+  LdMonkeyMasterSecondaryAppbarConfig({
+    super.appbarConfig,
+    super.additionalActions,
+    super.debugName,
+  });
+}
+
+class LdMonkeyDetailAppbarConfig extends LdMonkeyAppbarConfig {
+  LdMonkeyDetailAppbarConfig({
+    super.appbarConfig,
+    super.additionalActions,
+    super.debugName,
+  });
+}
+
+class LdMonkeyDetailSecondaryAppbarConfig extends LdMonkeyAppbarConfig {
+  LdMonkeyDetailSecondaryAppbarConfig({
+    super.appbarConfig,
+    super.additionalActions,
+    super.debugName,
+  });
+}
+
 class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
   final LdMonkeyActionLocation location;
   final String? debugName;
-  final List<Widget> additionalActions;
+  final LdMonkeyAppbarConfig? config;
 
   /// The subtree that this app bar wraps.
   ///
@@ -19,7 +63,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
 
   const LdMonkeyAppBar({
     super.key,
-    this.additionalActions = const [],
+    this.config,
     required this.location,
     this.debugName,
     this.child,
@@ -36,12 +80,23 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
     final selection = context.watch<LdMonkeySelection<T, IdType>>();
 
     final effectiveLayout = context.watch<LdMonkeyEffectiveLayoutMode>();
-    final appBarConfig = Provider.of<LdAppBarConfig?>(context, listen: true);
+
     final searchFilter = _getSearchFilter(context);
 
     final selectionControlsVisible = selection.showSelectionControls;
 
     final showClearSelectionButton = selectionControlsVisible && location == LdMonkeyActionLocation.masterSecondary;
+
+    final monkeyBarConfig = config ??
+        switch (location) {
+          LdMonkeyActionLocation.masterAppBar => context.watch<LdMonkeyMasterAppbarConfig?>(),
+          LdMonkeyActionLocation.detailAppBar => context.watch<LdMonkeyDetailAppbarConfig?>(),
+          LdMonkeyActionLocation.masterSecondary => context.watch<LdMonkeyMasterSecondaryAppbarConfig?>(),
+          LdMonkeyActionLocation.detailSecondary => context.watch<LdMonkeyDetailSecondaryAppbarConfig?>(),
+          _ => null,
+        };
+
+    final appBarConfig = monkeyBarConfig?.appbarConfig ?? context.watch<LdAppBarConfig?>();
 
     return Provider.value(
       value: location,
@@ -69,7 +124,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
 
         final barEmpty = actions.isEmpty &&
             searchConfig == null &&
-            additionalActions.isEmpty &&
+            (monkeyBarConfig?.additionalActions.isEmpty ?? true) &&
             appBarConfig?.title == null &&
             appBarConfig?.bottom == null &&
             !showClearSelectionButton;
@@ -104,12 +159,13 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
                     LiquidLocalizations.of(context).nItemsSelected(selection.selection.length),
                     value: selection.selection.length.toDouble(),
                   )
-                : null,
+                : appBarConfig?.title,
             debugName: debugName ?? appBarConfig?.debugName ?? location.name,
             positionMode: effectivePositionMode,
             scrollBehavior: showBar ? null : LdAppBarScrollBehavior.hidden,
             autoAttachToKeyboard: true,
             searchConfig: searchConfig,
+            implyFeatures: appBarConfig?.implyFeatures,
             overflowMenuProviders: (context) => [
                   ListenableProvider.value(value: LdListController.of<T, IdType>(context)),
                   Provider.value(value: location),
@@ -129,7 +185,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
                   };
                 },
               ),
-              ...additionalActions,
+              ...monkeyBarConfig?.additionalActions ?? [],
             ],
             child: child);
       }),

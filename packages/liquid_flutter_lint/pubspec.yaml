@@ -1,0 +1,13 @@
+name: liquid_flutter_lint
+description: Custom analyzer plugin with lint rules for Liquid Flutter design system compliance.
+version: 0.1.0-dev
+repository: https://github.com/emdgroup-liquid/liquid-flutter
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+
+dependencies:
+  analysis_server_plugin: ^0.2.2
+  analyzer: ^8.1.1
+  analyzer_plugin: ^0.13.0
+  meta: ^1.15.0
+  path: ^1.9.0

@@ -26,7 +26,8 @@ typedef LdFormLoadDetail<TDetail, T> = Future<TDetail> Function(
   T? entity,
 );
 
-typedef LdFormOnSubmitted<T extends Identifiable<IdType>, IdType> = void Function(
+typedef LdFormOnSubmitted<T extends Identifiable<IdType>, IdType> = void
+    Function(
   BuildContext context,
   T? created,
 );
@@ -37,7 +38,8 @@ typedef LdFormOnSubmitted<T extends Identifiable<IdType>, IdType> = void Functio
 /// [childrenBuilder] returns the free widget tree rendered inside the form.
 /// Use [LdFormInput], [LdFormChoose], etc. to bind controls by key, and place
 /// any other widgets freely alongside them.
-class LdForm<T extends Identifiable<IdType>, IdType, TDetail extends Object, TCreate, TUpdate> extends StatefulWidget {
+class LdForm<T extends Identifiable<IdType>, IdType, TDetail extends Object,
+    TCreate, TUpdate> extends StatefulWidget {
   final LdFormMode mode;
   final LdPaginatorItem<T>? item;
 
@@ -81,8 +83,12 @@ class LdForm<T extends Identifiable<IdType>, IdType, TDetail extends Object, TCr
       _LdFormState<T, IdType, TDetail, TCreate, TUpdate>();
 }
 
-class _LdFormState<T extends Identifiable<IdType>, IdType, TDetail extends Object, TCreate, TUpdate>
-    extends State<LdForm<T, IdType, TDetail, TCreate, TUpdate>> {
+class _LdFormState<
+    T extends Identifiable<IdType>,
+    IdType,
+    TDetail extends Object,
+    TCreate,
+    TUpdate> extends State<LdForm<T, IdType, TDetail, TCreate, TUpdate>> {
   late final FormGroup _form;
 
   TDetail? _detail;
@@ -101,13 +107,20 @@ class _LdFormState<T extends Identifiable<IdType>, IdType, TDetail extends Objec
   @override
   void initState() {
     super.initState();
+
     // Make sure the formToUpdatePayload and formToCreatePayload are provided in the correct mode.
     switch (widget.mode) {
       case LdFormMode.edit:
-        assert(widget.formToUpdatePayload != null, 'formToUpdatePayload must be provided in edit mode');
+        assert(
+          widget.formToUpdatePayload != null,
+          'formToUpdatePayload must be provided in edit mode',
+        );
         break;
       case LdFormMode.create:
-        assert(widget.formToCreatePayload != null, 'formToCreatePayload must be provided in create mode');
+        assert(
+          widget.formToCreatePayload != null,
+          'formToCreatePayload must be provided in create mode',
+        );
         break;
     }
 
@@ -142,7 +155,9 @@ class _LdFormState<T extends Identifiable<IdType>, IdType, TDetail extends Objec
   }
 
   @override
-  void didUpdateWidget(covariant LdForm<T, IdType, TDetail, TCreate, TUpdate> oldWidget) {
+  void didUpdateWidget(
+    covariant LdForm<T, IdType, TDetail, TCreate, TUpdate> oldWidget,
+  ) {
     super.didUpdateWidget(oldWidget);
     if (widget.mode != LdFormMode.edit) return;
 
@@ -249,9 +264,11 @@ class _LdFormState<T extends Identifiable<IdType>, IdType, TDetail extends Objec
         LdMonkeyFieldConflictResolution? resolution;
         if (widget.onFieldConflict != null) {
           resolution = await widget.onFieldConflict!(conflict);
-        } else if (widget.conflictPolicy == LdMonkeyFieldConflictPolicy.keepLocal) {
+        } else if (widget.conflictPolicy ==
+            LdMonkeyFieldConflictPolicy.keepLocal) {
           resolution = LdMonkeyFieldConflictResolution.keepLocal;
-        } else if (widget.conflictPolicy == LdMonkeyFieldConflictPolicy.preferServer) {
+        } else if (widget.conflictPolicy ==
+            LdMonkeyFieldConflictPolicy.preferServer) {
           resolution = LdMonkeyFieldConflictResolution.preferServer;
         }
 
@@ -264,7 +281,10 @@ class _LdFormState<T extends Identifiable<IdType>, IdType, TDetail extends Objec
     if (mounted) setState(() {});
   }
 
-  void _applyConflictResolution(LdMonkeyFieldConflict conflict, LdMonkeyFieldConflictResolution resolution) {
+  void _applyConflictResolution(
+    LdMonkeyFieldConflict conflict,
+    LdMonkeyFieldConflictResolution resolution,
+  ) {
     if (!_form.contains(conflict.fieldKey)) return;
     final control = _form.control(conflict.fieldKey);
     control.value = switch (resolution) {
@@ -279,10 +299,13 @@ class _LdFormState<T extends Identifiable<IdType>, IdType, TDetail extends Objec
   }
 
   // Extracts the server values from the exception and merges them into the form.
-  Future<void> _applyVersionConflict(LdFormConflictException<TDetail> exception) async {
+  Future<void> _applyVersionConflict(
+    LdFormConflictException<TDetail> exception,
+  ) async {
     final Map<String, Object?> serverValues;
     if (exception.serverDetail != null) {
-      serverValues = widget.detailToFormValues(exception.serverDetail as TDetail);
+      serverValues =
+          widget.detailToFormValues(exception.serverDetail as TDetail);
     } else {
       serverValues = exception.serverFieldValues ?? {};
     }
@@ -307,7 +330,10 @@ class _LdFormState<T extends Identifiable<IdType>, IdType, TDetail extends Objec
   }
 
   // Computes the conflicts between the local and server values.
-  List<LdMonkeyFieldConflict> _computeConflicts(Map<String, Object?> localValue, Map<String, Object?> serverValue) {
+  List<LdMonkeyFieldConflict> _computeConflicts(
+    Map<String, Object?> localValue,
+    Map<String, Object?> serverValue,
+  ) {
     final conflicts = <LdMonkeyFieldConflict>[];
     for (final entry in localValue.entries) {
       // Skip if the server value does not contain the key.
@@ -332,12 +358,14 @@ class _LdFormState<T extends Identifiable<IdType>, IdType, TDetail extends Objec
   }
 
   Future<void> _runPreSaveCheck() async {
-    if (widget.mode != LdFormMode.edit || widget.preSaveCheck != LdFormPreSaveCheck.repositoryGetById) {
+    if (widget.mode != LdFormMode.edit ||
+        widget.preSaveCheck != LdFormPreSaveCheck.repositoryGetById) {
       return;
     }
     final id = _currentId;
     if (id == null) return;
-    final serverEntity = await LdListController.of<T, IdType>(context).getById(context, id, skipCache: true);
+    final serverEntity = await LdListController.of<T, IdType>(context)
+        .getById(context, id, skipCache: true);
     if (!mounted) return;
     final newDetail = await widget.itemToDetail(context, serverEntity);
     final serverValues = widget.detailToFormValues(newDetail);
@@ -349,11 +377,15 @@ class _LdFormState<T extends Identifiable<IdType>, IdType, TDetail extends Objec
   Future<void> _triggerSubmit() async {
     if (_form.invalid || _isSaving) return;
     if (widget.mode == LdFormMode.edit && !_form.dirty) return;
-    _isSaving = true;
+    setState(() {
+      _isSaving = true;
+    });
     try {
       await _performSave();
     } finally {
-      _isSaving = false;
+      setState(() {
+        _isSaving = false;
+      });
     }
   }
 
@@ -460,7 +492,7 @@ class _LdFormState<T extends Identifiable<IdType>, IdType, TDetail extends Objec
 
   @override
   Widget build(BuildContext context) {
-    if (_loadingDetail || _detail == null) {
+    if (_detail == null) {
       return const Center(child: LdLoader());
     }
     if (widget.mode == LdFormMode.edit && widget.item?.value == null) {

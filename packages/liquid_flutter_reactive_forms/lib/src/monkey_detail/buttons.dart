@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 
@@ -13,7 +14,8 @@ class LdFormSubmitButton extends StatelessWidget {
     final form = ReactiveForm.of(context)!;
 
     return LdSubmit<void, void>(
-      disabled: !form.dirty || formState.isMergeInProgress || formState.isSaving,
+      disabled:
+          !form.dirty || formState.isMergeInProgress || formState.isSaving,
       config: LdSubmitConfig(
         submitText: switch (formState.mode) {
           LdFormMode.edit => LiquidLocalizations.of(context).save,
@@ -42,7 +44,6 @@ class LdFormResetButton extends StatelessWidget {
 
     return LdButton.outline(
       color: LdTheme.of(context).error,
-      autoLoading: false,
       onPressed: () async {
         final confirm = await ldConfirmModal(
           useRootNavigator: true,
@@ -58,7 +59,9 @@ class LdFormResetButton extends StatelessWidget {
           formState.onReset();
         }
       },
-      disabled: !form.dirty || formState.isMergeInProgress || formState.isSaving,
+      disabled:
+          !form.dirty || formState.isMergeInProgress || formState.isSaving,
+      leading: Icon(LucideIcons.x),
       child: Text(LiquidLocalizations.of(context).discardChanges),
     );
   }
