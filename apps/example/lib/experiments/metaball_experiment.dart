@@ -34,6 +34,10 @@ class MetaballExperiment extends StatelessWidget {
 
             // --- Demo 3: Button → menu morph (LdMetaballMask + springs) ---
             _MorphDemo(),
+            LdDivider(),
+
+            // --- Demo 4: Force multiplier ---
+            _ForceDemo(),
           ],
         ),
       ),
@@ -894,6 +898,93 @@ class _MorphContent extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ===========================================================================
+// Demo 4 — Force multiplier
+//
+// Three blobs with increasing force values. The left one barely merges,
+// the right one merges aggressively — all three are the same size.
+// ===========================================================================
+
+class _ForceDemo extends StatefulWidget {
+  const _ForceDemo();
+
+  @override
+  State<_ForceDemo> createState() => _ForceDemoState();
+}
+
+class _ForceDemoState extends State<_ForceDemo> {
+  @override
+  Widget build(BuildContext context) {
+    final theme = LdTheme.of(context, listen: true);
+    return Padding(
+      padding: theme.pad(size: LdSize.m),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          LdText.hs('Force multiplier'),
+          ldSpacerS,
+          LdText.p(
+            'Each blob has the same size. Left: force=0.3 (barely merges), '
+            'Middle: force=1.0 (default), Right: force=3.0 (aggressive).',
+            color: theme.textMuted,
+          ),
+          ldSpacerM,
+          SizedBox(
+            width: double.infinity,
+            child: LdMetaballScope(
+              surfaceColor: theme.primaryColor.withAlpha(50),
+              borderColor: theme.border,
+              blend: 40,
+              children: [
+                const SizedBox(height: 60),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      LdMetaball(
+                        shape: LdMetaballShape.ellipse,
+                        force: 0.3,
+                        child: Container(
+                          width: 60,
+                          height: 60,
+                          alignment: Alignment.center,
+                          child: Icon(LucideIcons.circle, size: 20, color: theme.text),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      LdMetaball(
+                        shape: LdMetaballShape.ellipse,
+                        force: 1,
+                        child: Container(
+                          width: 60,
+                          height: 60,
+                          alignment: Alignment.center,
+                          child: Icon(LucideIcons.circle, size: 20, color: theme.text),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      LdMetaball(
+                        shape: LdMetaballShape.ellipse,
+                        force: 1.5,
+                        child: Container(
+                          width: 60,
+                          height: 60,
+                          alignment: Alignment.center,
+                          child: Icon(LucideIcons.circle, size: 20, color: theme.text),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

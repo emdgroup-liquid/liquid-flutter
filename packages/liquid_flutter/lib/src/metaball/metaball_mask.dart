@@ -195,7 +195,7 @@ class LdMetaballMask extends StatelessWidget {
         s.setFloat(base + 3, b.width);
         s.setFloat(base + 4, b.height);
         s.setFloat(base + 5, b.cornerRadius);
-        s.setFloat(base + 6, 0.0);
+        s.setFloat(base + 6, b.force);
         s.setFloat(base + 7, 0.0);
       } else {
         // Off-screen placeholder — contributes nothing to the union.
@@ -261,15 +261,17 @@ class LdMetaballMask extends StatelessWidget {
       children: [
         fillLayer,
         SizedBox.expand(
-          child: CustomPaint(
-            painter: _MetaballBorderPainter(
-              shader: bs,
-              blobs: blobs,
-              blend: blend,
-              borderWidth: borderWidth,
-              borderColor: bc,
-              pointerPos: pointerPos,
-              pointerRadius: pointerRadius,
+          child: IgnorePointer(
+            child: CustomPaint(
+              painter: _MetaballBorderPainter(
+                shader: bs,
+                blobs: blobs,
+                blend: blend,
+                borderWidth: borderWidth,
+                borderColor: bc,
+                pointerPos: pointerPos,
+                pointerRadius: pointerRadius,
+              ),
             ),
           ),
         ),

@@ -314,6 +314,7 @@ class _LdMetaballScopeState extends State<LdMetaballScope>
     final fill = _fill;
     final border = _border;
     final blobs = _blobs.values.toList();
+    final showMask = fill != null && blobs.isNotEmpty;
 
     return _LdMetaballScopeData(
       scope: this,
@@ -325,7 +326,7 @@ class _LdMetaballScopeState extends State<LdMetaballScope>
         child: Stack(
           fit: StackFit.passthrough,
           children: [
-            if (fill != null && blobs.isNotEmpty)
+            if (showMask)
               Positioned.fill(
                 child: LdMetaballMask(
                   shader: fill,
@@ -337,9 +338,13 @@ class _LdMetaballScopeState extends State<LdMetaballScope>
                   borderWidth: widget.borderWidth,
                   pointerPos: _pointerPos,
                   pointerRadius: _radiusSpring.position,
+                  child: Stack(
+                    fit: StackFit.passthrough,
+                    children: widget.children,
+                  ),
                 ),
               ),
-            ...widget.children,
+            if (!showMask) ...widget.children,
           ],
         ),
       ),
@@ -376,12 +381,14 @@ class LdMetaball extends StatefulWidget {
   final Widget child;
   final LdMetaballShape shape;
   final double cornerRadius;
+  final double force;
 
   const LdMetaball({
     super.key,
     required this.child,
     this.shape = LdMetaballShape.roundedRect,
     this.cornerRadius = 16,
+    this.force = 1.0,
   });
 
   @override
@@ -419,9 +426,10 @@ class _LdMetaballState extends State<LdMetaball> {
   @override
   void didUpdateWidget(LdMetaball old) {
     super.didUpdateWidget(old);
-    // Shape/cornerRadius may have changed — re-measure immediately.
+    // Shape/cornerRadius/force may have changed — re-measure immediately.
     if (old.shape != widget.shape ||
-        old.cornerRadius != widget.cornerRadius) {
+        old.cornerRadius != widget.cornerRadius ||
+        old.force != widget.force) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _measure());
     }
   }
@@ -460,6 +468,7 @@ class _LdMetaballState extends State<LdMetaball> {
         height: size.height,
         cornerRadius: widget.cornerRadius,
         shape: widget.shape,
+        force: widget.force,
       ),
     );
 

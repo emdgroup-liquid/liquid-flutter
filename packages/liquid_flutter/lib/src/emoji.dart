@@ -166,8 +166,7 @@ class _LdEmojiState extends State<LdEmoji> {
   @override
   void didUpdateWidget(LdEmoji old) {
     super.didUpdateWidget(old);
-    if (old.emoji != widget.emoji ||
-        old.style?.fontSize != widget.style?.fontSize) {
+    if (old.emoji != widget.emoji || old.style?.fontSize != widget.style?.fontSize) {
       _scheduleComputation();
     }
   }
@@ -199,15 +198,19 @@ class _LdEmojiState extends State<LdEmoji> {
       height: size * 1.5,
       child: Center(
         child: Transform.translate(
-          offset: Offset.zero,
-          child: Text(
-            widget.emoji,
-            style: TextStyle(
-              fontSize: size,
-              height: 1,
+          offset: _offset,
+          child: Center(
+            child: Text(
+              widget.emoji,
+              style: widget.style?.copyWith(fontSize: size, height: 1) ??
+                  TextStyle(
+                    fontSize: size,
+                    height: 1,
+                    // No fontFamily override — use the platform emoji font.
+                  ),
+              maxLines: 1,
+              textAlign: TextAlign.center,
             ),
-            maxLines: 1,
-            textAlign: TextAlign.center,
           ),
         ),
       ),

@@ -64,6 +64,7 @@ uniform vec4 uS11a; uniform vec4 uS11b;
 #define SHAPE_W(sa)      (sa).w
 #define SHAPE_H(sb)      (sb).x
 #define SHAPE_R(sb)      (sb).y
+#define SHAPE_FORCE(sb)  (sb).z
 
 // ---------------------------------------------------------------------------
 // SDF helpers
@@ -101,11 +102,13 @@ float smoothUnion(float d1, float d2, float k) {
 // Scale uBlend by the smaller of the two blobs' half-extents so a near-zero
 // blob exerts near-zero pull on its neighbours.
 // Reference size: 40px half-extent → full uBlend. Clamped to [0,1].
+// Also multiplies by the minimum force of the two blobs.
 float sizedBlend(vec4 sa, vec4 sb, vec4 sa2, vec4 sb2) {
     float ra = min(SHAPE_W(sa),  SHAPE_H(sb))  * 0.5;
     float rb = min(SHAPE_W(sa2), SHAPE_H(sb2)) * 0.5;
     float t  = clamp(min(ra, rb) / 40.0, 0.0, 1.0);
-    return u0.z * t; // u0.z = uBlend
+    float f  = max(SHAPE_FORCE(sb), SHAPE_FORCE(sb2));
+    return u0.z * t * f; // u0.z = uBlend
 }
 
 // Blended scene SDF — used for fill boundary and pointer influence.

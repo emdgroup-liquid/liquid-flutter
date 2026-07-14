@@ -37,6 +37,9 @@ class LdThemeProvider extends StatefulWidget {
   /// When this stream emits `true`, [screenRadius] is overridden to `0` (e.g. maximized desktop window).
   final Stream<bool>? windowMaximizedStream;
 
+  /// Applies a window decoration to the theme if the platform is macOS
+  final bool applyWindowDecoration;
+
   const LdThemeProvider({
     required this.child,
     super.key,
@@ -46,6 +49,7 @@ class LdThemeProvider extends StatefulWidget {
     this.lightPalette,
     this.screenRadius,
     this.windowMaximizedStream,
+    this.applyWindowDecoration = true,
     this.size,
     this.platform,
   });
@@ -170,9 +174,7 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
   void _applyBrightness() {
     final targetPalette = switch (widget.brightnessMode) {
       LdThemeBrightnessMode.auto =>
-        WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark
-            ? _darkPalette
-            : _lightPalette,
+        WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark ? _darkPalette : _lightPalette,
       LdThemeBrightnessMode.light => _lightPalette,
       LdThemeBrightnessMode.dark => _darkPalette,
     };
@@ -257,7 +259,7 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
   }
 
   BoxDecoration? get _windowDecoration {
-    if (_theme.platform == LdPlatform.macos) {
+    if (widget.applyWindowDecoration && _theme.platform == LdPlatform.macos) {
       return BoxDecoration(
         color: _theme.background,
         borderRadius: BorderRadius.circular(_theme.screenRadius),
