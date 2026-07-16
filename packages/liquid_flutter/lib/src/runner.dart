@@ -160,6 +160,12 @@ class LdRunnerStep extends StatelessWidget {
 
   final List<Widget>? children;
 
+  /// The left padding applied to the expanded [children] block, used to
+  /// indent it under the step's indicator.
+  ///
+  /// Defaults to `32`.
+  final double childrenLeftPadding;
+
   const LdRunnerStep(
       {super.key,
       required this.title,
@@ -169,7 +175,8 @@ class LdRunnerStep extends StatelessWidget {
       this.isExpanded = false,
       this.onPress,
       this.customIndicator,
-      this.children});
+      this.children,
+      this.childrenLeftPadding = 32});
 
   @override
   Widget build(BuildContext context) {
@@ -241,7 +248,7 @@ class LdRunnerStep extends StatelessWidget {
           transformYOffset: 20,
           revealed: isExpanded,
           child: Padding(
-            padding: theme.pad().copyWith(left: 32),
+            padding: theme.pad().copyWith(left: childrenLeftPadding),
             child: LdAutoSpace(
               children: children!,
             ),
