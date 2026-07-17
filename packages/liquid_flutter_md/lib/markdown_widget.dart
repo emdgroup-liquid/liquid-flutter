@@ -114,6 +114,10 @@ class LdMarkdown extends StatefulWidget {
   /// for navigation or URL launching.
   final void Function(String url, String title)? onLinkTap;
 
+  /// Called when the user taps a hashtag (e.g. `#flutter`).
+  /// `tag` is the text without the `#` prefix.
+  final void Function(String tag)? onHashtagTap;
+
   /// Called to build an image widget for a given [src] / [alt] pair.
   /// Return `null` to fall back to a plain [Image.network].
   final Widget? Function(String src, String alt)? imageBuilder;
@@ -127,6 +131,7 @@ class LdMarkdown extends StatefulWidget {
     this.padding = EdgeInsets.zero,
     this.animated = false,
     this.onLinkTap,
+    this.onHashtagTap,
     this.imageBuilder,
   });
 
@@ -154,6 +159,7 @@ class _LdMarkdownState extends State<LdMarkdown> {
       context,
       _nodes(),
       onLinkTap: widget.onLinkTap,
+      onHashtagTap: widget.onHashtagTap,
       imageBuilder: widget.imageBuilder,
     );
 
@@ -186,7 +192,8 @@ TextStyle _paragraphStyle(BuildContext context) {
 List<Widget> markdownToWidgets(
   BuildContext context,
   List<md.Node> nodes, {
-  void Function(String url, String title)? onLinkTap,
+void Function(String url, String title)? onLinkTap,
+  void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
   return nodes
@@ -195,6 +202,7 @@ List<Widget> markdownToWidgets(
           context,
           node,
           onLinkTap: onLinkTap,
+          onHashtagTap: onHashtagTap,
           imageBuilder: imageBuilder,
         ),
       )
@@ -205,7 +213,8 @@ List<Widget> markdownToWidgets(
 Widget? _nodeToBlockWidget(
   BuildContext context,
   md.Node node, {
-  void Function(String url, String title)? onLinkTap,
+void Function(String url, String title)? onLinkTap,
+  void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
   if (node is md.Element) {
@@ -213,6 +222,7 @@ Widget? _nodeToBlockWidget(
       context,
       node,
       onLinkTap: onLinkTap,
+      onHashtagTap: onHashtagTap,
       imageBuilder: imageBuilder,
     );
   }
@@ -234,7 +244,8 @@ Widget _orphanTextWidget(BuildContext context, String text) {
 Widget _elementToBlockWidget(
   BuildContext context,
   md.Element node, {
-  void Function(String url, String title)? onLinkTap,
+void Function(String url, String title)? onLinkTap,
+  void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
   final theme = LdTheme.of(context, listen: true);
@@ -252,6 +263,7 @@ Widget _elementToBlockWidget(
       context,
       node,
       onLinkTap: onLinkTap,
+      onHashtagTap: onHashtagTap,
       imageBuilder: imageBuilder,
     ),
 
@@ -260,6 +272,7 @@ Widget _elementToBlockWidget(
       node,
       ordered: false,
       onLinkTap: onLinkTap,
+      onHashtagTap: onHashtagTap,
       imageBuilder: imageBuilder,
     ),
     'ol' => _buildList(
@@ -267,6 +280,7 @@ Widget _elementToBlockWidget(
       node,
       ordered: true,
       onLinkTap: onLinkTap,
+      onHashtagTap: onHashtagTap,
       imageBuilder: imageBuilder,
     ),
 
@@ -283,7 +297,8 @@ Widget _elementToBlockWidget(
       context,
       node,
       onLinkTap: onLinkTap,
-      imageBuilder: imageBuilder,
+          onHashtagTap: onHashtagTap,
+            imageBuilder: imageBuilder,
     ),
 
     'input' => LdCheckbox(checked: node.attributes['checked'] == 'true'),
@@ -296,6 +311,7 @@ Widget _elementToBlockWidget(
             context,
             node,
             onLinkTap: onLinkTap,
+            onHashtagTap: onHashtagTap,
             imageBuilder: imageBuilder,
           ),
         ],
@@ -309,6 +325,7 @@ Widget _elementToBlockWidget(
             context,
             node.children ?? [],
             onLinkTap: onLinkTap,
+            onHashtagTap: onHashtagTap,
             imageBuilder: imageBuilder,
           ),
         ),
@@ -327,6 +344,7 @@ Widget _elementToBlockWidget(
           context,
           node.children ?? [],
           onLinkTap: onLinkTap,
+          onHashtagTap: onHashtagTap,
           imageBuilder: imageBuilder,
         ),
       ),
@@ -342,6 +360,7 @@ Widget _elementToBlockWidget(
                 context,
                 child as md.Element,
                 onLinkTap: onLinkTap,
+                onHashtagTap: onHashtagTap,
                 imageBuilder: imageBuilder,
               ),
             )
@@ -356,6 +375,7 @@ Widget _elementToBlockWidget(
               context,
               child as md.Element,
               onLinkTap: onLinkTap,
+              onHashtagTap: onHashtagTap,
               imageBuilder: imageBuilder,
             ),
           )
@@ -370,6 +390,7 @@ Widget _elementToBlockWidget(
                 context,
                 child as md.Element,
                 onLinkTap: onLinkTap,
+                onHashtagTap: onHashtagTap,
                 imageBuilder: imageBuilder,
               ),
             )
@@ -383,6 +404,7 @@ Widget _elementToBlockWidget(
           context,
           node,
           onLinkTap: onLinkTap,
+          onHashtagTap: onHashtagTap,
           imageBuilder: imageBuilder,
         ),
       ),
@@ -395,6 +417,7 @@ Widget _elementToBlockWidget(
               context,
               child as md.Element,
               onLinkTap: onLinkTap,
+              onHashtagTap: onHashtagTap,
               imageBuilder: imageBuilder,
             ),
           )
@@ -419,6 +442,7 @@ Widget _elementToBlockWidget(
             context,
             node.children ?? [],
             onLinkTap: onLinkTap,
+            onHashtagTap: onHashtagTap,
             imageBuilder: imageBuilder,
           ),
         ),
@@ -429,6 +453,7 @@ Widget _elementToBlockWidget(
           context,
           node.children ?? [],
           onLinkTap: onLinkTap,
+          onHashtagTap: onHashtagTap,
           imageBuilder: imageBuilder,
         ),
       ),
@@ -441,13 +466,15 @@ Widget _elementToBlockWidget(
 Widget _combineBlockWidgets(
   BuildContext context,
   List<md.Node> nodes, {
-  void Function(String url, String title)? onLinkTap,
+void Function(String url, String title)? onLinkTap,
+  void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
   final widgets = markdownToWidgets(
     context,
     nodes,
     onLinkTap: onLinkTap,
+    onHashtagTap: onHashtagTap,
     imageBuilder: imageBuilder,
   );
   return switch (widgets.length) {
@@ -463,7 +490,8 @@ Widget _combineBlockWidgets(
 Widget _tableCellContent(
   BuildContext context,
   md.Element cell, {
-  void Function(String url, String title)? onLinkTap,
+void Function(String url, String title)? onLinkTap,
+  void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
   final children = cell.children ?? [];
@@ -476,6 +504,7 @@ Widget _tableCellContent(
         context,
         child,
         onLinkTap: onLinkTap,
+        onHashtagTap: onHashtagTap,
         imageBuilder: imageBuilder,
       );
     }
@@ -488,6 +517,7 @@ Widget _tableCellContent(
         context,
         children,
         onLinkTap: onLinkTap,
+        onHashtagTap: onHashtagTap,
         imageBuilder: imageBuilder,
       ),
     ),
@@ -522,7 +552,8 @@ Widget _buildList(
   md.Element list, {
   required bool ordered,
   int indent = 0,
-  void Function(String url, String title)? onLinkTap,
+void Function(String url, String title)? onLinkTap,
+  void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
   if (_listHasNestedLists(list)) {
@@ -540,6 +571,7 @@ Widget _buildList(
                 index: i,
                 indent: indent,
                 onLinkTap: onLinkTap,
+                onHashtagTap: onHashtagTap,
                 imageBuilder: imageBuilder,
               ),
         ],
@@ -557,6 +589,7 @@ Widget _buildList(
           list,
           ordered: ordered,
           onLinkTap: onLinkTap,
+          onHashtagTap: onHashtagTap,
           imageBuilder: imageBuilder,
         ),
       ),
@@ -568,7 +601,8 @@ List<InlineSpan> _flatListSpans(
   BuildContext context,
   md.Element list, {
   required bool ordered,
-  void Function(String url, String title)? onLinkTap,
+void Function(String url, String title)? onLinkTap,
+  void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
   final style = _paragraphStyle(context);
@@ -587,6 +621,7 @@ List<InlineSpan> _flatListSpans(
         node,
         style: style,
         onLinkTap: onLinkTap,
+        onHashtagTap: onHashtagTap,
         imageBuilder: imageBuilder,
       ),
     );
@@ -599,7 +634,8 @@ List<InlineSpan> _flatListSpans(
 Widget _buildStandaloneListItem(
   BuildContext context,
   md.Element li, {
-  void Function(String url, String title)? onLinkTap,
+void Function(String url, String title)? onLinkTap,
+  void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
   return _buildNestedListItem(
@@ -609,6 +645,7 @@ Widget _buildStandaloneListItem(
     index: 0,
     indent: 0,
     onLinkTap: onLinkTap,
+    onHashtagTap: onHashtagTap,
     imageBuilder: imageBuilder,
   );
 }
@@ -619,7 +656,8 @@ Widget _buildNestedListItem(
   required bool ordered,
   required int index,
   required int indent,
-  void Function(String url, String title)? onLinkTap,
+void Function(String url, String title)? onLinkTap,
+  void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
   final style = _paragraphStyle(context);
@@ -630,7 +668,8 @@ Widget _buildNestedListItem(
       li,
       style: style,
       onLinkTap: onLinkTap,
-      imageBuilder: imageBuilder,
+          onHashtagTap: onHashtagTap,
+            imageBuilder: imageBuilder,
     ),
   ];
 
@@ -644,6 +683,7 @@ Widget _buildNestedListItem(
           ordered: child.tag == 'ol',
           indent: indent + 1,
           onLinkTap: onLinkTap,
+          onHashtagTap: onHashtagTap,
           imageBuilder: imageBuilder,
         ),
       );
@@ -694,7 +734,8 @@ List<InlineSpan> _listItemInlineSpans(
   BuildContext context,
   md.Element li, {
   required TextStyle style,
-  void Function(String url, String title)? onLinkTap,
+void Function(String url, String title)? onLinkTap,
+  void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
   final spans = <InlineSpan>[];
@@ -714,6 +755,7 @@ List<InlineSpan> _listItemInlineSpans(
               context,
               child.children ?? [],
               onLinkTap: onLinkTap,
+              onHashtagTap: onHashtagTap,
               imageBuilder: imageBuilder,
             ),
           );
@@ -724,6 +766,7 @@ List<InlineSpan> _listItemInlineSpans(
               context,
               child,
               onLinkTap: onLinkTap,
+              onHashtagTap: onHashtagTap,
               imageBuilder: imageBuilder,
             ),
           );
@@ -734,6 +777,7 @@ List<InlineSpan> _listItemInlineSpans(
           context,
           child,
           onLinkTap: onLinkTap,
+          onHashtagTap: onHashtagTap,
           imageBuilder: imageBuilder,
         ),
       );
@@ -746,7 +790,8 @@ List<InlineSpan> _listItemInlineSpans(
 List<InlineSpan> _inlineNodesToSpans(
   BuildContext context,
   List<md.Node> nodes, {
-  void Function(String url, String title)? onLinkTap,
+void Function(String url, String title)? onLinkTap,
+  void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
   return nodes
@@ -755,6 +800,7 @@ List<InlineSpan> _inlineNodesToSpans(
           context,
           node,
           onLinkTap: onLinkTap,
+          onHashtagTap: onHashtagTap,
           imageBuilder: imageBuilder,
         ),
       )
@@ -778,6 +824,39 @@ Map<String, TextStyle> _themedHighlightMap(
 }
 
 const _kCodeFontSize = 13.0;
+
+final _hashtagRegex = RegExp(r'(?<!\w)#(\w[\w-]*)');
+
+List<TextSpan> _splitTextByHashtags(
+  String text,
+  void Function(String tag) onHashtagTap,
+  BuildContext context,
+) {
+  final theme = LdTheme.of(context);
+  final spans = <TextSpan>[];
+  var lastEnd = 0;
+
+  for (final m in _hashtagRegex.allMatches(text)) {
+    if (m.start > lastEnd) {
+      spans.add(TextSpan(text: text.substring(lastEnd, m.start)));
+    }
+    final tag = m.group(1)!;
+    spans.add(
+      TextSpan(
+        text: m.group(0),
+        style: TextStyle(color: theme.primaryColor),
+        recognizer: TapGestureRecognizer()..onTap = () => onHashtagTap(tag),
+      ),
+    );
+    lastEnd = m.end;
+  }
+
+  if (lastEnd < text.length) {
+    spans.add(TextSpan(text: text.substring(lastEnd)));
+  }
+
+  return spans;
+}
 
 class _MarkdownCode extends StatelessWidget {
   final String code;
@@ -826,7 +905,8 @@ class _MarkdownCode extends StatelessWidget {
 Widget buildText(
   BuildContext context,
   md.Element text, {
-  void Function(String url, String title)? onLinkTap,
+void Function(String url, String title)? onLinkTap,
+  void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
   final theme = LdTheme.of(context, listen: true);
@@ -851,6 +931,7 @@ Widget buildText(
           context,
           text.children ?? [],
           onLinkTap: onLinkTap,
+          onHashtagTap: onHashtagTap,
           imageBuilder: imageBuilder,
         ),
         style: switch (text.tag) {
@@ -872,11 +953,18 @@ Widget buildText(
 InlineSpan buildTextSpan(
   BuildContext context,
   md.Node node, {
-  void Function(String url, String title)? onLinkTap,
+void Function(String url, String title)? onLinkTap,
+  void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
   if (node is md.Text) {
-    return TextSpan(text: node.textContent);
+    final text = node.textContent;
+    if (onHashtagTap != null && text.contains('#')) {
+      final spans = _splitTextByHashtags(text, onHashtagTap, context);
+      if (spans.length == 1) return spans.first;
+      return TextSpan(children: spans);
+    }
+    return TextSpan(text: text);
   }
   if (node is md.UnparsedContent) {
     return TextSpan(text: node.textContent);
@@ -890,6 +978,7 @@ InlineSpan buildTextSpan(
                 context,
                 e,
                 onLinkTap: onLinkTap,
+                onHashtagTap: onHashtagTap,
                 imageBuilder: imageBuilder,
               ),
             )

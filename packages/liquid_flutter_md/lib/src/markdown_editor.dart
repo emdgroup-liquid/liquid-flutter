@@ -35,6 +35,10 @@ class LdMarkdownEditor extends StatefulWidget {
   /// Called when the user taps a link.
   final void Function(String url, String title)? onLinkTap;
 
+  /// Called when the user taps a hashtag (e.g. `#flutter`).
+  /// `tag` is the text without the `#` prefix.
+  final void Function(String tag)? onHashtagTap;
+
   /// Resolves images; return null to fall back to [Image.network].
   final Widget? Function(String src, String alt)? imageBuilder;
 
@@ -50,16 +54,10 @@ class LdMarkdownEditor extends StatefulWidget {
   /// Focus node.
   final FocusNode? focusNode;
 
-  /// Whether the field is in read-only mode.
+  /// Whether the field is disabled.
   ///
-  /// In read-only mode the WYSIWYG rendered view is always shown and tapping
-  /// the field does not bring up the keyboard. Defaults to `false`.
-  final bool readOnly;
-
-  /// Whether the field is enabled.
-  ///
-  /// A disabled field does not respond to user input. Defaults to `true`.
-  final bool enabled;
+  /// A disabled field does not respond to user input. Defaults to `false`.
+  final bool disabled;
 
   /// Whether the field should be focused automatically when the widget is
   /// inserted into the tree. Defaults to `false`.
@@ -95,13 +93,13 @@ class LdMarkdownEditor extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
     this.onLinkTap,
+    this.onHashtagTap,
     this.imageBuilder,
     this.minLines,
     this.maxLines,
     this.hintText,
     this.focusNode,
-    this.readOnly = false,
-    this.enabled = true,
+    this.disabled = false,
     this.autofocus = false,
     this.textInputAction = TextInputAction.newline,
     this.inputFormatters,
@@ -130,6 +128,7 @@ class _LdMarkdownEditorState extends State<LdMarkdownEditor> {
       _controller = widget.controller!;
     }
     _controller.onLinkTap = widget.onLinkTap;
+    _controller.onHashtagTap = widget.onHashtagTap;
     _controller.imageBuilder = widget.imageBuilder;
 
     if (widget.focusNode == null) {
@@ -154,6 +153,7 @@ class _LdMarkdownEditorState extends State<LdMarkdownEditor> {
       _controller = widget.controller!;
     }
     _controller.onLinkTap = widget.onLinkTap;
+    _controller.onHashtagTap = widget.onHashtagTap;
     _controller.imageBuilder = widget.imageBuilder;
   }
 
@@ -372,8 +372,7 @@ class _LdMarkdownEditorState extends State<LdMarkdownEditor> {
       expands: widget.expands,
       keyboardType: TextInputType.multiline,
       textInputAction: widget.textInputAction,
-      readOnly: widget.readOnly,
-      enabled: widget.enabled,
+      enabled: !widget.disabled,
       autofocus: widget.autofocus,
       inputFormatters: widget.inputFormatters,
       autocorrect: widget.autocorrect,
@@ -393,9 +392,8 @@ class _LdMarkdownEditorState extends State<LdMarkdownEditor> {
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context);
 
-final focused = _focusNode.hasFocus;
+    final focused = _focusNode.hasFocus;
     _controller.isEditing = focused;
-    final showRaw = focused || _controller.text.isEmpty;
 
     // The TextField must always stay mounted so the FocusNode remains attached.
     // When blurred we show a Text.rich driven by the same controller (with
@@ -403,21 +401,20 @@ final focused = _focusNode.hasFocus;
     // tap overlay to re-focus. Text.rich has no strut so WidgetSpan heights
     // work correctly.
     return Stack(
-children: [
-        // Show the raw TextField when focused or when empty (so the hint
-        // placeholder is always visible and the user can tap to focus).
+      children: [
+        // Always mounted — keeps FocusNode attached.
         Offstage(
-          offstage: !showRaw,
+          offstage: !focused,
           child: TapRegion(onTapOutside: (_) => _focusNode.unfocus(), child: _buildTextField(context, theme)),
         ),
 
-        // Shown when blurred and non-empty: Text.rich from the same controller.
+        // Shown when blurred: Text.rich from the same controller.
         // Match TextField's text metrics exactly:
         //  - same style (including letterSpacing:0 / wordSpacing:0 to match
         //    EditableText's internal behaviour and prevent layout shift)
         //  - strutStyle derived from that style (same as TextField does internally)
         //  - textHeightBehavior matching EditableText's default
-        if (!focused && _controller.text.isNotEmpty) ...[
+        if ((!focused) && _controller.text.isNotEmpty) ...[
           Text.rich(
             _controller.buildTextSpan(
               context: context,
@@ -436,7 +433,7 @@ children: [
               forceStrutHeight: true,
             ),
           ),
-          if (!widget.readOnly && widget.enabled)
+          if (!widget.disabled)
             Positioned.fill(
               child: GestureDetector(behavior: HitTestBehavior.translucent, onTap: () => _focusNode.requestFocus()),
             ),

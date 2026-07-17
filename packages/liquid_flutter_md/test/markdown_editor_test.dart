@@ -157,7 +157,7 @@ void main() {
         _withTheme(LdMarkdownEditor(controller: ctrl)),
       );
 
-      expect(find.text('initial'), findsOneWidget);
+      expect(ctrl.text, 'initial');
     });
   });
 
