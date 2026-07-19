@@ -18,7 +18,7 @@ void main() {
       _SearchItem(2, 'Banana bread'),
     ];
     final repository = LdListController(
-      LdCallbackModel.greedy<_SearchItem, int>(
+      LdCallbackModel.greedy<_SearchItem, int, _SearchItem, _SearchItem>(
         pageSize: 10,
         getById: (context, id) async => items.firstWhere((item) => item.id == id),
         fetchListWithParameters: (parameters) async {

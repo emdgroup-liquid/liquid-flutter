@@ -111,6 +111,22 @@ class LdCheckbox extends StatelessWidget {
     super.key,
   });
 
+  factory LdCheckbox.fromConfig({
+    required LdCheckboxConfig config,
+    Key? key,
+  }) {
+    return LdCheckbox(
+      label: config.label,
+      checked: config.checked,
+      onChanged: config.onChanged,
+      color: config.color,
+      focusNode: config.focusNode,
+      size: config.size,
+      disabled: config.disabled,
+      key: key,
+    );
+  }
+
   final String? label;
 
   final bool? checked;

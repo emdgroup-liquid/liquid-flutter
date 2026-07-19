@@ -23,23 +23,32 @@ class _TestTask with Identifiable<int> {
 
 class _StubRouter implements LdMonkeyRouterController<_TestTask, int> {
   @override
-  void updateFilter(BuildContext context, LdFilterOption<_TestTask, int> filter) {}
+  void updateFilter(
+    BuildContext context,
+    LdFilterOption<_TestTask, int> filter,
+  ) {}
 
   @override
   void updateSelection(BuildContext context, Set<int> selection) {}
 
   @override
-  void updateShowSelectionControls(BuildContext context, bool showSelectionControls) {}
+  void updateShowSelectionControls(
+    BuildContext context,
+    bool showSelectionControls,
+  ) {}
 
   @override
-  void updateSortOptions(BuildContext context, List<LdSortOption<_TestTask, int>> sortOptions) {}
+  void updateSortOptions(
+    BuildContext context,
+    List<LdSortOption<_TestTask, int>> sortOptions,
+  ) {}
 
   @override
   void updateViewing(BuildContext context, Set<int> viewingItems) {}
 }
 
 Widget _wrapDetailForm({
-  required LdCallbackModel<_TestTask, int> model,
+  required LdCallbackModel<_TestTask, int, _TestTask, _TestTask> model,
   required LdListController<_TestTask, int> listController,
   required Widget child,
 }) {
@@ -55,8 +64,12 @@ Widget _wrapDetailForm({
             path: '/task-demo/1',
             builder: (context, state) => MultiProvider(
               providers: [
-                Provider<LdModel<_TestTask, int, Object?, Object?>>.value(value: model),
-                ListenableProvider<LdListController<_TestTask, int>>.value(value: listController),
+                Provider<LdModel<_TestTask, int, Object?, Object?>>.value(
+                  value: model,
+                ),
+                ListenableProvider<LdListController<_TestTask, int>>.value(
+                  value: listController,
+                ),
               ],
               child: Provider<LdMonkeySelection<_TestTask, int>>.value(
                 value: LdMonkeySelection<_TestTask, int>(
@@ -77,11 +90,12 @@ Widget _wrapDetailForm({
   );
 }
 
-LdCallbackModel<_TestTask, int> _buildModel(
+LdCallbackModel<_TestTask, int, _TestTask, _TestTask> _buildModel(
   List<_TestTask> tasks, {
-  Future<_TestTask?> Function(BuildContext context, int id, _TestTask item)? updateItem,
+  Future<_TestTask?> Function(BuildContext context, int id, _TestTask item)?
+      updateItem,
 }) {
-  return LdCallbackModel<_TestTask, int>(
+  return LdCallbackModel<_TestTask, int, _TestTask, _TestTask>(
     pageSize: 10,
     initialItems: tasks,
     getById: (context, id) async => tasks.firstWhere((t) => t.id == id),
@@ -94,8 +108,13 @@ LdCallbackModel<_TestTask, int> _buildModel(
   );
 }
 
-LdListController<_TestTask, int> _buildListController(LdCallbackModel<_TestTask, int> model) {
-  return LdListController<_TestTask, int>(model, initialItems: model.initialItems);
+LdListController<_TestTask, int> _buildListController(
+  LdCallbackModel<_TestTask, int, _TestTask, _TestTask> model,
+) {
+  return LdListController<_TestTask, int>(
+    model,
+    initialItems: model.initialItems,
+  );
 }
 
 Widget _detailFormFor(List<_TestTask> tasks) {
@@ -113,9 +132,9 @@ Widget _detailFormFor(List<_TestTask> tasks) {
       title: form.control('title').value as String,
     ),
     itemToDetail: (context, entity) async => entity!,
-    formItems: [
-      LdReactiveFormItem<String>(key: 'title'),
-    ],
+    formGroup: (context) => FormGroup({
+      'title': FormControl<String>(),
+    }),
     child: Column(
       children: [
         LdFormInput<String>(
@@ -164,9 +183,9 @@ void main() {
             title: form.control('title').value as String,
           ),
           itemToDetail: (context, entity) async => entity!,
-          formItems: [
-            LdReactiveFormItem<String>(key: 'title'),
-          ],
+          formGroup: (context) => FormGroup({
+            'title': FormControl<String>(),
+          }),
           child: Column(
             children: [
               LdFormInput<String>(
@@ -189,7 +208,10 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
 
     final saveButton = find.byWidgetPredicate(
-      (widget) => widget is LdButton && widget.child is Text && (widget.child as Text).data == 'Save',
+      (widget) =>
+          widget is LdButton &&
+          widget.child is Text &&
+          (widget.child as Text).data == 'Save',
     );
     expect(saveButton, findsOneWidget);
     expect(tester.widget<LdButton>(saveButton).disabled, isFalse);
@@ -232,9 +254,9 @@ void main() {
                 title: form.control('title').value as String,
               ),
               itemToDetail: (context, entity) async => entity!,
-              formItems: [
-                LdReactiveFormItem<String>(key: 'title'),
-              ],
+              formGroup: (context) => FormGroup({
+                'title': FormControl<String>(),
+              }),
               child: Column(
                 children: [
                   LdFormInput<String>(
@@ -265,7 +287,8 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
   });
 
-  testWidgets('blocked back shows discard dialog and pops on confirm', (tester) async {
+  testWidgets('blocked back shows discard dialog and pops on confirm',
+      (tester) async {
     final tasks = [_TestTask(1, 'Original', false)];
     final model = _buildModel(tasks);
     final listController = _buildListController(model);
@@ -273,8 +296,12 @@ void main() {
     Widget detailRoute(BuildContext context) {
       return MultiProvider(
         providers: [
-          Provider<LdModel<_TestTask, int, Object?, Object?>>.value(value: model),
-          ListenableProvider<LdListController<_TestTask, int>>.value(value: listController),
+          Provider<LdModel<_TestTask, int, Object?, Object?>>.value(
+            value: model,
+          ),
+          ListenableProvider<LdListController<_TestTask, int>>.value(
+            value: listController,
+          ),
         ],
         child: Provider<LdMonkeySelection<_TestTask, int>>.value(
           value: LdMonkeySelection<_TestTask, int>(
@@ -348,7 +375,8 @@ void main() {
     expect(find.byType(LdInput), findsNothing);
   });
 
-  testWidgets('blocked back keeps the form when discard is cancelled', (tester) async {
+  testWidgets('blocked back keeps the form when discard is cancelled',
+      (tester) async {
     final tasks = [_TestTask(1, 'Original', false)];
     final model = _buildModel(tasks);
     final listController = _buildListController(model);
@@ -356,8 +384,12 @@ void main() {
     Widget detailRoute(BuildContext context) {
       return MultiProvider(
         providers: [
-          Provider<LdModel<_TestTask, int, Object?, Object?>>.value(value: model),
-          ListenableProvider<LdListController<_TestTask, int>>.value(value: listController),
+          Provider<LdModel<_TestTask, int, Object?, Object?>>.value(
+            value: model,
+          ),
+          ListenableProvider<LdListController<_TestTask, int>>.value(
+            value: listController,
+          ),
         ],
         child: Provider<LdMonkeySelection<_TestTask, int>>.value(
           value: LdMonkeySelection<_TestTask, int>(
@@ -448,10 +480,10 @@ void main() {
             title: form.control('title').value as String,
           ),
           itemToDetail: (context, entity) async => entity!,
-          formItems: [
-            LdReactiveFormItem<String>(key: 'title'),
-            LdReactiveFormItem<String>(key: 'note'),
-          ],
+          formGroup: (context) => FormGroup({
+            'title': FormControl<String>(),
+            'note': FormControl<String>(),
+          }),
           child: Column(
             children: [
               LdFormInput<String>(
@@ -498,9 +530,9 @@ void main() {
             title: form.control('title').value as String,
           ),
           itemToDetail: (context, entity) async => entity!,
-          formItems: [
-            LdReactiveFormItem<String>(key: 'title'),
-          ],
+          formGroup: (context) => FormGroup({
+            'title': FormControl<String>(),
+          }),
           child: Column(
             children: [
               Builder(

@@ -48,7 +48,7 @@ LdListController<_Item, int> _makeController(
   Future<void> Function(BuildContext, int)? deleteItem,
 }) {
   return LdListController.fromModel(
-    LdCallbackModel<_Item, int>(
+    LdCallbackModel<_Item, int, _Item, _Item>(
       fetchListWithParameters: fetchFn,
       getById: (ctx, id) async => _Item(id),
       deleteItem: deleteItem,
@@ -66,9 +66,7 @@ void main() {
   // 1. Server shrinks the total between two consecutive page fetches
   // ──────────────────────────────────────────────────────────────────────────
   group('Server total shrinks between page fetches', () {
-    testWidgets(
-        'totalItems updates to the smaller value returned by the second page',
-        (tester) async {
+    testWidgets('totalItems updates to the smaller value returned by the second page', (tester) async {
       // Page 0 → 5 items, claims total = 20.
       // Page 5 → 5 items, claims total = 8  (server shrank between requests).
       final serverData = List.generate(10, (i) => _Item(i + 1));
@@ -86,23 +84,19 @@ void main() {
       final ctx = await _ctx(tester);
 
       // Fetch page 0 — totalItems becomes 20
-      await controller.fetchPageAtOffset(ctx, 0,
-          reason: LdFetchReason.initial);
+      await controller.fetchPageAtOffset(ctx, 0, reason: LdFetchReason.initial);
       await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(controller.totalItems, 20);
 
       // Fetch page 5 — totalItems must shrink to 8
-      await controller.fetchPageAtOffset(ctx, 5,
-          reason: LdFetchReason.pagination);
+      await controller.fetchPageAtOffset(ctx, 5, reason: LdFetchReason.pagination);
       await tester.pumpAndSettle(const Duration(seconds: 1));
-      expect(controller.totalItems, 8,
-          reason: 'totalItems must track the latest server total');
+      expect(controller.totalItems, 8, reason: 'totalItems must track the latest server total');
 
       controller.dispose();
     });
 
-    testWidgets('items beyond the new total are not shown as gaps',
-        (tester) async {
+    testWidgets('items beyond the new total are not shown as gaps', (tester) async {
       // Page 0 claims total = 15; refresh returns total = 3.
       var callCount = 0;
       final controller = _makeController((params) async {
@@ -124,16 +118,14 @@ void main() {
       });
 
       final ctx = await _ctx(tester);
-      await controller.fetchPageAtOffset(ctx, 0,
-          reason: LdFetchReason.initial);
+      await controller.fetchPageAtOffset(ctx, 0, reason: LdFetchReason.initial);
       await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(controller.totalItems, 15);
 
       await controller.refreshList(context: ctx, reason: LdFetchReason.refresh);
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
-      expect(controller.totalItems, 3,
-          reason: 'after refresh totalItems must equal the new server total');
+      expect(controller.totalItems, 3, reason: 'after refresh totalItems must equal the new server total');
       // items() has length = totalItems; none should be null since we loaded
       // all 3 items in the single refresh page
       final items = controller.items;
@@ -149,9 +141,7 @@ void main() {
   //    fetch (server shifted items between the two requests)
   // ──────────────────────────────────────────────────────────────────────────
   group('Cross-page eviction', () {
-    testWidgets(
-        'item that moved from page 0 to page 1 is not duplicated in the map',
-        (tester) async {
+    testWidgets('item that moved from page 0 to page 1 is not duplicated in the map', (tester) async {
       // Snapshot A (served on first fetch of offset=0):
       //   [1, 2, 3, 4, 5]  total=10
       // Snapshot B (served on first fetch of offset=5):
@@ -182,27 +172,22 @@ void main() {
       });
 
       final ctx = await _ctx(tester);
-      await controller.fetchPageAtOffset(ctx, 0,
-          reason: LdFetchReason.initial);
+      await controller.fetchPageAtOffset(ctx, 0, reason: LdFetchReason.initial);
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
-      await controller.fetchPageAtOffset(ctx, 5,
-          reason: LdFetchReason.pagination);
+      await controller.fetchPageAtOffset(ctx, 5, reason: LdFetchReason.pagination);
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
       // id=5 must appear exactly once in the loaded items
-      final allIds = controller.itemsMap.values
-          .where((item) => item.value != null)
-          .map((item) => item.value!.id)
-          .toList();
+      final allIds =
+          controller.itemsMap.values.where((item) => item.value != null).map((item) => item.value!.id).toList();
       expect(allIds.where((id) => id == 5).length, 1,
           reason: 'duplicate item must be evicted by cross-page eviction logic');
 
       controller.dispose();
     });
 
-    testWidgets('cross-page eviction clears listCache to prevent ping-pong',
-        (tester) async {
+    testWidgets('cross-page eviction clears listCache to prevent ping-pong', (tester) async {
       // Strategy:
       //  1. Pre-populate the cache for offset=5 with stale data that contains
       //     item id=3 (which will also appear in page 0).
@@ -231,7 +216,7 @@ void main() {
 
       var networkCallCount = 0;
       final controller = LdListController.fromModel(
-        LdCallbackModel<_Item, int>(
+        LdCallbackModel<_Item, int, _Item, _Item>(
           fetchListWithParameters: (params) async {
             networkCallCount++;
             // Always return page 0 data: items 1-5
@@ -252,23 +237,19 @@ void main() {
       final ctx = await _ctx(tester);
 
       // Fetch page 0 (network call, writes offset=0 to cache)
-      await controller.fetchPageAtOffset(ctx, 0,
-          reason: LdFetchReason.initial);
+      await controller.fetchPageAtOffset(ctx, 0, reason: LdFetchReason.initial);
       await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(networkCallCount, 1);
 
       // Fetch offset=5 — served from stale cache, cross-page eviction fires,
       // listCache.clear() must be called.
-      await controller.fetchPageAtOffset(ctx, 5,
-          reason: LdFetchReason.pagination);
+      await controller.fetchPageAtOffset(ctx, 5, reason: LdFetchReason.pagination);
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
       // After the eviction the entire cache must be empty (both offset=0 and
       // offset=5 entries are gone).
-      expect(cache.readPage('', 0), isNull,
-          reason: 'listCache.clear() must remove all entries including offset=0');
-      expect(cache.readPage('', 5), isNull,
-          reason: 'listCache.clear() must remove the stale offset=5 entry');
+      expect(cache.readPage('', 0), isNull, reason: 'listCache.clear() must remove all entries including offset=0');
+      expect(cache.readPage('', 5), isNull, reason: 'listCache.clear() must remove the stale offset=5 entry');
 
       controller.dispose();
     });
@@ -279,9 +260,7 @@ void main() {
   //    trigger a redundant refreshList while one is already in flight
   // ──────────────────────────────────────────────────────────────────────────
   group('Refresh storm guard', () {
-    testWidgets(
-        'confirming multiple deletions concurrently issues at most one refresh',
-        (tester) async {
+    testWidgets('confirming multiple deletions concurrently issues at most one refresh', (tester) async {
       // 10 items; pageSize=10 so indices are contiguous and compactable,
       // except we only load 5 and leave indices 5-9 unloaded so compaction
       // cannot proceed (non-contiguous sparse map after 5 items) — forcing
@@ -300,8 +279,7 @@ void main() {
       final controller = _makeController(
         (params) async {
           refreshCallCount++;
-          final slice =
-              items.skip(params.offset).take(params.pageSize).toList();
+          final slice = items.skip(params.offset).take(params.pageSize).toList();
           return LdListPage<_Item>(
             newItems: slice,
             hasMore: params.offset + params.pageSize < items.length,
@@ -316,8 +294,7 @@ void main() {
 
       final ctx = await _ctx(tester);
       // Load all items (one page of 10)
-      await controller.fetchPageAtOffset(ctx, 0,
-          reason: LdFetchReason.initial);
+      await controller.fetchPageAtOffset(ctx, 0, reason: LdFetchReason.initial);
       await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(controller.totalItems, 10);
       refreshCallCount = 0; // only count refreshes from now on
@@ -343,8 +320,7 @@ void main() {
       //
       // Either way at most 1 refresh should have been triggered.
       expect(refreshCallCount, lessThanOrEqualTo(1),
-          reason:
-              'concurrent deletes must not each trigger an independent refreshList');
+          reason: 'concurrent deletes must not each trigger an independent refreshList');
 
       controller.dispose();
     });
@@ -354,9 +330,7 @@ void main() {
   // 4. Transient item (deleting) survives a concurrent refresh
   // ──────────────────────────────────────────────────────────────────────────
   group('Transient item survives concurrent refresh', () {
-    testWidgets(
-        'item in deleting state is moved to detached map during refresh commit',
-        (tester) async {
+    testWidgets('item in deleting state is moved to detached map during refresh commit', (tester) async {
       final deleteStarted = Completer<void>();
       final deleteGate = Completer<void>();
 
@@ -364,8 +338,7 @@ void main() {
 
       final controller = _makeController(
         (params) async {
-          final slice =
-              items.skip(params.offset).take(params.pageSize).toList();
+          final slice = items.skip(params.offset).take(params.pageSize).toList();
           return LdListPage<_Item>(
             newItems: slice,
             hasMore: false,
@@ -379,8 +352,7 @@ void main() {
       );
 
       final ctx = await _ctx(tester);
-      await controller.fetchPageAtOffset(ctx, 0,
-          reason: LdFetchReason.initial);
+      await controller.fetchPageAtOffset(ctx, 0, reason: LdFetchReason.initial);
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
       // Start delete for id=3 (does not await — will block on deleteGate)
@@ -391,8 +363,7 @@ void main() {
       await tester.pump();
 
       // Verify item is in deleting state
-      expect(controller.getItemById(3)?.state,
-          LdPaginatorItemState.deleting,
+      expect(controller.getItemById(3)?.state, LdPaginatorItemState.deleting,
           reason: 'item must be in deleting state before refresh');
 
       // Trigger a refresh while delete is in-flight
@@ -402,9 +373,7 @@ void main() {
       // After the refresh committed, id=3 should still be resolvable
       // (either still in paged items or promoted to detached map)
       final item = controller.getItemById(3);
-      expect(item, isNotNull,
-          reason:
-              'in-flight deleting item must remain accessible after refresh commit');
+      expect(item, isNotNull, reason: 'in-flight deleting item must remain accessible after refresh commit');
 
       // Now release the delete — it should complete cleanly
       deleteGate.complete();
@@ -418,8 +387,7 @@ void main() {
       controller.dispose();
     });
 
-    testWidgets('delete rollback resolves cleanly after a concurrent refresh',
-        (tester) async {
+    testWidgets('delete rollback resolves cleanly after a concurrent refresh', (tester) async {
       final deleteGate = Completer<void>();
       final items = List.generate(5, (i) => _Item(i + 1));
 
@@ -438,13 +406,11 @@ void main() {
       );
 
       final ctx = await _ctx(tester);
-      await controller.fetchPageAtOffset(ctx, 0,
-          reason: LdFetchReason.initial);
+      await controller.fetchPageAtOffset(ctx, 0, reason: LdFetchReason.initial);
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
       // Start failing delete
-      final deleteFuture =
-          controller.model.delete(context: ctx, id: 2).catchError((_) {});
+      final deleteFuture = controller.model.delete(context: ctx, id: 2).catchError((_) {});
 
       await tester.pump(const Duration(milliseconds: 10));
 
@@ -459,8 +425,7 @@ void main() {
 
       // The controller must not be in an error state; item 2 should be back
       // (rolled back) and the list must be consistent
-      expect(controller.hasError, isFalse,
-          reason: 'rollback after concurrent refresh must not leave an error');
+      expect(controller.hasError, isFalse, reason: 'rollback after concurrent refresh must not leave an error');
 
       controller.dispose();
     });
@@ -486,8 +451,7 @@ void main() {
       });
 
       final ctx = await _ctx(tester);
-      await controller.fetchPageAtOffset(ctx, 0,
-          reason: LdFetchReason.initial);
+      await controller.fetchPageAtOffset(ctx, 0, reason: LdFetchReason.initial);
       await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(controller.totalItems, 5);
 
@@ -495,8 +459,7 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
       expect(controller.totalItems, 0);
-      expect(controller.busy, isFalse,
-          reason: 'busy must be false after refresh completes with empty list');
+      expect(controller.busy, isFalse, reason: 'busy must be false after refresh completes with empty list');
       expect(controller.hasError, isFalse);
 
       controller.dispose();
@@ -521,14 +484,10 @@ void main() {
       final controller = _makeController(
         (params) async {
           // After the first load, the refresh returns items without id=1
-          final isRefresh = params.reason == LdFetchReason.refresh ||
-              params.reason == LdFetchReason.invalidate;
-          final serverItems = isRefresh
-              ? items.where((i) => i.id != 1).toList()
-              : items.toList();
+          final isRefresh = params.reason == LdFetchReason.refresh || params.reason == LdFetchReason.invalidate;
+          final serverItems = isRefresh ? items.where((i) => i.id != 1).toList() : items.toList();
           return LdListPage<_Item>(
-            newItems:
-                serverItems.skip(params.offset).take(params.pageSize).toList(),
+            newItems: serverItems.skip(params.offset).take(params.pageSize).toList(),
             hasMore: false,
             total: serverItems.length,
           );
@@ -539,8 +498,7 @@ void main() {
       );
 
       final ctx = await _ctx(tester);
-      await controller.fetchPageAtOffset(ctx, 0,
-          reason: LdFetchReason.initial);
+      await controller.fetchPageAtOffset(ctx, 0, reason: LdFetchReason.initial);
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
       // Start delete for id=1 — will block
@@ -548,9 +506,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 10));
 
       // Trigger refresh (server no longer returns id=1)
-      final refreshFuture = controller
-          .refreshList(context: ctx, reason: LdFetchReason.refresh)
-          .then((_) => refreshCompleted.complete());
+      final refreshFuture =
+          controller.refreshList(context: ctx, reason: LdFetchReason.refresh).then((_) => refreshCompleted.complete());
 
       // Let refresh complete before the delete
       await refreshFuture;
@@ -574,9 +531,7 @@ void main() {
   //    is triggered
   // ──────────────────────────────────────────────────────────────────────────
   group('Inconsistent total across pages', () {
-    testWidgets(
-        'paginator does not loop when each page returns a different total',
-        (tester) async {
+    testWidgets('paginator does not loop when each page returns a different total', (tester) async {
       var fetchCount = 0;
       final controller = LdPaginator<_Item, int>(
         pageSize: 5,
@@ -600,16 +555,13 @@ void main() {
       final ctx = await _ctx(tester);
 
       // Fetch the first two pages
-      await controller.fetchPageAtOffset(ctx, 0,
-          reason: LdFetchReason.initial);
+      await controller.fetchPageAtOffset(ctx, 0, reason: LdFetchReason.initial);
       await tester.pumpAndSettle(const Duration(seconds: 1));
-      await controller.fetchPageAtOffset(ctx, 5,
-          reason: LdFetchReason.pagination);
+      await controller.fetchPageAtOffset(ctx, 5, reason: LdFetchReason.pagination);
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
       // fetchCount must be bounded — no infinite loop
-      expect(fetchCount, lessThanOrEqualTo(4),
-          reason: 'inconsistent totals must not cause an infinite fetch loop');
+      expect(fetchCount, lessThanOrEqualTo(4), reason: 'inconsistent totals must not cause an infinite fetch loop');
 
       // totalItems must reflect the most recent fetch response
       expect(controller.totalItems, isPositive);
@@ -624,9 +576,7 @@ void main() {
   //    the remaining unloaded pages
   // ──────────────────────────────────────────────────────────────────────────
   group('Delete all loaded items with more on server', () {
-    testWidgets(
-        'currentItemCount==0 with totalItems>0 does not trigger empty state',
-        (tester) async {
+    testWidgets('currentItemCount==0 with totalItems>0 does not trigger empty state', (tester) async {
       // 10 items total; page 0 (ids 1-5) is loaded, page 1 (ids 6-10) is not.
       // Deleting all 5 loaded items must leave totalItems=5 (decremented from 10),
       // currentItemCount=0, but the empty state must NOT appear because
@@ -636,8 +586,7 @@ void main() {
 
       final controller = _makeController(
         (params) async {
-          final slice =
-              serverItems.skip(params.offset).take(params.pageSize).toList();
+          final slice = serverItems.skip(params.offset).take(params.pageSize).toList();
           return LdListPage<_Item>(
             newItems: slice,
             hasMore: params.offset + params.pageSize < serverItems.length,
@@ -664,9 +613,7 @@ void main() {
       // currentItemCount must be 0 (all loaded items gone)
       expect(controller.currentItemCount, 0);
       // totalItems must still reflect the remaining server items (5 left)
-      expect(controller.totalItems, 5,
-          reason:
-              'totalItems must be decremented per deletion, not set to 0');
+      expect(controller.totalItems, 5, reason: 'totalItems must be decremented per deletion, not set to 0');
       // busy should be false (no fetch currently in flight from the controller
       // itself — the widget-driven gap-fill is separate)
       expect(controller.hasError, isFalse);
@@ -674,9 +621,7 @@ void main() {
       controller.dispose();
     });
 
-    testWidgets(
-        'LdList does not show empty state when totalItems>0 after all loaded items deleted',
-        (tester) async {
+    testWidgets('LdList does not show empty state when totalItems>0 after all loaded items deleted', (tester) async {
       // This test pumps an actual LdList widget so we can verify the
       // _buildEmpty / _buildListView branch is chosen correctly.
 
@@ -684,8 +629,7 @@ void main() {
 
       final controller = _makeController(
         (params) async {
-          final slice =
-              serverItems.skip(params.offset).take(params.pageSize).toList();
+          final slice = serverItems.skip(params.offset).take(params.pageSize).toList();
           return LdListPage<_Item>(
             newItems: slice,
             hasMore: params.offset + params.pageSize < serverItems.length,
@@ -704,8 +648,7 @@ void main() {
               body: Builder(builder: (ctx) {
                 return LdList<_Item, int>(
                   paginator: controller,
-                  itemBuilder: (ctx, item, i) =>
-                      Text('Item ${item.value.id}', key: ValueKey(item.value.id)),
+                  itemBuilder: (ctx, item, i) => Text('Item ${item.value.id}', key: ValueKey(item.value.id)),
                 );
               }),
             ),
@@ -732,8 +675,7 @@ void main() {
 
       // The list must NOT show the LdListEmpty widget while totalItems > 0
       expect(find.byType(LdListEmpty), findsNothing,
-          reason:
-              'empty state must not appear while totalItems > 0 (unloaded items remain)');
+          reason: 'empty state must not appear while totalItems > 0 (unloaded items remain)');
 
       // Let the gap-fill fetch that the placeholder rows trigger complete, then
       // dispose cleanly (no pending timers).
@@ -752,16 +694,14 @@ void main() {
   // contains such an entry, so it throws.
   // ──────────────────────────────────────────────────────────────────────────
   group('Bug #1: confirmItemUpdate after concurrent refresh', () {
-    testWidgets('does not throw when refresh evicts the updating item to detached map',
-        (tester) async {
+    testWidgets('does not throw when refresh evicts the updating item to detached map', (tester) async {
       final updateGate = Completer<void>();
       final items = List.generate(5, (i) => _Item(i + 1, 'original'));
 
       final controller = LdListController.fromModel(
-        LdCallbackModel<_Item, int>(
+        LdCallbackModel<_Item, int, _Item, _Item>(
           fetchListWithParameters: (params) async {
-            final slice =
-                items.skip(params.offset).take(params.pageSize).toList();
+            final slice = items.skip(params.offset).take(params.pageSize).toList();
             return LdListPage<_Item>(
               newItems: slice,
               hasMore: false,
@@ -784,8 +724,7 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
       // Start an update for id=2 — will block on updateGate
-      final updateFuture =
-          controller.model.update(ctx, 2, _Item(2, 'updated'));
+      final updateFuture = controller.model.update(ctx, 2, _Item(2, 'updated'));
 
       // Give scheduleItemUpdate a moment to run (item is now in `updating` state)
       await tester.pump(const Duration(milliseconds: 10));
@@ -806,16 +745,14 @@ void main() {
       controller.dispose();
     });
 
-    testWidgets('confirmed value is visible after update + concurrent refresh',
-        (tester) async {
+    testWidgets('confirmed value is visible after update + concurrent refresh', (tester) async {
       final updateGate = Completer<void>();
       final items = List.generate(5, (i) => _Item(i + 1, 'original'));
 
       final controller = LdListController.fromModel(
-        LdCallbackModel<_Item, int>(
+        LdCallbackModel<_Item, int, _Item, _Item>(
           fetchListWithParameters: (params) async {
-            final slice =
-                items.skip(params.offset).take(params.pageSize).toList();
+            final slice = items.skip(params.offset).take(params.pageSize).toList();
             return LdListPage<_Item>(
               newItems: slice,
               hasMore: false,
@@ -837,8 +774,7 @@ void main() {
       await controller.fetchPageAtOffset(ctx, 0, reason: LdFetchReason.initial);
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
-      final updateFuture =
-          controller.model.update(ctx, 3, _Item(3, 'optimistic'));
+      final updateFuture = controller.model.update(ctx, 3, _Item(3, 'optimistic'));
       await tester.pump(const Duration(milliseconds: 10));
 
       // Refresh while update in-flight
@@ -871,8 +807,7 @@ void main() {
   //   to _requestedOffsets, blocking gap-fills for the unsatisfied indices.
   // ──────────────────────────────────────────────────────────────────────────
   group('Bug #2: short server page does not cause infinite loop or permanent spinner', () {
-    testWidgets('gap-fill for unsatisfied indices completes after server returns full page',
-        (tester) async {
+    testWidgets('gap-fill for unsatisfied indices completes after server returns full page', (tester) async {
       // First call returns 3 items for offset=0, pageSize=5.
       // Second call (triggered by gap at indices 3-4) returns remaining 2.
       var fetchCount = 0;
@@ -901,15 +836,12 @@ void main() {
       // After settling, all 5 items should be loaded — no permanent spinner
       expect(controller.totalItems, 5);
       // The paginator must not loop more than a handful of times
-      expect(fetchCount, lessThanOrEqualTo(5),
-          reason: 'short page must not cause an infinite re-fetch loop');
+      expect(fetchCount, lessThanOrEqualTo(5), reason: 'short page must not cause an infinite re-fetch loop');
 
       controller.dispose();
     });
 
-    testWidgets(
-        'refresh with short page does not permanently block gap-fills for unsatisfied indices',
-        (tester) async {
+    testWidgets('refresh with short page does not permanently block gap-fills for unsatisfied indices', (tester) async {
       // Initial load: 5 items. Refresh returns only 3. Indices 3-4 must
       // eventually be loaded (either re-fetched or handled gracefully) and
       // must NOT spin forever.
@@ -948,8 +880,7 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
       // Must not spin forever
-      expect(callCount, lessThanOrEqualTo(6),
-          reason: 'short-page refresh must not cause an infinite gap-fill loop');
+      expect(callCount, lessThanOrEqualTo(6), reason: 'short-page refresh must not cause an infinite gap-fill loop');
 
       controller.dispose();
     });
@@ -961,19 +892,17 @@ void main() {
   //          isControlledRefresh guard and race to commit their results.
   // ──────────────────────────────────────────────────────────────────────────
   group('Bug #3: refreshList race window with _getOffsetById', () {
-    testWidgets('second refresh is suppressed while first is resolving anchor offset',
-        (tester) async {
+    testWidgets('second refresh is suppressed while first is resolving anchor offset', (tester) async {
       var fetchCount = 0;
       final anchorGate = Completer<void>();
 
       final items = List.generate(5, (i) => _Item(i + 1));
 
       final controller = LdListController.fromModel(
-        LdCallbackModel<_Item, int>(
+        LdCallbackModel<_Item, int, _Item, _Item>(
           fetchListWithParameters: (params) async {
             fetchCount++;
-            final slice =
-                items.skip(params.offset).take(params.pageSize).toList();
+            final slice = items.skip(params.offset).take(params.pageSize).toList();
             return LdListPage<_Item>(
               newItems: slice,
               hasMore: false,
@@ -999,10 +928,8 @@ void main() {
 
       // Fire two invalidate refreshes simultaneously — both enter the
       // _getOffsetById await before _isControlledRefresh is set.
-      final r1 = controller.refreshList(
-          context: ctx, reason: LdFetchReason.invalidate);
-      final r2 = controller.refreshList(
-          context: ctx, reason: LdFetchReason.invalidate);
+      final r1 = controller.refreshList(context: ctx, reason: LdFetchReason.invalidate);
+      final r2 = controller.refreshList(context: ctx, reason: LdFetchReason.invalidate);
 
       // Release the anchor gate so both can proceed
       anchorGate.complete();
@@ -1011,8 +938,7 @@ void main() {
 
       // Only one full refresh fetch should have been made (the second must be
       // suppressed once the first sets _isControlledRefresh = true)
-      expect(fetchCount, 1,
-          reason: 'concurrent invalidate refreshes must not both fetch; second must be suppressed');
+      expect(fetchCount, 1, reason: 'concurrent invalidate refreshes must not both fetch; second must be suppressed');
 
       controller.dispose();
     });
@@ -1067,8 +993,7 @@ void main() {
       // NOT be findable via getItemIndexById — they are stale orphans.
       for (final id in [4, 5, 6, 7, 8, 9, 10]) {
         final index = controller.getItemIndexById(id);
-        expect(index, isNull,
-            reason: 'id=$id is beyond new totalItems=3 and must not be found');
+        expect(index, isNull, reason: 'id=$id is beyond new totalItems=3 and must not be found');
       }
       controller.dispose();
     });
@@ -1123,8 +1048,7 @@ void main() {
 
       // After refresh id=6 must be at the new index (0), not the stale one (5)
       final idx = controller.getItemIndexById(6);
-      expect(idx, 0,
-          reason: 'after refresh id=6 must be found at its new index, not the stale one');
+      expect(idx, 0, reason: 'after refresh id=6 must be found at its new index, not the stale one');
 
       controller.dispose();
     });
@@ -1136,8 +1060,7 @@ void main() {
   //           gap remains, so every render re-queues the same offset.
   // ──────────────────────────────────────────────────────────────────────────
   group('Risk #5: hasMore=false with total > loaded does not loop forever', () {
-    testWidgets('empty page with hasMore=false terminates gap-fills for that offset',
-        (tester) async {
+    testWidgets('empty page with hasMore=false terminates gap-fills for that offset', (tester) async {
       // Server says total=10 but returns 0 items for offset=5 with hasMore=false.
       // The paginator must not re-fetch offset=5 indefinitely.
       var fetchCount = 0;
@@ -1173,8 +1096,7 @@ void main() {
       controller.dispose();
     });
 
-    testWidgets('empty page with hasMore=true and mismatched total also terminates',
-        (tester) async {
+    testWidgets('empty page with hasMore=true and mismatched total also terminates', (tester) async {
       // Even more pathological: every call returns empty with hasMore=true.
       // The paginator must give up after a reasonable number of attempts.
       var fetchCount = 0;

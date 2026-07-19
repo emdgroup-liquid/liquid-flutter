@@ -241,6 +241,37 @@ class LdAppBar extends StatelessWidget {
     super.key,
   });
 
+  factory LdAppBar.fromConfig({
+    required LdAppBarConfig config,
+    Key? key,
+  }) {
+    return LdAppBar(
+      actions: config.actions,
+      addContainer: config.addContainer,
+      attachedMode: config.attachedMode,
+      autoAttachToKeyboard: config.autoAttachToKeyboard,
+      backgroundColor: config.backgroundColor,
+      backgroundMode: config.backgroundMode,
+      borderMode: config.borderMode,
+      bottom: config.bottom,
+      debugName: config.debugName,
+      insetScreenRadius: config.insetScreenRadius,
+      implyFeatures: config.implyFeatures,
+      avoidViewInsets: config.avoidViewInsets,
+      leading: config.leading,
+      overflowMenuProviders: config.overflowMenuProviders,
+      positionMode: config.positionMode,
+      scrollBehavior: config.scrollBehavior,
+      searchConfig: config.searchConfig,
+      shadowMode: config.shadowMode,
+      title: config.title,
+      trailing: config.trailing,
+      padding: config.padding,
+      key: key,
+      child: config.child,
+    );
+  }
+
   factory LdAppBar.top({
     required Widget child,
     List<Widget>? actions,

@@ -222,6 +222,35 @@ class LdListItem extends StatelessWidget {
     super.key,
   });
 
+  factory LdListItem.fromConfig({
+    required LdListItemConfig config,
+    Key? key,
+  }) {
+    return LdListItem(
+      active: config.active,
+      borderRadius: config.borderRadius,
+      disabled: config.disabled,
+      isSelected: config.isSelected,
+      leading: config.leading,
+      onSelectionChanged: config.onSelectionChanged,
+      onPressed: config.onPressed,
+      padding: config.padding,
+      selectDisabled: config.selectDisabled,
+      subContent: config.subContent,
+      subtitle: config.subtitle,
+      title: config.title,
+      tradeLeadingForSelectionControl: config.tradeLeadingForSelectionControl,
+      shadow: config.shadow,
+      focusNode: config.focusNode,
+      trailing: config.trailing,
+      color: config.color,
+      width: config.width,
+      isOdd: config.isOdd,
+      selectionControl: config.selectionControl,
+      key: key,
+    );
+  }
+
   factory LdListItem.trailingForward({
     bool? active,
     BorderRadius? borderRadius,

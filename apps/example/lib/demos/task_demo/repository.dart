@@ -47,7 +47,7 @@ List<Task> applyFiltersAndSorting(
   return filtered;
 }
 
-LdCallbackModel<Task, int> taskModel(BuildContext context) => LdCallbackModel<Task, int>(
+LdCallbackModel<Task, int, Task, Task> taskModel(BuildContext context) => LdCallbackModel<Task, int, Task, Task>(
   pageSize: 5,
   getOffsetByIdFn: (params) async {
     return applyFiltersAndSorting(
@@ -105,4 +105,3 @@ LdCallbackModel<Task, int> taskModel(BuildContext context) => LdCallbackModel<Ta
     return item;
   },
 );
-

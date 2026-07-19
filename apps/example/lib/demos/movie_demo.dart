@@ -66,50 +66,51 @@ List<MovieDemo> applyMovieFilters(List<MovieDemo> data, Set<LdFilterOption<Movie
   return ldFuzzySearchFromFilters<MovieDemo, int>(items: filtered, filters: filters, searchText: movieSearchText);
 }
 
-LdCallbackModel<MovieDemo, int> movieModel(BuildContext context) => LdCallbackModel<MovieDemo, int>(
-  pageSize: 5,
-  getOffsetByIdFn: (parameters) async {
-    await Future.delayed(const Duration(seconds: 1));
+LdCallbackModel<MovieDemo, int, MovieDemo, MovieDemo> movieModel(BuildContext context) =>
+    LdCallbackModel<MovieDemo, int, MovieDemo, MovieDemo>(
+      pageSize: 5,
+      getOffsetByIdFn: (parameters) async {
+        await Future.delayed(const Duration(seconds: 1));
 
-    final filtered = applyMovieFilters(movieData, parameters.filters);
+        final filtered = applyMovieFilters(movieData, parameters.filters);
 
-    return filtered.indexWhere((element) => element.id == parameters.id);
-  },
-  getById: (context, id) async {
-    return movieData.firstWhere((element) => element.id == id);
-  },
+        return filtered.indexWhere((element) => element.id == parameters.id);
+      },
+      getById: (context, id) async {
+        return movieData.firstWhere((element) => element.id == id);
+      },
 
-  fetchListWithParameters: (FetchPageParameters<MovieDemo, int> parameters) async {
-    await Future.delayed(const Duration(milliseconds: 50));
-    final filtered = applyMovieFilters(movieData, parameters.filters);
-    return LdListPage<MovieDemo>(
-      newItems: filtered.skip(parameters.offset).take(parameters.pageSize).toList(),
-      hasMore: parameters.offset + parameters.pageSize < filtered.length,
-      total: filtered.length,
+      fetchListWithParameters: (FetchPageParameters<MovieDemo, int> parameters) async {
+        await Future.delayed(const Duration(milliseconds: 50));
+        final filtered = applyMovieFilters(movieData, parameters.filters);
+        return LdListPage<MovieDemo>(
+          newItems: filtered.skip(parameters.offset).take(parameters.pageSize).toList(),
+          hasMore: parameters.offset + parameters.pageSize < filtered.length,
+          total: filtered.length,
+        );
+      },
+      deleteItem: (context, id) async {
+        movieData.removeWhere((element) => element.id == id);
+        await Future.delayed(const Duration(milliseconds: 500));
+      },
+      deleteBatchFn: (context, ids) async {
+        for (final id in ids) {
+          movieData.removeWhere((element) => element.id == id);
+        }
+        await Future.delayed(const Duration(milliseconds: 500));
+      },
+      updateItem: (context, id, newItem) async {
+        final index = movieData.indexWhere((element) => element.id == id);
+        newItem = newItem.copyWith(lastUpdate: DateTime.now());
+        movieData[index] = newItem;
+        await Future.delayed(const Duration(milliseconds: 500));
+        return newItem;
+      },
+      createItem: (context, item) async {
+        movieData.add(item);
+        return item;
+      },
     );
-  },
-  deleteItem: (context, id) async {
-    movieData.removeWhere((element) => element.id == id);
-    await Future.delayed(const Duration(milliseconds: 500));
-  },
-  deleteBatchFn: (context, ids) async {
-    for (final id in ids) {
-      movieData.removeWhere((element) => element.id == id);
-    }
-    await Future.delayed(const Duration(milliseconds: 500));
-  },
-  updateItem: (context, id, newItem) async {
-    final index = movieData.indexWhere((element) => element.id == id);
-    newItem = newItem.copyWith(lastUpdate: DateTime.now());
-    movieData[index] = newItem;
-    await Future.delayed(const Duration(milliseconds: 500));
-    return newItem;
-  },
-  createItem: (context, item) async {
-    movieData.add(item!);
-    return item;
-  },
-);
 
 Future<List<LdFilterOption<MovieDemo, int>>> buildMovieFilters(BuildContext context) async {
   final genres = await loadMovieGenres(context);
@@ -184,11 +185,12 @@ class MovieDetail extends StatelessWidget {
         );
       },
 
-      formItems: [
-        LdReactiveFormItem<String>(key: 'title', validators: [Validators.required]),
-        LdReactiveFormItem<Set<String>>(key: 'genre', validators: [Validators.required]),
-        LdReactiveFormItem<double>(key: 'rating', validators: [Validators.required]),
-      ],
+      formGroup: (context) => FormGroup({
+        'title': FormControl<String>(validators: [Validators.required]),
+        'genre': FormControl<Set<String>>(validators: [Validators.required]),
+        'rating': FormControl<double>(validators: [Validators.required]),
+      }),
+
       child: Builder(
         builder: (context) {
           final genreItems = movieData

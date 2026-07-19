@@ -91,7 +91,7 @@ void main() {
       final items = defaultItems.toList();
 
       return LdListController(
-        LdCallbackModel<_TestItem, int>(
+        LdCallbackModel<_TestItem, int, _TestItem, _TestItem>(
           fetchListWithParameters: fetchListWithParameters ??
               (parameters) async {
                 final start = parameters.offset;
@@ -429,7 +429,7 @@ void main() {
 
       testWidgets('deletes batch including detached selection items', (tester) async {
         var currentItems = defaultItems.toList();
-        final repository = LdListController(LdCallbackModel<_TestItem, int>(
+        final repository = LdListController(LdCallbackModel<_TestItem, int, _TestItem, _TestItem>(
           pageSize: 1,
           fetchListWithParameters: (parameters) async {
             final start = parameters.offset;
@@ -468,7 +468,7 @@ void main() {
 
       testWidgets('does not overwrite deleting items during page fetch', (tester) async {
         var currentItems = defaultItems.toList();
-        final repository = LdListController(LdCallbackModel<_TestItem, int>(
+        final repository = LdListController(LdCallbackModel<_TestItem, int, _TestItem, _TestItem>(
           pageSize: 3,
           fetchListWithParameters: (parameters) async {
             final start = parameters.offset;
@@ -531,7 +531,7 @@ void main() {
         final currentItems = [_TestItem(1, 'Item 1', 10), _TestItem(2, 'Item 2', 20)];
 
         final repository = LdListController(
-          LdCallbackModel<_TestItem, int>(
+          LdCallbackModel<_TestItem, int, _TestItem, _TestItem>(
             pageSize: 10,
             fetchListWithParameters: (parameters) async {
               final start = parameters.offset;
@@ -577,7 +577,7 @@ void main() {
       testWidgets('anchors list when getOffsetById is provided', (tester) async {
         var getOffsetCallCount = 0;
         var fetchCallCount = 0;
-        final repository = LdListController(LdCallbackModel<_TestItem, int>(
+        final repository = LdListController(LdCallbackModel<_TestItem, int, _TestItem, _TestItem>(
           fetchListWithParameters: (parameters) async {
             fetchCallCount++;
             return LdListPage<_TestItem>(
@@ -604,7 +604,7 @@ void main() {
       });
 
       testWidgets('handles null return from getOffsetById', (tester) async {
-        final repository = LdListController(LdCallbackModel<_TestItem, int>(
+        final repository = LdListController(LdCallbackModel<_TestItem, int, _TestItem, _TestItem>(
           fetchListWithParameters: (parameters) async {
             return LdListPage<_TestItem>(newItems: [], hasMore: false, total: 0);
           },
@@ -631,7 +631,7 @@ void main() {
 
     group('loadViewingItem', () {
       testWidgets('loads detached item and notifies stream listeners', (tester) async {
-        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
+        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int, _TestItem, _TestItem>(
           pageSize: 1,
           fetchListWithParameters: (parameters) async {
             return LdListPage<_TestItem>(
@@ -651,7 +651,7 @@ void main() {
       });
 
       testWidgets('rethrows when getById fails', (tester) async {
-        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
+        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int, _TestItem, _TestItem>(
           fetchListWithParameters: (parameters) async {
             return LdListPage<_TestItem>(newItems: [], hasMore: false, total: 0);
           },
@@ -669,7 +669,7 @@ void main() {
 
       testWidgets('returns cached item without calling getById again', (tester) async {
         var getByIdCallCount = 0;
-        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
+        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int, _TestItem, _TestItem>(
           fetchListWithParameters: (parameters) async {
             return LdListPage<_TestItem>(
               newItems: [_TestItem(1, 'Item 1', 10)],
@@ -1152,7 +1152,7 @@ void main() {
     group('greedy repository', () {
       testWidgets('ensureGreedyLoaded fetches all pages once', (tester) async {
         var fetchCount = 0;
-        final repository = LdListController.fromModel(LdCallbackModel.greedy<_TestItem, int>(
+        final repository = LdListController.fromModel(LdCallbackModel.greedy<_TestItem, int, _TestItem, _TestItem>(
           pageSize: 2,
           getById: (context, id) async => _TestItem(id, 'Item $id', id),
           fetchListWithParameters: (parameters) async {
@@ -1199,7 +1199,7 @@ void main() {
     group('mutation layout', () {
       testWidgets('create repositions item when getOffsetById is configured', (tester) async {
         final items = List.generate(10, (i) => _TestItem(i + 1, 'Item ${i + 1}', i + 1));
-        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
+        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int, _TestItem, _TestItem>(
           pageSize: 5,
           getOffsetByIdFn: (params) async => items.indexWhere((item) => item.id == params.id),
           createItem: (context, item) async {
@@ -1231,7 +1231,7 @@ void main() {
       });
 
       test('canCompactIndicesAfterDeletion requires contiguous loaded indices', () {
-        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
+        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int, _TestItem, _TestItem>(
           fetchListWithParameters: (_) async => LdListPage<_TestItem>(
             newItems: const [],
             hasMore: false,
@@ -1339,7 +1339,7 @@ void main() {
         );
         await tester.pump();
 
-        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
+        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int, _TestItem, _TestItem>(
           pageSize: 5,
           getOffsetByIdFn: (params) async => items.indexWhere((item) => item.id == params.id),
           updateItem: (context, id, newItem) async {
@@ -1402,7 +1402,7 @@ void main() {
         );
         await tester.pump();
 
-        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
+        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int, _TestItem, _TestItem>(
           pageSize: 10,
           getOffsetByIdFn: (params) async => items.indexWhere((item) => item.id == params.id),
           updateItem: (context, id, newItem) async {
@@ -1472,7 +1472,7 @@ void main() {
         );
         await tester.pump();
 
-        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
+        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int, _TestItem, _TestItem>(
           pageSize: 10,
           getOffsetByIdFn: (params) async => items.indexWhere((item) => item.id == params.id),
           updateItem: (context, id, newItem) async {
@@ -1603,7 +1603,7 @@ void main() {
         var updateCalls = 0;
         var getOffsetCalls = 0;
 
-        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int>(
+        final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int, _TestItem, _TestItem>(
           pageSize: 10,
           initialItems: items,
           getOffsetByIdFn: (params) async {

@@ -169,6 +169,46 @@ class LdButton extends StatelessWidget {
     super.key,
   });
 
+  factory LdButton.fromConfig({
+    required LdButtonConfig config,
+    required Widget child,
+    required FutureOr<void> Function() onPressed,
+    bool autoFocus = false,
+    Widget? leading,
+    bool loading = false,
+    String? loadingText,
+    String? errorText,
+    double? progress,
+    Widget? trailing,
+    Key? key,
+  }) {
+    return LdButton(
+      onPressed: onPressed,
+      autoLoading: config.autoLoading,
+      borderRadius: config.borderRadius,
+      color: config.color,
+      active: config.active,
+      width: config.width,
+      onHover: config.onHover,
+      disabled: config.disabled,
+      focusNode: config.focusNode,
+      autoFocus: autoFocus,
+      alignment: config.alignment,
+      leading: leading,
+      circular: config.circular,
+      loading: loading,
+      loadingText: loadingText,
+      errorText: errorText,
+      mode: config.mode,
+      progress: progress,
+      size: config.size,
+      trailing: trailing,
+      disableSqueeze: config.disableSqueeze,
+      key: key,
+      child: child,
+    );
+  }
+
   factory LdButton.ghost({
     required Widget child,
     required FutureOr<void> Function() onPressed,

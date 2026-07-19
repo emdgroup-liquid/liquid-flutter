@@ -20,7 +20,6 @@ export 'src/monkey_detail/detail_form.dart';
 export 'src/monkey_detail/form_state.dart';
 export 'src/monkey_detail/save_mode.dart';
 export 'src/monkey_detail/buttons.dart';
-export 'src/reactive_form_item.dart';
 
 export 'src/set_validators.dart';
 

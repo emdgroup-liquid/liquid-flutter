@@ -43,7 +43,7 @@ class LdForm<T extends Identifiable<IdType>, IdType, TDetail extends Object,
   final LdFormMode mode;
   final LdPaginatorItem<T>? item;
 
-  final List<LdReactiveFormItem<dynamic>> formItems;
+  final FormGroup Function(BuildContext context) formGroup;
   final Widget child;
   final LdDetailToForm<TDetail> detailToFormValues;
   final LdFormToUpdatePayload<TUpdate, TDetail>? formToUpdatePayload;
@@ -56,13 +56,15 @@ class LdForm<T extends Identifiable<IdType>, IdType, TDetail extends Object,
   final LdFormPreSaveCheck preSaveCheck;
   final LdFormOnSubmitted<T, IdType>? onSubmitted;
 
+  final void Function(FormGroup form)? onFormInit;
+
   final List<Validator<dynamic>> validators;
   final Map<String, ValidationMessageFunction>? validationMessages;
 
   const LdForm({
     super.key,
     required this.item,
-    required this.formItems,
+    required this.formGroup,
     required this.child,
     required this.detailToFormValues,
     required this.formToUpdatePayload,
@@ -71,6 +73,7 @@ class LdForm<T extends Identifiable<IdType>, IdType, TDetail extends Object,
     this.conflictPolicy = LdMonkeyFieldConflictPolicy.keepLocal,
     this.onFieldConflict,
     this.preSaveCheck = LdFormPreSaveCheck.none,
+    this.onFormInit,
     this.validators = const [],
     this.validationMessages,
     required this.mode,
@@ -89,8 +92,6 @@ class _LdFormState<
     TDetail extends Object,
     TCreate,
     TUpdate> extends State<LdForm<T, IdType, TDetail, TCreate, TUpdate>> {
-  late final FormGroup _form;
-
   TDetail? _detail;
   IdType? _currentId;
   final Map<String, Object?> _lastServerFormValues = {};
@@ -103,6 +104,8 @@ class _LdFormState<
   List<LdMonkeyFieldConflict> _conflicts = [];
 
   bool get _hasConflicts => _conflicts.isNotEmpty;
+
+  late FormGroup _form;
 
   @override
   void initState() {
@@ -124,10 +127,9 @@ class _LdFormState<
         break;
     }
 
-    _form = FormGroup(
-      {for (final item in widget.formItems) item.key: item.createFormControl()},
-      validators: widget.validators,
-    );
+    _form = widget.formGroup(context);
+
+    widget.onFormInit?.call(_form);
 
     _formSubscription = _form.valueChanges.listen((_) => _onEditStateChanged());
     _bootstrapDetail();
@@ -234,8 +236,15 @@ class _LdFormState<
     if (detail == null || !mounted) return;
     final values = widget.detailToFormValues(detail);
     for (final entry in values.entries) {
+      print('entry: ${entry.key} ${entry.value}');
       if (!_form.contains(entry.key)) continue;
-      _form.control(entry.key).value = entry.value;
+      final control = _form.control(entry.key);
+      if (control is FormArray) {
+        control.clear();
+        control.addAll(entry.value as List<AbstractControl<dynamic>>);
+      } else {
+        _form.control(entry.key).value = entry.value;
+      }
       if (markPristine) _form.control(entry.key).markAsPristine();
       _lastServerFormValues[entry.key] = entry.value;
     }

@@ -220,7 +220,7 @@ void main() {
                 TestItem(1, 'Item 1', 10),
                 TestItem(2, 'Item 2', 20),
               ];
-              return LdCallbackModel<TestItem, int>(
+              return LdCallbackModel<TestItem, int, TestItem, TestItem>(
                 fetchListWithParameters: (parameters) async {
                   fetchListCalled++;
                   final paginated = items.skip(parameters.offset).take(parameters.pageSize).toList();

@@ -9,7 +9,11 @@ import 'package:liquid_flutter/src/monkey/filter/ld_filter_option.dart';
 import 'package:liquid_flutter/src/monkey/sort/sort_option.dart';
 
 /// Callback-based [LdModel] for apps that wire data operations via closures.
-class LdCallbackModel<T extends Identifiable<IdType>, IdType> extends LdModel<T, IdType, T?, T> {
+///
+/// [TCreate] defaults to [T?] and [TUpdate] defaults to [T] when using
+/// [LdCallbackModel.greedy] or [LdCallbackModel.fromList].
+class LdCallbackModel<T extends Identifiable<IdType>, IdType, TCreate, TUpdate>
+    extends LdModel<T, IdType, TCreate, TUpdate> {
   LdCallbackModel({
     required Future<LdListPage<T>> Function(FetchPageParameters<T, IdType> parameters) fetchListWithParameters,
     required Future<T> Function(BuildContext context, IdType id) getById,
@@ -53,8 +57,7 @@ class LdCallbackModel<T extends Identifiable<IdType>, IdType> extends LdModel<T,
   @override
   LdListCache<T, IdType> get cache => _providedCache ?? super.cache;
 
-  final Future<LdListPage<T>> Function(FetchPageParameters<T, IdType> parameters)
-  fetchListFn;
+  final Future<LdListPage<T>> Function(FetchPageParameters<T, IdType> parameters) fetchListFn;
 
   final Future<T> Function(BuildContext context, IdType id) _getById;
 
@@ -65,14 +68,14 @@ class LdCallbackModel<T extends Identifiable<IdType>, IdType> extends LdModel<T,
 
   final Future<void> Function(BuildContext context, IdType id)? deleteItem;
 
-  final Future<T?> Function(BuildContext context, IdType id, T newItem)? updateItem;
+  final Future<T?> Function(BuildContext context, IdType id, TUpdate payload)? updateItem;
 
-  final Future<T> Function(BuildContext context, T? newItem)? createItem;
+  final Future<T> Function(BuildContext context, TCreate payload)? createItem;
 
   final Future<void> Function(BuildContext context, Set<IdType> ids)? deleteBatchFn;
 
-  /// Batch-update callback. Receives a map from item id to updated item.
-  final Future<void> Function(BuildContext context, Map<IdType, T> items)? updateBatchFn;
+  /// Batch-update callback. Receives a map from item id to update payload.
+  final Future<void> Function(BuildContext context, Map<IdType, TUpdate> items)? updateBatchFn;
 
   final List<T>? _initialItems;
 
@@ -82,7 +85,12 @@ class LdCallbackModel<T extends Identifiable<IdType>, IdType> extends LdModel<T,
   bool get supportsSingleDelete => deleteItem != null;
 
   @override
-  T? createPreview(T? payload) => payload;
+  T? createPreview(TCreate payload) {
+    if (payload is T) {
+      return payload as T;
+    }
+    return null;
+  }
 
   @override
   Future<LdListPage<T>> fetchListWithParameters(
@@ -94,7 +102,7 @@ class LdCallbackModel<T extends Identifiable<IdType>, IdType> extends LdModel<T,
   Future<T> getById(BuildContext context, IdType id) => _getById(context, id);
 
   @override
-  Future<T> persistCreate(BuildContext context, T? payload) {
+  Future<T> persistCreate(BuildContext context, TCreate payload) {
     assert(
       createItem != null,
       'Cannot create item. createItem was not configured for this model',
@@ -103,7 +111,7 @@ class LdCallbackModel<T extends Identifiable<IdType>, IdType> extends LdModel<T,
   }
 
   @override
-  Future<T?> persistUpdate(BuildContext context, IdType id, T payload) {
+  Future<T?> persistUpdate(BuildContext context, IdType id, TUpdate payload) {
     if (updateItem == null) {
       return Future.value(null);
     }
@@ -152,12 +160,12 @@ class LdCallbackModel<T extends Identifiable<IdType>, IdType> extends LdModel<T,
     }
   }
 
-  /// Persists a batch update. [items] is a map from item id to updated item.
+  /// Persists a batch update. [items] is a map from item id to update payload.
   ///
   /// Delegates to [updateBatchFn] when provided; otherwise falls back to
   /// calling [updateItem] once per entry.
   @override
-  Future<void> persistUpdateBatch(BuildContext context, Map<IdType, T> items) async {
+  Future<void> persistUpdateBatch(BuildContext context, Map<IdType, TUpdate> items) async {
     if (updateBatchFn != null) {
       await updateBatchFn!(context, items);
       return;
@@ -175,7 +183,7 @@ class LdCallbackModel<T extends Identifiable<IdType>, IdType> extends LdModel<T,
   /// Creates a greedy callback model that eagerly loads the full dataset by
   /// calling [fetchListWithParameters] for every page until [LdListPage.hasMore]
   /// is false.
-  static LdCallbackModel<L, IdType> greedy<L extends Identifiable<IdType>, IdType>({
+  static LdCallbackModel<L, IdType, TCreate, TUpdate> greedy<L extends Identifiable<IdType>, IdType, TCreate, TUpdate>({
     required Future<LdListPage<L>> Function(FetchPageParameters<L, IdType> parameters) fetchListWithParameters,
     required Future<L> Function(BuildContext context, IdType id) getById,
     int pageSize = 50,
@@ -184,14 +192,14 @@ class LdCallbackModel<T extends Identifiable<IdType>, IdType> extends LdModel<T,
     bool autoInvalidateCacheOnMutation = true,
     Future<int?> Function(FetchOffsetParameters<L, IdType> parameters)? getOffsetById,
     Future<void> Function(BuildContext context, IdType id)? deleteItem,
-    Future<L?> Function(BuildContext context, IdType id, L newItem)? updateItem,
-    Future<L> Function(BuildContext context, L? newItem)? createItem,
+    Future<L?> Function(BuildContext context, IdType id, TUpdate newItem)? updateItem,
+    Future<L> Function(BuildContext context, TCreate newItem)? createItem,
     Future<void> Function(BuildContext context, Set<IdType> ids)? deleteBatch,
-    Future<void> Function(BuildContext context, Map<IdType, L> items)? updateBatch,
+    Future<void> Function(BuildContext context, Map<IdType, TUpdate> items)? updateBatch,
     LdListCache<L, IdType>? cache,
     List<L>? initialItems,
   }) {
-    return LdCallbackModel<L, IdType>(
+    return LdCallbackModel<L, IdType, TCreate, TUpdate>(
       fetchListWithParameters: fetchListWithParameters,
       getById: getById,
       pageSize: pageSize,
@@ -211,13 +219,13 @@ class LdCallbackModel<T extends Identifiable<IdType>, IdType> extends LdModel<T,
   }
 
   /// Creates a greedy callback model backed by an in-memory [list].
-  static LdCallbackModel<L, IdType> fromList<L extends Identifiable<IdType>, IdType>({
+  static LdCallbackModel<L, IdType, L, L> fromList<L extends Identifiable<IdType>, IdType>({
     required List<L> list,
     bool Function(L item, Set<LdFilterOption<L, IdType>>? activeFilters)? filterFunction,
     int Function(L a, L b, List<LdSortOption<L, IdType>>? activeSortOptions)? sortFunction,
     int pageSize = 50,
   }) {
-    return greedy<L, IdType>(
+    return greedy<L, IdType, L, L>(
       pageSize: pageSize,
       getById: (context, id) async => list.firstWhere((item) => item.id == id),
       fetchListWithParameters: (parameters) async {

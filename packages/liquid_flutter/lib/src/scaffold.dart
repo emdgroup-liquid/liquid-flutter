@@ -16,6 +16,18 @@ enum LdAppBarScrollBehavior {
   hidden,
 }
 
+extension LdAppBarScrollBehaviorExtension on LdAppBarScrollBehavior {
+  /// Whether the app bar will react to scroll events.
+  bool willHideAppBar(BuildContext context) {
+    return switch (this) {
+      LdAppBarScrollBehavior.static => false,
+      LdAppBarScrollBehavior.mobileOnly => LdTheme.of(context).platform.isMobile,
+      LdAppBarScrollBehavior.always => true,
+      LdAppBarScrollBehavior.hidden => false,
+    };
+  }
+}
+
 class LdScaffold extends StatefulWidget {
   final Widget body;
 

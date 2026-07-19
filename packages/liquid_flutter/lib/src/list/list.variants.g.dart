@@ -203,6 +203,32 @@ class LdList<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
     super.key,
   });
 
+  factory LdList.fromConfig({
+    required LdListConfig<T, IdType> config,
+    Key? key,
+  }) {
+    return LdList<T, IdType>(
+      itemBuilder: config.itemBuilder,
+      paginator: config.paginator,
+      areEqual: config.areEqual,
+      emptyBuilder: config.emptyBuilder,
+      errorBuilder: config.errorBuilder,
+      footer: config.footer,
+      groupHeaderBuilder: config.groupHeaderBuilder,
+      groupingCriterion: config.groupingCriterion,
+      header: config.header,
+      loadingBuilder: config.loadingBuilder,
+      padding: config.padding,
+      physics: config.physics,
+      primary: config.primary,
+      retryConfig: config.retryConfig,
+      scrollController: config.scrollController,
+      separatorBuilder: config.separatorBuilder,
+      shrinkWrap: config.shrinkWrap,
+      key: key,
+    );
+  }
+
   final Widget Function(BuildContext, LdPaginatorLoadedItem<T>, int)?
       itemBuilder;
 

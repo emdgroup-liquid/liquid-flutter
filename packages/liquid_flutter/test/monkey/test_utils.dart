@@ -217,7 +217,7 @@ class TestSortAndFilterState<T extends Identifiable<IdType>, IdType> extends Cha
 }
 
 /// Creates a test [LdCallbackModel] with default implementations.
-LdCallbackModel<TestItem, int> createTestModel({
+LdCallbackModel<TestItem, int, TestItem, TestItem> createTestModel({
   List<TestItem>? initialItems,
   Future<TestItem> Function(BuildContext context, int id)? getById,
   Future<int?> Function(int id,
@@ -236,7 +236,7 @@ LdCallbackModel<TestItem, int> createTestModel({
         TestItem(3, 'Item 3', 30),
       ];
 
-  return LdCallbackModel<TestItem, int>(
+  return LdCallbackModel<TestItem, int, TestItem, TestItem>(
     fetchListWithParameters: (parameters) async {
       final paginated = items.skip(parameters.offset).take(parameters.pageSize).toList();
       return LdListPage<TestItem>(

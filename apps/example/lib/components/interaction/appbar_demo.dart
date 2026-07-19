@@ -135,6 +135,7 @@ class _AppBarDemoConfig {
       borderMode: borderMode,
       backgroundMode: backgroundMode,
       attachedMode: attachedMode,
+      bottom: LdInput(hint: 'Search', onChanged: (value) {}, allowTapOutside: true),
       addContainer: addContainer,
       implyFeatures: implyFeatures,
       autoAttachToKeyboard: autoAttachToKeyboard,
@@ -184,126 +185,122 @@ class _AppBarConfigModalState extends State<_AppBarConfigModal> {
         title: Text('App Bar ${widget.index + 1}'),
         child: LdScaffoldBody(
           children: [
-            LdAutoSpace(
-              children: [
-                LdInput(
-                  key: ValueKey('title-${_config.id}'),
-                  label: 'Title',
-                  hint: _config.title,
-                  onChanged: (value) => _update((c) => c.copyWith(title: value)),
-                ),
-                LdInput(
-                  key: ValueKey('debug-${_config.id}'),
-                  label: 'Debug name',
-                  hint: _config.debugName,
-                  onChanged: (value) => _update((c) => c.copyWith(debugName: value)),
-                ),
-                LdSwitch<LdAppBarPositionMode>(
-                  label: 'Position',
-                  value: _config.positionMode,
-                  onChanged: (value) => _update((c) => c.copyWith(positionMode: value)),
-                  children: {
-                    LdAppBarPositionMode.top: const Text('.top'),
-                    LdAppBarPositionMode.bottom: const Text('.bottom'),
-                    LdAppBarPositionMode.adaptive: const Text('.adaptive'),
-                  },
-                ),
-                LdSwitch<LdAppBarScrollBehavior>(
-                  label: 'Scroll behavior',
-                  value: _config.scrollBehavior,
-                  onChanged: (value) => _update((c) => c.copyWith(scrollBehavior: value)),
-                  children: {
-                    LdAppBarScrollBehavior.static: const Text('.static'),
-                    LdAppBarScrollBehavior.mobileOnly: const Text('.mobileOnly'),
-                    LdAppBarScrollBehavior.always: const Text('.always'),
-                    LdAppBarScrollBehavior.hidden: const Text('.hidden'),
-                  },
-                ),
-                LdSwitch<LdAppBarAttachedMode>(
-                  label: 'Attached mode',
-                  value: _config.attachedMode,
-                  onChanged: (value) => _update((c) => c.copyWith(attachedMode: value)),
-                  children: {
-                    LdAppBarAttachedMode.attached: const Text('.attached'),
-                    LdAppBarAttachedMode.adaptive: const Text('.adaptive'),
-                    LdAppBarAttachedMode.floating: const Text('.floating'),
-                  },
-                ),
-                LdSwitch<LdAppBarShadowMode>(
-                  label: 'Shadow mode',
-                  value: _config.shadowMode,
-                  onChanged: (value) => _update((c) => c.copyWith(shadowMode: value)),
-                  children: {
-                    LdAppBarShadowMode.visible: const Text('.visible'),
-                    LdAppBarShadowMode.whenScrolled: const Text('.whenScrolled'),
-                    LdAppBarShadowMode.hidden: const Text('.hidden'),
-                    LdAppBarShadowMode.adaptive: const Text('.adaptive'),
-                  },
-                ),
-                LdSwitch<LdAppBarBorderMode>(
-                  label: 'Border mode',
-                  value: _config.borderMode,
-                  onChanged: (value) => _update((c) => c.copyWith(borderMode: value)),
-                  children: {
-                    LdAppBarBorderMode.visible: const Text('.visible'),
-                    LdAppBarBorderMode.whenScrolled: const Text('.whenScrolled'),
-                    LdAppBarBorderMode.hidden: const Text('.hidden'),
-                    LdAppBarBorderMode.adaptive: const Text('.adaptive'),
-                  },
-                ),
-                LdSwitch<LdAppBarBackgroundMode>(
-                  label: 'Background mode',
-                  value: _config.backgroundMode,
-                  onChanged: (value) => _update((c) => c.copyWith(backgroundMode: value)),
-                  children: {
-                    LdAppBarBackgroundMode.visible: const Text('.visible'),
-                    LdAppBarBackgroundMode.whenScrolled: const Text('.whenScrolled'),
-                    LdAppBarBackgroundMode.hidden: const Text('.hidden'),
-                    LdAppBarBackgroundMode.adaptive: const Text('.adaptive'),
-                  },
-                ),
-                LdSwitch<int>(
-                  label: 'Action count',
-                  value: _config.actionCount,
-                  onChanged: (value) => _update((c) => c.copyWith(actionCount: value)),
-                  children: {
-                    0: const Text('0'),
-                    1: const Text('1'),
-                    2: const Text('2'),
-                    3: const Text('3'),
-                    4: const Text('4'),
-                  },
-                ),
-                LdToggle(
-                  label: 'Enable search',
-                  checked: _config.enableSearch,
-                  onChanged: (value) => _update((c) => c.copyWith(enableSearch: value)),
-                ),
-                LdToggle(
-                  label: 'Add container padding',
-                  checked: _config.addContainer,
-                  onChanged: (value) => _update((c) => c.copyWith(addContainer: value)),
-                ),
-                LdChoose.fromSelectItems(
-                  multiple: true,
-                  label: 'Implied features',
-                  items: LdAppBarImpliedFeature.values.map((e) => LdSelectItem(value: e, child: Text(e.name))).toList(),
-                  onChanged: (value) => _update((c) => c.copyWith(implyFeatures: value)),
-                  value: _config.implyFeatures,
-                ),
-                LdToggle(
-                  label: 'Auto attach to keyboard',
-                  checked: _config.autoAttachToKeyboard,
-                  onChanged: (value) => _update((c) => c.copyWith(autoAttachToKeyboard: value)),
-                ),
-                LdToggle(
-                  label: 'Avoid view insets',
-                  checked: _config.avoidViewInsets,
-                  onChanged: (value) => _update((c) => c.copyWith(avoidViewInsets: value)),
-                ),
-                LdButton.error(child: const Text('Remove app bar'), onPressed: widget.onDelete),
-              ],
+            LdInput(
+              key: ValueKey('title-${_config.id}'),
+              label: 'Title',
+              hint: _config.title,
+              onChanged: (value) => _update((c) => c.copyWith(title: value)),
             ),
+            LdInput(
+              key: ValueKey('debug-${_config.id}'),
+              label: 'Debug name',
+              hint: _config.debugName,
+              onChanged: (value) => _update((c) => c.copyWith(debugName: value)),
+            ),
+            LdSwitch<LdAppBarPositionMode>(
+              label: 'Position',
+              value: _config.positionMode,
+              onChanged: (value) => _update((c) => c.copyWith(positionMode: value)),
+              children: {
+                LdAppBarPositionMode.top: const Text('.top'),
+                LdAppBarPositionMode.bottom: const Text('.bottom'),
+                LdAppBarPositionMode.adaptive: const Text('.adaptive'),
+              },
+            ),
+            LdSwitch<LdAppBarScrollBehavior>(
+              label: 'Scroll behavior',
+              value: _config.scrollBehavior,
+              onChanged: (value) => _update((c) => c.copyWith(scrollBehavior: value)),
+              children: {
+                LdAppBarScrollBehavior.static: const Text('.static'),
+                LdAppBarScrollBehavior.mobileOnly: const Text('.mobileOnly'),
+                LdAppBarScrollBehavior.always: const Text('.always'),
+                LdAppBarScrollBehavior.hidden: const Text('.hidden'),
+              },
+            ),
+            LdSwitch<LdAppBarAttachedMode>(
+              label: 'Attached mode',
+              value: _config.attachedMode,
+              onChanged: (value) => _update((c) => c.copyWith(attachedMode: value)),
+              children: {
+                LdAppBarAttachedMode.attached: const Text('.attached'),
+                LdAppBarAttachedMode.adaptive: const Text('.adaptive'),
+                LdAppBarAttachedMode.floating: const Text('.floating'),
+              },
+            ),
+            LdSwitch<LdAppBarShadowMode>(
+              label: 'Shadow mode',
+              value: _config.shadowMode,
+              onChanged: (value) => _update((c) => c.copyWith(shadowMode: value)),
+              children: {
+                LdAppBarShadowMode.visible: const Text('.visible'),
+                LdAppBarShadowMode.whenScrolled: const Text('.whenScrolled'),
+                LdAppBarShadowMode.hidden: const Text('.hidden'),
+                LdAppBarShadowMode.adaptive: const Text('.adaptive'),
+              },
+            ),
+            LdSwitch<LdAppBarBorderMode>(
+              label: 'Border mode',
+              value: _config.borderMode,
+              onChanged: (value) => _update((c) => c.copyWith(borderMode: value)),
+              children: {
+                LdAppBarBorderMode.visible: const Text('.visible'),
+                LdAppBarBorderMode.whenScrolled: const Text('.whenScrolled'),
+                LdAppBarBorderMode.hidden: const Text('.hidden'),
+                LdAppBarBorderMode.adaptive: const Text('.adaptive'),
+              },
+            ),
+            LdSwitch<LdAppBarBackgroundMode>(
+              label: 'Background mode',
+              value: _config.backgroundMode,
+              onChanged: (value) => _update((c) => c.copyWith(backgroundMode: value)),
+              children: {
+                LdAppBarBackgroundMode.visible: const Text('.visible'),
+                LdAppBarBackgroundMode.whenScrolled: const Text('.whenScrolled'),
+                LdAppBarBackgroundMode.hidden: const Text('.hidden'),
+                LdAppBarBackgroundMode.adaptive: const Text('.adaptive'),
+              },
+            ),
+            LdSwitch<int>(
+              label: 'Action count',
+              value: _config.actionCount,
+              onChanged: (value) => _update((c) => c.copyWith(actionCount: value)),
+              children: {
+                0: const Text('0'),
+                1: const Text('1'),
+                2: const Text('2'),
+                3: const Text('3'),
+                4: const Text('4'),
+              },
+            ),
+            LdToggle(
+              label: 'Enable search',
+              checked: _config.enableSearch,
+              onChanged: (value) => _update((c) => c.copyWith(enableSearch: value)),
+            ),
+            LdToggle(
+              label: 'Add container padding',
+              checked: _config.addContainer,
+              onChanged: (value) => _update((c) => c.copyWith(addContainer: value)),
+            ),
+            LdChoose.fromSelectItems(
+              multiple: true,
+              label: 'Implied features',
+              items: LdAppBarImpliedFeature.values.map((e) => LdSelectItem(value: e, child: Text(e.name))).toList(),
+              onChanged: (value) => _update((c) => c.copyWith(implyFeatures: value)),
+              value: _config.implyFeatures,
+            ),
+            LdToggle(
+              label: 'Auto attach to keyboard',
+              checked: _config.autoAttachToKeyboard,
+              onChanged: (value) => _update((c) => c.copyWith(autoAttachToKeyboard: value)),
+            ),
+            LdToggle(
+              label: 'Avoid view insets',
+              checked: _config.avoidViewInsets,
+              onChanged: (value) => _update((c) => c.copyWith(avoidViewInsets: value)),
+            ),
+            LdButton.error(child: const Text('Remove app bar'), onPressed: widget.onDelete),
           ],
         ),
       ),
@@ -655,6 +652,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
           ),
         ),
         SizedBox(height: 1000, child: LdText.p('Scrollable content')),
+        LdText.p('End'),
       ],
     );
 

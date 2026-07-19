@@ -247,13 +247,13 @@ class _TagSelectorSectionState extends State<_TagSelectorSection> {
 
   Set<String> _selected = {'flutter', 'dart'};
 
-  late final LdCallbackModel<LdSelectItem<String>, String> _model;
+  late final LdCallbackModel<LdSelectItem<String>, String, LdSelectItem<String>, LdSelectItem<String>> _model;
   late final LdListController<LdSelectItem<String>, String> _repo;
 
   @override
   void initState() {
     super.initState();
-    _model = LdCallbackModel.greedy<LdSelectItem<String>, String>(
+    _model = LdCallbackModel.greedy<LdSelectItem<String>, String, LdSelectItem<String>, LdSelectItem<String>>(
       getById: (context, id) async => _tags.firstWhere((item) => item.id == id),
       fetchListWithParameters: (params) async {
         final page = _tags.skip(params.offset).take(params.pageSize).toList();
@@ -267,7 +267,7 @@ class _TagSelectorSectionState extends State<_TagSelectorSection> {
       // LdListController.createFromModel handles the optimistic insert and
       // calls confirmItemCreation once this future resolves.
       createItem: (context, newItem) async {
-        _tags.add(newItem!);
+        _tags.add(newItem);
         return newItem;
       },
     );

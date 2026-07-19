@@ -53,11 +53,11 @@ class LdTaskDetailForm extends StatelessWidget {
         LdFormMode.edit => Future.value(task),
         LdFormMode.create => Future.value(_initialTask()),
       },
-      formItems: [
-        LdReactiveFormItem<String>(key: 'task', validators: [Validators.required]),
-        LdReactiveFormItem<DateTime>(key: 'due', validators: [Validators.required]),
-        LdReactiveFormItem<String>(key: 'emoji'),
-      ],
+      formGroup: (context) => FormGroup({
+        'task': FormControl<String>(validators: [Validators.required]),
+        'due': FormControl<DateTime>(validators: [Validators.required]),
+        'emoji': FormControl<String>(),
+      }),
       saveMode: LdReactiveFormSaveMode.adaptive,
       conflictPolicy: LdMonkeyFieldConflictPolicy.prompt,
       detailToFormValues: taskDetailToFormValues,

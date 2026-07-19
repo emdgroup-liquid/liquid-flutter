@@ -14,7 +14,7 @@ void main() {
   testWidgets('first selection update does not refresh repository filters', (tester) async {
     var fetchCount = 0;
     final repository = LdListController.fromModel(
-      LdCallbackModel<_EphemeralItem, int>(
+      LdCallbackModel<_EphemeralItem, int, _EphemeralItem, _EphemeralItem>(
         getById: (context, id) async => _EphemeralItem(id),
         fetchListWithParameters: (parameters) async {
           fetchCount++;

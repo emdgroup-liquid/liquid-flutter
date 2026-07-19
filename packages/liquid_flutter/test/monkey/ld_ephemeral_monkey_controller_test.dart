@@ -30,7 +30,7 @@ void main() {
       final items = [createTestItem(1, name: 'Alpha'), createTestItem(2, name: 'Beta')];
       var fetchCount = 0;
       final repository = LdListController.fromModel(
-        LdCallbackModel<TestItem, int>(
+        LdCallbackModel<TestItem, int, TestItem, TestItem>(
           fetchListWithParameters: (parameters) async {
             fetchCount++;
             return LdListPage<TestItem>(

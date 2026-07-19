@@ -302,7 +302,7 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
       final items = widget.items!;
       final searchText = _effectiveSearchText;
       _repository = LdListController(
-        LdCallbackModel.greedy<T, IdType>(
+        LdCallbackModel.greedy<T, IdType, T, T>(
           getById: (context, id) async => items.firstWhere((item) => item.id == id),
           fetchListWithParameters: (parameters) async {
             var filtered = items.toList();

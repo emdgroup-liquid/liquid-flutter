@@ -20,9 +20,6 @@ Widget _withTheme(Widget child) {
 
 void main() {
   group('LdMarkdownEditingController — flat-text invariant', () {
-    // The invariant: the *length* of the flattened span equals the source
-    // length.  WidgetSpans contribute U+FFFC (one char) replacing exactly one
-    // source char, so lengths must match even if byte content differs.
     Future<void> checkInvariant(
       WidgetTester tester,
       LdMarkdownEditingController ctrl,
@@ -104,14 +101,6 @@ void main() {
       await checkInvariant(tester, ctrl);
     });
 
-    testWidgets('invariant holds for focused table row', (tester) async {
-      // Simulate cursor on the first row of a table.
-      final ctrl = LdMarkdownEditingController(text: '| A | B |\n| --- | --- |\n');
-      ctrl.selection = const TextSelection.collapsed(offset: 3); // inside first row
-      addTearDown(ctrl.dispose);
-      await checkInvariant(tester, ctrl);
-    });
-
     testWidgets('invariant holds for table mixed with other elements', (tester) async {
       const src = '# Heading\n\n| Col1 | Col2 |\n| --- | --- |\n| val | val |\n\nParagraph\n';
       final ctrl = LdMarkdownEditingController(text: src);
@@ -142,11 +131,8 @@ void main() {
           ),
         ),
       );
-      await tester.enterText(
-        find.byType(TextField, skipOffstage: false),
-        'hello',
-      );
-      expect(changed, isNotNull);
+      await tester.enterText(find.byType(TextField), 'hello');
+      expect(changed, 'hello');
     });
 
     testWidgets('controller is used when provided', (tester) async {
@@ -162,9 +148,6 @@ void main() {
   });
 
   group('LdMarkdownEditingController — list continuation (value setter intercept)', () {
-    // Simulates engine/IME behavior: inserting a single '\n' at the cursor
-    // position by calling the value setter directly (the actual runtime path
-    // in Flutter 3.44+).
     void insertNewlineAtCursor(LdMarkdownEditingController ctrl) {
       final pos = ctrl.selection.baseOffset;
       final text = ctrl.text;
@@ -276,8 +259,6 @@ void main() {
   });
 }
 
-/// Recursively flattens a [TextSpan] tree into a plain string.
-/// [WidgetSpan]s contribute the U+FFFC object replacement character.
 String _flattenSpan(InlineSpan span) {
   if (span is TextSpan) {
     final buf = StringBuffer();
@@ -290,7 +271,6 @@ String _flattenSpan(InlineSpan span) {
     return buf.toString();
   }
   if (span is WidgetSpan) {
-    // WidgetSpans are represented as U+FFFC in the text buffer.
     return '\uFFFC';
   }
   return '';

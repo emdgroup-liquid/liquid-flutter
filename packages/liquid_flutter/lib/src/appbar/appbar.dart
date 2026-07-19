@@ -325,6 +325,7 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
       shadowMode: widget.shadowMode,
       borderMode: widget.borderMode,
       backgroundMode: widget.backgroundMode,
+      scrollBehavior: widget.scrollBehavior,
     );
 
     // The bar surface is built as a widget that can read LdAppBarMetrics from

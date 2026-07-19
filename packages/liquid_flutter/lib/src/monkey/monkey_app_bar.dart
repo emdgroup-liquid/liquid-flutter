@@ -96,8 +96,6 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
           _ => null,
         };
 
-    final appBarConfig = monkeyBarConfig?.appbarConfig ?? context.watch<LdAppBarConfig?>();
-
     return Provider.value(
       value: location,
       child: Builder(builder: (innerCtx) {
@@ -125,8 +123,8 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
         final barEmpty = actions.isEmpty &&
             searchConfig == null &&
             (monkeyBarConfig?.additionalActions.isEmpty ?? true) &&
-            appBarConfig?.title == null &&
-            appBarConfig?.bottom == null &&
+            monkeyBarConfig?.appbarConfig?.title == null &&
+            monkeyBarConfig?.appbarConfig?.bottom == null &&
             !showClearSelectionButton;
 
         final showBar = switch (location) {
@@ -135,16 +133,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
           _ => !barEmpty,
         };
 
-        final effectivePositionMode = appBarConfig?.positionMode ??
-            switch (location) {
-              LdMonkeyActionLocation.masterAppBar || LdMonkeyActionLocation.detailAppBar => LdAppBarPositionMode.top,
-              LdMonkeyActionLocation.masterSecondary ||
-              LdMonkeyActionLocation.detailSecondary =>
-                LdAppBarPositionMode.bottom,
-              _ => LdAppBarPositionMode.top,
-            };
-
-        return LdAppBar(
+        final monkeyConfig = LdAppBarConfig(
             leading: switch (showClearSelectionButton) {
               true => LdButton.vague(
                   child: const Icon(LucideIcons.x),
@@ -159,15 +148,14 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
                     LiquidLocalizations.of(context).nItemsSelected(selection.selection.length),
                     value: selection.selection.length.toDouble(),
                   )
-                : appBarConfig?.title,
-            debugName: debugName ?? appBarConfig?.debugName ?? location.name,
-            positionMode: effectivePositionMode,
-            scrollBehavior: showBar ? null : LdAppBarScrollBehavior.hidden,
-            autoAttachToKeyboard: true,
+                : null,
+            debugName: debugName,
+            scrollBehavior: !showBar ? LdAppBarScrollBehavior.hidden : null,
             searchConfig: searchConfig,
-            implyFeatures: appBarConfig?.implyFeatures,
             overflowMenuProviders: (context) => [
-                  ListenableProvider.value(value: LdListController.of<T, IdType>(context)),
+                  ListenableProvider.value(
+                    value: LdListController.of<T, IdType>(context),
+                  ),
                   Provider.value(value: location),
                   Provider.value(value: effectiveLayout),
                   Provider.value(value: selection)
@@ -187,7 +175,19 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
               ),
               ...monkeyBarConfig?.additionalActions ?? [],
             ],
-            child: child);
+            positionMode: switch (location) {
+              LdMonkeyActionLocation.masterAppBar || LdMonkeyActionLocation.detailAppBar => LdAppBarPositionMode.top,
+              LdMonkeyActionLocation.masterSecondary ||
+              LdMonkeyActionLocation.detailSecondary =>
+                LdAppBarPositionMode.bottom,
+              _ => LdAppBarPositionMode.top,
+            });
+
+        return LdAppBar.fromConfig(
+          config: (monkeyBarConfig?.appbarConfig?.merge(monkeyConfig) ?? monkeyConfig).copyWith(
+            child: child,
+          ),
+        );
       }),
     );
   }

@@ -9,7 +9,8 @@ class _RouteTestItem with Identifiable<int> {
   _RouteTestItem(this.id);
 }
 
-LdCallbackModel<_RouteTestItem, int> _routeTestModel() => LdCallbackModel<_RouteTestItem, int>(
+LdCallbackModel<_RouteTestItem, int, _RouteTestItem, _RouteTestItem> _routeTestModel() =>
+    LdCallbackModel<_RouteTestItem, int, _RouteTestItem, _RouteTestItem>(
       isGreedy: true,
       getById: (context, id) async => _RouteTestItem(id),
       fetchListWithParameters: (parameters) async {
@@ -26,7 +27,7 @@ void main() {
   group('buildMonkeyRoutes', () {
     final routeConfig = LdMonkeyRouteConfig.identifiableInt<_RouteTestItem>(itemName: 'item');
 
-    LdCallbackModel<_RouteTestItem, int> testModel() => _routeTestModel();
+    LdCallbackModel<_RouteTestItem, int, _RouteTestItem, _RouteTestItem> testModel() => _routeTestModel();
 
     test('master route path and name', () {
       final routes = buildMonkeyRoutes<_RouteTestItem, int>(
@@ -73,7 +74,7 @@ void main() {
     final cfgB = LdMonkeyRouteConfig.identifiableInt<_RouteTestItem>(itemName: 'b');
     final cfgC = LdMonkeyRouteConfig.identifiableInt<_RouteTestItem>(itemName: 'c');
 
-    LdCallbackModel<_RouteTestItem, int> testModel() => _routeTestModel();
+    LdCallbackModel<_RouteTestItem, int, _RouteTestItem, _RouteTestItem> testModel() => _routeTestModel();
 
     test('two levels: nested detail path uses prefix', () {
       final routes = buildMonkeyRouteTree<_RouteTestItem, int>(

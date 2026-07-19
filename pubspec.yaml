@@ -43,3 +43,7 @@ melos:
     generate_docs:
       run: melos run generate_api && dart run apps/example/tools/generate_doc_pages.dart
       description: "Regenerate component doc pages from dartdoc comments. Runs generate_api automatically."
+
+    proto:identifiable:
+      run: dart run packages/liquid_flutter/bin/identifiable_proto.dart
+      description: "Post-process .pb.dart files to add Identifiable mixin to message classes."

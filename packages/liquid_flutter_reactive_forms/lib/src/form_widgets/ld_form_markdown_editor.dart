@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_md/liquid_flutter_md.dart';
-import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart' hide LdForm;
+import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart'
+    hide LdForm;
 import 'package:provider/provider.dart';
 
 /// A reactive markdown editor field that binds to a [FormControl<String>] by
@@ -21,7 +22,6 @@ class LdFormMarkdownEditor extends StatelessWidget {
   final int? maxLines;
   final bool? disabled;
   final bool expands;
-  final bool readOnly;
   final bool autofocus;
   final bool autocorrect;
   final bool enableSuggestions;
@@ -29,6 +29,7 @@ class LdFormMarkdownEditor extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
 
   final void Function(String url, String title)? onLinkTap;
+  final void Function(String tag)? onHashtagTap;
   final Widget? Function(String src, String alt)? imageBuilder;
 
   final LdHint? Function(ReactiveFormFieldState<String, String>)? hintBuilder;
@@ -42,13 +43,13 @@ class LdFormMarkdownEditor extends StatelessWidget {
     this.maxLines,
     this.disabled,
     this.expands = false,
-    this.readOnly = false,
     this.autofocus = false,
     this.autocorrect = false,
     this.enableSuggestions = false,
     this.textInputAction = TextInputAction.newline,
     this.inputFormatters,
     this.onLinkTap,
+    this.onHashtagTap,
     this.imageBuilder,
     this.hintBuilder,
     this.validationMessages,
@@ -73,13 +74,13 @@ class LdFormMarkdownEditor extends StatelessWidget {
           maxLines: maxLines,
           expands: expands,
           disabled: disabled,
-          readOnly: readOnly,
           autofocus: autofocus,
           autocorrect: autocorrect,
           enableSuggestions: enableSuggestions,
           textInputAction: textInputAction,
           inputFormatters: inputFormatters,
           onLinkTap: onLinkTap,
+          onHashtagTap: onHashtagTap,
           imageBuilder: imageBuilder,
           onBlurred: (value) => scope?.onFieldBlurred(formKey),
           onCommitted: (value) => scope?.onFieldCommitted(formKey),
@@ -96,13 +97,13 @@ class _LdFormMarkdownEditorField extends StatefulWidget {
   final int? maxLines;
   final bool expands;
   final bool? disabled;
-  final bool readOnly;
   final bool autofocus;
   final bool autocorrect;
   final bool enableSuggestions;
   final TextInputAction textInputAction;
   final List<TextInputFormatter>? inputFormatters;
   final void Function(String url, String title)? onLinkTap;
+  final void Function(String tag)? onHashtagTap;
   final Widget? Function(String src, String alt)? imageBuilder;
   final void Function(String value)? onBlurred;
   final void Function(String value)? onCommitted;
@@ -114,13 +115,13 @@ class _LdFormMarkdownEditorField extends StatefulWidget {
     this.maxLines,
     this.expands = false,
     this.disabled,
-    this.readOnly = false,
     this.autofocus = false,
     this.autocorrect = false,
     this.enableSuggestions = false,
     this.textInputAction = TextInputAction.newline,
     this.inputFormatters,
     this.onLinkTap,
+    this.onHashtagTap,
     this.imageBuilder,
     this.onBlurred,
     this.onCommitted,
@@ -135,7 +136,6 @@ class _LdFormMarkdownEditorFieldState
     extends State<_LdFormMarkdownEditorField> {
   late final LdMarkdownEditingController _controller;
   late final FocusNode _focusNode;
-  bool _suppressChange = false;
 
   @override
   void initState() {
@@ -151,9 +151,7 @@ class _LdFormMarkdownEditorFieldState
     super.didUpdateWidget(oldWidget);
     final text = widget.state.control.value ?? '';
     if (_controller.text != text) {
-      _suppressChange = true;
       _controller.text = text;
-      _suppressChange = false;
     }
   }
 
@@ -181,17 +179,16 @@ class _LdFormMarkdownEditorFieldState
       minLines: widget.minLines,
       maxLines: widget.maxLines,
       expands: widget.expands,
-      enabled: widget.disabled != true && !control.disabled,
-      readOnly: widget.readOnly,
+      disabled: widget.disabled != true && control.disabled,
       autofocus: widget.autofocus,
       autocorrect: widget.autocorrect,
       enableSuggestions: widget.enableSuggestions,
       textInputAction: widget.textInputAction,
       inputFormatters: widget.inputFormatters,
       onLinkTap: widget.onLinkTap,
+      onHashtagTap: widget.onHashtagTap,
       imageBuilder: widget.imageBuilder,
       onChanged: (value) {
-        if (_suppressChange) return;
         final modelValue = widget.state.control.value ?? '';
         if (value != modelValue) {
           widget.state.didChange(value);

@@ -2,15 +2,18 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-/// A [TextEditingController] that renders its content as live WYSIWYG markdown.
+/// A [TextEditingController] that renders its content as WYSIWYG markdown.
 ///
-/// Each source line is styled with lightweight regex rules.  The line that
-/// contains the cursor is always shown as raw source so the user can edit it.
+/// Unlike the old approach, there is no `isEditing` flag — [WidgetSpan]s
+/// (tables, HR, blockquote bars, images, checkboxes) are always rendered
+/// because the consuming widget is a [RichText] (backed by [RenderParagraph]),
+/// not an [EditableText].  [RenderParagraph] has no strut-height clamping, so
+/// [WidgetSpan]s size correctly at all times.
 ///
 /// ## Flat-text invariant
 /// The total character count of the emitted [TextSpan] tree always equals
 /// [text].length.  Hidden characters (delimiter markers, heading `#` prefix,
-/// blockquote `>` marker) are emitted with `fontSize: 0 / height: 0`.
+/// blockquote `>` marker) are emitted with `fontSize: 0.001 / height: 0.001`.
 /// [WidgetSpan]s (hr divider, blockquote bar) each replace exactly one source
 /// character via the same hidden-N-1 + WidgetSpan pattern.
 ///
@@ -31,11 +34,127 @@ class LdMarkdownEditingController extends TextEditingController {
   Widget? Function(String src, String alt)? imageBuilder;
 
   /// Whether the editor is currently focused/editing.
-  /// When false, [buildTextSpan] renders table blocks as real [WidgetSpan]s
-  /// (safe because the result is used in [Text.rich], not [EditableText]).
+  /// When true, the line containing the cursor shows raw markdown delimiters
+  /// dimmed so the user can edit them; other lines render as WYSIWYG.
+  /// When false, all lines render as WYSIWYG.
   bool isEditing = true;
 
   final List<GestureRecognizer> _activeRecognizers = [];
+  bool _transforming = false;
+  bool _gesturesEnabled = false;
+  bool _initialBuildDone = false;
+
+  /// Intercepts newline insertions from the engine/IME (Flutter 3.44+)
+  /// to implement smart list/blockquote continuation.
+  @override
+  set value(TextEditingValue newValue) {
+    if (_transforming) {
+      super.value = newValue;
+      return;
+    }
+
+    final oldValue = value;
+    super.value = newValue;
+
+    _handleNewlineInserted(oldValue, newValue);
+  }
+
+  void _handleNewlineInserted(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.length != oldValue.text.length + 1) return;
+    if (oldValue.selection.baseOffset < 0) return;
+
+    final cursorPos = oldValue.selection.baseOffset;
+    if (cursorPos >= newValue.text.length) return;
+    if (newValue.text[cursorPos] != '\n') return;
+
+    final lineStart = oldValue.text.lastIndexOf('\n', cursorPos - 1) + 1;
+    final line = oldValue.text.substring(lineStart, cursorPos);
+
+    if (RegExp(r'^(\*{3,}|-{3,}|_{3,})\s*$').hasMatch(line)) return;
+
+    _transforming = true;
+
+    final orderedMatch = RegExp(r'^(\s*)(\d+)\.\s').firstMatch(line);
+    if (orderedMatch != null) {
+      final indent = orderedMatch.group(1)!;
+      final num = int.parse(orderedMatch.group(2)!);
+      if (line.trim() == '${orderedMatch.group(2)}.') {
+        value = TextEditingValue(
+          text:
+              oldValue.text.substring(0, lineStart) +
+              oldValue.text.substring(cursorPos),
+          selection: TextSelection.collapsed(offset: lineStart),
+        );
+      } else {
+        final continuation = '$indent${num + 1}. ';
+        value = TextEditingValue(
+          text:
+              newValue.text.substring(0, cursorPos + 1) +
+              continuation +
+              newValue.text.substring(cursorPos + 1),
+          selection: TextSelection.collapsed(
+            offset: cursorPos + 1 + continuation.length,
+          ),
+        );
+      }
+      _transforming = false;
+      return;
+    }
+
+    final unorderedMatch = RegExp(r'^(\s*)([-*+]) ').firstMatch(line);
+    if (unorderedMatch != null) {
+      final indent = unorderedMatch.group(1)!;
+      final marker = unorderedMatch.group(2)!;
+      if (line.trim() == marker) {
+        value = TextEditingValue(
+          text:
+              oldValue.text.substring(0, lineStart) +
+              oldValue.text.substring(cursorPos),
+          selection: TextSelection.collapsed(offset: lineStart),
+        );
+      } else {
+        final continuation = '$indent$marker ';
+        value = TextEditingValue(
+          text:
+              newValue.text.substring(0, cursorPos + 1) +
+              continuation +
+              newValue.text.substring(cursorPos + 1),
+          selection: TextSelection.collapsed(
+            offset: cursorPos + 1 + continuation.length,
+          ),
+        );
+      }
+      _transforming = false;
+      return;
+    }
+
+    if (line.startsWith('> ')) {
+      if (line.trim() == '>') {
+        value = TextEditingValue(
+          text:
+              oldValue.text.substring(0, lineStart) +
+              oldValue.text.substring(cursorPos),
+          selection: TextSelection.collapsed(offset: lineStart),
+        );
+      } else {
+        final continuation = '> ';
+        value = TextEditingValue(
+          text:
+              '${newValue.text.substring(0, cursorPos + 1)}$continuation${newValue.text.substring(cursorPos + 1)}',
+          selection: TextSelection.collapsed(
+            offset: cursorPos + 1 + continuation.length,
+          ),
+        );
+      }
+      _transforming = false;
+      return;
+    }
+
+    _transforming = false;
+  }
 
   @override
   void dispose() {
@@ -55,10 +174,27 @@ class LdMarkdownEditingController extends TextEditingController {
   // ---------------------------------------------------------------------------
 
   @override
-  TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
+  TextSpan buildTextSpan({
+    required BuildContext context,
+    TextStyle? style,
+    required bool withComposing,
+  }) {
     // Short-circuit during IME composition.
     if (withComposing && value.isComposingRangeValid) {
-      return super.buildTextSpan(context: context, style: style, withComposing: withComposing);
+      return super.buildTextSpan(
+        context: context,
+        style: style,
+        withComposing: withComposing,
+      );
+    }
+
+    // Defer gesture recognizers until after the first buildTextSpan call to
+    // avoid Flutter issue #97433 (assertion in RenderEditable.describeSemanticsConfiguration
+    // on iOS when inline tap targets exist in a non-read-only EditableText).
+    if (_initialBuildDone) {
+      _gesturesEnabled = true;
+    } else {
+      _initialBuildDone = true;
     }
 
     _disposeRecognizers();
@@ -72,21 +208,23 @@ class LdMarkdownEditingController extends TextEditingController {
     // Determine focused line (the line the cursor is on).
     final cursorPos = value.selection.isValid ? value.selection.baseOffset : -1;
 
-    // Split source into lines, keeping track of each line's start offset.
+    // Split source into lines, tracking each line's start offset.
     final lines = source.split('\n');
     final lineStarts = <int>[];
-    var pos = 0;
-    for (final line in lines) {
-      lineStarts.add(pos);
-      pos += line.length + 1; // +1 for '\n'
+    {
+      var pos = 0;
+      for (final line in lines) {
+        lineStarts.add(pos);
+        pos += line.length + 1;
+      }
     }
 
     int focusedLineIdx = -1;
     if (cursorPos >= 0) {
-      for (var i = 0; i < lines.length; i++) {
-        final lineEnd = lineStarts[i] + lines[i].length;
-        if (cursorPos >= lineStarts[i] && cursorPos <= lineEnd) {
-          focusedLineIdx = i;
+      for (var li = 0; li < lines.length; li++) {
+        final lineEnd = lineStarts[li] + lines[li].length;
+        if (cursorPos >= lineStarts[li] && cursorPos <= lineEnd) {
+          focusedLineIdx = li;
           break;
         }
       }
@@ -101,41 +239,55 @@ class LdMarkdownEditingController extends TextEditingController {
 
       // ── Detect a table block (run of consecutive table lines) ──────────────
       if (_tableRow.hasMatch(line)) {
-        // Find the extent of the contiguous table block.
-        var tableEnd = i; // inclusive last index
-        while (tableEnd + 1 < lines.length && _tableRow.hasMatch(lines[tableEnd + 1])) {
+        var tableEnd = i;
+        while (tableEnd + 1 < lines.length &&
+            _tableRow.hasMatch(lines[tableEnd + 1])) {
           tableEnd++;
         }
 
         final tableLines = lines.sublist(i, tableEnd + 1);
 
-        if (isEditing) {
-          // Inside EditableText the strut clamps every line to text height,
-          // so WidgetSpan-based table rendering is impossible. Show raw source.
+        // When editing and cursor is inside this table block, show raw source.
+        if (isEditing && focusedLineIdx >= i && focusedLineIdx <= tableEnd) {
           for (var ti = 0; ti < tableLines.length; ti++) {
             spans.add(TextSpan(text: tableLines[ti], style: baseStyle));
             if (ti < tableLines.length - 1) {
               spans.add(TextSpan(text: '\n', style: baseStyle));
             }
           }
-        } else {
-          // In Text.rich (blurred view) WidgetSpans work correctly — no strut.
-          // Render the whole block as one WidgetSpan (first char = anchor).
-          final allParsed = tableLines.map(_splitTableRow).toList();
-          final dataRows = allParsed
-              .where((r) => !r.every((c) => _tableSepCell.hasMatch(c)))
-              .toList();
-          final colCount = dataRows.fold(0, (m, r) => r.length > m ? r.length : m);
-          final headerStyle = baseStyle
-              .merge(ldBuildTextStyle(theme, LdTextType.paragraph, LdSize.m))
-              .copyWith(fontWeight: FontWeight.bold);
-          final bodyStyle =
-              baseStyle.merge(ldBuildTextStyle(theme, LdTextType.paragraph, LdSize.m));
+          i = tableEnd + 1;
+          if (i < lines.length) {
+            spans.add(TextSpan(text: '\n', style: baseStyle));
+          }
+          continue;
+        }
 
-          final allSource = tableLines.join('\n');
-          final toHide = allSource.substring(1);
+        // Render the entire table as a single WidgetSpan.
+        // With forceStrutHeight: false, the hidden \n characters inside _hide
+        // create near-zero-height lines — no visible gaps between rows.
+        final allParsed = tableLines.map(_splitTableRow).toList();
+        final dataRows = allParsed
+            .where((r) => !r.every((c) => _tableSepCell.hasMatch(c)))
+            .toList();
+        final colCount = dataRows.fold(
+          0,
+          (m, r) => r.length > m ? r.length : m,
+        );
+        final headerStyle = baseStyle
+            .merge(ldBuildTextStyle(theme, LdTextType.paragraph, LdSize.m))
+            .copyWith(fontWeight: FontWeight.bold);
+        final bodyStyle = baseStyle.merge(
+          ldBuildTextStyle(theme, LdTextType.paragraph, LdSize.m),
+        );
 
-          spans.add(WidgetSpan(
+        final allSource = tableLines.join('\n');
+        final toHide = allSource.substring(1);
+        // Replace \n with spaces so _hide doesn't create visible line breaks.
+        // The hidden text (fontSize: 0.001) sits invisibly next to the
+        // WidgetSpan on the same line — no empty lines between table rows.
+        final hiddenNoBreaks = toHide.replaceAll('\n', ' ');
+        spans.add(
+          WidgetSpan(
             alignment: PlaceholderAlignment.top,
             child: _TableWidget(
               dataRows: dataRows,
@@ -144,12 +296,11 @@ class LdMarkdownEditingController extends TextEditingController {
               bodyStyle: bodyStyle,
               theme: theme,
             ),
-          ));
-          if (toHide.isNotEmpty) _hide(toHide, spans);
-        }
+          ),
+        );
+        if (hiddenNoBreaks.isNotEmpty) _hide(hiddenNoBreaks, spans);
 
         i = tableEnd + 1;
-        // Emit the \n after the last table line (unless it is the final line).
         if (i < lines.length) {
           spans.add(TextSpan(text: '\n', style: baseStyle));
         }
@@ -157,7 +308,8 @@ class LdMarkdownEditingController extends TextEditingController {
       }
 
       // ── Normal single-line rendering ───────────────────────────────────────
-      _emitLine(line, baseStyle, theme, spans, context, focused: i == focusedLineIdx);
+      final lineIsFocused = isEditing && i == focusedLineIdx;
+      _emitLine(line, baseStyle, theme, spans, context, focused: lineIsFocused);
 
       if (!isLast) {
         spans.add(TextSpan(text: '\n', style: baseStyle));
@@ -173,14 +325,20 @@ class LdMarkdownEditingController extends TextEditingController {
   // Line-level rendering
   // ---------------------------------------------------------------------------
 
-  // Heading patterns (most specific first).
   static final _h6 = RegExp(r'^(#{6} ?)(.*)$');
   static final _h5 = RegExp(r'^(#{5} ?)(.*)$');
   static final _h4 = RegExp(r'^(#{4} ?)(.*)$');
   static final _h3 = RegExp(r'^(#{3} ?)(.*)$');
   static final _h2 = RegExp(r'^(#{2} ?)(.*)$');
   static final _h1 = RegExp(r'^(#{1} ?)(.*)$');
-  static final _headings = [(6, _h6), (5, _h5), (4, _h4), (3, _h3), (2, _h2), (1, _h1)];
+  static final _headings = [
+    (6, _h6),
+    (5, _h5),
+    (4, _h4),
+    (3, _h3),
+    (2, _h2),
+    (1, _h1),
+  ];
 
   static final _hr = RegExp(r'^(\*{3,}|-{3,}|_{3,})\s*$');
   static final _blockquote = RegExp(r'^(> ?)(.*)$');
@@ -190,20 +348,9 @@ class LdMarkdownEditingController extends TextEditingController {
   static final _checkbox = RegExp(r'^(\s*[-*+] \[)([ xX])(\] )(.*)$');
   static final _indentedCode = RegExp(r'^( {4}|\t)(.*)$');
 
-  /// Matches a GFM table row — a line that starts and ends with `|`.
-  /// Both content rows (`| a | b |`) and separator rows (`|---|---|`) match.
   static final _tableRow = RegExp(r'^\|(.+)\|$');
-
-  /// Matches a single table separator cell: `---`, `:---`, `---:`, `:---:`.
   static final _tableSepCell = RegExp(r'^\s*:?-+:?\s*$');
 
-  /// Emits styled spans for one source line (no trailing newline).
-  ///
-  /// When [focused] is true, delimiter characters are shown dimmed instead
-  /// of hidden (fontSize:0), so the cursor lands at the correct visual
-  /// position while content still renders at its proper style.
-  /// Lines that use [WidgetSpan]s are exempt — they are rendered as raw
-  /// source on the focused line to avoid cursor-offset errors.
   void _emitLine(
     String line,
     TextStyle baseStyle,
@@ -212,7 +359,6 @@ class LdMarkdownEditingController extends TextEditingController {
     BuildContext context, {
     bool focused = false,
   }) {
-    // Empty line — emit as-is.
     if (line.isEmpty) return;
 
     // ── Horizontal rule ────────────────────────────────────────────────────
@@ -221,13 +367,14 @@ class LdMarkdownEditingController extends TextEditingController {
         out.add(TextSpan(text: line, style: baseStyle));
         return;
       }
-      // Hide all but last char; replace last char with WidgetSpan.
       _hide(line.substring(0, line.length - 1), out);
-      out.add(WidgetSpan(alignment: PlaceholderAlignment.middle, child: _HrWidget()));
+      out.add(
+        WidgetSpan(alignment: PlaceholderAlignment.middle, child: _HrWidget()),
+      );
       return;
     }
 
-    // ── Fenced code fence line (``` or ~~~) ────────────────────────────────
+    // ── Fenced code fence line ─────────────────────────────────────────────
     if (_fencedFence.hasMatch(line)) {
       out.add(
         TextSpan(
@@ -260,12 +407,17 @@ class LdMarkdownEditingController extends TextEditingController {
         out.add(TextSpan(text: line, style: baseStyle));
         return;
       }
-      final marker = bqMatch.group(1)!; // "> " or ">"
+      final marker = bqMatch.group(1)!;
       final content = bqMatch.group(2)!;
       if (marker.length > 1) {
         _hide(marker.substring(0, marker.length - 1), out);
       }
-      out.add(WidgetSpan(alignment: PlaceholderAlignment.middle, child: const _BlockquoteBar()));
+      out.add(
+        WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: const _BlockquoteBar(),
+        ),
+      );
       final contentStyle = _paragraphStyle(
         theme,
         baseStyle,
@@ -278,13 +430,19 @@ class LdMarkdownEditingController extends TextEditingController {
     for (final (level, pattern) in _headings) {
       final m = pattern.firstMatch(line);
       if (m != null) {
-        final prefix = m.group(1)!; // e.g. "## "
+        final prefix = m.group(1)!;
         final content = m.group(2)!;
         final hStyle = _headingStyle(level, theme, baseStyle);
-        // Always render the heading style — on focused lines show the
-        // prefix dimmed rather than invisible so cursor lands correctly.
         _emitMarker(prefix, hStyle, theme, out, focused: focused);
-        _emitInline(content, baseStyle, hStyle, theme, out, context, focused: focused);
+        _emitInline(
+          content,
+          baseStyle,
+          hStyle,
+          theme,
+          out,
+          context,
+          focused: focused,
+        );
         return;
       }
     }
@@ -301,7 +459,8 @@ class LdMarkdownEditingController extends TextEditingController {
       final afterBracket = cbMatch.group(3)!;
       final content = cbMatch.group(4)!;
       final checked = checkChar.toLowerCase() == 'x';
-      final markerLen = beforeBracket.length + checkChar.length + afterBracket.length;
+      final markerLen =
+          beforeBracket.length + checkChar.length + afterBracket.length;
       _hide(line.substring(0, markerLen - 1), out);
       out.add(
         WidgetSpan(
@@ -312,7 +471,14 @@ class LdMarkdownEditingController extends TextEditingController {
           ),
         ),
       );
-      _emitInline(content, baseStyle, _paragraphStyle(theme, baseStyle), theme, out, context);
+      _emitInline(
+        content,
+        baseStyle,
+        _paragraphStyle(theme, baseStyle),
+        theme,
+        out,
+        context,
+      );
       return;
     }
 
@@ -332,7 +498,15 @@ class LdMarkdownEditingController extends TextEditingController {
           style: baseStyle.copyWith(color: theme.textMuted),
         ),
       );
-      _emitInline(content, baseStyle, paraStyle, theme, out, context, focused: focused);
+      _emitInline(
+        content,
+        baseStyle,
+        paraStyle,
+        theme,
+        out,
+        context,
+        focused: focused,
+      );
       return;
     }
 
@@ -348,41 +522,34 @@ class LdMarkdownEditingController extends TextEditingController {
           style: baseStyle.copyWith(color: theme.textMuted),
         ),
       );
-      _emitInline(content, baseStyle, paraStyle, theme, out, context, focused: focused);
+      _emitInline(
+        content,
+        baseStyle,
+        paraStyle,
+        theme,
+        out,
+        context,
+        focused: focused,
+      );
       return;
     }
 
     // ── Default: paragraph ─────────────────────────────────────────────────
-    _emitInline(line, baseStyle, _paragraphStyle(theme, baseStyle), theme, out, context, focused: focused);
-  }
-
-  /// Emits a block-level marker (e.g. `## `) either hidden (non-focused) or
-  /// dimmed to [hStyle]'s size but muted color (focused).
-  static void _emitMarker(
-    String marker,
-    TextStyle hStyle,
-    LdTheme theme,
-    List<InlineSpan> out, {
-    required bool focused,
-  }) {
-    if (marker.isEmpty) return;
-    if (focused) {
-      out.add(
-        TextSpan(
-          text: marker,
-          style: hStyle.copyWith(color: theme.textMuted, fontWeight: FontWeight.normal),
-        ),
-      );
-    } else {
-      _hide(marker, out);
-    }
+    _emitInline(
+      line,
+      baseStyle,
+      _paragraphStyle(theme, baseStyle),
+      theme,
+      out,
+      context,
+      focused: focused,
+    );
   }
 
   // ---------------------------------------------------------------------------
   // Inline rendering (within a single line)
   // ---------------------------------------------------------------------------
 
-  // Inline patterns — boldItalic must come before bold, bold before italic.
   static final _boldItalic = RegExp(r'(\*{3}|_{3})(.*?)\1');
   static final _bold = RegExp(r'(\*{2}|_{2})(.*?)\1');
   static final _italic = RegExp(r'(\*|_)(.*?)\1');
@@ -404,7 +571,6 @@ class LdMarkdownEditingController extends TextEditingController {
     int cursor = 0;
 
     while (cursor < text.length) {
-      // Find the earliest match among all inline patterns.
       Match? earliest;
       _InlineKind? earliestKind;
       int earliestStart = text.length;
@@ -420,7 +586,6 @@ class LdMarkdownEditingController extends TextEditingController {
         }
       }
 
-      // Order matters: image before link (both start with `[`).
       tryPattern(_image, _InlineKind.image);
       tryPattern(_link, _InlineKind.link);
       tryPattern(_boldItalic, _InlineKind.boldItalic);
@@ -435,9 +600,13 @@ class LdMarkdownEditingController extends TextEditingController {
         return;
       }
 
-      // Emit plain text before this match.
       if (earliestStart > cursor) {
-        out.add(TextSpan(text: text.substring(cursor, earliestStart), style: lineStyle));
+        out.add(
+          TextSpan(
+            text: text.substring(cursor, earliestStart),
+            style: lineStyle,
+          ),
+        );
       }
 
       final matchLen = earliest!.group(0)!.length;
@@ -447,9 +616,20 @@ class LdMarkdownEditingController extends TextEditingController {
         case _InlineKind.boldItalic:
           final delim = earliest!.group(1)!;
           final inner = earliest!.group(2)!;
-          final innerStyle = lineStyle.copyWith(fontWeight: FontWeight.bold, fontStyle: FontStyle.italic);
+          final innerStyle = lineStyle.copyWith(
+            fontWeight: FontWeight.bold,
+            fontStyle: FontStyle.italic,
+          );
           _conceal(delim, lineStyle, theme, out, focused: focused);
-          _emitInline(inner, baseStyle, innerStyle, theme, out, context, focused: focused);
+          _emitInline(
+            inner,
+            baseStyle,
+            innerStyle,
+            theme,
+            out,
+            context,
+            focused: focused,
+          );
           _conceal(delim, lineStyle, theme, out, focused: focused);
 
         case _InlineKind.bold:
@@ -457,7 +637,15 @@ class LdMarkdownEditingController extends TextEditingController {
           final inner = earliest!.group(2)!;
           final innerStyle = lineStyle.copyWith(fontWeight: FontWeight.bold);
           _conceal(delim, lineStyle, theme, out, focused: focused);
-          _emitInline(inner, baseStyle, innerStyle, theme, out, context, focused: focused);
+          _emitInline(
+            inner,
+            baseStyle,
+            innerStyle,
+            theme,
+            out,
+            context,
+            focused: focused,
+          );
           _conceal(delim, lineStyle, theme, out, focused: focused);
 
         case _InlineKind.italic:
@@ -465,13 +653,24 @@ class LdMarkdownEditingController extends TextEditingController {
           final inner = earliest!.group(2)!;
           final innerStyle = lineStyle.copyWith(fontStyle: FontStyle.italic);
           _conceal(delim, lineStyle, theme, out, focused: focused);
-          _emitInline(inner, baseStyle, innerStyle, theme, out, context, focused: focused);
+          _emitInline(
+            inner,
+            baseStyle,
+            innerStyle,
+            theme,
+            out,
+            context,
+            focused: focused,
+          );
           _conceal(delim, lineStyle, theme, out, focused: focused);
 
         case _InlineKind.code:
           final delim = earliest!.group(1)!;
           final inner = earliest!.group(2)!;
-          final codeStyle = lineStyle.copyWith(fontFamily: 'monospace', background: Paint()..color = theme.surface);
+          final codeStyle = lineStyle.copyWith(
+            fontFamily: 'monospace',
+            background: Paint()..color = theme.surface,
+          );
           _conceal(delim, lineStyle, theme, out, focused: focused);
           out.add(TextSpan(text: inner, style: codeStyle));
           _conceal(delim, lineStyle, theme, out, focused: focused);
@@ -480,25 +679,38 @@ class LdMarkdownEditingController extends TextEditingController {
           final linkText = earliest!.group(1)!;
           final href = earliest!.group(2)!;
           _conceal('[', lineStyle, theme, out, focused: focused);
-          final recognizer = TapGestureRecognizer()..onTap = () => onLinkTap?.call(href, '');
-          _activeRecognizers.add(recognizer);
-          out.add(
-            TextSpan(
-              text: linkText,
-              style: lineStyle.copyWith(
-                color: theme.primaryColor,
-                decoration: TextDecoration.underline,
-                decorationColor: theme.primaryColor,
+          if (_gesturesEnabled && !isEditing && onLinkTap != null) {
+            final recognizer = TapGestureRecognizer()
+              ..onSecondaryTap = () => onLinkTap?.call(href, '');
+            _activeRecognizers.add(recognizer);
+            out.add(
+              TextSpan(
+                text: linkText,
+                style: lineStyle.copyWith(
+                  color: theme.primaryColor,
+                  decoration: TextDecoration.underline,
+                  decorationColor: theme.primaryColor,
+                ),
+                recognizer: recognizer,
               ),
-              recognizer: recognizer,
-            ),
-          );
+            );
+          } else {
+            out.add(
+              TextSpan(
+                text: linkText,
+                style: lineStyle.copyWith(
+                  color: theme.primaryColor,
+                  decoration: TextDecoration.underline,
+                  decorationColor: theme.primaryColor,
+                ),
+              ),
+            );
+          }
           final hiddenSuffix = matchStr.substring(1 + linkText.length);
           _conceal(hiddenSuffix, lineStyle, theme, out, focused: focused);
 
         case _InlineKind.image:
           if (focused) {
-            // Show raw source on focused line — WidgetSpan breaks cursor math.
             out.add(
               TextSpan(
                 text: matchStr,
@@ -510,31 +722,61 @@ class LdMarkdownEditingController extends TextEditingController {
             final alt = earliest!.group(1)!;
             final imgWidget =
                 imageBuilder?.call(src, alt) ??
-                Image.network(src, height: 80, errorBuilder: (context, error, stackTrace) => const SizedBox.shrink());
+                Image.network(
+                  src,
+                  height: 80,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const SizedBox.shrink(),
+                );
             if (matchLen > 1) _hide(matchStr.substring(0, matchLen - 1), out);
-            out.add(WidgetSpan(alignment: PlaceholderAlignment.middle, child: imgWidget));
+            out.add(
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: imgWidget,
+              ),
+            );
           }
 
         case _InlineKind.strikethrough:
           final delim = earliest!.group(1)!;
           final inner = earliest!.group(2)!;
-          final innerStyle = lineStyle.copyWith(decoration: TextDecoration.lineThrough);
+          final innerStyle = lineStyle.copyWith(
+            decoration: TextDecoration.lineThrough,
+          );
           _conceal(delim, lineStyle, theme, out, focused: focused);
-          _emitInline(inner, baseStyle, innerStyle, theme, out, context, focused: focused);
+          _emitInline(
+            inner,
+            baseStyle,
+            innerStyle,
+            theme,
+            out,
+            context,
+            focused: focused,
+          );
           _conceal(delim, lineStyle, theme, out, focused: focused);
 
         case _InlineKind.hashtag:
           final tag = earliest!.group(1)!;
           final fullMatch = earliest!.group(0)!;
-          final recognizer = TapGestureRecognizer()..onTap = () => onHashtagTap?.call(tag);
-          _activeRecognizers.add(recognizer);
-          out.add(
-            TextSpan(
-              text: fullMatch,
-              style: lineStyle.copyWith(color: theme.primaryColor),
-              recognizer: recognizer,
-            ),
-          );
+          if (_gesturesEnabled && !isEditing && onHashtagTap != null) {
+            final recognizer = TapGestureRecognizer()
+              ..onTap = () => onHashtagTap?.call(tag);
+            _activeRecognizers.add(recognizer);
+            out.add(
+              TextSpan(
+                text: fullMatch,
+                style: lineStyle.copyWith(color: theme.primaryColor),
+                recognizer: recognizer,
+              ),
+            );
+          } else {
+            out.add(
+              TextSpan(
+                text: fullMatch,
+                style: lineStyle.copyWith(color: theme.primaryColor),
+              ),
+            );
+          }
       }
 
       cursor = earliestStart + matchLen;
@@ -547,10 +789,6 @@ class LdMarkdownEditingController extends TextEditingController {
 
   /// Emits [text] invisible so it occupies buffer positions (preserves the
   /// char-count invariant) but contributes zero visual advance.
-  ///
-  /// fontSize:0.001 rather than 0 avoids undefined glyph-metrics behaviour.
-  /// letterSpacing and wordSpacing are zeroed so no inter-glyph gap leaks
-  /// into adjacent visible spans (e.g. the period after a hidden `](url)`).
   static void _hide(String text, List<InlineSpan> out) {
     if (text.isEmpty) return;
     out.add(
@@ -567,16 +805,50 @@ class LdMarkdownEditingController extends TextEditingController {
     );
   }
 
+  /// Emits a block-level marker (e.g. `## `) either hidden (non-focused) or
+  /// dimmed to [hStyle]'s size but muted color (focused).
+  static void _emitMarker(
+    String marker,
+    TextStyle hStyle,
+    LdTheme theme,
+    List<InlineSpan> out, {
+    required bool focused,
+  }) {
+    if (marker.isEmpty) return;
+    if (focused) {
+      out.add(
+        TextSpan(
+          text: marker,
+          style: hStyle.copyWith(
+            color: theme.textMuted,
+            fontWeight: FontWeight.normal,
+          ),
+        ),
+      );
+    } else {
+      _hide(marker, out);
+    }
+  }
+
   /// On unfocused lines: fully hides [text] (fontSize 0).
-  /// On focused lines: shows [text] at the same size as [lineStyle] but muted,
-  /// so the cursor lands at the correct visual position.
-  static void _conceal(String text, TextStyle lineStyle, LdTheme theme, List<InlineSpan> out, {required bool focused}) {
+  /// On focused lines: shows [text] at the same size as [lineStyle] but muted.
+  static void _conceal(
+    String text,
+    TextStyle lineStyle,
+    LdTheme theme,
+    List<InlineSpan> out, {
+    required bool focused,
+  }) {
     if (text.isEmpty) return;
     if (focused) {
       out.add(
         TextSpan(
           text: text,
-          style: lineStyle.copyWith(color: theme.textMuted, fontWeight: FontWeight.normal, fontStyle: FontStyle.normal),
+          style: lineStyle.copyWith(
+            color: theme.textMuted,
+            fontWeight: FontWeight.normal,
+            fontStyle: FontStyle.normal,
+          ),
         ),
       );
     } else {
@@ -588,9 +860,36 @@ class LdMarkdownEditingController extends TextEditingController {
       base.merge(ldBuildTextStyle(theme, LdTextType.paragraph, LdSize.m));
 
   static TextStyle _headingStyle(int level, LdTheme theme, TextStyle base) {
-    const sizes = [LdSize.l, LdSize.m, LdSize.s, LdSize.xs, LdSize.xs, LdSize.xs];
+    const sizes = [
+      LdSize.l,
+      LdSize.m,
+      LdSize.s,
+      LdSize.xs,
+      LdSize.xs,
+      LdSize.xs,
+    ];
     final size = sizes[(level - 1).clamp(0, 5)];
     return base.merge(ldBuildTextStyle(theme, LdTextType.headline, size));
+  }
+
+  /// Returns the link URL at [offset] in the current text, or null.
+  String? linkAtOffset(int offset) {
+    for (final m in _link.allMatches(text)) {
+      if (offset >= m.start && offset <= m.end) {
+        return m.group(2);
+      }
+    }
+    return null;
+  }
+
+  /// Returns the hashtag (without `#`) at [offset], or null.
+  String? hashtagAtOffset(int offset) {
+    for (final m in _hashtag.allMatches(text)) {
+      if (offset >= m.start && offset <= m.end) {
+        return m.group(1);
+      }
+    }
+    return null;
   }
 }
 
@@ -598,33 +897,36 @@ class LdMarkdownEditingController extends TextEditingController {
 // Internal types
 // ---------------------------------------------------------------------------
 
-enum _InlineKind { boldItalic, bold, italic, code, link, image, strikethrough, hashtag }
+enum _InlineKind {
+  boldItalic,
+  bold,
+  italic,
+  code,
+  link,
+  image,
+  strikethrough,
+  hashtag,
+}
 
 // ---------------------------------------------------------------------------
 // Horizontal rule widget
 // ---------------------------------------------------------------------------
 
-/// Renders a full-width divider inside a [WidgetSpan].
-///
-/// Uses [LayoutBuilder] to measure the available inline width so the child
-/// never requests [double.infinity], which would corrupt the paragraph's line
-/// breaking and cause subsequent empty lines to be visually swallowed.
 class _HrWidget extends StatelessWidget {
   const _HrWidget();
 
   @override
   Widget build(BuildContext context) {
-    // Workaround for https://github.com/flutter/flutter/issues/126258:
-    // A WidgetSpan whose child exactly fills the line width causes Flutter's
-    // paragraph layout engine to swallow subsequent \n line breaks.
-    // LayoutBuilder gives us the real available width; subtracting 1px keeps
-    // the divider visually full-width while avoiding the engine bug.
     return LayoutBuilder(
       builder: (context, constraints) {
-        final width = (constraints.maxWidth.isFinite ? constraints.maxWidth : 0.0) - 5;
+        final width =
+            (constraints.maxWidth.isFinite ? constraints.maxWidth : 0.0) - 5;
         return SizedBox(
           width: width,
-          child: const Padding(padding: EdgeInsets.symmetric(vertical: 6), child: LdDivider()),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(vertical: 6),
+            child: LdDivider(),
+          ),
         );
       },
     );
@@ -657,17 +959,13 @@ class _BlockquoteBar extends StatelessWidget {
 // Table helpers
 // ---------------------------------------------------------------------------
 
-/// Splits a raw GFM table line (e.g. `| foo | bar |`) into trimmed cell
-/// strings, excluding the empty segments produced by the leading/trailing `|`.
 List<String> _splitTableRow(String line) {
   final inner = line.substring(1, line.length - 1);
   return inner.split('|').map((c) => c.trim()).toList();
 }
 
 /// Renders an entire GFM table block as a single widget inside a [WidgetSpan].
-/// Only used in the blurred (read-only) [Text.rich] view — [EditableText]'s
-/// strut prevents correct line-height control so tables show as raw source
-/// while editing.
+/// Uses [LayoutBuilder] to fill the available width from the paragraph.
 class _TableWidget extends StatelessWidget {
   const _TableWidget({
     required this.dataRows,
@@ -700,34 +998,37 @@ class _TableWidget extends StatelessWidget {
       final topBorder = ri == 0
           ? BorderSide(color: bc, width: bw)
           : ri == 1
-              ? BorderSide(color: bc, width: bw * 2)
-              : BorderSide.none;
-      final bottomBorder =
-          isLast ? BorderSide(color: bc, width: bw) : BorderSide.none;
+          ? BorderSide(color: bc, width: bw * 2)
+          : BorderSide.none;
+      final bottomBorder = isLast
+          ? BorderSide(color: bc, width: bw)
+          : BorderSide.none;
 
-      tableRows.add(TableRow(
-        decoration: BoxDecoration(color: isHeader ? theme.surface : null),
-        children: List.generate(colCount, (ci) {
-          final text = ci < cells.length ? cells[ci] : '';
-          final isLastCol = ci == colCount - 1;
-          return DecoratedBox(
-            decoration: BoxDecoration(
-              border: Border(
-                top: topBorder,
-                bottom: bottomBorder,
-                left: BorderSide(color: bc, width: bw),
-                right: isLastCol
-                    ? BorderSide(color: bc, width: bw)
-                    : BorderSide.none,
+      tableRows.add(
+        TableRow(
+          decoration: BoxDecoration(color: isHeader ? theme.surface : null),
+          children: List.generate(colCount, (ci) {
+            final text = ci < cells.length ? cells[ci] : '';
+            final isLastCol = ci == colCount - 1;
+            return DecoratedBox(
+              decoration: BoxDecoration(
+                border: Border(
+                  top: topBorder,
+                  bottom: bottomBorder,
+                  left: BorderSide(color: bc, width: bw),
+                  right: isLastCol
+                      ? BorderSide(color: bc, width: bw)
+                      : BorderSide.none,
+                ),
               ),
-            ),
-            child: Padding(
-              padding: cellPad,
-              child: Text(text, style: style),
-            ),
-          );
-        }),
-      ));
+              child: Padding(
+                padding: cellPad,
+                child: Text(text, style: style),
+              ),
+            );
+          }),
+        ),
+      );
     }
 
     return LayoutBuilder(

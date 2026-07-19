@@ -27,12 +27,14 @@ class LdAppBarDecorationBuilder {
   final LdAppBarShadowMode shadowMode;
   final LdAppBarBorderMode borderMode;
   final LdAppBarBackgroundMode backgroundMode;
+  final LdAppBarScrollBehavior scrollBehavior;
 
   const LdAppBarDecorationBuilder({
-    this.backgroundColor,
-    this.shadowMode = LdAppBarShadowMode.adaptive,
-    this.borderMode = LdAppBarBorderMode.adaptive,
-    this.backgroundMode = LdAppBarBackgroundMode.adaptive,
+    required this.backgroundColor,
+    required this.shadowMode,
+    required this.borderMode,
+    required this.backgroundMode,
+    required this.scrollBehavior,
   });
 
   bool shouldShowShadow(BuildContext context, bool isScrolledUnder, bool isInBottomSlot) {
@@ -41,10 +43,13 @@ class LdAppBarDecorationBuilder {
       LdAppBarShadowMode.visible => true,
       LdAppBarShadowMode.whenScrolled => isScrolledUnder,
       LdAppBarShadowMode.hidden => false,
-      LdAppBarShadowMode.adaptive => switch (theme.platform.isDesktop) {
-          false => isScrolledUnder || isInBottomSlot,
-          true => true,
-        },
+      LdAppBarShadowMode.adaptive => switch (scrollBehavior.willHideAppBar(context)) {
+          true => switch (theme.platform.isDesktop) {
+              false => isScrolledUnder || isInBottomSlot,
+              true => true,
+            },
+          false => true,
+        }
     };
   }
 
@@ -54,10 +59,13 @@ class LdAppBarDecorationBuilder {
       LdAppBarBorderMode.visible => true,
       LdAppBarBorderMode.whenScrolled => isScrolledUnder,
       LdAppBarBorderMode.hidden => false,
-      LdAppBarBorderMode.adaptive => switch (theme.platform.isDesktop) {
-          false => isScrolledUnder || isInBottomSlot,
-          true => true,
-        },
+      LdAppBarBorderMode.adaptive => switch (scrollBehavior.willHideAppBar(context)) {
+          true => switch (theme.platform.isDesktop) {
+              false => isScrolledUnder || isInBottomSlot,
+              true => true,
+            },
+          false => true,
+        }
     };
   }
 
@@ -71,9 +79,13 @@ class LdAppBarDecorationBuilder {
       LdAppBarBackgroundMode.hidden => false,
       LdAppBarBackgroundMode.visible => true,
       LdAppBarBackgroundMode.whenScrolled => isScrolledUnder,
-      LdAppBarBackgroundMode.adaptive => switch (theme.platform.isDesktop) {
-          false => isScrolledUnder || isInBottomSlot,
-          true => true,
+      LdAppBarBackgroundMode.adaptive => switch (scrollBehavior.willHideAppBar(context)) {
+          true => switch (theme.platform.isDesktop) {
+              false => isScrolledUnder || isInBottomSlot,
+              true => true,
+            },
+          // If the app bar will not hide we always show the background.
+          false => true,
         },
     };
   }

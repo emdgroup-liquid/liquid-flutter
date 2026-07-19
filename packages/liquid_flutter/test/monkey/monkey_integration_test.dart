@@ -83,7 +83,7 @@ void main() {
               routeConfig: childRouteConfig,
               masterPage: const SizedBox(),
               detailPage: const Text('ChildDetail'),
-              modelBuilder: (context, state) => LdCallbackModel<_ChildItem, String>(
+              modelBuilder: (context, state) => LdCallbackModel<_ChildItem, String, _ChildItem, _ChildItem>(
                 isGreedy: true,
                 getById: (context, id) async => _ChildItem(id, id.toUpperCase()),
                 fetchListWithParameters: (parameters) async {

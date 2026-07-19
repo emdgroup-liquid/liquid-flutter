@@ -214,7 +214,7 @@ class _LdInputState extends State<LdInput> {
       height: 1.2,
     );
 
-    var clearButton = widget.showClear
+    var clearButton = widget.showClear && _controller.text.isNotEmpty && !widget.disabled
         ? GestureDetector(
             onTap: () {
               _controller.clear();

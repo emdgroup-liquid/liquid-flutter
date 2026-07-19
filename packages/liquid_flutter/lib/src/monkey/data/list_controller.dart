@@ -45,7 +45,7 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
         _getOffsetById = model.getOffsetById,
         super(
           pageSize: model.pageSize,
-          initialItems: initialItems ?? (model is LdCallbackModel<T, IdType> ? model.initialItems : null),
+          initialItems: initialItems ?? (model is LdCallbackModel<T, IdType, Object?, Object?> ? model.initialItems : null),
           listCache: model.cache,
           fetchListFunction: model.fetchListWithParametersCached,
         ) {
@@ -62,7 +62,7 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
         _getOffsetById = model.getOffsetById,
         super(
           pageSize: model.pageSize,
-          initialItems: initialItems ?? (model is LdCallbackModel<T, IdType> ? model.initialItems : null),
+          initialItems: initialItems ?? (model is LdCallbackModel<T, IdType, Object?, Object?> ? model.initialItems : null),
           listCache: model.cache,
           fetchListFunction: model.fetchListWithParametersCached,
         ) {

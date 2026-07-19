@@ -81,9 +81,9 @@ class LdTabNavigation extends StatefulWidget {
     this.minTabWidth = 75,
     this.pageController,
   }) : assert(
-         activeRoute != null || pageController != null,
-         'LdTabNavigation: either activeRoute or pageController must be provided.',
-       );
+          activeRoute != null || pageController != null,
+          'LdTabNavigation: either activeRoute or pageController must be provided.',
+        );
 
   @override
   State<LdTabNavigation> createState() => _LdTabNavigationState();
@@ -350,6 +350,7 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
       shadowMode: widget.shadowMode,
       borderMode: widget.borderMode,
       backgroundMode: widget.backgroundMode,
+      scrollBehavior: widget.scrollBehavior,
     );
 
     // The tab bar surface widget — passed as [child] to AppBarFrame.
@@ -474,25 +475,25 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                           onHorizontalDragCancel: () {
                             _updateIndicatorPosition();
                           },
-                           onHorizontalDragEnd: _onIndicatorDragEnd,
-                             child: IgnorePointer(
-                              child: LdTouchableSurface(
-                                onPressed: () {},
-                                trackPan: true,
-                                builder: (context, status, _) => LdTouchableTouchFeedback(
-                                   scaleFactor: 100,
-                                   status: status,
-                                   child: Container(
-                                     width: _tabWidth,
-                                     decoration: BoxDecoration(
-                                       color: theme.primaryColor.withAlpha(26),
-                                       borderRadius: LdTheme.of(context).radius(LdSize.m),
-                                     ),
-                                   )),
-                             ),
-                           ),
-                         ),
-                         builder: (context, state, child) {
+                          onHorizontalDragEnd: _onIndicatorDragEnd,
+                          child: IgnorePointer(
+                            child: LdTouchableSurface(
+                              onPressed: () {},
+                              trackPan: true,
+                              builder: (context, status, _) => LdTouchableTouchFeedback(
+                                  scaleFactor: 100,
+                                  status: status,
+                                  child: Container(
+                                    width: _tabWidth,
+                                    decoration: BoxDecoration(
+                                      color: theme.primaryColor.withAlpha(26),
+                                      borderRadius: LdTheme.of(context).radius(LdSize.m),
+                                    ),
+                                  )),
+                            ),
+                          ),
+                        ),
+                        builder: (context, state, child) {
                           return Positioned(
                             bottom: 0,
                             top: 0,

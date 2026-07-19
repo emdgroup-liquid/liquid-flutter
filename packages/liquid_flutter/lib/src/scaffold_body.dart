@@ -97,6 +97,7 @@ class LdScaffoldBody extends StatelessWidget {
   final Color? backgroundColor;
   final ScrollController? scrollController;
   final bool autoSpaceChildren;
+  final bool reverse;
   final bool addContainer;
   final bool shrinkWrap;
 
@@ -108,6 +109,9 @@ class LdScaffoldBody extends StatelessWidget {
 
   /// When true, the scroll viewport shrinks above the keyboard.
   final bool resizeToAvoidBottomInset;
+
+  final Widget Function(BuildContext context, int index)? itemBuilder;
+  final int? itemCount;
 
   const LdScaffoldBody({
     super.key,
@@ -124,6 +128,9 @@ class LdScaffoldBody extends StatelessWidget {
     this.shrinkWrap = false,
     this.scrollEdgeFadeExtent,
     this.resizeToAvoidBottomInset = true,
+    this.reverse = false,
+    this.itemBuilder,
+    this.itemCount,
   });
 
   @override
@@ -157,40 +164,58 @@ class LdScaffoldBody extends StatelessWidget {
         horizontalPadding = horizontalPadding.atLeast(maxWidthPadding);
       }
 
-      final scrollView = CustomScrollView(
-        controller: scrollController,
-        shrinkWrap: shrinkWrap,
-        slivers: [
-          if (effectiveChildren.isNotEmpty)
-            SliverPadding(
-              padding: horizontalPadding.copyWith(
-                top: verticalSliverPadding.top,
-                bottom: verticalSliverPadding.bottom,
-              ),
-              sliver: SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: effectiveChildren,
-                ),
-              ),
-            ),
-          if (slivers.isNotEmpty)
-            ...slivers.asMap().entries.map((entry) {
-              final index = entry.key;
-              final sliver = entry.value;
-              final isFirst = index == 0;
-              final isLast = index == slivers.length - 1;
+      late Widget scrollView;
 
-              return SliverPadding(
+      if (itemBuilder != null && itemCount != null) {
+        scrollView = ListView.builder(
+          itemBuilder: itemBuilder!,
+          itemCount: itemCount,
+          controller: scrollController,
+          shrinkWrap: shrinkWrap,
+          reverse: reverse,
+          padding: EdgeInsets.only(
+            top: verticalSliverPadding.top,
+            bottom: verticalSliverPadding.bottom,
+            left: horizontalPadding.left,
+            right: horizontalPadding.right,
+          ),
+        );
+      } else {
+        scrollView = CustomScrollView(
+          controller: scrollController,
+          shrinkWrap: shrinkWrap,
+          slivers: [
+            if (effectiveChildren.isNotEmpty)
+              SliverPadding(
                 padding: horizontalPadding.copyWith(
-                  top: isFirst ? verticalSliverPadding.top : 0,
-                  bottom: isLast ? verticalSliverPadding.bottom : 0,
+                  top: verticalSliverPadding.top,
+                  bottom: verticalSliverPadding.bottom,
                 ),
-                sliver: sliver,
-              );
-            }),
-        ],
-      );
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: effectiveChildren,
+                  ),
+                ),
+              ),
+            if (slivers.isNotEmpty)
+              ...slivers.asMap().entries.map((entry) {
+                final index = entry.key;
+                final sliver = entry.value;
+                final isFirst = index == 0;
+                final isLast = index == slivers.length - 1;
+
+                return SliverPadding(
+                  padding: horizontalPadding.copyWith(
+                    top: isFirst ? verticalSliverPadding.top : 0,
+                    bottom: isLast ? verticalSliverPadding.bottom : 0,
+                  ),
+                  sliver: sliver,
+                );
+              }),
+          ],
+        );
+      }
 
       final effectiveColor = backgroundColor ?? (context.isSurface ? theme.surface : theme.background);
 

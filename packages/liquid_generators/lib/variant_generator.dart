@@ -384,7 +384,98 @@ class VariantBuilder implements Builder {
         );
       }));
 
-      // 3. Generate factory constructors for variants (or static methods for context-dependent)
+      // 3. Generate .fromConfig factory constructor if there are context-configurable params
+      if (contextConfigurableParams.isNotEmpty) {
+        final configClassName = '${publicClassName}Config';
+        final fromConfigConstructor = Constructor((cb) {
+          cb.factory = true;
+          cb.name = 'fromConfig';
+
+          // Add config as required named parameter
+          final configType = typeParameters.isNotEmpty
+              ? TypeReference((tr) {
+                  tr.symbol = configClassName;
+                  tr.types.addAll(
+                    typeParameters.map((tp) => refer(tp.symbol)),
+                  );
+                })
+              : refer(configClassName);
+          cb.optionalParameters.add(Parameter((pb) => pb
+            ..name = 'config'
+            ..named = true
+            ..required = true
+            ..type = configType));
+
+          // Add all non-configurable parameters
+          final nonConfigurableParams = [
+            ...positionalParams,
+            ...optionalParams.where(
+                (p) => !contextConfigurableParams.contains(p)),
+          ];
+
+          cb.requiredParameters.addAll(
+            positionalParams.map((p) => Parameter((pb) => pb
+              ..name = p.name
+              ..type = refer(p.type.toString()))),
+          );
+
+          cb.optionalParameters.addAll(
+            optionalParams
+                .where((p) => !contextConfigurableParams.contains(p))
+                .map((p) => Parameter((pb) => pb
+                  ..name = p.name
+                  ..named = p.isNamed
+                  ..required = p.isRequired
+                  ..type = refer(p.type.toString())
+                  ..defaultTo = p.defaultValueCode != null
+                      ? Code(p.defaultValueCode!)
+                      : null)),
+          );
+
+          cb.optionalParameters.add(
+            Parameter((pb) => pb
+              ..name = 'key'
+              ..named = true
+              ..type = refer('Key?')
+              ..toSuper = false
+              ..required = false),
+          );
+
+          // Build instantiation: positional params pass through,
+          // configurable params come from config, non-configurable pass through
+          final positionalArgs =
+              positionalParams.map((p) => refer(p.name)).toList();
+          final namedArgs = _buildOrderedWidgetNamedArgs(
+            optionalParams: optionalParams,
+            variant: null,
+          );
+
+          // Override configurable params to read from config
+          for (final param in contextConfigurableParams) {
+            namedArgs[param.name] =
+                refer('config').property(param.name);
+          }
+
+          // Create reference with type parameters if needed
+          final classReference = typeParameters.isNotEmpty
+              ? TypeReference((tr) {
+                  tr.symbol = publicClassName;
+                  tr.types.addAll(
+                    typeParameters.map((tp) => refer(tp.symbol)),
+                  );
+                })
+              : refer(publicClassName);
+
+          cb.body = classReference
+              .newInstance(positionalArgs, namedArgs)
+              .returned
+              .statement;
+        });
+
+        builder.constructors.add(fromConfigConstructor);
+      }
+
+      // 4. Generate factory constructors for variants (or static methods for context-dependent)
       for (final variant in variants) {
         if (variant.requiresContext) {
           // Generate static method that returns Widget (can return Builder)
@@ -564,7 +655,7 @@ class VariantBuilder implements Builder {
         }
       }
 
-      // 4. Generate build method
+      // 5. Generate build method
       builder.methods.add(Method((mb) {
         mb.annotations.add(refer('override'));
         mb.name = 'build';

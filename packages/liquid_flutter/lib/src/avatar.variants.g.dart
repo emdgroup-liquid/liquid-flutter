@@ -80,6 +80,20 @@ class LdAvatar extends StatelessWidget {
     super.key,
   });
 
+  factory LdAvatar.fromConfig({
+    required LdAvatarConfig config,
+    required Widget child,
+    Key? key,
+  }) {
+    return LdAvatar(
+      color: config.color,
+      circular: config.circular,
+      size: config.size,
+      key: key,
+      child: child,
+    );
+  }
+
   final Widget child;
 
   final LdColor? color;

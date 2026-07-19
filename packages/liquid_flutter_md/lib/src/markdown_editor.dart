@@ -5,9 +5,10 @@ import 'package:liquid_flutter_md/src/markdown_editing_controller.dart';
 
 /// A live WYSIWYG markdown editor in the style of Typora / Obsidian.
 ///
-/// Renders markdown inline as the user types. The line containing the cursor
-/// is always shown as raw source text; all other lines are rendered with
-/// inline markdown styling.
+/// Renders markdown inline as the user types using a [TextField] with
+/// [StrutStyle.forceStrutHeight] set to `false`, which allows [WidgetSpan]s
+/// (tables, images, HR, blockquote bars, etc.) to size correctly inside
+/// [EditableText].
 ///
 /// ## Usage
 /// ```dart
@@ -166,8 +167,7 @@ class _LdMarkdownEditorState extends State<LdMarkdownEditor> {
   }
 
   void _onFocusChange() {
-    // Force a rebuild so the controller re-renders when focus changes
-    // (focused line switches between raw and styled).
+    _controller.isEditing = _focusNode.hasFocus;
     setState(() {});
   }
 
@@ -184,7 +184,6 @@ class _LdMarkdownEditorState extends State<LdMarkdownEditor> {
     final shift = HardwareKeyboard.instance.isShiftPressed;
 
     switch (event.logicalKey) {
-      // ---- Tab / Shift+Tab — indent / unindent ----
       case LogicalKeyboardKey.tab:
         if (shift) {
           _unindent();
@@ -193,7 +192,6 @@ class _LdMarkdownEditorState extends State<LdMarkdownEditor> {
         }
         return KeyEventResult.handled;
 
-      // ---- Meta+B — bold ----
       case LogicalKeyboardKey.keyB:
         if (ctrl) {
           _wrapSelection('**', '**');
@@ -201,7 +199,6 @@ class _LdMarkdownEditorState extends State<LdMarkdownEditor> {
         }
         return KeyEventResult.ignored;
 
-      // ---- Meta+I — italic ----
       case LogicalKeyboardKey.keyI:
         if (ctrl) {
           _wrapSelection('*', '*');
@@ -209,17 +206,11 @@ class _LdMarkdownEditorState extends State<LdMarkdownEditor> {
         }
         return KeyEventResult.ignored;
 
-      // ---- Meta+E — inline code ----
       case LogicalKeyboardKey.keyE:
         if (ctrl) {
           _wrapSelection('`', '`');
           return KeyEventResult.handled;
         }
-        return KeyEventResult.ignored;
-
-      // ---- Enter — smart continuation ----
-      case LogicalKeyboardKey.enter:
-        if (_handleEnter()) return KeyEventResult.handled;
         return KeyEventResult.ignored;
 
       default:
@@ -278,83 +269,12 @@ class _LdMarkdownEditorState extends State<LdMarkdownEditor> {
     widget.onChanged?.call(_controller.text);
   }
 
-  /// Returns true if Enter was handled (smart list/blockquote continuation).
-  bool _handleEnter() {
-    final sel = _controller.selection;
-    if (!sel.isValid || !sel.isCollapsed) return false;
-    final text = _controller.text;
-    final lineStart = text.lastIndexOf('\n', sel.start - 1) + 1;
-    final line = text.substring(lineStart, sel.start);
+  @override
+  Widget build(BuildContext context) {
+    final theme = LdTheme.of(context);
+    final textStyle = ldBuildTextStyle(theme, LdTextType.paragraph, LdSize.m)
+        .copyWith(letterSpacing: 0, wordSpacing: 0);
 
-    // Do not intercept Enter on horizontal rules (--- / *** / ___).
-    if (RegExp(r'^(\*{3,}|-{3,}|_{3,})\s*$').hasMatch(line)) return false;
-
-    // Ordered list continuation.
-    final orderedMatch = RegExp(r'^(\s*)(\d+)\.\s').firstMatch(line);
-    if (orderedMatch != null) {
-      final indent = orderedMatch.group(1)!;
-      final num = int.parse(orderedMatch.group(2)!);
-      // If line is just the marker with no content, remove it.
-      if (line.trim() == '${orderedMatch.group(2)}.') {
-        _replaceCurrentLine(lineStart, sel.start, '');
-        return true;
-      }
-      _insertAtCursor('\n$indent${num + 1}. ');
-      return true;
-    }
-
-    // Unordered list continuation.
-    final unorderedMatch = RegExp(r'^(\s*)([-*+]) ').firstMatch(line);
-    if (unorderedMatch != null) {
-      final indent = unorderedMatch.group(1)!;
-      final marker = unorderedMatch.group(2)!;
-      if (line.trim() == marker) {
-        _replaceCurrentLine(lineStart, sel.start, '');
-        return true;
-      }
-      _insertAtCursor('\n$indent$marker ');
-      return true;
-    }
-
-    // Blockquote continuation.
-    if (line.startsWith('> ')) {
-      if (line.trim() == '>') {
-        _replaceCurrentLine(lineStart, sel.start, '');
-        return true;
-      }
-      _insertAtCursor('\n> ');
-      return true;
-    }
-
-    return false;
-  }
-
-  void _insertAtCursor(String insert) {
-    final sel = _controller.selection;
-    final text = _controller.text;
-    final newText = text.substring(0, sel.start) + insert + text.substring(sel.end);
-    _controller.value = TextEditingValue(
-      text: newText,
-      selection: TextSelection.collapsed(offset: sel.start + insert.length),
-    );
-    widget.onChanged?.call(_controller.text);
-  }
-
-  void _replaceCurrentLine(int lineStart, int lineEnd, String replacement) {
-    final text = _controller.text;
-    final newText = text.substring(0, lineStart) + replacement + text.substring(lineEnd);
-    _controller.value = TextEditingValue(
-      text: newText,
-      selection: TextSelection.collapsed(offset: lineStart + replacement.length),
-    );
-    widget.onChanged?.call(_controller.text);
-  }
-
-  // -------------------------------------------------------------------------
-  // Build
-  // -------------------------------------------------------------------------
-
-  Widget _buildTextField(BuildContext context, LdTheme theme) {
     return TextField(
       controller: _controller,
       focusNode: _focusNode,
@@ -377,68 +297,51 @@ class _LdMarkdownEditorState extends State<LdMarkdownEditor> {
       inputFormatters: widget.inputFormatters,
       autocorrect: widget.autocorrect,
       enableSuggestions: widget.enableSuggestions,
-      style: ldBuildTextStyle(theme, LdTextType.paragraph, LdSize.m).copyWith(letterSpacing: 0, wordSpacing: 0),
-      strutStyle: StrutStyle.fromTextStyle(
-        ldBuildTextStyle(theme, LdTextType.paragraph, LdSize.m).copyWith(letterSpacing: 0, wordSpacing: 0),
-        forceStrutHeight: true,
+      style: textStyle,
+      strutStyle: StrutStyle(
+        forceStrutHeight: false,
       ),
+      readOnly: !_focusNode.hasFocus,
       onChanged: widget.onChanged,
       onSubmitted: widget.onSubmitted,
       cursorColor: theme.primaryColor,
-    );
-  }
+      contextMenuBuilder: !widget.disabled
+          ? (context, editableTextState) {
+              final selection = editableTextState.textEditingValue.selection;
+              final baseOffset = selection.baseOffset;
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = LdTheme.of(context);
+              final url = _controller.linkAtOffset(baseOffset);
+              final tag = _controller.hashtagAtOffset(baseOffset);
 
-    final focused = _focusNode.hasFocus;
-    _controller.isEditing = focused;
+              final buttons = <ContextMenuButtonItem>[
+                ...editableTextState.contextMenuButtonItems,
+              ];
 
-    // The TextField must always stay mounted so the FocusNode remains attached.
-    // When blurred we show a Text.rich driven by the same controller (with
-    // isEditing=false so tables render as real WidgetSpans) on top, with a
-    // tap overlay to re-focus. Text.rich has no strut so WidgetSpan heights
-    // work correctly.
-    return Stack(
-      children: [
-        // Always mounted — keeps FocusNode attached.
-        Offstage(
-          offstage: !focused,
-          child: TapRegion(onTapOutside: (_) => _focusNode.unfocus(), child: _buildTextField(context, theme)),
-        ),
+              if (url != null && widget.onLinkTap != null) {
+                buttons.insert(
+                  0,
+                  ContextMenuButtonItem(
+                    label: 'Open link',
+                    onPressed: () => widget.onLinkTap?.call(url, ''),
+                  ),
+                );
+              }
+              if (tag != null && widget.onHashtagTap != null) {
+                buttons.insert(
+                  0,
+                  ContextMenuButtonItem(
+                    label: 'Search tag',
+                    onPressed: () => widget.onHashtagTap?.call(tag),
+                  ),
+                );
+              }
 
-        // Shown when blurred: Text.rich from the same controller.
-        // Match TextField's text metrics exactly:
-        //  - same style (including letterSpacing:0 / wordSpacing:0 to match
-        //    EditableText's internal behaviour and prevent layout shift)
-        //  - strutStyle derived from that style (same as TextField does internally)
-        //  - textHeightBehavior matching EditableText's default
-        if ((!focused) && _controller.text.isNotEmpty) ...[
-          Text.rich(
-            _controller.buildTextSpan(
-              context: context,
-              style: ldBuildTextStyle(theme, LdTextType.paragraph, LdSize.m)
-                  .copyWith(letterSpacing: 0, wordSpacing: 0),
-              withComposing: false,
-            ),
-            // EditableText uses forceStrutHeight:true internally (see
-            // StrutStyle getter in editable_text.dart), so we match that here.
-            // No textHeightBehavior override — EditableText uses the Flutter
-            // default (both ascent/descent applied), so omitting it here keeps
-            // the two modes identical.
-            strutStyle: StrutStyle.fromTextStyle(
-              ldBuildTextStyle(theme, LdTextType.paragraph, LdSize.m)
-                  .copyWith(letterSpacing: 0, wordSpacing: 0),
-              forceStrutHeight: true,
-            ),
-          ),
-          if (!widget.disabled)
-            Positioned.fill(
-              child: GestureDetector(behavior: HitTestBehavior.translucent, onTap: () => _focusNode.requestFocus()),
-            ),
-        ],
-      ],
+              return AdaptiveTextSelectionToolbar.buttonItems(
+                buttonItems: buttons,
+                anchors: editableTextState.contextMenuAnchors,
+              );
+            }
+          : null,
     );
   }
 }

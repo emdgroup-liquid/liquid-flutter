@@ -188,7 +188,7 @@ void main() {
         final shellState = _RangeShellState(filter);
 
         final repository = LdListController.fromModel(
-          LdCallbackModel<_RangeTestItem, int>(
+          LdCallbackModel<_RangeTestItem, int, _RangeTestItem, _RangeTestItem>(
             fetchListWithParameters: (parameters) async {
               return LdListPage<_RangeTestItem>(newItems: [], hasMore: false, total: 0);
             },
