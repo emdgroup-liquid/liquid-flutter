@@ -38,43 +38,62 @@ class LdFormChoose<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scope = context.watch<LdFormState?>();
-    return ReactiveFormField<Set<T>, Set<T>>(
-      formControlName: formKey,
-      validationMessages: validationMessages ?? {},
-      showErrors: ldReactiveFormShowErrors,
-      builder: (state) => ldBuildFormFieldChrome(
-        state: state,
-        formKey: formKey,
-        hintBuilder: hintBuilder,
-        context: context,
-        field: LdChoose.fromSelectItems<T>(
-          label: label,
-          items: items,
-          multiple: multiple,
-          allowEmpty: allowEmpty,
-          mode: mode,
-          placeholder: placeholder ?? const Text('Select...'),
-          value: state.control.value,
-          disabled: disabled ?? state.control.disabled,
-          onChanged: (value) {
-            state.didChange(value);
-            state.control.markAsTouched();
-            scope?.onFieldCommitted(formKey);
-            onCommitted?.call(value);
-          },
-        ),
-      ),
-    );
+    Widget builder(state) => ldBuildFormFieldChrome(
+          state: state,
+          formKey: formKey,
+          hintBuilder: hintBuilder,
+          context: context,
+          field: LdChoose.fromSelectItems<T>(
+            label: label,
+            items: items,
+            multiple: multiple,
+            allowEmpty: allowEmpty,
+            mode: mode,
+            placeholder: placeholder ?? const Text('Select...'),
+            value: multiple ? state.control.value : {state.control.value},
+            disabled: disabled ?? state.control.disabled,
+            onChanged: (value) {
+              if (multiple) {
+                state.didChange(value);
+              } else {
+                state.didChange(value.isEmpty ? null : value.first);
+              }
+              state.control.markAsTouched();
+              scope?.onFieldCommitted(formKey);
+              onCommitted?.call(value);
+            },
+          ),
+        );
+    if (multiple) {
+      return ReactiveFormField<Set<T>, Set<T>>(
+        formControlName: formKey,
+        validationMessages: validationMessages ?? {},
+        showErrors: ldReactiveFormShowErrors,
+        builder: builder,
+      );
+    } else {
+      return ReactiveFormField<T, T>(
+        formControlName: formKey,
+        validationMessages: validationMessages ?? {},
+        showErrors: ldReactiveFormShowErrors,
+        builder: builder,
+      );
+    }
   }
 }
 
 /// A reactive choose field backed by a list of [Identifiable] entities.
-class LdFormChooseFromList<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
+class LdFormChooseFromList<T extends Identifiable<IdType>, IdType>
+    extends StatelessWidget {
   final String formKey;
   final String? label;
   final List<T> items;
   final Widget Function(BuildContext context, T item) selectedItemBuilder;
-  final Widget Function(BuildContext context, LdPaginatorItem<T> item, int index)? itemBuilder;
+  final Widget Function(
+    BuildContext context,
+    LdPaginatorItem<T> item,
+    int index,
+  )? itemBuilder;
   final bool multiple;
   final bool allowEmpty;
   final bool? disabled;
@@ -139,11 +158,16 @@ class LdFormChooseFromList<T extends Identifiable<IdType>, IdType> extends State
 }
 
 /// A reactive choose field backed by a monkey [LdListController].
-class LdFormChooseRepository<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
+class LdFormChooseRepository<T extends Identifiable<IdType>, IdType>
+    extends StatelessWidget {
   final String formKey;
   final String? label;
   final LdListController<T, IdType> repository;
-  final Widget Function(BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder;
+  final Widget Function(
+    BuildContext context,
+    LdPaginatorItem<T> item,
+    int index,
+  ) itemBuilder;
   final Widget Function(BuildContext context, T item) selectedItemBuilder;
   final bool multiple;
   final bool allowEmpty;
@@ -152,10 +176,17 @@ class LdFormChooseRepository<T extends Identifiable<IdType>, IdType> extends Sta
   final LdMonkeyFiltersBuilder<T, IdType>? filtersBuilder;
   final LdMonkeySortOptionsBuilder<T, IdType>? sortOptionsBuilder;
   final List<LdFilterChipConfig<T, IdType>>? filterChipConfigs;
+  final Widget Function(
+    BuildContext context,
+    LdChooseTriggerConfig<T, IdType> config,
+  )? triggerBuilder;
   final LdHint? Function(
     ReactiveFormFieldState<Set<IdType>, Set<IdType>>,
   )? hintBuilder;
   final Map<String, ValidationMessageFunction>? validationMessages;
+
+  final Text? hint;
+  final int? truncateDisplay;
 
   const LdFormChooseRepository({
     super.key,
@@ -166,6 +197,7 @@ class LdFormChooseRepository<T extends Identifiable<IdType>, IdType> extends Sta
     this.label,
     this.multiple = false,
     this.allowEmpty = false,
+    this.hint,
     this.disabled,
     this.mode = LdChooseMode.auto,
     this.filtersBuilder,
@@ -173,40 +205,60 @@ class LdFormChooseRepository<T extends Identifiable<IdType>, IdType> extends Sta
     this.filterChipConfigs,
     this.hintBuilder,
     this.validationMessages,
+    this.triggerBuilder,
+    this.truncateDisplay,
   });
 
   @override
   Widget build(BuildContext context) {
     final scope = context.watch<LdFormState?>();
-    return ReactiveFormField<Set<IdType>, Set<IdType>>(
-      formControlName: formKey,
-      validationMessages: validationMessages ?? {},
-      showErrors: ldReactiveFormShowErrors,
-      builder: (state) => ldBuildFormFieldChrome(
-        state: state,
-        formKey: formKey,
-        hintBuilder: hintBuilder,
-        context: context,
-        field: LdChoose<T, IdType>(
-          repository: repository,
-          label: label,
-          multiple: multiple,
-          allowEmpty: allowEmpty,
-          mode: mode,
-          filtersBuilder: filtersBuilder,
-          sortOptionsBuilder: sortOptionsBuilder,
-          filterChipConfigs: filterChipConfigs,
-          value: state.control.value,
-          disabled: disabled ?? state.control.disabled,
-          onChanged: (value) {
-            state.didChange(value);
-            state.control.markAsTouched();
-            scope?.onFieldCommitted(formKey);
-          },
-          itemBuilder: itemBuilder,
-          selectedItemBuilder: selectedItemBuilder,
-        ),
-      ),
-    );
+    Widget builder(state) => ldBuildFormFieldChrome(
+          state: state,
+          formKey: formKey,
+          hintBuilder: hintBuilder,
+          context: context,
+          field: LdChoose<T, IdType>(
+            hint: hint,
+            repository: repository,
+            label: label,
+            multiple: multiple,
+            allowEmpty: allowEmpty,
+            mode: mode,
+            filtersBuilder: filtersBuilder,
+            truncateDisplay: truncateDisplay,
+            sortOptionsBuilder: sortOptionsBuilder,
+            triggerBuilder: triggerBuilder,
+            filterChipConfigs: filterChipConfigs,
+            value: multiple ? state.control.value : {state.control.value},
+            disabled: disabled ?? state.control.disabled,
+            onChanged: (value) {
+              if (multiple) {
+                state.didChange(value);
+              } else {
+                state.didChange(value.isEmpty ? null : value.first);
+              }
+
+              state.control.markAsTouched();
+              scope?.onFieldCommitted(formKey);
+            },
+            itemBuilder: itemBuilder,
+            selectedItemBuilder: selectedItemBuilder,
+          ),
+        );
+    if (multiple) {
+      return ReactiveFormField<Set<IdType>, Set<IdType>>(
+        formControlName: formKey,
+        validationMessages: validationMessages ?? {},
+        showErrors: ldReactiveFormShowErrors,
+        builder: builder,
+      );
+    } else {
+      return ReactiveFormField<IdType, IdType>(
+        formControlName: formKey,
+        validationMessages: validationMessages ?? {},
+        showErrors: ldReactiveFormShowErrors,
+        builder: builder,
+      );
+    }
   }
 }

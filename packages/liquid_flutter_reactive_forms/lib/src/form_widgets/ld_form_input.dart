@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart' hide LdForm;
+import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart'
+    hide LdForm;
 import 'package:provider/provider.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 
@@ -44,9 +45,12 @@ class _LdFormInputState<T> extends State<LdFormInput<T>> {
     super.initState();
     _valueAccessor = switch (T) {
       const (int) => IntValueAccessor() as ControlValueAccessor<T, String>,
-      const (double) => DoubleValueAccessor() as ControlValueAccessor<T, String>,
-      const (DateTime) => DateTimeValueAccessor() as ControlValueAccessor<T, String>,
-      const (TimeOfDay) => TimeOfDayValueAccessor() as ControlValueAccessor<T, String>,
+      const (double) =>
+        DoubleValueAccessor() as ControlValueAccessor<T, String>,
+      const (DateTime) =>
+        DateTimeValueAccessor() as ControlValueAccessor<T, String>,
+      const (TimeOfDay) =>
+        TimeOfDayValueAccessor() as ControlValueAccessor<T, String>,
       _ => DefaultValueAccessor<T, String>() as ControlValueAccessor<T, String>,
     };
   }
@@ -139,9 +143,16 @@ class _LdFormInputFieldState<T> extends State<_LdFormInputField<T>> {
     return LdInput(
       hint: widget.hint,
       label: widget.label,
-      keyboardType: TextInputType.text,
+      keyboardType: switch (widget.maxLines) {
+        1 => TextInputType.text,
+        _ => TextInputType.multiline,
+      },
       maxLines: widget.maxLines,
       size: widget.size,
+      textInputAction: switch (widget.maxLines) {
+        1 => TextInputAction.done,
+        _ => TextInputAction.newline,
+      },
       valid: control.valid || widget.state.errorText == null,
       controller: _controller,
       onChanged: (value) {

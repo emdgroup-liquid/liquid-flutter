@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter_reactive_forms/src/form_widgets/ld_form_field_base.dart';
+import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart';
+import 'package:provider/provider.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 
 /// A reactive emoji-picker field that binds to a [FormControl<String>] by
@@ -70,8 +71,9 @@ class LdFormEmojiPicker extends StatelessWidget {
         final isDisabled = disabled ?? state.control.disabled;
         final currentEmoji = state.value;
         final hasEmoji = currentEmoji != null && currentEmoji.isNotEmpty;
-        final isRequired = state.control.validators.contains(Validators.required);
-
+        final isRequired =
+            state.control.validators.contains(Validators.required);
+        final scope = context.watch<LdFormState?>();
         return ldBuildFormFieldChrome(
           state: state,
           formKey: formKey,
@@ -81,12 +83,18 @@ class LdFormEmojiPicker extends StatelessWidget {
             message: label ?? '',
             child: LdTouchableSurface(
               disabled: isDisabled,
-              onPressed: () => _openPicker(context, currentEmoji, isRequired, (emoji) {
+              onPressed: () =>
+                  _openPicker(context, currentEmoji, isRequired, (emoji) {
                 state.didChange(emoji);
                 state.control.markAsDirty();
+                scope?.onFieldCommitted(formKey);
               }),
               builder: (context, status, child) {
-                final colors = inputColor(LdTheme.of(context), status, isValid: state.control.valid);
+                final colors = inputColor(
+                  LdTheme.of(context),
+                  status,
+                  isValid: state.control.valid,
+                );
                 return Container(
                   padding: LdTheme.of(context).pad(),
                   decoration: BoxDecoration(
@@ -96,7 +104,9 @@ class LdFormEmojiPicker extends StatelessWidget {
                   ),
                   child: DefaultTextStyle(
                     style: TextStyle(fontSize: _getEmojiSize(size)),
-                    child: hasEmoji ? LdEmoji(currentEmoji) : SizedBox(width: 20, height: 20, child: Placeholder()),
+                    child: hasEmoji
+                        ? LdEmoji(currentEmoji)
+                        : SizedBox(width: 20, height: 20, child: Placeholder()),
                   ),
                 );
               },
