@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart' hide LdForm;
+import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart'
+    hide LdForm;
 import 'package:provider/provider.dart';
 
 /// A reactive segmented-control field that binds to a [FormControl<T>] by [formKey].

@@ -45,7 +45,9 @@ class LdSwitch<T> extends StatelessWidget {
           child: IntrinsicHeight(
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              children: children.entries.map((e) => _buildItem(theme, e.key, e.value)).toList(),
+              children: children.entries
+                  .map((e) => _buildItem(theme, e.key, e.value))
+                  .toList(),
             ),
           ),
         ),

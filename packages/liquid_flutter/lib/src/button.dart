@@ -292,13 +292,15 @@ class _LdButtonState extends State<_LdButtonWidget> {
   }
 
   bool get centerText {
-    return _alignment == MainAxisAlignment.center || _alignment == MainAxisAlignment.spaceBetween;
+    return _alignment == MainAxisAlignment.center ||
+        _alignment == MainAxisAlignment.spaceBetween;
   }
 
   Widget get _buttonContent {
     final theme = LdTheme.of(context);
     return Row(
-      mainAxisSize: widget.width == double.infinity ? MainAxisSize.max : MainAxisSize.min,
+      mainAxisSize:
+          widget.width == double.infinity ? MainAxisSize.max : MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: _alignment,
       spacing: theme.labelSize(widget.size) / 2,
@@ -459,7 +461,9 @@ class _LdButtonState extends State<_LdButtonWidget> {
                     LdSpring(
                       dampingCoefficient: 5,
                       position: isLoading ? 0 : 1,
-                      child: isLoading ? _loadingContent(colors) : const SizedBox(),
+                      child: isLoading
+                          ? _loadingContent(colors)
+                          : const SizedBox(),
                       builder: (context, state, child) {
                         return Transform.translate(
                           offset: Offset(0, 20 * state.position),
@@ -538,7 +542,8 @@ class _ButtonShape extends StatelessWidget {
       ..add(FlagProperty('center', value: center, ifTrue: 'center'))
       ..add(EnumProperty<LdSize>('size', size))
       ..add(DoubleProperty('width', width))
-      ..add(FlagProperty('disableSqueeze', value: disableSqueeze, ifTrue: 'disableSqueeze'))
+      ..add(FlagProperty('disableSqueeze',
+          value: disableSqueeze, ifTrue: 'disableSqueeze'))
       ..add(FlagProperty('circular', value: circular, ifTrue: 'circular'))
       ..add(DiagnosticsProperty<Widget>('child', child))
       ..add(DiagnosticsProperty<Offset?>('panOffset', panOffset));
@@ -590,7 +595,8 @@ class _ButtonShape extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
-    final panDistance = sqrt(pow(status.panOffset?.dx ?? 0, 2) + pow(status.panOffset?.dy ?? 0, 2));
+    final panDistance = sqrt(
+        pow(status.panOffset?.dx ?? 0, 2) + pow(status.panOffset?.dy ?? 0, 2));
 
     double squeezeFactor = 0;
 
@@ -646,6 +652,7 @@ class _ButtonShape extends StatelessWidget {
             child: DefaultTextStyle(
               textAlign: center ? TextAlign.center : null,
               maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: colors.text,
                 package: theme.fontFamilyPackage,

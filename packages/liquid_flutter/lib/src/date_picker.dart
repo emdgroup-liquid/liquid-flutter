@@ -38,7 +38,6 @@ class LdDatePicker extends StatefulWidget {
 }
 
 class _LdDatePickerState extends State<LdDatePicker> {
-  late ValueNotifier<DateTime> _selectedDateNotifier;
   late DateTime _selectedDate;
 
   DateTime get _initialDate => widget.value ?? DateTime.now();
@@ -53,12 +52,10 @@ class _LdDatePickerState extends State<LdDatePicker> {
   void initState() {
     super.initState();
     _selectedDate = _initialDate;
-    _selectedDateNotifier = ValueNotifier<DateTime>(_selectedDate);
   }
 
   @override
   void dispose() {
-    _selectedDateNotifier.dispose();
     super.dispose();
   }
 
@@ -67,80 +64,80 @@ class _LdDatePickerState extends State<LdDatePicker> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.value != widget.value) {
       _selectedDate = widget.value ?? DateTime.now();
-      _selectedDateNotifier.value = _selectedDate;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
-    return LdModalBuilder(
-      useRootNavigator: widget.useRootNavigator,
-      builder: (context, open) => LdBundle(
-        children: [
-          if (widget.label != null) LdText.l(widget.label!),
-          LdTouchableSurface(
-            allowTapOutside: true,
-            key: const Key("date_picker_button"),
-            onPressed: () async {
-              await open();
-              if (!mounted) return;
-              widget.onChanged(_selectedDateNotifier.value);
-            },
-            disabled: widget.disabled,
-            builder: (context, status, _) => Builder(builder: (context) {
-              final colorBundle = inputColor(theme, status, isValid: true);
-              return Container(
-                clipBehavior: Clip.hardEdge,
-                padding: theme.pad(size: LdSize.s),
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: colorBundle.surface,
-                  borderRadius: theme.radius(LdSize.s),
-                  border: Border.all(
-                    color: colorBundle.border,
-                    width: theme.borderWidth,
-                  ),
+    return LdBundle(
+      children: [
+        if (widget.label != null) LdText.l(widget.label!),
+        LdTouchableSurface(
+          allowTapOutside: true,
+          key: const Key("date_picker_button"),
+          onPressed: () async {
+            final result = await Navigator.of(context).push<DateTime?>(LdModalRoute(
+                context: context,
+                pageBuilder: (context) => LdDatePickerModal(
+                      selectedDate: _selectedDate,
+                      minDate: widget.minDate,
+                      maxDate: widget.maxDate,
+                      label: widget.label ?? LiquidLocalizations.of(context).selectDate,
+                    )));
+
+            if (result != null && mounted) {
+              setState(() {
+                _selectedDate = result;
+              });
+              widget.onChanged(_selectedDate);
+            }
+          },
+          disabled: widget.disabled,
+          builder: (context, status, _) => Builder(builder: (context) {
+            final colorBundle = inputColor(theme, status, isValid: true);
+            return Container(
+              clipBehavior: Clip.hardEdge,
+              padding: theme.pad(size: LdSize.s),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: colorBundle.surface,
+                borderRadius: theme.radius(LdSize.s),
+                border: Border.all(
+                  color: colorBundle.border,
+                  width: theme.borderWidth,
                 ),
-                child: LdText.l(initialDateString),
-              );
-            }),
-          )
-        ],
-      ),
-      modal: LdModalRoute(
-        context: context,
-        pageBuilder: (context) => _DatePickerSheet(
-          minDate: widget.minDate,
-          maxDate: widget.maxDate,
-          selectedDateNotifier: _selectedDateNotifier,
-          label: widget.label ?? LiquidLocalizations.of(context).selectDate,
-        ),
-      ),
+              ),
+              child: LdText.l(initialDateString),
+            );
+          }),
+        )
+      ],
     );
   }
 }
 
-class _DatePickerSheet extends StatefulWidget {
-  final ValueNotifier<DateTime> selectedDateNotifier;
+class LdDatePickerModal extends StatefulWidget {
+  final DateTime selectedDate;
   final String label;
   final DateTime? minDate;
   final DateTime? maxDate;
 
-  const _DatePickerSheet({
-    required this.selectedDateNotifier,
+  const LdDatePickerModal({
+    super.key,
+    required this.selectedDate,
     required this.label,
     required this.minDate,
     required this.maxDate,
   });
 
   @override
-  State<_DatePickerSheet> createState() => _DatePickerSheetState();
+  State<LdDatePickerModal> createState() => _LdDatePickerModalState();
 }
 
-class _DatePickerSheetState extends State<_DatePickerSheet> {
+class _LdDatePickerModalState extends State<LdDatePickerModal> {
   late PageController? _pageController = PageController(
-    initialPage: monthSince0(widget.selectedDateNotifier.value),
+    initialPage: monthSince0(widget.selectedDate),
   );
 
   int monthSince0(DateTime other) =>
@@ -149,10 +146,12 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
   bool get _pageControllerIsValid => (_pageController?.positions.length == 1);
 
   int get _currentPage => _pageControllerIsValid
-      ? _pageController!.page?.toInt() ?? monthSince0(widget.selectedDateNotifier.value)
-      : monthSince0(widget.selectedDateNotifier.value);
+      ? _pageController!.page?.toInt() ?? monthSince0(widget.selectedDate)
+      : monthSince0(widget.selectedDate);
 
   DateTime get _viewDate => Jiffy.parseFromDateTime(DateTime(0)).add(months: _currentPage).dateTime;
+
+  late DateTime _selectedDate = widget.selectedDate;
 
   @override
   initState() {
@@ -165,9 +164,9 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
   }
 
   @override
-  void didUpdateWidget(covariant _DatePickerSheet oldWidget) {
-    if (oldWidget.selectedDateNotifier != widget.selectedDateNotifier) {
-      viewDate(widget.selectedDateNotifier.value);
+  void didUpdateWidget(covariant LdDatePickerModal oldWidget) {
+    if (oldWidget.selectedDate != widget.selectedDate) {
+      viewDate(widget.selectedDate);
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -182,7 +181,7 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
   bool _animating = false;
 
   void _selectDate(DateTime date) {
-    widget.selectedDateNotifier.value = date;
+    _selectedDate = date;
     viewDate(date);
     setState(() {});
   }
@@ -254,7 +253,7 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
   }
 
   bool isSelected(DateTime date) {
-    final selectedDate = widget.selectedDateNotifier.value;
+    final selectedDate = _selectedDate;
     return date.year == selectedDate.year && date.month == selectedDate.month && date.day == selectedDate.day;
   }
 
@@ -361,11 +360,11 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
             ),
             ...[7, 30, 90].map((days) => LdButton(
                   key: Key('in${days}d'),
-                  active: isSelected(widget.selectedDateNotifier.value.add(Duration(days: days))),
-                  disabled: !isValidDate(widget.selectedDateNotifier.value.add(Duration(days: days))),
+                  active: isSelected(_selectedDate.add(Duration(days: days))),
+                  disabled: !isValidDate(_selectedDate.add(Duration(days: days))),
                   child: Text('+${days}d'),
                   onPressed: () {
-                    _selectDate(widget.selectedDateNotifier.value.add(Duration(days: days)));
+                    _selectDate(_selectedDate.add(Duration(days: days)));
                   },
                 )),
           ],
@@ -373,7 +372,7 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
             key: const Key('done'),
             leading: const Icon(LucideIcons.chevronRight),
             onPressed: () {
-              Navigator.of(context).pop(widget.selectedDateNotifier.value);
+              Navigator.of(context).pop(_selectedDate);
             },
             child: const Text('Done'),
           ),
@@ -398,19 +397,14 @@ class _DatePickerSheetState extends State<_DatePickerSheet> {
               LdExpandablePageView(
                 controller: _pageController,
                 itemBuilder: (context, index) {
-                  return ValueListenableBuilder<DateTime>(
-                    valueListenable: widget.selectedDateNotifier,
-                    builder: (context, selectedDate, child) {
-                      return _MonthView(
-                        key: Key("month_view_$index"),
-                        viewDate: Jiffy.parseFromDateTime(DateTime(0)).add(months: index).dateTime,
-                        selectedDate: selectedDate,
-                        minDate: widget.minDate,
-                        maxDate: widget.maxDate,
-                        onSelected: (date) {
-                          widget.selectedDateNotifier.value = date;
-                        },
-                      );
+                  return _MonthView(
+                    key: Key("month_view_$index"),
+                    viewDate: Jiffy.parseFromDateTime(DateTime(0)).add(months: index).dateTime,
+                    selectedDate: _selectedDate,
+                    minDate: widget.minDate,
+                    maxDate: widget.maxDate,
+                    onSelected: (date) {
+                      _selectDate(date);
                     },
                   );
                 },

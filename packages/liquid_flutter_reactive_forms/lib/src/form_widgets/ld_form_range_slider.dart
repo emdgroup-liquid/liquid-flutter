@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart' hide LdForm;
+import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart'
+    hide LdForm;
 import 'package:provider/provider.dart';
 
 /// A reactive range-slider field that binds to a [FormControl<(double, double)>]
@@ -28,6 +29,7 @@ class LdFormRangeSlider extends StatelessWidget {
     ReactiveFormFieldState<(double, double), (double, double)>,
   )? hintBuilder;
   final Map<String, ValidationMessageFunction>? validationMessages;
+  final String Function(double value)? valueFormatter;
 
   const LdFormRangeSlider({
     super.key,
@@ -42,6 +44,7 @@ class LdFormRangeSlider extends StatelessWidget {
     this.color,
     this.hintBuilder,
     this.validationMessages,
+    this.valueFormatter,
   });
 
   @override
@@ -65,6 +68,7 @@ class LdFormRangeSlider extends StatelessWidget {
             min: min,
             max: max,
             step: step,
+            valueFormatter: valueFormatter,
             allowRangeDrag: allowRangeDrag,
             size: size,
             color: color,

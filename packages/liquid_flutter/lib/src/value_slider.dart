@@ -51,15 +51,15 @@ class _LdSliderHandle extends StatefulWidget {
   final LdColor? color;
   final Axis direction;
   final String tooltipMessage;
-  final GlobalKey<TooltipState> tooltipKey;
+  final bool showTooltip;
 
   const _LdSliderHandle({
     required this.fraction,
     required this.isDragging,
     required this.disabled,
+    required this.showTooltip,
     required this.size,
     required this.tooltipMessage,
-    required this.tooltipKey,
     this.color,
     this.direction = Axis.horizontal,
   });
@@ -88,22 +88,6 @@ class _LdSliderHandleState extends State<_LdSliderHandle> {
       LdSize.m => 16,
       LdSize.l => 20,
     };
-  }
-
-  @override
-  void didUpdateWidget(covariant _LdSliderHandle oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (!oldWidget.isDragging && widget.isDragging) {
-      // Drag started — show tooltip immediately
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          widget.tooltipKey.currentState?.ensureTooltipVisible();
-        }
-      });
-    } else if (oldWidget.isDragging && !widget.isDragging) {
-      // Drag ended — dismiss tooltip
-      widget.tooltipKey.currentState?.deactivate();
-    }
   }
 
   @override
@@ -140,45 +124,69 @@ class _LdSliderHandleState extends State<_LdSliderHandle> {
             ? SystemMouseCursors.resizeUpDown
             : SystemMouseCursors.resizeLeftRight;
 
-    return Tooltip(
-      key: widget.tooltipKey,
-      message: widget.tooltipMessage,
-      triggerMode: TooltipTriggerMode.manual,
-      child: MouseRegion(
-        cursor: cursor,
-        onEnter: (_) => setState(() => _isHovered = true),
-        onExit: (_) => setState(() {
-          _isHovered = false;
-          _isPressed = false;
-        }),
-        child: GestureDetector(
-          onTapDown: (_) => setState(() => _isPressed = true),
-          onTapUp: (_) => setState(() => _isPressed = false),
-          onTapCancel: () => setState(() => _isPressed = false),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 100),
-            width: diameter,
-            height: diameter,
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: borderColor,
-                width: theme.borderWidth,
-                strokeAlign: BorderSide.strokeAlignInside,
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        MouseRegion(
+          cursor: cursor,
+          onEnter: (_) => setState(() => _isHovered = true),
+          onExit: (_) => setState(() {
+            _isHovered = false;
+            _isPressed = false;
+          }),
+          child: GestureDetector(
+            onTapDown: (_) => setState(() => _isPressed = true),
+            onTapUp: (_) => setState(() => _isPressed = false),
+            onTapCancel: () => setState(() => _isPressed = false),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 100),
+              width: diameter,
+              height: diameter,
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: borderColor,
+                  width: theme.borderWidth,
+                  strokeAlign: BorderSide.strokeAlignInside,
+                ),
+                boxShadow: [ldShadowDefault],
               ),
-              boxShadow: [ldShadowDefault],
-            ),
-            child: Center(
-              child: Icon(
-                LucideIcons.gripVertical,
-                size: _iconSize(theme),
-                color: iconColor,
+              child: Center(
+                child: Icon(
+                  LucideIcons.gripVertical,
+                  size: _iconSize(theme),
+                  color: iconColor,
+                ),
               ),
             ),
           ),
         ),
-      ),
+        if (widget.showTooltip)
+          Positioned(
+            top: -diameter - theme.paddingSize(size: LdSize.m),
+            left: -50,
+            right: -50,
+            child: Center(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: theme.surface,
+                  borderRadius: theme.radius(LdSize.m),
+                  boxShadow: [ldShadowDefault],
+                  border: Border.all(
+                    color: theme.floatingBorder,
+                    width: theme.borderWidth,
+                    strokeAlign: BorderSide.strokeAlignInside,
+                  ),
+                ),
+                child: Text(
+                  widget.tooltipMessage,
+                  textAlign: TextAlign.center,
+                ).padXS(),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -254,6 +262,9 @@ class LdSlider extends StatefulWidget {
   /// Whether this is a range slider (two handles).
   final bool _isRange;
 
+  /// Optional formatter for the value.
+  final String Function(double value)? valueFormatter;
+
   const LdSlider({
     super.key,
     required double value,
@@ -265,6 +276,7 @@ class LdSlider extends StatefulWidget {
     this.direction = Axis.horizontal,
     this.size = LdSize.m,
     this.color,
+    this.valueFormatter,
     this.disabled = false,
     this.label,
   })  : _isRange = false,
@@ -282,13 +294,14 @@ class LdSlider extends StatefulWidget {
   ///
   /// [lowValue] must be <= [highValue] in debug mode; in release mode the
   /// values are clamped gracefully.
-const LdSlider.range({
+  const LdSlider.range({
     super.key,
     required double lowValue,
     required double highValue,
     required void Function(double low, double high) onRangeChanged,
     this.onRangeChangeEnd,
     bool allowRangeDrag = false,
+    this.valueFormatter,
     this.min = 0.0,
     this.max = 1.0,
     this.step = 0.0,
@@ -357,16 +370,14 @@ class _LdSliderState extends State<LdSlider> {
   /// Global pointer position when the range drag started, in screen pixels.
   Offset? _rangeDragStartGlobal;
 
-  // ---- Tooltip keys ------------------------------------------------------
-  // _lowTooltipKey used in both single and range mode.
-  final _lowTooltipKey = GlobalKey<TooltipState>();
-  final _highTooltipKey = GlobalKey<TooltipState>();
-
   // ---- Single-mode helpers -----------------------------------------------
 
   double get _clampedValue => widget.value!.clamp(widget.min, widget.max);
 
   String get _formattedValue {
+    if (widget.valueFormatter != null) {
+      return widget.valueFormatter!(_clampedValue);
+    }
     final v = _clampedValue;
     if (v == v.roundToDouble()) return v.toInt().toString();
     return v.toStringAsFixed(2);
@@ -750,12 +761,12 @@ class _LdSliderState extends State<LdSlider> {
                         child: _LdSliderHandle(
                           fraction: springFraction,
                           isDragging: _isDragging,
+                          showTooltip: _isDragging,
                           disabled: widget.disabled,
                           size: widget.size,
                           color: widget.color,
                           direction: widget.direction,
                           tooltipMessage: _formattedValue,
-                          tooltipKey: _lowTooltipKey,
                         ),
                       ),
                     ],
@@ -806,7 +817,7 @@ class _LdSliderState extends State<LdSlider> {
                           color: widget.color,
                           direction: widget.direction,
                           tooltipMessage: _formattedValue,
-                          tooltipKey: _lowTooltipKey,
+                          showTooltip: _isDragging,
                         ),
                       ),
                     ],
@@ -971,7 +982,7 @@ class _LdSliderState extends State<LdSlider> {
                                   color: widget.color,
                                   direction: widget.direction,
                                   tooltipMessage: _formatValue(clampedLow),
-                                  tooltipKey: _lowTooltipKey,
+                                  showTooltip: _isDraggingLow || _isDraggingRange,
                                 ),
                               ),
                             ),
@@ -991,7 +1002,7 @@ class _LdSliderState extends State<LdSlider> {
                                   color: widget.color,
                                   direction: widget.direction,
                                   tooltipMessage: _formatValue(clampedHigh),
-                                  tooltipKey: _highTooltipKey,
+                                  showTooltip: _isDraggingHigh || _isDraggingRange,
                                 ),
                               ),
                             ),
@@ -1111,7 +1122,7 @@ class _LdSliderState extends State<LdSlider> {
                                   color: widget.color,
                                   direction: widget.direction,
                                   tooltipMessage: _formatValue(clampedLow),
-                                  tooltipKey: _lowTooltipKey,
+                                  showTooltip: _isDraggingLow || _isDraggingRange,
                                 ),
                               ),
                             ),
@@ -1131,7 +1142,7 @@ class _LdSliderState extends State<LdSlider> {
                                   color: widget.color,
                                   direction: widget.direction,
                                   tooltipMessage: _formatValue(clampedHigh),
-                                  tooltipKey: _highTooltipKey,
+                                  showTooltip: _isDraggingHigh || _isDraggingRange,
                                 ),
                               ),
                             ),

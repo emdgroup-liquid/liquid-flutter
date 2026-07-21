@@ -11,9 +11,11 @@ class LdFormSlider extends StatelessWidget {
   final double min;
   final double max;
   final double step;
+  final bool isInteger;
 
-  final LdHint? Function(ReactiveFormFieldState<double, double>)? hintBuilder;
+  final LdHint? Function(ReactiveFormFieldState<num, num>)? hintBuilder;
   final Map<String, ValidationMessageFunction>? validationMessages;
+  final String Function(double value)? valueFormatter;
 
   const LdFormSlider({
     super.key,
@@ -23,36 +25,58 @@ class LdFormSlider extends StatelessWidget {
     this.min = 0,
     this.max = 100,
     this.step = 1,
+    this.isInteger = false,
     this.hintBuilder,
     this.validationMessages,
+    this.valueFormatter,
   });
 
   @override
   Widget build(BuildContext context) {
     final scope = context.watch<LdFormState?>();
+
+    Widget builder(ReactiveFormFieldState<num, num> state) =>
+        ldBuildFormFieldChrome(
+          state: state,
+          formKey: formKey,
+          hintBuilder: hintBuilder,
+          context: context,
+          field: LdSlider(
+            label: label,
+            value: switch (isInteger) {
+              true => (state.control.value as int?)?.toDouble() ?? min,
+              false =>
+                ((state.control.value as double?) ?? min).clamp(min, max),
+            },
+            min: min,
+            max: max,
+            valueFormatter: valueFormatter,
+            step: step,
+            onChanged: (value) {
+              if (isInteger) {
+                state.didChange(value.toInt());
+              } else {
+                state.didChange(value);
+              }
+            },
+            onChangeEnd: () {
+              scope?.onFieldCommitted(formKey);
+            },
+          ),
+        );
+    if (isInteger) {
+      return ReactiveFormField<int, int>(
+        formControlName: formKey,
+        validationMessages: validationMessages ?? {},
+        showErrors: ldReactiveFormShowErrors,
+        builder: builder,
+      );
+    }
     return ReactiveFormField<double, double>(
       formControlName: formKey,
       validationMessages: validationMessages ?? {},
       showErrors: ldReactiveFormShowErrors,
-      builder: (state) => ldBuildFormFieldChrome(
-        state: state,
-        formKey: formKey,
-        hintBuilder: hintBuilder,
-        context: context,
-        field: LdSlider(
-          label: label,
-          value: (state.control.value ?? min).clamp(min, max),
-          min: min,
-          max: max,
-          step: step,
-          onChanged: (value) {
-            state.didChange(value);
-          },
-          onChangeEnd: () {
-            scope?.onFieldCommitted(formKey);
-          },
-        ),
-      ),
+      builder: builder,
     );
   }
 }
