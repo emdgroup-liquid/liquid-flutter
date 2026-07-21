@@ -15,7 +15,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
-  liquid_flutter_window_utils: 08338c9de990e493e63db32a549aea6762e96c44
+  liquid_flutter_window_utils: 4f6190831a93935ae3f7c1078a2dcb7f4b384af5
 
 PODFILE CHECKSUM: 7ea94091761b499e0c705bed8ccc305efda9867b
 

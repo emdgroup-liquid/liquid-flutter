@@ -62,6 +62,10 @@ LdCallbackModel<Task, int, Task, Task> taskModel(BuildContext context) => LdCall
   fetchListWithParameters: (parameters) async {
     await Future.delayed(const Duration(milliseconds: 200));
 
+    if (!context.mounted) {
+      return LdListPage<Task>(newItems: [], hasMore: false, total: 0);
+    }
+
     final filtered = applyFiltersAndSorting(testData, parameters.filters, parameters.sortOptions);
     final result = filtered.skip(parameters.offset).take(parameters.pageSize).toList();
     return LdListPage<Task>(
@@ -103,5 +107,8 @@ LdCallbackModel<Task, int, Task, Task> taskModel(BuildContext context) => LdCall
     testData.add(item!);
 
     return item;
+  },
+  reorderItem: (context, item, fromIndex, toIndex, activeSortOption) async {
+    return item.copyWith(order: toIndex, lastUpdate: DateTime.now());
   },
 );

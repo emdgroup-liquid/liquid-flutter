@@ -4,7 +4,9 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 /// Shows a discard-confirmation modal for unsaved detail edits.
 ///
 /// Returns `true` when the user chooses to keep editing.
-Future<bool> ldFormConfirmDiscardEdits(
+/// Returns `false` when the user chooses to discard the edits.
+/// Returns `null` when the modal is dismissed.
+Future<bool?> ldFormConfirmDiscardEdits(
   BuildContext context, {
   String? description,
   Widget? title,

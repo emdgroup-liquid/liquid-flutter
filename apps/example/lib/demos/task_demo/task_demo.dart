@@ -276,9 +276,6 @@ List<LdSortOption<Task, int>> taskSortOptions = [
   ),
 ];
 
-Future<Task> taskReorderHandler(BuildContext context, Task item, int fromIndex, int toIndex) async {
-  return item.copyWith(order: toIndex, lastUpdate: DateTime.now());
-}
 
 List<LdFilterOption<Task, int>> taskFilters = [
   LdFilterSearch<Task, int, String>(

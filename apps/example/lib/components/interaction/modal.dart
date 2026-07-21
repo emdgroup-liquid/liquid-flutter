@@ -685,10 +685,12 @@ class _ModalDemoState extends State<ModalDemo> {
               );
 
               if (!context.mounted) return;
-              if (result) {
+              if (result == true) {
                 LdNotificationsController.of(context).success("Confirmed");
-              } else {
+              } else if (result == false) {
                 LdNotificationsController.of(context).error("Cancelled");
+              } else {
+                LdNotificationsController.of(context).error("Modal dismissed");
               }
             },
           ),

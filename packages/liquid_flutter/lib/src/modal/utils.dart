@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
-Future<bool> ldConfirmModal(
+Future<bool?> ldConfirmModal(
     {String? description,
     Widget? title,
     Widget? positive,
@@ -76,7 +76,7 @@ Future<bool> ldConfirmModal(
         );
       }).show(context, useRootNavigator: useRootNavigator);
 
-  return res == true;
+  return res;
 }
 
 Future<String?> ldEnterTextModal({

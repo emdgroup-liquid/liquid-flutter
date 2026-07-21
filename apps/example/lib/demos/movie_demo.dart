@@ -173,21 +173,21 @@ class MovieDetail extends StatelessWidget {
       saveMode: LdReactiveFormSaveMode.adaptive,
       detailToFormValues: (detail) => {
         'title': detail.title,
-        'genre': {detail.genre},
+        'genre': detail.genre,
         'rating': detail.rating.toDouble(),
       },
       formToUpdatePayload: (form, detail) {
-        final genres = form.control('genre').value as Set<String>;
+        final genre = form.control('genre').value as String;
         return detail.copyWith(
           title: form.control('title').value as String,
-          genre: genres.isEmpty ? detail.genre : genres.first,
+          genre: genre,
           rating: (form.control('rating').value as double).round(),
         );
       },
 
       formGroup: (context) => FormGroup({
         'title': FormControl<String>(validators: [Validators.required]),
-        'genre': FormControl<Set<String>>(validators: [Validators.required]),
+        'genre': FormControl<String>(validators: [Validators.required]),
         'rating': FormControl<double>(validators: [Validators.required]),
       }),
 
@@ -199,20 +199,15 @@ class MovieDetail extends StatelessWidget {
               .map((genre) => LdSelectItem(value: genre, child: Text(genre)))
               .toList();
 
-          return Provider.value(
-            value: LdMonkeyDetailAppbarConfig(appbarConfig: LdAppBarConfig(title: Text(movie.value!.title))),
-            child: LdMonkeyDetailAppBars<MovieDemo, int>(
-              child: LdScaffoldBody(
-                children: [
-                  LdFormInput<String>(formKey: 'title', label: 'Title', hint: 'Movie title'),
-                  LdFormChoose<String>(formKey: 'genre', label: 'Genre', items: genreItems),
-                  LdFormSlider(formKey: 'rating', label: 'Rating', min: 1, max: 5),
-                  LdText.p('Last updated: ${Jiffy.parseFromDateTime(movie.value!.lastUpdate).fromNow()}'),
+          return LdScaffoldBody(
+            children: [
+              LdFormInput<String>(formKey: 'title', label: 'Title', hint: 'Movie title'),
+              LdFormChoose<String>(formKey: 'genre', label: 'Genre', items: genreItems),
+              LdFormSlider(formKey: 'rating', label: 'Rating', min: 1, max: 5),
+              LdText.p('Last updated: ${Jiffy.parseFromDateTime(movie.value!.lastUpdate).fromNow()}'),
 
-                  Row(children: [LdFormSubmitButton(), LdFormResetButton()]).spaceS(),
-                ],
-              ),
-            ),
+              Row(children: [LdFormSubmitButton(), LdFormResetButton()]).spaceS(),
+            ],
           );
         },
       ),
@@ -263,13 +258,11 @@ class MovieDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LdScaffold(
-      body: LdMonkeyViewingBuilder<MovieDemo, int>(
-        builder: (context, items) {
-          final movie = items.first;
-          return MovieDetail(movie: movie);
-        },
-      ),
+    return LdMonkeySingleDetailPage<MovieDemo, int>(
+      titleBuilder: (context, movie) => Text(movie.value!.title),
+      builder: (context, item) {
+        return MovieDetail(movie: item);
+      },
     );
   }
 }

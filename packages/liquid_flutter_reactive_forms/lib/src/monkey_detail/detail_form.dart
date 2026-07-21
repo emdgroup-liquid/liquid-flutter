@@ -26,8 +26,7 @@ typedef LdFormLoadDetail<TDetail, T> = Future<TDetail> Function(
   T? entity,
 );
 
-typedef LdFormOnSubmitted<T extends Identifiable<IdType>, IdType> = void
-    Function(
+typedef LdFormOnSubmitted<T extends Identifiable<IdType>, IdType> = void Function(
   BuildContext context,
   T? created,
 );
@@ -38,8 +37,7 @@ typedef LdFormOnSubmitted<T extends Identifiable<IdType>, IdType> = void
 /// [childrenBuilder] returns the free widget tree rendered inside the form.
 /// Use [LdFormInput], [LdFormChoose], etc. to bind controls by key, and place
 /// any other widgets freely alongside them.
-class LdForm<T extends Identifiable<IdType>, IdType, TDetail extends Object,
-    TCreate, TUpdate> extends StatefulWidget {
+class LdForm<T extends Identifiable<IdType>, IdType, TDetail extends Object, TCreate, TUpdate> extends StatefulWidget {
   final LdFormMode mode;
   final LdPaginatorItem<T>? item;
 
@@ -86,12 +84,8 @@ class LdForm<T extends Identifiable<IdType>, IdType, TDetail extends Object,
       _LdFormState<T, IdType, TDetail, TCreate, TUpdate>();
 }
 
-class _LdFormState<
-    T extends Identifiable<IdType>,
-    IdType,
-    TDetail extends Object,
-    TCreate,
-    TUpdate> extends State<LdForm<T, IdType, TDetail, TCreate, TUpdate>> {
+class _LdFormState<T extends Identifiable<IdType>, IdType, TDetail extends Object, TCreate, TUpdate>
+    extends State<LdForm<T, IdType, TDetail, TCreate, TUpdate>> {
   TDetail? _detail;
   IdType? _currentId;
   final Map<String, Object?> _lastServerFormValues = {};
@@ -144,14 +138,14 @@ class _LdFormState<
 
   Future<bool> _onLeaveLockedLocation(BuildContext _) async {
     if (_isSaving) return false;
-    return ldFormConfirmDiscardEdits(context);
+    return (await ldFormConfirmDiscardEdits(context)) == false;
   }
 
   Future<void> _confirmDiscardAndPop(Object? result) async {
     if (_isSaving) return;
     final navigator = Navigator.of(context);
     final shouldKeepEditing = await ldFormConfirmDiscardEdits(context);
-    if (shouldKeepEditing || !mounted) return;
+    if (shouldKeepEditing != false || !mounted) return;
     _form.markAsPristine();
     navigator.pop(result);
   }
@@ -273,11 +267,9 @@ class _LdFormState<
         LdMonkeyFieldConflictResolution? resolution;
         if (widget.onFieldConflict != null) {
           resolution = await widget.onFieldConflict!(conflict);
-        } else if (widget.conflictPolicy ==
-            LdMonkeyFieldConflictPolicy.keepLocal) {
+        } else if (widget.conflictPolicy == LdMonkeyFieldConflictPolicy.keepLocal) {
           resolution = LdMonkeyFieldConflictResolution.keepLocal;
-        } else if (widget.conflictPolicy ==
-            LdMonkeyFieldConflictPolicy.preferServer) {
+        } else if (widget.conflictPolicy == LdMonkeyFieldConflictPolicy.preferServer) {
           resolution = LdMonkeyFieldConflictResolution.preferServer;
         }
 
@@ -313,8 +305,7 @@ class _LdFormState<
   ) async {
     final Map<String, Object?> serverValues;
     if (exception.serverDetail != null) {
-      serverValues =
-          widget.detailToFormValues(exception.serverDetail as TDetail);
+      serverValues = widget.detailToFormValues(exception.serverDetail as TDetail);
     } else {
       serverValues = exception.serverFieldValues ?? {};
     }
@@ -367,14 +358,12 @@ class _LdFormState<
   }
 
   Future<void> _runPreSaveCheck() async {
-    if (widget.mode != LdFormMode.edit ||
-        widget.preSaveCheck != LdFormPreSaveCheck.repositoryGetById) {
+    if (widget.mode != LdFormMode.edit || widget.preSaveCheck != LdFormPreSaveCheck.repositoryGetById) {
       return;
     }
     final id = _currentId;
     if (id == null) return;
-    final serverEntity = await LdListController.of<T, IdType>(context)
-        .getById(context, id, skipCache: true);
+    final serverEntity = await LdListController.of<T, IdType>(context).getById(context, id, skipCache: true);
     if (!mounted) return;
     final newDetail = await widget.itemToDetail(context, serverEntity);
     final serverValues = widget.detailToFormValues(newDetail);

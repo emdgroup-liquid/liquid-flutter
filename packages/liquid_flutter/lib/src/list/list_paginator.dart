@@ -898,7 +898,8 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
     final index = getItemIndexById(id);
 
     if (index == null) {
-      throw Exception('Item with id $id not found during scheduleItemUpdate');
+      // The item is not loaded in the paginator, so we can't update it
+      return;
     }
     final item = _items[index];
 

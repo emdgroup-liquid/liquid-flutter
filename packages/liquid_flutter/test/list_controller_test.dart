@@ -1603,6 +1603,13 @@ void main() {
         var updateCalls = 0;
         var getOffsetCalls = 0;
 
+        final activeSortOption = LdSortOption<_TestItem, int>(
+          name: 'order',
+          label: (_) => 'Order',
+          icon: (_) => const Icon(Icons.sort),
+          supportsReorder: true,
+        );
+
         final repository = LdListController.fromModel(LdCallbackModel<_TestItem, int, _TestItem, _TestItem>(
           pageSize: 10,
           initialItems: items,
@@ -1616,6 +1623,7 @@ void main() {
             items[index] = newItem;
             return newItem;
           },
+          reorderItem: (context, item, from, to, sortOption) async => item.copyWith(value: to),
           fetchListWithParameters: (parameters) async {
             final start = parameters.offset;
             final end = (start + parameters.pageSize).clamp(0, items.length);
@@ -1635,7 +1643,7 @@ void main() {
           id: 2,
           fromIndex: 1,
           toIndex: 3,
-          reorderHandler: (context, item, from, to) async => item.copyWith(value: to),
+          activeSortOption: activeSortOption,
         );
         await tester.pump();
 

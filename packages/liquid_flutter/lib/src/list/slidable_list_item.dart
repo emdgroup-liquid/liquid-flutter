@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/haptics.dart';
 
-
 /// Post-trigger behavior for a slide action.
 enum LdSlideActionDismissBehavior {
   /// Invoke [LdSlideAction.onTriggered], then spring the row closed.
@@ -708,11 +707,6 @@ class _LdSlidableListItemState extends State<LdSlidableListItem> {
                         theme.radiusSize(LdSize.m),
                       ),
                 ),
-                padding: theme.balPad(LdSize.m).atLeast(
-                      EdgeInsets.symmetric(
-                        vertical: state.position.abs().clamp(0, 10),
-                      ),
-                    ),
               ),
               child: springChild!,
             ),

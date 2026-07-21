@@ -34,7 +34,6 @@ List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
   double? detailPanelFraction,
   bool? allowMultipleSelection,
   bool? immediateViewSelection,
-  LdMonkeyReorderHandler<T, IdType>? reorderHandler,
 }) {
   return buildMonkeyRouteTree<T, IdType>(
     masterPath: masterPath,
@@ -55,7 +54,6 @@ List<RouteBase> buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>({
       detailPanelFraction: detailPanelFraction,
       allowMultipleSelection: allowMultipleSelection,
       immediateViewSelection: immediateViewSelection,
-      reorderHandler: reorderHandler,
     ),
     additionalMasterRoutes: additionalMasterRoutes,
     additionalDetailRoutes: additionalDetailRoutes,

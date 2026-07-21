@@ -114,53 +114,54 @@ class _LdSubmitDialogState<T, Arg> extends State<LdSubmitDialog<T, Arg>> {
     BuildContext context,
     LdSubmitController<T, Arg> controller,
   ) {
-    return widget.loadingBuilder != null
-        ? widget.loadingBuilder!(context, controller)
-        : LdAutoSpace(
-            animate: true,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
-                switchInCurve: Curves.easeInOut,
-                switchOutCurve: Curves.easeInOut,
-                child: switch (controller.state.type) {
-                  LdSubmitStateType.loading => LdIndicator.loading(customSize: 24, key: const Key('loading-indicator')),
-                  LdSubmitStateType.result => LdIndicator.success(customSize: 24, key: const Key('success-indicator')),
-                  LdSubmitStateType.error => LdIndicator.error(customSize: 24, key: const Key('error-indicator')),
-                  _ => SizedBox.shrink(),
-                },
-              ),
-              if (controller.state.type != LdSubmitStateType.error)
-                if (controller.config.loadingText != null)
-                  LdText.p(
-                    controller.config.loadingText!,
-                    textAlign: TextAlign.center,
-                  )
-                else
-                  LdText.p(
-                    LiquidLocalizations.of(context).loading,
-                    textAlign: TextAlign.center,
-                  ),
-              if (controller.state.type == LdSubmitStateType.error)
-                if (widget.errorBuilder != null)
-                  widget.errorBuilder!(context, controller.state.error!, controller)
-                else
-                  LdExceptionView(
-                    exception: controller.state.error!.localize(context),
-                    direction: Axis.vertical,
-                    retryController: controller.retryController,
-                    showIndicator: false,
-                  ).padL().animate().scaleXY(),
-              if (controller.state.type == LdSubmitStateType.result)
-                if (controller.canCancel)
-                  LdButton.ghost(
-                    onPressed: controller.cancel,
-                    child: Text(LiquidLocalizations.of(context).cancel),
-                  ),
-            ],
-          ).padL();
+    return LdAutoSpace(
+      animate: true,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        if (widget.loadingBuilder != null && controller.state.type == LdSubmitStateType.loading)
+          widget.loadingBuilder!(context, controller)
+        else
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
+            switchInCurve: Curves.easeInOut,
+            switchOutCurve: Curves.easeInOut,
+            child: switch (controller.state.type) {
+              LdSubmitStateType.loading => LdIndicator.loading(customSize: 24, key: const Key('loading-indicator')),
+              LdSubmitStateType.result => LdIndicator.success(customSize: 24, key: const Key('success-indicator')),
+              LdSubmitStateType.error => LdIndicator.error(customSize: 24, key: const Key('error-indicator')),
+              _ => SizedBox.shrink(),
+            },
+          ),
+        if (controller.state.type == LdSubmitStateType.loading)
+          if (controller.config.loadingText != null)
+            LdText.p(
+              controller.config.loadingText!,
+              textAlign: TextAlign.center,
+            )
+          else
+            LdText.p(
+              LiquidLocalizations.of(context).loading,
+              textAlign: TextAlign.center,
+            ),
+        if (controller.state.type == LdSubmitStateType.error)
+          if (widget.errorBuilder != null)
+            widget.errorBuilder!(context, controller.state.error!, controller)
+          else
+            LdExceptionView(
+              exception: controller.state.error!.localize(context),
+              direction: Axis.vertical,
+              retryController: controller.retryController,
+              showIndicator: false,
+            ).padL().animate().scaleXY(),
+        if (controller.state.type == LdSubmitStateType.result)
+          if (controller.canCancel)
+            LdButton.ghost(
+              onPressed: controller.cancel,
+              child: Text(LiquidLocalizations.of(context).cancel),
+            ),
+      ],
+    ).padL();
   }
 
   void _handleDismiss() {

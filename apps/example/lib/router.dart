@@ -112,7 +112,7 @@ class AppRouter {
           ),
 
           ...buildMonkeyRoutes<Task, int>(
-            masterPath: "/task-demo",
+            masterPath: "/task-demo?sort-task=order-asc",
             routeConfig: taskRouteConfig,
             sortOptionsBuilder: (_) async => taskSortOptions,
             actions: taskActions,
@@ -121,7 +121,6 @@ class AppRouter {
             createPage: const TaskCreatePage(),
             masterPage: TaskMasterPage(),
             modelBuilder: (context, state) => taskModel(context),
-            reorderHandler: taskReorderHandler,
           ),
 
           ...buildMonkeyRoutes<MovieDemo, int>(
@@ -240,8 +239,7 @@ class AppRouter {
           ),
           GoRoute(
             path: "/components/emoji-picker",
-            pageBuilder: (context, state) =>
-                NoTransitionPage<void>(key: state.pageKey, child: const EmojiPickerDemo()),
+            pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const EmojiPickerDemo()),
           ),
           GoRoute(
             path: "/components/drawer",
@@ -404,8 +402,7 @@ class AppRouter {
           ),
           GoRoute(
             path: "/components/tab-pageview",
-            pageBuilder: (context, state) =>
-                NoTransitionPage<void>(key: state.pageKey, child: const TabPageViewDemo()),
+            pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const TabPageViewDemo()),
           ),
           GoRoute(
             path: "/components/list",
@@ -431,7 +428,8 @@ class AppRouter {
           ),
           GoRoute(
             path: "/components/markdown",
-            pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const LdMarkdownDocPage()),
+            pageBuilder: (context, state) =>
+                NoTransitionPage<void>(key: state.pageKey, child: const LdMarkdownDocPage()),
           ),
           GoRoute(
             path: "/components/markdown-editor",

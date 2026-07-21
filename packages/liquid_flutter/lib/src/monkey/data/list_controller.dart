@@ -426,7 +426,8 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
     }
   }
 
-  /// Optimistically shuffles indices, then persists the moved item via [reorderHandler].
+  /// Optimistically shuffles indices, then persists the moved item via
+  /// [LdModel.persistReorder].
   ///
   /// Layout is already applied by [reorderIndices]; post-update reposition is skipped.
   Future<void> reorder(
@@ -434,7 +435,7 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
     required IdType id,
     required int fromIndex,
     required int toIndex,
-    required LdMonkeyReorderHandler<T, IdType> reorderHandler,
+    required LdSortOption<T, IdType> activeSortOption,
   }) async {
     if (fromIndex == toIndex) {
       return;
@@ -446,11 +447,11 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
     if (!context.mounted) {
       return;
     }
-    final updated = await reorderHandler(context, item, fromIndex, toIndex);
+    final model = _attachedModel;
+    final updated = await model.persistReorder(context, item, fromIndex, toIndex, activeSortOption);
     if (!context.mounted) {
       return;
     }
-    final model = _attachedModel;
     await model.update(context, id, updated, skipLayout: true);
   }
 

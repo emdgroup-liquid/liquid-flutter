@@ -66,27 +66,24 @@ class _LdRadioWidget extends StatelessWidget {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Transform.translate(
-                offset: Offset(0, 1),
-                child: LdSpring(
-                  springConstant: 20,
-                  position: (checked ? radioSize * 0.3 : radioSize * 0.15),
-                  builder: (context, state, child) {
-                    final borderWidth = state.position;
-                    return Container(
-                      height: radioSize,
-                      width: radioSize,
-                      key: const ValueKey("frame"),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: (color ?? theme.palette.primary).center(theme.isDark),
-                          width: borderWidth,
-                        ),
-                        shape: BoxShape.circle,
+              LdSpring(
+                springConstant: 20,
+                position: (checked ? radioSize * 0.3 : radioSize * 0.15),
+                builder: (context, state, child) {
+                  final borderWidth = state.position;
+                  return Container(
+                    height: radioSize,
+                    width: radioSize,
+                    key: const ValueKey("frame"),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: (color ?? theme.palette.primary).center(theme.isDark),
+                        width: borderWidth,
                       ),
-                    );
-                  },
-                ),
+                      shape: BoxShape.circle,
+                    ),
+                  );
+                },
               ),
               if (this.label != null) Flexible(child: label)
             ],

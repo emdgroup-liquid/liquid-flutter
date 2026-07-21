@@ -8,6 +8,15 @@ import 'package:liquid_flutter/src/monkey/data/ld_model.dart';
 import 'package:liquid_flutter/src/monkey/filter/ld_filter_option.dart';
 import 'package:liquid_flutter/src/monkey/sort/sort_option.dart';
 
+/// Callback type for [LdCallbackModel.reorderItem].
+typedef LdReorderItemCallback<T extends Identifiable<IdType>, IdType> = Future<T> Function(
+  BuildContext context,
+  T item,
+  int fromIndex,
+  int toIndex,
+  LdSortOption<T, IdType> activeSortOption,
+);
+
 /// Callback-based [LdModel] for apps that wire data operations via closures.
 ///
 /// [TCreate] defaults to [T?] and [TUpdate] defaults to [T] when using
@@ -23,6 +32,7 @@ class LdCallbackModel<T extends Identifiable<IdType>, IdType, TCreate, TUpdate>
     this.createItem,
     this.deleteBatchFn,
     this.updateBatchFn,
+    this.reorderItem,
     this.pageSize = 10,
     this.isGreedy = false,
     this.autoCache = true,
@@ -77,12 +87,36 @@ class LdCallbackModel<T extends Identifiable<IdType>, IdType, TCreate, TUpdate>
   /// Batch-update callback. Receives a map from item id to update payload.
   final Future<void> Function(BuildContext context, Map<IdType, TUpdate> items)? updateBatchFn;
 
+  /// Reorder callback. When non-null, drag-to-reorder is enabled for this model.
+  ///
+  /// Receives the moved [item], its [fromIndex], [toIndex], and the
+  /// [activeSortOption] that triggered the reorder. Must return the updated item.
+  final LdReorderItemCallback<T, IdType>? reorderItem;
+
   final List<T>? _initialItems;
 
   List<T>? get initialItems => _initialItems;
 
   @override
   bool get supportsSingleDelete => deleteItem != null;
+
+  @override
+  bool get supportsReorder => reorderItem != null;
+
+  @override
+  Future<T> persistReorder(
+    BuildContext context,
+    T item,
+    int fromIndex,
+    int toIndex,
+    LdSortOption<T, IdType> activeSortOption,
+  ) {
+    assert(
+      reorderItem != null,
+      'Cannot reorder item. reorderItem was not configured for this model',
+    );
+    return reorderItem!(context, item, fromIndex, toIndex, activeSortOption);
+  }
 
   @override
   T? createPreview(TCreate payload) {
@@ -196,6 +230,7 @@ class LdCallbackModel<T extends Identifiable<IdType>, IdType, TCreate, TUpdate>
     Future<L> Function(BuildContext context, TCreate newItem)? createItem,
     Future<void> Function(BuildContext context, Set<IdType> ids)? deleteBatch,
     Future<void> Function(BuildContext context, Map<IdType, TUpdate> items)? updateBatch,
+    LdReorderItemCallback<L, IdType>? reorderItem,
     LdListCache<L, IdType>? cache,
     List<L>? initialItems,
   }) {
@@ -212,6 +247,7 @@ class LdCallbackModel<T extends Identifiable<IdType>, IdType, TCreate, TUpdate>
       createItem: createItem,
       deleteBatchFn: deleteBatch,
       updateBatchFn: updateBatch,
+      reorderItem: reorderItem,
       cache: cache,
       initialItems: initialItems,
       isGreedy: true,

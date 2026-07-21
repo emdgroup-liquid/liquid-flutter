@@ -34,7 +34,6 @@ class LdMonkeyRouteScope<T extends Identifiable<IdType>, IdType> extends Statele
     this.detailPanelFraction,
     this.allowMultipleSelection,
     this.immediateViewSelection,
-    this.reorderHandler,
   });
 
   final GoRouterState routeState;
@@ -48,8 +47,6 @@ class LdMonkeyRouteScope<T extends Identifiable<IdType>, IdType> extends Statele
   final LdMonkeySortOptionsBuilder<T, IdType> sortOptionsBuilder;
 
   final LdMonkeyRouteDefinitionsLoadingTextBuilder? routeDefinitionsLoadingText;
-
-  final LdMonkeyReorderHandler<T, IdType>? reorderHandler;
 
   final LdModel<T, IdType, Object?, Object?> Function(
     BuildContext context,
@@ -76,35 +73,32 @@ class LdMonkeyRouteScope<T extends Identifiable<IdType>, IdType> extends Statele
   Widget build(BuildContext context) {
     return Provider<LdMonkeyRouteConfig<T, IdType>>.value(
       value: routeConfig,
-      child: Provider<LdMonkeyReorderHandler<T, IdType>?>.value(
-        value: reorderHandler,
-        child: Provider<LdMonkeyActions<T, IdType>>.value(
-          value: actions,
-          child: Provider<LdMonkeyActionScope<T, IdType>>(
-            create: (_) => LdMonkeyActionScope<T, IdType>(),
-            child: LdMonkeyDataProvider<T, IdType, LdModel<T, IdType, Object?, Object?>>(
-              modelBuilder: (context) => modelBuilder(context, routeState),
-              child: LdMonkeyRouteDefinitionsResolver<T, IdType>(
-                filtersBuilder: filtersBuilder,
-                sortOptionsBuilder: sortOptionsBuilder,
-                routeDefinitionsLoadingText: routeDefinitionsLoadingText,
-                child: (context, resolved) => LdMonkeyRouterAdapter<T, IdType>(
-                  routeConfig: routeConfig,
-                  filters: resolved.filters.toList(),
-                  sortOptions: resolved.sortOptions,
-                  child: LdMonkeyActionHost<T, IdType>(
-                    actions: actions,
-                    child: shellBuilder?.call(context, routeState, child) ??
-                        LdMonkeyShell<T, IdType>(
-                          masterPage: masterPage,
-                          layoutMode: layoutMode,
-                          reflowBreakpoint: reflowBreakpoint ?? 600,
-                          detailPanelFraction: detailPanelFraction ?? 0.3,
-                          allowMultipleSelection: allowMultipleSelection ?? true,
-                          immediateViewSelection: immediateViewSelection,
-                          child: child,
-                        ),
-                  ),
+      child: Provider<LdMonkeyActions<T, IdType>>.value(
+        value: actions,
+        child: Provider<LdMonkeyActionScope<T, IdType>>(
+          create: (_) => LdMonkeyActionScope<T, IdType>(),
+          child: LdMonkeyDataProvider<T, IdType, LdModel<T, IdType, Object?, Object?>>(
+            modelBuilder: (context) => modelBuilder(context, routeState),
+            child: LdMonkeyRouteDefinitionsResolver<T, IdType>(
+              filtersBuilder: filtersBuilder,
+              sortOptionsBuilder: sortOptionsBuilder,
+              routeDefinitionsLoadingText: routeDefinitionsLoadingText,
+              child: (context, resolved) => LdMonkeyRouterAdapter<T, IdType>(
+                routeConfig: routeConfig,
+                filters: resolved.filters.toList(),
+                sortOptions: resolved.sortOptions,
+                child: LdMonkeyActionHost<T, IdType>(
+                  actions: actions,
+                  child: shellBuilder?.call(context, routeState, child) ??
+                      LdMonkeyShell<T, IdType>(
+                        masterPage: masterPage,
+                        layoutMode: layoutMode,
+                        reflowBreakpoint: reflowBreakpoint ?? 600,
+                        detailPanelFraction: detailPanelFraction ?? 0.3,
+                        allowMultipleSelection: allowMultipleSelection ?? true,
+                        immediateViewSelection: immediateViewSelection,
+                        child: child,
+                      ),
                 ),
               ),
             ),
@@ -114,3 +108,4 @@ class LdMonkeyRouteScope<T extends Identifiable<IdType>, IdType> extends Statele
     );
   }
 }
+

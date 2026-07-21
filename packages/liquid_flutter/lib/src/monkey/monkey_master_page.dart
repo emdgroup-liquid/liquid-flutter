@@ -68,15 +68,15 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
 
     final selection = LdMonkeySelection.of<T, IdType>(context, listen: true);
     final sortState = LdMonkeySortAndFilterState.of<T, IdType>(context);
-    final reorderHandler = context.read<LdMonkeyReorderHandler<T, IdType>?>();
+    final model = LdListController.of<T, IdType>(context).model;
 
     final interactionMode = context.read<LdMonkeyInteractionMode?>() ?? LdMonkeyInteractionMode.browse;
 
     final canReorder = sortState.canReorder &&
+        model.supportsReorder &&
         selection.selection.length <= 1 &&
         !selection.showSelectionControls &&
-        interactionMode != LdMonkeyInteractionMode.pick &&
-        reorderHandler != null;
+        interactionMode != LdMonkeyInteractionMode.pick;
 
     return LdListConfigProvider<T, IdType>(
       config: LdListConfig<T, IdType>(
@@ -120,7 +120,7 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
                   id: id,
                   fromIndex: from,
                   toIndex: to,
-                  reorderHandler: reorderHandler,
+                  activeSortOption: sortState.activeSortOptions.first,
                 ),
                 child: LdList<T, IdType>(),
               )

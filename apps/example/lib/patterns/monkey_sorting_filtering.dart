@@ -29,7 +29,7 @@ class MonkeySortingFilteringDemo extends StatelessWidget {
           LdText.p(
             "Sort options allow users to order items by different criteria. Pass them via the async "
             "sortOptionsBuilder. Set supportsReorder: true on a sort option to enable drag-to-reorder "
-            "when that sort is active (requires reorderHandler on buildMonkeyRoutes).",
+            "when that sort is active (requires reorderItem on the model).",
           ),
           CodeBlock(
             language: "dart",
@@ -251,25 +251,25 @@ final searchText = search?.searchText ?? "";''',
           LdText.hs("9. Drag-to-Reorder"),
           LdText.p(
             "Enable drag-to-reorder by setting supportsReorder: true on a sort option and "
-            "providing a reorderHandler on buildMonkeyRoutes. Reorder mode activates automatically "
+            "providing a reorderItem callback on the model. Reorder mode activates automatically "
             "when that sort option is the sole active sort.",
           ),
           CodeBlock(
             language: "dart",
-            code: '''buildMonkeyRoutes<Task, int>(
-  reorderHandler: (context, item, fromIndex, toIndex) async {
-    return await api.reorderTask(item.id, toIndex);
+            code: '''LdCallbackModel<Task, int, Task, Task>(
+  reorderItem: (context, item, fromIndex, toIndex, activeSortOption) async {
+    return await api.reorderTask(item.id, toIndex, sortBy: activeSortOption.name);
   },
-  sortOptionsBuilder: (_) async => [
-    LdSortOption<Task, int>(
-      name: "order",
-      label: (context) => "Custom order",
-      icon: (context) => const Icon(LucideIcons.gripVertical),
-      supportsReorder: true,
-      optimisticSort: (a, b) => a.order.compareTo(b.order),
-    ),
-  ],
   ...
+)
+
+// Sort option with supportsReorder: true enables drag handles
+// when this sort is the sole active sort.
+LdSortOption<Task, int>(
+  name: "order",
+  label: (context) => "Custom order",
+  icon: (context) => const Icon(LucideIcons.gripVertical),
+  supportsReorder: true,
 )''',
           ),
         ],

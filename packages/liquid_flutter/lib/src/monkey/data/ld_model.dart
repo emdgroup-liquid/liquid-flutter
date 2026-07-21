@@ -6,6 +6,7 @@ import 'package:liquid_flutter/src/monkey/data/ld_fetch_reason.dart';
 import 'package:liquid_flutter/src/monkey/data/ld_list_cache.dart';
 import 'package:liquid_flutter/src/monkey/data/ld_list_cache_key.dart';
 import 'package:liquid_flutter/src/monkey/data/list_controller.dart';
+import 'package:liquid_flutter/src/monkey/sort/sort_option.dart';
 import 'package:meta/meta.dart';
 
 /// App-level data model for a monkey route.
@@ -111,6 +112,37 @@ abstract class LdModel<T extends Identifiable<IdType>, IdType, TCreate, TUpdate>
 
   /// Persists a batch update. [items] is a map from item id to update payload.
   Future<void> persistUpdateBatch(BuildContext context, Map<IdType, TUpdate> items);
+
+  /// Whether this model supports drag-to-reorder.
+  ///
+  /// The monkey framework uses this together with [LdSortOption.supportsReorder]
+  /// to decide whether drag handles are shown. Override and return `true` in
+  /// subclasses that implement [persistReorder].
+  bool get supportsReorder => false;
+
+  /// Persists a drag-to-reorder operation and returns the updated item.
+  ///
+  /// [activeSortOption] is the sort option that is currently active and has
+  /// [LdSortOption.supportsReorder] set to `true`. When a list defines several
+  /// reorderable sort options the caller needs this to know which ordering
+  /// column to update on the backend.
+  ///
+  /// Override this method in model subclasses that support reordering. The
+  /// default implementation throws [UnimplementedError]; it is only reached
+  /// when [supportsReorder] is `true` but the subclass has not provided an
+  /// implementation.
+  Future<T> persistReorder(
+    BuildContext context,
+    T item,
+    int fromIndex,
+    int toIndex,
+    LdSortOption<T, IdType> activeSortOption,
+  ) {
+    throw UnimplementedError(
+      '$runtimeType.persistReorder is not implemented. '
+      'Override persistReorder and set supportsReorder to true.',
+    );
+  }
 
   /// Maps a create payload to an optimistic list-row preview when [TCreate] != [T].
   T? createPreview(TCreate payload) => null;
