@@ -5,26 +5,21 @@
 Pod::Spec.new do |s|
   s.name             = 'liquid_flutter_window_utils'
   s.version          = '0.0.1'
-  s.summary          = 'A new Flutter plugin project.'
+  s.summary          = 'Utility platform interface for interacting with the window'
   s.description      = <<-DESC
-A new Flutter plugin project.
+Utility platform interface for interacting with the window
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'https://github.com/emdgroup-liquid/liquid-flutter'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Your Company' => 'email@example.com' }
+  s.author           = { 'EMD Group Liquid' => 'email@example.com' }
 
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
-
-  # If your plugin requires a privacy manifest, for example if it collects user
-  # data, update the PrivacyInfo.xcprivacy file to describe your plugin's
-  # privacy impact, and then uncomment this line. For more information,
-  # see https://developer.apple.com/documentation/bundleresources/privacy_manifest_files
-  # s.resource_bundles = {'liquid_flutter_window_utils_privacy' => ['Resources/PrivacyInfo.xcprivacy']}
+  s.source_files = 'liquid_flutter_window_utils/Sources/liquid_flutter_window_utils/**/*.swift'
+  s.resource_bundles = {'liquid_flutter_window_utils_privacy' => ['liquid_flutter_window_utils/Sources/liquid_flutter_window_utils/Resources/PrivacyInfo.xcprivacy']}
 
   s.dependency 'FlutterMacOS'
 
-  s.platform = :osx, '10.11'
+  s.platform = :osx, '13.0'
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
   s.swift_version = '5.0'
 end

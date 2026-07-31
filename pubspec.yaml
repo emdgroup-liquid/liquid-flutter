@@ -10,6 +10,7 @@ workspace:
   - packages/liquid_flutter_test_utils
   - packages/liquid_flutter/extension/devtools/liquid_flutter_extension
   - packages/liquid_flutter_md
+  - packages/liquid_flutter_ai
   - packages/liquid_flutter_reactive_forms
   - apps/example
 dev_dependencies:
@@ -22,6 +23,7 @@ melos:
       - packages/liquid_flutter_test_utils
       - packages/liquid_flutter_reactive_forms
       - packages/liquid_flutter_md
+      - packages/liquid_flutter_ai
   scripts:
     analyze:
       exec: dart analyze --fatal-infos
@@ -37,7 +39,8 @@ melos:
         mkdir -p apps/example/.api_guard &&
         mtrust_api_guard generate --root packages/liquid_flutter --out apps/example/.api_guard/liquid_flutter.json &&
         mtrust_api_guard generate --root packages/liquid_flutter_md --out apps/example/.api_guard/liquid_flutter_md.json &&
-        mtrust_api_guard generate --root packages/liquid_flutter_reactive_forms --out apps/example/.api_guard/liquid_flutter_reactive_forms.json
+        mtrust_api_guard generate --root packages/liquid_flutter_reactive_forms --out apps/example/.api_guard/liquid_flutter_reactive_forms.json &&
+        mtrust_api_guard generate --root packages/liquid_flutter_ai --out apps/example/.api_guard/liquid_flutter_ai.json
       description: "Generate per-package api.json snapshots for the example app doc generator. Output is gitignored and built on demand."
 
     generate_docs:

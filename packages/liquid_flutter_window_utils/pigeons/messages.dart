@@ -4,7 +4,8 @@ import 'package:pigeon/pigeon.dart';
   PigeonOptions(
     dartOut: 'lib/messages.g.dart',
     dartOptions: DartOptions(),
-    swiftOut: 'macos/Classes/Messages.swift',
+    swiftOut:
+        'macos/liquid_flutter_window_utils/Sources/liquid_flutter_window_utils/Messages.swift',
     swiftOptions: SwiftOptions(),
     kotlinOut:
         'android/src/main/kotlin/com/liquid/flutter/window_utils/Messages.kt',
