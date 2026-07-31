@@ -7,9 +7,24 @@ import 'package:liquid_flutter_ai/src/bubbles/reasoning.dart';
 import 'package:liquid_flutter_ai/src/bubbles/system_prompt.dart';
 import 'package:liquid_flutter_ai/src/bubbles/tool_call.dart';
 import 'package:liquid_flutter_ai/src/bubbles/user_bubble.dart';
+import 'package:liquid_flutter_ai/src/conversation/approval_actions.dart';
 import 'package:liquid_flutter_ai/src/conversation/group_items.dart';
 import 'package:liquid_flutter_ai/src/models/conversation_item.dart';
 import 'package:scroll_velocity_notifier/scroll_velocity_notifier.dart';
+
+typedef LdConversationItemBuilder =
+    Widget Function(
+      BuildContext context,
+      LdConversationItem item,
+      bool isSingleton,
+    );
+
+typedef LdConversationGroupBuilder =
+    Widget Function(
+      BuildContext context,
+      LdConversationVisualGroup group,
+      LdConversationItemBuilder itemBuilder,
+    );
 
 /// Reversed conversation list (newest near the compose bar).
 ///
@@ -21,14 +36,14 @@ class LdConversation extends StatefulWidget {
   final bool group;
   final List<LdConversationVisualGroup> Function(List<LdConversationItem>)?
   grouper;
-  final Widget Function(
-    BuildContext context,
-    LdConversationItem item,
-    bool isSingleton,
-  )?
-  itemBuilder;
-  final Widget Function(BuildContext context, LdConversationVisualGroup group)?
-  groupBuilder;
+  final LdConversationItemBuilder? itemBuilder;
+  final LdConversationGroupBuilder? groupBuilder;
+
+  /// Host handlers for pending approvals. Wired into [LdApprovalCard] by
+  /// [defaultItemBuilder] when [itemBuilder] is null (or when a custom
+  /// [itemBuilder] forwards [approval] to [defaultItemBuilder]).
+  final LdConversationApprovalActions? approval;
+
   final Widget? empty;
   final Widget? header;
   final Widget? footer;
@@ -45,6 +60,7 @@ class LdConversation extends StatefulWidget {
     this.grouper,
     this.itemBuilder,
     this.groupBuilder,
+    this.approval,
     this.empty,
     this.header,
     this.footer,
@@ -58,8 +74,9 @@ class LdConversation extends StatefulWidget {
   static Widget defaultItemBuilder(
     BuildContext context,
     LdConversationItem item,
-    bool isSingleton,
-  ) {
+    bool isSingleton, {
+    LdConversationApprovalActions? approval,
+  }) {
     return switch (item) {
       LdSystemPromptItem() => LdSystemPromptCard(item: item),
       LdUserMessageItem(text: final text, attachments: final attachments) =>
@@ -70,7 +87,16 @@ class LdConversation extends StatefulWidget {
       ) =>
         LdAgentMarkdownReply(markdown: markdown, isStreaming: isStreaming),
       LdToolCallItem() => LdToolCallCard(item: item),
-      LdApprovalItem() => LdApprovalCard(item: item),
+      LdApprovalItem() => LdApprovalCard(
+        item: item,
+        onApprove: approval?.onApprove == null
+            ? null
+            : () => approval!.onApprove!(item),
+        onDeny: approval?.onDeny == null ? null : () => approval!.onDeny!(item),
+        onApproveWithRule: approval?.onApproveWithRule == null
+            ? null
+            : (result) => approval!.onApproveWithRule!(item, result),
+      ),
       LdReasoningItem() => LdReasoningCard(
         item: item,
         isSingleton: isSingleton,
@@ -83,12 +109,7 @@ class LdConversation extends StatefulWidget {
   static Widget defaultGroupBuilder(
     BuildContext context,
     LdConversationVisualGroup group,
-    Widget Function(
-      BuildContext context,
-      LdConversationItem item,
-      bool isSingleton,
-    )
-    resolvedItemBuilder,
+    LdConversationItemBuilder resolvedItemBuilder,
   ) {
     return switch (group) {
       LdConversationSingletonGroup(item: final item) => resolvedItemBuilder(
@@ -142,8 +163,16 @@ class _LdConversationState extends State<LdConversation> {
       return widget.empty ?? const SizedBox.shrink();
     }
 
+    final approval = widget.approval;
     final resolvedItemBuilder =
-        widget.itemBuilder ?? LdConversation.defaultItemBuilder;
+        widget.itemBuilder ??
+        (BuildContext context, LdConversationItem item, bool isSingleton) =>
+            LdConversation.defaultItemBuilder(
+              context,
+              item,
+              isSingleton,
+              approval: approval,
+            );
     final resolvedGrouper = widget.grouper ?? groupConversationItems;
 
     final visualGroups = widget.group
@@ -174,7 +203,7 @@ class _LdConversationState extends State<LdConversation> {
       if (groupIndex < displayGroups.length) {
         final visualGroup = displayGroups[groupIndex];
         final child = widget.groupBuilder != null
-            ? widget.groupBuilder!(context, visualGroup)
+            ? widget.groupBuilder!(context, visualGroup, resolvedItemBuilder)
             : LdConversation.defaultGroupBuilder(
                 context,
                 visualGroup,

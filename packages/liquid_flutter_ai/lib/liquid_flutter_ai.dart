@@ -6,6 +6,7 @@ export 'src/models/compose_attachment.dart';
 export 'src/models/conversation_item.dart';
 export 'src/conversation/group_items.dart';
 export 'src/conversation/conversation.dart';
+export 'src/conversation/approval_actions.dart';
 export 'src/conversation/appear.dart';
 export 'src/compose/compose_bar.dart';
 export 'package:cross_file/cross_file.dart' show XFile;

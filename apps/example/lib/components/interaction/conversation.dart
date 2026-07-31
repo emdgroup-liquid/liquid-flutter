@@ -480,11 +480,11 @@ Call out if you want this expanded into a full changelog entry, a PR description
     });
   }
 
-  void _setApproval(LdApprovalStatus status) {
+  void _setApproval(String id, LdApprovalStatus status) {
     setState(() {
       _items = [
         for (final item in _items)
-          if (item is LdApprovalItem && item.id == 'ap1')
+          if (item is LdApprovalItem && item.id == id)
             LdApprovalItem(
               id: item.id,
               title: item.title,
@@ -500,33 +500,35 @@ Call out if you want this expanded into a full changelog entry, a PR description
     });
   }
 
-  Widget _buildItem(BuildContext context, LdConversationItem item, bool isSingleton) {
-    return switch (item) {
-      LdUserMessageItem(:final id, :final text, :final attachments) => LdSendFlyTarget(
-        id: id,
-        child: LdUserBubble(text: text, attachments: attachments),
-      ),
-      LdApprovalItem() => LdApprovalCard(
-        item: item,
-        onApprove: () => _setApproval(LdApprovalStatus.approved),
-        onDeny: () => _setApproval(LdApprovalStatus.denied),
-        onApproveWithRule: (result) {
+  LdConversationApprovalActions get _approvalActions =>
+      LdConversationApprovalActions(
+        onApprove: (item) => _setApproval(item.id, LdApprovalStatus.approved),
+        onDeny: (item) => _setApproval(item.id, LdApprovalStatus.denied),
+        onApproveWithRule: (item, result) {
           // Demo: rule would be persisted by the host app.
           debugPrint('Saved allow rule: ${result.savedRule}');
-          _setApproval(LdApprovalStatus.approved);
+          _setApproval(item.id, LdApprovalStatus.approved);
         },
+      );
+
+  Widget _buildItem(
+    BuildContext context,
+    LdConversationItem item,
+    bool isSingleton,
+  ) {
+    return switch (item) {
+      LdUserMessageItem(:final id, :final text, :final attachments) =>
+        LdSendFlyTarget(
+          id: id,
+          child: LdUserBubble(text: text, attachments: attachments),
+        ),
+      _ => LdConversation.defaultItemBuilder(
+        context,
+        item,
+        isSingleton,
+        approval: _approvalActions,
       ),
-      _ => LdConversation.defaultItemBuilder(context, item, isSingleton),
     };
-  }
-
-  Widget _buildGroup(BuildContext context, LdConversationVisualGroup group) {
-    final child = LdConversation.defaultGroupBuilder(context, group, _buildItem);
-    if (group is LdConversationSingletonGroup && group.item is LdUserMessageItem) {
-      return child;
-    }
-
-    return child;
   }
 
   @override
@@ -538,7 +540,11 @@ Call out if you want this expanded into a full changelog entry, a PR description
           final conversation = LdAgentTaskPanel(
             tasks: _tasks,
 
-            child: LdConversation(items: _items, itemBuilder: _buildItem, groupBuilder: _buildGroup),
+            child: LdConversation(
+              items: _items,
+              approval: _approvalActions,
+              itemBuilder: _buildItem,
+            ),
           );
           final composeBar = LdComposeBar(
             controller: _controller,

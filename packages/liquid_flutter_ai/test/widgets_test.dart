@@ -37,7 +37,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('Approve'));
+    await tester.tap(find.text('Approve once'));
     await tester.pump();
 
     expect(approved, isTrue);
@@ -64,7 +64,7 @@ void main() {
 
     expect(find.text('Approve & allow'), findsOneWidget);
     expect(find.text('Deny'), findsOneWidget);
-    expect(find.text('Approve'), findsOneWidget);
+    expect(find.text('Approve once'), findsOneWidget);
   });
 
   testWidgets('LdUsageCostModal shows mix, type, and tool sections',
@@ -634,4 +634,69 @@ void main() {
 
     expect(find.byIcon(LucideIcons.chevronDown), findsOneWidget);
   });
+
+  testWidgets('LdConversation wires approval actions into default item builder',
+      (tester) async {
+    LdApprovalItem? approved;
+
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          width: 400,
+          height: 600,
+          child: LdConversation(
+            items: const [
+              LdApprovalItem(
+                id: 'ap1',
+                title: 'Allow shell?',
+                status: LdApprovalStatus.pending,
+              ),
+            ],
+            approval: LdConversationApprovalActions(
+              onApprove: (item) => approved = item,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('Approve once'));
+    await tester.pump();
+
+    expect(approved?.id, 'ap1');
+  });
+
+  testWidgets(
+    'LdConversation groupBuilder receives resolved itemBuilder',
+    (tester) async {
+      var itemBuilderInvoked = false;
+
+      await tester.pumpWidget(
+        _wrap(
+          SizedBox(
+            width: 400,
+            height: 600,
+            child: LdConversation(
+              items: const [
+                LdAgentMarkdownItem(id: 'a1', markdown: 'Hello from agent'),
+              ],
+              groupBuilder: (context, group, itemBuilder) {
+                itemBuilderInvoked = true;
+                return LdConversation.defaultGroupBuilder(
+                  context,
+                  group,
+                  itemBuilder,
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(itemBuilderInvoked, isTrue);
+      expect(find.text('Hello from agent'), findsOneWidget);
+    },
+  );
 }
