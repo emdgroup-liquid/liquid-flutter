@@ -125,6 +125,7 @@ export 'src/touchable/touchable.dart';
 export 'src/touchable/input_color.dart';
 export 'src/touchable/touchable_colors.dart';
 export 'src/touchable/touchable_status.dart';
+export 'src/touchable/neutral_ghost_color.dart';
 export 'src/touchable/solid_color.dart';
 export 'src/touchable/ghost_color.dart';
 export 'src/touchable/outline_color.dart';

@@ -157,6 +157,22 @@ class LdTheme extends ChangeNotifier {
     );
   }
 
+  /// Inner padding for compact controls ([LdButton], [LdInput]) before border
+  /// width is subtracted. Smaller sizes use uniform [pad]; [m] and [l] use
+  /// [balPad] for a wider horizontal inset.
+  EdgeInsets controlContentPadding(LdSize size) {
+    return switch (size) {
+      LdSize.xs || LdSize.s => balPad(size),
+      LdSize.m || LdSize.l => balPad(size),
+    };
+  }
+
+  /// Outer height of compact controls ([LdButton], [LdInput]) for [size].
+  double controlHeight(LdSize size) {
+    final lineBoxHeight = labelSize(size) * ldLineHeight(LdTextType.label, size: size);
+    return controlContentPadding(size).vertical + lineBoxHeight;
+  }
+
   /// Get the border width for a given size
   double get borderWidth {
     switch (themeSize) {

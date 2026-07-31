@@ -6,9 +6,16 @@ bool ldAppBarIsScrolledUnder({
   required LdAppBarPosition position,
   required ScrollMetrics metrics,
 }) {
-  return switch (position) {
-    LdAppBarPosition.top => metrics.extentBefore > 0,
-    LdAppBarPosition.bottom => metrics.extentAfter > 0,
+  final isReverse = metrics.axisDirection == AxisDirection.up;
+  return switch (isReverse) {
+    false => switch (position) {
+        LdAppBarPosition.top => metrics.extentBefore > 0,
+        LdAppBarPosition.bottom => metrics.extentAfter > 0,
+      },
+    true => switch (position) {
+        LdAppBarPosition.top => metrics.extentAfter > 0,
+        LdAppBarPosition.bottom => metrics.extentBefore > 0,
+      },
   };
 }
 

@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/animation.dart';
 import 'package:liquid_flutter/src/preview_wrapper.dart';
 
 part 'hint.variants.g.dart';
@@ -113,10 +114,14 @@ class _LdHintWidget extends StatelessWidget {
   /// When `true`, renders a tinted background and border around the hint.
   final bool withBackground;
 
+  /// When `true`, the hint will animate in.
+  final bool animate;
+
   const _LdHintWidget({
     this.child,
     required this.type,
     this.withBackground = false,
+    this.animate = false,
     this.size = LdSize.m,
     this.crossAxisAlignment = CrossAxisAlignment.center,
   });
@@ -155,7 +160,7 @@ class _LdHintWidget extends StatelessWidget {
             LdHintType.pending => LdIndicatorType.pending,
             LdHintType.ongoing => LdIndicatorType.ongoing,
           },
-        ),
+        ).conditionallyAnimateScaleXY(animate),
         if (child != null) ...[
           Flexible(
             child: DefaultTextStyle(

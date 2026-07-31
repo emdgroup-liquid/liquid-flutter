@@ -135,9 +135,21 @@ class _LdScrollEdgeFadeState extends State<LdScrollEdgeFade> {
       return;
     }
 
+    final isReversed = metrics.axisDirection == AxisDirection.up;
+
     final canScroll = metrics.maxScrollExtent > metrics.minScrollExtent + _scrollEpsilon;
-    final showLeading = canScroll && metrics.pixels > metrics.minScrollExtent + _scrollEpsilon;
-    final showTrailing = canScroll && metrics.pixels < metrics.maxScrollExtent - _scrollEpsilon;
+    bool showLeading = false;
+    bool showTrailing = false;
+
+    if (canScroll) {
+      if (isReversed) {
+        showLeading = metrics.pixels < metrics.maxScrollExtent - _scrollEpsilon;
+        showTrailing = metrics.pixels > metrics.minScrollExtent + _scrollEpsilon;
+      } else {
+        showTrailing = metrics.pixels < metrics.maxScrollExtent - _scrollEpsilon;
+        showLeading = metrics.pixels > metrics.minScrollExtent + _scrollEpsilon;
+      }
+    }
 
     if (showLeading == _showLeading && showTrailing == _showTrailing) {
       return;

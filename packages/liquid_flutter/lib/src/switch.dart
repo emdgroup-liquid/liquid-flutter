@@ -41,13 +41,17 @@ class LdSwitch<T> extends StatelessWidget {
           clipBehavior: Clip.hardEdge,
           decoration: BoxDecoration(
             borderRadius: theme.radius(LdSize.s),
+            border: Border.all(
+              color: theme.border,
+              width: theme.borderWidth,
+              strokeAlign: BorderSide.strokeAlignOutside,
+            ),
           ),
           child: IntrinsicHeight(
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              children: children.entries
-                  .map((e) => _buildItem(theme, e.key, e.value))
-                  .toList(),
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [for (var entry in children.entries) ..._buildItem(theme, entry.key, entry.value)],
             ),
           ),
         ),
@@ -55,7 +59,9 @@ class LdSwitch<T> extends StatelessWidget {
     ).spaceS();
   }
 
-  Widget _buildItem(LdTheme theme, T key, Widget child) {
+  int get activeIndex => children.keys.toList().indexOf(value);
+
+  List<Widget> _buildItem(LdTheme theme, T key, Widget child) {
     var isSelected = key == value;
 
     var index = children.keys.toList().indexOf(key);
@@ -74,23 +80,39 @@ class LdSwitch<T> extends StatelessWidget {
       );
     }
 
-    return Flexible(
-      fit: expand ? FlexFit.tight : FlexFit.loose,
-      child: LdButton(
-        circular: false,
-        color: color,
-        size: size,
-        disabled: disabled,
-        width: expand ? double.infinity : null,
-        onPressed: () {
-          LdHaptics.vibrate(HapticsType.selection);
-          _onTap(key);
-        },
-        borderRadius: borderRadius,
-        mode: isSelected ? LdButtonMode.filled : LdButtonMode.vague,
-        child: child,
+    return [
+      Flexible(
+        fit: expand ? FlexFit.tight : FlexFit.loose,
+        child: LdTouchableSurface(
+          active: isSelected,
+          onPressed: () {
+            LdHaptics.vibrate(HapticsType.selection);
+            _onTap(key);
+          },
+          child: child,
+          builder: (context, state, child) {
+            final bundle = outlineColor(theme.palette.primary, theme, state);
+            final side = BorderSide(color: bundle.border, width: theme.borderWidth);
+
+            return IntrinsicWidth(
+              child: Container(
+                padding: theme.controlContentPadding(size) - EdgeInsets.all(theme.borderWidth),
+                decoration: BoxDecoration(
+                  color: bundle.surface,
+                ),
+                child: Align(
+                  alignment: Alignment.center,
+                  child: DefaultTextStyle(
+                      style: ldBuildTextStyle(theme, LdTextType.label, size).copyWith(color: bundle.text),
+                      child: child!),
+                ),
+              ),
+            );
+          },
+        ),
       ),
-    );
+      if (index < children.length - 1) VerticalDivider(color: theme.border, width: theme.borderWidth),
+    ];
   }
 
   void _onTap(T key) {

@@ -113,6 +113,10 @@ class LdScaffoldBody extends StatelessWidget {
   final Widget Function(BuildContext context, int index)? itemBuilder;
   final int? itemCount;
 
+  /// Lets [ListView.builder] move keyed children when indices change
+  /// (e.g. inserting above an existing row) instead of remounting them.
+  final ChildIndexGetter? findChildIndexCallback;
+
   const LdScaffoldBody({
     super.key,
     this.children = const [],
@@ -131,6 +135,7 @@ class LdScaffoldBody extends StatelessWidget {
     this.reverse = false,
     this.itemBuilder,
     this.itemCount,
+    this.findChildIndexCallback,
   });
 
   @override
@@ -170,6 +175,7 @@ class LdScaffoldBody extends StatelessWidget {
         scrollView = ListView.builder(
           itemBuilder: itemBuilder!,
           itemCount: itemCount,
+          findChildIndexCallback: findChildIndexCallback,
           controller: scrollController,
           shrinkWrap: shrinkWrap,
           reverse: reverse,

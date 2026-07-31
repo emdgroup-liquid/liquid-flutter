@@ -5,6 +5,7 @@ export 'appbar_scroll_notifier.dart';
 export 'appbar_system_ui.dart';
 export 'appbar_action_overflow_menu.dart';
 export 'appbar_state.dart';
+export 'appbar_frame.dart';
 
 export 'implied/drawer_buttons.dart';
 export 'implied/implied_features.dart';

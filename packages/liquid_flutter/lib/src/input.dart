@@ -10,6 +10,11 @@ class LdInput extends StatefulWidget {
   final String hint;
   final Function(String)? onChanged;
   final Function(String)? onBlurred;
+
+  /// Called when the user submits the field (e.g. soft keyboard action).
+  ///
+  /// On desktop, multiline inputs (`maxLines` null or greater than 1) treat
+  /// Enter as submit and Shift+Enter as a new line.
   final Function(String)? onSubmitted;
   final Function()? onCleared;
   final TextEditingController? controller;
@@ -31,6 +36,8 @@ class LdInput extends StatefulWidget {
 
   final Widget? trailingHint;
 
+  final EdgeInsets? padding;
+
   final int? maxLines;
   final int? minLines;
 
@@ -48,6 +55,7 @@ class LdInput extends StatefulWidget {
     this.selectAllOnFocus = false,
     this.maxLines = 1,
     this.minLines,
+    this.padding,
     this.autofocus = false,
     this.showClear = false,
     this.size = LdSize.m,
@@ -111,7 +119,29 @@ class _LdInputState extends State<LdInput> {
     _runCustomPaste();
   }
 
-  Map<ShortcutActivator, VoidCallback> get _shortcutBindings {
+  void _submitFromKeyboard() {
+    widget.onSubmitted?.call(_controller.text);
+  }
+
+  void _insertNewline() {
+    final selection = _controller.selection;
+    final start = selection.isValid ? selection.start : _controller.text.length;
+    final end = selection.isValid ? selection.end : _controller.text.length;
+    final newText = _controller.text.replaceRange(start, end, '\n');
+    _controller.value = _controller.value.copyWith(
+      text: newText,
+      selection: TextSelection.collapsed(offset: start + 1),
+      composing: TextRange.empty,
+    );
+  }
+
+  bool get _isMultiline => widget.maxLines == null || widget.maxLines! > 1;
+
+  bool _shouldSubmitOnEnter(BuildContext context) {
+    return _isMultiline && widget.onSubmitted != null && !widget.disabled && LdTheme.of(context).platform.isDesktop;
+  }
+
+  Map<ShortcutActivator, VoidCallback> _shortcutBindings(BuildContext context) {
     final bindings = <ShortcutActivator, VoidCallback>{
       const SingleActivator(LogicalKeyboardKey.escape): () {
         _focusScopeNode.unfocus();
@@ -120,6 +150,12 @@ class _LdInputState extends State<LdInput> {
     if (widget.onCustomPaste != null) {
       bindings[const SingleActivator(LogicalKeyboardKey.keyV, control: true)] = _onPasteShortcut;
       bindings[const SingleActivator(LogicalKeyboardKey.keyV, meta: true)] = _onPasteShortcut;
+    }
+    if (_shouldSubmitOnEnter(context)) {
+      bindings[const SingleActivator(LogicalKeyboardKey.enter)] = _submitFromKeyboard;
+      bindings[const SingleActivator(LogicalKeyboardKey.numpadEnter)] = _submitFromKeyboard;
+      bindings[const SingleActivator(LogicalKeyboardKey.enter, shift: true)] = _insertNewline;
+      bindings[const SingleActivator(LogicalKeyboardKey.numpadEnter, shift: true)] = _insertNewline;
     }
     return bindings;
   }
@@ -200,19 +236,13 @@ class _LdInputState extends State<LdInput> {
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
 
-    final contentPadding = theme.pad() -
-        EdgeInsets.all(theme.borderWidth) -
-        (widget.showClear ? EdgeInsets.only(top: 4, bottom: 4) : EdgeInsets.zero);
+    final contentPadding = widget.padding ?? EdgeInsets.zero;
 
-    final cursorHeight = theme.labelSize(widget.size);
-
-    var hintStyle = TextStyle(
-      color: theme.textMuted,
-      package: theme.fontFamilyPackage,
-      fontFamily: theme.fontFamily,
-      fontSize: theme.labelSize(widget.size),
-      height: 1.2,
-    );
+    final labelStyle = ldBuildTextStyle(theme, LdTextType.label, widget.size);
+    final hintStyle = labelStyle.copyWith(color: theme.textMuted);
+    final lineBoxHeight = labelStyle.fontSize! * labelStyle.height!;
+    final cursorHeight = lineBoxHeight;
+    final fieldPadding = theme.controlContentPadding(widget.size) - EdgeInsets.all(theme.borderWidth);
 
     var clearButton = widget.showClear && _controller.text.isNotEmpty && !widget.disabled
         ? GestureDetector(
@@ -227,7 +257,7 @@ class _LdInputState extends State<LdInput> {
       duration: const Duration(milliseconds: 150),
       child: switch (_controller.text.isEmpty && widget.trailingHint != null) {
         true => DefaultTextStyle(style: hintStyle, child: widget.trailingHint!),
-        false => widget.trailing ?? clearButton,
+        false => clearButton,
       },
     );
 
@@ -243,7 +273,7 @@ class _LdInputState extends State<LdInput> {
               size: widget.size,
             ),
           CallbackShortcuts(
-            bindings: _shortcutBindings,
+            bindings: _shortcutBindings(context),
             child: LdTouchableSurface(
               allowTapOutside: widget.allowTapOutside,
               textFieldTapRegion: true,
@@ -271,64 +301,63 @@ class _LdInputState extends State<LdInput> {
                     children: [
                       Padding(
                         padding: contentPadding,
-                        child: Container(
-                          constraints: BoxConstraints(
-                            minHeight: cursorHeight,
-                          ),
-                          child: Row(
-                            children: [
-                              if (widget.leading != null) ...[
-                                IconTheme(
-                                  data: IconThemeData(
-                                    color: colors.icon,
-                                    size: theme.labelSize(widget.size),
+                        child: Padding(
+                          padding: fieldPadding,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: lineBoxHeight,
+                            ),
+                            child: Row(
+                              children: [
+                                if (widget.leading != null) ...[
+                                  IconTheme(
+                                    data: IconThemeData(
+                                      color: colors.icon,
+                                      size: theme.labelSize(widget.size),
+                                    ),
+                                    child: widget.leading!,
                                   ),
-                                  child: widget.leading!,
+                                  ldSpacerS
+                                ],
+                                Flexible(
+                                  child: TextField(
+                                    focusNode: _focusNode,
+                                    contextMenuBuilder:
+                                        widget.onCustomPaste == null ? _defaultContextMenuBuilder : _buildContextMenu,
+                                    enabled: !widget.disabled,
+                                    controller: _controller,
+                                    cursorColor: theme.palette.primary.idle(
+                                      theme.isDark,
+                                    ),
+                                    selectAllOnFocus: widget.selectAllOnFocus,
+                                    cursorHeight: cursorHeight,
+                                    maxLines: widget.maxLines,
+                                    autofillHints: widget.autofillHints,
+                                    keyboardType: widget.keyboardType,
+                                    enableInteractiveSelection: true,
+                                    minLines: widget.minLines,
+                                    decoration: InputDecoration(
+                                      hintText: widget.hint,
+                                      border: InputBorder.none,
+                                      hintStyle: hintStyle,
+                                      isCollapsed: true,
+                                      filled: false,
+                                      isDense: true,
+                                      contentPadding: EdgeInsets.zero,
+                                    ),
+                                    obscureText: widget.obscureText,
+                                    autofocus: widget.autofocus,
+                                    textInputAction: widget.textInputAction,
+                                    scrollPadding: theme.pad() * 5,
+                                    onSubmitted: widget.onSubmitted,
+                                    cursorWidth: 1,
+                                    style: labelStyle.copyWith(color: colors.text),
+                                  ),
                                 ),
-                                ldSpacerS
+                                suffix,
+                                if (widget.trailing != null) widget.trailing!,
                               ],
-                              Flexible(
-                                child: TextField(
-                                  focusNode: _focusNode,
-                                  contextMenuBuilder:
-                                      widget.onCustomPaste == null ? _defaultContextMenuBuilder : _buildContextMenu,
-                                  enabled: !widget.disabled,
-                                  controller: _controller,
-                                  cursorColor: theme.palette.primary.idle(
-                                    theme.isDark,
-                                  ),
-                                  selectAllOnFocus: widget.selectAllOnFocus,
-                                  cursorHeight: cursorHeight,
-                                  maxLines: widget.maxLines,
-                                  autofillHints: widget.autofillHints,
-                                  keyboardType: widget.keyboardType,
-                                  enableInteractiveSelection: true,
-                                  minLines: widget.minLines,
-                                  decoration: InputDecoration(
-                                    hintText: widget.hint,
-                                    border: InputBorder.none,
-                                    hintStyle: hintStyle,
-                                    isCollapsed: true,
-                                    filled: false,
-                                    isDense: true,
-                                  ),
-                                  obscureText: widget.obscureText,
-                                  autofocus: widget.autofocus,
-                                  textInputAction: widget.textInputAction,
-                                  scrollPadding: theme.pad() * 5,
-                                  onSubmitted: widget.onSubmitted,
-                                  cursorWidth: 1,
-                                  style: TextStyle(
-                                    color: colors.text,
-                                    package: theme.fontFamilyPackage,
-                                    fontFamily: theme.fontFamily,
-                                    fontSize: theme.labelSize(widget.size),
-                                    height: 1.2,
-                                  ),
-                                ),
-                              ),
-                              suffix,
-                            ],
+                            ),
                           ),
                         ),
                       ),
@@ -393,7 +422,7 @@ class LdShortcutIndicator extends StatelessWidget {
               LucideIcons.circleArrowOutUpLeft,
             )
           else
-            Flexible(child: Text(key)),
+            Text(key),
         ],
       ),
     );
