@@ -21,6 +21,7 @@ import 'package:liquid/components/form_elements/toggle.dart';
 import 'package:liquid/components/interaction/action_runner.dart';
 import 'package:liquid/components/interaction/appbar_demo.dart';
 import 'package:liquid/components/interaction/context_menu.dart';
+import 'package:liquid/components/interaction/conversation.dart';
 import 'package:liquid/components/interaction/modal.dart';
 import 'package:liquid/components/interaction/orb.dart';
 import 'package:liquid/components/interaction/speed_reader.dart';
@@ -112,7 +113,7 @@ class AppRouter {
           ),
 
           ...buildMonkeyRoutes<Task, int>(
-            masterPath: "/task-demo?sort-task=order-asc",
+            masterPath: "/task-demo",
             routeConfig: taskRouteConfig,
             sortOptionsBuilder: (_) async => taskSortOptions,
             actions: taskActions,
@@ -286,6 +287,11 @@ class AppRouter {
           GoRoute(
             path: "/components/context-menu",
             pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const ContextMenuDemo()),
+          ),
+          GoRoute(
+            path: "/components/conversation",
+            pageBuilder: (context, state) =>
+                NoTransitionPage<void>(key: state.pageKey, child: const ConversationDemo()),
           ),
           GoRoute(
             path: "/components/date-time-picker",
