@@ -68,6 +68,7 @@ class _LdAgentActivityGroupState extends State<LdAgentActivityGroup> {
 
     return LdTouchableSurface(
       onPressed: _toggle,
+      disabled: !_showHeader,
       active: _userExpanded,
       builder: (context, status, child) => AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -86,7 +87,7 @@ class _LdAgentActivityGroupState extends State<LdAgentActivityGroup> {
               initialRevealed: _showHeader,
               child: _buildHeader(
                 theme,
-                outlineColor(theme.primary, theme, status).text,
+                status.hovering ? theme.primaryColor : theme.textMuted,
               ),
             ),
             LdReveal(

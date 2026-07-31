@@ -96,6 +96,7 @@ class LdConversation extends StatefulWidget {
         onApproveWithRule: approval?.onApproveWithRule == null
             ? null
             : (result) => approval!.onApproveWithRule!(item, result),
+        seedRule: approval?.seedRuleFor?.call(item),
       ),
       LdReasoningItem() => LdReasoningCard(
         item: item,

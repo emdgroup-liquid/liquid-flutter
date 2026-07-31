@@ -187,41 +187,29 @@ class _MonkeyShellLayoutBuilder<T extends Identifiable<IdType>, IdType> extends 
                 value: effectiveLayout,
                 child: Provider.value(
                   value: LdMonkeyEffectiveLayoutMode.sideBySide,
-                  child: Provider.value(
-                    value: LdDrawerState(
-                      isOpen: showingDetail || showingNew,
-                      isSideBySide: true,
-                    ),
-                    child: LdMultiPanelLayout(
-                      mode: LdMultiPanelLayoutMode.sideBySide,
-                      panelVisible: showingDetail || showingNew,
-                      minPanelWidth: 350,
-                      minBodyWidth: reflowBreakpoint - 351,
-                      allowResize: true,
-                      panelPosition: LdPanelPosition.right,
-                      initialPanelFraction: detailPanelFraction,
-                      body: Provider.value(
-                        value: LdDrawerSlot.drawer,
-                        child: masterPage,
-                      ),
-                      panel: Provider.value(
-                        value: LdDrawerSlot.body,
-                        child: PreventAutoFocus(
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              border: Border(
-                                left: BorderSide(
-                                  color: LdTheme.of(context).border,
-                                  width: LdTheme.of(context).borderWidth,
-                                ),
-                              ),
+                  child: LdMultiPanelLayout(
+                    mode: LdMultiPanelLayoutMode.sideBySide,
+                    panelVisible: showingDetail || showingNew,
+                    minPanelWidth: 350,
+                    minBodyWidth: reflowBreakpoint - 351,
+                    allowResize: true,
+                    panelPosition: LdPanelPosition.right,
+                    initialPanelFraction: detailPanelFraction,
+                    body: masterPage,
+                    panel: PreventAutoFocus(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          border: Border(
+                            left: BorderSide(
+                              color: LdTheme.of(context).border,
+                              width: LdTheme.of(context).borderWidth,
                             ),
-                            child: switch (showingDetail || showingNew) {
-                              true => wrappedChild,
-                              false => SizedBox.shrink(),
-                            },
                           ),
                         ),
+                        child: switch (showingDetail || showingNew) {
+                          true => wrappedChild,
+                          false => SizedBox.shrink(),
+                        },
                       ),
                     ),
                   ),

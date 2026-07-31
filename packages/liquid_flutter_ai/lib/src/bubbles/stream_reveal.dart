@@ -27,7 +27,7 @@ class LdStreamReveal extends StatelessWidget {
     super.key,
     required this.child,
     this.active = true,
-    this.fadeExtent = 40,
+    this.fadeExtent = 12,
     this.duration = const Duration(milliseconds: 280),
     this.curve = Curves.easeOutCubic,
     this.fadeColor,
@@ -51,7 +51,12 @@ class LdStreamReveal extends StatelessWidget {
         curve: curve,
         alignment: Alignment.topCenter,
         clipBehavior: Clip.hardEdge,
-        child: child,
+        child: AnimatedPadding(
+          duration: duration,
+          curve: curve,
+          padding: EdgeInsets.only(bottom: active ? fadeExtent : 0),
+          child: child,
+        ),
       ),
     );
   }

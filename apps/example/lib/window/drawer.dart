@@ -232,7 +232,7 @@ class _MainNavigationDrawerState extends State<MainNavigationDrawer> {
                     LdDrawerItemSection(
                       active: GoRouterState.of(context).uri.path.startsWith("/task-demo"),
                       leading: const Icon(LucideIcons.check),
-                      onPressed: () => _showPage(context, "/task-demo/38"),
+                      onPressed: () => _showPage(context, "/task-demo/38?sort-task=order-asc"),
                       child: const Text("Task"),
                     ),
                     LdDrawerItemSection(

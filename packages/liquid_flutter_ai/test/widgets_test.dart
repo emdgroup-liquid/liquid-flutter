@@ -157,6 +157,34 @@ void main() {
     expect(changed!.toolName, 'bash');
   });
 
+  testWidgets('LdToolAllowFieldTree shows Not allowed for optional schema gaps',
+      (tester) async {
+    final session = ldBuildToolAllowFieldSession(
+      inputSchema: {
+        'type': 'object',
+        'required': ['title'],
+        'properties': {
+          'title': {'type': 'string'},
+          'body': {'type': 'string'},
+        },
+      },
+      arguments: {'title': 'feat'},
+    );
+
+    await tester.pumpWidget(
+      _wrap(
+        LdToolAllowFieldTree(
+          session: session,
+          onPinChanged: (_, __) {},
+        ),
+      ),
+    );
+
+    expect(find.text('feat'), findsOneWidget);
+    expect(find.text('Not allowed'), findsOneWidget);
+    expect(find.text('body:'), findsOneWidget);
+  });
+
   test('ldStripGenuiBlocks removes fenced blocks', () {
     const raw = 'Hello\n\n```genui\n{"createSurface":{}}\n```\n\nWorld';
     expect(ldStripGenuiBlocks(raw), contains('Hello'));

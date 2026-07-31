@@ -83,6 +83,9 @@ final class LdApprovalItem extends LdConversationItem {
   final String? toolCallId;
   final String? toolName;
   final Object? arguments;
+
+  /// Optional JSON Schema for the tool input (map or JSON string).
+  final Object? inputSchema;
   final LdApprovalStatus status;
 
   const LdApprovalItem({
@@ -92,6 +95,7 @@ final class LdApprovalItem extends LdConversationItem {
     this.toolCallId,
     this.toolName,
     this.arguments,
+    this.inputSchema,
     this.status = LdApprovalStatus.pending,
   });
 }

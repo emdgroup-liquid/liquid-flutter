@@ -29,7 +29,7 @@ export 'src/send/send_fly_scope.dart'
         LdSendFlyMeasureKey,
         LdSendFlyPayload;
 
-export 'src/approval/tool_allow_rule.dart';
+export 'package:liquid_flutter_ai_shared/liquid_flutter_ai_shared.dart';
 export 'src/approval/tool_allow_rule_picker.dart';
 export 'src/approval/tool_allow_rule_editor.dart';
 export 'src/approval/tool_allow_field_tree.dart';

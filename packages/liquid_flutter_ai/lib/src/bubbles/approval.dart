@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter_ai_shared/liquid_flutter_ai_shared.dart';
 import 'package:liquid_flutter_ai/src/approval/tool_allow_rule_picker.dart';
 import 'package:liquid_flutter_ai/src/models/conversation_item.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -12,6 +13,9 @@ class LdApprovalCard extends StatelessWidget {
   final ValueChanged<LdToolAllowRulePickerResult>? onApproveWithRule;
   final WidgetBuilder? trailingBuilder;
 
+  /// Existing rule to extend in the allow-rule picker (same tool).
+  final LdToolAllowRule? seedRule;
+
   /// When false, hides the "Approve & allow" button even if [item.toolName] is set.
   final bool showAllowRule;
 
@@ -22,6 +26,7 @@ class LdApprovalCard extends StatelessWidget {
     this.onDeny,
     this.onApproveWithRule,
     this.trailingBuilder,
+    this.seedRule,
     this.showAllowRule = true,
   });
 
@@ -35,6 +40,8 @@ class LdApprovalCard extends StatelessWidget {
       context,
       toolName: item.toolName!,
       arguments: item.arguments,
+      inputSchema: item.inputSchema,
+      seedRule: seedRule,
     );
     if (!context.mounted) {
       return;
@@ -58,10 +65,21 @@ class LdApprovalCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                LucideIcons.shieldAlert,
-                size: theme.labelSize(LdSize.m),
-                color: theme.warningColor,
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                transitionBuilder: (child, animation) =>
+                    ScaleTransition(scale: animation, child: child),
+                child: switch (item.status) {
+                  LdApprovalStatus.pending => LdIndicator.info(
+                    key: const Key('request_pending'),
+                  ),
+                  LdApprovalStatus.approved => LdIndicator.success(
+                    key: const Key('request_approved'),
+                  ),
+                  LdApprovalStatus.denied => LdIndicator.error(
+                    key: const Key('request_denied'),
+                  ),
+                },
               ),
               ldHSpacerS,
               Expanded(
@@ -76,7 +94,14 @@ class LdApprovalCard extends StatelessWidget {
                         size: LdSize.s,
                         color: theme.textMuted,
                       ),
-                    _buildActions(context, theme),
+                    switch (item.status) {
+                      LdApprovalStatus.pending => _buildPendingActions(
+                        context,
+                        theme,
+                      ),
+                      LdApprovalStatus.approved => LdText.l('Request Approved'),
+                      LdApprovalStatus.denied => LdText.l('Request Denied'),
+                    },
                     if (trailingBuilder != null) trailingBuilder!(context),
                   ],
                 ),
@@ -88,43 +113,30 @@ class LdApprovalCard extends StatelessWidget {
     );
   }
 
-  Widget _buildActions(BuildContext context, LdTheme theme) {
-    return switch (item.status) {
-      LdApprovalStatus.pending => LdAutoSpace(
-        children: [
-          Row(
-            children: [
-              LdButton.outline(
-                onPressed: () async => onDeny?.call(),
-                disabled: onDeny == null,
-
-                child: const Text('Deny'),
-              ),
-
-              if (_canAllowRule)
-                LdButton(
-                  mode: LdButtonMode.vague,
-                  onPressed: () async => _approveAndAllow(context),
-                  child: const Text('Approve & allow'),
-                ),
+  Widget _buildPendingActions(BuildContext context, LdTheme theme) {
+    return LdAutoSpace(
+      children: [
+        Row(
+          children: [
+            LdButton.outline(
+              onPressed: () async => onDeny?.call(),
+              disabled: onDeny == null,
+              child: const Text('Deny'),
+            ),
+            if (_canAllowRule)
               LdButton(
-                onPressed: () async => onApprove?.call(),
-                disabled: onApprove == null,
-
-                child: const Text('Approve once'),
+                mode: LdButtonMode.vague,
+                onPressed: () async => _approveAndAllow(context),
+                child: const Text('Approve & allow'),
               ),
-            ],
-          ).spaceS(),
-        ],
-      ),
-      LdApprovalStatus.approved => const LdHint(
-        type: LdHintType.success,
-        child: Text('Approved'),
-      ),
-      LdApprovalStatus.denied => const LdHint(
-        type: LdHintType.error,
-        child: Text('Denied'),
-      ),
-    };
+            LdButton(
+              onPressed: () async => onApprove?.call(),
+              disabled: onApprove == null,
+              child: const Text('Approve once'),
+            ),
+          ],
+        ).spaceS(),
+      ],
+    );
   }
 }

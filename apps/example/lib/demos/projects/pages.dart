@@ -23,10 +23,13 @@ class FileMasterPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LdMonkeyMasterPage<File, String>(
-      buildItem: (context, item) {
-        return LdListItem(title: Text(item.value!.name), subtitle: Text(item.value!.description));
-      },
+    return Provider.value(
+      value: LdMonkeyMasterAppbarConfig(appbarConfig: LdAppBarConfig(title: Text("Files"))),
+      child: LdMonkeyMasterPage<File, String>(
+        buildItem: (context, item) {
+          return LdListItem(title: Text(item.value!.name), subtitle: Text(item.value!.description));
+        },
+      ),
     );
   }
 }

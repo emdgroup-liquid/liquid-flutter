@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_ai/src/approval/tool_allow_field_tree.dart';
-import 'package:liquid_flutter_ai/src/approval/tool_allow_rule.dart';
+import 'package:liquid_flutter_ai_shared/liquid_flutter_ai_shared.dart';
 
 /// Editable argument-pattern tree for an [LdToolAllowRule].
 ///
-/// Apps embed this in their own settings chrome. Toggling pins or switching
-/// to "allow any args" emits a new rule via [onChanged].
+/// Pass [inputSchema] to show schema properties (including omitted optionals
+/// as Not allowed). The current [rule] acts as the seed pattern so edits
+/// extend multi-value leaves instead of replacing them blindly.
 class LdToolAllowRuleEditor extends StatelessWidget {
   const LdToolAllowRuleEditor({
     super.key,
     required this.rule,
     required this.onChanged,
+    this.inputSchema,
   });
 
   final LdToolAllowRule rule;
   final ValueChanged<LdToolAllowRule> onChanged;
+  final Object? inputSchema;
 
   @override
   Widget build(BuildContext context) {
@@ -46,29 +49,31 @@ class LdToolAllowRuleEditor extends StatelessWidget {
       );
     }
 
-    final args = ldArgsFromPattern(rule.argumentPattern);
-    final pins = ldPinsFromPattern(rule.argumentPattern);
-    // Ensure every path from args has a pin (pattern may omit nested keys).
-    final mergedPins = {...ldDefaultPinsForArgs(args), ...pins};
+    final session = ldBuildToolAllowFieldSession(
+      inputSchema: inputSchema,
+      arguments: null,
+      seedRule: rule,
+    );
 
     return LdAutoSpace(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         LdText.l(rule.toolName),
         LdText.p(
-          'Toggle exact vs wildcard for each argument field.',
+          'Tap a field to set Fixed, Any, or Not allowed. Fixed leaves may '
+          'list several allowed values (OR). Nested object shapes are not '
+          'OR-combined.',
           color: theme.textMuted,
           size: LdSize.s,
         ),
         LdToolAllowFieldTree(
-          args: args,
-          pins: mergedPins,
-          onPinChanged: (path, mode) {
-            final nextPins = Map<String, LdToolAllowPinMode>.from(mergedPins)
-              ..[path] = mode;
-            onChanged(
-              LdToolAllowRule.fromPicker(rule.toolName, args, nextPins),
-            );
+          session: session,
+          onPinChanged: (path, pin) {
+            final next = session.copyWithPins({
+              ...session.pins,
+              path: pin,
+            });
+            onChanged(next.toRule(rule.toolName));
           },
           emptyLabel: 'No argument pattern — rule requires no arguments.',
         ),

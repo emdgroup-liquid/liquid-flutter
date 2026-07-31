@@ -36,15 +36,19 @@ class LdExceptionDialog extends StatelessWidget {
               if (localizedError.customIconBuilder != null) ...[
                 localizedError.customIconBuilder!(context),
               ],
-              LdText.h(
-                localizedError.message,
-                textAlign: TextAlign.center,
+              SelectableRegion(
+                selectionControls: MaterialTextSelectionControls(),
+                child: LdText.h(
+                  localizedError.message,
+                ),
               ),
               if (localizedError.moreInfo != null)
-                LdMute(
-                  child: LdText.ps(
-                    localizedError.moreInfo!,
-                    textAlign: TextAlign.center,
+                SelectableRegion(
+                  selectionControls: MaterialTextSelectionControls(),
+                  child: LdMute(
+                    child: LdText.ps(
+                      localizedError.moreInfo!,
+                    ),
                   ),
                 ),
               if (localizedError.additionalDetailsBuilder != null) ...[

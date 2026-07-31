@@ -84,9 +84,7 @@ bool _goRouterCanPop(GoRouter router, BuildContext context) {
       final navigatorContext = walker.navigatorKey.currentContext;
       final navigatorState = walker.navigatorKey.currentState;
 
-      if (navigatorContext != null &&
-          _isDescendant(context, navigatorContext) &&
-          (navigatorState?.canPop() ?? false)) {
+      if (navigatorContext != null && _isDescendant(context, navigatorContext) && (navigatorState?.canPop() ?? false)) {
         return true;
       }
       walker = walker.matches.last;
@@ -101,8 +99,7 @@ bool _goRouterCanPop(GoRouter router, BuildContext context) {
   // because that also returns true for open drawers (local history entries).
   if (matches.length > 1) {
     final rootNavigatorContext = router.routerDelegate.navigatorKey.currentContext;
-    if (rootNavigatorContext != null &&
-        _isDescendant(context, rootNavigatorContext)) {
+    if (rootNavigatorContext != null && _isDescendant(context, rootNavigatorContext)) {
       return true;
     }
   }

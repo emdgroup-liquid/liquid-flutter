@@ -25,6 +25,7 @@ class _ConversationDemoState extends State<ConversationDemo> {
 
   late List<LdConversationItem> _items = _seedItems();
   var _tasks = <LdAgentTask>[];
+  LdToolAllowRule? _seedAllowRule;
 
   @override
   void dispose() {
@@ -104,6 +105,66 @@ class _ConversationDemoState extends State<ConversationDemo> {
     "checks": {
       "ci": "required",
       "lint": "optional"
+    }
+  }
+}
+''',
+        inputSchema: '''
+{
+  "type": "object",
+  "required": ["title", "base", "head", "repo"],
+  "properties": {
+    "title": { "type": "string" },
+    "body": { "type": "string" },
+    "draft": { "type": "boolean" },
+    "base": { "type": "string" },
+    "head": { "type": "string" },
+    "labels": { "type": "array", "items": { "type": "string" } },
+    "assignees": { "type": "array", "items": { "type": "string" } },
+    "repo": {
+      "type": "object",
+      "required": ["owner", "name"],
+      "properties": {
+        "owner": { "type": "string" },
+        "name": { "type": "string" },
+        "visibility": {
+          "type": "string",
+          "enum": ["public", "private", "internal"]
+        }
+      }
+    },
+    "reviewers": {
+      "type": "object",
+      "properties": {
+        "users": { "type": "array", "items": { "type": "string" } },
+        "team": {
+          "type": "object",
+          "properties": {
+            "slug": { "type": "string" },
+            "required": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "options": {
+      "type": "object",
+      "properties": {
+        "squash": { "type": "boolean" },
+        "delete_branch": { "type": "boolean" },
+        "checks": {
+          "type": "object",
+          "properties": {
+            "ci": {
+              "type": "string",
+              "enum": ["required", "optional", "skip"]
+            },
+            "lint": {
+              "type": "string",
+              "enum": ["required", "optional", "skip"]
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -492,6 +553,7 @@ Call out if you want this expanded into a full changelog entry, a PR description
               toolCallId: item.toolCallId,
               toolName: item.toolName,
               arguments: item.arguments,
+              inputSchema: item.inputSchema,
               status: status,
             )
           else
@@ -504,9 +566,19 @@ Call out if you want this expanded into a full changelog entry, a PR description
       LdConversationApprovalActions(
         onApprove: (item) => _setApproval(item.id, LdApprovalStatus.approved),
         onDeny: (item) => _setApproval(item.id, LdApprovalStatus.denied),
+        seedRuleFor: (item) {
+          final seed = _seedAllowRule;
+          if (seed == null || seed.toolName != item.toolName) {
+            return null;
+          }
+          return seed;
+        },
         onApproveWithRule: (item, result) {
           // Demo: rule would be persisted by the host app.
           debugPrint('Saved allow rule: ${result.savedRule}');
+          if (result.savedRule != null) {
+            _seedAllowRule = result.savedRule;
+          }
           _setApproval(item.id, LdApprovalStatus.approved);
         },
       );

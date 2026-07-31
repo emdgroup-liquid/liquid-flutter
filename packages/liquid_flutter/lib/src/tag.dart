@@ -85,10 +85,13 @@ class _LdTagWidget extends StatelessWidget {
             ),
           ),
           if (onDismiss != null)
-            Icon(
-              Icons.clear,
-              color: text,
-              size: fontSize,
+            GestureDetector(
+              onTap: () => onDismiss?.call(),
+              child: Icon(
+                Icons.clear,
+                color: text,
+                size: fontSize,
+              ),
             ),
         ],
       ).spaceS(),

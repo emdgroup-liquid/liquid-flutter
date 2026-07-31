@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:liquid_flutter_ai/liquid_flutter_ai.dart';
+import 'package:liquid_flutter_ai_shared/liquid_flutter_ai_shared.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('LdToolAllowRule.matches', () {
@@ -59,6 +59,34 @@ void main() {
       expect(rule.matches('bash', {}), isTrue);
       expect(rule.matches('bash', {'cwd': '/app'}), isTrue);
       expect(rule.matches('bash', {'cwd': '/tmp'}), isFalse);
+    });
+    test('exact array value matches wrapped list arg', () {
+      const rule = LdToolAllowRule(
+        toolName: 'pr',
+        argumentPattern: {
+          'labels': [
+            ['ui', 'ai'],
+          ],
+        },
+      );
+      expect(rule.matches('pr', {'labels': ['ui', 'ai']}), isTrue);
+      expect(rule.matches('pr', {'labels': ['ui']}), isFalse);
+      expect(rule.matches('pr', {'labels': 'ui'}), isFalse);
+    });
+
+    test('OR of arrays matches nested list alternatives', () {
+      const rule = LdToolAllowRule(
+        toolName: 'pr',
+        argumentPattern: {
+          'labels': [
+            ['ui'],
+            ['ui', 'ai'],
+          ],
+        },
+      );
+      expect(rule.matches('pr', {'labels': ['ui']}), isTrue);
+      expect(rule.matches('pr', {'labels': ['ui', 'ai']}), isTrue);
+      expect(rule.matches('pr', {'labels': ['docs']}), isFalse);
     });
   });
 
@@ -194,6 +222,212 @@ void main() {
       );
       expect(rule.argumentPattern['data'], ldToolAllowWildcard);
       expect(rule.argumentPattern.containsKey('data.entity_id'), isFalse);
+    });
+  });
+
+  group('LdToolAllowRule.fromFieldPins', () {
+    test('omits notAllowed paths', () {
+      final rule = LdToolAllowRule.fromFieldPins(
+        'pr',
+        {
+          'title': const LdToolAllowFieldPin(
+            mode: LdToolAllowPinMode.exact,
+            values: ['feat'],
+          ),
+          'body': const LdToolAllowFieldPin(
+            mode: LdToolAllowPinMode.notAllowed,
+          ),
+        },
+      );
+      expect(rule.argumentPattern['title'], 'feat');
+      expect(rule.argumentPattern.containsKey('body'), isFalse);
+    });
+
+    test('notAllowed parent excludes children', () {
+      final rule = LdToolAllowRule.fromFieldPins(
+        'pr',
+        {
+          'repo': const LdToolAllowFieldPin(
+            mode: LdToolAllowPinMode.notAllowed,
+          ),
+          'repo.owner': const LdToolAllowFieldPin(
+            mode: LdToolAllowPinMode.exact,
+            values: ['mtrust'],
+          ),
+        },
+        objectPaths: {'repo'},
+      );
+      expect(rule.argumentPattern.containsKey('repo'), isFalse);
+    });
+
+    test('multi-value exact emits list', () {
+      final rule = LdToolAllowRule.fromFieldPins(
+        'bash',
+        {
+          'cwd': const LdToolAllowFieldPin(
+            mode: LdToolAllowPinMode.exact,
+            values: ['/app', '/tmp'],
+          ),
+        },
+      );
+      expect(rule.argumentPattern['cwd'], ['/app', '/tmp']);
+    });
+
+    test('array pin emits wrapped OR list', () {
+      final rule = LdToolAllowRule.fromFieldPins(
+        'pr',
+        {
+          'labels': LdToolAllowFieldPin(
+            mode: LdToolAllowPinMode.exact,
+            values: [
+              ['ui', 'ai'],
+              ['docs'],
+            ],
+          ),
+        },
+      );
+      expect(rule.argumentPattern['labels'], [
+        ['ui', 'ai'],
+        ['docs'],
+      ]);
+      expect(rule.matches('pr', {'labels': ['docs']}), isTrue);
+      expect(rule.matches('pr', {'labels': ['ui', 'ai']}), isTrue);
+      expect(rule.matches('pr', {'labels': 'ui'}), isFalse);
+    });
+
+    test('inclusive matcher rejects later extra key', () {
+      final rule = LdToolAllowRule.fromFieldPins(
+        'pr',
+        {
+          'title': const LdToolAllowFieldPin(
+            mode: LdToolAllowPinMode.exact,
+            values: ['feat'],
+          ),
+          'body': const LdToolAllowFieldPin(
+            mode: LdToolAllowPinMode.notAllowed,
+          ),
+        },
+      );
+      expect(rule.matches('pr', {'title': 'feat'}), isTrue);
+      expect(
+        rule.matches('pr', {'title': 'feat', 'body': 'hello'}),
+        isFalse,
+      );
+    });
+  });
+
+  group('ldBuildToolAllowFieldSession', () {
+    const schema = {
+      'type': 'object',
+      'required': ['title'],
+      'properties': {
+        'title': {'type': 'string'},
+        'body': {'type': 'string'},
+        'draft': {'type': 'boolean'},
+        'repo': {
+          'type': 'object',
+          'properties': {
+            'owner': {'type': 'string'},
+            'visibility': {
+              'type': 'string',
+              'enum': ['public', 'private'],
+            },
+          },
+        },
+      },
+    };
+
+    test('defaults optional absent to notAllowed', () {
+      final session = ldBuildToolAllowFieldSession(
+        inputSchema: schema,
+        arguments: {'title': 'feat'},
+      );
+      expect(session.pins['title']?.mode, LdToolAllowPinMode.exact);
+      expect(session.pins['title']?.values, ['feat']);
+      expect(session.pins['body']?.mode, LdToolAllowPinMode.notAllowed);
+      expect(session.pins['draft']?.mode, LdToolAllowPinMode.notAllowed);
+    });
+
+    test('seed ∪ call unions leaf values', () {
+      final session = ldBuildToolAllowFieldSession(
+        inputSchema: schema,
+        arguments: {'title': 'feat-b'},
+        seedRule: const LdToolAllowRule(
+          toolName: 'pr',
+          argumentPattern: {
+            'title': ['feat-a'],
+          },
+        ),
+      );
+      expect(session.pins['title']?.mode, LdToolAllowPinMode.exact);
+      expect(
+        session.pins['title']?.values,
+        containsAll(['feat-a', 'feat-b']),
+      );
+    });
+
+    test('schema enum options available on meta', () {
+      final session = ldBuildToolAllowFieldSession(
+        inputSchema: schema,
+        arguments: {
+          'title': 'x',
+          'repo': {'visibility': 'private'},
+        },
+      );
+      expect(
+        session.schemaMeta['repo.visibility']?.enumOptions,
+        ['public', 'private'],
+      );
+    });
+
+    test('invalid schema falls back to map walk', () {
+      final session = ldBuildToolAllowFieldSession(
+        inputSchema: {
+          'properties': {
+            'command': {'type': 'string'},
+            'cwd': {'type': 'string'},
+          },
+        },
+        arguments: {'command': 'ls'},
+      );
+      expect(session.pins.containsKey('command'), isTrue);
+      expect(session.pins['cwd']?.mode, LdToolAllowPinMode.notAllowed);
+    });
+  });
+
+  group('ldParseToolInputSchema', () {
+    test('parses nested object properties', () {
+      final meta = ldParseToolInputSchema({
+        'type': 'object',
+        'properties': {
+          'repo': {
+            'type': 'object',
+            'properties': {
+              'owner': {'type': 'string'},
+            },
+          },
+        },
+      });
+      expect(meta['repo']?.isObject, isTrue);
+      expect(meta['repo.owner']?.kind, LdToolAllowValueKind.string);
+    });
+
+    test('schema array items expose itemKind', () {
+      final meta = ldParseToolInputSchema({
+        'type': 'object',
+        'properties': {
+          'labels': {
+            'type': 'array',
+            'items': {
+              'type': 'string',
+              'enum': ['ui', 'ai', 'docs'],
+            },
+          },
+        },
+      });
+      expect(meta['labels']?.kind, LdToolAllowValueKind.array);
+      expect(meta['labels']?.itemKind, LdToolAllowValueKind.string);
+      expect(meta['labels']?.enumOptions, ['ui', 'ai', 'docs']);
     });
   });
 
