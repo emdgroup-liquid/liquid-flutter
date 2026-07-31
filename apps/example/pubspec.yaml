@@ -47,6 +47,8 @@ dependencies:
     path: ../../packages/liquid_flutter_window_utils
   liquid_flutter_md:
     path: ../../packages/liquid_flutter_md
+  liquid_flutter_ai:
+    path: ../../packages/liquid_flutter_ai
   hooks: ^1.0.0
   responsive_builder: ^0.7.1
   reactive_forms: ^18.2.2

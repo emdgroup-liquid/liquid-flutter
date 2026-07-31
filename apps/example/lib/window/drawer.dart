@@ -85,6 +85,7 @@ const components = [
   _Component("Breadcrumb", "/components/breadcrumb", LucideIcons.arrowRight, ComponentCategory.interaction),
   _Component("Button", "/components/button", LucideIcons.pointer, ComponentCategory.interaction),
   _Component("Context Menu", "/components/context-menu", LucideIcons.squareMousePointer, ComponentCategory.interaction),
+  _Component("Conversation", "/components/conversation", LucideIcons.messagesSquare, ComponentCategory.interaction),
   _Component("Modal", "/components/modal", LucideIcons.messageSquare, ComponentCategory.interaction),
   _Component("Orb", "/components/orb", LucideIcons.droplet, ComponentCategory.interaction),
   _Component("Speed Reader", "/components/speed-reader", LucideIcons.bookOpen, ComponentCategory.interaction),

@@ -52,6 +52,7 @@ class _LdTagWidget extends StatelessWidget {
     final fontSize = _fontSize(theme);
 
     return Container(
+      padding: EdgeInsets.all(_padding(theme) / 2),
       key: const ValueKey("tagBox"),
       decoration: BoxDecoration(
         borderRadius: theme.radius(LdSize.s),
@@ -61,44 +62,36 @@ class _LdTagWidget extends StatelessWidget {
         ),
         color: background,
       ),
-      child: Padding(
-        padding: EdgeInsets.all(_padding(theme) / 2),
-        child: IntrinsicWidth(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (onDismiss != null)
-                Padding(
-                  padding: const EdgeInsets.only(right: 6.0),
-                  child: Icon(
-                    Icons.clear,
-                    color: text,
-                    size: fontSize,
-                  ),
-                ),
-              Expanded(
-                child: IconTheme(
-                  data: IconThemeData(
-                    color: text,
-                    size: fontSize,
-                  ),
-                  child: DefaultTextStyle(
-                      style: TextStyle(
-                        height: 1,
-                        color: text,
-                        overflow: TextOverflow.ellipsis,
-                        package: theme.fontFamilyPackage,
-                        fontFamily: theme.fontFamily,
-                        fontWeight: FontWeight.bold,
-                        fontSize: fontSize,
-                      ),
-                      child: child),
-                ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: IconTheme(
+              data: IconThemeData(
+                color: text,
+                size: fontSize,
               ),
-            ],
+              child: DefaultTextStyle(
+                  style: TextStyle(
+                    height: 1,
+                    color: text,
+                    overflow: TextOverflow.ellipsis,
+                    package: theme.fontFamilyPackage,
+                    fontFamily: theme.fontFamily,
+                    fontWeight: FontWeight.bold,
+                    fontSize: fontSize,
+                  ),
+                  child: child),
+            ),
           ),
-        ),
-      ),
+          if (onDismiss != null)
+            Icon(
+              Icons.clear,
+              color: text,
+              size: fontSize,
+            ),
+        ],
+      ).spaceS(),
     );
   }
 }

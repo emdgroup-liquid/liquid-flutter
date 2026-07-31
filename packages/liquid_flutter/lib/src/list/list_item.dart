@@ -176,7 +176,7 @@ class _LdListItemWidgetState extends State<LdListItemWidget> {
   EdgeInsets _effectivePadding(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
     if (widget.padding != null) return widget.padding!;
-    if (widget.subContent != null || widget.subtitle != null) return theme.balPad(LdSize.s);
+    if (widget.subContent != null || widget.subtitle != null || widget.leading != null) return theme.balPad(LdSize.s);
     // In title only mode we apply a bit more padding
     return EdgeInsets.symmetric(
         horizontal: theme.paddingSize(size: LdSize.m), vertical: theme.paddingSize(size: LdSize.l));

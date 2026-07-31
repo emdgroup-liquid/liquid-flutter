@@ -522,8 +522,8 @@ class LdContextMenuRoute extends ModalRoute<void> {
             return Positioned(
               left: animatedRect.left,
               top: animatedRect.top,
-              width: animatedRect.width + 2,
-              height: animatedRect.height + 2,
+              width: animatedRect.width,
+              height: animatedRect.height,
               child: _wrapWithProviders(
                 context,
                 (context2) => Stack(
@@ -623,6 +623,7 @@ class LdContextMenuRoute extends ModalRoute<void> {
                     (animation.value * 255).toInt(),
                   ),
               width: LdTheme.of(context).borderWidth,
+              strokeAlign: BorderSide.strokeAlignOutside,
             ),
           ),
           child: child,
