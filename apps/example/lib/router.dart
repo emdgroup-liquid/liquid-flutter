@@ -112,7 +112,7 @@ class AppRouter {
           ),
 
           ...buildMonkeyRoutes<Task, int>(
-            masterPath: "/task-demo?sort-task=order-asc",
+            masterPath: "/task-demo",
             routeConfig: taskRouteConfig,
             sortOptionsBuilder: (_) async => taskSortOptions,
             actions: taskActions,

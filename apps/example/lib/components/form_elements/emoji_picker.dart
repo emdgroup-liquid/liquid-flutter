@@ -135,7 +135,7 @@ class _EmojiPickerDemoState extends State<EmojiPickerDemo> {
               child: Column(
                 children: ldEmojiData.map((cat) {
                   return LdListItem(
-                    leading: LdAvatar(child: Text(cat.icon, style: const TextStyle(fontSize: 18))),
+                    leading: LdAvatar(child: LdEmoji(cat.icon)),
                     title: Text(cat.name),
                     trailing: LdBadge(child: Text('${cat.emojis.length}')),
                   );

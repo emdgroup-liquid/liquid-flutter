@@ -29,7 +29,7 @@ export 'src/context_menu.dart';
 export 'src/date_picker.dart';
 export 'src/emoji_picker/emoji_picker.dart';
 export 'src/divider.dart';
-export 'src/emoji.dart';
+export 'src/emoji/emoji.dart';
 
 export 'src/drawer/section_header.dart';
 export 'src/drawer_state.dart';

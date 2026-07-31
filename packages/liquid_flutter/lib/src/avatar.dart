@@ -33,14 +33,14 @@ class _LdAvatarWidget extends StatelessWidget {
 
     final touchable = context.watch<LdTouchableStatus?>();
 
-    var fillColor = foreground.fromCenter(1, theme.isDark).withAlpha(50);
+    var fillColor = foreground.fromCenter(-1, theme.isDark).withAlpha(50);
 
     if (touchable != null) {
       if (touchable.active) {
-        fillColor = foreground.fromCenter(3, theme.isDark);
+        fillColor = foreground.fromCenter(1, theme.isDark).withAlpha(50);
       }
       if (touchable.pressed) {
-        fillColor = foreground.fromCenter(2, theme.isDark);
+        fillColor = foreground.fromCenter(2, theme.isDark).withAlpha(50);
       }
     }
 
