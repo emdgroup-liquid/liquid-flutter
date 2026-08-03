@@ -74,6 +74,7 @@ class LdFormEmojiPicker extends StatelessWidget {
         final isRequired =
             state.control.validators.contains(Validators.required);
         final scope = context.watch<LdFormState?>();
+
         return ldBuildFormFieldChrome(
           state: state,
           formKey: formKey,
@@ -89,6 +90,9 @@ class LdFormEmojiPicker extends StatelessWidget {
                 state.control.markAsDirty();
                 scope?.onFieldCommitted(formKey);
               }),
+              child: hasEmoji
+                  ? LdEmoji(currentEmoji)
+                  : SizedBox(width: 20, height: 20, child: Placeholder()),
               builder: (context, status, child) {
                 final colors = inputColor(
                   LdTheme.of(context),
@@ -104,9 +108,7 @@ class LdFormEmojiPicker extends StatelessWidget {
                   ),
                   child: DefaultTextStyle(
                     style: TextStyle(fontSize: _getEmojiSize(size)),
-                    child: hasEmoji
-                        ? LdEmoji(currentEmoji)
-                        : SizedBox(width: 20, height: 20, child: Placeholder()),
+                    child: child!,
                   ),
                 );
               },
