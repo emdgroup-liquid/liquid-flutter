@@ -52,8 +52,7 @@ const _maxAnalysisFontSize = 64.0;
 /// their advance/ascent (e.g. ⚽) are not clipped during rasterization.
 const _overflowPadFactor = 0.35;
 
-double _analysisFontSize(double fontSize) =>
-    math.min(fontSize, _maxAnalysisFontSize);
+double _analysisFontSize(double fontSize) => math.min(fontSize, _maxAnalysisFontSize);
 
 /// Renders [emoji], crops to opaque ink, measures V2 optical centre within
 /// that crop, and returns a paint-ready raster.
@@ -250,20 +249,18 @@ class _LdEmojiState extends State<LdEmoji> {
   @override
   void didUpdateWidget(LdEmoji old) {
     super.didUpdateWidget(old);
-    if (old.emoji != widget.emoji ||
-        old.style?.fontSize != widget.style?.fontSize) {
+    if (old.emoji != widget.emoji || old.style?.fontSize != widget.style?.fontSize) {
       _scheduleComputation();
     }
   }
 
   void _scheduleComputation() {
     final size = _resolveSize(context, widget.style);
-    if (size == _resolvedSize && _raster != null) return;
+
     _resolvedSize = size;
 
     final analysisFontSize = _analysisFontSize(size);
-    final key =
-        '${widget.emoji}:${analysisFontSize.round()}:$_algorithmVersion';
+    final key = '${widget.emoji}:${analysisFontSize.round()}:$_algorithmVersion';
 
     _getOrCompute(
       key,
@@ -285,8 +282,7 @@ class _LdEmojiState extends State<LdEmoji> {
       // Placeholder keeps layout stable while the raster is prepared.
       child = Text(
         widget.emoji,
-        style: widget.style?.copyWith(fontSize: size, height: 1) ??
-            TextStyle(fontSize: size, height: 1),
+        style: widget.style?.copyWith(fontSize: size, height: 1) ?? TextStyle(fontSize: size, height: 1),
         maxLines: 1,
       );
     } else {
