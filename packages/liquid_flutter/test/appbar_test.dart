@@ -1034,6 +1034,144 @@ void main() {
       expect(find.byIcon(LucideIcons.chevronLeft), findsOneWidget);
     });
 
+    testWidgets('App bar back ignores open drawer local history under GoRouter', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+      addTearDown(tester.view.resetPhysicalSize);
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
+
+      // Drawer local history makes Navigator.canPop() true; the back button must
+      // still stay hidden when there is no page-level route to pop.
+      final router = GoRouter(
+        initialLocation: '/settings',
+        routes: [
+          ShellRoute(
+            builder: (context, state, child) => LdThemeProvider(
+              size: LdThemeSize.m,
+              brightnessMode: LdThemeBrightnessMode.light,
+              child: MediaQuery(
+                data: const MediaQueryData(size: Size(400, 800)),
+                child: LdScaffold(
+                  drawer: const Center(child: Text('Drawer')),
+                  body: LdAppBar.top(
+                    title: const Text('Settings'),
+                    child: child,
+                  ),
+                ),
+              ),
+            ),
+            routes: [
+              GoRoute(
+                path: '/settings',
+                builder: (context, state) => const Center(child: Text('Settings body')),
+              ),
+            ],
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          routerConfig: router,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(LucideIcons.chevronLeft), findsNothing);
+
+      await tester.tap(find.byIcon(LucideIcons.menu));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Drawer'), findsOneWidget);
+      expect(find.byIcon(LucideIcons.chevronLeft), findsNothing);
+
+      LdDrawerLayout.closeDrawer(tester.element(find.text('Settings body')));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('App bar back pops outer shell when nested shell has sub-routes', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+
+      // Mirrors nested monkey side-by-side: the outer master lives in the shell
+      // builder (sibling of the nested navigator). GoRouter's shell PopScope
+      // blocks maybePop on the parent while the inner shell has sub-routes;
+      // the Files back button must still pop the outer shell.
+      final router = GoRouter(
+        initialLocation: '/projects/1/files/a',
+        routes: [
+          ShellRoute(
+            builder: (context, state, child) => LdThemeProvider(
+              size: LdThemeSize.m,
+              brightnessMode: LdThemeBrightnessMode.light,
+              child: child,
+            ),
+            routes: [
+              GoRoute(
+                path: '/projects',
+                builder: (context, state) => const Center(child: Text('Projects')),
+                routes: [
+                  ShellRoute(
+                    builder: (context, state, child) => Row(
+                      children: [
+                        Expanded(
+                          child: LdScaffold(
+                            body: LdAppBar.top(
+                              title: const Text('Files'),
+                              child: const Center(child: Text('Files body')),
+                            ),
+                          ),
+                        ),
+                        Expanded(child: child),
+                      ],
+                    ),
+                    routes: [
+                      GoRoute(
+                        path: ':projectId',
+                        builder: (context, state) => const Center(child: Text('Files route')),
+                        routes: [
+                          GoRoute(
+                            path: 'files/:fileId',
+                            builder: (context, state) => LdScaffold(
+                              body: LdAppBar.top(
+                                title: const Text('Detail'),
+                                child: const Center(child: Text('Detail body')),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          routerConfig: router,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Files'), findsOneWidget);
+      expect(find.text('Detail'), findsOneWidget);
+      expect(find.byIcon(LucideIcons.chevronLeft), findsNWidgets(2));
+
+      // Tap the Files (outer) back button — left panel.
+      await tester.tap(find.byIcon(LucideIcons.chevronLeft).first);
+      await tester.pumpAndSettle();
+
+      expect(router.state.uri.path, '/projects');
+      expect(find.text('Projects'), findsOneWidget);
+      expect(find.text('Files'), findsNothing);
+      expect(find.text('Detail'), findsNothing);
+    });
+
     testWidgets('App bar with custom backgroundColor', (WidgetTester tester) async {
       ldDisableAnimations = true;
       await tester.pumpWidget(
