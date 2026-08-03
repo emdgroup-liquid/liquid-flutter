@@ -24,11 +24,6 @@ class LdAppBarBackButton extends StatelessWidget {
 
     final router = GoRouter.maybeOf(context);
     if (router != null) {
-      final rootCanPop = context.canPop();
-
-      if (!rootCanPop) {
-        return false;
-      }
       return _goRouterCanPop(router, context);
     }
 
@@ -36,17 +31,21 @@ class LdAppBarBackButton extends StatelessWidget {
   }
 
   void _popParentRoute(BuildContext context) {
-    final route = ModalRoute.of(context);
-    if (route?.impliesAppBarDismissal ?? false) {
-      route?.navigator?.maybePop();
+    final router = GoRouter.maybeOf(context);
+    if (router == null) {
+      Navigator.of(context).maybePop();
       return;
     }
 
-    final router = GoRouter.maybeOf(context);
-    if (router != null) {
+    final shell = _findDeepestPoppableShell(router, context);
+    if (shell != null) {
+      _popShellMatch(shell);
+      return;
+    }
+
+    final matches = router.routerDelegate.currentConfiguration.matches;
+    if (matches.length > 1) {
       router.pop();
-    } else {
-      Navigator.of(context).maybePop();
     }
   }
 
@@ -65,30 +64,18 @@ class LdAppBarBackButton extends StatelessWidget {
 /// Checks shell navigators first (for `ShellRoute`-scoped stacks), then falls
 /// back to the root GoRouter navigator (for top-level `context.push` calls
 /// that land outside any shell, producing an `ImperativeRouteMatch` at the
-/// top level of the match list). Using `matches.length > 1` avoids a false
-/// positive from open drawers, which add a local history entry to the current
-/// route but do not create a new top-level match.
+/// top level of the match list).
+///
+/// Uses `matches.length > 1` rather than [NavigatorState.canPop] so open
+/// drawers (local history entries) do not produce a false positive.
 bool _goRouterCanPop(GoRouter router, BuildContext context) {
+  if (_findDeepestPoppableShell(router, context) != null) {
+    return true;
+  }
+
   final matches = router.routerDelegate.currentConfiguration.matches;
   if (matches.isEmpty) {
     return false;
-  }
-
-  // Walk every top-level match entry (there may be more than one when an
-  // ImperativeRouteMatch was pushed on top of an existing ShellRouteMatch).
-  // For each ShellRouteMatch, check if our context is a descendant of its
-  // navigator and if that navigator's page stack can pop.
-  for (final topMatch in matches) {
-    RouteMatchBase walker = topMatch;
-    while (walker is ShellRouteMatch) {
-      final navigatorContext = walker.navigatorKey.currentContext;
-      final navigatorState = walker.navigatorKey.currentState;
-
-      if (navigatorContext != null && _isDescendant(context, navigatorContext) && (navigatorState?.canPop() ?? false)) {
-        return true;
-      }
-      walker = walker.matches.last;
-    }
   }
 
   // No shell navigator owns the pop. Fall back to checking whether the root
@@ -105,6 +92,60 @@ bool _goRouterCanPop(GoRouter router, BuildContext context) {
   }
 
   return false;
+}
+
+/// Deepest [ShellRouteMatch] whose navigator owns [context] and has more than
+/// one page-level match (a real route to pop, not drawer local history).
+ShellRouteMatch? _findDeepestPoppableShell(GoRouter router, BuildContext context) {
+  ShellRouteMatch? deepest;
+  final matches = router.routerDelegate.currentConfiguration.matches;
+
+  void walk(RouteMatchBase match) {
+    if (match is! ShellRouteMatch) {
+      return;
+    }
+
+    final navigatorContext = match.navigatorKey.currentContext;
+    if (navigatorContext != null &&
+        _isDescendant(context, navigatorContext) &&
+        match.matches.length > 1) {
+      deepest = match;
+    }
+
+    for (final nested in match.matches) {
+      walk(nested);
+    }
+  }
+
+  for (final match in matches) {
+    walk(match);
+  }
+  return deepest;
+}
+
+/// Pops the top page of [shell].
+///
+/// GoRouter wraps each shell navigator in a [PopScope] with
+/// `canPop: matches.length == 1`. That blocks [Navigator.maybePop] on a
+/// *parent* navigator when the child shell still has sub-routes (nested
+/// master-detail). In that case we force [Navigator.pop] so GoRouter's
+/// `onPopPage` can remove the shell match. Otherwise we use [maybePop] so
+/// forms / page-level [PopScope]s still work.
+void _popShellMatch(ShellRouteMatch shell) {
+  assert(shell.matches.length > 1);
+
+  final navigator = shell.navigatorKey.currentState;
+  if (navigator == null) {
+    return;
+  }
+
+  final topMatch = shell.matches.last;
+  if (topMatch is ShellRouteMatch && topMatch.matches.length > 1) {
+    navigator.pop();
+    return;
+  }
+
+  navigator.maybePop();
 }
 
 bool _isDescendant(BuildContext descendant, BuildContext ancestor) {
