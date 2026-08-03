@@ -30,7 +30,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 ///   ),
 /// )
 /// ```
-class LdChooseLinkedListTrigger<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
+class LdChooseLinkedListTrigger<T extends Identifiable<IdType>, IdType>
+    extends StatelessWidget {
   const LdChooseLinkedListTrigger({
     required this.config,
     this.onItemPressed,
@@ -58,46 +59,49 @@ class LdChooseLinkedListTrigger<T extends Identifiable<IdType>, IdType> extends 
     final ids = config.selectedIds;
     final canRemoveLast = config.allowEmpty;
 
-    return LdSlidableGroup(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Empty state hint shown above the Add row when nothing is selected.
-          if (items.isEmpty)
-            Padding(
-              padding: theme.balPad(LdSize.s),
-              child: DefaultTextStyle(
+    return LdCard(
+      padding: EdgeInsets.zero,
+      child: LdSlidableGroup(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Empty state hint shown above the Add row when nothing is selected.
+            if (items.isEmpty) ...[
+              DefaultTextStyle(
+                textAlign: TextAlign.center,
                 style: ldBuildTextStyle(
                   theme,
-                  LdTextType.paragraph,
+                  LdTextType.label,
                   LdSize.s,
                   color: theme.textMuted,
                 ),
                 child: config.hint,
+              ).padL(),
+              LdDivider()
+            ],
+
+            // Selected item rows.
+            for (var i = 0; i < items.length; i++) ...[
+              if (i > 0) LdDivider(height: 1),
+              _buildItemRow(context, theme, items[i], ids, canRemoveLast),
+            ],
+
+            // Divider between items and Add row only when there are items.
+            if (items.isNotEmpty) LdDivider(height: 1),
+
+            // "Add" row — always present at the bottom.
+            LdListItem(
+              disabled: config.disabled,
+              onPressed: config.disabled ? null : config.onTap,
+              leading: Icon(
+                LucideIcons.plus,
+                color: config.disabled ? theme.textMuted : theme.primaryColor,
+                size: theme.labelSize(LdSize.m),
               ),
+              title: Text(addLabel ?? LiquidLocalizations.of(context).choose),
             ),
-
-          // Selected item rows.
-          for (var i = 0; i < items.length; i++) ...[
-            if (i > 0) LdDivider(height: 1),
-            _buildItemRow(context, theme, items[i], ids, canRemoveLast),
           ],
-
-          // Divider between items and Add row only when there are items.
-          if (items.isNotEmpty) LdDivider(height: 1),
-
-          // "Add" row — always present at the bottom.
-          LdListItem(
-            disabled: config.disabled,
-            onPressed: config.disabled ? null : config.onTap,
-            leading: Icon(
-              LucideIcons.plus,
-              color: config.disabled ? theme.textMuted : theme.primaryColor,
-              size: theme.labelSize(LdSize.m),
-            ),
-            title: Text(addLabel ?? LiquidLocalizations.of(context).choose),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -111,7 +115,8 @@ class LdChooseLinkedListTrigger<T extends Identifiable<IdType>, IdType> extends 
   ) {
     // Disable removal when allowEmpty is false and this is the last item.
     final isLastItem = ids.length == 1;
-    final removalEnabled = config.onRemoveItem != null && (canRemoveLast || !isLastItem);
+    final removalEnabled =
+        config.onRemoveItem != null && (canRemoveLast || !isLastItem);
 
     return LdSlidableListItem(
       enabled: !config.disabled && removalEnabled,
@@ -130,7 +135,8 @@ class LdChooseLinkedListTrigger<T extends Identifiable<IdType>, IdType> extends 
           : null,
       child: LdListItem(
         disabled: config.disabled,
-        onPressed: onItemPressed == null ? null : () => onItemPressed!(context, item),
+        onPressed:
+            onItemPressed == null ? null : () => onItemPressed!(context, item),
         title: config.selectedItemBuilder(context, item),
         trailing: onItemPressed != null
             ? Icon(
