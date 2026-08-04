@@ -25,6 +25,9 @@ class LdSubmitController<T, Arg> with ChangeNotifier {
 
   bool _isDisabled = false;
 
+  /// Bumped on each new attempt, cancel, and reset so stale completions are ignored.
+  int _generation = 0;
+
   bool get isDisabled => _isDisabled;
 
   set disabled(bool value) {
@@ -81,6 +84,30 @@ class LdSubmitController<T, Arg> with ChangeNotifier {
     notifyListeners();
   }
 
+  String get _debugLabel => config.debugLabel ?? 'LdSubmitController#$id';
+
+  void _logDebug(String message) {
+    if (ldPrintDebugMessages) {
+      // ignore: avoid_print
+      print('$_debugLabel: $message');
+    }
+  }
+
+  /// Returns true if [generation] is still the active attempt.
+  bool _isCurrentGeneration(int generation) => generation == _generation;
+
+  void _invalidateInFlight({required String reason}) {
+    final hadInFlight = _isLoading;
+    final previous = _generation;
+    _generation++;
+    if (hadInFlight) {
+      _logDebug(
+        '$reason: invalidated in-flight attempt generation=$previous, '
+        'now=$_generation',
+      );
+    }
+  }
+
   bool get canCancel => config.allowCancel == true && _isLoading;
 
   Future<void> cancel() async {
@@ -92,6 +119,7 @@ class LdSubmitController<T, Arg> with ChangeNotifier {
       config.onCanceled!();
     }
 
+    _invalidateInFlight(reason: 'cancel');
     _retryController.reset();
     _setState(LdSubmitState<T>(type: LdSubmitStateType.idle));
   }
@@ -100,6 +128,8 @@ class LdSubmitController<T, Arg> with ChangeNotifier {
     if (_disposed) {
       return;
     }
+
+    final generation = ++_generation;
 
     if (config.hapticsEnabled) {
       LdHaptics.vibrate(HapticsType.light);
@@ -119,7 +149,13 @@ class LdSubmitController<T, Arg> with ChangeNotifier {
         res = await config.action(arg?.value);
       }
 
-      if (!_isLoading) return;
+      if (!_isCurrentGeneration(generation)) {
+        _logDebug(
+          'ignoring stale success for generation=$generation '
+          '(current=$_generation)',
+        );
+        return;
+      }
 
       _retryController.notifyOperationCompleted();
 
@@ -131,8 +167,13 @@ class LdSubmitController<T, Arg> with ChangeNotifier {
         LdHaptics.vibrate(HapticsType.success);
       }
     } catch (e, s) {
-      // Somehow the state is not loading anymore...
-      if (!_isLoading) return;
+      if (!_isCurrentGeneration(generation)) {
+        _logDebug(
+          'ignoring stale error for generation=$generation '
+          '(current=$_generation): $e',
+        );
+        return;
+      }
 
       late LdException exception;
 
@@ -207,6 +248,7 @@ class LdSubmitController<T, Arg> with ChangeNotifier {
   }
 
   void reset() {
+    _invalidateInFlight(reason: 'reset');
     _retryController.reset();
     _setState(LdSubmitState<T>(type: LdSubmitStateType.idle));
   }

@@ -81,6 +81,98 @@ void main() {
     expect(controller.state.error, isA<LdException>());
   });
 
+  test('LdSubmitController ignores stale success after cancel and retry', () async {
+    Completer<int>? currentCompleter;
+    final controller = LdSubmitController<int, void>(
+      config: LdSubmitConfig(
+        allowCancel: true,
+        action: (arg) async {
+          currentCompleter = Completer<int>();
+          return currentCompleter!.future;
+        },
+      ),
+    );
+
+    final firstTrigger = controller.trigger();
+    expect(controller.state.type, LdSubmitStateType.loading);
+    final firstCompleter = currentCompleter!;
+
+    await controller.cancel();
+    expect(controller.state.type, LdSubmitStateType.idle);
+
+    final secondTrigger = controller.trigger();
+    expect(controller.state.type, LdSubmitStateType.loading);
+    final secondCompleter = currentCompleter!;
+
+    firstCompleter.complete(1);
+    await firstTrigger;
+    expect(controller.state.type, LdSubmitStateType.loading);
+    expect(controller.state.result, isNull);
+
+    secondCompleter.complete(2);
+    await secondTrigger;
+    expect(controller.state.type, LdSubmitStateType.result);
+    expect(controller.state.result, 2);
+  });
+
+  test('LdSubmitController ignores stale error after cancel and retry', () async {
+    Completer<int>? currentCompleter;
+    final controller = LdSubmitController<int, void>(
+      config: LdSubmitConfig(
+        allowCancel: true,
+        action: (arg) async {
+          currentCompleter = Completer<int>();
+          return currentCompleter!.future;
+        },
+      ),
+    );
+
+    final firstTrigger = controller.trigger();
+    expect(controller.state.type, LdSubmitStateType.loading);
+    final firstCompleter = currentCompleter!;
+
+    await controller.cancel();
+    expect(controller.state.type, LdSubmitStateType.idle);
+
+    final secondTrigger = controller.trigger();
+    expect(controller.state.type, LdSubmitStateType.loading);
+    final secondCompleter = currentCompleter!;
+
+    firstCompleter.completeError(Exception('stale'));
+    await firstTrigger;
+    expect(controller.state.type, LdSubmitStateType.loading);
+    expect(controller.state.error, isNull);
+    expect(controller.retryController.state.attempt, 0);
+
+    secondCompleter.complete(42);
+    await secondTrigger;
+    expect(controller.state.type, LdSubmitStateType.result);
+    expect(controller.state.result, 42);
+  });
+
+  test('LdSubmitController stays idle when cancelled attempt completes', () async {
+    final completer = Completer<int>();
+    final controller = LdSubmitController<int, void>(
+      config: LdSubmitConfig(
+        allowCancel: true,
+        action: (arg) async {
+          return completer.future;
+        },
+      ),
+    );
+
+    final pending = controller.trigger();
+    expect(controller.state.type, LdSubmitStateType.loading);
+
+    await controller.cancel();
+    expect(controller.state.type, LdSubmitStateType.idle);
+
+    completer.complete(99);
+    await pending;
+    expect(controller.state.type, LdSubmitStateType.idle);
+    expect(controller.state.result, isNull);
+  });
+
   testWidgets("LdSubmit Inline", (WidgetTester tester) async {
     Completer<int> completer = Completer<int>();
 
