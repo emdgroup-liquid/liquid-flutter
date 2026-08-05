@@ -119,17 +119,32 @@ class LdModalSheetTransition extends StatefulWidget {
     final isDarkMode = CupertinoTheme.brightnessOf(context) == Brightness.dark;
     final overlayColor = isDarkMode ? const Color(0xFFc8c8c8) : const Color(0xFF000000);
 
-    final Widget? contrastedChild = child != null && !secondaryAnimation.isDismissed
-        ? Stack(
+    // Wrapped unconditionally. Switching between `child` and a Stack around it
+    // changes the shape of the tree the moment another route starts covering
+    // this one, which makes the element below re-inflate instead of update.
+    // Re-inflating reparents every GlobalKey'd subtree of the covered page, and
+    // an OverlayPortal inside one of them then adopts its deferred child while
+    // this route is still laying out - which trips
+    // "a _RenderLayoutBuilder was mutated in _RenderLayoutBuilder.performLayout".
+    //
+    // The overlay is positioned so it stays out of the Stack's sizing, and
+    // ignores pointers because the dimming is decorative; a covered route is
+    // already blocked by the navigator.
+    final Widget? contrastedChild = child == null
+        ? child
+        : Stack(
             children: <Widget>[
               child,
-              FadeTransition(
-                opacity: opacityAnimation,
-                child: ColoredBox(color: overlayColor, child: const SizedBox.expand()),
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: FadeTransition(
+                    opacity: opacityAnimation,
+                    child: ColoredBox(color: overlayColor),
+                  ),
+                ),
               ),
             ],
-          )
-        : child;
+          );
 
     final double topGapHeight = MediaQuery.sizeOf(context).height * _kTopGapRatio;
 
