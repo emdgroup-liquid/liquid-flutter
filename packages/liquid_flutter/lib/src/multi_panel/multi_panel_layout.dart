@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -682,6 +683,10 @@ class _LdPanelResizeHandle extends StatelessWidget {
       cursor: SystemMouseCursors.resizeColumn,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
+        supportedDevices: {
+          PointerDeviceKind.touch,
+          PointerDeviceKind.mouse,
+        },
         onHorizontalDragUpdate: (details) {
           onDragUpdate(details.delta.dx);
         },
