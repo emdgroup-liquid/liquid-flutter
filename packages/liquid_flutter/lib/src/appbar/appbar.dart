@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_decoration.dart';
-import 'package:liquid_flutter/src/appbar/appbar_frame.dart';
 import 'package:liquid_flutter/src/appbar/appbar_scrolled_under.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
@@ -174,11 +173,11 @@ class LdAppBarWidget extends StatefulWidget {
     required this.child,
     this.actions = const [],
     this.addContainer = false,
-    this.attachedMode = LdAppBarAttachedMode.adaptive,
+    this.attachedMode = LdAppBarAttachedMode.attached,
     this.autoAttachToKeyboard = true,
     this.backgroundColor,
-    this.backgroundMode = LdAppBarBackgroundMode.adaptive,
-    this.borderMode = LdAppBarBorderMode.adaptive,
+    this.backgroundMode = LdAppBarBackgroundMode.visible,
+    this.borderMode = LdAppBarBorderMode.visible,
     this.bottom,
     this.debugName,
     this.insetScreenRadius = true,
