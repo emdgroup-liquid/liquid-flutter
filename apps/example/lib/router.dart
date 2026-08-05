@@ -80,8 +80,6 @@ import 'window/app_scaffold.dart';
 
 final projectRouteConfig = LdMonkeyRouteConfig.identifiableInt<Project>(itemName: "project");
 
-const projectMasterPath = "/projects";
-
 final fileRouteConfig = LdMonkeyRouteConfig.identifiableString<File>(itemName: "file");
 
 class AppRouter {
@@ -138,10 +136,12 @@ class AppRouter {
           ),
 
           ...buildMonkeyRouteTree<Project, int>(
-            masterPath: projectMasterPath,
+            masterPath: "/projects",
             root: MonkeyRouteNode<Project, int>(
               routeConfig: projectRouteConfig,
               masterPage: ProjectMasterPage(),
+              shellBuilder: (context, state, child) =>
+                  LdMonkeyShell<Project, int>(masterPage: ProjectMasterPage(), detailPanelFraction: 0.66, child: child),
               detailPage: FileMasterPage(),
               modelBuilder: (context, state) => projectModel(),
               filtersBuilder: (_) async => [],
