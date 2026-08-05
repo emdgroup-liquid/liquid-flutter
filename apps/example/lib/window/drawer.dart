@@ -91,6 +91,7 @@ const components = [
   _Component("Speed Reader", "/components/speed-reader", LucideIcons.bookOpen, ComponentCategory.interaction),
   _Component("Tab Navigation", "/components/tab", LucideIcons.betweenVerticalEnd, ComponentCategory.interaction),
   _Component("Tab + PageView", "/components/tab-pageview", LucideIcons.panelsTopLeft, ComponentCategory.interaction),
+  _Component("Navigation Rail", "/components/navigation-rail", LucideIcons.panelLeft, ComponentCategory.interaction),
 
   // Data Display
   _Component("Counter", "/components/counter", LucideIcons.hash, ComponentCategory.dataDisplay),

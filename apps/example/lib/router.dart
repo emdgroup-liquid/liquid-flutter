@@ -27,6 +27,7 @@ import 'package:liquid/components/interaction/orb.dart';
 import 'package:liquid/components/interaction/speed_reader.dart';
 import 'package:liquid/components/interaction/tab.dart';
 import 'package:liquid/components/interaction/tab_pageview.dart';
+import 'package:liquid/components/interaction/navigation_rail.dart';
 import 'package:liquid/components/layout/autospace.dart';
 import 'package:liquid/components/layout/card.dart';
 import 'package:liquid/components/layout/drawer.dart';
@@ -409,6 +410,11 @@ class AppRouter {
           GoRoute(
             path: "/components/tab-pageview",
             pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const TabPageViewDemo()),
+          ),
+          GoRoute(
+            path: "/components/navigation-rail",
+            pageBuilder: (context, state) =>
+                NoTransitionPage<void>(key: state.pageKey, child: const NavigationRailDemo()),
           ),
           GoRoute(
             path: "/components/list",

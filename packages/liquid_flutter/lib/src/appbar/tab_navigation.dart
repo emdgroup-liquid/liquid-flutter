@@ -11,15 +11,6 @@ import 'package:liquid_flutter/src/haptics.dart';
 import 'package:liquid_flutter/src/touchable/neutral_ghost_color.dart';
 import 'package:provider/provider.dart';
 
-class LdNavigationTab {
-  final String label;
-  final Widget icon;
-  final String route;
-  final bool Function(BuildContext context)? isActive;
-
-  const LdNavigationTab({required this.label, required this.icon, required this.route, this.isActive});
-}
-
 class LdTabNavigation extends StatefulWidget {
   /// The currently active route. Used to determine which tab is highlighted
   /// when [pageController] is not provided, or to supplement initial state
@@ -215,14 +206,7 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
       return widget.tabs.indexOf(tab) == _currentPageIndex;
     }
 
-    if (tab.isActive != null) {
-      return tab.isActive!(context);
-    }
-    if (tab.route.endsWith("*")) {
-      final withoutWildcard = tab.route.substring(0, tab.route.length - 1);
-      return route.startsWith(withoutWildcard);
-    }
-    return route == tab.route;
+    return tab.matches(context, route);
   }
 
   int _activeIndex() {

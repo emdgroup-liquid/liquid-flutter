@@ -36,6 +36,7 @@ class LdScaffold extends StatefulWidget {
   final String? debugName;
 
   final double drawerWidth;
+  final double drawerMinWidth;
 
   final double? reflowBreakpoint;
   final SingleActivator? toggleDrawerShortcut;
@@ -67,6 +68,7 @@ class LdScaffold extends StatefulWidget {
     this.backgroundColor,
     this.drawer,
     this.drawerWidth = 304,
+    this.drawerMinWidth = 200,
     this.reflowBreakpoint = 900,
     this.searchController,
     this.primaryScrollController,
@@ -182,6 +184,7 @@ class LdScaffoldState extends State<LdScaffold> {
                   builder: (context, child) => LdDrawerLayout(
                     drawerWidth: widget.drawerWidth,
                     drawerRight: false,
+                    drawerMinWidth: widget.drawerMinWidth,
                     onStateChange: _onDrawerStateChange,
                     drawer: RepaintBoundary(
                       child: FocusScope(

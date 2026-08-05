@@ -34,6 +34,7 @@ export 'src/emoji/emoji.dart';
 export 'src/drawer/section_header.dart';
 export 'src/drawer_state.dart';
 export 'src/drawer/section_item.dart';
+export 'src/drawer/navigation_rail.dart';
 export 'src/exception/exception_dialog.dart';
 export 'src/exception/exception_mapper.dart';
 export 'src/exception/exception_more_info_button.dart';

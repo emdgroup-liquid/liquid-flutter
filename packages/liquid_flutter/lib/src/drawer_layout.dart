@@ -11,6 +11,7 @@ class LdDrawerLayout extends StatefulWidget {
   final double reflowBreakpoint;
   final bool enableScaling;
   final bool drawerRight;
+  final double drawerMinWidth;
   final bool insetBody;
 
   final void Function(LdDrawerState) onStateChange;
@@ -22,6 +23,7 @@ class LdDrawerLayout extends StatefulWidget {
     required this.body,
     required this.reflowBreakpoint,
     required this.drawerWidth,
+    required this.drawerMinWidth,
     this.drawerRight = false,
     this.insetBody = false,
     this.enableScaling = false,
@@ -198,6 +200,7 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
                   panelWidth: _effectiveDrawerWidth,
                   panelPosition: widget.drawerRight ? LdPanelPosition.right : LdPanelPosition.left,
                   allowResize: true,
+                  minPanelWidth: widget.drawerMinWidth,
                   mass: 1,
                   springConstant: 12,
                   dampingCoefficient: 9,

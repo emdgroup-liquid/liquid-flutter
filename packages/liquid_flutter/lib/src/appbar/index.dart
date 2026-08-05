@@ -14,6 +14,7 @@ export 'implied/close_modal_button.dart';
 export 'implied/macos_window_controls.dart';
 export 'implied/windows_window_controls.dart';
 export 'tab_navigation.dart';
+export '../navigation/navigation_tab.dart';
 
 export 'search_components.dart';
 export 'search_config.dart';

@@ -393,6 +393,7 @@ void main() {
             key: drawerKey,
             reflowBreakpoint: 1200, // Force stacked mode at 800px width.
             drawerWidth: 250,
+            drawerMinWidth: 200,
             onStateChange: (s) => lastState = s,
             drawer: _placeholder('drawer', Colors.green),
             body: _placeholder('body', Colors.blue),
@@ -426,6 +427,7 @@ void main() {
             key: drawerKey,
             reflowBreakpoint: 1200,
             drawerWidth: 250,
+            drawerMinWidth: 200,
             onStateChange: (s) => lastState = s,
             drawer: _placeholder('drawer', Colors.green),
             body: _placeholder('body', Colors.blue),
@@ -476,6 +478,7 @@ void main() {
                       key: drawerKey,
                       reflowBreakpoint: 1200,
                       drawerWidth: 250,
+                      drawerMinWidth: 200,
                       onStateChange: (_) {},
                       drawer: _placeholder('drawer', Colors.green),
                       body: Builder(
@@ -550,6 +553,7 @@ void main() {
             key: drawerKey,
             reflowBreakpoint: 1200,
             drawerWidth: 250,
+            drawerMinWidth: 200,
             onStateChange: (s) => lastState = s,
             drawer: _placeholder('drawer', Colors.green),
             body: _placeholder('body', Colors.blue),
@@ -833,6 +837,7 @@ void main() {
             child: LdDrawerLayout(
               reflowBreakpoint: 1200,
               drawerWidth: drawerWidth,
+              drawerMinWidth: 200,
               onStateChange: (_) {},
               drawer: _placeholder('drawer', Colors.green),
               body: _placeholder('body', Colors.blue),
@@ -853,6 +858,7 @@ void main() {
             child: LdDrawerLayout(
               reflowBreakpoint: 1200,
               drawerWidth: drawerWidth,
+              drawerMinWidth: 200,
               onStateChange: (_) {},
               drawer: _placeholder('drawer', Colors.green),
               body: _placeholder('body', Colors.blue),
