@@ -305,15 +305,22 @@ class LdModalRoute<T> extends PageRoute<T> {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
   ) {
-    return LayoutBuilder(builder: (context, constraints) {
-      final bool isSheet = _shouldBeSheet(constraints);
+    // Sized from MediaQuery rather than a LayoutBuilder, as the delegated
+    // transition already does. A route's content is re-inflated whenever a
+    // second route starts covering it, because the delegated transition is
+    // wrapped around it; doing that inside a layout callback is what trips
+    // "a _RenderLayoutBuilder was mutated in _RenderLayoutBuilder.performLayout"
+    // once an OverlayPortal in the page adopts its deferred child.
+    if (_shouldBeSheet(_screenConstraints(context))) {
+      return _buildSheetContent(context, pageBuilder);
+    }
+    return _buildDialogContent(context, pageBuilder);
+  }
 
-      if (isSheet) {
-        return _buildSheetContent(context, pageBuilder);
-      } else {
-        return _buildDialogContent(context, pageBuilder);
-      }
-    });
+  /// The full screen as constraints, for the sheet/dialog decision.
+  static BoxConstraints _screenConstraints(BuildContext context) {
+    final Size screenSize = MediaQuery.sizeOf(context);
+    return BoxConstraints(maxWidth: screenSize.width, maxHeight: screenSize.height);
   }
 
   /// Builds transitions for sheet mode using CupertinoSheetTransition.
@@ -365,15 +372,12 @@ class LdModalRoute<T> extends PageRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return LayoutBuilder(builder: (context, constraints) {
-      final bool isSheet = _shouldBeSheet(constraints);
-
-      if (isSheet) {
-        return _buildSheetTransitions(context, animation, secondaryAnimation, child);
-      } else {
-        return _buildDialogTransitions(context, animation, secondaryAnimation, child);
-      }
-    });
+    // See buildPage: deciding this under a LayoutBuilder puts the re-inflation
+    // that comes with being covered inside a layout callback.
+    if (_shouldBeSheet(_screenConstraints(context))) {
+      return _buildSheetTransitions(context, animation, secondaryAnimation, child);
+    }
+    return _buildDialogTransitions(context, animation, secondaryAnimation, child);
   }
 
   @override
@@ -447,7 +451,13 @@ class LdModalRoute<T> extends PageRoute<T> {
         return child ?? const SizedBox.shrink();
       }
 
-      if (isDialog && !secondaryAnimation.isDismissed) {
+      // Deliberately not gated on `secondaryAnimation.isDismissed`. Handing a
+      // dialog the sheet transition while it rests and a different tree once it
+      // is covered changes the shape of the tree, so the covered page gets
+      // re-inflated rather than updated - which reparents its GlobalKey'd
+      // subtrees and lets an OverlayPortal adopt its deferred child mid-layout.
+      // Both dialog tweens start at identity, so resting looks unchanged.
+      if (isDialog) {
         if (!parentIsModal) {
           return child ?? const SizedBox.shrink();
         }
@@ -455,7 +465,7 @@ class LdModalRoute<T> extends PageRoute<T> {
         return _delegatedDialogSecondaryTransition(secondaryAnimation, child);
       }
 
-      // For sheets or when dismissed, fall back to sheet transition
+      // Sheets keep the sheet transition in every state.
       return LdModalSheetTransition.delegateTransition(
         context,
         animation,
