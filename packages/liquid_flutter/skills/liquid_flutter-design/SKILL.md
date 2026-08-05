@@ -1,6 +1,6 @@
 ---
 name: liquid_flutter-design
-description: Use when building UI with Liquid Flutter components — covers layout, text, forms, lists, modals, spacing, colors, typography, and common UI patterns.
+description: Use when building UI with Liquid Flutter components — covers layout, text, forms, lists, modals, primary navigation (tabs/rail), spacing, colors, typography, and common UI patterns.
 ---
 
 # Liquid Flutter Design System
@@ -11,13 +11,21 @@ The Liquid Flutter design system provides a comprehensive set of components and 
 ## Core Components for General Tasks
 
 ### Layout Components
-- **LdScaffold**: Main page scaffold with drawer support. Wrap the body with `LdAppBar` to add app bars.
+- **LdScaffold**: Main page scaffold with drawer support. Wrap the body with `LdAppBar` to add app bars. Use `drawer` / `drawerWidth` / `drawerMinWidth` when hosting a side panel (e.g. a rail).
 - **LdAppBar**: App bar that wraps its `child`. Use `LdAppBar.top` / `LdAppBar.bottom` or nest bars for multiple edges.
 - **LdScaffoldBody**: Body wrapper for scaffold content. Use `addContainer: true` for automatic container padding.
 - **LdAutoSpace**: Automatically spaces children in a Column based on component types. Use for arranging items vertically with proper spacing.
 - **LdBundle**: Wrapper that applies LdAutoSpace to its children. Use for grouping related content.
 - **LdCard**: Card component with optional header/footer. When placing LdListItems in a Card, set `padding: EdgeInsets.zero` and use a Column.
 - **LdContainer**: Container component with theme-aware styling.
+
+### Navigation Components
+- **LdNavigationTab**: Shared primary destination model (`label`, `icon`, `route`, optional `isActive`). Use the same list for bottom tabs and the side rail. Call `matches(context, activeRoute)` for highlight state (`*` wildcard suffix or custom `isActive`).
+- **LdTabNavigation**: Horizontal tab bar (typically bottom on mobile). Pass `List<LdNavigationTab>`, `activeRoute` (or `pageController`), and `onTabPressed`. Wraps `child` like an app bar edge.
+- **LdNavigationRail**: Vertical primary nav for `LdScaffold.drawer`. Same `LdNavigationTab` destinations. Width-responsive: compact square icon-over-label tiles when narrow; icon beside label when at/above `extendedBreakpoint` (default `LdNavigationRail.defaultExtendedBreakpoint`). Use `LdNavigationRail.defaultWidth` / `defaultMinWidth` with scaffold `drawerWidth` / `drawerMinWidth`. Optional `leading` / `trailing`.
+- **LdDrawerItemSection** / **LdSectionHeader**: Hierarchical drawer content (nested sections, search-heavy nav). Prefer these for deep trees; prefer `LdNavigationRail` for flat primary destinations.
+
+**App-owned chrome switch:** The app chooses tabs vs rail (e.g. mobile → `LdTabNavigation`, desktop → drawer + `LdNavigationRail`). Scaffold does not auto-switch.
 
 ### Text Components
 - **LdText**: Primary text component. Use factory constructors:
@@ -203,6 +211,40 @@ LdScaffold(
 
 Note: `LdAppBar` wraps the body as a parent widget (`child:` parameter). The deprecated `appBars: [...]` list API is no longer used.
 
+### Primary navigation: tabs vs rail
+Share one `List<LdNavigationTab>` and pick chrome per platform/breakpoint:
+
+```dart
+final tabs = [
+  LdNavigationTab(label: 'Home', icon: Icon(LucideIcons.house), route: '/home'),
+  LdNavigationTab(label: 'Search', icon: Icon(LucideIcons.search), route: '/search'),
+];
+
+// Desktop / wide: rail in the resizable drawer
+LdScaffold(
+  drawerWidth: LdNavigationRail.defaultWidth,
+  drawerMinWidth: LdNavigationRail.defaultMinWidth,
+  drawer: LdNavigationRail(
+    destinations: tabs,
+    activeRoute: route,
+    onDestinationSelected: go,
+  ),
+  body: content,
+)
+
+// Mobile: bottom tab bar wrapping body
+LdScaffold(
+  body: LdTabNavigation(
+    tabs: tabs,
+    activeRoute: route,
+    onTabPressed: go,
+    child: content,
+  ),
+)
+```
+
+Resizing the drawer reflows the rail (compact square tiles ↔ extended row). For hierarchical drawers with sections/search, use `LdDrawerItemSection` instead of the rail.
+
 ### Card with ListItems
 ```dart
 LdCard(
@@ -267,3 +309,4 @@ Prefer Lucide icons over `Icons` / `CupertinoIcons` where applicable. The `lucid
 8. **Retrieve colors** from `LdTheme.of(context)` rather than hardcoding
 9. **Apply radius** using `LdTheme.of(context).radius()` for consistency
 10. **Use Lucide icons** wherever possible instead of the default Icons or CupertinoIcons
+11. **Primary nav**: Reuse `LdNavigationTab` for both `LdTabNavigation` and `LdNavigationRail`; app chooses which chrome to show. Use `drawerMinWidth: LdNavigationRail.defaultMinWidth` when the drawer hosts a rail.

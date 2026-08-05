@@ -13,7 +13,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 class LdNavigationRail extends StatelessWidget {
   /// Suggested initial [LdScaffold.drawerWidth] for a mid-range rail that
   /// can be resized into both compact and extended layouts.
-  static const double defaultWidth = 200;
+  static const double defaultWidth = 80;
   static const double defaultMinWidth = 70;
 
   /// Width at/above which destinations use icon + label in a row.
