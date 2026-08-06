@@ -1,3 +1,375 @@
+## 23.0.0-9
+Released on: 8/6/2026, changelog automatically generated.
+
+
+### Bug Fixes
+
+- **LdSubmitController:** ignore stale results after cancel/retry ([58919d2](commit/58919d2))
+- use normal draggable on desktop since we can disambiguate touchables better now ([4bb2af9](commit/4bb2af9))
+- spacing for headlines and dividers reduced ([b3512b9](commit/b3512b9))
+- request focus for all touchables on tap ([086ee90](commit/086ee90))
+- ensure proper focus traversal in multi panel ([54d974c](commit/54d974c))
+- modal centering correctly in multi panel ([4283b22](commit/4283b22))
+- update disabledAlpha value for shadRed color token ([6018e7f](commit/6018e7f))
+- disallow trackpad swipe on multi-panel ([5f36680](commit/5f36680))
+- change default appbar behaviour ([6f43fed](commit/6f43fed))
+- emoji optical centering ([f1e6778](commit/f1e6778))
+- dismissal ([5e20b90](commit/5e20b90))
+- tooltip on sliders, extract date_picker to be imperatively called ([bddcb40](commit/bddcb40))
+- **ci:** unblock analyze and tests on Flutter 3.44.8 ([4c1b5a5](commit/4c1b5a5))
+### Features
+
+- **metaball:** add ForceDemo to showcase varying force multipliers for metaballs ([cd6603e](commit/cd6603e))
+- **ld_runner_step:** add customizable left padding for expanded children block ([3e44c13](commit/3e44c13))
+- **LdNavigationRail:** add width-responsive rail from shared LdNavigationTab ([7bf2878](commit/7bf2878))
+- add labels to sliders ([c523a78](commit/c523a78))
+- enhance LdInput and LdButton components with new features and improvements ([a8c526f](commit/a8c526f))
+- add swagger identifiable mixin processing ([351176d](commit/351176d))
+- add hashtag support to markdown editor/widget, rename enabled->disabled ([a4a7ff8](commit/a4a7ff8))
+
+### API Changes
+
+#### 💣 Breaking changes
+
+**`class` LdCallbackModel<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/data/ld_callback_model.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-bbe6dccbaff1f85db929a2244aa1272b485ea8ef19047f4e87871d9a0c49ee84))
+- 🔄 Type parameters changed: `T extends Identifiable<IdType>, IdType` → `T extends Identifiable<IdType>, IdType, TCreate, TUpdate`
+- 🔄 Param type changed in default constructor: `updateItem` (`Future<T?> Function(BuildContext, IdType, T)?` → `Future<T?> Function(BuildContext, IdType, TUpdate)?`), `createItem` (`Future<T> Function(BuildContext, T?)?` → `Future<T> Function(BuildContext, TCreate)?`), `updateBatchFn` (`Future<void> Function(BuildContext, Map<IdType, T>)?` → `Future<void> Function(BuildContext, Map<IdType, TUpdate>)?`)
+- 🔄 Properties type changed: `updateItem`, `createItem`, `updateBatchFn`
+- 🔄 Param type changed in method `persistCreate`: `payload` (`T?` → `TCreate`)
+- 🔄 Param type changed in method `persistUpdate`: `payload` (`T` → `TUpdate`)
+- 🔄 Param type changed in method `persistUpdateBatch`: `items` (`Map<IdType, T>` → `Map<IdType, TUpdate>`)
+- 🔄 Param type changed in method `createPreview`: `payload` (`T?` → `TCreate`)
+- 🔄 Param type changed in method `create`: `payload` (`T?` → `TCreate`)
+- 🔄 Param type changed in method `update`: `payload` (`T` → `TUpdate`)
+- 🔄 Param type changed in method `updateBatch`: `items` (`Map<IdType, T>` → `Map<IdType, TUpdate>`)
+- 🔄 Method type changed: `greedy` (`LdCallbackModel<L, IdType>` → `LdCallbackModel<L, IdType, TCreate, TUpdate>`), `fromList` (`LdCallbackModel<L, IdType>` → `LdCallbackModel<L, IdType, L, L>`)
+- 🔄 Type parameters changed: `L extends Identifiable<IdType>, IdType` → `L extends Identifiable<IdType>, IdType, TCreate, TUpdate`
+- 🔄 Param type changed in method `greedy`: `updateItem` (`Future<L?> Function(BuildContext, IdType, L)?` → `Future<L?> Function(BuildContext, IdType, TUpdate)?`), `createItem` (`Future<L> Function(BuildContext, L?)?` → `Future<L> Function(BuildContext, TCreate)?`), `updateBatch` (`Future<void> Function(BuildContext, Map<IdType, L>)?` → `Future<void> Function(BuildContext, Map<IdType, TUpdate>)?`)
+
+**`class` LdCounter** ([lib/src/counter.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-56493e7e7233aac1f95d625ed446d310fe0305379c2e1b4429cd8bc3083c6a4d))
+- 🔄 Superclass changed: `StatelessWidget` → `StatefulWidget`
+- ❌ Constructors removed: `s`, `l`, `xs`
+- ❌ Properties removed: `size`, `type`
+- ❌ Method removed: `build`
+
+**`class` LdListController<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/data/list_controller.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-2bd19515e63ce2d64323e30fa8b37fd3ca7fac879e8a0089508961972dcadd7c))
+- ❌ Param removed in method `reorder`: `reorderHandler` (named, required)
+- ❇️ Param added in method `reorder`: `activeSortOption` (named, required)
+
+**`class` LdMonkeyAppBar<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_app_bar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-1ed77dea165bf61117ba5c39537c923f703bf59c28964a4507ccb301fab79a69))
+- ❌ Property removed: `additionalActions`
+
+**`class` LdMonkeyDetailPage<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/detail_page.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-43d347b03da89e053d770a97150585d0955be32f82540fad5d2ceabd18d33035))
+- ❌ Class removed: `LdMonkeyDetailPage`
+
+**`class` LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_master_page.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-f027b9824ac3c8ae9ddbe6ac353d6cb02c90fe60d3a5d83846b29dbd7ec3c437))
+- ❌ Properties removed: `primaryAppBarConfig`, `secondaryAppBarConfig`, `primaryAppBarAdditionalActions`
+
+**`typedef` LdMonkeyReorderHandler<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/ld_monkey_route_definitions.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-364343882a673b5e43d5b6a63b8591f2a9554237699a63d5006bd8bbab610c03))
+- ❌ Typedef removed: `LdMonkeyReorderHandler`
+
+**`class` LdMonkeyRouteScope<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_route_scope.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-00b40f9e0517eb15a03249100eaf69b7c20db14e2b2ec72a032292e923048ac2))
+- ❌ Property removed: `reorderHandler`
+
+**`class` LdMonkeyScrollableDetailView<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_scrollable_detail_view.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-9400e0cdd55f75ba32cf7749184743cc74a59ce66cb9219b4dd01bcf26064b95))
+- ❌ Class removed: `LdMonkeyScrollableDetailView`
+
+**`class` LdMonkeyStackDetailView<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_stack_detail_view.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-859c21b7002de70c6a448c5f9c3ce24edf467197f6ef2bca6c7362c436bf9679))
+- ❌ Class removed: `LdMonkeyStackDetailView`
+
+**`class` LdMonkeyStreamSelection<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/detail_page.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-43d347b03da89e053d770a97150585d0955be32f82540fad5d2ceabd18d33035))
+- ❌ Class removed: `LdMonkeyStreamSelection`
+
+**`class` MonkeyRouteNode<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_route_tree.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-5ee5971433b226f5666f1c6e2da4cdd4b73a3416065519e97a778a01e3fae04d))
+- ❌ Property removed: `reorderHandler`
+
+**`class` _LdCounterDigit** ([lib/src/counter.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-56493e7e7233aac1f95d625ed446d310fe0305379c2e1b4429cd8bc3083c6a4d))
+- ❌ Params removed in default constructor: `size` (named, required), `type` (named, required)
+- ❇️ Param added in default constructor: `style` (named, required)
+
+**`class` _LdCounterState** ([lib/src/counter.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-56493e7e7233aac1f95d625ed446d310fe0305379c2e1b4429cd8bc3083c6a4d))
+- 🔄 Param type changed in method `didUpdateWidget`: `oldWidget` (`_LdCounterWidget` → `LdCounter`)
+
+**`class` _LdMonkeyViewingItemLoader<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/detail_page.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-43d347b03da89e053d770a97150585d0955be32f82540fad5d2ceabd18d33035))
+- ❌ Params removed in default constructor: `id` (named, required), `buildItem` (named, required)
+- ❇️ Params added in default constructor: `ids` (named, required), `builder` (named, required)
+
+**`class` _LdSliderHandle** ([lib/src/value_slider.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-7547e7e705402d81a528691826a522e6f9f4d8483b3f74be559aa653090961c8))
+- ❌ Param removed in default constructor: `tooltipKey` (named, required)
+- ❇️ Param added in default constructor: `showTooltip` (named, required)
+
+**`function` ldConfirmModal** ([lib/src/modal/utils.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-f01b6f5832f5bdf2f5a51ef00d415aedca5a29c465181b1e02d5a123527e80e6))
+- 🔄 Function type changed: `ldConfirmModal` (`Future<bool>` → `Future<bool?>`)
+
+**`function` ldFormConfirmDiscardEdits** ([lib/src/monkey/detail_editor/ld_monkey_discard_confirm.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-15feafebb4126ecc6852f9b263ff15be62e2881e931ac652a9d56061674155d9))
+- 🔄 Function type changed: `ldFormConfirmDiscardEdits` (`Future<bool>` → `Future<bool?>`)
+
+#### ✨ Minor changes
+
+**`class` AppBarFrame** ([lib/src/appbar/appbar_frame.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-f5dae86f88f57d7eacd239b0beba44a7a95e301f01ff1dd11b53d1ec43864c92))
+- ❇️ Class added: `AppBarFrame`
+
+**`extension` DoubleToEdgeInsets** ([lib/src/appbar/appbar_frame.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-f5dae86f88f57d7eacd239b0beba44a7a95e301f01ff1dd11b53d1ec43864c92))
+- ❇️ Extension added: `DoubleToEdgeInsets`
+
+**`class` LdAppBar** ([lib/src/appbar/appbar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-3fa4ae735c9f6ca4c26ac958e08eaa30e2da735b6e0f0ed00665eb6c2b2bb49f))
+- ❇️ Constructor added: `fromConfig`
+
+**`class` LdAppBarConfig** ([lib/src/appbar/appbar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-3fa4ae735c9f6ca4c26ac958e08eaa30e2da735b6e0f0ed00665eb6c2b2bb49f))
+- ❇️ Methods added: `copyWith`, `merge`
+
+**`extension` LdAppBarScrollBehaviorExtension** ([lib/src/scaffold.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-35c580af7b94cd13fc78765d9afc1f836ec439643e1a61922b4b6c7a0614553d))
+- ❇️ Extension added: `LdAppBarScrollBehaviorExtension`
+
+**`class` LdAvatar** ([lib/src/avatar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-e142afc5a4b71ea7f96a73a1f1b6ac035d2721395f0b2905b345fc22ff602458))
+- ❇️ Constructor added: `fromConfig`
+
+**`class` LdAvatarConfig** ([lib/src/avatar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-e142afc5a4b71ea7f96a73a1f1b6ac035d2721395f0b2905b345fc22ff602458))
+- ❇️ Methods added: `copyWith`, `merge`
+
+**`class` LdButton** ([lib/src/button.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-ff5af0a48673590388fb412e3ae360f4d302beeea64e1280f57ea1b097e23697))
+- ❇️ Constructor added: `fromConfig`
+
+**`class` LdButtonConfig** ([lib/src/button.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-ff5af0a48673590388fb412e3ae360f4d302beeea64e1280f57ea1b097e23697))
+- ❇️ Methods added: `copyWith`, `merge`
+
+**`class` LdCallbackModel<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/data/ld_callback_model.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-bbe6dccbaff1f85db929a2244aa1272b485ea8ef19047f4e87871d9a0c49ee84))
+- ❇️ Param added in default constructor: `reorderItem` (named, optional)
+- ❇️ Properties added: `supportsReorder`, `reorderItem`
+- ❇️ Param added in method `greedy`: `reorderItem` (named, optional)
+- ❇️ Method added: `persistReorder`
+
+**`class` LdCheckbox** ([lib/src/checkbox.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-212494581d361b843cfc944c41577dc67246a6cfcd3adcc6c8732ec7791c2599))
+- ❇️ Constructor added: `fromConfig`
+
+**`class` LdCheckboxConfig** ([lib/src/checkbox.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-212494581d361b843cfc944c41577dc67246a6cfcd3adcc6c8732ec7791c2599))
+- ❇️ Methods added: `copyWith`, `merge`
+
+**`class` LdCounter** ([lib/src/counter.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-56493e7e7233aac1f95d625ed446d310fe0305379c2e1b4429cd8bc3083c6a4d))
+- ❌ Params removed in default constructor: `size` (named, optional, default: LdSize.m), `type` (named, optional, default: LdTextType.headline)
+- ❇️ Param added in default constructor: `style` (named, optional)
+- ❇️ Property added: `style`
+- ❇️ Method added: `createState`
+
+**`class` LdDatePickerModal** ([lib/src/date_picker.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-705cf9a7b3b5d494795266f0d9bd90767b033dd2dc19f3eee04d709951be9dd7))
+- ❇️ Class added: `LdDatePickerModal`
+
+**`class` LdInput** ([lib/src/input.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-2ffc2d5e6008b31f35c68f6ed0d27138168bf19c95df7c0aab8349787a9a5ef6))
+- ❇️ Param added in default constructor: `padding` (named, optional)
+- ❇️ Property added: `padding`
+
+**`class` LdList<T extends Identifiable<IdType>, IdType>** ([lib/src/list/list.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-888f80c71ddeacb424418138bd38d5900a4ffe694069cba2af68eb89e66a4a41))
+- ❇️ Constructor added: `fromConfig`
+
+**`class` LdListConfig<T extends Identifiable<IdType>, IdType>** ([lib/src/list/list.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-888f80c71ddeacb424418138bd38d5900a4ffe694069cba2af68eb89e66a4a41))
+- ❇️ Methods added: `copyWith`, `merge`
+
+**`class` LdListItem** ([lib/src/list/list_item.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-78298edd98f67013b7aac32bb2d42bcfc7aac8ca48eadd30199b423dbceca120))
+- ❇️ Constructor added: `fromConfig`
+
+**`class` LdListItemConfig** ([lib/src/list/list_item.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-78298edd98f67013b7aac32bb2d42bcfc7aac8ca48eadd30199b423dbceca120))
+- ❇️ Methods added: `copyWith`, `merge`
+
+**`class` LdMetaball** ([lib/src/metaball/metaball.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-3f44f81d32a4f6357495811a0ef11ac4b71c58f40a155f27cc5a848a6665677c))
+- ❇️ Param added in default constructor: `force` (named, optional, default: 1.0)
+- ❇️ Property added: `force`
+
+**`class` LdMetaballBlob** ([lib/src/metaball/metaball_blob.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-5ab2bf79286f1500aa73f06dd57d5ad8636233eea68369fb92fbd871d2758d15))
+- ❇️ Param added in default constructor: `force` (named, optional, default: 1.0)
+- ❇️ Property added: `force`
+- ❇️ Param added in method `copyWith`: `force` (named, optional)
+
+**`class` LdModel<T extends Identifiable<IdType>, IdType, TCreate, TUpdate>** ([lib/src/monkey/data/ld_model.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-44449e404af55a988303764c787a8c8f8f96d93a74e10ed133ffd7252d0b2f68))
+- ❇️ Property added: `supportsReorder`
+- ❇️ Method added: `persistReorder`
+
+**`class` LdMonkeyAppBar<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_app_bar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-1ed77dea165bf61117ba5c39537c923f703bf59c28964a4507ccb301fab79a69))
+- ❌ Param removed in default constructor: `additionalActions` (named, optional, default: const [])
+- ❇️ Param added in default constructor: `config` (named, optional)
+- ❇️ Property added: `config`
+
+**`class` LdMonkeyAppbarConfig** ([lib/src/monkey/monkey_app_bar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-1ed77dea165bf61117ba5c39537c923f703bf59c28964a4507ccb301fab79a69))
+- ❇️ Class added: `LdMonkeyAppbarConfig`
+
+**`class` LdMonkeyDetailAppBars<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/detail_page.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-43d347b03da89e053d770a97150585d0955be32f82540fad5d2ceabd18d33035))
+- ❇️ Class added: `LdMonkeyDetailAppBars`
+
+**`class` LdMonkeyDetailAppbarConfig** ([lib/src/monkey/monkey_app_bar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-1ed77dea165bf61117ba5c39537c923f703bf59c28964a4507ccb301fab79a69))
+- ❇️ Class added: `LdMonkeyDetailAppbarConfig`
+
+**`class` LdMonkeyDetailSecondaryAppbarConfig** ([lib/src/monkey/monkey_app_bar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-1ed77dea165bf61117ba5c39537c923f703bf59c28964a4507ccb301fab79a69))
+- ❇️ Class added: `LdMonkeyDetailSecondaryAppbarConfig`
+
+**`class` LdMonkeyMasterAppbarConfig** ([lib/src/monkey/monkey_app_bar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-1ed77dea165bf61117ba5c39537c923f703bf59c28964a4507ccb301fab79a69))
+- ❇️ Class added: `LdMonkeyMasterAppbarConfig`
+
+**`class` LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_master_page.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-f027b9824ac3c8ae9ddbe6ac353d6cb02c90fe60d3a5d83846b29dbd7ec3c437))
+- ❌ Params removed in default constructor: `primaryAppBarConfig` (named, optional), `primaryAppBarAdditionalActions` (named, optional, default: const []), `secondaryAppBarConfig` (named, optional)
+
+**`class` LdMonkeyMasterSecondaryAppbarConfig** ([lib/src/monkey/monkey_app_bar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-1ed77dea165bf61117ba5c39537c923f703bf59c28964a4507ccb301fab79a69))
+- ❇️ Class added: `LdMonkeyMasterSecondaryAppbarConfig`
+
+**`class` LdMonkeyRouteScope<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_route_scope.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-00b40f9e0517eb15a03249100eaf69b7c20db14e2b2ec72a032292e923048ac2))
+- ❌ Param removed in default constructor: `reorderHandler` (named, optional)
+
+**`class` LdMonkeyScrollableDetailPage<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/detail_page.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-43d347b03da89e053d770a97150585d0955be32f82540fad5d2ceabd18d33035))
+- ❇️ Class added: `LdMonkeyScrollableDetailPage`
+
+**`class` LdMonkeySingleDetailPage<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/detail_page.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-43d347b03da89e053d770a97150585d0955be32f82540fad5d2ceabd18d33035))
+- ❇️ Class added: `LdMonkeySingleDetailPage`
+
+**`class` LdMonkeyViewingBuilder<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/detail_page.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-43d347b03da89e053d770a97150585d0955be32f82540fad5d2ceabd18d33035))
+- ❇️ Class added: `LdMonkeyViewingBuilder`
+
+**`class` LdNavigationRail** ([lib/src/drawer/navigation_rail.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-ae15dbf15eda67eeb99ea919631bf112402b32bb38f056e675abfe15ef628ae3))
+- ❇️ Class added: `LdNavigationRail`
+
+**`class` LdNavigationTab** ([lib/src/appbar/tab_navigation.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-52bf35196752849d0d45f783bb5b24e4217e93ef2ae5ff75caafe39bc5b551fc))
+- ❇️ Method added: `matches`
+
+**`typedef` LdReorderItemCallback<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/data/ld_callback_model.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-bbe6dccbaff1f85db929a2244aa1272b485ea8ef19047f4e87871d9a0c49ee84))
+- ❇️ Typedef added: `LdReorderItemCallback`
+
+**`class` LdRunnerStep** ([lib/src/runner.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-6b567e02a0af50b04f70212b6f0e9f870e0ed5de80b85853890572d0a7493947))
+- ❇️ Param added in default constructor: `childrenLeftPadding` (named, optional, default: 32)
+- ❇️ Property added: `childrenLeftPadding`
+
+**`class` LdScaffold** ([lib/src/scaffold.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-35c580af7b94cd13fc78765d9afc1f836ec439643e1a61922b4b6c7a0614553d))
+- ❇️ Param added in default constructor: `drawerMinWidth` (named, optional, default: 200)
+- ❇️ Property added: `drawerMinWidth`
+
+**`class` LdScaffoldBody** ([lib/src/scaffold_body.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-25fd66a644218adca4f46a542b28e361a2aea16ff32c8a2def5a1819cf1c507b))
+- ❇️ Params added in default constructor: `reverse` (named, optional, default: false), `itemBuilder` (named, optional), `itemCount` (named, optional), `findChildIndexCallback` (named, optional)
+- ❇️ Properties added: `reverse`, `itemBuilder`, `itemCount`, `findChildIndexCallback`
+
+**`class` LdSlider** ([lib/src/value_slider.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-7547e7e705402d81a528691826a522e6f9f4d8483b3f74be559aa653090961c8))
+- ❇️ Params added in default constructor: `onChangeEnd` (named, optional), `valueFormatter` (named, optional)
+- ❇️ Params added in constructor `range`: `onRangeChangeEnd` (named, optional), `valueFormatter` (named, optional)
+- ❇️ Properties added: `onChangeEnd`, `onRangeChangeEnd`, `valueFormatter`
+
+**`class` LdSwitch<T>** ([lib/src/switch.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-d8b30ecf078361f71ed29b6fb0755c25a0bb96217a1fbb7ba1593d825db75278))
+- ❇️ Property added: `activeIndex`
+
+**`class` LdTheme** ([lib/src/theme/theme.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-e230b3066fca6361167b035927f3d5e83cda9a34212c86e2a307ed82bcf0d99e))
+- ❇️ Methods added: `controlContentPadding`, `controlHeight`
+
+**`class` LdThemeProvider** ([lib/src/theme/theme_provider.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-bb56e3df14103825a8edc59aa7689986b2bface5596870727b1ab28297f86e57))
+- ❇️ Param added in default constructor: `applyWindowDecoration` (named, optional, default: true)
+- ❇️ Property added: `applyWindowDecoration`
+
+**`class` MonkeyRouteNode<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_route_tree.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-5ee5971433b226f5666f1c6e2da4cdd4b73a3416065519e97a778a01e3fae04d))
+- ❌ Param removed in default constructor: `reorderHandler` (named, optional)
+
+**`function` buildMonkeyRoutes<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/monkey_routes.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-5dd41942d7588e4b4e14333a7153952c923f9bc1226bae8302adcf3f9c97ce29))
+- ❌ Param removed in function `buildMonkeyRoutes`: `reorderHandler` (named, optional)
+
+**`function` ldAppBarFocusScopeHasInputFocus** ([lib/src/appbar/appbar_frame.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-f5dae86f88f57d7eacd239b0beba44a7a95e301f01ff1dd11b53d1ec43864c92))
+- ❇️ Function added: `ldAppBarFocusScopeHasInputFocus`
+
+**`function` neutralGhostColor** ([lib/src/touchable/neutral_ghost_color.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-c649ec6954b3fe7588b76fee551739c41c9bd5bd9e43a26f232992bdb3ea7155))
+- ❇️ Function added: `neutralGhostColor`
+
+#### 👀 Patch changes
+
+**`class` LdSubmitController<T, Arg>** ([lib/src/submit/model/submit_controller.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-d921dcc848cbe3ce44f849c2be50e41f4300cb5bddb83fe2c189bea7f63c8f34))
+- ❇️ Properties added: `_generation`, `_debugLabel`
+- ❇️ Methods added: `_logDebug`, `_isCurrentGeneration`, `_invalidateInFlight`
+
+**`class` LdSwitch<T>** ([lib/src/switch.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-d8b30ecf078361f71ed29b6fb0755c25a0bb96217a1fbb7ba1593d825db75278))
+- 🔄 Method type changed: `_buildItem` (`Widget` → `List<Widget>`)
+
+**`class` _AppBarFrameState** ([lib/src/appbar/appbar_frame.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-f5dae86f88f57d7eacd239b0beba44a7a95e301f01ff1dd11b53d1ec43864c92))
+- ❇️ Class added: `_AppBarFrameState`
+
+**`class` _ButtonShape** ([lib/src/button.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-ff5af0a48673590388fb412e3ae360f4d302beeea64e1280f57ea1b097e23697))
+- ❌ Property removed: `_circularSizeBump`
+
+**`class` _DatePickerSheet** ([lib/src/date_picker.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-705cf9a7b3b5d494795266f0d9bd90767b033dd2dc19f3eee04d709951be9dd7))
+- ❌ Class removed: `_DatePickerSheet`
+
+**`class` _DatePickerSheetState** ([lib/src/date_picker.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-705cf9a7b3b5d494795266f0d9bd90767b033dd2dc19f3eee04d709951be9dd7))
+- ❌ Class removed: `_DatePickerSheetState`
+
+**`class` _EmojiRaster** ([lib/src/emoji/emoji.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-77393bdc4901284c6ae0f3f5f7e5bd729c7c49b04576988888bfc893f13ff49d))
+- ❇️ Class added: `_EmojiRaster`
+
+**`class` _LdCounterDigit** ([lib/src/counter.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-56493e7e7233aac1f95d625ed446d310fe0305379c2e1b4429cd8bc3083c6a4d))
+- ❌ Properties removed: `size`, `type`
+- ❇️ Property added: `style`
+
+**`class` _LdCounterState** ([lib/src/counter.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-56493e7e7233aac1f95d625ed446d310fe0305379c2e1b4429cd8bc3083c6a4d))
+- ❇️ Method added: `_getStyle`
+
+**`class` _LdCounterWidget** ([lib/src/counter.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-56493e7e7233aac1f95d625ed446d310fe0305379c2e1b4429cd8bc3083c6a4d))
+- ❌ Class removed: `_LdCounterWidget`
+
+**`class` _LdDatePickerModalState** ([lib/src/date_picker.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-705cf9a7b3b5d494795266f0d9bd90767b033dd2dc19f3eee04d709951be9dd7))
+- ❇️ Class added: `_LdDatePickerModalState`
+
+**`class` _LdDatePickerState** ([lib/src/date_picker.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-705cf9a7b3b5d494795266f0d9bd90767b033dd2dc19f3eee04d709951be9dd7))
+- ❌ Property removed: `_selectedDateNotifier`
+
+**`class` _LdEmojiState** ([lib/src/emoji.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-1b3026d5bb3ce997167aa7c05fd472dae31ca624a851db5fe87322766ca879da))
+- ❌ Property removed: `_offset`
+- ❇️ Property added: `_raster`
+- ❌ Method removed: `_compute`
+
+**`class` _LdInputState** ([lib/src/input.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-2ffc2d5e6008b31f35c68f6ed0d27138168bf19c95df7c0aab8349787a9a5ef6))
+- ❌ Property removed: `_shortcutBindings`
+- ❇️ Property added: `_isMultiline`
+- ❇️ Methods added: `_submitFromKeyboard`, `_insertNewline`, `_shouldSubmitOnEnter`, `_shortcutBindings`
+
+**`class` _LdMonkeyViewingItemLoader<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/detail_page.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-43d347b03da89e053d770a97150585d0955be32f82540fad5d2ceabd18d33035))
+- ❌ Properties removed: `id`, `buildItem`
+- ❇️ Properties added: `ids`, `builder`
+
+**`class` _LdMonkeyViewingItemSubmitBuilder<T extends Identifiable<IdType>, IdType>** ([lib/src/monkey/detail_page.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-43d347b03da89e053d770a97150585d0955be32f82540fad5d2ceabd18d33035))
+- ❌ Class removed: `_LdMonkeyViewingItemSubmitBuilder`
+
+**`class` _LdNavigationRailDestination** ([lib/src/drawer/navigation_rail.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-ae15dbf15eda67eeb99ea919631bf112402b32bb38f056e675abfe15ef628ae3))
+- ❇️ Class added: `_LdNavigationRailDestination`
+
+**`class` _LdSliderHandle** ([lib/src/value_slider.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-7547e7e705402d81a528691826a522e6f9f4d8483b3f74be559aa653090961c8))
+- ❌ Property removed: `tooltipKey`
+- ❇️ Property added: `showTooltip`
+
+**`class` _LdSliderHandleState** ([lib/src/value_slider.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-7547e7e705402d81a528691826a522e6f9f4d8483b3f74be559aa653090961c8))
+- ➖ Method annotation removed: `didUpdateWidget` (@override)
+- ➕ Methods annotation added: `didUpdateWidget` (@mustCallSuper), `didUpdateWidget` (@protected)
+
+**`class` _LdSliderState** ([lib/src/value_slider.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-7547e7e705402d81a528691826a522e6f9f4d8483b3f74be559aa653090961c8))
+- ❌ Properties removed: `_lowTooltipKey`, `_highTooltipKey`
+
+**`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
+- 📦 Added `args`: with version `^2.4.0`
+- 📦 Added `path`: with version `^1.9.0`
+
+**`function` _analysisFontSize** ([lib/src/emoji/emoji.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-77393bdc4901284c6ae0f3f5f7e5bd729c7c49b04576988888bfc893f13ff49d))
+- ❇️ Function added: `_analysisFontSize`
+
+**`function` _computeTranslation** ([lib/src/emoji.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-1b3026d5bb3ce997167aa7c05fd472dae31ca624a851db5fe87322766ca879da))
+- ❌ Function removed: `_computeTranslation`
+
+**`function` _cropImage** ([lib/src/emoji/emoji.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-77393bdc4901284c6ae0f3f5f7e5bd729c7c49b04576988888bfc893f13ff49d))
+- ❇️ Function added: `_cropImage`
+
+**`function` _findDeepestPoppableShell** ([lib/src/appbar/implied/back_button.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-7e1d936bdce32148d727491647951c9dc105fdf48f2514a06d608a2d213355b0))
+- ❇️ Function added: `_findDeepestPoppableShell`
+
+**`function` _getOrCompute** ([lib/src/emoji.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-1b3026d5bb3ce997167aa7c05fd472dae31ca624a851db5fe87322766ca879da))
+- 🔄 Function type changed: `_getOrCompute` (`Future<Offset>` → `Future<_EmojiRaster>`)
+- 🔄 Param type changed in function `_getOrCompute`: `compute` (`Future<Offset> Function()` → `Future<_EmojiRaster> Function()`)
+
+**`function` _popShellMatch** ([lib/src/appbar/implied/back_button.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-7e1d936bdce32148d727491647951c9dc105fdf48f2514a06d608a2d213355b0))
+- ❇️ Function added: `_popShellMatch`
+
+**`function` _rasterizeEmoji** ([lib/src/emoji/emoji.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-77393bdc4901284c6ae0f3f5f7e5bd729c7c49b04576988888bfc893f13ff49d))
+- ❇️ Function added: `_rasterizeEmoji`
+
+**`function` _renderEmoji** ([lib/src/emoji.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-8..liquid_flutter/v23.0.0-9#diff-1b3026d5bb3ce997167aa7c05fd472dae31ca624a851db5fe87322766ca879da))
+- ❌ Function removed: `_renderEmoji`
+
+
 ## 23.0.0-8
 Released on: 7/10/2026, changelog automatically generated.
 
