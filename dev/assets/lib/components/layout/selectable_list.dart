@@ -14,7 +14,7 @@ class SelectableListDemo extends StatefulWidget {
 
 class _SelectableListDemoState extends State<SelectableListDemo> {
   late final LdListController<SampleItem, String> _paginator = LdListController<SampleItem, String>(
-    LdCallbackModel<SampleItem, String>(
+    LdCallbackModel<SampleItem, String, SampleItem, SampleItem>(
       fetchListWithParameters: _fetchItems,
       getById: (context, id) => Future.value(sampleItems.firstWhere((item) => item.id == id)),
     ),

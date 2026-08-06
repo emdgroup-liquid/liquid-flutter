@@ -108,7 +108,7 @@ class _CounterDemoState extends State<CounterDemo> {
                   child: Column(
                     children: [
                       /*begin demo:LdCounter*/
-                      LdCounter(value: _value, size: _size, type: _type, precision: _precision, minDigits: _minDigits),
+                      LdCounter(value: _value, precision: _precision, minDigits: _minDigits),
                       /*end demo:LdCounter*/
                       ldSpacerM,
                       Row(
@@ -227,47 +227,7 @@ class _CounterDemoState extends State<CounterDemo> {
               ),
             ],
           ),
-          LdBundle(
-            children: [
-              LdText.h("Size variants"),
-              LdText.p("Use factory constructors for preset sizes."),
-              ComponentWell(
-                child: Wrap(
-                  spacing: 16,
-                  runSpacing: 16,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    /*begin demo:LdCounterSizes*/
-                    LdCounter.xs(value: 128),
-                    LdCounter.s(value: 128),
-                    LdCounter(value: 128),
-                    LdCounter.l(value: 128),
-                    /*end demo:LdCounterSizes*/
-                  ],
-                ),
-              ),
-            ],
-          ),
-          LdBundle(
-            children: [
-              LdText.h("Typography types"),
-              ComponentWell(
-                child: Wrap(
-                  spacing: 16,
-                  runSpacing: 16,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    /*begin demo:LdCounterTypes*/
-                    LdCounter(value: 256, type: LdTextType.headline),
-                    LdCounter(value: 256, type: LdTextType.paragraph),
-                    LdCounter(value: 256, type: LdTextType.label),
-                    LdCounter(value: 256, type: LdTextType.caption),
-                    /*end demo:LdCounterTypes*/
-                  ],
-                ),
-              ),
-            ],
-          ),
+
           LdBundle(
             children: [
               LdText.h("Leading zeros"),
