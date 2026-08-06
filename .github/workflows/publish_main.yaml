@@ -56,7 +56,17 @@ jobs:
       - name: Push branch and tags
         run: |
           /usr/bin/git push origin main
-          /usr/bin/git push origin --tags
+          # GitHub emits no push events when >3 tags are pushed at once, so
+          # pub_dev_publish would never run. Push each new tag individually.
+          # https://docs.github.com/en/webhooks/webhook-events-and-payloads#push
+          while IFS= read -r tag; do
+            [[ -z "$tag" ]] && continue
+            /usr/bin/git push origin "refs/tags/${tag}"
+          done < <(
+            comm -23 \
+              <(/usr/bin/git tag -l | sort) \
+              <(/usr/bin/git ls-remote --tags origin | awk '{print $2}' | sed 's#refs/tags/##' | sed 's#\^{}$##' | sort -u)
+          )
 
       - name: Create releases
         uses: actions/github-script@v7
