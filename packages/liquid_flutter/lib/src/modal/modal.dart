@@ -197,27 +197,30 @@ class LdModalRoute<T> extends PageRoute<T> {
       );
     }
 
-    return MediaQuery(
-      data: mediaQuery.copyWith(
-        padding: mediaQuery.padding.copyWith(top: 0),
-        viewPadding: mediaQuery.viewPadding.copyWith(top: 0),
-        viewInsets: mediaQuery.viewInsets.copyWith(top: 0),
-      ),
-      child: Builder(builder: (context) {
-        return Align(
-          alignment: Alignment.bottomCenter,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: maxSheetHeight),
-            child: Container(
-              margin: sheetInsets,
-              child: Provider.value(
-                value: LdAppBarMetrics.reset(context),
-                child: sheet,
+    return Padding(
+      padding: mediaQuery.padding.copyWith(bottom: 0),
+      child: MediaQuery(
+        data: mediaQuery.copyWith(
+          padding: mediaQuery.padding.copyWith(top: 0),
+          viewPadding: mediaQuery.viewPadding.copyWith(top: 0),
+          viewInsets: mediaQuery.viewInsets.copyWith(top: 0),
+        ),
+        child: Builder(builder: (context) {
+          return Align(
+            alignment: Alignment.bottomCenter,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: maxSheetHeight),
+              child: Container(
+                margin: sheetInsets,
+                child: Provider.value(
+                  value: LdAppBarMetrics.reset(context),
+                  child: sheet,
+                ),
               ),
             ),
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 
@@ -263,39 +266,43 @@ class LdModalRoute<T> extends PageRoute<T> {
       availableSize.height - minPadding.vertical,
     );
 
-    return MediaQuery.removePadding(
-      context: context,
-      removeTop: true,
-      removeLeft: true,
-      removeRight: true,
-      removeBottom: true,
-      child: Builder(builder: (context) {
-        return Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minWidth: 0,
-              maxWidth: maxWidth,
-              minHeight: 0,
-              maxHeight: maxHeight,
-            ),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: dialogBorderRadius ?? theme.radius(LdSize.m),
-                border: Border.all(
-                  color: theme.stroke,
-                  width: LdTheme.of(context).borderWidth,
-                  strokeAlign: BorderSide.strokeAlignOutside,
+    final mediaQuery = MediaQuery.of(context);
+    return Padding(
+      padding: mediaQuery.padding.copyWith(bottom: 0, top: 0),
+      child: MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        removeLeft: true,
+        removeRight: true,
+        removeBottom: true,
+        child: Builder(builder: (context) {
+          return Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minWidth: 0,
+                maxWidth: maxWidth,
+                minHeight: 0,
+                maxHeight: maxHeight,
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: dialogBorderRadius ?? theme.radius(LdSize.m),
+                  border: Border.all(
+                    color: theme.stroke,
+                    width: LdTheme.of(context).borderWidth,
+                    strokeAlign: BorderSide.strokeAlignOutside,
+                  ),
+                ),
+                clipBehavior: Clip.hardEdge,
+                child: Provider.value(
+                  value: LdAppBarMetrics.reset(context),
+                  child: Builder(builder: pageBuilder),
                 ),
               ),
-              clipBehavior: Clip.hardEdge,
-              child: Provider.value(
-                value: LdAppBarMetrics.reset(context),
-                child: Builder(builder: pageBuilder),
-              ),
             ),
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 
