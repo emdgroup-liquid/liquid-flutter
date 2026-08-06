@@ -263,19 +263,37 @@ class _LdListReorderScopeState<T extends Identifiable<IdType>, IdType> extends S
       ),
     );
 
-    final draggable = LongPressDraggable<Object>(
-      key: ValueKey('reorder_lp_$id'),
-      data: id,
-      axis: Axis.vertical,
-      maxSimultaneousDrags: 1,
-      feedback: feedback,
-      childWhenDragging: childWhenDragging,
-      onDragStarted: () => _onDragStarted(id, index),
-      onDragUpdate: _onDragUpdate,
-      onDragEnd: _onDragEnd,
-      onDraggableCanceled: (_, __) => _onDragCanceled(),
-      child: child,
-    );
+    Widget draggable;
+
+    if (LdTheme.of(context).platform.isMobile) {
+      draggable = LongPressDraggable<Object>(
+        key: ValueKey('reorder_lp_$id'),
+        data: id,
+        axis: Axis.vertical,
+        maxSimultaneousDrags: 1,
+        feedback: feedback,
+        childWhenDragging: childWhenDragging,
+        onDragStarted: () => _onDragStarted(id, index),
+        onDragUpdate: _onDragUpdate,
+        onDragEnd: _onDragEnd,
+        onDraggableCanceled: (_, __) => _onDragCanceled(),
+        child: child,
+      );
+    } else {
+      draggable = Draggable<Object>(
+        key: ValueKey('reorder_dr_$id'),
+        data: id,
+        axis: Axis.vertical,
+        maxSimultaneousDrags: 1,
+        feedback: feedback,
+        childWhenDragging: childWhenDragging,
+        onDragStarted: () => _onDragStarted(id, index),
+        onDragUpdate: _onDragUpdate,
+        onDragEnd: _onDragEnd,
+        onDraggableCanceled: (_, __) => _onDragCanceled(),
+        child: child,
+      );
+    }
 
     return draggable;
   }
