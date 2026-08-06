@@ -347,7 +347,7 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
                       ),
                       child: child,
                     ),
-                    child: widget.panel,
+                    child: ExcludeFocus(excluding: !_panelVisible, child: FocusTraversalGroup(child: widget.panel)),
                   );
                 },
               ),
@@ -388,7 +388,7 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
                     margin: _bodyMargin,
                     clipBehavior: Clip.hardEdge,
                     decoration: _bodyDecoration,
-                    child: widget.body,
+                    child: FocusTraversalGroup(child: widget.body),
                   ),
                 );
               },
