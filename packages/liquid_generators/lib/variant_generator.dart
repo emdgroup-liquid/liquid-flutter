@@ -406,13 +406,6 @@ class VariantBuilder implements Builder {
             ..required = true
             ..type = configType));
 
-          // Add all non-configurable parameters
-          final nonConfigurableParams = [
-            ...positionalParams,
-            ...optionalParams.where(
-                (p) => !contextConfigurableParams.contains(p)),
-          ];
-
           cb.requiredParameters.addAll(
             positionalParams.map((p) => Parameter((pb) => pb
               ..name = p.name

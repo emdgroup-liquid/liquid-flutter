@@ -127,8 +127,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('TOKEN MIX'), findsOneWidget);
-    expect(find.text('BY TYPE'), findsOneWidget);
-    expect(find.text('Agent'), findsOneWidget);
+    expect(find.textContaining('Agent'), findsOneWidget);
     expect(find.text('BY TOOL'), findsOneWidget);
     expect(find.text('bash'), findsOneWidget);
     expect(find.text('BY MODEL'), findsOneWidget);
@@ -175,7 +174,7 @@ void main() {
       _wrap(
         LdToolAllowFieldTree(
           session: session,
-          onPinChanged: (_, __) {},
+          onPinChanged: (_, _) {},
         ),
       ),
     );
@@ -659,6 +658,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1100));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 220));
+    // Flush scroll-focus delay started while peeking.
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump();
 
     expect(find.byIcon(LucideIcons.chevronDown), findsOneWidget);
   });

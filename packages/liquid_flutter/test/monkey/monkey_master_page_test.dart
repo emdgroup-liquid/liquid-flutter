@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:provider/provider.dart';
 import 'test_utils.dart';
 
 bool _isListItemActive(WidgetTester tester, String itemLabel) {
@@ -130,11 +131,15 @@ void main() {
         await tester.pumpWidget(
           wrapMonkeyMasterPage(
             repository: repository,
-            child: LdMonkeyMasterPage<TestItem, int>(
-              buildItem: (context, item) => LdListItem(
-                title: Text(item.value?.name ?? ''),
+            child: Provider.value(
+              value: LdMonkeyMasterAppbarConfig(
+                appbarConfig: LdAppBarConfig(title: const Text('Custom App Bar')),
               ),
-              primaryAppBarConfig: LdAppBarConfig(title: const Text('Custom App Bar')),
+              child: LdMonkeyMasterPage<TestItem, int>(
+                buildItem: (context, item) => LdListItem(
+                  title: Text(item.value?.name ?? ''),
+                ),
+              ),
             ),
           ),
         );
@@ -173,10 +178,14 @@ void main() {
         await tester.pumpWidget(
           wrapMonkeyMasterPage(
             repository: repository,
-            child: LdMonkeyMasterPage<TestItem, int>(
-              secondaryAppBarConfig: LdAppBarConfig(title: const Text('Custom Secondary App Bar')),
-              buildItem: (context, item) => LdListItem(
-                title: Text(item.value?.name ?? ''),
+            child: Provider.value(
+              value: LdMonkeyMasterSecondaryAppbarConfig(
+                appbarConfig: LdAppBarConfig(title: const Text('Custom Secondary App Bar')),
+              ),
+              child: LdMonkeyMasterPage<TestItem, int>(
+                buildItem: (context, item) => LdListItem(
+                  title: Text(item.value?.name ?? ''),
+                ),
               ),
             ),
           ),

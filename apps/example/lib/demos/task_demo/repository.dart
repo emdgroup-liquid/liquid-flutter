@@ -104,7 +104,7 @@ LdCallbackModel<Task, int, Task, Task> taskModel(BuildContext context) => LdCall
     return newItem;
   },
   createItem: (context, item) async {
-    testData.add(item!);
+    testData.add(item);
 
     return item;
   },

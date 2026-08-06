@@ -1,6 +1,7 @@
 name: liquid_flutter_ai
 description: "AI conversation UI components for Liquid Flutter"
 version: 0.0.1
+publish_to: none
 
 environment:
   sdk: ^3.10.7

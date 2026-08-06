@@ -295,6 +295,7 @@ void main() {
                     value: currentValue,
                     min: 0.0,
                     max: 1.0,
+                    valueFormatter: (v) => 'tip:${v.toStringAsFixed(2)}',
                     onChanged: (v) => setState(() => currentValue = v),
                   ),
                 ),
@@ -306,8 +307,8 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Tooltip should NOT be visible before drag
-      expect(find.byType(Tooltip), findsOneWidget);
+      // Custom value tooltip is only shown while dragging.
+      expect(find.textContaining('tip:'), findsNothing);
 
       final sliderFinder = find.byType(LdSlider);
       final sliderRect = tester.getRect(sliderFinder);
@@ -320,19 +321,15 @@ void main() {
       );
       await tester.pump();
       await gesture.moveBy(const Offset(10, 0));
-      // Pump to process the ensureTooltipVisible post-frame callback
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
 
-      // Tooltip overlay entry should be present (ensureTooltipVisible was called)
-      expect(find.byType(Tooltip), findsOneWidget);
+      expect(find.textContaining('tip:'), findsOneWidget);
 
       await gesture.up();
       await tester.pumpAndSettle();
 
-      // After drag the tooltip should be dismissed
-      // The Tooltip widget itself stays in the tree, but its overlay is gone
-      expect(find.byType(Tooltip), findsOneWidget); // widget still in tree
+      expect(find.textContaining('tip:'), findsNothing);
     });
   });
 
@@ -364,8 +361,6 @@ void main() {
       expect(find.byType(LdSlider), findsOneWidget);
       // Range mode uses two nested LdSpring widgets — one for low, one for high
       expect(find.byType(LdSpring), findsNWidgets(2));
-      // Two Tooltip widgets (one per handle)
-      expect(find.byType(Tooltip), findsNWidgets(2));
     });
 
     testWidgets(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/touchable/neutral_ghost_color.dart';
 
 class LdTableRow extends StatelessWidget {
   final Widget? leading;

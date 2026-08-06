@@ -705,8 +705,6 @@ class _AppBarFrameState extends State<AppBarFrame> {
             builder: (springContext, springState, child) {
               _springLivePosition = springState.position;
 
-              final isScrolledUnder = LdAppBarScrolledUnderScope.of(springContext);
-
               final animatedHideOffset = honoringViewInsets ? 0.0 : _springLivePosition;
 
               final translateY = widget.position == LdAppBarPosition.top ? -animatedHideOffset : animatedHideOffset;

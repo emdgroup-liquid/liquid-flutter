@@ -50,7 +50,11 @@ class LdFormChoose<T> extends StatelessWidget {
             allowEmpty: allowEmpty,
             mode: mode,
             placeholder: placeholder ?? const Text('Select...'),
-            value: multiple ? state.control.value : {state.control.value},
+            value: multiple
+                ? state.control.value
+                : {
+                    if (state.control.value != null) state.control.value as T,
+                  },
             disabled: disabled ?? state.control.disabled,
             onChanged: (value) {
               if (multiple) {
@@ -229,7 +233,12 @@ class LdFormChooseRepository<T extends Identifiable<IdType>, IdType>
             sortOptionsBuilder: sortOptionsBuilder,
             triggerBuilder: triggerBuilder,
             filterChipConfigs: filterChipConfigs,
-            value: multiple ? state.control.value : {state.control.value},
+            value: multiple
+                ? state.control.value
+                : {
+                    if (state.control.value != null)
+                      state.control.value as IdType,
+                  },
             disabled: disabled ?? state.control.disabled,
             onChanged: (value) {
               if (multiple) {

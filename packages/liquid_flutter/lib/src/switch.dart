@@ -66,20 +66,6 @@ class LdSwitch<T> extends StatelessWidget {
 
     var index = children.keys.toList().indexOf(key);
 
-    var borderRadius = BorderRadius.zero;
-
-    if (index == 0) {
-      borderRadius = BorderRadius.only(
-        topLeft: theme.radius(LdSize.s).topLeft,
-        bottomLeft: theme.radius(LdSize.s).bottomLeft,
-      );
-    } else if (index == children.length - 1) {
-      borderRadius = BorderRadius.only(
-        topRight: theme.radius(LdSize.s).topRight,
-        bottomRight: theme.radius(LdSize.s).bottomRight,
-      );
-    }
-
     return [
       Flexible(
         fit: expand ? FlexFit.tight : FlexFit.loose,
@@ -92,7 +78,6 @@ class LdSwitch<T> extends StatelessWidget {
           child: child,
           builder: (context, state, child) {
             final bundle = outlineColor(theme.palette.primary, theme, state);
-            final side = BorderSide(color: bundle.border, width: theme.borderWidth);
 
             return IntrinsicWidth(
               child: Container(

@@ -93,7 +93,6 @@ class _LdFormState<T extends Identifiable<IdType>, IdType, TDetail extends Objec
   bool _mergeInProgress = false;
   StreamSubscription<LdPaginatorItem<T>>? _itemSubscription;
   StreamSubscription<dynamic>? _formSubscription;
-  bool _loadingDetail = false;
 
   List<LdMonkeyFieldConflict> _conflicts = [];
 
@@ -186,8 +185,6 @@ class _LdFormState<T extends Identifiable<IdType>, IdType, TDetail extends Objec
   Future<void> _bootstrapDetail() async {
     // We are in edit mode and there should be an item we can obtain by id.
 
-    _loadingDetail = true;
-
     try {
       final entity = widget.item?.value;
       if (entity != null) _currentId = entity.id;
@@ -195,7 +192,7 @@ class _LdFormState<T extends Identifiable<IdType>, IdType, TDetail extends Objec
 
       _patchFormFromDetail(markPristine: true);
     } finally {
-      if (mounted) setState(() => _loadingDetail = false);
+      // Detail bootstrap finished; form is ready for edits.
     }
   }
 
@@ -230,7 +227,6 @@ class _LdFormState<T extends Identifiable<IdType>, IdType, TDetail extends Objec
     if (detail == null || !mounted) return;
     final values = widget.detailToFormValues(detail);
     for (final entry in values.entries) {
-      print('entry: ${entry.key} ${entry.value}');
       if (!_form.contains(entry.key)) continue;
       final control = _form.control(entry.key);
       if (control is FormArray) {

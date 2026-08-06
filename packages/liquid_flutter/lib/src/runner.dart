@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/touchable/neutral_ghost_color.dart';
 
 class LdRunnerLog extends StatefulWidget {
   /// The list of messages to display.

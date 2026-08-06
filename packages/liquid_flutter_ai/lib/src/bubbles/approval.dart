@@ -3,7 +3,6 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_ai_shared/liquid_flutter_ai_shared.dart';
 import 'package:liquid_flutter_ai/src/approval/tool_allow_rule_picker.dart';
 import 'package:liquid_flutter_ai/src/models/conversation_item.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Approval request with deny / approve / approve-and-allow actions.
 class LdApprovalCard extends StatelessWidget {

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/haptics.dart';
-import 'package:liquid_flutter/src/touchable/neutral_ghost_color.dart';
 import 'package:provider/provider.dart';
 
 /// a collection of collapsible items in a group.

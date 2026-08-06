@@ -178,7 +178,7 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
         );
       }
       return newItem;
-    } catch (e, _) {
+    } catch (e) {
       rollbackItemCreation(tempIndex);
       rethrow;
     }

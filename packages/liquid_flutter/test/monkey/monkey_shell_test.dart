@@ -34,10 +34,9 @@ void main() {
             sortOptionsBuilder: (_) async => [],
             actions: const [],
             masterPage: const SizedBox(),
-            detailPage: LdMonkeyDetailAppBars<TestItem, int>(
-              child: LdMonkeyStackDetailView<TestItem, int>(
-                buildDetail: (context, item) => Text(item.value.toString()),
-              ),
+            detailPage: LdMonkeyScrollableDetailPage<TestItem, int>(
+              builder: (context, items) =>
+                  items.map((item) => Text(item.value.toString())).toList(),
             ),
           ),
         );
@@ -79,10 +78,9 @@ void main() {
             sortOptionsBuilder: (_) async => [],
             actions: const [],
             masterPage: const SizedBox(),
-            detailPage: LdMonkeyDetailAppBars<TestItem, int>(
-              child: LdMonkeyStackDetailView<TestItem, int>(
-                buildDetail: (context, item) => Text(item.value.toString()),
-              ),
+            detailPage: LdMonkeyScrollableDetailPage<TestItem, int>(
+              builder: (context, items) =>
+                  items.map((item) => Text(item.value.toString())).toList(),
             ),
           ),
         );
@@ -130,10 +128,9 @@ void main() {
             sortOptionsBuilder: (_) async => [],
             actions: const [],
             masterPage: const SizedBox(),
-            detailPage: LdMonkeyDetailAppBars<TestItem, int>(
-              child: LdMonkeyStackDetailView<TestItem, int>(
-                buildDetail: (context, item) => Text(item.value.toString()),
-              ),
+            detailPage: LdMonkeyScrollableDetailPage<TestItem, int>(
+              builder: (context, items) =>
+                  items.map((item) => Text(item.value.toString())).toList(),
             ),
           ),
         );
@@ -177,10 +174,9 @@ void main() {
               filtersBuilder: (_) async => [],
               sortOptionsBuilder: (_) async => [],
               actions: const [],
-              detailPage: LdMonkeyDetailAppBars<TestItem, int>(
-                child: LdMonkeyStackDetailView<TestItem, int>(buildDetail: (context, item) {
-                  return Text(item.value.toString());
-                }),
+              detailPage: LdMonkeyScrollableDetailPage<TestItem, int>(
+                builder: (context, items) =>
+                    items.map((item) => Text(item.value.toString())).toList(),
               ),
               masterPage: const SizedBox(),
             ),
@@ -237,10 +233,9 @@ void main() {
             sortOptionsBuilder: (_) async => [],
             actions: const [],
             masterPage: const SizedBox(),
-            detailPage: LdMonkeyDetailAppBars<TestItem, int>(
-              child: LdMonkeyStackDetailView<TestItem, int>(
-                buildDetail: (context, item) => Text(item.value.toString()),
-              ),
+            detailPage: LdMonkeyScrollableDetailPage<TestItem, int>(
+              builder: (context, items) =>
+                  items.map((item) => Text(item.value.toString())).toList(),
             ),
           ),
         );

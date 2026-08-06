@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/appbar/appbar_frame.dart';
 import 'package:liquid_flutter_test_utils/ld_frame.dart';
 import 'package:provider/provider.dart';
 

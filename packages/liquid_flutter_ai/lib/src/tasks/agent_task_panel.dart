@@ -151,6 +151,18 @@ class _LdAgentTaskPanelState extends State<LdAgentTaskPanel> {
       return;
     }
 
+    if (ldDisableAnimations) {
+      if (!rowContext.mounted) {
+        return;
+      }
+      Scrollable.ensureVisible(
+        rowContext,
+        alignment: 0.5,
+        duration: Duration.zero,
+      );
+      return;
+    }
+
     await Future.delayed(Duration(milliseconds: 500));
 
     if (!rowContext.mounted) {
@@ -160,9 +172,7 @@ class _LdAgentTaskPanelState extends State<LdAgentTaskPanel> {
     Scrollable.ensureVisible(
       rowContext,
       alignment: 0.5,
-      duration: ldDisableAnimations
-          ? Duration.zero
-          : const Duration(milliseconds: 220),
+      duration: const Duration(milliseconds: 220),
       curve: Curves.easeOutCubic,
     );
   }
@@ -259,7 +269,7 @@ class _LdAgentTaskPanelState extends State<LdAgentTaskPanel> {
             size: LdSize.s,
             onPressed: _toggleExpanded,
             leading: Icon(
-              _expanded ? LucideIcons.chevronDown : LucideIcons.chevronUp,
+              _expanded ? LucideIcons.chevronUp : LucideIcons.chevronDown,
             ),
             child: Text("${widget.tasks.length} Tasks"),
           ),

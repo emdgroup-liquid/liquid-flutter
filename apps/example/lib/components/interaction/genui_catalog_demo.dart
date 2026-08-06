@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
-import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_ai/liquid_flutter_ai.dart';
 

@@ -172,7 +172,7 @@ void main() {
 
   group('LdFormChoose', () {
     testWidgets('renders label and select trigger', (WidgetTester tester) async {
-      final form = FormGroup({'choice': FormControl<Set<String>>()});
+      final form = FormGroup({'choice': FormControl<String>()});
 
       await tester.pumpWidget(
         _wrapWithReactiveForm(
@@ -219,6 +219,7 @@ void main() {
           child: LdFormChoose<String>(
             formKey: 'choice',
             label: 'Pick one',
+            multiple: true,
             // In reactive_forms 18.x, ValidationMessage.equals = 'requiredEquals'.
             validationMessages: {'requiredEquals': (_) => 'Pick A'},
             items: const [

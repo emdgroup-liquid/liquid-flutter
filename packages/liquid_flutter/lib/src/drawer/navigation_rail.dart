@@ -152,10 +152,10 @@ class _LdNavigationRailDestination extends StatelessWidget {
             ).padS(),
           false => Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 icon,
-                ldSpacerXS,
-                label,
+                Flexible(child: label),
               ],
             ).padXS(),
         };
@@ -174,7 +174,7 @@ class _LdNavigationRailDestination extends StatelessWidget {
           true => tile,
           false => Center(
               child: ConstrainedBox(
-                constraints: BoxConstraints(
+                constraints: const BoxConstraints(
                   maxWidth: 70,
                   maxHeight: 70,
                 ),

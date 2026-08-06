@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/list/shuttle_safe_key.dart';
-import 'package:liquid_flutter/src/touchable/neutral_ghost_color.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 

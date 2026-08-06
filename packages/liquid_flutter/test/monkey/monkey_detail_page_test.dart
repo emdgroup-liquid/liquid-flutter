@@ -9,12 +9,11 @@ import 'test_utils.dart';
 
 /// Pump enough frames to flush async* stream delivery and setState rebuilds.
 Future<void> _pumpStream(WidgetTester tester) async {
-  // pump() flushes microtasks + renders 1 frame; repeat to catch setState chain.
-  // async* generators deliver their first element after an await point, so we
-  // need at least one pump() to allow the Dart event loop to run.
+  // LdSubmit auto-trigger + async* delivery need several frames / a short delay.
   await tester.pump();
-  await tester.pump();
-  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 100));
+  await tester.pump(const Duration(milliseconds: 100));
+  await tester.pumpAndSettle();
 }
 
 void main() {
@@ -23,7 +22,7 @@ void main() {
 
   group('LdMonkeyDetailPage Tests', () {
     group('Scrollable View', () {
-      testWidgets('scrollable() factory renders all viewing items', (WidgetTester tester) async {
+      testWidgets('scrollable page renders all viewing items', (WidgetTester tester) async {
         final repository = createTestListController(
           initialItems: [
             createTestItem(1, name: 'Item 1'),
@@ -36,8 +35,10 @@ void main() {
           showSelectionControls: false,
         );
 
-        final detailPage = LdMonkeyDetailAppBars<TestItem, int>.scrollable(
-          buildDetail: (context, item) => Text('Detail: ${item.value?.name ?? ''}'),
+        final detailPage = LdMonkeyScrollableDetailPage<TestItem, int>(
+          builder: (context, items) => items
+              .map((item) => Text('Detail: ${item.value?.name ?? ''}'))
+              .toList(),
         );
 
         await tester.pumpWidget(
@@ -54,12 +55,12 @@ void main() {
       });
     });
 
-    group('Stacked View', () {
-      testWidgets('stacked() factory creates stacked detail view', (WidgetTester tester) async {
+    group('Single View', () {
+      testWidgets('single page renders the first viewing item', (WidgetTester tester) async {
         final repository = createTestListController(
           initialItems: [
-            createTestItem(1),
-            createTestItem(2),
+            createTestItem(1, name: 'Item 1'),
+            createTestItem(2, name: 'Item 2'),
           ],
         );
         final selection = LdMonkeySelection<TestItem, int>(
@@ -68,8 +69,8 @@ void main() {
           showSelectionControls: false,
         );
 
-        final detailPage = LdMonkeyDetailAppBars<TestItem, int>.stacked(
-          buildDetail: (context, item) => Text('Detail: ${item.value?.name ?? ''}'),
+        final detailPage = LdMonkeySingleDetailPage<TestItem, int>(
+          builder: (context, item) => Text('Detail: ${item.value?.name ?? ''}'),
         );
 
         await tester.pumpWidget(
@@ -82,12 +83,11 @@ void main() {
 
         await _pumpStream(tester);
         expect(find.text('Detail: Item 1'), findsOneWidget);
-        expect(find.text('Detail: Item 2'), findsOneWidget);
       });
     });
 
     group('Stream Selection', () {
-      testWidgets('LdMonkeyStreamSelection updates when viewing items change', (WidgetTester tester) async {
+      testWidgets('LdMonkeyViewingBuilder updates when viewing items change', (WidgetTester tester) async {
         final repository = createTestListController(
           initialItems: [
             createTestItem(1, name: 'Item 1'),
@@ -109,9 +109,10 @@ void main() {
                   child: Provider<LdMonkeySelection<TestItem, int>>.value(
                     value: currentSelection,
                     child: LdMonkeyViewingBuilder<TestItem, int>(
-                      buildItem: (context, item) => Text(item.value?.name ?? ''),
-                      builder: (context, itemWidgets) => Column(
-                        children: itemWidgets,
+                      builder: (context, items) => Column(
+                        children: items
+                            .map((item) => Text(item.value?.name ?? ''))
+                            .toList(),
                       ),
                     ),
                   ),
@@ -136,7 +137,7 @@ void main() {
         expect(find.text('Item 2'), findsOneWidget);
       });
 
-      testWidgets('LdMonkeyStreamSelection handles empty viewing items', (WidgetTester tester) async {
+      testWidgets('LdMonkeyViewingBuilder handles empty viewing items', (WidgetTester tester) async {
         final repository = createTestListController();
         final selection = LdMonkeySelection<TestItem, int>(
           selection: {},
@@ -153,9 +154,10 @@ void main() {
                 child: Provider<LdMonkeySelection<TestItem, int>>.value(
                   value: selection,
                   child: LdMonkeyViewingBuilder<TestItem, int>(
-                    buildItem: (context, item) => Text(item.value?.name ?? ''),
-                    builder: (context, itemWidgets) => Column(
-                      children: itemWidgets,
+                    builder: (context, items) => Column(
+                      children: items
+                          .map((item) => Text(item.value?.name ?? ''))
+                          .toList(),
                     ),
                   ),
                 ),
@@ -165,7 +167,8 @@ void main() {
         );
 
         await _pumpStream(tester);
-        expect(find.byType(Column), findsOneWidget);
+        expect(find.byType(SizedBox), findsWidgets);
+        expect(find.textContaining('Item'), findsNothing);
       });
     });
 
@@ -178,9 +181,13 @@ void main() {
           showSelectionControls: false,
         );
 
-        final detailPage = LdMonkeyDetailAppBars<TestItem, int>(
-          primaryAppBarConfig: LdAppBarConfig(title: const Text('Custom Primary App Bar')),
-          child: Container(),
+        final detailPage = Provider.value(
+          value: LdMonkeyDetailAppbarConfig(
+            appbarConfig: LdAppBarConfig(title: const Text('Custom Primary App Bar')),
+          ),
+          child: LdMonkeyDetailAppBars<TestItem, int>(
+            child: Container(),
+          ),
         );
 
         await tester.pumpWidget(
@@ -233,9 +240,13 @@ void main() {
           showSelectionControls: false,
         );
 
-        final detailPage = LdMonkeyDetailAppBars<TestItem, int>(
-          primaryAppBarConfig: LdAppBarConfig(title: const Text('Primary Only Title')),
-          child: Container(),
+        final detailPage = Provider.value(
+          value: LdMonkeyDetailAppbarConfig(
+            appbarConfig: LdAppBarConfig(title: const Text('Primary Only Title')),
+          ),
+          child: LdMonkeyDetailAppBars<TestItem, int>(
+            child: Container(),
+          ),
         );
 
         await tester.pumpWidget(
@@ -258,9 +269,13 @@ void main() {
           showSelectionControls: false,
         );
 
-        final detailPage = LdMonkeyDetailAppBars<TestItem, int>(
-          secondaryAppBarConfig: LdAppBarConfig(title: const Text('Custom Secondary App Bar')),
-          child: Container(),
+        final detailPage = Provider.value(
+          value: LdMonkeyDetailSecondaryAppbarConfig(
+            appbarConfig: LdAppBarConfig(title: const Text('Custom Secondary App Bar')),
+          ),
+          child: LdMonkeyDetailAppBars<TestItem, int>(
+            child: Container(),
+          ),
         );
 
         await tester.pumpWidget(
@@ -291,8 +306,10 @@ void main() {
           showSelectionControls: false,
         );
 
-        final detailPage = LdMonkeyDetailAppBars<TestItem, int>.scrollable(
-          buildDetail: (context, item) => Text('Detail: ${item.value?.name ?? ''}'),
+        final detailPage = LdMonkeyScrollableDetailPage<TestItem, int>(
+          builder: (context, items) => items
+              .map((item) => Text('Detail: ${item.value?.name ?? ''}'))
+              .toList(),
         );
 
         Widget buildTree() => wrapMonkeyDetailPage(
@@ -330,8 +347,10 @@ void main() {
           showSelectionControls: false,
         );
 
-        final detailPage = LdMonkeyDetailAppBars<TestItem, int>.scrollable(
-          buildDetail: (context, item) => Text('Detail: ${item.value?.name ?? ''}'),
+        final detailPage = LdMonkeyScrollableDetailPage<TestItem, int>(
+          builder: (context, items) => items
+              .map((item) => Text('Detail: ${item.value?.name ?? ''}'))
+              .toList(),
         );
 
         await tester.pumpWidget(
@@ -347,7 +366,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byKey(const Key('retry-button')), findsOneWidget);
-        expect(find.textContaining('could not be loaded'), findsOneWidget);
+        expect(find.byType(LdExceptionView), findsOneWidget);
         expect(find.text('Detail:'), findsNothing);
       });
 
@@ -362,8 +381,10 @@ void main() {
           showSelectionControls: false,
         );
 
-        final detailPage = LdMonkeyDetailAppBars<TestItem, int>.scrollable(
-          buildDetail: (context, item) => Text('Detail: ${item.value?.name ?? ''}'),
+        final detailPage = LdMonkeyScrollableDetailPage<TestItem, int>(
+          builder: (context, items) => items
+              .map((item) => Text('Detail: ${item.value?.name ?? ''}'))
+              .toList(),
         );
 
         await tester.pumpWidget(
@@ -374,8 +395,10 @@ void main() {
           ),
         );
 
+        // Flush LdSubmit autoTrigger (Future.delayed(Duration.zero)).
         await tester.pump();
-        await tester.pump();
+        await tester.pump(Duration.zero);
+        await tester.pump(Duration.zero);
 
         expect(find.byType(LdLoader), findsWidgets);
         expect(find.textContaining('Loading item'), findsOneWidget);

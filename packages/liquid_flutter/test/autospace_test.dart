@@ -26,7 +26,7 @@ void main() {
       expect(_spacers(tester), isEmpty);
     });
 
-    testWidgets('LdText headline → LdText body inserts LdSize.l × 2 spacers',
+    testWidgets('LdText headline → LdText body inserts LdSize.l × 1 spacer',
         (tester) async {
       await tester.pumpWidget(_wrap(LdAutoSpace(
         children: [
@@ -37,7 +37,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final spacers = _spacers(tester).toList();
-      expect(spacers.length, 2);
+      expect(spacers.length, 1);
       expect(spacers.every((s) => s.size == LdSize.l), isTrue);
     });
 
@@ -58,7 +58,7 @@ void main() {
     });
 
     testWidgets(
-        'LdText paragraph → LdText headline inserts LdSize.l × 3 spacers',
+        'LdText paragraph → LdText headline inserts LdSize.l × 2 spacers',
         (tester) async {
       await tester.pumpWidget(_wrap(LdAutoSpace(
         children: [
@@ -69,7 +69,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final spacers = _spacers(tester).toList();
-      expect(spacers.length, 3);
+      expect(spacers.length, 2);
       expect(spacers.every((s) => s.size == LdSize.l), isTrue);
     });
 
@@ -149,7 +149,7 @@ void main() {
       expect(spacers.every((s) => s.size == LdSize.l), isTrue);
     });
 
-    testWidgets('LdDivider → anything inserts LdSize.l × 2 spacers',
+    testWidgets('LdDivider → anything inserts LdSize.l × 1 spacer',
         (tester) async {
       await tester.pumpWidget(_wrap(LdAutoSpace(
         children: [
@@ -160,7 +160,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final spacers = _spacers(tester).toList();
-      expect(spacers.length, 2);
+      expect(spacers.length, 1);
       expect(spacers.every((s) => s.size == LdSize.l), isTrue);
     });
 
