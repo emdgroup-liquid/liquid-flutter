@@ -144,9 +144,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
       behavior: innerBehavior,
       onTapDown: (d) => _safeSetState(() {
         if (!widget.disabled) {
-          if (widget.focusNode != null) {
-            _focusNode?.requestFocus();
-          }
+          _focusNode?.requestFocus();
           _pressed = true;
         }
       }),
