@@ -1,3 +1,62 @@
+## 0.1.1-4
+Released on: 8/6/2026, changelog automatically generated.
+
+### API Changes
+
+#### 💣 Breaking changes
+
+**`class` LdForm<T extends Identifiable<IdType>, IdType, TDetail extends Object, TCreate, TUpdate>** ([lib/src/monkey_detail/detail_form.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-3..liquid_flutter_reactive_forms/v0.1.1-4#diff-89b4bb66eebde2fa45d4db603df7a31fd895700872ef73e55f84ea3817c3a2b9))
+- ❌ Param removed in default constructor: `formItems` (named, required)
+- ❇️ Param added in default constructor: `formGroup` (named, required)
+- ❌ Property removed: `formItems`
+
+**`class` LdFormSlider** ([lib/src/form_widgets/ld_form_slider.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-3..liquid_flutter_reactive_forms/v0.1.1-4#diff-011cfbace12dcdece6e8cd2815c4101180c89e2bdf4fb054fe2d9283b70704ae))
+- 🔄 Param type changed in default constructor: `hintBuilder` (`LdHint? Function(ReactiveFormFieldState<double, double>)?` → `LdHint? Function(ReactiveFormFieldState<num, num>)?`)
+- 🔄 Property type changed: `hintBuilder`
+
+**`class` LdReactiveFormItem<TModel>** ([lib/src/reactive_form_item.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-3..liquid_flutter_reactive_forms/v0.1.1-4#diff-fecce365ac099bcac9c05fa0ebfcf73fb2f5c141032f4ca8bbda22ed6fcc9f1f))
+- ❌ Class removed: `LdReactiveFormItem`
+
+#### ✨ Minor changes
+
+**`class` LdForm<T extends Identifiable<IdType>, IdType, TDetail extends Object, TCreate, TUpdate>** ([lib/src/monkey_detail/detail_form.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-3..liquid_flutter_reactive_forms/v0.1.1-4#diff-89b4bb66eebde2fa45d4db603df7a31fd895700872ef73e55f84ea3817c3a2b9))
+- ❇️ Param added in default constructor: `onFormInit` (named, optional)
+- ❇️ Properties added: `formGroup`, `onFormInit`
+
+**`class` LdFormChooseRepository<T extends Identifiable<IdType>, IdType>** ([lib/src/form_widgets/ld_form_choose.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-3..liquid_flutter_reactive_forms/v0.1.1-4#diff-b17ff8842b55b034c0d81ca073196e99a6e00163948e3cfdaa488889073e2d22))
+- ❇️ Params added in default constructor: `hint` (named, optional), `triggerBuilder` (named, optional), `truncateDisplay` (named, optional)
+- ❇️ Properties added: `triggerBuilder`, `hint`, `truncateDisplay`
+
+**`class` LdFormMarkdownEditor** ([lib/src/form_widgets/ld_form_markdown_editor.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-3..liquid_flutter_reactive_forms/v0.1.1-4#diff-7ea40be9f8fa0147df5a8492494d793d5634fd227b1d65f24607849fca9b5f8d))
+- ❇️ Class added: `LdFormMarkdownEditor`
+
+**`class` LdFormRangeSlider** ([lib/src/form_widgets/ld_form_range_slider.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-3..liquid_flutter_reactive_forms/v0.1.1-4#diff-893403c54781dd46821754dcf7d56bb775c020d271b70bf46242e62490133a92))
+- ❇️ Params added in default constructor: `showValueInput` (named, optional, default: true), `valueFormatter` (named, optional)
+- ❇️ Properties added: `showValueInput`, `valueFormatter`
+
+**`class` LdFormSlider** ([lib/src/form_widgets/ld_form_slider.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-3..liquid_flutter_reactive_forms/v0.1.1-4#diff-011cfbace12dcdece6e8cd2815c4101180c89e2bdf4fb054fe2d9283b70704ae))
+- ❇️ Params added in default constructor: `isInteger` (named, optional, default: false), `showValueInput` (named, optional, default: true), `size` (named, optional, default: LdSize.m), `valueFormatter` (named, optional)
+- ❇️ Properties added: `isInteger`, `showValueInput`, `size`, `valueFormatter`
+
+#### 👀 Patch changes
+
+**`class` LdFormRangeSlider** ([lib/src/form_widgets/ld_form_range_slider.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-3..liquid_flutter_reactive_forms/v0.1.1-4#diff-893403c54781dd46821754dcf7d56bb775c020d271b70bf46242e62490133a92))
+- ❇️ Property added: `_minSeparation`
+
+**`class` _LdFormMarkdownEditorField** ([lib/src/form_widgets/ld_form_markdown_editor.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-3..liquid_flutter_reactive_forms/v0.1.1-4#diff-7ea40be9f8fa0147df5a8492494d793d5634fd227b1d65f24607849fca9b5f8d))
+- ❇️ Class added: `_LdFormMarkdownEditorField`
+
+**`class` _LdFormMarkdownEditorFieldState** ([lib/src/form_widgets/ld_form_markdown_editor.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-3..liquid_flutter_reactive_forms/v0.1.1-4#diff-7ea40be9f8fa0147df5a8492494d793d5634fd227b1d65f24607849fca9b5f8d))
+- ❇️ Class added: `_LdFormMarkdownEditorFieldState`
+
+**`class` _LdFormState<T extends Identifiable<IdType>, IdType, TDetail extends Object, TCreate, TUpdate>** ([lib/src/monkey_detail/detail_form.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-3..liquid_flutter_reactive_forms/v0.1.1-4#diff-89b4bb66eebde2fa45d4db603df7a31fd895700872ef73e55f84ea3817c3a2b9))
+- ❌ Modifier `final` removed from property: `_form`
+- ❌ Property removed: `_loadingDetail`
+
+**`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-3..liquid_flutter_reactive_forms/v0.1.1-4#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
+- 📦 Added `liquid_flutter_md`: with version `^0.0.1`
+
+
 ## 0.1.1-3
 Released on: 7/7/2026, changelog automatically generated.
 
