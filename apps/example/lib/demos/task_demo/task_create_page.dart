@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:liquid/demos/task_demo/detail.dart';
+import 'package:liquid/demos/task_demo/task_detail_form.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart';
 

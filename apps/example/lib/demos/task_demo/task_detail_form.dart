@@ -1,37 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:jiffy/jiffy.dart';
-import 'package:reactive_forms/reactive_forms.dart';
 import 'package:liquid/demos/task_demo/task.dart';
-import 'package:liquid/demos/task_demo/task_form.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart';
+import 'package:reactive_forms/reactive_forms.dart';
 
-class TaskDetail extends StatelessWidget {
-  final LdPaginatorItem<Task> task;
+Map<String, Object?> _taskDetailToFormValues(Task detail) => {
+  'task': detail.task,
+  'due': detail.due,
+  'emoji': detail.emoji,
+};
 
-  const TaskDetail({super.key, required this.task});
+Task _taskFormToUpdatePayload(FormGroup form, Task detail) => detail.copyWith(
+  task: form.control('task').value as String,
+  due: form.control('due').value as DateTime,
+  emoji: form.control('emoji').value as String? ?? detail.emoji,
+);
 
-  @override
-  Widget build(BuildContext context) {
-    if (task.value == null) {
-      return LdCard(child: Center(child: LdLoader()));
-    }
-
-    final selection = LdMonkeySelection.of<Task, int>(context, listen: true);
-    final taskValue = task.value!;
-
-    return LdWrapConditional(
-      condition: selection.viewing.length > 1,
-      builder: (context, child) => LdCard(child: child),
-      child: LdAutoSpace(
-        children: [
-          LdTaskDetailForm(mode: LdFormMode.edit, task: task),
-          LdMute(child: LdText.ls('Last updated: ${Jiffy.parseFromDateTime(taskValue.lastUpdate).fromNow()}')),
-        ],
-      ),
-    );
-  }
-}
+Task _taskFormToCreatePayload(FormGroup form, Task detail) => detail.copyWith(
+  task: form.control('task').value as String,
+  due: form.control('due').value as DateTime,
+  emoji: form.control('emoji').value as String? ?? detail.emoji,
+  lastUpdate: DateTime.now(),
+);
 
 class LdTaskDetailForm extends StatelessWidget {
   final LdFormMode mode;
@@ -60,10 +50,9 @@ class LdTaskDetailForm extends StatelessWidget {
       }),
       saveMode: LdReactiveFormSaveMode.adaptive,
       conflictPolicy: LdMonkeyFieldConflictPolicy.prompt,
-      detailToFormValues: taskDetailToFormValues,
-      formToUpdatePayload: taskFormToUpdatePayload,
-      formToCreatePayload: taskFormToCreatePayload,
-
+      detailToFormValues: _taskDetailToFormValues,
+      formToUpdatePayload: _taskFormToUpdatePayload,
+      formToCreatePayload: _taskFormToCreatePayload,
       child: LdAutoSpace(
         children: [
           Center(
@@ -83,9 +72,7 @@ class LdTaskDetailForm extends StatelessWidget {
             maxLines: null,
             size: LdSize.l,
           ),
-
           LdFormDatePicker(formKey: 'due', label: 'Due date', useRootNavigator: true),
-
           Wrap(children: [LdFormSubmitButton(), LdFormResetButton()]).spaceM(),
         ],
       ),
