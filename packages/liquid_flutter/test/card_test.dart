@@ -29,4 +29,29 @@ void main() {
 
     expect(find.byType(LdCard), findsOneWidget);
   });
+
+  testWidgets('LdCard in Row with unbounded width does not throw', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      LdThemeProvider(
+        theme: LdTheme(),
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Row(
+            children: [
+              LdCard(
+                header: Text('H'),
+                child: Text('Body'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.text('Body'), findsOneWidget);
+  });
 }

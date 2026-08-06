@@ -24,16 +24,23 @@ class LdGenuiSurfaceStrip extends StatelessWidget {
     }
 
     final theme = LdTheme.of(context);
-    return Padding(
-      padding: padding ?? theme.pad(size: LdSize.m),
-      child: LdAutoSpace(
-        children: [
-          for (final surfaceId in ids)
-            LdGenuiSurfaceWidget(
-              surfaceManager: surfaceManager,
-              surfaceId: surfaceId,
-            ),
-        ],
+    // Force a finite width from the conversation ListView so GenUI roots
+    // (and nested stretch layouts) never see unbounded horizontal constraints.
+    return SizedBox(
+      width: double.infinity,
+      child: Padding(
+        padding: padding ?? theme.pad(size: LdSize.m),
+        child: LdAutoSpace(
+          children: [
+            for (final surfaceId in ids)
+              LdCard(
+                child: LdGenuiSurfaceWidget(
+                  surfaceManager: surfaceManager,
+                  surfaceId: surfaceId,
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

@@ -40,44 +40,54 @@ class LdCard extends StatelessWidget {
                 : null,
             boxShadow: flat ? null : [ldShadowDefault]),
         child: LdAutoBackground(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (header != null) ...[
-                LdAutoBackground(
-                  child: Container(
-                    padding: padding ?? theme.pad(size: LdSize.m),
-                    child: header,
-                  ),
-                ),
-                const LdDivider(
-                  height: 1,
-                )
-              ],
-              expandChild
-                  ? Expanded(
-                      child: Padding(
+          // Stretch needs a bounded max width; inside a Row (or other
+          // unbounded main-axis parent) that would create infinite tight
+          // width constraints ("BoxConstraints forces an infinite width").
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final crossAlign = constraints.hasBoundedWidth
+                  ? CrossAxisAlignment.stretch
+                  : CrossAxisAlignment.start;
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: crossAlign,
+                children: [
+                  if (header != null) ...[
+                    LdAutoBackground(
+                      child: Container(
                         padding: padding ?? theme.pad(size: LdSize.m),
-                        child: child,
+                        child: header,
                       ),
-                    )
-                  : Padding(
-                      padding: padding ?? theme.pad(size: LdSize.m),
-                      child: child,
                     ),
-              if (footer != null) ...[
-                const LdDivider(
-                  height: 1,
-                ),
-                LdAutoBackground(
-                  child: Container(
-                    padding: padding ?? theme.pad(size: LdSize.m),
-                    child: footer,
-                  ),
-                ),
-              ]
-            ],
+                    const LdDivider(
+                      height: 1,
+                    ),
+                  ],
+                  expandChild
+                      ? Expanded(
+                          child: Padding(
+                            padding: padding ?? theme.pad(size: LdSize.m),
+                            child: child,
+                          ),
+                        )
+                      : Padding(
+                          padding: padding ?? theme.pad(size: LdSize.m),
+                          child: child,
+                        ),
+                  if (footer != null) ...[
+                    const LdDivider(
+                      height: 1,
+                    ),
+                    LdAutoBackground(
+                      child: Container(
+                        padding: padding ?? theme.pad(size: LdSize.m),
+                        child: footer,
+                      ),
+                    ),
+                  ],
+                ],
+              );
+            },
           ),
         ),
       ),

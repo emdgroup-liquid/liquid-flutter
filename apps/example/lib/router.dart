@@ -22,6 +22,7 @@ import 'package:liquid/components/interaction/action_runner.dart';
 import 'package:liquid/components/interaction/appbar_demo.dart';
 import 'package:liquid/components/interaction/context_menu.dart';
 import 'package:liquid/components/interaction/conversation.dart';
+import 'package:liquid/components/interaction/genui_catalog_demo.dart';
 import 'package:liquid/components/interaction/modal.dart';
 import 'package:liquid/components/interaction/orb.dart';
 import 'package:liquid/components/interaction/speed_reader.dart';
@@ -43,7 +44,6 @@ import 'package:liquid/demos/movie_demo.dart';
 import 'package:liquid/demos/projects/pages.dart';
 import 'package:liquid/demos/projects/repo.dart';
 import 'package:liquid/demos/radius_documentation.dart';
-import 'package:liquid/demos/task_demo/create.dart';
 import 'package:liquid/demos/task_demo/repository.dart';
 import 'package:liquid/demos/task_demo/task.dart';
 import 'package:liquid/demos/task_demo/task_demo.dart';
@@ -293,6 +293,11 @@ class AppRouter {
             path: "/components/conversation",
             pageBuilder: (context, state) =>
                 NoTransitionPage<void>(key: state.pageKey, child: const ConversationDemo()),
+          ),
+          GoRoute(
+            path: "/components/genui-catalog",
+            pageBuilder: (context, state) =>
+                NoTransitionPage<void>(key: state.pageKey, child: const GenuiCatalogDemo()),
           ),
           GoRoute(
             path: "/components/date-time-picker",
