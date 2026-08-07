@@ -1,3 +1,13 @@
+## 1.7.0-10
+Released on: 8/7/2026, changelog automatically generated.
+
+### API Changes
+
+#### 👀 Patch changes
+
+**`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.7.0-9..liquid_flutter_test_utils/v1.7.0-10#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
+- 📦 `liquid_flutter` version changed: from `^23.0.0-8` to `^23.0.0-10`
+
 ## 1.7.0-9
 Released on: 8/6/2026, changelog automatically generated.
 
@@ -10,7 +20,6 @@ Released on: 7/10/2026, changelog automatically generated.
 
 **`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.7.0-7..liquid_flutter_test_utils/v1.7.0-8#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
 - 📦 `liquid_flutter` version changed: from `^23.0.0-4` to `^23.0.0-8`
-
 
 ## 1.7.0-7
 Released on: 7/7/2026, changelog automatically generated.
@@ -85,7 +94,6 @@ Released on: 6/23/2026, changelog automatically generated.
 
 **`meta` dependency `liquid_flutter`** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.6.3-1..liquid_flutter_test_utils/v1.7.0-1#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
 - 📦 Dependency version changed: from `^23.0.0-1` to `^23.0.0-3`
-
 
 ## 1.7.0-1
 Released on: 6/23/2026, changelog automatically generated.
