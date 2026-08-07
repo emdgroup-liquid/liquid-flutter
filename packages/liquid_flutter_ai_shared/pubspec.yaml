@@ -1,6 +1,6 @@
 name: liquid_flutter_ai_shared
 description: Pure-Dart tool allow-rule model, matcher, merge, and GenUI schema helpers for Liquid Flutter AI.
-version: 0.0.1
+version: 0.0.1-1
 repository: https://github.com/emdgroup-liquid/liquid-flutter
 
 environment:

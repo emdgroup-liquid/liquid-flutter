@@ -1,6 +1,6 @@
 name: liquid_flutter_md
 description: "Markdown rendering and editing for Liquid Flutter"
-version: 0.0.1
+version: 0.0.1-1
 repository: https://github.com/emdgroup-liquid/liquid-flutter
 
 environment:
