@@ -1,3 +1,4 @@
 ## 0.0.1
 
-* TODO: Describe initial release.
+* Initial release: `LdMarkdown` viewer and `LdMarkdownEditor` with
+  `LdMarkdownEditingController`.

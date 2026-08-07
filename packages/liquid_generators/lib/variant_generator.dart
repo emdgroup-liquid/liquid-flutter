@@ -10,6 +10,10 @@ import 'package:dart_style/dart_style.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:source_gen/source_gen.dart';
 
+extension on Element {
+  String get elementName => name!;
+}
+
 class VariantBuilder implements Builder {
   @override
   Map<String, List<String>> get buildExtensions {
@@ -67,7 +71,7 @@ class VariantBuilder implements Builder {
   }
 
   ConstantReader? _getVariantsAnnotation(ClassElement classElement) {
-    for (final annotation in classElement.metadata) {
+    for (final annotation in classElement.metadata.annotations) {
       final reader = ConstantReader(annotation.computeConstantValue());
       if (reader.objectValue.type?.element?.name == 'Variants') {
         return reader;
@@ -76,8 +80,8 @@ class VariantBuilder implements Builder {
     return null;
   }
 
-  bool _hasContextConfigurableAnnotation(ParameterElement parameter) {
-    for (final annotation in parameter.metadata) {
+  bool _hasContextConfigurableAnnotation(FormalParameterElement parameter) {
+    for (final annotation in parameter.metadata.annotations) {
       try {
         final reader = ConstantReader(annotation.computeConstantValue());
         if (reader.objectValue.type?.element?.name == 'ContextConfigurable') {
@@ -95,7 +99,7 @@ class VariantBuilder implements Builder {
   /// as context-configurable without needing per-parameter annotations.
   bool _constructorHasContextConfigurableAnnotation(
       ConstructorElement constructor) {
-    for (final annotation in constructor.metadata) {
+    for (final annotation in constructor.metadata.annotations) {
       try {
         final reader = ConstantReader(annotation.computeConstantValue());
         if (reader.objectValue.type?.element?.name == 'ContextConfigurable') {
@@ -126,7 +130,7 @@ class VariantBuilder implements Builder {
     final typeParams = <TypeReference>[];
     for (final typeParam in classElement.typeParameters) {
       final typeRef = TypeReference((tr) {
-        tr.symbol = typeParam.name;
+        tr.symbol = typeParam.elementName;
         if (typeParam.bound != null) {
           // Convert the bound type to a TypeReference
           final boundType = typeParam.bound!;
@@ -142,12 +146,12 @@ class VariantBuilder implements Builder {
   Reference _convertDartTypeToReference(DartType dartType) {
     if (dartType is TypeParameterType) {
       // It's a type parameter reference
-      return refer(dartType.element.name);
+      return refer(dartType.element.elementName);
     } else if (dartType is InterfaceType) {
       // It's a concrete type, possibly with type arguments
       final typeArgs = dartType.typeArguments;
       if (typeArgs.isEmpty) {
-        return refer(dartType.element.name);
+        return refer(dartType.element.elementName);
       } else {
         // Handle generic types like Identifiable<IdType>
         final typeRef = TypeReference((tr) {
@@ -167,7 +171,7 @@ class VariantBuilder implements Builder {
   /// Checks if the config class needs type parameters by checking if any
   /// context-configurable parameter types reference generic type parameters
   bool _configNeedsTypeParameters(
-    List<ParameterElement> contextConfigurableParams,
+    List<FormalParameterElement> contextConfigurableParams,
     List<TypeReference> typeParameters,
   ) {
     if (typeParameters.isEmpty) {
@@ -231,15 +235,16 @@ class VariantBuilder implements Builder {
     ClassElement classItem,
     List<_VariantData> variants,
   ) {
-    if (!classItem.name.endsWith("Widget")) {
+    final className = classItem.elementName;
+    if (!className.endsWith("Widget")) {
       return [];
     }
 
-    final publicClassName = classItem.name
-        .substring(0, classItem.name.length - "Widget".length)
+    final publicClassName = className
+        .substring(0, className.length - "Widget".length)
         .removePrefix("_");
 
-    final privateWidgetName = classItem.name;
+    final privateWidgetName = className;
 
     // Extract type parameters from the class
     final typeParameters = _extractTypeParameters(classItem);
@@ -247,10 +252,10 @@ class VariantBuilder implements Builder {
     // Get constructor and fields from private widget
     final constructor = classItem.constructors.first;
     final positionalParams =
-        constructor.parameters.where((p) => p.isPositional).toList();
-    final optionalParams = constructor.parameters
-        .where((p) => !p.isPositional)
-        .where((p) => p.name != 'key')
+        constructor.formalParameters.where((p) => p.isPositional).toList();
+    final optionalParams = constructor.formalParameters
+        .where((p) => p.isNamed)
+        .where((p) => p.elementName != 'key')
         .toList();
 
     // Detect context-configurable parameters.
@@ -259,7 +264,7 @@ class VariantBuilder implements Builder {
     // per-parameter annotations.
     final constructorIsConfigurable =
         _constructorHasContextConfigurableAnnotation(constructor);
-    final contextConfigurableParams = <ParameterElement>[];
+    final contextConfigurableParams = <FormalParameterElement>[];
     for (final param in optionalParams) {
       if (constructorIsConfigurable ||
           _hasContextConfigurableAnnotation(param)) {
@@ -307,14 +312,14 @@ class VariantBuilder implements Builder {
       // 1. Generate final fields
       for (final field in fields) {
         // Find matching parameter to check if it's context-configurable
-        ParameterElement? matchingParam;
+        FormalParameterElement? matchingParam;
         try {
           matchingParam =
-              optionalParams.firstWhere((p) => p.name == field.name);
+              optionalParams.firstWhere((p) => p.elementName == field.name);
         } catch (_) {
           try {
             matchingParam =
-                positionalParams.firstWhere((p) => p.name == field.name);
+                positionalParams.firstWhere((p) => p.elementName == field.name);
           } catch (_) {
             matchingParam = null;
           }
@@ -344,7 +349,7 @@ class VariantBuilder implements Builder {
         // Add positional parameters using this.fieldName syntax
         cb.requiredParameters.addAll(
           positionalParams.map((p) => Parameter((pb) => pb
-            ..name = p.name
+            ..name = p.elementName
             ..toThis = true)),
         );
 
@@ -359,9 +364,9 @@ class VariantBuilder implements Builder {
             final shouldSkipDefault = isContextConfigurable && hasDefaultValue;
 
             return Parameter((pb) => pb
-              ..name = p.name
-              ..toThis = p.name != "key"
-              ..toSuper = p.name == "key"
+              ..name = p.elementName
+              ..toThis = p.elementName != "key"
+              ..toSuper = p.elementName == "key"
               ..named = p.isNamed
               ..required = !isContextConfigurable && p.isRequired
               //..type = refer(paramType)
@@ -408,7 +413,7 @@ class VariantBuilder implements Builder {
 
           cb.requiredParameters.addAll(
             positionalParams.map((p) => Parameter((pb) => pb
-              ..name = p.name
+              ..name = p.elementName
               ..type = refer(p.type.toString()))),
           );
 
@@ -416,7 +421,7 @@ class VariantBuilder implements Builder {
             optionalParams
                 .where((p) => !contextConfigurableParams.contains(p))
                 .map((p) => Parameter((pb) => pb
-                  ..name = p.name
+                  ..name = p.elementName
                   ..named = p.isNamed
                   ..required = p.isRequired
                   ..type = refer(p.type.toString())
@@ -437,7 +442,7 @@ class VariantBuilder implements Builder {
           // Build instantiation: positional params pass through,
           // configurable params come from config, non-configurable pass through
           final positionalArgs =
-              positionalParams.map((p) => refer(p.name)).toList();
+              positionalParams.map((p) => refer(p.elementName)).toList();
           final namedArgs = _buildOrderedWidgetNamedArgs(
             optionalParams: optionalParams,
             variant: null,
@@ -445,8 +450,8 @@ class VariantBuilder implements Builder {
 
           // Override configurable params to read from config
           for (final param in contextConfigurableParams) {
-            namedArgs[param.name] =
-                refer('config').property(param.name);
+            namedArgs[param.elementName] =
+                refer('config').property(param.elementName);
           }
 
           // Create reference with type parameters if needed
@@ -484,7 +489,7 @@ class VariantBuilder implements Builder {
             // Add all parameters (same as regular constructor)
             mb.requiredParameters.addAll(
               positionalParams.map((p) => Parameter((pb) => pb
-                ..name = p.name
+                ..name = p.elementName
                 ..type = refer(p.type.toString())
                 ..required = !p.isOptional)),
             );
@@ -504,7 +509,7 @@ class VariantBuilder implements Builder {
                     : p.type.toString();
 
                 return Parameter((pb) => pb
-                  ..name = p.name
+                  ..name = p.elementName
                   ..named = p.isNamed
                   ..required = p.isRequired
                   ..type = refer(paramType)
@@ -543,7 +548,7 @@ class VariantBuilder implements Builder {
 
             // Add positional arguments first
             for (final param in positionalParams) {
-              bodyLines.add(Code('      ${param.name},'));
+              bodyLines.add(Code('      ${param.elementName},'));
             }
 
             // Add named arguments
@@ -572,15 +577,15 @@ class VariantBuilder implements Builder {
             // positional params that are fully covered by variant defaults.
             cb.requiredParameters.addAll(
               positionalParams
-                  .where((p) => !variant.defaults.containsKey(p.name))
+                  .where((p) => !variant.defaults.containsKey(p.elementName))
                   .map((p) => Parameter((pb) => pb
-                    ..name = p.name
+                    ..name = p.elementName
                     ..type = refer(p.type.toString()))),
             );
 
             cb.optionalParameters.addAll(
               optionalParams
-                  .where((p) => !variant.defaults.containsKey(p.name))
+                  .where((p) => !variant.defaults.containsKey(p.elementName))
                   .map((p) {
                 final isContextConfigurable =
                     contextConfigurableParams.contains(p);
@@ -595,7 +600,7 @@ class VariantBuilder implements Builder {
                     : p.type.toString();
 
                 return Parameter((pb) => pb
-                  ..name = p.name
+                  ..name = p.elementName
                   ..named = p.isNamed
                   ..required = p.isRequired
                   ..type = refer(paramType)
@@ -620,7 +625,7 @@ class VariantBuilder implements Builder {
 
             // Direct instantiation with literal defaults
             final positionalArgs =
-                positionalParams.map((p) => refer(p.name)).toList();
+                positionalParams.map((p) => refer(p.elementName)).toList();
             final namedArgs = _buildOrderedWidgetNamedArgs(
               optionalParams: optionalParams,
               variant: variant,
@@ -661,7 +666,7 @@ class VariantBuilder implements Builder {
 
         // Build arguments for private widget instantiation
         final positionalArgs =
-            positionalParams.map((p) => refer(p.name)).toList();
+            positionalParams.map((p) => refer(p.elementName)).toList();
         final namedArgs = <String, Expression>{};
 
         // Get config class name if there are context-configurable parameters
@@ -690,7 +695,7 @@ class VariantBuilder implements Builder {
         }
 
         for (final param in optionalParams) {
-          if (param.name == 'child') {
+          if (param.elementName == 'child') {
             continue;
           }
           final isContextConfigurable =
@@ -701,15 +706,15 @@ class VariantBuilder implements Builder {
             if (param.defaultValueCode == null && param.isRequired) {
               if (param.defaultValueCode == null) {
                 bodyStatements.add(Code(
-                    'assert(config?.${param.name} != null || ${param.name} != null, "Parameter ${param.name} is required and it was neither provided nor directly passed");'));
+                    'assert(config?.${param.elementName} != null || ${param.elementName} != null, "Parameter ${param.elementName} is required and it was neither provided nor directly passed");'));
               }
             }
 
             if (param.defaultValueCode != null) {
               final providerAccessSafe =
-                  refer('config').nullSafeProperty(param.name);
+                  refer('config').nullSafeProperty(param.elementName);
 
-              namedArgs[param.name] = refer(param.name)
+              namedArgs[param.elementName] = refer(param.elementName)
                   .ifNullThen(providerAccessSafe)
                   .ifNullThen(CodeExpression(Code(param.defaultValueCode!)));
             } else {
@@ -717,22 +722,22 @@ class VariantBuilder implements Builder {
               if (param.isRequired) {
                 providerAccess = refer('config')
                     .nullChecked
-                    .property(param.name)
+                    .property(param.elementName)
                     .nullChecked;
               } else {
-                providerAccess = refer('config').nullSafeProperty(param.name);
+                providerAccess = refer('config').nullSafeProperty(param.elementName);
               }
-              namedArgs[param.name] =
-                  refer(param.name).ifNullThen(providerAccess);
+              namedArgs[param.elementName] =
+                  refer(param.elementName).ifNullThen(providerAccess);
             }
           } else {
-            namedArgs[param.name] = refer(param.name);
+            namedArgs[param.elementName] = refer(param.elementName);
           }
         }
 
         final childParam = optionalParams
-            .where((param) => param.name == 'child')
-            .cast<ParameterElement?>()
+            .where((param) => param.elementName == 'child')
+            .cast<FormalParameterElement?>()
             .firstOrNull;
         if (childParam != null) {
           final param = childParam;
@@ -741,14 +746,14 @@ class VariantBuilder implements Builder {
           if (isContextConfigurable && configClassName != null) {
             if (param.defaultValueCode == null && param.isRequired) {
               bodyStatements.add(Code(
-                  'assert(config?.${param.name} != null || ${param.name} != null, "Parameter ${param.name} is required and it was neither provided nor directly passed");'));
+                  'assert(config?.${param.elementName} != null || ${param.elementName} != null, "Parameter ${param.elementName} is required and it was neither provided nor directly passed");'));
             }
 
             if (param.defaultValueCode != null) {
               final providerAccessSafe =
-                  refer('config').nullSafeProperty(param.name);
+                  refer('config').nullSafeProperty(param.elementName);
 
-              namedArgs[param.name] = refer(param.name)
+              namedArgs[param.elementName] = refer(param.elementName)
                   .ifNullThen(providerAccessSafe)
                   .ifNullThen(CodeExpression(Code(param.defaultValueCode!)));
             } else {
@@ -756,16 +761,16 @@ class VariantBuilder implements Builder {
               if (param.isRequired) {
                 providerAccess = refer('config')
                     .nullChecked
-                    .property(param.name)
+                    .property(param.elementName)
                     .nullChecked;
               } else {
-                providerAccess = refer('config').nullSafeProperty(param.name);
+                providerAccess = refer('config').nullSafeProperty(param.elementName);
               }
-              namedArgs[param.name] =
-                  refer(param.name).ifNullThen(providerAccess);
+              namedArgs[param.elementName] =
+                  refer(param.elementName).ifNullThen(providerAccess);
             }
           } else {
-            namedArgs[param.name] = refer(param.name);
+            namedArgs[param.elementName] = refer(param.elementName);
           }
         }
 
@@ -787,8 +792,8 @@ class VariantBuilder implements Builder {
 
   Class _generateConfigClass(
     String configClassName,
-    List<ParameterElement> contextConfigurableParams,
-    List<ParameterElement> allOptionalParams,
+    List<FormalParameterElement> contextConfigurableParams,
+    List<FormalParameterElement> allOptionalParams,
     List<TypeReference> typeParameters,
   ) {
     return Class((builder) {
@@ -803,7 +808,7 @@ class VariantBuilder implements Builder {
       for (final param in contextConfigurableParams) {
         final nullableType = _makeNullableType(param.type.toString());
         builder.fields.add(Field((fb) => fb
-          ..name = param.name
+          ..name = param.elementName
           ..type = refer(nullableType)
           ..modifier = FieldModifier.final$));
       }
@@ -813,7 +818,7 @@ class VariantBuilder implements Builder {
         cb.constant = true;
         for (final param in contextConfigurableParams) {
           cb.optionalParameters.add(Parameter((pb) => pb
-            ..name = param.name
+            ..name = param.elementName
             ..named = true
             ..required = false
             ..toThis = true
@@ -829,7 +834,7 @@ class VariantBuilder implements Builder {
 
         for (final param in contextConfigurableParams) {
           mb.optionalParameters.add(Parameter((pb) => pb
-            ..name = param.name
+            ..name = param.elementName
             ..named = true
             ..required = false
             ..type = refer(_makeNullableType(param.type.toString()))));
@@ -837,8 +842,8 @@ class VariantBuilder implements Builder {
 
         final namedArgs = <String, Expression>{};
         for (final param in contextConfigurableParams) {
-          namedArgs[param.name] = refer(param.name)
-              .ifNullThen(refer('this').property(param.name));
+          namedArgs[param.elementName] = refer(param.elementName)
+              .ifNullThen(refer('this').property(param.elementName));
         }
 
         mb.body = _configTypeReference(configClassName, typeParameters)
@@ -861,9 +866,9 @@ class VariantBuilder implements Builder {
 
         final namedArgs = <String, Expression>{};
         for (final param in contextConfigurableParams) {
-          namedArgs[param.name] = refer('other')
-              .property(param.name)
-              .ifNullThen(refer('this').property(param.name));
+          namedArgs[param.elementName] = refer('other')
+              .property(param.elementName)
+              .ifNullThen(refer('this').property(param.elementName));
         }
 
         bodyStatements.add(
@@ -881,7 +886,7 @@ class VariantBuilder implements Builder {
   Class _generateProviderClass(
     String configClassName,
     String publicClassName,
-    List<ParameterElement> contextConfigurableParams,
+    List<FormalParameterElement> contextConfigurableParams,
     List<TypeReference> typeParameters,
   ) {
     return Class((builder) {
@@ -984,7 +989,7 @@ class VariantBuilder implements Builder {
         final mergeArgs = <String>[];
         for (final param in contextConfigurableParams) {
           mergeArgs.add(
-              '${param.name}: config.${param.name} ?? parentConfig.${param.name}');
+              '${param.elementName}: config.${param.elementName} ?? parentConfig.${param.elementName}');
         }
 
         // Determine merged config
@@ -1057,40 +1062,40 @@ class _VariantData {
 
 bool _isDeferredWidgetNamedArg(String name) => name == 'child' || name == 'key';
 
-String _namedArgExpression(ParameterElement param, _VariantData? variant) {
-  final defaultValue = variant?.defaults[param.name];
+String _namedArgExpression(FormalParameterElement param, _VariantData? variant) {
+  final defaultValue = variant?.defaults[param.elementName];
   if (defaultValue != null) {
-    return '${param.name}: $defaultValue';
+    return '${param.elementName}: $defaultValue';
   }
-  return '${param.name}: ${param.name}';
+  return '${param.elementName}: ${param.elementName}';
 }
 
 Map<String, Expression> _buildOrderedWidgetNamedArgs({
-  required List<ParameterElement> optionalParams,
+  required List<FormalParameterElement> optionalParams,
   required _VariantData? variant,
 }) {
   final namedArgs = <String, Expression>{};
 
   for (final param in optionalParams) {
-    if (_isDeferredWidgetNamedArg(param.name)) {
+    if (_isDeferredWidgetNamedArg(param.elementName)) {
       continue;
     }
-    final defaultValue = variant?.defaults[param.name];
+    final defaultValue = variant?.defaults[param.elementName];
     if (defaultValue != null) {
-      namedArgs[param.name] = CodeExpression(Code(defaultValue));
+      namedArgs[param.elementName] = CodeExpression(Code(defaultValue));
     } else {
-      namedArgs[param.name] = refer(param.name);
+      namedArgs[param.elementName] = refer(param.elementName);
     }
   }
 
   namedArgs['key'] = refer('key');
 
-  for (final param in optionalParams.where((param) => param.name == 'child')) {
-    final defaultValue = variant?.defaults[param.name];
+  for (final param in optionalParams.where((param) => param.elementName == 'child')) {
+    final defaultValue = variant?.defaults[param.elementName];
     if (defaultValue != null) {
-      namedArgs[param.name] = CodeExpression(Code(defaultValue));
+      namedArgs[param.elementName] = CodeExpression(Code(defaultValue));
     } else {
-      namedArgs[param.name] = refer(param.name);
+      namedArgs[param.elementName] = refer(param.elementName);
     }
   }
 
@@ -1098,13 +1103,13 @@ Map<String, Expression> _buildOrderedWidgetNamedArgs({
 }
 
 List<String> _buildOrderedWidgetNamedArgLines({
-  required List<ParameterElement> optionalParams,
+  required List<FormalParameterElement> optionalParams,
   required _VariantData variant,
 }) {
   final namedArgsList = <String>[];
 
   for (final param in optionalParams) {
-    if (_isDeferredWidgetNamedArg(param.name)) {
+    if (_isDeferredWidgetNamedArg(param.elementName)) {
       continue;
     }
     namedArgsList.add(_namedArgExpression(param, variant));
@@ -1112,7 +1117,7 @@ List<String> _buildOrderedWidgetNamedArgLines({
 
   namedArgsList.add('key: key');
 
-  for (final param in optionalParams.where((param) => param.name == 'child')) {
+  for (final param in optionalParams.where((param) => param.elementName == 'child')) {
     namedArgsList.add(_namedArgExpression(param, variant));
   }
 

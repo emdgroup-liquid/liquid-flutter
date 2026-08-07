@@ -1,6 +1,7 @@
 name: liquid_flutter_md
-description: "Markdown rendering package for Liquid Flutter"
+description: "Markdown rendering and editing for Liquid Flutter"
 version: 0.0.1
+repository: https://github.com/emdgroup-liquid/liquid-flutter
 
 environment:
   sdk: ^3.10.7
@@ -11,12 +12,10 @@ dependencies:
   flutter:
     sdk: flutter
   collection: ^1.19.1
-  liquid_flutter: any
+  liquid_flutter: ^23.0.0-8
   flutter_highlight: ^0.7.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-
-
