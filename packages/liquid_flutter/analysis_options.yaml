@@ -11,6 +11,7 @@ analyzer:
     - lib/src/*.variants.g.dart
     - lib/src/**/*.variants.g.dart
     - build/**
+    - generators/**
     - android/**
     - ios/**
     - web/**

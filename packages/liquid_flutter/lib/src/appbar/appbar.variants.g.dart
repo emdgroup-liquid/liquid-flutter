@@ -427,15 +427,15 @@ class LdAppBar extends StatelessWidget {
       actions: actions ?? config?.actions ?? const [],
       addContainer: addContainer ?? config?.addContainer ?? false,
       attachedMode:
-          attachedMode ?? config?.attachedMode ?? LdAppBarAttachedMode.adaptive,
+          attachedMode ?? config?.attachedMode ?? LdAppBarAttachedMode.attached,
       autoAttachToKeyboard:
           autoAttachToKeyboard ?? config?.autoAttachToKeyboard ?? true,
       backgroundColor: backgroundColor ?? config?.backgroundColor,
       backgroundMode: backgroundMode ??
           config?.backgroundMode ??
-          LdAppBarBackgroundMode.adaptive,
+          LdAppBarBackgroundMode.visible,
       borderMode:
-          borderMode ?? config?.borderMode ?? LdAppBarBorderMode.adaptive,
+          borderMode ?? config?.borderMode ?? LdAppBarBorderMode.visible,
       bottom: bottom ?? config?.bottom,
       debugName: debugName ?? config?.debugName,
       insetScreenRadius: insetScreenRadius ?? config?.insetScreenRadius ?? true,

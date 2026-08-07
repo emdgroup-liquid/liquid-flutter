@@ -1,8 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
+import 'package:liquid/api_docs/doc_items.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:mtrust_api_guard/models/doc_items.dart';
 import '../code_block.dart';
 
 class ComponentApi extends StatefulWidget {
