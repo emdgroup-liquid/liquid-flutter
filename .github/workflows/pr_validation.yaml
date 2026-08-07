@@ -37,6 +37,9 @@ jobs:
       - name: Bootstrap Melos
         run: melos bootstrap
 
+      - name: Install mtrust_api_guard
+        run: dart pub global activate mtrust_api_guard 8.1.6
+
       - name: Generate API guard snapshots
         run: melos run generate_api
 
@@ -82,8 +85,7 @@ jobs:
           list-tests: all
           fail-on-error: false
 
-      - name: Install mtrust_api_guard
-        run: dart pub global activate mtrust_api_guard 8.1.6
+      
 
       - name: Run mtrust_api_guard workspace check
         id: version_check
