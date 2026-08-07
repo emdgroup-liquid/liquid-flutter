@@ -13,6 +13,7 @@ workspace:
   - packages/liquid_flutter_ai
   - packages/liquid_flutter_ai_shared
   - packages/liquid_flutter_reactive_forms
+  - apps/example
 dev_dependencies:
   melos: ^7.1.0
 

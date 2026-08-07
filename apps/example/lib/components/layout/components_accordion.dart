@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
+import 'package:liquid/api_docs/doc_items.dart';
 import 'package:liquid/components/component_api.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:mtrust_api_guard/models/doc_items.dart';
 
 class ComponentsAccordion extends StatefulWidget {
   final Set<String> components;
