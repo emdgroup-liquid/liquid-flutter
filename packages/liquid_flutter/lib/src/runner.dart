@@ -88,6 +88,26 @@ class _LdRunnerLogState extends State<LdRunnerLog> {
     bool isDesktop = LdTheme.of(context).platform.isDesktop;
     final tr = LiquidLocalizations.of(context);
 
+    final log = SizedBox(
+      height: widget.messages.length < 50 ? null : 300,
+      child: ListView.builder(
+        padding: EdgeInsets.zero,
+        shrinkWrap: widget.messages.length < 50,
+        itemCount: widget.messages.length,
+        physics: widget.messages.length < 50
+            ? const NeverScrollableScrollPhysics()
+            : const AlwaysScrollableScrollPhysics(),
+        itemBuilder: (context, index) {
+          return buildLine(index, theme);
+        },
+      ),
+    );
+
+    // A region of our own would be an island: the surrounding text could not be
+    // dragged over together with the log. When something above already provides
+    // one, join it instead.
+    final hasEnclosingSelection = SelectionContainer.maybeOf(context) != null;
+
     return LdCard(
       padding: EdgeInsets.zero,
       child: MouseRegion(
@@ -95,24 +115,14 @@ class _LdRunnerLogState extends State<LdRunnerLog> {
         onExit: (_) => setState(() => _isHovering = false),
         child: Stack(
           children: [
-            SelectableRegion(
-              focusNode: _node,
-              selectionControls: MaterialTextSelectionControls(),
-              child: SizedBox(
-                height: widget.messages.length < 50 ? null : 300,
-                child: ListView.builder(
-                  padding: EdgeInsets.zero,
-                  shrinkWrap: widget.messages.length < 50,
-                  itemCount: widget.messages.length,
-                  physics: widget.messages.length < 50
-                      ? const NeverScrollableScrollPhysics()
-                      : const AlwaysScrollableScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    return buildLine(index, theme);
-                  },
-                ),
+            if (hasEnclosingSelection)
+              log
+            else
+              SelectableRegion(
+                focusNode: _node,
+                selectionControls: MaterialTextSelectionControls(),
+                child: log,
               ),
-            ),
             if (widget.showCopyButton && isDesktop && _isHovering)
               Positioned(
                 top: theme.balPad(LdSize.s).top,

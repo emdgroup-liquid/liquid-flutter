@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/l10n/generated/liquid_localizations_en.dart';
@@ -457,6 +458,76 @@ void main() {
       expect(find.byKey(const Key('details-builder')), findsOneWidget);
       // The dialog also displays the custom icon
       expect(find.byKey(const Key('custom-icon')), findsWidgets);
+    });
+  });
+
+  group('LdExceptionDialog selection', () {
+    final detailedException = LdLocalizedException(
+      message: 'Selectable message',
+      moreInfo: 'Selectable more info',
+      additionalDetailsBuilder: (context) => const Text('Selectable details', key: Key('details-builder')),
+      stackTrace: StackTrace.fromString('#0      first frame'),
+    );
+
+    Future<void> openDetails(WidgetTester tester) async {
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          SizedBox(
+            width: 300,
+            height: 300,
+            child: LdExceptionView(
+              exception: detailedException,
+              direction: Axis.horizontal,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('more-info-button')).first);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('puts the whole error under a single selection region', (WidgetTester tester) async {
+      await openDetails(tester);
+
+      expect(find.byType(SelectionArea), findsOneWidget);
+      // A nested region would be an island the outer selection cannot reach,
+      // so the log has to join the dialog's region rather than open its own.
+      expect(find.byType(SelectableRegion), findsOneWidget);
+    });
+
+    testWidgets('selecting all copies the message, details and stack trace', (WidgetTester tester) async {
+      final copied = <String>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            copied.add((call.arguments as Map)['text'] as String);
+          }
+          return null;
+        },
+      );
+      addTearDown(() {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+      });
+
+      await openDetails(tester);
+
+      tester.state<SelectableRegionState>(find.byType(SelectableRegion)).selectAll();
+      await tester.pump();
+      Actions.invoke(
+        tester.element(find.byType(LdRunnerLog)),
+        CopySelectionTextIntent.copy,
+      );
+      await tester.pump();
+
+      expect(copied, isNotEmpty);
+      final clipboard = copied.join();
+      expect(clipboard, contains('Selectable message'));
+      expect(clipboard, contains('Selectable more info'));
+      expect(clipboard, contains('Selectable details'));
+      expect(clipboard, contains('#0      first frame'));
     });
   });
 }

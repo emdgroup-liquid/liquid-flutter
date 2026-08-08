@@ -31,39 +31,38 @@ class LdExceptionDialog extends StatelessWidget {
                   },
                 )
           ],
-          child: LdScaffoldBody(
-            children: [
-              if (localizedError.customIconBuilder != null) ...[
-                localizedError.customIconBuilder!(context),
-              ],
-              SelectableRegion(
-                selectionControls: MaterialTextSelectionControls(),
-                child: LdText.h(
+          // One region around the whole body, so a report can be dragged out in
+          // a single selection. Per-widget regions would each be their own
+          // island and would leave the details builder unselectable entirely.
+          child: SelectionArea(
+            child: LdScaffoldBody(
+              children: [
+                if (localizedError.customIconBuilder != null) ...[
+                  localizedError.customIconBuilder!(context),
+                ],
+                LdText.h(
                   localizedError.message,
                 ),
-              ),
-              if (localizedError.moreInfo != null)
-                SelectableRegion(
-                  selectionControls: MaterialTextSelectionControls(),
-                  child: LdMute(
+                if (localizedError.moreInfo != null)
+                  LdMute(
                     child: LdText.ps(
                       localizedError.moreInfo!,
                     ),
                   ),
-                ),
-              if (localizedError.additionalDetailsBuilder != null) ...[
-                localizedError.additionalDetailsBuilder!(context),
+                if (localizedError.additionalDetailsBuilder != null) ...[
+                  localizedError.additionalDetailsBuilder!(context),
+                ],
+                if (kDebugMode && localizedError.stackTrace != null) ...[
+                  LdHint(
+                    type: LdHintType.info,
+                    child: Text("Stack trace only visible in debug mode."),
+                  ),
+                  LdRunnerLog(
+                    messages: localizedError.stackTrace.toString().split("\n"),
+                  ),
+                ]
               ],
-              if (kDebugMode && localizedError.stackTrace != null) ...[
-                LdHint(
-                  type: LdHintType.info,
-                  child: Text("Stack trace only visible in debug mode."),
-                ),
-                LdRunnerLog(
-                  messages: localizedError.stackTrace.toString().split("\n"),
-                ),
-              ]
-            ],
+            ),
           ),
         ),
       ),
