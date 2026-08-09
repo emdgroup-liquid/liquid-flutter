@@ -7,6 +7,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_decoration.dart';
 import 'package:liquid_flutter/src/appbar/appbar_scrolled_under.dart';
 import 'package:liquid_flutter/src/haptics.dart';
+import 'package:liquid_flutter/src/theme/adaptive_radius.dart';
 import 'package:provider/provider.dart';
 
 class LdTabNavigation extends StatefulWidget {
@@ -236,7 +237,7 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
 
   double get _tabWidth => max(widget.minTabWidth, (_availableWidth - _totalSpacing) / _tabCount);
 
-  double get _availableWidth => _navWidth - LdTheme.of(context).paddingSize(size: LdSize.xs) * 2;
+  double get _availableWidth => _navWidth - LdTheme.of(context).paddingSize(size: LdSize.s) * 2;
 
   double get _totalSpacing => _tabSpacing * (_tabCount - 1);
 
@@ -363,10 +364,11 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
             return LdScrollEdgeFade(
               axis: Axis.horizontal,
               fadeColor: context.surfaceColor,
+              fadeExtent: _tabWidth / 2,
               controller: _scrollController,
               child: Builder(builder: (context) {
                 return SingleChildScrollView(
-                  padding: LdTheme.of(context).pad(size: LdSize.xs),
+                  padding: LdTheme.of(context).pad(size: LdSize.s),
                   controller: _scrollController,
                   scrollDirection: Axis.horizontal,
                   child: Stack(
@@ -388,7 +390,9 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                                   return Container(
                                     decoration: BoxDecoration(
                                       color: colors.surface,
-                                      borderRadius: LdTheme.of(context).radius(LdSize.m),
+                                      borderRadius: context.adaptiveRadius.childRadius.max.atLeast(
+                                        theme.radius(LdSize.m),
+                                      ),
                                     ),
                                     child: Builder(
                                       builder: (context) {
@@ -458,21 +462,20 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                             _updateIndicatorPosition();
                           },
                           onHorizontalDragEnd: _onIndicatorDragEnd,
-                          child: IgnorePointer(
-                            child: LdTouchableSurface(
-                              onPressed: () {},
-                              trackPan: true,
-                              builder: (context, status, _) => LdTouchableTouchFeedback(
-                                  scaleFactor: 100,
-                                  status: status,
-                                  child: Container(
-                                    width: _tabWidth,
-                                    decoration: BoxDecoration(
-                                      color: theme.primaryColor.withAlpha(26),
-                                      borderRadius: LdTheme.of(context).radius(LdSize.m),
-                                    ),
-                                  )),
-                            ),
+                          child: LdTouchableSurface(
+                            onPressed: () {},
+                            trackPan: true,
+                            builder: (context, status, _) => LdTouchableTouchFeedback(
+                                scaleFactor: 100,
+                                status: status,
+                                child: Container(
+                                  width: _tabWidth,
+                                  decoration: BoxDecoration(
+                                    color: theme.primaryColor.withAlpha(26),
+                                    borderRadius:
+                                        context.adaptiveRadius.childRadius.max.atLeast(theme.radius(LdSize.m)),
+                                  ),
+                                )),
                           ),
                         ),
                         builder: (context, state, child) {
@@ -502,6 +505,7 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
         attached: isAttached,
         isTabNavigation: true,
         addContainer: widget.addContainer,
+        insidePadding: EdgeInsets.zero,
         scrollBehavior: widget.scrollBehavior,
         wrappedChild: widget.child,
         outsideAdditionalPadding: !isAttached ? LdTheme.of(context).pad(size: LdSize.s) : null,

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/theme/adaptive_radius.dart';
 import 'package:provider/provider.dart';
 
 enum LdThemeBrightnessMode {
@@ -278,22 +279,25 @@ class _LdThemeProviderState extends State<LdThemeProvider> with WidgetsBindingOb
         clipBehavior: windowDecoration != null ? Clip.hardEdge : Clip.none,
         child: Provider.value(
           value: LdSurfaceInfo(isSurface: false),
-          child: ChangeNotifierProvider.value(
-            value: _theme,
-            builder: (context, child) {
-              return Directionality(
-                textDirection: TextDirection.ltr,
-                child: DefaultTextStyle.merge(
-                  style: ldBuildTextStyle(
-                    _theme,
-                    LdTextType.paragraph,
-                    LdSize.m,
+          child: Provider.value(
+            value: LdAdaptiveRadius.fromTheme(_theme, context),
+            child: ChangeNotifierProvider.value(
+              value: _theme,
+              builder: (context, child) {
+                return Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: DefaultTextStyle.merge(
+                    style: ldBuildTextStyle(
+                      _theme,
+                      LdTextType.paragraph,
+                      LdSize.m,
+                    ),
+                    child: child!,
                   ),
-                  child: child!,
-                ),
-              );
-            },
-            child: widget.child,
+                );
+              },
+              child: widget.child,
+            ),
           ),
         ),
       ),

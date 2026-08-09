@@ -148,7 +148,7 @@ class LdAppBarWidget extends StatefulWidget {
 
   final EdgeInsets? padding;
 
-  final bool? insetScreenRadius;
+  final bool? useAdaptiveRadius;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -173,14 +173,14 @@ class LdAppBarWidget extends StatefulWidget {
     required this.child,
     this.actions = const [],
     this.addContainer = false,
-    this.attachedMode = LdAppBarAttachedMode.attached,
+    this.attachedMode = LdAppBarAttachedMode.adaptive,
     this.autoAttachToKeyboard = true,
     this.backgroundColor,
     this.backgroundMode = LdAppBarBackgroundMode.visible,
     this.borderMode = LdAppBarBorderMode.visible,
     this.bottom,
     this.debugName,
-    this.insetScreenRadius = true,
+    this.useAdaptiveRadius = true,
     this.implyFeatures = const {
       LdAppBarImpliedFeature.back,
       LdAppBarImpliedFeature.close,
@@ -251,14 +251,12 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
 
   bool _effectivelyAttached() {
     final position = _effectivePosition;
+
     final attached = switch (widget.attachedMode) {
       LdAppBarAttachedMode.attached => true,
 
       /// Adaptive mode means the app bar is floating when in the bottom slot on mobile.
-      LdAppBarAttachedMode.adaptive => switch (position) {
-          LdAppBarPosition.bottom => LdTheme.of(context).platform.isDesktop,
-          _ => true,
-        },
+      LdAppBarAttachedMode.adaptive => !(context.isInSheet && _effectivePosition == LdAppBarPosition.bottom),
       LdAppBarAttachedMode.floating => false,
     };
 
@@ -350,12 +348,11 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
             widget.implyFeatures.contains(LdAppBarImpliedFeature.windowControls);
 
         return LdButtonConfigProvider(
-          config: const LdButtonConfig(
-            mode: LdButtonMode.ghost,
-          ),
+          config: const LdButtonConfig(mode: LdButtonMode.ghost, size: LdSize.m),
           child: LayoutBuilder(
             builder: (context, constraints) {
               final barWidth = constraints.maxWidth;
+
               final isNarrowBar = barWidth.isFinite && barWidth < kLdAppBarInlineSearchMinWidth;
               final searchBelowBar = mobile || (hasSearch && isNarrowBar);
 
@@ -458,7 +455,7 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
       addContainer: widget.addContainer,
       debugName: widget.debugName,
       position: position,
-      insetBorderRadius: widget.insetScreenRadius ?? false,
+      useAdaptiveRadius: widget.useAdaptiveRadius ?? false,
       attached: isAttached,
       outsideAdditionalPadding: isAttached ? EdgeInsets.zero : LdTheme.of(context).pad(size: LdSize.s),
       scrollBehavior: widget.scrollBehavior,
@@ -486,6 +483,7 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
         isAttached: isAttached,
         position: position,
       ),
+      scrimColor: (isScrolledUnder) => decorationBuilder.buildScrimColor(context, isScrolledUnder, position),
       insideDecorationBuilder: (isScrolledUnder) => decorationBuilder.buildInsideDecoration(
         context: context,
         isScrolledUnder: isScrolledUnder,

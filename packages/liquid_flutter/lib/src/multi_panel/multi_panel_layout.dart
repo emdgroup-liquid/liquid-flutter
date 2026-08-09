@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/theme/adaptive_radius.dart';
 import 'package:provider/provider.dart';
 
 /// A layout widget that displays a [body] and a [panel] side-by-side or stacked.
@@ -230,11 +231,11 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
   bool get _panelIsLeft => widget.panelPosition == LdPanelPosition.left;
   bool get _insetBody => widget.insetBody;
 
-  Decoration get _bodyDecoration => switch (_insetBody) {
+  BoxDecoration get _bodyDecoration => switch (_insetBody) {
         true => BoxDecoration(
             boxShadow: [ldShadowSticky],
             color: LdTheme.of(context).background,
-            borderRadius: LdTheme.of(context).radius(LdSize.m),
+            borderRadius: context.adaptiveRadius.shrinkBy(_insetPadding),
             border: Border.all(
               color: LdTheme.of(context).border,
               width: LdTheme.of(context).borderWidth,
@@ -248,15 +249,11 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
           )),
       };
 
-  EdgeInsets get _insetPadding => LdTheme.of(context).pad(size: LdSize.m);
-
-  EdgeInsets get _bodyMargin => switch (_insetBody) {
-        true => switch (_panelVisible) {
-            true => _insetPadding,
-            false => EdgeInsets.zero,
-          },
+  EdgeInsets get _insetPadding => switch (_insetBody) {
+        true => LdTheme.of(context).pad(size: LdSize.m),
         false => EdgeInsets.zero,
       };
+
   EdgeInsets get _additionalDrawerPadding => switch (_insetBody) {
         true => _insetPadding.copyWith(
             left: _panelIsLeft ? null : 0,
@@ -357,20 +354,29 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
       );
     }
 
-    Widget buildBody({required double left, required double right}) {
+    Widget buildBody({required double left, required double right, required double panelVisibility}) {
       final mediaQuery = MediaQuery.of(context);
+
+      var padding = EdgeInsets.only(
+        left: left.clamp(0, _totalWidth),
+        right: right.clamp(0, _totalWidth),
+      );
+
+      final effectiveInset = _insetPadding * panelVisibility;
+
+      // Apply inset
+
+      // Correct the media query for the body.
+
       return Positioned.fill(
         child: MediaQuery(
           data: mediaQuery.copyWith(
-            padding: mediaQuery.padding.copyWith(
-              left: max(0, mediaQuery.padding.left - left),
-              right: max(0, mediaQuery.padding.right - right),
-            ),
+            padding: mediaQuery.padding,
           ),
           child: Provider.value(
             value: LdMultiPanelChildState(
               left: left,
-              width: _totalWidth - left - right,
+              width: _totalWidth - padding.horizontal,
               onScreen: true,
               isDragging: _isResizing,
               dragOffset: 0,
@@ -379,16 +385,17 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
             child: Builder(
               builder: (context) {
                 return Padding(
-                  padding: EdgeInsets.only(
-                    left: left.clamp(0, _totalWidth),
-                    right: right.clamp(0, _totalWidth),
-                  ),
-                  child: AnimatedContainer(
-                    duration: Duration(milliseconds: 300),
-                    margin: _bodyMargin,
+                  padding: padding,
+                  child: Container(
                     clipBehavior: Clip.hardEdge,
+                    margin: effectiveInset,
                     decoration: _bodyDecoration,
-                    child: FocusTraversalGroup(child: widget.body),
+                    child: Provider.value(
+                        value: LdAdaptiveRadius(
+                          ownRadius: context.adaptiveRadius.shrinkBy(effectiveInset),
+                          insets: effectiveInset,
+                        ),
+                        child: FocusTraversalGroup(child: widget.body)),
                   ),
                 );
               },
@@ -440,7 +447,7 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
               child: Stack(
                 children: [
                   buildPanel(panelLeft: panelLeft, panelWidth: effectivePanelWidth, panelVisibility: panelVisibility),
-                  buildBody(left: bodyLeft, right: bodyRight),
+                  buildBody(left: bodyLeft, right: bodyRight, panelVisibility: panelVisibility),
 
                   // Resize handle overlay
                   if (widget.allowResize && _panelVisible)

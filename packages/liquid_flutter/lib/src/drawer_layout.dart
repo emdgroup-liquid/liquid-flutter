@@ -60,12 +60,13 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
   @override
   initState() {
     super.initState();
-    if (LdTheme.of(context).platform.isDesktop) {
-      _panelVisible = true;
-    }
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _onStateChange();
+      }
+      if (LdTheme.of(context).platform.isDesktop && _isSideBySide) {
+        _showDrawer();
       }
     });
   }
@@ -140,6 +141,9 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
   }
 
   void _hideDrawer() {
+    if (!mounted) {
+      return;
+    }
     setState(() {
       _panelVisible = false;
     });

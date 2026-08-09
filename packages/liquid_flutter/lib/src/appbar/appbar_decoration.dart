@@ -90,6 +90,16 @@ class LdAppBarDecorationBuilder {
     };
   }
 
+  Color? buildScrimColor(BuildContext context, bool isScrolledUnder, LdAppBarPosition position) {
+    final appearance = resolveAppearance(
+      context,
+      isScrolledUnder: isScrolledUnder,
+      position: position,
+    );
+
+    return appearance.showsFill ? appearance.baseColor : null;
+  }
+
   /// Resolves fill color, opacity, and child [LdSurfaceInfo] in one place.
   LdAppBarAppearance resolveAppearance(
     BuildContext context, {
@@ -198,6 +208,7 @@ class LdAppBarDecorationBuilder {
             .floatingBorder
             .withAlpha(shouldShowBorder(context, isScrolledUnder, isInBottomSlot) ? 255 : 0),
         width: LdTheme.of(context).borderWidth,
+        strokeAlign: BorderSide.strokeAlignOutside,
       ),
     );
   }

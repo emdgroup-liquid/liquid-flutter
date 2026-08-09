@@ -135,7 +135,7 @@ class _AppBarDemoConfig {
       borderMode: borderMode,
       backgroundMode: backgroundMode,
       attachedMode: attachedMode,
-      bottom: LdInput(hint: 'Search', onChanged: (value) {}, allowTapOutside: true),
+
       addContainer: addContainer,
       implyFeatures: implyFeatures,
       autoAttachToKeyboard: autoAttachToKeyboard,
@@ -571,6 +571,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
   @override
   Widget build(BuildContext context) {
     final scaffoldContent = LdScaffoldBody(
+      addContainer: true,
       children: [
         LdText.h('LdAppBar Demo'),
         LdButton.outline(
@@ -667,6 +668,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
           LdNavigationTab(label: 'Search', icon: Icon(LucideIcons.search), route: '/search'),
           LdNavigationTab(label: 'Settings', icon: Icon(LucideIcons.settings), route: '/settings'),
           LdNavigationTab(label: 'Profile', icon: Icon(LucideIcons.user), route: '/profile'),
+          LdNavigationTab(label: 'Notifications', icon: Icon(LucideIcons.bell), route: '/notifications'),
         ],
         attachedMode: _tabAttachedMode,
         backgroundMode: _tabBackgroundMode,

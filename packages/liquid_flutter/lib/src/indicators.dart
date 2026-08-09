@@ -46,7 +46,7 @@ class _LdIndicatorWidget extends StatelessWidget {
           height: size * 1.6,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: LdTheme.of(context, listen: true).neutralShade(3),
+            color: LdTheme.of(context, listen: true).neutralShade(4),
           ),
           child: Center(
             child: LdLoader(

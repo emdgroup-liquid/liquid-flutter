@@ -209,6 +209,7 @@ class LdRunnerStep extends StatelessWidget {
                         child: Icon(
                           Icons.chevron_right_rounded,
                           color: colorBundle.icon,
+                          size: theme.labelSize(LdSize.m),
                         ),
                       ),
                     )
@@ -231,9 +232,10 @@ class LdRunnerStep extends StatelessWidget {
                   if (trailing != null)
                     DefaultTextStyle(
                       style: TextStyle(
-                          fontFamily: "NotoSansMono",
-                          color: colorBundle.text,
-                          fontSize: LdTheme.of(context).labelSize(LdSize.m)),
+                        fontFamily: "NotoSansMono",
+                        color: colorBundle.text,
+                        fontSize: LdTheme.of(context).labelSize(LdSize.m),
+                      ),
                       child: trailing!,
                     ),
                 ],

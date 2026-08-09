@@ -314,12 +314,14 @@ class LdModalRoute<T> extends PageRoute<T> {
   ) {
     return LayoutBuilder(builder: (context, constraints) {
       final bool isSheet = _shouldBeSheet(constraints);
+      final modalRouteInfo = LdModalRouteInfo(isSheet: isSheet);
 
-      if (isSheet) {
-        return _buildSheetContent(context, pageBuilder);
-      } else {
-        return _buildDialogContent(context, pageBuilder);
-      }
+      return Provider.value(
+          value: modalRouteInfo,
+          child: switch (isSheet) {
+            true => _buildSheetContent(context, pageBuilder),
+            false => _buildDialogContent(context, pageBuilder),
+          });
     });
   }
 
@@ -611,10 +613,19 @@ class _LdSheetDragGestureDetectorState<T> extends State<_LdSheetDragGestureDetec
   }
 }
 
+class LdModalRouteInfo {
+  final bool isSheet;
+  LdModalRouteInfo({required this.isSheet});
+}
+
 extension LdModalRouteExtension on BuildContext {
   /// Whether this context is inside an [LdModalRoute].
   bool get isInLdModal {
     final modalRoute = ModalRoute.of(this);
     return modalRoute is LdModalRoute;
+  }
+
+  bool get isInSheet {
+    return watch<LdModalRouteInfo?>()?.isSheet ?? false;
   }
 }
