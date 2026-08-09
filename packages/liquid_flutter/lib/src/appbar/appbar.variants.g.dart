@@ -12,7 +12,7 @@ class LdAppBarConfig {
     this.borderMode,
     this.bottom,
     this.debugName,
-    this.insetScreenRadius,
+    this.useAdaptiveRadius,
     this.implyFeatures,
     this.avoidViewInsets,
     this.leading,
@@ -46,7 +46,7 @@ class LdAppBarConfig {
 
   final String? debugName;
 
-  final bool? insetScreenRadius;
+  final bool? useAdaptiveRadius;
 
   final Set<LdAppBarImpliedFeature>? implyFeatures;
 
@@ -81,7 +81,7 @@ class LdAppBarConfig {
     LdAppBarBorderMode? borderMode,
     Widget? bottom,
     String? debugName,
-    bool? insetScreenRadius,
+    bool? useAdaptiveRadius,
     Set<LdAppBarImpliedFeature>? implyFeatures,
     bool? avoidViewInsets,
     Widget? leading,
@@ -105,7 +105,7 @@ class LdAppBarConfig {
       borderMode: borderMode ?? this.borderMode,
       bottom: bottom ?? this.bottom,
       debugName: debugName ?? this.debugName,
-      insetScreenRadius: insetScreenRadius ?? this.insetScreenRadius,
+      useAdaptiveRadius: useAdaptiveRadius ?? this.useAdaptiveRadius,
       implyFeatures: implyFeatures ?? this.implyFeatures,
       avoidViewInsets: avoidViewInsets ?? this.avoidViewInsets,
       leading: leading ?? this.leading,
@@ -135,7 +135,7 @@ class LdAppBarConfig {
       borderMode: other.borderMode ?? this.borderMode,
       bottom: other.bottom ?? this.bottom,
       debugName: other.debugName ?? this.debugName,
-      insetScreenRadius: other.insetScreenRadius ?? this.insetScreenRadius,
+      useAdaptiveRadius: other.useAdaptiveRadius ?? this.useAdaptiveRadius,
       implyFeatures: other.implyFeatures ?? this.implyFeatures,
       avoidViewInsets: other.avoidViewInsets ?? this.avoidViewInsets,
       leading: other.leading ?? this.leading,
@@ -190,8 +190,8 @@ class LdAppBarConfigProvider extends StatelessWidget {
             borderMode: config.borderMode ?? parentConfig.borderMode,
             bottom: config.bottom ?? parentConfig.bottom,
             debugName: config.debugName ?? parentConfig.debugName,
-            insetScreenRadius:
-                config.insetScreenRadius ?? parentConfig.insetScreenRadius,
+            useAdaptiveRadius:
+                config.useAdaptiveRadius ?? parentConfig.useAdaptiveRadius,
             implyFeatures: config.implyFeatures ?? parentConfig.implyFeatures,
             avoidViewInsets:
                 config.avoidViewInsets ?? parentConfig.avoidViewInsets,
@@ -226,7 +226,7 @@ class LdAppBar extends StatelessWidget {
     this.borderMode,
     this.bottom,
     this.debugName,
-    this.insetScreenRadius,
+    this.useAdaptiveRadius,
     this.implyFeatures,
     this.avoidViewInsets,
     this.leading,
@@ -255,7 +255,7 @@ class LdAppBar extends StatelessWidget {
       borderMode: config.borderMode,
       bottom: config.bottom,
       debugName: config.debugName,
-      insetScreenRadius: config.insetScreenRadius,
+      useAdaptiveRadius: config.useAdaptiveRadius,
       implyFeatures: config.implyFeatures,
       avoidViewInsets: config.avoidViewInsets,
       leading: config.leading,
@@ -283,7 +283,7 @@ class LdAppBar extends StatelessWidget {
     LdAppBarBorderMode? borderMode,
     Widget? bottom,
     String? debugName,
-    bool? insetScreenRadius,
+    bool? useAdaptiveRadius,
     Set<LdAppBarImpliedFeature>? implyFeatures,
     bool? avoidViewInsets,
     Widget? leading,
@@ -306,7 +306,7 @@ class LdAppBar extends StatelessWidget {
       borderMode: borderMode,
       bottom: bottom,
       debugName: debugName,
-      insetScreenRadius: insetScreenRadius,
+      useAdaptiveRadius: useAdaptiveRadius,
       implyFeatures: implyFeatures,
       avoidViewInsets: avoidViewInsets,
       leading: leading,
@@ -334,7 +334,7 @@ class LdAppBar extends StatelessWidget {
     LdAppBarBorderMode? borderMode,
     Widget? bottom,
     String? debugName,
-    bool? insetScreenRadius,
+    bool? useAdaptiveRadius,
     Set<LdAppBarImpliedFeature>? implyFeatures,
     bool? avoidViewInsets,
     Widget? leading,
@@ -357,7 +357,7 @@ class LdAppBar extends StatelessWidget {
       borderMode: borderMode,
       bottom: bottom,
       debugName: debugName,
-      insetScreenRadius: insetScreenRadius,
+      useAdaptiveRadius: useAdaptiveRadius,
       implyFeatures: implyFeatures,
       avoidViewInsets: avoidViewInsets,
       leading: leading,
@@ -416,7 +416,7 @@ class LdAppBar extends StatelessWidget {
 
   final EdgeInsets? padding;
 
-  final bool? insetScreenRadius;
+  final bool? useAdaptiveRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -427,7 +427,7 @@ class LdAppBar extends StatelessWidget {
       actions: actions ?? config?.actions ?? const [],
       addContainer: addContainer ?? config?.addContainer ?? false,
       attachedMode:
-          attachedMode ?? config?.attachedMode ?? LdAppBarAttachedMode.attached,
+          attachedMode ?? config?.attachedMode ?? LdAppBarAttachedMode.adaptive,
       autoAttachToKeyboard:
           autoAttachToKeyboard ?? config?.autoAttachToKeyboard ?? true,
       backgroundColor: backgroundColor ?? config?.backgroundColor,
@@ -438,7 +438,7 @@ class LdAppBar extends StatelessWidget {
           borderMode ?? config?.borderMode ?? LdAppBarBorderMode.visible,
       bottom: bottom ?? config?.bottom,
       debugName: debugName ?? config?.debugName,
-      insetScreenRadius: insetScreenRadius ?? config?.insetScreenRadius ?? true,
+      useAdaptiveRadius: useAdaptiveRadius ?? config?.useAdaptiveRadius ?? true,
       implyFeatures: implyFeatures ??
           config?.implyFeatures ??
           const {

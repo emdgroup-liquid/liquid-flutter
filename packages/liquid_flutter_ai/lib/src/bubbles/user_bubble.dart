@@ -106,7 +106,11 @@ class LdUserBubble extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            attachment.isImage ? LucideIcons.image : LucideIcons.paperclip,
+            attachment.isImage
+                ? LucideIcons.image
+                : attachment.isAudio
+                    ? LucideIcons.mic
+                    : LucideIcons.paperclip,
             size: theme.labelSize(LdSize.s),
           ),
           ldHSpacerXS,

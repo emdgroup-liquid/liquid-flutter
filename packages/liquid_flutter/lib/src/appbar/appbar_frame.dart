@@ -6,6 +6,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_decoration.dart';
 import 'package:liquid_flutter/src/appbar/appbar_scrolled_under.dart';
 import 'package:liquid_flutter/src/modal/size_notifier.dart';
+import 'package:liquid_flutter/src/theme/adaptive_radius.dart';
 import 'package:provider/provider.dart';
 
 /// Whether [scope] currently contains the primary focus, including inputs in
@@ -52,7 +53,7 @@ class AppBarFrame extends StatefulWidget {
   /// insets but is always applied in addition.
   final EdgeInsets? outsideAdditionalPadding;
   final bool addContainer;
-  final bool insetBorderRadius;
+  final bool useAdaptiveRadius;
   final bool avoidViewInsets;
 
   /// Tracks focus inside the bar surface for keyboard/view-inset padding.
@@ -73,7 +74,7 @@ class AppBarFrame extends StatefulWidget {
   final bool isTabNavigation;
 
   /// The scrim color
-  final Color? scrimColor;
+  final Color? Function(bool isScrolledUnder)? scrimColor;
 
   const AppBarFrame({
     super.key,
@@ -89,7 +90,7 @@ class AppBarFrame extends StatefulWidget {
     this.outsideDecorationBuilder,
     this.avoidViewInsets = false,
     this.focusScopeNode,
-    this.insetBorderRadius = true,
+    this.useAdaptiveRadius = true,
     this.insidePadding,
     this.outsideMinPadding,
     this.debugName,
@@ -157,7 +158,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
     properties.add(StringProperty("position", widget.position.name));
     properties.add(StringProperty("attached", widget.attached.toString()));
     properties.add(StringProperty("addContainer", widget.addContainer.toString()));
-    properties.add(StringProperty("insetBorderRadius", widget.insetBorderRadius.toString()));
+    properties.add(StringProperty("insetBorderRadius", widget.useAdaptiveRadius.toString()));
     properties.add(StringProperty("avoidViewInsets", widget.avoidViewInsets.toString()));
     properties.add(StringProperty("insideDecoration", widget.insideDecoration?.toString()));
     properties.add(StringProperty("outsideDecoration", widget.outsideDecoration?.toString()));
@@ -211,19 +212,13 @@ class _AppBarFrameState extends State<AppBarFrame> {
 
     systemInsets = effectivePadding.trimToAppBarPosition(widget.position);
 
-    if (!widget.attached) {
-      systemInsets = systemInsets + LdTheme.of(context).pad(size: LdSize.xs).positionOnly(widget.position);
-    }
-
     return systemInsets;
   }
 
-  BorderRadius _screenRelativeBorderRadius(BuildContext context, EdgeInsets outerPadding) {
+  BorderRadius _adaptiveBorderRadius(BuildContext context, EdgeInsets outerPadding) {
     final theme = LdTheme.of(context);
-    final innerRadius = theme.screenRadius -
-        max(max(outerPadding.left, outerPadding.right), max(outerPadding.top, outerPadding.bottom));
-
-    return BorderRadius.circular(max(innerRadius, theme.radiusSize(LdSize.s)));
+    final parentRadius = context.adaptiveRadius;
+    return parentRadius.shrinkBy(outerPadding).max.atLeast(theme.radius(LdSize.s));
   }
 
   /// Build the EdgeInsets we need to apply to place the app bar such that it is not overlapping
@@ -280,18 +275,15 @@ class _AppBarFrameState extends State<AppBarFrame> {
     return effectiveMediaQuery.viewInsets.atPosition(widget.position) > 0;
   }
 
-  EdgeInsets _insidePadding(BoxConstraints constraints) {
+  EdgeInsets _insidePadding(BoxConstraints constraints, BorderRadius? outsideRadius) {
     EdgeInsets result = EdgeInsets.zero;
     if (widget.insidePadding != null) {
       result = widget.insidePadding!;
     } else {
       final theme = LdTheme.of(context);
-      if (widget.attached) {
-        result = theme.pad(size: LdSize.s).atLeast(_containerPadding(constraints));
-      } else {
-        result = theme.balPad(LdSize.s);
-      }
+      result = theme.pad(size: LdSize.s);
     }
+
     return result;
   }
 
@@ -412,7 +404,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
       if (scrollOffset < 100) {
         target = 0.0;
       } else if (target >
-          (metrics.configuredInsets + metrics.innerHeight + metrics.systemInsets + metrics.accumulatedEffectiveSizes)
+          (metrics.configuredInsets + metrics.innerHeight + metrics.accumulatedEffectiveSizes)
                   .atPosition(widget.position) /
               2) {
         target = max(target, fullyHiddenTarget);
@@ -454,7 +446,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
 
     double newHideOffset = _hideOffset;
 
-    newHideOffset = _hideOffset + scrollDelta * 0.5;
+    newHideOffset = _hideOffset + scrollDelta;
 
     newHideOffset = newHideOffset.clamp(0.0, maxOffset);
 
@@ -478,7 +470,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
       if (scrollOffset < 100) {
         snapTarget = 0.0;
       } else if (_hideOffset >
-          (metrics.configuredInsets + metrics.innerHeight + metrics.systemInsets + metrics.accumulatedEffectiveSizes)
+          (metrics.configuredInsets + metrics.innerHeight + metrics.accumulatedEffectiveSizes)
                   .atPosition(widget.position) /
               2) {
         snapTarget = fullyHiddenTarget;
@@ -516,14 +508,17 @@ class _AppBarFrameState extends State<AppBarFrame> {
     var outsideDeco = widget.outsideDecorationBuilder != null
         ? widget.outsideDecorationBuilder!(isScrolledUnder)
         : widget.outsideDecoration;
-    final insideDeco = widget.insideDecorationBuilder != null
+    var insideDeco = widget.insideDecorationBuilder != null
         ? widget.insideDecorationBuilder!(isScrolledUnder)
         : widget.insideDecoration;
 
-    if (widget.insetBorderRadius && !widget.attached) {
-      outsideDeco = outsideDeco?.copyWith(
-        borderRadius: _screenRelativeBorderRadius(context, outerMargin),
-      );
+    final effectiveOuterMargin = outerMargin.trimToAppBarPosition(widget.position);
+
+    BorderRadius? outsideRadius =
+        widget.useAdaptiveRadius ? _adaptiveBorderRadius(context, effectiveOuterMargin) : null;
+
+    if (widget.useAdaptiveRadius && !widget.attached) {
+      insideDeco = insideDeco?.copyWith(borderRadius: outsideRadius);
     }
 
     return FocusScope(
@@ -533,7 +528,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
         decoration: outsideDeco,
         key: Key("appbar_frame_outside_${widget.position.name}"),
         child: Padding(
-          padding: outerMargin.trimToAppBarPosition(widget.position),
+          padding: effectiveOuterMargin,
           child: MeasureSize(
             onSizeChange: _onInnerSizeChange,
             child: AnimatedContainer(
@@ -543,7 +538,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
               key: Key("appbar_frame_inside_${widget.position.name}"),
               child: MediaQuery(
                 data: MediaQuery.of(context).copyWith(
-                  padding: _insidePadding(constraints),
+                  padding: _insidePadding(constraints, outsideRadius),
                 ),
                 child: widget.child,
               ),
@@ -598,9 +593,17 @@ class _AppBarFrameState extends State<AppBarFrame> {
     );
   }
 
-  Widget _buildScrim(LdAppBarMetrics metrics, Color scrimColor) {
+  Widget _buildScrim(LdAppBarMetrics metrics, bool isScrolledUnder) {
     var height = (metrics.systemInsets + metrics.configuredInsets).atPosition(widget.position);
 
+    final scrimColor = widget.scrimColor!(isScrolledUnder);
+
+    if (scrimColor == null) {
+      print('scrimColor is null');
+      return const SizedBox.shrink();
+    }
+
+    print('scrimColor: $scrimColor');
     final visiblePortion = (metrics.maximumSize - metrics.scrollOffset).atPosition(widget.position);
 
     height = visiblePortion.clamp(0.0, max(1, height.toDouble()));
@@ -747,7 +750,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
                           ),
                         ),
                       ),
-                      if (widget.scrimColor != null) _buildScrim(metrics, widget.scrimColor!),
+                      if (widget.scrimColor != null) _buildScrim(metrics, LdAppBarScrolledUnderScope.of(springContext)),
                     ],
                   ),
                 ),

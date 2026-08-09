@@ -9,10 +9,12 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 class LdContextUsageIndicator extends StatelessWidget {
   final LdContextUsage contextUsage;
   final VoidCallback? onTap;
+  final LdSize size;
 
   const LdContextUsageIndicator({
     super.key,
     required this.contextUsage,
+    this.size = LdSize.l,
     this.onTap,
   });
 
@@ -32,21 +34,26 @@ class LdContextUsageIndicator extends StatelessWidget {
 
     return LdButton.outline(
       circular: true,
-      size: LdSize.s,
+      size: size,
       disabled: onTap == null,
       onPressed: () async {
         onTap?.call();
       },
       child: usage.hasLimit
-          ? SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(
-                value: usage.usageRatio,
-                color: progressColor,
-                strokeWidth: 2,
-                backgroundColor: theme.neutralShade(3),
-              ),
+          ? Builder(
+              builder: (context) {
+                final iconSize = IconTheme.of(context).size ?? 14;
+                return SizedBox(
+                  width: iconSize,
+                  height: iconSize,
+                  child: CircularProgressIndicator(
+                    value: usage.usageRatio,
+                    color: progressColor,
+                    strokeWidth: iconSize * 0.15,
+                    backgroundColor: theme.neutralShade(3),
+                  ),
+                );
+              },
             )
           : Icon(LucideIcons.gauge, size: 14, color: progressColor),
     );

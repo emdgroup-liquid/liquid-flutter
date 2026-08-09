@@ -115,7 +115,7 @@ class _LdNavigationRailDestination extends StatelessWidget {
 
         final iconSize = switch (isExtended) {
           true => theme.labelSize(LdSize.l),
-          false => theme.labelSize(LdSize.l) * 1.35,
+          false => theme.labelSize(LdSize.l) * 1.2,
         };
 
         final icon = IconTheme(
@@ -155,6 +155,7 @@ class _LdNavigationRailDestination extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 icon,
+                ldSpacerXS,
                 Flexible(child: label),
               ],
             ).padXS(),

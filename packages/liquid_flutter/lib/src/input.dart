@@ -45,6 +45,9 @@ class LdInput extends StatefulWidget {
   /// when paste was handled (e.g. image attachment). Otherwise plain text is pasted.
   final Future<bool> Function()? onCustomPaste;
 
+  final TextStyle? style;
+  final BorderRadius? borderRadius;
+
   const LdInput({
     required this.hint,
     this.controller,
@@ -60,6 +63,8 @@ class LdInput extends StatefulWidget {
     this.showClear = false,
     this.size = LdSize.m,
     this.allowTapOutside = false,
+    this.style,
+    this.borderRadius,
     this.onBlurred,
     this.valid = true,
     this.loading = false,
@@ -290,7 +295,7 @@ class _LdInputState extends State<LdInput> {
                   clipBehavior: Clip.hardEdge,
                   decoration: BoxDecoration(
                     color: colors.surface,
-                    borderRadius: theme.radius(LdSize.s),
+                    borderRadius: widget.borderRadius ?? theme.radius(LdSize.s),
                     border: Border.all(
                       color: colors.border,
                       width: theme.borderWidth,
@@ -351,7 +356,7 @@ class _LdInputState extends State<LdInput> {
                                     scrollPadding: theme.pad() * 5,
                                     onSubmitted: widget.onSubmitted,
                                     cursorWidth: 1,
-                                    style: labelStyle.copyWith(color: colors.text),
+                                    style: widget.style ?? labelStyle.copyWith(color: colors.text),
                                   ),
                                 ),
                                 suffix,

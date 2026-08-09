@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/haptics.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 /// a collection of collapsible items in a group.
@@ -157,9 +158,7 @@ class _LdAccordionChild extends StatelessWidget {
         color: !collapsed ? color : null,
         borderRadius: wrapActiveInCard ? theme.radius(size) : null,
         border: Border.all(
-          color: wrapActiveInCard && !collapsed
-              ? theme.border
-              : Colors.transparent,
+          color: wrapActiveInCard && !collapsed ? theme.border : Colors.transparent,
           width: theme.borderWidth,
           strokeAlign: BorderSide.strokeAlignOutside,
         ),
@@ -196,7 +195,7 @@ class _LdAccordionChild extends StatelessWidget {
                         duration: const Duration(milliseconds: 150),
                         turns: !collapsed ? 0.25 : 0,
                         child: Icon(
-                          Icons.chevron_right_rounded,
+                          LucideIcons.chevronRight,
                           size: theme.labelSize(size),
                           color: colorBundle.icon,
                         ),
@@ -237,21 +236,16 @@ class _LdAccordionState extends State<LdAccordion> {
   Widget build(BuildContext context) {
     var theme = LdTheme.of(context, listen: true);
 
-    var headerPadding =
-        widget.headerPadding ?? theme.pad(size: widget.size ?? LdSize.s);
-    var childPadding =
-        widget.childPadding ?? theme.pad(size: widget.size ?? LdSize.s);
+    var headerPadding = widget.headerPadding ?? theme.pad(size: widget.size ?? LdSize.m);
+    var childPadding = widget.childPadding ?? theme.pad(size: widget.size ?? LdSize.m);
 
     return FocusTraversalGroup(
       child: ListView.separated(
         padding: EdgeInsets.zero,
         shrinkWrap: widget.shrinkWrap,
-        physics:
-            widget.shrinkWrap ? const NeverScrollableScrollPhysics() : null,
+        physics: widget.shrinkWrap ? const NeverScrollableScrollPhysics() : null,
         itemCount: widget.itemCount,
-        separatorBuilder: (context, n) => !widget.wrapActiveInCard
-            ? const LdDivider()
-            : const SizedBox.shrink(),
+        separatorBuilder: (context, n) => !widget.wrapActiveInCard ? const LdDivider() : const SizedBox.shrink(),
         itemBuilder: (context, n) => _LdAccordionChild(
           collapsed: !openIndex.contains(n),
           wrapActiveInCard: widget.wrapActiveInCard,

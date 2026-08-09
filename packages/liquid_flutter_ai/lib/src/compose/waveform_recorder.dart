@@ -39,14 +39,11 @@ class _LdWaveformRecorderState extends State<LdWaveformRecorder> {
     if (widget.onRecordingStopped != null) {
       widget.controller.addListener(_onRecordingChange);
     }
-    _timer = Timer.periodic(
-      const Duration(seconds: 1),
-      (_) {
-        if (mounted) {
-          setState(() {});
-        }
-      },
-    );
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   void _onRecordingChange() {
@@ -84,11 +81,8 @@ class _LdWaveformRecorderState extends State<LdWaveformRecorder> {
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
         color: theme.surface,
-        borderRadius: theme.radius(LdSize.s),
-        border: Border.all(
-          color: theme.border,
-          width: theme.borderWidth,
-        ),
+        borderRadius: theme.radius(widget.size),
+        border: Border.all(color: theme.border, width: theme.borderWidth),
       ),
       child: Padding(
         padding: fieldPadding,
