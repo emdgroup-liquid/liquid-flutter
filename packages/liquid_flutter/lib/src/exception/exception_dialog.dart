@@ -22,14 +22,16 @@ class LdExceptionDialog extends StatelessWidget {
         title: Text(LiquidLocalizations.of(context).errorDetails),
         child: LdAppBar.bottom(
           actions: [
-            primaryButton ??
-                LdButton.ghost(
-                  width: double.infinity,
-                  child: Text(LiquidLocalizations.of(context).close),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                )
+            LdFlexibleChild(
+              child: primaryButton ??
+                  LdButton.vague(
+                    width: double.infinity,
+                    child: Text(LiquidLocalizations.of(context).close),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+            )
           ],
           child: LdScaffoldBody(
             children: [
