@@ -1,3 +1,11 @@
+## 23.0.0-11
+Released on: 8/11/2026, changelog automatically generated.
+
+
+### Bug Fixes
+
+- don't write to LdSubmitController after dispose ([675cd26](commit/675cd26))
+
 ## 23.0.0-10
 Released on: 8/7/2026, changelog automatically generated.
 
