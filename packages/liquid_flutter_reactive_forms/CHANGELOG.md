@@ -1,3 +1,14 @@
+## 0.1.1-5
+Released on: 8/11/2026, changelog automatically generated.
+
+### API Changes
+
+#### 👀 Patch changes
+
+**`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-4..liquid_flutter_reactive_forms/v0.1.1-5#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
+- 📦 `liquid_flutter` version changed: from `^23.0.0-5` to `^23.0.0-11`
+- 📦 `liquid_flutter_md` version changed: from `^0.0.1` to `^0.0.1-1`
+
 ## 0.1.1-4
 Released on: 8/6/2026, changelog automatically generated.
 
@@ -55,7 +66,6 @@ Released on: 8/6/2026, changelog automatically generated.
 
 **`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-3..liquid_flutter_reactive_forms/v0.1.1-4#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
 - 📦 Added `liquid_flutter_md`: with version `^0.0.1`
-
 
 ## 0.1.1-3
 Released on: 7/7/2026, changelog automatically generated.
@@ -297,7 +307,6 @@ Released on: 7/7/2026, changelog automatically generated.
 **`function` _resolveConflict** ([lib/src/monkey_detail/ld_monkey_detail_form_merge.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-2..liquid_flutter_reactive_forms/v0.1.1-3#diff-366954feef300bfd505e2a25134bf01c66daca42b8fd83911d2b380cf2fde80f))
 - ❌ Function removed: `_resolveConflict`
 
-
 ## 0.1.1-2
 Released on: 7/2/2026, changelog automatically generated.
 
@@ -315,7 +324,6 @@ Released on: 7/2/2026, changelog automatically generated.
 - 📦 Added `collection`: with version `^1.19.0`
 - 📦 Added `provider`: with version `^6.1.0`
 
-
 ## 0.1.1-1
 Released on: 6/28/2026, changelog automatically generated.
 
@@ -325,7 +333,6 @@ Released on: 6/28/2026, changelog automatically generated.
 
 **`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.0.1..liquid_flutter_reactive_forms/v0.1.1-1#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
 - 📦 `liquid_flutter` version changed: from `^23.0.0-4` to `^23.0.0-5`
-
 
 ## 0.1.0
 
