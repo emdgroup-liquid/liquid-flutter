@@ -69,6 +69,11 @@ class LdSubmitController<T, Arg> with ChangeNotifier {
   LdSubmitState<T> state = LdSubmitState<T>(type: LdSubmitStateType.idle);
 
   Future<void> init() async {
+    // init() is scheduled from a post frame callback, so the subtree can
+    // already be gone by the time it runs.
+    if (_disposed) {
+      return;
+    }
     if (config.autoTrigger) {
       Future.delayed(Duration.zero, _trigger);
     }
@@ -77,6 +82,11 @@ class LdSubmitController<T, Arg> with ChangeNotifier {
   }
 
   void _setState(LdSubmitState<T> newState) {
+    // An action can outlive the widget that owns the controller, in which case
+    // the completion lands here after dispose() and notifyListeners() throws.
+    if (_disposed) {
+      return;
+    }
     state = newState;
     if (!_stateController.isClosed) {
       _stateController.add(newState);
@@ -108,7 +118,7 @@ class LdSubmitController<T, Arg> with ChangeNotifier {
     }
   }
 
-  bool get canCancel => config.allowCancel == true && _isLoading;
+  bool get canCancel => config.allowCancel && _isLoading;
 
   Future<void> cancel() async {
     if (!canCancel) {
@@ -232,7 +242,7 @@ class LdSubmitController<T, Arg> with ChangeNotifier {
 
   bool get canRetry => _retryController.state.canRetry;
 
-  bool get canTrigger => !_isDisabled && (_isIdle || canRetry || (_isResult && config.allowResubmit == true));
+  bool get canTrigger => !_isDisabled && (_isIdle || canRetry || (_isResult && config.allowResubmit));
 
   Future<void> trigger() async {
     if (!canTrigger) {
@@ -259,12 +269,20 @@ class LdSubmitController<T, Arg> with ChangeNotifier {
 
   @override
   void dispose() {
-    if (_isLoading) {
-      cancel();
+    if (_disposed) {
+      return;
     }
+    // Set first so _setState stops notifying listeners while the widget owning
+    // us is being torn down.
+    _disposed = true;
+    if (canCancel) {
+      config.onCanceled?.call();
+    }
+    // An in-flight action outlives us, so bump the generation to make its
+    // completion stale instead of letting it touch _retryController.
+    _invalidateInFlight(reason: 'dispose');
     _retryController.dispose();
     arg?.removeListener(_onArgChanged);
-    _disposed = true;
     _stateController.close();
     SubmitDevTools.instance.unregisterController(this);
     super.dispose();

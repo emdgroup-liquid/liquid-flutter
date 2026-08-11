@@ -477,4 +477,73 @@ void main() {
 
     expect(find.text("The result is 3"), findsOneWidget);
   });
+
+  for (final fails in [false, true]) {
+    test('controller disposed while its action is in flight (fails: $fails)', () async {
+      final completer = Completer<int>();
+
+      final controller = LdSubmitController<int, void>(
+        config: LdSubmitConfig(action: (arg) async => completer.future),
+      );
+
+      controller.trigger();
+      expect(controller.state.type, LdSubmitStateType.loading);
+
+      // The widget owning the controller goes away before the action settles.
+      controller.dispose();
+
+      if (fails) {
+        completer.completeError(Exception('boom'));
+      } else {
+        completer.complete(42);
+      }
+
+      await Future.delayed(Duration.zero);
+
+      // The stale completion must not write to the disposed controller.
+      expect(controller.disposed, isTrue);
+      expect(controller.state.result, isNull);
+      expect(controller.state.error, isNull);
+    });
+  }
+
+  testWidgets('submit action outliving its subtree', (WidgetTester tester) async {
+    final completer = Completer<bool>();
+    final swap = ValueNotifier(false);
+    addTearDown(swap.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [LiquidLocalizations.delegate],
+        home: LdThemeProvider(
+          child: ValueListenableBuilder<bool>(
+            valueListenable: swap,
+            builder: (context, swapped, _) {
+              if (swapped) return const SizedBox(key: Key('after'));
+              return LdSubmit<bool, void>(
+                config: LdSubmitConfig(action: (_) async {
+                  // The action itself is what removes the subtree, which is the
+                  // shape the mtrust URP connect button has: it navigates away
+                  // before the future it returns settles.
+                  swap.value = true;
+                  return completer.future;
+                }),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Submit'));
+    await tester.pump();
+
+    expect(find.byKey(const Key('after')), findsOneWidget);
+
+    completer.complete(true);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('after')), findsOneWidget);
+  });
 }
